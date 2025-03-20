@@ -88,8 +88,9 @@ public class R4NpmPackageLoaderInMemory implements R4NpmPackageLoader {
         }
     }
 
-    private void setupNpmPackageInfo(NpmPackage npmPackage,
-            NpmPackage.NpmPackageFolder packageFolder, FhirContext fhirContext) throws IOException {
+    private void setupNpmPackageInfo(
+            NpmPackage npmPackage, NpmPackage.NpmPackageFolder packageFolder, FhirContext fhirContext)
+            throws IOException {
         final Map<String, List<String>> types = packageFolder.getTypes();
 
         Measure measure = null;
@@ -101,8 +102,7 @@ public class R4NpmPackageLoaderInMemory implements R4NpmPackageLoader {
                 final String fileContents = new String(fileBytes, StandardCharsets.UTF_8);
 
                 if (nextFile.toLowerCase().endsWith(".json")) {
-                    final IBaseResource resource =
-                            fhirContext.newJsonParser().parseResource(fileContents);
+                    final IBaseResource resource = fhirContext.newJsonParser().parseResource(fileContents);
 
                     if (resource instanceof Library libraryToUse) {
                         library = libraryToUse;
@@ -116,9 +116,7 @@ public class R4NpmPackageLoaderInMemory implements R4NpmPackageLoader {
         }
 
         if (measure != null) {
-            urlToResourceInfo.put(
-                    measure.getUrl(), new R4NpmResourceInfoForCql(measure, library, List.of(
-                    npmPackage)));
+            urlToResourceInfo.put(measure.getUrl(), new R4NpmResourceInfoForCql(measure, library, List.of(npmPackage)));
         }
     }
 }

@@ -36,9 +36,9 @@ class MeasureWithNpmTest {
     private static final String MEASURE_URL_ALPHA = SIMPLE_URL + SLASH_MEASURE_SLASH + SIMPLE_ALPHA;
     private static final String MEASURE_URL_BRAVO = SIMPLE_URL + SLASH_MEASURE_SLASH + SIMPLE_BRAVO;
     private static final String MEASURE_URL_WITH_DERIVED_LIBRARY =
-        DERIVED_URL + SLASH_MEASURE_SLASH + WITH_DERIVED_LIBRARY_UPPER;
+            DERIVED_URL + SLASH_MEASURE_SLASH + WITH_DERIVED_LIBRARY_UPPER;
     private static final String MEASURE_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES =
-        DERIVED_TWO_LAYERS_URL + SLASH_MEASURE_SLASH + WITH_TWO_LAYERS_DERIVED_LIBRARIES_UPPER;
+            DERIVED_TWO_LAYERS_URL + SLASH_MEASURE_SLASH + WITH_TWO_LAYERS_DERIVED_LIBRARIES_UPPER;
 
     private static final LocalDateTime LOCAL_DATE_TIME_2021_01_01 =
             LocalDate.of(2021, Month.JANUARY, 1).atStartOfDay();
@@ -46,9 +46,9 @@ class MeasureWithNpmTest {
             LocalDate.of(2022, Month.JANUARY, 1).atStartOfDay().minusNanos(1);
 
     private static final LocalDateTime LOCAL_DATE_TIME_2022_01_01 =
-        LocalDate.of(2022, Month.JANUARY, 1).atStartOfDay();
+            LocalDate.of(2022, Month.JANUARY, 1).atStartOfDay();
     private static final LocalDateTime LOCAL_DATE_TIME_2023_01_01_MINUS_ONE_SECOND =
-        LocalDate.of(2023, Month.JANUARY, 1).atStartOfDay().minusNanos(1);
+            LocalDate.of(2023, Month.JANUARY, 1).atStartOfDay().minusNanos(1);
 
     private static final LocalDateTime LOCAL_DATE_TIME_2024_01_01 =
             LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay();
@@ -100,37 +100,37 @@ class MeasureWithNpmTest {
         setupPatient(npmRepo);
 
         npmRepo.when()
-            .measureUrl(MEASURE_URL_ALPHA)
-            .reportType(MeasureEvalType.SUBJECT.toCode())
-            .evaluate()
-            .then()
-            .hasMeasureUrl(MEASURE_URL_ALPHA)
-            .hasPeriodStart(toJavaUtilDate(LOCAL_DATE_TIME_2021_01_01))
-            .hasPeriodEnd(toJavaUtilDate(LOCAL_DATE_TIME_2022_01_01_MINUS_ONE_SECOND))
-            .hasSubjectReference(PATIENT_REFERENCE)
-            .hasStatus(MeasureReportStatus.COMPLETE)
-            .hasEvaluatedResourceCount(0);
+                .measureUrl(MEASURE_URL_ALPHA)
+                .reportType(MeasureEvalType.SUBJECT.toCode())
+                .evaluate()
+                .then()
+                .hasMeasureUrl(MEASURE_URL_ALPHA)
+                .hasPeriodStart(toJavaUtilDate(LOCAL_DATE_TIME_2021_01_01))
+                .hasPeriodEnd(toJavaUtilDate(LOCAL_DATE_TIME_2022_01_01_MINUS_ONE_SECOND))
+                .hasSubjectReference(PATIENT_REFERENCE)
+                .hasStatus(MeasureReportStatus.COMPLETE)
+                .hasEvaluatedResourceCount(0);
 
         npmRepo.when()
-            .measureUrl(MEASURE_URL_WITH_DERIVED_LIBRARY)
-            .reportType(MeasureEvalType.SUBJECT.toCode())
-            .evaluate()
-            .then()
-            .hasMeasureUrl(MEASURE_URL_WITH_DERIVED_LIBRARY)
-            .hasPeriodStart(toJavaUtilDate(LOCAL_DATE_TIME_2021_01_01))
-            .hasPeriodEnd(toJavaUtilDate(LOCAL_DATE_TIME_2022_01_01_MINUS_ONE_SECOND))
-            .hasSubjectReference(PATIENT_REFERENCE)
-            .hasStatus(MeasureReportStatus.COMPLETE)
-            .hasEvaluatedResourceCount(1)
-            .firstGroup()
-            .population("initial-population")
-            .hasCount(1)
-            .up()
-            .population("denominator")
-            .hasCount(1)
-            .up()
-            .population("numerator")
-            .hasCount(1);
+                .measureUrl(MEASURE_URL_WITH_DERIVED_LIBRARY)
+                .reportType(MeasureEvalType.SUBJECT.toCode())
+                .evaluate()
+                .then()
+                .hasMeasureUrl(MEASURE_URL_WITH_DERIVED_LIBRARY)
+                .hasPeriodStart(toJavaUtilDate(LOCAL_DATE_TIME_2021_01_01))
+                .hasPeriodEnd(toJavaUtilDate(LOCAL_DATE_TIME_2022_01_01_MINUS_ONE_SECOND))
+                .hasSubjectReference(PATIENT_REFERENCE)
+                .hasStatus(MeasureReportStatus.COMPLETE)
+                .hasEvaluatedResourceCount(1)
+                .firstGroup()
+                .population("initial-population")
+                .hasCount(1)
+                .up()
+                .population("denominator")
+                .hasCount(1)
+                .up()
+                .population("numerator")
+                .hasCount(1);
     }
 
     @Test
@@ -140,43 +140,41 @@ class MeasureWithNpmTest {
         setupPatient(npmRepo);
 
         npmRepo.when()
-            .measureUrl(MEASURE_URL_BRAVO)
-            .reportType(MeasureEvalType.SUBJECT.toCode())
-            .evaluate()
-            .then()
-            .hasMeasureUrl(MEASURE_URL_BRAVO)
-            .hasPeriodStart(toJavaUtilDate(LOCAL_DATE_TIME_2024_01_01))
-            .hasPeriodEnd(toJavaUtilDate(LOCAL_DATE_TIME_2025_01_01_MINUS_ONE_SECOND))
-            .hasSubjectReference(PATIENT_REFERENCE)
-            .hasStatus(MeasureReportStatus.COMPLETE)
-            .hasEvaluatedResourceCount(0);
+                .measureUrl(MEASURE_URL_BRAVO)
+                .reportType(MeasureEvalType.SUBJECT.toCode())
+                .evaluate()
+                .then()
+                .hasMeasureUrl(MEASURE_URL_BRAVO)
+                .hasPeriodStart(toJavaUtilDate(LOCAL_DATE_TIME_2024_01_01))
+                .hasPeriodEnd(toJavaUtilDate(LOCAL_DATE_TIME_2025_01_01_MINUS_ONE_SECOND))
+                .hasSubjectReference(PATIENT_REFERENCE)
+                .hasStatus(MeasureReportStatus.COMPLETE)
+                .hasEvaluatedResourceCount(0);
 
         npmRepo.when()
-            .measureUrl(MEASURE_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES)
-            .reportType(MeasureEvalType.SUBJECT.toCode())
-            .evaluate()
-            .then()
-            .hasMeasureUrl(MEASURE_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES)
-            .hasPeriodStart(toJavaUtilDate(LOCAL_DATE_TIME_2022_01_01))
-            .hasPeriodEnd(toJavaUtilDate(LOCAL_DATE_TIME_2023_01_01_MINUS_ONE_SECOND))
-            .hasSubjectReference(PATIENT_REFERENCE)
-            .hasStatus(MeasureReportStatus.COMPLETE)
-            .hasEvaluatedResourceCount(1)
-            .firstGroup()
-            .population("initial-population")
-            .hasCount(1)
-            .up()
-            .population("denominator")
-            .hasCount(1)
-            .up()
-            .population("numerator")
-            .hasCount(1);
+                .measureUrl(MEASURE_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES)
+                .reportType(MeasureEvalType.SUBJECT.toCode())
+                .evaluate()
+                .then()
+                .hasMeasureUrl(MEASURE_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES)
+                .hasPeriodStart(toJavaUtilDate(LOCAL_DATE_TIME_2022_01_01))
+                .hasPeriodEnd(toJavaUtilDate(LOCAL_DATE_TIME_2023_01_01_MINUS_ONE_SECOND))
+                .hasSubjectReference(PATIENT_REFERENCE)
+                .hasStatus(MeasureReportStatus.COMPLETE)
+                .hasEvaluatedResourceCount(1)
+                .firstGroup()
+                .population("initial-population")
+                .hasCount(1)
+                .up()
+                .population("denominator")
+                .hasCount(1)
+                .up()
+                .population("numerator")
+                .hasCount(1);
     }
 
     private void setupPatient(Given npmRepo) {
-        npmRepo.getRepository()
-            .update(new Patient()
-                .setId(new IdType(ResourceType.Patient.toString(), PATIENT_ID)));
+        npmRepo.getRepository().update(new Patient().setId(new IdType(ResourceType.Patient.toString(), PATIENT_ID)));
     }
 
     // LUKETODO:  test Measure with groups/populations so we can assert the initial population and other counts

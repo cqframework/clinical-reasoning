@@ -1,6 +1,8 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 public class PopulationDef {
@@ -13,6 +15,7 @@ public class PopulationDef {
     protected Set<Object> evaluatedResources;
     protected Set<Object> resources;
     protected Set<String> subjects;
+    protected Map<String, Set<Object>> subjectResources = new HashMap<>();
 
     public PopulationDef(String id, ConceptDef code, MeasurePopulationType measurePopulationType, String expression) {
         this.id = id;
@@ -65,10 +68,6 @@ public class PopulationDef {
         this.getResources().add(resource);
     }
 
-    public void removeResource(Object resource) {
-        this.getResources().remove(resource);
-    }
-
     public Set<Object> getResources() {
         if (this.resources == null) {
             this.resources = new HashSet<>();
@@ -79,5 +78,32 @@ public class PopulationDef {
 
     public String expression() {
         return this.expression;
+    }
+
+    // Getter method
+    public Map<String, Set<Object>> getSubjectResources() {
+        return subjectResources;
+    }
+
+    // Add an element to Set<Object> under a key (Creates a new set if key is missing)
+    public void addResource(String key, Object value) {
+        subjectResources.computeIfAbsent(key, k -> new HashSet<>()).add(value);
+    }
+
+    public void removeOverlaps(Map<String, Set<Object>> overlap) {
+        var iterator = subjectResources.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<String, Set<Object>> entry = iterator.next();
+            String key = entry.getKey();
+            Set<Object> valuesInA = entry.getValue();
+
+            if (overlap.containsKey(key)) {
+                valuesInA.removeAll(overlap.get(key)); // Remove overlapping elements
+            }
+
+            if (valuesInA.isEmpty()) {
+                iterator.remove(); // Safely remove key if Set is empty
+            }
+        }
     }
 }

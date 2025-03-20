@@ -15,6 +15,9 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -41,8 +44,8 @@ public class ExpandHelper {
     private static final int MAX_RETRIES = 3;
     private final Repository repository;
     private final TerminologyServerClient terminologyServerClient;
-    public static final List<String> unsupportedParametersToRemove =
-            Collections.unmodifiableList(new ArrayList<String>(Arrays.asList(Constants.CANONICAL_VERSION)));
+    public static final List<String> unsupportedParametersToRemove = Collections
+            .unmodifiableList(new ArrayList<String>(Arrays.asList(Constants.CANONICAL_VERSION)));
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     private int expansionAttempt = 0;
     private TerminologySettings terminologySettings = new TerminologySettings();
@@ -87,15 +90,18 @@ public class ExpandHelper {
                 .map(url -> ((IPrimitiveType<String>) url.getValue()).getValueAsString())
                 .map(url -> TerminologyServerClient.getAddressBase(url, fhirContext()))
                 .orElse(null);
-        // If terminologyEndpoint exists and we have no authoritativeSourceUrl or the authoritativeSourceUrl matches the
-        // terminologyEndpoint address then we will use the terminologyEndpoint for expansion
+        // If terminologyEndpoint exists and we have no authoritativeSourceUrl or the
+        // authoritativeSourceUrl matches the
+        // terminologyEndpoint address then we will use the terminologyEndpoint for
+        // expansion
         if (terminologyEndpoint.isPresent()
                 && (authoritativeSourceUrl == null
                         || authoritativeSourceUrl.equals(
                                 terminologyEndpoint.get().getAddress()))) {
             terminologyServerExpand(valueSet, expansionParameters, terminologyEndpoint);
         }
-        // Else if the ValueSet has a simple compose then we will perform naive expansion.
+        // Else if the ValueSet has a simple compose then we will perform naive
+        // expansion.
         else if (valueSet.hasSimpleCompose()) {
             valueSet.naiveExpand();
         }
@@ -120,53 +126,49 @@ public class ExpandHelper {
             IValueSetAdapter valueSet,
             IParametersAdapter expansionParameters,
             Optional<IEndpointAdapter> terminologyEndpoint) {
-        expansionAttempt = 0;
-        ScheduledFuture<?> result = scheduler.schedule(
-                new Runnable() {
-                    @Override
-                    public void run() throws UnprocessableEntityException {
-                        try {
-                            expansionAttempt++;
-                            if (expansionAttempt <= terminologySettings.getMaxRetryCount()) {
-                                myLogger.info(
-                                        "Expansion attempt:" + expansionAttempt + " for ValueSet: " + valueSet.getId());
-                                var expandedValueSet =
-                                        (IValueSetAdapter) createAdapterForResource(terminologyServerClient.expand(
-                                                valueSet, terminologyEndpoint.get(), expansionParameters));
-                                // expansions are only valid for a particular version
-                                if (!valueSet.hasVersion()) {
-                                    valueSet.setVersion(expandedValueSet.getVersion());
-                                }
-                                valueSet.setExpansion(expandedValueSet.getExpansion());
-                                scheduler.shutdown();
-                            }
-                        } catch (NullPointerException ex) {
-                            throw new UnprocessableEntityException(String.format(
-                                    "Terminology Server expansion failed for ValueSet (%s): %s",
-                                    valueSet.getId(), ex.getMessage()));
-                        } catch (Exception ex) {
-                            if (expansionAttempt <= terminologySettings.getMaxRetryCount()) {
-                                myLogger.info("Expansion attempt:" + expansionAttempt + " failed.");
-                                scheduler.schedule(
-                                        this, terminologySettings.getRetryIntervalMillis(), TimeUnit.MILLISECONDS);
-                            } else {
-                                scheduler.shutdown();
-                                throw new UnprocessableEntityException(String.format(
-                                        "Terminology Server expansion failed for ValueSet (%s): %s",
-                                        valueSet.getId(), ex.getMessage()));
-                            }
-                        }
-                    }
-                },
-                0,
-                TimeUnit.SECONDS);
 
-        try {
-            result.get();
-        } catch (ExecutionException | InterruptedException e) {
-            if (e.getCause() instanceof UnprocessableEntityException) {
-                throw (UnprocessableEntityException) e.getCause();
+    
+        expansionAttempt = 0;
+        while(expansionAttempt < terminologySettings.getMaxRetryCount()) {
+            long delay = terminologySettings.getRetryIntervalMillis() * expansionAttempt;
+            expansionAttempt++;
+            var executor = CompletableFuture.delayedExecutor(delay, TimeUnit.MILLISECONDS);
+            CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
+                        var expandedValueSet =
+                        (IValueSetAdapter) createAdapterForResource(terminologyServerClient.expand(
+                                valueSet, terminologyEndpoint.get(), expansionParameters));
+                // expansions are only valid for a particular version
+                if (!valueSet.hasVersion()) {
+                    valueSet.setVersion(expandedValueSet.getVersion());
+                }
+                valueSet.setExpansion(expandedValueSet.getExpansion());
+            }, executor
+            );
+
+            try {
+                future.join();
+                break;
             }
+            catch(CompletionException ex) {
+                if (ex.getCause() instanceof NullPointerException) {
+                    throw new UnprocessableEntityException("it broke", ex);
+                }
+                else {
+                    myLogger.info("Expansion attempt:" + expansionAttempt + " failed.");
+                }
+            }
+            catch(CancellationException ex) {
+                myLogger.info("Expansion attempt:" + expansionAttempt + " cancelled.");
+                break; 
+            }
+        }
+
+
+        if (!valueSet.hasExpansion() && expansionAttempt <= terminologySettings.getMaxRetryCount()) {
+            throw new IllegalStateException("Something went horribly wrong, we didn't fail and we didn't get a ValueSet!");
+        }
+        else if (!valueSet.hasExpansion()) {
+            throw new RuntimeException("Ran out of retry attempts!");
         }
     }
 
@@ -213,8 +215,8 @@ public class ExpandHelper {
             // Grab the ValueSet
             var url = Canonicals.getUrl(reference);
             var version = Canonicals.getVersion(reference);
-            var includedVS =
-                    getIncludedValueSet(valueSet, terminologyEndpoint, valueSets, repository, reference, url, version);
+            var includedVS = getIncludedValueSet(valueSet, terminologyEndpoint, valueSets, repository, reference, url,
+                    version);
             if (includedVS != null) {
                 // Expand the ValueSet if we haven't already
                 if (!expandedList.contains(url)) {

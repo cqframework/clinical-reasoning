@@ -37,7 +37,6 @@ import org.opencds.cqf.fhir.cql.engine.retrieve.FederatedDataProvider;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings;
 import org.opencds.cqf.fhir.utility.Constants;
-import org.opencds.cqf.fhir.utility.npm.R4NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.npm.R4NpmResourceInfoForCql;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.slf4j.Logger;
@@ -311,8 +310,7 @@ class EnginesTest {
         var additionalData = bundleBuilder.getBundle();
 
         // LUKETODO:  pass a non-empty value?
-        var engine = Engines.forRepository(
-                repository, settings, additionalData, R4NpmPackageLoader.DEFAULT, R4NpmResourceInfoForCql.EMPTY);
+        var engine = Engines.forRepository(repository, settings, additionalData, R4NpmResourceInfoForCql.EMPTY);
 
         assertNotNull(engine.getState());
 
@@ -399,7 +397,6 @@ class EnginesTest {
     @Nonnull
     private CqlEngine getEngine(EvaluationSettings settings, IBaseBundle bundle) {
         // LUKETODO:  pass a non-empty value?
-        return Engines.forRepository(
-                repository, settings, bundle, R4NpmPackageLoader.DEFAULT, R4NpmResourceInfoForCql.EMPTY);
+        return Engines.forRepository(repository, settings, bundle, R4NpmResourceInfoForCql.EMPTY);
     }
 }

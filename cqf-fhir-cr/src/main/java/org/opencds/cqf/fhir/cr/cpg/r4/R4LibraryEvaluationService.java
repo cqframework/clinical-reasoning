@@ -17,7 +17,6 @@ import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.cpg.CqlExecutionProcessor;
-import org.opencds.cqf.fhir.utility.npm.R4NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.npm.R4NpmResourceInfoForCql;
 import org.opencds.cqf.fhir.utility.repository.Repositories;
 
@@ -55,8 +54,7 @@ public class R4LibraryEvaluationService {
         var libraryEngine = new LibraryEngine(repository, this.evaluationSettings);
         var library = repository.read(Library.class, id);
         // LUKETODO:  pass a non-empty value?
-        var engine = Engines.forRepository(
-                repository, evaluationSettings, data, R4NpmPackageLoader.DEFAULT, R4NpmResourceInfoForCql.EMPTY);
+        var engine = Engines.forRepository(repository, evaluationSettings, data, R4NpmResourceInfoForCql.EMPTY);
         var libraryManager = engine.getEnvironment().getLibraryManager();
         var libraryIdentifier = baseCqlExecutionProcessor.resolveLibraryIdentifier(null, library, libraryManager);
 

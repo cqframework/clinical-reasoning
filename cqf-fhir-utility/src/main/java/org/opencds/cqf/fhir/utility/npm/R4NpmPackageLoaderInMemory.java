@@ -20,8 +20,11 @@ import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.utilities.npm.NpmPackage;
 
-// LUKETODO:  comment that this is for tests
-// LUKETODO:  figure out where this will utlimately live
+/**
+ * Simplistic implementation of {@link R4NpmPackageLoader} that loads NpmPackages from the classpath
+ * and stores {@link R4NpmResourceInfoForCql}s in a Map. This class is recommended for testing
+ * and NOT for production.
+ */
 public class R4NpmPackageLoaderInMemory implements R4NpmPackageLoader {
 
     private final Map<String, R4NpmResourceInfoForCql> urlToResourceInfo = new HashMap<>();

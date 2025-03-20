@@ -271,7 +271,4 @@ class R4NpmResourceInfoForCqlTest {
     private R4NpmPackageLoaderInMemory setup(Path... tgzPaths) {
         return R4NpmPackageLoaderInMemory.fromNpmPackageTgzPath(getClass(), tgzPaths);
     }
-
-    // LUKETODO:  test derived library both with and without versions?
-
 }

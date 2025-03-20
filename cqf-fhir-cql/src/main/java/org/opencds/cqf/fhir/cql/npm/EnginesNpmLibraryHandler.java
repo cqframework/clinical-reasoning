@@ -2,7 +2,6 @@ package org.opencds.cqf.fhir.cql.npm;
 
 import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.ModelManager;
-import org.opencds.cqf.fhir.utility.npm.R4NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.npm.R4NpmResourceInfoForCql;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,23 +10,17 @@ public class EnginesNpmLibraryHandler {
     private static final Logger logger = LoggerFactory.getLogger(EnginesNpmLibraryHandler.class);
 
     public static void registerNpmResourceHolderGetter(
-            LibraryManager libraryManager,
-            ModelManager modelManager,
-            R4NpmPackageLoader r4NpmPackageLoader,
-            R4NpmResourceInfoForCql r4NpmResourceInfoForCql) {
+            LibraryManager libraryManager, ModelManager modelManager, R4NpmResourceInfoForCql r4NpmResourceInfoForCql) {
 
         var loader = libraryManager.getLibrarySourceLoader();
 
         addNamespacesToNamespaceManager(r4NpmResourceInfoForCql, libraryManager);
 
-        loader.registerProvider(new NpmLibraryProvider(r4NpmPackageLoader, r4NpmResourceInfoForCql));
+        loader.registerProvider(new NpmLibraryProvider(r4NpmResourceInfoForCql));
 
-        modelManager
-                .getModelInfoLoader()
-                .registerModelInfoProvider(new NpmModelInfoProvider(r4NpmPackageLoader, r4NpmResourceInfoForCql));
+        modelManager.getModelInfoLoader().registerModelInfoProvider(new NpmModelInfoProvider(r4NpmResourceInfoForCql));
     }
 
-    // LUKETODO:  why do we need to do this?  good question for JP
     private static void addNamespacesToNamespaceManager(
             R4NpmResourceInfoForCql r4NpmResourceInfoForCql, LibraryManager libraryManager) {
         r4NpmResourceInfoForCql

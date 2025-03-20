@@ -11,7 +11,6 @@ import org.hl7.cql.model.ModelInfoProvider;
 import org.hl7.elm_modelinfo.r1.ModelInfo;
 import org.hl7.fhir.r4.model.Attachment;
 import org.hl7.fhir.r4.model.Library;
-import org.opencds.cqf.fhir.utility.npm.R4NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.npm.R4NpmResourceInfoForCql;
 
 // LUKETODO:  javadoc
@@ -20,13 +19,9 @@ public class NpmModelInfoProvider implements ModelInfoProvider {
     private static final String APPLICATION_XML = "application/xml";
 
     private final R4NpmResourceInfoForCql r4NpmResourceInfoForCql;
-    // LUKETODO: do we need this anymore?
-    private final R4NpmPackageLoader r4NpmPackageLoader;
 
-    public NpmModelInfoProvider(
-            R4NpmPackageLoader r4NpmPackageLoader, R4NpmResourceInfoForCql r4NpmResourceInfoForCql) {
+    public NpmModelInfoProvider(R4NpmResourceInfoForCql r4NpmResourceInfoForCql) {
         this.r4NpmResourceInfoForCql = r4NpmResourceInfoForCql;
-        this.r4NpmPackageLoader = r4NpmPackageLoader;
     }
 
     @Override

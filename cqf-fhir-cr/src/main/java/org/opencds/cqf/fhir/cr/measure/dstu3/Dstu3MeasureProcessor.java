@@ -28,7 +28,6 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
 import org.opencds.cqf.fhir.cr.measure.common.SubjectProvider;
 import org.opencds.cqf.fhir.cr.measure.helper.DateHelper;
-import org.opencds.cqf.fhir.utility.npm.R4NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.npm.R4NpmResourceInfoForCql;
 import org.opencds.cqf.fhir.utility.repository.FederatedRepository;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
@@ -95,7 +94,6 @@ public class Dstu3MeasureProcessor {
                 this.repository,
                 this.measureEvaluationOptions.getEvaluationSettings(),
                 additionalData,
-                R4NpmPackageLoader.DEFAULT,
                 R4NpmResourceInfoForCql.EMPTY);
 
         CompiledLibrary lib;

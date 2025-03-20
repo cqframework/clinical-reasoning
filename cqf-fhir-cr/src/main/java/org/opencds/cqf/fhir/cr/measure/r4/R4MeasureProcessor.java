@@ -144,7 +144,7 @@ public class R4MeasureProcessor {
 
         var url = measure.getLibrary().get(0).asStringValue();
 
-        // LUKETODO:  we try to find the Library, so try the Holder first
+        // Check to see if this Library exists in an NPM Package.  If not, search the Repository
         if (r4NpmResourceInfoForCql.getOptMainLibrary().isEmpty()) {
             Bundle b = this.repository.search(Bundle.class, Library.class, Searches.byCanonical(url), null);
             if (b.getEntry().isEmpty()) {
@@ -158,12 +158,10 @@ public class R4MeasureProcessor {
                 this.repository,
                 this.measureEvaluationOptions.getEvaluationSettings(),
                 additionalData,
-                r4NpmPackageLoader,
                 r4NpmResourceInfoForCql);
 
         CompiledLibrary lib;
         try {
-            // LUKETODO:  this is one code path where we trigger the R4NpmResourceHolder to load the Library
             lib = context.getEnvironment().getLibraryManager().resolveLibrary(id);
         } catch (CqlIncludeException e) {
             throw new IllegalStateException(

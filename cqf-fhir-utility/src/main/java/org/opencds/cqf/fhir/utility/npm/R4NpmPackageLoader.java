@@ -3,23 +3,17 @@ package org.opencds.cqf.fhir.utility.npm;
 import jakarta.annotation.Nullable;
 import java.util.Optional;
 import org.hl7.fhir.r4.model.CanonicalType;
-import org.hl7.fhir.r4.model.Library;
 
-// LUKETODO:  javadoc
-// LUKETODO:  better name?
-// LUKETODO:  should we try to account for other FHIR versions?  should these be FHIR version specific?
+/**
+ * Interface for loading NPM resources including Measures, Libraries and NpmPackages as captured
+ * within {@link R4NpmResourceInfoForCql}.
+ */
 public interface R4NpmPackageLoader {
 
     R4NpmPackageLoader DEFAULT = new R4NpmPackageLoader() {};
 
-    // LUKETODO:  unit test this:
     default R4NpmResourceInfoForCql loadNpmResources(CanonicalType measureUrl) {
         return R4NpmResourceInfoForCql.EMPTY;
-    }
-
-    // LUKETODO:  think about this API:  are we getting a Library or an InputStream?
-    default Optional<Library> loadLibrary(String url) {
-        return Optional.empty();
     }
 
     /**

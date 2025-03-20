@@ -9,7 +9,6 @@ import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.r4.model.Attachment;
 import org.hl7.fhir.r4.model.Library;
-import org.opencds.cqf.fhir.utility.npm.R4NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.npm.R4NpmResourceInfoForCql;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,21 +20,10 @@ public class NpmLibraryProvider implements LibrarySourceProvider {
     private static final String TEXT_CQL = "text/cql";
 
     private final R4NpmResourceInfoForCql r4NpmResourceInfoForCql;
-    // LUKETODO:  do we need this anymore?
-    private final R4NpmPackageLoader r4NpmPackageLoader;
 
-    public NpmLibraryProvider(R4NpmPackageLoader r4NpmPackageLoader, R4NpmResourceInfoForCql r4NpmResourceInfoForCql) {
+    public NpmLibraryProvider(R4NpmResourceInfoForCql r4NpmResourceInfoForCql) {
         this.r4NpmResourceInfoForCql = r4NpmResourceInfoForCql;
-        this.r4NpmPackageLoader = r4NpmPackageLoader;
     }
-
-    // LUKETODO:  steps
-    // 1) Check the Library retrieved directly from the results of searching for the Measure and its associated Library
-    // URL and see if it matches with the VersionedIdentifier
-    // 2) If it doesn't match, then search the NpmPackages associated with the Measure by massaging the
-    // VersionedIdentifier into a URL
-    // 3) So what do we load?  Only the NPM packages associated with the Measure, or somehow retrieve ALL of them for
-    // the CQL engine?
 
     @Override
     @Nullable

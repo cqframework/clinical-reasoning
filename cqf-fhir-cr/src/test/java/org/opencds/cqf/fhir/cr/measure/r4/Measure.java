@@ -239,20 +239,17 @@ public class Measure {
         }
 
         public When evaluate() {
-            this.operation = () -> service.evaluate(
-                    Eithers.forMiddle3(new IdType("Measure", measureId)),
-                    periodStart,
-                    periodEnd,
-                    reportType,
-                    subject,
-                    null,
-                    null,
-                    null,
-                    null,
-                    additionalData,
-                    parameters,
-                    productLine,
-                    practitioner);
+            this.operation = () -> service.evaluate(R4MeasureEvaluatorSingleRequest.builder()
+                    .setMeasure(Eithers.forMiddle3(new IdType("Measure", measureId)))
+                    .setPeriodStart(periodStart)
+                    .setPeriodEnd(periodEnd)
+                    .setReportType(reportType)
+                    .setSubjectId(subject)
+                    .setAdditionalData(additionalData)
+                    .setParameters(parameters)
+                    .setProductLine(productLine)
+                    .setPractitioner(practitioner)
+                    .build());
             return this;
         }
 

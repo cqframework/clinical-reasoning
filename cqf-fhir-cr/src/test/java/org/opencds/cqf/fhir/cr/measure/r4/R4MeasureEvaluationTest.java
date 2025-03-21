@@ -53,9 +53,9 @@ import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupComponent;
 import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupPopulationComponent;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.OperationOutcome.OperationOutcomeIssueComponent;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Resource;
-import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -335,14 +335,23 @@ class R4MeasureEvaluationTest extends BaseMeasureEvaluationTest {
         assertEquals(MeasureReportStatus.ERROR, report.getStatus());
         hasContainedOperationOutcomeMsg(
                 report,
-                "group expression criteria results for expression: [InitialPopulation] and scoring: [PROPORTION] must fall within accepted types for population basis: [Encounter] for Measure: http://test.com/fhir/Measure/Test");
+                "group expression criteria results for expression: [InitialPopulation] and scoring: [PROPORTION] must fall within accepted types for population basis: [Encounter] for Measure: [http://test.com/fhir/Measure/Test] due to mismatch between total result classes: [Boolean] and matching result classes: []");
     }
 
-    public void hasContainedOperationOutcomeMsg(MeasureReport report, String msg) {
-        assertTrue(report.getContained().stream()
-                .filter(t -> t.getResourceType().equals(ResourceType.OperationOutcome))
-                .map(y -> (OperationOutcome) y)
-                .anyMatch(x -> x.getIssueFirstRep().getDiagnostics().contains(msg)));
+    public void hasContainedOperationOutcomeMsg(MeasureReport report, String expectedMsg) {
+        assertNotNull(expectedMsg);
+        assertTrue(expectedMsg.length() > 1);
+
+        final List<String> actualDiagnostics = report.getContained().stream()
+                .filter(OperationOutcome.class::isInstance)
+                .map(OperationOutcome.class::cast)
+                .map(OperationOutcome::getIssueFirstRep)
+                .map(OperationOutcomeIssueComponent::getDiagnostics)
+                .toList();
+
+        assertTrue(
+                actualDiagnostics.stream().anyMatch(actualMsg -> actualMsg.contains(expectedMsg)),
+                "Expected: %n%s was not found in actual:%n%s".formatted(expectedMsg, actualDiagnostics));
     }
 
     @Test

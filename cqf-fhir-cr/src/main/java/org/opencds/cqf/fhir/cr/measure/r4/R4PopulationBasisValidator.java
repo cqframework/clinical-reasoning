@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.Arrays;
 import java.util.Collections;
@@ -8,7 +9,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Enumeration;
@@ -66,7 +67,9 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
     private void validateGroupPopulationBasisType(
             String url, GroupDef groupDef, PopulationDef populationDef, EvaluationResult evaluationResult) {
 
+        // PROPORTION
         var scoring = groupDef.measureScoring();
+        // Numerator
         var populationExpression = populationDef.expression();
         var expressionResult = evaluationResult.forExpression(populationDef.expression());
 
@@ -75,19 +78,26 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
         }
 
         var resultClasses = extractClassesFromSingleOrListResult(expressionResult.value());
+        // Encounter
         var groupPopulationBasisCode = groupDef.getPopulationBasis().code();
         var optResourceClass = extractResourceType(groupPopulationBasisCode);
 
         if (optResourceClass.isPresent()) {
 
-            var resultMatchingClassCount = resultClasses.stream()
+            var resultMatchingClasses = resultClasses.stream()
                     .filter(it -> optResourceClass.get().isAssignableFrom(it))
-                    .count();
+                    .toList();
 
-            if (resultMatchingClassCount != resultClasses.size()) {
-                throw new InvalidRequestException(String.format(
-                        "group expression criteria results for expression: [%s] and scoring: [%s] must fall within accepted types for population basis: [%s] for Measure: %s",
-                        populationExpression, scoring, groupPopulationBasisCode, url));
+            if (resultMatchingClasses.size() != resultClasses.size()) {
+                throw new InvalidRequestException(
+                        "group expression criteria results for expression: [%s] and scoring: [%s] must fall within accepted types for population basis: [%s] for Measure: [%s] due to mismatch between total result classes: %s and matching result classes: %s"
+                                .formatted(
+                                        populationExpression,
+                                        scoring,
+                                        groupPopulationBasisCode,
+                                        url,
+                                        prettyClassNames(resultClasses),
+                                        prettyClassNames(resultMatchingClasses)));
             }
         }
     }
@@ -116,23 +126,29 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
         var resultClasses = extractClassesFromSingleOrListResult(expressionResult.value());
         var groupPopulationBasisCode = groupDef.getPopulationBasis().code();
 
-        var resultMatchingClassCount = resultClasses.stream()
+        var resultMatchingClasses = resultClasses.stream()
                 .filter(resultClass ->
                         ALLOWED_STRATIFIER_BOOLEAN_BASIS_TYPES.contains(resultClass) || Boolean.class == resultClass)
-                .count();
+                .toList();
 
-        if (resultMatchingClassCount != resultClasses.size()) {
-            throw new InvalidRequestException(String.format(
-                    "stratifier expression criteria results for expression: [%s] must fall within accepted types for population-basis: [%s] for Measure: %s",
-                    expression, groupPopulationBasisCode, url));
+        if (resultMatchingClasses.size() != resultClasses.size()) {
+            throw new InvalidRequestException(
+                    "stratifier expression criteria results for expression: [%s] must fall within accepted types for population-basis: [%s] for Measure: [%s] due to mismatch between total result classes: %s and matching result classes: %s"
+                            .formatted(
+                                    expression,
+                                    groupPopulationBasisCode,
+                                    url,
+                                    prettyClassNames(resultClasses),
+                                    prettyClassNames(resultMatchingClasses)));
         }
     }
 
-    private Optional<? extends Class<?>> extractResourceType(String groupPopulationBasisCode) {
+    private Optional<Class<?>> extractResourceType(String groupPopulationBasisCode) {
         if (BOOLEAN_BASIS.equals(groupPopulationBasisCode)) {
             return Optional.of(Boolean.class);
         }
-        return Arrays.stream(ResourceType.values())
+
+        final Optional<String> optResourceClassName = Arrays.stream(ResourceType.values())
                 .map(ResourceType::name)
                 .filter(theName -> {
                     if ("ListResource".equals(groupPopulationBasisCode)) {
@@ -142,14 +158,16 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
                     return theName.equals(groupPopulationBasisCode);
                 })
                 .map(typeName -> "org.hl7.fhir.r4.model." + typeName)
-                .map(fullyQualified -> {
-                    try {
-                        return Class.forName(fullyQualified);
-                    } catch (Exception exception) {
-                        throw new IllegalArgumentException(exception);
-                    }
-                })
                 .findFirst();
+
+        if (optResourceClassName.isPresent()) {
+            try {
+                return Optional.of(Class.forName(optResourceClassName.get()));
+            } catch (ClassNotFoundException exception) {
+                throw new InternalErrorException(exception);
+            }
+        }
+        return Optional.empty();
     }
 
     private List<Class<?>> extractClassesFromSingleOrListResult(Object result) {
@@ -161,6 +179,14 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
             return Collections.singletonList(result.getClass());
         }
 
-        return list.stream().filter(Objects::nonNull).map(Object::getClass).collect(Collectors.toList());
+        // Need to this to return List<Class<?>> and get rid of Sonar warnings.
+        final Stream<Class<?>> classStream =
+                list.stream().filter(Objects::nonNull).map(Object::getClass);
+
+        return classStream.toList();
+    }
+
+    private List<String> prettyClassNames(List<Class<?>> classes) {
+        return classes.stream().map(Class::getSimpleName).toList();
     }
 }

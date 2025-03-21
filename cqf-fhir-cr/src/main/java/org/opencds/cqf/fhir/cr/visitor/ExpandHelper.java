@@ -18,8 +18,6 @@ import java.util.Optional;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
@@ -44,7 +42,6 @@ public class ExpandHelper {
     private final TerminologyServerClient terminologyServerClient;
     public static final List<String> unsupportedParametersToRemove =
             Collections.unmodifiableList(new ArrayList<String>(Arrays.asList(Constants.CANONICAL_VERSION)));
-    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     private int expansionAttempt = 0;
     private TerminologySettings terminologySettings = new TerminologySettings();
 

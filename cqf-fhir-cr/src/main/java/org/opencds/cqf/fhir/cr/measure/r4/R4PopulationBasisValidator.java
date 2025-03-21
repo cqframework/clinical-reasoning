@@ -83,19 +83,20 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
 
         if (optResourceClass.isPresent()) {
 
-            var resultMatchingClassCount = resultClasses.stream()
+            var resultMatchingClasses = resultClasses.stream()
                     .filter(it -> optResourceClass.get().isAssignableFrom(it))
-                    .count();
+                    .toList();
 
-            /*
-            "diagnostics": "Exception for subjectId: Patient/CMS68v12-TC3-2024-9, Message:
-            group expression criteria results for expression: [Numerator] and scoring: [PROPORTION] must fall within accepted types for population basis: [Encounter] for Measure: http://content.alphora.com/fhir/dqm/Measure/CMS68v12"
-             */
-
-            if (resultMatchingClassCount != resultClasses.size()) {
-                throw new InvalidRequestException(String.format(
-                        "group expression criteria results for expression: [%s] and scoring: [%s] must fall within accepted types for population basis: [%s] for Measure: %s",
-                        populationExpression, scoring, groupPopulationBasisCode, url));
+            if (resultMatchingClasses.size() != resultClasses.size()) {
+                throw new InvalidRequestException(
+                        "group expression criteria results for expression: [%s] and scoring: [%s] must fall within accepted types for population basis: [%s] for Measure: [%s] due to mismatch between total result classes: %s and matching result classes: %s"
+                                .formatted(
+                                        populationExpression,
+                                        scoring,
+                                        groupPopulationBasisCode,
+                                        url,
+                                        prettyClassNames(resultClasses),
+                                        prettyClassNames(resultMatchingClasses)));
             }
         }
     }
@@ -124,15 +125,20 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
         var resultClasses = extractClassesFromSingleOrListResult(expressionResult.value());
         var groupPopulationBasisCode = groupDef.getPopulationBasis().code();
 
-        var resultMatchingClassCount = resultClasses.stream()
+        var resultMatchingClasses = resultClasses.stream()
                 .filter(resultClass ->
                         ALLOWED_STRATIFIER_BOOLEAN_BASIS_TYPES.contains(resultClass) || Boolean.class == resultClass)
-                .count();
+                .toList();
 
-        if (resultMatchingClassCount != resultClasses.size()) {
-            throw new InvalidRequestException(String.format(
-                    "stratifier expression criteria results for expression: [%s] must fall within accepted types for population-basis: [%s] for Measure: %s",
-                    expression, groupPopulationBasisCode, url));
+        if (resultMatchingClasses.size() != resultClasses.size()) {
+            throw new InvalidRequestException(
+                    "stratifier expression criteria results for expression: [%s] must fall within accepted types for population-basis: [%s] for Measure: [%s] due to mismatch between total result classes: %s and matching result classes: %s"
+                            .formatted(
+                                    expression,
+                                    groupPopulationBasisCode,
+                                    url,
+                                    prettyClassNames(resultClasses),
+                                    prettyClassNames(resultMatchingClasses)));
         }
     }
 
@@ -170,5 +176,9 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
         }
 
         return list.stream().filter(Objects::nonNull).map(Object::getClass).collect(Collectors.toList());
+    }
+
+    private List<String> prettyClassNames(List<Class<?>> classes) {
+        return classes.stream().map(Class::getSimpleName).collect(Collectors.toList());
     }
 }

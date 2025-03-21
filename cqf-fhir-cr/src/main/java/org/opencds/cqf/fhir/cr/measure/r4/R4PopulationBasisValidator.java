@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Enumeration;
@@ -166,7 +165,7 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
                 .findFirst();
     }
 
-    private List<Class<?>> extractClassesFromSingleOrListResult(Object result) {
+    private List<? extends Class<?>> extractClassesFromSingleOrListResult(Object result) {
         if (result == null) {
             return Collections.emptyList();
         }
@@ -175,10 +174,10 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
             return Collections.singletonList(result.getClass());
         }
 
-        return list.stream().filter(Objects::nonNull).map(Object::getClass).collect(Collectors.toUnmodifiableList());
+        return list.stream().filter(Objects::nonNull).map(Object::getClass).toList();
     }
 
-    private List<String> prettyClassNames(List<Class<?>> classes) {
+    private List<String> prettyClassNames(List<? extends Class<?>> classes) {
         return classes.stream().map(Class::getSimpleName).toList();
     }
 }

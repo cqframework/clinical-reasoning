@@ -175,10 +175,10 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
             return Collections.singletonList(result.getClass());
         }
 
-        return list.stream().filter(Objects::nonNull).map(Object::getClass).collect(Collectors.toList());
+        return list.stream().filter(Objects::nonNull).map(Object::getClass).collect(Collectors.toUnmodifiableList());
     }
 
     private List<String> prettyClassNames(List<Class<?>> classes) {
-        return classes.stream().map(Class::getSimpleName).collect(Collectors.toList());
+        return classes.stream().map(Class::getSimpleName).toList();
     }
 }

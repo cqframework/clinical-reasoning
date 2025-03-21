@@ -15,10 +15,11 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
@@ -121,51 +122,47 @@ public class ExpandHelper {
             IParametersAdapter expansionParameters,
             Optional<IEndpointAdapter> terminologyEndpoint) {
         expansionAttempt = 0;
-        ScheduledFuture<?> result = scheduler.schedule(
-                new Runnable() {
-                    @Override
-                    public void run() throws UnprocessableEntityException {
-                        try {
-                            expansionAttempt++;
-                            if (expansionAttempt <= terminologySettings.getMaxRetryCount()) {
-                                myLogger.info(
-                                        "Expansion attempt:" + expansionAttempt + " for ValueSet: " + valueSet.getId());
-                                var expandedValueSet =
-                                        (IValueSetAdapter) createAdapterForResource(terminologyServerClient.expand(
-                                                valueSet, terminologyEndpoint.get(), expansionParameters));
-                                // expansions are only valid for a particular version
-                                if (!valueSet.hasVersion()) {
-                                    valueSet.setVersion(expandedValueSet.getVersion());
-                                }
-                                valueSet.setExpansion(expandedValueSet.getExpansion());
-                                scheduler.shutdown();
-                            }
-                        } catch (NullPointerException ex) {
-                            throw new UnprocessableEntityException(String.format(
-                                    "Terminology Server expansion failed for ValueSet (%s): %s",
-                                    valueSet.getId(), ex.getMessage()));
-                        } catch (Exception ex) {
-                            if (expansionAttempt <= terminologySettings.getMaxRetryCount()) {
-                                myLogger.info("Expansion attempt:" + expansionAttempt + " failed.");
-                                scheduler.schedule(
-                                        this, terminologySettings.getRetryIntervalMillis(), TimeUnit.MILLISECONDS);
-                            } else {
-                                scheduler.shutdown();
-                                throw new UnprocessableEntityException(String.format(
-                                        "Terminology Server expansion failed for ValueSet (%s): %s",
-                                        valueSet.getId(), ex.getMessage()));
-                            }
+        while (expansionAttempt < terminologySettings.getMaxRetryCount()) {
+            long delay = terminologySettings.getRetryIntervalMillis() * expansionAttempt;
+            expansionAttempt++;
+            var executor = CompletableFuture.delayedExecutor(delay, TimeUnit.MILLISECONDS);
+            CompletableFuture<Void> future = CompletableFuture.runAsync(
+                    () -> {
+                        var expandedValueSet =
+                                (IValueSetAdapter) createAdapterForResource(terminologyServerClient.expand(
+                                        valueSet, terminologyEndpoint.get(), expansionParameters));
+                        // expansions are only valid for a particular version
+                        if (!valueSet.hasVersion()) {
+                            valueSet.setVersion(expandedValueSet.getVersion());
                         }
-                    }
-                },
-                0,
-                TimeUnit.SECONDS);
+                        valueSet.setExpansion(expandedValueSet.getExpansion());
+                    },
+                    executor);
 
-        try {
-            result.get();
-        } catch (ExecutionException | InterruptedException e) {
-            if (e.getCause() instanceof UnprocessableEntityException) {
-                throw (UnprocessableEntityException) e.getCause();
+            try {
+                future.join();
+                break;
+            } catch (CompletionException ex) {
+                if (ex.getCause() instanceof NullPointerException) {
+                    // If NPE is thrown once, it will always be thrown - don't retry
+                    throw new UnprocessableEntityException(String.format(
+                            "Terminology Server expansion failed for ValueSet (%s): %s",
+                            valueSet.getId(), ex.getMessage()));
+                } else {
+                    myLogger.info("Expansion attempt:" + expansionAttempt + " failed.");
+                    if (expansionAttempt == terminologySettings.getMaxRetryCount()) {
+                        throw new UnprocessableEntityException(String.format(
+                                "Final Terminology Server expansion attempt failed for ValueSet (%s): %s",
+                                valueSet.getId(), ex.getMessage()));
+                    }
+                }
+            } catch (CancellationException ex) {
+                myLogger.info("Expansion attempt:" + expansionAttempt + " cancelled.");
+                if (expansionAttempt == terminologySettings.getMaxRetryCount()) {
+                    throw new UnprocessableEntityException(String.format(
+                            "Final Terminology Server expansion attempt cancelled for ValueSet (%s): %s",
+                            valueSet.getId(), ex.getMessage()));
+                }
             }
         }
     }

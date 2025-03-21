@@ -385,7 +385,6 @@ class ExpandHelperTest {
                 new ArrayList<String>(),
                 new Date());
 
-        Thread.sleep(3000);
         assertEquals(3, grouper.getExpansion().getContains().size());
         verify(rep, never()).search(any(), any(), any());
         verify(client, never()).getResource(any(), any(), any());
@@ -428,7 +427,6 @@ class ExpandHelperTest {
                     new ArrayList<IValueSetAdapter>(),
                     new ArrayList<String>(),
                     new Date());
-            Thread.sleep(3000);
         });
         verify(rep, never()).search(any(), any(), any());
         verify(client, never()).getResource(any(), any(), any());
@@ -468,7 +466,6 @@ class ExpandHelperTest {
                     new ArrayList<IValueSetAdapter>(),
                     new ArrayList<String>(),
                     new Date());
-            Thread.sleep(3000);
         });
         verify(rep, never()).search(any(), any(), any());
         verify(client, never()).getResource(any(), any(), any());

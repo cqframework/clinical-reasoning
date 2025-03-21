@@ -66,7 +66,9 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
     private void validateGroupPopulationBasisType(
             String url, GroupDef groupDef, PopulationDef populationDef, EvaluationResult evaluationResult) {
 
+        // PROPORTION
         var scoring = groupDef.measureScoring();
+        // Numerator
         var populationExpression = populationDef.expression();
         var expressionResult = evaluationResult.forExpression(populationDef.expression());
 
@@ -75,6 +77,7 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
         }
 
         var resultClasses = extractClassesFromSingleOrListResult(expressionResult.value());
+        // Encounter
         var groupPopulationBasisCode = groupDef.getPopulationBasis().code();
         var optResourceClass = extractResourceType(groupPopulationBasisCode);
 
@@ -83,6 +86,11 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
             var resultMatchingClassCount = resultClasses.stream()
                     .filter(it -> optResourceClass.get().isAssignableFrom(it))
                     .count();
+
+            /*
+            "diagnostics": "Exception for subjectId: Patient/CMS68v12-TC3-2024-9, Message:
+            group expression criteria results for expression: [Numerator] and scoring: [PROPORTION] must fall within accepted types for population basis: [Encounter] for Measure: http://content.alphora.com/fhir/dqm/Measure/CMS68v12"
+             */
 
             if (resultMatchingClassCount != resultClasses.size()) {
                 throw new InvalidRequestException(String.format(

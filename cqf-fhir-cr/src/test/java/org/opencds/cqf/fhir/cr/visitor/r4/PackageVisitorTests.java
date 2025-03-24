@@ -145,6 +145,7 @@ class PackageVisitorTests {
         Endpoint terminologyEndpoint = new Endpoint();
         terminologyEndpoint.addExtension(Constants.VSAC_USERNAME, new StringType(username));
         terminologyEndpoint.addExtension(Constants.APIKEY, new StringType(apiKey));
+        terminologyEndpoint.setAddress("test.com");
         Parameters params = parameters(part("terminologyEndpoint", terminologyEndpoint));
 
         var exception = assertThrows(UnprocessableEntityException.class, () -> {

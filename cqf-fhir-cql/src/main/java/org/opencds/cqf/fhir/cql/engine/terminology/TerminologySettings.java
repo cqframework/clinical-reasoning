@@ -59,8 +59,6 @@ public class TerminologySettings {
     private VALUESET_MEMBERSHIP_MODE valuesetMembershipMode = VALUESET_MEMBERSHIP_MODE.AUTO;
     private CODE_LOOKUP_MODE codeLookupMode = CODE_LOOKUP_MODE.AUTO;
     private VALUESET_PRE_EXPANSION_MODE valueSetPreExpansionMode = VALUESET_PRE_EXPANSION_MODE.USE_IF_PRESENT;
-    private int maxRetryCount = 3;
-    private long retryIntervalMillis = 1000;
 
     /*
      * Default constructor for TerminologySettings
@@ -78,8 +76,6 @@ public class TerminologySettings {
         this.valuesetMembershipMode = terminologySettings.valuesetMembershipMode;
         this.codeLookupMode = terminologySettings.codeLookupMode;
         this.valueSetPreExpansionMode = terminologySettings.valueSetPreExpansionMode;
-        this.maxRetryCount = terminologySettings.maxRetryCount;
-        this.retryIntervalMillis = terminologySettings.retryIntervalMillis;
     }
 
     public VALUESET_EXPANSION_MODE getValuesetExpansionMode() {
@@ -115,24 +111,6 @@ public class TerminologySettings {
 
     public TerminologySettings setValuesetPreExpansionMode(VALUESET_PRE_EXPANSION_MODE valuesetPreExpansionMode) {
         this.valueSetPreExpansionMode = valuesetPreExpansionMode;
-        return this;
-    }
-
-    public int getMaxRetryCount() {
-        return maxRetryCount;
-    }
-
-    public TerminologySettings setMaxRetryCount(int maxRetryCount) {
-        this.maxRetryCount = maxRetryCount;
-        return this;
-    }
-
-    public long getRetryIntervalMillis() {
-        return this.retryIntervalMillis;
-    }
-
-    public TerminologySettings setRetryIntervalMillis(long retryIntervalMillis) {
-        this.retryIntervalMillis = retryIntervalMillis;
         return this;
     }
 }

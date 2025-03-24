@@ -476,17 +476,18 @@ public class MeasureEvaluator {
                 if (denominatorExclusion != null) {
                     // numerator should not include den-exclusions
                     numerator.getSubjects().removeAll(denominatorExclusion.getSubjects());
-                    numerator.getResources().removeAll(denominatorExclusion.getResources());
                     numerator.removeOverlaps(denominatorExclusion.getSubjectResources());
 
                     // verify exclusion results are found in denominator
                     denominatorExclusion.getResources().retainAll(denominator.getResources());
                     denominatorExclusion.getSubjects().retainAll(denominator.getSubjects());
+                    denominatorExclusion.retainOverlaps(denominator.getSubjectResources());
                 }
                 if (numeratorExclusion != null) {
                     // verify results are in Numerator
                     numeratorExclusion.getResources().retainAll(numerator.getResources());
                     numeratorExclusion.getSubjects().retainAll(numerator.getSubjects());
+                    numeratorExclusion.retainOverlaps(numerator.getSubjectResources());
                 }
                 if (denominatorException != null) {
                     // Remove Subjects Exceptions that are present in Numerator
@@ -497,6 +498,7 @@ public class MeasureEvaluator {
                     // verify exception results are found in denominator
                     denominatorException.getResources().retainAll(denominator.getResources());
                     denominatorException.getSubjects().retainAll(denominator.getSubjects());
+                    denominatorException.retainOverlaps(denominator.getSubjectResources());
                 }
             } else {
                 // Remove Only Resource Exclusions
@@ -508,12 +510,12 @@ public class MeasureEvaluator {
                     numerator.removeOverlaps(denominatorExclusion.getSubjectResources());
                     // verify exclusion results are found in denominator
                     denominatorExclusion.getResources().retainAll(denominator.getResources());
-                    denominatorExclusion.getSubjects().retainAll(denominator.getSubjects());
+                    denominatorExclusion.retainOverlaps(denominator.getSubjectResources());
                 }
                 if (numeratorExclusion != null) {
                     // verify exclusion results are found in numerator results, otherwise remove
                     numeratorExclusion.getResources().retainAll(numerator.getResources());
-                    numeratorExclusion.getSubjects().retainAll(numerator.getSubjects());
+                    numeratorExclusion.retainOverlaps(numerator.getSubjectResources());
                 }
                 if (denominatorException != null) {
                     // Remove Resource Exceptions that are present in Numerator
@@ -521,7 +523,7 @@ public class MeasureEvaluator {
                     denominatorException.removeOverlaps(numerator.getSubjectResources());
                     // verify exception results are found in denominator
                     denominatorException.getResources().retainAll(denominator.getResources());
-                    denominatorException.getSubjects().retainAll(denominator.getSubjects());
+                    denominatorException.retainOverlaps(denominator.getSubjectResources());
                 }
             }
             if (reportType.equals(MeasureReportType.INDIVIDUAL) && populationSize == 1 && dateOfCompliance != null) {

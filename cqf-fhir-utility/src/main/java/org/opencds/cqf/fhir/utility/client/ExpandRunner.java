@@ -64,6 +64,8 @@ public class ExpandRunner implements Runnable {
                         terminologyServerClientSettings.getTimeoutSeconds()));
             }
         } catch (ExecutionException | InterruptedException e) {
+            scheduler.shutdown();
+            Thread.currentThread().interrupt();
             throw new RuntimeException(e);
         }
     }

@@ -454,7 +454,7 @@ class PackageVisitorTests {
 
         var clientMock = mock(TerminologyServerClient.class, new ReturnsDeepStubs());
         // expect the Tx Server to provide the missing ValueSet
-        when(clientMock.getResource(any(IEndpointAdapter.class), any(), any())).thenReturn(Optional.of(missingVset));
+        when(clientMock.getResource(any(IEndpointAdapter.class), any())).thenReturn(Optional.of(missingVset));
         doAnswer(new Answer<ValueSet>() {
                     @Override
                     public ValueSet answer(InvocationOnMock invocation) throws Throwable {

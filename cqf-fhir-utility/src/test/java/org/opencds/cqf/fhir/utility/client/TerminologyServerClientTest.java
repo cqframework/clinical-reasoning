@@ -57,7 +57,7 @@ public class TerminologyServerClientTest {
     private final FhirContext fhirContextR5 = FhirContext.forR5Cached();
 
     @Test
-    void testR4UrlAndVersion() throws IllegalAccessException {
+    void testR4UrlAndVersion() {
         var factory = IAdapterFactory.forFhirVersion(FhirVersionEnum.R4);
         var valueSet = (IValueSetAdapter) factory.createKnowledgeArtifactAdapter(new org.hl7.fhir.r4.model.ValueSet());
         valueSet.setUrl(url);
@@ -263,7 +263,7 @@ public class TerminologyServerClientTest {
 
         // test
         var client = new TerminologyServerClient(contextMock);
-        client.getLatestNonDraftResource(endpointMock, "www.test.com/fhir/ValueSet/123|1.2.3", supportedVersion);
+        client.getLatestNonDraftResource(endpointMock, "www.test.com/fhir/ValueSet/123|1.2.3");
         var capturedUrlParams = urlParamsCaptor.getValue();
         var token = (TokenParam) capturedUrlParams.get("status").get(0);
 
@@ -273,7 +273,7 @@ public class TerminologyServerClientTest {
     }
 
     @Test
-    void expandRetrySuccessful() throws InterruptedException {
+    void expandRetrySuccessful() {
         // setup tx server endpoint
         var baseUrl = "www.test.com/fhir";
         var endpoint = new org.hl7.fhir.r4.model.Endpoint();
@@ -323,7 +323,7 @@ public class TerminologyServerClientTest {
                 (org.hl7.fhir.r4.model.ValueSet) client.expand(valueSetAdapter, endpointAdapter, parametersAdapter);
 
         assertEquals(3, actual.getExpansion().getContains().size());
-        verify(client, never()).getResource(any(), any(), any());
+        verify(client, never()).getResource(any(), any());
         verify(fhirClient, atLeast(3)).operation();
     }
 
@@ -367,7 +367,7 @@ public class TerminologyServerClientTest {
         assertThrows(
                 UnprocessableEntityException.class,
                 () -> client.expand(valueSetAdapter, endpointAdapter, parametersAdapter));
-        verify(client, never()).getResource(any(), any(), any());
+        verify(client, never()).getResource(any(), any());
         verify(fhirClient, atLeast(3)).operation();
     }
 }

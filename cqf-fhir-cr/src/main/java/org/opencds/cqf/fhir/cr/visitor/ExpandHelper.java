@@ -219,10 +219,7 @@ public class ExpandHelper {
                 .orElseGet(() -> {
                     if (terminologyEndpoint.isPresent()) {
                         return terminologyServerClient
-                                .getResource(
-                                        terminologyEndpoint.get(),
-                                        reference,
-                                        valueSet.get().getStructureFhirVersionEnum())
+                                .getResource(terminologyEndpoint.get(), reference)
                                 .map(r -> (IValueSetAdapter) createAdapterForResource(r))
                                 .orElse(null);
                     } else {

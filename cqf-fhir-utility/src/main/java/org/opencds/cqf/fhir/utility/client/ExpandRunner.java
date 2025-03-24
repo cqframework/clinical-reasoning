@@ -59,14 +59,14 @@ public class ExpandRunner implements Runnable {
                             String.format("Terminology Server expansion failed for ValueSet (%s)", valueSetUrl));
                 }
             } else {
-                throw new RuntimeException(String.format(
+                throw new UnprocessableEntityException(String.format(
                         "Terminology Server expansion took longer than the allotted timeout: %s",
                         terminologyServerClientSettings.getTimeoutSeconds()));
             }
         } catch (ExecutionException | InterruptedException e) {
             scheduler.shutdown();
             Thread.currentThread().interrupt();
-            throw new RuntimeException(e);
+            throw new UnprocessableEntityException(e.getMessage());
         }
     }
 

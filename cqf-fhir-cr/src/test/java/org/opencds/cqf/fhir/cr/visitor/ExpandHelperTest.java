@@ -63,7 +63,7 @@ class ExpandHelperTest {
         assertEquals(
                 expansionDate.getTime(), grouper.getExpansion().getTimestamp().getTime());
         verify(rep, times(1)).search(any(), any(), any(), any());
-        verify(client, never()).getResource(any(), any(), any());
+        verify(client, never()).getResource(any(), any());
         verify(client, never()).expand(any(IValueSetAdapter.class), any(), any());
     }
 
@@ -100,7 +100,7 @@ class ExpandHelperTest {
                 new Date());
         assertEquals(3, grouper.getExpansion().getContains().size());
         verify(rep, never()).search(any(), any(), any());
-        verify(client, times(1)).getResource(any(), any(), any());
+        verify(client, times(1)).getResource(any(), any());
         verify(client, times(1)).expand(any(IValueSetAdapter.class), any(), any());
     }
 
@@ -371,7 +371,7 @@ class ExpandHelperTest {
 
     TerminologyServerClient mockTerminologyServerWithValueSetR4(ValueSet valueSet) {
         var mockClient = mock(TerminologyServerClient.class);
-        when(mockClient.getResource(any(), anyString(), any())).thenReturn(java.util.Optional.of(valueSet));
+        when(mockClient.getResource(any(), anyString())).thenReturn(java.util.Optional.of(valueSet));
         when(mockClient.expand(any(IValueSetAdapter.class), any(), any())).thenReturn(valueSet);
         return mockClient;
     }

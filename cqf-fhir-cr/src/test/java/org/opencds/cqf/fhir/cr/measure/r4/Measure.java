@@ -47,6 +47,7 @@ import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupComponent;
 import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupPopulationComponent;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.OperationOutcome.OperationOutcomeIssueComponent;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Reference;
@@ -748,11 +749,21 @@ public class Measure {
             return this;
         }
 
-        public SelectedReport hasContainedOperationOutcomeMsg(String msg) {
-            assertTrue(report().getContained().stream()
-                    .filter(t -> t.getResourceType().equals(ResourceType.OperationOutcome))
-                    .map(y -> (OperationOutcome) y)
-                    .anyMatch(x -> x.getIssueFirstRep().getDiagnostics().contains(msg)));
+        public SelectedReport hasContainedOperationOutcomeMsg(String expectedMsg) {
+            assertNotNull(expectedMsg);
+            assertTrue(expectedMsg.length() > 1);
+
+            final List<String> actualDiagnostics = report().getContained().stream()
+                    .filter(OperationOutcome.class::isInstance)
+                    .map(OperationOutcome.class::cast)
+                    .map(OperationOutcome::getIssueFirstRep)
+                    .map(OperationOutcomeIssueComponent::getDiagnostics)
+                    .toList();
+
+            assertTrue(
+                    actualDiagnostics.stream().anyMatch(actualMsg -> actualMsg.contains(expectedMsg)),
+                    "Expected: %n%s was not found in actual:%n%s".formatted(expectedMsg, actualDiagnostics));
+
             return this;
         }
 
@@ -1026,6 +1037,14 @@ public class Measure {
                     .filter(x -> x.hasValue() && x.getValue().hasText())
                     .filter(x -> x.getValue().getText().equals(textValue))
                     .findFirst()
+                    .orElse(null));
+        }
+
+        public SelectedStratum stratumByComponentText(String textValue) {
+            return stratum(s -> s.getStratum().stream()
+                    .filter(x -> x.getComponent().stream()
+                            .anyMatch(t -> t.getCode().getText().equals(textValue)))
+                    .findFirst()
                     .get());
         }
 
@@ -1045,6 +1064,11 @@ public class Measure {
 
         public SelectedStratum hasScore(String score) {
             MeasureValidationUtils.validateStratumScore(value(), score);
+            return this;
+        }
+
+        public SelectedStratum hasComponentStratifierCount(int count) {
+            assertEquals(count, value().getComponent().size());
             return this;
         }
 

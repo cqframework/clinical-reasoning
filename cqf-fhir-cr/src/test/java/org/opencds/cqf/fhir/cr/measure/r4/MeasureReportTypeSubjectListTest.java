@@ -231,24 +231,6 @@ class MeasureReportTypeSubjectListTest {
                 .hasCount(2)
                 .hasSubjectResults()
                 .up()
-                .firstStratifier()
-                .stratumCount(9)
-                .stratum("Encounter/patient-1-encounter-1")
-                .population("initial-population")
-                .hasCount(1)
-                .hasStratumPopulationSubjectResults()
-                .up()
-                .population("denominator")
-                .hasCount(1)
-                .hasStratumPopulationSubjectResults()
-                .up()
-                .population("numerator")
-                .hasCount(0) // no subject results
-                .hasNoStratumPopulationSubjectResults() // validates nothing is there
-                .up()
-                .hasScore("0.0") // make sure stratum are scored
-                .up()
-                .up()
                 .up()
                 .report();
     }

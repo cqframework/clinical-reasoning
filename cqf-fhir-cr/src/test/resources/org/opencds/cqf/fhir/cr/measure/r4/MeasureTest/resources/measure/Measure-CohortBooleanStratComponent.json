@@ -43,13 +43,25 @@
       "stratifier": [
         {
           "id": "stratifier-1",
-          "component": {
-            "id": "stratifier-comp-1",
-            "criteria": {
-              "language": "text/cql.identifier",
-              "expression": "Gender Stratification"
+          "code" : {
+            "text": "Gender and Age"
+          },
+          "component": [
+            {
+              "id": "stratifier-comp-1",
+              "criteria": {
+                "language": "text/cql.identifier",
+                "expression": "Gender Stratification"
+              }
+            },
+            {
+              "id": "stratifier-comp-2",
+              "criteria": {
+                "language": "text/cql.identifier",
+                "expression": "Age"
+              }
             }
-          }
+          ]
         }
       ]
     }],

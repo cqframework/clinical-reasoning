@@ -1,0 +1,19 @@
+{
+  "resourceType": "Library",
+  "id": "EncounterBasisMismatchWithProcedure",
+  "name": "EncounterBasisMismatchWithProcedure",
+  "version": "0.1",
+  "url": "http://example.com/Library/EncounterBasisMismatchWithProcedure",
+  "status": "active",
+  "experimental": true,
+  "type": {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/library-type",
+      "code": "logic-library"
+    } ]
+  },
+  "content": [ {
+    "contentType": "text/cql",
+    "url": "../../cql/EncounterBasisMismatchWithProcedure.cql"
+  } ]
+}

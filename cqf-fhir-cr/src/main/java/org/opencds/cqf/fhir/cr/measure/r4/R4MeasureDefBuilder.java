@@ -121,6 +121,12 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                     components.add(scd);
                 }
 
+                if (!components.isEmpty() && mgsc.getCriteria().getExpression() != null) {
+                    throw new InvalidRequestException(String.format(
+                            "Measure stratifier: %s, has both component and stratifier criteria expression defined. Only one should be specified",
+                            mgsc.getId()));
+                }
+
                 var stratifierDef = new StratifierDef(
                         mgsc.getId(),
                         conceptToConceptDef(mgsc.getCode()),

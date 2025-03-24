@@ -296,7 +296,7 @@ class SimpleMeasureProcessorTest {
                     .hasStatus(MeasureReportStatus.ERROR)
                     .hasContainedOperationOutcome()
                     .hasContainedOperationOutcomeMsg(
-                            "Exception for subjectId: Patient/denom-EXM108, Message: group expression criteria results for expression: [Initial Population] and scoring: [PROPORTION] must fall within accepted types for population basis: [boolean] for Measure: http://hl7.org/fhir/us/cqfmeasures/Measure/EXM108-basis-boolean")
+                            "Exception for subjectId: Patient/denom-EXM108, Message: group expression criteria results for expression: [Initial Population] and scoring: [PROPORTION] must fall within accepted types for population basis: [boolean] for Measure: [http://hl7.org/fhir/us/cqfmeasures/Measure/EXM108-basis-boolean] due to mismatch between total result classes: [Encounter] and matching result classes: []")
                     .report();
         }
 

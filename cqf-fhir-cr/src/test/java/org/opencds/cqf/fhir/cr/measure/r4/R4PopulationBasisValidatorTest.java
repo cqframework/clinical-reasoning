@@ -173,7 +173,7 @@ class R4PopulationBasisValidatorTest {
                                 List.of(ENCOUNTER),
                                 EXPRESSION_NUMERATOR,
                                 List.of(ENCOUNTER))),
-                        "group expression criteria results for expression: [InitialPopulation] and scoring: [PROPORTION] must fall within accepted types for population basis: [boolean] for Measure: fakeMeasureUrl"),
+                        "group expression criteria results for expression: [InitialPopulation] and scoring: [PROPORTION] must fall within accepted types for population basis: [boolean] for Measure: [fakeMeasureUrl] due to mismatch between total result classes: [Encounter] and matching result classes: []"),
                 Arguments.of(
                         buildGroupDef(
                                 Basis.BOOLEAN,
@@ -187,7 +187,7 @@ class R4PopulationBasisValidatorTest {
                                 List.of(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE),
                                 EXPRESSION_NUMERATOR,
                                 List.of(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE))),
-                        "group expression criteria results for expression: [InitialPopulation] and scoring: [PROPORTION] must fall within accepted types for population basis: [boolean] for Measure: fakeMeasureUrl"),
+                        "group expression criteria results for expression: [InitialPopulation] and scoring: [PROPORTION] must fall within accepted types for population basis: [boolean] for Measure: [fakeMeasureUrl] due to mismatch between total result classes: [Boolean, Boolean, Encounter] and matching result classes: [Boolean, Boolean]"),
                 Arguments.of(
                         buildGroupDef(
                                 Basis.BOOLEAN,
@@ -201,7 +201,7 @@ class R4PopulationBasisValidatorTest {
                                 List.of(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE),
                                 EXPRESSION_NUMERATOR,
                                 List.of(Boolean.TRUE, Boolean.TRUE, ENCOUNTER))),
-                        "group expression criteria results for expression: [Numerator] and scoring: [PROPORTION] must fall within accepted types for population basis: [boolean] for Measure: fakeMeasureUrl"),
+                        "group expression criteria results for expression: [Numerator] and scoring: [PROPORTION] must fall within accepted types for population basis: [boolean] for Measure: [fakeMeasureUrl] due to mismatch between total result classes: [Boolean, Boolean, Encounter] and matching result classes: [Boolean, Boolean]"),
                 Arguments.of(
                         buildGroupDef(
                                 Basis.ENCOUNTER,
@@ -215,7 +215,7 @@ class R4PopulationBasisValidatorTest {
                                 Boolean.TRUE,
                                 EXPRESSION_NUMERATOR,
                                 Boolean.TRUE)),
-                        "group expression criteria results for expression: [InitialPopulation] and scoring: [PROPORTION] must fall within accepted types for population basis: [Encounter] for Measure: fakeMeasureUrl"),
+                        "group expression criteria results for expression: [InitialPopulation] and scoring: [PROPORTION] must fall within accepted types for population basis: [Encounter] for Measure: [fakeMeasureUrl] due to mismatch between total result classes: [Boolean] and matching result classes: []"),
                 Arguments.of(
                         buildGroupDef(
                                 Basis.ENCOUNTER,
@@ -229,7 +229,7 @@ class R4PopulationBasisValidatorTest {
                                 Boolean.TRUE,
                                 EXPRESSION_NUMERATOR,
                                 Boolean.TRUE)),
-                        "group expression criteria results for expression: [InitialPopulation] and scoring: [PROPORTION] must fall within accepted types for population basis: [Encounter] for Measure: fakeMeasureUrl"),
+                        "group expression criteria results for expression: [InitialPopulation] and scoring: [PROPORTION] must fall within accepted types for population basis: [Encounter] for Measure: [fakeMeasureUrl] due to mismatch between total result classes: [Boolean] and matching result classes: []"),
                 Arguments.of(
                         buildGroupDef(
                                 Basis.PROCEDURE,
@@ -243,7 +243,21 @@ class R4PopulationBasisValidatorTest {
                                 List.of(ENCOUNTER),
                                 EXPRESSION_NUMERATOR,
                                 List.of(ENCOUNTER))),
-                        "group expression criteria results for expression: [InitialPopulation] and scoring: [PROPORTION] must fall within accepted types for population basis: [Procedure] for Measure: fakeMeasureUrl"));
+                        "group expression criteria results for expression: [InitialPopulation] and scoring: [PROPORTION] must fall within accepted types for population basis: [Procedure] for Measure: [fakeMeasureUrl] due to mismatch between total result classes: [Encounter] and matching result classes: []"),
+                Arguments.of(
+                        buildGroupDef(
+                                Basis.ENCOUNTER,
+                                buildPopulationDefs(INITIALPOPULATION, DENOMINATOR, NUMERATOR),
+                                buildStratifierDefs(
+                                        EXPRESSION_INITIALPOPULATION, EXPRESSION_DENOMINATOR, EXPRESSION_NUMERATOR)),
+                        buildEvaluationResult(Map.of(
+                                EXPRESSION_INITIALPOPULATION,
+                                List.of(ENCOUNTER),
+                                EXPRESSION_DENOMINATOR,
+                                List.of(ENCOUNTER),
+                                EXPRESSION_NUMERATOR,
+                                List.of(ENCOUNTER, PROCEDURE, ENCOUNTER))),
+                        "group expression criteria results for expression: [Numerator] and scoring: [PROPORTION] must fall within accepted types for population basis: [Encounter] for Measure: [fakeMeasureUrl] due to mismatch between total result classes: [Encounter, Procedure, Encounter] and matching result classes: [Encounter, Encounter]"));
     }
 
     @ParameterizedTest
@@ -258,6 +272,11 @@ class R4PopulationBasisValidatorTest {
         }
     }
 
+    /**
+     *
+     * Correction to Non-boolean population basis, these should not return type of Resource, they should stratify results based on single return type per subject
+     * Of resulting Encounters, which are tied to Gender M or F, Age range 10-50 or 51-100...etc
+     */
     private static Stream<Arguments> validateStratifierBasisTypeHappyPathParams() {
         return Stream.of(
                 Arguments.of(
@@ -307,11 +326,11 @@ class R4PopulationBasisValidatorTest {
                                         EXPRESSION_INITIALPOPULATION, EXPRESSION_DENOMINATOR, EXPRESSION_NUMERATOR)),
                         buildEvaluationResult(Map.of(
                                 EXPRESSION_INITIALPOPULATION,
-                                ENCOUNTER,
+                                List.of(Boolean.TRUE, new CodeableConcept(), new Range()),
                                 EXPRESSION_DENOMINATOR,
-                                ENCOUNTER,
+                                List.of(new Reference(), new Coding()),
                                 EXPRESSION_NUMERATOR,
-                                ENCOUNTER))),
+                                List.of(new Enumeration<>(new CompartmentCodeEnumFactory()), new Code())))),
                 Arguments.of(
                         buildGroupDef(
                                 Basis.ENCOUNTER,
@@ -320,37 +339,11 @@ class R4PopulationBasisValidatorTest {
                                         EXPRESSION_INITIALPOPULATION, EXPRESSION_DENOMINATOR, EXPRESSION_NUMERATOR)),
                         buildEvaluationResult(Map.of(
                                 EXPRESSION_INITIALPOPULATION,
-                                List.of(ENCOUNTER, ENCOUNTER, ENCOUNTER),
+                                List.of(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE),
                                 EXPRESSION_DENOMINATOR,
-                                List.of(ENCOUNTER, ENCOUNTER),
+                                List.of(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE),
                                 EXPRESSION_NUMERATOR,
-                                List.of(ENCOUNTER, ENCOUNTER)))),
-                Arguments.of(
-                        buildGroupDef(
-                                Basis.PROCEDURE,
-                                buildPopulationDefs(INITIALPOPULATION, DENOMINATOR, NUMERATOR),
-                                buildStratifierDefs(
-                                        EXPRESSION_INITIALPOPULATION, EXPRESSION_DENOMINATOR, EXPRESSION_NUMERATOR)),
-                        buildEvaluationResult(Map.of(
-                                EXPRESSION_INITIALPOPULATION,
-                                PROCEDURE,
-                                EXPRESSION_DENOMINATOR,
-                                PROCEDURE,
-                                EXPRESSION_NUMERATOR,
-                                PROCEDURE))),
-                Arguments.of(
-                        buildGroupDef(
-                                Basis.PROCEDURE,
-                                buildPopulationDefs(INITIALPOPULATION, DENOMINATOR, NUMERATOR),
-                                buildStratifierDefs(
-                                        EXPRESSION_INITIALPOPULATION, EXPRESSION_DENOMINATOR, EXPRESSION_NUMERATOR)),
-                        buildEvaluationResult(Map.of(
-                                EXPRESSION_INITIALPOPULATION,
-                                List.of(PROCEDURE, PROCEDURE, PROCEDURE),
-                                EXPRESSION_DENOMINATOR,
-                                List.of(PROCEDURE, PROCEDURE, PROCEDURE),
-                                EXPRESSION_NUMERATOR,
-                                List.of(PROCEDURE, PROCEDURE, PROCEDURE)))));
+                                List.of(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE)))));
     }
 
     @ParameterizedTest
@@ -374,7 +367,7 @@ class R4PopulationBasisValidatorTest {
                                 ENCOUNTER,
                                 EXPRESSION_NUMERATOR,
                                 ENCOUNTER)),
-                        "stratifier expression criteria results for expression: [InitialPopulation] must fall within accepted types for boolean population basis: [boolean] for Measure: fakeMeasureUrl"),
+                        "stratifier expression criteria results for expression: [InitialPopulation] must fall within accepted types for population-basis: [boolean] for Measure: [fakeMeasureUrl] due to mismatch between total result classes: [Encounter] and matching result classes: []"),
                 Arguments.of(
                         buildGroupDef(
                                 Basis.BOOLEAN,
@@ -388,7 +381,7 @@ class R4PopulationBasisValidatorTest {
                                 List.of(ENCOUNTER, ENCOUNTER, ENCOUNTER),
                                 EXPRESSION_NUMERATOR,
                                 List.of(ENCOUNTER, ENCOUNTER, ENCOUNTER))),
-                        "stratifier expression criteria results for expression: [InitialPopulation] must fall within accepted types for boolean population basis: [boolean] for Measure: fakeMeasureUrl"),
+                        "stratifier expression criteria results for expression: [InitialPopulation] must fall within accepted types for population-basis: [boolean] for Measure: [fakeMeasureUrl] due to mismatch between total result classes: [Encounter, Encounter, Encounter] and matching result classes: []"),
                 Arguments.of(
                         buildGroupDef(
                                 Basis.BOOLEAN,
@@ -402,7 +395,7 @@ class R4PopulationBasisValidatorTest {
                                 List.of(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE),
                                 EXPRESSION_NUMERATOR,
                                 List.of(Boolean.TRUE, Boolean.TRUE, ENCOUNTER))),
-                        "stratifier expression criteria results for expression: [Numerator] must fall within accepted types for boolean population basis: [boolean] for Measure: fakeMeasureUrl"));
+                        "stratifier expression criteria results for expression: [Numerator] must fall within accepted types for population-basis: [boolean] for Measure: [fakeMeasureUrl] due to mismatch between total result classes: [Boolean, Boolean, Encounter] and matching result classes: [Boolean, Boolean]"));
     }
 
     @ParameterizedTest

@@ -23,25 +23,40 @@ import org.opencds.cqf.fhir.cr.measure.enumeration.CareGapsStatusCode;
  */
 public class R4CareGapStatusEvaluator {
     /**
-     * Below table is a mapping of expected behavior of the care-gap-status to Measure Report score
-     * | Gap-Status        | initial-population | denominator | denominator-exclusion | denominator-exception\*\* | numerator-exclusion | numerator | Improvement Notation\*\*\* |
-     * | ----------------- | ------------------ | ----------- | --------------------- | ------------------------- | ------------------- | --------- | -------------------------- |
-     * | not-applicable    | FALSE              | N/A         | N/A                   | N/A                       | N/A                 | N/A       | N/A                        |
-     * | closed-gap        | TRUE               | FALSE       | FALSE                 | FALSE                     | FALSE               | FALSE     | N/A                        |
-     * | closed-gap        | TRUE               | FALSE       | TRUE                  | FALSE                     | FALSE               | FALSE     | N/A                        |
-     * | closed-gap        | TRUE               | FALSE       | FALSE                 | TRUE                      | FALSE               | FALSE     | N/A                        |
-     * | prospective-gap\* | TRUE               | TRUE        | FALSE                 | FALSE                     | FALSE               | FALSE     | N/A                        |
-     * | prospective-gap\* | TRUE               | TRUE        | FALSE                 | FALSE                     | TRUE                | FALSE     | N/A                        |
-     * | open-gap          | TRUE               | TRUE        | FALSE                 | FALSE                     | TRUE                | FALSE     | increase                   |
-     * | open-gap          | TRUE               | TRUE        | FALSE                 | FALSE                     | FALSE               | FALSE     | increase                   |
-     * | open-gap          | TRUE               | TRUE        | FALSE                 | FALSE                     | FALSE               | TRUE      | decrease                   |
-     * | closed-gap        | TRUE               | TRUE        | FALSE                 | FALSE                     | TRUE                | FALSE     | decrease                   |
-     * | closed-gap        | TRUE               | TRUE        | FALSE                 | FALSE                     | FALSE               | TRUE      | increase                   |
-     * | closed-gap        | TRUE               | TRUE        | FALSE                 | FALSE                     | FALSE               | FALSE     | decrease                   |
+     * Compares MeasureReport values and calculated results for various gap statuses.
      *
-     * *`prospective-gap` status requires additional data points than just population-code values within a MeasureReport in order to determine if ‘prospective-gap’ or just ‘open-gap’.
-     * **denominator-exception: is only for ‘proportion’ scoring type.
-     * ***improvement Notation: is a Measure defined value that tells users how to view results of the Measure Report.
+     * <p>This table evaluates performance across different population criteria:
+     * Initial Population, Denominator, Denominator Exclusion, Numerator,
+     * Denominator Exception, and Numerator Exclusion.
+     *
+     * <pre>{@code
+     * Gap-Status       | Improvement | IP MR | IP Calc | D MR  | D Calc | DX MR | DX Calc | N MR  | N Calc | DE MR | DE Calc | NX MR | NX Calc
+     * -----------------|-------------|-------|---------|-------|--------|-------|---------|-------|--------|-------|---------|-------|---------
+     * not-applicable   | N/A         | FALSE | FALSE   | N/A   | N/A    | N/A   | N/A     | N/A   | N/A    | N/A   | N/A     | N/A   | N/A
+     * closed-gap       | N/A         | TRUE  | TRUE    | FALSE | FALSE  | FALSE | FALSE   | FALSE | FALSE  | FALSE | FALSE   | FALSE | FALSE
+     * closed-gap       | N/A         | TRUE  | TRUE    | TRUE  | FALSE  | TRUE  | TRUE    | FALSE | FALSE  | FALSE | FALSE   | FALSE | FALSE
+     * closed-gap       | N/A         | TRUE  | TRUE    | TRUE  | FALSE  | FALSE | FALSE   | FALSE | FALSE  | TRUE  | TRUE    | FALSE | FALSE
+     * prospective-gap* | N/A         | TRUE  | TRUE    | TRUE  | TRUE   | FALSE | FALSE   | FALSE | FALSE  | FALSE | FALSE   | FALSE | FALSE
+     * prospective-gap* | N/A         | TRUE  | TRUE    | TRUE  | TRUE   | FALSE | FALSE   | TRUE  | FALSE  | FALSE | FALSE   | TRUE  | TRUE
+     * open-gap         | increase    | TRUE  | TRUE    | TRUE  | TRUE   | FALSE | FALSE   | TRUE  | FALSE  | FALSE | FALSE   | TRUE  | TRUE
+     * open-gap         | increase    | TRUE  | TRUE    | TRUE  | TRUE   | FALSE | FALSE   | FALSE | FALSE  | FALSE | FALSE   | FALSE | FALSE
+     * open-gap         | decrease    | TRUE  | TRUE    | TRUE  | TRUE   | FALSE | FALSE   | TRUE  | TRUE   | FALSE | FALSE   | FALSE | FALSE
+     * closed-gap       | decrease    | TRUE  | TRUE    | TRUE  | TRUE   | FALSE | FALSE   | TRUE  | FALSE  | FALSE | FALSE   | TRUE  | TRUE
+     * closed-gap       | increase    | TRUE  | TRUE    | TRUE  | TRUE   | FALSE | FALSE   | TRUE  | TRUE   | FALSE | FALSE   | FALSE | FALSE
+     * closed-gap       | decrease    | TRUE  | TRUE    | TRUE  | TRUE   | FALSE | FALSE   | FALSE | FALSE  | FALSE | FALSE   | FALSE | FALSE
+     * }</pre>
+     *
+     * <p><strong>Legend:</strong><br>
+     * - MR = MeasureReport<br>
+     * - Calc = Calculated Result<br>
+     * - IP = Initial Population<br>
+     * - D = Denominator<br>
+     * - DX = Denominator Exclusion<br>
+     * - N = Numerator<br>
+     * - DE = Denominator Exception<br>
+     * - NX = Numerator Exclusion<br>
+     *
+     * <p>Rows marked with <code>*</code> (e.g., prospective-gap*) indicate predictive or future-looking evaluations.
      */
     public Map<String, CareGapsStatusCode> getGroupGapStatus(Measure measure, MeasureReport measureReport) {
         Map<String, CareGapsStatusCode> groupStatus = new HashMap<>();
@@ -60,8 +75,13 @@ public class R4CareGapStatusEvaluator {
             Measure measure, MeasureReportGroupComponent measureReportGroup, DateTimeType reportDate) {
         Pair<String, Boolean> inInitialPopulation = new MutablePair<>("initial-population", false);
         Pair<String, Boolean> inNumerator = new MutablePair<>("numerator", false);
+        Pair<String, Boolean> inNumeratorExclusion = new MutablePair<>("numerator-exclusion", false);
         Pair<String, Boolean> inDenominator = new MutablePair<>("denominator", false);
+        Pair<String, Boolean> inDenominatorException = new MutablePair<>("denominator-exception", false);
+        Pair<String, Boolean> inDenominatorExclusion = new MutablePair<>("denominator-exclusion", false);
+
         // get Numerator and Denominator membership
+
         measureReportGroup.getPopulation().forEach(population -> {
             if (population.hasCode()
                     && population
@@ -79,6 +99,33 @@ public class R4CareGapStatusEvaluator {
                     && population.getCode().hasCoding(MEASUREREPORT_MEASURE_POPULATION_SYSTEM, inDenominator.getKey())
                     && population.getCount() == 1) {
                 inDenominator.setValue(true);
+            }
+            if (population.hasCode()
+                    && population
+                            .getCode()
+                            .hasCoding(MEASUREREPORT_MEASURE_POPULATION_SYSTEM, inDenominatorExclusion.getKey())
+                    && population.getCount() == 1) {
+                inDenominatorExclusion.setValue(true);
+                // if in Exclusion, then move to false
+                inDenominator.setValue(false);
+            }
+            if (population.hasCode()
+                    && population
+                            .getCode()
+                            .hasCoding(MEASUREREPORT_MEASURE_POPULATION_SYSTEM, inDenominatorException.getKey())
+                    && population.getCount() == 1) {
+                inDenominatorException.setValue(true);
+                // if in Exception, then move to false
+                inDenominator.setValue(false);
+            }
+            if (population.hasCode()
+                    && population
+                            .getCode()
+                            .hasCoding(MEASUREREPORT_MEASURE_POPULATION_SYSTEM, inNumeratorExclusion.getKey())
+                    && population.getCount() == 1) {
+                inNumeratorExclusion.setValue(true);
+                // if in Exclusion, then move to false
+                inNumerator.setValue(false);
             }
         });
 

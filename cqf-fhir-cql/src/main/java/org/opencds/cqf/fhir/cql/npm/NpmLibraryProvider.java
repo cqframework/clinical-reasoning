@@ -11,14 +11,11 @@ import org.hl7.fhir.r4.model.Attachment;
 import org.hl7.fhir.r4.model.Library;
 import org.opencds.cqf.fhir.utility.npm.R4NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.npm.R4NpmResourceInfoForCql;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * {@link LibrarySourceProvider} to provide a CQL Library Stream from an NPM package.
  */
 public class NpmLibraryProvider implements LibrarySourceProvider {
-    private static final Logger logger = LoggerFactory.getLogger(NpmLibraryProvider.class);
 
     private static final String TEXT_CQL = "text/cql";
 
@@ -34,7 +31,8 @@ public class NpmLibraryProvider implements LibrarySourceProvider {
     @Nullable
     public InputStream getLibrarySource(VersionedIdentifier versionedIdentifier) {
 
-        final Optional<Library> optLibrary = findMatchingLibrary(versionedIdentifier);
+        final Optional<Library> optLibrary =
+                r4NpmPackageLoader.findMatchingLibrary(r4NpmResourceInfoForCql, versionedIdentifier);
 
         final Optional<Attachment> optCqlData = optLibrary.map(Library::getContent).stream()
                 .flatMap(Collection::stream)
@@ -48,19 +46,5 @@ public class NpmLibraryProvider implements LibrarySourceProvider {
         final Attachment attachment = optCqlData.get();
 
         return new ByteArrayInputStream(attachment.getData());
-    }
-
-    private Optional<Library> findMatchingLibrary(VersionedIdentifier versionedIdentifier) {
-        return r4NpmResourceInfoForCql
-                .findMatchingLibrary(versionedIdentifier)
-                .or(() -> findLibraryFromUnrelatedNpmPackage(versionedIdentifier));
-    }
-
-    private Optional<Library> findLibraryFromUnrelatedNpmPackage(VersionedIdentifier versionedIdentifier) {
-        return r4NpmPackageLoader.loadLibraryByUrl(getUrl(versionedIdentifier));
-    }
-
-    private String getUrl(VersionedIdentifier versionedIdentifier) {
-        return "%s/Library/%s".formatted(versionedIdentifier.getSystem(), versionedIdentifier.getId());
     }
 }

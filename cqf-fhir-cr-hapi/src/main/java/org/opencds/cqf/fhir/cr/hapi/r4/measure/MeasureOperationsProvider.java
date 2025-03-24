@@ -87,7 +87,7 @@ public class MeasureOperationsProvider {
                         practitioner);
     }
 
-    // LUKETODO:  merge with proper $evaluate-measure later somehow?????
+    // TODO: LD:  we may have to permanently keep this API separate from $evaluate_mesasure
     @Operation(name = CrProviderConstants.CR_OPERATION_EVALUATE_MEASURE_URL, idempotent = true, type = Measure.class)
     public MeasureReport evaluateMeasureWithUrl(
             @OperationParam(name = "measureUrl") String measureUrl,

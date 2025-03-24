@@ -74,8 +74,6 @@ class MeasureWithNpmTest {
     private static final String DENOMINATOR = "denominator";
     private static final String NUMERATOR = "numerator";
 
-    // LUKETODO:  depending Library in Package X  depended Library in Package Y:  make sure this all works
-
     @Test
     void evaluateSucceedsWithMinimalMeasure() {
         final Given npmRepo = initNpmRepos(SIMPLE_ALPHA);

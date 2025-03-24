@@ -27,12 +27,11 @@ import org.hl7.fhir.utilities.npm.NpmPackage;
  * Simplistic implementation of {@link R4NpmPackageLoader} that loads NpmPackages from the classpath
  * and stores {@link R4NpmResourceInfoForCql}s in a Map. This class is recommended for testing
  * and NOT for production.
+ * <p/
+ * Does not use an {@link NpmNamespaceManager} and instead resolves all NamespaceInfos by extracting
+ * them from all loaded packages at construction time.
  */
 public class R4NpmPackageLoaderInMemory implements R4NpmPackageLoader {
-
-    // LUKETODO:  inject a NpmNamespaceManager ?
-    //    private static final List<NamespaceInfo> NAMESPACE_INFOS = List.of(new
-    // NamespaceInfo("opencds.crosspackagetarget", "http://cross.package.target.npm.opencds.org"));
 
     private final Map<String, R4NpmResourceInfoForCql> measureUrlToResourceInfo = new HashMap<>();
     private final Map<String, NpmPackage> libraryUrlToPackage = new HashMap<>();
@@ -50,7 +49,6 @@ public class R4NpmPackageLoaderInMemory implements R4NpmPackageLoader {
                 measureUrl.asStringValue(), input -> R4NpmResourceInfoForCql.EMPTY);
     }
 
-    // LUKETODO: improve implementation and try to track the other implementations of R4NpmPackageLoader
     @Override
     public Optional<Library> loadLibraryByUrl(String url) {
         for (NpmPackage npmPackage : libraryUrlToPackage.values()) {
@@ -133,8 +131,7 @@ public class R4NpmPackageLoaderInMemory implements R4NpmPackageLoader {
 
         for (Map.Entry<String, List<String>> typeToFiles : types.entrySet()) {
             for (String nextFile : typeToFiles.getValue()) {
-                final byte[] fileBytes = packageFolder.fetchFile(nextFile);
-                final String fileContents = new String(fileBytes, StandardCharsets.UTF_8);
+                final String fileContents = new String(packageFolder.fetchFile(nextFile), StandardCharsets.UTF_8);
 
                 if (nextFile.toLowerCase().endsWith(".json")) {
                     final IBaseResource resource = fhirContext.newJsonParser().parseResource(fileContents);
@@ -150,6 +147,10 @@ public class R4NpmPackageLoaderInMemory implements R4NpmPackageLoader {
             }
         }
 
+        storeResources(npmPackage, measure, library);
+    }
+
+    private void storeResources(NpmPackage npmPackage, Measure measure, Library library) {
         if (measure != null) {
             measureUrlToResourceInfo.put(
                     measure.getUrl(), new R4NpmResourceInfoForCql(measure, library, List.of(npmPackage)));

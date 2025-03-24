@@ -2,9 +2,13 @@ package org.opencds.cqf.fhir.cql.npm;
 
 import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.ModelManager;
+import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.utility.npm.R4NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.npm.R4NpmResourceInfoForCql;
 
+/**
+ * Convenience class to extend {@link Engines} to handle NPM package specific logic.
+ */
 public class EnginesNpmLibraryHandler {
 
     private EnginesNpmLibraryHandler() {

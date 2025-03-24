@@ -5,7 +5,6 @@ import org.hl7.elm.r1.VersionedIdentifier;
 
 public class VersionedIdentifiers {
     private static final Pattern LIBRARY_SPLIT_PATTERN = Pattern.compile("Library/");
-    private static final Pattern TOP_LEVEL_SPLIT_PATTERN = Pattern.compile("^(https?://[^/]+)");
 
     private VersionedIdentifiers() {
         // empty
@@ -23,7 +22,7 @@ public class VersionedIdentifiers {
                     "Invalid url, Library.url SHALL be <CQL namespace url>/Library/<CQL library name>");
         }
 
-        String cqlName = urlSplitByLibrary.length == 1 ? urlSplitByLibrary[0] : urlSplitByLibrary[1];
+        final String cqlName = urlSplitByLibrary.length == 1 ? urlSplitByLibrary[0] : urlSplitByLibrary[1];
         VersionedIdentifier versionedIdentifier = new VersionedIdentifier();
         if (cqlName.contains("|")) {
             String[] nameVersion = cqlName.split("\\|");
@@ -34,13 +33,6 @@ public class VersionedIdentifiers {
         } else {
             versionedIdentifier.setId(cqlName);
         }
-
-        //        // for http://example.com/foo/bar, extract http://example.com
-        //        final Matcher matcher = TOP_LEVEL_SPLIT_PATTERN.matcher(url);
-        //
-        //        if (matcher.find()) {
-        //            versionedIdentifier.setSystem(matcher.group(0));
-        //        }
 
         return versionedIdentifier;
     }

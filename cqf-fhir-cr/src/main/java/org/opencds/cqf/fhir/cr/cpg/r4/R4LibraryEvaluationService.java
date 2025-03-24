@@ -54,7 +54,7 @@ public class R4LibraryEvaluationService {
         }
         var libraryEngine = new LibraryEngine(repository, this.evaluationSettings);
         var library = repository.read(Library.class, id);
-        // LUKETODO:  is this a use case for retrieving an NPM package by library URL?
+        // for now we can't process NPM packages in this scenario
         var engine = Engines.forRepository(
                 repository, evaluationSettings, data, R4NpmResourceInfoForCql.EMPTY, R4NpmPackageLoader.DEFAULT);
         var libraryManager = engine.getEnvironment().getLibraryManager();

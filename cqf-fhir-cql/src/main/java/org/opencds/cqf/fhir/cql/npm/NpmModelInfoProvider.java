@@ -22,7 +22,6 @@ public class NpmModelInfoProvider implements ModelInfoProvider {
     private static final String APPLICATION_XML = "application/xml";
 
     private final R4NpmResourceInfoForCql r4NpmResourceInfoForCql;
-    // LUKETODO: look at NpmLibraryProvider and do the same thing and try to reuse code:
     private final R4NpmPackageLoader r4NpmPackageLoader;
 
     public NpmModelInfoProvider(
@@ -35,7 +34,8 @@ public class NpmModelInfoProvider implements ModelInfoProvider {
     @Nullable
     public ModelInfo load(ModelIdentifier modelIdentifier) {
 
-        final Optional<Library> optLibrary = r4NpmResourceInfoForCql.findMatchingLibrary(modelIdentifier);
+        final Optional<Library> optLibrary =
+                r4NpmPackageLoader.findMatchingLibrary(r4NpmResourceInfoForCql, modelIdentifier);
 
         final Optional<Attachment> optCqlData = optLibrary.map(Library::getContent).stream()
                 .flatMap(Collection::stream)

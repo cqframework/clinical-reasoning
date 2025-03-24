@@ -4,7 +4,6 @@ import jakarta.annotation.Nullable;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Collection;
-import java.util.Map;
 import java.util.Optional;
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.hl7.elm.r1.VersionedIdentifier;
@@ -60,24 +59,6 @@ public class NpmLibraryProvider implements LibrarySourceProvider {
     private Optional<Library> findLibraryFromUnrelatedNpmPackage(VersionedIdentifier versionedIdentifier) {
         return r4NpmPackageLoader.loadLibraryByUrl(getUrl(versionedIdentifier));
     }
-
-    /*
-      {
-          "name": "org.opencds.npm.with-derived-library",
-          "version":"0.1",
-          "canonical":"http://with-derived-library.npm.opencds.org",
-          "url":"http://with-derived-library.npm.opencds.org/Draft1",
-          "author": "luke",
-          "fhirVersions": [
-          "4.0.1"
-    ],
-          "dependencies": {
-          "hl7.fhir.r4.core": "4.0.1"
-      }
-      }
-       */
-
-    private static final Map<String, String> ID_TO_URL = Map.of("x", "http://with-derived-library.npm.opencds.org");
 
     private String getUrl(VersionedIdentifier versionedIdentifier) {
         return "%s/Library/%s".formatted(versionedIdentifier.getSystem(), versionedIdentifier.getId());

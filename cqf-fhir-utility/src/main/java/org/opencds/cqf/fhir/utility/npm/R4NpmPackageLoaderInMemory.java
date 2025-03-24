@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import org.hl7.cql.model.NamespaceInfo;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.formats.JsonParser;
 import org.hl7.fhir.r4.model.CanonicalType;
@@ -21,8 +22,6 @@ import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.utilities.npm.NpmPackage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Simplistic implementation of {@link R4NpmPackageLoader} that loads NpmPackages from the classpath
@@ -30,19 +29,19 @@ import org.slf4j.LoggerFactory;
  * and NOT for production.
  */
 public class R4NpmPackageLoaderInMemory implements R4NpmPackageLoader {
-    private static final Logger logger = LoggerFactory.getLogger(R4NpmPackageLoaderInMemory.class);
+
+    // LUKETODO:  inject a NpmNamespaceManager ?
+    //    private static final List<NamespaceInfo> NAMESPACE_INFOS = List.of(new
+    // NamespaceInfo("opencds.crosspackagetarget", "http://cross.package.target.npm.opencds.org"));
 
     private final Map<String, R4NpmResourceInfoForCql> measureUrlToResourceInfo = new HashMap<>();
     private final Map<String, NpmPackage> libraryUrlToPackage = new HashMap<>();
+    private final List<NamespaceInfo> namespaceInfos;
 
     public static R4NpmPackageLoaderInMemory fromNpmPackageTgzPath(Class<?> clazz, Path... tgzPaths) {
         final List<NpmPackage> npmPackages = buildNpmPackage(clazz, tgzPaths);
 
         return new R4NpmPackageLoaderInMemory(npmPackages);
-    }
-
-    public static R4NpmPackageLoaderInMemory fromNpmPackages(NpmPackage... npmPackage) {
-        return new R4NpmPackageLoaderInMemory(Arrays.asList(npmPackage));
     }
 
     @Override
@@ -53,9 +52,9 @@ public class R4NpmPackageLoaderInMemory implements R4NpmPackageLoader {
 
     // LUKETODO: improve implementation and try to track the other implementations of R4NpmPackageLoader
     @Override
-    public Optional<Library> loadLibraryByUrl(String theUrl) {
+    public Optional<Library> loadLibraryByUrl(String url) {
         for (NpmPackage npmPackage : libraryUrlToPackage.values()) {
-            try (InputStream libraryInputStream = npmPackage.loadByCanonical(theUrl)) {
+            try (InputStream libraryInputStream = npmPackage.loadByCanonical(url)) {
                 if (libraryInputStream != null) {
                     final Resource resource = new JsonParser().parse(libraryInputStream);
                     if (resource instanceof Library library) {
@@ -67,6 +66,11 @@ public class R4NpmPackageLoaderInMemory implements R4NpmPackageLoader {
             }
         }
         return Optional.empty();
+    }
+
+    @Override
+    public List<NamespaceInfo> getAllNamespaceInfos() {
+        return namespaceInfos;
     }
 
     @Nonnull
@@ -88,6 +92,11 @@ public class R4NpmPackageLoaderInMemory implements R4NpmPackageLoader {
     }
 
     private R4NpmPackageLoaderInMemory(List<NpmPackage> npmPackages) {
+
+        namespaceInfos = npmPackages.stream()
+                .map(npmPackage -> new NamespaceInfo(npmPackage.name(), npmPackage.canonical()))
+                .toList();
+
         npmPackages.forEach(this::setup);
     }
 
@@ -116,6 +125,7 @@ public class R4NpmPackageLoaderInMemory implements R4NpmPackageLoader {
     private void setupNpmPackageInfo(
             NpmPackage npmPackage, NpmPackage.NpmPackageFolder packageFolder, FhirContext fhirContext)
             throws IOException {
+
         final Map<String, List<String>> types = packageFolder.getTypes();
 
         Measure measure = null;

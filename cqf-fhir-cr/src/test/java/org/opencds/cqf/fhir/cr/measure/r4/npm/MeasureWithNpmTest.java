@@ -43,10 +43,8 @@ class MeasureWithNpmTest {
     private static final String CROSS_PACKAGE_SOURCE = "cross-package-source";
     private static final String CROSS_PACKAGE_SOURCE_UPPER = "CrossPackageSource";
     private static final String CROSS_PACKAGE_TARGET = "cross-package-target";
-    private static final String CROSS_PACKAGE_TARGET_UPPER = "CrossPackageTarget";
 
     private static final String CROSS_PACKAGE_SOURCE_URL = "http://cross.package.source.npm.opencds.org";
-    private static final String CROSS_PACKAGE_TARGET_URL = "http://cross.package.target.npm.opencds.org";
 
     private static final String MEASURE_URL_CROSS_PACKAGE_SOURCE =
             CROSS_PACKAGE_SOURCE_URL + SLASH_MEASURE_SLASH + CROSS_PACKAGE_SOURCE_UPPER;
@@ -194,7 +192,6 @@ class MeasureWithNpmTest {
                 .hasCount(1);
     }
 
-    // LUKETODO:  make this test work:
     @Test
     void evaluateWithDerivedLibraryCrossPackage() {
         final Given npmRepo = initNpmRepos(CROSS_PACKAGE_SOURCE, CROSS_PACKAGE_TARGET);

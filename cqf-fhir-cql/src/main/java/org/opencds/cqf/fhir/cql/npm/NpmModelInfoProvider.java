@@ -11,6 +11,7 @@ import org.hl7.cql.model.ModelInfoProvider;
 import org.hl7.elm_modelinfo.r1.ModelInfo;
 import org.hl7.fhir.r4.model.Attachment;
 import org.hl7.fhir.r4.model.Library;
+import org.opencds.cqf.fhir.utility.npm.R4NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.npm.R4NpmResourceInfoForCql;
 
 /**
@@ -21,9 +22,13 @@ public class NpmModelInfoProvider implements ModelInfoProvider {
     private static final String APPLICATION_XML = "application/xml";
 
     private final R4NpmResourceInfoForCql r4NpmResourceInfoForCql;
+    // LUKETODO: look at NpmLibraryProvider and do the same thing and try to reuse code:
+    private final R4NpmPackageLoader r4NpmPackageLoader;
 
-    public NpmModelInfoProvider(R4NpmResourceInfoForCql r4NpmResourceInfoForCql) {
+    public NpmModelInfoProvider(
+            R4NpmResourceInfoForCql r4NpmResourceInfoForCql, R4NpmPackageLoader r4NpmPackageLoader) {
         this.r4NpmResourceInfoForCql = r4NpmResourceInfoForCql;
+        this.r4NpmPackageLoader = r4NpmPackageLoader;
     }
 
     @Override

@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.utility.npm;
 
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import java.io.IOException;
@@ -50,6 +51,11 @@ public class R4NpmResourceInfoForCql {
 
     public Optional<Library> getOptMainLibrary() {
         return Optional.ofNullable(mainLibrary);
+    }
+
+    @VisibleForTesting
+    List<NpmPackage> getNpmPackages() {
+        return npmPackages;
     }
 
     public Optional<Library> findMatchingLibrary(VersionedIdentifier versionedIdentifier) {

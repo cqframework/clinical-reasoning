@@ -79,10 +79,9 @@ public class R4CqlExecutionService {
                         null);
             }
 
-            // LUKETODO:  is this a use case for retrieving an NPM package by library URL?
-            // LUKETODO:  pass a non-empty value?  I think we need to hard code this before we need to query by Measure
-            // URL and we have none here
-            var engine = Engines.forRepository(repository, evaluationSettings, null, R4NpmResourceInfoForCql.EMPTY);
+            // for now we can't process NPM packages in this scenario
+            var engine = Engines.forRepository(
+                    repository, evaluationSettings, null, R4NpmResourceInfoForCql.EMPTY, R4NpmPackageLoader.DEFAULT);
             var libraryManager = engine.getEnvironment().getLibraryManager();
             var libraryIdentifier = baseCqlExecutionProcessor.resolveLibraryIdentifier(content, null, libraryManager);
 

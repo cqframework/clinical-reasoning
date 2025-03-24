@@ -40,6 +40,22 @@ class MeasureWithNpmTest {
     private static final String MEASURE_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES =
             DERIVED_TWO_LAYERS_URL + SLASH_MEASURE_SLASH + WITH_TWO_LAYERS_DERIVED_LIBRARIES_UPPER;
 
+    private static final String CROSS_PACKAGE_SOURCE = "cross-package-source";
+    private static final String CROSS_PACKAGE_SOURCE_UPPER = "CrossPackageSource";
+    private static final String CROSS_PACKAGE_TARGET = "cross-package-target";
+    private static final String CROSS_PACKAGE_TARGET_UPPER = "CrossPackageTarget";
+
+    private static final String CROSS_PACKAGE_SOURCE_URL = "http://cross.package.source.npm.opencds.org";
+    private static final String CROSS_PACKAGE_TARGET_URL = "http://cross.package.target.npm.opencds.org";
+
+    private static final String MEASURE_URL_CROSS_PACKAGE_SOURCE =
+            CROSS_PACKAGE_SOURCE_URL + SLASH_MEASURE_SLASH + CROSS_PACKAGE_SOURCE_UPPER;
+
+    private static final LocalDateTime LOCAL_DATE_TIME_2020_01_01 =
+            LocalDate.of(2020, Month.JANUARY, 1).atStartOfDay();
+    private static final LocalDateTime LOCAL_DATE_TIME_2021_01_01_MINUS_ONE_SECOND =
+            LocalDate.of(2021, Month.JANUARY, 1).atStartOfDay().minusNanos(1);
+
     private static final LocalDateTime LOCAL_DATE_TIME_2021_01_01 =
             LocalDate.of(2021, Month.JANUARY, 1).atStartOfDay();
     private static final LocalDateTime LOCAL_DATE_TIME_2022_01_01_MINUS_ONE_SECOND =
@@ -56,6 +72,11 @@ class MeasureWithNpmTest {
             LocalDate.of(2025, Month.JANUARY, 1).atStartOfDay().minusNanos(1);
     private static final String PATIENT_ID = "pat1";
     private static final String PATIENT_REFERENCE = ResourceType.Patient + "/pat1";
+    private static final String INITIAL_POPULATION = "initial-population";
+    private static final String DENOMINATOR = "denominator";
+    private static final String NUMERATOR = "numerator";
+
+    // LUKETODO:  depending Library in Package X  depended Library in Package Y:  make sure this all works
 
     @Test
     void evaluateSucceedsWithMinimalMeasure() {
@@ -123,13 +144,13 @@ class MeasureWithNpmTest {
                 .hasStatus(MeasureReportStatus.COMPLETE)
                 .hasEvaluatedResourceCount(1)
                 .firstGroup()
-                .population("initial-population")
+                .population(INITIAL_POPULATION)
                 .hasCount(1)
                 .up()
-                .population("denominator")
+                .population(DENOMINATOR)
                 .hasCount(1)
                 .up()
-                .population("numerator")
+                .population(NUMERATOR)
                 .hasCount(1);
     }
 
@@ -163,13 +184,42 @@ class MeasureWithNpmTest {
                 .hasStatus(MeasureReportStatus.COMPLETE)
                 .hasEvaluatedResourceCount(1)
                 .firstGroup()
-                .population("initial-population")
+                .population(INITIAL_POPULATION)
                 .hasCount(1)
                 .up()
-                .population("denominator")
+                .population(DENOMINATOR)
                 .hasCount(1)
                 .up()
-                .population("numerator")
+                .population(NUMERATOR)
+                .hasCount(1);
+    }
+
+    // LUKETODO:  make this test work:
+    @Test
+    void evaluateWithDerivedLibraryCrossPackage() {
+        final Given npmRepo = initNpmRepos(CROSS_PACKAGE_SOURCE, CROSS_PACKAGE_TARGET);
+
+        setupPatient(npmRepo);
+
+        npmRepo.when()
+                .measureUrl(MEASURE_URL_CROSS_PACKAGE_SOURCE)
+                .reportType(MeasureEvalType.SUBJECT.toCode())
+                .evaluate()
+                .then()
+                .hasMeasureUrl(MEASURE_URL_CROSS_PACKAGE_SOURCE)
+                .hasPeriodStart(toJavaUtilDate(LOCAL_DATE_TIME_2020_01_01))
+                .hasPeriodEnd(toJavaUtilDate(LOCAL_DATE_TIME_2021_01_01_MINUS_ONE_SECOND))
+                .hasSubjectReference(PATIENT_REFERENCE)
+                .hasStatus(MeasureReportStatus.COMPLETE)
+                .hasEvaluatedResourceCount(1)
+                .firstGroup()
+                .population(INITIAL_POPULATION)
+                .hasCount(1)
+                .up()
+                .population(DENOMINATOR)
+                .hasCount(1)
+                .up()
+                .population(NUMERATOR)
                 .hasCount(1);
     }
 

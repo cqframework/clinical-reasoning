@@ -158,7 +158,8 @@ public class R4MeasureProcessor {
                 this.repository,
                 this.measureEvaluationOptions.getEvaluationSettings(),
                 additionalData,
-                r4NpmResourceInfoForCql);
+                r4NpmResourceInfoForCql,
+                r4NpmPackageLoader);
 
         CompiledLibrary lib;
         try {

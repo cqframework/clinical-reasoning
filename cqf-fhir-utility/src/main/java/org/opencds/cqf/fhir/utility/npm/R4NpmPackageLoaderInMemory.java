@@ -15,10 +15,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.formats.JsonParser;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Measure;
+import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.utilities.npm.NpmPackage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Simplistic implementation of {@link R4NpmPackageLoader} that loads NpmPackages from the classpath
@@ -26,8 +30,10 @@ import org.hl7.fhir.utilities.npm.NpmPackage;
  * and NOT for production.
  */
 public class R4NpmPackageLoaderInMemory implements R4NpmPackageLoader {
+    private static final Logger logger = LoggerFactory.getLogger(R4NpmPackageLoaderInMemory.class);
 
-    private final Map<String, R4NpmResourceInfoForCql> urlToResourceInfo = new HashMap<>();
+    private final Map<String, R4NpmResourceInfoForCql> measureUrlToResourceInfo = new HashMap<>();
+    private final Map<String, NpmPackage> libraryUrlToPackage = new HashMap<>();
 
     public static R4NpmPackageLoaderInMemory fromNpmPackageTgzPath(Class<?> clazz, Path... tgzPaths) {
         final List<NpmPackage> npmPackages = buildNpmPackage(clazz, tgzPaths);
@@ -41,7 +47,26 @@ public class R4NpmPackageLoaderInMemory implements R4NpmPackageLoader {
 
     @Override
     public R4NpmResourceInfoForCql loadNpmResources(CanonicalType measureUrl) {
-        return urlToResourceInfo.computeIfAbsent(measureUrl.asStringValue(), input -> R4NpmResourceInfoForCql.EMPTY);
+        return measureUrlToResourceInfo.computeIfAbsent(
+                measureUrl.asStringValue(), input -> R4NpmResourceInfoForCql.EMPTY);
+    }
+
+    // LUKETODO: improve implementation and try to track the other implementations of R4NpmPackageLoader
+    @Override
+    public Optional<Library> loadLibraryByUrl(String theUrl) {
+        for (NpmPackage npmPackage : libraryUrlToPackage.values()) {
+            try (InputStream libraryInputStream = npmPackage.loadByCanonical(theUrl)) {
+                if (libraryInputStream != null) {
+                    final Resource resource = new JsonParser().parse(libraryInputStream);
+                    if (resource instanceof Library library) {
+                        return Optional.of(library);
+                    }
+                }
+            } catch (IOException exception) {
+                throw new InternalErrorException(exception);
+            }
+        }
+        return Optional.empty();
     }
 
     @Nonnull
@@ -116,7 +141,12 @@ public class R4NpmPackageLoaderInMemory implements R4NpmPackageLoader {
         }
 
         if (measure != null) {
-            urlToResourceInfo.put(measure.getUrl(), new R4NpmResourceInfoForCql(measure, library, List.of(npmPackage)));
+            measureUrlToResourceInfo.put(
+                    measure.getUrl(), new R4NpmResourceInfoForCql(measure, library, List.of(npmPackage)));
+        }
+
+        if (library != null) {
+            libraryUrlToPackage.put(library.getUrl(), npmPackage);
         }
     }
 }

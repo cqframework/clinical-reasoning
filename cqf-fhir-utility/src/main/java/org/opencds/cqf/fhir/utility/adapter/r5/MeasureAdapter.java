@@ -10,6 +10,7 @@ import org.hl7.fhir.r5.model.CanonicalType;
 import org.hl7.fhir.r5.model.Extension;
 import org.hl7.fhir.r5.model.Library;
 import org.hl7.fhir.r5.model.Measure;
+import org.hl7.fhir.r5.model.PrimitiveType;
 import org.hl7.fhir.r5.model.Reference;
 import org.hl7.fhir.r5.model.RelatedArtifact;
 import org.hl7.fhir.r5.model.UriType;
@@ -49,6 +50,14 @@ public class MeasureAdapter extends KnowledgeArtifactAdapter implements IMeasure
     private boolean checkedEffectiveDataRequirements;
     private Library effectiveDataRequirements;
     private LibraryAdapter effectiveDataRequirementsAdapter;
+
+    @Override
+    public List<String> getLibraryValues() {
+        return getMeasure().getLibrary()
+            .stream()
+            .map(PrimitiveType::getValueAsString)
+            .toList();
+    }
 
     private String getEdrReferenceString(Extension edrExtension) {
         return edrExtension.getUrl().contains("cqfm")

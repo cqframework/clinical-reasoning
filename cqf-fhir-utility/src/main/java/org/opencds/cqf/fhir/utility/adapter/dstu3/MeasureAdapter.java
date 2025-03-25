@@ -49,6 +49,14 @@ public class MeasureAdapter extends KnowledgeArtifactAdapter
     private Library effectiveDataRequirements;
     private LibraryAdapter effectiveDataRequirementsAdapter;
 
+    @Override
+    public List<String> getLibraryValues() {
+        return getMeasure().getLibrary()
+            .stream()
+            .map(Reference::getReference)
+            .toList();
+    }
+
     private String getEdrReferenceString(Extension edrExtension) {
         return edrExtension.getUrl().contains("cqfm")
                 ? ((Reference) edrExtension.getValue()).getReference()

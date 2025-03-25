@@ -116,10 +116,8 @@ public class R4MeasureProcessor {
     private Measure getMeasure(
             Either3<CanonicalType, IdType, Measure> measure, NpmResourceInfoForCql npmResourceInfoForCql) {
         final Optional<IMeasureAdapter> optMeasure = npmResourceInfoForCql.getMeasure();
-        if (optMeasure.isPresent()) {
-            if (optMeasure.get().get() instanceof Measure measureFromNpm) {
-                return measureFromNpm;
-            }
+        if (optMeasure.isPresent() && optMeasure.get().get() instanceof Measure measureFromNpm) {
+            return measureFromNpm;
         }
 
         return measure.fold(this::resolveByUrl, this::resolveById, Function.identity());

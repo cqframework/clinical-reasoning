@@ -51,10 +51,7 @@ public class MeasureAdapter extends KnowledgeArtifactAdapter
 
     @Override
     public List<String> getLibraryValues() {
-        return getMeasure().getLibrary()
-            .stream()
-            .map(Reference::getReference)
-            .toList();
+        return getMeasure().getLibrary().stream().map(Reference::getReference).toList();
     }
 
     private String getEdrReferenceString(Extension edrExtension) {

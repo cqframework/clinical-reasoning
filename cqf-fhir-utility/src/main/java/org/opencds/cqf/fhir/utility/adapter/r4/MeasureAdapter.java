@@ -6,7 +6,6 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IDomainResource;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Library;
@@ -54,10 +53,9 @@ public class MeasureAdapter extends KnowledgeArtifactAdapter implements IMeasure
 
     @Override
     public List<String> getLibraryValues() {
-        return getMeasure().getLibrary()
-            .stream()
-            .map(PrimitiveType::getValueAsString)
-            .toList();
+        return getMeasure().getLibrary().stream()
+                .map(PrimitiveType::getValueAsString)
+                .toList();
     }
 
     private String getEdrReferenceString(Extension edrExtension) {

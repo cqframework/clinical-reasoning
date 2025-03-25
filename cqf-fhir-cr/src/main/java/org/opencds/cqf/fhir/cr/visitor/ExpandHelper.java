@@ -156,8 +156,7 @@ public class ExpandHelper {
             // Grab the ValueSet
             var url = Canonicals.getUrl(reference);
             var version = Canonicals.getVersion(reference);
-            var includedVS =
-                    getIncludedValueSet(valueSet, terminologyEndpoint, valueSets, repository, reference, url, version);
+            var includedVS = getIncludedValueSet(terminologyEndpoint, valueSets, repository, reference, url, version);
             if (includedVS != null) {
                 // Expand the ValueSet if we haven't already
                 if (!expandedList.contains(url)) {
@@ -205,7 +204,6 @@ public class ExpandHelper {
     }
 
     private IValueSetAdapter getIncludedValueSet(
-            IValueSetAdapter valueSet,
             Optional<IEndpointAdapter> terminologyEndpoint,
             List<IValueSetAdapter> valueSets,
             Repository repository,

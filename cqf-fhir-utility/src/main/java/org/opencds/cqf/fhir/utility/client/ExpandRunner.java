@@ -4,7 +4,6 @@ import static java.util.Objects.requireNonNull;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -63,9 +62,11 @@ public class ExpandRunner implements Runnable {
                         "Terminology Server expansion took longer than the allotted timeout: %s",
                         terminologyServerClientSettings.getTimeoutSeconds()));
             }
-        } catch (ExecutionException | InterruptedException e) {
+        } catch (Exception e) {
             scheduler.shutdown();
-            Thread.currentThread().interrupt();
+            if (e instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+            }
             throw new UnprocessableEntityException(e.getMessage());
         }
     }

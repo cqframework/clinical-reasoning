@@ -16,15 +16,15 @@ import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.cpg.CqlExecutionProcessor;
-import org.opencds.cqf.fhir.utility.npm.R4NpmPackageLoader;
-import org.opencds.cqf.fhir.utility.npm.R4NpmResourceInfoForCql;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
+import org.opencds.cqf.fhir.utility.npm.NpmResourceInfoForCql;
 import org.opencds.cqf.fhir.utility.repository.Repositories;
 
 public class R4CqlExecutionService {
 
     protected Repository repository;
     protected EvaluationSettings evaluationSettings;
-    protected R4NpmPackageLoader r4NpmPackageLoader;
+    protected NpmPackageLoader npmPackageLoader;
 
     public R4CqlExecutionService(Repository repository, EvaluationSettings evaluationSettings) {
         this.repository = repository;
@@ -81,7 +81,7 @@ public class R4CqlExecutionService {
 
             // for now we can't process NPM packages in this scenario
             var engine = Engines.forRepository(
-                    repository, evaluationSettings, null, R4NpmResourceInfoForCql.EMPTY, R4NpmPackageLoader.DEFAULT);
+                    repository, evaluationSettings, null, NpmResourceInfoForCql.EMPTY, NpmPackageLoader.DEFAULT);
             var libraryManager = engine.getEnvironment().getLibraryManager();
             var libraryIdentifier = baseCqlExecutionProcessor.resolveLibraryIdentifier(content, null, libraryManager);
 

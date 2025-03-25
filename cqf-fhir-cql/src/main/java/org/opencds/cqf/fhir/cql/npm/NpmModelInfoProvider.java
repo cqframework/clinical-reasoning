@@ -1,18 +1,19 @@
 package org.opencds.cqf.fhir.cql.npm;
 
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.xml.bind.JAXB;
 import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.util.Collection;
 import java.util.Optional;
+import java.util.function.Function;
 import org.hl7.cql.model.ModelIdentifier;
 import org.hl7.cql.model.ModelInfoProvider;
 import org.hl7.elm_modelinfo.r1.ModelInfo;
-import org.hl7.fhir.r4.model.Attachment;
-import org.hl7.fhir.r4.model.Library;
-import org.opencds.cqf.fhir.utility.npm.R4NpmPackageLoader;
-import org.opencds.cqf.fhir.utility.npm.R4NpmResourceInfoForCql;
+import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
+import org.opencds.cqf.fhir.utility.adapter.IAttachmentAdapter;
+import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
+import org.opencds.cqf.fhir.utility.npm.NpmResourceInfoForCql;
 
 /**
  * {@link ModelInfoProvider} to provide a ELM ModelInfo from an NPM package.
@@ -21,35 +22,36 @@ public class NpmModelInfoProvider implements ModelInfoProvider {
 
     private static final String APPLICATION_XML = "application/xml";
 
-    private final R4NpmResourceInfoForCql r4NpmResourceInfoForCql;
-    private final R4NpmPackageLoader r4NpmPackageLoader;
+    private final NpmResourceInfoForCql npmResourceInfoForCql;
+    private final NpmPackageLoader npmPackageLoader;
 
-    public NpmModelInfoProvider(
-            R4NpmResourceInfoForCql r4NpmResourceInfoForCql, R4NpmPackageLoader r4NpmPackageLoader) {
-        this.r4NpmResourceInfoForCql = r4NpmResourceInfoForCql;
-        this.r4NpmPackageLoader = r4NpmPackageLoader;
+    public NpmModelInfoProvider(NpmResourceInfoForCql npmResourceInfoForCql, NpmPackageLoader npmPackageLoader) {
+        this.npmResourceInfoForCql = npmResourceInfoForCql;
+        this.npmPackageLoader = npmPackageLoader;
     }
 
     @Override
     @Nullable
     public ModelInfo load(ModelIdentifier modelIdentifier) {
 
-        final Optional<Library> optLibrary =
-                r4NpmPackageLoader.findMatchingLibrary(r4NpmResourceInfoForCql, modelIdentifier);
+        return npmPackageLoader
+                .findMatchingLibrary(npmResourceInfoForCql, modelIdentifier)
+                .map(this::findElmXmlAttachment)
+                .flatMap(Function.identity())
+                .map(IAttachmentAdapter::getData)
+                .map(ByteArrayInputStream::new)
+                .map(inputStream -> JAXB.unmarshal(inputStream, ModelInfo.class))
+                .orElse(null);
+    }
 
-        final Optional<Attachment> optCqlData = optLibrary.map(Library::getContent).stream()
-                .flatMap(Collection::stream)
+    @Nonnull
+    private Optional<IAttachmentAdapter> findElmXmlAttachment(ILibraryAdapter library) {
+        final IAdapterFactory adapterFactory = IAdapterFactory.forFhirVersion(
+                library.fhirContext().getVersion().getVersion());
+
+        return library.getContent().stream()
+                .map(adapterFactory::createAttachment)
                 .filter(attachment -> APPLICATION_XML.equals(attachment.getContentType()))
                 .findFirst();
-
-        if (optCqlData.isEmpty()) {
-            return null;
-        }
-
-        final Attachment attachment = optCqlData.get();
-
-        final InputStream inputStream = new ByteArrayInputStream(attachment.getData());
-
-        return JAXB.unmarshal(inputStream, ModelInfo.class);
     }
 }

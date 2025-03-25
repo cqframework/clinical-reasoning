@@ -1,16 +1,18 @@
 package org.opencds.cqf.fhir.cql.npm;
 
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.util.Collection;
 import java.util.Optional;
+import java.util.function.Function;
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.hl7.elm.r1.VersionedIdentifier;
-import org.hl7.fhir.r4.model.Attachment;
-import org.hl7.fhir.r4.model.Library;
-import org.opencds.cqf.fhir.utility.npm.R4NpmPackageLoader;
-import org.opencds.cqf.fhir.utility.npm.R4NpmResourceInfoForCql;
+import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
+import org.opencds.cqf.fhir.utility.adapter.IAttachmentAdapter;
+import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
+import org.opencds.cqf.fhir.utility.npm.NpmResourceInfoForCql;
 
 /**
  * {@link LibrarySourceProvider} to provide a CQL Library Stream from an NPM package.
@@ -19,32 +21,35 @@ public class NpmLibraryProvider implements LibrarySourceProvider {
 
     private static final String TEXT_CQL = "text/cql";
 
-    private final R4NpmResourceInfoForCql r4NpmResourceInfoForCql;
-    private final R4NpmPackageLoader r4NpmPackageLoader;
+    private final NpmResourceInfoForCql npmResourceInfoForCql;
+    private final NpmPackageLoader npmPackageLoader;
 
-    public NpmLibraryProvider(R4NpmResourceInfoForCql r4NpmResourceInfoForCql, R4NpmPackageLoader r4NpmPackageLoader) {
-        this.r4NpmResourceInfoForCql = r4NpmResourceInfoForCql;
-        this.r4NpmPackageLoader = r4NpmPackageLoader;
+    public NpmLibraryProvider(NpmResourceInfoForCql npmResourceInfoForCql, NpmPackageLoader npmPackageLoader) {
+        this.npmResourceInfoForCql = npmResourceInfoForCql;
+        this.npmPackageLoader = npmPackageLoader;
     }
 
     @Override
     @Nullable
     public InputStream getLibrarySource(VersionedIdentifier versionedIdentifier) {
 
-        final Optional<Library> optLibrary =
-                r4NpmPackageLoader.findMatchingLibrary(r4NpmResourceInfoForCql, versionedIdentifier);
+        return npmPackageLoader
+                .findMatchingLibrary(npmResourceInfoForCql, versionedIdentifier)
+                .map(this::findCqlAttachment)
+                .flatMap(Function.identity())
+                .map(IAttachmentAdapter::getData)
+                .map(ByteArrayInputStream::new)
+                .orElse(null);
+    }
 
-        final Optional<Attachment> optCqlData = optLibrary.map(Library::getContent).stream()
-                .flatMap(Collection::stream)
-                .filter(content -> content.getContentType().equals(TEXT_CQL))
+    @Nonnull
+    private Optional<IAttachmentAdapter> findCqlAttachment(ILibraryAdapter library) {
+        final IAdapterFactory adapterFactory = IAdapterFactory.forFhirVersion(
+                library.fhirContext().getVersion().getVersion());
+
+        return library.getContent().stream()
+                .map(adapterFactory::createAttachment)
+                .filter(attachment -> TEXT_CQL.equals(attachment.getContentType()))
                 .findFirst();
-
-        if (optCqlData.isEmpty()) {
-            return null;
-        }
-
-        final Attachment attachment = optCqlData.get();
-
-        return new ByteArrayInputStream(attachment.getData());
     }
 }

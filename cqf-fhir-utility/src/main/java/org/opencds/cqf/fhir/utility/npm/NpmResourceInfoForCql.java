@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.utility.npm;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
@@ -13,43 +14,46 @@ import org.hl7.cql.model.ModelIdentifier;
 import org.hl7.cql.model.NamespaceInfo;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.Attachment;
-import org.hl7.fhir.r4.model.Library;
-import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.utilities.npm.NpmPackage;
+import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
+import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IMeasureAdapter;
 
-/**
- * Container for {@link Measure} and {@link Library}, and a List of associated {@link NpmPackage}s.
- * Encapsulate the NpmPackages by only exposing the {@link NamespaceInfo}s and derived
- * {@link Library}s not directly associated with a given Measure.
- */
-public class R4NpmResourceInfoForCql {
+public class NpmResourceInfoForCql {
 
-    public static final R4NpmResourceInfoForCql EMPTY = new R4NpmResourceInfoForCql(null, null, List.of());
+    public static final NpmResourceInfoForCql EMPTY = new NpmResourceInfoForCql(null, null, List.of());
 
     private static final String TEXT_CQL = "text/cql";
 
     @Nullable
-    private final Measure measure;
+    private final IMeasureAdapter measure;
 
     @Nullable
-    private final Library mainLibrary;
+    private final ILibraryAdapter mainLibrary;
 
     // In theory, it's possible to have more than one associated NpmPackage
     private final List<NpmPackage> npmPackages;
 
-    public R4NpmResourceInfoForCql(
-            @Nullable Measure measure, @Nullable Library mainLibrary, List<NpmPackage> npmPackages) {
+    @Nullable
+    private final IAdapterFactory adapterFactory;
+
+    public NpmResourceInfoForCql(
+            @Nullable IMeasureAdapter measure, @Nullable ILibraryAdapter mainLibrary, List<NpmPackage> npmPackages) {
         this.measure = measure;
         this.mainLibrary = mainLibrary;
         this.npmPackages = npmPackages;
+
+        adapterFactory = Optional.ofNullable(measure)
+                .map(measureNonNull -> IAdapterFactory.forFhirVersion(
+                        measureNonNull.fhirContext().getVersion().getVersion()))
+                .orElse(null);
     }
 
-    public Optional<Measure> getMeasure() {
+    public Optional<IMeasureAdapter> getMeasure() {
         return Optional.ofNullable(measure);
     }
 
-    public Optional<Library> getOptMainLibrary() {
+    public Optional<ILibraryAdapter> getOptMainLibrary() {
         return Optional.ofNullable(mainLibrary);
     }
 
@@ -58,36 +62,38 @@ public class R4NpmResourceInfoForCql {
         return npmPackages;
     }
 
-    public Optional<Library> findMatchingLibrary(VersionedIdentifier versionedIdentifier) {
+    public Optional<ILibraryAdapter> findMatchingLibrary(VersionedIdentifier versionedIdentifier) {
 
-        final Optional<Library> optMainLibrary = getOptMainLibrary();
-        final Optional<Library> optDerivedLibrary = loadNpmLibrary(versionedIdentifier);
+        final Optional<ILibraryAdapter> optMainLibrary = getOptMainLibrary();
 
         if (doesLibraryMatch(versionedIdentifier)) {
             return optMainLibrary;
         }
 
+        final Optional<ILibraryAdapter> optDerivedLibrary = loadNpmLibrary(versionedIdentifier);
+
         return optDerivedLibrary;
     }
 
-    public Optional<Library> findMatchingLibrary(ModelIdentifier modelIdentifier) {
+    public Optional<ILibraryAdapter> findMatchingLibrary(ModelIdentifier modelIdentifier) {
 
-        final Optional<Library> optMainLibrary = getOptMainLibrary();
-        final Optional<Library> optDerivedLibrary = loadNpmLibrary(modelIdentifier);
+        final Optional<ILibraryAdapter> optMainLibrary = getOptMainLibrary();
 
         if (doesLibraryMatch(modelIdentifier)) {
             return optMainLibrary;
         }
 
+        final Optional<ILibraryAdapter> optDerivedLibrary = loadNpmLibrary(modelIdentifier);
+
         return optDerivedLibrary;
     }
 
-    private Optional<Library> loadNpmLibrary(VersionedIdentifier versionedIdentifier) {
+    private Optional<ILibraryAdapter> loadNpmLibrary(VersionedIdentifier versionedIdentifier) {
         return npmPackages.stream()
-                .map(npmPackage -> loadLibraryAsInputStream(npmPackage, versionedIdentifier))
+                .map(npmPackage -> loadLibraryInputStreamContext(npmPackage, versionedIdentifier))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
-                .map(R4NpmResourceInfoForCql::convertInputStreamToLibrary)
+                .map(this::convertContextToLibrary)
                 .flatMap(Optional::stream)
                 .findFirst();
     }
@@ -103,12 +109,12 @@ public class R4NpmResourceInfoForCql {
 
     // Note that this code hasn't actually been tested and is not needed at the present time.
     // If this should change, the code will need to be tested and possibly modified.
-    private Optional<Library> loadNpmLibrary(ModelIdentifier modelIdentifier) {
+    private Optional<ILibraryAdapter> loadNpmLibrary(ModelIdentifier modelIdentifier) {
         return npmPackages.stream()
-                .map(npmPackage -> loadLibraryAsInputStream(npmPackage, modelIdentifier))
+                .map(npmPackage -> loadLibraryInputStreamContext(npmPackage, modelIdentifier))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
-                .map(R4NpmResourceInfoForCql::convertInputStreamToLibrary)
+                .map(this::convertContextToLibrary)
                 .flatMap(Optional::stream)
                 .findFirst();
     }
@@ -122,31 +128,43 @@ public class R4NpmResourceInfoForCql {
     }
 
     private boolean doesLibraryMatch(String id) {
-        if (mainLibrary == null) {
+        if (mainLibrary == null || adapterFactory == null) {
             return false;
         }
 
-        if (mainLibrary.getIdPart().equals(id)) {
-            final Optional<Attachment> optCqlData = mainLibrary.getContent().stream()
-                    .filter(content -> TEXT_CQL.equals(content.getContentType()))
-                    .findFirst();
-
-            return optCqlData.isPresent();
+        if (mainLibrary.getId().getIdPart().equals(id)) {
+            return mainLibrary.getContent().stream()
+                    .map(adapterFactory::createAttachment)
+                    .anyMatch(attachment -> TEXT_CQL.equals(attachment.getContentType()));
         }
 
         return false;
     }
 
-    private static Optional<Library> convertInputStreamToLibrary(@Nullable InputStream libraryInputStream) {
-        try {
-            if (libraryInputStream == null) {
-                return Optional.empty();
-            }
+    record LibraryInputStreamContext(FhirVersionEnum fhirVersionEnum, InputStream libraryInputStream) {}
 
-            final IBaseResource resource =
-                    FhirContext.forR4Cached().newJsonParser().parseResource(libraryInputStream);
-            if (resource instanceof Library library) {
-                return Optional.of(library);
+    Optional<LibraryInputStreamContext> loadLibraryInputStreamContext(
+            NpmPackage npmPackage, VersionedIdentifier libraryIdentifier) {
+        return loadLibraryAsInputStream(npmPackage, libraryIdentifier)
+                .map(inputStream -> new LibraryInputStreamContext(
+                        FhirVersionEnum.forVersionString(npmPackage.fhirVersion()), inputStream));
+    }
+
+    Optional<LibraryInputStreamContext> loadLibraryInputStreamContext(
+            NpmPackage npmPackage, ModelIdentifier modelIdentifier) {
+        return loadLibraryAsInputStream(npmPackage, modelIdentifier)
+                .map(inputStream -> new LibraryInputStreamContext(
+                        FhirVersionEnum.forVersionString(npmPackage.fhirVersion()), inputStream));
+    }
+
+    private Optional<ILibraryAdapter> convertContextToLibrary(LibraryInputStreamContext context) {
+        try {
+            final IBaseResource resource = FhirContext.forCached(context.fhirVersionEnum)
+                    .newJsonParser()
+                    .parseResource(context.libraryInputStream);
+
+            if (adapterFactory != null) {
+                return Optional.of(adapterFactory.createLibrary(resource));
             }
 
             return Optional.empty();
@@ -177,11 +195,13 @@ public class R4NpmResourceInfoForCql {
         }
     }
 
+    // LUKETODO:  util class?
     @Nonnull
     private static String buildUrl(NpmPackage npmPackage, VersionedIdentifier libraryIdentifier) {
         return "%s/Library/%s".formatted(npmPackage.canonical(), libraryIdentifier.getId());
     }
 
+    // LUKETODO:  util class?
     @Nonnull
     private static String buildUrl(NpmPackage npmPackage, ModelIdentifier modelIdentifier) {
         return "%s/Library/%s-ModelInfo".formatted(npmPackage.canonical(), modelIdentifier.getId());

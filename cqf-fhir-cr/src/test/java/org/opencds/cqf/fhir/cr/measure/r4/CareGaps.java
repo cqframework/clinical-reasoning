@@ -39,7 +39,7 @@ import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_
 import org.opencds.cqf.fhir.cr.measure.CareGapsProperties;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
-import org.opencds.cqf.fhir.utility.npm.R4NpmPackageLoader;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 public class CareGaps {
@@ -94,7 +94,7 @@ public class CareGaps {
         private CareGapsProperties careGapsProperties;
         private final String serverBase;
         private final MeasurePeriodValidator measurePeriodEvaluator;
-        private final R4NpmPackageLoader r4NpmPackageLoader;
+        private final NpmPackageLoader npmPackageLoader;
 
         public Given() {
             this.evaluationOptions = MeasureEvaluationOptions.defaultOptions();
@@ -115,7 +115,7 @@ public class CareGaps {
             this.careGapsProperties.setCareGapsCompositionSectionAuthor("alphora-author");
             this.serverBase = "http://localhost";
             this.measurePeriodEvaluator = new MeasurePeriodValidator();
-            this.r4NpmPackageLoader = R4NpmPackageLoader.DEFAULT;
+            this.npmPackageLoader = NpmPackageLoader.DEFAULT;
         }
 
         public CareGaps.Given repository(Repository repository) {
@@ -147,7 +147,7 @@ public class CareGaps {
                     evaluationOptions,
                     serverBase,
                     measurePeriodEvaluator,
-                    r4NpmPackageLoader);
+                    npmPackageLoader);
         }
 
         public When when() {

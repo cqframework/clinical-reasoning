@@ -27,8 +27,8 @@ import org.opencds.cqf.fhir.cql.engine.parameters.CqlFhirParametersConverter;
 import org.opencds.cqf.fhir.cql.engine.parameters.CqlParameterDefinition;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.CqfExpression;
-import org.opencds.cqf.fhir.utility.npm.R4NpmPackageLoader;
-import org.opencds.cqf.fhir.utility.npm.R4NpmResourceInfoForCql;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
+import org.opencds.cqf.fhir.utility.npm.NpmResourceInfoForCql;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -135,7 +135,7 @@ public class LibraryEngine {
         requestSettings.getLibrarySourceProviders().add(new StringLibrarySourceProvider(Lists.newArrayList(cql)));
 
         var engine = Engines.forRepository(
-                repository, requestSettings, bundle, R4NpmResourceInfoForCql.EMPTY, R4NpmPackageLoader.DEFAULT);
+                repository, requestSettings, bundle, NpmResourceInfoForCql.EMPTY, NpmPackageLoader.DEFAULT);
 
         var evaluationParameters = cqlFhirParametersConverter.toCqlParameters(parameters);
         if (contextParameter != null) {
@@ -303,7 +303,7 @@ public class LibraryEngine {
         if (engine == null) {
             // for now we can't process NPM packages in this scenario
             engine = Engines.forRepository(
-                    repository, settings, additionalData, R4NpmResourceInfoForCql.EMPTY, R4NpmPackageLoader.DEFAULT);
+                    repository, settings, additionalData, NpmResourceInfoForCql.EMPTY, NpmPackageLoader.DEFAULT);
         }
 
         var evaluationParameters = cqlFhirParametersConverter.toCqlParameters(parameters);

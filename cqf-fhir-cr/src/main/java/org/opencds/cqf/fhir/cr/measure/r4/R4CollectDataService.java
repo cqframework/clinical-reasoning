@@ -20,25 +20,25 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
-import org.opencds.cqf.fhir.utility.npm.R4NpmPackageLoader;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 
 public class R4CollectDataService {
     private final Repository repository;
     private final MeasureEvaluationOptions measureEvaluationOptions;
     private final R4RepositorySubjectProvider subjectProvider;
     private final R4MeasureServiceUtils measureServiceUtils;
-    private final R4NpmPackageLoader r4NpmPackageLoader;
+    private final NpmPackageLoader npmPackageLoader;
 
     public R4CollectDataService(
             Repository repository,
             MeasureEvaluationOptions measureEvaluationOptions,
             R4MeasureServiceUtils measureServiceUtils,
-            R4NpmPackageLoader r4NpmPackageLoader) {
+            NpmPackageLoader npmPackageLoader) {
         this.repository = repository;
         this.measureEvaluationOptions = measureEvaluationOptions;
         this.subjectProvider = new R4RepositorySubjectProvider(measureEvaluationOptions.getSubjectProviderOptions());
         this.measureServiceUtils = measureServiceUtils;
-        this.r4NpmPackageLoader = r4NpmPackageLoader;
+        this.npmPackageLoader = npmPackageLoader;
     }
 
     /**
@@ -74,7 +74,7 @@ public class R4CollectDataService {
                 this.measureEvaluationOptions,
                 this.subjectProvider,
                 this.measureServiceUtils,
-                this.r4NpmPackageLoader);
+                this.npmPackageLoader);
 
         // getSubjects
         List<String> subjectList = getSubjects(subject, practitioner, subjectProvider);

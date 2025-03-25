@@ -37,7 +37,7 @@ import org.opencds.cqf.fhir.cr.measure.r4.R4DataRequirementsService;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureService;
 import org.opencds.cqf.fhir.cr.measure.r4.R4SubmitDataService;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
-import org.opencds.cqf.fhir.utility.npm.R4NpmPackageLoader;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -53,7 +53,7 @@ public class CrR4Config {
             MeasureEvaluationOptions evaluationOptions,
             MeasurePeriodValidator measurePeriodValidator,
             R4MeasureServiceUtilsFactory r4MeasureServiceUtilsFactory,
-            Optional<R4NpmPackageLoader> optNpmResourceHolderGetter) {
+            Optional<NpmPackageLoader> optNpmResourceHolderGetter) {
         return rd -> new R4MeasureService(
                 repositoryFactory.create(rd),
                 evaluationOptions,
@@ -96,7 +96,7 @@ public class CrR4Config {
             IRepositoryFactory repositoryFactory,
             MeasureEvaluationOptions measureEvaluationOptions,
             R4MeasureServiceUtilsFactory r4MeasureServiceUtilsFactory,
-            Optional<R4NpmPackageLoader> optNpmResourceHolderGetter) {
+            Optional<NpmPackageLoader> optNpmResourceHolderGetter) {
         return rd -> new R4CollectDataService(
                 repositoryFactory.create(rd),
                 measureEvaluationOptions,
@@ -122,7 +122,7 @@ public class CrR4Config {
             CareGapsProperties careGapsProperties,
             MeasureEvaluationOptions measureEvaluationOptions,
             MeasurePeriodValidator measurePeriodValidator,
-            Optional<R4NpmPackageLoader> optNpmResourceHolderGetter) {
+            Optional<NpmPackageLoader> optNpmResourceHolderGetter) {
         return rd -> new R4CareGapsService(
                 careGapsProperties,
                 repositoryFactory.create(rd),
@@ -168,7 +168,7 @@ public class CrR4Config {
         return new ProviderLoader(restfulServer, applicationContext, selector);
     }
 
-    private R4NpmPackageLoader npmResourceHolderGetter(Optional<R4NpmPackageLoader> optNpmResourceHolderGetter) {
-        return R4NpmPackageLoader.getDefaultIfEmpty(optNpmResourceHolderGetter.orElse(null));
+    private NpmPackageLoader npmResourceHolderGetter(Optional<NpmPackageLoader> optNpmResourceHolderGetter) {
+        return NpmPackageLoader.getDefaultIfEmpty(optNpmResourceHolderGetter.orElse(null));
     }
 }

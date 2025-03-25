@@ -16,9 +16,10 @@ import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
-import org.opencds.cqf.fhir.utility.npm.R4NpmPackageLoaderInMemory;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoaderInMemory;
 
-class MeasureWithNpmTest {
+// LUKETODO:  introduce an R5 version of this test
+class R4MeasureWithNpmTest {
 
     private static final String SIMPLE_ALPHA = "simple-alpha";
     private static final String SIMPLE_BRAVO = "simple-bravo";
@@ -224,8 +225,7 @@ class MeasureWithNpmTest {
 
     private Given initNpmRepos(String... tgzFileNames) {
         return Measure.given()
-                .r4NpmPackageLoader(
-                        R4NpmPackageLoaderInMemory.fromNpmPackageTgzPath(getClass(), getPaths(tgzFileNames)));
+                .npmPackageLoader(NpmPackageLoaderInMemory.fromNpmPackageTgzPath(getClass(), getPaths(tgzFileNames)));
     }
 
     private Path[] getPaths(String[] tgzFileNames) {

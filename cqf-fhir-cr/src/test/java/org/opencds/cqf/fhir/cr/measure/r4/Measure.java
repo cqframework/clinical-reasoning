@@ -64,7 +64,7 @@ import org.opencds.cqf.fhir.cr.measure.r4.Measure.SelectedGroup.SelectedReferenc
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.monad.Either3;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
-import org.opencds.cqf.fhir.utility.npm.R4NpmPackageLoader;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.r4.ContainedHelper;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
@@ -122,7 +122,7 @@ public class Measure {
         private MeasureEvaluationOptions evaluationOptions;
         private final MeasurePeriodValidator measurePeriodValidator;
         private final R4MeasureServiceUtils measureServiceUtils;
-        private R4NpmPackageLoader r4NpmPackageLoader;
+        private NpmPackageLoader npmPackageLoader;
 
         public Given() {
             this.evaluationOptions = MeasureEvaluationOptions.defaultOptions();
@@ -141,7 +141,7 @@ public class Measure {
 
             this.measureServiceUtils = new R4MeasureServiceUtils(repository);
 
-            this.r4NpmPackageLoader = R4NpmPackageLoader.DEFAULT;
+            this.npmPackageLoader = NpmPackageLoader.DEFAULT;
         }
 
         public Given repository(Repository repository) {
@@ -149,10 +149,9 @@ public class Measure {
             return this;
         }
 
-        // For now, assume R4
-        public Given r4NpmPackageLoader(R4NpmPackageLoader r4NpmPackageLoader) {
+        public Given npmPackageLoader(NpmPackageLoader npmPackageLoader) {
             this.repository = new InMemoryFhirRepository(FhirContext.forR4Cached());
-            this.r4NpmPackageLoader = r4NpmPackageLoader;
+            this.npmPackageLoader = npmPackageLoader;
             return this;
         }
 
@@ -175,7 +174,7 @@ public class Measure {
 
         private R4MeasureService buildMeasureService() {
             return new R4MeasureService(
-                    repository, evaluationOptions, measurePeriodValidator, measureServiceUtils, r4NpmPackageLoader);
+                    repository, evaluationOptions, measurePeriodValidator, measureServiceUtils, npmPackageLoader);
         }
 
         public When when() {

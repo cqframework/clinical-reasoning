@@ -16,7 +16,7 @@ import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.monad.Either3;
-import org.opencds.cqf.fhir.utility.npm.R4NpmPackageLoader;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.repository.Repositories;
 
 public class R4MeasureService implements R4MeasureEvaluatorSingle {
@@ -25,20 +25,20 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
     private final MeasurePeriodValidator measurePeriodValidator;
     private final R4RepositorySubjectProvider subjectProvider;
     private final R4MeasureServiceUtils measureServiceUtils;
-    private final R4NpmPackageLoader resourceHolderGetter;
+    private final NpmPackageLoader npmPackageLoader;
 
     public R4MeasureService(
             Repository repository,
             MeasureEvaluationOptions measureEvaluationOptions,
             MeasurePeriodValidator measurePeriodValidator,
             R4MeasureServiceUtils measureServiceUtils,
-            R4NpmPackageLoader resourceHolderGetter) {
+            NpmPackageLoader npmPackageLoader) {
         this.repository = repository;
         this.measureEvaluationOptions = measureEvaluationOptions;
         this.measurePeriodValidator = measurePeriodValidator;
         this.subjectProvider = new R4RepositorySubjectProvider(measureEvaluationOptions.getSubjectProviderOptions());
         this.measureServiceUtils = measureServiceUtils;
-        this.resourceHolderGetter = resourceHolderGetter;
+        this.npmPackageLoader = npmPackageLoader;
     }
 
     @Override
@@ -65,7 +65,7 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
                 this.measureEvaluationOptions,
                 this.subjectProvider,
                 this.measureServiceUtils,
-                this.resourceHolderGetter);
+                this.npmPackageLoader);
 
         R4MeasureServiceUtils r4MeasureServiceUtils = new R4MeasureServiceUtils(repository);
         r4MeasureServiceUtils.ensureSupplementalDataElementSearchParameter();

@@ -1,10 +1,11 @@
-package org.opencds.cqf.fhir.utility.npm;
+package org.opencds.cqf.fhir.utility.npm.r5;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import ca.uhn.fhir.context.FhirVersionEnum;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import java.nio.charset.StandardCharsets;
@@ -14,26 +15,30 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 import org.hl7.elm.r1.VersionedIdentifier;
-import org.hl7.fhir.r4.model.Attachment;
-import org.hl7.fhir.r4.model.CanonicalType;
+import org.hl7.fhir.r5.model.Attachment;
+import org.hl7.fhir.r5.model.CanonicalType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IMeasureAdapter;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoaderInMemory;
+import org.opencds.cqf.fhir.utility.npm.NpmResourceInfoForCql;
 
-class NpmResourceInfoForCqlTest {
+class NpmResourceInfoForCqlR5Test {
+    private static final FhirVersionEnum EXPECTED_FHIR_VERSION = FhirVersionEnum.R5;
+
     private static final String DOT_TGZ = ".tgz";
 
     private static final String EXPECTED_CQL_ALPHA =
-            "library SimpleAlpha  parameter \"Measurement Period\" Interval<DateTime> default Interval[@2021-01-01T00:00:00.0-06:00, @2022-01-01T00:00:00.0-06:00)  define \"Initial Population\": true ";
+            "library SimpleAlpha  using FHIR version '5.0.1'  parameter \"Measurement Period\" Interval<DateTime> default Interval[@2021-01-01T00:00:00.0-06:00, @2022-01-01T00:00:00.0-06:00)  context Patient  define \"Initial Population\": true ";
     private static final String EXPECTED_CQL_BRAVO =
-            "library SimpleBravo  parameter \"Measurement Period\" Interval<DateTime>   default Interval[@2024-01-01T00:00:00.0-06:00, @2025-01-01T00:00:00.0-06:00)  define \"Initial Population\": true ";
+            "library SimpleBravo  using FHIR version '5.0.1'  parameter \"Measurement Period\" Interval<DateTime>   default Interval[@2024-01-01T00:00:00.0-06:00, @2025-01-01T00:00:00.0-06:00)  context Patient  define \"Initial Population\": true ";
     private static final String EXPECTED_CQL_WITH_DERIVED =
-            "library WithDerivedLibrary version '0.1'  using FHIR version '4.0.1'  include DerivedLibrary version '0.1'  parameter \"Measurement Period\" Interval<DateTime>     default Interval[@2021-01-01T00:00:00.0-06:00, @2022-01-01T00:00:00.0-06:00)  context Patient  define \"Initial Population\":     DerivedLibrary.\"Has Initial Population\"  define \"Denominator\":     \"Initial Population\"  define \"Numerator\":     \"Initial Population\" ";
+            "library WithDerivedLibrary version '0.1'  using FHIR version '5.0.1'  include DerivedLibrary version '0.1'  parameter \"Measurement Period\" Interval<DateTime>     default Interval[@2021-01-01T00:00:00.0-06:00, @2022-01-01T00:00:00.0-06:00)  context Patient  define \"Initial Population\":     DerivedLibrary.\"Has Initial Population\"  define \"Denominator\":     \"Initial Population\"  define \"Numerator\":     \"Initial Population\" ";
     private static final String EXPECTED_CQL_DERIVED =
-            "library DerivedLibrary version '0.1'  define \"Has Initial Population\": true ";
+            "library DerivedLibrary version '0.1'  using FHIR version '5.0.1'  context Patient  define \"Has Initial Population\": true ";
 
     private static final String EXPECTED_CQL_DERIVED_TWO_LAYERS =
             "library with-two-layers-derived-libraries '0.1'  using FHIR version '4.0.1'  include derived-layer-1a version '0.1.a' include derived-layer-1b version '0.1.b'  parameter \"Measurement Period\" Interval<DateTime>     default Interval[@2021-01-01T00:00:00.0-06:00, @2022-01-01T00:00:00.0-06:00)   context Patient  define \"Initial Population\":     derived-layer-1a.\"Has Initial Population\"  define \"Denominator\":     derived-layer-1a.\"Has Denominator\"  define \"Numerator\":     derived-layer-1b.\"Has Numerator\" ";
@@ -237,6 +242,8 @@ class NpmResourceInfoForCqlTest {
     private void verifyLibrary(String expectedLibraryUrl, String expectedCql, @Nullable ILibraryAdapter library) {
         assertNotNull(library);
 
+        assertEquals(EXPECTED_FHIR_VERSION, library.fhirContext().getVersion().getVersion());
+
         assertEquals(expectedLibraryUrl, library.getUrl());
 
         final List<Attachment> attachments = library.getContent();
@@ -257,6 +264,7 @@ class NpmResourceInfoForCqlTest {
         final Optional<IMeasureAdapter> optMeasure = npmResourceInfoForCql.getMeasure();
         assertTrue(optMeasure.isPresent());
         final IMeasureAdapter measure = optMeasure.get();
+        assertEquals(EXPECTED_FHIR_VERSION, measure.fhirContext().getVersion().getVersion());
         assertEquals(measureUrl, measure.getUrl());
         final List<String> libraryUrls = measure.getLibraryValues();
         assertEquals(1, libraryUrls.size());

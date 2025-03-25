@@ -162,7 +162,6 @@ public class NpmPackageLoaderInMemory implements NpmPackageLoader {
         }
     }
 
-    // LUKETODO:  util class?
     private FhirContext getFhirContext(NpmPackage npmPackage) {
         return FhirContext.forCached(FhirVersionEnum.forVersionString(npmPackage.fhirVersion()));
     }

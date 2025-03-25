@@ -195,13 +195,11 @@ public class NpmResourceInfoForCql {
         }
     }
 
-    // LUKETODO:  util class?
     @Nonnull
     private static String buildUrl(NpmPackage npmPackage, VersionedIdentifier libraryIdentifier) {
         return "%s/Library/%s".formatted(npmPackage.canonical(), libraryIdentifier.getId());
     }
 
-    // LUKETODO:  util class?
     @Nonnull
     private static String buildUrl(NpmPackage npmPackage, ModelIdentifier modelIdentifier) {
         return "%s/Library/%s-ModelInfo".formatted(npmPackage.canonical(), modelIdentifier.getId());

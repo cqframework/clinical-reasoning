@@ -16,14 +16,14 @@ import java.util.stream.Stream;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.r4.model.Attachment;
 import org.hl7.fhir.r4.model.CanonicalType;
-import org.hl7.fhir.r4.model.Library;
-import org.hl7.fhir.r4.model.Measure;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IMeasureAdapter;
 
-class R4NpmResourceInfoForCqlTest {
+class NpmResourceInfoForCqlTest {
     private static final String DOT_TGZ = ".tgz";
 
     private static final String EXPECTED_CQL_ALPHA =
@@ -106,24 +106,24 @@ class R4NpmResourceInfoForCqlTest {
     @ParameterizedTest
     @MethodSource("simplePackagesParams")
     void simple(Path tgzPath, String measureUrl, String expectedLibraryUrl, String expectedCql) {
-        final R4NpmPackageLoaderInMemory loader = setup(tgzPath);
+        final NpmPackageLoaderInMemory loader = setup(tgzPath);
 
-        final R4NpmResourceInfoForCql r4NpmResourceInfoForCql = loader.loadNpmResources(new CanonicalType(measureUrl));
+        final NpmResourceInfoForCql npmResourceInfoForCql = loader.loadNpmResources(new CanonicalType(measureUrl));
 
-        verifyMeasure(measureUrl, expectedLibraryUrl, r4NpmResourceInfoForCql);
+        verifyMeasure(measureUrl, expectedLibraryUrl, npmResourceInfoForCql);
         verifyLibrary(
                 expectedLibraryUrl,
                 expectedCql,
-                r4NpmResourceInfoForCql.getOptMainLibrary().orElse(null));
+                npmResourceInfoForCql.getOptMainLibrary().orElse(null));
     }
 
     @Test
     void multiplePackages() {
-        final R4NpmPackageLoaderInMemory loader = setup(
+        final NpmPackageLoaderInMemory loader = setup(
                 Stream.of(SIMPLE_ALPHA_TGZ, SIMPLE_BRAVO_TGZ).map(Paths::get).toArray(Path[]::new));
 
-        final R4NpmResourceInfoForCql resourceInfoAlpha = loader.loadNpmResources(new CanonicalType(MEASURE_URL_ALPHA));
-        final R4NpmResourceInfoForCql resourceInfoBravo = loader.loadNpmResources(new CanonicalType(MEASURE_URL_BRAVO));
+        final NpmResourceInfoForCql resourceInfoAlpha = loader.loadNpmResources(new CanonicalType(MEASURE_URL_ALPHA));
+        final NpmResourceInfoForCql resourceInfoBravo = loader.loadNpmResources(new CanonicalType(MEASURE_URL_BRAVO));
 
         verifyMeasure(MEASURE_URL_ALPHA, LIBRARY_URL_ALPHA, resourceInfoAlpha);
         verifyLibrary(
@@ -148,9 +148,9 @@ class R4NpmResourceInfoForCqlTest {
         final String expectedCql = EXPECTED_CQL_WITH_DERIVED;
         final String expectedCqlDerived = EXPECTED_CQL_DERIVED;
 
-        final R4NpmPackageLoaderInMemory loader = setup(tgzPath);
+        final NpmPackageLoaderInMemory loader = setup(tgzPath);
 
-        final R4NpmResourceInfoForCql resourceInfo = loader.loadNpmResources(new CanonicalType(measureUrl));
+        final NpmResourceInfoForCql resourceInfo = loader.loadNpmResources(new CanonicalType(measureUrl));
 
         verifyMeasure(measureUrl, libraryUrlWithVersion, resourceInfo);
         verifyLibrary(
@@ -158,20 +158,20 @@ class R4NpmResourceInfoForCqlTest {
                 expectedCql,
                 resourceInfo.getOptMainLibrary().orElse(null));
 
-        final Library derivedLibraryFromNoVersion = resourceInfo
+        final ILibraryAdapter derivedLibraryFromNoVersion = resourceInfo
                 .findMatchingLibrary(new VersionedIdentifier().withId(DERIVED_LIBRARY_ID))
                 .orElse(null);
 
         verifyLibrary(derivedLibraryUrl, expectedCqlDerived, derivedLibraryFromNoVersion);
 
-        final Library derivedLibraryFromVersion = resourceInfo
+        final ILibraryAdapter derivedLibraryFromVersion = resourceInfo
                 .findMatchingLibrary(
                         new VersionedIdentifier().withId(DERIVED_LIBRARY_ID).withVersion("0.1"))
                 .orElse(null);
 
         verifyLibrary(derivedLibraryUrl, expectedCqlDerived, derivedLibraryFromVersion);
 
-        final Library derivedLibraryFromBadVersion = resourceInfo
+        final ILibraryAdapter derivedLibraryFromBadVersion = resourceInfo
                 .findMatchingLibrary(
                         new VersionedIdentifier().withId(DERIVED_LIBRARY_ID).withVersion("bad"))
                 .orElse(null);
@@ -195,9 +195,9 @@ class R4NpmResourceInfoForCqlTest {
         final String expectedCqlDerived2a = EXPECTED_CQL_DERIVED_2_A;
         final String expectedCqlDerived2b = EXPECTED_CQL_DERIVED_2_B;
 
-        final R4NpmPackageLoaderInMemory loader = setup(tgzPath);
+        final NpmPackageLoaderInMemory loader = setup(tgzPath);
 
-        final R4NpmResourceInfoForCql resourceInfo = loader.loadNpmResources(new CanonicalType(measureUrl));
+        final NpmResourceInfoForCql resourceInfo = loader.loadNpmResources(new CanonicalType(measureUrl));
 
         verifyMeasure(measureUrl, libraryUrlWithVersion, resourceInfo);
         verifyLibrary(
@@ -205,28 +205,28 @@ class R4NpmResourceInfoForCqlTest {
                 expectedCql,
                 resourceInfo.getOptMainLibrary().orElse(null));
 
-        final Library derivedLibrary1a = resourceInfo
+        final ILibraryAdapter derivedLibrary1a = resourceInfo
                 .findMatchingLibrary(
                         new VersionedIdentifier().withId("derived-layer-1a").withVersion("0.1.a"))
                 .orElse(null);
 
         verifyLibrary(derivedLibraryUrl1a, expectedCqlDerived1a, derivedLibrary1a);
 
-        final Library derivedLibrary1b = resourceInfo
+        final ILibraryAdapter derivedLibrary1b = resourceInfo
                 .findMatchingLibrary(
                         new VersionedIdentifier().withId("derived-layer-1b").withVersion("0.1.b"))
                 .orElse(null);
 
         verifyLibrary(derivedLibraryUrl1b, expectedCqlDerived1b, derivedLibrary1b);
 
-        final Library derivedLibrary2a = resourceInfo
+        final ILibraryAdapter derivedLibrary2a = resourceInfo
                 .findMatchingLibrary(
                         new VersionedIdentifier().withId("derived-layer-2a").withVersion("0.2.a"))
                 .orElse(null);
 
         verifyLibrary(derivedLibraryUrl2a, expectedCqlDerived2a, derivedLibrary2a);
 
-        final Library derivedLibrary2b = resourceInfo
+        final ILibraryAdapter derivedLibrary2b = resourceInfo
                 .findMatchingLibrary(
                         new VersionedIdentifier().withId("derived-layer-2b").withVersion("0.2.b"))
                 .orElse(null);
@@ -234,7 +234,7 @@ class R4NpmResourceInfoForCqlTest {
         verifyLibrary(derivedLibraryUrl2b, expectedCqlDerived2b, derivedLibrary2b);
     }
 
-    private void verifyLibrary(String expectedLibraryUrl, String expectedCql, @Nullable Library library) {
+    private void verifyLibrary(String expectedLibraryUrl, String expectedCql, @Nullable ILibraryAdapter library) {
         assertNotNull(library);
 
         assertEquals(expectedLibraryUrl, library.getUrl());
@@ -253,22 +253,21 @@ class R4NpmResourceInfoForCqlTest {
     }
 
     private void verifyMeasure(
-            String measureUrl, String expectedLibraryUrl, R4NpmResourceInfoForCql r4NpmResourceInfoForCql) {
-        final Optional<Measure> optMeasure = r4NpmResourceInfoForCql.getMeasure();
+            String measureUrl, String expectedLibraryUrl, NpmResourceInfoForCql npmResourceInfoForCql) {
+        final Optional<IMeasureAdapter> optMeasure = npmResourceInfoForCql.getMeasure();
         assertTrue(optMeasure.isPresent());
-        final Measure measure = optMeasure.get();
+        final IMeasureAdapter measure = optMeasure.get();
         assertEquals(measureUrl, measure.getUrl());
-        final List<CanonicalType> libraryCanonicals = measure.getLibrary();
-        assertEquals(1, libraryCanonicals.size());
+        final List<String> libraryUrls = measure.getLibraryValues();
+        assertEquals(1, libraryUrls.size());
 
-        final CanonicalType libraryCanonical = libraryCanonicals.get(0);
+        final String libraryUrl = libraryUrls.get(0);
 
-        assertEquals(expectedLibraryUrl, libraryCanonical.asStringValue());
-        assertEquals("canonical", libraryCanonicals.get(0).fhirType());
+        assertEquals(expectedLibraryUrl, libraryUrl);
     }
 
     @Nonnull
-    private R4NpmPackageLoaderInMemory setup(Path... tgzPaths) {
-        return R4NpmPackageLoaderInMemory.fromNpmPackageTgzPath(getClass(), tgzPaths);
+    private NpmPackageLoaderInMemory setup(Path... tgzPaths) {
+        return NpmPackageLoaderInMemory.fromNpmPackageTgzPath(getClass(), tgzPaths);
     }
 }

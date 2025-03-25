@@ -19,7 +19,7 @@ import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 import org.opencds.cqf.fhir.utility.npm.NpmPackageLoaderInMemory;
 
 // LUKETODO:  introduce an R5 version of this test
-class R4MeasureWithNpmTest {
+class MeasureWithNpmForR4Test {
 
     private static final String SIMPLE_ALPHA = "simple-alpha";
     private static final String SIMPLE_BRAVO = "simple-bravo";

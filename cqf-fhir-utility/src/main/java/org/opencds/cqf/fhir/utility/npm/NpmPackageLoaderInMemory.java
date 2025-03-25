@@ -23,8 +23,8 @@ import org.opencds.cqf.fhir.utility.adapter.IMeasureAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IResourceAdapter;
 
 /**
- * Simplistic implementation of {@link R4NpmPackageLoader} that loads NpmPackages from the classpath
- * and stores {@link R4NpmResourceInfoForCql}s in a Map. This class is recommended for testing
+ * Simplistic implementation of {@link NpmPackageLoader} that loads NpmPackages from the classpath
+ * and stores {@link NpmResourceInfoForCql}s in a Map. This class is recommended for testing
  * and NOT for production.
  * <p/
  * Does not use an {@link NpmNamespaceManager} and instead resolves all NamespaceInfos by extracting

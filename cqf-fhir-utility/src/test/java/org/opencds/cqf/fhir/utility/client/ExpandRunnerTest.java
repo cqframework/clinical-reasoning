@@ -4,10 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.hl7.fhir.r4.model.Parameters;
 import org.junit.jupiter.api.Test;
 import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
+import org.opencds.cqf.fhir.utility.client.ExpandRunner.TerminologyServerExpansionException;
 
 class ExpandRunnerTest {
 
@@ -19,7 +19,7 @@ class ExpandRunnerTest {
         var fhirClient = mock(IGenericClient.class, new ReturnsDeepStubs());
         var fixture = new ExpandRunner(fhirClient, settings, url, params);
         assertThrows(
-                UnprocessableEntityException.class,
+                TerminologyServerExpansionException.class,
                 fixture::expandValueSet,
                 "Terminology Server expansion took longer than the allotted timeout: 2");
     }

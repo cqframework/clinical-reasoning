@@ -40,6 +40,7 @@ import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
+import org.opencds.cqf.fhir.utility.client.ExpandRunner.TerminologyServerExpansionException;
 
 public class TerminologyServerClientTest {
     private static final String VALUE_SET = "ValueSet";
@@ -365,7 +366,7 @@ public class TerminologyServerClientTest {
         var client = spy(new TerminologyServerClient(fhirContextR4));
         doReturn(fhirClient).when(client).initializeClientWithAuth(any(IEndpointAdapter.class));
         assertThrows(
-                UnprocessableEntityException.class,
+                TerminologyServerExpansionException.class,
                 () -> client.expand(valueSetAdapter, endpointAdapter, parametersAdapter));
         verify(client, never()).getResource(any(), any());
         verify(fhirClient, atLeast(3)).operation();

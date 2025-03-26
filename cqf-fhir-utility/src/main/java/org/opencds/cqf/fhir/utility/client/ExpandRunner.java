@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.utility.client;
 import static java.util.Objects.requireNonNull;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -14,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ExpandRunner implements Runnable {
+
     private static final Logger logger = LoggerFactory.getLogger(ExpandRunner.class);
 
     private int expansionAttempt = 0;
@@ -54,8 +56,9 @@ public class ExpandRunner implements Runnable {
                 if (result.isDone() && expandedValueSet != null) {
                     return expandedValueSet;
                 } else {
-                    throw new UnprocessableEntityException(
-                            String.format("Terminology Server expansion failed for ValueSet (%s)", valueSetUrl));
+                    throw new UnprocessableEntityException(String.format(
+                            "Terminology Server expansion failed for ValueSet (%s) - Server could not process expansion requests.",
+                            valueSetUrl));
                 }
             } else {
                 throw new UnprocessableEntityException(String.format(
@@ -67,7 +70,7 @@ public class ExpandRunner implements Runnable {
             if (e instanceof InterruptedException) {
                 Thread.currentThread().interrupt();
             }
-            throw new UnprocessableEntityException(e.getMessage());
+            throw new TerminologyServerExpansionException(e.getMessage());
         }
     }
 
@@ -90,7 +93,9 @@ public class ExpandRunner implements Runnable {
             logger.info("Expansion attempt {} failed: {}", expansionAttempt, ex.getMessage());
             if (expansionAttempt < terminologyServerClientSettings.getMaxRetryCount()) {
                 scheduler.schedule(
-                        this, terminologyServerClientSettings.getRetryIntervalMillis(), TimeUnit.MILLISECONDS);
+                        this,
+                        terminologyServerClientSettings.getRetryIntervalMillis() * expansionAttempt,
+                        TimeUnit.MILLISECONDS);
             } else {
                 scheduler.shutdown();
             }
@@ -100,5 +105,14 @@ public class ExpandRunner implements Runnable {
     private Class<IBaseResource> getValueSetClass() {
         return Resources.getClassForTypeAndVersion(
                 "ValueSet", fhirClient.getFhirContext().getVersion().getVersion());
+    }
+
+    static class TerminologyServerExpansionException extends BaseServerResponseException {
+
+        private static final int STATUS_CODE = 429;
+
+        public TerminologyServerExpansionException(String message) {
+            super(STATUS_CODE, message);
+        }
     }
 }

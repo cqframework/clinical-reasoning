@@ -173,7 +173,6 @@ public class NpmResourceInfoForCql {
             NpmPackage npmPackage, VersionedIdentifier libraryIdentifier) {
 
         try {
-            String url = buildUrl(npmPackage, libraryIdentifier);
             return Optional.ofNullable(npmPackage.loadByCanonicalVersion(
                     buildUrl(npmPackage, libraryIdentifier), libraryIdentifier.getVersion()));
         } catch (IOException exception) {

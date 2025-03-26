@@ -553,21 +553,11 @@ public class MeasureEvaluator {
             if (measurePopulationExclusion != null) {
                 evaluatePopulationMembership(
                         subjectType, subjectId, groupDef.getSingle(MEASUREPOPULATIONEXCLUSION), evaluationResult);
+                // verify exclusions are in measure-population
+                measurePopulationExclusion.getResources().retainAll(measurePopulation.getResources());
+                measurePopulationExclusion.getSubjects().retainAll(measurePopulation.getSubjects());
             }
-            // Apply Exclusions to Population
-            if (groupDef.isBooleanBasis()) {
-                if (measurePopulationExclusion != null) {
-                    // verify exclusions are in measure-population
-                    measurePopulationExclusion.getResources().retainAll(measurePopulation.getResources());
-                    measurePopulationExclusion.getSubjects().retainAll(measurePopulation.getSubjects());
-                }
-            } else {
-                if (measurePopulationExclusion != null) {
-                    // verify exclusions are in measure-population
-                    measurePopulationExclusion.getResources().retainAll(measurePopulation.getResources());
-                    measurePopulationExclusion.getSubjects().retainAll(measurePopulation.getSubjects());
-                }
-            }
+
             // Evaluate Observation Population
             if (measureObservation != null) {
                 for (Object resource : measurePopulation.getResources()) {

@@ -15,30 +15,63 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 
 /**
- * <p>The R4 MeasureScorer takes population components from MeasureReport resources and scores each group population
- * according to the values populated.</p>
- *<br></br>
- * <p>The population scores within a group are each independently calculated as 'sets' and not counts.</p>
- *<br></br>
- *  <p>A person may be a member of 0, 1, or more sets.</p>
- *  <br></br>
- *  <p>The CQL returns "true" or "false" or "1" or "0" if a person is a member of a given set. It's not giving you a number to count, it's telling you whether a subject is a member of some population or not. The set math happens external to the CQL.</p>
- *<br></br>
- * <B>For example, given Patients A, B, C, D: </B>
+ * Evaluation of Measure Report Data showing raw CQL criteria results compared to resulting Measure Report.
+ *
+ * <p>Each row represents a subject as raw cql criteria expression output:
+ *
+ * <pre>{@code
+ * Subject | IP | D  | DX | N  | DE | NX | Notes
+ * --------|----|----|----|----|----|----|---------------------------------------------------------------
+ * A       | A  | A  | A  |    |    |    |
+ * B       | B  | B  |    | B  |    |    |
+ * C       | C  | C  |    |    | C  |    | InDenominator = true, InDenominatorException = true,
+ *                                       | InNumerator = false
+ * D       | D  | D  |    | D  |    | D  |
+ * E       | E  | E  |    | E  |    |    |
+ * F       |    |    |    | F  |    |    | Not in Initial Population or Denominator
+ * G       | G  | G  |    | G  | G  |    | InDenominatorException = true & InNumerator = true
+ * }</pre>
+ *
+ * <p>Each row represents a subject and their inclusion/exclusion population criteria on a Measure Report:
+ *
+ * <pre>{@code
+ * Subject | IP | D  | DX | N  | DE | NX | Notes
+ * --------|----|----|----|----|----|----|---------------------------------------------------------------
+ * A       | A  | A  | A  |    |    |    |
+ * B       | B  | B  |    | B  |    |    |
+ * C       | C  | C  |    |    | C  |    | InDenominator = true, InDenominatorException = true,
+ *                                       | InNumerator = false → Scores as InDenominatorException = true
+ * D       | D  | D  |    | D  |    | D  |
+ * E       | E  | E  |    | E  |    |    |
+ * F       |    |    |    |    |    |    | Excluded: Not in Initial Population or Denominator
+ * G       | G  | G  |    | G  |    |    | InDenominatorException = true & InNumerator = true → Remove from DE
+ * }</pre>
+ *
+ * <p><strong>Population Counts:</strong>
  * <ul>
- * <li>"Denominator" [A, B, C, D] - "Denominator Exclusion" [ A, B, C, D] = "Total Denominator" []</li>
- * <li>"Denominator" [A, B, C, D] - "Denominator Exclusion" [] = "Total Denominator" [A, B, C, D]</li>
- * <li>"Denominator" [A, B, C] - "Denominator Exclusion" [ B, C ] = "Total Denominator" [A]</li>
- * <li>"Denominator" [] - "Denominator Exclusion" [ A, B, C ] = "Total Denominator" []</li>
- * <li>"Denominator" [A, B] - "Denominator Exclusion" [C, D] = "Total Denominator" [A, B]</li>
- * <li>"Denominator" [B, C, D] - "Denominator Exclusion" [A, B, C] = "Total Denominator" [D]</li>
+ *   <li>Initial Population (ip): 6</li>
+ *   <li>Denominator (d): 6</li>
+ *   <li>Denominator Exclusion (dx): 1</li>
+ *   <li>Numerator (n): 4</li>
+ *   <li>Denominator Exception (de): 1</li>
+ *   <li>Numerator Exclusion (nx): 1</li>
  * </ul>
- * "Total Denominator" and "Total Numerator" are not explicit in the Measure, MeasureReport, or the CQL. Those values are calculated internally in the engine and are implicitly used in the score.
+ *
+ * <p><strong>Performance Rate Formula:</strong><br>
+ * {@code (n - nx) / (d - dx - de)}<br>
+ * {@code (4 - 1) / (6 - 1 - 1)} = <b>0.75</b>
+ *
+ * <p><strong>Measure Score:</strong> {@code 0.75}<br>
+ *
+ * <p> (v3.18.0 and below) Previous calculation of measure score from MeasureReport only interpreted Numerator, Denominator membership since exclusions and exceptions were already applied. Now exclusions and exceptions are present in Denominator and Numerator populations, the measure scorer calculation has to take into account additional population membership to determine Final-Numerator and Final-Denominator values</p>
  */
 public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport> {
 
     private static final String NUMERATOR = "numerator";
     private static final String DENOMINATOR = "denominator";
+    private static final String DENOMINATOR_EXCLUSION = "denominator-exclusion";
+    private static final String DENOMINATOR_EXCEPTION = "denominator-exception";
+    private static final String NUMERATOR_EXCLUSION = "numerator-exclusion";
 
     @Override
     public void score(String measureUrl, MeasureDef measureDef, MeasureReport measureReport) {
@@ -118,8 +151,11 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
             case PROPORTION:
             case RATIO:
                 var score = calcProportionScore(
-                        getCountFromGroupPopulation(mrgc.getPopulation(), NUMERATOR),
-                        getCountFromGroupPopulation(mrgc.getPopulation(), DENOMINATOR));
+                        getCountFromGroupPopulation(mrgc.getPopulation(), NUMERATOR)
+                                - getCountFromGroupPopulation(mrgc.getPopulation(), NUMERATOR_EXCLUSION),
+                        getCountFromGroupPopulation(mrgc.getPopulation(), DENOMINATOR)
+                                - getCountFromGroupPopulation(mrgc.getPopulation(), DENOMINATOR_EXCLUSION)
+                                - getCountFromGroupPopulation(mrgc.getPopulation(), DENOMINATOR_EXCEPTION));
                 if (score != null) {
                     if (isIncreaseImprovementNotation) {
                         mrgc.setMeasureScore(new Quantity(score));

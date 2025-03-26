@@ -106,4 +106,27 @@ public class PopulationDef {
             }
         }
     }
+
+    public void retainOverlaps(Map<String, Set<Object>> filterMap) {
+        var iterator = subjectResources.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<String, Set<Object>> entry = iterator.next();
+            String key = entry.getKey();
+            Set<Object> values = entry.getValue();
+
+            if (filterMap.containsKey(key)) {
+                // Retain only values also present in filterMap
+                values.retainAll(filterMap.get(key));
+            } else {
+                // If the key doesn't exist in filterMap, remove the entire entry
+                iterator.remove();
+                continue;
+            }
+
+            // If no values remain, remove the key
+            if (values.isEmpty()) {
+                iterator.remove();
+            }
+        }
+    }
 }

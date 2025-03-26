@@ -62,6 +62,8 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
  * {@code (4 - 1) / (6 - 1 - 1)} = <b>0.75</b>
  *
  * <p><strong>Measure Score:</strong> {@code 0.75}<br>
+ *
+ * <p> (v3.18.0 and below) Previous calculation of measure score from MeasureReport only interpreted Numerator, Denominator membership since exclusions and exceptions were already applied. Now exclusions and exceptions are present in Denominator and Numerator populations, the measure scorer calculation has to take into account additional population membership to determine Final-Numerator and Final-Denominator values</p>
  */
 public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport> {
 

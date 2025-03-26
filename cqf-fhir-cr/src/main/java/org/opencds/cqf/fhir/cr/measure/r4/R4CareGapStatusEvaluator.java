@@ -57,6 +57,8 @@ public class R4CareGapStatusEvaluator {
      * - NX = Numerator Exclusion<br>
      *
      * <p>Rows marked with <code>*</code> (e.g., prospective-gap*) indicate predictive or future-looking evaluations.
+     *
+     * <p> Previous interpretation of care-gap status from MeasureReport v3.18.0 and below only interpreted Numerator, Denominator, Initial-Population membership to determine care-gap status. Since exclusions and exceptions are now present in Denominator and Numerator populations, the care-gap evaluator had to take into account additional population membership to determine Final-Numerator and Final-Denominator membership</p>
      */
     public Map<String, CareGapsStatusCode> getGroupGapStatus(Measure measure, MeasureReport measureReport) {
         Map<String, CareGapsStatusCode> groupStatus = new HashMap<>();

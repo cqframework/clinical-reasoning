@@ -70,9 +70,7 @@ public class NpmResourceInfoForCql {
             return optMainLibrary;
         }
 
-        final Optional<ILibraryAdapter> optDerivedLibrary = loadNpmLibrary(versionedIdentifier);
-
-        return optDerivedLibrary;
+        return loadNpmLibrary(versionedIdentifier);
     }
 
     public Optional<ILibraryAdapter> findMatchingLibrary(ModelIdentifier modelIdentifier) {
@@ -83,9 +81,7 @@ public class NpmResourceInfoForCql {
             return optMainLibrary;
         }
 
-        final Optional<ILibraryAdapter> optDerivedLibrary = loadNpmLibrary(modelIdentifier);
-
-        return optDerivedLibrary;
+        return loadNpmLibrary(modelIdentifier);
     }
 
     private Optional<ILibraryAdapter> loadNpmLibrary(VersionedIdentifier versionedIdentifier) {
@@ -177,6 +173,7 @@ public class NpmResourceInfoForCql {
             NpmPackage npmPackage, VersionedIdentifier libraryIdentifier) {
 
         try {
+            String url = buildUrl(npmPackage, libraryIdentifier);
             return Optional.ofNullable(npmPackage.loadByCanonicalVersion(
                     buildUrl(npmPackage, libraryIdentifier), libraryIdentifier.getVersion()));
         } catch (IOException exception) {

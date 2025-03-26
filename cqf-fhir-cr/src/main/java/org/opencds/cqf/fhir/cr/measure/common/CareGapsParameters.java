@@ -1,21 +1,23 @@
-package org.opencds.cqf.fhir.cr.measure.r4;
+package org.opencds.cqf.fhir.cr.measure.common;
+
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.opencds.cqf.fhir.utility.adapter.IEitherMeasureAdapter;
+import org.opencds.cqf.fhir.utility.monad.Either3;
 
 import java.time.ZonedDateTime;
 import java.util.List;
-import org.hl7.fhir.r4.model.CanonicalType;
-import org.hl7.fhir.r4.model.IdType;
-import org.opencds.cqf.fhir.utility.monad.Either3;
 
-// LUKETODO: need to handle different variants of Either, which will need a new adapter.  otherwise, simple adapters
+// LUKETODO:  figure out what to do with this
 /**
  * Parameters class to manage input parameters for care-gaps service
  */
-public class R4CareGapsParameters {
+public class CareGapsParameters {
     private ZonedDateTime periodStart;
     private ZonedDateTime periodEnd;
     private String subject;
     private List<String> status;
-    private List<Either3<IdType, String, CanonicalType>> measure;
+    private List<IEitherMeasureAdapter> measure;
     private boolean notDocument;
 
     public void setPeriodStart(ZonedDateTime periodStart) {
@@ -50,11 +52,15 @@ public class R4CareGapsParameters {
         return notDocument;
     }
 
-    public void setMeasure(List<Either3<IdType, String, CanonicalType>> measure) {
+    public void setMeasure(List<IEitherMeasureAdapter> measure) {
         this.measure = measure;
     }
 
-    public List<Either3<IdType, String, CanonicalType>> getMeasure() {
+//    public List<? extends Either3<? extends IIdType, String, ? extends IPrimitiveType<String>>> getMeasure() {
+//        return measure;
+//    }
+
+    public List<IEitherMeasureAdapter> getMeasure() {
         return measure;
     }
 

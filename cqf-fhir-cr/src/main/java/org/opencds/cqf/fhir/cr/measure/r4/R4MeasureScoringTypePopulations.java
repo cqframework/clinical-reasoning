@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 
+// LUKETODO:  why do we call this "R4"?  there is nothing version-specific in here
 public class R4MeasureScoringTypePopulations {
     public enum PROPORTION_ALLOWED {
         INITIALPOPULATION(MeasurePopulationType.INITIALPOPULATION),

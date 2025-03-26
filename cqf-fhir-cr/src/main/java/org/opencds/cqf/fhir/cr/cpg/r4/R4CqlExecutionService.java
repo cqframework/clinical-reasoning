@@ -18,6 +18,7 @@ import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.cpg.CqlExecutionProcessor;
 import org.opencds.cqf.fhir.utility.repository.Repositories;
 
+// LUKETODO:  medium complexity here with new adapter code and possibly classes
 public class R4CqlExecutionService {
 
     protected Repository repository;

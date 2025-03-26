@@ -1,0 +1,54 @@
+package org.opencds.cqf.fhir.utility.adapter.dstu3;
+
+import ca.uhn.fhir.context.FhirContext;
+import org.hl7.fhir.dstu3.model.Period;
+import org.opencds.cqf.cql.engine.model.ModelResolver;
+import org.opencds.cqf.fhir.utility.adapter.IPeriodAdapter;
+import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
+import java.util.Date;
+
+public class PeriodAdapter implements IPeriodAdapter {
+
+    private final FhirContext fhirContext = FhirContext.forDstu3Cached();
+    private final ModelResolver modelResolver = FhirModelResolverCache.resolverForVersion(
+        fhirContext.getVersion().getVersion());
+    private final Period period = new Period();
+
+    @Override
+    public Period get() {
+        return period;
+    }
+
+    @Override
+    public FhirContext fhirContext() {
+        return fhirContext;
+    }
+
+    @Override
+    public ModelResolver getModelResolver() {
+        return modelResolver;
+    }
+
+    @Override
+    public Date getStart() {
+        return period.getStart();
+    }
+
+    @Override
+    public Date getEnd() {
+        return period.getEnd();
+    }
+
+
+    @Override
+    public IPeriodAdapter setStart(Date start) {
+        period.setStart(start);
+        return this;
+    }
+
+    @Override
+    public IPeriodAdapter setEnd(Date end) {
+        period.setEnd(end);
+        return this;
+    }
+}

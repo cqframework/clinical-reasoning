@@ -50,6 +50,7 @@ public class R4RepositorySubjectProvider implements SubjectProvider {
                 || subjectIds.isEmpty()
                 || subjectIds.get(0) == null
                 || subjectIds.get(0).isEmpty()) {
+            // LUKETODO:  how do we abstract this away?
             var bundle = repository.search(Bundle.class, Patient.class, Searches.ALL);
             return new BundleMappingIterable<>(repository, bundle, x -> x.getResource()
                             .getIdElement()
@@ -66,7 +67,9 @@ public class R4RepositorySubjectProvider implements SubjectProvider {
             }
             // Single Patient
             if (subjectId.startsWith("Patient")) {
+                // LUKETODO:  adapter based on fhir version
                 IdType id = new IdType(subjectId);
+                // LUKETODO:  how do we abstract this away?
                 Patient r = repository.read(Patient.class, id);
 
                 if (r == null) {
@@ -82,6 +85,7 @@ public class R4RepositorySubjectProvider implements SubjectProvider {
                 // Group Subject
             } else if (subjectId.startsWith("Group")) {
                 IdType id = new IdType(subjectId);
+                // LUKETODO:  how do we abstract this away?
                 Group r = repository.read(Group.class, id);
 
                 if (r == null) {
@@ -89,6 +93,7 @@ public class R4RepositorySubjectProvider implements SubjectProvider {
                 }
                 // Group of Patients
                 if (r.getType().equals(GroupType.PERSON)) {
+                    // LUKETODO:  how do we abstract this away?
                     for (GroupMemberComponent gmc : r.getMember()) {
                         IIdType ref = gmc.getEntity().getReferenceElement();
                         subjects.add(ref.getResourceType() + "/" + ref.getIdPart());
@@ -176,6 +181,7 @@ public class R4RepositorySubjectProvider implements SubjectProvider {
 
     private static Stream<String> handlePatientBundle(
             Repository repository, Map<String, List<IQueryParameterType>> searchParam) {
+        // LUKETODO:  how do we abstract this away?
         var bundle = repository.search(Bundle.class, Patient.class, searchParam);
 
         var bundleEntries = bundle.getEntry();

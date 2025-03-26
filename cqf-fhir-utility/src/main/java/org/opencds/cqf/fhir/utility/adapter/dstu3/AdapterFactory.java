@@ -26,6 +26,7 @@ import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IParametersParameterComponentAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IPeriodAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IPlanDefinitionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IRequestActionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IResourceAdapter;
@@ -126,5 +127,10 @@ public class AdapterFactory implements IAdapterFactory {
     @Override
     public IDataRequirementAdapter createDataRequirement(ICompositeType dataRequirement) {
         return new DataRequirementAdapter(dataRequirement);
+    }
+
+    @Override
+    public IPeriodAdapter createPeriod() {
+        return new PeriodAdapter();
     }
 }

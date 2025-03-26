@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+// LUKETODO:  there are no R4 classes in here.  rename
 /**
  * This class was created to separate R4 accepted MeasureEvalTypes from other dSTU3 compatible values (Patient, Patient-List)
  */

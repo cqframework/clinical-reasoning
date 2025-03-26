@@ -5,6 +5,7 @@ import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.CQFM_CAR
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_CRITERIA_REFERENCE_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_SDE_REFERENCE_URL;
 
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
@@ -45,6 +46,7 @@ import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupPopulationComponent;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueType;
+import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ResourceType;
@@ -54,6 +56,7 @@ import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.fhir.cr.measure.common.CodeDef;
 import org.opencds.cqf.fhir.cr.measure.common.ConceptDef;
 import org.opencds.cqf.fhir.cr.measure.common.CriteriaResult;
+import org.opencds.cqf.fhir.cr.measure.common.DateHelper;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureInfo;
@@ -68,8 +71,8 @@ import org.opencds.cqf.fhir.cr.measure.common.StratifierComponentDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants;
-import org.opencds.cqf.fhir.cr.measure.r4.utils.R4DateHelper;
 
+// LUKETODO: medium-high complexity requiring quite a bit of new adapter code
 public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, MeasureReport, DomainResource> {
 
     protected static final String POPULATION_SUBJECT_SET = "POPULATION_SUBJECT_SET";
@@ -364,11 +367,11 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                         assert docValue instanceof Interval;
                         Interval docInterval = (Interval) docValue;
 
-                        var helper = new R4DateHelper();
+                        var helper = new DateHelper(FhirVersionEnum.R4);
                         reportGroup
                                 .addExtension()
                                 .setUrl(CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL)
-                                .setValue(helper.buildMeasurementPeriod((docInterval)));
+                                .setValue(helper.buildMeasurementPeriod((docInterval)).get());
                     }
                 }
             }
@@ -856,9 +859,11 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         if (type == MeasureReportType.INDIVIDUAL && !subjectIds.isEmpty()) {
             report.setSubject(new Reference(subjectIds.get(0)));
         }
-        var helper = new R4DateHelper();
+        var helper = new DateHelper(FhirVersionEnum.R4);
         if (measurementPeriod != null) {
-            report.setPeriod(helper.buildMeasurementPeriod((measurementPeriod)));
+            if (helper.buildMeasurementPeriod(measurementPeriod).get() instanceof Period period) {
+                report.setPeriod(period);
+            }
         }
 
         report.setMeasure(getMeasure(measure));

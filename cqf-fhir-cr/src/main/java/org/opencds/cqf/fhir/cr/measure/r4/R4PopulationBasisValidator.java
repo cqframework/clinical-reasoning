@@ -25,6 +25,7 @@ import org.opencds.cqf.fhir.cr.measure.common.PopulationBasisValidator;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
 
+// LUKETODO:  low to medium complexity
 /**
  * Validates group populations and stratifiers against population basis-es for R4 only.
  */

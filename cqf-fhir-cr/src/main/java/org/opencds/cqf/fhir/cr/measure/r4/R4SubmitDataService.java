@@ -7,6 +7,7 @@ import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Resource;
 import org.opencds.cqf.fhir.api.Repository;
 
+// LUKETODO:  I think we can use use simple adapters here and we're good
 /**
  * See: <a href='https://www.hl7.org/fhir/R4/measure-operation-submit-data.html'>https://www.hl7.org/fhir/R4/measure-operation-submit-data.html</a>
  */

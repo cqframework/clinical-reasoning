@@ -35,6 +35,7 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
  * </ul>
  * "Total Denominator" and "Total Numerator" are not explicit in the Measure, MeasureReport, or the CQL. Those values are calculated internally in the engine and are implicitly used in the score.
  */
+// LUKETODO:  I think we can use existing and new adapters to fix this
 public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport> {
 
     private static final String NUMERATOR = "numerator";

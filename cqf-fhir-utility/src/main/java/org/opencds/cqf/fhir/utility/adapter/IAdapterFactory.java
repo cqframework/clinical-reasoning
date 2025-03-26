@@ -138,4 +138,7 @@ public interface IAdapterFactory {
      * @return an adapter exposing common api calls
      */
     IDataRequirementAdapter createDataRequirement(ICompositeType dataRequirement);
+
+    // LUKETODO:  javadoc
+    IPeriodAdapter createPeriod();
 }

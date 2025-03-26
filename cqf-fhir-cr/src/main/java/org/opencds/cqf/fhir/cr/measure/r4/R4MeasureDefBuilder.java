@@ -43,6 +43,7 @@ import org.opencds.cqf.fhir.cr.measure.common.StratifierComponentDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 
+// LUKETODO: medium-high complexity requiring quite a bit of new adapter code
 public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
     @Override
     public MeasureDef build(Measure measure) {

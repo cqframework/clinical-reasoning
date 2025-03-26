@@ -60,6 +60,7 @@ import org.opencds.cqf.fhir.utility.search.Searches;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+// LUKETODO: this isn't super-simple but probably isn't terrible:  we'd need new Adapter code for sure and possibly new adapter classes
 public class R4DataRequirementsService {
     private static final Logger ourLog = LoggerFactory.getLogger(R4DataRequirementsService.class);
     private final Repository repository;

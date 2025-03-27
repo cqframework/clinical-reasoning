@@ -65,6 +65,7 @@ import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
 import org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.r4.LibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.r4.ValueSetAdapter;
+import org.opencds.cqf.fhir.utility.client.ExpandRunner.TerminologyServerExpansionException;
 import org.opencds.cqf.fhir.utility.client.TerminologyServerClient;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
@@ -132,7 +133,6 @@ class PackageVisitorTests {
     @CsvSource({
         ",some-api-key,Cannot expand ValueSet without VSAC Username.",
         "someUsername,,Cannot expand ValueSet without VSAC API Key.",
-        "someUsername,some-api-key,Terminology Server expansion failed for ValueSet "
     })
     void packageOperation_should_fail(@Nullable String username, String apiKey, String expectedError) {
         Bundle loadedBundle = (Bundle) jsonParser.parseResource(
@@ -149,6 +149,31 @@ class PackageVisitorTests {
         Parameters params = parameters(part("terminologyEndpoint", terminologyEndpoint));
 
         var exception = assertThrows(UnprocessableEntityException.class, () -> {
+            libraryAdapter.accept(packageVisitor, params);
+        });
+
+        assertTrue(exception.getMessage().contains(expectedError));
+    }
+
+    @Test
+    void packageOperation_expansion_should_fail() {
+        String username = "someUsername";
+        String apiKey = "some-api-key";
+        String expectedError = " Server could not process expansion requests";
+        Bundle loadedBundle = (Bundle) jsonParser.parseResource(
+                PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
+        repo.transaction(loadedBundle);
+        PackageVisitor packageVisitor = new PackageVisitor(repo);
+        Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
+                .copy();
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        Endpoint terminologyEndpoint = new Endpoint();
+        terminologyEndpoint.addExtension(Constants.VSAC_USERNAME, new StringType(username));
+        terminologyEndpoint.addExtension(Constants.APIKEY, new StringType(apiKey));
+        terminologyEndpoint.setAddress("test.com");
+        Parameters params = parameters(part("terminologyEndpoint", terminologyEndpoint));
+
+        var exception = assertThrows(TerminologyServerExpansionException.class, () -> {
             libraryAdapter.accept(packageVisitor, params);
         });
 

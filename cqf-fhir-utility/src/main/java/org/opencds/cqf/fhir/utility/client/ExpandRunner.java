@@ -107,7 +107,7 @@ public class ExpandRunner implements Runnable {
                 "ValueSet", fhirClient.getFhirContext().getVersion().getVersion());
     }
 
-    static class TerminologyServerExpansionException extends BaseServerResponseException {
+    public static class TerminologyServerExpansionException extends BaseServerResponseException {
 
         private static final int STATUS_CODE = 429;
 

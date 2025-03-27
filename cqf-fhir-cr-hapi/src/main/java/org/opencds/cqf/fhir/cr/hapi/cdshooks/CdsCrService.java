@@ -111,7 +111,7 @@ public class CdsCrService implements ICdsCrService {
             parameters.addParameter(paramName, contextResource);
         }
         if (parameters.getParameter().size() == 1) {
-            var listExtension = parameters.getParameter().get(0).addExtension();
+            var listExtension = parameters.getParameter().get(0).get().addExtension();
             listExtension.setUrl(Constants.CPG_PARAMETER_DEFINITION);
             var paramDef = (IBaseDatatype) Resources.newBaseForVersion("ParameterDefinition", getFhirVersion());
             parameters
@@ -158,16 +158,24 @@ public class CdsCrService implements ICdsCrService {
         if (!(response instanceof IBaseResource)) {
             throw new InternalErrorException("response is not an instance of a Resource");
         }
-        responseAdapter = adapterFactory.createResource((IBaseResource) response);
         serviceResponse = new CdsServiceResponseJson();
         IResourceAdapter mainRequest = null;
         IPrimitiveType<String> canonical = null;
-        if (response instanceof IBaseBundle bundle) {
+        if (response instanceof IBaseParameters parameters) {
+            var parametersAdapter = adapterFactory.createParameters(parameters);
+            var bundle = parametersAdapter.getParameter().stream()
+                    .map(p -> (IBaseBundle) p.getResource())
+                    .findFirst()
+                    .orElse(null);
+            if (bundle == null) {
+                throw new InternalErrorException("response does not contain a Bundle");
+            }
             if (!BundleHelper.getEntry(bundle).isEmpty()) {
                 mainRequest = adapterFactory.createResource(BundleHelper.getEntryResourceFirstRep(bundle));
                 canonical = (IPrimitiveType<String>) mainRequest.getProperty("instantiatesCanonical")[0];
             }
         } else {
+            responseAdapter = adapterFactory.createResource((IBaseResource) response);
             var activity = responseAdapter.getProperty("activity");
             if (activity != null && activity.length > 0) {
                 var requestGroupRef = responseAdapter.resolvePath(activity[0], "reference", IBaseReference.class);

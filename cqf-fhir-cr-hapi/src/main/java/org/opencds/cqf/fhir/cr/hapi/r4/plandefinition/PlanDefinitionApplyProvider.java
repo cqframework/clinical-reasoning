@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.hapi.r4.plandefinition;
 
+import static ca.uhn.fhir.rest.annotation.OperationParam.MAX_UNLIMITED;
 import static org.opencds.cqf.fhir.cr.hapi.common.CanonicalHelper.getCanonicalType;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -211,7 +212,7 @@ public class PlanDefinitionApplyProvider {
             @OperationParam(name = "canonical") String canonical,
             @OperationParam(name = "url") String url,
             @OperationParam(name = "version") String version,
-            @OperationParam(name = "subject") String subject,
+            @OperationParam(name = "subject", min = 1, max = MAX_UNLIMITED) List<String> subject,
             @OperationParam(name = "encounter") String encounter,
             @OperationParam(name = "practitioner") String practitioner,
             @OperationParam(name = "organization") String organization,
@@ -258,7 +259,7 @@ public class PlanDefinitionApplyProvider {
             @OperationParam(name = "canonical") String canonical,
             @OperationParam(name = "url") String url,
             @OperationParam(name = "version") String version,
-            @OperationParam(name = "subject") String subject,
+            @OperationParam(name = "subject", min = 1, max = MAX_UNLIMITED) List<String> subject,
             @OperationParam(name = "encounter") String encounter,
             @OperationParam(name = "practitioner") String practitioner,
             @OperationParam(name = "organization") String organization,

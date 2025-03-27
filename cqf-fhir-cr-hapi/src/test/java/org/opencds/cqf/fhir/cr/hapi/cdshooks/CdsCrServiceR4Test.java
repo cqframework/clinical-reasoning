@@ -16,6 +16,7 @@ import ca.uhn.hapi.fhir.cdshooks.module.CdsHooksObjectMapperFactory;
 import java.io.IOException;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -63,7 +64,7 @@ class CdsCrServiceR4Test extends BaseCdsCrServiceTest {
                 new CdsCrService(requestDetails, repository, cdsConfigService).encodeParams(cdsServiceRequestJson));
 
         assertEquals(2, params.getParameter().size());
-        assertTrue(((ParametersParameterComponent) params.getParameter("parameters")).hasResource());
+        assertTrue((params.getParameter("parameters")).hasResource());
     }
 
     @Test
@@ -73,11 +74,14 @@ class CdsCrServiceR4Test extends BaseCdsCrServiceTest {
         final Repository repository = new InMemoryFhirRepository(fhirContext, bundle);
         final Bundle responseBundle = ClasspathUtil.loadResource(
                 fhirContext, Bundle.class, "org/opencds/cqf/fhir/cr/hapi/cdshooks/Bundle-ASLPCrd-Response.json");
+        final Parameters response = new Parameters()
+                .addParameter(
+                        new ParametersParameterComponent().setName("return").setResource(responseBundle));
         final RequestDetails requestDetails = new SystemRequestDetails();
         final IdType planDefinitionId = new IdType(PLAN_DEFINITION_RESOURCE_NAME, "ASLPCrd");
         requestDetails.setId(planDefinitionId);
         final CdsServiceResponseJson cdsServiceResponseJson =
-                new CdsCrService(requestDetails, repository, cdsConfigService).encodeResponse(responseBundle);
+                new CdsCrService(requestDetails, repository, cdsConfigService).encodeResponse(response);
 
         assertEquals(1, cdsServiceResponseJson.getCards().size());
         assertFalse(cdsServiceResponseJson.getCards().get(0).getSummary().isEmpty());

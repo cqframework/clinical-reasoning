@@ -233,7 +233,6 @@ public class CqlFhirParametersConverter {
         IParametersAdapter parametersAdapter = this.adapterFactory.createParameters(parameters);
 
         Map<String, List<IParametersParameterComponentAdapter>> children = parametersAdapter.getParameter().stream()
-                .map(x -> this.adapterFactory.createParametersParameter(x))
                 .filter(x -> x.getName() != null)
                 .collect(Collectors.groupingBy(IParametersParameterComponentAdapter::getName));
 

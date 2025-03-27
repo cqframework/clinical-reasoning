@@ -10,6 +10,7 @@ import org.hl7.fhir.r5.model.Parameters;
 import org.hl7.fhir.r5.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r5.model.Resource;
 import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IParametersParameterComponentAdapter;
 
 class ParametersAdapter extends ResourceAdapter implements IParametersAdapter {
 
@@ -23,7 +24,7 @@ class ParametersAdapter extends ResourceAdapter implements IParametersAdapter {
         this.parameters = (Parameters) parameters;
     }
 
-    private Parameters parameters;
+    private final Parameters parameters;
 
     protected Parameters getParameters() {
         return this.parameters;
@@ -34,10 +35,11 @@ class ParametersAdapter extends ResourceAdapter implements IParametersAdapter {
         return parameters.hasParameter();
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public List<ParametersParameterComponent> getParameter() {
-        return this.getParameters().getParameter().stream().collect(Collectors.toList());
+    public List<IParametersParameterComponentAdapter> getParameter() {
+        return getParameters().getParameter().stream()
+                .map(adapterFactory::createParametersParameter)
+                .toList();
     }
 
     @SuppressWarnings("unchecked")
@@ -47,8 +49,14 @@ class ParametersAdapter extends ResourceAdapter implements IParametersAdapter {
     }
 
     @Override
-    public ParametersParameterComponent getParameter(String name) {
-        return this.getParameters().getParameter(name);
+    public boolean hasParameter(String name) {
+        return parameters.hasParameter(name);
+    }
+
+    @Override
+    public IParametersParameterComponentAdapter getParameter(String name) {
+        var param = getParameters().getParameter(name);
+        return param == null ? null : adapterFactory.createParametersParameter(param);
     }
 
     @Override

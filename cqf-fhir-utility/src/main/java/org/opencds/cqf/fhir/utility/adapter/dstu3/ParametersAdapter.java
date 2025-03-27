@@ -11,6 +11,7 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IParametersParameterComponentAdapter;
 
 class ParametersAdapter extends ResourceAdapter implements IParametersAdapter {
 
@@ -24,7 +25,7 @@ class ParametersAdapter extends ResourceAdapter implements IParametersAdapter {
         this.parameters = (Parameters) parameters;
     }
 
-    private Parameters parameters;
+    private final Parameters parameters;
 
     protected Parameters getParameters() {
         return this.parameters;
@@ -35,10 +36,11 @@ class ParametersAdapter extends ResourceAdapter implements IParametersAdapter {
         return parameters.hasParameter();
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public List<ParametersParameterComponent> getParameter() {
-        return this.getParameters().getParameter();
+    public List<IParametersParameterComponentAdapter> getParameter() {
+        return this.getParameters().getParameter().stream()
+                .map(adapterFactory::createParametersParameter)
+                .toList();
     }
 
     @Override
@@ -92,14 +94,20 @@ class ParametersAdapter extends ResourceAdapter implements IParametersAdapter {
     public List<Type> getParameterValues(String name) {
         return this.getParameters().getParameter().stream()
                 .filter(p -> p.getName().equals(name))
-                .map(p -> p.getValue())
+                .map(ParametersParameterComponent::getValue)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public ParametersParameterComponent getParameter(String name) {
-        return this.getParameters().getParameter().stream()
+    public boolean hasParameter(String name) {
+        return getParameters().getParameter().stream().anyMatch(p -> p.getName().equals(name));
+    }
+
+    @Override
+    public IParametersParameterComponentAdapter getParameter(String name) {
+        return getParameters().getParameter().stream()
                 .filter(p -> p.getName().equals(name))
+                .map(adapterFactory::createParametersParameter)
                 .findFirst()
                 .orElse(null);
     }

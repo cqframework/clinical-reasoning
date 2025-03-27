@@ -43,14 +43,14 @@ public interface ICdsCrService {
                             org.hl7.fhir.r4.model.PlanDefinition.class,
                             operationName,
                             params,
-                            org.hl7.fhir.r4.model.Bundle.class,
+                            org.hl7.fhir.r4.model.Parameters.class,
                             Collections.singletonMap(Constants.HEADER_CONTENT_TYPE, Constants.CT_FHIR_JSON));
             case R5 -> getRepository()
                     .invoke(
                             org.hl7.fhir.r5.model.PlanDefinition.class,
                             operationName,
                             params,
-                            org.hl7.fhir.r5.model.Bundle.class,
+                            org.hl7.fhir.r5.model.Parameters.class,
                             Collections.singletonMap(Constants.HEADER_CONTENT_TYPE, Constants.CT_FHIR_JSON));
             default -> null;
         };

@@ -21,7 +21,6 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Parameters;
-import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.Test;
@@ -148,9 +147,8 @@ class ExpandHelperTest {
         // leaf is expanded with Leaf url not Grouper url
 
         @SuppressWarnings("unchecked")
-        var url = ((IPrimitiveType<String>) ((ParametersParameterComponent)
-                                childExpParams.getParameter(TerminologyServerClient.urlParamName))
-                        .getValue())
+        var url = ((IPrimitiveType<String>)
+                        (childExpParams.getParameter(TerminologyServerClient.urlParamName)).getValue())
                 .getValue();
         assertEquals(leafUrl, url);
         // the Version parameter is removed because leaf has no version

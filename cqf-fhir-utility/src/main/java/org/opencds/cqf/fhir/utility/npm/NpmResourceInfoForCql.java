@@ -19,6 +19,11 @@ import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IMeasureAdapter;
 
+/**
+ * FHIR version agnostic container for Measures and Libraries, and a List of associated {@link NpmPackage}s.
+ * Encapsulate the NpmPackages by only exposing the {@link NamespaceInfo}s and derived
+ *Libraries not directly associated with a given Measure.
+ */
 public class NpmResourceInfoForCql {
 
     public static final NpmResourceInfoForCql EMPTY = new NpmResourceInfoForCql(null, null, List.of());

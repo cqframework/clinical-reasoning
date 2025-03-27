@@ -4,12 +4,58 @@ import jakarta.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
 import org.cqframework.cql.cql2elm.LibraryManager;
+import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.hl7.cql.model.ModelIdentifier;
 import org.hl7.cql.model.NamespaceInfo;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
 
+/**
+ * FHIR version agnostic Interface for loading NPM resources including Measures, Libraries and
+ * NpmPackages as captured within {@link NpmResourceInfoForCql}.
+ * <p/>
+ * This javadoc documents the entire NPM package feature in the clinical-reasoning project.  Please
+ * read below:
+ * <p/>
+ * A downstream app from clinical-reasoning will be able to maintain Measures and Libraries loaded
+ * from NPM packages.  Such Measures and Libraries will, for those clients implementing this
+ * feature, no longer be maintained in {@link Repository} storage, unlike all other FHIR resources,
+ * such as Patients.
+ * <p/>
+ * Downstream apps are responsible for loading and retrieving such packages from implementations
+ * of the below interface.  Additionally, they must map all package IDs to package URLs via a
+ * List of {@link NamespaceInfo}s.  This is done via the
+ * {@link #initNamespaceMappings(LibraryManager)}, as due to how CQL libraries are loaded, it
+ * won't work automatically.
+ * <p/>
+ * The {@link NpmResourceInfoForCql} class is used to capture the results of query the NPM
+ * package with a given measure URL.  It's effectively a container for the Measure, its directly
+ * associated Library, and its NPM package information.  In theory, there could be more than one
+ * NPM package for a given Measure.  When CQL runs and calls a custom {@link LibrarySourceProvider},
+ * it will first check to see if the directly associated Library matches the provided
+ * {@link VersionedIdentifier}.  If not, it will query all NPM packages within the
+ * R4NpmResourceInfoForCql to find the Library.  And if there is still no match, it will pass the
+ * VersionedIdentifier, and build a URL from the system and ID before calling
+ * {@link #loadLibraryByUrl(String)} to load that Library from another package, with the
+ * VersionedIdentifier already resolved correctly with the help of the NamespaceInfos provided above.
+ * The implementor is responsible for implementing loadLibraryByUrl to properly return the Library
+ * from any packages maintained by the application.
+ * <p/>
+ * The above should also work with multiple layers of includes across packages.
+ * <p/>
+ * This workflow is meant to be triggered by a new Measure operation provider:
+ * $evaluate-measure-by-url, which takes a canonical measure URL instead of a measure ID like
+ * $evaluate-measure.
+ * <p/>
+ * Example:  Package with ID X and URL <a href='http://packageX.org'>...</a> contains Measure ABC
+ * is associated with Library 123, which contains CQL that includes Library 456 from NPM Package
+ * with ID Y  and URL <a href='http://packageX.org'>...</a>, which contains both the Library and
+ * its CQL.  When resolve the CQL include pointing to Package ID Y, the CQL engine must be able
+ * to read the namespace info and resolve ID Y to URL <a href='http://packageY.org'>...</a>.  This
+ * can only be accomplished via an explicit mapping.
+ */
 public interface NpmPackageLoader {
 
     NpmPackageLoader DEFAULT = new NpmPackageLoader() {

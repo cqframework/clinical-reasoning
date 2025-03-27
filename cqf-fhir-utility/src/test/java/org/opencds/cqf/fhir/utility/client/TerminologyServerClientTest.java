@@ -1,28 +1,33 @@
 package org.opencds.cqf.fhir.utility.client;
 
-import static org.junit.Assert.assertSame;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.client.impl.GenericClient;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.List;
 import java.util.Map;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -33,9 +38,13 @@ import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
+import org.opencds.cqf.fhir.utility.client.ExpandRunner.TerminologyServerExpansionException;
 
 public class TerminologyServerClientTest {
+    private static final String VALUE_SET = "ValueSet";
+    private static final String EXPAND_OPERATION = "$expand";
     private static final String url = "www.test.com";
     private static final String version = "1.0";
     private static final String authoritativeSource = "www.source.com/ValueSet";
@@ -43,11 +52,10 @@ public class TerminologyServerClientTest {
     private static final String password = "password";
     private static final String urlParamName = TerminologyServerClient.urlParamName;
     private static final String versionParamName = TerminologyServerClient.versionParamName;
-    ;
 
-    private FhirContext fhirContextDstu3 = FhirContext.forDstu3Cached();
-    private FhirContext fhirContextR4 = FhirContext.forR4Cached();
-    private FhirContext fhirContextR5 = FhirContext.forR5Cached();
+    private final FhirContext fhirContextDstu3 = FhirContext.forDstu3Cached();
+    private final FhirContext fhirContextR4 = FhirContext.forR4Cached();
+    private final FhirContext fhirContextR5 = FhirContext.forR5Cached();
 
     @Test
     void testR4UrlAndVersion() {
@@ -61,23 +69,9 @@ public class TerminologyServerClientTest {
         endpoint.addExtension(
                 new org.hl7.fhir.r4.model.Extension(Constants.APIKEY, new org.hl7.fhir.r4.model.StringType(password)));
         var capt = ArgumentCaptor.forClass(org.hl7.fhir.r4.model.Parameters.class);
-        var clientMock = mock(GenericClient.class, new ReturnsDeepStubs());
-        var contextMock = mock(FhirContext.class, new ReturnsDeepStubs());
-        when(contextMock.newRestfulGenericClient(any())).thenReturn(clientMock);
-        when(contextMock.getVersion().getVersion()).thenReturn(FhirVersionEnum.R4);
 
-        when(clientMock
-                        .operation()
-                        .onType(anyString())
-                        .named(anyString())
-                        .withParameters(capt.capture())
-                        .returnResourceType(any())
-                        .execute())
-                .thenReturn(valueSet.get());
-        var contextSpy = spy(fhirContextR4);
-        doReturn(clientMock).when(contextSpy).newRestfulGenericClient(any());
-
-        var client = new TerminologyServerClient(contextSpy);
+        var client = spy(new TerminologyServerClient(fhirContextR4));
+        doReturn(valueSet.get()).when(client).expand(any(IGenericClient.class), any(), capt.capture());
         var parameters = factory.createParameters(new org.hl7.fhir.r4.model.Parameters());
         client.expand(valueSet, endpoint, parameters);
         assertNotNull(capt.getValue());
@@ -89,7 +83,7 @@ public class TerminologyServerClientTest {
                         .getValue());
         assertNull(params.getParameter(versionParamName));
 
-        // when the valueset has a version it should be in params
+        // when the ValueSet has a version it should be in params
         valueSet.setVersion(version);
         client.expand(valueSet, endpoint, parameters);
         params = capt.getAllValues().get(1);
@@ -125,22 +119,9 @@ public class TerminologyServerClientTest {
         endpoint.addExtension(
                 new org.hl7.fhir.r5.model.Extension(Constants.APIKEY, new org.hl7.fhir.r5.model.StringType(password)));
         var capt = ArgumentCaptor.forClass(org.hl7.fhir.r5.model.Parameters.class);
-        var clientMock = mock(GenericClient.class, new ReturnsDeepStubs());
-        var contextMock = mock(FhirContext.class, new ReturnsDeepStubs());
-        when(contextMock.newRestfulGenericClient(any())).thenReturn(clientMock);
-        when(contextMock.getVersion().getVersion()).thenReturn(FhirVersionEnum.R5);
-        when(clientMock
-                        .operation()
-                        .onType(anyString())
-                        .named(anyString())
-                        .withParameters(capt.capture())
-                        .returnResourceType(any())
-                        .execute())
-                .thenReturn(valueSet.get());
-        var contextSpy = spy(fhirContextR5);
-        doReturn(clientMock).when(contextSpy).newRestfulGenericClient(any());
 
-        var client = new TerminologyServerClient(contextSpy);
+        var client = spy(new TerminologyServerClient(fhirContextR5));
+        doReturn(valueSet.get()).when(client).expand(any(IGenericClient.class), any(), capt.capture());
         var parameters = factory.createParameters(new org.hl7.fhir.r5.model.Parameters());
         client.expand(valueSet, endpoint, parameters);
         assertNotNull(capt.getValue());
@@ -189,22 +170,9 @@ public class TerminologyServerClientTest {
         endpoint.addExtension(new org.hl7.fhir.dstu3.model.Extension(
                 Constants.APIKEY, new org.hl7.fhir.dstu3.model.StringType(password)));
         var capt = ArgumentCaptor.forClass(org.hl7.fhir.dstu3.model.Parameters.class);
-        var clientMock = mock(GenericClient.class, new ReturnsDeepStubs());
-        var contextMock = mock(FhirContext.class, new ReturnsDeepStubs());
-        when(contextMock.newRestfulGenericClient(any())).thenReturn(clientMock);
-        when(contextMock.getVersion().getVersion()).thenReturn(FhirVersionEnum.DSTU3);
-        when(clientMock
-                        .operation()
-                        .onType(anyString())
-                        .named(anyString())
-                        .withParameters(capt.capture())
-                        .returnResourceType(any())
-                        .execute())
-                .thenReturn(valueSet.get());
-        var contextSpy = spy(fhirContextDstu3);
-        doReturn(clientMock).when(contextSpy).newRestfulGenericClient(any());
 
-        var client = new TerminologyServerClient(contextSpy);
+        var client = spy(new TerminologyServerClient(fhirContextDstu3));
+        doReturn(valueSet.get()).when(client).expand(any(IGenericClient.class), any(), capt.capture());
         var parameters = factory.createParameters(new org.hl7.fhir.dstu3.model.Parameters());
         client.expand(valueSet, endpoint, parameters);
         assertNotNull(capt.getValue());
@@ -217,9 +185,9 @@ public class TerminologyServerClientTest {
                                 .orElseThrow()
                                 .getValue())
                         .getValue());
-        assertTrue(!params.getParameter().stream().anyMatch(p -> p.getName().equals(versionParamName)));
+        assertFalse(params.getParameter().stream().anyMatch(p -> p.getName().equals(versionParamName)));
 
-        // when the valueset has a version it should be in params
+        // when the ValueSet has a version it should be in params
         valueSet.setVersion(version);
         client.expand(valueSet, endpoint, parameters);
         params = capt.getAllValues().get(1);
@@ -296,12 +264,111 @@ public class TerminologyServerClientTest {
 
         // test
         var client = new TerminologyServerClient(contextMock);
-        client.getLatestNonDraftResource(endpointMock, "www.test.com/fhir/ValueSet/123|1.2.3", supportedVersion);
+        client.getLatestNonDraftResource(endpointMock, "www.test.com/fhir/ValueSet/123|1.2.3");
         var capturedUrlParams = urlParamsCaptor.getValue();
         var token = (TokenParam) capturedUrlParams.get("status").get(0);
 
         // assert
         assertEquals("draft", token.getValue());
-        assertSame(TokenParamModifier.NOT, token.getModifier());
+        Assertions.assertSame(TokenParamModifier.NOT, token.getModifier());
+    }
+
+    @Test
+    void expandRetrySuccessful() {
+        // setup tx server endpoint
+        var baseUrl = "www.test.com/fhir";
+        var endpoint = new org.hl7.fhir.r4.model.Endpoint();
+        endpoint.setAddress(baseUrl);
+        var endpointAdapter = (IEndpointAdapter) IAdapterFactory.createAdapterForResource(endpoint);
+        // setup ValueSets
+        var leafUrl = baseUrl + "/ValueSet/leaf";
+        // ensure that the grouper is not expanded using the Tx Server
+        var grouperUrl = "www.test.com/fhir/ValueSet/grouper";
+        var grouper = new org.hl7.fhir.r4.model.ValueSet();
+        grouper.setUrl(grouperUrl);
+        grouper.getCompose().getIncludeFirstRep().getValueSet().add(new org.hl7.fhir.r4.model.CanonicalType(leafUrl));
+        grouper.addExtension()
+                .setUrl(Constants.AUTHORITATIVE_SOURCE_URL)
+                .setValue(new org.hl7.fhir.r4.model.UriType(grouperUrl));
+        var valueSetAdapter = (IValueSetAdapter) IAdapterFactory.createAdapterForResource(grouper);
+        var parametersAdapter =
+                (IParametersAdapter) IAdapterFactory.createAdapterForResource(new org.hl7.fhir.r4.model.Parameters());
+        var leaf = new org.hl7.fhir.r4.model.ValueSet();
+        leaf.setUrl(url);
+        leaf.getExpansion().addContains().setSystem("system1").setCode("code1");
+        leaf.getExpansion().addContains().setSystem("system2").setCode("code2");
+        leaf.getExpansion().addContains().setSystem("system2").setCode("code3");
+        leaf.getCompose().addInclude().setSystem("system1").addConcept().setCode("code1");
+        var include2 = leaf.getCompose().addInclude().setSystem("system2");
+        include2.addConcept().setCode("code2");
+        include2.addConcept().setCode("code3");
+
+        var fhirClient = mock(IGenericClient.class, new ReturnsDeepStubs());
+        when(fhirClient.getFhirContext().getVersion().getVersion()).thenReturn(FhirVersionEnum.R4);
+        when(fhirClient
+                        .operation()
+                        .onType(eq(VALUE_SET))
+                        .named(eq(EXPAND_OPERATION))
+                        .withParameters(any(IBaseParameters.class))
+                        .returnResourceType(any())
+                        .execute())
+                .thenThrow(new UnprocessableEntityException())
+                .thenThrow(new UnprocessableEntityException())
+                .thenReturn(leaf);
+        // Important part - successful response on 3rd attempt to expand
+
+        var client = spy(new TerminologyServerClient(fhirContextR4));
+        doReturn(fhirClient).when(client).initializeClientWithAuth(any(IEndpointAdapter.class));
+
+        var actual =
+                (org.hl7.fhir.r4.model.ValueSet) client.expand(valueSetAdapter, endpointAdapter, parametersAdapter);
+
+        assertEquals(3, actual.getExpansion().getContains().size());
+        verify(client, never()).getResource(any(), any());
+        verify(fhirClient, atLeast(3)).operation();
+    }
+
+    @Test
+    void expandRetryFail() {
+        // setup tx server endpoint
+        var baseUrl = "www.test.com/fhir";
+        var endpoint = new org.hl7.fhir.r4.model.Endpoint();
+        endpoint.setAddress(baseUrl);
+        var endpointAdapter = (IEndpointAdapter) IAdapterFactory.createAdapterForResource(endpoint);
+        // setup ValueSets
+        var leafUrl = baseUrl + "/ValueSet/leaf";
+        // ensure that the grouper is not expanded using the Tx Server
+        var grouperUrl = "www.test.com/fhir/ValueSet/grouper";
+        var grouper = new org.hl7.fhir.r4.model.ValueSet();
+        grouper.setUrl(grouperUrl);
+        grouper.getCompose().getIncludeFirstRep().getValueSet().add(new org.hl7.fhir.r4.model.CanonicalType(leafUrl));
+        grouper.addExtension()
+                .setUrl(Constants.AUTHORITATIVE_SOURCE_URL)
+                .setValue(new org.hl7.fhir.r4.model.UriType(grouperUrl));
+        var valueSetAdapter = (IValueSetAdapter) IAdapterFactory.createAdapterForResource(grouper);
+        var parametersAdapter =
+                (IParametersAdapter) IAdapterFactory.createAdapterForResource(new org.hl7.fhir.r4.model.Parameters());
+
+        // important part - expand fails all 3 attempts
+        var fhirClient = mock(IGenericClient.class, new ReturnsDeepStubs());
+        when(fhirClient.getFhirContext().getVersion().getVersion()).thenReturn(FhirVersionEnum.R4);
+        when(fhirClient
+                        .operation()
+                        .onType(eq(VALUE_SET))
+                        .named(eq(EXPAND_OPERATION))
+                        .withParameters(any(IBaseParameters.class))
+                        .returnResourceType(any())
+                        .execute())
+                .thenThrow(new UnprocessableEntityException())
+                .thenThrow(new UnprocessableEntityException())
+                .thenThrow(new UnprocessableEntityException());
+
+        var client = spy(new TerminologyServerClient(fhirContextR4));
+        doReturn(fhirClient).when(client).initializeClientWithAuth(any(IEndpointAdapter.class));
+        assertThrows(
+                TerminologyServerExpansionException.class,
+                () -> client.expand(valueSetAdapter, endpointAdapter, parametersAdapter));
+        verify(client, never()).getResource(any(), any());
+        verify(fhirClient, atLeast(3)).operation();
     }
 }

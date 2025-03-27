@@ -9,9 +9,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -34,8 +31,7 @@ public class ExpandHelper {
     private static final Logger myLogger = LoggerFactory.getLogger(ExpandHelper.class);
     private final Repository repository;
     private final TerminologyServerClient terminologyServerClient;
-    public static final List<String> unsupportedParametersToRemove =
-            Collections.unmodifiableList(new ArrayList<String>(Arrays.asList(Constants.CANONICAL_VERSION)));
+    public static final List<String> unsupportedParametersToRemove = List.of(Constants.CANONICAL_VERSION);
 
     public ExpandHelper(Repository repository, TerminologyServerClient server) {
         this.repository = repository;
@@ -83,19 +79,7 @@ public class ExpandHelper {
                 && (authoritativeSourceUrl == null
                         || authoritativeSourceUrl.equals(
                                 terminologyEndpoint.get().getAddress()))) {
-            try {
-                var expandedValueSet = (IValueSetAdapter) createAdapterForResource(
-                        terminologyServerClient.expand(valueSet, terminologyEndpoint.get(), expansionParameters));
-                // expansions are only valid for a particular version
-                if (!valueSet.hasVersion()) {
-                    valueSet.setVersion(expandedValueSet.getVersion());
-                }
-                valueSet.setExpansion(expandedValueSet.getExpansion());
-            } catch (Exception ex) {
-                throw new UnprocessableEntityException(String.format(
-                        "Terminology Server expansion failed for ValueSet (%s): %s",
-                        valueSet.getId(), ex.getMessage()));
-            }
+            terminologyServerExpand(valueSet, expansionParameters, terminologyEndpoint.get());
         }
         // Else if the ValueSet has a simple compose then we will perform naive expansion.
         else if (valueSet.hasSimpleCompose()) {
@@ -116,6 +100,17 @@ public class ExpandHelper {
                     "Cannot expand ValueSet without a terminology server: " + valueSet.getId());
         }
         expandedList.add(valueSet.getUrl());
+    }
+
+    private void terminologyServerExpand(
+            IValueSetAdapter valueSet, IParametersAdapter expansionParameters, IEndpointAdapter terminologyEndpoint) {
+        var expandedValueSet = (IValueSetAdapter) createAdapterForResource(
+                terminologyServerClient.expand(valueSet, terminologyEndpoint, expansionParameters));
+        // expansions are only valid for a particular version
+        if (!valueSet.hasVersion()) {
+            valueSet.setVersion(expandedValueSet.getVersion());
+        }
+        valueSet.setExpansion(expandedValueSet.getExpansion());
     }
 
     private void groupExpand(
@@ -161,8 +156,7 @@ public class ExpandHelper {
             // Grab the ValueSet
             var url = Canonicals.getUrl(reference);
             var version = Canonicals.getVersion(reference);
-            var includedVS =
-                    getIncludedValueSet(valueSet, terminologyEndpoint, valueSets, repository, reference, url, version);
+            var includedVS = getIncludedValueSet(terminologyEndpoint, valueSets, repository, reference, url, version);
             if (includedVS != null) {
                 // Expand the ValueSet if we haven't already
                 if (!expandedList.contains(url)) {
@@ -210,7 +204,6 @@ public class ExpandHelper {
     }
 
     private IValueSetAdapter getIncludedValueSet(
-            IValueSetAdapter valueSet,
             Optional<IEndpointAdapter> terminologyEndpoint,
             List<IValueSetAdapter> valueSets,
             Repository repository,
@@ -224,10 +217,7 @@ public class ExpandHelper {
                 .orElseGet(() -> {
                     if (terminologyEndpoint.isPresent()) {
                         return terminologyServerClient
-                                .getResource(
-                                        terminologyEndpoint.get(),
-                                        reference,
-                                        valueSet.get().getStructureFhirVersionEnum())
+                                .getResource(terminologyEndpoint.get(), reference)
                                 .map(r -> (IValueSetAdapter) createAdapterForResource(r))
                                 .orElse(null);
                     } else {

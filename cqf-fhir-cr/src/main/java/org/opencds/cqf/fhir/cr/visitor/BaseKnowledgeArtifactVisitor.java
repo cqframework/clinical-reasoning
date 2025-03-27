@@ -205,11 +205,7 @@ public abstract class BaseKnowledgeArtifactVisitor implements IKnowledgeArtifact
         if (client != null
                 && endpoint != null
                 && Canonicals.getResourceType(ra.getReference()).equals("ValueSet")) {
-            return client.getResource(
-                            endpoint,
-                            ra.getReference(),
-                            fhirContext().getVersion().getVersion())
-                    .orElse(null);
+            return client.getResource(endpoint, ra.getReference()).orElse(null);
         }
         return null;
     }

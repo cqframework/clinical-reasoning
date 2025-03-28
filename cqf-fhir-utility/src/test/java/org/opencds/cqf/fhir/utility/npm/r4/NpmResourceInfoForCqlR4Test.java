@@ -15,9 +15,9 @@ class NpmResourceInfoForCqlR4Test extends BaseNpmResourceInfoForCqlTest {
     protected FhirVersionEnum fhirVersion = FhirVersionEnum.R4;
 
     private static final String EXPECTED_CQL_ALPHA =
-            "library SimpleAlpha  parameter \"Measurement Period\" Interval<DateTime> default Interval[@2021-01-01T00:00:00.0-06:00, @2022-01-01T00:00:00.0-06:00)  define \"Initial Population\": true ";
+            "library SimpleAlpha  using FHIR version '4.0.1'  parameter \"Measurement Period\" Interval<DateTime> default Interval[@2021-01-01T00:00:00.0-06:00, @2022-01-01T00:00:00.0-06:00)  context Patient  define \"Initial Population\": true ";
     private static final String EXPECTED_CQL_BRAVO =
-            "library SimpleBravo  parameter \"Measurement Period\" Interval<DateTime>   default Interval[@2024-01-01T00:00:00.0-06:00, @2025-01-01T00:00:00.0-06:00)  define \"Initial Population\": true ";
+            "library SimpleBravo  using FHIR version '4.0.1'  parameter \"Measurement Period\" Interval<DateTime>   default Interval[@2024-01-01T00:00:00.0-06:00, @2025-01-01T00:00:00.0-06:00)  context Patient  define \"Initial Population\": true ";
     private static final String EXPECTED_CQL_WITH_DERIVED =
             "library WithDerivedLibrary version '0.1'  using FHIR version '4.0.1'  include DerivedLibrary version '0.1'  parameter \"Measurement Period\" Interval<DateTime>     default Interval[@2021-01-01T00:00:00.0-06:00, @2022-01-01T00:00:00.0-06:00)  context Patient  define \"Initial Population\":     DerivedLibrary.\"Has Initial Population\"  define \"Denominator\":     \"Initial Population\"  define \"Numerator\":     \"Initial Population\" ";
     private static final String EXPECTED_CQL_DERIVED =

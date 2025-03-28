@@ -9,7 +9,9 @@ import jakarta.annotation.Nullable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.StringJoiner;
 import org.hl7.cql.model.ModelIdentifier;
 import org.hl7.cql.model.NamespaceInfo;
 import org.hl7.elm.r1.VersionedIdentifier;
@@ -87,6 +89,31 @@ public class NpmResourceInfoForCql {
         }
 
         return loadNpmLibrary(modelIdentifier);
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (object == null || getClass() != object.getClass()) {
+            return false;
+        }
+        final NpmResourceInfoForCql that = (NpmResourceInfoForCql) object;
+        return Objects.equals(measure, that.measure) &&
+                Objects.equals(mainLibrary, that.mainLibrary) &&
+                Objects.equals(npmPackages, that.npmPackages);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(measure, mainLibrary, npmPackages);
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", NpmResourceInfoForCql.class.getSimpleName() + "[", "]")
+            .add("measure=" + measure)
+            .add("mainLibrary=" + mainLibrary)
+            .add("npmPackages=" + npmPackages)
+            .toString();
     }
 
     private Optional<ILibraryAdapter> loadNpmLibrary(VersionedIdentifier versionedIdentifier) {

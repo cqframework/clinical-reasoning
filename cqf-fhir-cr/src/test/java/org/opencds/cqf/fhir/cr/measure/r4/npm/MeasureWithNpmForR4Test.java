@@ -34,8 +34,19 @@ class MeasureWithNpmForR4Test {
 
     private static final String SLASH_MEASURE_SLASH = "/Measure/";
 
+    private static final String PIPE = "|";
+    private static final String VERSION_0_1 = "0.1";
+    private static final String VERSION_0_2 = "0.2";
+    private static final String VERSION_0_3 = "0.3";
+    private static final String VERSION_0_4 = "0.4";
+    private static final String VERSION_0_5 = "0.5";
+    private static final String VERSION_0_6 = "0.6";
+
     private static final String MEASURE_URL_ALPHA = SIMPLE_URL + SLASH_MEASURE_SLASH + SIMPLE_ALPHA;
+    private static final String MEASURE_URL_ALPHA_WITH_VERSION = MEASURE_URL_ALPHA + PIPE + VERSION_0_2;
     private static final String MEASURE_URL_BRAVO = SIMPLE_URL + SLASH_MEASURE_SLASH + SIMPLE_BRAVO;
+    private static final String MEASURE_URL_BRAVO_WITH_VERSION = MEASURE_URL_BRAVO + PIPE + VERSION_0_5;
+
     private static final String MEASURE_URL_WITH_DERIVED_LIBRARY =
             DERIVED_URL + SLASH_MEASURE_SLASH + WITH_DERIVED_LIBRARY_UPPER;
     private static final String MEASURE_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES =
@@ -84,12 +95,24 @@ class MeasureWithNpmForR4Test {
                 .reportType(MeasureEvalType.SUBJECT.toCode())
                 .evaluate()
                 .then()
-                .hasMeasureUrl(MEASURE_URL_ALPHA)
+                .hasMeasureUrl(MEASURE_URL_ALPHA_WITH_VERSION)
                 .hasPeriodStart(toJavaUtilDate(LOCAL_DATE_TIME_2021_01_01))
                 .hasPeriodEnd(toJavaUtilDate(LOCAL_DATE_TIME_2022_01_01_MINUS_ONE_SECOND))
                 .hasEmptySubject()
                 .hasStatus(MeasureReportStatus.COMPLETE)
                 .hasEvaluatedResourceCount(0);
+
+        npmRepo.when()
+               .measureUrl(MEASURE_URL_ALPHA_WITH_VERSION)
+               .reportType(MeasureEvalType.SUBJECT.toCode())
+               .evaluate()
+               .then()
+               .hasMeasureUrl(MEASURE_URL_ALPHA_WITH_VERSION)
+               .hasPeriodStart(toJavaUtilDate(LOCAL_DATE_TIME_2021_01_01))
+               .hasPeriodEnd(toJavaUtilDate(LOCAL_DATE_TIME_2022_01_01_MINUS_ONE_SECOND))
+               .hasEmptySubject()
+               .hasStatus(MeasureReportStatus.COMPLETE)
+               .hasEvaluatedResourceCount(0);
     }
 
     @Test
@@ -103,13 +126,15 @@ class MeasureWithNpmForR4Test {
                 .reportType(MeasureEvalType.SUBJECT.toCode())
                 .evaluate()
                 .then()
-                .hasMeasureUrl(MEASURE_URL_BRAVO)
+                .hasMeasureUrl(MEASURE_URL_BRAVO_WITH_VERSION)
                 .hasPeriodStart(toJavaUtilDate(LOCAL_DATE_TIME_2024_01_01))
                 .hasPeriodEnd(toJavaUtilDate(LOCAL_DATE_TIME_2025_01_01_MINUS_ONE_SECOND))
                 .hasSubjectReference(PATIENT_REFERENCE)
                 .hasStatus(MeasureReportStatus.COMPLETE)
                 .hasEvaluatedResourceCount(0);
     }
+
+    // LUKETODO:  test with searching by URLs with versions
 
     @Test
     void evaluateWithDerivedLibraryOneLayer() {
@@ -122,7 +147,7 @@ class MeasureWithNpmForR4Test {
                 .reportType(MeasureEvalType.SUBJECT.toCode())
                 .evaluate()
                 .then()
-                .hasMeasureUrl(MEASURE_URL_ALPHA)
+                .hasMeasureUrl(MEASURE_URL_ALPHA_WITH_VERSION)
                 .hasPeriodStart(toJavaUtilDate(LOCAL_DATE_TIME_2021_01_01))
                 .hasPeriodEnd(toJavaUtilDate(LOCAL_DATE_TIME_2022_01_01_MINUS_ONE_SECOND))
                 .hasSubjectReference(PATIENT_REFERENCE)
@@ -162,7 +187,7 @@ class MeasureWithNpmForR4Test {
                 .reportType(MeasureEvalType.SUBJECT.toCode())
                 .evaluate()
                 .then()
-                .hasMeasureUrl(MEASURE_URL_BRAVO)
+                .hasMeasureUrl(MEASURE_URL_BRAVO_WITH_VERSION)
                 .hasPeriodStart(toJavaUtilDate(LOCAL_DATE_TIME_2024_01_01))
                 .hasPeriodEnd(toJavaUtilDate(LOCAL_DATE_TIME_2025_01_01_MINUS_ONE_SECOND))
                 .hasSubjectReference(PATIENT_REFERENCE)

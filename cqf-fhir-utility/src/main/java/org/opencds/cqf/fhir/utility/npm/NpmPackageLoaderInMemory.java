@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import jakarta.annotation.Nullable;
 import org.hl7.cql.model.NamespaceInfo;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.utilities.npm.NpmPackage;
@@ -22,6 +23,10 @@ import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IMeasureAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IResourceAdapter;
 
+// LUKETODO:  feature request to improve JpaPackageCache :  error or warning if we get more than one
+// LUKETODO:  document duplicate Measure across NPM problem
+// LUKETODO:  not a problem with packages we build... but clients could do the wrong thing
+// LUKETODO:  how does support find out?  query the database?
 /**
  * Simplistic implementation of {@link NpmPackageLoader} that loads NpmPackages from the classpath
  * and stores {@link NpmResourceInfoForCql}s in a Map. This class is recommended for testing
@@ -32,8 +37,8 @@ import org.opencds.cqf.fhir.utility.adapter.IResourceAdapter;
  */
 public class NpmPackageLoaderInMemory implements NpmPackageLoader {
 
-    private final Map<String, NpmResourceInfoForCql> measureUrlToResourceInfo = new HashMap<>();
-    private final Map<String, NpmPackage> libraryUrlToPackage = new HashMap<>();
+    private final Map<UrlAndVersion, NpmResourceInfoForCql> measureUrlToResourceInfo = new HashMap<>();
+    private final Map<UrlAndVersion, NpmPackage> libraryUrlToPackage = new HashMap<>();
     private final List<NamespaceInfo> namespaceInfos;
 
     public static NpmPackageLoaderInMemory fromNpmPackageTgzPath(Class<?> clazz, Path... tgzPaths) {
@@ -42,10 +47,41 @@ public class NpmPackageLoaderInMemory implements NpmPackageLoader {
         return new NpmPackageLoaderInMemory(npmPackages);
     }
 
+    record UrlAndVersion(String url, @Nullable String version) {
+
+        static UrlAndVersion fromCanonical(String canonical) {
+            final String[] parts = canonical.split("\\|");
+            if (parts.length > 2) {
+                throw new IllegalArgumentException("Invalid canonical URL: " + canonical);
+            }
+            if (parts.length == 1) {
+                return new UrlAndVersion(parts[0], null);
+            }
+            return new UrlAndVersion(parts[0], parts[1]);
+        }
+
+        static UrlAndVersion fromCanonicalAndVersion(String canonical, @Nullable String version) {
+            if (version == null) {
+                return new UrlAndVersion(canonical, null);
+            }
+
+            return new UrlAndVersion(canonical, version);
+        }
+
+        @Override
+        public String toString() {
+            return url + "|" + version;
+        }
+    }
+
     @Override
     public NpmResourceInfoForCql loadNpmResources(IPrimitiveType<String> measureUrl) {
-        return measureUrlToResourceInfo.computeIfAbsent(
-                measureUrl.getValueAsString(), input -> NpmResourceInfoForCql.EMPTY);
+        return measureUrlToResourceInfo.entrySet()
+            .stream()
+            .filter(entry -> doesUrlAndVersionMatch(measureUrl, entry))
+            .map(Map.Entry::getValue)
+            .findFirst()
+            .orElse(NpmResourceInfoForCql.EMPTY);
     }
 
     @Override
@@ -154,12 +190,25 @@ public class NpmPackageLoaderInMemory implements NpmPackageLoader {
     private void storeResources(NpmPackage npmPackage, IMeasureAdapter measure, ILibraryAdapter library) {
         if (measure != null) {
             measureUrlToResourceInfo.put(
-                    measure.getUrl(), new NpmResourceInfoForCql(measure, library, List.of(npmPackage)));
+                    UrlAndVersion.fromCanonicalAndVersion(measure.getUrl(), measure.getVersion()),
+                    new NpmResourceInfoForCql(measure, library, List.of(npmPackage)));
         }
 
         if (library != null) {
-            libraryUrlToPackage.put(library.getUrl(), npmPackage);
+            libraryUrlToPackage.put(
+                UrlAndVersion.fromCanonicalAndVersion(library.getUrl(), library.getVersion()), npmPackage);
         }
+    }
+
+    private static boolean doesUrlAndVersionMatch(
+            IPrimitiveType<String> measureUrl,
+            Map.Entry<UrlAndVersion, NpmResourceInfoForCql> entry) {
+
+        if (entry.getKey().equals( UrlAndVersion.fromCanonical(measureUrl.getValueAsString()))) {
+            return true;
+        }
+
+        return entry.getKey().url.equals( measureUrl.getValueAsString());
     }
 
     private FhirContext getFhirContext(NpmPackage npmPackage) {

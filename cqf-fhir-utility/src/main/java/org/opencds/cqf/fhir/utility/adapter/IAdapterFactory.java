@@ -59,6 +59,14 @@ public interface IAdapterFactory {
     ILibraryAdapter createLibrary(IBaseResource library);
 
     /**
+     * Creates an adapter that exposes common Measure operations across multiple versions of FHIR
+     *
+     * @param measure a FHIR Measure Resource
+     * @return an adapter exposing common api calls
+     */
+    IMeasureAdapter createMeasure(IBaseResource measure);
+
+    /**
      * Creates an adapter that exposes common Library operations across multiple versions of FHIR
      *
      * @param planDefinition a FHIR PlanDefinition Resource

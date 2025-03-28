@@ -27,12 +27,14 @@ import org.opencds.cqf.fhir.cql.engine.parameters.CqlFhirParametersConverter;
 import org.opencds.cqf.fhir.cql.engine.parameters.CqlParameterDefinition;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.CqfExpression;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
+import org.opencds.cqf.fhir.utility.npm.NpmResourceInfoForCql;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class LibraryEngine {
 
-    private static Logger logger = LoggerFactory.getLogger(LibraryEngine.class);
+    private static final Logger logger = LoggerFactory.getLogger(LibraryEngine.class);
 
     protected final Repository repository;
     protected final FhirContext fhirContext;
@@ -132,7 +134,8 @@ public class LibraryEngine {
 
         requestSettings.getLibrarySourceProviders().add(new StringLibrarySourceProvider(Lists.newArrayList(cql)));
 
-        var engine = Engines.forRepository(repository, requestSettings, bundle);
+        var engine = Engines.forRepository(
+                repository, requestSettings, bundle, NpmResourceInfoForCql.EMPTY, NpmPackageLoader.DEFAULT);
 
         var evaluationParameters = cqlFhirParametersConverter.toCqlParameters(parameters);
         if (contextParameter != null) {
@@ -298,7 +301,9 @@ public class LibraryEngine {
         }
         // engine context built externally of LibraryEngine?
         if (engine == null) {
-            engine = Engines.forRepository(repository, settings, additionalData);
+            // for now we can't process NPM packages in this scenario
+            engine = Engines.forRepository(
+                    repository, settings, additionalData, NpmResourceInfoForCql.EMPTY, NpmPackageLoader.DEFAULT);
         }
 
         var evaluationParameters = cqlFhirParametersConverter.toCqlParameters(parameters);

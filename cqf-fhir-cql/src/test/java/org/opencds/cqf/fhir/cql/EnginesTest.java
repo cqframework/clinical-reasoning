@@ -37,6 +37,8 @@ import org.opencds.cqf.fhir.cql.engine.retrieve.FederatedDataProvider;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings;
 import org.opencds.cqf.fhir.utility.Constants;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
+import org.opencds.cqf.fhir.utility.npm.NpmResourceInfoForCql;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -308,7 +310,8 @@ class EnginesTest {
         bundleBuilder.addTransactionCreateEntry(new Encounter().setId("en1"));
         var additionalData = bundleBuilder.getBundle();
 
-        var engine = Engines.forRepository(repository, settings, additionalData);
+        var engine = Engines.forRepository(
+                repository, settings, additionalData, NpmResourceInfoForCql.EMPTY, NpmPackageLoader.DEFAULT);
 
         assertNotNull(engine.getState());
 
@@ -394,6 +397,7 @@ class EnginesTest {
 
     @Nonnull
     private CqlEngine getEngine(EvaluationSettings settings, IBaseBundle bundle) {
-        return Engines.forRepository(repository, settings, bundle);
+        return Engines.forRepository(
+                repository, settings, bundle, NpmResourceInfoForCql.EMPTY, NpmPackageLoader.DEFAULT);
     }
 }

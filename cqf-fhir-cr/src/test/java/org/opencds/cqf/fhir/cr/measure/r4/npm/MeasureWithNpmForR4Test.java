@@ -49,6 +49,8 @@ class MeasureWithNpmForR4Test {
 
     private static final String MEASURE_URL_WITH_DERIVED_LIBRARY =
             DERIVED_URL + SLASH_MEASURE_SLASH + WITH_DERIVED_LIBRARY_UPPER;
+    private static final String MEASURE_URL_WITH_DERIVED_LIBRARY_WITH_VERSION =
+        MEASURE_URL_WITH_DERIVED_LIBRARY + PIPE + VERSION_0_2;
     private static final String MEASURE_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES =
             DERIVED_TWO_LAYERS_URL + SLASH_MEASURE_SLASH + WITH_TWO_LAYERS_DERIVED_LIBRARIES_UPPER;
 
@@ -159,7 +161,7 @@ class MeasureWithNpmForR4Test {
                 .reportType(MeasureEvalType.SUBJECT.toCode())
                 .evaluate()
                 .then()
-                .hasMeasureUrl(MEASURE_URL_WITH_DERIVED_LIBRARY)
+                .hasMeasureUrl(MEASURE_URL_WITH_DERIVED_LIBRARY_WITH_VERSION)
                 .hasPeriodStart(toJavaUtilDate(LOCAL_DATE_TIME_2021_01_01))
                 .hasPeriodEnd(toJavaUtilDate(LOCAL_DATE_TIME_2022_01_01_MINUS_ONE_SECOND))
                 .hasSubjectReference(PATIENT_REFERENCE)

@@ -10,11 +10,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.regex.Pattern;
 import org.hl7.cql.model.NamespaceInfo;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.utilities.npm.NpmPackage;
@@ -37,6 +39,8 @@ import org.opencds.cqf.fhir.utility.adapter.IResourceAdapter;
  */
 public class NpmPackageLoaderInMemory implements NpmPackageLoader {
 
+    private final static Pattern PATTERN_PIPE = Pattern.compile("\\|");
+
     private final Map<UrlAndVersion, NpmResourceInfoForCql> measureUrlToResourceInfo = new HashMap<>();
     private final Map<UrlAndVersion, NpmPackage> libraryUrlToPackage = new HashMap<>();
     private final List<NamespaceInfo> namespaceInfos;
@@ -50,7 +54,7 @@ public class NpmPackageLoaderInMemory implements NpmPackageLoader {
     record UrlAndVersion(String url, @Nullable String version) {
 
         static UrlAndVersion fromCanonical(String canonical) {
-            final String[] parts = canonical.split("\\|");
+            final String[] parts = PATTERN_PIPE.split(canonical);
             if (parts.length > 2) {
                 throw new IllegalArgumentException("Invalid canonical URL: " + canonical);
             }
@@ -159,10 +163,19 @@ public class NpmPackageLoaderInMemory implements NpmPackageLoader {
             NpmPackage npmPackage, NpmPackage.NpmPackageFolder packageFolder, FhirContext fhirContext)
             throws IOException {
 
-        final Map<String, List<String>> types = packageFolder.getTypes();
+        final List<IResourceAdapter> resources = findResources(packageFolder, fhirContext);
 
-        IMeasureAdapter measure = null;
-        ILibraryAdapter library = null;
+        final Optional<IMeasureAdapter> optMeasure = findMeasure(resources);
+        final List<ILibraryAdapter> libraries = findLibraries(resources);
+
+        storeResources(npmPackage, optMeasure.orElse(null), libraries);
+    }
+
+    private List<IResourceAdapter> findResources(NpmPackage.NpmPackageFolder packageFolder, FhirContext fhirContext)
+        throws IOException {
+
+        final Map<String, List<String>> types = packageFolder.getTypes();
+        final List<IResourceAdapter> resources = new ArrayList<>();
 
         for (Map.Entry<String, List<String>> typeToFiles : types.entrySet()) {
             for (String nextFile : typeToFiles.getValue()) {
@@ -170,33 +183,52 @@ public class NpmPackageLoaderInMemory implements NpmPackageLoader {
 
                 if (nextFile.toLowerCase().endsWith(".json")) {
                     final IResourceAdapter resourceAdapter = IAdapterFactory.createAdapterForResource(
-                            fhirContext.newJsonParser().parseResource(fileContents));
+                        fhirContext.newJsonParser().parseResource(fileContents));
 
-                    if (resourceAdapter instanceof ILibraryAdapter libraryAdapter) {
-                        library = libraryAdapter;
-                    }
-
-                    if (resourceAdapter instanceof IMeasureAdapter measureAdapter) {
-                        measure = measureAdapter;
-                    }
+                    resources.add(resourceAdapter);
                 }
             }
         }
 
-        storeResources(npmPackage, measure, library);
+        return resources;
     }
 
-    private void storeResources(NpmPackage npmPackage, IMeasureAdapter measure, ILibraryAdapter library) {
+    private Optional<IMeasureAdapter> findMeasure(List<IResourceAdapter> resources) {
+        return resources.stream()
+            .filter(IMeasureAdapter.class::isInstance)
+            .map(IMeasureAdapter.class::cast)
+            .findFirst();
+    }
+
+    private List<ILibraryAdapter> findLibraries(List<IResourceAdapter> resources) {
+        return resources.stream()
+            .filter(ILibraryAdapter.class::isInstance)
+            .map(ILibraryAdapter.class::cast)
+            .toList();
+    }
+
+    private void storeResources(NpmPackage npmPackage, @Nullable IMeasureAdapter measure, List<ILibraryAdapter> libraries) {
         if (measure != null) {
             measureUrlToResourceInfo.put(
                     UrlAndVersion.fromCanonicalAndVersion(measure.getUrl(), measure.getVersion()),
-                    new NpmResourceInfoForCql(measure, library, List.of(npmPackage)));
+                    new NpmResourceInfoForCql(measure, findMatchingLibrary(measure, libraries), List.of(npmPackage)));
         }
 
-        if (library != null) {
+        for (ILibraryAdapter library : libraries) {
             libraryUrlToPackage.put(
-                    UrlAndVersion.fromCanonicalAndVersion(library.getUrl(), library.getVersion()), npmPackage);
+                UrlAndVersion.fromCanonicalAndVersion(library.getUrl(), library.getVersion()), npmPackage);
         }
+    }
+
+    private ILibraryAdapter findMatchingLibrary(IMeasureAdapter measure, List<ILibraryAdapter> libraries) {
+        return libraries.stream()
+            .filter(library ->
+                measure.getLibraryValues()
+                    .stream()
+                    .anyMatch(measureLibraryUrl ->
+                        doMeasureUrlAndLibraryMatch(measureLibraryUrl, library)))
+            .findFirst()
+            .orElse(null);
     }
 
     private static boolean doesUrlAndVersionMatch(
@@ -207,6 +239,20 @@ public class NpmPackageLoaderInMemory implements NpmPackageLoader {
         }
 
         return entry.getKey().url.equals(measureUrl.getValueAsString());
+    }
+
+    private static boolean doMeasureUrlAndLibraryMatch(String measureLibraryUrl, ILibraryAdapter library) {
+        final String[] split = PATTERN_PIPE.split(measureLibraryUrl);
+
+        if (split.length == 1) {
+            return library.getUrl().equals(measureLibraryUrl);
+        }
+
+        if (split.length == 2) {
+            return library.getUrl().equals(split[0]) && library.getVersion().equals(split[1]);
+        }
+
+        throw new InternalErrorException("bad measureUrl: " + measureLibraryUrl);
     }
 
     private FhirContext getFhirContext(NpmPackage npmPackage) {

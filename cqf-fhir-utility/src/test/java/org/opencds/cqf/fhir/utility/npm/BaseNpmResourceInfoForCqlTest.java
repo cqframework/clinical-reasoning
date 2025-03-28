@@ -55,6 +55,14 @@ public abstract class BaseNpmResourceInfoForCqlTest {
     protected static final String SLASH_MEASURE_SLASH = "/Measure/";
     protected static final String SLASH_LIBRARY_SLASH = "/Library/";
 
+    private static final String PIPE = "|";
+    private static final String VERSION_0_1 = "0.1";
+    private static final String VERSION_0_2 = "0.2";
+    private static final String VERSION_0_3 = "0.3";
+    private static final String VERSION_0_4 = "0.4";
+    private static final String VERSION_0_5 = "0.5";
+    private static final String VERSION_0_6 = "0.6";
+
     protected static final String SIMPLE_URL = "http://example.com";
     protected static final String DERIVED_URL = "http://with-derived-library.npm.opencds.org";
     protected static final String DERIVED_TWO_LAYERS_URL = "http://with-two-layers-derived-libraries.npm.opencds.org";
@@ -74,9 +82,13 @@ public abstract class BaseNpmResourceInfoForCqlTest {
     protected static final String LIBRARY_URL_BRAVO = SIMPLE_URL + SLASH_LIBRARY_SLASH + SIMPLE_BRAVO;
     protected static final String LIBRARY_URL_WITH_DERIVED_LIBRARY =
             DERIVED_URL + SLASH_LIBRARY_SLASH + WITH_DERIVED_LIBRARY_UPPER;
+    protected static final String LIBRARY_URL_WITH_DERIVED_LIBRARY_AND_VERSION =
+        LIBRARY_URL_WITH_DERIVED_LIBRARY + PIPE + VERSION_0_1;
     protected static final String LIBRARY_URL_DERIVED_LIBRARY = DERIVED_URL + SLASH_LIBRARY_SLASH + DERIVED_LIBRARY;
     protected static final String LIBRARY_URL_CROSS_PACKAGE_SOURCE =
             CROSS_PACKAGE_SOURCE_URL + SLASH_LIBRARY_SLASH + CROSS_PACKAGE_SOURCE_ID;
+    protected static final String LIBRARY_URL_CROSS_PACKAGE_SOURCE_WITH_VERSION =
+        LIBRARY_URL_CROSS_PACKAGE_SOURCE + PIPE + VERSION_0_1;
     protected static final String LIBRARY_URL_CROSS_PACKAGE_TARGET =
             CROSS_PACKAGE_TARGET_URL + SLASH_LIBRARY_SLASH + CROSS_PACKAGE_TARGET_ID;
 
@@ -136,7 +148,7 @@ public abstract class BaseNpmResourceInfoForCqlTest {
         final NpmResourceInfoForCql resourceInfo =
                 loader.loadNpmResources(new CanonicalType(MEASURE_URL_WITH_DERIVED_LIBRARY));
 
-        verifyMeasure(MEASURE_URL_WITH_DERIVED_LIBRARY, LIBRARY_URL_WITH_DERIVED_LIBRARY + "|0.1", resourceInfo);
+        verifyMeasure(MEASURE_URL_WITH_DERIVED_LIBRARY, LIBRARY_URL_WITH_DERIVED_LIBRARY, resourceInfo);
         verifyLibrary(
                 LIBRARY_URL_WITH_DERIVED_LIBRARY,
                 expectedCql,
@@ -150,7 +162,7 @@ public abstract class BaseNpmResourceInfoForCqlTest {
 
         final ILibraryAdapter derivedLibraryFromVersion = resourceInfo
                 .findMatchingLibrary(
-                        new VersionedIdentifier().withId(DERIVED_LIBRARY_ID).withVersion("0.1"))
+                        new VersionedIdentifier().withId(DERIVED_LIBRARY_ID).withVersion("0.4"))
                 .orElse(null);
 
         verifyLibrary(LIBRARY_URL_DERIVED_LIBRARY, expectedCqlDerived, derivedLibraryFromVersion);
@@ -163,6 +175,8 @@ public abstract class BaseNpmResourceInfoForCqlTest {
         assertNull(derivedLibraryFromBadVersion);
     }
 
+    // LUKETODO: keep versioned Library references (ie: "http://cross.package.source.npm.opencds.org/Library/CrossPackageSource|0.1")
+    // but play around with different versions between Measure, Library, cross package Library, and packages.
     protected void crossPackage(String expectedCqlSource, String expectedCqlTarget) {
 
         final NpmPackageLoaderInMemory loader = setup(CROSS_PACKAGE_SOURCE_TGZ, CROSS_PACKAGE_TARGET_TGZ);
@@ -170,7 +184,7 @@ public abstract class BaseNpmResourceInfoForCqlTest {
         final NpmResourceInfoForCql resourceInfo =
                 loader.loadNpmResources(new CanonicalType(MEASURE_URL_CROSS_PACKAGE_SOURCE));
 
-        verifyMeasure(MEASURE_URL_CROSS_PACKAGE_SOURCE, LIBRARY_URL_CROSS_PACKAGE_SOURCE + "|0.1", resourceInfo);
+        verifyMeasure(MEASURE_URL_CROSS_PACKAGE_SOURCE, LIBRARY_URL_CROSS_PACKAGE_SOURCE_WITH_VERSION, resourceInfo);
         verifyLibrary(
                 LIBRARY_URL_CROSS_PACKAGE_SOURCE,
                 expectedCqlSource,
@@ -203,7 +217,7 @@ public abstract class BaseNpmResourceInfoForCqlTest {
 
         verifyMeasure(
                 MEASURE_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES,
-                LIBRARY_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES + "|0.1",
+                LIBRARY_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES,
                 resourceInfo);
         verifyLibrary(
                 LIBRARY_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES,

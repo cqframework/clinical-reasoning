@@ -5,6 +5,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -14,7 +15,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import jakarta.annotation.Nullable;
 import org.hl7.cql.model.NamespaceInfo;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.utilities.npm.NpmPackage;
@@ -76,12 +76,11 @@ public class NpmPackageLoaderInMemory implements NpmPackageLoader {
 
     @Override
     public NpmResourceInfoForCql loadNpmResources(IPrimitiveType<String> measureUrl) {
-        return measureUrlToResourceInfo.entrySet()
-            .stream()
-            .filter(entry -> doesUrlAndVersionMatch(measureUrl, entry))
-            .map(Map.Entry::getValue)
-            .findFirst()
-            .orElse(NpmResourceInfoForCql.EMPTY);
+        return measureUrlToResourceInfo.entrySet().stream()
+                .filter(entry -> doesUrlAndVersionMatch(measureUrl, entry))
+                .map(Map.Entry::getValue)
+                .findFirst()
+                .orElse(NpmResourceInfoForCql.EMPTY);
     }
 
     @Override
@@ -196,19 +195,18 @@ public class NpmPackageLoaderInMemory implements NpmPackageLoader {
 
         if (library != null) {
             libraryUrlToPackage.put(
-                UrlAndVersion.fromCanonicalAndVersion(library.getUrl(), library.getVersion()), npmPackage);
+                    UrlAndVersion.fromCanonicalAndVersion(library.getUrl(), library.getVersion()), npmPackage);
         }
     }
 
     private static boolean doesUrlAndVersionMatch(
-            IPrimitiveType<String> measureUrl,
-            Map.Entry<UrlAndVersion, NpmResourceInfoForCql> entry) {
+            IPrimitiveType<String> measureUrl, Map.Entry<UrlAndVersion, NpmResourceInfoForCql> entry) {
 
-        if (entry.getKey().equals( UrlAndVersion.fromCanonical(measureUrl.getValueAsString()))) {
+        if (entry.getKey().equals(UrlAndVersion.fromCanonical(measureUrl.getValueAsString()))) {
             return true;
         }
 
-        return entry.getKey().url.equals( measureUrl.getValueAsString());
+        return entry.getKey().url.equals(measureUrl.getValueAsString());
     }
 
     private FhirContext getFhirContext(NpmPackage npmPackage) {

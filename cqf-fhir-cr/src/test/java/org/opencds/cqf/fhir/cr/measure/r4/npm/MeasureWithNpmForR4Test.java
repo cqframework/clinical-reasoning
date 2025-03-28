@@ -103,16 +103,16 @@ class MeasureWithNpmForR4Test {
                 .hasEvaluatedResourceCount(0);
 
         npmRepo.when()
-               .measureUrl(MEASURE_URL_ALPHA_WITH_VERSION)
-               .reportType(MeasureEvalType.SUBJECT.toCode())
-               .evaluate()
-               .then()
-               .hasMeasureUrl(MEASURE_URL_ALPHA_WITH_VERSION)
-               .hasPeriodStart(toJavaUtilDate(LOCAL_DATE_TIME_2021_01_01))
-               .hasPeriodEnd(toJavaUtilDate(LOCAL_DATE_TIME_2022_01_01_MINUS_ONE_SECOND))
-               .hasEmptySubject()
-               .hasStatus(MeasureReportStatus.COMPLETE)
-               .hasEvaluatedResourceCount(0);
+                .measureUrl(MEASURE_URL_ALPHA_WITH_VERSION)
+                .reportType(MeasureEvalType.SUBJECT.toCode())
+                .evaluate()
+                .then()
+                .hasMeasureUrl(MEASURE_URL_ALPHA_WITH_VERSION)
+                .hasPeriodStart(toJavaUtilDate(LOCAL_DATE_TIME_2021_01_01))
+                .hasPeriodEnd(toJavaUtilDate(LOCAL_DATE_TIME_2022_01_01_MINUS_ONE_SECOND))
+                .hasEmptySubject()
+                .hasStatus(MeasureReportStatus.COMPLETE)
+                .hasEvaluatedResourceCount(0);
     }
 
     @Test

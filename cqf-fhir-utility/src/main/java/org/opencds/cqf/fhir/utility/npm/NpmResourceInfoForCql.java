@@ -97,9 +97,9 @@ public class NpmResourceInfoForCql {
             return false;
         }
         final NpmResourceInfoForCql that = (NpmResourceInfoForCql) object;
-        return Objects.equals(measure, that.measure) &&
-                Objects.equals(mainLibrary, that.mainLibrary) &&
-                Objects.equals(npmPackages, that.npmPackages);
+        return Objects.equals(measure, that.measure)
+                && Objects.equals(mainLibrary, that.mainLibrary)
+                && Objects.equals(npmPackages, that.npmPackages);
     }
 
     @Override
@@ -110,10 +110,10 @@ public class NpmResourceInfoForCql {
     @Override
     public String toString() {
         return new StringJoiner(", ", NpmResourceInfoForCql.class.getSimpleName() + "[", "]")
-            .add("measure=" + measure)
-            .add("mainLibrary=" + mainLibrary)
-            .add("npmPackages=" + npmPackages)
-            .toString();
+                .add("measure=" + measure)
+                .add("mainLibrary=" + mainLibrary)
+                .add("npmPackages=" + npmPackages)
+                .toString();
     }
 
     private Optional<ILibraryAdapter> loadNpmLibrary(VersionedIdentifier versionedIdentifier) {

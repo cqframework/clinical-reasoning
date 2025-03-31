@@ -17,8 +17,9 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 import org.opencds.cqf.fhir.utility.npm.NpmPackageLoaderInMemory;
+import org.w3._1999.xhtml.P;
 
-// LUKETODO:  introduce an R5 version of this test
+// TODO: LD :  introduce an R5 version of this test once R5 services/etc become available
 class MeasureWithNpmForR4Test {
 
     private static final String SIMPLE_ALPHA = "simple-alpha";
@@ -53,6 +54,8 @@ class MeasureWithNpmForR4Test {
         MEASURE_URL_WITH_DERIVED_LIBRARY + PIPE + VERSION_0_2;
     private static final String MEASURE_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES =
             DERIVED_TWO_LAYERS_URL + SLASH_MEASURE_SLASH + WITH_TWO_LAYERS_DERIVED_LIBRARIES_UPPER;
+    private static final String MEASURE_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES_WITH_VERSION =
+        MEASURE_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES + PIPE + VERSION_0_1;
 
     private static final String CROSS_PACKAGE_SOURCE = "cross-package-source";
     private static final String CROSS_PACKAGE_SOURCE_UPPER = "CrossPackageSource";
@@ -62,6 +65,8 @@ class MeasureWithNpmForR4Test {
 
     private static final String MEASURE_URL_CROSS_PACKAGE_SOURCE =
             CROSS_PACKAGE_SOURCE_URL + SLASH_MEASURE_SLASH + CROSS_PACKAGE_SOURCE_UPPER;
+    private static final String MEASURE_URL_CROSS_PACKAGE_SOURCE_WITH_VERSION =
+        MEASURE_URL_CROSS_PACKAGE_SOURCE + PIPE + VERSION_0_2;
 
     private static final LocalDateTime LOCAL_DATE_TIME_2020_01_01 =
             LocalDate.of(2020, Month.JANUARY, 1).atStartOfDay();
@@ -136,8 +141,6 @@ class MeasureWithNpmForR4Test {
                 .hasEvaluatedResourceCount(0);
     }
 
-    // LUKETODO:  test with searching by URLs with versions
-
     @Test
     void evaluateWithDerivedLibraryOneLayer() {
         final Given npmRepo = initNpmRepos(SIMPLE_ALPHA, WITH_DERIVED_LIBRARY);
@@ -201,7 +204,7 @@ class MeasureWithNpmForR4Test {
                 .reportType(MeasureEvalType.SUBJECT.toCode())
                 .evaluate()
                 .then()
-                .hasMeasureUrl(MEASURE_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES)
+                .hasMeasureUrl(MEASURE_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES_WITH_VERSION)
                 .hasPeriodStart(toJavaUtilDate(LOCAL_DATE_TIME_2022_01_01))
                 .hasPeriodEnd(toJavaUtilDate(LOCAL_DATE_TIME_2023_01_01_MINUS_ONE_SECOND))
                 .hasSubjectReference(PATIENT_REFERENCE)
@@ -229,7 +232,7 @@ class MeasureWithNpmForR4Test {
                 .reportType(MeasureEvalType.SUBJECT.toCode())
                 .evaluate()
                 .then()
-                .hasMeasureUrl(MEASURE_URL_CROSS_PACKAGE_SOURCE)
+                .hasMeasureUrl(MEASURE_URL_CROSS_PACKAGE_SOURCE_WITH_VERSION)
                 .hasPeriodStart(toJavaUtilDate(LOCAL_DATE_TIME_2020_01_01))
                 .hasPeriodEnd(toJavaUtilDate(LOCAL_DATE_TIME_2021_01_01_MINUS_ONE_SECOND))
                 .hasSubjectReference(PATIENT_REFERENCE)

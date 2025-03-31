@@ -39,10 +39,10 @@ class NpmResourceInfoForCqlR5Test extends BaseNpmResourceInfoForCqlTest {
             "library DerivedLayer2b version '0.1'  using FHIR version '5.0.1'  define \"Has Numerator\": true ";
 
     private static final String EXPECTED_CQL_CROSS_SOURCE =
-            "library CrossPackageSource version '0.1'  using FHIR version '5.0.1'  include opencds.crosspackagetarget.CrossPackageTarget version '0.2' called CrossPackageTarget  parameter \"Measurement Period\" Interval<DateTime>     default Interval[@2020-01-01T00:00:00.0-06:00, @2021-01-01T00:00:00.0-06:00)  context Patient  define \"Initial Population\":     CrossPackageTarget.\"Has Initial Population\"  define \"Denominator\":     CrossPackageTarget.\"Has Denominator\"  define \"Numerator\":     CrossPackageTarget.\"Has Numerator\" ";
+            "library CrossPackageSource version '0.3'  using FHIR version '5.0.1'  include opencds.crosspackagetarget.CrossPackageTarget version '0.5' called CrossPackageTarget  parameter \"Measurement Period\" Interval<DateTime>     default Interval[@2020-01-01T00:00:00.0-06:00, @2021-01-01T00:00:00.0-06:00)  context Patient  define \"Initial Population\":     CrossPackageTarget.\"Has Initial Population\"  define \"Denominator\":     CrossPackageTarget.\"Has Denominator\"  define \"Numerator\":     CrossPackageTarget.\"Has Numerator\" ";
 
     private static final String EXPECTED_CQL_CROSS_TARGET =
-            "library CrossPackageTarget version '0.2'  using FHIR version '5.0.1'  define \"Has Initial Population\": true  define \"Has Denominator\": true  define \"Has Numerator\": true ";
+            "library CrossPackageTarget version '0.5'  using FHIR version '5.0.1'  define \"Has Initial Population\": true  define \"Has Denominator\": true  define \"Has Numerator\": true ";
 
     @Override
     protected FhirVersionEnum getExpectedFhirVersion() {

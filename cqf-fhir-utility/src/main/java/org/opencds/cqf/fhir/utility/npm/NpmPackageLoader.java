@@ -59,7 +59,7 @@ import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
  * Note that there is the real possibility of Measures corresponding to the same canonical URL
  * among multiple NPM packages.  As such, clients who unintentionally add Measures with the same
  * URL in at least two different packages may see the Measure they're not expecting during an
- * $evaluate-measure-by-url, and may file production issues accordingly.   This may be mitgated
+ * $evaluate-measure-by-url, and may file production issues accordingly.   This may be mitigated
  * by new APIs in IHapiPackageCacheManager.
  */
 public interface NpmPackageLoader {

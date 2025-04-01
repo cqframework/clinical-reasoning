@@ -77,7 +77,7 @@ public class NpmPackageLoaderInMemory implements NpmPackageLoader {
     @Override
     public NpmResourceInfoForCql loadNpmResources(IPrimitiveType<String> measureUrl) {
         return measureUrlToResourceInfo.entrySet().stream()
-                .filter(entry -> doesUrlAndVersionMatch(measureUrl, entry))
+                .filter(entry -> doUrlAndVersionMatch(measureUrl, entry))
                 .map(Map.Entry::getValue)
                 .findFirst()
                 .orElse(NpmResourceInfoForCql.EMPTY);
@@ -225,7 +225,7 @@ public class NpmPackageLoaderInMemory implements NpmPackageLoader {
                 .orElse(null);
     }
 
-    private static boolean doesUrlAndVersionMatch(
+    private static boolean doUrlAndVersionMatch(
             IPrimitiveType<String> measureUrl, Map.Entry<UrlAndVersion, NpmResourceInfoForCql> entry) {
 
         if (entry.getKey().equals(UrlAndVersion.fromCanonical(measureUrl.getValueAsString()))) {

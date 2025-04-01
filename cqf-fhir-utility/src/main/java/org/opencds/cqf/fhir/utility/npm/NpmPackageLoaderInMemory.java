@@ -25,10 +25,6 @@ import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IMeasureAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IResourceAdapter;
 
-// LUKETODO:  feature request to improve JpaPackageCache :  error or warning if we get more than one
-// LUKETODO:  document duplicate Measure across NPM problem
-// LUKETODO:  not a problem with packages we build... but clients could do the wrong thing
-// LUKETODO:  how does support find out?  query the database?
 /**
  * Simplistic implementation of {@link NpmPackageLoader} that loads NpmPackages from the classpath
  * and stores {@link NpmResourceInfoForCql}s in a Map. This class is recommended for testing

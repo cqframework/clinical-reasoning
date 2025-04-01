@@ -15,7 +15,7 @@ public class EnginesNpmLibraryHandler {
         // private constructor
     }
 
-    public static void registerNpmResourceHolderGetter(
+    public static void registerNpmPackageLoader(
             LibraryManager libraryManager,
             ModelManager modelManager,
             NpmResourceInfoForCql r4NpmResourceInfoForCql,

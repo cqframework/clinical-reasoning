@@ -90,7 +90,7 @@ public class Engines {
 
         registerLibrarySourceProviders(settings, libraryManager, repository);
         registerNpmSupport(settings, libraryManager, modelManager);
-        EnginesNpmLibraryHandler.registerNpmResourceHolderGetter(
+        EnginesNpmLibraryHandler.registerNpmPackageLoader(
                 libraryManager, modelManager, npmResourceInfoForCql, npmPackageLoader);
 
         return new Environment(libraryManager, dataProviders, terminologyProvider);

@@ -55,6 +55,12 @@ import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
  * its CQL.  When resolve the CQL include pointing to Package ID Y, the CQL engine must be able
  * to read the namespace info and resolve ID Y to URL <a href='http://packageY.org'>...</a>.  This
  * can only be accomplished via an explicit mapping.
+ * <p/>
+ * Note that there is the real possibility of Measures corresponding to the same canonical URL
+ * among multiple NPM packages.  As such, clients who unintentionally add Measures with the same
+ * URL in at least two different packages may see the Measure they're not expecting during an
+ * $evaluate-measure-by-url, and may file production issues accordingly.   This may be mitgated
+ * by new APIs in IHapiPackageCacheManager.
  */
 public interface NpmPackageLoader {
 
@@ -85,9 +91,9 @@ public interface NpmPackageLoader {
     /**
      * Hackish:  Either the downstream app injected this or we default to a NO-OP implementation.
      *
-     * @param npmPackageLoader The NpmResourceHolderGetter, if injected by the downstream app,
+     * @param npmPackageLoader The NpmPackageLoader, if injected by the downstream app,
      *                           otherwise null.
-     * @return Either the downstream app's NpmResourceHolderGetter or a no-op implementation.
+     * @return Either the downstream app's NpmPackageLoaderor a no-op implementation.
      */
     static NpmPackageLoader getDefaultIfEmpty(@Nullable NpmPackageLoader npmPackageLoader) {
         return Optional.ofNullable(npmPackageLoader).orElse(NpmPackageLoader.DEFAULT);

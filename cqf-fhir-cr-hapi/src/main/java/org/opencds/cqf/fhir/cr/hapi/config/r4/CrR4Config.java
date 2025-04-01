@@ -53,13 +53,13 @@ public class CrR4Config {
             MeasureEvaluationOptions evaluationOptions,
             MeasurePeriodValidator measurePeriodValidator,
             R4MeasureServiceUtilsFactory r4MeasureServiceUtilsFactory,
-            Optional<NpmPackageLoader> optNpmResourceHolderGetter) {
+            Optional<NpmPackageLoader> optNpmPackageLoader) {
         return rd -> new R4MeasureService(
                 repositoryFactory.create(rd),
                 evaluationOptions,
                 measurePeriodValidator,
                 r4MeasureServiceUtilsFactory.create(rd),
-                npmResourceHolderGetter(optNpmResourceHolderGetter));
+                npmPackageLoader(optNpmPackageLoader));
     }
 
     @Bean
@@ -96,12 +96,12 @@ public class CrR4Config {
             IRepositoryFactory repositoryFactory,
             MeasureEvaluationOptions measureEvaluationOptions,
             R4MeasureServiceUtilsFactory r4MeasureServiceUtilsFactory,
-            Optional<NpmPackageLoader> optNpmResourceHolderGetter) {
+            Optional<NpmPackageLoader> optNpmPackageLoader) {
         return rd -> new R4CollectDataService(
                 repositoryFactory.create(rd),
                 measureEvaluationOptions,
                 r4MeasureServiceUtilsFactory.create(rd),
-                npmResourceHolderGetter(optNpmResourceHolderGetter));
+                npmPackageLoader(optNpmPackageLoader));
     }
 
     @Bean
@@ -122,14 +122,14 @@ public class CrR4Config {
             CareGapsProperties careGapsProperties,
             MeasureEvaluationOptions measureEvaluationOptions,
             MeasurePeriodValidator measurePeriodValidator,
-            Optional<NpmPackageLoader> optNpmResourceHolderGetter) {
+            Optional<NpmPackageLoader> optNpmPackageLoader) {
         return rd -> new R4CareGapsService(
                 careGapsProperties,
                 repositoryFactory.create(rd),
                 measureEvaluationOptions,
                 rd.getFhirServerBase(),
                 measurePeriodValidator,
-                npmResourceHolderGetter(optNpmResourceHolderGetter));
+                npmPackageLoader(optNpmPackageLoader));
     }
 
     @Bean
@@ -168,7 +168,7 @@ public class CrR4Config {
         return new ProviderLoader(restfulServer, applicationContext, selector);
     }
 
-    private NpmPackageLoader npmResourceHolderGetter(Optional<NpmPackageLoader> optNpmResourceHolderGetter) {
-        return NpmPackageLoader.getDefaultIfEmpty(optNpmResourceHolderGetter.orElse(null));
+    private NpmPackageLoader npmPackageLoader(Optional<NpmPackageLoader> optNpmPackageLoader) {
+        return NpmPackageLoader.getDefaultIfEmpty(optNpmPackageLoader.orElse(null));
     }
 }

@@ -74,28 +74,28 @@ public abstract class BaseNpmResourceInfoForCqlTest {
     protected static final String MEASURE_URL_WITH_DERIVED_LIBRARY =
             DERIVED_URL + SLASH_MEASURE_SLASH + WITH_DERIVED_LIBRARY_UPPER;
     protected static final String MEASURE_URL_WITH_DERIVED_LIBRARY_WITH_VERSION =
-        MEASURE_URL_WITH_DERIVED_LIBRARY + PIPE + VERSION_0_2;
+            MEASURE_URL_WITH_DERIVED_LIBRARY + PIPE + VERSION_0_2;
     protected static final String MEASURE_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES =
             DERIVED_TWO_LAYERS_URL + SLASH_MEASURE_SLASH + WITH_TWO_LAYERS_DERIVED_LIBRARIES_UPPER;
     protected static final String MEASURE_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES_WITH_VERSION =
-        MEASURE_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES + PIPE + VERSION_0_1;
+            MEASURE_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES + PIPE + VERSION_0_1;
 
     protected static final String MEASURE_URL_CROSS_PACKAGE_SOURCE =
             CROSS_PACKAGE_SOURCE_URL + SLASH_MEASURE_SLASH + CROSS_PACKAGE_SOURCE_ID;
     protected static final String MEASURE_URL_CROSS_PACKAGE_SOURCE_WITH_VERSION =
-        MEASURE_URL_CROSS_PACKAGE_SOURCE + PIPE + VERSION_0_2;
+            MEASURE_URL_CROSS_PACKAGE_SOURCE + PIPE + VERSION_0_2;
 
     protected static final String LIBRARY_URL_ALPHA = SIMPLE_URL + SLASH_LIBRARY_SLASH + SIMPLE_ALPHA;
     protected static final String LIBRARY_URL_BRAVO = SIMPLE_URL + SLASH_LIBRARY_SLASH + SIMPLE_BRAVO;
     protected static final String LIBRARY_URL_WITH_DERIVED_LIBRARY =
             DERIVED_URL + SLASH_LIBRARY_SLASH + WITH_DERIVED_LIBRARY_UPPER;
     protected static final String LIBRARY_URL_WITH_DERIVED_LIBRARY_AND_VERSION =
-        LIBRARY_URL_WITH_DERIVED_LIBRARY + PIPE + VERSION_0_1;
+            LIBRARY_URL_WITH_DERIVED_LIBRARY + PIPE + VERSION_0_1;
     protected static final String LIBRARY_URL_DERIVED_LIBRARY = DERIVED_URL + SLASH_LIBRARY_SLASH + DERIVED_LIBRARY;
     protected static final String LIBRARY_URL_CROSS_PACKAGE_SOURCE =
             CROSS_PACKAGE_SOURCE_URL + SLASH_LIBRARY_SLASH + CROSS_PACKAGE_SOURCE_ID;
     protected static final String LIBRARY_URL_CROSS_PACKAGE_SOURCE_WITH_VERSION =
-        LIBRARY_URL_CROSS_PACKAGE_SOURCE + PIPE + VERSION_0_3;
+            LIBRARY_URL_CROSS_PACKAGE_SOURCE + PIPE + VERSION_0_3;
     protected static final String LIBRARY_URL_CROSS_PACKAGE_TARGET =
             CROSS_PACKAGE_TARGET_URL + SLASH_LIBRARY_SLASH + CROSS_PACKAGE_TARGET_ID;
 
@@ -156,12 +156,12 @@ public abstract class BaseNpmResourceInfoForCqlTest {
                 loader.loadNpmResources(new CanonicalType(MEASURE_URL_WITH_DERIVED_LIBRARY));
         verifyMeasure(MEASURE_URL_WITH_DERIVED_LIBRARY, LIBRARY_URL_WITH_DERIVED_LIBRARY, resourceInfoWithNoVersion);
         final NpmResourceInfoForCql resourceInfoWithVersion =
-            loader.loadNpmResources(new CanonicalType(MEASURE_URL_WITH_DERIVED_LIBRARY_WITH_VERSION));
+                loader.loadNpmResources(new CanonicalType(MEASURE_URL_WITH_DERIVED_LIBRARY_WITH_VERSION));
         verifyMeasure(MEASURE_URL_WITH_DERIVED_LIBRARY, LIBRARY_URL_WITH_DERIVED_LIBRARY, resourceInfoWithVersion);
         verifyLibrary(
                 LIBRARY_URL_WITH_DERIVED_LIBRARY,
                 expectedCql,
-            resourceInfoWithVersion.getOptMainLibrary().orElse(null));
+                resourceInfoWithVersion.getOptMainLibrary().orElse(null));
 
         final ILibraryAdapter derivedLibraryFromNoVersion = resourceInfoWithVersion
                 .findMatchingLibrary(new VersionedIdentifier().withId(DERIVED_LIBRARY_ID))
@@ -185,61 +185,61 @@ public abstract class BaseNpmResourceInfoForCqlTest {
     }
 
     protected void derivedLibraryTwoLayers(
-        String expectedCql,
-        String expectedCqlDerived1a,
-        String expectedCqlDerived1b,
-        String expectedCqlDerived2a,
-        String expectedCqlDerived2b) {
+            String expectedCql,
+            String expectedCqlDerived1a,
+            String expectedCqlDerived1b,
+            String expectedCqlDerived2a,
+            String expectedCqlDerived2b) {
 
         final NpmPackageLoaderInMemory loader = setup(WITH_TWO_LAYERS_DERIVED_LIBRARIES_TGZ);
 
         final NpmResourceInfoForCql resourceInfoNoVersion =
-            loader.loadNpmResources(new CanonicalType(MEASURE_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES));
+                loader.loadNpmResources(new CanonicalType(MEASURE_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES));
         verifyMeasure(
-            MEASURE_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES,
-            LIBRARY_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES,
-            resourceInfoNoVersion);
+                MEASURE_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES,
+                LIBRARY_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES,
+                resourceInfoNoVersion);
         verifyLibrary(
-            LIBRARY_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES,
-            expectedCql,
-            resourceInfoNoVersion.getOptMainLibrary().orElse(null));
+                LIBRARY_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES,
+                expectedCql,
+                resourceInfoNoVersion.getOptMainLibrary().orElse(null));
 
         final NpmResourceInfoForCql resourceInfoWithVersion =
-            loader.loadNpmResources(new CanonicalType(MEASURE_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES_WITH_VERSION));
+                loader.loadNpmResources(new CanonicalType(MEASURE_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES_WITH_VERSION));
         verifyMeasure(
-            MEASURE_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES,
-            LIBRARY_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES,
-            resourceInfoWithVersion);
+                MEASURE_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES,
+                LIBRARY_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES,
+                resourceInfoWithVersion);
         verifyLibrary(
-            LIBRARY_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES,
-            expectedCql,
-            resourceInfoWithVersion.getOptMainLibrary().orElse(null));
+                LIBRARY_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES,
+                expectedCql,
+                resourceInfoWithVersion.getOptMainLibrary().orElse(null));
 
         final ILibraryAdapter derivedLibrary1a = resourceInfoWithVersion
-            .findMatchingLibrary(
-                new VersionedIdentifier().withId(DERIVED_LAYER_1_A).withVersion("0.1"))
-            .orElse(null);
+                .findMatchingLibrary(
+                        new VersionedIdentifier().withId(DERIVED_LAYER_1_A).withVersion("0.1"))
+                .orElse(null);
 
         verifyLibrary(LIBRARY_URL_WITH_TWO_LAYERS_DERIVED_LIBRARY_1A, expectedCqlDerived1a, derivedLibrary1a);
 
         final ILibraryAdapter derivedLibrary1b = resourceInfoWithVersion
-            .findMatchingLibrary(
-                new VersionedIdentifier().withId(DERIVED_LAYER_1_B).withVersion("0.1"))
-            .orElse(null);
+                .findMatchingLibrary(
+                        new VersionedIdentifier().withId(DERIVED_LAYER_1_B).withVersion("0.1"))
+                .orElse(null);
 
         verifyLibrary(LIBRARY_URL_WITH_TWO_LAYERS_DERIVED_LIBRARY_1B, expectedCqlDerived1b, derivedLibrary1b);
 
         final ILibraryAdapter derivedLibrary2a = resourceInfoWithVersion
-            .findMatchingLibrary(
-                new VersionedIdentifier().withId(DERIVED_LAYER_2_A).withVersion("0.1"))
-            .orElse(null);
+                .findMatchingLibrary(
+                        new VersionedIdentifier().withId(DERIVED_LAYER_2_A).withVersion("0.1"))
+                .orElse(null);
 
         verifyLibrary(LIBRARY_URL_WITH_TWO_LAYERS_DERIVED_LIBRARY_2A, expectedCqlDerived2a, derivedLibrary2a);
 
         final ILibraryAdapter derivedLibrary2b = resourceInfoWithVersion
-            .findMatchingLibrary(
-                new VersionedIdentifier().withId(DERIVED_LAYER_2_B).withVersion("0.1"))
-            .orElse(null);
+                .findMatchingLibrary(
+                        new VersionedIdentifier().withId(DERIVED_LAYER_2_B).withVersion("0.1"))
+                .orElse(null);
 
         verifyLibrary(LIBRARY_URL_WITH_TWO_LAYERS_DERIVED_LIBRARY_2B, expectedCqlDerived2b, derivedLibrary2b);
     }
@@ -250,10 +250,16 @@ public abstract class BaseNpmResourceInfoForCqlTest {
 
         final NpmResourceInfoForCql resourceInfoWithNoVersion =
                 loader.loadNpmResources(new CanonicalType(MEASURE_URL_CROSS_PACKAGE_SOURCE));
-        verifyMeasure(MEASURE_URL_CROSS_PACKAGE_SOURCE, LIBRARY_URL_CROSS_PACKAGE_SOURCE_WITH_VERSION, resourceInfoWithNoVersion);
+        verifyMeasure(
+                MEASURE_URL_CROSS_PACKAGE_SOURCE,
+                LIBRARY_URL_CROSS_PACKAGE_SOURCE_WITH_VERSION,
+                resourceInfoWithNoVersion);
         final NpmResourceInfoForCql resourceInfoWithVersion =
-            loader.loadNpmResources(new CanonicalType(MEASURE_URL_CROSS_PACKAGE_SOURCE_WITH_VERSION));
-        verifyMeasure(MEASURE_URL_CROSS_PACKAGE_SOURCE, LIBRARY_URL_CROSS_PACKAGE_SOURCE_WITH_VERSION, resourceInfoWithVersion);
+                loader.loadNpmResources(new CanonicalType(MEASURE_URL_CROSS_PACKAGE_SOURCE_WITH_VERSION));
+        verifyMeasure(
+                MEASURE_URL_CROSS_PACKAGE_SOURCE,
+                LIBRARY_URL_CROSS_PACKAGE_SOURCE_WITH_VERSION,
+                resourceInfoWithVersion);
 
         verifyLibrary(
                 LIBRARY_URL_CROSS_PACKAGE_SOURCE,
@@ -261,7 +267,7 @@ public abstract class BaseNpmResourceInfoForCqlTest {
                 resourceInfoWithVersion.getOptMainLibrary().orElse(null));
 
         final Optional<ILibraryAdapter> matchingLibraryWithSourceResult =
-            resourceInfoWithVersion.findMatchingLibrary(new VersionedIdentifier().withId(CROSS_PACKAGE_TARGET_ID));
+                resourceInfoWithVersion.findMatchingLibrary(new VersionedIdentifier().withId(CROSS_PACKAGE_TARGET_ID));
 
         // We expect NOT to find the target Library here since it's not in the source package at all
         assertTrue(matchingLibraryWithSourceResult.isEmpty());

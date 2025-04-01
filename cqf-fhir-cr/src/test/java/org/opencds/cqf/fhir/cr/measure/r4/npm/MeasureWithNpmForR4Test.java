@@ -17,7 +17,6 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 import org.opencds.cqf.fhir.utility.npm.NpmPackageLoaderInMemory;
-import org.w3._1999.xhtml.P;
 
 // TODO: LD :  introduce an R5 version of this test once R5 services/etc become available
 class MeasureWithNpmForR4Test {
@@ -51,11 +50,11 @@ class MeasureWithNpmForR4Test {
     private static final String MEASURE_URL_WITH_DERIVED_LIBRARY =
             DERIVED_URL + SLASH_MEASURE_SLASH + WITH_DERIVED_LIBRARY_UPPER;
     private static final String MEASURE_URL_WITH_DERIVED_LIBRARY_WITH_VERSION =
-        MEASURE_URL_WITH_DERIVED_LIBRARY + PIPE + VERSION_0_2;
+            MEASURE_URL_WITH_DERIVED_LIBRARY + PIPE + VERSION_0_2;
     private static final String MEASURE_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES =
             DERIVED_TWO_LAYERS_URL + SLASH_MEASURE_SLASH + WITH_TWO_LAYERS_DERIVED_LIBRARIES_UPPER;
     private static final String MEASURE_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES_WITH_VERSION =
-        MEASURE_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES + PIPE + VERSION_0_1;
+            MEASURE_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES + PIPE + VERSION_0_1;
 
     private static final String CROSS_PACKAGE_SOURCE = "cross-package-source";
     private static final String CROSS_PACKAGE_SOURCE_UPPER = "CrossPackageSource";
@@ -66,7 +65,7 @@ class MeasureWithNpmForR4Test {
     private static final String MEASURE_URL_CROSS_PACKAGE_SOURCE =
             CROSS_PACKAGE_SOURCE_URL + SLASH_MEASURE_SLASH + CROSS_PACKAGE_SOURCE_UPPER;
     private static final String MEASURE_URL_CROSS_PACKAGE_SOURCE_WITH_VERSION =
-        MEASURE_URL_CROSS_PACKAGE_SOURCE + PIPE + VERSION_0_2;
+            MEASURE_URL_CROSS_PACKAGE_SOURCE + PIPE + VERSION_0_2;
 
     private static final LocalDateTime LOCAL_DATE_TIME_2020_01_01 =
             LocalDate.of(2020, Month.JANUARY, 1).atStartOfDay();

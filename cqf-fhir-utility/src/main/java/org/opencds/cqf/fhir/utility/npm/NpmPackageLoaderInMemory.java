@@ -35,7 +35,7 @@ import org.opencds.cqf.fhir.utility.adapter.IResourceAdapter;
  */
 public class NpmPackageLoaderInMemory implements NpmPackageLoader {
 
-    private final static Pattern PATTERN_PIPE = Pattern.compile("\\|");
+    private static final Pattern PATTERN_PIPE = Pattern.compile("\\|");
 
     private final Map<UrlAndVersion, NpmResourceInfoForCql> measureUrlToResourceInfo = new HashMap<>();
     private final Map<UrlAndVersion, NpmPackage> libraryUrlToPackage = new HashMap<>();
@@ -168,7 +168,7 @@ public class NpmPackageLoaderInMemory implements NpmPackageLoader {
     }
 
     private List<IResourceAdapter> findResources(NpmPackage.NpmPackageFolder packageFolder, FhirContext fhirContext)
-        throws IOException {
+            throws IOException {
 
         final Map<String, List<String>> types = packageFolder.getTypes();
         final List<IResourceAdapter> resources = new ArrayList<>();
@@ -179,7 +179,7 @@ public class NpmPackageLoaderInMemory implements NpmPackageLoader {
 
                 if (nextFile.toLowerCase().endsWith(".json")) {
                     final IResourceAdapter resourceAdapter = IAdapterFactory.createAdapterForResource(
-                        fhirContext.newJsonParser().parseResource(fileContents));
+                            fhirContext.newJsonParser().parseResource(fileContents));
 
                     resources.add(resourceAdapter);
                 }
@@ -191,19 +191,20 @@ public class NpmPackageLoaderInMemory implements NpmPackageLoader {
 
     private Optional<IMeasureAdapter> findMeasure(List<IResourceAdapter> resources) {
         return resources.stream()
-            .filter(IMeasureAdapter.class::isInstance)
-            .map(IMeasureAdapter.class::cast)
-            .findFirst();
+                .filter(IMeasureAdapter.class::isInstance)
+                .map(IMeasureAdapter.class::cast)
+                .findFirst();
     }
 
     private List<ILibraryAdapter> findLibraries(List<IResourceAdapter> resources) {
         return resources.stream()
-            .filter(ILibraryAdapter.class::isInstance)
-            .map(ILibraryAdapter.class::cast)
-            .toList();
+                .filter(ILibraryAdapter.class::isInstance)
+                .map(ILibraryAdapter.class::cast)
+                .toList();
     }
 
-    private void storeResources(NpmPackage npmPackage, @Nullable IMeasureAdapter measure, List<ILibraryAdapter> libraries) {
+    private void storeResources(
+            NpmPackage npmPackage, @Nullable IMeasureAdapter measure, List<ILibraryAdapter> libraries) {
         if (measure != null) {
             measureUrlToResourceInfo.put(
                     UrlAndVersion.fromCanonicalAndVersion(measure.getUrl(), measure.getVersion()),
@@ -212,19 +213,16 @@ public class NpmPackageLoaderInMemory implements NpmPackageLoader {
 
         for (ILibraryAdapter library : libraries) {
             libraryUrlToPackage.put(
-                UrlAndVersion.fromCanonicalAndVersion(library.getUrl(), library.getVersion()), npmPackage);
+                    UrlAndVersion.fromCanonicalAndVersion(library.getUrl(), library.getVersion()), npmPackage);
         }
     }
 
     private ILibraryAdapter findMatchingLibrary(IMeasureAdapter measure, List<ILibraryAdapter> libraries) {
         return libraries.stream()
-            .filter(library ->
-                measure.getLibraryValues()
-                    .stream()
-                    .anyMatch(measureLibraryUrl ->
-                        doMeasureUrlAndLibraryMatch(measureLibraryUrl, library)))
-            .findFirst()
-            .orElse(null);
+                .filter(library -> measure.getLibraryValues().stream()
+                        .anyMatch(measureLibraryUrl -> doMeasureUrlAndLibraryMatch(measureLibraryUrl, library)))
+                .findFirst()
+                .orElse(null);
     }
 
     private static boolean doesUrlAndVersionMatch(

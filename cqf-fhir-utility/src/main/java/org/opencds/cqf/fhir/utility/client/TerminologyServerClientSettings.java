@@ -2,8 +2,8 @@ package org.opencds.cqf.fhir.utility.client;
 
 public class TerminologyServerClientSettings {
 
-    private int maxRetryCount = 3;
-    private long retryIntervalMillis = 1000;
+    private int maxRetryCount = 5;
+    private long retryIntervalMillis = 2000;
     private int timeoutSeconds = 30;
 
     /*

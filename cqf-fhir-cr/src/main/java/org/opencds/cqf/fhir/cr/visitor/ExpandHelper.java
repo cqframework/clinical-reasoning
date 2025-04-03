@@ -26,11 +26,8 @@ import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IParametersParameterComponentAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
 import org.opencds.cqf.fhir.utility.client.TerminologyServerClient;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ExpandHelper {
-    private static final Logger myLogger = LoggerFactory.getLogger(ExpandHelper.class);
     private final Repository repository;
     private final IAdapterFactory adapterFactory;
     private final TerminologyServerClient terminologyServerClient;

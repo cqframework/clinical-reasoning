@@ -230,6 +230,7 @@ public class HapiFhirRepository implements Repository {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public <B extends IBaseBundle> B transaction(B bundle, Map<String, String> headers) {
         var details = startWith(requestDetails)
                 .setAction(RestOperationTypeEnum.TRANSACTION)

@@ -25,13 +25,8 @@ import org.opencds.cqf.fhir.cr.measure.common.SubjectProvider;
 import org.opencds.cqf.fhir.utility.iterable.BundleIterator;
 import org.opencds.cqf.fhir.utility.iterable.BundleMappingIterable;
 import org.opencds.cqf.fhir.utility.search.Searches;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class R4RepositorySubjectProvider implements SubjectProvider {
-
-    private static final Logger logger = LoggerFactory.getLogger(R4RepositorySubjectProvider.class);
-
     private final SubjectProviderOptions subjectProviderOptions;
 
     public R4RepositorySubjectProvider(SubjectProviderOptions subjectProviderOptions) {

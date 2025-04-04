@@ -13,7 +13,6 @@ on:
 jobs:
   compile-against-cdr-cr:
     runs-on: ubuntu-latest
-    if: false # TODO: LD: remove this once we're ready to run this on cdr-cr
     steps:
     - uses: actions/checkout@v3
       name: Checkout

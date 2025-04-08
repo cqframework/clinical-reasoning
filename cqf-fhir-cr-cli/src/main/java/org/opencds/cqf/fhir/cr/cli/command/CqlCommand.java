@@ -96,7 +96,7 @@ public class CqlCommand implements Callable<Integer> {
         @Option(names = {"-e", "--expression"})
         public String[] expression;
 
-        @ArgGroup(multiplicity = "0..1", exclusive = false)
+        @ArgGroup(exclusive = false)
         public ContextParameter context;
 
         static class ContextParameter {
@@ -104,7 +104,7 @@ public class CqlCommand implements Callable<Integer> {
             public String contextName;
 
             @Option(names = {"-cv", "--context-value"})
-            public String contextValue;
+            public List<String> contextValues;
         }
 
         static class ModelParameter {
@@ -196,8 +196,7 @@ public class CqlCommand implements Callable<Integer> {
         evaluationSettings.setNpmProcessor(new NpmProcessor(igContext));
 
         for (LibraryParameter library : libraries) {
-            var repository = createRepository(
-                    fhirContext, library.terminologyUrl, library.model.modelUrl, library.context.contextValue);
+            var repository = createRepository(fhirContext, library.terminologyUrl, library.model.modelUrl, null);
             var engine = Engines.forRepository(repository, evaluationSettings);
 
             if (library.libraryUrl != null) {
@@ -213,12 +212,18 @@ public class CqlCommand implements Callable<Integer> {
             Pair<String, Object> contextParameter = null;
 
             if (library.context != null) {
-                contextParameter = Pair.of(library.context.contextName, library.context.contextValue);
+                for (String contextValue : library.context.contextValues) {
+                    contextParameter = Pair.of(library.context.contextName, contextValue);
+                    EvaluationResult result = engine.evaluate(identifier, contextParameter);
+                    writeResult(result);
+                }
+
+            } else {
+
+                EvaluationResult result = engine.evaluate(identifier, contextParameter);
+
+                writeResult(result);
             }
-
-            EvaluationResult result = engine.evaluate(identifier, contextParameter);
-
-            writeResult(result);
         }
 
         return 0;

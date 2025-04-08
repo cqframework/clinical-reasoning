@@ -410,8 +410,8 @@ class CliTest {
                 output.contains(
                         "SDE Race=[Code { code: 1586-7, system: urn:oid:2.16.840.1.113883.6.238, version: null, display: Shoshone }, Code { code: 2036-2, system: urn:oid:2.16.840.1.113883.6.238, version: null, display: Filipino }, Code { code: 1735-0, system: urn:oid:2.16.840.1.113883.6.238, version: null, display: Alaska Native }]"));
         assertTrue(output.contains("SDE Payer=[Tuple {\n" + "  code: Concept {\n"
-                 + "\tCode { code: 59, system: urn:oid:2.16.840.1.113883.3.221.5, version: null, display: Other Private Insurance }\n"
-                 + "}\n" + "  period: Interval[2011-05-23, 2012-05-23]\n" + "}]"));
+                + "\tCode { code: 59, system: urn:oid:2.16.840.1.113883.3.221.5, version: null, display: Other Private Insurance }\n"
+                + "}\n" + "  period: Interval[2011-05-23, 2012-05-23]\n" + "}]"));
         assertTrue(
                 output.contains(
                         "SDE Sex=Code { code: M, system: http://hl7.org/fhir/v3/AdministrativeGender, version: null, display: Male }"));
@@ -463,7 +463,7 @@ class CliTest {
             "-ln=EXM124_QICore4",
             "-lv=8.2.000",
             "-m=FHIR",
-            "-mu=" + testResourcePath + "/qicore/denom-EXM124",
+            "-mu=" + testResourcePath + "/qicore/tests/denom-EXM124",
             "-t=" + testResourcePath + "/qicore/vocabulary/valueset",
             "-c=Patient",
             "-cv=denom-EXM124"
@@ -491,7 +491,7 @@ class CliTest {
             "-ln=EXM124_QICore4",
             "-lv=8.2.000",
             "-m=FHIR",
-            "-mu=" + testResourcePath + "/qicore/numer-EXM124",
+            "-mu=" + testResourcePath + "/qicore/tests/numer-EXM124",
             "-t=" + testResourcePath + "/qicore/vocabulary/valueset",
             "-c=Patient",
             "-cv=numer-EXM124"
@@ -508,6 +508,29 @@ class CliTest {
         assertTrue(output.contains("Denominator=true"));
         assertTrue(output.contains("Denominator Exclusion=false"));
         assertTrue(output.contains("Numerator=true"));
+    }
+
+    @Test
+    void qICoreMultiContext() {
+        String[] args = new String[] {
+            "cql",
+            "-fv=R4",
+            "-lu=" + testResourcePath + "/qicore",
+            "-ln=EXM124_QICore4",
+            "-lv=8.2.000",
+            "-m=FHIR",
+            "-mu=" + testResourcePath + "/qicore/tests",
+            "-t=" + testResourcePath + "/qicore/vocabulary/valueset",
+            "-c=Patient",
+            "-cv=numer-EXM124",
+            "-cv=denom-EXM124"
+        };
+
+        Main.run(args);
+
+        String output = outContent.toString();
+        assertTrue(output.contains("Patient=Patient(id=numer-EXM124)"));
+        assertTrue(output.contains("Patient=Patient(id=denom-EXM124)"));
     }
 
     @Test

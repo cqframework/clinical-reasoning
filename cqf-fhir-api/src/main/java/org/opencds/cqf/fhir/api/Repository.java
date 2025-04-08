@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.api;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
@@ -663,6 +664,11 @@ public interface Repository {
         throw new NotImplementedOperationException("instance-level history is not supported by this repository");
     }
 
+    // LUKETODO: javadoc
+    default FhirVersionEnum fhirVersion() {
+        return fhirContext().getVersion().getVersion();
+    }
+
     /**
      * Returns the {@link FhirContext} used by the repository
      *
@@ -674,5 +680,5 @@ public interface Repository {
      *
      * @return a FhirContext
      */
-    public FhirContext fhirContext();
+    FhirContext fhirContext();
 }

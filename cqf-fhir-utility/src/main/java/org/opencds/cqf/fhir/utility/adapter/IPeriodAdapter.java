@@ -1,7 +1,7 @@
 package org.opencds.cqf.fhir.utility.adapter;
 
-import org.hl7.fhir.instance.model.api.ICompositeType;
 import java.util.Date;
+import org.hl7.fhir.instance.model.api.ICompositeType;
 
 public interface IPeriodAdapter extends IAdapter<ICompositeType> {
 

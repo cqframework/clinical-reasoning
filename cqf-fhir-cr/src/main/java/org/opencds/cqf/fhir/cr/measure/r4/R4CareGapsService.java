@@ -9,9 +9,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import org.hl7.fhir.r4.model.CanonicalType;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.measure.CareGapsProperties;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
@@ -22,7 +22,9 @@ import org.opencds.cqf.fhir.utility.monad.Eithers;
 /**
  * Care Gap service that processes and produces care-gaps report as a result
  */
-public class R4CareGapsService implements R4CareGapsServiceInterface {
+public class R4CareGapsService<C extends IPrimitiveType<String>, I extends IIdType, P extends IBaseParameters>
+        implements R4CareGapsServiceInterface<C, I, P> {
+
     private final R4CareGapsProcessor r4CareGapsProcessor;
 
     public R4CareGapsService(
@@ -54,14 +56,14 @@ public class R4CareGapsService implements R4CareGapsServiceInterface {
      *         Reports will be returned.
      */
     @Override
-    public Parameters getCareGapsReport(
+    public P getCareGapsReport(
             @Nullable ZonedDateTime periodStart,
             @Nullable ZonedDateTime periodEnd,
             @Nullable String subject,
             List<String> status,
-            List<IdType> measureId,
+            List<I> measureId,
             List<String> measureIdentifier,
-            List<CanonicalType> measureUrl,
+            List<C> measureUrl,
             boolean notDocument) {
 
         return r4CareGapsProcessor.getCareGapsReport(
@@ -74,26 +76,27 @@ public class R4CareGapsService implements R4CareGapsServiceInterface {
     }
 
     @Override
-    public List<Either3<IdType, String, CanonicalType>> liftMeasureParameters(
-            List<IdType> measureId, List<String> measureIdentifier, List<CanonicalType> measureUrl) {
+    public List<Either3<I, String, C>> liftMeasureParameters(
+            List<I> measureId, List<String> measureIdentifier, List<C> measureUrl) {
 
-        List<Either3<IdType, String, CanonicalType>> eitherList = new ArrayList<>();
+        List<Either3<I, String, C>> eitherList = new ArrayList<>();
         Optional.ofNullable(measureId).ifPresent(list -> measureId.stream()
                 .filter(this::isValidMeasureIdType)
-                .map(Eithers::<IdType, String, CanonicalType>forLeft3)
+                .map(Eithers::<I, String, C>forLeft3)
                 .forEach(eitherList::add));
         Optional.ofNullable(measureIdentifier).ifPresent(list -> measureIdentifier.stream()
                 .filter(Objects::nonNull)
-                .map(Eithers::<IdType, String, CanonicalType>forMiddle3)
+                .map(Eithers::<I, String, C>forMiddle3)
                 .forEach(eitherList::add));
         Optional.ofNullable(measureUrl).ifPresent(list -> measureUrl.stream()
                 .filter(this::isValidCanonical)
-                .map(Eithers::<IdType, String, CanonicalType>forRight3)
+                .map(Eithers::<I, String, C>forRight3)
                 .forEach(eitherList::add));
         if (eitherList.isEmpty()) {
             final List<String> measureIdsAsStrings = Optional.ofNullable(measureId)
-                    .map(nonNullMeasureId ->
-                            nonNullMeasureId.stream().map(IdType::getIdPart).collect(Collectors.toList()))
+                    .map(nonNullMeasureId -> nonNullMeasureId.stream()
+                            .map(IPrimitiveType::getValueAsString)
+                            .collect(Collectors.toList()))
                     .orElse(Collections.emptyList());
 
             throw new InvalidRequestException(
@@ -102,11 +105,11 @@ public class R4CareGapsService implements R4CareGapsServiceInterface {
         return eitherList;
     }
 
-    private boolean isValidCanonical(CanonicalType canonicalType) {
+    private boolean isValidCanonical(C canonicalType) {
         return canonicalType != null && !canonicalType.toString().contains("null");
     }
 
-    private boolean isValidMeasureIdType(IdType measureId) {
+    private boolean isValidMeasureIdType(I measureId) {
         return measureId != null && measureId.getIdPart() != null;
     }
 }

@@ -30,7 +30,9 @@ import org.opencds.cqf.cql.engine.runtime.Precision;
 class DateHelperTest {
 
     @ParameterizedTest
-    @EnumSource(value = FhirVersionEnum.class, names = {"DSTU3", "R4", "R5"})
+    @EnumSource(
+            value = FhirVersionEnum.class,
+            names = {"DSTU3", "R4", "R5"})
     void checkDate(FhirVersionEnum fhirVersion) {
         var date = new Interval(new Date("2019-01-01"), true, new Date("2019-12-31"), true);
 
@@ -49,7 +51,9 @@ class DateHelperTest {
     }
 
     @ParameterizedTest
-    @EnumSource(value = FhirVersionEnum.class, names = {"DSTU3", "R4", "R5"})
+    @EnumSource(
+            value = FhirVersionEnum.class,
+            names = {"DSTU3", "R4", "R5"})
     void checkDateTime(FhirVersionEnum fhirVersion) {
         ZoneOffset offset = ZonedDateTime.now().getOffset();
 
@@ -71,7 +75,9 @@ class DateHelperTest {
     }
 
     @ParameterizedTest
-    @EnumSource(value = FhirVersionEnum.class, names = {"DSTU3", "R4", "R5"})
+    @EnumSource(
+            value = FhirVersionEnum.class,
+            names = {"DSTU3", "R4", "R5"})
     void checkNull(FhirVersionEnum fhirVersion) {
         var helper = new DateHelper(R4);
         final Interval measurementPeriodInterval = new Interval(new java.util.Date(), true, new java.util.Date(), true);
@@ -86,74 +92,96 @@ class DateHelperTest {
     public static Stream<Arguments> zonedDateTimesParams() {
         return Stream.of(
                 Arguments.of(
-                        DSTU3, LocalDate.of(2020, Month.JANUARY, 1).atStartOfDay(ZoneId.systemDefault()), Precision.SECOND),
-                Arguments.of(
-                    DSTU3, LocalDateTime.of(2020, Month.JANUARY, 1, 12, 0, 0).atZone(ZoneId.systemDefault()),
+                        DSTU3,
+                        LocalDate.of(2020, Month.JANUARY, 1).atStartOfDay(ZoneId.systemDefault()),
                         Precision.SECOND),
                 Arguments.of(
-                    DSTU3, LocalDateTime.of(2020, Month.JANUARY, 1, 12, 23, 0).atZone(ZoneId.systemDefault()),
+                        DSTU3,
+                        LocalDateTime.of(2020, Month.JANUARY, 1, 12, 0, 0).atZone(ZoneId.systemDefault()),
                         Precision.SECOND),
                 Arguments.of(
-                    DSTU3, LocalDateTime.of(2020, Month.JANUARY, 1, 0, 23, 0).atZone(ZoneId.systemDefault()),
+                        DSTU3,
+                        LocalDateTime.of(2020, Month.JANUARY, 1, 12, 23, 0).atZone(ZoneId.systemDefault()),
                         Precision.SECOND),
                 Arguments.of(
-                    DSTU3, LocalDateTime.of(2020, Month.JANUARY, 1, 12, 23, 47).atZone(ZoneId.systemDefault()),
+                        DSTU3,
+                        LocalDateTime.of(2020, Month.JANUARY, 1, 0, 23, 0).atZone(ZoneId.systemDefault()),
                         Precision.SECOND),
                 Arguments.of(
-                    DSTU3, LocalDateTime.of(2020, Month.JANUARY, 1, 12, 0, 47).atZone(ZoneId.systemDefault()),
+                        DSTU3,
+                        LocalDateTime.of(2020, Month.JANUARY, 1, 12, 23, 47).atZone(ZoneId.systemDefault()),
                         Precision.SECOND),
                 Arguments.of(
-                    DSTU3, LocalDateTime.of(2020, Month.JANUARY, 1, 0, 0, 47).atZone(ZoneId.systemDefault()),
+                        DSTU3,
+                        LocalDateTime.of(2020, Month.JANUARY, 1, 12, 0, 47).atZone(ZoneId.systemDefault()),
                         Precision.SECOND),
-
-            Arguments.of(
-                R4, LocalDate.of(2020, Month.JANUARY, 1).atStartOfDay(ZoneId.systemDefault()), Precision.SECOND),
-            Arguments.of(
-                R4, LocalDateTime.of(2020, Month.JANUARY, 1, 12, 0, 0).atZone(ZoneId.systemDefault()),
-                Precision.SECOND),
-            Arguments.of(
-                R4, LocalDateTime.of(2020, Month.JANUARY, 1, 12, 23, 0).atZone(ZoneId.systemDefault()),
-                Precision.SECOND),
-            Arguments.of(
-                R4, LocalDateTime.of(2020, Month.JANUARY, 1, 0, 23, 0).atZone(ZoneId.systemDefault()),
-                Precision.SECOND),
-            Arguments.of(
-                R4, LocalDateTime.of(2020, Month.JANUARY, 1, 12, 23, 47).atZone(ZoneId.systemDefault()),
-                Precision.SECOND),
-            Arguments.of(
-                R4, LocalDateTime.of(2020, Month.JANUARY, 1, 12, 0, 47).atZone(ZoneId.systemDefault()),
-                Precision.SECOND),
-            Arguments.of(
-                R4, LocalDateTime.of(2020, Month.JANUARY, 1, 0, 0, 47).atZone(ZoneId.systemDefault()),
-                Precision.SECOND),
-
-            Arguments.of(
-                R5, LocalDate.of(2020, Month.JANUARY, 1).atStartOfDay(ZoneId.systemDefault()), Precision.SECOND),
-            Arguments.of(
-                R5, LocalDateTime.of(2020, Month.JANUARY, 1, 12, 0, 0).atZone(ZoneId.systemDefault()),
-                Precision.SECOND),
-            Arguments.of(
-                R5, LocalDateTime.of(2020, Month.JANUARY, 1, 12, 23, 0).atZone(ZoneId.systemDefault()),
-                Precision.SECOND),
-            Arguments.of(
-                R5, LocalDateTime.of(2020, Month.JANUARY, 1, 0, 23, 0).atZone(ZoneId.systemDefault()),
-                Precision.SECOND),
-            Arguments.of(
-                R5, LocalDateTime.of(2020, Month.JANUARY, 1, 12, 23, 47).atZone(ZoneId.systemDefault()),
-                Precision.SECOND),
-            Arguments.of(
-                R5, LocalDateTime.of(2020, Month.JANUARY, 1, 12, 0, 47).atZone(ZoneId.systemDefault()),
-                Precision.SECOND),
-            Arguments.of(
-                R5, LocalDateTime.of(2020, Month.JANUARY, 1, 0, 0, 47).atZone(ZoneId.systemDefault()),
-                Precision.SECOND)
-        );
+                Arguments.of(
+                        DSTU3,
+                        LocalDateTime.of(2020, Month.JANUARY, 1, 0, 0, 47).atZone(ZoneId.systemDefault()),
+                        Precision.SECOND),
+                Arguments.of(
+                        R4,
+                        LocalDate.of(2020, Month.JANUARY, 1).atStartOfDay(ZoneId.systemDefault()),
+                        Precision.SECOND),
+                Arguments.of(
+                        R4,
+                        LocalDateTime.of(2020, Month.JANUARY, 1, 12, 0, 0).atZone(ZoneId.systemDefault()),
+                        Precision.SECOND),
+                Arguments.of(
+                        R4,
+                        LocalDateTime.of(2020, Month.JANUARY, 1, 12, 23, 0).atZone(ZoneId.systemDefault()),
+                        Precision.SECOND),
+                Arguments.of(
+                        R4,
+                        LocalDateTime.of(2020, Month.JANUARY, 1, 0, 23, 0).atZone(ZoneId.systemDefault()),
+                        Precision.SECOND),
+                Arguments.of(
+                        R4,
+                        LocalDateTime.of(2020, Month.JANUARY, 1, 12, 23, 47).atZone(ZoneId.systemDefault()),
+                        Precision.SECOND),
+                Arguments.of(
+                        R4,
+                        LocalDateTime.of(2020, Month.JANUARY, 1, 12, 0, 47).atZone(ZoneId.systemDefault()),
+                        Precision.SECOND),
+                Arguments.of(
+                        R4,
+                        LocalDateTime.of(2020, Month.JANUARY, 1, 0, 0, 47).atZone(ZoneId.systemDefault()),
+                        Precision.SECOND),
+                Arguments.of(
+                        R5,
+                        LocalDate.of(2020, Month.JANUARY, 1).atStartOfDay(ZoneId.systemDefault()),
+                        Precision.SECOND),
+                Arguments.of(
+                        R5,
+                        LocalDateTime.of(2020, Month.JANUARY, 1, 12, 0, 0).atZone(ZoneId.systemDefault()),
+                        Precision.SECOND),
+                Arguments.of(
+                        R5,
+                        LocalDateTime.of(2020, Month.JANUARY, 1, 12, 23, 0).atZone(ZoneId.systemDefault()),
+                        Precision.SECOND),
+                Arguments.of(
+                        R5,
+                        LocalDateTime.of(2020, Month.JANUARY, 1, 0, 23, 0).atZone(ZoneId.systemDefault()),
+                        Precision.SECOND),
+                Arguments.of(
+                        R5,
+                        LocalDateTime.of(2020, Month.JANUARY, 1, 12, 23, 47).atZone(ZoneId.systemDefault()),
+                        Precision.SECOND),
+                Arguments.of(
+                        R5,
+                        LocalDateTime.of(2020, Month.JANUARY, 1, 12, 0, 47).atZone(ZoneId.systemDefault()),
+                        Precision.SECOND),
+                Arguments.of(
+                        R5,
+                        LocalDateTime.of(2020, Month.JANUARY, 1, 0, 0, 47).atZone(ZoneId.systemDefault()),
+                        Precision.SECOND));
     }
 
     @ParameterizedTest
     @MethodSource("zonedDateTimesParams")
     void zonedDateTimes(FhirVersionEnum fhirVersion, ZonedDateTime theZonedDateTime, Precision theExpectedPrecision) {
-        final Interval interval = new DateHelper(fhirVersion).buildMeasurementPeriodInterval(theZonedDateTime, theZonedDateTime);
+        final Interval interval =
+                new DateHelper(fhirVersion).buildMeasurementPeriodInterval(theZonedDateTime, theZonedDateTime);
         final Object start = interval.getStart();
         final Object end = interval.getEnd();
         assertInstanceOf(DateTime.class, start);

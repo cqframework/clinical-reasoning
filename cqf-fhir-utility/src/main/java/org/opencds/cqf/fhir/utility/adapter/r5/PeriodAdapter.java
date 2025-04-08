@@ -10,8 +10,8 @@ import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 public class PeriodAdapter implements IPeriodAdapter {
 
     private final FhirContext fhirContext = FhirContext.forR5Cached();
-    private final ModelResolver modelResolver = FhirModelResolverCache.resolverForVersion(
-        fhirContext.getVersion().getVersion());
+    private final ModelResolver modelResolver =
+            FhirModelResolverCache.resolverForVersion(fhirContext.getVersion().getVersion());
     private final Period period = new Period();
 
     @Override

@@ -1,17 +1,17 @@
 package org.opencds.cqf.fhir.utility.adapter.dstu3;
 
 import ca.uhn.fhir.context.FhirContext;
+import java.util.Date;
 import org.hl7.fhir.dstu3.model.Period;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.utility.adapter.IPeriodAdapter;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
-import java.util.Date;
 
 public class PeriodAdapter implements IPeriodAdapter {
 
     private final FhirContext fhirContext = FhirContext.forDstu3Cached();
-    private final ModelResolver modelResolver = FhirModelResolverCache.resolverForVersion(
-        fhirContext.getVersion().getVersion());
+    private final ModelResolver modelResolver =
+            FhirModelResolverCache.resolverForVersion(fhirContext.getVersion().getVersion());
     private final Period period = new Period();
 
     @Override
@@ -38,7 +38,6 @@ public class PeriodAdapter implements IPeriodAdapter {
     public Date getEnd() {
         return period.getEnd();
     }
-
 
     @Override
     public IPeriodAdapter setStart(Date start) {

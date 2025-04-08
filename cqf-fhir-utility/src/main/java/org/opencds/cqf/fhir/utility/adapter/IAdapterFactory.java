@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.utility.adapter;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
@@ -141,4 +142,7 @@ public interface IAdapterFactory {
 
     // LUKETODO:  javadoc
     IPeriodAdapter createPeriod();
+
+    // LUKETODO:  javadoc
+    IBundleAdapter createBundle(IBaseBundle bundle);
 }

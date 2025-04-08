@@ -3,27 +3,28 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 import jakarta.annotation.Nullable;
 import java.time.ZonedDateTime;
 import java.util.List;
-import org.hl7.fhir.r4.model.CanonicalType;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.utility.monad.Either3;
 
 /**
  * Describe operations provided by caregaps services for downstream implementors
  */
 @SuppressWarnings("squid:S107")
-public interface R4CareGapsServiceInterface {
+public interface R4CareGapsServiceInterface<
+        C extends IPrimitiveType<String>, I extends IIdType, P extends IBaseParameters> {
 
-    Parameters getCareGapsReport(
+    P getCareGapsReport(
             @Nullable ZonedDateTime periodStart,
             @Nullable ZonedDateTime periodEnd,
             @Nullable String subject,
             List<String> status,
-            List<IdType> measureId,
+            List<I> measureId,
             List<String> measureIdentifier,
-            List<CanonicalType> measureUrl,
+            List<C> measureUrl,
             boolean notDocument);
 
-    List<Either3<IdType, String, CanonicalType>> liftMeasureParameters(
-            List<IdType> measureId, List<String> measureIdentifier, List<CanonicalType> measureUrl);
+    List<Either3<I, String, C>> liftMeasureParameters(
+            List<I> measureId, List<String> measureIdentifier, List<C> measureUrl);
 }

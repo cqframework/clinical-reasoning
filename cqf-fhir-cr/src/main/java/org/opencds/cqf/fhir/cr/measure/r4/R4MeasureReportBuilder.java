@@ -371,7 +371,8 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                         reportGroup
                                 .addExtension()
                                 .setUrl(CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL)
-                                .setValue(helper.buildMeasurementPeriod((docInterval)).get());
+                                .setValue(helper.buildMeasurementPeriod((docInterval))
+                                        .get());
                     }
                 }
             }

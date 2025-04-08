@@ -18,7 +18,8 @@ import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
 import org.hl7.fhir.r4.model.Period;
 import org.opencds.cqf.fhir.cr.measure.enumeration.CareGapsStatusCode;
 
-// LUKETODO: this isn't super-simple but probably isn't terrible:  we'd need new Adapter code for sure and possibly new adapter classes
+// LUKETODO: this isn't super-simple but probably isn't terrible:  we'd need new Adapter code for sure and possibly new
+// adapter classes
 /**
  * Care Gaps Status Evaluator houses the algorithm logic for which Care-Gap status is applicable to a Measure Report.
  */

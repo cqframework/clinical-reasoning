@@ -1,15 +1,14 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import java.time.OffsetDateTime;
+import java.time.ZonedDateTime;
 import org.opencds.cqf.cql.engine.runtime.Date;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.cql.engine.runtime.Precision;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IPeriodAdapter;
-
-import java.time.OffsetDateTime;
-import java.time.ZonedDateTime;
 
 public class DateHelper {
 

@@ -1,12 +1,8 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.opencds.cqf.fhir.utility.adapter.IEitherMeasureAdapter;
-import org.opencds.cqf.fhir.utility.monad.Either3;
-
 import java.time.ZonedDateTime;
 import java.util.List;
+import org.opencds.cqf.fhir.utility.adapter.IEitherMeasureAdapter;
 
 // LUKETODO:  figure out what to do with this
 /**
@@ -56,9 +52,9 @@ public class CareGapsParameters {
         this.measure = measure;
     }
 
-//    public List<? extends Either3<? extends IIdType, String, ? extends IPrimitiveType<String>>> getMeasure() {
-//        return measure;
-//    }
+    //    public List<? extends Either3<? extends IIdType, String, ? extends IPrimitiveType<String>>> getMeasure() {
+    //        return measure;
+    //    }
 
     public List<IEitherMeasureAdapter> getMeasure() {
         return measure;

@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.utility.adapter.r4;
 
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
@@ -17,6 +18,7 @@ import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IAttachmentAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IBundleAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ICodeableConceptAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ICodingAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IDataRequirementAdapter;
@@ -30,6 +32,7 @@ import org.opencds.cqf.fhir.utility.adapter.IPeriodAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IPlanDefinitionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IRequestActionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IResourceAdapter;
+import org.opencds.cqf.fhir.utility.adapter.r5.BundleAdapter;
 
 public class AdapterFactory implements IAdapterFactory {
 
@@ -131,5 +134,10 @@ public class AdapterFactory implements IAdapterFactory {
     @Override
     public IPeriodAdapter createPeriod() {
         return new PeriodAdapter();
+    }
+
+    @Override
+    public IBundleAdapter createBundle(IBaseBundle bundle) {
+        return new BundleAdapter(bundle);
     }
 }

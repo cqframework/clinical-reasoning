@@ -53,6 +53,24 @@ public class CqlCommand implements Callable<Integer> {
     @ArgGroup(multiplicity = "0..1", exclusive = false)
     public NamespaceParameter namespace;
 
+    @Option(names = {"-rd", "--root-dir"})
+    public String rootDir;
+
+    @Option(names = {"-ig", "--ig-path"})
+    public String igPath;
+
+    @Option(names = {"-t", "--terminology-url"})
+    public String terminologyUrl;
+
+    @ArgGroup(multiplicity = "1..1", exclusive = false)
+    LibraryParameter library;
+
+    @ArgGroup(multiplicity = "0..1", exclusive = false)
+    public ModelParameter model;
+
+    @ArgGroup(multiplicity = "0..*", exclusive = false)
+    public List<EvaluationParameter> evaluations;
+
     static class NamespaceParameter {
         @Option(names = {"-nn", "--namespace-name"})
         public String namespaceName;
@@ -60,15 +78,6 @@ public class CqlCommand implements Callable<Integer> {
         @Option(names = {"-nu", "--namespace-uri"})
         public String namespaceUri;
     }
-
-    @Option(names = {"-rd", "--root-dir"})
-    public String rootDir;
-
-    @Option(names = {"-ig", "--ig-path"})
-    public String igPath;
-
-    @ArgGroup(multiplicity = "1..*", exclusive = false)
-    List<LibraryParameter> libraries;
 
     static class LibraryParameter {
         @Option(
@@ -84,17 +93,21 @@ public class CqlCommand implements Callable<Integer> {
         @Option(names = {"-lv", "--library-version"})
         public String libraryVersion;
 
-        @Option(names = {"-t", "--terminology-url"})
-        public String terminologyUrl;
-
-        @ArgGroup(multiplicity = "0..1", exclusive = false)
-        public ModelParameter model;
-
-        @ArgGroup(multiplicity = "0..*", exclusive = false)
-        public List<ParameterParameter> parameters;
-
         @Option(names = {"-e", "--expression"})
         public String[] expression;
+    }
+
+    static class ModelParameter {
+        @Option(names = {"-m", "--model"})
+        public String modelName;
+
+        @Option(names = {"-mu", "--model-url"})
+        public String modelUrl;
+    }
+
+    static class EvaluationParameter {
+        @ArgGroup(multiplicity = "0..*", exclusive = false)
+        public List<ParameterParameter> parameters;
 
         @ArgGroup(multiplicity = "0..1", exclusive = false)
         public ContextParameter context;
@@ -105,14 +118,6 @@ public class CqlCommand implements Callable<Integer> {
 
             @Option(names = {"-cv", "--context-value"})
             public String contextValue;
-        }
-
-        static class ModelParameter {
-            @Option(names = {"-m", "--model"})
-            public String modelName;
-
-            @Option(names = {"-mu", "--model-url"})
-            public String modelUrl;
         }
 
         static class ParameterParameter {
@@ -195,37 +200,26 @@ public class CqlCommand implements Callable<Integer> {
         evaluationSettings.setRetrieveSettings(retrieveSettings);
         evaluationSettings.setNpmProcessor(new NpmProcessor(igContext));
 
-        for (LibraryParameter library : libraries) {
-            var repository = createRepository(
-                    fhirContext, library.terminologyUrl, library.model.modelUrl, library.context.contextValue);
-            var engine = Engines.forRepository(repository, evaluationSettings);
+        var repository = createRepository(fhirContext, terminologyUrl, model.modelUrl);
 
-            if (library.libraryUrl != null) {
-                var provider = new DefaultLibrarySourceProvider(Path.of(library.libraryUrl));
-                engine.getEnvironment()
-                        .getLibraryManager()
-                        .getLibrarySourceLoader()
-                        .registerProvider(provider);
-            }
+        var engine = Engines.forRepository(repository, evaluationSettings);
+        if (library.libraryUrl != null) {
+            var provider = new DefaultLibrarySourceProvider(Path.of(library.libraryUrl));
+            engine.getEnvironment().getLibraryManager().getLibrarySourceLoader().registerProvider(provider);
+        }
 
-            VersionedIdentifier identifier = new VersionedIdentifier().withId(library.libraryName);
+        VersionedIdentifier identifier = new VersionedIdentifier().withId(library.libraryName);
 
-            Pair<String, Object> contextParameter = null;
-
-            if (library.context != null) {
-                contextParameter = Pair.of(library.context.contextName, library.context.contextValue);
-            }
-
-            EvaluationResult result = engine.evaluate(identifier, contextParameter);
-
+        for (var e : evaluations) {
+            var contextParameter = Pair.<String, Object>of(e.context.contextName, e.context.contextValue);
+            var result = engine.evaluate(identifier, contextParameter);
             writeResult(result);
         }
 
         return 0;
     }
 
-    private Repository createRepository(
-            FhirContext fhirContext, String terminologyUrl, String modelUrl, String contextValue) {
+    private Repository createRepository(FhirContext fhirContext, String terminologyUrl, String modelUrl) {
         Repository data = null;
         Repository terminology = null;
 

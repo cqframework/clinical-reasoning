@@ -511,6 +511,30 @@ class CliTest {
     }
 
     @Test
+    void compartmentalizedTests() {
+        String[] args = new String[] {
+            "cql",
+            "-fv=R4",
+            "-lu=" + testResourcePath + "/compartment/cql",
+            "-ln=Example",
+            "-m=FHIR",
+            "-mu=" + testResourcePath + "/compartment",
+            "-c=Patient",
+            "-cv=123",
+            "-c=Patient",
+            "-cv=456"
+        };
+
+        Main.run(args);
+
+        String output = outContent.toString();
+        assertTrue(output.contains("Patient=Patient(id=123)"));
+        assertTrue(output.contains("Encounters=[Encounter(id=ABC)]"));
+        assertTrue(output.contains("Patient=Patient(id=456)"));
+        assertTrue(output.contains("Encounters=[Encounter(id=DEF)]"));
+    }
+
+    @Test
     @Disabled("This test is failing on the CI Server for reasons unknown. Need to debug that.")
     void sampleContentIG() {
         String[] args = new String[] {

@@ -8,7 +8,6 @@ import ca.uhn.fhir.repository.Repository;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import com.google.common.collect.Multimap;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -98,17 +97,6 @@ public class ProxyRepository implements Repository {
             Class<B> bundleType,
             Class<T> resourceType,
             Multimap<String, List<IQueryParameterType>> searchParameters,
-            Map<String, String> headers) {
-        var params = new HashMap<String, List<IQueryParameterType>>();
-        searchParameters.entries().forEach(p -> params.put(p.getKey(), p.getValue()));
-        return search(bundleType, resourceType, params, headers);
-    }
-
-    @Override
-    public <B extends IBaseBundle, T extends IBaseResource> B search(
-            Class<B> bundleType,
-            Class<T> resourceType,
-            Map<String, List<IQueryParameterType>> searchParameters,
             Map<String, String> headers) {
         if (isTerminologyResource(resourceType.getSimpleName())) {
             return terminology.search(bundleType, resourceType, searchParameters, headers);

@@ -2,12 +2,15 @@ package org.opencds.cqf.fhir.utility.repository;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.repository.Repository;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IClientExecutable;
 import ca.uhn.fhir.rest.gclient.IHistoryTyped;
 import ca.uhn.fhir.util.ParametersUtil;
+import com.google.common.collect.Multimap;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -16,7 +19,6 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.opencds.cqf.fhir.api.Repository;
 
 public class RestRepository implements Repository {
 
@@ -67,11 +69,13 @@ public class RestRepository implements Repository {
     public <B extends IBaseBundle, T extends IBaseResource> B search(
             Class<B> bundleType,
             Class<T> resourceType,
-            Map<String, List<IQueryParameterType>> searchParameters,
+            Multimap<String, List<IQueryParameterType>> searchParameters,
             Map<String, String> headers) {
         var op = this.client.search().forResource(resourceType).returnBundle(bundleType);
         if (searchParameters != null) {
-            op = op.where(searchParameters);
+            var params = new HashMap<String, List<IQueryParameterType>>();
+            searchParameters.entries().forEach(p -> params.put(p.getKey(), p.getValue()));
+            op = op.where(params);
         }
 
         if (headers != null) {

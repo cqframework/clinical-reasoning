@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.utility.r5;
 
+import ca.uhn.fhir.repository.Repository;
 import java.util.Arrays;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -7,7 +8,6 @@ import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.r5.model.Enumerations.FHIRTypes;
 import org.hl7.fhir.r5.model.RelatedArtifact;
 import org.hl7.fhir.r5.model.RelatedArtifact.RelatedArtifactType;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;

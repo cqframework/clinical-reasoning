@@ -4,8 +4,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.repository.Repository;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import com.google.common.collect.Multimap;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -15,7 +18,6 @@ import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.opencds.cqf.fhir.api.Repository;
 
 public class ProxyRepository implements Repository {
 
@@ -89,6 +91,17 @@ public class ProxyRepository implements Repository {
     public <T extends IBaseResource, I extends IIdType> MethodOutcome delete(
             Class<T> resourceType, I id, Map<String, String> headers) {
         return null;
+    }
+
+    @Override
+    public <B extends IBaseBundle, T extends IBaseResource> B search(
+            Class<B> bundleType,
+            Class<T> resourceType,
+            Multimap<String, List<IQueryParameterType>> searchParameters,
+            Map<String, String> headers) {
+        var params = new HashMap<String, List<IQueryParameterType>>();
+        searchParameters.entries().forEach(p -> params.put(p.getKey(), p.getValue()));
+        return search(bundleType, resourceType, params, headers);
     }
 
     @Override

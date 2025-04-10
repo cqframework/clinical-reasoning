@@ -17,6 +17,7 @@ import static org.opencds.cqf.fhir.utility.SearchHelper.readRepository;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.repository.Repository;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -36,7 +37,6 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.json.JSONException;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.benchmark.TestOperationProvider;
 import org.opencds.cqf.fhir.benchmark.helpers.DataRequirementsLibrary;
 import org.opencds.cqf.fhir.benchmark.helpers.GeneratedPackage;

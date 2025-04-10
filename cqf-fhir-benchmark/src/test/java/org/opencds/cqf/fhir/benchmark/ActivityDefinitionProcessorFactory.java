@@ -1,6 +1,6 @@
 package org.opencds.cqf.fhir.benchmark;
 
-import org.opencds.cqf.fhir.api.Repository;
+import ca.uhn.fhir.repository.Repository;
 import org.opencds.cqf.fhir.cr.activitydefinition.ActivityDefinitionProcessor;
 import org.opencds.cqf.fhir.utility.repository.operations.IActivityDefinitionProcessor;
 import org.opencds.cqf.fhir.utility.repository.operations.IActivityDefinitionProcessorFactory;

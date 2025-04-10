@@ -1,11 +1,11 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
+import ca.uhn.fhir.repository.Repository;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Resource;
-import org.opencds.cqf.fhir.api.Repository;
 
 /**
  * See: <a href='https://www.hl7.org/fhir/R4/measure-operation-submit-data.html'>https://www.hl7.org/fhir/R4/measure-operation-submit-data.html</a>

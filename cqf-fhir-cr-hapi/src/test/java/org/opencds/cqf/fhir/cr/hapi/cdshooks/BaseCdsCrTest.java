@@ -1,10 +1,10 @@
 package org.opencds.cqf.fhir.cr.hapi.cdshooks;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.repository.Repository;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsCrSettings;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 

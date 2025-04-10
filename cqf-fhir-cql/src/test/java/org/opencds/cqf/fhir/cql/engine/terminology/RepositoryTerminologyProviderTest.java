@@ -8,13 +8,14 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.repository.Repository;
+import java.util.Map;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 import org.opencds.cqf.cql.engine.terminology.ValueSetInfo;
-import org.opencds.cqf.fhir.api.Repository;
 
 class RepositoryTerminologyProviderTest {
 
@@ -75,7 +76,7 @@ class RepositoryTerminologyProviderTest {
         when(mockRepository.fhirContext()).thenReturn(FhirContext.forR4Cached());
         Bundle bundle = new Bundle();
         bundle.addEntry().setFullUrl(valueSet.getUrl()).setResource(valueSet);
-        when(mockRepository.search(any(), any(), any(), isNull())).thenReturn(bundle);
+        when(mockRepository.search(any(), any(), any(Map.class), isNull())).thenReturn(bundle);
         return mockRepository;
     }
 

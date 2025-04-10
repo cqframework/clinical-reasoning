@@ -16,6 +16,8 @@ import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.UriAndListParam;
 import ca.uhn.fhir.rest.param.UriOrListParam;
 import ca.uhn.fhir.rest.param.UriParam;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -114,8 +116,8 @@ class SearchConverterTest {
     @Test
     void separateParameterTypesShouldSeparateSearchAndResultParams() {
         myFixture.separateParameterTypes(withParamList());
-        assertThat(myFixture.separatedSearchParameters).hasSize(2);
-        assertThat(myFixture.separatedResultParameters).hasSize(3);
+        assertThat(myFixture.separatedSearchParameters.entries()).hasSize(2);
+        assertThat(myFixture.separatedResultParameters.entries()).hasSize(3);
     }
 
     @Test
@@ -128,8 +130,8 @@ class SearchConverterTest {
                 .isTrue();
     }
 
-    Map<String, List<IQueryParameterType>> withParamList() {
-        Map<String, List<IQueryParameterType>> paramList = new HashMap<>();
+    Multimap<String, List<IQueryParameterType>> withParamList() {
+        ArrayListMultimap<String, List<IQueryParameterType>> paramList = ArrayListMultimap.create();
         paramList.put("_id", withUriParam(1));
         paramList.put("_elements", withUriParam(2));
         paramList.put("_lastUpdated", withUriParam(1));

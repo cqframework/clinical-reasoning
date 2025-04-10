@@ -3,13 +3,13 @@ package org.opencds.cqf.fhir.cr.common;
 import static java.util.Objects.requireNonNull;
 import static org.opencds.cqf.fhir.utility.Resources.castOrThrow;
 
+import ca.uhn.fhir.repository.Repository;
 import java.util.function.Function;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.iterable.BundleMappingIterable;
 import org.opencds.cqf.fhir.utility.monad.Either;
 import org.opencds.cqf.fhir.utility.monad.Either3;

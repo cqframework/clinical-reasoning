@@ -6,6 +6,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.repository.Repository;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -16,6 +17,7 @@ import ca.uhn.fhir.util.BundleBuilder;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Multimap;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -34,7 +36,6 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.matcher.ResourceMatcher;
 import org.opencds.cqf.fhir.utility.repository.Repositories;
@@ -734,7 +735,7 @@ public class IgRepository implements Repository {
     public <B extends IBaseBundle, T extends IBaseResource> B search(
             Class<B> bundleType,
             Class<T> resourceType,
-            Map<String, List<IQueryParameterType>> searchParameters,
+            Multimap<String, List<IQueryParameterType>> searchParameters,
             Map<String, String> headers) {
         BundleBuilder builder = new BundleBuilder(this.fhirContext);
         builder.setType("searchset");
@@ -749,22 +750,24 @@ public class IgRepository implements Repository {
         if (searchParameters.containsKey("_id")) {
             // We are consuming the _id parameter in this if statement
             var idQueries = searchParameters.get("_id");
-            searchParameters.remove("_id");
 
             var idResources = new ArrayList<T>(idQueries.size());
             for (var idQuery : idQueries) {
-                var idToken = (TokenParam) idQuery;
-                // Need to construct the equivalent "UnqualifiedVersionless" id that the map is
-                // indexed by. If an id has a version it won't match. Need apples-to-apples Id
-                // types
-                var id = Ids.newId(fhirContext, resourceType.getSimpleName(), idToken.getValue());
-                var resource = resourceIdMap.get(id);
-                if (resource != null) {
-                    idResources.add(resource);
+                for (var query : idQuery) {
+                    var idToken = (TokenParam) query;
+                    // Need to construct the equivalent "UnqualifiedVersionless" id that the map is
+                    // indexed by. If an id has a version it won't match. Need apples-to-apples Id
+                    // types
+                    var id = Ids.newId(fhirContext, resourceType.getSimpleName(), idToken.getValue());
+                    var resource = resourceIdMap.get(id);
+                    if (resource != null) {
+                        idResources.add(resource);
+                    }
                 }
             }
 
             candidates = idResources;
+            searchParameters.removeAll("_id");
         } else {
             candidates = resourceIdMap.values();
         }
@@ -779,8 +782,8 @@ public class IgRepository implements Repository {
     }
 
     private boolean allParametersMatch(
-            Map<String, List<IQueryParameterType>> searchParameters, IBaseResource resource) {
-        for (var nextEntry : searchParameters.entrySet()) {
+            Multimap<String, List<IQueryParameterType>> searchParameters, IBaseResource resource) {
+        for (var nextEntry : searchParameters.entries()) {
             var paramName = nextEntry.getKey();
             if (!resourceMatcher.matches(paramName, nextEntry.getValue(), resource)) {
                 return false;

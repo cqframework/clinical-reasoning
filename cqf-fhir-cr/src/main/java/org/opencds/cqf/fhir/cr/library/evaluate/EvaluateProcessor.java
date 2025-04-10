@@ -3,8 +3,8 @@ package org.opencds.cqf.fhir.cr.library.evaluate;
 import static org.opencds.cqf.fhir.utility.Parameters.newParameters;
 import static org.opencds.cqf.fhir.utility.Parameters.newPart;
 
+import ca.uhn.fhir.repository.Repository;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 
 public class EvaluateProcessor implements IEvaluateProcessor {

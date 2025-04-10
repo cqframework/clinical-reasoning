@@ -7,6 +7,8 @@ import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 import jakarta.annotation.Nonnull;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -29,12 +31,12 @@ public class SearchConverter {
             "_elements",
             "_contained",
             "_containedType");
-    public final Map<String, List<IQueryParameterType>> separatedSearchParameters = new HashMap<>();
-    public final Map<String, List<IQueryParameterType>> separatedResultParameters = new HashMap<>();
+    public final Multimap<String, List<IQueryParameterType>> separatedSearchParameters = ArrayListMultimap.create();
+    public final Multimap<String, List<IQueryParameterType>> separatedResultParameters = ArrayListMultimap.create();
     public final SearchParameterMap searchParameterMap = new SearchParameterMap();
     public final Map<String, String[]> resultParameters = new HashMap<>();
 
-    public void convertParameters(Map<String, List<IQueryParameterType>> parameters, FhirContext fhirContext) {
+    public void convertParameters(Multimap<String, List<IQueryParameterType>> parameters, FhirContext fhirContext) {
         if (parameters == null) {
             return;
         }
@@ -44,8 +46,8 @@ public class SearchConverter {
     }
 
     public void convertToStringMap(
-            @Nonnull Map<String, List<IQueryParameterType>> parameters, @Nonnull FhirContext fhirContext) {
-        for (var entry : parameters.entrySet()) {
+            @Nonnull Multimap<String, List<IQueryParameterType>> parameters, @Nonnull FhirContext fhirContext) {
+        for (var entry : parameters.entries()) {
             String[] values = new String[entry.getValue().size()];
             for (int i = 0; i < entry.getValue().size(); i++) {
                 values[i] = entry.getValue().get(i).getValueAsQueryToken(fhirContext);
@@ -54,11 +56,11 @@ public class SearchConverter {
         }
     }
 
-    public void convertToSearchParameterMap(Map<String, List<IQueryParameterType>> searchMap) {
+    public void convertToSearchParameterMap(Multimap<String, List<IQueryParameterType>> searchMap) {
         if (searchMap == null) {
             return;
         }
-        for (var entry : searchMap.entrySet()) {
+        for (var entry : searchMap.entries()) {
             // if list of parameters is the value
             if (entry.getValue().size() > 1 && !isOrList(entry.getValue()) && !isAndList(entry.getValue())) {
                 // is value a TokenParam
@@ -94,8 +96,8 @@ public class SearchConverter {
         }
     }
 
-    public void separateParameterTypes(@Nonnull Map<String, List<IQueryParameterType>> parameters) {
-        for (var entry : parameters.entrySet()) {
+    public void separateParameterTypes(@Nonnull Multimap<String, List<IQueryParameterType>> parameters) {
+        for (var entry : parameters.entries()) {
             if (isSearchResultParameter(entry.getKey())) {
                 separatedResultParameters.put(entry.getKey(), entry.getValue());
             } else {

@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cr.inputparameters.dstu3;
 import static org.opencds.cqf.fhir.utility.dstu3.Parameters.parameters;
 import static org.opencds.cqf.fhir.utility.dstu3.Parameters.part;
 
+import ca.uhn.fhir.repository.Repository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -19,7 +20,6 @@ import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.inputparameters.BaseInputParameterResolver;
 import org.opencds.cqf.fhir.utility.adapter.IParametersParameterComponentAdapter;
 import org.opencds.cqf.fhir.utility.search.Searches;

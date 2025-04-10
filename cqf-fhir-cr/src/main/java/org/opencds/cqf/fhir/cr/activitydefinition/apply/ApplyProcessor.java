@@ -1,9 +1,9 @@
 package org.opencds.cqf.fhir.cr.activitydefinition.apply;
 
+import ca.uhn.fhir.repository.Repository;
 import java.util.Arrays;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.common.DynamicValueProcessor;
 import org.opencds.cqf.fhir.cr.common.ExtensionProcessor;
 import org.opencds.cqf.fhir.utility.Constants;

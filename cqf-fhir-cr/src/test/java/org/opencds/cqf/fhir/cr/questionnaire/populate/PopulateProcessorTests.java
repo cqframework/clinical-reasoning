@@ -8,6 +8,7 @@ import static org.opencds.cqf.fhir.cr.helpers.RequestHelpers.newPopulateRequestF
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.repository.Repository;
 import java.util.Collections;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
@@ -24,7 +25,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 
 @ExtendWith(MockitoExtension.class)

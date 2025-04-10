@@ -8,6 +8,7 @@ import static org.opencds.cqf.fhir.utility.r4.Parameters.part;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.repository.Repository;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import java.util.Map;
 import org.hl7.fhir.r4.model.Bundle;
@@ -20,7 +21,6 @@ import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.visitor.RetireVisitor;
 import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactVisitor;
 import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;

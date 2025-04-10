@@ -5,12 +5,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.repository.Repository;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -19,7 +21,6 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 class R4RepositoryTest {
@@ -34,13 +35,13 @@ class R4RepositoryTest {
 
     @Test
     void read() {
-        IBaseResource res = repository.read(Patient.class, new IdType("Patient/example"), null);
+        IBaseResource res = repository.read(Patient.class, new IdType("Patient/example"));
         assertEquals("example", res.getIdElement().getIdPart());
     }
 
     @Test
     void readLibrary() throws IOException {
-        Library res = repository.read(Library.class, new IdType("Library/dependency-example"), null);
+        Library res = repository.read(Library.class, new IdType("Library/dependency-example"));
         assertEquals("dependency-example", res.getIdElement().getIdPart());
         assertTrue(IOUtils.toString(
                         new ByteArrayInputStream(res.getContent().get(0).getData()), StandardCharsets.UTF_8)
@@ -51,13 +52,13 @@ class R4RepositoryTest {
     void testCreate() {
         Patient john = new Patient();
         john.setId(new IdType("Patient", "id-john-doe"));
-        MethodOutcome methodOutcome = repository.create(john, null);
+        MethodOutcome methodOutcome = repository.create(john);
         assertTrue(methodOutcome.getCreated());
     }
 
     @Test
     void search() {
-        IBaseBundle bundle = repository.search(IBaseBundle.class, Library.class, null, null);
+        IBaseBundle bundle = repository.search(IBaseBundle.class, Library.class, Collections.emptyMap());
         assertEquals(6, ((Bundle) bundle).getEntry().size());
     }
 }

@@ -10,6 +10,7 @@ import static org.opencds.cqf.fhir.utility.BundleHelper.newEntryWithResource;
 import static org.opencds.cqf.fhir.utility.VersionUtilities.stringTypeForVersion;
 import static org.opencds.cqf.fhir.utility.VersionUtilities.uriTypeForVersion;
 
+import ca.uhn.fhir.repository.Repository;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collections;
@@ -21,7 +22,6 @@ import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.common.ExtensionProcessor;
 import org.opencds.cqf.fhir.cr.common.ICpgRequest;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.GenerateProcessor;

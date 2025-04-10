@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.r4.utils;
 
+import ca.uhn.fhir.repository.Repository;
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.time.ZoneId;
@@ -11,7 +12,6 @@ import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Reference;
-import org.opencds.cqf.fhir.api.Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

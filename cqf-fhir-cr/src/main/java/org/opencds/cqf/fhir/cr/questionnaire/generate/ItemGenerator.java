@@ -4,6 +4,7 @@ import static org.opencds.cqf.fhir.cr.common.ExtensionBuilders.buildSdcLaunchCon
 import static org.opencds.cqf.fhir.utility.SearchHelper.searchRepositoryByCanonical;
 import static org.opencds.cqf.fhir.utility.VersionUtilities.canonicalTypeForVersion;
 
+import ca.uhn.fhir.repository.Repository;
 import jakarta.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,7 +20,6 @@ import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cr.common.ExpressionProcessor;
 import org.opencds.cqf.fhir.cr.common.ExtensionProcessor;

@@ -32,7 +32,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
-import ognl.Token;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -765,7 +764,8 @@ public class IgRepository implements Repository {
         return (B) builder.getBundle();
     }
 
-    private <T extends IBaseResource> List<T> getIdCandidates(Collection<List<IQueryParameterType>> idQueries, Map<IIdType, T> resourceIdMap, Class<T> resourceType) {
+    private <T extends IBaseResource> List<T> getIdCandidates(
+            Collection<List<IQueryParameterType>> idQueries, Map<IIdType, T> resourceIdMap, Class<T> resourceType) {
         var idResources = new ArrayList<T>();
         for (var idQuery : idQueries) {
             for (var query : idQuery) {
@@ -773,8 +773,7 @@ public class IgRepository implements Repository {
                     // Need to construct the equivalent "UnqualifiedVersionless" id that the map is
                     // indexed by. If an id has a version it won't match. Need apples-to-apples Id
                     // types
-                    var id = Ids.newId(fhirContext, resourceType.getSimpleName(),
-                        idToken.getValue());
+                    var id = Ids.newId(fhirContext, resourceType.getSimpleName(), idToken.getValue());
                     var resource = resourceIdMap.get(id);
                     if (resource != null) {
                         idResources.add(resource);

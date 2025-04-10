@@ -916,6 +916,10 @@ public class IgRepository implements Repository {
     }
 
     protected Compartment compartmentFrom(Map<String, String> headers) {
+        if (headers == null) {
+            return new Compartment();
+        }
+
         var compartmentHeader = headers.get(FHIR_COMPARTMENT_HEADER);
         return compartmentHeader == null ? new Compartment() : new Compartment(compartmentHeader);
     }

@@ -163,12 +163,12 @@ public final class IgConventions {
                 var compartments = FHIR_TYPE_NAMES.stream().map(tests::resolve).filter(x -> x.toFile()
                         .exists());
 
+                // Check if any of the potential compartment directories
+                // have subdirectories that are not FHIR types (e.g. "input/tests/Patient/test1).
                 hasCompartmentDirectory = compartments
                         .flatMap(x -> Stream.of(x.toFile().listFiles()))
                         .filter(File::isDirectory)
-                        .filter(x -> !FHIR_TYPE_NAMES.contains(x.getName().toLowerCase()))
-                        .findFirst()
-                        .isPresent();
+                        .anyMatch(x -> !FHIR_TYPE_NAMES.contains(x.getName().toLowerCase()));
             }
         }
 

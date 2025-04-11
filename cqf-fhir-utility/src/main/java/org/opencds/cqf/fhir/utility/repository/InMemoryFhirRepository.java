@@ -151,13 +151,15 @@ public class InMemoryFhirRepository implements Repository {
             var idResources = new ArrayList<IBaseResource>(idQueries.size());
             for (var idQuery : idQueries) {
                 for (var query : idQuery) {
-                    var idToken = (TokenParam) query;
-                    // Need to construct the equivalent "UnqualifiedVersionless" id that the map is
-                    // indexed by. If an id has a version it won't match. Need apples-to-apples Ids types
-                    var id = Ids.newId(context, resourceType.getSimpleName(), idToken.getValue());
-                    var r = resourceIdMap.get(id);
-                    if (r != null) {
-                        idResources.add(r);
+                    if (query instanceof TokenParam idToken) {
+                        // Need to construct the equivalent "UnqualifiedVersionless" id that the map is
+                        // indexed by. If an id has a version it won't match. Need apples-to-apples Ids types
+                        var id = Ids.newId(context, resourceType.getSimpleName(),
+                            idToken.getValue());
+                        var r = resourceIdMap.get(id);
+                        if (r != null) {
+                            idResources.add(r);
+                        }
                     }
                 }
             }

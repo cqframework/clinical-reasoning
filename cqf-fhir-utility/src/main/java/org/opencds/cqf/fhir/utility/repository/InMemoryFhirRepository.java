@@ -154,8 +154,7 @@ public class InMemoryFhirRepository implements Repository {
                     if (query instanceof TokenParam idToken) {
                         // Need to construct the equivalent "UnqualifiedVersionless" id that the map is
                         // indexed by. If an id has a version it won't match. Need apples-to-apples Ids types
-                        var id = Ids.newId(context, resourceType.getSimpleName(),
-                            idToken.getValue());
+                        var id = Ids.newId(context, resourceType.getSimpleName(), idToken.getValue());
                         var r = resourceIdMap.get(id);
                         if (r != null) {
                             idResources.add(r);

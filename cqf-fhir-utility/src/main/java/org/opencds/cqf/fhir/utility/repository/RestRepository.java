@@ -9,6 +9,7 @@ import ca.uhn.fhir.rest.gclient.IClientExecutable;
 import ca.uhn.fhir.rest.gclient.IHistoryTyped;
 import ca.uhn.fhir.util.ParametersUtil;
 import com.google.common.collect.Multimap;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -71,11 +72,22 @@ public class RestRepository implements Repository {
             Class<T> resourceType,
             Multimap<String, List<IQueryParameterType>> searchParameters,
             Map<String, String> headers) {
+        var params = new HashMap<String, List<IQueryParameterType>>();
+        if (searchParameters != null) {
+            searchParameters.entries().forEach(p -> params.put(p.getKey(), p.getValue()));
+        }
+        return search(bundleType, resourceType, params, Collections.emptyMap());
+    }
+
+    @Override
+    public <B extends IBaseBundle, T extends IBaseResource> B search(
+            Class<B> bundleType,
+            Class<T> resourceType,
+            Map<String, List<IQueryParameterType>> searchParameters,
+            Map<String, String> headers) {
         var op = this.client.search().forResource(resourceType).returnBundle(bundleType);
         if (searchParameters != null) {
-            var params = new HashMap<String, List<IQueryParameterType>>();
-            searchParameters.entries().forEach(p -> params.put(p.getKey(), p.getValue()));
-            op = op.where(params);
+            op = op.where(searchParameters);
         }
 
         if (headers != null) {

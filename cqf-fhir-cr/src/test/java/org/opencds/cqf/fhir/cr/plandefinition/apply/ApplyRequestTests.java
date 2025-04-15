@@ -2,7 +2,9 @@ package org.opencds.cqf.fhir.cr.plandefinition.apply;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import org.junit.jupiter.api.Test;
@@ -11,8 +13,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
+import org.opencds.cqf.fhir.cr.common.IInputParameterResolver;
 import org.opencds.cqf.fhir.cr.helpers.RequestHelpers;
-import org.opencds.cqf.fhir.cr.inputparameters.IInputParameterResolver;
 
 @ExtendWith(MockitoExtension.class)
 class ApplyRequestTests {
@@ -28,9 +30,9 @@ class ApplyRequestTests {
 
     @Test
     void invalidVersionReturnsNull() {
-        var request = RequestHelpers.newPDApplyRequestForVersion(
-                FhirVersionEnum.R4B, libraryEngine, modelResolver, inputParameterResolver);
-        var activityDef = new org.hl7.fhir.r4.model.ActivityDefinition();
+        var request = mock(ApplyRequest.class, CALLS_REAL_METHODS);
+        doReturn(FhirVersionEnum.R4B).when(request).getFhirVersion();
+        var activityDef = new org.hl7.fhir.r4b.model.ActivityDefinition();
         assertNull(request.transformRequestParameters(activityDef));
     }
 

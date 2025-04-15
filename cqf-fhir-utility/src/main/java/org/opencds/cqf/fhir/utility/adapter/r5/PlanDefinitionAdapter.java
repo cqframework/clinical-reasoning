@@ -1,18 +1,20 @@
 package org.opencds.cqf.fhir.utility.adapter.r5;
 
+import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toMap;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r5.model.CanonicalType;
 import org.hl7.fhir.r5.model.Extension;
 import org.hl7.fhir.r5.model.PlanDefinition;
 import org.hl7.fhir.r5.model.PrimitiveType;
-import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.utility.SearchHelper;
+import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IPlanDefinitionActionAdapter;
@@ -156,9 +158,11 @@ public class PlanDefinitionAdapter extends KnowledgeArtifactAdapter implements I
     }
 
     @Override
-    public IBaseResource getPrimaryLibrary(Repository repository) {
-        var libraries = getPlanDefinition().getLibrary();
-        return libraries.isEmpty() ? null : SearchHelper.searchRepositoryByCanonical(repository, libraries.get(0));
+    public Map<String, String> getReferencedLibraries() {
+        var libraries = getPlanDefinition().getLibrary().stream()
+                .collect(toMap(l -> requireNonNull(Canonicals.getIdPart(l)), CanonicalType::getCanonical));
+        libraries.putAll(resolveCqfLibraries());
+        return libraries;
     }
 
     @Override

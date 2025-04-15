@@ -50,22 +50,20 @@ public interface IQuestionnaireRequest extends ICqlOperationRequest {
         }
     }
 
-    default void addCqlLibraryExtension() {
-        addCqlLibraryExtension(null);
-    }
-
     @SuppressWarnings("unchecked")
-    default void addCqlLibraryExtension(String library) {
-        var libraryRef = StringUtils.isNotBlank(library) ? library : getDefaultLibraryUrl();
-        if (StringUtils.isNotBlank(libraryRef)
-                && getExtensionsByUrl(getQuestionnaire(), Constants.CQF_LIBRARY).stream()
-                        .noneMatch(e -> ((IPrimitiveType<String>) e.getValue())
-                                .getValueAsString()
-                                .equals(libraryRef))) {
-            var libraryExt = ((IDomainResource) getQuestionnaire()).addExtension();
-            libraryExt.setUrl(Constants.CQF_LIBRARY);
-            libraryExt.setValue(canonicalTypeForVersion(getFhirVersion(), libraryRef));
-        }
+    default void addCqlLibraryExtension() {
+        // addCqlLibraryExtension(null);
+        getReferencedLibraries().values().forEach(library -> {
+            if (StringUtils.isNotBlank(library)
+                    && getExtensionsByUrl(getQuestionnaire(), Constants.CQF_LIBRARY).stream()
+                            .noneMatch(e -> ((IPrimitiveType<String>) e.getValue())
+                                    .getValueAsString()
+                                    .equals(library))) {
+                var libraryExt = ((IDomainResource) getQuestionnaire()).addExtension();
+                libraryExt.setUrl(Constants.CQF_LIBRARY);
+                libraryExt.setValue(canonicalTypeForVersion(getFhirVersion(), library));
+            }
+        });
     }
 
     default List<IBaseBackboneElement> getItems(IBase base) {

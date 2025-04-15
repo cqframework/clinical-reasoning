@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.utility;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+import java.util.Map;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.junit.jupiter.api.Test;
 
@@ -22,19 +23,23 @@ class CqfExpressionTests {
         var language = "text/cql";
         var expression = "expression";
         var libraryUrl = "Library/lib";
-        var altLanguage = "text/fhirpath";
+        var referencedLibraries = Map.of("lib", libraryUrl);
+        var altLanguage = "text/cql-identifier";
         var altExpression = "altExpression";
         var altLibraryUrl = "Library/alt";
         var cqfExpression = new CqfExpression();
         cqfExpression.setLanguage(language);
         cqfExpression.setExpression(expression);
-        cqfExpression.setLibraryUrl(libraryUrl);
+        cqfExpression.setReferencedLibraries(referencedLibraries);
+        cqfExpression.setLibraryUrl(referencedLibraries.get("lib"));
         cqfExpression.setAltLanguage(altLanguage);
         cqfExpression.setAltExpression(altExpression);
         cqfExpression.setAltLibraryUrl(altLibraryUrl);
         assertEquals(language, cqfExpression.getLanguage());
         assertEquals(expression, cqfExpression.getExpression());
-        assertEquals(libraryUrl, cqfExpression.getLibraryUrl());
+        assertEquals(referencedLibraries, cqfExpression.getReferencedLibraries());
+        // library url is always null for language type other than text/cql-identifier
+        assertNull(cqfExpression.getLibraryUrl());
         assertEquals(altLanguage, cqfExpression.getAltLanguage());
         assertEquals(altExpression, cqfExpression.getAltExpression());
         assertEquals(altLibraryUrl, cqfExpression.getAltLibraryUrl());
@@ -44,21 +49,22 @@ class CqfExpressionTests {
     void testDstu3Extension() {
         var expression = new org.hl7.fhir.dstu3.model.StringType("expression");
         var ext = new org.hl7.fhir.dstu3.model.Extension(Constants.CQIF_CQL_EXPRESSION, expression);
-        var cqfExpression = CqfExpression.of(ext, "http://test.com/Library/test");
+        var cqfExpression = CqfExpression.of(ext, Map.of("test", "http://test.com/Library/test"));
         assertEquals(expression.getValue(), cqfExpression.getExpression());
     }
 
     @Test
     void testR4Extension() {
-        var defaultLibraryUrl = "http://test.com/Library/test";
+        var referencedLibraries = Map.of("test", "http://test.com/Library/test");
         var expression = new org.hl7.fhir.r4.model.Expression()
                 .setLanguage("text/cql.identifier")
                 .setExpression("expression");
         var ext = new org.hl7.fhir.r4.model.Extension(Constants.CQF_EXPRESSION, expression);
-        var cqfExpression = CqfExpression.of(ext, defaultLibraryUrl);
+        var cqfExpression = CqfExpression.of(ext, referencedLibraries);
         assertEquals(expression.getExpression(), cqfExpression.getExpression());
         assertEquals(expression.getLanguage(), cqfExpression.getLanguage());
-        assertEquals(defaultLibraryUrl, cqfExpression.getLibraryUrl());
+        assertEquals(referencedLibraries, cqfExpression.getReferencedLibraries());
+        assertEquals(referencedLibraries.get("test"), cqfExpression.getLibraryUrl());
         assertNull(cqfExpression.getAltExpression());
         assertNull(cqfExpression.getAltLanguage());
         assertNull(cqfExpression.getAltLibraryUrl());
@@ -66,7 +72,7 @@ class CqfExpressionTests {
 
     @Test
     void testR4ExtensionWithAlternate() {
-        var defaultLibraryUrl = "http://test.com/Library/test";
+        var referencedLibraries = Map.of("test", "http://test.com/Library/test");
         var expression = new org.hl7.fhir.r4.model.Expression()
                 .setLanguage("text/cql.identifier")
                 .setExpression("expression");
@@ -75,10 +81,11 @@ class CqfExpressionTests {
                 .setExpression("altExpression");
         expression.addExtension(Constants.ALT_EXPRESSION_EXT, altExpression);
         var ext = new org.hl7.fhir.r4.model.Extension(Constants.CQF_EXPRESSION, expression);
-        var cqfExpression = CqfExpression.of(ext, defaultLibraryUrl);
+        var cqfExpression = CqfExpression.of(ext, referencedLibraries);
         assertEquals(expression.getExpression(), cqfExpression.getExpression());
         assertEquals(expression.getLanguage(), cqfExpression.getLanguage());
-        assertEquals(defaultLibraryUrl, cqfExpression.getLibraryUrl());
+        assertEquals(referencedLibraries, cqfExpression.getReferencedLibraries());
+        assertEquals(referencedLibraries.get("test"), cqfExpression.getLibraryUrl());
         assertEquals(altExpression.getExpression(), cqfExpression.getAltExpression());
         assertEquals(altExpression.getLanguage(), cqfExpression.getAltLanguage());
         assertNull(cqfExpression.getAltLibraryUrl());
@@ -86,15 +93,16 @@ class CqfExpressionTests {
 
     @Test
     void testR5Extension() {
-        var defaultLibraryUrl = "http://test.com/Library/test";
+        var referencedLibraries = Map.of("test", "http://test.com/Library/test");
         var expression = new org.hl7.fhir.r5.model.Expression()
                 .setLanguage("text/cql.identifier")
                 .setExpression("expression");
         var ext = new org.hl7.fhir.r5.model.Extension(Constants.CQF_EXPRESSION, expression);
-        var cqfExpression = CqfExpression.of(ext, defaultLibraryUrl);
+        var cqfExpression = CqfExpression.of(ext, referencedLibraries);
         assertEquals(expression.getExpression(), cqfExpression.getExpression());
         assertEquals(expression.getLanguage(), cqfExpression.getLanguage());
-        assertEquals(defaultLibraryUrl, cqfExpression.getLibraryUrl());
+        assertEquals(referencedLibraries, cqfExpression.getReferencedLibraries());
+        assertEquals(referencedLibraries.get("test"), cqfExpression.getLibraryUrl());
         assertNull(cqfExpression.getAltExpression());
         assertNull(cqfExpression.getAltLanguage());
         assertNull(cqfExpression.getAltLibraryUrl());
@@ -102,7 +110,7 @@ class CqfExpressionTests {
 
     @Test
     void testR5ExtensionWithAlternate() {
-        var defaultLibraryUrl = "http://test.com/Library/test";
+        var referencedLibraries = Map.of("test", "http://test.com/Library/test");
         var expression = new org.hl7.fhir.r5.model.Expression()
                 .setLanguage("text/cql.identifier")
                 .setExpression("expression");
@@ -111,12 +119,37 @@ class CqfExpressionTests {
                 .setExpression("altExpression");
         expression.addExtension(Constants.ALT_EXPRESSION_EXT, altExpression);
         var ext = new org.hl7.fhir.r5.model.Extension(Constants.CQF_EXPRESSION, expression);
-        var cqfExpression = CqfExpression.of(ext, defaultLibraryUrl);
+        var cqfExpression = CqfExpression.of(ext, referencedLibraries);
         assertEquals(expression.getExpression(), cqfExpression.getExpression());
         assertEquals(expression.getLanguage(), cqfExpression.getLanguage());
-        assertEquals(defaultLibraryUrl, cqfExpression.getLibraryUrl());
+        assertEquals(referencedLibraries, cqfExpression.getReferencedLibraries());
+        assertEquals(referencedLibraries.get("test"), cqfExpression.getLibraryUrl());
         assertEquals(altExpression.getExpression(), cqfExpression.getAltExpression());
         assertEquals(altExpression.getLanguage(), cqfExpression.getAltLanguage());
         assertNull(cqfExpression.getAltLibraryUrl());
     }
+
+    @Test
+    void testSingleLibraryReference() {
+        var library1 = "TestLibrary1";
+        var libraryUrl1 = "http://fhir.test/Library/TestLibrary1";
+        var expression =
+                new CqfExpression("text/cql-identifier", "TestLibrary1.testExpression", Map.of(library1, libraryUrl1));
+        var result = expression.getLibraryUrl();
+        assertEquals(libraryUrl1, result);
+    }
+
+    //    @Test
+    //    void testMultipleLibraryReferences() {
+    //        var library1 = "TestLibrary1";
+    //        var libraryUrl1 = "http://fhir.test/Library/TestLibrary1";
+    //        var library2 = "TestLibrary2";
+    //        var libraryUrl2 = "http://fhir.test/Library/TestLibrary2";
+    //        var expression = new CqfExpression(
+    //            "text/cql-expression",
+    //            "TestLibrary1.testExpression",
+    //            Map.of(library1, libraryUrl1, library2, libraryUrl2));
+    //        var result = expression.getLibraryUrl();
+    //        assertEquals(libraryUrl1, result);
+    //    }
 }

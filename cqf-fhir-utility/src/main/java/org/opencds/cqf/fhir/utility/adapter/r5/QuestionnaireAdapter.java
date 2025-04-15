@@ -2,15 +2,12 @@ package org.opencds.cqf.fhir.utility.adapter.r5;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.r5.model.CanonicalType;
 import org.hl7.fhir.r5.model.Expression;
 import org.hl7.fhir.r5.model.Questionnaire;
 import org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemComponent;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Constants;
-import org.opencds.cqf.fhir.utility.SearchHelper;
 import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireAdapter;
@@ -88,7 +85,7 @@ public class QuestionnaireAdapter extends KnowledgeArtifactAdapter implements IQ
 
         getQuestionnaire().getExtensionsByUrl(Constants.VARIABLE_EXTENSION).stream()
                 .map(e -> (Expression) e.getValue())
-                .filter(e -> e.hasReference())
+                .filter(Expression::hasReference)
                 .forEach(expression -> references.add(new DependencyInfo(
                         referenceSource,
                         expression.getReference(),
@@ -121,20 +118,12 @@ public class QuestionnaireAdapter extends KnowledgeArtifactAdapter implements IQ
         item.getExtension().stream()
                 .filter(e -> EXPRESSION_EXTENSIONS.contains(e.getUrl()))
                 .map(e -> (Expression) e.getValue())
-                .filter(e -> e.hasReference())
+                .filter(Expression::hasReference)
                 .forEach(expression -> references.add(new DependencyInfo(
                         referenceSource,
                         expression.getReference(),
                         expression.getExtension(),
                         expression::setReference)));
         item.getItem().forEach(childItem -> getDependenciesOfItem(childItem, references, referenceSource));
-    }
-
-    @Override
-    public IBaseResource getPrimaryLibrary(Repository repository) {
-        var library = getQuestionnaire().getExtensionByUrl(Constants.CQF_LIBRARY);
-        return library == null
-                ? null
-                : SearchHelper.searchRepositoryByCanonical(repository, library.getValueCanonicalType());
     }
 }

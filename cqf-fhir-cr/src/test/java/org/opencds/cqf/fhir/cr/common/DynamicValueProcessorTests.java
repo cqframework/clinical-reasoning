@@ -1,9 +1,10 @@
 package org.opencds.cqf.fhir.cr.common;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
@@ -18,7 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.helpers.RequestHelpers;
-import org.opencds.cqf.fhir.cr.inputparameters.IInputParameterResolver;
+import org.opencds.cqf.fhir.cr.plandefinition.apply.ApplyRequest;
 import org.opencds.cqf.fhir.utility.CqfExpression;
 import org.slf4j.event.Level;
 
@@ -39,8 +40,8 @@ class DynamicValueProcessorTests {
 
     @Test
     void unsupportedFhirVersion() {
-        var request = RequestHelpers.newPDApplyRequestForVersion(
-                FhirVersionEnum.R4B, libraryEngine, modelResolver, inputParameterResolver);
+        var request = mock(ApplyRequest.class);
+        doReturn(FhirVersionEnum.R4B).when(request).getFhirVersion();
         assertNull(fixture.getDynamicValueExpression(request, null));
     }
 
@@ -107,22 +108,17 @@ class DynamicValueProcessorTests {
     }
 
     private List<IBase> withExpressionResults(FhirVersionEnum fhirVersion) {
-        switch (fhirVersion) {
-            case DSTU3:
-                return List.of(new org.hl7.fhir.dstu3.model.StringType("string type value"));
-            case R4:
-                return List.of(
-                        new org.hl7.fhir.r4.model.StringType("string type value"),
-                        new org.hl7.fhir.r4.model.BooleanType(true),
-                        new org.hl7.fhir.r4.model.IntegerType(3));
-            case R5:
-                return List.of(
-                        new org.hl7.fhir.r5.model.StringType("string type value"),
-                        new org.hl7.fhir.r5.model.BooleanType(true),
-                        new org.hl7.fhir.r5.model.IntegerType(3));
-
-            default:
-                return null;
-        }
+        return switch (fhirVersion) {
+            case DSTU3 -> List.of(new org.hl7.fhir.dstu3.model.StringType("string type value"));
+            case R4 -> List.of(
+                    new org.hl7.fhir.r4.model.StringType("string type value"),
+                    new org.hl7.fhir.r4.model.BooleanType(true),
+                    new org.hl7.fhir.r4.model.IntegerType(3));
+            case R5 -> List.of(
+                    new org.hl7.fhir.r5.model.StringType("string type value"),
+                    new org.hl7.fhir.r5.model.BooleanType(true),
+                    new org.hl7.fhir.r5.model.IntegerType(3));
+            default -> null;
+        };
     }
 }

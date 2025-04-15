@@ -2,6 +2,8 @@ package org.opencds.cqf.fhir.cr.questionnaire.populate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -67,7 +69,7 @@ class ProcessItemTests {
                 .getItemInitialExpression(populateRequest, originalQuestionnaireItemComponent);
         doReturn(expressionResults)
                 .when(expressionProcessor)
-                .getExpressionResultForItem(populateRequest, expression, "1");
+                .getExpressionResultForItem(eq(populateRequest), eq(expression), eq("1"), any(), any());
         // execute
         final IBaseBackboneElement actual =
                 processItem.processItem(populateRequest, originalQuestionnaireItemComponent);
@@ -95,7 +97,7 @@ class ProcessItemTests {
                 .getItemInitialExpression(populateRequest, originalQuestionnaireItemComponent);
         doReturn(expressionResults)
                 .when(expressionProcessor)
-                .getExpressionResultForItem(populateRequest, expression, "1");
+                .getExpressionResultForItem(eq(populateRequest), eq(expression), eq("1"), any(), any());
         // execute
         final IBaseBackboneElement actual =
                 processItem.processItem(populateRequest, originalQuestionnaireItemComponent);
@@ -140,11 +142,11 @@ class ProcessItemTests {
                 .getItemInitialExpression(prePopulateRequest, questionnaireItemComponent);
         // execute
         final List<IBase> actual = processItem.getInitialValue(
-                prePopulateRequest, questionnaireItemComponent, questionnaireResponseItemComponent);
+                prePopulateRequest, questionnaireItemComponent, questionnaireResponseItemComponent, null);
         // validate
         assertTrue(actual.isEmpty());
         verify(expressionProcessor).getItemInitialExpression(prePopulateRequest, questionnaireItemComponent);
-        verify(expressionProcessor, never()).getExpressionResultForItem(prePopulateRequest, null, "linkId");
+        verify(expressionProcessor, never()).getExpressionResultForItem(prePopulateRequest, null, "linkId", null, null);
     }
 
     @Test
@@ -165,14 +167,14 @@ class ProcessItemTests {
                 .getItemInitialExpression(prePopulateRequest, questionnaireItemComponent);
         doReturn(expected)
                 .when(expressionProcessor)
-                .getExpressionResultForItem(prePopulateRequest, expression, "linkId");
+                .getExpressionResultForItem(prePopulateRequest, expression, "linkId", null, null);
         // execute
         final List<IBase> actual = processItem.getInitialValue(
-                prePopulateRequest, questionnaireItemComponent, questionnaireResponseItemComponent);
+                prePopulateRequest, questionnaireItemComponent, questionnaireResponseItemComponent, null);
         // validate
         assertEquals(expected, actual);
         verify(expressionProcessor).getItemInitialExpression(prePopulateRequest, questionnaireItemComponent);
-        verify(expressionProcessor).getExpressionResultForItem(prePopulateRequest, expression, "linkId");
+        verify(expressionProcessor).getExpressionResultForItem(prePopulateRequest, expression, "linkId", null, null);
     }
 
     private CqfExpression withExpression() {

@@ -20,6 +20,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CommunicationRequest;
+import org.hl7.fhir.r4.model.MedicationRequest;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Task;
@@ -92,7 +93,7 @@ class ActivityDefinitionProcessorTests {
                 libraryEngine);
         assertEquals("apply", request.getOperationName());
         assertEquals("patientId", request.getSubjectId().getIdPart());
-        assertEquals(activityDefinition, request.getContext());
+        assertEquals(activityDefinition, request.getContextVariable());
     }
 
     @Test
@@ -120,7 +121,7 @@ class ActivityDefinitionProcessorTests {
                 null,
                 null,
                 null);
-        assertTrue(result instanceof ProcedureRequest);
+        assertInstanceOf(ProcedureRequest.class, result);
         var request = (ProcedureRequest) result;
         assertTrue(request.getDoNotPerform());
     }
@@ -139,7 +140,7 @@ class ActivityDefinitionProcessorTests {
                 null,
                 null,
                 null);
-        assertTrue(result instanceof org.hl7.fhir.r4.model.MedicationRequest);
+        assertInstanceOf(MedicationRequest.class, result);
         org.hl7.fhir.r4.model.MedicationRequest request = (org.hl7.fhir.r4.model.MedicationRequest) result;
         assertTrue(request.getDoNotPerform());
     }
@@ -158,7 +159,7 @@ class ActivityDefinitionProcessorTests {
                 null,
                 null,
                 null);
-        assertTrue(result instanceof Task);
+        assertInstanceOf(Task.class, result);
         var task = (Task) result;
         assertTrue(task.hasInput());
         var input = task.getInput().get(0);
@@ -186,7 +187,7 @@ class ActivityDefinitionProcessorTests {
                 null,
                 null,
                 null);
-        assertTrue(result instanceof org.hl7.fhir.r5.model.MedicationRequest);
+        assertInstanceOf(org.hl7.fhir.r5.model.MedicationRequest.class, result);
         org.hl7.fhir.r5.model.MedicationRequest request = (org.hl7.fhir.r5.model.MedicationRequest) result;
         assertTrue(request.getDoNotPerform());
     }

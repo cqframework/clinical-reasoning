@@ -1,11 +1,12 @@
 package org.opencds.cqf.fhir.cr.questionnaireresponse.extract;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.opencds.cqf.fhir.cr.inputparameters.IInputParameterResolver.createResolver;
+import static org.opencds.cqf.fhir.cr.common.IInputParameterResolver.createResolver;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.List;
+import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
@@ -14,18 +15,17 @@ import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
+import org.opencds.cqf.fhir.cr.common.IInputParameterResolver;
 import org.opencds.cqf.fhir.cr.common.IQuestionnaireRequest;
-import org.opencds.cqf.fhir.cr.inputparameters.IInputParameterResolver;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireAdapter;
 
 public class ExtractRequest implements IQuestionnaireRequest {
     private final IBaseResource questionnaireResponse;
-    private final IBaseResource questionnaire;
+    private final IQuestionnaireAdapter questionnaireAdapter;
     private final IIdType subjectId;
     private final IBaseParameters parameters;
     private final IBaseBundle data;
@@ -34,10 +34,9 @@ public class ExtractRequest implements IQuestionnaireRequest {
     private final ModelResolver modelResolver;
     private final FhirContext fhirContext;
     private final FhirVersionEnum fhirVersion;
-    private final String defaultLibraryUrl;
+    private final Map<String, String> referencedLibraries;
     private final IInputParameterResolver inputParameterResolver;
     private IBaseOperationOutcome operationOutcome;
-    private IQuestionnaireAdapter questionnaireAdapter;
 
     public ExtractRequest(
             IBaseResource questionnaireResponse,
@@ -53,7 +52,9 @@ public class ExtractRequest implements IQuestionnaireRequest {
         checkNotNull(libraryEngine, "expected non-null value for libraryEngine");
         checkNotNull(modelResolver, "expected non-null value for modelResolver");
         this.questionnaireResponse = questionnaireResponse;
-        this.questionnaire = questionnaire;
+        fhirVersion = this.questionnaireResponse.getStructureFhirVersionEnum();
+        questionnaireAdapter =
+                questionnaire == null ? null : getAdapterFactory().createQuestionnaire(questionnaire);
         this.subjectId = subjectId;
         this.parameters = parameters;
         this.data = bundle;
@@ -71,8 +72,7 @@ public class ExtractRequest implements IQuestionnaireRequest {
                         this.useServerData,
                         this.data);
         fhirContext = this.libraryEngine.getRepository().fhirContext();
-        fhirVersion = this.questionnaireResponse.getStructureFhirVersionEnum();
-        defaultLibraryUrl = "";
+        referencedLibraries = Map.of();
     }
 
     public IBaseResource getQuestionnaireResponse() {
@@ -80,18 +80,14 @@ public class ExtractRequest implements IQuestionnaireRequest {
     }
 
     public boolean hasQuestionnaire() {
-        return questionnaire != null;
+        return questionnaireAdapter != null;
     }
 
     public IBaseResource getQuestionnaire() {
-        return questionnaire;
+        return hasQuestionnaire() ? questionnaireAdapter.get() : null;
     }
 
     public IQuestionnaireAdapter getQuestionnaireAdapter() {
-        if (questionnaireAdapter == null && questionnaire != null) {
-            questionnaireAdapter = (IQuestionnaireAdapter)
-                    getAdapterFactory().createKnowledgeArtifactAdapter((IDomainResource) questionnaire);
-        }
         return questionnaireAdapter;
     }
 
@@ -125,9 +121,9 @@ public class ExtractRequest implements IQuestionnaireRequest {
         if (qrExt != null) {
             return (T) qrExt;
         }
-        return questionnaire == null
+        return questionnaireAdapter == null
                 ? null
-                : (T) getExtensions(questionnaire).stream()
+                : (T) questionnaireAdapter.getExtension().stream()
                         .filter(e -> e.getUrl().equals(Constants.SDC_QUESTIONNAIRE_ITEM_EXTRACTION_CONTEXT)
                                 || e.getUrl().equals(Constants.SDC_QUESTIONNAIRE_DEFINITION_EXTRACT))
                         .findFirst()
@@ -149,7 +145,7 @@ public class ExtractRequest implements IQuestionnaireRequest {
     }
 
     @Override
-    public IBase getContext() {
+    public IBase getContextVariable() {
         return getQuestionnaireResponse();
     }
 
@@ -174,6 +170,12 @@ public class ExtractRequest implements IQuestionnaireRequest {
     }
 
     @Override
+    public Map<String, Object> getRawParameters() {
+        // TODO: do this
+        return null;
+    }
+
+    @Override
     public LibraryEngine getLibraryEngine() {
         return libraryEngine;
     }
@@ -189,8 +191,8 @@ public class ExtractRequest implements IQuestionnaireRequest {
     }
 
     @Override
-    public String getDefaultLibraryUrl() {
-        return defaultLibraryUrl;
+    public Map<String, String> getReferencedLibraries() {
+        return referencedLibraries;
     }
 
     @Override

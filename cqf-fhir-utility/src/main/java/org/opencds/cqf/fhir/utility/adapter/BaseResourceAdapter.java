@@ -14,6 +14,7 @@ public abstract class BaseResourceAdapter implements IResourceAdapter {
     protected final BaseRuntimeElementDefinition<?> elementDefinition;
     protected final IBaseResource resource;
     protected final ModelResolver modelResolver;
+    protected final IAdapterFactory adapterFactory;
 
     protected static final Set<String> LIBRARY_TYPES =
             Sets.newHashSet("logic-library", "model-definition", "asset-collection", "module-definition");
@@ -43,6 +44,7 @@ public abstract class BaseResourceAdapter implements IResourceAdapter {
         }
         this.resource = resource;
         fhirContext = FhirContext.forCached(resource.getStructureFhirVersionEnum());
+        adapterFactory = IAdapterFactory.forFhirContext(fhirContext);
         elementDefinition = fhirContext.getElementDefinition(this.resource.getClass());
         modelResolver = FhirModelResolverCache.resolverForVersion(
                 fhirContext.getVersion().getVersion());
@@ -58,5 +60,9 @@ public abstract class BaseResourceAdapter implements IResourceAdapter {
 
     public IBaseResource get() {
         return resource;
+    }
+
+    public IAdapterFactory getAdapterFactory() {
+        return adapterFactory;
     }
 }

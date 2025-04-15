@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.common;
 
 import java.util.List;
+import java.util.Map;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -11,11 +12,17 @@ import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 
 public interface ICqlOperationRequest extends IOperationRequest {
-    IBase getContext();
+    IBase getContextVariable();
+
+    default IBase getResourceVariable() {
+        return null;
+    }
 
     IIdType getSubjectId();
 
     IBaseParameters getParameters();
+
+    Map<String, Object> getRawParameters();
 
     boolean getUseServerData();
 

@@ -1,5 +1,7 @@
 package org.opencds.cqf.fhir.utility.adapter;
 
+import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toMap;
 import static org.opencds.cqf.fhir.utility.adapter.IAdapter.newDateTimeType;
 import static org.opencds.cqf.fhir.utility.adapter.IAdapter.newDateType;
 import static org.opencds.cqf.fhir.utility.adapter.IAdapter.newPeriod;
@@ -10,6 +12,8 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -26,6 +30,10 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.BundleHelper;
+import org.opencds.cqf.fhir.utility.Canonicals;
+import org.opencds.cqf.fhir.utility.Constants;
+import org.opencds.cqf.fhir.utility.SearchHelper;
+import org.opencds.cqf.fhir.utility.VersionUtilities;
 import org.opencds.cqf.fhir.utility.Versions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -99,7 +107,7 @@ public interface IKnowledgeArtifactAdapter extends IResourceAdapter {
 
     /**
      * Returns the url of the artifact appended with '|' version if the artifact has a version.
-     * @return
+     * @return canonical url of artifact
      */
     default String getCanonical() {
         if (!hasUrl()) {
@@ -299,7 +307,7 @@ public interface IKnowledgeArtifactAdapter extends IResourceAdapter {
         final String referenceSource = hasVersion() ? getUrl() + "|" + getVersion() : getUrl();
         return Stream.concat(
                         getComponents().stream()
-                                .filter(ra -> ra != null)
+                                .filter(Objects::nonNull)
                                 .map(ra -> DependencyInfo.convertRelatedArtifact(ra, referenceSource)),
                         getDependencies().stream())
                 .collect(Collectors.toList());
@@ -312,7 +320,7 @@ public interface IKnowledgeArtifactAdapter extends IResourceAdapter {
     @SuppressWarnings("unchecked")
     default <T extends ICompositeType & IBaseHasExtensions> List<T> getOwnedRelatedArtifacts() {
         return (List<T>) getRelatedArtifactsOfType("composed-of").stream()
-                .filter(ra -> checkIfRelatedArtifactIsOwned(ra))
+                .filter(IKnowledgeArtifactAdapter::checkIfRelatedArtifactIsOwned)
                 .collect(Collectors.toList());
     }
 
@@ -324,15 +332,15 @@ public interface IKnowledgeArtifactAdapter extends IResourceAdapter {
 
     static Optional<IDomainResource> findLatestVersion(IBaseBundle bundle) {
         var sorted = BundleHelper.getEntryResources(bundle).stream()
-                .filter(r -> isSupportedMetadataResource(r))
+                .filter(IKnowledgeArtifactAdapter::isSupportedMetadataResource)
                 .map(r -> (IKnowledgeArtifactAdapter) IAdapterFactory.forFhirVersion(r.getStructureFhirVersionEnum())
                         .createResource(r))
                 .sorted((a, b) -> Versions.compareVersions(a.getVersion(), b.getVersion()))
-                .collect(Collectors.toList());
+                .toList();
         if (!sorted.isEmpty()) {
             return Optional.of(sorted.get(sorted.size() - 1).get());
         } else {
-            return Optional.ofNullable(null);
+            return Optional.empty();
         }
     }
 
@@ -340,8 +348,26 @@ public interface IKnowledgeArtifactAdapter extends IResourceAdapter {
         return Optional.empty();
     }
 
-    default IBaseResource getPrimaryLibrary(Repository repository) {
-        return get().fhirType().equals("Library") ? get() : null;
+    default Map<String, String> getReferencedLibraries() {
+        return resolveCqfLibraries();
+    }
+
+    default Map<String, ILibraryAdapter> retrieveReferencedLibraries(Repository repository) {
+        return getReferencedLibraries().values().stream()
+                .map(url -> getAdapterFactory()
+                        .createLibrary(SearchHelper.searchRepositoryByCanonical(
+                                repository,
+                                VersionUtilities.canonicalTypeForVersion(
+                                        repository.fhirContext().getVersion().getVersion(), url))))
+                .collect(toMap(IKnowledgeArtifactAdapter::getName, l -> l));
+    }
+
+    @SuppressWarnings("unchecked")
+    default Map<String, String> resolveCqfLibraries() {
+        return getExtension().stream()
+                .filter(e -> e.getUrl().equals(Constants.CQF_LIBRARY))
+                .map(e -> ((IPrimitiveType<String>) e.getValue()).getValue())
+                .collect(Collectors.toMap(l -> requireNonNull(Canonicals.getIdPart(l)), l -> l));
     }
 
     String VALID_RELATED_ARTIFACT = "Must be a valid RelatedArtifact";

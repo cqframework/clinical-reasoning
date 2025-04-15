@@ -11,6 +11,7 @@ import org.hl7.fhir.r5.model.Parameters;
 import org.hl7.fhir.r5.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r5.model.Resource;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
+import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IParametersParameterComponentAdapter;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 
@@ -19,6 +20,7 @@ class ParametersParameterComponentAdapter implements IParametersParameterCompone
     private final FhirContext fhirContext = FhirContext.forR5Cached();
     private final Parameters.ParametersParameterComponent parametersParameterComponent;
     private final ModelResolver modelResolver;
+    private final IAdapterFactory adapterFactory;
 
     protected Parameters.ParametersParameterComponent getParametersParameterComponent() {
         return this.parametersParameterComponent;
@@ -37,6 +39,7 @@ class ParametersParameterComponentAdapter implements IParametersParameterCompone
         this.parametersParameterComponent = (ParametersParameterComponent) parametersParameterComponent;
         modelResolver = FhirModelResolverCache.resolverForVersion(
                 fhirContext.getVersion().getVersion());
+        adapterFactory = IAdapterFactory.forFhirContext(fhirContext);
     }
 
     @Override
@@ -55,15 +58,17 @@ class ParametersParameterComponentAdapter implements IParametersParameterCompone
     }
 
     @Override
-    public List<IBaseBackboneElement> getPart() {
-        return this.getParametersParameterComponent().getPart().stream().collect(Collectors.toList());
+    public List<IParametersParameterComponentAdapter> getPart() {
+        return this.getParametersParameterComponent().getPart().stream()
+                .map(adapterFactory::createParametersParameter)
+                .toList();
     }
 
     @Override
     public List<IBaseDatatype> getPartValues(String name) {
         return this.getParametersParameterComponent().getPart().stream()
                 .filter(p -> p.getName().equals(name))
-                .map(p -> p.getValue())
+                .map(ParametersParameterComponent::getValue)
                 .collect(Collectors.toList());
     }
 

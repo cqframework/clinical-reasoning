@@ -1,7 +1,6 @@
 package org.opencds.cqf.fhir.utility.adapter.r5;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBaseDatatypeElement;
@@ -25,7 +24,8 @@ public class DataRequirementCodeFilterAdapter implements IDataRequirementCodeFil
         }
         this.codeFilter = (DataRequirementCodeFilterComponent) codeFilter;
         fhirContext = FhirContext.forR5Cached();
-        modelResolver = FhirModelResolverCache.resolverForVersion(FhirVersionEnum.R5);
+        modelResolver = FhirModelResolverCache.resolverForVersion(
+                fhirContext.getVersion().getVersion());
     }
 
     @Override

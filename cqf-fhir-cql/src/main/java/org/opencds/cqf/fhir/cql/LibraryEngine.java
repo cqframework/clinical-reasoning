@@ -8,12 +8,15 @@ import com.google.common.collect.Lists;
 import jakarta.annotation.Nullable;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.cqframework.cql.cql2elm.StringLibrarySourceProvider;
 import org.hl7.elm.r1.VersionedIdentifier;
@@ -25,7 +28,6 @@ import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.engine.parameters.CqlFhirParametersConverter;
 import org.opencds.cqf.fhir.cql.engine.parameters.CqlParameterDefinition;
-import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.CqfExpression;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -96,11 +98,35 @@ public class LibraryEngine {
         return cqlFhirParametersConverter.toFhirParameters(result);
     }
 
+    protected String getModelName(Object base) {
+        if (base instanceof List<?> list) {
+            return getModelName(list.get(0));
+        }
+        var fhirType = ((IBase) base).fhirType();
+        if (fhirType.contains(".")) {
+            var split = fhirType.split("\\.");
+            fhirType = Arrays.stream(split).map(StringUtils::capitalize).collect(Collectors.joining("."));
+        }
+        return String.format("FHIR.%s", fhirType);
+    }
+
+    protected String getLibraryName(String expression) {
+        var uuid = UUID.nameUUIDFromBytes(expression.getBytes()).toString();
+        var sb = new StringBuilder();
+        for (var c : uuid.toCharArray()) {
+            if (Character.isLetter(c)) {
+                sb.append(c);
+            }
+        }
+        return sb.toString();
+    }
+
     public IBaseParameters evaluateExpression(
             String expression,
             IBaseParameters parameters,
+            Map<String, Object> rawParameters,
             String patientId,
-            List<Pair<String, String>> libraries,
+            Map<String, String> referencedLibraries,
             IBaseBundle bundle,
             IBase contextParameter,
             IBase resourceParameter) {
@@ -108,14 +134,14 @@ public class LibraryEngine {
         var cqlFhirParametersConverter = Engines.getCqlFhirParametersConverter(fhirContext);
         var cqlParameters = cqlFhirParametersConverter.toCqlParameterDefinitions(parameters);
         if (contextParameter != null) {
-            var contextType = contextParameter.getClass().getSimpleName();
-            cqlParameters.add(new CqlParameterDefinition("%fhirpathcontext", contextType, false, contextParameter));
-            var resourceType = resourceParameter == null
-                    ? contextType
-                    : resourceParameter.getClass().getSimpleName();
-            cqlParameters.add(new CqlParameterDefinition(
-                    "%resource",
-                    resourceType, false, resourceParameter == null ? contextParameter : resourceParameter));
+            var contextType = getModelName(contextParameter);
+            cqlParameters.add(new CqlParameterDefinition("%fhirpathcontext", contextType, false));
+            var resourceType = resourceParameter == null ? contextType : getModelName(resourceParameter);
+            cqlParameters.add(new CqlParameterDefinition("%resource", resourceType, false));
+        }
+        if (rawParameters != null) {
+            rawParameters.forEach(
+                    (k, v) -> cqlParameters.add(new CqlParameterDefinition(k, getModelName(v), v instanceof List<?>)));
         }
         // There is currently a bug in the CQL compiler that causes the FHIRPath %context variable to fail.
         // This bit of hackery finds any uses of %context in the expression being evaluated and switches it to
@@ -123,23 +149,30 @@ public class LibraryEngine {
         if (expression.contains("%context")) {
             expression = expression.replace("%context", "%fhirpathcontext");
         }
-        var cql = libraryConstructor.constructCqlLibrary(expression, libraries, cqlParameters);
-
+        // var libraryName = "expression";
+        var libraryName = getLibraryName(expression);
+        var libraryVersion = "1.0.0";
+        var cql = libraryConstructor.constructCqlLibrary(
+                libraryName, libraryVersion, expression, referencedLibraries, cqlParameters);
         Set<String> expressions = new HashSet<>();
         expressions.add("return");
 
-        var requestSettings = new EvaluationSettings(settings);
-
-        requestSettings.getLibrarySourceProviders().add(new StringLibrarySourceProvider(Lists.newArrayList(cql)));
-
-        var engine = Engines.forRepository(repository, requestSettings, bundle);
+        //        var requestSettings = new EvaluationSettings(settings);
+        //        requestSettings.getLibrarySourceProviders().add(new
+        // StringLibrarySourceProvider(Lists.newArrayList(cql)));
+        //        var engine = Engines.forRepository(repository, requestSettings, bundle);
+        settings.getLibrarySourceProviders().add(new StringLibrarySourceProvider(Lists.newArrayList(cql)));
+        var engine = Engines.forRepository(repository, settings, bundle);
 
         var evaluationParameters = cqlFhirParametersConverter.toCqlParameters(parameters);
         if (contextParameter != null) {
             evaluationParameters.put("%fhirpathcontext", contextParameter);
             evaluationParameters.put("%resource", resourceParameter == null ? contextParameter : resourceParameter);
         }
-        var id = new VersionedIdentifier().withId("expression").withVersion("1.0.0");
+        if (rawParameters != null) {
+            evaluationParameters.putAll(rawParameters);
+        }
+        var id = new VersionedIdentifier().withId(libraryName).withVersion(libraryVersion);
         var result = engine.evaluate(id.getId(), expressions, buildContextParameter(patientId), evaluationParameters);
 
         return cqlFhirParametersConverter.toFhirParameters(result);
@@ -150,7 +183,9 @@ public class LibraryEngine {
             String expression,
             String language,
             String libraryToBeEvaluated,
+            Map<String, String> referencedLibraries,
             IBaseParameters parameters,
+            Map<String, Object> rawParameters,
             IBaseBundle bundle,
             IBase contextParameter,
             IBase resourceParameter) {
@@ -162,13 +197,15 @@ public class LibraryEngine {
             case "text/cql.expression":
             case "text/cql-expression":
             case "text/fhirpath":
-                var libraries = new ArrayList<Pair<String, String>>();
-                if (!StringUtils.isBlank(libraryToBeEvaluated)) {
-                    libraries.add(
-                            new ImmutablePair<>(libraryToBeEvaluated, Canonicals.getIdPart(libraryToBeEvaluated)));
-                }
                 parametersResult = this.evaluateExpression(
-                        expression, parameters, subjectId, libraries, bundle, contextParameter, resourceParameter);
+                        expression,
+                        parameters,
+                        rawParameters,
+                        subjectId,
+                        referencedLibraries,
+                        bundle,
+                        contextParameter,
+                        resourceParameter);
                 // The expression is assumed to be the parameter component name
                 // The expression evaluator creates a library with a single expression defined as "return"
                 results = resolveParameterValues(
@@ -256,6 +293,7 @@ public class LibraryEngine {
             String patientId,
             CqfExpression expression,
             IBaseParameters params,
+            Map<String, Object> rawParameters,
             IBaseBundle bundle,
             IBase contextParameter,
             IBase resourceParameter) {
@@ -264,7 +302,9 @@ public class LibraryEngine {
                 expression.getExpression(),
                 expression.getLanguage(),
                 expression.getLibraryUrl(),
+                expression.getReferencedLibraries(),
                 params,
+                rawParameters,
                 bundle,
                 contextParameter,
                 resourceParameter);
@@ -274,7 +314,9 @@ public class LibraryEngine {
                     expression.getAltExpression(),
                     expression.getAltLanguage(),
                     expression.getAltLibraryUrl(),
+                    expression.getReferencedLibraries(),
                     params,
+                    rawParameters,
                     bundle,
                     contextParameter,
                     resourceParameter);

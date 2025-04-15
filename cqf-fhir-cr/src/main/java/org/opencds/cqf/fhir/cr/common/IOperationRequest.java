@@ -10,6 +10,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
@@ -33,7 +34,9 @@ public interface IOperationRequest {
         return getRepository().fhirContext();
     }
 
-    String getDefaultLibraryUrl();
+    //    String getDefaultLibraryUrl();
+
+    Map<String, String> getReferencedLibraries();
 
     IBaseOperationOutcome getOperationOutcome();
 

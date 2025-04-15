@@ -1,7 +1,7 @@
 package org.opencds.cqf.fhir.cr.plandefinition.apply;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.opencds.cqf.fhir.cr.inputparameters.IInputParameterResolver.createResolver;
+import static org.opencds.cqf.fhir.cr.common.IInputParameterResolver.createResolver;
 import static org.opencds.cqf.fhir.utility.BundleHelper.newBundle;
 import static org.opencds.cqf.fhir.utility.Constants.APPLY_PARAMETER_ACTIVITY_DEFINITION;
 import static org.opencds.cqf.fhir.utility.Constants.APPLY_PARAMETER_DATA;
@@ -18,6 +18,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -32,15 +33,16 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.common.ICpgRequest;
-import org.opencds.cqf.fhir.cr.inputparameters.IInputParameterResolver;
+import org.opencds.cqf.fhir.cr.common.IInputParameterResolver;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.GenerateRequest;
 import org.opencds.cqf.fhir.cr.questionnaire.populate.PopulateRequest;
 import org.opencds.cqf.fhir.utility.Constants;
+import org.opencds.cqf.fhir.utility.adapter.IPlanDefinitionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireAdapter;
 
 public class ApplyRequest implements ICpgRequest {
     private static final String ACTIVITY_DEFINITION = "ActivityDefinition";
-    private final IBaseResource planDefinition;
+    private final IPlanDefinitionAdapter planDefinitionAdapter;
     private final IIdType subjectId;
     private final IIdType encounterId;
     private final IIdType practitionerId;
@@ -56,7 +58,7 @@ public class ApplyRequest implements ICpgRequest {
     private final LibraryEngine libraryEngine;
     private final ModelResolver modelResolver;
     private final FhirVersionEnum fhirVersion;
-    private final String defaultLibraryUrl;
+    private final Map<String, String> referencedLibraries;
     private final IInputParameterResolver inputParameterResolver;
     private final Collection<IBaseResource> requestResources;
     private final Collection<IBaseResource> extractedResources;
@@ -86,8 +88,8 @@ public class ApplyRequest implements ICpgRequest {
         checkNotNull(planDefinition, "expected non-null value for planDefinition");
         checkNotNull(libraryEngine, "expected non-null value for libraryEngine");
         checkNotNull(modelResolver, "expected non-null value for modelResolver");
-        this.planDefinition = planDefinition;
         fhirVersion = planDefinition.getStructureFhirVersionEnum();
+        planDefinitionAdapter = getAdapterFactory().createPlanDefinition(planDefinition);
         this.subjectId = subjectId;
         this.encounterId = encounterId;
         this.practitionerId = practitionerId;
@@ -118,7 +120,7 @@ public class ApplyRequest implements ICpgRequest {
                         this.parameters,
                         this.useServerData,
                         this.data);
-        defaultLibraryUrl = resolveDefaultLibraryUrl();
+        referencedLibraries = planDefinitionAdapter.getReferencedLibraries();
         requestResources = new ArrayList<>();
         extractedResources = new ArrayList<>();
         containResources = false;
@@ -169,7 +171,7 @@ public class ApplyRequest implements ICpgRequest {
 
     public GenerateRequest toGenerateRequest(IBaseResource profile) {
         return new GenerateRequest(profile, false, true, libraryEngine, modelResolver)
-                .setDefaultLibraryUrl(defaultLibraryUrl)
+                .setReferencedLibraries(referencedLibraries)
                 .setQuestionnaire(questionnaire);
     }
 
@@ -181,11 +183,11 @@ public class ApplyRequest implements ICpgRequest {
             var code = lc.getExtension().stream()
                     .map(c -> (IBaseExtension<?, ?>) c)
                     .filter(c -> c.getUrl().equals("name"))
-                    .map(c -> resolvePathString(c.getValue(), "code"))
+                    .map(c -> resolvePathString(c.getValue(), "code").toUpperCase())
                     .findFirst()
                     .orElse(null);
             String value = null;
-            switch (Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT_CODE.valueOf(code.toUpperCase())) {
+            switch (Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT_CODE.valueOf(code)) {
                 case PATIENT:
                     value = subjectId.getValue();
                     break;
@@ -209,7 +211,7 @@ public class ApplyRequest implements ICpgRequest {
     }
 
     public IBaseResource getPlanDefinition() {
-        return planDefinition;
+        return planDefinitionAdapter.get();
     }
 
     @Override
@@ -273,6 +275,12 @@ public class ApplyRequest implements ICpgRequest {
     }
 
     @Override
+    public Map<String, Object> getRawParameters() {
+        // TODO: do this
+        return null;
+    }
+
+    @Override
     public LibraryEngine getLibraryEngine() {
         return libraryEngine;
     }
@@ -288,8 +296,8 @@ public class ApplyRequest implements ICpgRequest {
     }
 
     @Override
-    public String getDefaultLibraryUrl() {
-        return defaultLibraryUrl;
+    public Map<String, String> getReferencedLibraries() {
+        return referencedLibraries;
     }
 
     @Override
@@ -308,7 +316,7 @@ public class ApplyRequest implements ICpgRequest {
     }
 
     @Override
-    public IBase getContext() {
+    public IBase getContextVariable() {
         return getPlanDefinition();
     }
 
@@ -358,17 +366,12 @@ public class ApplyRequest implements ICpgRequest {
     }
 
     public IBaseParameters transformRequestParameters(IBaseResource resource) {
-        switch (fhirVersion) {
-            case DSTU3:
-                return transformRequestParametersDstu3(resource);
-            case R4:
-                return transformRequestParametersR4(resource);
-            case R5:
-                return transformRequestParametersR5(resource);
-
-            default:
-                return null;
-        }
+        return switch (getFhirVersion()) {
+            case DSTU3 -> transformRequestParametersDstu3(resource);
+            case R4 -> transformRequestParametersR4(resource);
+            case R5 -> transformRequestParametersR5(resource);
+            default -> null;
+        };
     }
 
     protected IBaseParameters transformRequestParametersDstu3(IBaseResource resource) {
@@ -468,33 +471,5 @@ public class ApplyRequest implements ICpgRequest {
         }
 
         return params;
-    }
-
-    protected final String resolveDefaultLibraryUrl() {
-        switch (fhirVersion) {
-            case DSTU3:
-                return ((org.hl7.fhir.dstu3.model.PlanDefinition) planDefinition).hasLibrary()
-                        ? ((org.hl7.fhir.dstu3.model.PlanDefinition) planDefinition)
-                                .getLibrary()
-                                .get(0)
-                                .getReference()
-                        : null;
-            case R4:
-                return ((org.hl7.fhir.r4.model.PlanDefinition) planDefinition).hasLibrary()
-                        ? ((org.hl7.fhir.r4.model.PlanDefinition) planDefinition)
-                                .getLibrary()
-                                .get(0)
-                                .getValueAsString()
-                        : null;
-            case R5:
-                return ((org.hl7.fhir.r5.model.PlanDefinition) planDefinition).hasLibrary()
-                        ? ((org.hl7.fhir.r5.model.PlanDefinition) planDefinition)
-                                .getLibrary()
-                                .get(0)
-                                .getValueAsString()
-                        : null;
-            default:
-                return null;
-        }
     }
 }

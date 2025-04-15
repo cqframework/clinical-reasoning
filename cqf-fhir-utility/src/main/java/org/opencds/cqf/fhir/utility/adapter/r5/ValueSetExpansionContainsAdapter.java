@@ -58,4 +58,14 @@ public class ValueSetExpansionContainsAdapter implements IValueSetExpansionConta
     public String getSystem() {
         return get().getSystem();
     }
+
+    @Override
+    public boolean hasDisplay() {
+        return get().hasDisplay();
+    }
+
+    @Override
+    public String getDisplay() {
+        return get().getDisplay();
+    }
 }

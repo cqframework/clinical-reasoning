@@ -73,8 +73,8 @@ class QuestionnaireProcessorTests {
                 .parameters(newParameters(fhirContextR4, newStringPart(fhirContextR4, "ClaimId", "OPA-Claim1")))
                 .thenPopulate(true)
                 .hasItems(2)
-                .itemHasAnswerValue("1.1", new org.hl7.fhir.r4.model.StringType("Acme Clinic"))
-                .hasNoErrors();
+                .hasNoErrors()
+                .itemHasAnswerValue("1.1", new org.hl7.fhir.r4.model.StringType("Acme Clinic"));
     }
 
     @Test
@@ -150,9 +150,9 @@ class QuestionnaireProcessorTests {
                                 newPart(fhirContextR4, "Reference", "content", "Patient/OPA-Patient1"))))
                 .thenPopulate(true)
                 .hasItems(14)
+                .hasNoErrors()
                 .itemHasAnswer("family-name")
-                .itemHasAnswer("provider-name")
-                .hasNoErrors();
+                .itemHasAnswer("provider-name");
     }
 
     @Test

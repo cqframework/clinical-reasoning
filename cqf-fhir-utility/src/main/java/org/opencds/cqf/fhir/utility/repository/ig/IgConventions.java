@@ -221,7 +221,14 @@ public final class IgConventions {
                 return false;
             }
 
-            return contents.toUpperCase().contains(String.format("\"RESOURCETYPE\": \"%s\"", claimedFhirType.name()));
+            var filename = file.getName();
+            var fileNameWithoutExtension = filename.substring(0, filename.lastIndexOf("."));
+            // Check that the contents contain the claimed type, and that the id is not the same as the filename
+            // NOTE: This does not work for XML files.
+            return contents.toUpperCase().contains(String.format("\"RESOURCETYPE\": \"%s\"", claimedFhirType.name()))
+                    && !contents.toUpperCase()
+                            .contains(String.format("\"ID\": \"%s\"", fileNameWithoutExtension.toUpperCase()));
+
         } catch (IOException e) {
             return false;
         }

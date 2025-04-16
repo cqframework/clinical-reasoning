@@ -14,7 +14,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -110,17 +109,6 @@ public class LibraryEngine {
         return String.format("FHIR.%s", fhirType);
     }
 
-    protected String getLibraryName(String expression) {
-        var uuid = UUID.nameUUIDFromBytes(expression.getBytes()).toString();
-        var sb = new StringBuilder();
-        for (var c : uuid.toCharArray()) {
-            if (Character.isLetter(c)) {
-                sb.append(c);
-            }
-        }
-        return sb.toString();
-    }
-
     public IBaseParameters evaluateExpression(
             String expression,
             IBaseParameters parameters,
@@ -149,20 +137,16 @@ public class LibraryEngine {
         if (expression.contains("%context")) {
             expression = expression.replace("%context", "%fhirpathcontext");
         }
-        // var libraryName = "expression";
-        var libraryName = getLibraryName(expression);
+        var libraryName = "expression";
         var libraryVersion = "1.0.0";
         var cql = libraryConstructor.constructCqlLibrary(
                 libraryName, libraryVersion, expression, referencedLibraries, cqlParameters);
         Set<String> expressions = new HashSet<>();
         expressions.add("return");
 
-        //        var requestSettings = new EvaluationSettings(settings);
-        //        requestSettings.getLibrarySourceProviders().add(new
-        // StringLibrarySourceProvider(Lists.newArrayList(cql)));
-        //        var engine = Engines.forRepository(repository, requestSettings, bundle);
-        settings.getLibrarySourceProviders().add(new StringLibrarySourceProvider(Lists.newArrayList(cql)));
-        var engine = Engines.forRepository(repository, settings, bundle);
+        var requestSettings = new EvaluationSettings(settings);
+        requestSettings.getLibrarySourceProviders().add(new StringLibrarySourceProvider(Lists.newArrayList(cql)));
+        var engine = Engines.forRepository(repository, requestSettings, bundle);
 
         var evaluationParameters = cqlFhirParametersConverter.toCqlParameters(parameters);
         if (contextParameter != null) {

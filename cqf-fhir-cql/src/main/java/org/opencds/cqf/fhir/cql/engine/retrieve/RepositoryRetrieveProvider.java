@@ -4,6 +4,7 @@ import static java.util.Objects.requireNonNull;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +17,7 @@ import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.iterable.BundleMappingIterable;
+import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 public class RepositoryRetrieveProvider extends BaseRetrieveProvider {
     private final Repository repository;
@@ -54,10 +56,21 @@ public class RepositoryRetrieveProvider extends BaseRetrieveProvider {
         this.configureProfile(config, dataType, templateId);
         this.configureDates(config, dataType, datePath, dateLowPath, dateHighPath, dateRange);
 
-        var resources = this.repository.search(bt, resourceType, config.searchParams);
+        Map<String, String> headers = headersForContext(context, contextValue);
+
+        var resources = this.repository.search(bt, resourceType, config.searchParams, headers);
 
         var iter = new BundleMappingIterable<>(repository, resources, p -> p.getResource());
         return iter.toStream().filter(config.filter).collect(Collectors.toList());
+    }
+
+    // Create headers for the FHIR compartment search (e.g. X-FHIR-Compartment: Patient/123)
+    private Map<String, String> headersForContext(String context, Object contextValue) {
+        if (context == null || contextValue == null) {
+            return Collections.emptyMap();
+        }
+
+        return Map.of(IgRepository.FHIR_COMPARTMENT_HEADER, context + "/" + contextValue.toString());
     }
 
     private void configureProfile(SearchConfig config, String dataType, String templateId) {

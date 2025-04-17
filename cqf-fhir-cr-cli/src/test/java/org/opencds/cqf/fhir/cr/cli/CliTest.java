@@ -410,8 +410,8 @@ class CliTest {
                 output.contains(
                         "SDE Race=[Code { code: 1586-7, system: urn:oid:2.16.840.1.113883.6.238, version: null, display: Shoshone }, Code { code: 2036-2, system: urn:oid:2.16.840.1.113883.6.238, version: null, display: Filipino }, Code { code: 1735-0, system: urn:oid:2.16.840.1.113883.6.238, version: null, display: Alaska Native }]"));
         assertTrue(output.contains("SDE Payer=[Tuple {\n" + "  code: Concept {\n"
-                 + "\tCode { code: 59, system: urn:oid:2.16.840.1.113883.3.221.5, version: null, display: Other Private Insurance }\n"
-                 + "}\n" + "  period: Interval[2011-05-23, 2012-05-23]\n" + "}]"));
+                + "\tCode { code: 59, system: urn:oid:2.16.840.1.113883.3.221.5, version: null, display: Other Private Insurance }\n"
+                + "}\n" + "  period: Interval[2011-05-23, 2012-05-23]\n" + "}]"));
         assertTrue(
                 output.contains(
                         "SDE Sex=Code { code: M, system: http://hl7.org/fhir/v3/AdministrativeGender, version: null, display: Male }"));
@@ -508,6 +508,30 @@ class CliTest {
         assertTrue(output.contains("Denominator=true"));
         assertTrue(output.contains("Denominator Exclusion=false"));
         assertTrue(output.contains("Numerator=true"));
+    }
+
+    @Test
+    void compartmentalizedTests() {
+        String[] args = new String[] {
+            "cql",
+            "-fv=R4",
+            "-lu=" + testResourcePath + "/compartment/cql",
+            "-ln=Example",
+            "-m=FHIR",
+            "-mu=" + testResourcePath + "/compartment",
+            "-c=Patient",
+            "-cv=123",
+            "-c=Patient",
+            "-cv=456"
+        };
+
+        Main.run(args);
+
+        String output = outContent.toString();
+        assertTrue(output.contains("Patient=Patient(id=123)"));
+        assertTrue(output.contains("Encounters=[Encounter(id=ABC)]"));
+        assertTrue(output.contains("Patient=Patient(id=456)"));
+        assertTrue(output.contains("Encounters=[Encounter(id=DEF)]"));
     }
 
     @Test

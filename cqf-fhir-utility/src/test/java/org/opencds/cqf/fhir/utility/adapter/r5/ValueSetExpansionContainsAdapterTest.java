@@ -31,12 +31,17 @@ class ValueSetExpansionContainsAdapterTest {
     void testCodeAndSystem() {
         var code = "test";
         var system = "test.com";
-        var contains =
-                new ValueSet.ValueSetExpansionContainsComponent().setCode(code).setSystem(system);
+        var display = "Test";
+        var contains = new ValueSet.ValueSetExpansionContainsComponent()
+                .setCode(code)
+                .setSystem(system)
+                .setDisplay(display);
         var adapter = new ValueSetExpansionContainsAdapter(contains);
         assertTrue(adapter.hasCode());
         assertEquals(code, adapter.getCode());
         assertTrue(adapter.hasSystem());
         assertEquals(system, adapter.getSystem());
+        assertTrue(adapter.hasDisplay());
+        assertEquals(display, adapter.getDisplay());
     }
 }

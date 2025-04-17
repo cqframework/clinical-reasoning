@@ -15,6 +15,7 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import org.hl7.fhir.r5.model.CanonicalType;
 import org.hl7.fhir.r5.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r5.model.Extension;
@@ -225,5 +226,16 @@ class PlanDefinitionAdapterTest {
         var adapter = adapterFactory.createPlanDefinition(planDef);
         assertTrue(adapter.hasAction());
         assertEquals(action, adapter.getAction().get(0).get());
+    }
+
+    @Test
+    void testLibrary() {
+        var planDef = new PlanDefinition();
+        var library = "Library/test";
+        planDef.addLibrary(library);
+        var adapter = (IPlanDefinitionAdapter) adapterFactory.createKnowledgeArtifactAdapter(planDef);
+        assertTrue(adapter.hasLibrary());
+        assertEquals(List.of(library), adapter.getLibrary());
+        assertEquals(Map.of("test", library), adapter.getReferencedLibraries());
     }
 }

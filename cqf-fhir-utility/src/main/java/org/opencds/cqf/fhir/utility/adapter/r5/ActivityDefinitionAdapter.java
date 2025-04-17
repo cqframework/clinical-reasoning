@@ -62,11 +62,10 @@ public class ActivityDefinitionAdapter extends KnowledgeArtifactAdapter implemen
                 .toList());
 
         // library[]
-        List<CanonicalType> libraries = getActivityDefinition().getLibrary();
-        for (CanonicalType ct : libraries) {
-            DependencyInfo dependency =
-                    new DependencyInfo(referenceSource, ct.getValue(), ct.getExtension(), ct::setValue);
-            references.add(dependency);
+        if (hasLibrary()) {
+            for (var ct : getActivityDefinition().getLibrary()) {
+                references.add(new DependencyInfo(referenceSource, ct.getValue(), ct.getExtension(), ct::setValue));
+            }
         }
 
         return references;

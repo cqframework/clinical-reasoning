@@ -1,7 +1,7 @@
 package org.opencds.cqf.fhir.utility.adapter.r5;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -38,9 +38,18 @@ class CodingAdapterTest {
         var adapter = adapterFactory.createCoding(coding);
         assertTrue(adapter.hasCode());
         assertEquals(code, adapter.getCode());
+        var newCode = "test2";
+        adapter.setCode(newCode);
+        assertEquals(newCode, adapter.getCode());
         assertTrue(adapter.hasDisplay());
         assertEquals(display, adapter.getDisplay());
+        var newDisplay = "Test2";
+        adapter.setDisplay(newDisplay);
+        assertEquals(newDisplay, adapter.getDisplay());
         assertTrue(adapter.hasSystem());
         assertEquals(system, adapter.getSystem());
+        var newSystem = "test2.com";
+        adapter.setSystem(newSystem);
+        assertEquals(newSystem, adapter.getSystem());
     }
 }

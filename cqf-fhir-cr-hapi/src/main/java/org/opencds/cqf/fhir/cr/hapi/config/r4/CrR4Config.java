@@ -2,13 +2,12 @@ package org.opencds.cqf.fhir.cr.hapi.config.r4;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.rest.api.server.IRepositoryFactory;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import java.util.Arrays;
 import java.util.Map;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cr.cpg.r4.R4CqlExecutionService;
-import org.opencds.cqf.fhir.cr.hapi.common.IRepositoryFactory;
-import org.opencds.cqf.fhir.cr.hapi.common.RepositoryFactoryForRepositoryInterface;
 import org.opencds.cqf.fhir.cr.hapi.common.StringTimePeriodHandler;
 import org.opencds.cqf.fhir.cr.hapi.config.CrBaseConfig;
 import org.opencds.cqf.fhir.cr.hapi.config.ProviderLoader;
@@ -47,7 +46,7 @@ public class CrR4Config {
 
     @Bean
     R4MeasureEvaluatorSingleFactory r4MeasureServiceFactory(
-            RepositoryFactoryForRepositoryInterface repositoryFactory,
+            IRepositoryFactory repositoryFactory,
             MeasureEvaluationOptions evaluationOptions,
             MeasurePeriodValidator measurePeriodValidator,
             R4MeasureServiceUtilsFactory r4MeasureServiceUtilsFactory) {
@@ -83,7 +82,7 @@ public class CrR4Config {
 
     @Bean
     R4MeasureServiceUtilsFactory r4MeasureServiceUtilsFactory(
-            RepositoryFactoryForRepositoryInterface repositoryFactory) {
+            IRepositoryFactory repositoryFactory) {
         return requestDetails -> new R4MeasureServiceUtils(repositoryFactory.create(requestDetails));
     }
 

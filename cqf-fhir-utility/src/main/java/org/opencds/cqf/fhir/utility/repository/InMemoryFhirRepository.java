@@ -29,7 +29,6 @@ import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.Ids;
@@ -222,8 +221,7 @@ public class InMemoryFhirRepository implements Repository {
                                 version, BundleHelper.newResponseWithLocation(version, location)));
             } else if (BundleHelper.isEntryRequestDelete(version, e)) {
                 if (BundleHelper.getEntryRequestId(version, e).isPresent()) {
-                    var resourceType = Canonicals.getResourceType(
-                            ((BundleEntryComponent) e).getRequest().getUrl());
+                    var resourceType = Canonicals.getResourceType(BundleHelper.getEntryRequestUrl(version, e));
                     var resourceClass =
                             this.context.getResourceDefinition(resourceType).getImplementingClass();
                     var res = this.delete(

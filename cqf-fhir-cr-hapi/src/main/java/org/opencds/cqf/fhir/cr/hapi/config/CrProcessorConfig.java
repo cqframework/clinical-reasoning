@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.hapi.config;
 
+import ca.uhn.fhir.rest.api.server.IRepositoryFactory;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cr.activitydefinition.ActivityDefinitionProcessor;
 import org.opencds.cqf.fhir.cr.hapi.common.*;

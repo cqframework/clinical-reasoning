@@ -110,7 +110,7 @@ public class Libraries {
         checkArgument(library.fhirType().equals(LIBRARY_RESOURCE_TYPE));
 
         LibraryFunctions libraryFunctions = getFunctions(library);
-        return libraryFunctions.getVersion().apply(library);
+        return libraryFunctions.getName().apply(library);
     }
 
     public static final class LibraryFunctions {

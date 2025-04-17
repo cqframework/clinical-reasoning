@@ -77,4 +77,22 @@ class LibrariesTest {
 
         assertNull(version);
     }
+
+    @Test
+    void libraryWithNameReturnsName() {
+        Library library = new Library().setName("test");
+
+        String name = Libraries.getName(library);
+
+        assertEquals("test", name);
+    }
+
+    @Test
+    void libraryNoNameReturnsNull() {
+        Library library = new Library();
+
+        String name = Libraries.getName(library);
+
+        assertNull(name);
+    }
 }

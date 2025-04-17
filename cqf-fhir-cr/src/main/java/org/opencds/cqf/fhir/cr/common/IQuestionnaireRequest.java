@@ -52,7 +52,6 @@ public interface IQuestionnaireRequest extends ICqlOperationRequest {
 
     @SuppressWarnings("unchecked")
     default void addCqlLibraryExtension() {
-        // addCqlLibraryExtension(null);
         getReferencedLibraries().values().forEach(library -> {
             if (StringUtils.isNotBlank(library)
                     && getExtensionsByUrl(getQuestionnaire(), Constants.CQF_LIBRARY).stream()

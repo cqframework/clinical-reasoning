@@ -66,7 +66,6 @@ public class ProcessItemWithContext extends ProcessItem {
                 request, item.getExtension(), Constants.SDC_QUESTIONNAIRE_ITEM_POPULATION_CONTEXT);
         List<IBaseResource> populationContext;
         try {
-            // var inputParams = request.getParameters();
             populationContext =
                     expressionProcessor
                             .getExpressionResultForItem(request, contextExpression, itemLinkId, null, null)

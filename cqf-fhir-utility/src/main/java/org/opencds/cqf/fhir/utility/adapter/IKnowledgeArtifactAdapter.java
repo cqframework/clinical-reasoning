@@ -281,6 +281,15 @@ public interface IKnowledgeArtifactAdapter extends IResourceAdapter {
                 .collect(Collectors.toList());
     }
 
+    default <T extends ICompositeType & IBaseHasExtensions> void addRelatedArtifact(T relatedArtifact) {
+        try {
+            getModelResolver().setValue(get(), "relatedArtifact", List.of(relatedArtifact));
+        } catch (Exception e) {
+            // Do nothing
+            logger.debug("Field 'relatedArtifact' does not exist on Resource type {}", get().fhirType());
+        }
+    }
+
     default <T extends ICompositeType & IBaseHasExtensions> void setRelatedArtifact(List<T> relatedArtifacts) {
         try {
             getModelResolver().setValue(get(), "relatedArtifact", null);

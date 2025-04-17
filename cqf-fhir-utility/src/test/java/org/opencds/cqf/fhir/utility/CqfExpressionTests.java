@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.util.Map;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
+import org.hl7.fhir.r4.model.Expression;
 import org.junit.jupiter.api.Test;
 
 class CqfExpressionTests {
@@ -139,17 +140,18 @@ class CqfExpressionTests {
         assertEquals(libraryUrl1, result);
     }
 
-    //    @Test
-    //    void testMultipleLibraryReferences() {
-    //        var library1 = "TestLibrary1";
-    //        var libraryUrl1 = "http://fhir.test/Library/TestLibrary1";
-    //        var library2 = "TestLibrary2";
-    //        var libraryUrl2 = "http://fhir.test/Library/TestLibrary2";
-    //        var expression = new CqfExpression(
-    //            "text/cql-expression",
-    //            "TestLibrary1.testExpression",
-    //            Map.of(library1, libraryUrl1, library2, libraryUrl2));
-    //        var result = expression.getLibraryUrl();
-    //        assertEquals(libraryUrl1, result);
-    //    }
+    @Test
+    void testMultipleLibraryReferences() {
+        var library1 = "TestLibrary1";
+        var libraryUrl1 = "http://fhir.test/Library/TestLibrary1";
+        var library2 = "TestLibrary2";
+        var libraryUrl2 = "http://fhir.test/Library/TestLibrary2";
+        var expression = new Expression()
+                .setLanguage("text/cql-identifier")
+                .setExpression("testExpression")
+                .setReference(libraryUrl1);
+        var cqfExpression = CqfExpression.of(expression, Map.of(library1, libraryUrl1, library2, libraryUrl2));
+        var result = cqfExpression.getLibraryUrl();
+        assertEquals(libraryUrl1, result);
+    }
 }

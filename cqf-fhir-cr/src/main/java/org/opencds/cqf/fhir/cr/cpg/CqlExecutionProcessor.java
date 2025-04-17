@@ -16,7 +16,7 @@ import org.opencds.cqf.fhir.utility.Canonicals;
 
 public class CqlExecutionProcessor {
 
-    // TODO: Use a parameter adapter here
+    // Should use a parameter adapter here
     public Map<String, String> resolveIncludedLibraries(List<?> includedLibraries) {
         if (includedLibraries != null) {
             Map<String, String> libraries = new HashMap<>();

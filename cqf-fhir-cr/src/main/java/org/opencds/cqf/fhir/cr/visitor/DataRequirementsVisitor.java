@@ -60,35 +60,35 @@ public class DataRequirementsVisitor extends BaseKnowledgeArtifactVisitor {
                         "forceArtifactVersion", operationParameters)
                 .orElseGet(ArrayList::new);
 
-        ILibraryAdapter library;
+        var library = IAdapterFactory.forFhirContext(fhirContext())
+                .createLibrary(fhirContext().getResourceDefinition("Library").newInstance());
+        library.setName("EffectiveDataRequirements");
+        library.setStatus(adapter.getStatus());
+        library.setType("module-definition");
         var referencedLibraries = adapter.retrieveReferencedLibraries(repository);
-        // var primaryLibrary = adapter.getPrimaryLibrary(repository);
         if (!referencedLibraries.isEmpty()) {
             var libraryManager = createLibraryManager();
-            // TODO: Handle multiple Libraries
-            // referencedLibraries.forEach((k, v) -> );
-            var primaryLibrary = referencedLibraries.values().stream().toList().get(0);
-            CqlTranslator translator = translateLibrary(primaryLibrary.get(), libraryManager);
-            var cqlFhirParametersConverter = Engines.getCqlFhirParametersConverter(fhirContext());
-            var evaluationParameters =
-                    parameters.map(cqlFhirParametersConverter::toCqlParameters).orElse(null);
+            referencedLibraries.forEach((k, v) -> {
+                var primaryLibrary =
+                        referencedLibraries.values().stream().toList().get(0);
+                CqlTranslator translator = translateLibrary(primaryLibrary.get(), libraryManager);
+                var cqlFhirParametersConverter = Engines.getCqlFhirParametersConverter(fhirContext());
+                var evaluationParameters = parameters
+                        .map(cqlFhirParametersConverter::toCqlParameters)
+                        .orElse(null);
 
-            var r5Library = dataRequirementsProcessor.gatherDataRequirements(
-                    libraryManager,
-                    translator.getTranslatedLibrary(),
-                    evaluationSettings.getCqlOptions().getCqlCompilerOptions(),
-                    null,
-                    evaluationParameters,
-                    true,
-                    true);
-            library = convertAndCreateAdapter(r5Library);
-        } else {
-            library = IAdapterFactory.forFhirContext(fhirContext())
-                    .createLibrary(
-                            fhirContext().getResourceDefinition("Library").newInstance());
-            library.setName("EffectiveDataRequirements");
-            library.setStatus(adapter.getStatus());
-            library.setType("module-definition");
+                var r5Library = dataRequirementsProcessor.gatherDataRequirements(
+                        libraryManager,
+                        translator.getTranslatedLibrary(),
+                        evaluationSettings.getCqlOptions().getCqlCompilerOptions(),
+                        null,
+                        evaluationParameters,
+                        true,
+                        true);
+                var convertedLibrary = convertAndCreateAdapter(r5Library);
+                convertedLibrary.getDataRequirement().forEach(dataReq -> library.addDataRequirement(dataReq.get()));
+                convertedLibrary.getRelatedArtifact().forEach(library::addRelatedArtifact);
+            });
         }
         var gatheredResources = new HashMap<String, IKnowledgeArtifactAdapter>();
         var relatedArtifacts = stripInvalid(library);

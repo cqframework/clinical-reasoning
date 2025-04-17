@@ -88,7 +88,6 @@ class ActivityDefinitionProcessorTests {
                 null,
                 null,
                 null,
-                false,
                 null,
                 libraryEngine);
         assertEquals("apply", request.getOperationName());

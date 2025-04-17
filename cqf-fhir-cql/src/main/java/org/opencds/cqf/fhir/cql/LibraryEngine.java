@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
 
 public class LibraryEngine {
 
-    private static Logger logger = LoggerFactory.getLogger(LibraryEngine.class);
+    private static final Logger logger = LoggerFactory.getLogger(LibraryEngine.class);
 
     protected final Repository repository;
     protected final FhirContext fhirContext;
@@ -121,9 +121,10 @@ public class LibraryEngine {
         var libraryConstructor = new LibraryConstructor(fhirContext);
         var cqlFhirParametersConverter = Engines.getCqlFhirParametersConverter(fhirContext);
         var cqlParameters = cqlFhirParametersConverter.toCqlParameterDefinitions(parameters);
+        var fhirPathContextName = "%fhirpathcontext";
         if (contextParameter != null) {
             var contextType = getModelName(contextParameter);
-            cqlParameters.add(new CqlParameterDefinition("%fhirpathcontext", contextType, false));
+            cqlParameters.add(new CqlParameterDefinition(fhirPathContextName, contextType, false));
             var resourceType = resourceParameter == null ? contextType : getModelName(resourceParameter);
             cqlParameters.add(new CqlParameterDefinition("%resource", resourceType, false));
         }
@@ -135,7 +136,7 @@ public class LibraryEngine {
         // This bit of hackery finds any uses of %context in the expression being evaluated and switches it to
         // fhirpathcontext to allow for successful evaluation.
         if (expression.contains("%context")) {
-            expression = expression.replace("%context", "%fhirpathcontext");
+            expression = expression.replace("%context", fhirPathContextName);
         }
         var libraryName = "expression";
         var libraryVersion = "1.0.0";
@@ -150,7 +151,7 @@ public class LibraryEngine {
 
         var evaluationParameters = cqlFhirParametersConverter.toCqlParameters(parameters);
         if (contextParameter != null) {
-            evaluationParameters.put("%fhirpathcontext", contextParameter);
+            evaluationParameters.put(fhirPathContextName, contextParameter);
             evaluationParameters.put("%resource", resourceParameter == null ? contextParameter : resourceParameter);
         }
         if (rawParameters != null) {

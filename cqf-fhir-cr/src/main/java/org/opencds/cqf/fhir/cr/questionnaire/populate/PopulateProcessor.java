@@ -71,7 +71,8 @@ public class PopulateProcessor implements IPopulateProcessor {
     }
 
     protected List<IBaseBackboneElement> populateItem(PopulateRequest request, IBaseBackboneElement item) {
-        logger.info("Processing item {}", request.getItemLinkId(item));
+        var linkId = request.getItemLinkId(item);
+        logger.info("Processing item {}", linkId);
         var populationContextExt = item.getExtension().stream()
                 .filter(e -> e.getUrl().equals(Constants.SDC_QUESTIONNAIRE_ITEM_POPULATION_CONTEXT))
                 .findFirst()

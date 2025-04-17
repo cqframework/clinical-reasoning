@@ -34,8 +34,6 @@ public interface IOperationRequest {
         return getRepository().fhirContext();
     }
 
-    //    String getDefaultLibraryUrl();
-
     Map<String, String> getReferencedLibraries();
 
     IBaseOperationOutcome getOperationOutcome();

@@ -28,7 +28,7 @@ public class R4CqlExecutionService {
         this.evaluationSettings = evaluationSettings;
     }
 
-    // TODO: use adapters to make this version agnostic
+    // should use adapters to make this version agnostic
     public Parameters evaluate(
             // RequestDetails requestDetails,
             String subject,

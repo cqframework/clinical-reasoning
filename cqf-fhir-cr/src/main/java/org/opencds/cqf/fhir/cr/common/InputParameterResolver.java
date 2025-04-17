@@ -7,7 +7,6 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
@@ -22,6 +21,7 @@ import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Resources;
 import org.opencds.cqf.fhir.utility.SearchHelper;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
+import org.opencds.cqf.fhir.utility.adapter.IDataRequirementAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IParametersParameterComponentAdapter;
 import org.opencds.cqf.fhir.utility.repository.FederatedRepository;
@@ -177,7 +177,7 @@ public class InputParameterResolver implements IInputParameterResolver {
                                         .equals(name)))
                         .flatMap(c ->
                                 c.getPart().stream().filter(p -> p.getName().equals("content")))
-                        .collect(Collectors.toList());
+                        .toList();
     }
 
     protected List<IBaseResource> getValue(List<String> types, List<IParametersParameterComponentAdapter> content) {
@@ -205,7 +205,7 @@ public class InputParameterResolver implements IInputParameterResolver {
                     }
                 })
                 .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public IBaseParameters getParameters() {
@@ -229,40 +229,42 @@ public class InputParameterResolver implements IInputParameterResolver {
 
             var parameter = adapterFactory.createParametersParameter(
                     (IBaseBackboneElement) newPart(fhirContext(), "%" + String.format("%s", req.getId())));
-            for (var filter : req.getCodeFilter()) {
-                if (filter != null && filter.hasPath() && filter.hasValueSet()) {
-                    try {
-                        var valueSet = adapterFactory.createValueSet(
-                                SearchHelper.searchRepositoryByCanonical(repository, filter.getValueSet()));
-                        var codes = valueSet.getExpansionContains().stream()
-                                .map(c -> adapterFactory
-                                        .createCoding(
-                                                (ICompositeType) Resources.newBaseForVersion("Coding", fhirVersion()))
-                                        .setCode(c.getCode())
-                                        .setSystem(c.getSystem())
-                                        .setDisplay(c.getDisplay()))
-                                .toList();
-
-                        var searchBuilder = Searches.builder();
-                        codes.forEach(c -> searchBuilder.withTokenParam("code", c.getCode()));
-                        var resourceType = fhirContext()
-                                .getResourceDefinition(req.getType())
-                                .getImplementingClass();
-                        var searchResults = SearchHelper.searchRepositoryWithPaging(
-                                repository, resourceType, searchBuilder.build(), null);
-                        if (!BundleHelper.getEntry(searchResults).isEmpty()) {
-                            parameter.setResource(
-                                    BundleHelper.getEntry(searchResults).size() > 1
-                                            ? searchResults
-                                            : BundleHelper.getEntryResourceFirstRep(searchResults));
-                        }
-                    } catch (Exception e) {
-                        logger.debug("Could not find ValueSet with url {} on the local server.", filter.getValueSet());
-                    }
-                }
-            }
+            resolveCodeFilters(req, parameter);
             params.addParameter(parameter.get());
         }
         return (IBaseParameters) params.get();
+    }
+
+    private void resolveCodeFilters(IDataRequirementAdapter req, IParametersParameterComponentAdapter parameter) {
+        for (var filter : req.getCodeFilter()) {
+            if (filter != null && filter.hasPath() && filter.hasValueSet()) {
+                try {
+                    var valueSet = adapterFactory.createValueSet(
+                            SearchHelper.searchRepositoryByCanonical(repository, filter.getValueSet()));
+                    var codes = valueSet.getExpansionContains().stream()
+                            .map(c -> adapterFactory
+                                    .createCoding((ICompositeType) Resources.newBaseForVersion("Coding", fhirVersion()))
+                                    .setCode(c.getCode())
+                                    .setSystem(c.getSystem())
+                                    .setDisplay(c.getDisplay()))
+                            .toList();
+
+                    var searchBuilder = Searches.builder();
+                    codes.forEach(c -> searchBuilder.withTokenParam("code", c.getCode()));
+                    var resourceType =
+                            fhirContext().getResourceDefinition(req.getType()).getImplementingClass();
+                    var searchResults = SearchHelper.searchRepositoryWithPaging(
+                            repository, resourceType, searchBuilder.build(), null);
+                    if (!BundleHelper.getEntry(searchResults).isEmpty()) {
+                        parameter.setResource(
+                                BundleHelper.getEntry(searchResults).size() > 1
+                                        ? searchResults
+                                        : BundleHelper.getEntryResourceFirstRep(searchResults));
+                    }
+                } catch (Exception e) {
+                    logger.debug("Could not find ValueSet with url {} on the local server.", filter.getValueSet());
+                }
+            }
+        }
     }
 }

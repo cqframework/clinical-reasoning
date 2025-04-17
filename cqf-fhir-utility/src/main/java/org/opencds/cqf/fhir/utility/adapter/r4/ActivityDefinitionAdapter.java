@@ -6,7 +6,6 @@ import static java.util.stream.Collectors.toMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.CanonicalType;
@@ -91,6 +90,6 @@ public class ActivityDefinitionAdapter extends KnowledgeArtifactAdapter implemen
 
     @Override
     public List<String> getLibrary() {
-        return get().getLibrary().stream().map(PrimitiveType::asStringValue).collect(Collectors.toList());
+        return get().getLibrary().stream().map(PrimitiveType::asStringValue).toList();
     }
 }

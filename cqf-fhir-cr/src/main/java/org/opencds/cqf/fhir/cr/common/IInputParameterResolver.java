@@ -18,10 +18,8 @@ public interface IInputParameterResolver {
             IIdType encounterId,
             IIdType practitionerId,
             IBaseParameters parameters,
-            boolean useServerData,
             IBaseBundle data) {
-        return createResolver(
-                repository, subjectId, encounterId, practitionerId, parameters, useServerData, data, null, null);
+        return createResolver(repository, subjectId, encounterId, practitionerId, parameters, data, null, null);
     }
 
     @SuppressWarnings("unchecked")
@@ -31,20 +29,11 @@ public interface IInputParameterResolver {
             IIdType encounterId,
             IIdType practitionerId,
             IBaseParameters parameters,
-            boolean useServerData,
             IBaseBundle data,
             List<IParametersParameterComponentAdapter> context,
             List<IBaseExtension<?, ?>> launchContext) {
         checkNotNull(repository, "expected non-null value for repository");
         return (T) new InputParameterResolver(
-                repository,
-                subjectId,
-                encounterId,
-                practitionerId,
-                parameters,
-                useServerData,
-                data,
-                context,
-                launchContext);
+                repository, subjectId, encounterId, practitionerId, parameters, data, context, launchContext);
     }
 }

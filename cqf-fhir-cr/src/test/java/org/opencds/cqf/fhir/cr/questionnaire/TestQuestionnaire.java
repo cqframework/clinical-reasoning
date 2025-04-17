@@ -154,7 +154,6 @@ public class TestQuestionnaire {
                     launchContext,
                     parameters,
                     data,
-                    useServerData,
                     new LibraryEngine(repository, processor.evaluationSettings),
                     processor.modelResolver);
         }

@@ -122,11 +122,6 @@ public class GenerateRequest implements IQuestionnaireRequest {
     }
 
     @Override
-    public boolean getUseServerData() {
-        throw new UnsupportedOperationException("Unimplemented method 'getUseServerData'");
-    }
-
-    @Override
     public IBaseParameters getParameters() {
         throw new UnsupportedOperationException("Unimplemented method 'getParameters'");
     }

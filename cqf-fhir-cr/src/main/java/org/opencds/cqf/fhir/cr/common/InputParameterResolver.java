@@ -50,31 +50,22 @@ public class InputParameterResolver implements IInputParameterResolver {
             IIdType encounterId,
             IIdType practitionerId,
             IBaseParameters parameters,
-            boolean useServerData,
             IBaseBundle data,
             List<IParametersParameterComponentAdapter> context,
             List<IBaseExtension<?, ?>> launchContext) {
         this.subjectId = subjectId;
         this.encounterId = encounterId;
         this.practitionerId = practitionerId;
-        Repository bundleRepository = null;
-        if (data != null) {
-            bundleRepository = new InMemoryFhirRepository(repository.fhirContext(), data);
-        }
-        this.repository = resolveRepository(useServerData, repository, bundleRepository);
+        this.repository = resolveRepository(repository, data);
         adapterFactory = IAdapterFactory.forFhirContext(this.repository.fhirContext());
         this.parameters = resolveParameters(parameters, context, launchContext);
     }
 
-    protected final Repository resolveRepository(
-            Boolean useServerData, Repository serverRepository, Repository bundleRepository) {
-        if (bundleRepository == null) {
-            return serverRepository;
-        } else {
-            return Boolean.TRUE.equals(useServerData)
-                    ? new FederatedRepository(serverRepository, bundleRepository)
-                    : bundleRepository;
-        }
+    protected final Repository resolveRepository(Repository serverRepository, IBaseBundle data) {
+        return data == null
+                ? serverRepository
+                : new FederatedRepository(
+                        serverRepository, new InMemoryFhirRepository(serverRepository.fhirContext(), data));
     }
 
     protected FhirContext fhirContext() {
@@ -231,44 +222,42 @@ public class InputParameterResolver implements IInputParameterResolver {
             parameters.getParameter().forEach(p -> params.addParameter(p.get()));
         }
         for (var req : dataRequirements) {
-            if (!req.hasId()) {
+            // only resolve requirements that have both an id and code filter
+            if (!req.hasId() || !req.hasCodeFilter()) {
                 continue;
             }
 
             var parameter = adapterFactory.createParametersParameter(
                     (IBaseBackboneElement) newPart(fhirContext(), "%" + String.format("%s", req.getId())));
-            if (req.hasCodeFilter()) {
-                for (var filter : req.getCodeFilter()) {
-                    if (filter != null && filter.hasPath() && filter.hasValueSet()) {
-                        try {
-                            var valueSet = adapterFactory.createValueSet(
-                                    SearchHelper.searchRepositoryByCanonical(repository, filter.getValueSet()));
-                            var codes = valueSet.getExpansionContains().stream()
-                                    .map(c -> adapterFactory
-                                            .createCoding((ICompositeType)
-                                                    Resources.newBaseForVersion("Coding", fhirVersion()))
-                                            .setCode(c.getCode())
-                                            .setSystem(c.getSystem())
-                                            .setDisplay(c.getDisplay()))
-                                    .toList();
+            for (var filter : req.getCodeFilter()) {
+                if (filter != null && filter.hasPath() && filter.hasValueSet()) {
+                    try {
+                        var valueSet = adapterFactory.createValueSet(
+                                SearchHelper.searchRepositoryByCanonical(repository, filter.getValueSet()));
+                        var codes = valueSet.getExpansionContains().stream()
+                                .map(c -> adapterFactory
+                                        .createCoding(
+                                                (ICompositeType) Resources.newBaseForVersion("Coding", fhirVersion()))
+                                        .setCode(c.getCode())
+                                        .setSystem(c.getSystem())
+                                        .setDisplay(c.getDisplay()))
+                                .toList();
 
-                            var searchBuilder = Searches.builder();
-                            codes.forEach(c -> searchBuilder.withTokenParam("code", c.getCode()));
-                            var resourceType = fhirContext()
-                                    .getResourceDefinition(req.getType())
-                                    .getImplementingClass();
-                            var searchResults = SearchHelper.searchRepositoryWithPaging(
-                                    repository, resourceType, searchBuilder.build(), null);
-                            if (!BundleHelper.getEntry(searchResults).isEmpty()) {
-                                parameter.setResource(
-                                        BundleHelper.getEntry(searchResults).size() > 1
-                                                ? searchResults
-                                                : BundleHelper.getEntryResourceFirstRep(searchResults));
-                            }
-                        } catch (Exception e) {
-                            logger.debug(
-                                    "Could not find ValueSet with url {} on the local server.", filter.getValueSet());
+                        var searchBuilder = Searches.builder();
+                        codes.forEach(c -> searchBuilder.withTokenParam("code", c.getCode()));
+                        var resourceType = fhirContext()
+                                .getResourceDefinition(req.getType())
+                                .getImplementingClass();
+                        var searchResults = SearchHelper.searchRepositoryWithPaging(
+                                repository, resourceType, searchBuilder.build(), null);
+                        if (!BundleHelper.getEntry(searchResults).isEmpty()) {
+                            parameter.setResource(
+                                    BundleHelper.getEntry(searchResults).size() > 1
+                                            ? searchResults
+                                            : BundleHelper.getEntryResourceFirstRep(searchResults));
                         }
+                    } catch (Exception e) {
+                        logger.debug("Could not find ValueSet with url {} on the local server.", filter.getValueSet());
                     }
                 }
             }

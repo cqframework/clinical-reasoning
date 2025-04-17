@@ -46,6 +46,8 @@ public class PopulateProcessor implements IPopulateProcessor {
         return request.getQuestionnaireResponse();
     }
 
+    // This method is not currently used but is intended to support variable extensions for evaluation
+    // This work will be done in a separate PR
     protected Map<String, Object> getVariables(PopulateRequest request, IBase element) {
         var variables = new HashMap<String, Object>();
         var expressions = request.getExtensionsByUrl(element, Constants.VARIABLE_EXTENSION).stream()

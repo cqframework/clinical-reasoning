@@ -230,7 +230,6 @@ public class ActivityDefinitionProcessor implements IActivityDefinitionProcessor
                 setting,
                 settingContext,
                 parameters,
-                useServerData,
                 data,
                 libraryEngine,
                 modelResolver);

@@ -30,7 +30,6 @@ public class ApplyRequest implements ICpgRequest {
     private final IBaseDatatype setting;
     private final IBaseDatatype settingContext;
     private final IBaseParameters parameters;
-    private final Boolean useServerData;
     private final IBaseBundle data;
     private final LibraryEngine libraryEngine;
     private final ModelResolver modelResolver;
@@ -51,7 +50,6 @@ public class ApplyRequest implements ICpgRequest {
             IBaseDatatype setting,
             IBaseDatatype settingContext,
             IBaseParameters parameters,
-            boolean useServerData,
             IBaseBundle data,
             LibraryEngine libraryEngine,
             ModelResolver modelResolver) {
@@ -70,7 +68,6 @@ public class ApplyRequest implements ICpgRequest {
         this.setting = setting;
         this.settingContext = settingContext;
         this.parameters = parameters;
-        this.useServerData = useServerData;
         this.data = data;
         this.libraryEngine = libraryEngine;
         this.modelResolver = modelResolver;
@@ -81,7 +78,6 @@ public class ApplyRequest implements ICpgRequest {
                 this.encounterId,
                 this.practitionerId,
                 this.parameters,
-                this.useServerData,
                 this.data);
     }
 
@@ -147,11 +143,6 @@ public class ApplyRequest implements ICpgRequest {
     @Override
     public IBaseBundle getData() {
         return data;
-    }
-
-    @Override
-    public boolean getUseServerData() {
-        return useServerData;
     }
 
     @Override

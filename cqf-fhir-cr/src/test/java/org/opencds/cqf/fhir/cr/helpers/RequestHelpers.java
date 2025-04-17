@@ -118,7 +118,6 @@ public class RequestHelpers {
                 null,
                 null,
                 null,
-                true,
                 null,
                 null,
                 libraryEngine,
@@ -156,7 +155,6 @@ public class RequestHelpers {
                 null,
                 null,
                 null,
-                true,
                 libraryEngine,
                 FhirModelResolverCache.resolverForVersion(fhirVersion));
     }
@@ -172,7 +170,6 @@ public class RequestHelpers {
                 Ids.newId(fhirVersion, Ids.ensureIdType(PATIENT_ID, "Patient")),
                 null,
                 null,
-                true,
                 libraryEngine,
                 FhirModelResolverCache.resolverForVersion(fhirVersion),
                 null);

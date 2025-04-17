@@ -53,7 +53,6 @@ public class ApplyRequest implements ICpgRequest {
     private final IBaseDatatype setting;
     private final IBaseDatatype settingContext;
     private final IBaseParameters parameters;
-    private final boolean useServerData;
     private IBaseBundle data;
     private final LibraryEngine libraryEngine;
     private final ModelResolver modelResolver;
@@ -79,7 +78,6 @@ public class ApplyRequest implements ICpgRequest {
             IBaseDatatype setting,
             IBaseDatatype settingContext,
             IBaseParameters parameters,
-            boolean useServerData,
             IBaseBundle data,
             List<? extends IBaseBackboneElement> prefetchData,
             LibraryEngine libraryEngine,
@@ -100,7 +98,6 @@ public class ApplyRequest implements ICpgRequest {
         this.setting = setting;
         this.settingContext = settingContext;
         this.parameters = parameters;
-        this.useServerData = useServerData;
         if (prefetchData != null && !prefetchData.isEmpty()) {
             if (data == null) {
                 data = newBundle(fhirVersion);
@@ -118,7 +115,6 @@ public class ApplyRequest implements ICpgRequest {
                         this.encounterId,
                         this.practitionerId,
                         this.parameters,
-                        this.useServerData,
                         this.data);
         referencedLibraries = planDefinitionAdapter.getReferencedLibraries();
         requestResources = new ArrayList<>();
@@ -139,7 +135,6 @@ public class ApplyRequest implements ICpgRequest {
                         setting,
                         settingContext,
                         parameters,
-                        useServerData,
                         data,
                         null,
                         libraryEngine,
@@ -163,7 +158,6 @@ public class ApplyRequest implements ICpgRequest {
                 getSetting(),
                 getSettingContext(),
                 getParameters(),
-                getUseServerData(),
                 getData(),
                 libraryEngine,
                 modelResolver);
@@ -207,7 +201,7 @@ public class ApplyRequest implements ICpgRequest {
                     newPart(getFhirContext(), "Reference", "content", value)));
         });
         return new PopulateRequest(
-                questionnaire, subjectId, context, null, parameters, data, useServerData, libraryEngine, modelResolver);
+                questionnaire, subjectId, context, null, parameters, data, libraryEngine, modelResolver);
     }
 
     public IBaseResource getPlanDefinition() {
@@ -262,11 +256,6 @@ public class ApplyRequest implements ICpgRequest {
     @Override
     public IBaseBundle getData() {
         return data;
-    }
-
-    @Override
-    public boolean getUseServerData() {
-        return useServerData;
     }
 
     @Override

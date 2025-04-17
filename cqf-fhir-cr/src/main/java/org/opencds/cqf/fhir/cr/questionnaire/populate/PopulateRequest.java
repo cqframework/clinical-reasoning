@@ -35,7 +35,6 @@ public class PopulateRequest implements IQuestionnaireRequest {
     private final IIdType subjectId;
     private final List<IParametersParameterComponentAdapter> context;
     private final IBaseBundle data;
-    private final boolean useServerData;
     private final LibraryEngine libraryEngine;
     private final ModelResolver modelResolver;
     private final FhirVersionEnum fhirVersion;
@@ -51,7 +50,6 @@ public class PopulateRequest implements IQuestionnaireRequest {
             IBaseExtension<?, ?> launchContext,
             IBaseParameters parameters,
             IBaseBundle data,
-            boolean useServerData,
             LibraryEngine libraryEngine,
             ModelResolver modelResolver) {
         checkNotNull(questionnaire, "expected non-null value for questionnaire");
@@ -67,7 +65,6 @@ public class PopulateRequest implements IQuestionnaireRequest {
                         .collect(Collectors.toList());
         this.subjectId = getSubjectId(subjectId);
         this.data = data;
-        this.useServerData = useServerData;
         this.libraryEngine = libraryEngine;
         this.modelResolver = modelResolver;
         var launchContexts = getExtensionsByUrl(questionnaireAdapter.get(), Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT);
@@ -87,7 +84,6 @@ public class PopulateRequest implements IQuestionnaireRequest {
                 null,
                 null,
                 parameters,
-                this.useServerData,
                 this.data,
                 this.context,
                 launchContexts);
@@ -157,11 +153,6 @@ public class PopulateRequest implements IQuestionnaireRequest {
     @Override
     public IBaseBundle getData() {
         return data;
-    }
-
-    @Override
-    public boolean getUseServerData() {
-        return useServerData;
     }
 
     @Override

@@ -168,7 +168,6 @@ public class ApplyProcessor implements IApplyProcessor {
                             null,
                             request.getParameters(),
                             request.getData(),
-                            request.getUseServerData(),
                             request.getLibraryEngine());
                     for (var entry : getEntry(extractBundle)) {
                         addEntry(request.getData(), entry);

@@ -29,7 +29,6 @@ public class ExtractRequest implements IQuestionnaireRequest {
     private final IIdType subjectId;
     private final IBaseParameters parameters;
     private final IBaseBundle data;
-    private final boolean useServerData;
     private final LibraryEngine libraryEngine;
     private final ModelResolver modelResolver;
     private final FhirContext fhirContext;
@@ -44,7 +43,6 @@ public class ExtractRequest implements IQuestionnaireRequest {
             IIdType subjectId,
             IBaseParameters parameters,
             IBaseBundle bundle,
-            boolean useServerData,
             LibraryEngine libraryEngine,
             ModelResolver modelResolver,
             IInputParameterResolver inputParameterResolver) {
@@ -58,19 +56,11 @@ public class ExtractRequest implements IQuestionnaireRequest {
         this.subjectId = subjectId;
         this.parameters = parameters;
         this.data = bundle;
-        this.useServerData = useServerData;
         this.libraryEngine = libraryEngine;
         this.modelResolver = modelResolver;
         this.inputParameterResolver = inputParameterResolver != null
                 ? inputParameterResolver
-                : createResolver(
-                        libraryEngine.getRepository(),
-                        this.subjectId,
-                        null,
-                        null,
-                        this.parameters,
-                        this.useServerData,
-                        this.data);
+                : createResolver(libraryEngine.getRepository(), this.subjectId, null, null, this.parameters, this.data);
         fhirContext = this.libraryEngine.getRepository().fhirContext();
         referencedLibraries = Map.of();
     }
@@ -157,11 +147,6 @@ public class ExtractRequest implements IQuestionnaireRequest {
     @Override
     public IBaseBundle getData() {
         return data;
-    }
-
-    @Override
-    public boolean getUseServerData() {
-        return useServerData;
     }
 
     @Override

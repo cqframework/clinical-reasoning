@@ -24,8 +24,6 @@ public interface ICqlOperationRequest extends IOperationRequest {
 
     Map<String, Object> getRawParameters();
 
-    boolean getUseServerData();
-
     IBaseBundle getData();
 
     LibraryEngine getLibraryEngine();

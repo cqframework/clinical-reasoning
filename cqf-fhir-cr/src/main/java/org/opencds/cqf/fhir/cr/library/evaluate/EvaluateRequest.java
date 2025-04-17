@@ -144,9 +144,4 @@ public class EvaluateRequest implements ICqlOperationRequest {
     public void setOperationOutcome(IBaseOperationOutcome operationOutcome) {
         this.operationOutcome = operationOutcome;
     }
-
-    @Override
-    public boolean getUseServerData() {
-        return useServerData;
-    }
 }

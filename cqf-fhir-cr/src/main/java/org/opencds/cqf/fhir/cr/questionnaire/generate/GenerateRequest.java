@@ -127,12 +127,6 @@ public class GenerateRequest implements IQuestionnaireRequest {
     }
 
     @Override
-    public Map<String, Object> getRawParameters() {
-        // TODO: do this
-        return null;
-    }
-
-    @Override
     public LibraryEngine getLibraryEngine() {
         return libraryEngine;
     }

@@ -5,7 +5,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -160,11 +159,6 @@ public class PopulateRequest implements IQuestionnaireRequest {
         return (IBaseParameters) getAdapterFactory()
                 .createParameters(inputParameterResolver.getParameters())
                 .copy();
-    }
-
-    @Override
-    public Map<String, Object> getRawParameters() {
-        return new HashMap<>();
     }
 
     @Override

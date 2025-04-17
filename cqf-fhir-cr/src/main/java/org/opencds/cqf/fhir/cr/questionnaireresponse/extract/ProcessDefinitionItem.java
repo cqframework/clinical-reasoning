@@ -14,6 +14,7 @@ import ca.uhn.fhir.context.RuntimeChildChoiceDefinition;
 import ca.uhn.fhir.context.RuntimeChildExtension;
 import ca.uhn.fhir.context.RuntimeChildPrimitiveDatatypeDefinition;
 import ca.uhn.fhir.context.RuntimeChildPrimitiveEnumerationDatatypeDefinition;
+import ca.uhn.fhir.context.RuntimeChildResourceBlockDefinition;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -231,7 +232,8 @@ public class ProcessDefinitionItem {
             var definition = ((IPrimitiveType<String>) definitionExt.getValue()).getValueAsString();
             var value = fixedValueExt != null
                     ? fixedValueExt.getValue()
-                    : expressionProcessor.getExpressionResult(request, CqfExpression.of(expressionExt, null));
+                    : expressionProcessor.getExpressionResult(
+                            request, CqfExpression.of(expressionExt, request.getReferencedLibraries()));
             if (value != null) {
                 var path = getPathAdapter(request, profile, definition);
                 request.getModelResolver().setValue(resource, path.left, value);
@@ -308,6 +310,7 @@ public class ProcessDefinitionItem {
         return stripTypeFromPath(path);
     }
 
+    @SuppressWarnings("unchecked")
     protected void processChildItem(
             ExtractRequest request,
             BaseRuntimeElementDefinition<?> resourceDefinition,
@@ -343,8 +346,12 @@ public class ProcessDefinitionItem {
             var prop = identifiers[identifiers.length - 1];
             var element = repeats ? null : getElement(request, parent, path);
             if (element == null) {
-                if (propertyDefs.get(prop) instanceof BaseRuntimeChildDatatypeDefinition datatypeDef) {
+                var propDef = propertyDefs.get(prop);
+                if (propDef instanceof BaseRuntimeChildDatatypeDefinition datatypeDef) {
                     element = newBase(datatypeDef.getDatatype());
+                } else if (propDef instanceof RuntimeChildResourceBlockDefinition blockDef) {
+                    element = newBase(
+                            blockDef.getChildByName(blockDef.getElementName()).getImplementingClass());
                 } else if (adapter != null) {
                     var elementDef = adapter.getElementByPath(path);
                     element = newBaseForVersion(elementDef.getTypeCode(), request.getFhirVersion());
@@ -360,7 +367,7 @@ public class ProcessDefinitionItem {
                     new ImmutablePair<>(children, request.getItems(itemPair.getItem())),
                     repeats,
                     path);
-            request.getModelResolver().setValue(parent, prop, Arrays.asList(element));
+            request.getModelResolver().setValue(parent, prop, List.of(element));
         } else {
             var answers = request.resolvePathList(itemPair.getResponseItem(), "answer", IBaseBackboneElement.class);
             processItem(

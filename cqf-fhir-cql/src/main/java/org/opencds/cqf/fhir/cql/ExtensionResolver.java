@@ -43,14 +43,11 @@ public class ExtensionResolver {
                 if (valueExtensions != null) {
                     var expressionExtensions = valueExtensions.stream()
                             .filter(e -> e.getUrl() != null && e.getUrl().equals(Constants.CQF_EXPRESSION))
-                            .toList();
-                    if (!expressionExtensions.isEmpty()) {
-                        var expression = expressionExtensions.get(0).getValue();
-                        if (expression != null) {
-                            var result = getExpressionResult(expression, referencedLibraries, resource);
-                            if (result != null) {
-                                extension.setValue(result);
-                            }
+                            .findFirst();
+                    if (expressionExtensions.isPresent()) {
+                        var result = getExpressionResult(expressionExtensions.get(), referencedLibraries, resource);
+                        if (result != null) {
+                            extension.setValue(result);
                         }
                     }
                 }
@@ -58,30 +55,16 @@ public class ExtensionResolver {
         }
     }
 
-    protected IBaseDatatype getExpressionResult(
-            IBaseDatatype expression, Map<String, String> referencedLibraries, IBase resource) {
-        List<IBase> result = null;
-        if (expression instanceof org.hl7.fhir.r4.model.Expression) {
-            result = libraryEngine.resolveExpression(
-                    subjectId.getIdPart(),
-                    CqfExpression.of((org.hl7.fhir.r4.model.Expression) expression, referencedLibraries),
-                    parameters,
-                    null,
-                    bundle,
-                    resource,
-                    null);
-        }
-
-        if (expression instanceof org.hl7.fhir.r5.model.Expression) {
-            result = libraryEngine.resolveExpression(
-                    subjectId.getIdPart(),
-                    CqfExpression.of((org.hl7.fhir.r5.model.Expression) expression, referencedLibraries),
-                    parameters,
-                    null,
-                    bundle,
-                    resource,
-                    null);
-        }
+    protected <E extends IBaseExtension<?, ?>> IBaseDatatype getExpressionResult(
+            E expressionExtension, Map<String, String> referencedLibraries, IBase resource) {
+        var result = libraryEngine.resolveExpression(
+                subjectId.getIdPart(),
+                CqfExpression.of(expressionExtension, referencedLibraries),
+                parameters,
+                null,
+                bundle,
+                resource,
+                null);
 
         return result != null && !result.isEmpty() ? (IBaseDatatype) result.get(0) : null;
     }

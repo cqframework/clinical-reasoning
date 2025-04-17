@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.common;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -22,7 +23,9 @@ public interface ICqlOperationRequest extends IOperationRequest {
 
     IBaseParameters getParameters();
 
-    Map<String, Object> getRawParameters();
+    default Map<String, Object> getRawParameters() {
+        return new HashMap<>();
+    }
 
     IBaseBundle getData();
 

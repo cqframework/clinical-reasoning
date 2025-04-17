@@ -111,11 +111,6 @@ public class EvaluateRequest implements ICqlOperationRequest {
     }
 
     @Override
-    public Map<String, Object> getRawParameters() {
-        return null;
-    }
-
-    @Override
     public LibraryEngine getLibraryEngine() {
         return libraryEngine;
     }

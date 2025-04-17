@@ -56,7 +56,13 @@ public class PopulateProcessor implements IPopulateProcessor {
         expressions.forEach(expression -> {
             try {
                 var result = expressionProcessor.getExpressionResult(request, expression, null, null);
-                variables.put(expression.getName(), result);
+                if (!result.isEmpty()) {
+                    if (result.size() == 1) {
+                        variables.put(expression.getName(), result.get(0));
+                    } else {
+                        variables.put(expression.getName(), result);
+                    }
+                }
             } catch (Exception e) {
                 logger.error("Error encountered evaluating result for variable: {}", expression.getName());
             }

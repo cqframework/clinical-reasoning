@@ -151,12 +151,6 @@ public class ApplyRequest implements ICpgRequest {
     }
 
     @Override
-    public Map<String, Object> getRawParameters() {
-        // TODO: do this
-        return null;
-    }
-
-    @Override
     public LibraryEngine getLibraryEngine() {
         return libraryEngine;
     }
@@ -170,11 +164,6 @@ public class ApplyRequest implements ICpgRequest {
     public FhirVersionEnum getFhirVersion() {
         return fhirVersion;
     }
-
-    //    @Override
-    //    public String getDefaultLibraryUrl() {
-    //        return defaultLibraryUrl;
-    //    }
 
     @Override
     public Map<String, String> getReferencedLibraries() {

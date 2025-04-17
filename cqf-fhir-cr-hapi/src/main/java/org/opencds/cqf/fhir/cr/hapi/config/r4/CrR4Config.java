@@ -81,8 +81,7 @@ public class CrR4Config {
     }
 
     @Bean
-    R4MeasureServiceUtilsFactory r4MeasureServiceUtilsFactory(
-            IRepositoryFactory repositoryFactory) {
+    R4MeasureServiceUtilsFactory r4MeasureServiceUtilsFactory(IRepositoryFactory repositoryFactory) {
         return requestDetails -> new R4MeasureServiceUtils(repositoryFactory.create(requestDetails));
     }
 

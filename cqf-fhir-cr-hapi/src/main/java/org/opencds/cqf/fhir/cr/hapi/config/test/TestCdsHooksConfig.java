@@ -4,7 +4,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
-import ca.uhn.fhir.rest.api.server.IRepositoryFactory;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsConfigService;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsHooksDaoAuthorizationSvc;
@@ -63,7 +62,8 @@ public class TestCdsHooksConfig {
         final CdsServiceRequestJsonDeserializer cdsServiceRequestJsonDeserializer =
                 new CdsServiceRequestJsonDeserializer(fhirContext, objectMapper);
 
-        return new CdsServiceRegistryImpl(cdsHooksContextBooter, cdsPrefetchSvc, objectMapper, cdsServiceRequestJsonDeserializer);
+        return new CdsServiceRegistryImpl(
+                cdsHooksContextBooter, cdsPrefetchSvc, objectMapper, cdsServiceRequestJsonDeserializer);
     }
 
     @Bean

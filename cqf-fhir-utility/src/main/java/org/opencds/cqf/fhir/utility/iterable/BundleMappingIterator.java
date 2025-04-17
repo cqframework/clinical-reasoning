@@ -1,11 +1,11 @@
 package org.opencds.cqf.fhir.utility.iterable;
 
+import ca.uhn.fhir.repository.Repository;
 import ca.uhn.fhir.util.bundle.BundleEntryParts;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.function.Function;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.opencds.cqf.fhir.api.Repository;
 
 public class BundleMappingIterator<B extends IBaseBundle, T> implements Iterator<T> {
 

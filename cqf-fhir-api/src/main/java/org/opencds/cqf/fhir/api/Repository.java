@@ -7,7 +7,6 @@ import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
-import com.google.common.annotations.Beta;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +17,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 /**
+ * @deprecated
  * <p>
  * NOTE: This API is still incubating. In particular, we're looking at ways to provide a fluent
  * pattern for it. The intent is to eventually promote it up to the HAPI FHIR core once all
@@ -67,7 +67,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
  *
  * @see <a href="https://www.hl7.org/fhir/http.html">FHIR REST API</a>
  */
-@Beta
+@Deprecated(since = "3.20.0", forRemoval = true)
 public interface Repository {
 
     // CRUD starts here

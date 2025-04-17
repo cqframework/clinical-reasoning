@@ -7,6 +7,7 @@ import static org.opencds.cqf.fhir.utility.repository.Repositories.createRestRep
 import static org.opencds.cqf.fhir.utility.repository.Repositories.proxy;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.repository.Repository;
 import jakarta.annotation.Nonnull;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
@@ -18,7 +19,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.IRequestResolverFactory;

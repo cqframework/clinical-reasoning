@@ -4,7 +4,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.repository.Repository;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import com.google.common.collect.Multimap;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -15,7 +17,6 @@ import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.opencds.cqf.fhir.api.Repository;
 
 public class ProxyRepository implements Repository {
 
@@ -95,7 +96,7 @@ public class ProxyRepository implements Repository {
     public <B extends IBaseBundle, T extends IBaseResource> B search(
             Class<B> bundleType,
             Class<T> resourceType,
-            Map<String, List<IQueryParameterType>> searchParameters,
+            Multimap<String, List<IQueryParameterType>> searchParameters,
             Map<String, String> headers) {
         if (isTerminologyResource(resourceType.getSimpleName())) {
             return terminology.search(bundleType, resourceType, searchParameters, headers);

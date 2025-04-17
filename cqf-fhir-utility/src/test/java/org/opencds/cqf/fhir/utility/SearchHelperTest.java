@@ -7,9 +7,10 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.repository.Repository;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.opencds.cqf.fhir.api.Repository;
 
 public class SearchHelperTest {
     private Repository R4mockRepository;
@@ -92,7 +93,7 @@ public class SearchHelperTest {
         when(mockRepository.fhirContext()).thenReturn(FhirContext.forR4Cached());
         org.hl7.fhir.r4.model.Bundle bundle = new org.hl7.fhir.r4.model.Bundle();
         bundle.addEntry().setFullUrl(valueSet.getUrl()).setResource(valueSet);
-        when(mockRepository.search(any(), any(), any(), isNull())).thenReturn(bundle);
+        when(mockRepository.search(any(), any(), any(Map.class), isNull())).thenReturn(bundle);
         return mockRepository;
     }
 
@@ -101,7 +102,7 @@ public class SearchHelperTest {
         when(mockRepository.fhirContext()).thenReturn(FhirContext.forR5Cached());
         org.hl7.fhir.r5.model.Bundle bundle = new org.hl7.fhir.r5.model.Bundle();
         bundle.addEntry().setFullUrl(valueSet.getUrl()).setResource(valueSet);
-        when(mockRepository.search(any(), any(), any(), isNull())).thenReturn(bundle);
+        when(mockRepository.search(any(), any(), any(Map.class), isNull())).thenReturn(bundle);
         return mockRepository;
     }
 
@@ -110,7 +111,7 @@ public class SearchHelperTest {
         when(mockRepository.fhirContext()).thenReturn(FhirContext.forDstu3Cached());
         org.hl7.fhir.dstu3.model.Bundle bundle = new org.hl7.fhir.dstu3.model.Bundle();
         bundle.addEntry().setFullUrl(valueSet.getUrl()).setResource(valueSet);
-        when(mockRepository.search(any(), any(), any(), isNull())).thenReturn(bundle);
+        when(mockRepository.search(any(), any(), any(Map.class), isNull())).thenReturn(bundle);
         return mockRepository;
     }
 }

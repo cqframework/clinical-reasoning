@@ -6,6 +6,7 @@ import static org.opencds.cqf.fhir.utility.ValueSets.getCodesInExpansion;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.repository.Repository;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Date;
@@ -15,7 +16,6 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.Parameters;

@@ -7,6 +7,7 @@ import static org.opencds.cqf.fhir.utility.adapter.IAdapter.newStringType;
 import static org.opencds.cqf.fhir.utility.adapter.IAdapter.newUriType;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.repository.Repository;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.Date;
 import java.util.List;
@@ -24,7 +25,6 @@ import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Versions;
 import org.slf4j.Logger;

@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.utility.r5;
 
+import ca.uhn.fhir.repository.Repository;
 import java.util.List;
 import java.util.function.Consumer;
 import org.hl7.fhir.r5.model.ActivityDefinition;
@@ -9,7 +10,6 @@ import org.hl7.fhir.r5.model.Library;
 import org.hl7.fhir.r5.model.Measure;
 import org.hl7.fhir.r5.model.PlanDefinition;
 import org.hl7.fhir.r5.model.ValueSet;
-import org.opencds.cqf.fhir.api.Repository;
 
 public class MetadataResourceHelper {
     public static void forEachMetadataResource(

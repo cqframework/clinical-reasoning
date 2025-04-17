@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cr.inputparameters.r4;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.parameters;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.part;
 
+import ca.uhn.fhir.repository.Repository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,7 +24,6 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.ValueSet;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.inputparameters.BaseInputParameterResolver;
 import org.opencds.cqf.fhir.utility.adapter.IParametersParameterComponentAdapter;
 import org.opencds.cqf.fhir.utility.search.Searches;

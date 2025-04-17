@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.utility.r5;
 
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.repository.Repository;
 import java.util.List;
 import java.util.Map;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -9,7 +10,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.Resource;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.search.Searches;
 

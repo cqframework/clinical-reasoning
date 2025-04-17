@@ -2,9 +2,11 @@ package org.opencds.cqf.fhir.utility.repository;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.repository.Repository;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.BundleBuilder;
+import com.google.common.collect.Multimap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -15,7 +17,6 @@ import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.iterable.BundleIterator;
 
 // wip
@@ -89,7 +90,7 @@ public class FederatedRepository implements Repository {
             Repository repository,
             Class<B> bundleType,
             Class<T> resourceType,
-            Map<String, List<IQueryParameterType>> searchParameters,
+            Multimap<String, List<IQueryParameterType>> searchParameters,
             Map<String, String> headers) {
         List<T> results = new ArrayList<>();
         var bundle = repository.search(bundleType, resourceType, searchParameters, headers);
@@ -102,7 +103,7 @@ public class FederatedRepository implements Repository {
     public <B extends IBaseBundle, T extends IBaseResource> B search(
             Class<B> bundleType,
             Class<T> resourceType,
-            Map<String, List<IQueryParameterType>> searchParameters,
+            Multimap<String, List<IQueryParameterType>> searchParameters,
             Map<String, String> headers) {
         // Search all repositories and return combined results.
         var builder = new BundleBuilder(fhirContext());

@@ -1,10 +1,10 @@
 package org.opencds.cqf.fhir.utility.repository;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.repository.Repository;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import org.apache.commons.lang3.NotImplementedException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.client.Clients;
 import org.opencds.cqf.fhir.utility.matcher.ResourceMatcher;
 import org.opencds.cqf.fhir.utility.matcher.ResourceMatcherDSTU3;

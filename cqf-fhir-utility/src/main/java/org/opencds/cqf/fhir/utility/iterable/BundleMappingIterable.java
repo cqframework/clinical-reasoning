@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.utility.iterable;
 
+import ca.uhn.fhir.repository.Repository;
 import ca.uhn.fhir.util.bundle.BundleEntryParts;
 import java.util.Iterator;
 import java.util.Spliterator;
@@ -8,7 +9,6 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.opencds.cqf.fhir.api.Repository;
 
 /**
  * This class allows you to iterate a Bundle (including fetching the next links

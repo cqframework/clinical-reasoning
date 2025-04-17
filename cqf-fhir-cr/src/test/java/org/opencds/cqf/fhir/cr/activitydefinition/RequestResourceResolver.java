@@ -3,10 +3,10 @@ package org.opencds.cqf.fhir.cr.activitydefinition;
 import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.repository.Repository;
 import java.nio.file.Paths;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.ApplyRequest;

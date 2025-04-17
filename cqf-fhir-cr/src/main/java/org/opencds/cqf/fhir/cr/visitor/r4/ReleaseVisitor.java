@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.visitor.r4;
 
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.repository.Repository;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.ArrayList;
@@ -21,7 +22,6 @@ import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.ValueSet;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.visitor.r4.CRMIReleaseExperimentalBehavior.CRMIReleaseExperimentalBehaviorCodes;
 import org.opencds.cqf.fhir.cr.visitor.r4.CRMIReleaseVersionBehavior.CRMIReleaseVersionBehaviorCodes;
 import org.opencds.cqf.fhir.utility.PackageHelper;

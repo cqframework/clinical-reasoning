@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.utility.operation;
 
 import static java.util.Objects.requireNonNull;
 
+import ca.uhn.fhir.repository.Repository;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.collect.Multimap;
@@ -14,7 +15,6 @@ import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.opencds.cqf.fhir.api.Repository;
 
 /**
  * That class allows registering of methods annotated with @Operation, and then can be used to execute those

@@ -2,9 +2,9 @@ package org.opencds.cqf.fhir.utility.operation;
 
 import static java.util.Objects.requireNonNull;
 
+import ca.uhn.fhir.repository.Repository;
 import jakarta.annotation.Nonnull;
 import java.util.function.Function;
-import org.opencds.cqf.fhir.api.Repository;
 
 /*
  * The InvocationContext is a wrapper around a method annotated with @Operation. It contains a reference to the method

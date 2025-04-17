@@ -4,11 +4,11 @@ import static org.opencds.cqf.fhir.utility.Parameters.newBooleanPart;
 import static org.opencds.cqf.fhir.utility.Parameters.newParameters;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.repository.Repository;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IDomainResource;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.visitor.PackageVisitor;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 

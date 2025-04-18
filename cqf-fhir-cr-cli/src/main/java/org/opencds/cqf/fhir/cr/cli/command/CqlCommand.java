@@ -8,6 +8,7 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.lang3.tuple.Pair;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptionsMapper;
@@ -206,29 +207,31 @@ public class CqlCommand implements Callable<Integer> {
         evaluationSettings.setNpmProcessor(new NpmProcessor(igContext));
 
         var repository = createRepository(fhirContext, terminologyUrl, model.modelUrl);
-
-        var engine = Engines.forRepository(repository, evaluationSettings);
-        if (library.libraryUrl != null) {
-            var provider = new DefaultLibrarySourceProvider(Path.of(library.libraryUrl));
-            engine.getEnvironment().getLibraryManager().getLibrarySourceLoader().registerProvider(provider);
-        }
-
         VersionedIdentifier identifier = new VersionedIdentifier().withId(library.libraryName);
 
         var initTime = watch.elapsed().toMillis();
         log.error("initialized in {} millis", initTime);
-        var count = 1;
-        for (var e : evaluations) {
+        AtomicInteger counter = new AtomicInteger(0);
+        evaluations.parallelStream().forEach(e -> {
+            var engine = Engines.forRepository(repository, evaluationSettings);
+            if (library.libraryUrl != null) {
+                var provider = new DefaultLibrarySourceProvider(Path.of(library.libraryUrl));
+                engine.getEnvironment()
+                        .getLibraryManager()
+                        .getLibrarySourceLoader()
+                        .registerProvider(provider);
+            }
+
             var evalStart = watch.elapsed().toMillis();
             var contextParameter = Pair.<String, Object>of(e.context.contextName, e.context.contextValue);
             var result = engine.evaluate(identifier, contextParameter);
+            var count = counter.incrementAndGet();
             writeResult(result);
             var evalEnd = watch.elapsed().toMillis();
-            log.error("evaluated #{} in {} millis", count, evalEnd - evalStart);
-            log.error("avg {} millis", (evalEnd - initTime) / count);
+            log.error("evaluated {} in {} millis", count, evalEnd - evalStart);
+            log.error("avg (amortized across threads) {} millis", (evalEnd - initTime) / count);
+        });
 
-            count++;
-        }
         var finalTime = watch.elapsed().toMillis();
         var elapsedTime = finalTime - initTime;
         log.error("evaluated in {} millis", elapsedTime);
@@ -256,12 +259,14 @@ public class CqlCommand implements Callable<Integer> {
 
     @SuppressWarnings("java:S106") // We are intending to output to the console here as a CLI tool
     private void writeResult(EvaluationResult result) {
-        for (Map.Entry<String, ExpressionResult> libraryEntry : result.expressionResults.entrySet()) {
-            System.out.println(libraryEntry.getKey() + "="
-                    + this.tempConvert(libraryEntry.getValue().value()));
-        }
+        synchronized (System.out) {
+            for (Map.Entry<String, ExpressionResult> libraryEntry : result.expressionResults.entrySet()) {
+                System.out.println(libraryEntry.getKey() + "="
+                        + this.tempConvert(libraryEntry.getValue().value()));
+            }
 
-        System.out.println();
+            System.out.println();
+        }
     }
 
     private String tempConvert(Object value) {

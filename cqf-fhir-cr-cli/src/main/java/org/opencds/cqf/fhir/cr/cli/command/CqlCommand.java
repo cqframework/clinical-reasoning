@@ -217,10 +217,17 @@ public class CqlCommand implements Callable<Integer> {
 
         var initTime = watch.elapsed().toMillis();
         log.error("initialized in {} millis", initTime);
+        var count = 1;
         for (var e : evaluations) {
+            var evalStart = watch.elapsed().toMillis();
             var contextParameter = Pair.<String, Object>of(e.context.contextName, e.context.contextValue);
             var result = engine.evaluate(identifier, contextParameter);
             writeResult(result);
+            var evalEnd = watch.elapsed().toMillis();
+            log.error("evaluated #{} in {} millis", count, evalEnd - evalStart);
+            log.error("avg {} millis", (evalEnd - initTime) / count);
+
+            count++;
         }
         var finalTime = watch.elapsed().toMillis();
         var elapsedTime = finalTime - initTime;

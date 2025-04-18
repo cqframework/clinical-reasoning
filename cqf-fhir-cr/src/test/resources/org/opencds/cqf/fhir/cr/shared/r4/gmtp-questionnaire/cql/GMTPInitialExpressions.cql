@@ -1,15 +1,18 @@
-library GMTPInitialExpressions version '0.1.0'
+library GMTPInitialExpressions
 
 using USCore version '3.1.1'
 using FHIR version '4.0.1'
 
-include FHIRHelpers version '4.0.1' called FHIRHelpers
-include USCoreCommon version '0.1.0' called UC
-include USCoreElements version '0.1.0' called UCE
+include FHIRHelpers version '4.1.0' called FHIRHelpers
+include USCoreCommon called UC
+include USCoreElements called UCE
 
 codesystem "LOINC": 'http://loinc.org'
 codesystem "Identifier Type": 'http://terminology.hl7.org/CodeSystem/v2-0203'
 code "Member Number": 'MB' from "Identifier Type"
+
+parameter "Coverage" FHIR.Coverage
+parameter "ServiceRequest" FHIR.ServiceRequest
 
 context Patient
 
@@ -34,130 +37,105 @@ define "Patient history":
       abatement: ToString(if prevalence.hasEnd() then end of prevalence else null)
     }
 
-define "Requesting Provider Name":
-  UCE."Requesting Provider".name.family 
-
-define "Requesting Provider Phone":
-  UC.Mobile(UCE."Requesting Provider".telecom).value
-  //This definition looks for #mobile, but wouldn't a practitioner be #work?
-/*
-define "Requesting Provider Address":
-  (singleton from "Requesting Provider".address).line
-*/
-define "Requesting Provider Address":
-  { 'TODO: remove hard-coded address' }
-
-define "Requesting Provider NPI":
-  UCE."Requesting Provider".identifier I 
-  where I.system = 'http://hl7.org/fhir/sid/us-npi'
-  return I.value
-
-define "Requesting Provider Fax":
-  UCE."Requesting Provider".telecom T
-  where T.system = 'fax'
-  return T.value
-
-define "Servicing Provider Name":
-  UCE."Servicing Provider".name
-
-define "Servicing Provider Phone":
-  UC.Mobile(UCE."Servicing Provider".telecom).value
-
-// TODO: Error: Could not resolve data provider for package 'java.util'.
-/*
-define "Servicing Provider Address":
-  (singleton from "Servicing Provider".address).line
-*/
-define "Servicing Provider Address":
-  { 'TODO: remove hard-coded address' }
-
-define "Servicing Provider NPI":
-  UCE."Servicing Provider".identifier I 
-  where I.system = 'http://hl7.org/fhir/sid/us-npi'
-  return I.value
-
-define "Servicing Provider Fax":
-  UCE."Servicing Provider".telecom T
-  where T.system = 'fax'
-  return T.value
-
 define "Billing Provider Name":
-  UCE."Billing Provider".name
+  "Billing Provider".name
 
 define "Billing Provider Phone":
-  UC.Mobile(UCE."Billing Provider".telecom).value
+  UC.Mobile("Billing Provider".telecom).value
 
-// TODO: Error: Could not resolve data provider for package 'java.util'.
-/*
-define "Billing Provider Address":
-  (singleton from "Billing Provider".address).line
-*/
 define "Billing Provider Address":
   { 'TODO: remove hard-coded address' }
 
+define "Retrieve Member Coverage test parameter":
+  // When executing CQL with the VSCode extension retrieve the resource specific for the test case
+  //   the list of resource ids match the resources from the test case folders
+  singleton from ([FHIR.Coverage] CV where CV.id in {
+    'Coverage-example-GMTP', // testcase: GMTP-example-patient-2
+    'coverage-GMTP-1'        // testcase: USCorePatient-GMTP-1
+  })
+
+define "Member Coverage":
+  Coalesce(
+    Coverage,
+    "Retrieve Member Coverage test parameter"
+  )
+
+define "Retrieve Service Request test parameter":
+  // When executing CQL with the VSCode extension retrieve the resource specific for the test case
+  //   the list of resource ids match the resources from the test case folders
+  singleton from ([FHIR.ServiceRequest] SR where SR.id in {
+    'ServiceRequest-example-1-GMTP',       // testcase: GMTP-example-patient-2
+    'service-request-USCorePatient-GMTP-1' // testcase: USCorePatient-GMTP-1
+  })
+
+define "Most Recent ServiceRequest":
+  Coalesce(
+    ServiceRequest,
+    "Retrieve Service Request test parameter"
+  )
+
+define "Billing Provider":
+  UCE.BillingProvider("Member Coverage")
+
 define "Billing Provider NPI":
-  UCE."Billing Provider".identifier I 
+  "Billing Provider".identifier I
   where I.system = 'http://hl7.org/fhir/sid/us-npi'
   return I.value
 
 define "Billing Provider Fax":
-  UCE."Billing Provider".telecom T
+  "Billing Provider".telecom T
   where T.system = 'fax'
   return T.value
 
 define "Date of Service":
-  UCE."Most Recent ServiceRequest".occurrence.value
+  "Most Recent ServiceRequest".occurrence.value
 
 define "Requested Test":
-  UCE."Most Recent ServiceRequest" SR
-  return SR.code
+  "Most Recent ServiceRequest".code
 
 define "Test ID":
-  Combine("Requested Test".coding.code.value, ', ') 
-  //"Requested Test".coding.code.value 
-  /* feature req */
+  Combine("Requested Test".coding.code.value, ', ')
 
 define "Test name":
    Combine("Requested Test".coding.display.value, ', ')
-   //"Requested Test".coding.display.valu
 
 define "ALL ICD and CPT Test Codes":
-   "Test ICD Codes" union "Test CPT Codes" as List<FHIR.Coding>
+   "Test ICD Codes" union "Test CPT Codes"
 
 define "Test ICD Codes":
  "Requested Test".coding C
   where C.system.value = 'http://hl7.org/fhir/sid/icd-10-cm'
-  return C
-  
+  return C.code.value
+
 define "Test CPT Codes":
   "Requested Test".coding C
   where C.system.value =  'http://www.ama-assn.org/go/cpt'
-  return C
+  return C.code.value
 
 define "Test Related Condition":
-  UCE."Test Related Condition"
+  UCE.RelatedCondition("Most Recent ServiceRequest")
   //.reasonReference changed to .reason in FHIR R5
 
 define "Diagnosis Descriptions":
   "Test Related Condition".code.coding.display.value
 
 define "Billing Provider different from Servicing Provider":
-  if UCE."Billing Provider".id != UCE."Servicing Provider".id then
+  if "Billing Provider".id != First(UCE.ServicingProvider("Most Recent ServiceRequest").id) then
   'Yes'
-  else 
+  else
   'No'
 
 define "Clinical Trial Organization":
-  First(UCE."Clinical Trial Organization" O 
-    with "Clinical Trial"  T such that EndsWith(T.sponsor.reference, O.id))  
- //in FHIR R5 T.associatedParty instead of T.sponsor 
+  First(UCE."Clinical Trial Organization" O
+    with "Clinical Trial"  T such that EndsWith(T.sponsor.reference, O.id))
+ //in FHIR R5 T.associatedParty instead of T.sponsor
 
-define "BillingProvider is Clinical Trial Organisation":
-  UCE."Billing Provider" = "Clinical Trial Organization"
+define "BillingProvider is Clinical Trial Organization":
+  "Billing Provider" = "Clinical Trial Organization"
 
 //TODO does not get populated properly
 define "Part of clinical trial":
- if "Is Research Subject" and "BillingProvider is Clinical Trial Organisation" then
+ if "Is Research Subject" and "BillingProvider is Clinical Trial Organization" then
  'Yes'
  else
  'No'
@@ -170,7 +148,7 @@ define "Research Subject":
      //ResearchSubject.individual is from FHIR version v4.0.1 and has been replaced by R.subject in FHIR R5
 
 define "Clinical Trial":
-  UCE."All Clinical Trials" R 
+  UCE."All Clinical Trials" R
     with "Research Subject" S such that EndsWith(S.study.reference, R.id)
     with  "Test Related Condition" C such that C.code in R.condition
 
@@ -180,9 +158,9 @@ define "Clinical Trial ID":
   return C.value.value
 
 define "Previous genetic testing for condition":
-  from 
+  from
     UCE."All ServiceRequests" S,
-    UCE."Most Recent ServiceRequest" SR 
+    ServiceRequest SR
   where S.occurrence before SR.occurrence
     and S.id != SR.id
     and S.reasonReference = SR.reasonReference
@@ -190,6 +168,3 @@ define "Previous genetic testing for condition":
 
 //define "Family history of genetic testing"
 //too general to prefill?
-
-
-

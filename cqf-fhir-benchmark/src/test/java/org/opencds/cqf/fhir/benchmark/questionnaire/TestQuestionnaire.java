@@ -22,7 +22,7 @@ import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 public class TestQuestionnaire {
-    public static final String CLASS_PATH = "shared";
+    public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/shared";
 
     public static Given given() {
         return new Given();

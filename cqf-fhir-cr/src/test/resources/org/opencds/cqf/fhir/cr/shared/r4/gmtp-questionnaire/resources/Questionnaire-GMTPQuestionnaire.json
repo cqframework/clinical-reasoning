@@ -4,172 +4,81 @@
   "extension": [
     {
       "url": "http://hl7.org/fhir/StructureDefinition/cqf-library",
-      "valueCanonical": "http://fhir.org/guides/cqf/us/common/Library/GMTPInitialExpressions"
+      "valueCanonical": "http://hl7.org/fhir/us/cql/Library/GMTPInitialExpressions"
+    },
+    {
+      "extension": [
+        {
+          "url": "name",
+          "valueCoding": {
+            "system": "http://hl7.org/fhir/uv/sdc/CodeSystem/launchContext",
+            "code": "patient",
+            "display": "Patient"
+          }
+        },
+        {
+          "url": "type",
+          "valueCode": "Patient"
+        },
+        {
+          "url": "description",
+          "valueString": "The patient that is to be used to pre-populate the form"
+        }
+      ],
+      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-launchContext"
+    },
+    {
+      "extension": [
+        {
+          "url": "name",
+          "valueCoding": {
+            "system": "http://hl7.org/fhir/uv/sdc/CodeSystem/launchContext",
+            "code": "Coverage",
+            "display": "Coverage"
+          }
+        },
+        {
+          "url": "type",
+          "valueCode": "Coverage"
+        },
+        {
+          "url": "description",
+          "valueString": "The Coverage that is to be used to pre-populate the form"
+        }
+      ],
+      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-launchContext"
+    },
+    {
+      "extension": [
+        {
+          "url": "name",
+          "valueCoding": {
+            "system": "http://hl7.org/fhir/uv/sdc/CodeSystem/launchContext",
+            "code": "ServiceRequest",
+            "display": "ServiceRequest"
+          }
+        },
+        {
+          "url": "type",
+          "valueCode": "ServiceRequest"
+        },
+        {
+          "url": "description",
+          "valueString": "The ServiceRequest that is to be used to pre-populate the form"
+        }
+      ],
+      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-launchContext"
     }
   ],
-  "url": "http://fhir.org/guides/cqf/us/common/Questionnaire/GMTPQuestionnaire",
-  "version": "0.1.0",
+  "url": "http://hl7.org/fhir/us/cql/Questionnaire/GMTPQuestionnaire",
   "name": "GMTPQuestionnaire",
-  "title": "Genetic/Molecular testing preauthorization request",
+  "title": "Example Genetic/Molecular Testing Preauthorization Questionnaire",
   "status": "active",
   "experimental": true,
   "date": "2023-10-12T00:00:00+00:00",
-  "description": "Automated online preauthorization is available for some tests. Please log into the Availity Portal at Availity.com for a list of available questionnaires. If the appropriate questionnaire is not available, please complete this form.",
+  "description": "This is an example of a prior authorization questionnaire developed based on an existing industry prior-authorization form.",
+  "copyright": "This content is informed by the following source, used with permission: https://docushare-web.apps.external.pioneer.humana.com/Marketing/docushare-app?file=1986712",
   "item": [
-    {
-      "linkId": "provider-info",
-      "text": "Requesting Provider Information",
-      "type": "group",
-      "item": [
-        {
-          "extension": [
-            {
-              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
-              "valueExpression": {
-                "language": "text/cql-identifier",
-                "expression": "Requesting Provider Name"
-              }
-            }
-          ],
-          "linkId": "provider-info|name",
-          "text": "Requesting provider name",
-          "type": "string"
-        },
-        {
-          "extension": [
-            {
-              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
-              "valueExpression": {
-                "language": "text/cql-identifier",
-                "expression": "Requesting Provider Phone"
-              }
-            }
-          ],
-          "linkId": "provider-info|phone-number",
-          "text": "Phone",
-          "type": "string"
-        },
-        {
-          "extension": [
-            {
-              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
-              "valueExpression": {
-                "language": "text/cql-identifier",
-                "expression": "Requesting Provider Address"
-              }
-            }
-          ],
-          "linkId": "provider-info|address",
-          "text": "Ordering provider address",
-          "type": "string"
-        },
-        {
-          "extension": [
-            {
-              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
-              "valueExpression": {
-                "language": "text/cql-identifier",
-                "expression": "Requesting Provider NPI"
-              }
-            }
-          ],
-          "linkId": "provider-info|npi",
-          "text": "Ordering provider Tax ID/NPI #",
-          "type": "string"
-        },
-        {
-          "extension": [
-            {
-              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
-              "valueExpression": {
-                "language": "text/cql-identifier",
-                "expression": "Requesting Provider Fax"
-              }
-            }
-          ],
-          "linkId": "provider-info|fax",
-          "text": "Fax",
-          "type": "string"
-        }
-      ]
-    },
-    {
-      "linkId": "servicing-provider",
-      "text": "Laboratory performing testing/Servicing Provider",
-      "type": "group",
-      "item": [
-        {
-          "extension": [
-            {
-              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
-              "valueExpression": {
-                "language": "text/cql-identifier",
-                "expression": "Servicing Provider Name"
-              }
-            }
-          ],
-          "linkId": "servicing-provider|name",
-          "text": "Requesting provider name",
-          "type": "string"
-        },
-        {
-          "extension": [
-            {
-              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
-              "valueExpression": {
-                "language": "text/cql-identifier",
-                "expression": "Servicing Provider Phone"
-              }
-            }
-          ],
-          "linkId": "servicing-provider|phone-number",
-          "text": "Phone",
-          "type": "string"
-        },
-        {
-          "extension": [
-            {
-              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
-              "valueExpression": {
-                "language": "text/cql-identifier",
-                "expression": "Servicing Provider Address"
-              }
-            }
-          ],
-          "linkId": "servicing-provider|address",
-          "text": "Ordering provider address",
-          "type": "string"
-        },
-        {
-          "extension": [
-            {
-              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
-              "valueExpression": {
-                "language": "text/cql-identifier",
-                "expression": "Servicing Provider NPI"
-              }
-            }
-          ],
-          "linkId": "servicing-provider|npi",
-          "text": "Ordering provider Tax ID/NPI #",
-          "type": "string"
-        },
-        {
-          "extension": [
-            {
-              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
-              "valueExpression": {
-                "language": "text/cql-identifier",
-                "expression": "Servicing Provider Fax"
-              }
-            }
-          ],
-          "linkId": "servicing-provider|fax",
-          "text": "Fax",
-          "type": "string"
-        }
-      ]
-    },
     {
       "extension": [
         {

@@ -306,6 +306,7 @@ class QuestionnaireProcessorTests {
                 .getBundle();
         assertInstanceOf(Observation.class, BundleHelper.getEntryResourceFirstRep(bundle));
         var observation = (Observation) BundleHelper.getEntryResourceFirstRep(bundle);
+        assertNotNull(observation);
         assertEquals("Patient/" + patientId, observation.getSubject().getReference());
         assertTrue(observation.hasCategory());
         assertTrue(observation.hasCode());
@@ -319,9 +320,22 @@ class QuestionnaireProcessorTests {
         given().repositoryFor(fhirContextR4, "r4/gmtp-questionnaire")
                 .when()
                 .questionnaireUrl(canonicalTypeForVersion(
-                        FhirVersionEnum.R4, "http://fhir.org/guides/cqf/us/common/Questionnaire/GMTPQuestionnaire"))
+                        FhirVersionEnum.R4, "http://hl7.org/fhir/us/cql/Questionnaire/GMTPQuestionnaire"))
                 .subjectId("USCorePatient-GMTP-1")
                 .thenPopulate(true)
-                .hasNoErrors();
+                .hasNoErrors()
+                .itemHasAnswerValue("billing-provider-info|name", "Oak Street Billing Provider")
+                .itemHasAnswerValue("billing-provider-info|phone-number", "+1 (123) 4567890")
+                .itemHasAnswerValue("billing-provider-info|npi", "1144221849")
+                .itemHasAnswerValue("billing-provider-info|fax", "+1 (123) 4567890")
+                .itemHasAnswer("test-requested|service-date")
+                .itemHasAnswerValue("test-requested|test-id", "405825005, Z13.89, 81479")
+                .itemHasAnswerValue(
+                        "test-requested|test-name",
+                        "Molecular genetic test (procedure),  Encounter for screening for other disorder, Unlisted molecular pathology procedure")
+                .itemHasAnswerValue(
+                        "test-requested|diagnosis-description",
+                        "Type 2 diabetes mellitus with other diabetic arthropathy")
+                .itemHasAnswer("history|other-findings");
     }
 }

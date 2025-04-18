@@ -40,6 +40,7 @@ import org.opencds.cqf.fhir.cr.questionnaire.populate.IPopulateProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.populate.PopulateRequest;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.Ids;
+import org.opencds.cqf.fhir.utility.VersionUtilities;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -381,6 +382,13 @@ public class TestQuestionnaire {
         public GeneratedQuestionnaireResponse itemHasAnswer(String linkId) {
             assertTrue(!request.resolvePathList(items.get(linkId), "answer").isEmpty());
             return this;
+        }
+
+        public GeneratedQuestionnaireResponse itemHasAnswerValue(String linkId, String value) {
+            return itemHasAnswerValue(
+                    linkId,
+                    VersionUtilities.stringTypeForVersion(
+                            repository.fhirContext().getVersion().getVersion(), value));
         }
 
         public GeneratedQuestionnaireResponse itemHasAnswerValue(String linkId, IBase value) {

@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.cr.cli.command;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
@@ -36,12 +37,16 @@ import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_
 import org.opencds.cqf.fhir.utility.repository.ProxyRepository;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Stopwatch;
+
 import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
 @Command(name = "cql", mixinStandardHelpOptions = true)
 public class CqlCommand implements Callable<Integer> {
+    private static final org.slf4j.Logger log = LoggerFactory.getLogger(CqlCommand.class);
     @Option(
             names = {"-fv", "--fhir-version"},
             required = true)
@@ -166,6 +171,8 @@ public class CqlCommand implements Callable<Integer> {
     @Override
     public Integer call() throws Exception {
 
+        log.error("initializing");
+        var watch = Stopwatch.createStarted();
         FhirVersionEnum fhirVersionEnum = FhirVersionEnum.valueOf(fhirVersion);
 
         FhirContext fhirContext = FhirContext.forCached(fhirVersionEnum);
@@ -210,11 +217,18 @@ public class CqlCommand implements Callable<Integer> {
 
         VersionedIdentifier identifier = new VersionedIdentifier().withId(library.libraryName);
 
+        var initTime = watch.elapsed().toMillis();
+        log.error("initialized in {} millis", initTime);
         for (var e : evaluations) {
             var contextParameter = Pair.<String, Object>of(e.context.contextName, e.context.contextValue);
             var result = engine.evaluate(identifier, contextParameter);
             writeResult(result);
         }
+        var finalTime = watch.elapsed().toMillis();
+        var elapsedTime = finalTime - initTime;
+        log.error("evaluated in {} millis", elapsedTime);
+        log.error("total time in {} millis", finalTime);
+        log.error("per patient time in {} millis", elapsedTime / evaluations.size());
 
         return 0;
     }

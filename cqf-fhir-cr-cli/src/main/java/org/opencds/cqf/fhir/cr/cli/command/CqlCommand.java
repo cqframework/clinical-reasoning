@@ -228,7 +228,7 @@ public class CqlCommand implements Callable<Integer> {
             var count = counter.incrementAndGet();
             writeResult(result);
             var evalEnd = watch.elapsed().toMillis();
-            log.error("evaluated {} in {} millis", count, evalEnd - evalStart);
+            log.error("evaluated #{} in {} millis", count, evalEnd - evalStart);
             log.error("avg (amortized across threads) {} millis", (evalEnd - initTime) / count);
         });
 

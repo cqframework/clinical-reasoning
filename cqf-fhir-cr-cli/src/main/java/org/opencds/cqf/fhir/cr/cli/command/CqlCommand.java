@@ -2,7 +2,7 @@ package org.opencds.cqf.fhir.cr.cli.command;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-
+import com.google.common.base.Stopwatch;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
@@ -37,9 +37,6 @@ import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_
 import org.opencds.cqf.fhir.utility.repository.ProxyRepository;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Stopwatch;
-
 import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -47,6 +44,7 @@ import picocli.CommandLine.Option;
 @Command(name = "cql", mixinStandardHelpOptions = true)
 public class CqlCommand implements Callable<Integer> {
     private static final org.slf4j.Logger log = LoggerFactory.getLogger(CqlCommand.class);
+
     @Option(
             names = {"-fv", "--fhir-version"},
             required = true)

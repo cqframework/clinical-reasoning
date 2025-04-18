@@ -1,11 +1,10 @@
 package org.opencds.cqf.fhir.cr.cli;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.List;
 
 class JPTest {
 
@@ -33,8 +32,7 @@ class JPTest {
     }
 
     public void run(String patientResources, List<String> patientIds, String libraryName) {
-        // Total args = base + one -cv=... per patientId
-        var args =new ArrayList<>(List.of(
+        var args = new ArrayList<>(List.of(
                 "cql",
                 "-fv=R4",
                 "-rd=/Users/jp/repos/ncqa-hedis-discovery",
@@ -50,6 +48,6 @@ class JPTest {
             args.add("-cv=" + patientId);
         }
 
-        Main.run(args.toArray(new String[0]));
+        Main.run(args.toArray(String[]::new));
     }
 }

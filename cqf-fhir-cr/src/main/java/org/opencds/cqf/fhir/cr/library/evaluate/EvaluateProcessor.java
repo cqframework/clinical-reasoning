@@ -20,7 +20,7 @@ public class EvaluateProcessor implements IEvaluateProcessor {
         try {
             return request.getLibraryEngine()
                     .evaluate(
-                            request.getDefaultLibraryUrl(),
+                            request.getLibraryAdapter().getUrl(),
                             request.getSubject(),
                             request.getParameters(),
                             request.getData(),

@@ -1,6 +1,9 @@
 package org.opencds.cqf.fhir.utility;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import java.util.List;
+import java.util.Map;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 
@@ -12,13 +15,14 @@ public class CqfExpression {
 
     private String language;
     private String expression;
+    private Map<String, String> referencedLibraries;
     private String libraryUrl;
     private String altLanguage;
     private String altExpression;
     private String altLibraryUrl;
     private String name;
 
-    public static CqfExpression of(IBaseExtension<?, ?> extension, String defaultLibraryUrl) {
+    public static CqfExpression of(IBaseExtension<?, ?> extension, Map<String, String> referencedLibraries) {
         if (extension == null) {
             return null;
         }
@@ -31,21 +35,17 @@ public class CqfExpression {
         var model = modelSplit[1];
         model = model.substring(0, model.indexOf(".")).toUpperCase();
         var version = FhirVersionEnum.forVersionString(model);
-        switch (version) {
-            case DSTU3:
-                return new CqfExpression(
-                        "text/cql-expression", extension.getValue().toString(), defaultLibraryUrl);
-            case R4:
-                return CqfExpression.of((org.hl7.fhir.r4.model.Expression) extension.getValue(), defaultLibraryUrl);
-            case R5:
-                return CqfExpression.of((org.hl7.fhir.r5.model.Expression) extension.getValue(), defaultLibraryUrl);
-
-            default:
-                return null;
-        }
+        return switch (version) {
+            case DSTU3 -> new CqfExpression(
+                    "text/cql-expression", extension.getValue().toString(), referencedLibraries);
+            case R4 -> CqfExpression.of((org.hl7.fhir.r4.model.Expression) extension.getValue(), referencedLibraries);
+            case R5 -> CqfExpression.of((org.hl7.fhir.r5.model.Expression) extension.getValue(), referencedLibraries);
+            default -> null;
+        };
     }
 
-    public static CqfExpression of(org.hl7.fhir.r4.model.Expression expression, String defaultLibraryUrl) {
+    public static CqfExpression of(
+            org.hl7.fhir.r4.model.Expression expression, Map<String, String> referencedLibraries) {
         if (expression == null) {
             return null;
         }
@@ -55,14 +55,16 @@ public class CqfExpression {
         return new CqfExpression(
                 expression.getLanguage(),
                 expression.getExpression(),
-                expression.hasReference() ? expression.getReference() : defaultLibraryUrl,
+                referencedLibraries,
+                expression.getReference(),
                 altExpression != null ? altExpression.getLanguage() : null,
                 altExpression != null ? altExpression.getExpression() : null,
                 altExpression != null && altExpression.hasReference() ? altExpression.getReference() : null,
                 expression.getName());
     }
 
-    public static CqfExpression of(org.hl7.fhir.r5.model.Expression expression, String defaultLibraryUrl) {
+    public static CqfExpression of(
+            org.hl7.fhir.r5.model.Expression expression, Map<String, String> referencedLibraries) {
         if (expression == null) {
             return null;
         }
@@ -72,7 +74,8 @@ public class CqfExpression {
         return new CqfExpression(
                 expression.getLanguage(),
                 expression.getExpression(),
-                expression.hasReference() ? expression.getReference() : defaultLibraryUrl,
+                referencedLibraries,
+                expression.getReference(),
                 altExpression != null ? altExpression.getLanguage() : null,
                 altExpression != null ? altExpression.getExpression() : null,
                 altExpression != null && altExpression.hasReference() ? altExpression.getReference() : null,
@@ -81,13 +84,14 @@ public class CqfExpression {
 
     public CqfExpression() {}
 
-    public CqfExpression(String language, String expression, String libraryUrl) {
-        this(language, expression, libraryUrl, null, null, null, null);
+    public CqfExpression(String language, String expression, Map<String, String> referencedLibraries) {
+        this(language, expression, referencedLibraries, null, null, null, null, null);
     }
 
     public CqfExpression(
             String language,
             String expression,
+            Map<String, String> referencedLibraries,
             String libraryUrl,
             String altLanguage,
             String altExpression,
@@ -95,11 +99,29 @@ public class CqfExpression {
             String name) {
         this.language = language;
         this.expression = expression;
+        this.referencedLibraries = referencedLibraries;
         this.libraryUrl = libraryUrl;
         this.altLanguage = altLanguage;
         this.altExpression = altExpression;
         this.altLibraryUrl = altLibraryUrl;
         this.name = name;
+    }
+
+    private String resolveLibrary(String lang, String url, String expr) {
+        // If the expression is FHIRPath or a raw CQL expression a wrapper Library will be created
+        if (List.of("text/cql", "text/cql.expression", "text/cql-expression", "text/fhirpath")
+                .contains(lang)) {
+            return null;
+        }
+        // If the expression has a reference use it
+        if (StringUtils.isNotBlank(url)) {
+            return url;
+        }
+        // If the expression is an identifier and has no reference there should be a single referenced Library
+        if (referencedLibraries != null && !referencedLibraries.isEmpty()) {
+            return referencedLibraries.values().stream().findFirst().get();
+        }
+        throw new IllegalArgumentException(String.format("No Library reference found for expression: %s", expr));
     }
 
     public String getName() {
@@ -129,8 +151,17 @@ public class CqfExpression {
         return this;
     }
 
+    public Map<String, String> getReferencedLibraries() {
+        return referencedLibraries;
+    }
+
+    public CqfExpression setReferencedLibraries(Map<String, String> referencedLibraries) {
+        this.referencedLibraries = referencedLibraries;
+        return this;
+    }
+
     public String getLibraryUrl() {
-        return libraryUrl;
+        return resolveLibrary(language, libraryUrl, expression);
     }
 
     public CqfExpression setLibraryUrl(String libraryUrl) {
@@ -157,7 +188,7 @@ public class CqfExpression {
     }
 
     public String getAltLibraryUrl() {
-        return altLibraryUrl;
+        return StringUtils.isBlank(altExpression) ? null : resolveLibrary(altLanguage, altLibraryUrl, altExpression);
     }
 
     public CqfExpression setAltLibraryUrl(String altLibraryUrl) {
@@ -166,22 +197,18 @@ public class CqfExpression {
     }
 
     public ICompositeType toExpressionType(FhirVersionEnum fhirVersion) {
-        switch (fhirVersion) {
-            case R4:
-                return new org.hl7.fhir.r4.model.Expression()
-                        .setLanguage(language)
-                        .setExpression(expression)
-                        .setReference(libraryUrl)
-                        .setName(name);
-            case R5:
-                return new org.hl7.fhir.r5.model.Expression()
-                        .setLanguage(language)
-                        .setExpression(expression)
-                        .setReference(libraryUrl)
-                        .setName(name);
-
-            default:
-                return null;
-        }
+        return switch (fhirVersion) {
+            case R4 -> new org.hl7.fhir.r4.model.Expression()
+                    .setLanguage(language)
+                    .setExpression(expression)
+                    .setReference(libraryUrl)
+                    .setName(name);
+            case R5 -> new org.hl7.fhir.r5.model.Expression()
+                    .setLanguage(language)
+                    .setExpression(expression)
+                    .setReference(libraryUrl)
+                    .setName(name);
+            default -> null;
+        };
     }
 }

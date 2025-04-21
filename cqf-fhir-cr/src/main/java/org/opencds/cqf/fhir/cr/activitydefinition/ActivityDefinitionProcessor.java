@@ -158,7 +158,6 @@ public class ActivityDefinitionProcessor implements IActivityDefinitionProcessor
                 setting,
                 settingContext,
                 parameters,
-                useServerData,
                 data,
                 new LibraryEngine(repository, evaluationSettings));
     }
@@ -175,7 +174,6 @@ public class ActivityDefinitionProcessor implements IActivityDefinitionProcessor
             IBaseDatatype setting,
             IBaseDatatype settingContext,
             IBaseParameters parameters,
-            boolean useServerData,
             IBaseBundle data,
             LibraryEngine libraryEngine) {
         if (StringUtils.isBlank(subjectId)) {
@@ -193,7 +191,6 @@ public class ActivityDefinitionProcessor implements IActivityDefinitionProcessor
                 setting,
                 settingContext,
                 parameters,
-                useServerData,
                 data,
                 libraryEngine);
         initApplyProcessor();
@@ -212,7 +209,6 @@ public class ActivityDefinitionProcessor implements IActivityDefinitionProcessor
             IBaseDatatype setting,
             IBaseDatatype settingContext,
             IBaseParameters parameters,
-            boolean useServerData,
             IBaseBundle data,
             LibraryEngine libraryEngine) {
         if (StringUtils.isBlank(subject)) {
@@ -230,7 +226,6 @@ public class ActivityDefinitionProcessor implements IActivityDefinitionProcessor
                 setting,
                 settingContext,
                 parameters,
-                useServerData,
                 data,
                 libraryEngine,
                 modelResolver);

@@ -10,6 +10,8 @@ public interface IResourceAdapter extends IAdapter<IBaseResource> {
 
     public IBaseResource get();
 
+    public IAdapterFactory getAdapterFactory();
+
     public IBase setProperty(String name, IBase value) throws FHIRException;
 
     public IBase addChild(String name) throws FHIRException;

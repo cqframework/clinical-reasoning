@@ -1,1527 +1,912 @@
+
 {
   "resourceType": "Library",
   "id": "USCoreElements",
-  "contained": [
-    {
-      "resourceType": "Parameters",
-      "id": "options",
-      "parameter": [
-        {
-          "name": "translatorVersion",
-          "valueString": "3.11.0"
-        },
-        {
-          "name": "option",
-          "valueString": "EnableAnnotations"
-        },
-        {
-          "name": "option",
-          "valueString": "EnableLocators"
-        },
-        {
-          "name": "option",
-          "valueString": "DisableListDemotion"
-        },
-        {
-          "name": "option",
-          "valueString": "DisableListPromotion"
-        },
-        {
-          "name": "format",
-          "valueString": "JSON"
-        },
-        {
-          "name": "format",
-          "valueString": "XML"
-        },
-        {
-          "name": "analyzeDataRequirements",
-          "valueBoolean": false
-        },
-        {
-          "name": "collapseDataRequirements",
-          "valueBoolean": false
-        },
-        {
-          "name": "compatibilityLevel",
-          "valueString": "1.5"
-        },
-        {
-          "name": "enableCqlOnly",
-          "valueBoolean": false
-        },
-        {
-          "name": "errorLevel",
-          "valueString": "Info"
-        },
-        {
-          "name": "signatureLevel",
-          "valueString": "All"
-        },
-        {
-          "name": "validateUnits",
-          "valueBoolean": true
-        },
-        {
-          "name": "verifyOnly",
-          "valueBoolean": false
-        }
-      ]
+  "contained": [ {
+    "resourceType": "Parameters",
+    "id": "options",
+    "parameter": [ {
+      "name": "translatorVersion",
+      "valueString": "3.11.0"
+    }, {
+      "name": "option",
+      "valueString": "EnableAnnotations"
+    }, {
+      "name": "option",
+      "valueString": "EnableLocators"
+    }, {
+      "name": "option",
+      "valueString": "DisableListDemotion"
+    }, {
+      "name": "option",
+      "valueString": "DisableListPromotion"
+    }, {
+      "name": "format",
+      "valueString": "JSON"
+    }, {
+      "name": "format",
+      "valueString": "XML"
+    }, {
+      "name": "analyzeDataRequirements",
+      "valueBoolean": false
+    }, {
+      "name": "collapseDataRequirements",
+      "valueBoolean": false
+    }, {
+      "name": "compatibilityLevel",
+      "valueString": "1.5"
+    }, {
+      "name": "enableCqlOnly",
+      "valueBoolean": false
+    }, {
+      "name": "errorLevel",
+      "valueString": "Info"
+    }, {
+      "name": "signatureLevel",
+      "valueString": "All"
+    }, {
+      "name": "validateUnits",
+      "valueBoolean": true
+    }, {
+      "name": "verifyOnly",
+      "valueBoolean": false
+    } ]
+  } ],
+  "extension": [ {
+    "url": "http://hl7.org/fhir/StructureDefinition/cqf-cqlOptions",
+    "valueReference": {
+      "reference": "#options"
     }
-  ],
-  "extension": [
-    {
-      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem",
-      "valueReference": {
-        "reference": "Device/cqf-tooling"
-      }
-    },
-    {
-      "url": "http://hl7.org/fhir/StructureDefinition/cqf-cqlOptions",
-      "valueReference": {
-        "reference": "#options"
-      }
+  }, {
+    "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem",
+    "valueReference": {
+      "reference": "Device/cqf-tooling"
     }
-  ],
-  "url": "http://fhir.org/guides/cqf/us/common/Library/USCoreElements",
-  "version": "0.1.0",
+  } ],
+  "url": "http://hl7.org/fhir/us/cql/Library/USCoreElements",
   "name": "USCoreElements",
+  "title": "US Core Elements",
   "type": {
-    "coding": [
-      {
-        "system": "http://terminology.hl7.org/CodeSystem/library-type",
-        "code": "logic-library"
-      }
-    ]
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/library-type",
+      "code": "logic-library"
+    } ]
   },
-  "relatedArtifact": [
-    {
-      "type": "depends-on",
-      "display": "USCore model information",
-      "resource": "http://hl7.org/fhir/Library/USCore-ModelInfo"
-    },
-    {
-      "type": "depends-on",
-      "display": "FHIR model information",
-      "resource": "http://fhir.org/guides/cqf/common/Library/FHIR-ModelInfo|4.0.1"
-    },
-    {
-      "type": "depends-on",
-      "display": "Library FHIRHelpers",
-      "resource": "http://fhir.org/guides/cqf/common/Library/FHIRHelpers|4.0.1"
-    },
-    {
-      "type": "depends-on",
-      "display": "Library UC",
-      "resource": "http://fhir.org/guides/cqf/us/common/Library/USCoreCommon|0.1.0"
-    },
-    {
-      "type": "depends-on",
-      "display": "Code system LOINC",
-      "resource": "http://loinc.org"
-    },
-    {
-      "type": "depends-on",
-      "display": "Code system Identifier Type",
-      "resource": "http://terminology.hl7.org/CodeSystem/v2-0203"
-    },
-    {
-      "type": "depends-on",
-      "display": "Code system Verification Status",
-      "resource": "http://terminology.hl7.org/CodeSystem/condition-ver-status"
-    },
-    {
-      "type": "depends-on",
-      "display": "Code system Condition Clinical",
-      "resource": "http://terminology.hl7.org/CodeSystem/condition-clinical"
-    },
-    {
-      "type": "depends-on",
-      "display": "Code system SNOMEDCT",
-      "resource": "http://snomed.info/sct"
-    },
-    {
-      "type": "depends-on",
-      "display": "Code system AllergyIntoleranceVerificationStatusCodes",
-      "resource": "http://terminology.hl7.org/CodeSystem/allergyintolerance-verification"
-    },
-    {
-      "type": "depends-on",
-      "display": "Code system AllergyIntoleranceClinicalStatusCodes",
-      "resource": "http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical"
-    },
-    {
-      "type": "depends-on",
-      "display": "Code system ConditionCategory",
-      "resource": "http://terminology.hl7.org/CodeSystem/condition-category"
-    },
-    {
-      "type": "depends-on",
-      "display": "Code system ConditionVerificationStatusCodes",
-      "resource": "http://terminology.hl7.org/CodeSystem/condition-ver-status"
-    },
-    {
-      "type": "depends-on",
-      "display": "Code system ConditionClinicalStatusCodes",
-      "resource": "http://terminology.hl7.org/CodeSystem/condition-clinical"
-    },
-    {
-      "type": "depends-on",
-      "display": "Code system USCoreConditionCategory",
-      "resource": "http://hl7.org/fhir/us/core/CodeSystem/condition-category"
-    },
-    {
-      "type": "depends-on",
-      "display": "Code system ObservationStatusCodes",
-      "resource": "http://hl7.org/fhir/observation-status"
-    },
-    {
-      "type": "depends-on",
-      "display": "Code system IdentifierType",
-      "resource": "http://terminology.hl7.org/CodeSystem/v2-0203"
-    },
-    {
-      "type": "depends-on",
-      "display": "Value set Common allergy substances",
-      "resource": "http://hl7.org/fhir/us/core/ValueSet/us-core-allergy-substance"
-    }
-  ],
-  "parameter": [
-    {
-      "name": "Patient",
-      "use": "out",
-      "min": 0,
-      "max": "1",
-      "type": "Resource"
-    },
-    {
-      "name": "Usual Name",
-      "use": "out",
-      "min": 0,
-      "max": "1",
-      "type": "Resource"
-    },
-    {
-      "name": "Official Name",
-      "use": "out",
-      "min": 0,
-      "max": "1",
-      "type": "Resource"
-    },
-    {
-      "name": "First Occurrence of Non-Official, Non-Usual Name",
-      "use": "out",
-      "min": 0,
-      "max": "1",
-      "type": "Resource"
-    },
-    {
-      "name": "Name",
-      "use": "out",
-      "min": 0,
-      "max": "1",
-      "type": "Resource"
-    },
-    {
-      "name": "First Name",
-      "use": "out",
-      "min": 0,
-      "max": "1",
-      "type": "string"
-    },
-    {
-      "name": "Middle Names",
-      "use": "out",
-      "min": 0,
-      "max": "1",
-      "type": "string"
-    },
-    {
-      "name": "Last Name",
-      "use": "out",
-      "min": 0,
-      "max": "1",
-      "type": "string"
-    },
-    {
-      "name": "Name - First Middle(s) Last",
-      "use": "out",
-      "min": 0,
-      "max": "1",
-      "type": "string"
-    },
-    {
-      "name": "Name - Last, First Middle(s)",
-      "use": "out",
-      "min": 0,
-      "max": "1",
-      "type": "string"
-    },
-    {
-      "name": "All Allergies and Intolerances",
-      "use": "out",
-      "min": 0,
-      "max": "*",
-      "type": "Resource"
-    },
-    {
-      "name": "Active Confirmed Allergies and Intolerances",
-      "use": "out",
-      "min": 0,
-      "max": "*",
-      "type": "Resource"
-    },
-    {
-      "name": "Common Allergies and Intolerances",
-      "use": "out",
-      "min": 0,
-      "max": "*",
-      "type": "Resource"
-    },
-    {
-      "name": "Active Confirmed Common Allergies and Intolerances",
-      "use": "out",
-      "min": 0,
-      "max": "*",
-      "type": "Resource"
-    },
-    {
-      "name": "No Known Allergies (Not Asked)",
-      "use": "out",
-      "min": 0,
-      "max": "*",
-      "type": "Resource"
-    },
-    {
-      "name": "No Known Allergies (Confirmed)",
-      "use": "out",
-      "min": 0,
-      "max": "*",
-      "type": "Resource"
-    },
-    {
-      "name": "All Conditions",
-      "use": "out",
-      "min": 0,
-      "max": "*",
-      "type": "Resource"
-    },
-    {
-      "name": "All Problem List Items",
-      "use": "out",
-      "min": 0,
-      "max": "*",
-      "type": "Resource"
-    },
-    {
-      "name": "Active Confirmed Problem List Items",
-      "use": "out",
-      "min": 0,
-      "max": "*",
-      "type": "Resource"
-    },
-    {
-      "name": "All Encounter Diagnoses",
-      "use": "out",
-      "min": 0,
-      "max": "*",
-      "type": "Resource"
-    },
-    {
-      "name": "All Health Concerns",
-      "use": "out",
-      "min": 0,
-      "max": "*",
-      "type": "Resource"
-    },
-    {
-      "name": "All Diagnostic Reports for Laboratory Results",
-      "use": "out",
-      "min": 0,
-      "max": "*",
-      "type": "Resource"
-    },
-    {
-      "name": "All Diagnostic Report Notes",
-      "use": "out",
-      "min": 0,
-      "max": "*",
-      "type": "Resource"
-    },
-    {
-      "name": "All Encounters",
-      "use": "out",
-      "min": 0,
-      "max": "*",
-      "type": "Resource"
-    },
-    {
-      "name": "All Performed Encounters",
-      "use": "out",
-      "min": 0,
-      "max": "*",
-      "type": "Resource"
-    },
-    {
-      "name": "All Immunizations",
-      "use": "out",
-      "min": 0,
-      "max": "*",
-      "type": "Resource"
-    },
-    {
-      "name": "All Completed Immunizations",
-      "use": "out",
-      "min": 0,
-      "max": "*",
-      "type": "Resource"
-    },
-    {
-      "name": "All Implantable Devices",
-      "use": "out",
-      "min": 0,
-      "max": "*",
-      "type": "Resource"
-    },
-    {
-      "name": "All Laboratory Results",
-      "use": "out",
-      "min": 0,
-      "max": "*",
-      "type": "Resource"
-    },
-    {
-      "name": "Resulted Laboratory Results",
-      "use": "out",
-      "min": 0,
-      "max": "*",
-      "type": "Resource"
-    },
-    {
-      "name": "All Medication Requests",
-      "use": "out",
-      "min": 0,
-      "max": "*",
-      "type": "Resource"
-    },
-    {
-      "name": "Most Recent Medication Request",
-      "use": "out",
-      "min": 0,
-      "max": "1",
-      "type": "Resource"
-    },
-    {
-      "name": "Active Medication Orders",
-      "use": "out",
-      "min": 0,
-      "max": "*",
-      "type": "Resource"
-    },
-    {
-      "name": "All Medications",
-      "use": "out",
-      "min": 0,
-      "max": "*",
-      "type": "Resource"
-    },
-    {
-      "name": "Pediatric BMI for Age",
-      "use": "out",
-      "min": 0,
-      "max": "*",
-      "type": "Resource"
-    },
-    {
-      "name": "Pediatric BMI for Age All Statuses",
-      "use": "out",
-      "min": 0,
-      "max": "*",
-      "type": "Resource"
-    },
-    {
-      "name": "Pediatric Weight for Height",
-      "use": "out",
-      "min": 0,
-      "max": "*",
-      "type": "Resource"
-    },
-    {
-      "name": "Pediatric Weight for Height All Statuses",
-      "use": "out",
-      "min": 0,
-      "max": "*",
-      "type": "Resource"
-    },
-    {
-      "name": "All Procedures",
-      "use": "out",
-      "min": 0,
-      "max": "*",
-      "type": "Resource"
-    },
-    {
-      "name": "All Performed Procedures",
-      "use": "out",
-      "min": 0,
-      "max": "*",
-      "type": "Resource"
-    },
-    {
-      "name": "Pulse Oximetry",
-      "use": "out",
-      "min": 0,
-      "max": "*",
-      "type": "Resource"
-    },
-    {
-      "name": "Pulse Oximetry All Statuses",
-      "use": "out",
-      "min": 0,
-      "max": "*",
-      "type": "Resource"
-    },
-    {
-      "name": "Smoking Status",
-      "use": "out",
-      "min": 0,
-      "max": "*",
-      "type": "Resource"
-    },
-    {
-      "name": "Smoking Status All Statuses",
-      "use": "out",
-      "min": 0,
-      "max": "*",
-      "type": "Resource"
-    },
-    {
-      "name": "Most Recent Smoking Status",
-      "use": "out",
-      "min": 0,
-      "max": "1",
-      "type": "Resource"
-    },
-    {
-      "name": "All Vital Signs Panels",
-      "use": "out",
-      "min": 0,
-      "max": "*",
-      "type": "Resource"
-    },
-    {
-      "name": "All Vital Signs Panels All Statuses",
-      "use": "out",
-      "min": 0,
-      "max": "*",
-      "type": "Resource"
-    },
-    {
-      "name": "All Respiratory Rate Measurements",
-      "use": "out",
-      "min": 0,
-      "max": "*",
-      "type": "Resource"
-    },
-    {
-      "name": "All Respiratory Rate Measurements All Statuses",
-      "use": "out",
-      "min": 0,
-      "max": "*",
-      "type": "Resource"
-    },
-    {
-      "name": "All Heart Rate Measurements",
-      "use": "out",
-      "min": 0,
-      "max": "*",
-      "type": "Resource"
-    },
-    {
-      "name": "All Heart Rate Measurements All Statuses",
-      "use": "out",
-      "min": 0,
-      "max": "*",
-      "type": "Resource"
-    },
-    {
-      "name": "All Oxygen Saturation Measurements",
-      "use": "out",
-      "min": 0,
-      "max": "*",
-      "type": "Resource"
-    },
-    {
-      "name": "All Oxygen Saturation Measurements All Statuses",
-      "use": "out",
-      "min": 0,
-      "max": "*",
-      "type": "Resource"
-    },
-    {
-      "name": "All Body Temperature Measurements",
-      "use": "out",
-      "min": 0,
-      "max": "*",
-      "type": "Resource"
-    },
-    {
-      "name": "All Body Temperature Measurements All Statuses",
-      "use": "out",
-      "min": 0,
-      "max": "*",
-      "type": "Resource"
-    },
-    {
-      "name": "All Body Height Measurements",
-      "use": "out",
-      "min": 0,
-      "max": "*",
-      "type": "Resource"
-    },
-    {
-      "name": "All Body Height Measurements All Statuses",
-      "use": "out",
-      "min": 0,
-      "max": "*",
-      "type": "Resource"
-    },
-    {
-      "name": "All Head Circumference Measurements",
-      "use": "out",
-      "min": 0,
-      "max": "*",
-      "type": "Resource"
-    },
-    {
-      "name": "All Head Circumference Measurements All Statuses",
-      "use": "out",
-      "min": 0,
-      "max": "*",
-      "type": "Resource"
-    },
-    {
-      "name": "All Body Weight Measurements",
-      "use": "out",
-      "min": 0,
-      "max": "*",
-      "type": "Resource"
-    },
-    {
-      "name": "All Body Weight Measurements All Statuses",
-      "use": "out",
-      "min": 0,
-      "max": "*",
-      "type": "Resource"
-    },
-    {
-      "name": "All Body Mass Index Measurements",
-      "use": "out",
-      "min": 0,
-      "max": "*",
-      "type": "Resource"
-    },
-    {
-      "name": "All Body Mass Index Measurements All Statuses",
-      "use": "out",
-      "min": 0,
-      "max": "*",
-      "type": "Resource"
-    },
-    {
-      "name": "All Blood Pressure Measurements",
-      "use": "out",
-      "min": 0,
-      "max": "*",
-      "type": "Resource"
-    },
-    {
-      "name": "All Blood Pressure Measurements All Statuses",
-      "use": "out",
-      "min": 0,
-      "max": "*",
-      "type": "Resource"
-    },
-    {
-      "name": "Systolic Blood Pressure",
-      "use": "out",
-      "min": 0,
-      "max": "*",
-      "type": "Resource"
-    },
-    {
-      "name": "Diastolic Blood Pressure",
-      "use": "out",
-      "min": 0,
-      "max": "*",
-      "type": "Resource"
-    },
-    {
-      "name": "Coverage",
-      "use": "out",
-      "min": 0,
-      "max": "1",
-      "type": "Coverage"
-    },
-    {
-      "name": "Member ID",
-      "use": "out",
-      "min": 0,
-      "max": "1",
-      "type": "string"
-    },
-    {
-      "name": "Medical Record Number",
-      "use": "out",
-      "min": 0,
-      "max": "1",
-      "type": "string"
-    },
-    {
-      "name": "Most Recent BSA",
-      "use": "out",
-      "min": 0,
-      "max": "1",
-      "type": "Quantity"
-    },
-    {
-      "name": "All ServiceRequests",
-      "use": "out",
-      "min": 0,
-      "max": "*",
-      "type": "ServiceRequest"
-    },
-    {
-      "name": "Most Recent ServiceRequest",
-      "use": "out",
-      "min": 0,
-      "max": "1",
-      "type": "ServiceRequest"
-    },
-    {
-      "name": "Requesting Provider Practitioner",
-      "use": "out",
-      "min": 0,
-      "max": "*",
-      "type": "Resource"
-    },
-    {
-      "name": "Requesting Provider",
-      "use": "out",
-      "min": 0,
-      "max": "*",
-      "type": "Resource"
-    },
-    {
-      "name": "Servicing Provider",
-      "use": "out",
-      "min": 0,
-      "max": "1",
-      "type": "Resource"
-    },
-    {
-      "name": "Test Coverage",
-      "use": "out",
-      "min": 0,
-      "max": "*",
-      "type": "Coverage"
-    },
-    {
-      "name": "Billing Provider",
-      "use": "out",
-      "min": 0,
-      "max": "1",
-      "type": "Resource"
-    },
-    {
-      "name": "Test Related Condition",
-      "use": "out",
-      "min": 0,
-      "max": "*",
-      "type": "Condition"
-    },
-    {
-      "name": "Research Subject",
-      "use": "out",
-      "min": 0,
-      "max": "*",
-      "type": "ResearchSubject"
-    },
-    {
-      "name": "All Clinical Trials",
-      "use": "out",
-      "min": 0,
-      "max": "*",
-      "type": "ResearchStudy"
-    },
-    {
-      "name": "Clinical Trial Organization",
-      "use": "out",
-      "min": 0,
-      "max": "*",
-      "type": "Resource"
-    },
-    {
-      "name": "Policy Number",
-      "use": "out",
-      "min": 0,
-      "max": "1",
-      "type": "Identifier"
-    },
-    {
-      "name": "Requester",
-      "use": "out",
-      "min": 0,
-      "max": "1",
-      "type": "Resource"
-    },
-    {
-      "name": "RequesterRole",
-      "use": "out",
-      "min": 0,
-      "max": "1",
-      "type": "Resource"
-    }
-  ],
-  "dataRequirement": [
-    {
-      "type": "Patient",
-      "profile": [
-        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
-      ]
-    },
-    {
-      "type": "Patient",
-      "profile": [
-        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
-      ],
-      "mustSupport": [
-        "use",
-        "use.value"
-      ]
-    },
-    {
-      "type": "Patient",
-      "profile": [
-        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
-      ],
-      "mustSupport": [
-        "use",
-        "use.value"
-      ]
-    },
-    {
-      "type": "Patient",
-      "profile": [
-        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
-      ],
-      "mustSupport": [
-        "use",
-        "use.value"
-      ]
-    },
-    {
-      "type": "Patient",
-      "profile": [
-        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
-      ],
-      "mustSupport": [
-        "use",
-        "use.value"
-      ]
-    },
-    {
-      "type": "Patient",
-      "profile": [
-        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
-      ],
-      "mustSupport": [
-        "use",
-        "use.value"
-      ]
-    },
-    {
-      "type": "Patient",
-      "profile": [
-        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
-      ],
-      "mustSupport": [
-        "use",
-        "use.value"
-      ]
-    },
-    {
-      "type": "AllergyIntolerance",
-      "profile": [
-        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-allergyintolerance"
-      ]
-    },
-    {
-      "type": "AllergyIntolerance",
-      "profile": [
-        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-allergyintolerance"
-      ],
-      "mustSupport": [
-        "code"
-      ]
-    },
-    {
-      "type": "AllergyIntolerance",
-      "profile": [
-        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-allergyintolerance"
-      ],
-      "mustSupport": [
-        "code"
-      ]
-    },
-    {
-      "type": "AllergyIntolerance",
-      "profile": [
-        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-allergyintolerance"
-      ],
-      "mustSupport": [
-        "code"
-      ]
-    },
-    {
-      "type": "Condition",
-      "profile": [
-        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition"
-      ]
-    },
-    {
-      "type": "Condition",
-      "profile": [
-        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition"
-      ]
-    },
-    {
-      "type": "Condition",
-      "profile": [
-        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition"
-      ]
-    },
-    {
-      "type": "Condition",
-      "profile": [
-        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition"
-      ]
-    },
-    {
-      "type": "DiagnosticReport",
-      "profile": [
-        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-diagnosticreport-lab"
-      ]
-    },
-    {
-      "type": "DiagnosticReport",
-      "profile": [
-        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-diagnosticreport-note"
-      ]
-    },
-    {
-      "type": "Encounter",
-      "profile": [
-        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-encounter"
-      ]
-    },
-    {
-      "type": "Encounter",
-      "profile": [
-        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-encounter"
-      ],
-      "mustSupport": [
-        "status",
-        "status.value"
-      ]
-    },
-    {
-      "type": "Immunization",
-      "profile": [
-        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-immunization"
-      ]
-    },
-    {
-      "type": "Immunization",
-      "profile": [
-        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-immunization"
-      ],
-      "mustSupport": [
-        "status",
-        "status.value"
-      ]
-    },
-    {
-      "type": "Device",
-      "profile": [
-        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-implantable-device"
-      ]
-    },
-    {
-      "type": "Observation",
-      "profile": [
-        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-observation-lab"
-      ]
-    },
-    {
-      "type": "Observation",
-      "profile": [
-        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-observation-lab"
-      ],
-      "mustSupport": [
-        "status",
-        "status.value"
-      ]
-    },
-    {
-      "type": "MedicationRequest",
-      "profile": [
-        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-medicationrequest"
-      ]
-    },
-    {
-      "type": "MedicationRequest",
-      "profile": [
-        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-medicationrequest"
-      ],
-      "mustSupport": [
-        "status",
-        "status.value",
-        "intent",
-        "intent.value"
-      ]
-    },
-    {
-      "type": "Medication",
-      "profile": [
-        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-medication"
-      ]
-    },
-    {
-      "type": "Observation",
-      "profile": [
-        "http://hl7.org/fhir/us/core/StructureDefinition/pediatric-bmi-for-age"
-      ]
-    },
-    {
-      "type": "Observation",
-      "profile": [
-        "http://hl7.org/fhir/us/core/StructureDefinition/pediatric-bmi-for-age"
-      ]
-    },
-    {
-      "type": "Observation",
-      "profile": [
-        "http://hl7.org/fhir/us/core/StructureDefinition/pediatric-bmi-for-age"
-      ]
-    },
-    {
-      "type": "Observation",
-      "profile": [
-        "http://hl7.org/fhir/us/core/StructureDefinition/pediatric-weight-for-height"
-      ]
-    },
-    {
-      "type": "Observation",
-      "profile": [
-        "http://hl7.org/fhir/us/core/StructureDefinition/pediatric-weight-for-height"
-      ]
-    },
-    {
-      "type": "Observation",
-      "profile": [
-        "http://hl7.org/fhir/us/core/StructureDefinition/pediatric-weight-for-height"
-      ]
-    },
-    {
-      "type": "Procedure",
-      "profile": [
-        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-procedure"
-      ],
-      "mustSupport": [
-        "status",
-        "status.value"
-      ]
-    },
-    {
-      "type": "Procedure",
-      "profile": [
-        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-procedure"
-      ],
-      "mustSupport": [
-        "status",
-        "status.value"
-      ]
-    },
-    {
-      "type": "Observation",
-      "profile": [
-        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-pulse-oximetry"
-      ]
-    },
-    {
-      "type": "Observation",
-      "profile": [
-        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-pulse-oximetry"
-      ]
-    },
-    {
-      "type": "Observation",
-      "profile": [
-        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-pulse-oximetry"
-      ]
-    },
-    {
-      "type": "Observation",
-      "profile": [
-        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-smokingstatus"
-      ]
-    },
-    {
-      "type": "Observation",
-      "profile": [
-        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-smokingstatus"
-      ]
-    },
-    {
-      "type": "Observation",
-      "profile": [
-        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-smokingstatus"
-      ]
-    },
-    {
-      "type": "Observation",
-      "profile": [
-        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-smokingstatus"
-      ],
-      "mustSupport": [
-        "status",
-        "status.value"
-      ]
-    },
-    {
-      "type": "Observation",
-      "profile": [
-        "http://hl7.org/fhir/StructureDefinition/vitalspanel"
-      ]
-    },
-    {
-      "type": "Observation",
-      "profile": [
-        "http://hl7.org/fhir/StructureDefinition/vitalspanel"
-      ]
-    },
-    {
-      "type": "Observation",
-      "profile": [
-        "http://hl7.org/fhir/StructureDefinition/vitalspanel"
-      ]
-    },
-    {
-      "type": "Observation",
-      "profile": [
-        "http://hl7.org/fhir/StructureDefinition/resprate"
-      ]
-    },
-    {
-      "type": "Observation",
-      "profile": [
-        "http://hl7.org/fhir/StructureDefinition/resprate"
-      ]
-    },
-    {
-      "type": "Observation",
-      "profile": [
-        "http://hl7.org/fhir/StructureDefinition/resprate"
-      ]
-    },
-    {
-      "type": "Observation",
-      "profile": [
-        "http://hl7.org/fhir/StructureDefinition/heartrate"
-      ]
-    },
-    {
-      "type": "Observation",
-      "profile": [
-        "http://hl7.org/fhir/StructureDefinition/heartrate"
-      ]
-    },
-    {
-      "type": "Observation",
-      "profile": [
-        "http://hl7.org/fhir/StructureDefinition/heartrate"
-      ]
-    },
-    {
-      "type": "Observation",
-      "profile": [
-        "http://hl7.org/fhir/StructureDefinition/oxygensat"
-      ]
-    },
-    {
-      "type": "Observation",
-      "profile": [
-        "http://hl7.org/fhir/StructureDefinition/oxygensat"
-      ]
-    },
-    {
-      "type": "Observation",
-      "profile": [
-        "http://hl7.org/fhir/StructureDefinition/oxygensat"
-      ]
-    },
-    {
-      "type": "Observation",
-      "profile": [
-        "http://hl7.org/fhir/StructureDefinition/bodytemp"
-      ]
-    },
-    {
-      "type": "Observation",
-      "profile": [
-        "http://hl7.org/fhir/StructureDefinition/bodytemp"
-      ]
-    },
-    {
-      "type": "Observation",
-      "profile": [
-        "http://hl7.org/fhir/StructureDefinition/bodytemp"
-      ]
-    },
-    {
-      "type": "Observation",
-      "profile": [
-        "http://hl7.org/fhir/StructureDefinition/bodyheight"
-      ]
-    },
-    {
-      "type": "Observation",
-      "profile": [
-        "http://hl7.org/fhir/StructureDefinition/bodyheight"
-      ]
-    },
-    {
-      "type": "Observation",
-      "profile": [
-        "http://hl7.org/fhir/StructureDefinition/headcircum"
-      ]
-    },
-    {
-      "type": "Observation",
-      "profile": [
-        "http://hl7.org/fhir/StructureDefinition/headcircum"
-      ]
-    },
-    {
-      "type": "Observation",
-      "profile": [
-        "http://hl7.org/fhir/StructureDefinition/headcircum"
-      ]
-    },
-    {
-      "type": "Observation",
-      "profile": [
-        "http://hl7.org/fhir/StructureDefinition/bodyweight"
-      ]
-    },
-    {
-      "type": "Observation",
-      "profile": [
-        "http://hl7.org/fhir/StructureDefinition/bodyweight"
-      ]
-    },
-    {
-      "type": "Observation",
-      "profile": [
-        "http://hl7.org/fhir/StructureDefinition/bodyweight"
-      ]
-    },
-    {
-      "type": "Observation",
-      "profile": [
-        "http://hl7.org/fhir/StructureDefinition/bmi"
-      ]
-    },
-    {
-      "type": "Observation",
-      "profile": [
-        "http://hl7.org/fhir/StructureDefinition/bmi"
-      ]
-    },
-    {
-      "type": "Observation",
-      "profile": [
-        "http://hl7.org/fhir/StructureDefinition/bmi"
-      ]
-    },
-    {
-      "type": "Observation",
-      "profile": [
-        "http://hl7.org/fhir/StructureDefinition/bp"
-      ]
-    },
-    {
-      "type": "Observation",
-      "profile": [
-        "http://hl7.org/fhir/StructureDefinition/bp"
-      ]
-    },
-    {
-      "type": "Observation",
-      "profile": [
-        "http://hl7.org/fhir/StructureDefinition/bp"
-      ]
-    },
-    {
-      "type": "Observation",
-      "profile": [
-        "http://hl7.org/fhir/StructureDefinition/bp"
-      ],
-      "mustSupport": [
-        "component"
-      ]
-    },
-    {
-      "type": "Observation",
-      "profile": [
-        "http://hl7.org/fhir/StructureDefinition/bp"
-      ],
-      "mustSupport": [
-        "component",
-        "value"
-      ]
-    },
-    {
-      "type": "Observation",
-      "profile": [
-        "http://hl7.org/fhir/StructureDefinition/bp"
-      ],
-      "mustSupport": [
-        "component"
-      ]
-    },
-    {
-      "type": "Observation",
-      "profile": [
-        "http://hl7.org/fhir/StructureDefinition/bp"
-      ],
-      "mustSupport": [
-        "component",
-        "value"
-      ]
-    },
-    {
-      "type": "Coverage",
-      "profile": [
-        "http://hl7.org/fhir/StructureDefinition/Coverage"
-      ],
-      "mustSupport": [
-        "beneficiary",
-        "beneficiary.reference",
-        "period"
-      ]
-    },
-    {
-      "type": "Coverage",
-      "profile": [
-        "http://hl7.org/fhir/StructureDefinition/Coverage"
-      ],
-      "mustSupport": [
-        "beneficiary",
-        "beneficiary.reference",
-        "period",
-        "type"
-      ]
-    },
-    {
-      "type": "Patient",
-      "profile": [
-        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
-      ],
-      "mustSupport": [
-        "type"
-      ]
-    },
-    {
-      "type": "Observation",
-      "profile": [
-        "http://hl7.org/fhir/StructureDefinition/Observation"
-      ],
-      "mustSupport": [
-        "code"
-      ],
-      "codeFilter": [
-        {
-          "path": "code",
-          "code": [
-            {
-              "system": "http://loinc.org",
-              "code": "8277-6",
-              "display": "Intensive care unit"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "type": "ServiceRequest",
-      "profile": [
-        "http://hl7.org/fhir/StructureDefinition/ServiceRequest"
-      ]
-    },
-    {
-      "type": "Practitioner",
-      "profile": [
-        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner"
-      ],
-      "mustSupport": [
-        "id",
-        "id.value"
-      ]
-    },
-    {
-      "type": "Organization",
-      "profile": [
-        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization"
-      ],
-      "mustSupport": [
-        "id",
-        "id.value"
-      ]
-    },
-    {
-      "type": "ServiceRequest",
-      "profile": [
-        "http://hl7.org/fhir/StructureDefinition/ServiceRequest"
-      ]
-    },
-    {
-      "type": "Coverage",
-      "profile": [
-        "http://hl7.org/fhir/StructureDefinition/Coverage"
-      ],
-      "mustSupport": [
-        "id"
-      ]
-    },
-    {
-      "type": "Organization",
-      "profile": [
-        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization"
-      ],
-      "mustSupport": [
-        "id",
-        "id.value"
-      ]
-    },
-    {
-      "type": "Condition",
-      "profile": [
-        "http://hl7.org/fhir/StructureDefinition/Condition"
-      ],
-      "mustSupport": [
-        "id"
-      ]
-    },
-    {
-      "type": "ResearchSubject",
-      "profile": [
-        "http://hl7.org/fhir/StructureDefinition/ResearchSubject"
-      ],
-      "mustSupport": [
-        "individual",
-        "individual.reference"
-      ]
-    },
-    {
-      "type": "ResearchStudy",
-      "profile": [
-        "http://hl7.org/fhir/StructureDefinition/ResearchStudy"
-      ]
-    },
-    {
-      "type": "Organization",
-      "profile": [
-        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization"
-      ]
-    },
-    {
-      "type": "Condition",
-      "profile": [
-        "http://hl7.org/fhir/StructureDefinition/Condition"
-      ],
-      "mustSupport": [
-        "id"
-      ]
-    },
-    {
-      "type": "Coverage",
-      "profile": [
-        "http://hl7.org/fhir/StructureDefinition/Coverage"
-      ],
-      "mustSupport": [
-        "beneficiary",
-        "beneficiary.reference",
-        "period",
-        "type"
-      ]
-    },
-    {
-      "type": "Practitioner",
-      "profile": [
-        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner"
-      ],
-      "mustSupport": [
-        "id",
-        "id.value"
-      ]
-    },
-    {
-      "type": "PractitionerRole",
-      "profile": [
-        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitionerrole"
-      ],
-      "mustSupport": [
-        "practitioner",
-        "practitioner.reference",
-        "practitioner.reference.value"
-      ]
-    },
-    {
-      "type": "AllergyIntolerance",
-      "profile": [
-        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-allergyintolerance"
-      ]
-    },
-    {
-      "type": "AllergyIntolerance",
-      "profile": [
-        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-allergyintolerance"
-      ],
-      "mustSupport": [
-        "code"
-      ]
-    },
-    {
-      "type": "Condition",
-      "profile": [
-        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition"
-      ]
-    },
-    {
-      "type": "Practitioner",
-      "profile": [
-        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner"
-      ],
-      "mustSupport": [
-        "id",
-        "id.value"
-      ]
-    }
-  ],
+  "description": "A library of expressions, functions, and terminology declarations for use with FHIR in the US Realm.",
+  "relatedArtifact": [ {
+    "type": "depends-on",
+    "display": "USCore model information",
+    "resource": "http://hl7.org/fhir/Library/USCore-ModelInfo"
+  }, {
+    "type": "depends-on",
+    "display": "FHIR model information",
+    "resource": "http://fhir.org/guides/cqf/common/Library/FHIR-ModelInfo|4.0.1"
+  }, {
+    "type": "depends-on",
+    "display": "Library FHIRHelpers",
+    "resource": "http://hl7.org/fhir/us/cql/Library/FHIRHelpers|4.1.0"
+  }, {
+    "type": "depends-on",
+    "display": "Library UC",
+    "resource": "http://hl7.org/fhir/us/cql/Library/USCoreCommon"
+  }, {
+    "type": "depends-on",
+    "display": "Library FHIRHelpers",
+    "resource": "http://hl7.org/fhir/us/cql/Library/FHIRHelpers|4.1.0"
+  }, {
+    "type": "depends-on",
+    "display": "Code system LOINC",
+    "resource": "http://loinc.org"
+  }, {
+    "type": "depends-on",
+    "display": "Code system Identifier Type",
+    "resource": "http://terminology.hl7.org/CodeSystem/v2-0203"
+  }, {
+    "type": "depends-on",
+    "display": "Code system Verification Status",
+    "resource": "http://terminology.hl7.org/CodeSystem/condition-ver-status"
+  }, {
+    "type": "depends-on",
+    "display": "Code system Condition Clinical",
+    "resource": "http://terminology.hl7.org/CodeSystem/condition-clinical"
+  }, {
+    "type": "depends-on",
+    "display": "Code system SNOMEDCT",
+    "resource": "http://snomed.info/sct"
+  }, {
+    "type": "depends-on",
+    "display": "Code system AllergyIntoleranceVerificationStatusCodes",
+    "resource": "http://terminology.hl7.org/CodeSystem/allergyintolerance-verification"
+  }, {
+    "type": "depends-on",
+    "display": "Code system AllergyIntoleranceClinicalStatusCodes",
+    "resource": "http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical"
+  }, {
+    "type": "depends-on",
+    "display": "Code system ConditionCategory",
+    "resource": "http://terminology.hl7.org/CodeSystem/condition-category"
+  }, {
+    "type": "depends-on",
+    "display": "Code system ConditionVerificationStatusCodes",
+    "resource": "http://terminology.hl7.org/CodeSystem/condition-ver-status"
+  }, {
+    "type": "depends-on",
+    "display": "Code system ConditionClinicalStatusCodes",
+    "resource": "http://terminology.hl7.org/CodeSystem/condition-clinical"
+  }, {
+    "type": "depends-on",
+    "display": "Code system USCoreConditionCategory",
+    "resource": "http://hl7.org/fhir/us/core/CodeSystem/condition-category"
+  }, {
+    "type": "depends-on",
+    "display": "Code system ObservationStatusCodes",
+    "resource": "http://hl7.org/fhir/observation-status"
+  }, {
+    "type": "depends-on",
+    "display": "Code system IdentifierType",
+    "resource": "http://terminology.hl7.org/CodeSystem/v2-0203"
+  }, {
+    "type": "depends-on",
+    "display": "Value set Common allergy substances",
+    "resource": "http://hl7.org/fhir/us/core/ValueSet/us-core-allergy-substance"
+  } ],
+  "parameter": [ {
+    "name": "Patient",
+    "use": "out",
+    "min": 0,
+    "max": "1",
+    "type": "Resource"
+  }, {
+    "name": "Usual Name",
+    "use": "out",
+    "min": 0,
+    "max": "1",
+    "type": "Resource"
+  }, {
+    "name": "Official Name",
+    "use": "out",
+    "min": 0,
+    "max": "1",
+    "type": "Resource"
+  }, {
+    "name": "First Occurrence of Non-Official, Non-Usual Name",
+    "use": "out",
+    "min": 0,
+    "max": "1",
+    "type": "Resource"
+  }, {
+    "name": "Name",
+    "use": "out",
+    "min": 0,
+    "max": "1",
+    "type": "Resource"
+  }, {
+    "name": "First Name",
+    "use": "out",
+    "min": 0,
+    "max": "1",
+    "type": "string"
+  }, {
+    "name": "Middle Names",
+    "use": "out",
+    "min": 0,
+    "max": "1",
+    "type": "string"
+  }, {
+    "name": "Last Name",
+    "use": "out",
+    "min": 0,
+    "max": "1",
+    "type": "string"
+  }, {
+    "name": "Name - First Middle(s) Last",
+    "use": "out",
+    "min": 0,
+    "max": "1",
+    "type": "string"
+  }, {
+    "name": "Name - Last, First Middle(s)",
+    "use": "out",
+    "min": 0,
+    "max": "1",
+    "type": "string"
+  }, {
+    "name": "All Allergies and Intolerances",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Resource"
+  }, {
+    "name": "Active Confirmed Allergies and Intolerances",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Resource"
+  }, {
+    "name": "Common Allergies and Intolerances",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Resource"
+  }, {
+    "name": "Active Confirmed Common Allergies and Intolerances",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Resource"
+  }, {
+    "name": "No Known Allergies (Not Asked)",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Resource"
+  }, {
+    "name": "No Known Allergies (Confirmed)",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Resource"
+  }, {
+    "name": "All Conditions",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Resource"
+  }, {
+    "name": "All Problem List Items",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Resource"
+  }, {
+    "name": "Active Confirmed Problem List Items",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Resource"
+  }, {
+    "name": "All Encounter Diagnoses",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Resource"
+  }, {
+    "name": "All Health Concerns",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Resource"
+  }, {
+    "name": "All Diagnostic Reports for Laboratory Results",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Resource"
+  }, {
+    "name": "All Diagnostic Report Notes",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Resource"
+  }, {
+    "name": "All Encounters",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Resource"
+  }, {
+    "name": "All Performed Encounters",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Resource"
+  }, {
+    "name": "All Immunizations",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Resource"
+  }, {
+    "name": "All Completed Immunizations",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Resource"
+  }, {
+    "name": "All Implantable Devices",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Resource"
+  }, {
+    "name": "All Laboratory Results",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Resource"
+  }, {
+    "name": "Resulted Laboratory Results",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Resource"
+  }, {
+    "name": "All Medication Requests",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Resource"
+  }, {
+    "name": "Most Recent Medication Request",
+    "use": "out",
+    "min": 0,
+    "max": "1",
+    "type": "Resource"
+  }, {
+    "name": "Active Medication Orders",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Resource"
+  }, {
+    "name": "All Medications",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Resource"
+  }, {
+    "name": "Pediatric BMI for Age",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Resource"
+  }, {
+    "name": "Pediatric BMI for Age All Statuses",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Resource"
+  }, {
+    "name": "Pediatric Weight for Height",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Resource"
+  }, {
+    "name": "Pediatric Weight for Height All Statuses",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Resource"
+  }, {
+    "name": "All Procedures",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Resource"
+  }, {
+    "name": "All Performed Procedures",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Resource"
+  }, {
+    "name": "Pulse Oximetry",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Resource"
+  }, {
+    "name": "Pulse Oximetry All Statuses",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Resource"
+  }, {
+    "name": "Smoking Status",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Resource"
+  }, {
+    "name": "Smoking Status All Statuses",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Resource"
+  }, {
+    "name": "Most Recent Smoking Status",
+    "use": "out",
+    "min": 0,
+    "max": "1",
+    "type": "Resource"
+  }, {
+    "name": "All Vital Signs Panels",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Resource"
+  }, {
+    "name": "All Vital Signs Panels All Statuses",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Resource"
+  }, {
+    "name": "All Respiratory Rate Measurements",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Resource"
+  }, {
+    "name": "All Respiratory Rate Measurements All Statuses",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Resource"
+  }, {
+    "name": "All Heart Rate Measurements",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Resource"
+  }, {
+    "name": "All Heart Rate Measurements All Statuses",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Resource"
+  }, {
+    "name": "All Oxygen Saturation Measurements",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Resource"
+  }, {
+    "name": "All Oxygen Saturation Measurements All Statuses",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Resource"
+  }, {
+    "name": "All Body Temperature Measurements",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Resource"
+  }, {
+    "name": "All Body Temperature Measurements All Statuses",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Resource"
+  }, {
+    "name": "All Body Height Measurements",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Resource"
+  }, {
+    "name": "All Body Height Measurements All Statuses",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Resource"
+  }, {
+    "name": "All Head Circumference Measurements",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Resource"
+  }, {
+    "name": "All Head Circumference Measurements All Statuses",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Resource"
+  }, {
+    "name": "All Body Weight Measurements",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Resource"
+  }, {
+    "name": "All Body Weight Measurements All Statuses",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Resource"
+  }, {
+    "name": "All Body Mass Index Measurements",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Resource"
+  }, {
+    "name": "All Body Mass Index Measurements All Statuses",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Resource"
+  }, {
+    "name": "All Blood Pressure Measurements",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Resource"
+  }, {
+    "name": "All Blood Pressure Measurements All Statuses",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Resource"
+  }, {
+    "name": "Systolic Blood Pressure",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Resource"
+  }, {
+    "name": "Diastolic Blood Pressure",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Resource"
+  }, {
+    "name": "Medical Record Number",
+    "use": "out",
+    "min": 0,
+    "max": "1",
+    "type": "string"
+  }, {
+    "name": "Most Recent BSA",
+    "use": "out",
+    "min": 0,
+    "max": "1",
+    "type": "Quantity"
+  }, {
+    "name": "All ServiceRequests",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "ServiceRequest"
+  }, {
+    "name": "Research Subject",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "ResearchSubject"
+  }, {
+    "name": "All Clinical Trials",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "ResearchStudy"
+  }, {
+    "name": "Clinical Trial Organization",
+    "use": "out",
+    "min": 0,
+    "max": "*",
+    "type": "Resource"
+  } ],
+  "dataRequirement": [ {
+    "type": "Patient",
+    "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient" ]
+  }, {
+    "type": "Patient",
+    "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient" ],
+    "mustSupport": [ "use", "use.value" ]
+  }, {
+    "type": "Patient",
+    "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient" ],
+    "mustSupport": [ "use", "use.value" ]
+  }, {
+    "type": "Patient",
+    "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient" ],
+    "mustSupport": [ "use", "use.value" ]
+  }, {
+    "type": "Patient",
+    "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient" ],
+    "mustSupport": [ "use", "use.value" ]
+  }, {
+    "type": "Patient",
+    "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient" ],
+    "mustSupport": [ "use", "use.value" ]
+  }, {
+    "type": "Patient",
+    "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient" ],
+    "mustSupport": [ "use", "use.value" ]
+  }, {
+    "type": "AllergyIntolerance",
+    "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-allergyintolerance" ]
+  }, {
+    "type": "AllergyIntolerance",
+    "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-allergyintolerance" ],
+    "mustSupport": [ "code" ]
+  }, {
+    "type": "AllergyIntolerance",
+    "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-allergyintolerance" ],
+    "mustSupport": [ "code" ]
+  }, {
+    "type": "AllergyIntolerance",
+    "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-allergyintolerance" ],
+    "mustSupport": [ "code" ]
+  }, {
+    "type": "Condition",
+    "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition" ]
+  }, {
+    "type": "Condition",
+    "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition" ]
+  }, {
+    "type": "Condition",
+    "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition" ]
+  }, {
+    "type": "Condition",
+    "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition" ]
+  }, {
+    "type": "DiagnosticReport",
+    "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-diagnosticreport-lab" ]
+  }, {
+    "type": "DiagnosticReport",
+    "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-diagnosticreport-note" ]
+  }, {
+    "type": "Encounter",
+    "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-encounter" ]
+  }, {
+    "type": "Encounter",
+    "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-encounter" ],
+    "mustSupport": [ "status", "status.value" ]
+  }, {
+    "type": "Immunization",
+    "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-immunization" ]
+  }, {
+    "type": "Immunization",
+    "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-immunization" ],
+    "mustSupport": [ "status", "status.value" ]
+  }, {
+    "type": "Device",
+    "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-implantable-device" ]
+  }, {
+    "type": "Observation",
+    "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-observation-lab" ]
+  }, {
+    "type": "Observation",
+    "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-observation-lab" ],
+    "mustSupport": [ "status", "status.value" ]
+  }, {
+    "type": "MedicationRequest",
+    "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-medicationrequest" ]
+  }, {
+    "type": "MedicationRequest",
+    "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-medicationrequest" ],
+    "mustSupport": [ "status", "status.value", "intent", "intent.value" ]
+  }, {
+    "type": "Medication",
+    "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-medication" ]
+  }, {
+    "type": "Observation",
+    "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/pediatric-bmi-for-age" ]
+  }, {
+    "type": "Observation",
+    "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/pediatric-bmi-for-age" ]
+  }, {
+    "type": "Observation",
+    "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/pediatric-bmi-for-age" ]
+  }, {
+    "type": "Observation",
+    "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/pediatric-weight-for-height" ]
+  }, {
+    "type": "Observation",
+    "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/pediatric-weight-for-height" ]
+  }, {
+    "type": "Observation",
+    "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/pediatric-weight-for-height" ]
+  }, {
+    "type": "Procedure",
+    "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-procedure" ],
+    "mustSupport": [ "status", "status.value" ]
+  }, {
+    "type": "Procedure",
+    "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-procedure" ],
+    "mustSupport": [ "status", "status.value" ]
+  }, {
+    "type": "Observation",
+    "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-pulse-oximetry" ]
+  }, {
+    "type": "Observation",
+    "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-pulse-oximetry" ]
+  }, {
+    "type": "Observation",
+    "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-pulse-oximetry" ]
+  }, {
+    "type": "Observation",
+    "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-smokingstatus" ]
+  }, {
+    "type": "Observation",
+    "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-smokingstatus" ]
+  }, {
+    "type": "Observation",
+    "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-smokingstatus" ]
+  }, {
+    "type": "Observation",
+    "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-smokingstatus" ],
+    "mustSupport": [ "status", "status.value" ]
+  }, {
+    "type": "Observation",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/vitalspanel" ]
+  }, {
+    "type": "Observation",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/vitalspanel" ]
+  }, {
+    "type": "Observation",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/vitalspanel" ]
+  }, {
+    "type": "Observation",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/resprate" ]
+  }, {
+    "type": "Observation",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/resprate" ]
+  }, {
+    "type": "Observation",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/resprate" ]
+  }, {
+    "type": "Observation",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/heartrate" ]
+  }, {
+    "type": "Observation",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/heartrate" ]
+  }, {
+    "type": "Observation",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/heartrate" ]
+  }, {
+    "type": "Observation",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/oxygensat" ]
+  }, {
+    "type": "Observation",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/oxygensat" ]
+  }, {
+    "type": "Observation",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/oxygensat" ]
+  }, {
+    "type": "Observation",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/bodytemp" ]
+  }, {
+    "type": "Observation",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/bodytemp" ]
+  }, {
+    "type": "Observation",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/bodytemp" ]
+  }, {
+    "type": "Observation",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/bodyheight" ]
+  }, {
+    "type": "Observation",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/bodyheight" ]
+  }, {
+    "type": "Observation",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/bodyheight" ]
+  }, {
+    "type": "Observation",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/headcircum" ]
+  }, {
+    "type": "Observation",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/headcircum" ]
+  }, {
+    "type": "Observation",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/headcircum" ]
+  }, {
+    "type": "Observation",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/bodyweight" ]
+  }, {
+    "type": "Observation",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/bodyweight" ]
+  }, {
+    "type": "Observation",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/bodyweight" ]
+  }, {
+    "type": "Observation",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/bmi" ]
+  }, {
+    "type": "Observation",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/bmi" ]
+  }, {
+    "type": "Observation",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/bmi" ]
+  }, {
+    "type": "Observation",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/bp" ]
+  }, {
+    "type": "Observation",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/bp" ]
+  }, {
+    "type": "Observation",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/bp" ]
+  }, {
+    "type": "Observation",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/bp" ],
+    "mustSupport": [ "component" ]
+  }, {
+    "type": "Observation",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/bp" ],
+    "mustSupport": [ "component", "value" ]
+  }, {
+    "type": "Observation",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/bp" ],
+    "mustSupport": [ "component" ]
+  }, {
+    "type": "Observation",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/bp" ],
+    "mustSupport": [ "component", "value" ]
+  }, {
+    "type": "Patient",
+    "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient" ],
+    "mustSupport": [ "type" ]
+  }, {
+    "type": "Observation",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/Observation" ],
+    "mustSupport": [ "code" ],
+    "codeFilter": [ {
+      "path": "code",
+      "code": [ {
+        "system": "http://loinc.org",
+        "code": "8277-6",
+        "display": "Body surface area"
+      } ]
+    } ]
+  }, {
+    "type": "ServiceRequest",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/ServiceRequest" ]
+  }, {
+    "type": "Practitioner",
+    "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner" ],
+    "mustSupport": [ "id", "id.value" ]
+  }, {
+    "type": "Practitioner",
+    "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner" ],
+    "mustSupport": [ "id", "id.value" ]
+  }, {
+    "type": "Organization",
+    "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization" ],
+    "mustSupport": [ "id", "id.value" ]
+  }, {
+    "type": "Condition",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/Condition" ],
+    "mustSupport": [ "id" ]
+  }, {
+    "type": "ResearchSubject",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/ResearchSubject" ],
+    "mustSupport": [ "individual", "individual.reference" ]
+  }, {
+    "type": "ResearchStudy",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/ResearchStudy" ]
+  }, {
+    "type": "Organization",
+    "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization" ]
+  }, {
+    "type": "Condition",
+    "profile": [ "http://hl7.org/fhir/StructureDefinition/Condition" ],
+    "mustSupport": [ "id" ]
+  }, {
+    "type": "Practitioner",
+    "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner" ],
+    "mustSupport": [ "id", "id.value" ]
+  }, {
+    "type": "PractitionerRole",
+    "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitionerrole" ],
+    "mustSupport": [ "practitioner", "practitioner.reference", "practitioner.reference.value" ]
+  }, {
+    "type": "AllergyIntolerance",
+    "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-allergyintolerance" ]
+  }, {
+    "type": "AllergyIntolerance",
+    "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-allergyintolerance" ],
+    "mustSupport": [ "code" ]
+  }, {
+    "type": "Condition",
+    "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition" ]
+  } ],
   "content": [
-    {
+  {
       "contentType": "text/cql",
       "url": "../cql/USCoreElements.cql"
    }

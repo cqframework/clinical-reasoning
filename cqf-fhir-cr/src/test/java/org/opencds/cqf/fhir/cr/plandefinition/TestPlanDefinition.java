@@ -198,17 +198,17 @@ public class TestPlanDefinition {
             return this;
         }
 
-        private void loadAdditionalData(IBaseResource resource) {
+        public When additionalData(IBaseResource resource) {
             var fhirVersion = repository.fhirContext().getVersion().getVersion();
             additionalData = resource.getIdElement().getResourceType().equals("Bundle")
                     ? (IBaseBundle) resource
                     : addEntry(newBundle(fhirVersion), newEntryWithResource(resource));
+            return this;
         }
 
         public When additionalData(String dataAssetName) {
             var data = jsonParser.parseResource(open(dataAssetName));
-            loadAdditionalData(data);
-            return this;
+            return additionalData(data);
         }
 
         public When additionalDataId(IIdType id) {
@@ -239,7 +239,7 @@ public class TestPlanDefinition {
 
         public IBaseBundle applyR5() {
             if (additionalDataId != null) {
-                loadAdditionalData(readRepository(repository, additionalDataId));
+                additionalData(readRepository(repository, additionalDataId));
             }
             var param = (IParametersAdapter) IAdapterFactory.createAdapterForResource(processor.applyR5(
                     Eithers.forMiddle3(Ids.newId(repository.fhirContext(), "PlanDefinition", planDefinitionId)),
@@ -268,7 +268,7 @@ public class TestPlanDefinition {
 
         public GeneratedCarePlan thenApply() {
             if (additionalDataId != null) {
-                loadAdditionalData(readRepository(repository, additionalDataId));
+                additionalData(readRepository(repository, additionalDataId));
             }
             return new GeneratedCarePlan(
                     repository,

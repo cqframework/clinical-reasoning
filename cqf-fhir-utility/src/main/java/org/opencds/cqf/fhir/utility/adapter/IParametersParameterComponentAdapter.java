@@ -13,7 +13,7 @@ public interface IParametersParameterComponentAdapter extends IAdapter<IBaseBack
 
     public void setName(String name);
 
-    public List<IBaseBackboneElement> getPart();
+    public List<IParametersParameterComponentAdapter> getPart();
 
     public List<IBaseDatatype> getPartValues(String name);
 

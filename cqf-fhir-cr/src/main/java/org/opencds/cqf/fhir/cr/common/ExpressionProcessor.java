@@ -1,10 +1,10 @@
 package org.opencds.cqf.fhir.cr.common;
 
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import jakarta.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -27,12 +27,16 @@ public class ExpressionProcessor {
      * @param request operation request with parameters
      * @param expression CqfExpression to evaluate
      * @param itemLinkId link Id of the item
-     * @return
+     * @return the results of the expression
      */
     public List<IBase> getExpressionResultForItem(
-            ICqlOperationRequest request, CqfExpression expression, String itemLinkId) {
+            ICqlOperationRequest request,
+            CqfExpression expression,
+            String itemLinkId,
+            IBaseParameters parameters,
+            Map<String, Object> rawParameters) {
         try {
-            return getExpressionResult(request, expression);
+            return getExpressionResult(request, expression, parameters, rawParameters);
         } catch (Exception ex) {
             final String message =
                     String.format(EXCEPTION_MESSAGE_TEMPLATE, expression.getExpression(), itemLinkId, ex.getMessage());
@@ -45,10 +49,10 @@ public class ExpressionProcessor {
      *
      * @param request operation request with parameters
      * @param expression CqfExpression to evaluate
-     * @return
+     * @return the results of the expression
      */
     public List<IBase> getExpressionResult(ICqlOperationRequest request, CqfExpression expression) {
-        return getExpressionResult(request, expression, null);
+        return getExpressionResult(request, expression, null, null);
     }
 
     /**
@@ -57,11 +61,16 @@ public class ExpressionProcessor {
      * @param request operation request with parameters
      * @param expression CqfExpression to evaluate
      * @param parameters the parameters to use in place of the request parameters
-     * @return
+     * @param rawParameters the raw CQL parameters to use in place of the request raw parameters
+     * @return the results of the expression
      */
     public List<IBase> getExpressionResult(
-            ICqlOperationRequest request, CqfExpression expression, @Nullable IBaseParameters parameters) {
+            ICqlOperationRequest request,
+            CqfExpression expression,
+            @Nullable IBaseParameters parameters,
+            @Nullable Map<String, Object> rawParameters) {
         parameters = parameters == null ? request.getParameters() : parameters;
+        rawParameters = rawParameters == null ? request.getRawParameters() : rawParameters;
         var result = expression == null
                 ? null
                 : request.getLibraryEngine()
@@ -69,21 +78,22 @@ public class ExpressionProcessor {
                                 request.getSubjectId().getIdPart(),
                                 expression,
                                 parameters,
+                                rawParameters,
                                 request.getData(),
-                                request.getContext(),
-                                null);
+                                request.getContextVariable(),
+                                request.getResourceVariable());
         return result == null
                 ? new ArrayList<>()
                 : result.stream().filter(Objects::nonNull).collect(Collectors.toList());
     }
 
     /**
-     * Returns a CqfExpression from a list of extensions filtered by the given url.  This is done against a list of extensions to support the lack of an Expression type in Dstu3.
+     * Returns a CqfExpression from a list of extensions filtered by the given url.
      *
      * @param request operation request with parameters
      * @param extensions list of extensions to pull the CqfExpression from
      * @param extensionUrl the list of extensions will be filtered by this url
-     * @return
+     * @return a CqfExpression
      */
     public <E extends IBaseExtension<?, ?>> CqfExpression getCqfExpression(
             IOperationRequest request, List<E> extensions, String extensionUrl) {
@@ -91,7 +101,7 @@ public class ExpressionProcessor {
                 .filter(e -> e.getUrl().equals(extensionUrl))
                 .findFirst()
                 .orElse(null);
-        return extension == null ? null : CqfExpression.of(extension, request.getDefaultLibraryUrl());
+        return extension == null ? null : CqfExpression.of(extension, request.getReferencedLibraries());
     }
 
     /**
@@ -99,49 +109,41 @@ public class ExpressionProcessor {
      *
      * @param request operation request with parameters
      * @param element the element to pull the Expression element from
-     * @return
+     * @return a CqfExpression
      */
     public CqfExpression getCqfExpressionForElement(IOperationRequest request, IBaseBackboneElement element) {
         if (element == null) {
             return null;
         }
         String expressionPath = "expression";
-        switch (request.getFhirVersion()) {
-            case DSTU3:
-                return new CqfExpression(
-                        request.resolvePathString(element, "language"),
-                        request.resolvePathString(element, expressionPath),
-                        request.getDefaultLibraryUrl());
-            case R4:
-                return CqfExpression.of(
-                        request.resolvePath(element, expressionPath, org.hl7.fhir.r4.model.Expression.class),
-                        request.getDefaultLibraryUrl());
-            case R5:
-                return CqfExpression.of(
-                        request.resolvePath(element, expressionPath, org.hl7.fhir.r5.model.Expression.class),
-                        request.getDefaultLibraryUrl());
-
-            default:
-                return null;
-        }
+        return switch (request.getFhirVersion()) {
+            case DSTU3 -> new CqfExpression(
+                    request.resolvePathString(element, "language"),
+                    request.resolvePathString(element, expressionPath),
+                    request.getReferencedLibraries());
+            case R4 -> CqfExpression.of(
+                    request.resolvePath(element, expressionPath, org.hl7.fhir.r4.model.Expression.class),
+                    request.getReferencedLibraries());
+            case R5 -> CqfExpression.of(
+                    request.resolvePath(element, expressionPath, org.hl7.fhir.r5.model.Expression.class),
+                    request.getReferencedLibraries());
+            default -> null;
+        };
     }
 
     /**
      * Returns a CqfExpression for the initial expression of a given item with an SDC Initial Expression Extension
-     * "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression"
+     * "<a href="http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression">...</a>"
      *
      * @param request operation request with parameters
      * @param item the item
-     * @return
+     * @return a CqfExpression
      */
     public CqfExpression getItemInitialExpression(IOperationRequest request, IBaseBackboneElement item) {
         if (!item.hasExtension()) {
             return null;
         }
-        var expressionExtensionUrl = request.getFhirVersion() == FhirVersionEnum.DSTU3
-                ? Constants.CQIF_CQL_EXPRESSION
-                : Constants.CQF_EXPRESSION;
-        var cqfExpression = getCqfExpression(request, item.getExtension(), expressionExtensionUrl);
+        var cqfExpression = getCqfExpression(request, item.getExtension(), Constants.CQF_EXPRESSION);
         return cqfExpression != null
                 ? cqfExpression
                 : getCqfExpression(request, item.getExtension(), Constants.SDC_QUESTIONNAIRE_INITIAL_EXPRESSION);

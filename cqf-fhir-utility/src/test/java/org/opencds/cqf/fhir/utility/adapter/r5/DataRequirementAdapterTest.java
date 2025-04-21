@@ -24,11 +24,15 @@ class DataRequirementAdapterTest {
     @Test
     void test() {
         var dataReq = new DataRequirement();
+        var id = "test";
+        dataReq.setId(id);
         var adapter = new DataRequirementAdapter(dataReq);
         assertNotNull(adapter);
         assertEquals(dataReq, adapter.get());
         assertEquals(FhirVersionEnum.R5, adapter.fhirContext().getVersion().getVersion());
         assertNotNull(adapter.getModelResolver());
+        assertTrue(adapter.hasId());
+        assertEquals(id, adapter.getId());
     }
 
     @Test

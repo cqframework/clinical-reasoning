@@ -146,7 +146,6 @@ public class PlanDefinitionProcessor {
             IBaseDatatype setting,
             IBaseDatatype settingContext,
             IBaseParameters parameters,
-            boolean useServerData,
             IBaseBundle data,
             List<? extends IBaseBackboneElement> prefetchData,
             LibraryEngine libraryEngine) {
@@ -165,7 +164,6 @@ public class PlanDefinitionProcessor {
                 setting,
                 settingContext,
                 parameters,
-                useServerData,
                 data,
                 prefetchData,
                 libraryEngine,
@@ -196,7 +194,6 @@ public class PlanDefinitionProcessor {
                 setting,
                 settingContext,
                 null,
-                true,
                 null,
                 null,
                 new LibraryEngine(repository, evaluationSettings));
@@ -271,7 +268,6 @@ public class PlanDefinitionProcessor {
                 setting,
                 settingContext,
                 parameters,
-                useServerData,
                 data,
                 prefetchData,
                 new LibraryEngine(repository, this.evaluationSettings));
@@ -289,7 +285,6 @@ public class PlanDefinitionProcessor {
             IBaseDatatype setting,
             IBaseDatatype settingContext,
             IBaseParameters parameters,
-            boolean useServerData,
             IBaseBundle data,
             List<? extends IBaseBackboneElement> prefetchData,
             LibraryEngine libraryEngine) {
@@ -306,7 +301,6 @@ public class PlanDefinitionProcessor {
                     setting,
                     settingContext,
                     parameters,
-                    useServerData,
                     data,
                     prefetchData,
                     libraryEngine);
@@ -323,7 +317,6 @@ public class PlanDefinitionProcessor {
                 setting,
                 settingContext,
                 parameters,
-                useServerData,
                 data,
                 prefetchData,
                 libraryEngine));
@@ -403,7 +396,6 @@ public class PlanDefinitionProcessor {
                 setting,
                 settingContext,
                 parameters,
-                useServerData,
                 data,
                 prefetchData,
                 new LibraryEngine(repository, this.evaluationSettings));
@@ -421,7 +413,6 @@ public class PlanDefinitionProcessor {
             IBaseDatatype setting,
             IBaseDatatype settingContext,
             IBaseParameters parameters,
-            boolean useServerData,
             IBaseBundle data,
             List<? extends IBaseBackboneElement> prefetchData,
             LibraryEngine libraryEngine) {
@@ -442,7 +433,6 @@ public class PlanDefinitionProcessor {
                             setting,
                             settingContext,
                             parameters,
-                            useServerData,
                             data,
                             prefetchData,
                             libraryEngine)));

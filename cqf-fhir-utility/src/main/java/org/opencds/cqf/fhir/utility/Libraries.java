@@ -81,7 +81,8 @@ public class Libraries {
         Function<IBase, byte[]> content = Reflections.getPrimitiveFunction(
                 fhirContext.getElementDefinition("Attachment").getImplementingClass(), "data");
         Function<IBase, String> version = Reflections.getVersionFunction(libraryClass);
-        return new LibraryFunctions(attachments, contentType, content, version);
+        Function<IBase, String> name = Reflections.getNameFunction(libraryClass);
+        return new LibraryFunctions(attachments, contentType, content, version, name);
     }
 
     /**
@@ -98,22 +99,39 @@ public class Libraries {
         return libraryFunctions.getVersion().apply(library);
     }
 
+    /**
+     * Returns the name for a given library IBase Resource type
+     *
+     * @param library an IBase type
+     * @return the Library name
+     */
+    public static String getName(IBaseResource library) {
+        checkNotNull(library);
+        checkArgument(library.fhirType().equals(LIBRARY_RESOURCE_TYPE));
+
+        LibraryFunctions libraryFunctions = getFunctions(library);
+        return libraryFunctions.getName().apply(library);
+    }
+
     public static final class LibraryFunctions {
 
         private final Function<IBase, List<IBase>> getAttachments;
         private final Function<IBase, String> getContentType;
         private final Function<IBase, byte[]> getContent;
         private final Function<IBase, String> getVersion;
+        private final Function<IBase, String> getName;
 
         LibraryFunctions(
                 Function<IBase, List<IBase>> getAttachments,
                 Function<IBase, String> getContentType,
                 Function<IBase, byte[]> getContent,
-                Function<IBase, String> getVersion) {
+                Function<IBase, String> getVersion,
+                Function<IBase, String> getName) {
             this.getAttachments = getAttachments;
             this.getContentType = getContentType;
             this.getContent = getContent;
             this.getVersion = getVersion;
+            this.getName = getName;
         }
 
         public Function<IBase, List<IBase>> getAttachments() {
@@ -130,6 +148,10 @@ public class Libraries {
 
         public Function<IBase, String> getVersion() {
             return this.getVersion;
+        }
+
+        public Function<IBase, String> getName() {
+            return this.getName;
         }
     }
 }

@@ -10,6 +10,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
@@ -20,6 +21,9 @@ import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 
+/**
+ * This interface exposes common functionality across Operations
+ */
 public interface IOperationRequest {
     String getOperationName();
 
@@ -33,7 +37,7 @@ public interface IOperationRequest {
         return getRepository().fhirContext();
     }
 
-    String getDefaultLibraryUrl();
+    Map<String, String> getReferencedLibraries();
 
     IBaseOperationOutcome getOperationOutcome();
 

@@ -6,11 +6,8 @@ import org.hl7.fhir.dstu3.model.Questionnaire;
 import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.UriType;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IDomainResource;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Constants;
-import org.opencds.cqf.fhir.utility.SearchHelper;
 import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireAdapter;
@@ -111,14 +108,5 @@ public class QuestionnaireAdapter extends KnowledgeArtifactAdapter implements IQ
                         referenceExt.getExtension(),
                         reference -> referenceExt.setValue(new UriType(reference)))));
         item.getItem().forEach(childItem -> getDependenciesOfItem(childItem, references, referenceSource));
-    }
-
-    @Override
-    public IBaseResource getPrimaryLibrary(Repository repository) {
-        var library = getQuestionnaire().getExtensionByUrl(Constants.CQIF_LIBRARY);
-        return library == null
-                ? null
-                : SearchHelper.searchRepositoryByCanonical(
-                        repository, ((Reference) library.getValue()).getReferenceElement());
     }
 }

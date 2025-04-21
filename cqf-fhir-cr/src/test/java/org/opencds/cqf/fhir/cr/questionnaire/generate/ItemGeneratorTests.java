@@ -33,7 +33,6 @@ class ItemGeneratorTests {
         var request = RequestHelpers.newGenerateRequestForVersion(FhirVersionEnum.R4, libraryEngine);
         assertThrows(UnsupportedOperationException.class, request::getSubjectId);
         assertThrows(UnsupportedOperationException.class, request::getData);
-        assertThrows(UnsupportedOperationException.class, request::getUseServerData);
         assertThrows(UnsupportedOperationException.class, request::getParameters);
     }
 

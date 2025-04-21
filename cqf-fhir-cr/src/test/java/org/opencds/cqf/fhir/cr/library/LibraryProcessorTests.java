@@ -49,7 +49,7 @@ class LibraryProcessorTests {
         var request = RequestHelpers.newEvaluateRequestForVersion(FhirVersionEnum.R4, libraryEngine, library);
         assertEquals("evaluate", request.getOperationName());
         assertEquals("patientId", request.getSubjectId().getIdPart());
-        assertNull(request.getContext());
+        assertNull(request.getContextVariable());
     }
 
     @Test

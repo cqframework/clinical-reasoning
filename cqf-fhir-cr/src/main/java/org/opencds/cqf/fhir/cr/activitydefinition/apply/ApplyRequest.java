@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cr.activitydefinition.apply;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import java.util.Map;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
@@ -13,11 +14,12 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.common.ICpgRequest;
-import org.opencds.cqf.fhir.cr.inputparameters.IInputParameterResolver;
+import org.opencds.cqf.fhir.cr.common.IInputParameterResolver;
+import org.opencds.cqf.fhir.utility.adapter.IActivityDefinitionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireAdapter;
 
 public class ApplyRequest implements ICpgRequest {
-    private final IBaseResource activityDefinition;
+    private final IActivityDefinitionAdapter activityDefinitionAdapter;
     private final IIdType subjectId;
     private final IIdType encounterId;
     private final IIdType practitionerId;
@@ -28,12 +30,11 @@ public class ApplyRequest implements ICpgRequest {
     private final IBaseDatatype setting;
     private final IBaseDatatype settingContext;
     private final IBaseParameters parameters;
-    private final Boolean useServerData;
     private final IBaseBundle data;
     private final LibraryEngine libraryEngine;
     private final ModelResolver modelResolver;
     private final FhirVersionEnum fhirVersion;
-    private final String defaultLibraryUrl;
+    private final Map<String, String> referencedLibraries;
     private final IInputParameterResolver inputParameterResolver;
     private IBaseOperationOutcome operationOutcome;
 
@@ -49,14 +50,14 @@ public class ApplyRequest implements ICpgRequest {
             IBaseDatatype setting,
             IBaseDatatype settingContext,
             IBaseParameters parameters,
-            boolean useServerData,
             IBaseBundle data,
             LibraryEngine libraryEngine,
             ModelResolver modelResolver) {
         checkNotNull(activityDefinition, "expected non-null value for activityDefinition");
         checkNotNull(libraryEngine, "expected non-null value for libraryEngine");
         checkNotNull(modelResolver, "expected non-null value for modelResolver");
-        this.activityDefinition = activityDefinition;
+        fhirVersion = activityDefinition.getStructureFhirVersionEnum();
+        this.activityDefinitionAdapter = getAdapterFactory().createActivityDefinition(activityDefinition);
         this.subjectId = subjectId;
         this.encounterId = encounterId;
         this.practitionerId = practitionerId;
@@ -67,24 +68,21 @@ public class ApplyRequest implements ICpgRequest {
         this.setting = setting;
         this.settingContext = settingContext;
         this.parameters = parameters;
-        this.useServerData = useServerData;
         this.data = data;
         this.libraryEngine = libraryEngine;
         this.modelResolver = modelResolver;
-        fhirVersion = activityDefinition.getStructureFhirVersionEnum();
-        defaultLibraryUrl = resolveDefaultLibraryUrl();
+        referencedLibraries = activityDefinitionAdapter.getReferencedLibraries();
         inputParameterResolver = IInputParameterResolver.createResolver(
                 libraryEngine.getRepository(),
                 this.subjectId,
                 this.encounterId,
                 this.practitionerId,
                 this.parameters,
-                this.useServerData,
                 this.data);
     }
 
     public IBaseResource getActivityDefinition() {
-        return activityDefinition;
+        return activityDefinitionAdapter.get();
     }
 
     @Override
@@ -93,7 +91,7 @@ public class ApplyRequest implements ICpgRequest {
     }
 
     @Override
-    public IBase getContext() {
+    public IBase getContextVariable() {
         return getActivityDefinition();
     }
 
@@ -148,11 +146,6 @@ public class ApplyRequest implements ICpgRequest {
     }
 
     @Override
-    public boolean getUseServerData() {
-        return useServerData;
-    }
-
-    @Override
     public IBaseParameters getParameters() {
         return inputParameterResolver.getParameters();
     }
@@ -173,8 +166,8 @@ public class ApplyRequest implements ICpgRequest {
     }
 
     @Override
-    public String getDefaultLibraryUrl() {
-        return defaultLibraryUrl;
+    public Map<String, String> getReferencedLibraries() {
+        return referencedLibraries;
     }
 
     @Override
@@ -185,34 +178,6 @@ public class ApplyRequest implements ICpgRequest {
     @Override
     public void setOperationOutcome(IBaseOperationOutcome operationOutcome) {
         this.operationOutcome = operationOutcome;
-    }
-
-    protected final String resolveDefaultLibraryUrl() {
-        switch (fhirVersion) {
-            case DSTU3:
-                return ((org.hl7.fhir.dstu3.model.ActivityDefinition) activityDefinition).hasLibrary()
-                        ? ((org.hl7.fhir.dstu3.model.ActivityDefinition) activityDefinition)
-                                .getLibrary()
-                                .get(0)
-                                .getReference()
-                        : null;
-            case R4:
-                return ((org.hl7.fhir.r4.model.ActivityDefinition) activityDefinition).hasLibrary()
-                        ? ((org.hl7.fhir.r4.model.ActivityDefinition) activityDefinition)
-                                .getLibrary()
-                                .get(0)
-                                .getValueAsString()
-                        : null;
-            case R5:
-                return ((org.hl7.fhir.r5.model.ActivityDefinition) activityDefinition).hasLibrary()
-                        ? ((org.hl7.fhir.r5.model.ActivityDefinition) activityDefinition)
-                                .getLibrary()
-                                .get(0)
-                                .getValueAsString()
-                        : null;
-            default:
-                return null;
-        }
     }
 
     @Override

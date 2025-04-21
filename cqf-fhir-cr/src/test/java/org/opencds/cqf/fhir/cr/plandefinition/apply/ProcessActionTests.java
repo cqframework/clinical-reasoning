@@ -21,8 +21,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
+import org.opencds.cqf.fhir.cr.common.IInputParameterResolver;
 import org.opencds.cqf.fhir.cr.helpers.RequestHelpers;
-import org.opencds.cqf.fhir.cr.inputparameters.IInputParameterResolver;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.GenerateProcessor;
 
 @ExtendWith(MockitoExtension.class)
@@ -106,7 +106,7 @@ class ProcessActionTests {
                 FhirVersionEnum.R4, libraryEngine, null, inputParameterResolver);
         doThrow(new IllegalArgumentException())
                 .when(libraryEngine)
-                .resolveExpression(eq(RequestHelpers.PATIENT_ID), any(), eq(null), eq(null), any(), eq(null));
+                .resolveExpression(eq(RequestHelpers.PATIENT_ID), any(), eq(null), eq(null), eq(null), any(), eq(null));
         fixture.meetsConditions(request, action);
         var oc = (org.hl7.fhir.r4.model.OperationOutcome) request.getOperationOutcome();
         assertTrue(oc.hasIssue());
@@ -125,7 +125,7 @@ class ProcessActionTests {
                 FhirVersionEnum.R4, libraryEngine, null, inputParameterResolver);
         doReturn(null)
                 .when(libraryEngine)
-                .resolveExpression(eq(RequestHelpers.PATIENT_ID), any(), eq(null), eq(null), any(), eq(null));
+                .resolveExpression(eq(RequestHelpers.PATIENT_ID), any(), eq(null), any(), eq(null), any(), eq(null));
         var result = fixture.meetsConditions(request, action);
         assertFalse(result);
         assertNull(request.getOperationOutcome());
@@ -140,7 +140,7 @@ class ProcessActionTests {
                 FhirVersionEnum.R4, libraryEngine, null, inputParameterResolver);
         doReturn(Arrays.asList(new org.hl7.fhir.r4.model.StringType("Test")))
                 .when(libraryEngine)
-                .resolveExpression(eq(RequestHelpers.PATIENT_ID), any(), eq(null), eq(null), any(), eq(null));
+                .resolveExpression(eq(RequestHelpers.PATIENT_ID), any(), eq(null), any(), eq(null), any(), eq(null));
         var result = fixture.meetsConditions(request, action);
         assertFalse(result);
         assertNull(request.getOperationOutcome());

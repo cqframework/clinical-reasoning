@@ -10,26 +10,10 @@ import org.junit.jupiter.api.Test;
 class JPTest {
     @Test
     public void hedis() {
-        this.run(
-                "AABReporting", "/Users/jp/hedis", List.of()
-                // List.of(
-                //         "patient.2024.aab.0.95115",
-                //         "patient.2024.aab.0.95116",
-                //         "patient.2024.aab.0.95117",
-                //         "patient.2024.aab.0.95118",
-                //         "patient.2024.aab.0.95119",
-                //         "patient.2024.aab.0.95120",
-                //         "patient.2024.aab.0.95121",
-                //         "patient.2024.aab.0.95122",
-                //         "patient.2024.aab.0.95123",
-                //         "patient.2024.aab.0.95124",
-                //         "patient.2024.aab.0.95125",
-                //         "patient.2024.aab.0.95127",
-                //         "patient.2024.aab.0.95128"),
-                );
+        this.run("AABReporting", "/Users/jp/hedis", 500);
     }
 
-    public void run(String libraryName, String patientPath, List<String> patientIds) {
+    public void run(String libraryName, String patientPath, int count) {
         var args = new ArrayList<>(List.of(
                 "cql",
                 "-fv=R4",
@@ -41,7 +25,7 @@ class JPTest {
                 "-mu=" + patientPath,
                 "-t=/Users/jp/repos/ncqa-hedis-discovery/input/vocabulary/valueset"));
 
-        var patientArgs = idsToArgs(!patientIds.isEmpty() ? patientIds : allPatients(patientPath));
+        var patientArgs = idsToArgs(allPatients(patientPath, count));
 
         args.addAll(patientArgs);
         Main.run(args.toArray(String[]::new));
@@ -53,8 +37,9 @@ class JPTest {
                 .toList();
     }
 
-    private List<String> allPatients(String dataPath) {
+    private List<String> allPatients(String dataPath, int count) {
         return Arrays.stream(Path.of(dataPath).resolve("tests/Patient").toFile().listFiles())
+                .limit(count)
                 .filter(file -> file.isDirectory())
                 .map(File::getName)
                 .toList();

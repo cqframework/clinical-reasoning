@@ -212,7 +212,8 @@ public class CqlCommand implements Callable<Integer> {
         var initTime = watch.elapsed().toMillis();
         log.error("initialized in {} millis", initTime);
         AtomicInteger counter = new AtomicInteger(0);
-        evaluations.parallelStream().forEach(e -> {
+        for (var e : evaluations) {
+            // evaluations.parallelStream().forEach(e -> {
             var engine = Engines.forRepository(repository, evaluationSettings);
             if (library.libraryUrl != null) {
                 var provider = new DefaultLibrarySourceProvider(Path.of(library.libraryUrl));
@@ -230,7 +231,8 @@ public class CqlCommand implements Callable<Integer> {
             var evalEnd = watch.elapsed().toMillis();
             log.error("evaluated #{} in {} millis", count, evalEnd - evalStart);
             log.error("avg (amortized across threads) {} millis", (evalEnd - initTime) / count);
-        });
+        }
+        // });
 
         var finalTime = watch.elapsed().toMillis();
         var elapsedTime = finalTime - initTime;

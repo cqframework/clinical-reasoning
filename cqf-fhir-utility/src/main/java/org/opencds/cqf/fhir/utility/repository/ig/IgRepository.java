@@ -18,8 +18,6 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableMap;
-import java.io.BufferedInputStream;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -362,8 +360,9 @@ public class IgRepository implements Repository {
 
         var encoding = FILE_EXTENSIONS.inverse().get(extension);
 
-        try (var stream = new BufferedInputStream(new FileInputStream(file))) {
-            var resource = parserForEncoding(fhirContext, encoding).parseResource(stream);
+        try {
+            var s = Files.readString(path);
+            var resource = parserForEncoding(fhirContext, encoding).parseResource(s);
 
             resource.setUserData(SOURCE_PATH_TAG, path);
             CqlContent.loadCqlContent(resource, path.getParent());

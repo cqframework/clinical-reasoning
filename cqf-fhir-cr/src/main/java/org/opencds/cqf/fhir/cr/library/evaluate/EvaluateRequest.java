@@ -36,7 +36,6 @@ public class EvaluateRequest implements ICqlOperationRequest {
             IIdType subjectId,
             List<String> expression,
             IBaseParameters parameters,
-            boolean useServerData,
             IBaseBundle data,
             List<? extends IBaseBackboneElement> prefetchData,
             LibraryEngine libraryEngine,
@@ -49,7 +48,6 @@ public class EvaluateRequest implements ICqlOperationRequest {
         this.subjectId = subjectId;
         this.expression = expression == null ? null : new HashSet<>(expression);
         this.parameters = parameters;
-        this.useServerData = useServerData;
         if (prefetchData != null && !prefetchData.isEmpty()) {
             if (data == null) {
                 data = newBundle(fhirVersion);

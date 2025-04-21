@@ -16,8 +16,17 @@ import org.opencds.cqf.fhir.utility.BundleHelper;
  * This interface exposes common functionality across Operations that use CQL evaluation
  */
 public interface ICqlOperationRequest extends IOperationRequest {
+
+    /**
+     * Returns the object to be used as the %context variable for FHIRPath evaluation.  Is expected to be null when not supporting FHIRPath.
+     * @return IBase
+     */
     IBase getContextVariable();
 
+    /**
+     * Returns the object to be used as the %resource variable for FHIRPath evaluation.  Is expected to be null when not supporting FHIRPath.
+     * @return IBase
+     */
     default IBase getResourceVariable() {
         return null;
     }

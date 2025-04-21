@@ -182,7 +182,6 @@ public class RequestHelpers {
                 Ids.newId(fhirVersion, Ids.ensureIdType(PATIENT_ID, "Patient")),
                 null,
                 null,
-                true,
                 null,
                 null,
                 libraryEngine,

@@ -41,7 +41,7 @@ public class InputParameterResolver implements IInputParameterResolver {
     protected final IIdType encounterId;
     protected final IIdType practitionerId;
     protected final IAdapterFactory adapterFactory;
-    protected Repository repository;
+    protected final Repository repository;
     protected final IParametersAdapter parameters;
 
     public InputParameterResolver(

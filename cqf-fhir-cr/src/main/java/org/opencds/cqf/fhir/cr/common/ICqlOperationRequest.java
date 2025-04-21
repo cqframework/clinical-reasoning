@@ -12,6 +12,9 @@ import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 
+/**
+ * This interface exposes common functionality across Operations that use CQL evaluation
+ */
 public interface ICqlOperationRequest extends IOperationRequest {
     IBase getContextVariable();
 

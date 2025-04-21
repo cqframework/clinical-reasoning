@@ -31,7 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This class provides the default parameters passed into an operation as CQL Resource parameters
+ * This class provides functionality to resolve parameters passed into an operation as CQL Resource parameters
  * for evaluation. e.g. "%subject"
  */
 public class InputParameterResolver implements IInputParameterResolver {

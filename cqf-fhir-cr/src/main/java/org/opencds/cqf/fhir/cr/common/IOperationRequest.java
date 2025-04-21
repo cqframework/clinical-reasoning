@@ -21,6 +21,9 @@ import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 
+/**
+ * This interface exposes common functionality across Operations
+ */
 public interface IOperationRequest {
     String getOperationName();
 

@@ -11,6 +11,10 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.adapter.IParametersParameterComponentAdapter;
 
+/**
+ * This interface exposes functionality to resolve parameters passed into an operation as CQL Resource parameters
+ * for evaluation. e.g. "%subject"
+ */
 public interface IInputParameterResolver {
     public IBaseParameters getParameters();
 

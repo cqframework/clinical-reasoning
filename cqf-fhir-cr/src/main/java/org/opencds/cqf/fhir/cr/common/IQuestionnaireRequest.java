@@ -14,6 +14,9 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireAdapter;
 
+/**
+ * This interface exposes common functionality across Operations that use Questionnaires
+ */
 public interface IQuestionnaireRequest extends ICqlOperationRequest {
     IBaseResource getQuestionnaire();
 

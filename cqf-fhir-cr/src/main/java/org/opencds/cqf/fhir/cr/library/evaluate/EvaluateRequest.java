@@ -25,7 +25,6 @@ public class EvaluateRequest implements ICqlOperationRequest {
     private final IIdType subjectId;
     private final Set<String> expression;
     private final IBaseParameters parameters;
-    private final boolean useServerData;
     private final IBaseBundle data;
     private final LibraryEngine libraryEngine;
     private final ModelResolver modelResolver;
@@ -81,12 +80,6 @@ public class EvaluateRequest implements ICqlOperationRequest {
 
     @Override
     public IBase getContextVariable() {
-        // The is used for FHIRPath evaluation which the $evaluate operation does not support
-        return null;
-    }
-
-    @Override
-    public IBase getResourceVariable() {
         // The is used for FHIRPath evaluation which the $evaluate operation does not support
         return null;
     }

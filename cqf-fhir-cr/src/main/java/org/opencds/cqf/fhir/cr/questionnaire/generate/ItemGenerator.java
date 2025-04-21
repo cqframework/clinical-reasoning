@@ -8,6 +8,7 @@ import jakarta.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -235,9 +236,9 @@ public class ItemGenerator {
     protected List<IElementDefinitionAdapter> getElements(
             GenerateRequest request, String parentPath, String sliceName) {
         // Add all elements from the differential
-        List<IElementDefinitionAdapter> elements = new ArrayList<>(request.getDifferentialElements().stream()
+        var elements = request.getDifferentialElements().stream()
                 .filter(e -> filterElement(request, e, null, parentPath, sliceName, false))
-                .toList());
+                .collect(Collectors.toList());
         // Add elements from the snapshot that were not in the differential
         if (request.getSnapshotElements() != null) {
             elements.addAll(request.getProfileAdapter().getSnapshotElements().stream()

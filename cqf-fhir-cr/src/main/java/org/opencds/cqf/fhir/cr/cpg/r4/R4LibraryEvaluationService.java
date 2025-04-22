@@ -62,7 +62,7 @@ public class R4LibraryEvaluationService {
         }
         try {
             return (Parameters)
-                    libraryEngine.evaluate(libraryIdentifier, subject, parameters, data, null, expressionSet);
+                    libraryEngine.evaluate(libraryIdentifier, subject, parameters, null, data, null, expressionSet);
         } catch (Exception e) {
             return parameters(part("evaluation error", (OperationOutcome)
                     baseCqlExecutionProcessor.createIssue("error", e.getMessage(), repository)));

@@ -307,7 +307,7 @@ public class MeasureEvaluator {
             context.getState().setContextValue(subjectTypePart, subjectIdPart);
             try {
                 EvaluationResult result = libraryEngine.getEvaluationResult(
-                        id, subjectId, null, null, null, null, zonedDateTime, context);
+                        id, subjectId, null, null, null, null, null, zonedDateTime, context);
                 evaluateSubject(measureDef, subjectTypePart, subjectIdPart, subjectSize, type, result);
             } catch (Exception e) {
                 // Catch Exceptions from evaluation per subject, but allow rest of subjects to be processed (if

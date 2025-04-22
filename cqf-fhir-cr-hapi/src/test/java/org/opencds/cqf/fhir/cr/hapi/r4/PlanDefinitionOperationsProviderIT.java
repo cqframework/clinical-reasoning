@@ -41,7 +41,7 @@ class PlanDefinitionOperationsProviderIT extends BaseCrR4TestServer {
         var requestDetails = setupRequestDetails();
         var url = "http://example.org/sdh/dtr/aslp/PlanDefinition/ASLPA1";
         var version = "1.0.0";
-        var patientID = "positive";
+        var patientID = "Patient/positive";
         var parameters = new Parameters()
                 .addParameter("Service Request Id", "SleepStudy")
                 .addParameter("Service Request Id", "SleepStudy2");
@@ -105,6 +105,7 @@ class PlanDefinitionOperationsProviderIT extends BaseCrR4TestServer {
         var questionnaireResponse =
                 (QuestionnaireResponse) questionnaireResponses.get(0).getResource();
         assertNotNull(questionnaireResponse);
+        assertEquals(patientID, questionnaireResponse.getSubject().getReference());
         var questionnaires = bundle.getEntry().stream()
                 .filter(e -> e.hasResource() && e.getResource().fhirType().equals("Questionnaire"))
                 .toList();

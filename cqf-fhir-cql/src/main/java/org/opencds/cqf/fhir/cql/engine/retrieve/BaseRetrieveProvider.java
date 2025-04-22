@@ -301,11 +301,9 @@ public abstract class BaseRetrieveProvider implements RetrieveProvider {
 
     public void populateTemplateSearchParams(
             Map<String, List<IQueryParameterType>> searchParams, final String templateId) {
-
-        // TODO: If profile mode is optional, trust, or enforced AND the repository
-        // supports the _profile
-        // parameter, we should add it.
-        if (this.getRetrieveSettings().getProfileMode() != PROFILE_MODE.OFF && StringUtils.isNotBlank(templateId)) {
+        if (getRetrieveSettings().getProfileMode() != PROFILE_MODE.OFF
+                && StringUtils.isNotBlank(templateId)
+                && !templateId.startsWith("http://hl7.org/fhir/StructureDefinition/")) {
             var profileParam = getFhirVersion().isOlderThan(FhirVersionEnum.R5)
                     ? new UriParam(templateId)
                     : new ReferenceParam(templateId);

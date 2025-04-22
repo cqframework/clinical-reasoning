@@ -24,12 +24,12 @@ class BaseRetrieveProviderTests {
         doReturn(FhirVersionEnum.R4).when(fixture).getFhirVersion();
 
         Map<String, List<IQueryParameterType>> searchParamsR4 = new HashMap<>();
-        fixture.populateTemplateSearchParams(searchParamsR4, "test");
+        fixture.populateTemplateSearchParams(searchParamsR4, null, "test");
         assertInstanceOf(UriParam.class, searchParamsR4.get("_profile").get(0));
 
         doReturn(FhirVersionEnum.R5).when(fixture).getFhirVersion();
         Map<String, List<IQueryParameterType>> searchParamsR5 = new HashMap<>();
-        fixture.populateTemplateSearchParams(searchParamsR5, "test");
+        fixture.populateTemplateSearchParams(searchParamsR5, null, "test");
         assertInstanceOf(ReferenceParam.class, searchParamsR5.get("_profile").get(0));
     }
 }

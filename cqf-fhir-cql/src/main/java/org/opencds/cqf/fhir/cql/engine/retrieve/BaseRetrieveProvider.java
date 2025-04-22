@@ -300,10 +300,10 @@ public abstract class BaseRetrieveProvider implements RetrieveProvider {
     }
 
     public void populateTemplateSearchParams(
-            Map<String, List<IQueryParameterType>> searchParams, final String templateId) {
+            Map<String, List<IQueryParameterType>> searchParams, final String dataType, final String templateId) {
         if (getRetrieveSettings().getProfileMode() != PROFILE_MODE.OFF
                 && StringUtils.isNotBlank(templateId)
-                && !templateId.startsWith("http://hl7.org/fhir/StructureDefinition/")) {
+                && !templateId.startsWith(String.format("http://hl7.org/fhir/StructureDefinition/%s", dataType))) {
             var profileParam = getFhirVersion().isOlderThan(FhirVersionEnum.R5)
                     ? new UriParam(templateId)
                     : new ReferenceParam(templateId);

@@ -46,6 +46,7 @@ public interface IResourceLoader extends IDaoRegistryUser {
      * @return of type bundle
      * @param <T>
      */
+    @SuppressWarnings("unchecked")
     default <T extends IBaseBundle> T loadBundle(Class<T> type, String location) {
         var bundle = readResource(type, location);
         getDaoRegistry().getSystemDao().transaction(new SystemRequestDetails(), bundle);

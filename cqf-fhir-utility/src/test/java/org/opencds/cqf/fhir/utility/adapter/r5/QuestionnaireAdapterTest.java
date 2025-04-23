@@ -33,7 +33,7 @@ class QuestionnaireAdapterTest {
     @Test
     void invalid_object_fails() {
         var library = new Library();
-        assertThrows(IllegalArgumentException.class, () -> new QuestionnaireAdapter(library));
+        assertThrows(IllegalArgumentException.class, () -> adapterFactory.createQuestionnaire(library));
     }
 
     @Test

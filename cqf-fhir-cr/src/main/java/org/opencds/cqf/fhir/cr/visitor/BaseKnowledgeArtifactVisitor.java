@@ -33,11 +33,8 @@ import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactVisitor;
 import org.opencds.cqf.fhir.utility.client.TerminologyServerClient;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public abstract class BaseKnowledgeArtifactVisitor implements IKnowledgeArtifactVisitor {
-    private static final Logger myLogger = LoggerFactory.getLogger(BaseKnowledgeArtifactVisitor.class);
     String isOwnedUrl = "http://hl7.org/fhir/StructureDefinition/artifact-isOwned";
     protected final Repository repository;
     protected final Optional<IValueSetExpansionCache> valueSetExpansionCache;
@@ -205,11 +202,7 @@ public abstract class BaseKnowledgeArtifactVisitor implements IKnowledgeArtifact
         if (client != null
                 && endpoint != null
                 && Canonicals.getResourceType(ra.getReference()).equals("ValueSet")) {
-            return client.getResource(
-                            endpoint,
-                            ra.getReference(),
-                            fhirContext().getVersion().getVersion())
-                    .orElse(null);
+            return client.getResource(endpoint, ra.getReference()).orElse(null);
         }
         return null;
     }

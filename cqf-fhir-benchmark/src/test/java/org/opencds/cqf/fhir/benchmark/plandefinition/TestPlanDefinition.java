@@ -24,7 +24,6 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,6 +46,8 @@ import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FIL
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
 import org.opencds.cqf.fhir.cr.plandefinition.PlanDefinitionProcessor;
 import org.opencds.cqf.fhir.utility.Ids;
+import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
+import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
@@ -241,7 +242,7 @@ public class TestPlanDefinition {
 
         public When prefetchData(String name, String dataAssetName) {
             var data = jsonParser.parseResource(open(dataAssetName));
-            prefetchData = Arrays.asList((IBaseBackboneElement) newPart(repository.fhirContext(), name, data));
+            prefetchData = List.of((IBaseBackboneElement) newPart(repository.fhirContext(), name, data));
             return this;
         }
 
@@ -259,9 +260,9 @@ public class TestPlanDefinition {
             if (additionalDataId != null) {
                 loadAdditionalData(readRepository(repository, additionalDataId));
             }
-            return processor.applyR5(
+            var param = (IParametersAdapter) IAdapterFactory.createAdapterForResource(processor.applyR5(
                     Eithers.forMiddle3(Ids.newId(repository.fhirContext(), PLAN_DEFINITION, planDefinitionId)),
-                    subjectId,
+                    List.of(subjectId),
                     encounterId,
                     practitionerId,
                     organizationId,
@@ -276,7 +277,8 @@ public class TestPlanDefinition {
                     prefetchData,
                     dataRepository,
                     contentRepository,
-                    terminologyRepository);
+                    terminologyRepository));
+            return (IBaseBundle) param.getParameter().get(0).getResource();
         }
 
         public GeneratedBundle thenApplyR5() {

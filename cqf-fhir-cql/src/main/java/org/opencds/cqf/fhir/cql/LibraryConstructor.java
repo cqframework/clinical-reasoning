@@ -5,10 +5,9 @@ import static java.util.Objects.requireNonNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.fhirpath.IFhirPath;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.opencds.cqf.fhir.cql.engine.parameters.CqlParameterDefinition;
 import org.opencds.cqf.fhir.utility.FhirPathCache;
 import org.slf4j.Logger;
@@ -28,12 +27,16 @@ public class LibraryConstructor {
     }
 
     public String constructCqlLibrary(
-            String expression, List<Pair<String, String>> libraries, List<CqlParameterDefinition> parameters) {
+            String name,
+            String version,
+            String expression,
+            Map<String, String> libraries,
+            List<CqlParameterDefinition> parameters) {
         logger.debug("Constructing expression for local evaluation");
         return constructCqlLibrary(
-                "expression",
-                "1.0.0",
-                Arrays.asList(String.format("%ndefine \"return\":%n       %s", expression)),
+                name,
+                version,
+                List.of(String.format("%ndefine \"return\":%n       %s", expression)),
                 libraries,
                 parameters);
     }
@@ -42,7 +45,7 @@ public class LibraryConstructor {
             String name,
             String version,
             List<String> expressions,
-            List<Pair<String, String>> libraries,
+            Map<String, String> libraries,
             List<CqlParameterDefinition> parameters) {
 
         StringBuilder sb = new StringBuilder();
@@ -67,21 +70,19 @@ public class LibraryConstructor {
         return fhirVersion == FhirVersionEnum.DSTU3 ? "3.0.1" : fhirVersion.getFhirVersionString();
     }
 
-    private void constructIncludes(StringBuilder sb, List<Pair<String, String>> libraries) {
+    private void constructIncludes(StringBuilder sb, Map<String, String> libraries) {
         sb.append(String.format(
                 "include FHIRHelpers version '%s' called FHIRHelpers%n",
                 getFhirVersionString(fhirContext.getVersion().getVersion())));
 
         if (libraries != null) {
-            for (Pair<String, String> library : libraries) {
-                var vi = VersionedIdentifiers.forUrl(library.getLeft());
+            for (var library : libraries.entrySet()) {
+                var vi = VersionedIdentifiers.forUrl(library.getValue());
                 sb.append(String.format("include \"%s\"", vi.getId()));
                 if (vi.getVersion() != null) {
                     sb.append(String.format(" version '%s'", vi.getVersion()));
                 }
-                if (library.getRight() != null) {
-                    sb.append(String.format(" called \"%s\"", library.getRight()));
-                }
+                sb.append(String.format(" called \"%s\"", library.getKey()));
                 sb.append("\n");
             }
         }

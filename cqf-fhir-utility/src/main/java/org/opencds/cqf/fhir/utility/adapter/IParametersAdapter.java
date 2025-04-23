@@ -10,9 +10,11 @@ public interface IParametersAdapter extends IResourceAdapter {
 
     public boolean hasParameter();
 
-    public <T extends IBaseBackboneElement> List<T> getParameter();
+    public List<IParametersParameterComponentAdapter> getParameter();
 
-    public IBaseBackboneElement getParameter(String name);
+    public boolean hasParameter(String name);
+
+    public IParametersParameterComponentAdapter getParameter(String name);
 
     public <T extends IBaseDatatype> List<T> getParameterValues(String name);
 

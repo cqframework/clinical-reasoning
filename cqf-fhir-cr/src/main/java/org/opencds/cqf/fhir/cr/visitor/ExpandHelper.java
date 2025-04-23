@@ -3,18 +3,15 @@ package org.opencds.cqf.fhir.cr.visitor;
 import static org.opencds.cqf.fhir.utility.ValueSets.addCodeToExpansion;
 import static org.opencds.cqf.fhir.utility.ValueSets.addParameterToExpansion;
 import static org.opencds.cqf.fhir.utility.ValueSets.getCodesInExpansion;
-import static org.opencds.cqf.fhir.utility.adapter.IAdapterFactory.createAdapterForResource;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -23,22 +20,22 @@ import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.Parameters;
 import org.opencds.cqf.fhir.utility.ValueSets;
+import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IParametersParameterComponentAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
 import org.opencds.cqf.fhir.utility.client.TerminologyServerClient;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ExpandHelper {
-    private static final Logger myLogger = LoggerFactory.getLogger(ExpandHelper.class);
     private final Repository repository;
+    private final IAdapterFactory adapterFactory;
     private final TerminologyServerClient terminologyServerClient;
-    public static final List<String> unsupportedParametersToRemove =
-            Collections.unmodifiableList(new ArrayList<String>(Arrays.asList(Constants.CANONICAL_VERSION)));
+    public static final List<String> unsupportedParametersToRemove = List.of(Constants.CANONICAL_VERSION);
 
     public ExpandHelper(Repository repository, TerminologyServerClient server) {
         this.repository = repository;
+        adapterFactory = IAdapterFactory.forFhirContext(this.repository.fhirContext());
         terminologyServerClient = server;
     }
 
@@ -49,9 +46,11 @@ public class ExpandHelper {
     private static void filterOutUnsupportedParameters(IParametersAdapter parameters) {
         var paramsToSet = parameters.getParameter();
         unsupportedParametersToRemove.forEach(parameterUrl -> {
-            while (parameters.getParameter(parameterUrl) != null) {
-                paramsToSet.remove(parameters.getParameter(parameterUrl));
-                parameters.setParameter(paramsToSet);
+            while (parameters.hasParameter(parameterUrl)) {
+                parameters.setParameter(paramsToSet.stream()
+                        .filter(p -> !p.getName().equals(parameterUrl))
+                        .map(IParametersParameterComponentAdapter::get)
+                        .toList());
             }
         });
     }
@@ -83,19 +82,7 @@ public class ExpandHelper {
                 && (authoritativeSourceUrl == null
                         || authoritativeSourceUrl.equals(
                                 terminologyEndpoint.get().getAddress()))) {
-            try {
-                var expandedValueSet = (IValueSetAdapter) createAdapterForResource(
-                        terminologyServerClient.expand(valueSet, terminologyEndpoint.get(), expansionParameters));
-                // expansions are only valid for a particular version
-                if (!valueSet.hasVersion()) {
-                    valueSet.setVersion(expandedValueSet.getVersion());
-                }
-                valueSet.setExpansion(expandedValueSet.getExpansion());
-            } catch (Exception ex) {
-                throw new UnprocessableEntityException(String.format(
-                        "Terminology Server expansion failed for ValueSet (%s): %s",
-                        valueSet.getId(), ex.getMessage()));
-            }
+            terminologyServerExpand(valueSet, expansionParameters, terminologyEndpoint.get());
         }
         // Else if the ValueSet has a simple compose then we will perform naive expansion.
         else if (valueSet.hasSimpleCompose()) {
@@ -116,6 +103,17 @@ public class ExpandHelper {
                     "Cannot expand ValueSet without a terminology server: " + valueSet.getId());
         }
         expandedList.add(valueSet.getUrl());
+    }
+
+    private void terminologyServerExpand(
+            IValueSetAdapter valueSet, IParametersAdapter expansionParameters, IEndpointAdapter terminologyEndpoint) {
+        var expandedValueSet = (IValueSetAdapter) adapterFactory.createResource(
+                terminologyServerClient.expand(valueSet, terminologyEndpoint, expansionParameters));
+        // expansions are only valid for a particular version
+        if (!valueSet.hasVersion()) {
+            valueSet.setVersion(expandedValueSet.getVersion());
+        }
+        valueSet.setExpansion(expandedValueSet.getExpansion());
     }
 
     private void groupExpand(
@@ -161,8 +159,7 @@ public class ExpandHelper {
             // Grab the ValueSet
             var url = Canonicals.getUrl(reference);
             var version = Canonicals.getVersion(reference);
-            var includedVS =
-                    getIncludedValueSet(valueSet, terminologyEndpoint, valueSets, repository, reference, url, version);
+            var includedVS = getIncludedValueSet(terminologyEndpoint, valueSets, repository, reference, url, version);
             if (includedVS != null) {
                 // Expand the ValueSet if we haven't already
                 if (!expandedList.contains(url)) {
@@ -210,7 +207,6 @@ public class ExpandHelper {
     }
 
     private IValueSetAdapter getIncludedValueSet(
-            IValueSetAdapter valueSet,
             Optional<IEndpointAdapter> terminologyEndpoint,
             List<IValueSetAdapter> valueSets,
             Repository repository,
@@ -224,11 +220,8 @@ public class ExpandHelper {
                 .orElseGet(() -> {
                     if (terminologyEndpoint.isPresent()) {
                         return terminologyServerClient
-                                .getResource(
-                                        terminologyEndpoint.get(),
-                                        reference,
-                                        valueSet.get().getStructureFhirVersionEnum())
-                                .map(r -> (IValueSetAdapter) createAdapterForResource(r))
+                                .getResource(terminologyEndpoint.get(), reference)
+                                .map(r -> (IValueSetAdapter) adapterFactory.createResource(r))
                                 .orElse(null);
                     } else {
                         return VisitorHelper.tryGetLatestVersion(reference, repository)
@@ -246,28 +239,34 @@ public class ExpandHelper {
             Date expansionTimestamp,
             IValueSetAdapter includedVS) {
         // update url and version exp params for child expansions
-        var childExpParams = (IParametersAdapter) createAdapterForResource(expansionParameters.copy());
-        var urlParam = childExpParams.getParameter(TerminologyServerClient.urlParamName);
-        if (urlParam != null) {
-            var ind = childExpParams.getParameter().indexOf(urlParam);
-            childExpParams.getParameter().remove(ind);
+        var childExpParams = (IParametersAdapter) adapterFactory.createResource(expansionParameters.copy());
+        if (childExpParams.hasParameter(TerminologyServerClient.urlParamName)) {
+            var newParams = childExpParams.getParameter().stream()
+                    .filter(p -> !p.getName().equals(TerminologyServerClient.urlParamName))
+                    .collect(Collectors.toList());
             if (includedVS.hasUrl()) {
-                childExpParams.addParameter(
-                        fhirContext().getVersion().getVersion() == FhirVersionEnum.DSTU3
+                newParams.add(adapterFactory.createParametersParameter((IBaseBackboneElement)
+                        (fhirContext().getVersion().getVersion() == FhirVersionEnum.DSTU3
                                 ? Parameters.newUriPart(
                                         fhirContext(), TerminologyServerClient.urlParamName, includedVS.getUrl())
                                 : Parameters.newUrlPart(
-                                        fhirContext(), TerminologyServerClient.urlParamName, includedVS.getUrl()));
+                                        fhirContext(), TerminologyServerClient.urlParamName, includedVS.getUrl()))));
             }
+            childExpParams.setParameter(newParams.stream()
+                    .map(IParametersParameterComponentAdapter::get)
+                    .toList());
         }
-        var versionParam = childExpParams.getParameter(TerminologyServerClient.versionParamName);
-        if (versionParam != null) {
-            var ind = childExpParams.getParameter().indexOf(versionParam);
-            childExpParams.getParameter().remove(ind);
+        if (childExpParams.hasParameter(TerminologyServerClient.versionParamName)) {
+            var newParams = childExpParams.getParameter().stream()
+                    .filter(p -> !p.getName().equals(TerminologyServerClient.versionParamName))
+                    .collect(Collectors.toList());
             if (includedVS.hasVersion()) {
-                childExpParams.addParameter(Parameters.newStringPart(
-                        fhirContext(), TerminologyServerClient.versionParamName, includedVS.getVersion()));
+                newParams.add(adapterFactory.createParametersParameter((IBaseBackboneElement) Parameters.newStringPart(
+                        fhirContext(), TerminologyServerClient.versionParamName, includedVS.getVersion())));
             }
+            childExpParams.setParameter(newParams.stream()
+                    .map(IParametersParameterComponentAdapter::get)
+                    .toList());
         }
         expandValueSet(includedVS, childExpParams, terminologyEndpoint, valueSets, expandedList, expansionTimestamp);
     }

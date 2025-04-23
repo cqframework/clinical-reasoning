@@ -2,6 +2,8 @@ package org.opencds.cqf.fhir.cr.questionnaire.populate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.opencds.cqf.fhir.cr.helpers.RequestHelpers.newPopulateRequestForVersion;
@@ -9,13 +11,13 @@ import static org.opencds.cqf.fhir.cr.helpers.RequestHelpers.newPopulateRequestF
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent;
+import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType;
 import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseItemComponent;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterEach;
@@ -60,17 +62,20 @@ class ProcessItemWithContextTests {
         var questionnaire = new Questionnaire();
         doReturn(FhirContext.forR4Cached()).when(repository).fhirContext();
         var populateRequest = newPopulateRequestForVersion(FhirVersionEnum.R4, libraryEngine, questionnaire);
-        var questionnaireItem = new QuestionnaireItemComponent().setLinkId("1").setDefinition("missing");
-        var extensions = Arrays.asList(new Extension(Constants.SDC_QUESTIONNAIRE_ITEM_POPULATION_CONTEXT));
+        var questionnaireItem = new QuestionnaireItemComponent()
+                .setLinkId("1")
+                .setType(QuestionnaireItemType.GROUP)
+                .setDefinition("missing");
+        var extensions = List.of(new Extension(Constants.SDC_QUESTIONNAIRE_ITEM_POPULATION_CONTEXT));
         questionnaireItem.setExtension(extensions);
         var expression = new CqfExpression().setLanguage("text/cql").setExpression("%subject.name.given[0]");
-        List<IBase> expressionResults = Arrays.asList(new StringType("test"));
+        List<IBase> expressionResults = List.of(new StringType("test"));
         doReturn(expression)
                 .when(expressionProcessor)
                 .getCqfExpression(populateRequest, extensions, Constants.SDC_QUESTIONNAIRE_ITEM_POPULATION_CONTEXT);
         doReturn(expressionResults)
                 .when(expressionProcessor)
-                .getExpressionResultForItem(populateRequest, expression, "1");
+                .getExpressionResultForItem(eq(populateRequest), eq(expression), eq("1"), any(), any());
         processItemWithContext.processContextItem(populateRequest, questionnaireItem);
         var operationOutcome = (OperationOutcome) populateRequest.getOperationOutcome();
         assertTrue(operationOutcome.hasIssue());
@@ -84,8 +89,9 @@ class ProcessItemWithContextTests {
         var populateRequest = newPopulateRequestForVersion(FhirVersionEnum.R4, libraryEngine, questionnaire);
         var questionnaireItem = new QuestionnaireItemComponent()
                 .setLinkId("1")
+                .setType(QuestionnaireItemType.GROUP)
                 .setDefinition("http://hl7.org/fhir/Patient#Patient.name.given");
-        var extensions = Arrays.asList(new Extension(Constants.SDC_QUESTIONNAIRE_ITEM_POPULATION_CONTEXT));
+        var extensions = List.of(new Extension(Constants.SDC_QUESTIONNAIRE_ITEM_POPULATION_CONTEXT));
         questionnaireItem.setExtension(extensions);
         var expression = new CqfExpression().setLanguage("text/cql").setExpression("%subject.name.given[0]");
         List<IBase> expressionResults = new ArrayList<>();
@@ -94,7 +100,7 @@ class ProcessItemWithContextTests {
                 .getCqfExpression(populateRequest, extensions, Constants.SDC_QUESTIONNAIRE_ITEM_POPULATION_CONTEXT);
         doReturn(expressionResults)
                 .when(expressionProcessor)
-                .getExpressionResultForItem(populateRequest, expression, "1");
+                .getExpressionResultForItem(eq(populateRequest), eq(expression), eq("1"), any(), any());
         var actual = processItemWithContext.processContextItem(populateRequest, questionnaireItem);
         assertEquals(1, actual.size());
         assertTrue(

@@ -5,6 +5,10 @@ import org.hl7.fhir.instance.model.api.ICompositeType;
 
 public interface IDataRequirementAdapter extends IAdapter<ICompositeType> {
 
+    boolean hasId();
+
+    String getId();
+
     boolean hasType();
 
     String getType();

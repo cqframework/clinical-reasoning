@@ -7,7 +7,9 @@
   "status": "draft",
   "description": "Create the medication request.",
   "library": [
-    "http://test/fhir/Library/TestActivityDefinition|1.0.0"
+    {
+      "reference": "http://test/fhir/Library/TestActivityDefinition|1.0.0"
+    }
   ],
   "intent": "proposal",
   "kind": "MedicationRequest",

@@ -11,4 +11,8 @@ public interface IValueSetExpansionContainsAdapter extends IAdapter<IBaseBackbon
     boolean hasSystem();
 
     String getSystem();
+
+    boolean hasDisplay();
+
+    String getDisplay();
 }

@@ -24,7 +24,6 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,17 +45,19 @@ import org.opencds.cqf.fhir.cr.TestOperationProvider;
 import org.opencds.cqf.fhir.cr.helpers.DataRequirementsLibrary;
 import org.opencds.cqf.fhir.cr.helpers.GeneratedPackage;
 import org.opencds.cqf.fhir.utility.Ids;
+import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
+import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 import org.skyscreamer.jsonassert.JSONAssert;
 
-public class PlanDefinition {
+public class TestPlanDefinition {
     public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/shared";
 
     private static InputStream open(String asset) {
-        var path = Paths.get(getResourcePath(PlanDefinition.class) + "/" + CLASS_PATH + "/" + asset);
+        var path = Paths.get(getResourcePath(TestPlanDefinition.class) + "/" + CLASS_PATH + "/" + asset);
         var file = path.toFile();
         try {
             return new FileInputStream(file);
@@ -197,17 +198,17 @@ public class PlanDefinition {
             return this;
         }
 
-        private void loadAdditionalData(IBaseResource resource) {
+        public When additionalData(IBaseResource resource) {
             var fhirVersion = repository.fhirContext().getVersion().getVersion();
             additionalData = resource.getIdElement().getResourceType().equals("Bundle")
                     ? (IBaseBundle) resource
                     : addEntry(newBundle(fhirVersion), newEntryWithResource(resource));
+            return this;
         }
 
         public When additionalData(String dataAssetName) {
             var data = jsonParser.parseResource(open(dataAssetName));
-            loadAdditionalData(data);
-            return this;
+            return additionalData(data);
         }
 
         public When additionalDataId(IIdType id) {
@@ -222,7 +223,7 @@ public class PlanDefinition {
 
         public When prefetchData(String name, String dataAssetName) {
             var data = jsonParser.parseResource(open(dataAssetName));
-            prefetchData = Arrays.asList((IBaseBackboneElement) newPart(repository.fhirContext(), name, data));
+            prefetchData = List.of((IBaseBackboneElement) newPart(repository.fhirContext(), name, data));
             return this;
         }
 
@@ -238,11 +239,11 @@ public class PlanDefinition {
 
         public IBaseBundle applyR5() {
             if (additionalDataId != null) {
-                loadAdditionalData(readRepository(repository, additionalDataId));
+                additionalData(readRepository(repository, additionalDataId));
             }
-            return processor.applyR5(
+            var param = (IParametersAdapter) IAdapterFactory.createAdapterForResource(processor.applyR5(
                     Eithers.forMiddle3(Ids.newId(repository.fhirContext(), "PlanDefinition", planDefinitionId)),
-                    subjectId,
+                    List.of(subjectId),
                     encounterId,
                     practitionerId,
                     organizationId,
@@ -257,7 +258,8 @@ public class PlanDefinition {
                     prefetchData,
                     dataRepository,
                     contentRepository,
-                    terminologyRepository);
+                    terminologyRepository));
+            return (IBaseBundle) param.getParameter().get(0).getResource();
         }
 
         public GeneratedBundle thenApplyR5() {
@@ -266,7 +268,7 @@ public class PlanDefinition {
 
         public GeneratedCarePlan thenApply() {
             if (additionalDataId != null) {
-                loadAdditionalData(readRepository(repository, additionalDataId));
+                additionalData(readRepository(repository, additionalDataId));
             }
             return new GeneratedCarePlan(
                     repository,

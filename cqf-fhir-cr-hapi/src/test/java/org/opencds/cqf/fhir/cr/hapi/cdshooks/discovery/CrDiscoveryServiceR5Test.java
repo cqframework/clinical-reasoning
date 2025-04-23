@@ -25,7 +25,6 @@ class CrDiscoveryServiceR5Test extends BaseCdsCrDiscoveryServiceTest {
 
     private static final PrefetchUrlList PREFETCH_URL_LIST_EMPTY = new PrefetchUrlList();
 
-    private static final DataRequirement DATA_REQUIREMENT_EMPTY = new DataRequirement();
     private static final DataRequirement DATA_REQUIREMENT_PATIENT = new DataRequirement().setType(FHIRTypes.PATIENT);
     private static final DataRequirement DATA_REQUIREMENT_ENCOUNTER =
             new DataRequirement().setType(FHIRTypes.ENCOUNTER);

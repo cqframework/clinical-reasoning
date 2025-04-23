@@ -49,6 +49,12 @@ public class CodingAdapter implements ICodingAdapter {
     }
 
     @Override
+    public ICodingAdapter setCode(String code) {
+        get().setCode(code);
+        return this;
+    }
+
+    @Override
     public String getDisplay() {
         return get().getDisplay();
     }
@@ -59,6 +65,12 @@ public class CodingAdapter implements ICodingAdapter {
     }
 
     @Override
+    public ICodingAdapter setDisplay(String display) {
+        get().setDisplay(display);
+        return this;
+    }
+
+    @Override
     public String getSystem() {
         return get().getSystem();
     }
@@ -66,5 +78,11 @@ public class CodingAdapter implements ICodingAdapter {
     @Override
     public boolean hasSystem() {
         return get().hasSystem();
+    }
+
+    @Override
+    public ICodingAdapter setSystem(String system) {
+        get().setSystem(system);
+        return this;
     }
 }

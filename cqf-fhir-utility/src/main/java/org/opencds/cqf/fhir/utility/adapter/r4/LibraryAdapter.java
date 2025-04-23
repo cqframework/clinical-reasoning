@@ -2,7 +2,9 @@ package org.opencds.cqf.fhir.utility.adapter.r4;
 
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -21,6 +23,7 @@ import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.RelatedArtifact;
 import org.hl7.fhir.r4.model.UriType;
+import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IDataRequirementAdapter;
@@ -101,6 +104,20 @@ public class LibraryAdapter extends KnowledgeArtifactAdapter implements ILibrary
                             new DependencyInfo(referenceSource, cf.getValueSet(), cf.getExtension(), cf::setValueSet)));
         });
         return references;
+    }
+
+    @Override
+    public Map<String, String> getReferencedLibraries() {
+        var map = new HashMap<String, String>();
+        map.put(getName(), getCanonical());
+        return map;
+    }
+
+    @Override
+    public Map<String, ILibraryAdapter> retrieveReferencedLibraries(Repository repository) {
+        var map = new HashMap<String, ILibraryAdapter>();
+        map.put(getName(), this);
+        return map;
     }
 
     @SuppressWarnings("unchecked")

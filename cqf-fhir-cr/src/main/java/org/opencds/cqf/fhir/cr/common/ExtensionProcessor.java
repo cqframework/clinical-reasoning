@@ -30,7 +30,7 @@ public class ExtensionProcessor {
         }
         var extensionResolver = new ExtensionResolver(
                 request.getSubjectId(), request.getParameters(), request.getData(), request.getLibraryEngine());
-        extensionResolver.resolveExtensions(resource, extensions, request.getDefaultLibraryUrl());
+        extensionResolver.resolveExtensions(resource, extensions, request.getReferencedLibraries());
         request.getModelResolver().setValue(resource, "extension", extensions);
     }
 }

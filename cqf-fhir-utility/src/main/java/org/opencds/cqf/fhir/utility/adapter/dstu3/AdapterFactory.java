@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.utility.adapter.dstu3;
 
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import org.hl7.fhir.dstu3.model.ActivityDefinition;
 import org.hl7.fhir.dstu3.model.Endpoint;
 import org.hl7.fhir.dstu3.model.Library;
 import org.hl7.fhir.dstu3.model.Measure;
@@ -15,6 +16,7 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
+import org.opencds.cqf.fhir.utility.adapter.IActivityDefinitionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IAttachmentAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ICodeableConceptAdapter;
@@ -28,9 +30,10 @@ import org.opencds.cqf.fhir.utility.adapter.IMeasureAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IParametersParameterComponentAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IPlanDefinitionAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IRequestActionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IResourceAdapter;
-import org.opencds.cqf.fhir.utility.adapter.r4.RequestActionAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
 
 public class AdapterFactory implements IAdapterFactory {
 
@@ -54,6 +57,8 @@ public class AdapterFactory implements IAdapterFactory {
             adapter = createLibrary(resource);
         } else if (resource instanceof Measure measure) {
             adapter = new MeasureAdapter(measure);
+        } else if (resource instanceof ActivityDefinition activityDefinition) {
+            adapter = new ActivityDefinitionAdapter(activityDefinition);
         } else if (resource instanceof PlanDefinition planDefinition) {
             adapter = new PlanDefinitionAdapter(planDefinition);
         } else if (resource instanceof Questionnaire questionnaire) {
@@ -120,8 +125,13 @@ public class AdapterFactory implements IAdapterFactory {
     }
 
     @Override
-    public IPlanDefinitionAdapter createPlanDefinition(IBaseResource library) {
-        return new PlanDefinitionAdapter((IDomainResource) library);
+    public IActivityDefinitionAdapter createActivityDefinition(IBaseResource activityDefinition) {
+        return new ActivityDefinitionAdapter((IDomainResource) activityDefinition);
+    }
+
+    @Override
+    public IPlanDefinitionAdapter createPlanDefinition(IBaseResource planDefinition) {
+        return new PlanDefinitionAdapter((IDomainResource) planDefinition);
     }
 
     @Override
@@ -132,5 +142,15 @@ public class AdapterFactory implements IAdapterFactory {
     @Override
     public IDataRequirementAdapter createDataRequirement(ICompositeType dataRequirement) {
         return new DataRequirementAdapter(dataRequirement);
+    }
+
+    @Override
+    public IQuestionnaireAdapter createQuestionnaire(IBaseResource questionnaire) {
+        return new QuestionnaireAdapter((IDomainResource) questionnaire);
+    }
+
+    @Override
+    public IValueSetAdapter createValueSet(IBaseResource valueSet) {
+        return new ValueSetAdapter((IDomainResource) valueSet);
     }
 }

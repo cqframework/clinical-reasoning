@@ -1,7 +1,7 @@
 package org.opencds.cqf.fhir.cql;
 
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
@@ -31,11 +31,11 @@ public class ExtensionResolver {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     public <E extends IBaseExtension> void resolveExtensions(
-            IBase resource, List<E> extensions, String defaultLibraryUrl) {
+            IBase resource, List<E> extensions, Map<String, String> referencedLibraries) {
         for (var extension : extensions) {
             var nestedExtensions = extension.getExtension();
             if (nestedExtensions != null && !nestedExtensions.isEmpty()) {
-                resolveExtensions(resource, nestedExtensions, defaultLibraryUrl);
+                resolveExtensions(resource, nestedExtensions, referencedLibraries);
             }
             var value = extension.getValue();
             if (value instanceof IBaseHasExtensions) {
@@ -43,14 +43,11 @@ public class ExtensionResolver {
                 if (valueExtensions != null) {
                     var expressionExtensions = valueExtensions.stream()
                             .filter(e -> e.getUrl() != null && e.getUrl().equals(Constants.CQF_EXPRESSION))
-                            .collect(Collectors.toList());
-                    if (expressionExtensions != null && !expressionExtensions.isEmpty()) {
-                        var expression = expressionExtensions.get(0).getValue();
-                        if (expression != null) {
-                            var result = getExpressionResult(expression, defaultLibraryUrl, resource);
-                            if (result != null) {
-                                extension.setValue(result);
-                            }
+                            .findFirst();
+                    if (expressionExtensions.isPresent()) {
+                        var result = getExpressionResult(expressionExtensions.get(), referencedLibraries, resource);
+                        if (result != null) {
+                            extension.setValue(result);
                         }
                     }
                 }
@@ -58,27 +55,16 @@ public class ExtensionResolver {
         }
     }
 
-    protected IBaseDatatype getExpressionResult(IBaseDatatype expression, String defaultLibraryUrl, IBase resource) {
-        List<IBase> result = null;
-        if (expression instanceof org.hl7.fhir.r4.model.Expression) {
-            result = libraryEngine.resolveExpression(
-                    subjectId.getIdPart(),
-                    CqfExpression.of((org.hl7.fhir.r4.model.Expression) expression, defaultLibraryUrl),
-                    parameters,
-                    bundle,
-                    resource,
-                    null);
-        }
-
-        if (expression instanceof org.hl7.fhir.r5.model.Expression) {
-            result = libraryEngine.resolveExpression(
-                    subjectId.getIdPart(),
-                    CqfExpression.of((org.hl7.fhir.r5.model.Expression) expression, defaultLibraryUrl),
-                    parameters,
-                    bundle,
-                    resource,
-                    null);
-        }
+    protected <E extends IBaseExtension<?, ?>> IBaseDatatype getExpressionResult(
+            E expressionExtension, Map<String, String> referencedLibraries, IBase resource) {
+        var result = libraryEngine.resolveExpression(
+                subjectId.getIdPart(),
+                CqfExpression.of(expressionExtension, referencedLibraries),
+                parameters,
+                null,
+                bundle,
+                resource,
+                null);
 
         return result != null && !result.isEmpty() ? (IBaseDatatype) result.get(0) : null;
     }

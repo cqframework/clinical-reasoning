@@ -3,13 +3,17 @@ package org.opencds.cqf.fhir.cr.plandefinition;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.opencds.cqf.fhir.cr.plandefinition.PlanDefinition.CLASS_PATH;
-import static org.opencds.cqf.fhir.cr.plandefinition.PlanDefinition.given;
+import static org.opencds.cqf.fhir.cr.plandefinition.TestPlanDefinition.CLASS_PATH;
+import static org.opencds.cqf.fhir.cr.plandefinition.TestPlanDefinition.given;
 import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.nio.file.Paths;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.IRequestResolverFactory;
@@ -381,7 +385,7 @@ class PlanDefinitionProcessorTests {
         var patientID = "OPA-Patient1";
         var parameters = org.opencds.cqf.fhir.utility.r4.Parameters.parameters(
                 org.opencds.cqf.fhir.utility.r4.Parameters.stringPart("ClaimId", "OPA-Claim1"));
-        given().repositoryFor(fhirContextR4, "r4")
+        var questionnaireResponse = (QuestionnaireResponse) given().repositoryFor(fhirContextR4, "r4")
                 .when()
                 .planDefinitionId(planDefinitionID)
                 .subjectId(patientID)
@@ -395,7 +399,20 @@ class PlanDefinitionProcessorTests {
                 .hasQuestionnaireResponseItemValue("2.2.1", "1407071236")
                 .hasQuestionnaireResponseItemValue("3.4.1", "12345")
                 .hasQuestionnaireResponseItemValue("4.1.1", "1245319599")
-                .hasQuestionnaireResponseItemValue("4.2.1", "456789");
+                .hasQuestionnaireResponseItemValue("4.2.1", "456789")
+                .questionnaireResponse;
+        var bundle = new Bundle().addEntry(new BundleEntryComponent().setResource(questionnaireResponse));
+        bundle.setIdElement(new IdType().setValue("bundle").withResourceType("Bundle"));
+        given().repositoryFor(fhirContextR4, "r4")
+                .when()
+                .planDefinitionId(planDefinitionID)
+                .subjectId(patientID)
+                .parameters(parameters)
+                .additionalData(bundle)
+                .thenApplyR5()
+                .hasEntry(4)
+                .hasQuestionnaire()
+                .hasQuestionnaireResponse();
     }
 
     @Test

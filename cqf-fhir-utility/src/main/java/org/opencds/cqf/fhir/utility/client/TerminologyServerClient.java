@@ -1,12 +1,12 @@
 package org.opencds.cqf.fhir.utility.client;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseEnumFactory;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -15,27 +15,33 @@ import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.Parameters;
+import org.opencds.cqf.fhir.utility.Resources;
 import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
 import org.opencds.cqf.fhir.utility.search.Searches;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * This class currently serves as a VSAC Terminology Server client as it expects the Endpoint provided to contain a VSAC username and api key.
  * Future enhancements include adding support for multiple endpoints
  */
 public class TerminologyServerClient {
-    private static final Logger myLogger = LoggerFactory.getLogger(TerminologyServerClient.class);
-
-    private final FhirContext ctx;
+    private final FhirContext fhirContext;
+    private final TerminologyServerClientSettings terminologyServerClientSettings;
     public static final String versionParamName = "valueSetVersion";
     public static final String urlParamName = "url";
 
-    public TerminologyServerClient(FhirContext ctx) {
-        this.ctx = ctx;
+    public TerminologyServerClient(FhirContext fhirContext) {
+        this(fhirContext, null);
+    }
+
+    public TerminologyServerClient(
+            FhirContext fhirContext, TerminologyServerClientSettings terminologyServerClientSettings) {
+        this.fhirContext = requireNonNull(fhirContext);
+        this.terminologyServerClientSettings = terminologyServerClientSettings != null
+                ? terminologyServerClientSettings
+                : new TerminologyServerClientSettings();
     }
 
     public IBaseResource expand(IValueSetAdapter valueSet, IEndpointAdapter endpoint, IParametersAdapter parameters) {
@@ -73,23 +79,21 @@ public class TerminologyServerClient {
             }
             parameters.addParameter(
                     fhirVersion == FhirVersionEnum.DSTU3
-                            ? Parameters.newUriPart(ctx, urlParamName, url)
-                            : Parameters.newUrlPart(ctx, urlParamName, url));
+                            ? Parameters.newUriPart(fhirContext, urlParamName, url)
+                            : Parameters.newUrlPart(fhirContext, urlParamName, url));
         }
         if (parameters.getParameter(versionParamName) == null && valueSetVersion != null) {
-            parameters.addParameter(Parameters.newStringPart(ctx, versionParamName, valueSetVersion));
+            parameters.addParameter(Parameters.newStringPart(fhirContext, versionParamName, valueSetVersion));
         }
-        // Invoke on the type using the url parameter
-        return fhirClient
-                .operation()
-                .onType("ValueSet")
-                .named("$expand")
-                .withParameters((IBaseParameters) parameters.get())
-                .returnResourceType(getValueSetClass(fhirVersion))
-                .execute();
+        return expand(fhirClient, url, (IBaseParameters) parameters.get());
     }
 
-    private IGenericClient initializeClientWithAuth(IEndpointAdapter endpoint) {
+    public IBaseResource expand(IGenericClient fhirClient, String url, IBaseParameters parameters) {
+        var expandRunner = new ExpandRunner(fhirClient, terminologyServerClientSettings, url, parameters);
+        return expandRunner.expandValueSet();
+    }
+
+    public IGenericClient initializeClientWithAuth(IEndpointAdapter endpoint) {
         var username = endpoint.getExtensionsByUrl(Constants.VSAC_USERNAME).stream()
                 .findFirst()
                 .map(ext -> ext.getValue().toString())
@@ -98,52 +102,43 @@ public class TerminologyServerClient {
                 .findFirst()
                 .map(ext -> ext.getValue().toString())
                 .orElseThrow(() -> new UnprocessableEntityException("Cannot expand ValueSet without VSAC API Key."));
-        IGenericClient fhirClient = ctx.newRestfulGenericClient(getAddressBase(endpoint.getAddress()));
+        var fhirClient = fhirContext.newRestfulGenericClient(getAddressBase(endpoint.getAddress()));
         Clients.registerAdditionalRequestHeadersAuth(fhirClient, username, apiKey);
         return fhirClient;
     }
 
-    public java.util.Optional<IDomainResource> getResource(
-            IEndpointAdapter endpoint, String url, FhirVersionEnum versionEnum) {
+    public java.util.Optional<IDomainResource> getResource(IEndpointAdapter endpoint, String url) {
         return IKnowledgeArtifactAdapter.findLatestVersion(initializeClientWithAuth(endpoint)
                 .search()
-                .forResource(getValueSetClass(versionEnum))
+                .forResource(getValueSetClass())
                 .where(Searches.byCanonical(url))
                 .execute());
     }
 
-    public java.util.Optional<IDomainResource> getLatestNonDraftResource(
-            IEndpointAdapter endpoint, String url, FhirVersionEnum versionEnum) {
+    public java.util.Optional<IDomainResource> getLatestNonDraftResource(IEndpointAdapter endpoint, String url) {
         var urlParams = Searches.byCanonical(url);
         var statusParam = Searches.exceptStatus("draft");
         urlParams.putAll(statusParam);
         return IKnowledgeArtifactAdapter.findLatestVersion(initializeClientWithAuth(endpoint)
                 .search()
-                .forResource(getValueSetClass(versionEnum))
+                .forResource(getValueSetClass())
                 .where(urlParams)
                 .execute());
     }
 
-    private Class<? extends IBaseResource> getValueSetClass(FhirVersionEnum fhirVersion) {
-        switch (fhirVersion) {
-            case DSTU3:
-                return org.hl7.fhir.dstu3.model.ValueSet.class;
-            case R4:
-                return org.hl7.fhir.r4.model.ValueSet.class;
-            case R5:
-                return org.hl7.fhir.r5.model.ValueSet.class;
-            default:
-                throw new UnprocessableEntityException("Unknown ValueSet version");
-        }
+    private Class<? extends IBaseResource> getValueSetClass() {
+        return Resources.getClassForTypeAndVersion(
+                "ValueSet", fhirContext.getVersion().getVersion());
     }
 
     private String getAddressBase(String address) {
-        return getAddressBase(address, this.ctx);
+        return getAddressBase(address, this.fhirContext);
     }
+
     // Strips resource and id from the endpoint address URL, these are not needed as the client constructs the URL.
     // Converts http URLs to https
     public static String getAddressBase(String address, FhirContext ctx) {
-        Objects.requireNonNull(address, "address must not be null");
+        requireNonNull(address, "address must not be null");
         if (address.startsWith("http://")) {
             address = address.replaceFirst("http://", "https://");
         }

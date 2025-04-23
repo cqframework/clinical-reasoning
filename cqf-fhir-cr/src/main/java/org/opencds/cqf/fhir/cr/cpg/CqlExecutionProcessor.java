@@ -1,10 +1,10 @@
 package org.opencds.cqf.fhir.cr.cpg;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.LibraryManager;
 import org.hl7.elm.r1.VersionedIdentifier;
@@ -16,9 +16,10 @@ import org.opencds.cqf.fhir.utility.Canonicals;
 
 public class CqlExecutionProcessor {
 
-    public List<Pair<String, String>> resolveIncludedLibraries(List<?> includedLibraries) {
+    // Should use a parameter adapter here
+    public Map<String, String> resolveIncludedLibraries(List<?> includedLibraries) {
         if (includedLibraries != null) {
-            List<Pair<String, String>> libraries = new ArrayList<>();
+            Map<String, String> libraries = new HashMap<>();
             String name = null;
             String url = null;
             for (Object parameters : includedLibraries) {
@@ -43,7 +44,7 @@ public class CqlExecutionProcessor {
                         }
                     }
                 }
-                libraries.add(Pair.of(url, name));
+                libraries.put(name, url);
             }
             return libraries;
         }

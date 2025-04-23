@@ -1,6 +1,9 @@
 package org.opencds.cqf.fhir.cr.questionnaire.populate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.opencds.cqf.fhir.cr.helpers.RequestHelpers.PATIENT_ID;
@@ -8,16 +11,18 @@ import static org.opencds.cqf.fhir.cr.helpers.RequestHelpers.newPopulateRequestF
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import java.util.Collections;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Expression;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Questionnaire;
+import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseItemComponent;
+import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,6 +31,7 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
+import org.opencds.cqf.fhir.utility.Constants;
 
 @ExtendWith(MockitoExtension.class)
 class PopulateProcessorTests {
@@ -51,11 +57,13 @@ class PopulateProcessorTests {
         final var originalQuestionnaire = new Questionnaire();
         originalQuestionnaire.setId(prePopulatedQuestionnaireId);
         originalQuestionnaire.setUrl(questionnaireUrl);
+        final var item = new QuestionnaireItemComponent();
+        originalQuestionnaire.addItem(item);
         doReturn(FhirContext.forR4Cached()).when(repository).fhirContext();
         final PopulateRequest request =
                 newPopulateRequestForVersion(FhirVersionEnum.R4, libraryEngine, originalQuestionnaire);
         final var expectedResponses = getExpectedResponses(request);
-        doReturn(expectedResponses).when(fixture).processItems(request, Collections.emptyList());
+        doReturn(expectedResponses).when(fixture).populateItem(request, item);
         // execute
         final IBaseResource actual = fixture.populate(request);
         // validate
@@ -73,7 +81,7 @@ class PopulateProcessorTests {
                         .getReferenceElement()
                         .getValue());
         assertEquals(expectedResponses, request.getItems(actual));
-        verify(fixture).processItems(request, Collections.emptyList());
+        verify(fixture).populateItem(request, item);
     }
 
     @Test
@@ -84,11 +92,13 @@ class PopulateProcessorTests {
         final var originalQuestionnaire = new org.hl7.fhir.r5.model.Questionnaire();
         originalQuestionnaire.setId(prePopulatedQuestionnaireId);
         originalQuestionnaire.setUrl(questionnaireUrl);
+        final var item = new org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemComponent();
+        originalQuestionnaire.addItem(item);
         doReturn(FhirContext.forR5Cached()).when(repository).fhirContext();
         final PopulateRequest request =
                 newPopulateRequestForVersion(FhirVersionEnum.R5, libraryEngine, originalQuestionnaire);
         final var expectedResponses = getExpectedResponses(request);
-        doReturn(expectedResponses).when(fixture).processItems(request, Collections.emptyList());
+        doReturn(expectedResponses).when(fixture).populateItem(request, item);
         // execute
         final IBaseResource actual = fixture.populate(request);
         // validate
@@ -106,7 +116,7 @@ class PopulateProcessorTests {
                         .getReferenceElement()
                         .getValue());
         assertEquals(expectedResponses, request.getItems(actual));
-        verify(fixture).processItems(request, Collections.emptyList());
+        verify(fixture).populateItem(request, item);
     }
 
     private List<IBaseBackboneElement> getExpectedResponses(PopulateRequest request) {
@@ -176,5 +186,43 @@ class PopulateProcessorTests {
                 .setSeverity(OperationOutcome.IssueSeverity.ERROR)
                 .setCode(OperationOutcome.IssueType.EXCEPTION);
         return operationOutcome;
+    }
+
+    @Test
+    void testGetVariablesReturnsObject() {
+        var questionnaire = new Questionnaire();
+        var expression = new Expression()
+                .setLanguage("text/cql-expression")
+                .setExpression("test")
+                .setName("testName");
+        questionnaire.addExtension(Constants.VARIABLE_EXTENSION, expression);
+        var expectedResponse = new StringType("test");
+        doReturn(FhirContext.forR4Cached()).when(repository).fhirContext();
+        doReturn(List.of(expectedResponse))
+                .when(libraryEngine)
+                .resolveExpression(eq(PATIENT_ID), any(), any(), any(), any(), any(), any());
+        final PopulateRequest request = newPopulateRequestForVersion(FhirVersionEnum.R4, libraryEngine, questionnaire);
+        var actual = fixture.getVariables(request, questionnaire);
+        assertNotNull(actual);
+        assertEquals(expectedResponse, actual.get("testName"));
+    }
+
+    @Test
+    void testGetVariablesReturnsList() {
+        var questionnaire = new Questionnaire();
+        var expression = new Expression()
+                .setLanguage("text/cql-expression")
+                .setExpression("test")
+                .setName("testName");
+        questionnaire.addExtension(Constants.VARIABLE_EXTENSION, expression);
+        var expectedResponse = List.of(new StringType("test1"), new StringType("test2"));
+        doReturn(FhirContext.forR4Cached()).when(repository).fhirContext();
+        doReturn(expectedResponse)
+                .when(libraryEngine)
+                .resolveExpression(eq(PATIENT_ID), any(), any(), any(), any(), any(), any());
+        final PopulateRequest request = newPopulateRequestForVersion(FhirVersionEnum.R4, libraryEngine, questionnaire);
+        var actual = fixture.getVariables(request, questionnaire);
+        assertNotNull(actual);
+        assertEquals(expectedResponse, actual.get("testName"));
     }
 }

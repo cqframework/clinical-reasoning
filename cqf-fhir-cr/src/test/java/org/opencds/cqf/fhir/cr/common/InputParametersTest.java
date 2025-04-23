@@ -1,8 +1,9 @@
-package org.opencds.cqf.fhir.cr.inputparameters;
+package org.opencds.cqf.fhir.cr.common;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.opencds.cqf.fhir.utility.Parameters.newPart;
 import static org.opencds.cqf.fhir.utility.Parameters.newStringPart;
@@ -12,12 +13,21 @@ import java.util.Arrays;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.DataRequirement;
+import org.hl7.fhir.r4.model.DataRequirement.DataRequirementCodeFilterComponent;
 import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.PractitionerRole;
+import org.hl7.fhir.r4.model.ValueSet;
+import org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionComponent;
+import org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionContainsComponent;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -63,7 +73,6 @@ class InputParametersTest {
                 Ids.newId(fhirContextDstu3, "Encounter", encounterId),
                 practitioner.getIdElement(),
                 null,
-                true,
                 null,
                 // SDC Launch Context is not supported in Dstu3
                 null,
@@ -103,7 +112,6 @@ class InputParametersTest {
                 null,
                 null,
                 null,
-                true,
                 null,
                 Arrays.asList(
                         adapterFactoryR4.createParametersParameter((IBaseBackboneElement) newPart(
@@ -206,14 +214,13 @@ class InputParametersTest {
                 null,
                 null,
                 null,
-                true,
                 null,
-                Arrays.asList(adapterFactoryR4.createParametersParameter((IBaseBackboneElement) newPart(
+                List.of(adapterFactoryR4.createParametersParameter((IBaseBackboneElement) newPart(
                         fhirContextR4,
                         "context",
                         newStringPart(fhirContextR4, "name", "user"),
                         newPart(fhirContextR4, "Reference", "content", user.getId())))),
-                Arrays.asList((IBaseExtension<?, ?>) new Extension(Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT)
+                List.of((IBaseExtension<?, ?>) new Extension(Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT)
                         .setExtension(Arrays.asList(
                                 new Extension("name", new Coding().setCode("user")),
                                 new Extension("type", new CodeType("Patient"))))));
@@ -239,14 +246,13 @@ class InputParametersTest {
                 null,
                 null,
                 null,
-                true,
                 null,
-                Arrays.asList(adapterFactoryR4.createParametersParameter((IBaseBackboneElement) newPart(
+                List.of(adapterFactoryR4.createParametersParameter((IBaseBackboneElement) newPart(
                         fhirContextR4,
                         "context",
                         newStringPart(fhirContextR4, "name", "user"),
                         newPart(fhirContextR4, "Reference", "content", user.getId())))),
-                Arrays.asList((IBaseExtension<?, ?>) new Extension(Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT)
+                List.of((IBaseExtension<?, ?>) new Extension(Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT)
                         .setExtension(Arrays.asList(
                                 new Extension("name", new Coding().setCode("user")),
                                 new Extension("type", new CodeType("PractitionerRole"))))));
@@ -272,14 +278,13 @@ class InputParametersTest {
                 null,
                 null,
                 null,
-                true,
                 null,
-                Arrays.asList(adapterFactoryR4.createParametersParameter((IBaseBackboneElement) newPart(
+                List.of(adapterFactoryR4.createParametersParameter((IBaseBackboneElement) newPart(
                         fhirContextR4,
                         "context",
                         newStringPart(fhirContextR4, "name", "user"),
                         newPart(fhirContextR4, "Reference", "content", user.getId())))),
-                Arrays.asList((IBaseExtension<?, ?>)
+                List.of((IBaseExtension<?, ?>)
                         new org.hl7.fhir.r4.model.Extension(Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT)
                                 .setExtension(Arrays.asList(
                                         new org.hl7.fhir.r4.model.Extension(
@@ -322,9 +327,8 @@ class InputParametersTest {
                 null,
                 null,
                 null,
-                true,
                 null,
-                Arrays.asList(
+                List.of(
                         adapterFactoryR5.createParametersParameter((IBaseBackboneElement) newPart(
                                 fhirContextR5,
                                 "context",
@@ -350,7 +354,7 @@ class InputParametersTest {
                                 "context",
                                 newStringPart(fhirContextR5, "name", "study"),
                                 newPart(fhirContextR5, "Reference", "content", study.getId())))),
-                Arrays.asList(
+                List.of(
                         (IBaseExtension<?, ?>)
                                 new org.hl7.fhir.r5.model.Extension(Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT)
                                         .setExtension(Arrays.asList(
@@ -425,14 +429,13 @@ class InputParametersTest {
                 null,
                 null,
                 null,
-                true,
                 null,
-                Arrays.asList(adapterFactoryR5.createParametersParameter((IBaseBackboneElement) newPart(
+                List.of(adapterFactoryR5.createParametersParameter((IBaseBackboneElement) newPart(
                         fhirContextR5,
                         "context",
                         newStringPart(fhirContextR5, "name", "user"),
                         newPart(fhirContextR5, "Reference", "content", user.getId())))),
-                Arrays.asList((IBaseExtension<?, ?>)
+                List.of((IBaseExtension<?, ?>)
                         new org.hl7.fhir.r5.model.Extension(Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT)
                                 .setExtension(Arrays.asList(
                                         new org.hl7.fhir.r5.model.Extension(
@@ -461,14 +464,13 @@ class InputParametersTest {
                 null,
                 null,
                 null,
-                true,
                 null,
-                Arrays.asList(adapterFactoryR5.createParametersParameter((IBaseBackboneElement) newPart(
+                List.of(adapterFactoryR5.createParametersParameter((IBaseBackboneElement) newPart(
                         fhirContextR5,
                         "context",
                         newStringPart(fhirContextR5, "name", "user"),
                         newPart(fhirContextR5, "Reference", "content", user.getId())))),
-                Arrays.asList((IBaseExtension<?, ?>)
+                List.of((IBaseExtension<?, ?>)
                         new org.hl7.fhir.r5.model.Extension(Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT)
                                 .setExtension(Arrays.asList(
                                         new org.hl7.fhir.r5.model.Extension(
@@ -497,14 +499,13 @@ class InputParametersTest {
                 null,
                 null,
                 null,
-                true,
                 null,
-                Arrays.asList(adapterFactoryR5.createParametersParameter((IBaseBackboneElement) newPart(
+                List.of(adapterFactoryR5.createParametersParameter((IBaseBackboneElement) newPart(
                         fhirContextR5,
                         "context",
                         newStringPart(fhirContextR5, "name", "user"),
                         newPart(fhirContextR5, "Reference", "content", user.getId())))),
-                Arrays.asList((IBaseExtension<?, ?>)
+                List.of((IBaseExtension<?, ?>)
                         new org.hl7.fhir.r5.model.Extension(Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT)
                                 .setExtension(Arrays.asList(
                                         new org.hl7.fhir.r5.model.Extension(
@@ -522,72 +523,36 @@ class InputParametersTest {
     }
 
     @Test
-    void testUnsupportedLaunchContextR5() {
-        var user = new org.hl7.fhir.r5.model.Patient();
-        user.setIdElement(Ids.newId(fhirContextR5, "Patient", patientId));
-        doReturn(fhirContextR5).when(repository).fhirContext();
-        doReturn(user).when(repository).read(org.hl7.fhir.r5.model.Patient.class, user.getIdElement());
-        var userId = user.getIdElement();
-        var contextParam = Arrays.asList(adapterFactoryR5.createParametersParameter((IBaseBackboneElement) newPart(
-                fhirContextR5,
-                "context",
-                newStringPart(fhirContextR5, "name", "user"),
-                newPart(fhirContextR5, "Reference", "content", user.getId()))));
-        List<IBaseExtension<?, ?>> launchContext = Arrays.asList(
-                (IBaseExtension<?, ?>) new org.hl7.fhir.r5.model.Extension(Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT)
-                        .setExtension(Arrays.asList(
-                                new org.hl7.fhir.r5.model.Extension(
-                                        "name", new org.hl7.fhir.r5.model.Coding().setCode("user")),
-                                new org.hl7.fhir.r5.model.Extension(
-                                        "type", new org.hl7.fhir.r5.model.CodeType("Observation")))));
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> IInputParameterResolver.createResolver(
-                        repository, userId, null, null, null, true, null, contextParam, launchContext));
-    }
-
-    @Test
-    void testMissingLaunchContextContentR5() {
-        var user = new org.hl7.fhir.r5.model.Patient();
-        user.setIdElement(Ids.newId(fhirContextR5, "Patient", patientId));
-        doReturn(fhirContextR5).when(repository).fhirContext();
-        doReturn(user).when(repository).read(org.hl7.fhir.r5.model.Patient.class, user.getIdElement());
-        var userId = user.getIdElement();
-        List<IBaseExtension<?, ?>> launchContext = Arrays.asList(
-                (IBaseExtension<?, ?>) new org.hl7.fhir.r5.model.Extension(Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT)
-                        .setExtension(Arrays.asList(
-                                new org.hl7.fhir.r5.model.Extension(
-                                        "name", new org.hl7.fhir.r5.model.Coding().setCode("user")),
-                                new org.hl7.fhir.r5.model.Extension(
-                                        "type", new org.hl7.fhir.r5.model.CodeType("Patient")))));
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> IInputParameterResolver.createResolver(
-                        repository, userId, null, null, null, true, null, null, launchContext));
-    }
-
-    @Test
-    void testMissingLaunchContextResourceR5() {
-        var patient = new org.hl7.fhir.r5.model.Patient();
-        patient.setIdElement(Ids.newId(fhirContextR5, "Patient", patientId));
-        doReturn(fhirContextR5).when(repository).fhirContext();
-        doReturn(patient).when(repository).read(org.hl7.fhir.r5.model.Patient.class, patient.getIdElement());
-        var id = patient.getIdElement();
-        var contextParam = Arrays.asList(adapterFactoryR5.createParametersParameter((IBaseBackboneElement) newPart(
-                fhirContextR5,
-                "context",
-                newStringPart(fhirContextR5, "name", "user"),
-                newPart(fhirContextR5, "Reference", "content", practitionerId))));
-        List<IBaseExtension<?, ?>> launchContext = Arrays.asList(
-                (IBaseExtension<?, ?>) new org.hl7.fhir.r5.model.Extension(Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT)
-                        .setExtension(Arrays.asList(
-                                new org.hl7.fhir.r5.model.Extension(
-                                        "name", new org.hl7.fhir.r5.model.Coding().setCode("user")),
-                                new org.hl7.fhir.r5.model.Extension(
-                                        "type", new org.hl7.fhir.r5.model.CodeType("Practitioner")))));
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> IInputParameterResolver.createResolver(
-                        repository, id, null, null, null, true, null, contextParam, launchContext));
+    void testResolveInputParametersWithDataRequirements() {
+        var patient = new org.hl7.fhir.r4.model.Patient();
+        patient.setIdElement(Ids.newId(fhirContextR4, "Patient", patientId));
+        var valueSetUrl = "ValueSet/testValueSet";
+        var valueSet = new ValueSet()
+                .setUrl(valueSetUrl)
+                .setExpansion(new ValueSetExpansionComponent()
+                        .addContains(new ValueSetExpansionContainsComponent()
+                                .setCode("testCode")
+                                .setSystem("testSystem")));
+        var valueSetBundle = new Bundle().addEntry(new BundleEntryComponent().setResource(valueSet));
+        var obs = new Observation()
+                .setCode(new CodeableConcept()
+                        .addCoding(new Coding().setCode("testCode").setSystem("testSystem")));
+        var obsBundle = new Bundle().addEntry(new BundleEntryComponent().setResource(obs));
+        doReturn(fhirContextR4).when(repository).fhirContext();
+        doReturn(patient).when(repository).read(org.hl7.fhir.r4.model.Patient.class, patient.getIdElement());
+        doReturn(valueSetBundle).when(repository).search(eq(Bundle.class), eq(ValueSet.class), any());
+        doReturn(obsBundle).when(repository).search(eq(Bundle.class), eq(Observation.class), any(), any());
+        var resolver = IInputParameterResolver.createResolver(
+                repository, patient.getIdElement(), null, null, null, null, null, null);
+        var inputReq = new DataRequirement()
+                .setType("Observation")
+                .addCodeFilter(
+                        new DataRequirementCodeFilterComponent().setPath("code").setValueSet(valueSetUrl));
+        inputReq.setId("test");
+        var actual = (Parameters) resolver.resolveInputParameters(List.of(inputReq));
+        assertNotNull(actual);
+        var parameter = actual.getParameter("%" + inputReq.getId());
+        assertNotNull(parameter);
+        assertEquals(obs, parameter.getResource());
     }
 }

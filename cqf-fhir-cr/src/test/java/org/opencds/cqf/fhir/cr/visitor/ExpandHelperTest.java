@@ -1,8 +1,8 @@
 package org.opencds.cqf.fhir.cr.visitor;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -21,7 +21,6 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Parameters;
-import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.Test;
@@ -63,7 +62,7 @@ class ExpandHelperTest {
         assertEquals(
                 expansionDate.getTime(), grouper.getExpansion().getTimestamp().getTime());
         verify(rep, times(1)).search(any(), any(), any(), any());
-        verify(client, never()).getResource(any(), any(), any());
+        verify(client, never()).getResource(any(), any());
         verify(client, never()).expand(any(IValueSetAdapter.class), any(), any());
     }
 
@@ -91,7 +90,7 @@ class ExpandHelperTest {
 
         var expandHelper = new ExpandHelper(rep, client);
         expandHelper.expandValueSet(
-                (IValueSetAdapter) this.factory.createKnowledgeArtifactAdapter(grouper),
+                (IValueSetAdapter) factory.createKnowledgeArtifactAdapter(grouper),
                 factory.createParameters(new Parameters()),
                 // important part of the test
                 Optional.of(factory.createEndpoint(endpoint)),
@@ -100,7 +99,7 @@ class ExpandHelperTest {
                 new Date());
         assertEquals(3, grouper.getExpansion().getContains().size());
         verify(rep, never()).search(any(), any(), any());
-        verify(client, times(1)).getResource(any(), any(), any());
+        verify(client, times(1)).getResource(any(), any());
         verify(client, times(1)).expand(any(IValueSetAdapter.class), any(), any());
     }
 
@@ -148,9 +147,8 @@ class ExpandHelperTest {
         // leaf is expanded with Leaf url not Grouper url
 
         @SuppressWarnings("unchecked")
-        var url = ((IPrimitiveType<String>) ((ParametersParameterComponent)
-                                childExpParams.getParameter(TerminologyServerClient.urlParamName))
-                        .getValue())
+        var url = ((IPrimitiveType<String>)
+                        (childExpParams.getParameter(TerminologyServerClient.urlParamName)).getValue())
                 .getValue();
         assertEquals(leafUrl, url);
         // the Version parameter is removed because leaf has no version
@@ -371,7 +369,7 @@ class ExpandHelperTest {
 
     TerminologyServerClient mockTerminologyServerWithValueSetR4(ValueSet valueSet) {
         var mockClient = mock(TerminologyServerClient.class);
-        when(mockClient.getResource(any(), anyString(), any())).thenReturn(java.util.Optional.of(valueSet));
+        when(mockClient.getResource(any(), anyString())).thenReturn(java.util.Optional.of(valueSet));
         when(mockClient.expand(any(IValueSetAdapter.class), any(), any())).thenReturn(valueSet);
         return mockClient;
     }

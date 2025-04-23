@@ -41,7 +41,7 @@ class PlanDefinitionOperationsProviderIT extends BaseCrR4TestServer {
         var requestDetails = setupRequestDetails();
         var url = "http://example.org/sdh/dtr/aslp/PlanDefinition/ASLPA1";
         var version = "1.0.0";
-        var patientID = "positive";
+        var patientID = "Patient/positive";
         var parameters = new Parameters()
                 .addParameter("Service Request Id", "SleepStudy")
                 .addParameter("Service Request Id", "SleepStudy2");
@@ -72,13 +72,13 @@ class PlanDefinitionOperationsProviderIT extends BaseCrR4TestServer {
         assertNotNull(result);
         assertEquals(1, result.getContained().size());
 
-        var resultR5 = (Bundle) planDefinitionApplyProvider.applyR5(
+        var resultR5 = (Parameters) planDefinitionApplyProvider.applyR5(
                 null,
                 null,
                 null,
                 url,
                 version,
-                patientID,
+                List.of(patientID),
                 null,
                 null,
                 null,
@@ -97,14 +97,16 @@ class PlanDefinitionOperationsProviderIT extends BaseCrR4TestServer {
                 requestDetails);
 
         assertNotNull(resultR5);
-        var questionnaireResponses = resultR5.getEntry().stream()
+        var bundle = (Bundle) resultR5.getParameter().get(0).getResource();
+        var questionnaireResponses = bundle.getEntry().stream()
                 .filter(e -> e.hasResource() && e.getResource().fhirType().equals("QuestionnaireResponse"))
                 .toList();
         assertEquals(1, questionnaireResponses.size());
         var questionnaireResponse =
                 (QuestionnaireResponse) questionnaireResponses.get(0).getResource();
         assertNotNull(questionnaireResponse);
-        var questionnaires = resultR5.getEntry().stream()
+        assertEquals(patientID, questionnaireResponse.getSubject().getReference());
+        var questionnaires = bundle.getEntry().stream()
                 .filter(e -> e.hasResource() && e.getResource().fhirType().equals("Questionnaire"))
                 .toList();
         assertEquals(1, questionnaires.size());

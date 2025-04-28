@@ -12,6 +12,7 @@ import static org.opencds.cqf.fhir.utility.VersionUtilities.canonicalTypeForVers
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.repository.IRepository;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -28,7 +29,6 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
@@ -68,10 +68,10 @@ public class TestLibrary {
     }
 
     public static class Given {
-        private Repository repository;
+        private IRepository repository;
         private EvaluationSettings evaluationSettings;
 
-        public Given repository(Repository repository) {
+        public Given repository(IRepository repository) {
             this.repository = repository;
             return this;
         }
@@ -87,7 +87,7 @@ public class TestLibrary {
             return this;
         }
 
-        public LibraryProcessor buildProcessor(Repository repository) {
+        public LibraryProcessor buildProcessor(IRepository repository) {
             if (repository instanceof IgRepository) {
                 ((IgRepository) repository)
                         .setOperationProvider(TestOperationProvider.newProvider(repository.fhirContext()));
@@ -112,7 +112,7 @@ public class TestLibrary {
     }
 
     public static class When {
-        private final Repository repository;
+        private final IRepository repository;
         private final LibraryProcessor processor;
         private final IParser jsonParser;
 
@@ -122,16 +122,16 @@ public class TestLibrary {
         private String subjectId;
         private List<String> expression;
         private boolean useServerData;
-        private Repository dataRepository;
-        private Repository contentRepository;
-        private Repository terminologyRepository;
+        private IRepository dataRepository;
+        private IRepository contentRepository;
+        private IRepository terminologyRepository;
         private IBaseBundle additionalData;
         private List<IBaseBackboneElement> prefetchData;
         private IIdType additionalDataId;
         private IBaseParameters parameters;
         private Boolean isPackagePut;
 
-        public When(Repository repository, LibraryProcessor processor) {
+        public When(IRepository repository, LibraryProcessor processor) {
             this.repository = repository;
             this.processor = processor;
             useServerData = true;
@@ -273,14 +273,14 @@ public class TestLibrary {
     }
 
     public static class Evaluation {
-        final Repository repository;
+        final IRepository repository;
         final IBaseParameters result;
         final IParser jsonParser;
         final ModelResolver modelResolver;
         final List<IBaseResource> parameter;
 
         @SuppressWarnings("unchecked")
-        public Evaluation(Repository repository, IBaseParameters result) {
+        public Evaluation(IRepository repository, IBaseParameters result) {
             this.repository = repository;
             this.result = result;
             jsonParser = this.repository.fhirContext().newJsonParser().setPrettyPrint(true);

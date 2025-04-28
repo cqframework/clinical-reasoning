@@ -7,6 +7,7 @@ import static org.opencds.cqf.fhir.cr.hapi.config.CrCdsHooksConfig.PLAN_DEFINITI
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestJson;
@@ -20,7 +21,6 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
@@ -56,7 +56,7 @@ class CdsCrServiceR4Test extends BaseCdsCrServiceTest {
                 objectMapper.readValue(rawRequest, CdsServiceRequestJson.class);
         final Bundle bundle = ClasspathUtil.loadResource(
                 fhirContext, Bundle.class, "org/opencds/cqf/fhir/cr/hapi/cdshooks/Bundle-ASLPCrd-Content.json");
-        final Repository repository = new InMemoryFhirRepository(fhirContext, bundle);
+        final IRepository repository = new InMemoryFhirRepository(fhirContext, bundle);
         final RequestDetails requestDetails = new SystemRequestDetails();
         final IdType planDefinitionId = new IdType(PLAN_DEFINITION_RESOURCE_NAME, "ASLPCrd");
         requestDetails.setId(planDefinitionId);
@@ -71,7 +71,7 @@ class CdsCrServiceR4Test extends BaseCdsCrServiceTest {
     public void testR4Response() {
         final Bundle bundle = ClasspathUtil.loadResource(
                 fhirContext, Bundle.class, "org/opencds/cqf/fhir/cr/hapi/cdshooks/Bundle-ASLPCrd-Content.json");
-        final Repository repository = new InMemoryFhirRepository(fhirContext, bundle);
+        final IRepository repository = new InMemoryFhirRepository(fhirContext, bundle);
         final Bundle responseBundle = ClasspathUtil.loadResource(
                 fhirContext, Bundle.class, "org/opencds/cqf/fhir/cr/hapi/cdshooks/Bundle-ASLPCrd-Response.json");
         final Parameters response = new Parameters()

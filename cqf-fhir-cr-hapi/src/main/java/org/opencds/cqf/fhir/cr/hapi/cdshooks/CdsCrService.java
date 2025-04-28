@@ -11,6 +11,7 @@ import static org.opencds.cqf.fhir.cr.hapi.cdshooks.CdsCrConstants.CDS_PARAMETER
 import static org.opencds.cqf.fhir.cr.hapi.cdshooks.CdsCrConstants.CDS_PARAMETER_USER_ID;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestJson;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -36,7 +37,6 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.Constants;
@@ -52,13 +52,13 @@ import org.opencds.cqf.fhir.utility.adapter.IResourceAdapter;
 @SuppressWarnings("squid:S125")
 public class CdsCrService implements ICdsCrService {
     protected final RequestDetails requestDetails;
-    protected final Repository repository;
+    protected final IRepository repository;
     protected final ICdsConfigService cdsConfigService;
     protected final IAdapterFactory adapterFactory;
     protected IResourceAdapter responseAdapter;
     protected CdsServiceResponseJson serviceResponse;
 
-    public CdsCrService(RequestDetails requestDetails, Repository repository, ICdsConfigService cdsConfigService) {
+    public CdsCrService(RequestDetails requestDetails, IRepository repository, ICdsConfigService cdsConfigService) {
         this.cdsConfigService = cdsConfigService;
         this.requestDetails = requestDetails;
         this.repository = repository;
@@ -69,7 +69,7 @@ public class CdsCrService implements ICdsCrService {
         return repository.fhirContext().getVersion().getVersion();
     }
 
-    public Repository getRepository() {
+    public IRepository getRepository() {
         return repository;
     }
 

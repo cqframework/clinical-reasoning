@@ -9,6 +9,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.repository.IRepository;
 import java.util.Arrays;
 import org.hl7.fhir.r4.model.Expression;
 import org.hl7.fhir.r4.model.PlanDefinition.ActionConditionKind;
@@ -19,7 +20,6 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.common.IInputParameterResolver;
 import org.opencds.cqf.fhir.cr.helpers.RequestHelpers;
@@ -28,7 +28,7 @@ import org.opencds.cqf.fhir.cr.questionnaire.generate.GenerateProcessor;
 @ExtendWith(MockitoExtension.class)
 class ProcessActionTests {
     @Mock
-    Repository repository;
+    IRepository repository;
 
     @Mock
     LibraryEngine libraryEngine;

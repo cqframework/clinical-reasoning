@@ -7,14 +7,15 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.repository.IRepository;
+import com.google.common.collect.Multimap;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.opencds.cqf.fhir.api.Repository;
 
 public class SearchHelperTest {
-    private Repository R4mockRepository;
-    private Repository R5mockRepository;
-    private Repository DSTU3mockRepository;
+    private IRepository R4mockRepository;
+    private IRepository R5mockRepository;
+    private IRepository DSTU3mockRepository;
 
     @BeforeEach
     void resetRepository() {
@@ -87,30 +88,30 @@ public class SearchHelperTest {
                         DSTU3mockRepository, invalidResourceTypeDstu3CanonicalWithCqfResourceTypeExtension));
     }
 
-    Repository mockRepositoryWithValueSetR4(org.hl7.fhir.r4.model.ValueSet valueSet) {
-        var mockRepository = mock(Repository.class);
+    IRepository mockRepositoryWithValueSetR4(org.hl7.fhir.r4.model.ValueSet valueSet) {
+        var mockRepository = mock(IRepository.class);
         when(mockRepository.fhirContext()).thenReturn(FhirContext.forR4Cached());
         org.hl7.fhir.r4.model.Bundle bundle = new org.hl7.fhir.r4.model.Bundle();
         bundle.addEntry().setFullUrl(valueSet.getUrl()).setResource(valueSet);
-        when(mockRepository.search(any(), any(), any(), isNull())).thenReturn(bundle);
+        when(mockRepository.search(any(), any(), any(Multimap.class), isNull())).thenReturn(bundle);
         return mockRepository;
     }
 
-    Repository mockRepositoryWithValueSetR5(org.hl7.fhir.r5.model.ValueSet valueSet) {
-        var mockRepository = mock(Repository.class);
+    IRepository mockRepositoryWithValueSetR5(org.hl7.fhir.r5.model.ValueSet valueSet) {
+        var mockRepository = mock(IRepository.class);
         when(mockRepository.fhirContext()).thenReturn(FhirContext.forR5Cached());
         org.hl7.fhir.r5.model.Bundle bundle = new org.hl7.fhir.r5.model.Bundle();
         bundle.addEntry().setFullUrl(valueSet.getUrl()).setResource(valueSet);
-        when(mockRepository.search(any(), any(), any(), isNull())).thenReturn(bundle);
+        when(mockRepository.search(any(), any(), any(Multimap.class), isNull())).thenReturn(bundle);
         return mockRepository;
     }
 
-    Repository mockRepositoryWithValueSetDstu3(org.hl7.fhir.dstu3.model.ValueSet valueSet) {
-        var mockRepository = mock(Repository.class);
+    IRepository mockRepositoryWithValueSetDstu3(org.hl7.fhir.dstu3.model.ValueSet valueSet) {
+        var mockRepository = mock(IRepository.class);
         when(mockRepository.fhirContext()).thenReturn(FhirContext.forDstu3Cached());
         org.hl7.fhir.dstu3.model.Bundle bundle = new org.hl7.fhir.dstu3.model.Bundle();
         bundle.addEntry().setFullUrl(valueSet.getUrl()).setResource(valueSet);
-        when(mockRepository.search(any(), any(), any(), isNull())).thenReturn(bundle);
+        when(mockRepository.search(any(), any(), any(Multimap.class), isNull())).thenReturn(bundle);
         return mockRepository;
     }
 }

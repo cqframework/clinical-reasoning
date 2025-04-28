@@ -5,6 +5,8 @@ import static ca.uhn.hapi.fhir.cdshooks.config.CdsHooksConfig.CDS_HOOKS_OBJECT_M
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.repository.IRepository;
+import ca.uhn.fhir.rest.api.server.IRepositoryFactory;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsConfigService;
 import ca.uhn.hapi.fhir.cdshooks.svc.CdsServiceRegistryImpl;
@@ -14,7 +16,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Optional;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.hapi.cdshooks.CdsCrServiceRegistry;
 import org.opencds.cqf.fhir.cr.hapi.cdshooks.CdsServiceInterceptor;
 import org.opencds.cqf.fhir.cr.hapi.cdshooks.ICdsCrService;
@@ -24,7 +25,6 @@ import org.opencds.cqf.fhir.cr.hapi.cdshooks.discovery.CdsCrDiscoveryServiceRegi
 import org.opencds.cqf.fhir.cr.hapi.cdshooks.discovery.ICdsCrDiscoveryServiceRegistry;
 import org.opencds.cqf.fhir.cr.hapi.cdshooks.discovery.ICrDiscoveryService;
 import org.opencds.cqf.fhir.cr.hapi.cdshooks.discovery.ICrDiscoveryServiceFactory;
-import org.opencds.cqf.fhir.cr.hapi.common.IRepositoryFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -59,7 +59,7 @@ public class CrCdsHooksConfig {
                 return null;
             }
             RequestDetails rd = cdsConfigService.createRequestDetails(fhirContext, id, PLAN_DEFINITION_RESOURCE_NAME);
-            Repository repository = repositoryFactory.create(rd);
+            IRepository repository = repositoryFactory.create(rd);
             Optional<Class<? extends ICdsCrService>> clazz =
                     cdsCrServiceRegistry.find(fhirContext.getVersion().getVersion());
             if (clazz.isEmpty()) {
@@ -67,7 +67,7 @@ public class CrCdsHooksConfig {
             }
             try {
                 Constructor<? extends ICdsCrService> constructor =
-                        clazz.get().getConstructor(RequestDetails.class, Repository.class, ICdsConfigService.class);
+                        clazz.get().getConstructor(RequestDetails.class, IRepository.class, ICdsConfigService.class);
                 return constructor.newInstance(rd, repository, cdsConfigService);
             } catch (NoSuchMethodException
                     | InvocationTargetException
@@ -95,7 +95,7 @@ public class CrCdsHooksConfig {
                 return null;
             }
             RequestDetails rd = cdsConfigService.createRequestDetails(fhirContext, id, PLAN_DEFINITION_RESOURCE_NAME);
-            Repository repository = repositoryFactory.create(rd);
+            IRepository repository = repositoryFactory.create(rd);
             Optional<Class<? extends ICrDiscoveryService>> clazz =
                     cdsCrDiscoveryServiceRegistry.find(fhirContext.getVersion().getVersion());
             if (clazz.isEmpty()) {
@@ -103,7 +103,7 @@ public class CrCdsHooksConfig {
             }
             try {
                 Constructor<? extends ICrDiscoveryService> constructor =
-                        clazz.get().getConstructor(IIdType.class, Repository.class);
+                        clazz.get().getConstructor(IIdType.class, IRepository.class);
                 return constructor.newInstance(rd.getId(), repository);
             } catch (NoSuchMethodException
                     | InvocationTargetException

@@ -3,11 +3,11 @@ package org.opencds.cqf.fhir.cql.cql2elm.content;
 import static java.util.Objects.requireNonNull;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.repository.IRepository;
 import java.util.ArrayList;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.cql2elm.util.LibraryVersionSelector;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.iterable.BundleIterable;
@@ -15,19 +15,19 @@ import org.opencds.cqf.fhir.utility.search.Searches;
 
 public class RepositoryFhirLibrarySourceProvider extends BaseFhirLibrarySourceProvider {
 
-    private final Repository repository;
+    private final IRepository repository;
     private final FhirContext fhirContext;
     private final LibraryVersionSelector libraryVersionSelector;
 
     public RepositoryFhirLibrarySourceProvider(
-            Repository repository, IAdapterFactory adapterFactory, LibraryVersionSelector libraryVersionSelector) {
+            IRepository repository, IAdapterFactory adapterFactory, LibraryVersionSelector libraryVersionSelector) {
         super(adapterFactory);
         this.repository = requireNonNull(repository, "repository can not be null");
         this.fhirContext = repository.fhirContext();
         this.libraryVersionSelector = requireNonNull(libraryVersionSelector, "libraryVersionSelector can not be null");
     }
 
-    protected Repository getRepository() {
+    protected IRepository getRepository() {
         return this.repository;
     }
 

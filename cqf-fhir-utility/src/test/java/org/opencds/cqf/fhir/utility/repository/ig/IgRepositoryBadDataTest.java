@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -19,13 +20,12 @@ import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.test.Resources;
 import org.opencds.cqf.fhir.utility.search.Searches;
 
 class IgRepositoryBadDataTest {
 
-    private static Repository repository;
+    private static IRepository repository;
 
     @TempDir
     static Path tempDir;

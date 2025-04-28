@@ -1,9 +1,9 @@
 package org.opencds.cqf.fhir.cr.activitydefinition.apply;
 
+import ca.uhn.fhir.repository.IRepository;
 import java.util.Arrays;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.common.DynamicValueProcessor;
 import org.opencds.cqf.fhir.cr.common.ExtensionProcessor;
 import org.opencds.cqf.fhir.utility.Constants;
@@ -16,12 +16,12 @@ public class ApplyProcessor implements IApplyProcessor {
     protected static final List<String> EXCLUDED_EXTENSION_LIST =
             Arrays.asList(Constants.CPG_KNOWLEDGE_CAPABILITY, Constants.CPG_KNOWLEDGE_REPRESENTATION_LEVEL);
 
-    protected final Repository repository;
+    protected final IRepository repository;
     protected final IRequestResolverFactory resolverFactory;
     protected final ExtensionProcessor extensionProcessor;
     protected final DynamicValueProcessor dynamicValueProcessor;
 
-    public ApplyProcessor(Repository repository, IRequestResolverFactory resolverFactory) {
+    public ApplyProcessor(IRepository repository, IRequestResolverFactory resolverFactory) {
         this.repository = repository;
         this.resolverFactory = resolverFactory;
         this.extensionProcessor = new ExtensionProcessor();

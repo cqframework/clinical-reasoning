@@ -6,6 +6,7 @@ import static org.opencds.cqf.fhir.utility.repository.Repositories.createRestRep
 import static org.opencds.cqf.fhir.utility.repository.Repositories.proxy;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.repository.IRepository;
 import jakarta.annotation.Nonnull;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
@@ -44,19 +45,19 @@ public class PlanDefinitionProcessor {
     protected IDataRequirementsProcessor dataRequirementsProcessor;
     protected org.opencds.cqf.fhir.cr.activitydefinition.apply.IApplyProcessor activityProcessor;
     protected IRequestResolverFactory requestResolverFactory;
-    protected Repository repository;
+    protected IRepository repository;
     protected EvaluationSettings evaluationSettings;
 
-    public PlanDefinitionProcessor(Repository repository) {
+    public PlanDefinitionProcessor(IRepository repository) {
         this(repository, EvaluationSettings.getDefault());
     }
 
-    public PlanDefinitionProcessor(Repository repository, EvaluationSettings evaluationSettings) {
+    public PlanDefinitionProcessor(IRepository repository, EvaluationSettings evaluationSettings) {
         this(repository, evaluationSettings, null, null, null, null, null);
     }
 
     public PlanDefinitionProcessor(
-            Repository repository,
+            IRepository repository,
             EvaluationSettings evaluationSettings,
             IApplyProcessor applyProcessor,
             IPackageProcessor packageProcessor,
@@ -246,9 +247,9 @@ public class PlanDefinitionProcessor {
             boolean useServerData,
             IBaseBundle data,
             List<? extends IBaseBackboneElement> prefetchData,
-            Repository dataRepository,
-            Repository contentRepository,
-            Repository terminologyRepository) {
+            IRepository dataRepository,
+            IRepository contentRepository,
+            IRepository terminologyRepository) {
         repository = proxy(repository, useServerData, dataRepository, contentRepository, terminologyRepository);
         return apply(
                 planDefinition,
@@ -374,9 +375,9 @@ public class PlanDefinitionProcessor {
             boolean useServerData,
             IBaseBundle data,
             List<? extends IBaseBackboneElement> prefetchData,
-            Repository dataRepository,
-            Repository contentRepository,
-            Repository terminologyRepository) {
+            IRepository dataRepository,
+            IRepository contentRepository,
+            IRepository terminologyRepository) {
         repository = proxy(repository, useServerData, dataRepository, contentRepository, terminologyRepository);
         return applyR5(
                 planDefinition,

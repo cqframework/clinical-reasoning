@@ -4,6 +4,7 @@ import static org.opencds.cqf.fhir.utility.Parameters.newPart;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.List;
 import java.util.Objects;
@@ -16,7 +17,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Resources;
 import org.opencds.cqf.fhir.utility.SearchHelper;
@@ -41,11 +41,11 @@ public class InputParameterResolver implements IInputParameterResolver {
     protected final IIdType encounterId;
     protected final IIdType practitionerId;
     protected final IAdapterFactory adapterFactory;
-    protected final Repository repository;
+    protected final IRepository repository;
     protected final IParametersAdapter parameters;
 
     public InputParameterResolver(
-            Repository repository,
+            IRepository repository,
             IIdType subjectId,
             IIdType encounterId,
             IIdType practitionerId,
@@ -61,7 +61,7 @@ public class InputParameterResolver implements IInputParameterResolver {
         this.parameters = resolveParameters(parameters, context, launchContext);
     }
 
-    protected final Repository resolveRepository(Repository serverRepository, IBaseBundle data) {
+    protected final IRepository resolveRepository(IRepository serverRepository, IBaseBundle data) {
         return data == null
                 ? serverRepository
                 : new FederatedRepository(

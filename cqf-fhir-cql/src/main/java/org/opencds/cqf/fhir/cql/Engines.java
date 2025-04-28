@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cql;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.repository.IRepository;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -24,7 +25,6 @@ import org.opencds.cqf.cql.engine.execution.Environment;
 import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverterFactory;
 import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.cql2elm.content.RepositoryFhirLibrarySourceProvider;
 import org.opencds.cqf.fhir.cql.cql2elm.util.LibraryVersionSelector;
 import org.opencds.cqf.fhir.cql.engine.parameters.CqlFhirParametersConverter;
@@ -45,16 +45,16 @@ public class Engines {
 
     private Engines() {}
 
-    public static CqlEngine forRepository(Repository repository) {
+    public static CqlEngine forRepository(IRepository repository) {
         return forRepository(repository, EvaluationSettings.getDefault());
     }
 
-    public static CqlEngine forRepository(Repository repository, EvaluationSettings settings) {
+    public static CqlEngine forRepository(IRepository repository, EvaluationSettings settings) {
         return forRepository(repository, settings, null);
     }
 
     public static CqlEngine forRepository(
-            Repository repository, EvaluationSettings settings, IBaseBundle additionalData) {
+            IRepository repository, EvaluationSettings settings, IBaseBundle additionalData) {
         checkNotNull(settings);
         checkNotNull(repository);
 
@@ -67,7 +67,7 @@ public class Engines {
     }
 
     private static Environment buildEnvironment(
-            Repository repository,
+            IRepository repository,
             EvaluationSettings settings,
             TerminologyProvider terminologyProvider,
             Map<String, DataProvider> dataProviders) {
@@ -85,7 +85,7 @@ public class Engines {
     }
 
     private static void registerLibrarySourceProviders(
-            EvaluationSettings settings, LibraryManager manager, Repository repository) {
+            EvaluationSettings settings, LibraryManager manager, IRepository repository) {
         var loader = manager.getLibrarySourceLoader();
         loader.clearProviders();
 
@@ -134,14 +134,14 @@ public class Engines {
         }
     }
 
-    private static LibrarySourceProvider buildLibrarySource(Repository repository) {
+    private static LibrarySourceProvider buildLibrarySource(IRepository repository) {
         var adapterFactory = IAdapterFactory.forFhirContext(repository.fhirContext());
         return new RepositoryFhirLibrarySourceProvider(
                 repository, adapterFactory, new LibraryVersionSelector(adapterFactory));
     }
 
     private static Map<String, DataProvider> buildDataProviders(
-            Repository repository,
+            IRepository repository,
             IBaseBundle additionalData,
             TerminologyProvider terminologyProvider,
             RetrieveSettings retrieveSettings) {

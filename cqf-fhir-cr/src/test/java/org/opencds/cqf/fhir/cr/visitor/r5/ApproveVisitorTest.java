@@ -10,6 +10,7 @@ import static org.opencds.cqf.fhir.utility.r5.Parameters.part;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.Date;
 import java.util.Optional;
@@ -28,7 +29,6 @@ import org.hl7.fhir.r5.model.Reference;
 import org.hl7.fhir.r5.model.RelatedArtifact.RelatedArtifactType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.visitor.ApproveVisitor;
 import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.r5.AdapterFactory;
@@ -36,7 +36,7 @@ import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
 class ApproveVisitorTest {
     private final FhirContext fhirContext = FhirContext.forR5Cached();
-    private Repository repo;
+    private IRepository repo;
     private final IParser jsonParser = fhirContext.newJsonParser();
 
     @BeforeEach

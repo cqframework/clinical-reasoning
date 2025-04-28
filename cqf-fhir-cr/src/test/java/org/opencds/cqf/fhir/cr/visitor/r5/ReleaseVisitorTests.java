@@ -15,6 +15,7 @@ import static org.opencds.cqf.fhir.utility.r5.Parameters.part;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import com.github.valfirst.slf4jtest.LoggingEvent;
@@ -47,7 +48,6 @@ import org.hl7.fhir.r5.model.ValueSet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.visitor.ReleaseVisitor;
 import org.opencds.cqf.fhir.cr.visitor.VisitorHelper;
 import org.opencds.cqf.fhir.utility.Canonicals;
@@ -64,7 +64,7 @@ import org.slf4j.event.Level;
 
 class ReleaseVisitorTests {
     private final FhirContext fhirContext = FhirContext.forR5Cached();
-    private Repository repo;
+    private IRepository repo;
     private final IParser jsonParser = fhirContext.newJsonParser();
     private final List<String> badVersionList = Arrays.asList(
             "11asd1",
@@ -520,7 +520,7 @@ class ReleaseVisitorTests {
         return endpoint;
     }
 
-    void removeVersionsFromLibraryAndGrouperAndUpdate(Repository repo, String leafOid) {
+    void removeVersionsFromLibraryAndGrouperAndUpdate(IRepository repo, String leafOid) {
         // remove versions from references
         var library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"));
         library.getRelatedArtifact().forEach(ra -> {

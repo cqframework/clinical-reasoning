@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import ca.uhn.fhir.repository.IRepository;
 import jakarta.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
@@ -24,7 +25,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureEvalType;
@@ -47,7 +47,7 @@ class R4MeasureServiceUtilsTest {
     private static final Either<Optional<Reference>, Exception> EITHER_EMPTY_RESULT = buildEitherLeft(null);
 
     @Mock
-    private Repository repository;
+    private IRepository repository;
 
     private R4MeasureServiceUtils testSubject;
 

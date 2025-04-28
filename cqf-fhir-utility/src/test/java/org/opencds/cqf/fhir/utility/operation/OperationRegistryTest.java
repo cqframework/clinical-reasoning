@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -21,16 +22,15 @@ import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.operation.OperationRegistry.OperationInvocationParams;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
 class OperationRegistryTest {
 
     // Dummy repository for testing... Doesn't actually do anything in these tests
-    private static final Repository repo = new InMemoryFhirRepository(FhirContext.forR4Cached());
+    private static final IRepository repo = new InMemoryFhirRepository(FhirContext.forR4Cached());
 
-    private static <T> OperationRegistry constructAndRegister(Class<T> clazz, Function<Repository, T> factory) {
+    private static <T> OperationRegistry constructAndRegister(Class<T> clazz, Function<IRepository, T> factory) {
         var registry = new OperationRegistry();
         registry.register(clazz, factory);
         return registry;

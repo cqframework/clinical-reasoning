@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.utility.operation;
 
 import static java.util.Objects.requireNonNull;
 
+import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.collect.Multimap;
@@ -14,7 +15,6 @@ import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.opencds.cqf.fhir.api.Repository;
 
 /**
  * That class allows registering of methods annotated with @Operation, and then can be used to execute those
@@ -24,18 +24,18 @@ public class OperationRegistry {
 
     public class OperationInvocationParams {
 
-        private final Repository repository;
+        private final IRepository repository;
         private final String name;
         private IBaseParameters parameters;
         private IIdType id;
         private Class<? extends IBaseResource> resourceType;
 
-        OperationInvocationParams(Repository repository, String name) {
+        OperationInvocationParams(IRepository repository, String name) {
             this.repository = requireNonNull(repository, "Repository cannot be null");
             this.name = requireNonNull(name, "Operation name cannot be null");
         }
 
-        public Repository repository() {
+        public IRepository repository() {
             return repository;
         }
 
@@ -113,7 +113,7 @@ public class OperationRegistry {
      * @param clazz The class to register
      * @param factory A factory function that will create an instance of the class
      */
-    public <T> void register(Class<T> clazz, Function<Repository, T> factory) {
+    public <T> void register(Class<T> clazz, Function<IRepository, T> factory) {
         var methodBinders = Arrays.stream(clazz.getMethods())
                 .filter(m -> m.isAnnotationPresent(Operation.class))
                 .map(MethodBinder::new)
@@ -135,7 +135,7 @@ public class OperationRegistry {
      * @param operationName the name of the operation to execute
      * @return an OperationInvocationParams object that can be used to execute the operation
      */
-    public OperationInvocationParams buildInvocationContext(Repository repository, String operationName) {
+    public OperationInvocationParams buildInvocationContext(IRepository repository, String operationName) {
         return new OperationInvocationParams(repository, operationName);
     }
 

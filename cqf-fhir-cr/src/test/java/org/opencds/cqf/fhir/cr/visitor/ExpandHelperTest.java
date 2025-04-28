@@ -14,8 +14,11 @@ import static org.mockito.Mockito.when;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.repository.IRepository;
+import com.google.common.collect.Multimap;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Map;
 import java.util.Optional;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CanonicalType;
@@ -25,7 +28,6 @@ import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
@@ -61,7 +63,7 @@ class ExpandHelperTest {
         assertEquals(3, grouper.getExpansion().getContains().size());
         assertEquals(
                 expansionDate.getTime(), grouper.getExpansion().getTimestamp().getTime());
-        verify(rep, times(1)).search(any(), any(), any(), any());
+        verify(rep, times(1)).search(any(), any(), any(Map.class), any());
         verify(client, never()).getResource(any(), any());
         verify(client, never()).expand(any(IValueSetAdapter.class), any(), any());
     }
@@ -98,7 +100,7 @@ class ExpandHelperTest {
                 new ArrayList<String>(),
                 new Date());
         assertEquals(3, grouper.getExpansion().getContains().size());
-        verify(rep, never()).search(any(), any(), any());
+        verify(rep, never()).search(any(), any(), any(Multimap.class));
         verify(client, times(1)).getResource(any(), any());
         verify(client, times(1)).expand(any(IValueSetAdapter.class), any(), any());
     }
@@ -141,7 +143,7 @@ class ExpandHelperTest {
                 new Date());
         var parametersCaptor = ArgumentCaptor.forClass(IParametersAdapter.class);
         verify(client, times(1)).expand(any(IValueSetAdapter.class), any(), parametersCaptor.capture());
-        verify(rep, times(0)).search(any(), any(), any(), any());
+        verify(rep, times(0)).search(any(), any(), any(Multimap.class), any());
         var childExpParams = parametersCaptor.getValue();
         assertNotNull(childExpParams.getParameter(TerminologyServerClient.urlParamName));
         // leaf is expanded with Leaf url not Grouper url
@@ -198,7 +200,7 @@ class ExpandHelperTest {
         // should not call the client
         verify(client, times(0)).expand(any(IValueSetAdapter.class), any(), any());
         // should not search the repository
-        verify(rep, times(0)).search(any(), any(), any(), any());
+        verify(rep, times(0)).search(any(), any(), any(Multimap.class), any());
         // should not add any expansions
         assertEquals(0, grouper.getExpansion().getContains().size());
     }
@@ -250,7 +252,7 @@ class ExpandHelperTest {
         // should call the client
         verify(client, times(1)).expand(any(IValueSetAdapter.class), any(), any());
         // should not search the repository
-        verify(rep, times(0)).search(any(), any(), any(), any());
+        verify(rep, times(0)).search(any(), any(), any(Multimap.class), any());
         // should not add any expansions
         assertEquals(0, grouper.getExpansion().getContains().size());
     }
@@ -341,7 +343,7 @@ class ExpandHelperTest {
         // leaf got a version
         assertEquals(version, initiallyNoVersionNoExpansion.getVersion());
         // trivial checks
-        verify(rep, never()).search(any(), any(), any());
+        verify(rep, never()).search(any(), any(), any(Multimap.class));
         verify(client, times(1)).expand(eq(adapter), any(), any());
     }
 
@@ -358,12 +360,12 @@ class ExpandHelperTest {
         return leaf;
     }
 
-    Repository mockRepositoryWithValueSetR4(ValueSet valueSet) {
-        var mockRepository = mock(Repository.class);
+    IRepository mockRepositoryWithValueSetR4(ValueSet valueSet) {
+        var mockRepository = mock(IRepository.class);
         when(mockRepository.fhirContext()).thenReturn(FhirContext.forR4Cached());
         org.hl7.fhir.r4.model.Bundle bundle = new org.hl7.fhir.r4.model.Bundle();
         bundle.addEntry().setFullUrl(valueSet.getUrl()).setResource(valueSet);
-        when(mockRepository.search(any(), any(), any(), any())).thenReturn(bundle);
+        when(mockRepository.search(any(), any(), any(Map.class), any())).thenReturn(bundle);
         return mockRepository;
     }
 

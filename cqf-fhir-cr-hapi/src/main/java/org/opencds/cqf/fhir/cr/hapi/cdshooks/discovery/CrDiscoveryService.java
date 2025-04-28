@@ -5,13 +5,13 @@ import static org.opencds.cqf.fhir.utility.Constants.CQF_FHIR_QUERY_PATTERN;
 import static org.opencds.cqf.fhir.utility.Constants.CRMI_EFFECTIVE_DATA_REQUIREMENTS;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceJson;
 import java.util.ArrayList;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.hapi.cdshooks.CdsCrUtils;
 import org.opencds.cqf.fhir.utility.SearchHelper;
 import org.opencds.cqf.fhir.utility.VersionUtilities;
@@ -38,11 +38,11 @@ public class CrDiscoveryService implements ICrDiscoveryService {
     private static final String PROCEDURE_REQUEST = "ProcedureRequest";
     protected int maxUriLength;
 
-    protected final Repository repository;
+    protected final IRepository repository;
     protected final IIdType planDefinitionId;
     protected final IAdapterFactory adapterFactory;
 
-    public CrDiscoveryService(IIdType planDefinitionId, Repository repository) {
+    public CrDiscoveryService(IIdType planDefinitionId, IRepository repository) {
         this.planDefinitionId = planDefinitionId;
         this.repository = repository;
         this.adapterFactory = IAdapterFactory.forFhirContext(repository.fhirContext());

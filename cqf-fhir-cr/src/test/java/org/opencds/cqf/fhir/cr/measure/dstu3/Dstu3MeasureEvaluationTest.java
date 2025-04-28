@@ -12,6 +12,7 @@ import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.repository.IRepository;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
@@ -54,7 +55,6 @@ import org.opencds.cqf.cql.engine.fhir.model.Dstu3FhirModelResolver;
 import org.opencds.cqf.cql.engine.model.CachingModelResolverDecorator;
 import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
 import org.opencds.cqf.cql.engine.runtime.Interval;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.measure.BaseMeasureEvaluationTest;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
@@ -69,7 +69,7 @@ class Dstu3MeasureEvaluationTest extends BaseMeasureEvaluationTest {
         return "3.0.0";
     }
 
-    private Repository repository = new IgRepository(
+    private IRepository repository = new IgRepository(
             FhirContext.forDstu3Cached(),
             Paths.get(getResourcePath(this.getClass()) + "/org/opencds/cqf/fhir/cr/measure/dstu3/EXM105FHIR3Measure/"));
     private MeasureEvaluationOptions evaluationOptions = MeasureEvaluationOptions.defaultOptions();

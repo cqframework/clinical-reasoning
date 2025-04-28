@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import ca.uhn.fhir.jpa.repository.HapiFhirRepository;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.param.InternalCodingDt;
@@ -27,7 +28,6 @@ import org.hl7.fhir.r4.model.Immunization;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.opencds.cqf.fhir.cr.hapi.repo.HapiFhirRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 
 class HapiFhirRepositoryR4IT extends BaseCrR4TestServer {

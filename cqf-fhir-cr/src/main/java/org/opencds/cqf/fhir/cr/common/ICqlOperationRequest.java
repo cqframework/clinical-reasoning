@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.common;
 
+import ca.uhn.fhir.repository.IRepository;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -8,7 +9,6 @@ import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 
@@ -44,7 +44,7 @@ public interface ICqlOperationRequest extends IOperationRequest {
     LibraryEngine getLibraryEngine();
 
     @Override
-    default Repository getRepository() {
+    default IRepository getRepository() {
         return getLibraryEngine().getRepository();
     }
 

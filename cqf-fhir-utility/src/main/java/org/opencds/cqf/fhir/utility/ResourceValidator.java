@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.utility;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
+import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.SingleValidationMessage;
@@ -18,22 +19,21 @@ import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.ImplementationGuide;
-import org.opencds.cqf.fhir.api.Repository;
 
 public class ResourceValidator {
-    protected Repository repo;
+    protected IRepository repo;
     protected FhirContext context;
     protected FhirValidator validator;
     protected Map<String, ValidationProfile> profiles;
 
-    public ResourceValidator(FhirContext context, Map<String, ValidationProfile> profiles, Repository repo) {
+    public ResourceValidator(FhirContext context, Map<String, ValidationProfile> profiles, IRepository repo) {
         this.repo = repo;
         this.context = context;
         this.profiles = profiles == null ? new HashMap<>() : profiles;
         setValidator();
     }
 
-    public ResourceValidator(FhirVersionEnum version, Map<String, ValidationProfile> profiles, Repository repo) {
+    public ResourceValidator(FhirVersionEnum version, Map<String, ValidationProfile> profiles, IRepository repo) {
         this.repo = repo;
         this.context = FhirContext.forCached(version);
         this.profiles = profiles == null ? new HashMap<>() : profiles;

@@ -7,6 +7,7 @@ import static org.opencds.cqf.fhir.utility.repository.Repositories.createRestRep
 import static org.opencds.cqf.fhir.utility.repository.Repositories.proxy;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.repository.IRepository;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -16,7 +17,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.common.DataRequirementsProcessor;
@@ -42,22 +42,22 @@ public class QuestionnaireProcessor {
     protected final ModelResolver modelResolver;
     protected final EvaluationSettings evaluationSettings;
     protected final FhirVersionEnum fhirVersion;
-    protected Repository repository;
+    protected IRepository repository;
     protected IGenerateProcessor generateProcessor;
     protected IPackageProcessor packageProcessor;
     protected IDataRequirementsProcessor dataRequirementsProcessor;
     protected IPopulateProcessor populateProcessor;
 
-    public QuestionnaireProcessor(Repository repository) {
+    public QuestionnaireProcessor(IRepository repository) {
         this(repository, EvaluationSettings.getDefault());
     }
 
-    public QuestionnaireProcessor(Repository repository, EvaluationSettings evaluationSettings) {
+    public QuestionnaireProcessor(IRepository repository, EvaluationSettings evaluationSettings) {
         this(repository, evaluationSettings, null, null, null, null);
     }
 
     public QuestionnaireProcessor(
-            Repository repository,
+            IRepository repository,
             EvaluationSettings evaluationSettings,
             IGenerateProcessor generateProcessor,
             IPackageProcessor packageProcessor,
@@ -127,8 +127,8 @@ public class QuestionnaireProcessor {
             Either3<C, IIdType, R> profile,
             boolean supportedOnly,
             boolean requiredOnly,
-            Repository contentRepository,
-            Repository terminologyRepository,
+            IRepository contentRepository,
+            IRepository terminologyRepository,
             String id) {
         repository = proxy(repository, true, null, contentRepository, terminologyRepository);
         return generateQuestionnaire(profile, supportedOnly, requiredOnly, id);
@@ -247,9 +247,9 @@ public class QuestionnaireProcessor {
             IBaseParameters parameters,
             IBaseBundle data,
             boolean useServerData,
-            Repository dataRepository,
-            Repository contentRepository,
-            Repository terminologyRepository) {
+            IRepository dataRepository,
+            IRepository contentRepository,
+            IRepository terminologyRepository) {
         repository = proxy(repository, useServerData, dataRepository, contentRepository, terminologyRepository);
         return populate(
                 questionnaire,

@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.doReturn;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.repository.IRepository;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
 import org.hl7.fhir.r4.model.PlanDefinition;
@@ -13,7 +14,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 
 @ExtendWith(MockitoExtension.class)
@@ -21,7 +21,7 @@ class PackageProcessorTests {
     FhirContext fhirContext = FhirContext.forR4Cached();
 
     @Mock
-    Repository repository;
+    IRepository repository;
 
     PackageProcessor packageProcessor;
 

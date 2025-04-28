@@ -11,6 +11,7 @@ import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.repository.IRepository;
 import java.nio.file.Paths;
 import org.hl7.fhir.dstu3.model.ProcedureRequest;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -31,7 +32,6 @@ import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.IRequestResolverFactory;
 import org.opencds.cqf.fhir.utility.Ids;
@@ -42,9 +42,9 @@ import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 @TestInstance(Lifecycle.PER_CLASS)
 @ExtendWith(MockitoExtension.class)
 class ActivityDefinitionProcessorTests {
-    private Repository repositoryDstu3;
-    private Repository repositoryR4;
-    private Repository repositoryR5;
+    private IRepository repositoryDstu3;
+    private IRepository repositoryR4;
+    private IRepository repositoryR5;
     private ActivityDefinitionProcessor activityDefinitionProcessorDstu3;
     private ActivityDefinitionProcessor activityDefinitionProcessorR4;
     private ActivityDefinitionProcessor activityDefinitionProcessorR5;
@@ -52,13 +52,13 @@ class ActivityDefinitionProcessorTests {
     @Mock
     LibraryEngine libraryEngine;
 
-    private Repository createRepository(FhirContext fhirContext, String version) {
+    private IRepository createRepository(FhirContext fhirContext, String version) {
         return new IgRepository(
                 fhirContext,
                 Paths.get(getResourcePath(this.getClass()) + "/org/opencds/cqf/fhir/cr/shared/" + version));
     }
 
-    private ActivityDefinitionProcessor createProcessor(Repository repository) {
+    private ActivityDefinitionProcessor createProcessor(IRepository repository) {
         return new ActivityDefinitionProcessor(repository);
     }
 

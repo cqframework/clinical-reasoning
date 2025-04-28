@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.utility.r5;
 
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.repository.IRepository;
 import java.util.List;
 import java.util.Map;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -9,7 +10,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.Resource;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.search.Searches;
 
@@ -18,7 +18,7 @@ public class SearchHelper {
     private SearchHelper() {}
 
     public static <CanonicalType extends IPrimitiveType<String>> Resource searchRepositoryByCanonical(
-            Repository repository, CanonicalType canonical) {
+            IRepository repository, CanonicalType canonical) {
         var url = Canonicals.getUrl(canonical);
         var version = Canonicals.getVersion(canonical);
         var resourceType = repository
@@ -37,7 +37,7 @@ public class SearchHelper {
     }
 
     public static <T extends IBaseResource> Bundle searchRepositoryWithPaging(
-            Repository repository,
+            IRepository repository,
             Class<T> resourceType,
             Map<String, List<IQueryParameterType>> searchParameters,
             Map<String, String> headers) {
@@ -50,7 +50,7 @@ public class SearchHelper {
         return result;
     }
 
-    private static void getNextPage(Repository repository, Bundle bundle, String nextUrl) {
+    private static void getNextPage(IRepository repository, Bundle bundle, String nextUrl) {
         var nextBundle = repository.link(Bundle.class, nextUrl);
         nextBundle.getEntry().forEach(bundle::addEntry);
         var next = nextBundle.getLink(IBaseBundle.LINK_NEXT);

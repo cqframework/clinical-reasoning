@@ -21,6 +21,7 @@ import static org.opencds.cqf.fhir.utility.Constants.APPLY_PARAMETER_USER_TYPE;
 import static org.opencds.cqf.fhir.utility.Constants.APPLY_PARAMETER_USE_SERVER_DATA;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.repository.IRepository;
 import java.util.Map;
 import java.util.Optional;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -29,7 +30,6 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 
@@ -63,7 +63,7 @@ public class RepositoryOperationProvider implements IRepositoryOperationProvider
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> R invokeOperation(
-            Repository repository, IIdType id, String resourceType, String operationName, IBaseParameters parameters) {
+            IRepository repository, IIdType id, String resourceType, String operationName, IBaseParameters parameters) {
         requireNonNull(repository);
         var paramMap = operationParametersParser.getParameterParts(parameters);
         switch (resourceType) {
@@ -77,7 +77,7 @@ public class RepositoryOperationProvider implements IRepositoryOperationProvider
 
     @SuppressWarnings("unchecked")
     protected <C extends IPrimitiveType<String>, R extends IBaseResource> R invokeActivityDefinition(
-            Repository repository, IIdType id, String operationName, Map<String, Object> paramMap) {
+            IRepository repository, IIdType id, String operationName, Map<String, Object> paramMap) {
         if (activityDefinitionProcessorFactory == null) {
             throw new IllegalArgumentException(String.format(noFactoryError, activityDef, operationName));
         }
@@ -115,7 +115,7 @@ public class RepositoryOperationProvider implements IRepositoryOperationProvider
 
     @SuppressWarnings("unchecked")
     protected <C extends IPrimitiveType<String>, R extends IBaseResource> R invokePlanDefinition(
-            Repository repository, IIdType id, String operationName, Map<String, Object> paramMap) {
+            IRepository repository, IIdType id, String operationName, Map<String, Object> paramMap) {
         if (planDefinitionProcessorFactory == null) {
             throw new IllegalArgumentException(String.format(noFactoryError, planDef, operationName));
         }
@@ -193,7 +193,7 @@ public class RepositoryOperationProvider implements IRepositoryOperationProvider
 
     @SuppressWarnings("unused")
     protected <C extends IPrimitiveType<String>, R extends IBaseResource> R invokeQuestionnaire(
-            Repository repository, IIdType id, String operationName, Map<String, Object> paramMap) {
+            IRepository repository, IIdType id, String operationName, Map<String, Object> paramMap) {
         if (questionnaireProcessorFactory == null) {
             throw new IllegalArgumentException(String.format(noFactoryError, questionnaire, operationName));
         }
@@ -206,7 +206,7 @@ public class RepositoryOperationProvider implements IRepositoryOperationProvider
 
     @SuppressWarnings("unused")
     protected <C extends IPrimitiveType<String>, R extends IBaseResource> R invokeQuestionnaireResponse(
-            Repository repository, IIdType id, String operationName, Map<String, Object> paramMap) {
+            IRepository repository, IIdType id, String operationName, Map<String, Object> paramMap) {
         if (questionnaireResponseProcessorFactory == null) {
             throw new IllegalArgumentException(String.format(noFactoryError, questionnaireResponse, operationName));
         }

@@ -1,27 +1,49 @@
 package org.opencds.cqf.fhir.cr.cli;
 
+import org.junit.jupiter.api.Test;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
-import org.junit.jupiter.api.Test;
 
-class JPTest {
+class JPTest2 {
 
     @Test
     void hedis_AAB() throws IOException {
         List<String> measureCodes = new ArrayList<>();
-        measureCodes.add("AAB"); // other team
+//        measureCodes.add("AAB"); // results partially processed with old FHIRCommon "has"
 //        measureCodes.add("AAP");
-//        measureCodes.add("AMR"); // other team
+//        measureCodes.add("AMR");
 //        measureCodes.add("BPD");
-//        measureCodes.add("BCSE"); done
+//        measureCodes.add("BCSE");
 //        measureCodes.add("CBP");
-//        measureCodes.add("CCS"); done
-//        measureCodes.add("COLE"); done
-//        measureCodes.add("LSC"); done
+//        measureCodes.add("CCS");
+//        measureCodes.add("COLE");
+        measureCodes.add("LSC");
+//        measureCodes.add("PBH");
+        //LSC
+
+        for (String measureCode : measureCodes) {
+            run(measureCode + "_Reporting",
+                "/Users/justinmckelvy/Documents/DCSv2-Certification/LSC/A/Patients-v0", 100000);
+        }
+    }
+
+    @Test
+    void hedis_AAB2() throws IOException {
+        List<String> measureCodes = new ArrayList<>();
+        measureCodes.add("AAB"); // results partially processed with old FHIRCommon "has"
+//        measureCodes.add("AAP");
+//        measureCodes.add("AMR");
+//        measureCodes.add("BPD");
+//        measureCodes.add("BCSE");
+//        measureCodes.add("CBP");
+//        measureCodes.add("CCS");
+//        measureCodes.add("COLE");
+//        measureCodes.add("LSC");
 //        measureCodes.add("PBH");
         //LSC
 

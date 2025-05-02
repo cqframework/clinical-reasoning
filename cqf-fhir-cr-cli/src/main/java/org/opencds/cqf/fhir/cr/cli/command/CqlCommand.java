@@ -3,6 +3,9 @@ package org.opencds.cqf.fhir.cr.cli.command;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import com.google.common.base.Stopwatch;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
@@ -213,6 +216,15 @@ public class CqlCommand implements Callable<Integer> {
         log.error("initialized in {} millis", initTime);
         AtomicInteger counter = new AtomicInteger(0);
         for (var e : evaluations) {
+            String basePath = "/Users/justinmckelvy/Documents/DCSv2-Certification/Results_1/";
+            Path filepath = Paths.get(
+                basePath + this.library.libraryName + "/" + e.context.contextValue + ".txt");
+
+            // ✅ Skip if already written
+            if (Files.exists(filepath)) {
+                System.out.println("⏭️ Skipping " + e.context.contextValue + " (already processed)");
+                continue;
+            }
             // evaluations.parallelStream().forEach(e -> {
             var engine = Engines.forRepository(repository, evaluationSettings);
             if (library.libraryUrl != null) {
@@ -226,8 +238,19 @@ public class CqlCommand implements Callable<Integer> {
             var evalStart = watch.elapsed().toMillis();
             var contextParameter = Pair.<String, Object>of(e.context.contextName, e.context.contextValue);
             var result = engine.evaluate(identifier, contextParameter);
+
+            // generate MeasureReport from ExpressionResult
+
+            //Measure
+
+            //Subject
+
+
+            // ✅ Write TXT result
+            writeResultToFile(result, e.context.contextValue, basePath + this.library.libraryName);
             var count = counter.incrementAndGet();
-            writeResult(result);
+            //writeResult(result);
+
             var evalEnd = watch.elapsed().toMillis();
             log.error("evaluated #{} in {} millis", count, evalEnd - evalStart);
             log.error("avg (amortized across threads) {} millis", (evalEnd - initTime) / count);
@@ -268,6 +291,30 @@ public class CqlCommand implements Callable<Integer> {
             }
 
             System.out.println();
+        }
+    }
+
+    private void writeResultToFile(EvaluationResult result, String patientId, String path) {
+        Path outputPath = Paths.get(path, patientId + ".txt");
+
+        try {
+            // Ensure parent directories exist
+            Files.createDirectories(outputPath.getParent());
+
+            try (BufferedWriter writer = Files.newBufferedWriter(outputPath)) {
+                for (Map.Entry<String, ExpressionResult> libraryEntry : result.expressionResults.entrySet()) {
+                    String key = libraryEntry.getKey();
+                    Object value = this.tempConvert(libraryEntry.getValue().value());
+                    writer.write(key + "=" + value);
+                    writer.newLine();
+                }
+            }
+
+            System.out.println("✅ Wrote result to: " + outputPath.toAbsolutePath());
+
+        } catch (IOException e) {
+            System.err.println("❌ Failed to write result for patient " + patientId);
+            e.printStackTrace();
         }
     }
 

@@ -152,6 +152,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
                 canonicalVersionParams,
                 latestFromTxServer,
                 terminologyEndpoint.orElse(null));
+
         if (rootAdapter.get().fhirType().equals("Library")) {
             ((ILibraryAdapter) rootAdapter).setExpansionParameters(systemVersionParams, canonicalVersionParams);
         }
@@ -329,6 +330,12 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
                     if (maybeAdapter.isPresent()) {
                         dependencyAdapter = maybeAdapter.get();
                         alreadyUpdatedDependencies.put(dependencyAdapter.getUrl(), dependencyAdapter.get());
+
+                        String url = Canonicals.getUrl(dependencyAdapter.getUrl()) + "|" + dependencyAdapter.getVersion();
+                        var existingArtifactsForUrl = SearchHelper.searchRepositoryByCanonicalWithPaging(repository, url);
+                        if (BundleHelper.getEntry(existingArtifactsForUrl).isEmpty()) {
+                            repository.create(dependencyAdapter.get());
+                        }
                     } else {
                         alreadyUpdatedDependencies.put(dependencyUrl, null);
                     }

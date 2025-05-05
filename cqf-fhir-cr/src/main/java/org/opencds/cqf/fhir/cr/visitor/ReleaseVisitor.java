@@ -331,8 +331,10 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
                         dependencyAdapter = maybeAdapter.get();
                         alreadyUpdatedDependencies.put(dependencyAdapter.getUrl(), dependencyAdapter.get());
 
-                        String url = Canonicals.getUrl(dependencyAdapter.getUrl()) + "|" + dependencyAdapter.getVersion();
-                        var existingArtifactsForUrl = SearchHelper.searchRepositoryByCanonicalWithPaging(repository, url);
+                        String url =
+                                Canonicals.getUrl(dependencyAdapter.getUrl()) + "|" + dependencyAdapter.getVersion();
+                        var existingArtifactsForUrl =
+                                SearchHelper.searchRepositoryByCanonicalWithPaging(repository, url);
                         if (BundleHelper.getEntry(existingArtifactsForUrl).isEmpty()) {
                             repository.create(dependencyAdapter.get());
                         }

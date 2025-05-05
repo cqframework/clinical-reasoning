@@ -122,7 +122,7 @@ public class R4MeasureProcessor {
             MeasureEvalType evalType) {
         var m = measure.fold(this::resolveByUrl, this::resolveById, Function.identity());
         return this.evaluateMeasure(
-                m, periodStart, periodEnd, reportType, subjectIds, additionalData, parameters, evalType);
+                m, periodStart, periodEnd, reportType, subjectIds, additionalData, parameters, evalType, false);
     }
 
     protected MeasureReport evaluateMeasure(
@@ -134,7 +134,8 @@ public class R4MeasureProcessor {
             IBaseBundle additionalData,
             Parameters parameters,
             MeasureEvalType evalType,
-        Map<String, EvaluationResult> results) {
+        Map<String, EvaluationResult> results,
+        boolean applyScoring) {
 
         checkMeasureLibrary(measure);
 
@@ -146,7 +147,7 @@ public class R4MeasureProcessor {
         var measureDef = new R4MeasureDefBuilder().build(measure);
 
         //Process Criteria Expression Results
-        processResults(results, measureDef, evaluationType);
+        processResults(results, measureDef, evaluationType, applyScoring);
 
         // Populate populationDefs that require MeasureDef results
         // TODO JM: CLI tool is not compliant here due to requiring CQL Engine context
@@ -165,7 +166,8 @@ public class R4MeasureProcessor {
         List<String> subjectIds,
         IBaseBundle additionalData,
         Parameters parameters,
-        MeasureEvalType evalType) {
+        MeasureEvalType evalType,
+        boolean applyScoring) {
 
         checkMeasureLibrary(measure);
 
@@ -193,7 +195,7 @@ public class R4MeasureProcessor {
         var results = getEvaluationResults(subjectIds, measureDef, measure, parameters, additionalData, zonedMeasurementPeriod, context, libraryEngine, libraryVersionIdentifier);
 
         //Process Criteria Expression Results
-        processResults(results, measureDef, evaluationType);
+        processResults(results, measureDef, evaluationType, applyScoring);
 
         // Populate populationDefs that require MeasureDef results
         // TODO JM: CLI tool is not compliant here due to requiring CQL Engine context
@@ -204,7 +206,7 @@ public class R4MeasureProcessor {
             measure, measureDef, r4EvalTypeToReportType(evaluationType, measure), measurementPeriod, subjectIds);
     }
 
-    protected void processResults(Map<String, EvaluationResult> results, MeasureDef measureDef, @NotNull MeasureEvalType measureEvalType){
+    protected void processResults(Map<String, EvaluationResult> results, MeasureDef measureDef, @NotNull MeasureEvalType measureEvalType, boolean applyScoring){
         MeasureEvaluator evaluator = new MeasureEvaluator(new R4PopulationBasisValidator());
         // Populate MeasureDef using MeasureEvaluator
         for (Map.Entry<String, EvaluationResult> entry : results.entrySet()) {
@@ -218,7 +220,7 @@ public class R4MeasureProcessor {
             try {
                 //populate results into MeasureDef
                 evaluator.evaluate(measureDef, measureEvalType, subjectTypePart, subjectIdPart,
-                    evalResult);
+                    evalResult, applyScoring);
             } catch (Exception e) {
                 // Catch Exceptions from evaluation per subject, but allow rest of subjects to be processed (if
                 // applicable)

@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.cr.common;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -51,15 +52,7 @@ class ExpressionProcessorTests {
         var questionnaire = new Questionnaire();
         var request = RequestHelpers.newPopulateRequestForVersion(FhirVersionEnum.R4, libraryEngine, questionnaire);
         var expression = new CqfExpression();
-        doReturn(null)
-                .when(libraryEngine)
-                .resolveExpression(
-                        request.getSubjectId().getIdPart(),
-                        expression,
-                        request.getParameters(),
-                        request.getData(),
-                        questionnaire,
-                        null);
+        doReturn(null).when(libraryEngine).resolveExpression(any(), any(), any(), any(), any(), any(), any());
         var result = fixture.getExpressionResult(request, expression);
         assertNotNull(result);
         assertEquals(0, result.size());

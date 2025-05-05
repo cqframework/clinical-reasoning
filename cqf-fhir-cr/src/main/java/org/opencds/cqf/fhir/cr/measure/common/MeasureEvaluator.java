@@ -66,53 +66,48 @@ public class MeasureEvaluator {
 
     private static final Logger logger = LoggerFactory.getLogger(MeasureEvaluator.class);
 
-    protected CqlEngine context;
-    protected String measurementPeriodParameterName;
+   // protected CqlEngine context;
+    //protected String measurementPeriodParameterName;
 
-    private final LibraryEngine libraryEngine;
+    //private final LibraryEngine libraryEngine;
     private final PopulationBasisValidator populationBasisValidator;
 
     public MeasureEvaluator(
-            CqlEngine context,
-            String measurementPeriodParameterName,
-            LibraryEngine libraryEngine,
+            //CqlEngine context,
+            //String measurementPeriodParameterName,
+            //LibraryEngine libraryEngine,
             PopulationBasisValidator populationBasisValidator) {
-        this.context = Objects.requireNonNull(context, "context is a required argument");
-        this.libraryEngine = libraryEngine;
-        this.measurementPeriodParameterName = Objects.requireNonNull(
-                measurementPeriodParameterName, "measurementPeriodParameterName is a required argument");
+        //this.context = Objects.requireNonNull(context, "context is a required argument");
+        //this.libraryEngine = libraryEngine;
+        //this.measurementPeriodParameterName = Objects.requireNonNull(
+        //        measurementPeriodParameterName, "measurementPeriodParameterName is a required argument");
         this.populationBasisValidator = populationBasisValidator;
     }
 
     public MeasureDef evaluate(
             MeasureDef measureDef,
             MeasureEvalType measureEvalType,
-            List<String> subjectIds,
-            @Nullable Interval measurementPeriod,
-            VersionedIdentifier versionedIdentifier) {
+            String subjectType,
+            String subjectId,
+            EvaluationResult evaluationResult) {
         Objects.requireNonNull(measureDef, "measureDef is a required argument");
-        Objects.requireNonNull(subjectIds, "subjectIds is a required argument");
-
-        // measurementPeriod is not required, because it's often defaulted in CQL
-        setMeasurementPeriod(measureDef, measurementPeriod);
-
-        final ZonedDateTime zonedDateTime = getZonedTimeZoneForEval(measurementPeriod);
+        Objects.requireNonNull(subjectId, "subjectIds is a required argument");
 
         switch (measureEvalType) {
             case PATIENT:
             case SUBJECT:
-                return this.evaluate(
-                        measureDef, MeasureReportType.INDIVIDUAL, subjectIds, versionedIdentifier, zonedDateTime);
+                return this.evaluateSubject(
+                        measureDef, subjectType, subjectId, 1, MeasureReportType.INDIVIDUAL, evaluationResult);
             case SUBJECTLIST:
-                return this.evaluate(
-                        measureDef, MeasureReportType.SUBJECTLIST, subjectIds, versionedIdentifier, zonedDateTime);
+                return this.evaluateSubject(
+                    measureDef, subjectType, subjectId, 1, MeasureReportType.SUBJECTLIST, evaluationResult);
             case PATIENTLIST:
                 // DSTU3 Only
-                return this.evaluate(
-                        measureDef, MeasureReportType.PATIENTLIST, subjectIds, versionedIdentifier, zonedDateTime);
+                return this.evaluateSubject(
+                    measureDef, subjectType, subjectId, 1, MeasureReportType.PATIENTLIST, evaluationResult);
             case POPULATION:
-                return this.evaluate(
-                        measureDef, MeasureReportType.SUMMARY, subjectIds, versionedIdentifier, zonedDateTime);
+                return this.evaluateSubject(
+                    measureDef, subjectType, subjectId, 1, MeasureReportType.SUMMARY, evaluationResult);
             default:
                 // never hit because this value is set upstream
                 throw new InvalidRequestException(String.format(
@@ -132,197 +127,8 @@ public class MeasureEvaluator {
                 .orElse(null);
     }
 
-    protected ParameterDef getMeasurementPeriodParameterDef() {
-        Library lib = this.context.getState().getCurrentLibrary();
 
-        if (lib.getParameters() == null
-                || lib.getParameters().getDef() == null
-                || lib.getParameters().getDef().isEmpty()) {
-            return null;
-        }
-
-        for (ParameterDef pd : lib.getParameters().getDef()) {
-            if (this.measurementPeriodParameterName != null
-                    && pd.getName().equals(this.measurementPeriodParameterName)) {
-                return pd;
-            }
-        }
-
-        return null;
-    }
-
-    protected void setMeasurementPeriod(MeasureDef measureDef, Interval measurementPeriod) {
-        ParameterDef pd = this.getMeasurementPeriodParameterDef();
-        if (pd == null) {
-            logger.warn(
-                    "Parameter \"{}\" was not found. Unable to validate type.", this.measurementPeriodParameterName);
-            this.context.getState().setParameter(null, this.measurementPeriodParameterName, measurementPeriod);
-            return;
-        }
-
-        if (measurementPeriod == null && pd.getDefault() == null) {
-            logger.warn(
-                    "No default or value supplied for Parameter \"{}\". This may result in incorrect results or errors.",
-                    this.measurementPeriodParameterName);
-            return;
-        }
-
-        // Use the default, skip validation
-        if (measurementPeriod == null) {
-            measurementPeriod =
-                    (Interval) this.context.getEvaluationVisitor().visitParameterDef(pd, this.context.getState());
-
-            this.context
-                    .getState()
-                    .setParameter(null, this.measurementPeriodParameterName, cloneIntervalWithUtc(measurementPeriod));
-            return;
-        }
-
-        IntervalTypeSpecifier intervalTypeSpecifier = (IntervalTypeSpecifier) pd.getParameterTypeSpecifier();
-        if (intervalTypeSpecifier == null) {
-            logger.debug(
-                    "No ELM type information available. Unable to validate type of \"{}\"",
-                    this.measurementPeriodParameterName);
-            this.context.getState().setParameter(null, this.measurementPeriodParameterName, measurementPeriod);
-            return;
-        }
-
-        NamedTypeSpecifier pointType = (NamedTypeSpecifier) intervalTypeSpecifier.getPointType();
-        String targetType = pointType.getName().getLocalPart();
-        Interval convertedPeriod = convertInterval(measureDef, measurementPeriod, targetType);
-
-        this.context.getState().setParameter(null, this.measurementPeriodParameterName, convertedPeriod);
-    }
-
-    /**
-     * Convert an Interval from some other timezone to UTC, including both the start and end.
-     * For example, 2020-01-16T12:00:00-07:00-2020-01-16T12:59:59-07:00 becomes
-     * 2020-01-16T12:00:00Z-2020-01-16T12:59:59Z
-     *
-     * @param interval The original interval with some offset.
-     * @return The original dateTime but converted to UTC with the same local timestamp.
-     */
-    private static Interval cloneIntervalWithUtc(Interval interval) {
-        final Object startAsObject = interval.getStart();
-        final Object endAsObject = interval.getEnd();
-
-        if (startAsObject instanceof DateTime && endAsObject instanceof DateTime) {
-            return new Interval(
-                    cloneDateTimeWithUtc((DateTime) startAsObject),
-                    true,
-                    cloneDateTimeWithUtc((DateTime) endAsObject),
-                    true);
-        }
-
-        // Give up and just return the original Interval
-        return interval;
-    }
-
-    /**
-     * Convert a DateTime from some other timezone to UTC.
-     * For example, 2020-01-16T12:00:00-07:00 becomes 2020-01-16T12:00:00Z
-     *
-     * @param dateTime The original dateTime with some offset.
-     * @return The original dateTime but converted to UTC with the same local timestamp.
-     */
-    private static DateTime cloneDateTimeWithUtc(DateTime dateTime) {
-        final DateTime newDateTime = new DateTime(dateTime.getDateTime().withOffsetSameLocal(ZoneOffset.UTC));
-        newDateTime.setPrecision(dateTime.getPrecision());
-        return newDateTime;
-    }
-
-    protected Interval convertInterval(MeasureDef measureDef, Interval interval, String targetType) {
-        String sourceTypeQualified = interval.getPointType().getTypeName();
-        String sourceType =
-                sourceTypeQualified.substring(sourceTypeQualified.lastIndexOf(".") + 1, sourceTypeQualified.length());
-        if (sourceType.equals(targetType)) {
-            return interval;
-        }
-
-        if (sourceType.equals("DateTime") && targetType.equals("Date")) {
-            logger.debug(
-                    "A DateTime interval was provided and a Date interval was expected. The DateTime will be truncated.");
-            return new Interval(
-                    truncateDateTime((DateTime) interval.getLow()),
-                    interval.getLowClosed(),
-                    truncateDateTime((DateTime) interval.getHigh()),
-                    interval.getHighClosed());
-        }
-
-        throw new InvalidRequestException(String.format(
-                "The interval type of %s did not match the expected type of %s and no conversion was possible for MeasureDef: %s.",
-                sourceType, targetType, measureDef.url()));
-    }
-
-    protected Date truncateDateTime(DateTime dateTime) {
-        OffsetDateTime odt = dateTime.getDateTime();
-        return new Date(odt.getYear(), odt.getMonthValue(), odt.getDayOfMonth());
-    }
-
-    protected Pair<String, String> getSubjectTypeAndId(String subjectId) {
-        if (subjectId.contains("/")) {
-            String[] subjectIdParts = subjectId.split("/");
-            return Pair.of(subjectIdParts[0], subjectIdParts[1]);
-        } else {
-            throw new InvalidRequestException(String.format(
-                    "Unable to determine Subject type for id: %s. SubjectIds must be in the format {subjectType}/{subjectId} (e.g. Patient/123)",
-                    subjectId));
-        }
-    }
-
-    protected void captureEvaluatedResources(Set<Object> outEvaluatedResources) {
-        if (outEvaluatedResources != null && this.context.getState().getEvaluatedResources() != null) {
-            outEvaluatedResources.addAll(this.context.getState().getEvaluatedResources());
-        }
-        clearEvaluatedResources();
-    }
-
-    // reset evaluated resources followed by a context evaluation
-    private void clearEvaluatedResources() {
-        this.context.getState().clearEvaluatedResources();
-    }
-
-    protected MeasureDef evaluate(
-            MeasureDef measureDef,
-            MeasureReportType type,
-            List<String> subjectIds,
-            VersionedIdentifier id,
-            ZonedDateTime zonedDateTime) {
-        var subjectSize = subjectIds.size();
-        logger.info(
-                "Evaluating Measure {}, report type {}, with {} subject(s)",
-                measureDef.url(),
-                type.toCode(),
-                subjectSize);
-
-        // Library/$evaluate
-
-        for (String subjectId : subjectIds) {
-            if (subjectId == null) {
-                throw new NullPointerException("SubjectId is required in order to calculate.");
-            }
-            Pair<String, String> subjectInfo = this.getSubjectTypeAndId(subjectId);
-            String subjectTypePart = subjectInfo.getLeft();
-            String subjectIdPart = subjectInfo.getRight();
-            context.getState().setContextValue(subjectTypePart, subjectIdPart);
-            try {
-                EvaluationResult result = libraryEngine.getEvaluationResult(
-                        id, subjectId, null, null, null, null, zonedDateTime, context);
-                evaluateSubject(measureDef, subjectTypePart, subjectIdPart, subjectSize, type, result);
-            } catch (Exception e) {
-                // Catch Exceptions from evaluation per subject, but allow rest of subjects to be processed (if
-                // applicable)
-                var error = String.format("Exception for subjectId: %s, Message: %s", subjectId, e.getMessage());
-                // Capture error for MeasureReportBuilder
-                measureDef.addError(error);
-                logger.error(error, e);
-            }
-        }
-
-        return measureDef;
-    }
-
-    protected void evaluateSubject(
+    protected MeasureDef evaluateSubject(
             MeasureDef measureDef,
             String subjectType,
             String subjectId,
@@ -333,6 +139,7 @@ public class MeasureEvaluator {
         for (GroupDef groupDef : measureDef.groups()) {
             evaluateGroup(measureDef, groupDef, subjectType, subjectId, populationSize, reportType, evaluationResult);
         }
+        return measureDef;
     }
 
     @SuppressWarnings("unchecked")
@@ -356,7 +163,7 @@ public class MeasureEvaluator {
                 Object booleanResult =
                         evaluationResult.forExpression(subjectType).value();
                 // remove evaluated resources
-                clearEvaluatedResources();
+                //clearEvaluatedResources();
                 return Collections.singletonList(booleanResult);
             } else {
                 // false result shows nothing
@@ -367,36 +174,36 @@ public class MeasureEvaluator {
         return (Iterable<Object>) expressionResult.value();
     }
 
-    protected Object evaluateObservationCriteria(
-            Object resource, String criteriaExpression, Set<Object> outEvaluatedResources, boolean isBooleanBasis) {
-
-        var ed = Libraries.resolveExpressionRef(
-                criteriaExpression, this.context.getState().getCurrentLibrary());
-
-        if (!(ed instanceof FunctionDef)) {
-            throw new InvalidRequestException(String.format(
-                    "Measure observation %s does not reference a function definition", criteriaExpression));
-        }
-
-        Object result;
-        context.getState().pushWindow();
-        try {
-            if (!isBooleanBasis) {
-                // subject based observations don't have a parameter to pass in
-                context.getState()
-                        .push(new Variable()
-                                .withName(((FunctionDef) ed).getOperand().get(0).getName())
-                                .withValue(resource));
-            }
-            result = context.getEvaluationVisitor().visitExpression(ed.getExpression(), context.getState());
-        } finally {
-            context.getState().popWindow();
-        }
-
-        captureEvaluatedResources(outEvaluatedResources);
-
-        return result;
-    }
+//    protected Object evaluateObservationCriteria(
+//            Object resource, String criteriaExpression, Set<Object> outEvaluatedResources, boolean isBooleanBasis) {
+//
+//        var ed = Libraries.resolveExpressionRef(
+//                criteriaExpression, this.context.getState().getCurrentLibrary());
+//
+//        if (!(ed instanceof FunctionDef)) {
+//            throw new InvalidRequestException(String.format(
+//                    "Measure observation %s does not reference a function definition", criteriaExpression));
+//        }
+//
+//        Object result;
+//        context.getState().pushWindow();
+//        try {
+//            if (!isBooleanBasis) {
+//                // subject based observations don't have a parameter to pass in
+//                context.getState()
+//                        .push(new Variable()
+//                                .withName(((FunctionDef) ed).getOperand().get(0).getName())
+//                                .withValue(resource));
+//            }
+//            result = context.getEvaluationVisitor().visitExpression(ed.getExpression(), context.getState());
+//        } finally {
+//            context.getState().popWindow();
+//        }
+//
+//        captureEvaluatedResources(outEvaluatedResources);
+//
+//        return result;
+//    }
 
     protected PopulationDef evaluatePopulationMembership(
             String subjectType, String subjectId, PopulationDef inclusionDef, EvaluationResult evaluationResult) {
@@ -526,8 +333,8 @@ public class MeasureEvaluator {
                     denominatorException.retainOverlaps(denominator.getSubjectResources());
                 }
             }
-            if (reportType.equals(MeasureReportType.INDIVIDUAL) && populationSize == 1 && dateOfCompliance != null) {
-                var doc = evaluateDateOfCompliance(dateOfCompliance);
+            if (reportType.equals(MeasureReportType.INDIVIDUAL) && dateOfCompliance != null) {
+                var doc = evaluateDateOfCompliance(dateOfCompliance, evaluationResult);
                 dateOfCompliance.addResource(doc);
             }
         }
@@ -537,7 +344,7 @@ public class MeasureEvaluator {
             GroupDef groupDef, String subjectType, String subjectId, EvaluationResult evaluationResult) {
         PopulationDef initialPopulation = groupDef.getSingle(INITIALPOPULATION);
         PopulationDef measurePopulation = groupDef.getSingle(MEASUREPOPULATION);
-        PopulationDef measureObservation = groupDef.getSingle(MEASUREOBSERVATION);
+        //PopulationDef measureObservation = groupDef.getSingle(MEASUREOBSERVATION);
         PopulationDef measurePopulationExclusion = groupDef.getSingle(MEASUREPOPULATIONEXCLUSION);
         // Validate Required Populations are Present
         R4MeasureScoringTypePopulations.validateScoringTypePopulations(
@@ -558,17 +365,17 @@ public class MeasureEvaluator {
                 measurePopulationExclusion.getSubjects().retainAll(measurePopulation.getSubjects());
             }
 
-            // Evaluate Observation Population
-            if (measureObservation != null) {
-                for (Object resource : measurePopulation.getResources()) {
-                    Object observationResult = evaluateObservationCriteria(
-                            resource,
-                            measureObservation.expression(),
-                            measureObservation.getEvaluatedResources(),
-                            groupDef.isBooleanBasis());
-                    measureObservation.addResource(observationResult);
-                }
-            }
+            // Evaluate Observation Population, upstreamed into measureProcessor
+//            if (measureObservation != null) {
+//                for (Object resource : measurePopulation.getResources()) {
+//                    Object observationResult = evaluateObservationCriteria(
+//                            resource,
+//                            measureObservation.expression(),
+//                            measureObservation.getEvaluatedResources(),
+//                            groupDef.isBooleanBasis());
+//                    measureObservation.addResource(observationResult);
+//                }
+//            }
         }
     }
 
@@ -612,10 +419,8 @@ public class MeasureEvaluator {
         }
     }
 
-    protected Object evaluateDateOfCompliance(PopulationDef populationDef) {
-        var ref = Libraries.resolveExpressionRef(
-                populationDef.expression(), this.context.getState().getCurrentLibrary());
-        return this.context.getEvaluationVisitor().visitExpressionDef(ref, this.context.getState());
+    protected Object evaluateDateOfCompliance(PopulationDef populationDef, EvaluationResult evaluationResult) {
+        return evaluationResult.forExpression(populationDef.expression()).value();
     }
 
     protected void evaluateSdes(String subjectId, List<SdeDef> sdes, EvaluationResult evaluationResult) {
@@ -627,9 +432,7 @@ public class MeasureEvaluator {
                 result = null;
             }
 
-            sde.putResult(subjectId, result, context.getState().getEvaluatedResources());
-
-            clearEvaluatedResources();
+            sde.putResult(subjectId, result, expressionResult.evaluatedResources());
         }
     }
 
@@ -656,7 +459,7 @@ public class MeasureEvaluator {
             var expressionResult = evaluationResult.forExpression(component.expression());
             Object result = addStratifierResult(expressionResult.value(), subjectId);
             if (result != null) {
-                component.putResult(subjectId, result, this.context.getState().getEvaluatedResources());
+                component.putResult(subjectId, result, expressionResult.evaluatedResources());
             }
         }
     }
@@ -675,7 +478,7 @@ public class MeasureEvaluator {
                     sd.putResult(
                             subjectId, // context of CQL expression ex: Patient based
                             result,
-                            this.context.getState().getEvaluatedResources());
+                            expressionResult.evaluatedResources());
                 }
             }
         }

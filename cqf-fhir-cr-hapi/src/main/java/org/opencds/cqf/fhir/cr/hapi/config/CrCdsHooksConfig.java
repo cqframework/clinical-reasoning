@@ -1,5 +1,7 @@
 package org.opencds.cqf.fhir.cr.hapi.config;
 
+import static ca.uhn.hapi.fhir.cdshooks.config.CdsHooksConfig.CDS_HOOKS_OBJECT_MAPPER_FACTORY;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -25,6 +27,7 @@ import org.opencds.cqf.fhir.cr.hapi.cdshooks.discovery.ICrDiscoveryServiceFactor
 import org.opencds.cqf.fhir.cr.hapi.common.IRepositoryFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -118,7 +121,7 @@ public class CrCdsHooksConfig {
             CdsServiceRegistryImpl cdsServiceRegistry,
             ICrDiscoveryServiceFactory discoveryServiceFactory,
             ICdsCrServiceFactory crServiceFactory,
-            ObjectMapper om,
+            @Qualifier(CDS_HOOKS_OBJECT_MAPPER_FACTORY) ObjectMapper om,
             Optional<IResourceChangeListenerRegistry> resourceChangeListenerRegistry) {
         if (resourceChangeListenerRegistry.isEmpty()) {
             return null;

@@ -43,6 +43,16 @@ public class DataRequirementAdapter implements IDataRequirementAdapter {
     }
 
     @Override
+    public boolean hasId() {
+        return get().hasId();
+    }
+
+    @Override
+    public String getId() {
+        return get().getId();
+    }
+
+    @Override
     public boolean hasType() {
         return get().hasType();
     }

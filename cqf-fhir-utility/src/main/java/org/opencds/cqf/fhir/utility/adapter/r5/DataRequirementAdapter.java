@@ -1,7 +1,6 @@
 package org.opencds.cqf.fhir.utility.adapter.r5;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.ICompositeType;
@@ -24,7 +23,8 @@ public class DataRequirementAdapter implements IDataRequirementAdapter {
         }
         this.dataRequirement = dataRequirementInner;
         fhirContext = FhirContext.forR5Cached();
-        modelResolver = FhirModelResolverCache.resolverForVersion(FhirVersionEnum.R4);
+        modelResolver = FhirModelResolverCache.resolverForVersion(
+                fhirContext.getVersion().getVersion());
     }
 
     @Override
@@ -40,6 +40,16 @@ public class DataRequirementAdapter implements IDataRequirementAdapter {
     @Override
     public ModelResolver getModelResolver() {
         return modelResolver;
+    }
+
+    @Override
+    public boolean hasId() {
+        return get().hasId();
+    }
+
+    @Override
+    public String getId() {
+        return get().getId();
     }
 
     @Override

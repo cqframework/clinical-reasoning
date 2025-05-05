@@ -1,0 +1,85 @@
+{
+  "resourceType": "Library",
+  "id": "FHIRHelpers",
+  "contained": [ {
+    "resourceType": "Parameters",
+    "id": "options",
+    "parameter": [ {
+      "name": "translatorVersion",
+      "valueString": "3.11.0"
+    }, {
+      "name": "option",
+      "valueString": "EnableAnnotations"
+    }, {
+      "name": "option",
+      "valueString": "EnableLocators"
+    }, {
+      "name": "option",
+      "valueString": "DisableListDemotion"
+    }, {
+      "name": "option",
+      "valueString": "DisableListPromotion"
+    }, {
+      "name": "format",
+      "valueString": "JSON"
+    }, {
+      "name": "format",
+      "valueString": "XML"
+    }, {
+      "name": "analyzeDataRequirements",
+      "valueBoolean": false
+    }, {
+      "name": "collapseDataRequirements",
+      "valueBoolean": false
+    }, {
+      "name": "compatibilityLevel",
+      "valueString": "1.5"
+    }, {
+      "name": "enableCqlOnly",
+      "valueBoolean": false
+    }, {
+      "name": "errorLevel",
+      "valueString": "Info"
+    }, {
+      "name": "signatureLevel",
+      "valueString": "All"
+    }, {
+      "name": "validateUnits",
+      "valueBoolean": true
+    }, {
+      "name": "verifyOnly",
+      "valueBoolean": false
+    } ]
+  } ],
+  "extension": [ {
+    "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem",
+    "valueReference": {
+      "reference": "Device/cqf-tooling"
+    }
+  }, {
+    "url": "http://hl7.org/fhir/StructureDefinition/cqf-cqlOptions",
+    "valueReference": {
+      "reference": "#options"
+    }
+  } ],
+  "url": "http://hl7.org/fhir/us/cql/Library/FHIRHelpers",
+  "version": "4.1.0",
+  "name": "FHIRHelpers",
+  "type": {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/library-type",
+      "code": "logic-library"
+    } ]
+  },
+  "relatedArtifact": [ {
+    "type": "depends-on",
+    "display": "FHIR model information",
+    "resource": "http://fhir.org/guides/cqf/common/Library/FHIR-ModelInfo|4.0.1"
+  } ],
+  "content": [
+    {
+      "contentType": "text/cql",
+      "url": "../cql/FHIRHelpers.cql"
+    }
+  ]
+}

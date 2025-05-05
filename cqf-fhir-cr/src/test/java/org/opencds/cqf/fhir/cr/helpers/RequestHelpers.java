@@ -6,7 +6,7 @@ import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
-import org.opencds.cqf.fhir.cr.inputparameters.IInputParameterResolver;
+import org.opencds.cqf.fhir.cr.common.IInputParameterResolver;
 import org.opencds.cqf.fhir.cr.library.evaluate.EvaluateRequest;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.GenerateRequest;
 import org.opencds.cqf.fhir.cr.questionnaire.populate.PopulateRequest;
@@ -118,7 +118,6 @@ public class RequestHelpers {
                 null,
                 null,
                 null,
-                true,
                 null,
                 null,
                 libraryEngine,
@@ -156,7 +155,6 @@ public class RequestHelpers {
                 null,
                 null,
                 null,
-                true,
                 libraryEngine,
                 FhirModelResolverCache.resolverForVersion(fhirVersion));
     }
@@ -172,7 +170,6 @@ public class RequestHelpers {
                 Ids.newId(fhirVersion, Ids.ensureIdType(PATIENT_ID, "Patient")),
                 null,
                 null,
-                true,
                 libraryEngine,
                 FhirModelResolverCache.resolverForVersion(fhirVersion),
                 null);
@@ -185,7 +182,6 @@ public class RequestHelpers {
                 Ids.newId(fhirVersion, Ids.ensureIdType(PATIENT_ID, "Patient")),
                 null,
                 null,
-                true,
                 null,
                 null,
                 libraryEngine,

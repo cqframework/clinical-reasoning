@@ -203,7 +203,6 @@ public class QuestionnaireProcessor {
             IBaseExtension<?, ?> launchContext,
             IBaseParameters parameters,
             IBaseBundle data,
-            boolean useServerData,
             LibraryEngine libraryEngine) {
         return new PopulateRequest(
                 questionnaire,
@@ -212,7 +211,6 @@ public class QuestionnaireProcessor {
                 launchContext,
                 parameters,
                 data,
-                useServerData,
                 libraryEngine != null ? libraryEngine : new LibraryEngine(repository, evaluationSettings),
                 modelResolver);
     }
@@ -260,7 +258,6 @@ public class QuestionnaireProcessor {
                 launchContext,
                 parameters,
                 data,
-                useServerData,
                 new LibraryEngine(repository, this.evaluationSettings));
     }
 
@@ -271,7 +268,6 @@ public class QuestionnaireProcessor {
             IBaseExtension<?, ?> launchContext,
             IBaseParameters parameters,
             IBaseBundle data,
-            boolean useServerData,
             LibraryEngine libraryEngine) {
         return populate(
                 resolveQuestionnaire(questionnaire),
@@ -280,7 +276,6 @@ public class QuestionnaireProcessor {
                 launchContext,
                 parameters,
                 data,
-                useServerData,
                 libraryEngine);
     }
 
@@ -291,10 +286,9 @@ public class QuestionnaireProcessor {
             IBaseExtension<?, ?> launchContext,
             IBaseParameters parameters,
             IBaseBundle data,
-            boolean useServerData,
             LibraryEngine libraryEngine) {
         return populate(buildPopulateRequest(
-                questionnaire, subjectId, context, launchContext, parameters, data, useServerData, libraryEngine));
+                questionnaire, subjectId, context, launchContext, parameters, data, libraryEngine));
     }
 
     public IBaseResource populate(PopulateRequest request) {

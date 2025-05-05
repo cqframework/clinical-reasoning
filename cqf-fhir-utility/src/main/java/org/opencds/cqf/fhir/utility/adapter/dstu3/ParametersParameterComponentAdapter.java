@@ -11,6 +11,7 @@ import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
+import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IParametersParameterComponentAdapter;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 
@@ -19,6 +20,11 @@ class ParametersParameterComponentAdapter implements IParametersParameterCompone
     private final FhirContext fhirContext = FhirContext.forDstu3Cached();
     private final Parameters.ParametersParameterComponent parametersParameterComponent;
     private final ModelResolver modelResolver;
+    private final IAdapterFactory adapterFactory;
+
+    protected ParametersParameterComponent getParametersParameterComponent() {
+        return parametersParameterComponent;
+    }
 
     public ParametersParameterComponentAdapter(IBaseBackboneElement parametersParameterComponent) {
         if (parametersParameterComponent == null) {
@@ -33,6 +39,7 @@ class ParametersParameterComponentAdapter implements IParametersParameterCompone
         this.parametersParameterComponent = (ParametersParameterComponent) parametersParameterComponent;
         modelResolver = FhirModelResolverCache.resolverForVersion(
                 fhirContext.getVersion().getVersion());
+        adapterFactory = IAdapterFactory.forFhirContext(fhirContext);
     }
 
     @Override
@@ -51,15 +58,17 @@ class ParametersParameterComponentAdapter implements IParametersParameterCompone
     }
 
     @Override
-    public List<IBaseBackboneElement> getPart() {
-        return this.parametersParameterComponent.getPart().stream().collect(Collectors.toList());
+    public List<IParametersParameterComponentAdapter> getPart() {
+        return this.getParametersParameterComponent().getPart().stream()
+                .map(adapterFactory::createParametersParameter)
+                .toList();
     }
 
     @Override
     public List<IBaseDatatype> getPartValues(String name) {
         return this.parametersParameterComponent.getPart().stream()
                 .filter(p -> p.getName().equals(name))
-                .map(p -> p.getValue())
+                .map(ParametersParameterComponent::getValue)
                 .collect(Collectors.toList());
     }
 

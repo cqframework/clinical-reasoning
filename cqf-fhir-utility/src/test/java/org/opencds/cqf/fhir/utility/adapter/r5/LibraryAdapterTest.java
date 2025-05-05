@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import org.hl7.fhir.r5.model.Attachment;
 import org.hl7.fhir.r5.model.CodeableConcept;
 import org.hl7.fhir.r5.model.Coding;
@@ -30,6 +31,7 @@ import org.hl7.fhir.r5.model.RelatedArtifact;
 import org.hl7.fhir.r5.model.UsageContext;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.utility.adapter.IAdapter;
+import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.TestVisitor;
 
 class LibraryAdapterTest {
@@ -233,5 +235,17 @@ class LibraryAdapterTest {
         library.setUseContext(Collections.singletonList(useContext));
         var adapter = new LibraryAdapter(library);
         assertEquals(useContext, adapter.getUseContext().get(0));
+    }
+
+    @Test
+    void testLibrary() {
+        var libraryName = "test";
+        var libraryUrl = "Library/" + libraryName;
+        var library = new Library().setUrl(libraryUrl).setName(libraryName);
+        var adapter = (ILibraryAdapter) adapterFactory.createKnowledgeArtifactAdapter(library);
+        assertEquals(Map.of(libraryName, libraryUrl), adapter.getReferencedLibraries());
+        assertEquals(
+                library,
+                adapter.retrieveReferencedLibraries(null).get(libraryName).get());
     }
 }

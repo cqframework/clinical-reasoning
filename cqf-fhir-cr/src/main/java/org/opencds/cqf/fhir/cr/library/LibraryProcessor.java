@@ -114,7 +114,6 @@ public class LibraryProcessor {
             String subject,
             List<String> expression,
             IBaseParameters parameters,
-            boolean useServerData,
             IBaseBundle data,
             List<? extends IBaseBackboneElement> prefetchData,
             LibraryEngine libraryEngine) {
@@ -123,7 +122,6 @@ public class LibraryProcessor {
                 StringUtils.isBlank(subject) ? null : Ids.newId(fhirVersion, subject),
                 expression,
                 parameters,
-                useServerData,
                 data,
                 prefetchData,
                 libraryEngine,
@@ -171,7 +169,6 @@ public class LibraryProcessor {
                 subject,
                 expression,
                 parameters,
-                useServerData,
                 data,
                 prefetchData,
                 new LibraryEngine(repository, this.evaluationSettings));
@@ -182,14 +179,13 @@ public class LibraryProcessor {
             String subject,
             List<String> expression,
             IBaseParameters parameters,
-            boolean useServerData,
             IBaseBundle data,
             List<? extends IBaseBackboneElement> prefetchData,
             LibraryEngine libraryEngine) {
         var processor = evaluateProcessor != null
                 ? evaluateProcessor
                 : new EvaluateProcessor(this.repository, this.evaluationSettings);
-        return processor.evaluate(buildEvaluateRequest(
-                library, subject, expression, parameters, useServerData, data, prefetchData, libraryEngine));
+        return processor.evaluate(
+                buildEvaluateRequest(library, subject, expression, parameters, data, prefetchData, libraryEngine));
     }
 }

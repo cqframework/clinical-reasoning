@@ -33,14 +33,14 @@ class ValueSetAdapterTest {
     @Test
     void invalid_object_fails() {
         var library = new Library();
-        assertThrows(IllegalArgumentException.class, () -> new ValueSetAdapter(library));
+        assertThrows(IllegalArgumentException.class, () -> adapterFactory.createValueSet(library));
     }
 
     @Test
     void adapter_accepts_visitor() {
         var spyVisitor = spy(new TestVisitor());
         var valueSet = new ValueSet();
-        var adapter = adapterFactory.createKnowledgeArtifactAdapter(valueSet);
+        var adapter = adapterFactory.createValueSet(valueSet);
         doReturn(valueSet).when(spyVisitor).visit(any(ValueSetAdapter.class), any());
         adapter.accept(spyVisitor, null);
         verify(spyVisitor, times(1)).visit(any(ValueSetAdapter.class), any());

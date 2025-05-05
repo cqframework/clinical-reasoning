@@ -14,18 +14,12 @@ import org.opencds.cqf.fhir.utility.adapter.BaseResourceAdapter;
 
 class ResourceAdapter extends BaseResourceAdapter {
 
-    protected final AdapterFactory adapterFactory;
-
     public ResourceAdapter(IBaseResource resource) {
         super(resource);
-        if (resource == null) {
-            throw new IllegalArgumentException("resource can not be null");
-        }
 
         if (!resource.getStructureFhirVersionEnum().equals(FhirVersionEnum.R5)) {
             throw new IllegalArgumentException("resource is incorrect fhir version for this adapter");
         }
-        adapterFactory = new AdapterFactory();
     }
 
     protected Resource getResource() {

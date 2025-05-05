@@ -98,13 +98,13 @@ public class ItemGenerator {
                             var name = request.resolvePathString(p, "name").toUpperCase();
                             return (name.equals("PRACTITIONER"))
                                     || request.resolvePathString(p, "use").equals("in")
-                                            && Arrays.asList(SDC_QUESTIONNAIRE_LAUNCH_CONTEXT_CODE.values()).stream()
+                                            && Arrays.stream(SDC_QUESTIONNAIRE_LAUNCH_CONTEXT_CODE.values())
                                                     .map(Object::toString)
-                                                    .collect(Collectors.toList())
+                                                    .toList()
                                                     .contains(name);
                         })
                         .map(p -> request.resolvePathString(p, "name").toLowerCase())
-                        .collect(Collectors.toList());
+                        .toList();
                 inParameters.forEach(p -> launchContextExts.add(buildSdcLaunchContextExt(request.getFhirVersion(), p)));
             }
             return new ImmutablePair<>(questionnaireItem, launchContextExts);
@@ -235,16 +235,15 @@ public class ItemGenerator {
 
     protected List<IElementDefinitionAdapter> getElements(
             GenerateRequest request, String parentPath, String sliceName) {
-        List<IElementDefinitionAdapter> elements = new ArrayList<>();
         // Add all elements from the differential
-        elements.addAll(request.getDifferentialElements().stream()
+        var elements = request.getDifferentialElements().stream()
                 .filter(e -> filterElement(request, e, null, parentPath, sliceName, false))
-                .collect(Collectors.toList()));
+                .collect(Collectors.toList());
         // Add elements from the snapshot that were not in the differential
         if (request.getSnapshotElements() != null) {
             elements.addAll(request.getProfileAdapter().getSnapshotElements().stream()
                     .filter(e -> filterElement(request, e, elements, parentPath, sliceName, request.getRequiredOnly()))
-                    .collect(Collectors.toList()));
+                    .toList());
         }
         return elements;
     }
@@ -293,17 +292,12 @@ public class ItemGenerator {
         var pathSplit = path.split("\\.");
         if (parentPath == null) {
             // grab only top level elements
-            if (pathSplit.length > 2) {
-                return true;
-            }
+            return pathSplit.length > 2;
         } else {
             // grab only the next level of elements
             var splitLength = parentPath.split("\\.").length + 1;
-            if (pathSplit.length > splitLength || !path.contains(parentPath + ".")) {
-                return true;
-            }
+            return pathSplit.length > splitLength || !path.contains(parentPath + ".");
         }
-        return false;
     }
 
     protected <E extends ICompositeType> boolean isRequiredPath(GenerateRequest request, E element) {
@@ -348,23 +342,17 @@ public class ItemGenerator {
 
     protected IBaseBackboneElement createQuestionnaireItemComponent(
             GenerateRequest request, String text, String linkId, String definition, Boolean isDisplay) {
-        Object itemType;
-        switch (request.getFhirVersion()) {
-            case R4:
-                itemType = Boolean.TRUE.equals(isDisplay)
-                        ? org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType.DISPLAY
-                        : org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType.GROUP;
-                break;
-            case R5:
-                itemType = Boolean.TRUE.equals(isDisplay)
-                        ? org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemType.DISPLAY
-                        : org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemType.GROUP;
-                break;
-
-            default:
-                itemType = null;
-        }
-        return initializeQuestionnaireItem(request, itemType, definition, linkId, text, false, false);
+        Object itemType =
+                switch (request.getFhirVersion()) {
+                    case R4 -> Boolean.TRUE.equals(isDisplay)
+                            ? org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType.DISPLAY
+                            : org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType.GROUP;
+                    case R5 -> Boolean.TRUE.equals(isDisplay)
+                            ? org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemType.DISPLAY
+                            : org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemType.GROUP;
+                    default -> null;
+                };
+        return initializeQuestionnaireItem(request, itemType, definition, linkId, text, false, true);
     }
 
     protected IBaseBackboneElement initializeQuestionnaireItem(
@@ -375,27 +363,23 @@ public class ItemGenerator {
             String text,
             boolean required,
             boolean repeats) {
-        switch (request.getFhirVersion()) {
-            case R4:
-                return new org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent()
-                        .setType((org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType) itemType)
-                        .setDefinition(definition)
-                        .setLinkId(linkId)
-                        .setText(text)
-                        .setRequired(required)
-                        .setRepeats(repeats);
-            case R5:
-                return new org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemComponent()
-                        .setType((org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemType) itemType)
-                        .setDefinition(definition)
-                        .setLinkId(linkId)
-                        .setText(text)
-                        .setRequired(required)
-                        .setRepeats(repeats);
-
-            default:
-                return null;
-        }
+        return switch (request.getFhirVersion()) {
+            case R4 -> new org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent()
+                    .setType((org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType) itemType)
+                    .setDefinition(definition)
+                    .setLinkId(linkId)
+                    .setText(text)
+                    .setRequired(required)
+                    .setRepeats(repeats);
+            case R5 -> new org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemComponent()
+                    .setType((org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemType) itemType)
+                    .setDefinition(definition)
+                    .setLinkId(linkId)
+                    .setText(text)
+                    .setRequired(required)
+                    .setRepeats(repeats);
+            default -> null;
+        };
     }
 
     protected String getElementText(IElementDefinitionAdapter element) {

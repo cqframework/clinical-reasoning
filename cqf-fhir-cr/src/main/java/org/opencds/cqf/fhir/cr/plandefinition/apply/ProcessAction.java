@@ -134,7 +134,7 @@ public class ProcessAction {
                 IBase result = null;
                 try {
                     var expressionResult =
-                            expressionProcessor.getExpressionResult(request, conditionExpression, inputParams);
+                            expressionProcessor.getExpressionResult(request, conditionExpression, inputParams, null);
                     result = expressionResult.isEmpty() ? null : expressionResult.get(0);
                 } catch (Exception e) {
                     var message = String.format(

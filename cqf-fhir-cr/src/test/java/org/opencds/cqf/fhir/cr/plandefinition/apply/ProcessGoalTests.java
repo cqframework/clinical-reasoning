@@ -4,12 +4,12 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.opencds.cqf.fhir.cr.helpers.RequestHelpers.newPDApplyRequestForVersion;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import org.hl7.fhir.dstu3.model.Coding;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -31,15 +31,10 @@ class ProcessGoalTests {
 
     ProcessGoal fixture = new ProcessGoal();
 
-    @BeforeEach
-    void setup() {
-        doReturn(repository).when(libraryEngine).getRepository();
-    }
-
     @Test
     void unsupportedVersionShouldReturnNull() {
-        doReturn(FhirContext.forR4BCached()).when(repository).fhirContext();
-        var request = newPDApplyRequestForVersion(FhirVersionEnum.R4B, libraryEngine, modelResolver);
+        var request = mock(ApplyRequest.class);
+        doReturn(FhirVersionEnum.R4B).when(request).getFhirVersion();
         var goalElement = new org.hl7.fhir.r4b.model.PlanDefinition.PlanDefinitionGoalComponent();
         var result = fixture.convertGoal(request, goalElement);
         assertNull(result);
@@ -47,6 +42,7 @@ class ProcessGoalTests {
 
     @Test
     void convertDstu3Goal() {
+        doReturn(repository).when(libraryEngine).getRepository();
         doReturn(FhirContext.forDstu3Cached()).when(repository).fhirContext();
         var request = newPDApplyRequestForVersion(FhirVersionEnum.DSTU3, libraryEngine, null);
         var goalElement = new org.hl7.fhir.dstu3.model.PlanDefinition.PlanDefinitionGoalComponent()
@@ -60,6 +56,7 @@ class ProcessGoalTests {
 
     @Test
     void convertR4Goal() {
+        doReturn(repository).when(libraryEngine).getRepository();
         doReturn(FhirContext.forR4Cached()).when(repository).fhirContext();
         var request = newPDApplyRequestForVersion(FhirVersionEnum.R4, libraryEngine, null);
         var goalElement = new org.hl7.fhir.r4.model.PlanDefinition.PlanDefinitionGoalComponent()
@@ -72,6 +69,7 @@ class ProcessGoalTests {
 
     @Test
     void convertR5Goal() {
+        doReturn(repository).when(libraryEngine).getRepository();
         doReturn(FhirContext.forR5Cached()).when(repository).fhirContext();
         var request = newPDApplyRequestForVersion(FhirVersionEnum.R5, libraryEngine, null);
         var goalElement = new org.hl7.fhir.r5.model.PlanDefinition.PlanDefinitionGoalComponent()

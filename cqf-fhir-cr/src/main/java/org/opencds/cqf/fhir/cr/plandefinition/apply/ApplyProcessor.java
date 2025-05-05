@@ -16,7 +16,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -160,8 +159,8 @@ public class ApplyProcessor implements IApplyProcessor {
 
         var questionnaireResponses = getEntryResources(request.getData()).stream()
                 .filter(r -> r.fhirType().equals("QuestionnaireResponse"))
-                .collect(Collectors.toList());
-        if (questionnaireResponses != null && !questionnaireResponses.isEmpty()) {
+                .toList();
+        if (!questionnaireResponses.isEmpty()) {
             for (var questionnaireResponse : questionnaireResponses) {
                 try {
                     var extractBundle = extractProcessor.extract(
@@ -169,7 +168,6 @@ public class ApplyProcessor implements IApplyProcessor {
                             null,
                             request.getParameters(),
                             request.getData(),
-                            request.getUseServerData(),
                             request.getLibraryEngine());
                     for (var entry : getEntry(extractBundle)) {
                         addEntry(request.getData(), entry);
@@ -242,21 +240,14 @@ public class ApplyProcessor implements IApplyProcessor {
     }
 
     protected IBaseResource liftContainedResourcesToParent(ICpgRequest request, IBaseResource resource) {
-        switch (request.getFhirVersion()) {
-            case DSTU3:
-                return org.opencds.cqf.fhir.utility.dstu3.ContainedHelper.liftContainedResourcesToParent(
-                        (org.hl7.fhir.dstu3.model.DomainResource) resource);
-            case R4:
-                return org.opencds.cqf.fhir.utility.r4.ContainedHelper.liftContainedResourcesToParent(
-                        (org.hl7.fhir.r4.model.DomainResource) resource);
-            case R5:
-                return org.opencds.cqf.fhir.utility.r5.ContainedHelper.liftContainedResourcesToParent(
-                        (org.hl7.fhir.r5.model.DomainResource) resource);
-
-            default:
-                break;
-        }
-
-        return resource;
+        return switch (request.getFhirVersion()) {
+            case DSTU3 -> org.opencds.cqf.fhir.utility.dstu3.ContainedHelper.liftContainedResourcesToParent(
+                    (org.hl7.fhir.dstu3.model.DomainResource) resource);
+            case R4 -> org.opencds.cqf.fhir.utility.r4.ContainedHelper.liftContainedResourcesToParent(
+                    (org.hl7.fhir.r4.model.DomainResource) resource);
+            case R5 -> org.opencds.cqf.fhir.utility.r5.ContainedHelper.liftContainedResourcesToParent(
+                    (org.hl7.fhir.r5.model.DomainResource) resource);
+            default -> resource;
+        };
     }
 }

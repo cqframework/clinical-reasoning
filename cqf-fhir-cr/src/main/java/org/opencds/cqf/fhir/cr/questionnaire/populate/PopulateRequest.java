@@ -4,7 +4,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
@@ -19,26 +21,25 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
+import org.opencds.cqf.fhir.cr.common.IInputParameterResolver;
 import org.opencds.cqf.fhir.cr.common.IQuestionnaireRequest;
-import org.opencds.cqf.fhir.cr.inputparameters.IInputParameterResolver;
 import org.opencds.cqf.fhir.utility.Constants;
+import org.opencds.cqf.fhir.utility.Resources;
 import org.opencds.cqf.fhir.utility.adapter.IParametersParameterComponentAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireAdapter;
 
 public class PopulateRequest implements IQuestionnaireRequest {
-    private final IBaseResource questionnaire;
+    private final IQuestionnaireAdapter questionnaireAdapter;
+    private final IBaseResource questionnaireResponse;
     private final IIdType subjectId;
     private final List<IParametersParameterComponentAdapter> context;
-    private final List<IBaseExtension<?, ?>> launchContext;
-    private final IBaseParameters parameters;
     private final IBaseBundle data;
-    private final boolean useServerData;
     private final LibraryEngine libraryEngine;
     private final ModelResolver modelResolver;
     private final FhirVersionEnum fhirVersion;
-    private final String defaultLibraryUrl;
+    private final Map<String, String> referencedLibraries;
     private final IInputParameterResolver inputParameterResolver;
-    private final IQuestionnaireAdapter questionnaireAdapter;
+    private IBase contextVariable;
     private IBaseOperationOutcome operationOutcome;
 
     public PopulateRequest(
@@ -48,42 +49,43 @@ public class PopulateRequest implements IQuestionnaireRequest {
             IBaseExtension<?, ?> launchContext,
             IBaseParameters parameters,
             IBaseBundle data,
-            boolean useServerData,
             LibraryEngine libraryEngine,
             ModelResolver modelResolver) {
         checkNotNull(questionnaire, "expected non-null value for questionnaire");
         checkNotNull(libraryEngine, "expected non-null value for libraryEngine");
         checkNotNull(modelResolver, "expected non-null value for modelResolver");
-        this.questionnaire = questionnaire;
-        this.fhirVersion = questionnaire.getStructureFhirVersionEnum();
+        fhirVersion = questionnaire.getStructureFhirVersionEnum();
+        questionnaireAdapter = (IQuestionnaireAdapter)
+                getAdapterFactory().createKnowledgeArtifactAdapter((IDomainResource) questionnaire);
         this.context = context == null
                 ? new ArrayList<>()
                 : context.stream()
                         .map(c -> getAdapterFactory().createParametersParameter(c))
                         .collect(Collectors.toList());
         this.subjectId = getSubjectId(subjectId);
-        this.parameters = parameters;
         this.data = data;
-        this.useServerData = useServerData;
         this.libraryEngine = libraryEngine;
         this.modelResolver = modelResolver;
-        this.launchContext = getExtensionsByUrl(this.questionnaire, Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT);
+        var launchContexts = getExtensionsByUrl(questionnaireAdapter.get(), Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT);
         if (launchContext != null) {
-            this.launchContext.add(launchContext);
+            launchContexts.add(launchContext);
         }
-        this.defaultLibraryUrl = resolveDefaultLibraryUrl();
-        questionnaireAdapter = (IQuestionnaireAdapter)
-                getAdapterFactory().createKnowledgeArtifactAdapter((IDomainResource) this.questionnaire);
+        if (parameters == null) {
+            parameters = (IBaseParameters) Resources.newBaseForVersion("Parameters", fhirVersion);
+        }
+        getAdapterFactory().createParameters(parameters).addParameter("%questionnaire", questionnaireAdapter.get());
+        questionnaireResponse = createQuestionnaireResponse();
+        contextVariable = questionnaireResponse;
+        referencedLibraries = questionnaireAdapter.getReferencedLibraries();
         inputParameterResolver = IInputParameterResolver.createResolver(
                 libraryEngine.getRepository(),
                 this.subjectId,
                 null,
                 null,
-                this.parameters,
-                this.useServerData,
+                parameters,
                 this.data,
                 this.context,
-                this.launchContext);
+                launchContexts);
     }
 
     @SuppressWarnings("unchecked")
@@ -119,13 +121,22 @@ public class PopulateRequest implements IQuestionnaireRequest {
     }
 
     @Override
-    public IBase getContext() {
-        return getQuestionnaire();
+    public IBase getContextVariable() {
+        return contextVariable;
+    }
+
+    public void setContextVariable(IBase value) {
+        contextVariable = value;
+    }
+
+    @Override
+    public IBase getResourceVariable() {
+        return getQuestionnaireResponse();
     }
 
     @Override
     public IBaseResource getQuestionnaire() {
-        return questionnaire;
+        return questionnaireAdapter.get();
     }
 
     @Override
@@ -144,13 +155,10 @@ public class PopulateRequest implements IQuestionnaireRequest {
     }
 
     @Override
-    public boolean getUseServerData() {
-        return useServerData;
-    }
-
-    @Override
     public IBaseParameters getParameters() {
-        return inputParameterResolver.getParameters();
+        return (IBaseParameters) getAdapterFactory()
+                .createParameters(inputParameterResolver.getParameters())
+                .copy();
     }
 
     @Override
@@ -169,8 +177,8 @@ public class PopulateRequest implements IQuestionnaireRequest {
     }
 
     @Override
-    public String getDefaultLibraryUrl() {
-        return defaultLibraryUrl;
+    public Map<String, String> getReferencedLibraries() {
+        return referencedLibraries;
     }
 
     @Override
@@ -183,17 +191,36 @@ public class PopulateRequest implements IQuestionnaireRequest {
         this.operationOutcome = operationOutcome;
     }
 
-    @SuppressWarnings("unchecked")
-    protected final String resolveDefaultLibraryUrl() {
-        var libraryExt = getExtensions(questionnaire).stream()
-                .filter(e -> e.getUrl()
-                        .equals(fhirVersion == FhirVersionEnum.DSTU3 ? Constants.CQIF_LIBRARY : Constants.CQF_LIBRARY))
-                .findFirst()
-                .orElse(null);
-        return libraryExt == null ? null : ((IPrimitiveType<String>) libraryExt.getValue()).getValue();
+    protected IBaseResource createQuestionnaireResponse() {
+        var response =
+                switch (fhirVersion) {
+                    case R4 -> new org.hl7.fhir.r4.model.QuestionnaireResponse()
+                            .setStatus(
+                                    org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseStatus.INPROGRESS)
+                            .setQuestionnaire(questionnaireAdapter.getCanonical())
+                            .setSubject(new org.hl7.fhir.r4.model.Reference(subjectId))
+                            .setAuthored(new Date());
+                    case R5 -> new org.hl7.fhir.r5.model.QuestionnaireResponse()
+                            .setStatus(
+                                    org.hl7.fhir.r5.model.QuestionnaireResponse.QuestionnaireResponseStatus.INPROGRESS)
+                            .setQuestionnaire(questionnaireAdapter.getCanonical())
+                            .setSubject(new org.hl7.fhir.r5.model.Reference(subjectId))
+                            .setAuthored(new Date());
+                    default -> null;
+                };
+        if (response == null) {
+            throw new IllegalArgumentException(
+                    String.format("Unsupported FHIR version: %s", fhirVersion.getFhirVersionString()));
+        }
+        response.setId(String.format("%s-%s", questionnaireAdapter.getId().getIdPart(), subjectId.getIdPart()));
+        return response;
     }
 
-    public void addContextParameter(String name, IBaseResource resource) {
-        getAdapterFactory().createParameters(getParameters()).addParameter(name, resource);
+    public IBaseResource getQuestionnaireResponse() {
+        return questionnaireResponse;
+    }
+
+    public void addQuestionnaireResponseItems(List<IBaseBackboneElement> items) {
+        getModelResolver().setValue(getQuestionnaireResponse(), "item", items);
     }
 }

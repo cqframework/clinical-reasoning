@@ -8,6 +8,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
@@ -29,7 +30,10 @@ public class ProcessItem {
 
     public IBaseBackboneElement processItem(PopulateRequest request, IBaseBackboneElement item) {
         final var responseItem = createResponseItem(request.getFhirVersion(), item);
-        populateAnswer(request, responseItem, getInitialValue(request, item, responseItem));
+        request.setContextVariable(responseItem);
+        var rawParams = request.getRawParameters();
+        rawParams.put("%qitem", item);
+        populateAnswer(request, responseItem, getInitialValue(request, item, responseItem, rawParams));
         return responseItem;
     }
 
@@ -45,13 +49,17 @@ public class ProcessItem {
     }
 
     protected List<IBase> getInitialValue(
-            PopulateRequest request, IBaseBackboneElement item, IBaseBackboneElement responseItem) {
+            PopulateRequest request,
+            IBaseBackboneElement item,
+            IBaseBackboneElement responseItem,
+            Map<String, Object> rawParameters) {
         List<IBase> results;
         var expression = expressionProcessor.getItemInitialExpression(request, item);
         if (expression != null) {
             var itemLinkId = request.getItemLinkId(item);
             try {
-                results = expressionProcessor.getExpressionResultForItem(request, expression, itemLinkId);
+                results = expressionProcessor.getExpressionResultForItem(
+                        request, expression, itemLinkId, null, rawParameters);
                 if (results != null && !results.isEmpty()) {
                     addAuthorExtension(request, responseItem);
                 }
@@ -62,9 +70,6 @@ public class ProcessItem {
                 request.logException(message);
                 results = new ArrayList<>();
             }
-        } else if (request.getFhirVersion().equals(FhirVersionEnum.DSTU3)) {
-            var initial = request.resolvePath(item, "initial");
-            results = initial == null ? new ArrayList<>() : Collections.singletonList(initial);
         } else {
             results = request.resolvePathList(item, "initial", IBaseBackboneElement.class).stream()
                     .map(i -> request.resolvePath(i, "value", IBase.class))
@@ -83,36 +88,32 @@ public class ProcessItem {
     }
 
     protected IBaseBackboneElement createAnswer(FhirVersionEnum fhirVersion, IBase value) {
-        switch (fhirVersion) {
-            case R4:
-                return new org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent()
-                        .setValue(transformValueToItem((org.hl7.fhir.r4.model.Type) value));
-            case R5:
-                return new org.hl7.fhir.r5.model.QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent()
-                        .setValue(transformValueToItem((org.hl7.fhir.r5.model.DataType) value));
-
-            default:
-                return null;
-        }
+        return switch (fhirVersion) {
+            case R4 -> new org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent()
+                    .setValue(transformValueToItem((org.hl7.fhir.r4.model.Type) value));
+            case R5 -> new org.hl7.fhir.r5.model.QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent()
+                    .setValue(transformValueToItem((org.hl7.fhir.r5.model.DataType) value));
+            default -> null;
+        };
     }
 
     protected IBaseBackboneElement createResponseItem(FhirVersionEnum fhirVersion, IBaseBackboneElement item) {
-        switch (fhirVersion) {
-            case R4:
+        return switch (fhirVersion) {
+            case R4 -> {
                 var r4Item = (org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent) item;
-                return new org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseItemComponent(
+                yield new org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseItemComponent(
                                 r4Item.getLinkIdElement())
                         .setDefinitionElement(r4Item.getDefinitionElement())
                         .setTextElement(r4Item.getTextElement());
-            case R5:
+            }
+            case R5 -> {
                 var r5Item = (org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemComponent) item;
-                return new org.hl7.fhir.r5.model.QuestionnaireResponse.QuestionnaireResponseItemComponent(
+                yield new org.hl7.fhir.r5.model.QuestionnaireResponse.QuestionnaireResponseItemComponent(
                                 r5Item.getLinkId())
                         .setDefinitionElement(r5Item.getDefinitionElement())
                         .setTextElement(r5Item.getTextElement());
-
-            default:
-                return null;
-        }
+            }
+            default -> null;
+        };
     }
 }

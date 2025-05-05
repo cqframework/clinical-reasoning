@@ -66,21 +66,11 @@ public class MeasureEvaluator {
 
     private static final Logger logger = LoggerFactory.getLogger(MeasureEvaluator.class);
 
-   // protected CqlEngine context;
-    //protected String measurementPeriodParameterName;
-
     //private final LibraryEngine libraryEngine;
     private final PopulationBasisValidator populationBasisValidator;
 
     public MeasureEvaluator(
-            //CqlEngine context,
-            //String measurementPeriodParameterName,
-            //LibraryEngine libraryEngine,
             PopulationBasisValidator populationBasisValidator) {
-        //this.context = Objects.requireNonNull(context, "context is a required argument");
-        //this.libraryEngine = libraryEngine;
-        //this.measurementPeriodParameterName = Objects.requireNonNull(
-        //        measurementPeriodParameterName, "measurementPeriodParameterName is a required argument");
         this.populationBasisValidator = populationBasisValidator;
     }
 
@@ -89,7 +79,8 @@ public class MeasureEvaluator {
             MeasureEvalType measureEvalType,
             String subjectType,
             String subjectId,
-            EvaluationResult evaluationResult) {
+            EvaluationResult evaluationResult,
+            boolean applyScoring) {
         Objects.requireNonNull(measureDef, "measureDef is a required argument");
         Objects.requireNonNull(subjectId, "subjectIds is a required argument");
 
@@ -97,17 +88,17 @@ public class MeasureEvaluator {
             case PATIENT:
             case SUBJECT:
                 return this.evaluateSubject(
-                        measureDef, subjectType, subjectId, 1, MeasureReportType.INDIVIDUAL, evaluationResult);
+                        measureDef, subjectType, subjectId, 1, MeasureReportType.INDIVIDUAL, evaluationResult, applyScoring);
             case SUBJECTLIST:
                 return this.evaluateSubject(
-                    measureDef, subjectType, subjectId, 1, MeasureReportType.SUBJECTLIST, evaluationResult);
+                    measureDef, subjectType, subjectId, 1, MeasureReportType.SUBJECTLIST, evaluationResult, applyScoring);
             case PATIENTLIST:
                 // DSTU3 Only
                 return this.evaluateSubject(
-                    measureDef, subjectType, subjectId, 1, MeasureReportType.PATIENTLIST, evaluationResult);
+                    measureDef, subjectType, subjectId, 1, MeasureReportType.PATIENTLIST, evaluationResult, applyScoring);
             case POPULATION:
                 return this.evaluateSubject(
-                    measureDef, subjectType, subjectId, 1, MeasureReportType.SUMMARY, evaluationResult);
+                    measureDef, subjectType, subjectId, 1, MeasureReportType.SUMMARY, evaluationResult, applyScoring);
             default:
                 // never hit because this value is set upstream
                 throw new InvalidRequestException(String.format(
@@ -134,10 +125,11 @@ public class MeasureEvaluator {
             String subjectId,
             int populationSize,
             MeasureReportType reportType,
-            EvaluationResult evaluationResult) {
+            EvaluationResult evaluationResult,
+            boolean applyScoring) {
         evaluateSdes(subjectId, measureDef.sdes(), evaluationResult);
         for (GroupDef groupDef : measureDef.groups()) {
-            evaluateGroup(measureDef, groupDef, subjectType, subjectId, populationSize, reportType, evaluationResult);
+            evaluateGroup(measureDef, groupDef, subjectType, subjectId, populationSize, reportType, evaluationResult, applyScoring);
         }
         return measureDef;
     }
@@ -233,7 +225,8 @@ public class MeasureEvaluator {
             String subjectId,
             int populationSize,
             MeasureReportType reportType,
-            EvaluationResult evaluationResult) {
+            EvaluationResult evaluationResult,
+        boolean applyScoring) {
         // check populations
         R4MeasureScoringTypePopulations.validateScoringTypePopulations(
                 groupDef.populations().stream().map(PopulationDef::type).collect(Collectors.toList()),
@@ -257,13 +250,14 @@ public class MeasureEvaluator {
             // Evaluate Population Expressions
             denominator = evaluatePopulationMembership(subjectType, subjectId, denominator, evaluationResult);
             numerator = evaluatePopulationMembership(subjectType, subjectId, numerator, evaluationResult);
-            // remove denominator values not in IP
-            denominator.getResources().retainAll(initialPopulation.getResources());
-            denominator.getSubjects().retainAll(initialPopulation.getSubjects());
-            // remove numerator values if not in Denominator
-            numerator.getSubjects().retainAll(denominator.getSubjects());
-            numerator.getResources().retainAll(denominator.getResources());
-
+            if(applyScoring) {
+                // remove denominator values not in IP
+                denominator.getResources().retainAll(initialPopulation.getResources());
+                denominator.getSubjects().retainAll(initialPopulation.getSubjects());
+                // remove numerator values if not in Denominator
+                numerator.getSubjects().retainAll(denominator.getSubjects());
+                numerator.getResources().retainAll(denominator.getResources());
+            }
             // Evaluate Exclusions and Exception Populations
             if (denominatorExclusion != null) {
                 denominatorExclusion =
@@ -280,7 +274,7 @@ public class MeasureEvaluator {
             // Apply Exclusions and Exceptions
             if (groupDef.isBooleanBasis()) {
                 // Remove Subject and Resource Exclusions
-                if (denominatorExclusion != null) {
+                if (denominatorExclusion != null && applyScoring) {
                     // numerator should not include den-exclusions
                     numerator.getSubjects().removeAll(denominatorExclusion.getSubjects());
                     numerator.removeOverlaps(denominatorExclusion.getSubjectResources());
@@ -290,13 +284,13 @@ public class MeasureEvaluator {
                     denominatorExclusion.getSubjects().retainAll(denominator.getSubjects());
                     denominatorExclusion.retainOverlaps(denominator.getSubjectResources());
                 }
-                if (numeratorExclusion != null) {
+                if (numeratorExclusion != null && applyScoring) {
                     // verify results are in Numerator
                     numeratorExclusion.getResources().retainAll(numerator.getResources());
                     numeratorExclusion.getSubjects().retainAll(numerator.getSubjects());
                     numeratorExclusion.retainOverlaps(numerator.getSubjectResources());
                 }
-                if (denominatorException != null) {
+                if (denominatorException != null && applyScoring) {
                     // Remove Subjects Exceptions that are present in Numerator
                     denominatorException.getSubjects().removeAll(numerator.getSubjects());
                     denominatorException.getResources().removeAll(numerator.getResources());
@@ -311,7 +305,7 @@ public class MeasureEvaluator {
                 // Remove Only Resource Exclusions
                 // * Multiple resources can be from one subject and represented in multiple populations
                 // * This is why we only remove resources and not subjects too for `Resource Basis`.
-                if (denominatorExclusion != null) {
+                if (denominatorExclusion != null && applyScoring) {
                     // remove any denominator-exception subjects/resources found in Numerator
                     numerator.getResources().removeAll(denominatorExclusion.getResources());
                     numerator.removeOverlaps(denominatorExclusion.getSubjectResources());
@@ -319,12 +313,12 @@ public class MeasureEvaluator {
                     denominatorExclusion.getResources().retainAll(denominator.getResources());
                     denominatorExclusion.retainOverlaps(denominator.getSubjectResources());
                 }
-                if (numeratorExclusion != null) {
+                if (numeratorExclusion != null && applyScoring) {
                     // verify exclusion results are found in numerator results, otherwise remove
                     numeratorExclusion.getResources().retainAll(numerator.getResources());
                     numeratorExclusion.retainOverlaps(numerator.getSubjectResources());
                 }
-                if (denominatorException != null) {
+                if (denominatorException != null && applyScoring) {
                     // Remove Resource Exceptions that are present in Numerator
                     denominatorException.getResources().removeAll(numerator.getResources());
                     denominatorException.removeOverlaps(numerator.getSubjectResources());
@@ -341,10 +335,9 @@ public class MeasureEvaluator {
     }
 
     protected void evaluateContinuousVariable(
-            GroupDef groupDef, String subjectType, String subjectId, EvaluationResult evaluationResult) {
+            GroupDef groupDef, String subjectType, String subjectId, EvaluationResult evaluationResult, boolean applyScoring) {
         PopulationDef initialPopulation = groupDef.getSingle(INITIALPOPULATION);
         PopulationDef measurePopulation = groupDef.getSingle(MEASUREPOPULATION);
-        //PopulationDef measureObservation = groupDef.getSingle(MEASUREOBSERVATION);
         PopulationDef measurePopulationExclusion = groupDef.getSingle(MEASUREPOPULATIONEXCLUSION);
         // Validate Required Populations are Present
         R4MeasureScoringTypePopulations.validateScoringTypePopulations(
@@ -360,27 +353,19 @@ public class MeasureEvaluator {
             if (measurePopulationExclusion != null) {
                 evaluatePopulationMembership(
                         subjectType, subjectId, groupDef.getSingle(MEASUREPOPULATIONEXCLUSION), evaluationResult);
-                // verify exclusions are in measure-population
-                measurePopulationExclusion.getResources().retainAll(measurePopulation.getResources());
-                measurePopulationExclusion.getSubjects().retainAll(measurePopulation.getSubjects());
+                if(applyScoring) {
+                    // verify exclusions are in measure-population
+                    measurePopulationExclusion.getResources()
+                        .retainAll(measurePopulation.getResources());
+                    measurePopulationExclusion.getSubjects()
+                        .retainAll(measurePopulation.getSubjects());
+                }
             }
-
-            // Evaluate Observation Population, upstreamed into measureProcessor
-//            if (measureObservation != null) {
-//                for (Object resource : measurePopulation.getResources()) {
-//                    Object observationResult = evaluateObservationCriteria(
-//                            resource,
-//                            measureObservation.expression(),
-//                            measureObservation.getEvaluatedResources(),
-//                            groupDef.isBooleanBasis());
-//                    measureObservation.addResource(observationResult);
-//                }
-//            }
         }
     }
 
     protected void evaluateCohort(
-            GroupDef groupDef, String subjectType, String subjectId, EvaluationResult evaluationResult) {
+            GroupDef groupDef, String subjectType, String subjectId, EvaluationResult evaluationResult, boolean applyScoring) {
         PopulationDef initialPopulation = groupDef.getSingle(INITIALPOPULATION);
         // Validate Required Populations are Present
         R4MeasureScoringTypePopulations.validateScoringTypePopulations(
@@ -397,7 +382,8 @@ public class MeasureEvaluator {
             String subjectId,
             int populationSize,
             MeasureReportType reportType,
-            EvaluationResult evaluationResult) {
+            EvaluationResult evaluationResult,
+            boolean applyScoring) {
 
         populationBasisValidator.validateGroupPopulations(measureDef, groupDef, evaluationResult);
         populationBasisValidator.validateStratifiers(measureDef, groupDef, evaluationResult);
@@ -408,13 +394,13 @@ public class MeasureEvaluator {
         switch (scoring) {
             case PROPORTION:
             case RATIO:
-                evaluateProportion(groupDef, subjectType, subjectId, populationSize, reportType, evaluationResult);
+                evaluateProportion(groupDef, subjectType, subjectId, populationSize, reportType, evaluationResult, applyScoring);
                 break;
             case CONTINUOUSVARIABLE:
-                evaluateContinuousVariable(groupDef, subjectType, subjectId, evaluationResult);
+                evaluateContinuousVariable(groupDef, subjectType, subjectId, evaluationResult, applyScoring);
                 break;
             case COHORT:
-                evaluateCohort(groupDef, subjectType, subjectId, evaluationResult);
+                evaluateCohort(groupDef, subjectType, subjectId, evaluationResult, applyScoring);
                 break;
         }
     }

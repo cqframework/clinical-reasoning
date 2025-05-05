@@ -287,7 +287,8 @@ public class CqlCommand implements Callable<Integer> {
             null,
             null,
             null,
-                result);
+                result,
+                false);
 
             String jsonReport = parser.encodeResourceToString(report);
             writeJsonToFile(jsonReport, e.context.contextValue, basePath + this.library.libraryName + "/measurereports");

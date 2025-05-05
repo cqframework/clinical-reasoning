@@ -2,12 +2,23 @@ package org.opencds.cqf.fhir.cr.cli.command;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.parser.IParser;
 import com.google.common.base.Stopwatch;
 import java.io.BufferedWriter;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -22,6 +33,9 @@ import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r5.context.IWorkerContext.ILoggingService;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
@@ -38,6 +52,11 @@ import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.CODE_LOOK
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_MEMBERSHIP_MODE;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_PRE_EXPANSION_MODE;
+import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
+import org.opencds.cqf.fhir.cr.measure.SubjectProviderOptions;
+import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureProcessor;
+import org.opencds.cqf.fhir.cr.measure.r4.R4RepositorySubjectProvider;
+import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.repository.ProxyRepository;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 import org.slf4j.LoggerFactory;
@@ -212,6 +231,18 @@ public class CqlCommand implements Callable<Integer> {
         var repository = createRepository(fhirContext, terminologyUrl, model.modelUrl);
         VersionedIdentifier identifier = new VersionedIdentifier().withId(library.libraryName);
 
+        MeasureEvaluationOptions evaluationOptions = new MeasureEvaluationOptions();
+        evaluationOptions.setEvaluationSettings(evaluationSettings);
+        R4MeasureProcessor measureProcessor = new R4MeasureProcessor(repository, evaluationOptions, new R4RepositorySubjectProvider(new SubjectProviderOptions()), new R4MeasureServiceUtils(repository));
+
+        // hack to bring in Measure
+        IParser parser = fhirContext.newJsonParser();
+
+        InputStream is = new FileInputStream("/Users/justinmckelvy/alphora/DCS-HEDIS-2024-v2/input/resources/Measure/LSC-Reporting.json");
+
+        Measure measure = (org.hl7.fhir.r4.model.Measure)
+            parser.parseResource(is);
+
         var initTime = watch.elapsed().toMillis();
         log.error("initialized in {} millis", initTime);
         AtomicInteger counter = new AtomicInteger(0);
@@ -237,17 +268,32 @@ public class CqlCommand implements Callable<Integer> {
 
             var evalStart = watch.elapsed().toMillis();
             var contextParameter = Pair.<String, Object>of(e.context.contextName, e.context.contextValue);
-            var result = engine.evaluate(identifier, contextParameter);
+            var cqlResult = engine.evaluate(identifier, contextParameter);
+            var subjectId = e.context.contextName + "/" + e.context.contextValue;
+
+            Map<String, EvaluationResult> result = new HashMap<>();
+            result.put(subjectId, cqlResult);
 
             // generate MeasureReport from ExpressionResult
+            var report = measureProcessor.evaluateMeasureResult(
+                measure,
+                LocalDate.parse("2024-01-01", DateTimeFormatter.ISO_LOCAL_DATE)
+                    .atStartOfDay(ZoneId.systemDefault()),
+                LocalDate.parse("2024-12-31", DateTimeFormatter.ISO_LOCAL_DATE)
+                    .atTime(LocalTime.MAX)
+                    .atZone(ZoneId.systemDefault()),
+            "subject",
+                Collections.singletonList(subjectId),
+            null,
+            null,
+            null,
+                result);
 
-            //Measure
-
-            //Subject
-
+            String jsonReport = parser.encodeResourceToString(report);
+            writeJsonToFile(jsonReport, e.context.contextValue, basePath + this.library.libraryName + "/measurereports");
 
             // ✅ Write TXT result
-            writeResultToFile(result, e.context.contextValue, basePath + this.library.libraryName);
+            writeResultToFile(cqlResult, e.context.contextValue, basePath + this.library.libraryName + "/txtresults");
             var count = counter.incrementAndGet();
             //writeResult(result);
 
@@ -291,6 +337,25 @@ public class CqlCommand implements Callable<Integer> {
             }
 
             System.out.println();
+        }
+    }
+
+    private void writeJsonToFile(String json, String patientId, String path) {
+        Path outputPath = Paths.get(path, patientId + ".json");
+
+        try {
+            // Ensure parent directories exist
+            Files.createDirectories(outputPath.getParent());
+
+            // Write JSON to file
+            try (OutputStream out = Files.newOutputStream(outputPath)) {
+                out.write(json.getBytes());
+                System.out.println("✅ Saved MeasureReport to: " + outputPath.toAbsolutePath());
+            }
+
+        } catch (IOException e) {
+            System.err.println("❌ Failed to write result for patient " + patientId);
+            e.printStackTrace();
         }
     }
 

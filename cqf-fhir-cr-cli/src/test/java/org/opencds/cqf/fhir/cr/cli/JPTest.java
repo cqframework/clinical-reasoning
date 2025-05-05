@@ -13,7 +13,7 @@ class JPTest {
     @Test
     void hedis_AAB() throws IOException {
         List<String> measureCodes = new ArrayList<>();
-        measureCodes.add("AAB"); // other team
+//        measureCodes.add("AAB"); // other team
 //        measureCodes.add("AAP");
 //        measureCodes.add("AMR"); // other team
 //        measureCodes.add("BPD");
@@ -21,13 +21,13 @@ class JPTest {
 //        measureCodes.add("CBP");
 //        measureCodes.add("CCS"); done
 //        measureCodes.add("COLE"); done
-//        measureCodes.add("LSC"); done
+        measureCodes.add("LSC");
 //        measureCodes.add("PBH");
         //LSC
 
         for (String measureCode : measureCodes) {
             run(measureCode + "_Reporting",
-                "/Users/justinmckelvy/Documents/DCSv2/" + measureCode + "/Sample/v1_tests", 100000);
+                "/Users/justinmckelvy/Documents/DCSv2/" + measureCode + "/Sample/v2_tests", 100000);
         }
     }
 

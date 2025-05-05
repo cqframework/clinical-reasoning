@@ -125,7 +125,7 @@ public class R4MeasureProcessor {
                 m, periodStart, periodEnd, reportType, subjectIds, additionalData, parameters, evalType);
     }
 
-    protected MeasureReport evaluateMeasure(
+    public MeasureReport evaluateMeasureResult(
             Measure measure,
             @Nullable ZonedDateTime periodStart,
             @Nullable ZonedDateTime periodEnd,

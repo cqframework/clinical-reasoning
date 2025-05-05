@@ -78,9 +78,8 @@ public abstract class BaseMeasureEvaluation<MeasureT, MeasureReportT, SubjectT> 
         Objects.requireNonNull(measureEvalType, "measureEvalType is a required parameter");
 
         MeasureDef measureDef = this.measureDefBuilder.build(measure);
-        MeasureEvaluator measureEvaluation = new MeasureEvaluator(
-                context, this.measurementPeriodParameterName, libraryEngine, populationBasisValidator);
-        measureDef = measureEvaluation.evaluate(measureDef, measureEvalType, subjectIds, measurementPeriod, id);
+        MeasureEvaluator measureEvaluation = new MeasureEvaluator(populationBasisValidator);
+        //measureDef = measureEvaluation.evaluate(measureDef, measureEvalType, subjectIds, measurementPeriod, id);
 
         Interval measurementPeriodInterval;
         if (measurementPeriod == null) {

@@ -14,7 +14,6 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.IRequestResolverFactory;
@@ -250,7 +249,6 @@ class PlanDefinitionProcessorTests {
                 .isEqualsTo(new org.hl7.fhir.r4.model.IdType("Bundle", planDefinitionID));
     }
 
-    @Disabled
     @Test
     void opioidRec10PatientView() {
         var planDefinitionID = "opioidcds-10-patient-view";

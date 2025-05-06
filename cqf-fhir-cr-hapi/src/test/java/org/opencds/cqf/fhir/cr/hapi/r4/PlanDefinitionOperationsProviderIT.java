@@ -10,6 +10,7 @@ import java.util.List;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CarePlan;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Parameters;
@@ -18,6 +19,7 @@ import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.hapi.r4.plandefinition.PlanDefinitionApplyProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.plandefinition.PlanDefinitionDataRequirementsProvider;
+import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.repository.FhirResourceLoader;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -98,6 +100,7 @@ class PlanDefinitionOperationsProviderIT extends BaseCrR4TestServer {
 
         assertNotNull(resultR5);
         var bundle = (Bundle) resultR5.getParameter().get(0).getResource();
+        // Has QuestionnaireResponse for Patient
         var questionnaireResponses = bundle.getEntry().stream()
                 .filter(e -> e.hasResource() && e.getResource().fhirType().equals("QuestionnaireResponse"))
                 .toList();
@@ -106,18 +109,42 @@ class PlanDefinitionOperationsProviderIT extends BaseCrR4TestServer {
                 (QuestionnaireResponse) questionnaireResponses.get(0).getResource();
         assertNotNull(questionnaireResponse);
         assertEquals(patientID, questionnaireResponse.getSubject().getReference());
+        // Has generated Questionnaire
         var questionnaires = bundle.getEntry().stream()
                 .filter(e -> e.hasResource() && e.getResource().fhirType().equals("Questionnaire"))
                 .toList();
         assertEquals(1, questionnaires.size());
         var questionnaire = (Questionnaire) questionnaires.get(0).getResource();
         assertNotNull(questionnaire);
-        assertThat(questionnaire.getItem().get(0).getItem().get(0).getText()).isEqualTo("Sleep Study");
-        assertThat(questionnaireResponse.getItem().size()).isEqualTo(2);
-        assertTrue(questionnaireResponse.getItem().get(0).getItem().get(0).hasAnswer());
-        assertTrue(questionnaireResponse.getItem().get(0).getItem().get(1).hasAnswer());
-        assertTrue(questionnaireResponse.getItem().get(1).getItem().get(0).hasAnswer());
-        assertTrue(questionnaireResponse.getItem().get(1).getItem().get(1).hasAnswer());
+        assertThat(questionnaire.getItem()).hasSize(1);
+        // Generated Item is correct
+        var questionnaireItem = questionnaire.getItemFirstRep();
+        assertTrue(questionnaireItem.hasExtension(Constants.SDC_QUESTIONNAIRE_ITEM_POPULATION_CONTEXT));
+        assertThat(questionnaireItem.getText()).isEqualTo("Input Text Test");
+        assertThat(questionnaireItem.getItem().get(0).getText()).isEqualTo("Sleep Study");
+        // First response Item is correct
+        var responseItem1 = questionnaireResponse.getItem().get(0);
+        assertNotNull(responseItem1);
+        assertThat(responseItem1.getText()).isEqualTo("Input Text Test");
+        assertTrue(responseItem1.getItem().get(0).hasAnswer());
+        // First response Item has first child item with answer
+        var codingItem1 =
+                (Coding) responseItem1.getItem().get(0).getAnswerFirstRep().getValue();
+        assertThat(codingItem1.getCode()).isEqualTo("ASLP.A1.DE14");
+        // First response Item has second child item with answer
+        assertTrue(responseItem1.getItem().get(1).hasAnswer());
+
+        assertThat(questionnaireResponse.getItem()).hasSize(2);
+        // Second response Item is correct
+        var responseItem2 = questionnaireResponse.getItem().get(1);
+        assertThat(responseItem2.getText()).isEqualTo("Input Text Test");
+        assertTrue(responseItem2.getItem().get(0).hasAnswer());
+        // Second response Item has first child item with answer
+        var codingItem2 =
+                (Coding) responseItem2.getItem().get(0).getAnswerFirstRep().getValue();
+        assertThat(codingItem2.getCode()).isEqualTo("ASLP.A1.DE2");
+        // Second response Item has second child item with answer
+        assertTrue(responseItem2.getItem().get(1).hasAnswer());
     }
 
     @Test

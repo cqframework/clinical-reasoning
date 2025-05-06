@@ -75,8 +75,7 @@ public class R4MeasureProcessor {
             String reportType,
             List<String> subjectIds,
             IBaseBundle additionalData,
-            Parameters parameters,
-            boolean applyScoring) {
+            Parameters parameters) {
 
         var evalType = r4MeasureServiceUtils.getMeasureEvalType(reportType, subjectIds);
 
@@ -88,15 +87,7 @@ public class R4MeasureProcessor {
         var subjects = subjectProvider.getSubjects(actualRepo, subjectIds).collect(Collectors.toList());
 
         return this.evaluateMeasure(
-                measure,
-                periodStart,
-                periodEnd,
-                reportType,
-                subjects,
-                additionalData,
-                parameters,
-                evalType,
-                applyScoring);
+                measure, periodStart, periodEnd, reportType, subjects, additionalData, parameters, evalType);
     }
 
     public MeasureReport evaluateMeasure(
@@ -107,11 +98,10 @@ public class R4MeasureProcessor {
             List<String> subjectIds,
             IBaseBundle additionalData,
             Parameters parameters,
-            MeasureEvalType evalType,
-            boolean applyScoring) {
+            MeasureEvalType evalType) {
         var m = measure.fold(this::resolveByUrl, this::resolveById, Function.identity());
         return this.evaluateMeasure(
-                m, periodStart, periodEnd, reportType, subjectIds, additionalData, parameters, evalType, applyScoring);
+                m, periodStart, periodEnd, reportType, subjectIds, additionalData, parameters, evalType);
     }
 
     /**
@@ -173,7 +163,6 @@ public class R4MeasureProcessor {
      * @param additionalData external bundle to process with results
      * @param parameters cql parameters specified in parameters resource
      * @param evalType the type of evaluation to process, this is an output of reportType param
-     * @param applyScoring whether to apply set membership per measure scoring algorithm used
      * @return Measure Report resource
      */
     protected MeasureReport evaluateMeasure(
@@ -184,8 +173,7 @@ public class R4MeasureProcessor {
             List<String> subjectIds,
             IBaseBundle additionalData,
             Parameters parameters,
-            MeasureEvalType evalType,
-            boolean applyScoring) {
+            MeasureEvalType evalType) {
 
         checkMeasureLibrary(measure);
 
@@ -217,7 +205,11 @@ public class R4MeasureProcessor {
 
         // Process Criteria Expression Results
         measureProcessorUtils.processResults(
-                results, measureDef, evaluationType, applyScoring, new R4PopulationBasisValidator());
+                results,
+                measureDef,
+                evaluationType,
+                this.measureEvaluationOptions.getApplyScoringSetMembership(),
+                new R4PopulationBasisValidator());
 
         // Populate populationDefs that require MeasureDef results
         measureProcessorUtils.continuousVariableObservation(measureDef, context);

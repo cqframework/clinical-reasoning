@@ -115,7 +115,6 @@ public class Dstu3MeasureProcessor {
                     new Dstu3PopulationBasisValidator());
         }
         // Populate populationDefs that require MeasureDef results
-        // TODO JM: CLI tool is not compliant here due to requiring CQL Engine context
         measureProcessorUtils.continuousVariableObservation(measureDef, context);
 
         // Build Measure Report with Results

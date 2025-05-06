@@ -374,7 +374,7 @@ public class MeasureProcessorUtils {
                 result.put(
                         subjectId,
                         libraryEngine.getEvaluationResult(
-                                id, subjectId, null, null, null, null, zonedMeasurementPeriod, context));
+                                id, subjectId, null, null, null, null, null, zonedMeasurementPeriod, context));
             } catch (Exception e) {
                 // Catch Exceptions from evaluation per subject, but allow rest of subjects to be processed (if
                 // applicable)

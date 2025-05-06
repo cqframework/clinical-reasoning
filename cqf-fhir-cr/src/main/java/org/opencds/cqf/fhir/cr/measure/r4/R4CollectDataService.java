@@ -101,8 +101,7 @@ public class R4CollectDataService {
                 subjects,
                 null,
                 null,
-                null,
-                this.measureEvaluationOptions.getApplyScoringSetMembership());
+                null);
 
         report.setType(MeasureReport.MeasureReportType.DATACOLLECTION);
         report.setGroup(null);

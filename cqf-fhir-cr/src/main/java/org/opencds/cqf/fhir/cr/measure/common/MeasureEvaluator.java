@@ -42,8 +42,7 @@ import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureScoringTypePopulations;
 public class MeasureEvaluator {
     private final PopulationBasisValidator populationBasisValidator;
 
-    public MeasureEvaluator(
-            PopulationBasisValidator populationBasisValidator) {
+    public MeasureEvaluator(PopulationBasisValidator populationBasisValidator) {
         this.populationBasisValidator = populationBasisValidator;
     }
 
@@ -61,17 +60,41 @@ public class MeasureEvaluator {
             case PATIENT:
             case SUBJECT:
                 return this.evaluateSubject(
-                        measureDef, subjectType, subjectId, 1, MeasureReportType.INDIVIDUAL, evaluationResult, applyScoring);
+                        measureDef,
+                        subjectType,
+                        subjectId,
+                        1,
+                        MeasureReportType.INDIVIDUAL,
+                        evaluationResult,
+                        applyScoring);
             case SUBJECTLIST:
                 return this.evaluateSubject(
-                    measureDef, subjectType, subjectId, 1, MeasureReportType.SUBJECTLIST, evaluationResult, applyScoring);
+                        measureDef,
+                        subjectType,
+                        subjectId,
+                        1,
+                        MeasureReportType.SUBJECTLIST,
+                        evaluationResult,
+                        applyScoring);
             case PATIENTLIST:
                 // DSTU3 Only
                 return this.evaluateSubject(
-                    measureDef, subjectType, subjectId, 1, MeasureReportType.PATIENTLIST, evaluationResult, applyScoring);
+                        measureDef,
+                        subjectType,
+                        subjectId,
+                        1,
+                        MeasureReportType.PATIENTLIST,
+                        evaluationResult,
+                        applyScoring);
             case POPULATION:
                 return this.evaluateSubject(
-                    measureDef, subjectType, subjectId, 1, MeasureReportType.SUMMARY, evaluationResult, applyScoring);
+                        measureDef,
+                        subjectType,
+                        subjectId,
+                        1,
+                        MeasureReportType.SUMMARY,
+                        evaluationResult,
+                        applyScoring);
             default:
                 // never hit because this value is set upstream
                 throw new InvalidRequestException(String.format(
@@ -90,7 +113,15 @@ public class MeasureEvaluator {
             boolean applyScoring) {
         evaluateSdes(subjectId, measureDef.sdes(), evaluationResult);
         for (GroupDef groupDef : measureDef.groups()) {
-            evaluateGroup(measureDef, groupDef, subjectType, subjectId, populationSize, reportType, evaluationResult, applyScoring);
+            evaluateGroup(
+                    measureDef,
+                    groupDef,
+                    subjectType,
+                    subjectId,
+                    populationSize,
+                    reportType,
+                    evaluationResult,
+                    applyScoring);
         }
         return measureDef;
     }
@@ -155,7 +186,7 @@ public class MeasureEvaluator {
             int populationSize,
             MeasureReportType reportType,
             EvaluationResult evaluationResult,
-        boolean applyScoring) {
+            boolean applyScoring) {
         // check populations
         R4MeasureScoringTypePopulations.validateScoringTypePopulations(
                 groupDef.populations().stream().map(PopulationDef::type).collect(Collectors.toList()),
@@ -179,7 +210,7 @@ public class MeasureEvaluator {
             // Evaluate Population Expressions
             denominator = evaluatePopulationMembership(subjectType, subjectId, denominator, evaluationResult);
             numerator = evaluatePopulationMembership(subjectType, subjectId, numerator, evaluationResult);
-            if(applyScoring) {
+            if (applyScoring) {
                 // remove denominator values not in IP
                 denominator.getResources().retainAll(initialPopulation.getResources());
                 denominator.getSubjects().retainAll(initialPopulation.getSubjects());
@@ -264,7 +295,11 @@ public class MeasureEvaluator {
     }
 
     protected void evaluateContinuousVariable(
-            GroupDef groupDef, String subjectType, String subjectId, EvaluationResult evaluationResult, boolean applyScoring) {
+            GroupDef groupDef,
+            String subjectType,
+            String subjectId,
+            EvaluationResult evaluationResult,
+            boolean applyScoring) {
         PopulationDef initialPopulation = groupDef.getSingle(INITIALPOPULATION);
         PopulationDef measurePopulation = groupDef.getSingle(MEASUREPOPULATION);
         PopulationDef measurePopulationExclusion = groupDef.getSingle(MEASUREPOPULATIONEXCLUSION);
@@ -282,19 +317,21 @@ public class MeasureEvaluator {
             if (measurePopulationExclusion != null) {
                 evaluatePopulationMembership(
                         subjectType, subjectId, groupDef.getSingle(MEASUREPOPULATIONEXCLUSION), evaluationResult);
-                if(applyScoring) {
+                if (applyScoring) {
                     // verify exclusions are in measure-population
-                    measurePopulationExclusion.getResources()
-                        .retainAll(measurePopulation.getResources());
-                    measurePopulationExclusion.getSubjects()
-                        .retainAll(measurePopulation.getSubjects());
+                    measurePopulationExclusion.getResources().retainAll(measurePopulation.getResources());
+                    measurePopulationExclusion.getSubjects().retainAll(measurePopulation.getSubjects());
                 }
             }
         }
     }
 
     protected void evaluateCohort(
-            GroupDef groupDef, String subjectType, String subjectId, EvaluationResult evaluationResult, boolean applyScoring) {
+            GroupDef groupDef,
+            String subjectType,
+            String subjectId,
+            EvaluationResult evaluationResult,
+            boolean applyScoring) {
         PopulationDef initialPopulation = groupDef.getSingle(INITIALPOPULATION);
         // Validate Required Populations are Present
         R4MeasureScoringTypePopulations.validateScoringTypePopulations(
@@ -323,7 +360,8 @@ public class MeasureEvaluator {
         switch (scoring) {
             case PROPORTION:
             case RATIO:
-                evaluateProportion(groupDef, subjectType, subjectId, populationSize, reportType, evaluationResult, applyScoring);
+                evaluateProportion(
+                        groupDef, subjectType, subjectId, populationSize, reportType, evaluationResult, applyScoring);
                 break;
             case CONTINUOUSVARIABLE:
                 evaluateContinuousVariable(groupDef, subjectType, subjectId, evaluationResult, applyScoring);

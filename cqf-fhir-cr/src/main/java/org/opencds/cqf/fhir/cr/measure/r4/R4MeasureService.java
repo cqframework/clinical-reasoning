@@ -78,7 +78,8 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
                 reportType,
                 Collections.singletonList(subjectId),
                 additionalData,
-                parameters, measureEvaluationOptions.getApplyScoringSetMembership());
+                parameters,
+                measureEvaluationOptions.getApplyScoringSetMembership());
 
         // add ProductLine after report is generated
         measureReport = r4MeasureServiceUtils.addProductLineExtension(measureReport, productLine);

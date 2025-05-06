@@ -1,15 +1,25 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
+import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.MEASUREPOPULATION;
+
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
-import org.antlr.v4.runtime.misc.NotNull;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.elm.r1.FunctionDef;
 import org.hl7.elm.r1.IntervalTypeSpecifier;
 import org.hl7.elm.r1.NamedTypeSpecifier;
 import org.hl7.elm.r1.ParameterDef;
 import org.hl7.elm.r1.VersionedIdentifier;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.Libraries;
@@ -22,17 +32,6 @@ import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.opencds.cqf.fhir.cr.measure.helper.DateHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-
-import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.MEASUREPOPULATION;
 
 public class MeasureProcessorUtils {
     private static final Logger logger = LoggerFactory.getLogger(MeasureProcessorUtils.class);
@@ -45,26 +44,29 @@ public class MeasureProcessorUtils {
      * @param populationBasisValidator the validator class to use for checking consistency of results
      */
     public void processResults(
-        Map<String, EvaluationResult> results, MeasureDef measureDef, @NotNull MeasureEvalType measureEvalType, boolean applyScoring, PopulationBasisValidator populationBasisValidator) {
+            Map<String, EvaluationResult> results,
+            MeasureDef measureDef,
+            @Nonnull MeasureEvalType measureEvalType,
+            boolean applyScoring,
+            PopulationBasisValidator populationBasisValidator) {
         MeasureEvaluator evaluator = new MeasureEvaluator(populationBasisValidator);
         // Populate MeasureDef using MeasureEvaluator
         for (Map.Entry<String, EvaluationResult> entry : results.entrySet()) {
-            //subject
+            // subject
             String subjectId = entry.getKey();
             var sub = getSubjectTypeAndId(subjectId);
             var subjectIdPart = sub.getRight();
             var subjectTypePart = sub.getLeft();
-            //cql results
+            // cql results
             EvaluationResult evalResult = entry.getValue();
             try {
-                //populate results into MeasureDef
-                evaluator.evaluate(measureDef, measureEvalType, subjectTypePart, subjectIdPart,
-                    evalResult, applyScoring);
+                // populate results into MeasureDef
+                evaluator.evaluate(
+                        measureDef, measureEvalType, subjectTypePart, subjectIdPart, evalResult, applyScoring);
             } catch (Exception e) {
                 // Catch Exceptions from evaluation per subject, but allow rest of subjects to be processed (if
                 // applicable)
-                var error = String.format("Exception for subjectId: %s, Message: %s", subjectId,
-                    e.getMessage());
+                var error = String.format("Exception for subjectId: %s, Message: %s", subjectId, e.getMessage());
                 // Capture error for MeasureReportBuilder
                 measureDef.addError(error);
                 logger.error(error, e);
@@ -79,12 +81,12 @@ public class MeasureProcessorUtils {
      * @param measureDef measure defined objects that are populated from criteria expression results
      * @param context cql engine context used to evaluate results
      */
-    public void continuousVariableObservation(MeasureDef measureDef, CqlEngine context){
+    public void continuousVariableObservation(MeasureDef measureDef, CqlEngine context) {
         // Continuous Variable?
-        for(GroupDef groupDef: measureDef.groups()){
+        for (GroupDef groupDef : measureDef.groups()) {
             // Measure Observation defined?
-            if(groupDef.measureScoring().equals(MeasureScoring.CONTINUOUSVARIABLE) &&
-                groupDef.getSingle(MeasurePopulationType.MEASUREOBSERVATION)!=null){
+            if (groupDef.measureScoring().equals(MeasureScoring.CONTINUOUSVARIABLE)
+                    && groupDef.getSingle(MeasurePopulationType.MEASUREOBSERVATION) != null) {
 
                 PopulationDef measurePopulation = groupDef.getSingle(MEASUREPOPULATION);
                 PopulationDef measureObservation = groupDef.getSingle(MeasurePopulationType.MEASUREOBSERVATION);
@@ -92,11 +94,11 @@ public class MeasureProcessorUtils {
                 // Inject MeasurePopulation results into Measure Observation Function
                 for (Object resource : measurePopulation.getResources()) {
                     Object observationResult = evaluateObservationCriteria(
-                        resource,
-                        measureObservation.expression(),
-                        measureObservation.getEvaluatedResources(),
-                        groupDef.isBooleanBasis(),
-                        context);
+                            resource,
+                            measureObservation.expression(),
+                            measureObservation.getEvaluatedResources(),
+                            groupDef.isBooleanBasis(),
+                            context);
                     measureObservation.addResource(observationResult);
                 }
             }
@@ -105,18 +107,18 @@ public class MeasureProcessorUtils {
 
     /**
      * method used to convert measurement period Interval object into ZonedDateTime
-     * @param interval
+     * @param interval measurementPeriod interval
      * @return ZonedDateTime interval with appropriate offset
      */
     @Nullable
     public static ZonedDateTime getZonedTimeZoneForEval(@Nullable Interval interval) {
         return Optional.ofNullable(interval)
-            .map(Interval::getLow)
-            .filter(DateTime.class::isInstance)
-            .map(DateTime.class::cast)
-            .map(DateTime::getZoneOffset)
-            .map(zoneOffset -> LocalDateTime.now().atOffset(zoneOffset).toZonedDateTime())
-            .orElse(null);
+                .map(Interval::getLow)
+                .filter(DateTime.class::isInstance)
+                .map(DateTime.class::cast)
+                .map(DateTime::getZoneOffset)
+                .map(zoneOffset -> LocalDateTime.now().atOffset(zoneOffset).toZonedDateTime())
+                .orElse(null);
     }
 
     /**
@@ -128,8 +130,8 @@ public class MeasureProcessorUtils {
         org.hl7.elm.r1.Library lib = context.getState().getCurrentLibrary();
 
         if (lib.getParameters() == null
-            || lib.getParameters().getDef() == null
-            || lib.getParameters().getDef().isEmpty()) {
+                || lib.getParameters().getDef() == null
+                || lib.getParameters().getDef().isEmpty()) {
             return null;
         }
 
@@ -149,39 +151,44 @@ public class MeasureProcessorUtils {
      * @param measurementPeriod Interval defined by operation parameters to override default CQL value
      * @param context cql engine context used to set measurement period parameter
      */
+    @SuppressWarnings("deprecation")
     public void setMeasurementPeriod(MeasureDef measureDef, Interval measurementPeriod, CqlEngine context) {
         ParameterDef pd = this.getMeasurementPeriodParameterDef(context);
         if (pd == null) {
             logger.warn(
-                "Parameter \"{}\" was not found. Unable to validate type.", MeasureConstants.MEASUREMENT_PERIOD_PARAMETER_NAME);
-            context.getState().setParameter(null, MeasureConstants.MEASUREMENT_PERIOD_PARAMETER_NAME, measurementPeriod);
+                    "Parameter \"{}\" was not found. Unable to validate type.",
+                    MeasureConstants.MEASUREMENT_PERIOD_PARAMETER_NAME);
+            context.getState()
+                    .setParameter(null, MeasureConstants.MEASUREMENT_PERIOD_PARAMETER_NAME, measurementPeriod);
             return;
         }
 
         if (measurementPeriod == null && pd.getDefault() == null) {
             logger.warn(
-                "No default or value supplied for Parameter \"{}\". This may result in incorrect results or errors.",
-                MeasureConstants.MEASUREMENT_PERIOD_PARAMETER_NAME);
+                    "No default or value supplied for Parameter \"{}\". This may result in incorrect results or errors.",
+                    MeasureConstants.MEASUREMENT_PERIOD_PARAMETER_NAME);
             return;
         }
 
         // Use the default, skip validation
         if (measurementPeriod == null) {
-            measurementPeriod =
-                (Interval) context.getEvaluationVisitor().visitParameterDef(pd, context.getState());
+            measurementPeriod = (Interval) context.getEvaluationVisitor().visitParameterDef(pd, context.getState());
 
-            context
-                .getState()
-                .setParameter(null, MeasureConstants.MEASUREMENT_PERIOD_PARAMETER_NAME, cloneIntervalWithUtc(measurementPeriod));
+            context.getState()
+                    .setParameter(
+                            null,
+                            MeasureConstants.MEASUREMENT_PERIOD_PARAMETER_NAME,
+                            cloneIntervalWithUtc(measurementPeriod));
             return;
         }
 
         IntervalTypeSpecifier intervalTypeSpecifier = (IntervalTypeSpecifier) pd.getParameterTypeSpecifier();
         if (intervalTypeSpecifier == null) {
             logger.debug(
-                "No ELM type information available. Unable to validate type of \"{}\"",
-                MeasureConstants.MEASUREMENT_PERIOD_PARAMETER_NAME);
-            context.getState().setParameter(null, MeasureConstants.MEASUREMENT_PERIOD_PARAMETER_NAME, measurementPeriod);
+                    "No ELM type information available. Unable to validate type of \"{}\"",
+                    MeasureConstants.MEASUREMENT_PERIOD_PARAMETER_NAME);
+            context.getState()
+                    .setParameter(null, MeasureConstants.MEASUREMENT_PERIOD_PARAMETER_NAME, measurementPeriod);
             return;
         }
 
@@ -190,6 +197,21 @@ public class MeasureProcessorUtils {
         Interval convertedPeriod = convertInterval(measureDef, measurementPeriod, targetType);
 
         context.getState().setParameter(null, MeasureConstants.MEASUREMENT_PERIOD_PARAMETER_NAME, convertedPeriod);
+    }
+
+    /**
+     * Get Cql MeasurementPeriod if parameters are empty
+     * @param measurementPeriod Interval from operation parameters
+     * @param context cql context to extract default values
+     * @return operation parameters if populated, otherwise default CQL interval
+     */
+    public Interval getDefaultMeasurementPeriod(Interval measurementPeriod, CqlEngine context) {
+        if (measurementPeriod == null) {
+            return (Interval)
+                    context.getState().getParameters().get(MeasureConstants.MEASUREMENT_PERIOD_PARAMETER_NAME);
+        } else {
+            return measurementPeriod;
+        }
     }
 
     /**
@@ -206,10 +228,10 @@ public class MeasureProcessorUtils {
 
         if (startAsObject instanceof DateTime && endAsObject instanceof DateTime) {
             return new Interval(
-                cloneDateTimeWithUtc((DateTime) startAsObject),
-                true,
-                cloneDateTimeWithUtc((DateTime) endAsObject),
-                true);
+                    cloneDateTimeWithUtc((DateTime) startAsObject),
+                    true,
+                    cloneDateTimeWithUtc((DateTime) endAsObject),
+                    true);
         }
 
         // Give up and just return the original Interval
@@ -224,33 +246,31 @@ public class MeasureProcessorUtils {
      * @return The original dateTime but converted to UTC with the same local timestamp.
      */
     private static DateTime cloneDateTimeWithUtc(DateTime dateTime) {
-        final DateTime newDateTime = new DateTime(dateTime.getDateTime().withOffsetSameLocal(
-            ZoneOffset.UTC));
+        final DateTime newDateTime = new DateTime(dateTime.getDateTime().withOffsetSameLocal(ZoneOffset.UTC));
         newDateTime.setPrecision(dateTime.getPrecision());
         return newDateTime;
     }
 
     public Interval convertInterval(MeasureDef measureDef, Interval interval, String targetType) {
         String sourceTypeQualified = interval.getPointType().getTypeName();
-        String sourceType =
-            sourceTypeQualified.substring(sourceTypeQualified.lastIndexOf(".") + 1, sourceTypeQualified.length());
+        String sourceType = sourceTypeQualified.substring(sourceTypeQualified.lastIndexOf(".") + 1);
         if (sourceType.equals(targetType)) {
             return interval;
         }
 
         if (sourceType.equals("DateTime") && targetType.equals("Date")) {
             logger.debug(
-                "A DateTime interval was provided and a Date interval was expected. The DateTime will be truncated.");
+                    "A DateTime interval was provided and a Date interval was expected. The DateTime will be truncated.");
             return new Interval(
-                truncateDateTime((DateTime) interval.getLow()),
-                interval.getLowClosed(),
-                truncateDateTime((DateTime) interval.getHigh()),
-                interval.getHighClosed());
+                    truncateDateTime((DateTime) interval.getLow()),
+                    interval.getLowClosed(),
+                    truncateDateTime((DateTime) interval.getHigh()),
+                    interval.getHighClosed());
         }
 
         throw new InvalidRequestException(String.format(
-            "The interval type of %s did not match the expected type of %s and no conversion was possible for MeasureDef: %s.",
-            sourceType, targetType, measureDef.url()));
+                "The interval type of %s did not match the expected type of %s and no conversion was possible for MeasureDef: %s.",
+                sourceType, targetType, measureDef.url()));
     }
 
     public Date truncateDateTime(DateTime dateTime) {
@@ -285,15 +305,20 @@ public class MeasureProcessorUtils {
      * @param context cql engine context used to evaluate expression
      * @return cql results for subject requested
      */
+    @SuppressWarnings("deprecation")
     public Object evaluateObservationCriteria(
-        Object resource, String criteriaExpression, Set<Object> outEvaluatedResources, boolean isBooleanBasis, CqlEngine context) {
+            Object resource,
+            String criteriaExpression,
+            Set<Object> outEvaluatedResources,
+            boolean isBooleanBasis,
+            CqlEngine context) {
 
         var ed = Libraries.resolveExpressionRef(
-            criteriaExpression, context.getState().getCurrentLibrary());
+                criteriaExpression, context.getState().getCurrentLibrary());
 
         if (!(ed instanceof FunctionDef)) {
             throw new InvalidRequestException(String.format(
-                "Measure observation %s does not reference a function definition", criteriaExpression));
+                    "Measure observation %s does not reference a function definition", criteriaExpression));
         }
 
         Object result;
@@ -302,9 +327,9 @@ public class MeasureProcessorUtils {
             if (!isBooleanBasis) {
                 // subject based observations don't have a parameter to pass in
                 context.getState()
-                    .push(new Variable()
-                        .withName(((FunctionDef) ed).getOperand().get(0).getName())
-                        .withValue(resource));
+                        .push(new Variable()
+                                .withName(((FunctionDef) ed).getOperand().get(0).getName())
+                                .withValue(resource));
             }
             result = context.getEvaluationVisitor().visitExpression(ed.getExpression(), context.getState());
         } finally {
@@ -320,14 +345,19 @@ public class MeasureProcessorUtils {
      * method used to execute generate CQL results via Library $evaluate
      * @param subjectIds subjects to generate results for
      * @param measureDef Measure definition object used to store results of criteria expressions
-     * @param additionalData external bundle defined data
      * @param zonedMeasurementPeriod offset defined measurement period for evaluation
      * @param context cql engine context
      * @param libraryEngine library engine to use for evaluation of cql
      * @param id library Version identifier used by library engine
      * @return CQL results for Library defined in the Measure resource
      */
-    public Map<String, EvaluationResult> getEvaluationResults(List<String> subjectIds, MeasureDef measureDef, IBaseBundle additionalData, ZonedDateTime zonedMeasurementPeriod, CqlEngine context, LibraryEngine libraryEngine, VersionedIdentifier id) {
+    public Map<String, EvaluationResult> getEvaluationResults(
+            List<String> subjectIds,
+            MeasureDef measureDef,
+            ZonedDateTime zonedMeasurementPeriod,
+            CqlEngine context,
+            LibraryEngine libraryEngine,
+            VersionedIdentifier id) {
 
         Map<String, EvaluationResult> result = new HashMap<>();
 
@@ -341,10 +371,10 @@ public class MeasureProcessorUtils {
             String subjectIdPart = subjectInfo.getRight();
             context.getState().setContextValue(subjectTypePart, subjectIdPart);
             try {
-                result.put(subjectId,
-                    libraryEngine.getEvaluationResult(
-                        id, subjectId, null, null, null, null, zonedMeasurementPeriod, context)
-                );
+                result.put(
+                        subjectId,
+                        libraryEngine.getEvaluationResult(
+                                id, subjectId, null, null, null, null, zonedMeasurementPeriod, context));
             } catch (Exception e) {
                 // Catch Exceptions from evaluation per subject, but allow rest of subjects to be processed (if
                 // applicable)
@@ -364,28 +394,32 @@ public class MeasureProcessorUtils {
             return Pair.of(subjectIdParts[0], subjectIdParts[1]);
         } else {
             throw new InvalidRequestException(String.format(
-                "Unable to determine Subject type for id: %s. SubjectIds must be in the format {subjectType}/{subjectId} (e.g. Patient/123)",
-                subjectId));
+                    "Unable to determine Subject type for id: %s. SubjectIds must be in the format {subjectType}/{subjectId} (e.g. Patient/123)",
+                    subjectId));
         }
     }
 
-    public MeasureEvalType getEvalType(MeasureEvalType evalType, String reportType, List<String> subjectIds){
+    public MeasureEvalType getEvalType(MeasureEvalType evalType, String reportType, List<String> subjectIds) {
         if (evalType == null) {
             evalType = MeasureEvalType.fromCode(reportType)
-                .orElse(
-                    subjectIds == null || subjectIds.isEmpty() || subjectIds.get(0) == null
-                        ? MeasureEvalType.POPULATION
-                        : MeasureEvalType.SUBJECT);
+                    .orElse(
+                            subjectIds == null || subjectIds.isEmpty() || subjectIds.get(0) == null
+                                    ? MeasureEvalType.POPULATION
+                                    : MeasureEvalType.SUBJECT);
         }
         return evalType;
     }
 
     public Interval buildMeasurementPeriod(String periodStart, String periodEnd) {
-        // resolve the measurement period
-        return new Interval(
-            DateHelper.resolveRequestDate(periodStart, true),
-            true,
-            DateHelper.resolveRequestDate(periodEnd, false),
-            true);
+        if (periodStart == null || periodEnd == null) {
+            return null;
+        } else {
+            // resolve the measurement period
+            return new Interval(
+                    DateHelper.resolveRequestDate(periodStart, true),
+                    true,
+                    DateHelper.resolveRequestDate(periodEnd, false),
+                    true);
+        }
     }
 }

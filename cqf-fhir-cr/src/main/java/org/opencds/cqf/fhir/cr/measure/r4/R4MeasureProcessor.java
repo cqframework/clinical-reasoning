@@ -150,7 +150,7 @@ public class R4MeasureProcessor {
                 new R4PopulationBasisValidator());
 
         // Populate populationDefs that require MeasureDef results
-        // TODO JM: blocking certain continuous-variable Measures due to need of CQL context
+        // blocking certain continuous-variable Measures due to need of CQL context
         continuousVariableObservationCheck(measureDef, measure);
 
         // Build Measure Report with Results
@@ -220,7 +220,6 @@ public class R4MeasureProcessor {
                 results, measureDef, evaluationType, applyScoring, new R4PopulationBasisValidator());
 
         // Populate populationDefs that require MeasureDef results
-        // TODO JM: CLI tool is not compliant here due to requiring CQL Engine context
         measureProcessorUtils.continuousVariableObservation(measureDef, context);
 
         // Build Measure Report with Results
@@ -237,7 +236,6 @@ public class R4MeasureProcessor {
      *
      * @param measureDef defined measure definition object used to capture criteria expression results
      * @param measure measure resource used for evaluation
-     * TODO: JM CLI tool requires this check
      */
     protected void continuousVariableObservationCheck(MeasureDef measureDef, Measure measure) {
         for (GroupDef groupDef : measureDef.groups()) {

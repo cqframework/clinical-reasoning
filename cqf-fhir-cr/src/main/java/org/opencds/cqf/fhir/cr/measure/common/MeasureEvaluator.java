@@ -63,7 +63,6 @@ public class MeasureEvaluator {
                         measureDef,
                         subjectType,
                         subjectId,
-                        1,
                         MeasureReportType.INDIVIDUAL,
                         evaluationResult,
                         applyScoring);
@@ -72,7 +71,6 @@ public class MeasureEvaluator {
                         measureDef,
                         subjectType,
                         subjectId,
-                        1,
                         MeasureReportType.SUBJECTLIST,
                         evaluationResult,
                         applyScoring);
@@ -82,19 +80,12 @@ public class MeasureEvaluator {
                         measureDef,
                         subjectType,
                         subjectId,
-                        1,
                         MeasureReportType.PATIENTLIST,
                         evaluationResult,
                         applyScoring);
             case POPULATION:
                 return this.evaluateSubject(
-                        measureDef,
-                        subjectType,
-                        subjectId,
-                        1,
-                        MeasureReportType.SUMMARY,
-                        evaluationResult,
-                        applyScoring);
+                        measureDef, subjectType, subjectId, MeasureReportType.SUMMARY, evaluationResult, applyScoring);
             default:
                 // never hit because this value is set upstream
                 throw new InvalidRequestException(String.format(
@@ -107,21 +98,12 @@ public class MeasureEvaluator {
             MeasureDef measureDef,
             String subjectType,
             String subjectId,
-            int populationSize,
             MeasureReportType reportType,
             EvaluationResult evaluationResult,
             boolean applyScoring) {
         evaluateSdes(subjectId, measureDef.sdes(), evaluationResult);
         for (GroupDef groupDef : measureDef.groups()) {
-            evaluateGroup(
-                    measureDef,
-                    groupDef,
-                    subjectType,
-                    subjectId,
-                    populationSize,
-                    reportType,
-                    evaluationResult,
-                    applyScoring);
+            evaluateGroup(measureDef, groupDef, subjectType, subjectId, reportType, evaluationResult, applyScoring);
         }
         return measureDef;
     }
@@ -183,7 +165,6 @@ public class MeasureEvaluator {
             GroupDef groupDef,
             String subjectType,
             String subjectId,
-            int populationSize,
             MeasureReportType reportType,
             EvaluationResult evaluationResult,
             boolean applyScoring) {
@@ -327,11 +308,7 @@ public class MeasureEvaluator {
     }
 
     protected void evaluateCohort(
-            GroupDef groupDef,
-            String subjectType,
-            String subjectId,
-            EvaluationResult evaluationResult,
-            boolean applyScoring) {
+            GroupDef groupDef, String subjectType, String subjectId, EvaluationResult evaluationResult) {
         PopulationDef initialPopulation = groupDef.getSingle(INITIALPOPULATION);
         // Validate Required Populations are Present
         R4MeasureScoringTypePopulations.validateScoringTypePopulations(
@@ -346,7 +323,6 @@ public class MeasureEvaluator {
             GroupDef groupDef,
             String subjectType,
             String subjectId,
-            int populationSize,
             MeasureReportType reportType,
             EvaluationResult evaluationResult,
             boolean applyScoring) {
@@ -360,14 +336,13 @@ public class MeasureEvaluator {
         switch (scoring) {
             case PROPORTION:
             case RATIO:
-                evaluateProportion(
-                        groupDef, subjectType, subjectId, populationSize, reportType, evaluationResult, applyScoring);
+                evaluateProportion(groupDef, subjectType, subjectId, reportType, evaluationResult, applyScoring);
                 break;
             case CONTINUOUSVARIABLE:
                 evaluateContinuousVariable(groupDef, subjectType, subjectId, evaluationResult, applyScoring);
                 break;
             case COHORT:
-                evaluateCohort(groupDef, subjectType, subjectId, evaluationResult, applyScoring);
+                evaluateCohort(groupDef, subjectType, subjectId, evaluationResult);
                 break;
         }
     }

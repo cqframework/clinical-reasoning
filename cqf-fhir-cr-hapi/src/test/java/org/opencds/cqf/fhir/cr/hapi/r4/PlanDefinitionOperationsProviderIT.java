@@ -100,15 +100,6 @@ class PlanDefinitionOperationsProviderIT extends BaseCrR4TestServer {
 
         assertNotNull(resultR5);
         var bundle = (Bundle) resultR5.getParameter().get(0).getResource();
-        // Has QuestionnaireResponse for Patient
-        var questionnaireResponses = bundle.getEntry().stream()
-                .filter(e -> e.hasResource() && e.getResource().fhirType().equals("QuestionnaireResponse"))
-                .toList();
-        assertEquals(1, questionnaireResponses.size());
-        var questionnaireResponse =
-                (QuestionnaireResponse) questionnaireResponses.get(0).getResource();
-        assertNotNull(questionnaireResponse);
-        assertEquals(patientID, questionnaireResponse.getSubject().getReference());
         // Has generated Questionnaire
         var questionnaires = bundle.getEntry().stream()
                 .filter(e -> e.hasResource() && e.getResource().fhirType().equals("Questionnaire"))
@@ -122,6 +113,15 @@ class PlanDefinitionOperationsProviderIT extends BaseCrR4TestServer {
         assertTrue(questionnaireItem.hasExtension(Constants.SDC_QUESTIONNAIRE_ITEM_POPULATION_CONTEXT));
         assertThat(questionnaireItem.getText()).isEqualTo("Input Text Test");
         assertThat(questionnaireItem.getItem().get(0).getText()).isEqualTo("Sleep Study");
+        // Has QuestionnaireResponse for Patient
+        var questionnaireResponses = bundle.getEntry().stream()
+                .filter(e -> e.hasResource() && e.getResource().fhirType().equals("QuestionnaireResponse"))
+                .toList();
+        assertEquals(1, questionnaireResponses.size());
+        var questionnaireResponse =
+                (QuestionnaireResponse) questionnaireResponses.get(0).getResource();
+        assertNotNull(questionnaireResponse);
+        assertEquals(patientID, questionnaireResponse.getSubject().getReference());
         // First response Item is correct
         var responseItem1 = questionnaireResponse.getItem().get(0);
         assertNotNull(responseItem1);

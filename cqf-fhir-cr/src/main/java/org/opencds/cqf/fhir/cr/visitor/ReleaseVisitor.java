@@ -330,9 +330,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
                     if (maybeAdapter.isPresent()) {
                         dependencyAdapter = maybeAdapter.get();
                         alreadyUpdatedDependencies.put(dependencyAdapter.getUrl(), dependencyAdapter.get());
-
-                        String url =
-                                Canonicals.getUrl(dependencyAdapter.getUrl()) + "|" + dependencyAdapter.getVersion();
+                        var url = Canonicals.getUrl(dependencyAdapter.getUrl()) + "|" + dependencyAdapter.getVersion();
                         var existingArtifactsForUrl =
                                 SearchHelper.searchRepositoryByCanonicalWithPaging(repository, url);
                         if (BundleHelper.getEntry(existingArtifactsForUrl).isEmpty()) {

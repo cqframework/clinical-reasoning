@@ -113,8 +113,11 @@ class PlanDefinitionOperationsProviderIT extends BaseCrR4TestServer {
         var questionnaire = (Questionnaire) questionnaires.get(0).getResource();
         assertNotNull(questionnaire);
         assertThat(questionnaire.getItem().get(0).getItem().get(0).getText()).isEqualTo("Sleep Study");
+        assertThat(questionnaireResponse.getItem().size()).isEqualTo(2);
         assertTrue(questionnaireResponse.getItem().get(0).getItem().get(0).hasAnswer());
         assertTrue(questionnaireResponse.getItem().get(0).getItem().get(1).hasAnswer());
+        assertTrue(questionnaireResponse.getItem().get(1).getItem().get(0).hasAnswer());
+        assertTrue(questionnaireResponse.getItem().get(1).getItem().get(1).hasAnswer());
     }
 
     @Test

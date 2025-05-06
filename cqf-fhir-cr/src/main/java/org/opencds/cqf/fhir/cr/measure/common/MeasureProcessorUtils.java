@@ -151,7 +151,7 @@ public class MeasureProcessorUtils {
      * @param measurementPeriod Interval defined by operation parameters to override default CQL value
      * @param context cql engine context used to set measurement period parameter
      */
-    @SuppressWarnings("deprecation")
+    @SuppressWarnings({"deprecation", "removal"})
     public void setMeasurementPeriod(MeasureDef measureDef, Interval measurementPeriod, CqlEngine context) {
         ParameterDef pd = this.getMeasurementPeriodParameterDef(context);
         if (pd == null) {
@@ -305,7 +305,7 @@ public class MeasureProcessorUtils {
      * @param context cql engine context used to evaluate expression
      * @return cql results for subject requested
      */
-    @SuppressWarnings("deprecation")
+    @SuppressWarnings({"deprecation", "removal"})
     public Object evaluateObservationCriteria(
             Object resource,
             String criteriaExpression,

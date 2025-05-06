@@ -12,6 +12,7 @@ public class MeasureEvaluationOptions {
         return options;
     }
 
+    private boolean applyScoringSetMembership = true;
     private boolean isValidationEnabled = false;
     private Map<String, ValidationProfile> validationProfiles = new HashMap<>();
     private SubjectProviderOptions subjectProviderOptions;
@@ -50,5 +51,14 @@ public class MeasureEvaluationOptions {
             subjectProviderOptions = new SubjectProviderOptions();
         }
         return subjectProviderOptions;
+    }
+
+    public MeasureEvaluationOptions setApplyScoringSetMembership(boolean applyScoringSetMembership) {
+        this.applyScoringSetMembership = applyScoringSetMembership;
+        return this;
+    }
+
+    public boolean getApplyScoringSetMembership() {
+        return this.applyScoringSetMembership;
     }
 }

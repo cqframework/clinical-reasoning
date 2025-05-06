@@ -244,7 +244,7 @@ class CrDiscoveryServiceR4Test extends BaseCdsCrDiscoveryServiceTest {
         var fixture = new CrDiscoveryService(planDefinition.getIdElement(), repository);
         var actual = fixture.getPrefetchUrlList(planDefAdapter);
         assertNotNull(actual);
-        PrefetchUrlList expected = new PrefetchUrlList();
+        var expected = new PrefetchUrlList();
         expected.addAll(
                 List.of(
                         "Patient?_id={{context.patientId}}",

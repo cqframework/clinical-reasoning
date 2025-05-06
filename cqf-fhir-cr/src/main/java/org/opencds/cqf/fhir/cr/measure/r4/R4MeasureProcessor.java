@@ -96,7 +96,8 @@ public class R4MeasureProcessor {
             String reportType,
             List<String> subjectIds,
             IBaseBundle additionalData,
-            Parameters parameters) {
+            Parameters parameters,
+            boolean applyScoring) {
 
         var evalType = r4MeasureServiceUtils.getMeasureEvalType(reportType, subjectIds);
 
@@ -108,7 +109,7 @@ public class R4MeasureProcessor {
         var subjects = subjectProvider.getSubjects(actualRepo, subjectIds).collect(Collectors.toList());
 
         return this.evaluateMeasure(
-                measure, periodStart, periodEnd, reportType, subjects, additionalData, parameters, evalType);
+                measure, periodStart, periodEnd, reportType, subjects, additionalData, parameters, evalType, applyScoring);
     }
 
     public MeasureReport evaluateMeasure(
@@ -119,23 +120,21 @@ public class R4MeasureProcessor {
             List<String> subjectIds,
             IBaseBundle additionalData,
             Parameters parameters,
-            MeasureEvalType evalType) {
+            MeasureEvalType evalType,
+        boolean applyScoring) {
         var m = measure.fold(this::resolveByUrl, this::resolveById, Function.identity());
         return this.evaluateMeasure(
-                m, periodStart, periodEnd, reportType, subjectIds, additionalData, parameters, evalType, false);
+                m, periodStart, periodEnd, reportType, subjectIds, additionalData, parameters, evalType, applyScoring);
     }
 
-    protected MeasureReport evaluateMeasure(
+    public MeasureReport evaluateMeasure(
             Measure measure,
             @Nullable ZonedDateTime periodStart,
             @Nullable ZonedDateTime periodEnd,
             String reportType,
             List<String> subjectIds,
-            IBaseBundle additionalData,
-            Parameters parameters,
             MeasureEvalType evalType,
-        Map<String, EvaluationResult> results,
-        boolean applyScoring) {
+            Map<String, EvaluationResult> results) {
 
         checkMeasureLibrary(measure);
 
@@ -147,7 +146,7 @@ public class R4MeasureProcessor {
         var measureDef = new R4MeasureDefBuilder().build(measure);
 
         //Process Criteria Expression Results
-        processResults(results, measureDef, evaluationType, applyScoring);
+        processResults(results, measureDef, evaluationType, this.measureEvaluationOptions.getApplyScoringSetMembership());
 
         // Populate populationDefs that require MeasureDef results
         // TODO JM: CLI tool is not compliant here due to requiring CQL Engine context

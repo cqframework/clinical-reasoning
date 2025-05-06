@@ -5,43 +5,20 @@ import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.DENOM
 import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.DENOMINATOREXCEPTION;
 import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.DENOMINATOREXCLUSION;
 import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.INITIALPOPULATION;
-import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.MEASUREOBSERVATION;
 import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.MEASUREPOPULATION;
 import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.MEASUREPOPULATIONEXCLUSION;
 import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.NUMERATOR;
 import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.NUMERATOREXCLUSION;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.annotation.Nullable;
-import org.apache.commons.lang3.tuple.Pair;
-import org.hl7.elm.r1.FunctionDef;
-import org.hl7.elm.r1.IntervalTypeSpecifier;
-import org.hl7.elm.r1.Library;
-import org.hl7.elm.r1.NamedTypeSpecifier;
-import org.hl7.elm.r1.ParameterDef;
-import org.hl7.elm.r1.VersionedIdentifier;
-import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
-import org.opencds.cqf.cql.engine.execution.Libraries;
-import org.opencds.cqf.cql.engine.execution.Variable;
-import org.opencds.cqf.cql.engine.runtime.Date;
-import org.opencds.cqf.cql.engine.runtime.DateTime;
-import org.opencds.cqf.cql.engine.runtime.Interval;
-import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureScoringTypePopulations;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * This class implements the core Measure evaluation logic that's defined in the
@@ -63,10 +40,6 @@ import org.slf4j.LoggerFactory;
  */
 @SuppressWarnings("removal")
 public class MeasureEvaluator {
-
-    private static final Logger logger = LoggerFactory.getLogger(MeasureEvaluator.class);
-
-    //private final LibraryEngine libraryEngine;
     private final PopulationBasisValidator populationBasisValidator;
 
     public MeasureEvaluator(
@@ -107,18 +80,6 @@ public class MeasureEvaluator {
         }
     }
 
-    @Nullable
-    private static ZonedDateTime getZonedTimeZoneForEval(@Nullable Interval interval) {
-        return Optional.ofNullable(interval)
-                .map(Interval::getLow)
-                .filter(DateTime.class::isInstance)
-                .map(DateTime.class::cast)
-                .map(DateTime::getZoneOffset)
-                .map(zoneOffset -> LocalDateTime.now().atOffset(zoneOffset).toZonedDateTime())
-                .orElse(null);
-    }
-
-
     protected MeasureDef evaluateSubject(
             MeasureDef measureDef,
             String subjectType,
@@ -155,7 +116,6 @@ public class MeasureEvaluator {
                 Object booleanResult =
                         evaluationResult.forExpression(subjectType).value();
                 // remove evaluated resources
-                //clearEvaluatedResources();
                 return Collections.singletonList(booleanResult);
             } else {
                 // false result shows nothing
@@ -165,37 +125,6 @@ public class MeasureEvaluator {
 
         return (Iterable<Object>) expressionResult.value();
     }
-
-//    protected Object evaluateObservationCriteria(
-//            Object resource, String criteriaExpression, Set<Object> outEvaluatedResources, boolean isBooleanBasis) {
-//
-//        var ed = Libraries.resolveExpressionRef(
-//                criteriaExpression, this.context.getState().getCurrentLibrary());
-//
-//        if (!(ed instanceof FunctionDef)) {
-//            throw new InvalidRequestException(String.format(
-//                    "Measure observation %s does not reference a function definition", criteriaExpression));
-//        }
-//
-//        Object result;
-//        context.getState().pushWindow();
-//        try {
-//            if (!isBooleanBasis) {
-//                // subject based observations don't have a parameter to pass in
-//                context.getState()
-//                        .push(new Variable()
-//                                .withName(((FunctionDef) ed).getOperand().get(0).getName())
-//                                .withValue(resource));
-//            }
-//            result = context.getEvaluationVisitor().visitExpression(ed.getExpression(), context.getState());
-//        } finally {
-//            context.getState().popWindow();
-//        }
-//
-//        captureEvaluatedResources(outEvaluatedResources);
-//
-//        return result;
-//    }
 
     protected PopulationDef evaluatePopulationMembership(
             String subjectType, String subjectId, PopulationDef inclusionDef, EvaluationResult evaluationResult) {

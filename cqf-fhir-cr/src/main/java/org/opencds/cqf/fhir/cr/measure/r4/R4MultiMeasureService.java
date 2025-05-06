@@ -157,7 +157,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
             MeasureReport measureReport;
             // evaluate each measure
             measureReport = r4Processor.evaluateMeasure(
-                    measure, periodStart, periodEnd, reportType, subjects, additionalData, parameters, evalType, false);
+                    measure, periodStart, periodEnd, reportType, subjects, additionalData, parameters, evalType, this.measureEvaluationOptions.getApplyScoringSetMembership());
 
             // add ProductLine after report is generated
             measureReport = r4MeasureServiceUtils.addProductLineExtension(measureReport, productLine);
@@ -219,7 +219,8 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
                         Collections.singletonList(subject),
                         additionalData,
                         parameters,
-                        evalType, false);
+                        evalType,
+                        this.measureEvaluationOptions.getApplyScoringSetMembership());
 
                 // add ProductLine after report is generated
                 measureReport = r4MeasureServiceUtils.addProductLineExtension(measureReport, productLine);

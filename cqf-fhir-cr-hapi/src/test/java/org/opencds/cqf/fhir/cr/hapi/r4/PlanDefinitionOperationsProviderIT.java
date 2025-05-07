@@ -37,6 +37,8 @@ class PlanDefinitionOperationsProviderIT extends BaseCrR4TestServer {
         var resourceLoader = new FhirResourceLoader(getFhirContext(), this.getClass(), List.of("pa-aslp"), true);
         resourceLoader.getResources().forEach(this::loadResource);
 
+        myCacheWarmingSvc.performWarmingPass();
+
         var planDef = read(new IdType("PlanDefinition/ASLPA1"));
         assertNotNull(planDef);
 

@@ -23,6 +23,7 @@ public class EvaluateProcessor implements IEvaluateProcessor {
                             request.getLibraryAdapter().getUrl(),
                             request.getSubject(),
                             request.getParameters(),
+                            request.getRawParameters(),
                             request.getData(),
                             null,
                             request.getExpression());

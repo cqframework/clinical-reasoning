@@ -81,7 +81,7 @@ public class RepositoryRetrieveProvider extends BaseRetrieveProvider {
                 config.filter = config.filter.and(filterByTemplateId(dataType, templateId));
                 break;
             case USE_SEARCH_PARAMETERS:
-                populateTemplateSearchParams(config.searchParams, templateId);
+                populateTemplateSearchParams(config.searchParams, dataType, templateId);
         }
     }
 

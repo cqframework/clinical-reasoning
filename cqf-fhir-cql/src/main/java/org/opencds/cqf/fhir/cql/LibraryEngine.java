@@ -69,17 +69,25 @@ public class LibraryEngine {
             String url,
             String patientId,
             IBaseParameters parameters,
+            Map<String, Object> rawParameters,
             IBaseBundle additionalData,
             ZonedDateTime zonedDateTime,
             Set<String> expressions) {
         return this.evaluate(
-                VersionedIdentifiers.forUrl(url), patientId, parameters, additionalData, zonedDateTime, expressions);
+                VersionedIdentifiers.forUrl(url),
+                patientId,
+                parameters,
+                rawParameters,
+                additionalData,
+                zonedDateTime,
+                expressions);
     }
 
     public IBaseParameters evaluate(
             VersionedIdentifier id,
             String patientId,
             IBaseParameters parameters,
+            Map<String, Object> rawParameters,
             IBaseBundle additionalData,
             ZonedDateTime zonedDateTime,
             Set<String> expressions) {
@@ -88,6 +96,7 @@ public class LibraryEngine {
                 id,
                 patientId,
                 parameters,
+                rawParameters,
                 additionalData,
                 expressions,
                 cqlFhirParametersConverter,
@@ -202,7 +211,13 @@ public class LibraryEngine {
             case "text/cql-name":
                 validateLibrary(libraryToBeEvaluated);
                 parametersResult = this.evaluate(
-                        libraryToBeEvaluated, subjectId, parameters, bundle, null, Collections.singleton(expression));
+                        libraryToBeEvaluated,
+                        subjectId,
+                        parameters,
+                        rawParameters,
+                        bundle,
+                        null,
+                        Collections.singleton(expression));
                 results = resolveParameterValues(
                         ParametersUtil.getNamedParameters(fhirContext, parametersResult, expression));
                 break;
@@ -314,6 +329,7 @@ public class LibraryEngine {
             VersionedIdentifier id,
             String patientId,
             IBaseParameters parameters,
+            Map<String, Object> rawParameters,
             IBaseBundle additionalData,
             Set<String> expressions,
             CqlFhirParametersConverter cqlFhirParametersConverter,
@@ -329,6 +345,9 @@ public class LibraryEngine {
         }
 
         var evaluationParameters = cqlFhirParametersConverter.toCqlParameters(parameters);
+        if (rawParameters != null && !rawParameters.isEmpty()) {
+            evaluationParameters.putAll(rawParameters);
+        }
 
         return engine.evaluate(
                 new VersionedIdentifier().withId(id.getId()),

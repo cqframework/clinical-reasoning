@@ -7,9 +7,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import java.util.List;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CarePlan;
@@ -40,24 +39,12 @@ class PlanDefinitionOperationsProviderIT extends BaseCrR4TestServer {
         var resourceLoader = new FhirResourceLoader(getFhirContext(), this.getClass(), List.of("pa-aslp"), true);
         resourceLoader.getResources().forEach(this::loadResource);
 
-        myCacheWarmingSvc.performWarmingPass();
-        IBaseResource serviceRequest1 = null;
-        while (serviceRequest1 == null) {
-            var searchResult = myDaoRegistry
-                    .getResourceDao("ServiceRequest")
-                    .search(new SearchParameterMap("_id", new TokenParam("SleepStudy")));
-            if (!searchResult.isEmpty()) {
-                serviceRequest1 = searchResult.getAllResources().get(0);
-            }
-        }
-
-        IBaseResource serviceRequest2 = null;
-        while (serviceRequest2 == null) {
-            var searchResult = myDaoRegistry
-                    .getResourceDao("ServiceRequest")
-                    .search(new SearchParameterMap("_id", new TokenParam("SleepStudy2")));
-            if (!searchResult.isEmpty()) {
-                serviceRequest2 = searchResult.getAllResources().get(0);
+        // Loop until we find 2 ServiceRequests
+        IBundleProvider searchResults = null;
+        while (searchResults == null || searchResults.isEmpty()) {
+            searchResults = myDaoRegistry.getResourceDao("ServiceRequest").search(new SearchParameterMap());
+            if (searchResults.size() != 2) {
+                searchResults = null;
             }
         }
 

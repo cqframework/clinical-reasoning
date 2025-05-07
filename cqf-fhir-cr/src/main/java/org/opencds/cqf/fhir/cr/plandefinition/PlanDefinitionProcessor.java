@@ -1,8 +1,7 @@
 package org.opencds.cqf.fhir.cr.plandefinition;
 
 import static java.util.Objects.requireNonNull;
-import static org.opencds.cqf.fhir.utility.Parameters.newBooleanPart;
-import static org.opencds.cqf.fhir.utility.Parameters.newParameters;
+import static org.opencds.cqf.fhir.utility.PackageHelper.packageParameters;
 import static org.opencds.cqf.fhir.utility.repository.Repositories.createRestRepository;
 import static org.opencds.cqf.fhir.utility.repository.Repositories.proxy;
 
@@ -104,12 +103,7 @@ public class PlanDefinitionProcessor {
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseBundle packagePlanDefinition(
             Either3<C, IIdType, R> planDefinition, boolean isPut) {
-        return packagePlanDefinition(
-                planDefinition,
-                newParameters(
-                        repository.fhirContext(),
-                        "package-parameters",
-                        newBooleanPart(repository.fhirContext(), "isPut", isPut)));
+        return packagePlanDefinition(planDefinition, packageParameters(fhirVersion, null, isPut));
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseBundle packagePlanDefinition(

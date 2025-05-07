@@ -150,6 +150,23 @@ public class VersionUtilities {
     }
 
     /**
+     * Returns a BooleanType for the supplied version with a value of the supplied value.
+     *
+     * @param fhirVersion the FHIR version to create a BooleanType for
+     * @param value the value of the BooleanType
+     * @return the new BooleanType
+     */
+    public static IPrimitiveType<Boolean> booleanTypeForVersion(FhirVersionEnum fhirVersion, boolean value) {
+        return switch (fhirVersion) {
+            case DSTU2 -> new org.hl7.fhir.dstu2.model.BooleanType(value);
+            case DSTU3 -> new org.hl7.fhir.dstu3.model.BooleanType(value);
+            case R4 -> new org.hl7.fhir.r4.model.BooleanType(value);
+            case R5 -> new org.hl7.fhir.r5.model.BooleanType(value);
+            default -> throw new IllegalArgumentException(UNSUPPORTED);
+        };
+    }
+
+    /**
      * Returns a CodeType for the supplied version with a value of the supplied code.
      *
      * @param fhirVersion the FHIR version to create a CodeType for

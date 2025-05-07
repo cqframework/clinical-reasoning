@@ -1,8 +1,7 @@
 package org.opencds.cqf.fhir.cr.valueset;
 
 import static java.util.Objects.requireNonNull;
-import static org.opencds.cqf.fhir.utility.Parameters.newBooleanPart;
-import static org.opencds.cqf.fhir.utility.Parameters.newParameters;
+import static org.opencds.cqf.fhir.utility.PackageHelper.packageParameters;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -66,12 +65,7 @@ public class ValueSetProcessor {
 
     public <T extends IPrimitiveType<String>, R extends IBaseResource> IBaseBundle packageValueSet(
             Either3<T, IIdType, R> valueSet, boolean isPut) {
-        return packageValueSet(
-                valueSet,
-                newParameters(
-                        repository.fhirContext(),
-                        "package-parameters",
-                        newBooleanPart(repository.fhirContext(), "isPut", isPut)));
+        return packageValueSet(valueSet, packageParameters(fhirVersion, null, isPut));
     }
 
     public <T extends IPrimitiveType<String>, R extends IBaseResource> IBaseBundle packageValueSet(

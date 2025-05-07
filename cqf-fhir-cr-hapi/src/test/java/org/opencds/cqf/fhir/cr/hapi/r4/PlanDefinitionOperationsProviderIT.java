@@ -6,6 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.rest.param.TokenParam;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.BooleanType;
@@ -39,23 +41,23 @@ class PlanDefinitionOperationsProviderIT extends BaseCrR4TestServer {
         resourceLoader.getResources().forEach(this::loadResource);
 
         myCacheWarmingSvc.performWarmingPass();
-        var serviceRequestId1 = new IdType("ServiceRequest", "SleepStudy");
         IBaseResource serviceRequest1 = null;
         while (serviceRequest1 == null) {
-            try {
-                serviceRequest1 = read(serviceRequestId1);
-            } catch (Exception e) {
-                // Do nothing
+            var searchResult = myDaoRegistry
+                    .getResourceDao("ServiceRequest")
+                    .search(new SearchParameterMap("_id", new TokenParam("SleepStudy")));
+            if (!searchResult.isEmpty()) {
+                serviceRequest1 = searchResult.getAllResources().get(0);
             }
         }
 
-        var serviceRequestId2 = new IdType("ServiceRequest", "SleepStudy2");
         IBaseResource serviceRequest2 = null;
         while (serviceRequest2 == null) {
-            try {
-                serviceRequest2 = read(serviceRequestId2);
-            } catch (Exception e) {
-                // Do nothing
+            var searchResult = myDaoRegistry
+                    .getResourceDao("ServiceRequest")
+                    .search(new SearchParameterMap("_id", new TokenParam("SleepStudy2")));
+            if (!searchResult.isEmpty()) {
+                serviceRequest2 = searchResult.getAllResources().get(0);
             }
         }
 

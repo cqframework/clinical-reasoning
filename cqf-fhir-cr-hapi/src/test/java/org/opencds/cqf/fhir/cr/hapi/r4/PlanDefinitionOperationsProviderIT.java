@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CarePlan;
@@ -38,6 +39,25 @@ class PlanDefinitionOperationsProviderIT extends BaseCrR4TestServer {
         resourceLoader.getResources().forEach(this::loadResource);
 
         myCacheWarmingSvc.performWarmingPass();
+        var serviceRequestId1 = new IdType("ServiceRequest", "SleepStudy");
+        IBaseResource serviceRequest1 = null;
+        while (serviceRequest1 == null) {
+            try {
+                serviceRequest1 = read(serviceRequestId1);
+            } catch (Exception e) {
+                // Do nothing
+            }
+        }
+
+        var serviceRequestId2 = new IdType("ServiceRequest", "SleepStudy2");
+        IBaseResource serviceRequest2 = null;
+        while (serviceRequest2 == null) {
+            try {
+                serviceRequest2 = read(serviceRequestId2);
+            } catch (Exception e) {
+                // Do nothing
+            }
+        }
 
         var planDef = read(new IdType("PlanDefinition/ASLPA1"));
         assertNotNull(planDef);

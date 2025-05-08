@@ -1,8 +1,10 @@
 package org.opencds.cqf.fhir.cr.plandefinition;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.opencds.cqf.fhir.cr.plandefinition.TestPlanDefinition.CLASS_PATH;
 import static org.opencds.cqf.fhir.cr.plandefinition.TestPlanDefinition.given;
 import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
@@ -12,6 +14,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import java.nio.file.Paths;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.junit.jupiter.api.Test;
@@ -423,7 +426,7 @@ class PlanDefinitionProcessorTests {
                 org.opencds.cqf.fhir.utility.r4.Parameters.stringPart("Service Request Id", "SleepStudy"),
                 org.opencds.cqf.fhir.utility.r4.Parameters.stringPart("Service Request Id", "SleepStudy2"),
                 org.opencds.cqf.fhir.utility.r4.Parameters.stringPart("Coverage Id", "Coverage-positive"));
-        given().repositoryFor(fhirContextR4, "r4/pa-aslp")
+        var questionnaireResponse = (QuestionnaireResponse) given().repositoryFor(fhirContextR4, "r4/pa-aslp")
                 .when()
                 .planDefinitionId(planDefinitionID)
                 .subjectId(patientID)
@@ -431,7 +434,31 @@ class PlanDefinitionProcessorTests {
                 .thenApplyR5()
                 .hasEntry(3)
                 .hasQuestionnaire()
-                .hasQuestionnaireResponse();
+                .hasQuestionnaireResponse()
+                .questionnaireResponse;
+        // First response Item is correct
+        var responseItem1 = questionnaireResponse.getItem().get(0);
+        assertNotNull(responseItem1);
+        assertEquals("Input Text Test", responseItem1.getText());
+        assertTrue(responseItem1.getItem().get(0).hasAnswer());
+        // First response Item has first child item with answer
+        var codingItem1 =
+                (Coding) responseItem1.getItem().get(0).getAnswerFirstRep().getValue();
+        assertEquals("ASLP.A1.DE14", codingItem1.getCode());
+        // First response Item has second child item with answer
+        assertTrue(responseItem1.getItem().get(1).hasAnswer());
+
+        assertEquals(2, questionnaireResponse.getItem().size());
+        // Second response Item is correct
+        var responseItem2 = questionnaireResponse.getItem().get(1);
+        assertEquals("Input Text Test", responseItem2.getText());
+        assertTrue(responseItem2.getItem().get(0).hasAnswer());
+        // Second response Item has first child item with answer
+        var codingItem2 =
+                (Coding) responseItem2.getItem().get(0).getAnswerFirstRep().getValue();
+        assertEquals("ASLP.A1.DE2", codingItem2.getCode());
+        // Second response Item has second child item with answer
+        assertTrue(responseItem2.getItem().get(1).hasAnswer());
     }
 
     @Test

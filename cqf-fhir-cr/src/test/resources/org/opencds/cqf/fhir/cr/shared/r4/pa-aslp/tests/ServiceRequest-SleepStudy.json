@@ -30,6 +30,6 @@
     ],
     "occurrenceDateTime": "2023-04-10",
     "requester": {
-        "reference": "Practitioner/positive-Practitioner"
+        "reference": "Practitioner/Practitioner-positive"
     }
 }

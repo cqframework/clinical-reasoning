@@ -1,10 +1,13 @@
 package org.opencds.cqf.fhir.utility;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import org.hl7.fhir.dstu3.model.BooleanType;
+import org.hl7.fhir.dstu3.model.StringType;
+import org.hl7.fhir.dstu3.model.UriType;
 import org.junit.jupiter.api.Test;
 
 class VersionUtilitiesTests {
@@ -16,11 +19,9 @@ class VersionUtilitiesTests {
         assertEquals(FhirVersionEnum.DSTU3, VersionUtilities.enumForVersion("3"));
         assertEquals(FhirVersionEnum.DSTU3, VersionUtilities.enumForVersion("3.0"));
         assertEquals(FhirVersionEnum.DSTU3, VersionUtilities.enumForVersion("3.0.1"));
-        assertTrue(
-                VersionUtilities.stringTypeForVersion(FhirVersionEnum.DSTU3)
-                        instanceof org.hl7.fhir.dstu3.model.StringType);
-        assertTrue(
-                VersionUtilities.uriTypeForVersion(FhirVersionEnum.DSTU3) instanceof org.hl7.fhir.dstu3.model.UriType);
+        assertInstanceOf(StringType.class, VersionUtilities.stringTypeForVersion(FhirVersionEnum.DSTU3));
+        assertInstanceOf(UriType.class, VersionUtilities.uriTypeForVersion(FhirVersionEnum.DSTU3));
+        assertInstanceOf(BooleanType.class, VersionUtilities.booleanTypeForVersion(FhirVersionEnum.DSTU3, true));
     }
 
     @Test
@@ -30,9 +31,12 @@ class VersionUtilitiesTests {
         assertEquals(FhirVersionEnum.R4, VersionUtilities.enumForVersion("4"));
         assertEquals(FhirVersionEnum.R4, VersionUtilities.enumForVersion("4.0"));
         assertEquals(FhirVersionEnum.R4, VersionUtilities.enumForVersion("4.0.1"));
-        assertTrue(
-                VersionUtilities.stringTypeForVersion(FhirVersionEnum.R4) instanceof org.hl7.fhir.r4.model.StringType);
-        assertTrue(VersionUtilities.uriTypeForVersion(FhirVersionEnum.R4) instanceof org.hl7.fhir.r4.model.UriType);
+        assertInstanceOf(
+                org.hl7.fhir.r4.model.StringType.class, VersionUtilities.stringTypeForVersion(FhirVersionEnum.R4));
+        assertInstanceOf(org.hl7.fhir.r4.model.UriType.class, VersionUtilities.uriTypeForVersion(FhirVersionEnum.R4));
+        assertInstanceOf(
+                org.hl7.fhir.r4.model.BooleanType.class,
+                VersionUtilities.booleanTypeForVersion(FhirVersionEnum.R4, true));
     }
 
     @Test
@@ -42,9 +46,12 @@ class VersionUtilitiesTests {
         assertEquals(FhirVersionEnum.R5, VersionUtilities.enumForVersion("5"));
         assertEquals(FhirVersionEnum.R5, VersionUtilities.enumForVersion("5.0"));
         assertEquals(FhirVersionEnum.R5, VersionUtilities.enumForVersion("5.0.1"));
-        assertTrue(
-                VersionUtilities.stringTypeForVersion(FhirVersionEnum.R5) instanceof org.hl7.fhir.r5.model.StringType);
-        assertTrue(VersionUtilities.uriTypeForVersion(FhirVersionEnum.R5) instanceof org.hl7.fhir.r5.model.UriType);
+        assertInstanceOf(
+                org.hl7.fhir.r5.model.StringType.class, VersionUtilities.stringTypeForVersion(FhirVersionEnum.R5));
+        assertInstanceOf(org.hl7.fhir.r5.model.UriType.class, VersionUtilities.uriTypeForVersion(FhirVersionEnum.R5));
+        assertInstanceOf(
+                org.hl7.fhir.r5.model.BooleanType.class,
+                VersionUtilities.booleanTypeForVersion(FhirVersionEnum.R5, true));
     }
 
     @Test
@@ -71,6 +78,9 @@ class VersionUtilitiesTests {
         });
         assertThrows(IllegalArgumentException.class, () -> {
             VersionUtilities.uriTypeForVersion(FhirVersionEnum.R4B);
+        });
+        assertThrows(IllegalArgumentException.class, () -> {
+            VersionUtilities.booleanTypeForVersion(FhirVersionEnum.R4B, true);
         });
     }
 }

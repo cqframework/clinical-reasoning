@@ -87,10 +87,8 @@ public class ProcessItemWithContext extends ProcessItem {
                             .collect(Collectors.toList());
 
         } catch (Exception e) {
-            var message =
-                    String.format("Encountered error evaluating expression: %s", contextExpression.getExpression());
-            logger.error(message);
-            request.logException(message);
+            logger.error(e.getMessage());
+            request.logException(e.getMessage());
             populationContext = new ArrayList<>();
         }
         if (populationContext.isEmpty()) {

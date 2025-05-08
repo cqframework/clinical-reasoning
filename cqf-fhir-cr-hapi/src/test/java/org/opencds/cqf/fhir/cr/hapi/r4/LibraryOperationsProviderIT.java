@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Parameters;
 import org.junit.jupiter.api.Test;
@@ -49,5 +50,15 @@ class LibraryOperationsProviderIT extends BaseCrR4TestServer {
         assertEquals(
                 "module-definition",
                 ((Library) result).getType().getCodingFirstRep().getCode());
+    }
+
+    @Test
+    void testPackage() {
+        loadBundle("org/opencds/cqf/fhir/cr/hapi/r4/Bundle-GenerateQuestionnaireContent.json");
+        loadBundle("org/opencds/cqf/fhir/cr/hapi/r4/Bundle-GenerateQuestionnaireStructures.json");
+        var requestDetails = setupRequestDetails();
+        var result = planDefinitionPackageProvider.packagePlanDefinition(
+                "PlanDefinition/ASLPA1", null, null, null, null, null, requestDetails);
+        assertInstanceOf(Bundle.class, result);
     }
 }

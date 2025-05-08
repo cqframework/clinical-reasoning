@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.hapi.r4.plandefinition.PlanDefinitionApplyProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.plandefinition.PlanDefinitionDataRequirementsProvider;
+import org.opencds.cqf.fhir.cr.hapi.r4.plandefinition.PlanDefinitionPackageProvider;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.repository.FhirResourceLoader;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,9 @@ class PlanDefinitionOperationsProviderIT extends BaseCrR4TestServer {
 
     @Autowired
     PlanDefinitionDataRequirementsProvider planDefinitionDataRequirementsProvider;
+
+    @Autowired
+    PlanDefinitionPackageProvider planDefinitionPackageProvider;
 
     @Disabled("Disabling for now.  Needs to be fixed before the next release.")
     @Test
@@ -160,5 +164,15 @@ class PlanDefinitionOperationsProviderIT extends BaseCrR4TestServer {
         assertEquals(
                 "module-definition",
                 ((Library) result).getType().getCodingFirstRep().getCode());
+    }
+
+    @Test
+    void testPackage() {
+        loadBundle("org/opencds/cqf/fhir/cr/hapi/r4/Bundle-GenerateQuestionnaireContent.json");
+        loadBundle("org/opencds/cqf/fhir/cr/hapi/r4/Bundle-GenerateQuestionnaireStructures.json");
+        var requestDetails = setupRequestDetails();
+        var result = planDefinitionPackageProvider.packagePlanDefinition(
+                "PlanDefinition/ASLPA1", null, null, null, null, null, requestDetails);
+        assertInstanceOf(Bundle.class, result);
     }
 }

@@ -34,6 +34,7 @@ import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IParametersParameterComponentAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
 import org.opencds.cqf.fhir.utility.client.TerminologyServerClient;
 import org.slf4j.Logger;
@@ -234,8 +235,12 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
         missingInCache.forEach(valueSet -> {
             var url = valueSet.getUrl();
             var expansionStartTime = new Date().getTime();
-            params.getParameter().removeIf(p -> p.getName().equals(TerminologyServerClient.urlParamName));
-            params.getParameter().removeIf(p -> p.getName().equals(TerminologyServerClient.versionParamName));
+            params.setParameter(params.getParameter().stream()
+                    .filter(p -> !List.of(
+                                    TerminologyServerClient.urlParamName, TerminologyServerClient.versionParamName)
+                            .contains(p.getName()))
+                    .map(IParametersParameterComponentAdapter::get)
+                    .toList());
             expandHelper.expandValueSet(valueSet, params, terminologyEndpoint, valueSets, expandedList, new Date());
             var elapsed = String.valueOf(((new Date()).getTime() - expansionStartTime) / 1000);
             myLogger.info("Expanded {} in {}s", url, elapsed);

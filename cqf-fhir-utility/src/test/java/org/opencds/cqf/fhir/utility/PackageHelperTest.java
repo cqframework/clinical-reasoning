@@ -8,7 +8,7 @@ import static org.opencds.cqf.fhir.utility.PackageHelper.packageParameters;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import org.junit.jupiter.api.Test;
 
-public class PackageHelperTest {
+class PackageHelperTest {
 
     @Test
     void testPackageParameters() {

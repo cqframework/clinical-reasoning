@@ -61,8 +61,8 @@ class LibraryOperationsProviderIT extends BaseCrR4TestServer {
         loadBundle("org/opencds/cqf/fhir/cr/hapi/r4/Bundle-GenerateQuestionnaireContent.json");
         loadBundle("org/opencds/cqf/fhir/cr/hapi/r4/Bundle-GenerateQuestionnaireStructures.json");
         var requestDetails = setupRequestDetails();
-        var result =
-                libraryPackageProvider.packageLibrary("Library/ASLPDataElements", null, null, null, null, null, requestDetails);
+        var result = libraryPackageProvider.packageLibrary(
+                "Library/ASLPDataElements", null, null, null, null, null, requestDetails);
         assertInstanceOf(Bundle.class, result);
     }
 }

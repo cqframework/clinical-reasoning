@@ -234,6 +234,8 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
         missingInCache.forEach(valueSet -> {
             var url = valueSet.getUrl();
             var expansionStartTime = new Date().getTime();
+            params.getParameter().removeIf(p -> p.getName().equals(TerminologyServerClient.urlParamName));
+            params.getParameter().removeIf(p -> p.getName().equals(TerminologyServerClient.versionParamName));
             expandHelper.expandValueSet(valueSet, params, terminologyEndpoint, valueSets, expandedList, new Date());
             var elapsed = String.valueOf(((new Date()).getTime() - expansionStartTime) / 1000);
             myLogger.info("Expanded {} in {}s", url, elapsed);

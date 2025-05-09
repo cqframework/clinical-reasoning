@@ -22,6 +22,7 @@ import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Optional;
@@ -552,6 +553,14 @@ class ReleaseVisitorTests {
         var library = repo.read(Library.class, new IdType("Library/ReleaseSpecificationLibrary"))
                 .copy();
         var libraryAdapter = new AdapterFactory().createLibrary(library);
+        try {
+            libraryAdapter.accept(releaseVisitor, params1);
+        } catch (Exception e) {
+            actualErrorMessage = e.getMessage();
+        }
+        assertTrue(actualErrorMessage.contains("last modified date (indicated by date)"));
+
+        libraryAdapter.setDate(new Date());
         try {
             libraryAdapter.accept(releaseVisitor, params1);
         } catch (Exception e) {

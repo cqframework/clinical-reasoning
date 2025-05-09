@@ -6,12 +6,14 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Parameters;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.hapi.r4.library.LibraryDataRequirementsProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.library.LibraryEvaluateProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.library.LibraryPackageProvider;
+import org.opencds.cqf.fhir.cr.hapi.r4.library.LibraryReleaseProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 
 class LibraryOperationsProviderIT extends BaseCrR4TestServer {
@@ -23,6 +25,9 @@ class LibraryOperationsProviderIT extends BaseCrR4TestServer {
 
     @Autowired
     LibraryPackageProvider libraryPackageProvider;
+
+    @Autowired
+    LibraryReleaseProvider libraryReleaseProvider;
 
     @Test
     void testEvaluateLibrary() {
@@ -63,6 +68,15 @@ class LibraryOperationsProviderIT extends BaseCrR4TestServer {
         var requestDetails = setupRequestDetails();
         var result = libraryPackageProvider.packageLibrary(
                 "Library/ASLPDataElements", null, null, null, null, null, requestDetails);
+        assertInstanceOf(Bundle.class, result);
+    }
+
+    @Test
+    void testRelease() {
+        loadBundle("org/opencds/cqf/fhir/cr/hapi/r4/Bundle-GenerateQuestionnaireContent.json");
+        var requestDetails = setupRequestDetails();
+        var result = libraryReleaseProvider.releaseLibrary(
+                "Library/ASLPDataElements", "1.0.0", new CodeType("default"), null, null, null, null, requestDetails);
         assertInstanceOf(Bundle.class, result);
     }
 }

@@ -587,6 +587,14 @@ class ReleaseVisitorTests {
         } catch (Exception e) {
             actualErrorMessage = e.getMessage();
         }
+        assertTrue(actualErrorMessage.contains("last modified date (indicated by date)"));
+
+        libraryAdapter.setDate(new Date());
+        try {
+            libraryAdapter.accept(releaseVisitor, params1);
+        } catch (Exception e) {
+            actualErrorMessage = e.getMessage();
+        }
         assertTrue(actualErrorMessage.contains("approvalDate"));
     }
 

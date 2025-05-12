@@ -7,6 +7,7 @@ import static org.mockito.Mockito.doReturn;
 import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.PlanDefinition;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,7 +35,8 @@ class PackageProcessorTests {
     @Test
     void testPOST() {
         var resource = new PlanDefinition().setId("test");
-        var bundle = packageProcessor.packageResource(resource);
+        var params = new Parameters();
+        var bundle = packageProcessor.packageResource(resource, params);
         assertNotNull(bundle);
         var entry = (BundleEntryComponent) BundleHelper.getEntryFirstRep(bundle);
         assertEquals(HTTPVerb.POST, entry.getRequest().getMethod());
@@ -44,7 +46,8 @@ class PackageProcessorTests {
     @Test
     void testPUT() {
         var resource = new PlanDefinition().setId("test");
-        var bundle = packageProcessor.packageResource(resource, "PUT");
+        var params = new Parameters().addParameter("isPut", true);
+        var bundle = packageProcessor.packageResource(resource, params);
         assertNotNull(bundle);
         var entry = (BundleEntryComponent) BundleHelper.getEntryFirstRep(bundle);
         assertEquals(HTTPVerb.PUT, entry.getRequest().getMethod());

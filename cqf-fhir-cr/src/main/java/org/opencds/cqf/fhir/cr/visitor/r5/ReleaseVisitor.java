@@ -16,15 +16,20 @@ import org.hl7.fhir.r5.model.ArtifactAssessment;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r5.model.Extension;
+import org.hl7.fhir.r5.model.Library;
+import org.hl7.fhir.r5.model.Measure;
 import org.hl7.fhir.r5.model.MetadataResource;
 import org.hl7.fhir.r5.model.Period;
+import org.hl7.fhir.r5.model.Reference;
 import org.hl7.fhir.r5.model.RelatedArtifact.RelatedArtifactType;
 import org.hl7.fhir.r5.model.ResourceType;
 import org.hl7.fhir.r5.model.StringType;
 import org.hl7.fhir.r5.model.ValueSet;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.opencds.cqf.fhir.cr.visitor.r5.CRMIReleaseExperimentalBehavior.CRMIReleaseExperimentalBehaviorCodes;
 import org.opencds.cqf.fhir.cr.visitor.r5.CRMIReleaseVersionBehavior.CRMIReleaseVersionBehaviorCodes;
+import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.PackageHelper;
 import org.opencds.cqf.fhir.utility.SearchHelper;
 import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
@@ -142,5 +147,20 @@ public class ReleaseVisitor {
                     returnEntries.add((BundleEntryComponent) PackageHelper.createEntry(artifactComment, true));
                 });
         return returnEntries;
+    }
+
+    public static void extractDirectReferenceCodes(IKnowledgeArtifactAdapter rootAdapter, Measure measure) {
+        Optional<Extension> effectiveDataRequirementsExt = measure.getExtension().stream()
+                .filter(ext -> ext.getUrl().equals(Constants.CQFM_EFFECTIVE_DATA_REQUIREMENTS))
+                .findFirst();
+        if (effectiveDataRequirementsExt.isPresent()) {
+            Reference ref = effectiveDataRequirementsExt.get().getValueReference();
+            Library effectiveDataRequirementsLib = (Library) measure.getContained("#" + ref.getReference());
+            if (effectiveDataRequirementsLib != null) {
+                effectiveDataRequirementsLib.getExtension().stream()
+                        .filter(ext -> ext.getUrl().equals(MeasureConstants.CQF_DIRECT_REFERENCE_EXTENSION))
+                        .forEach(rootAdapter::addExtension);
+            }
+        }
     }
 }

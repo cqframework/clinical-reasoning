@@ -43,4 +43,9 @@ public class MeasureConstants {
     public static final String FHIR_ALL_TYPES_SYSTEM_URL = "http://hl7.org/fhir/fhir-types";
     public static final String POPULATION_BASIS_URL =
             "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-populationBasis";
+
+    public static final String CQFM_DIRECT_REFERENCE_EXTENSION =
+            "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-directReferenceCode";
+    public static final String CQF_DIRECT_REFERENCE_EXTENSION =
+            "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqf-directReferenceCode";
 }

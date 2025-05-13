@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.cqframework.cql.cql2elm.CqlIncludeException;
@@ -34,7 +35,10 @@ import org.opencds.cqf.fhir.cr.measure.common.SubjectProvider;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4DateHelper;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.Canonicals;
+import org.opencds.cqf.fhir.utility.adapter.IMeasureAdapter;
 import org.opencds.cqf.fhir.utility.monad.Either3;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
+import org.opencds.cqf.fhir.utility.npm.NpmResourceInfoForCql;
 import org.opencds.cqf.fhir.utility.repository.FederatedRepository;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.search.Searches;
@@ -44,17 +48,20 @@ public class R4MeasureProcessor {
     private final MeasureEvaluationOptions measureEvaluationOptions;
     private final SubjectProvider subjectProvider;
     private final R4MeasureServiceUtils r4MeasureServiceUtils;
+    private final NpmPackageLoader npmPackageLoader;
 
     public R4MeasureProcessor(
             Repository repository,
             MeasureEvaluationOptions measureEvaluationOptions,
             SubjectProvider subjectProvider,
-            R4MeasureServiceUtils r4MeasureServiceUtils) {
+            R4MeasureServiceUtils r4MeasureServiceUtils,
+            NpmPackageLoader npmPackageLoader) {
         this.repository = Objects.requireNonNull(repository);
         this.measureEvaluationOptions =
                 measureEvaluationOptions != null ? measureEvaluationOptions : MeasureEvaluationOptions.defaultOptions();
         this.subjectProvider = subjectProvider;
         this.r4MeasureServiceUtils = r4MeasureServiceUtils;
+        this.npmPackageLoader = npmPackageLoader;
     }
 
     public MeasureReport evaluateMeasure(
@@ -88,9 +95,32 @@ public class R4MeasureProcessor {
             IBaseBundle additionalData,
             Parameters parameters,
             MeasureEvalType evalType) {
-        var m = measure.fold(this::resolveByUrl, this::resolveById, Function.identity());
-        return this.evaluateMeasure(
-                m, periodStart, periodEnd, reportType, subjectIds, additionalData, parameters, evalType);
+        var npmResourceHolder = measure.isLeft()
+                ? npmPackageLoader.loadNpmResources(measure.leftOrThrow())
+                : NpmResourceInfoForCql.EMPTY;
+
+        var retrievedMeasure = getMeasure(measure, npmResourceHolder);
+
+        return evaluateMeasure(
+                retrievedMeasure,
+                periodStart,
+                periodEnd,
+                reportType,
+                subjectIds,
+                additionalData,
+                parameters,
+                evalType,
+                npmResourceHolder);
+    }
+
+    private Measure getMeasure(
+            Either3<CanonicalType, IdType, Measure> measure, NpmResourceInfoForCql npmResourceInfoForCql) {
+        final Optional<IMeasureAdapter> optMeasure = npmResourceInfoForCql.getMeasure();
+        if (optMeasure.isPresent() && optMeasure.get().get() instanceof Measure measureFromNpm) {
+            return measureFromNpm;
+        }
+
+        return measure.fold(this::resolveByUrl, this::resolveById, Function.identity());
     }
 
     protected MeasureReport evaluateMeasure(
@@ -101,7 +131,8 @@ public class R4MeasureProcessor {
             List<String> subjectIds,
             IBaseBundle additionalData,
             Parameters parameters,
-            MeasureEvalType evalType) {
+            MeasureEvalType evalType,
+            NpmResourceInfoForCql npmResourceInfoForCql) {
 
         if (!measure.hasLibrary()) {
             throw new InvalidRequestException(
@@ -116,15 +147,22 @@ public class R4MeasureProcessor {
 
         var url = measure.getLibrary().get(0).asStringValue();
 
-        Bundle b = this.repository.search(Bundle.class, Library.class, Searches.byCanonical(url), null);
-        if (b.getEntry().isEmpty()) {
-            var errorMsg = String.format("Unable to find Library with url: %s", url);
-            throw new ResourceNotFoundException(errorMsg);
+        // Check to see if this Library exists in an NPM Package.  If not, search the Repository
+        if (npmResourceInfoForCql.getOptMainLibrary().isEmpty()) {
+            Bundle b = this.repository.search(Bundle.class, Library.class, Searches.byCanonical(url), null);
+            if (b.getEntry().isEmpty()) {
+                var errorMsg = String.format("Unable to find Library with url: %s", url);
+                throw new ResourceNotFoundException(errorMsg);
+            }
         }
 
         var id = VersionedIdentifiers.forUrl(url);
         var context = Engines.forRepository(
-                this.repository, this.measureEvaluationOptions.getEvaluationSettings(), additionalData);
+                this.repository,
+                this.measureEvaluationOptions.getEvaluationSettings(),
+                additionalData,
+                npmResourceInfoForCql,
+                npmPackageLoader);
 
         CompiledLibrary lib;
         try {
@@ -169,6 +207,7 @@ public class R4MeasureProcessor {
     }
 
     protected Measure resolveByUrl(CanonicalType url) {
+
         var parts = Canonicals.getParts(url);
         var result = this.repository.search(
                 Bundle.class, Measure.class, Searches.byNameAndVersion(parts.idPart(), parts.version()));

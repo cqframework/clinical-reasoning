@@ -28,6 +28,8 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
 import org.opencds.cqf.fhir.cr.measure.common.SubjectProvider;
 import org.opencds.cqf.fhir.cr.measure.helper.DateHelper;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
+import org.opencds.cqf.fhir.utility.npm.NpmResourceInfoForCql;
 import org.opencds.cqf.fhir.utility.repository.FederatedRepository;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
@@ -89,7 +91,12 @@ public class Dstu3MeasureProcessor {
 
         var id = new VersionedIdentifier().withId(library.getName()).withVersion(library.getVersion());
         var context = Engines.forRepository(
-                this.repository, this.measureEvaluationOptions.getEvaluationSettings(), additionalData);
+                this.repository,
+                this.measureEvaluationOptions.getEvaluationSettings(),
+                additionalData,
+                // we currently don't have a need for NPM Packages in DSTU3
+                NpmResourceInfoForCql.EMPTY,
+                NpmPackageLoader.DEFAULT);
 
         CompiledLibrary lib;
         try {

@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.utility.iterable;
 
+import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.bundle.BundleEntryParts;
 import java.util.Collections;
@@ -7,16 +8,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.opencds.cqf.fhir.api.Repository;
 
 public class BundleIterator<B extends IBaseBundle> implements Iterator<BundleEntryParts> {
 
-    protected final Repository repository;
+    protected final IRepository repository;
     protected B bundle;
     protected int index = 0;
     protected List<BundleEntryParts> parts;
 
-    public BundleIterator(Repository repository, B bundle) {
+    public BundleIterator(IRepository repository, B bundle) {
         this.repository = repository;
         this.bundle = bundle;
         this.parts = BundleUtil.toListOfEntries(repository.fhirContext(), bundle);

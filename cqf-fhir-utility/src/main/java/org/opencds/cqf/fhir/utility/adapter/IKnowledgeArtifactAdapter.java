@@ -9,6 +9,7 @@ import static org.opencds.cqf.fhir.utility.adapter.IAdapter.newStringType;
 import static org.opencds.cqf.fhir.utility.adapter.IAdapter.newUriType;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.Date;
 import java.util.List;
@@ -28,7 +29,6 @@ import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.Constants;
@@ -361,7 +361,7 @@ public interface IKnowledgeArtifactAdapter extends IResourceAdapter {
         return resolveCqfLibraries();
     }
 
-    default Map<String, ILibraryAdapter> retrieveReferencedLibraries(Repository repository) {
+    default Map<String, ILibraryAdapter> retrieveReferencedLibraries(IRepository repository) {
         return getReferencedLibraries().values().stream()
                 .map(url -> getAdapterFactory()
                         .createLibrary(SearchHelper.searchRepositoryByCanonical(

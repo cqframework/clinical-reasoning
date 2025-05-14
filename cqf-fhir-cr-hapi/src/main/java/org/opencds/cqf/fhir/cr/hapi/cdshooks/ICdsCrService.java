@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.cr.hapi.cdshooks;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestJson;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
@@ -9,7 +10,6 @@ import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseJson;
 import java.util.Collections;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.opencds.cqf.fhir.api.Repository;
 
 public interface ICdsCrService {
     IBaseParameters encodeParams(CdsServiceRequestJson json);
@@ -18,7 +18,7 @@ public interface ICdsCrService {
 
     FhirVersionEnum getFhirVersion();
 
-    Repository getRepository();
+    IRepository getRepository();
 
     default Object invoke(IModelJson json) {
         IBaseParameters params = encodeParams((CdsServiceRequestJson) json);

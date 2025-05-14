@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cr.visitor;
 import static org.opencds.cqf.fhir.utility.adapter.IAdapterFactory.createAdapterForResource;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
@@ -26,7 +27,6 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.Constants;
@@ -50,12 +50,12 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
     private static final String VALUESET = "ValueSet";
     protected final TerminologyServerClient terminologyServerClient;
 
-    public ReleaseVisitor(Repository repository) {
+    public ReleaseVisitor(IRepository repository) {
         super(repository);
         terminologyServerClient = new TerminologyServerClient(fhirContext());
     }
 
-    public ReleaseVisitor(Repository repository, TerminologyServerClient terminologyServerClient) {
+    public ReleaseVisitor(IRepository repository, TerminologyServerClient terminologyServerClient) {
         super(repository);
         this.terminologyServerClient = terminologyServerClient;
     }
@@ -491,7 +491,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
     }
 
     private void checkNonExperimental(
-            IDomainResource resource, Optional<String> experimentalBehavior, Repository repository)
+            IDomainResource resource, Optional<String> experimentalBehavior, IRepository repository)
             throws UnprocessableEntityException {
         if (resource instanceof org.hl7.fhir.dstu3.model.MetadataResource) {
             var code = experimentalBehavior.isPresent()
@@ -539,7 +539,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
         }
     }
 
-    private IKnowledgeArtifactAdapter getArtifactByCanonical(String inputReference, Repository repository) {
+    private IKnowledgeArtifactAdapter getArtifactByCanonical(String inputReference, IRepository repository) {
         List<IKnowledgeArtifactAdapter> matchingResources = VisitorHelper.getMetadataResourcesFromBundle(
                         SearchHelper.searchRepositoryByCanonicalWithPaging(repository, inputReference))
                 .stream()

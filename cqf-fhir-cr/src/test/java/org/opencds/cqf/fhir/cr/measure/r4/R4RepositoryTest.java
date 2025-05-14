@@ -5,12 +5,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import com.google.common.collect.Multimap;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -19,12 +23,11 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 class R4RepositoryTest {
 
-    Repository repository;
+    IRepository repository;
     Path path = Paths.get(getResourcePath(R4RepositoryTest.class));
 
     public R4RepositoryTest() {
@@ -57,7 +60,8 @@ class R4RepositoryTest {
 
     @Test
     void search() {
-        IBaseBundle bundle = repository.search(IBaseBundle.class, Library.class, null, null);
+        IBaseBundle bundle = repository.search(
+                IBaseBundle.class, Library.class, (Multimap<String, List<IQueryParameterType>>) null, null);
         assertEquals(6, ((Bundle) bundle).getEntry().size());
     }
 }

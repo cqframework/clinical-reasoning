@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.hapi.config;
 
+import ca.uhn.fhir.rest.api.server.IRepositoryFactory;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cr.activitydefinition.ActivityDefinitionProcessor;
 import org.opencds.cqf.fhir.cr.hapi.common.IActivityDefinitionProcessorFactory;
@@ -7,7 +8,6 @@ import org.opencds.cqf.fhir.cr.hapi.common.ILibraryProcessorFactory;
 import org.opencds.cqf.fhir.cr.hapi.common.IPlanDefinitionProcessorFactory;
 import org.opencds.cqf.fhir.cr.hapi.common.IQuestionnaireProcessorFactory;
 import org.opencds.cqf.fhir.cr.hapi.common.IQuestionnaireResponseProcessorFactory;
-import org.opencds.cqf.fhir.cr.hapi.common.IRepositoryFactory;
 import org.opencds.cqf.fhir.cr.hapi.common.IValueSetProcessorFactory;
 import org.opencds.cqf.fhir.cr.library.LibraryProcessor;
 import org.opencds.cqf.fhir.cr.plandefinition.PlanDefinitionProcessor;

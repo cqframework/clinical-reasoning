@@ -4,6 +4,7 @@ import static java.util.Objects.requireNonNull;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.fhirpath.IFhirPath;
+import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.util.BundleUtil;
 import java.util.Collections;
 import java.util.Comparator;
@@ -19,7 +20,6 @@ import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.cql.engine.terminology.CodeSystemInfo;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 import org.opencds.cqf.cql.engine.terminology.ValueSetInfo;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_PRE_EXPANSION_MODE;
 import org.opencds.cqf.fhir.utility.FhirPathCache;
@@ -40,7 +40,7 @@ public class RepositoryTerminologyProvider implements TerminologyProvider {
 
     private static final Comparator<Code> CODE_COMPARATOR =
             (x, y) -> x.getCode().compareTo(y.getCode());
-    private final Repository repository;
+    private final IRepository repository;
     private final FhirContext fhirContext;
     private final IFhirPath fhirPath;
     private final Map<String, List<Code>> valueSetIndex;
@@ -61,12 +61,12 @@ public class RepositoryTerminologyProvider implements TerminologyProvider {
         public final int end;
     }
 
-    public RepositoryTerminologyProvider(Repository repository, TerminologySettings terminologySettings) {
+    public RepositoryTerminologyProvider(IRepository repository, TerminologySettings terminologySettings) {
         this(repository, new HashMap<>(), terminologySettings);
     }
 
     public RepositoryTerminologyProvider(
-            Repository repository, Map<String, List<Code>> valueSetIndex, TerminologySettings terminologySettings) {
+            IRepository repository, Map<String, List<Code>> valueSetIndex, TerminologySettings terminologySettings) {
         this.repository = requireNonNull(repository, "repository can not be null.");
         this.valueSetIndex = requireNonNull(valueSetIndex, "valueSetIndex can not be null.");
         this.terminologySettings = requireNonNull(terminologySettings, "terminologySettings can not be null.");
@@ -75,7 +75,7 @@ public class RepositoryTerminologyProvider implements TerminologyProvider {
         this.fhirPath = FhirPathCache.cachedForContext(fhirContext);
     }
 
-    public RepositoryTerminologyProvider(Repository repository) {
+    public RepositoryTerminologyProvider(IRepository repository) {
         this(repository, new HashMap<>(), new TerminologySettings());
     }
 

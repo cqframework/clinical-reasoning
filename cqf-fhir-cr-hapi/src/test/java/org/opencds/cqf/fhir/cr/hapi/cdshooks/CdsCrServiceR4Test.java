@@ -34,8 +34,7 @@ class CdsCrServiceR4Test extends BaseCdsCrServiceTest {
         repository = new InMemoryFhirRepository(fhirContext);
         adapterFactory = IAdapterFactory.forFhirContext(fhirContext);
         objectMapper = new CdsHooksObjectMapperFactory(fhirContext).newMapper();
-        cdsConfigService = getCdsConfigService();
-        testSubject = new CdsCrService(REQUEST_DETAILS, repository, cdsConfigService);
+        testSubject = new CdsCrService(REQUEST_DETAILS, repository);
     }
 
     @Test
@@ -61,7 +60,7 @@ class CdsCrServiceR4Test extends BaseCdsCrServiceTest {
         final IdType planDefinitionId = new IdType(PLAN_DEFINITION_RESOURCE_NAME, "ASLPCrd");
         requestDetails.setId(planDefinitionId);
         final var params = adapterFactory.createParameters(
-                new CdsCrService(requestDetails, repository, cdsConfigService).encodeParams(cdsServiceRequestJson));
+                new CdsCrService(requestDetails, repository).encodeParams(cdsServiceRequestJson));
 
         assertEquals(2, params.getParameter().size());
         assertTrue((params.getParameter("parameters")).hasResource());
@@ -81,7 +80,7 @@ class CdsCrServiceR4Test extends BaseCdsCrServiceTest {
         final IdType planDefinitionId = new IdType(PLAN_DEFINITION_RESOURCE_NAME, "ASLPCrd");
         requestDetails.setId(planDefinitionId);
         final CdsServiceResponseJson cdsServiceResponseJson =
-                new CdsCrService(requestDetails, repository, cdsConfigService).encodeResponse(response);
+                new CdsCrService(requestDetails, repository).encodeResponse(response);
 
         assertEquals(1, cdsServiceResponseJson.getCards().size());
         assertFalse(cdsServiceResponseJson.getCards().get(0).getSummary().isEmpty());

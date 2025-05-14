@@ -15,7 +15,6 @@ import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestJson;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.hapi.fhir.cdshooks.api.ICdsConfigService;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceIndicatorEnum;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseCardJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseCardSourceJson;
@@ -53,13 +52,11 @@ import org.opencds.cqf.fhir.utility.adapter.IResourceAdapter;
 public class CdsCrService implements ICdsCrService {
     protected final RequestDetails requestDetails;
     protected final IRepository repository;
-    protected final ICdsConfigService cdsConfigService;
     protected final IAdapterFactory adapterFactory;
     protected IResourceAdapter responseAdapter;
     protected CdsServiceResponseJson serviceResponse;
 
-    public CdsCrService(RequestDetails requestDetails, IRepository repository, ICdsConfigService cdsConfigService) {
-        this.cdsConfigService = cdsConfigService;
+    public CdsCrService(RequestDetails requestDetails, IRepository repository) {
         this.requestDetails = requestDetails;
         this.repository = repository;
         adapterFactory = IAdapterFactory.forFhirContext(this.repository.fhirContext());

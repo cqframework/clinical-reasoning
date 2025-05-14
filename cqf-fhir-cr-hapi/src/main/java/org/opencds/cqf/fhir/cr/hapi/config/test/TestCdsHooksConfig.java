@@ -73,6 +73,7 @@ public class TestCdsHooksConfig {
 
     @Bean
     CdsPrefetchSvc cdsPrefetchSvc(
+            FhirContext fhirContext,
             CdsResolutionStrategySvc cdsResolutionStrategySvc,
             CdsPrefetchDaoSvc resourcePrefetchDao,
             CdsPrefetchFhirClientSvc resourcePrefetchFhirClient,
@@ -83,6 +84,7 @@ public class TestCdsHooksConfig {
                 resourcePrefetchDao,
                 resourcePrefetchFhirClient,
                 cdsHooksDaoAuthorizationSvc,
+                fhirContext,
                 interceptorBroadcaster);
     }
 

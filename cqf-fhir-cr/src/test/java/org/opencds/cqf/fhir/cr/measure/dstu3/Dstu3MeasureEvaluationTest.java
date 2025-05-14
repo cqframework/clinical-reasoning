@@ -269,7 +269,7 @@ class Dstu3MeasureEvaluationTest extends BaseMeasureEvaluationTest {
                 .collect(Collectors.toMap(r -> r.getClass().getSimpleName(), Function.identity()));
 
         ListResource list = (ListResource) contained.get("ListResource");
-        assertEquals(list.getIdElement().getIdPart(), listRef);
+        assertEquals(list.getIdElement().getIdPart(), listRef.replace("#", ""));
 
         Observation obs = (Observation) contained.get("Observation");
         assertEquals(

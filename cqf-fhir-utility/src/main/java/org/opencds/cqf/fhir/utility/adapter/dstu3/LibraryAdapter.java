@@ -191,8 +191,7 @@ public class LibraryAdapter extends KnowledgeArtifactAdapter implements ILibrary
                 .map(ref -> {
                     if (getLibrary().hasContained()) {
                         return getLibrary().getContained().stream()
-                                .filter(containedResource ->
-                                        containedResource.getId().equals(ref))
+                                .filter(containedResource -> ref.equals("#" + containedResource.getId()))
                                 .filter(IBaseParameters.class::isInstance)
                                 .map(IBaseParameters.class::cast)
                                 .findFirst()
@@ -226,14 +225,14 @@ public class LibraryAdapter extends KnowledgeArtifactAdapter implements ILibrary
         if (existingExpansionParameters.isPresent()) {
             ((Parameters) existingExpansionParameters.get()).setParameter(newParameters);
         } else {
-            var id = "#exp-params";
+            var id = "exp-params";
             var newExpansionParameters = new Parameters();
             newExpansionParameters.setParameter(newParameters);
             newExpansionParameters.setId(id);
             getLibrary().addContained(newExpansionParameters);
             var expansionParamsExt = getLibrary().addExtension();
             expansionParamsExt.setUrl(Constants.CQF_EXPANSION_PARAMETERS);
-            expansionParamsExt.setValue(new Reference(id));
+            expansionParamsExt.setValue(new Reference("#" + id));
         }
     }
 }

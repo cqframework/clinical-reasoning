@@ -47,5 +47,5 @@ public class MeasureConstants {
     public static final String CQFM_DIRECT_REFERENCE_EXTENSION =
             "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-directReferenceCode";
     public static final String CQF_DIRECT_REFERENCE_EXTENSION =
-            "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqf-directReferenceCode";
+            "http://hl7.org/fhir/StructureDefinition/cqf-directReferenceCode";
 }

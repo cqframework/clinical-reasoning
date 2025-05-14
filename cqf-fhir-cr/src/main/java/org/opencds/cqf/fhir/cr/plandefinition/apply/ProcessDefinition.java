@@ -218,9 +218,14 @@ public class ProcessDefinition {
     protected IBaseResource resolveContained(ApplyRequest request, String id) {
         requireNonNull(id);
         var contained = request.resolvePathList(request.getPlanDefinition(), "contained", IBaseResource.class);
+        var containedId = getContainedId(id);
         var first = contained.stream()
-                .filter(r -> r.getIdElement().getIdPart().equals(id))
+                .filter(r -> getContainedId(r.getIdElement().getIdPart()).equals(containedId))
                 .findFirst();
         return first.orElse(null);
+    }
+
+    private String getContainedId(String id) {
+        return id.replaceFirst("#", "");
     }
 }

@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.plandefinition.apply;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -16,6 +17,7 @@ import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Expression;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.PlanDefinition.ActionConditionKind;
 import org.hl7.fhir.r4.model.PlanDefinition.PlanDefinitionActionComponent;
 import org.hl7.fhir.r4.model.RequestGroup;
@@ -158,14 +160,16 @@ class ProcessActionTests {
     @Test
     void testProcessChildActionsApplicabilityBehavior() {
         var action = new org.hl7.fhir.r4.model.PlanDefinition.PlanDefinitionActionComponent();
-        action.addExtension(CQF_APPLICABILITY_BEHAVIOR, new CodeType("any"));
+        action.setId("action1");
         var expression = new Expression().setLanguage("text/cql-expression").setExpression("1 = 1");
-        action.addCondition().setKind(ActionConditionKind.APPLICABILITY).setExpression(expression);
         var childAction1 = new PlanDefinitionActionComponent();
+        childAction1.setId("child1");
         childAction1.addCondition().setKind(ActionConditionKind.APPLICABILITY).setExpression(expression);
         var childAction2 = new PlanDefinitionActionComponent();
+        childAction2.setId("child2");
         childAction2.addCondition().setKind(ActionConditionKind.APPLICABILITY).setExpression(expression);
         var childAction3 = new PlanDefinitionActionComponent();
+        childAction3.setId("child3");
         childAction3.addCondition().setKind(ActionConditionKind.APPLICABILITY).setExpression(expression);
         action.setAction(List.of(childAction1, childAction2, childAction3));
 
@@ -178,6 +182,31 @@ class ProcessActionTests {
                 .when(libraryEngine)
                 .resolveExpression(eq(RequestHelpers.PATIENT_ID), any(), eq(null), any(), eq(null), any(), eq(null));
         fixture.processChildActions(request, requestOrchestration, metConditions, action, requestAction);
-        Assertions.assertEquals(1, requestAction.getAction().size());
+        assertEquals(3, requestAction.getAction().size());
+
+        requestAction.setAction(null);
+        assertTrue(requestAction.getAction().isEmpty());
+        metConditions = new HashMap<String, IBaseBackboneElement>();
+        action.addExtension(CQF_APPLICABILITY_BEHAVIOR, new CodeType("any"));
+        fixture.processChildActions(request, requestOrchestration, metConditions, action, requestAction);
+        assertEquals(1, requestAction.getAction().size());
+    }
+
+    @Test
+    void testProcessChildActionsDoesNotThrowOnInvalidApplicabilityBehavior() {
+        var action = new org.hl7.fhir.r4.model.PlanDefinition.PlanDefinitionActionComponent();
+        action.addExtension(CQF_APPLICABILITY_BEHAVIOR, new BooleanType(true));
+
+        var requestOrchestration = new RequestGroup();
+        var requestAction = (RequestGroupActionComponent) fixture.generateRequestActionR4(action);
+        var request = RequestHelpers.newPDApplyRequestForVersion(
+                FhirVersionEnum.R4, libraryEngine, null, inputParameterResolver);
+        var metConditions = new HashMap<String, IBaseBackboneElement>();
+        fixture.processChildActions(request, requestOrchestration, metConditions, action, requestAction);
+        assertTrue(requestAction.getAction().isEmpty());
+
+        action.setExtension(List.of(new Extension(CQF_APPLICABILITY_BEHAVIOR, new CodeType("bad"))));
+        fixture.processChildActions(request, requestOrchestration, metConditions, action, requestAction);
+        assertTrue(requestAction.getAction().isEmpty());
     }
 }

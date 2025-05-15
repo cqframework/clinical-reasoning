@@ -75,6 +75,10 @@ public class ProcessAction {
             Map<String, IBaseBackboneElement> metConditions,
             IBaseBackboneElement action,
             IBaseBackboneElement requestAction) {
+        var childActions = request.resolvePathList(action, "action", IBaseBackboneElement.class);
+        if (childActions.isEmpty()) {
+            return;
+        }
         var applicabilityBehavior = CqfApplicabilityBehavior.ALL;
         var applicabilityBehaviorExt = request.getExtensionByUrl(action, CQF_APPLICABILITY_BEHAVIOR);
         if (applicabilityBehaviorExt != null
@@ -83,13 +87,14 @@ public class ProcessAction {
                 applicabilityBehavior = CqfApplicabilityBehavior.valueOf(
                         primitiveType.getValueAsString().toUpperCase());
             } catch (IllegalArgumentException e) {
-                logger.warn(
-                        "Encountered invalid value for applicabilityBehavior extension {}.  Expected `all` or `any`.",
+                var message = String.format(
+                        "Encountered invalid value for applicabilityBehavior extension %s.  Expected `all` or `any`.",
                         primitiveType.getValueAsString());
+                logger.error(message);
+                request.logException(message);
             }
         }
         var metConditionsCount = metConditions.size();
-        var childActions = request.resolvePathList(action, "action", IBaseBackboneElement.class);
         for (var childAction : childActions) {
             var childRequestAction = processAction(request, requestOrchestration, metConditions, childAction);
             if (childRequestAction != null) {

@@ -48,7 +48,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
 import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.opencds.cqf.fhir.cr.visitor.ReleaseVisitor;
 import org.opencds.cqf.fhir.cr.visitor.VisitorHelper;
 import org.opencds.cqf.fhir.utility.Canonicals;
@@ -281,7 +280,7 @@ class ReleaseVisitorTests {
         Library releasedLibrary =
                 repo.read(Library.class, new IdType(maybeLib.get().getResponse().getLocation()));
         var directReferenceExtensions = releasedLibrary.getExtension().stream()
-                .filter(ext -> ext.getUrl().equals(MeasureConstants.CQF_DIRECT_REFERENCE_EXTENSION))
+                .filter(ext -> ext.getUrl().equals(Constants.CQF_DIRECT_REFERENCE_EXTENSION))
                 .toList();
 
         assertEquals(18, directReferenceExtensions.size());

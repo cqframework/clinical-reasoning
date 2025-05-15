@@ -26,7 +26,6 @@ import org.hl7.fhir.r5.model.ResourceType;
 import org.hl7.fhir.r5.model.StringType;
 import org.hl7.fhir.r5.model.ValueSet;
 import org.opencds.cqf.fhir.api.Repository;
-import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.opencds.cqf.fhir.cr.visitor.r5.CRMIReleaseExperimentalBehavior.CRMIReleaseExperimentalBehaviorCodes;
 import org.opencds.cqf.fhir.cr.visitor.r5.CRMIReleaseVersionBehavior.CRMIReleaseVersionBehaviorCodes;
 import org.opencds.cqf.fhir.utility.Constants;
@@ -158,7 +157,7 @@ public class ReleaseVisitor {
             Library effectiveDataRequirementsLib = (Library) measure.getContained("#" + ref.getReference());
             if (effectiveDataRequirementsLib != null) {
                 effectiveDataRequirementsLib.getExtension().stream()
-                        .filter(ext -> ext.getUrl().equals(MeasureConstants.CQF_DIRECT_REFERENCE_EXTENSION))
+                        .filter(ext -> ext.getUrl().equals(Constants.CQF_DIRECT_REFERENCE_EXTENSION))
                         .forEach(rootAdapter::addExtension);
             }
         }

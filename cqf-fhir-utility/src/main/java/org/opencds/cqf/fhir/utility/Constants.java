@@ -73,6 +73,14 @@ public class Constants {
     public static final String CQIF_LIBRARY = "http://hl7.org/fhir/StructureDefinition/cqif-library";
     public static final String CQIF_CQL_EXPRESSION = "http://hl7.org/fhir/StructureDefinition/cqif-cqlExpression";
 
+    public static final String CQF_APPLICABILITY_BEHAVIOR =
+            "http://hl7.org/fhir/StructureDefinition/cqf-applicabilityBehavior";
+
+    public enum CqfApplicabilityBehavior {
+        ALL,
+        ANY
+    }
+
     public static final String CQF_CQL_OPTIONS = "http://hl7.org/fhir/StructureDefinition/cqf-cqlOptions";
     public static final String CQF_EXPANSION_PARAMETERS =
             "http://hl7.org/fhir/StructureDefinition/cqf-expansionParameters";

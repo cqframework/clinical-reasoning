@@ -17,7 +17,6 @@ import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Expression;
-import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.PlanDefinition.ActionConditionKind;
 import org.hl7.fhir.r4.model.PlanDefinition.PlanDefinitionActionComponent;
 import org.hl7.fhir.r4.model.RequestGroup;
@@ -157,8 +156,7 @@ class ProcessActionTests {
         assertNull(request.getOperationOutcome());
     }
 
-    @Test
-    void testProcessChildActionsApplicabilityBehavior() {
+    org.hl7.fhir.r4.model.PlanDefinition.PlanDefinitionActionComponent actionWithChildren() {
         var action = new org.hl7.fhir.r4.model.PlanDefinition.PlanDefinitionActionComponent();
         action.setId("action1");
         var expression = new Expression().setLanguage("text/cql-expression").setExpression("1 = 1");
@@ -172,7 +170,12 @@ class ProcessActionTests {
         childAction3.setId("child3");
         childAction3.addCondition().setKind(ActionConditionKind.APPLICABILITY).setExpression(expression);
         action.setAction(List.of(childAction1, childAction2, childAction3));
+        return action;
+    }
 
+    @Test
+    void testProcessChildActionsApplicabilityBehavior() {
+        var action = actionWithChildren();
         var requestOrchestration = new RequestGroup();
         var requestAction = (RequestGroupActionComponent) fixture.generateRequestActionR4(action);
         var request = RequestHelpers.newPDApplyRequestForVersion(
@@ -194,9 +197,8 @@ class ProcessActionTests {
 
     @Test
     void testProcessChildActionsDoesNotThrowOnInvalidApplicabilityBehavior() {
-        var action = new org.hl7.fhir.r4.model.PlanDefinition.PlanDefinitionActionComponent();
+        var action = actionWithChildren();
         action.addExtension(CQF_APPLICABILITY_BEHAVIOR, new BooleanType(true));
-
         var requestOrchestration = new RequestGroup();
         var requestAction = (RequestGroupActionComponent) fixture.generateRequestActionR4(action);
         var request = RequestHelpers.newPDApplyRequestForVersion(
@@ -205,7 +207,8 @@ class ProcessActionTests {
         fixture.processChildActions(request, requestOrchestration, metConditions, action, requestAction);
         assertTrue(requestAction.getAction().isEmpty());
 
-        action.setExtension(List.of(new Extension(CQF_APPLICABILITY_BEHAVIOR, new CodeType("bad"))));
+        action.setExtension(null);
+        action.addExtension(CQF_APPLICABILITY_BEHAVIOR, new CodeType("bad"));
         fixture.processChildActions(request, requestOrchestration, metConditions, action, requestAction);
         assertTrue(requestAction.getAction().isEmpty());
     }

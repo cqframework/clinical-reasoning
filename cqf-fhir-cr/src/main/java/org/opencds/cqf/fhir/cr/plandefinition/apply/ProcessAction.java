@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.plandefinition.apply;
 
+import static org.opencds.cqf.fhir.utility.Constants.CQF_APPLICABILITY_BEHAVIOR;
 import static org.opencds.cqf.fhir.utility.SearchHelper.searchRepositoryByCanonical;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -21,6 +22,7 @@ import org.opencds.cqf.fhir.cr.common.ExpressionProcessor;
 import org.opencds.cqf.fhir.cr.common.ExtensionProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.GenerateProcessor;
 import org.opencds.cqf.fhir.utility.Constants;
+import org.opencds.cqf.fhir.utility.Constants.CqfApplicabilityBehavior;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,15 +59,7 @@ public class ProcessAction {
             metConditions.put(request.resolvePathString(action, "id"), action);
             var requestAction = generateRequestAction(request.getFhirVersion(), action);
             extensionProcessor.processExtensions(request, requestAction, action, new ArrayList<>());
-            var childActions = request.resolvePathList(action, "action", IBaseBackboneElement.class);
-            for (var childAction : childActions) {
-                request.getModelResolver()
-                        .setValue(
-                                requestAction,
-                                "action",
-                                Collections.singletonList(
-                                        processAction(request, requestOrchestration, metConditions, childAction)));
-            }
+            processChildActions(request, requestOrchestration, metConditions, action, requestAction);
             var resource = processDefinition.resolveDefinition(request, requestOrchestration, action, requestAction);
             dynamicValueProcessor.processDynamicValues(
                     request, request.getPlanDefinition(), resource, action, requestAction);
@@ -73,6 +67,45 @@ public class ProcessAction {
         }
 
         return null;
+    }
+
+    protected void processChildActions(
+            ApplyRequest request,
+            IBaseResource requestOrchestration,
+            Map<String, IBaseBackboneElement> metConditions,
+            IBaseBackboneElement action,
+            IBaseBackboneElement requestAction) {
+        var childActions = request.resolvePathList(action, "action", IBaseBackboneElement.class);
+        if (childActions.isEmpty()) {
+            return;
+        }
+        var applicabilityBehavior = CqfApplicabilityBehavior.ALL;
+        var applicabilityBehaviorExt = request.getExtensionByUrl(action, CQF_APPLICABILITY_BEHAVIOR);
+        if (applicabilityBehaviorExt != null
+                && applicabilityBehaviorExt.getValue() instanceof IPrimitiveType<?> primitiveType) {
+            try {
+                applicabilityBehavior = CqfApplicabilityBehavior.valueOf(
+                        primitiveType.getValueAsString().toUpperCase());
+            } catch (IllegalArgumentException e) {
+                var message = String.format(
+                        "Encountered invalid value for applicabilityBehavior extension %s.  Expected `all` or `any`.",
+                        primitiveType.getValueAsString());
+                logger.error(message);
+                request.logException(message);
+            }
+        }
+        var metConditionsCount = metConditions.size();
+        for (var childAction : childActions) {
+            var childRequestAction = processAction(request, requestOrchestration, metConditions, childAction);
+            if (childRequestAction != null) {
+                request.getModelResolver()
+                        .setValue(requestAction, "action", Collections.singletonList(childRequestAction));
+            }
+            if (applicabilityBehavior.equals(CqfApplicabilityBehavior.ANY)
+                    && metConditionsCount < metConditions.size()) {
+                break;
+            }
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -173,17 +206,12 @@ public class ProcessAction {
     }
 
     protected IBaseBackboneElement generateRequestAction(FhirVersionEnum fhirVersion, IBaseBackboneElement action) {
-        switch (fhirVersion) {
-            case DSTU3:
-                return generateRequestActionDstu3(action);
-            case R4:
-                return generateRequestActionR4(action);
-            case R5:
-                return generateRequestActionR5(action);
-
-            default:
-                return null;
-        }
+        return switch (fhirVersion) {
+            case DSTU3 -> generateRequestActionDstu3(action);
+            case R4 -> generateRequestActionR4(action);
+            case R5 -> generateRequestActionR5(action);
+            default -> null;
+        };
     }
 
     protected IBaseBackboneElement generateRequestActionDstu3(IBaseBackboneElement a) {

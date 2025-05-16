@@ -21,7 +21,7 @@ public class SupplyRequestResolver extends BaseRequestResourceResolver {
         logger.debug(RESOLVE_MESSAGE, activityDefinition.getId(), activityDefinition.getKind());
         var supplyRequest = new SupplyRequest();
 
-        supplyRequest.setStatus(SupplyRequest.SupplyRequestStatus.DRAFT);
+        supplyRequest.setStatus(SupplyRequest.SupplyRequestStatus.ACTIVE);
 
         if (request.hasPractitionerId()) {
             supplyRequest.setRequester(new Reference(request.getPractitionerId()));

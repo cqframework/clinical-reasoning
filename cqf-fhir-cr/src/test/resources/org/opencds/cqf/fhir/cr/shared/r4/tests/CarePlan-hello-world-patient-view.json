@@ -8,7 +8,7 @@
       "instantiatesCanonical": [
         "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/hello-world-patient-view|1.0.0"
       ],
-      "status": "draft",
+      "status": "active",
       "intent": "proposal",
       "subject": {
         "reference": "Patient/helloworld-patient-1"
@@ -37,7 +37,7 @@
   "instantiatesCanonical": [
     "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/hello-world-patient-view|1.0.0"
   ],
-  "status": "draft",
+  "status": "active",
   "intent": "proposal",
   "subject": {
     "reference": "Patient/helloworld-patient-1"

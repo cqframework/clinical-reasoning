@@ -8,7 +8,7 @@
       "instantiatesCanonical": [
         "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/ChildRoutineVisit-PlanDefinition-1.0.0"
       ],
-      "status": "draft",
+      "status": "active",
       "intent": "proposal",
       "subject": {
         "reference": "Patient/ChildRoutine-Reportable"
@@ -86,7 +86,7 @@
   "instantiatesCanonical": [
     "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/ChildRoutineVisit-PlanDefinition-1.0.0"
   ],
-  "status": "draft",
+  "status": "active",
   "intent": "proposal",
   "subject": {
     "reference": "Patient/ChildRoutine-Reportable"

@@ -156,7 +156,9 @@ public class ProcessAction {
     }
 
     protected Boolean meetsConditions(ApplyRequest request, IBaseBackboneElement action) {
-        var conditions = request.resolvePathList(action, "condition", IBaseBackboneElement.class);
+        var conditions = request.resolvePathList(action, "condition", IBaseBackboneElement.class).stream()
+                .filter(c -> "applicability".equals(request.resolvePathString(c, "kind")))
+                .toList();
         if (conditions.isEmpty()) {
             return true;
         }

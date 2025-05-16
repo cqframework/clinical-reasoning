@@ -209,7 +209,7 @@
             "id": "effective-data-requirements",
             "extension": [
               {
-                "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-directReferenceCode",
+                "url": "http://hl7.org/fhir/StructureDefinition/cqf-directReferenceCode",
                 "valueCoding": {
                   "system": "http://terminology.hl7.org/CodeSystem/observation-category",
                   "code": "laboratory",
@@ -217,7 +217,7 @@
                 }
               },
               {
-                "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-directReferenceCode",
+                "url": "http://hl7.org/fhir/StructureDefinition/cqf-directReferenceCode",
                 "valueCoding": {
                   "system": "http://snomed.info/sct",
                   "code": "428361000124107",
@@ -225,7 +225,7 @@
                 }
               },
               {
-                "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-directReferenceCode",
+                "url": "http://hl7.org/fhir/StructureDefinition/cqf-directReferenceCode",
                 "valueCoding": {
                   "system": "http://snomed.info/sct",
                   "code": "428371000124100",
@@ -233,7 +233,7 @@
                 }
               },
               {
-                "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-directReferenceCode",
+                "url": "http://hl7.org/fhir/StructureDefinition/cqf-directReferenceCode",
                 "valueCoding": {
                   "system": "http://terminology.hl7.org/CodeSystem/observation-category",
                   "code": "survey",
@@ -241,7 +241,7 @@
                 }
               },
               {
-                "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-directReferenceCode",
+                "url": "http://hl7.org/fhir/StructureDefinition/cqf-directReferenceCode",
                 "valueCoding": {
                   "system": "http://snomed.info/sct",
                   "code": "373066001",
@@ -249,7 +249,7 @@
                 }
               },
               {
-                "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-directReferenceCode",
+                "url": "http://hl7.org/fhir/StructureDefinition/cqf-directReferenceCode",
                 "valueCoding": {
                   "system": "http://loinc.org",
                   "code": "45755-6",
@@ -257,7 +257,7 @@
                 }
               },
               {
-                "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-directReferenceCode",
+                "url": "http://hl7.org/fhir/StructureDefinition/cqf-directReferenceCode",
                 "valueCoding": {
                   "system": "http://loinc.org",
                   "code": "71007-9",
@@ -2145,7 +2145,7 @@
             "id": "effective-data-requirements",
             "extension": [
               {
-                "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-directReferenceCode",
+                "url": "http://hl7.org/fhir/StructureDefinition/cqf-directReferenceCode",
                 "valueCoding": {
                   "system": "http://snomed.info/sct",
                   "code": "428361000124107",
@@ -2153,7 +2153,7 @@
                 }
               },
               {
-                "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-directReferenceCode",
+                "url": "http://hl7.org/fhir/StructureDefinition/cqf-directReferenceCode",
                 "valueCoding": {
                   "system": "http://snomed.info/sct",
                   "code": "428371000124100",
@@ -2161,7 +2161,7 @@
                 }
               },
               {
-                "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-directReferenceCode",
+                "url": "http://hl7.org/fhir/StructureDefinition/cqf-directReferenceCode",
                 "valueCoding": {
                   "system": "http://terminology.hl7.org/CodeSystem/observation-category",
                   "code": "survey",
@@ -2169,7 +2169,7 @@
                 }
               },
               {
-                "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-directReferenceCode",
+                "url": "http://hl7.org/fhir/StructureDefinition/cqf-directReferenceCode",
                 "valueCoding": {
                   "system": "http://snomed.info/sct",
                   "code": "373066001",
@@ -2177,7 +2177,7 @@
                 }
               },
               {
-                "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-directReferenceCode",
+                "url": "http://hl7.org/fhir/StructureDefinition/cqf-directReferenceCode",
                 "valueCoding": {
                   "system": "http://loinc.org",
                   "code": "45755-6",
@@ -2185,7 +2185,7 @@
                 }
               },
               {
-                "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-directReferenceCode",
+                "url": "http://hl7.org/fhir/StructureDefinition/cqf-directReferenceCode",
                 "valueCoding": {
                   "system": "http://snomed.info/sct",
                   "code": "24028007",
@@ -2193,7 +2193,7 @@
                 }
               },
               {
-                "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-directReferenceCode",
+                "url": "http://hl7.org/fhir/StructureDefinition/cqf-directReferenceCode",
                 "valueCoding": {
                   "system": "http://snomed.info/sct",
                   "code": "7771000",
@@ -2201,7 +2201,7 @@
                 }
               },
               {
-                "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-directReferenceCode",
+                "url": "http://hl7.org/fhir/StructureDefinition/cqf-directReferenceCode",
                 "valueCoding": {
                   "system": "http://loinc.org",
                   "code": "98181-1",
@@ -2209,7 +2209,7 @@
                 }
               },
               {
-                "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-directReferenceCode",
+                "url": "http://hl7.org/fhir/StructureDefinition/cqf-directReferenceCode",
                 "valueCoding": {
                   "system": "http://loinc.org",
                   "code": "71802-3",
@@ -2217,7 +2217,7 @@
                 }
               },
               {
-                "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-directReferenceCode",
+                "url": "http://hl7.org/fhir/StructureDefinition/cqf-directReferenceCode",
                 "valueCoding": {
                   "system": "http://snomed.info/sct",
                   "code": "160734000",
@@ -2225,7 +2225,7 @@
                 }
               },
               {
-                "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-directReferenceCode",
+                "url": "http://hl7.org/fhir/StructureDefinition/cqf-directReferenceCode",
                 "valueCoding": {
                   "system": "http://loinc.org",
                   "code": "71007-9",

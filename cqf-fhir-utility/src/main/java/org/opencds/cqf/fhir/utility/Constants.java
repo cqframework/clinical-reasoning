@@ -88,6 +88,8 @@ public class Constants {
     public static final String CQF_LIBRARY = "http://hl7.org/fhir/StructureDefinition/cqf-library";
     public static final String CQF_CALCULATED_VALUE = "http://hl7.org/fhir/StructureDefinition/cqf-calculatedValue";
     public static final String CQF_FHIR_QUERY_PATTERN = "http://hl7.org/fhir/StructureDefinition/cqf-fhirQueryPattern";
+    public static final String CQF_DIRECT_REFERENCE_EXTENSION =
+            "http://hl7.org/fhir/StructureDefinition/cqf-directReferenceCode";
 
     public static final String CQFM_EFFECTIVE_DATA_REQUIREMENTS =
             "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-effectiveDataRequirements";
@@ -98,7 +100,8 @@ public class Constants {
     public static final String CQFM_INPUT_PARAMETERS =
             "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-inputParameters";
     public static final String CQFM_COMPONENT = "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-component";
-
+    public static final String CQFM_DIRECT_REFERENCE_EXTENSION =
+            "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-directReferenceCode";
     public static final String CRMI_EFFECTIVE_DATA_REQUIREMENTS =
             "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-effectiveDataRequirements";
 

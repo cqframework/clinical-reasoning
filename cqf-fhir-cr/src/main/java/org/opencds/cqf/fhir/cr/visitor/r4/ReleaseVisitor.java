@@ -16,14 +16,18 @@ import org.hl7.fhir.r4.model.Basic;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.Library;
+import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MetadataResource;
 import org.hl7.fhir.r4.model.Period;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.visitor.r4.CRMIReleaseExperimentalBehavior.CRMIReleaseExperimentalBehaviorCodes;
 import org.opencds.cqf.fhir.cr.visitor.r4.CRMIReleaseVersionBehavior.CRMIReleaseVersionBehaviorCodes;
+import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.PackageHelper;
 import org.opencds.cqf.fhir.utility.SearchHelper;
 import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
@@ -155,5 +159,21 @@ public class ReleaseVisitor {
                     returnEntries.add((BundleEntryComponent) PackageHelper.createEntry(artifactComment, true));
                 });
         return returnEntries;
+    }
+
+    public static void extractDirectReferenceCodes(IKnowledgeArtifactAdapter rootAdapter, Measure measure) {
+        Optional<Extension> effectiveDataRequirementsExt = measure.getExtension().stream()
+                .filter(ext -> ext.getUrl().equals(Constants.CQFM_EFFECTIVE_DATA_REQUIREMENTS))
+                .findFirst();
+        if (effectiveDataRequirementsExt.isPresent()) {
+            Reference ref = (Reference) effectiveDataRequirementsExt.get().getValue();
+            Library effectiveDataRequirementsLib = (Library) measure.getContained("#" + ref.getReference());
+            if (effectiveDataRequirementsLib != null) {
+                effectiveDataRequirementsLib.getExtension().stream()
+                        .filter(ext -> ext.getUrl().equals(Constants.CQFM_DIRECT_REFERENCE_EXTENSION))
+                        .map(ext -> ext.setUrl(Constants.CQF_DIRECT_REFERENCE_EXTENSION))
+                        .forEach(rootAdapter::addExtension);
+            }
+        }
     }
 }

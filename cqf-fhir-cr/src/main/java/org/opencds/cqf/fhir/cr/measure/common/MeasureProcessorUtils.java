@@ -326,9 +326,9 @@ public class MeasureProcessorUtils {
         try {
             if (!isBooleanBasis) {
                 // subject based observations don't have a parameter to pass in
+                var name = ((FunctionDef) ed).getOperand().get(0).getName();
                 context.getState()
-                        .push(new Variable()
-                                .withName(((FunctionDef) ed).getOperand().get(0).getName())
+                        .push(new Variable(name)
                                 .withValue(resource));
             }
             result = context.getEvaluationVisitor().visitExpression(ed.getExpression(), context.getState());

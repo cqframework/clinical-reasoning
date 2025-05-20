@@ -24,6 +24,9 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.lang3.tuple.Pair;
+import org.cqframework.cql.cql2elm.CqlCompiler;
+import org.cqframework.cql.cql2elm.CqlCompilerOptions;
+import org.cqframework.cql.cql2elm.CqlCompilerOptions.Options;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptionsMapper;
 import org.cqframework.cql.cql2elm.DefaultLibrarySourceProvider;
@@ -33,13 +36,13 @@ import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.DateTimeType;
-import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r5.context.IWorkerContext.ILoggingService;
+import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
 import org.opencds.cqf.fhir.api.Repository;
+import org.opencds.cqf.fhir.cql.CqlEngineOptions;
 import org.opencds.cqf.fhir.cql.CqlOptions;
 import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
@@ -87,6 +90,24 @@ public class CqlCommand implements Callable<Integer> {
 
     @Option(names = {"-t", "--terminology-url"})
     public String terminologyUrl;
+
+    @Option(names = {"-measure"})
+    public String measureName;
+
+    @Option(names = {"-periodStart"})
+    public String periodStart;
+
+    @Option(names = {"-periodEnd"})
+    public String periodEnd;
+
+    @Option(names = {"-measurePath"})
+    public String measurePath;
+
+    @Option(names = {"-singleFile"})
+    public boolean singleFile = false;
+
+    @Option(names = {"-resultsPath"})
+    public String resultsPath;
 
     @ArgGroup(multiplicity = "1..1", exclusive = false)
     LibraryParameter library;
@@ -203,13 +224,21 @@ public class CqlCommand implements Callable<Integer> {
             igContext = new IGContext(new Logger());
             igContext.initializeFromIg(rootDir, igPath, toVersionNumber(fhirVersionEnum));
         }
-
         CqlOptions cqlOptions = CqlOptions.defaultOptions();
+        CqlEngineOptions cqlEngineOptions = CqlEngineOptions.defaultOptions();
+        cqlEngineOptions.setEnableHedisCompatibilityMode(true);
 
         if (optionsPath != null) {
             CqlTranslatorOptions options = CqlTranslatorOptionsMapper.fromFile(optionsPath);
-            cqlOptions.setCqlCompilerOptions(options.getCqlCompilerOptions());
+            var compiler = options.getCqlCompilerOptions();
+            compiler.getOptions().add(Options.EnableResultTypes);
+            cqlOptions.setCqlCompilerOptions(compiler);
         }
+        CqlTranslatorOptions options = CqlTranslatorOptions.defaultOptions();
+        var compiler = options.getCqlCompilerOptions();
+        compiler.getOptions().add(Options.EnableResultTypes);
+        cqlOptions.setCqlCompilerOptions(compiler);
+        cqlOptions.setCqlEngineOptions(cqlEngineOptions);
 
         var terminologySettings = new TerminologySettings();
         terminologySettings.setValuesetExpansionMode(VALUESET_EXPANSION_MODE.PERFORM_NAIVE_EXPANSION);
@@ -232,22 +261,29 @@ public class CqlCommand implements Callable<Integer> {
         VersionedIdentifier identifier = new VersionedIdentifier().withId(library.libraryName);
 
         MeasureEvaluationOptions evaluationOptions = new MeasureEvaluationOptions();
+        evaluationOptions.setApplyScoringSetMembership(false);
         evaluationOptions.setEvaluationSettings(evaluationSettings);
         R4MeasureProcessor measureProcessor = new R4MeasureProcessor(repository, evaluationOptions, new R4RepositorySubjectProvider(new SubjectProviderOptions()), new R4MeasureServiceUtils(repository));
 
-        // hack to bring in Measure
-        IParser parser = fhirContext.newJsonParser();
 
-        InputStream is = new FileInputStream("/Users/justinmckelvy/alphora/DCS-HEDIS-2024-v2/input/resources/Measure/LSC-Reporting.json");
 
-        Measure measure = (org.hl7.fhir.r4.model.Measure)
-            parser.parseResource(is);
+        Measure measure = null;
+        if(measureName != null) {
+            // hack to bring in Measure
+            IParser parser = fhirContext.newJsonParser();
+            InputStream is = new FileInputStream(measurePath + measureName + ".json");
+            measure = (org.hl7.fhir.r4.model.Measure)
+                parser.parseResource(is);
+            if(measure == null) {
+                throw new IllegalArgumentException(String.format("measureName: %s not found", measureName));
+            }
+        }
 
         var initTime = watch.elapsed().toMillis();
         log.error("initialized in {} millis", initTime);
         AtomicInteger counter = new AtomicInteger(0);
         for (var e : evaluations) {
-            String basePath = "/Users/justinmckelvy/Documents/DCSv2-Certification/Results_1/";
+            String basePath = resultsPath;
             Path filepath = Paths.get(
                 basePath + this.library.libraryName + "/" + e.context.contextValue + ".txt");
 
@@ -258,6 +294,9 @@ public class CqlCommand implements Callable<Integer> {
             }
             // evaluations.parallelStream().forEach(e -> {
             var engine = Engines.forRepository(repository, evaluationSettings);
+            // enable return all and equivalence
+            engine.getState().getEngineOptions().add(CqlEngine.Options.EnableHedisCompatibilityMode);
+            //engine.getState().getEngineOptions().add(CqlCompilerOptions.EnableResultTypes);
             if (library.libraryUrl != null) {
                 var provider = new DefaultLibrarySourceProvider(Path.of(library.libraryUrl));
                 engine.getEnvironment()
@@ -265,38 +304,57 @@ public class CqlCommand implements Callable<Integer> {
                         .getLibrarySourceLoader()
                         .registerProvider(provider);
             }
+            var subjectId = e.context.contextName + "/" + e.context.contextValue;
+            log.error("evaluating: {}", subjectId);
 
             var evalStart = watch.elapsed().toMillis();
             var contextParameter = Pair.<String, Object>of(e.context.contextName, e.context.contextValue);
             var cqlResult = engine.evaluate(identifier, contextParameter);
-            var subjectId = e.context.contextName + "/" + e.context.contextValue;
 
             Map<String, EvaluationResult> result = new HashMap<>();
             result.put(subjectId, cqlResult);
 
-            // generate MeasureReport from ExpressionResult
-            var report = measureProcessor.evaluateMeasureResult(
-                measure,
-                LocalDate.parse("2024-01-01", DateTimeFormatter.ISO_LOCAL_DATE)
-                    .atStartOfDay(ZoneId.systemDefault()),
-                LocalDate.parse("2024-12-31", DateTimeFormatter.ISO_LOCAL_DATE)
-                    .atTime(LocalTime.MAX)
-                    .atZone(ZoneId.systemDefault()),
-            "subject",
-                Collections.singletonList(subjectId),
-            null,
-            null,
-            null,
-                result,
-                false);
-
-            String jsonReport = parser.encodeResourceToString(report);
-            writeJsonToFile(jsonReport, e.context.contextValue, basePath + this.library.libraryName + "/measurereports");
-
-            // ✅ Write TXT result
-            writeResultToFile(cqlResult, e.context.contextValue, basePath + this.library.libraryName + "/txtresults");
+//            // generate MeasureReport from ExpressionResult
+//            if(measure != null) {
+//                String jsonReport;
+//                if(periodStart != null && periodEnd != null) {
+//                    var report = measureProcessor.evaluateMeasureResults(
+//                        measure,
+//                        LocalDate.parse(periodStart, DateTimeFormatter.ISO_LOCAL_DATE)
+//                            .atStartOfDay(ZoneId.systemDefault()),
+//                        LocalDate.parse(periodEnd, DateTimeFormatter.ISO_LOCAL_DATE)
+//                            .atTime(LocalTime.MAX)
+//                            .atZone(ZoneId.systemDefault()),
+//                        "subject",
+//                        Collections.singletonList(subjectId),
+//                        result);
+//
+//                    jsonReport = parser.encodeResourceToString(report);
+//                } else {
+//                    var report = measureProcessor.evaluateMeasureResults(
+//                        measure,
+//                        LocalDate.parse(periodStart, DateTimeFormatter.ISO_LOCAL_DATE)
+//                            .atStartOfDay(ZoneId.systemDefault()),
+//                        LocalDate.parse(periodEnd, DateTimeFormatter.ISO_LOCAL_DATE)
+//                            .atTime(LocalTime.MAX)
+//                            .atZone(ZoneId.systemDefault()),
+//                        "subject",
+//                        Collections.singletonList(subjectId),
+//                        result);
+//                     jsonReport = parser.encodeResourceToString(report);
+//                }
+//
+//                writeJsonToFile(jsonReport, e.context.contextValue,
+//                    basePath + this.library.libraryName + "/measurereports");
+//            }
+            if(singleFile) {
+                // ✅ Write TXT result
+                writeResultToFile(cqlResult, e.context.contextValue,
+                    basePath + this.library.libraryName + "/txtresults");
+            } else {
+                writeResult(cqlResult);
+            }
             var count = counter.incrementAndGet();
-            //writeResult(result);
 
             var evalEnd = watch.elapsed().toMillis();
             log.error("evaluated #{} in {} millis", count, evalEnd - evalStart);

@@ -21,6 +21,7 @@ import com.google.common.collect.ImmutableMap;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -361,7 +362,7 @@ public class IgRepository implements Repository {
         var encoding = FILE_EXTENSIONS.inverse().get(extension);
 
         try {
-            var s = Files.readString(path);
+            String s = new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
             var resource = parserForEncoding(fhirContext, encoding).parseResource(s);
 
             resource.setUserData(SOURCE_PATH_TAG, path);

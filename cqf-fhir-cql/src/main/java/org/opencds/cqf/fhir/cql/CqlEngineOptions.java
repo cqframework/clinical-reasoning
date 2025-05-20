@@ -12,6 +12,7 @@ public class CqlEngineOptions {
     private Integer pageSize;
     private Integer maxCodesPerQuery;
     private Integer queryBatchThreshold;
+    private boolean enableHedisCompatibilityMode = false;
 
     public Set<CqlEngine.Options> getOptions() {
         return this.options;
@@ -60,6 +61,10 @@ public class CqlEngineOptions {
     public void setQueryBatchThreshold(Integer value) {
         this.queryBatchThreshold = value;
     }
+
+    public void setEnableHedisCompatibilityMode(boolean enableHedisCompatibilityMode) {this.enableHedisCompatibilityMode = enableHedisCompatibilityMode;}
+
+    public boolean isEnableHedisCompatibilityMode() {return this.enableHedisCompatibilityMode;}
 
     public static CqlEngineOptions defaultOptions() {
         CqlEngineOptions result = new CqlEngineOptions();

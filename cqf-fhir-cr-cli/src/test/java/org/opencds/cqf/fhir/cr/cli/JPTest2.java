@@ -12,7 +12,7 @@ import java.util.stream.Stream;
 class JPTest2 {
 
     @Test
-    void hedis_AAB() throws IOException {
+    void hedis_CERT_Deck() throws IOException {
         List<String> measureCodes = new ArrayList<>();
 //        measureCodes.add("AAB"); // results partially processed with old FHIRCommon "has"
 //        measureCodes.add("AAP");
@@ -33,30 +33,36 @@ class JPTest2 {
     }
 
     @Test
-    void hedis_AAB2() throws IOException {
+    void hedis_DCSv2TestDeck() throws IOException {
         List<String> measureCodes = new ArrayList<>();
-        measureCodes.add("AAB"); // results partially processed with old FHIRCommon "has"
-//        measureCodes.add("AAP");
-//        measureCodes.add("AMR");
-//        measureCodes.add("BPD");
-//        measureCodes.add("BCSE");
-//        measureCodes.add("CBP");
-//        measureCodes.add("CCS");
-//        measureCodes.add("COLE");
-//        measureCodes.add("LSC");
-//        measureCodes.add("PBH");
-        //LSC
+        measureCodes.add("FMC");
+
 
         for (String measureCode : measureCodes) {
             run(measureCode + "_Reporting",
-                "/Users/justinmckelvy/Documents/DCSv2/" + measureCode + "/Sample/v1_tests", 100000);
+                "/Users/justinmckelvy/Documents/DCSv2/" + measureCode + "/Sample/v0_tests", 100000);
         }
     }
 
-//    @Test
-//    void hedis_LSC() throws IOException {
-//        run("LSC_Reporting", "/Users/justinmckelvy/Documents/DCSv2/LSC/Sample/v2_tests", 100000);
-//    }
+    @Test
+    void hedis_DCSv2TestDeck2() throws IOException {
+        List<String> measureCodes = new ArrayList<>();
+
+//        measureCodes.add("BPD");
+        measureCodes.add("EDH");
+//        measureCodes.add("LDM");
+//        measureCodes.add("CRE");
+//        measureCodes.add("ASFE");
+//        measureCodes.add("AXR");
+//        measureCodes.add("COU");
+
+
+        for (String measureCode : measureCodes) {
+            run(measureCode + "_Reporting",
+                "/Users/justinmckelvy/Documents/DCSv2/" + measureCode + "/Sample/v0_tests", 100000);
+        }
+    }
+
 
     void run(String libraryName, String patientPath, int count) throws IOException {
         var baseArgs = Stream.of(
@@ -68,6 +74,8 @@ class JPTest2 {
                 "-lv=2024.2.0",
                 "-m=FHIR",
                 "-mu=" + patientPath,
+                "-resultsPath=/Users/justinmckelvy/Documents/DCSv2/_Results7/",
+                "-singleFile=" + true,
                 "-t=/Users/justinmckelvy/alphora/DCS-HEDIS-2024-v2/input/vocabulary/valueset");
 
         var patientArgs = allPatients(patientPath, count).flatMap(id -> Stream.of("-c=Patient", "-cv=" + id));

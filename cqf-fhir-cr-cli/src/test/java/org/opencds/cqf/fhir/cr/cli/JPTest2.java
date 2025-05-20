@@ -14,11 +14,11 @@ class JPTest2 {
     @Test
     void hedis_DCSv2TestDeck() throws IOException {
         List<String> measureCodes = new ArrayList<>();
-        var patientPath = "/Users/justinmckelvy/Documents/DCSv2/";
-        var testingPath = "/Sample/v0_tests";
-        var cqlContentDirectory = "/Users/justinmckelvy/alphora/DCS-HEDIS-2024-v2";
-        var resultsPath = patientPath + "_Results7/";
-        measureCodes.add("FMC");
+        var patientPath = "/Users/justinmckelvy/Documents/DCSv2/"; //where your test deck data is
+        var testingPath = "/Sample/v0_tests"; //test deck data path suffix
+        var cqlContentDirectory = "/Users/justinmckelvy/alphora/DCS-HEDIS-2024-v2"; // the CQL that will be used for test
+        var resultsPath = patientPath + "_Results7/"; // the path where results will save
+        measureCodes.add("FMC"); //measure(s) to evaluate, add more if wanting to test multiple
 
 
         for (String measureCode : measureCodes) {

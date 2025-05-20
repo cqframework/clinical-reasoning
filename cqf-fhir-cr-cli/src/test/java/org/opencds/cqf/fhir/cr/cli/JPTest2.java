@@ -12,71 +12,53 @@ import java.util.stream.Stream;
 class JPTest2 {
 
     @Test
-    void hedis_CERT_Deck() throws IOException {
-        List<String> measureCodes = new ArrayList<>();
-//        measureCodes.add("AAB"); // results partially processed with old FHIRCommon "has"
-//        measureCodes.add("AAP");
-//        measureCodes.add("AMR");
-//        measureCodes.add("BPD");
-//        measureCodes.add("BCSE");
-//        measureCodes.add("CBP");
-//        measureCodes.add("CCS");
-//        measureCodes.add("COLE");
-        measureCodes.add("LSC");
-//        measureCodes.add("PBH");
-        //LSC
-
-        for (String measureCode : measureCodes) {
-            run(measureCode + "_Reporting",
-                "/Users/justinmckelvy/Documents/DCSv2-Certification/LSC/A/Patients-v0", 100000);
-        }
-    }
-
-    @Test
     void hedis_DCSv2TestDeck() throws IOException {
         List<String> measureCodes = new ArrayList<>();
+        var patientPath = "/Users/justinmckelvy/Documents/DCSv2/";
+        var testingPath = "/Sample/v0_tests";
+        var cqlContentDirectory = "/Users/justinmckelvy/alphora/DCS-HEDIS-2024-v2";
+        var resultsPath = patientPath + "_Results7/";
         measureCodes.add("FMC");
 
 
         for (String measureCode : measureCodes) {
             run(measureCode + "_Reporting",
-                "/Users/justinmckelvy/Documents/DCSv2/" + measureCode + "/Sample/v0_tests", 100000);
+                patientPath + measureCode + testingPath, 100000, cqlContentDirectory, resultsPath);
         }
     }
 
     @Test
     void hedis_DCSv2TestDeck2() throws IOException {
         List<String> measureCodes = new ArrayList<>();
-
-//        measureCodes.add("BPD");
+        var patientPath = "/Users/justinmckelvy/Documents/DCSv2/";
+        var testingPath = "/Sample/v0_tests";
+        var cqlContentDirectory = "/Users/justinmckelvy/alphora/DCS-HEDIS-2024-v2";
+        var resultsPath = patientPath + "_Results7/";
         measureCodes.add("EDH");
-//        measureCodes.add("LDM");
-//        measureCodes.add("CRE");
-//        measureCodes.add("ASFE");
-//        measureCodes.add("AXR");
-//        measureCodes.add("COU");
+
 
 
         for (String measureCode : measureCodes) {
             run(measureCode + "_Reporting",
-                "/Users/justinmckelvy/Documents/DCSv2/" + measureCode + "/Sample/v0_tests", 100000);
+                patientPath + measureCode + testingPath, 100000, cqlContentDirectory, resultsPath);
         }
     }
 
 
-    void run(String libraryName, String patientPath, int count) throws IOException {
+    void run(String libraryName, String patientPath, int count, String cqlContentDirectory, String resultsPath) throws IOException {
         var baseArgs = Stream.of(
                 "cql",
                 "-fv=R4",
-                "-rd=/Users/justinmckelvy/alphora/DCS-HEDIS-2024-v2",
-                "-lu=/Users/justinmckelvy/alphora/DCS-HEDIS-2024-v2/input/cql",
+                "-rd=" + cqlContentDirectory,
+                "-lu=" + cqlContentDirectory + "/input/cql",
                 "-ln=" + libraryName,
                 "-lv=2024.2.0",
                 "-m=FHIR",
                 "-mu=" + patientPath,
-                "-resultsPath=/Users/justinmckelvy/Documents/DCSv2/_Results7/",
+                "-resultsPath=" + resultsPath,
                 "-singleFile=" + true,
-                "-t=/Users/justinmckelvy/alphora/DCS-HEDIS-2024-v2/input/vocabulary/valueset");
+                "-t=" + cqlContentDirectory + "/input/vocabulary/valueset"
+        );
 
         var patientArgs = allPatients(patientPath, count).flatMap(id -> Stream.of("-c=Patient", "-cv=" + id));
 

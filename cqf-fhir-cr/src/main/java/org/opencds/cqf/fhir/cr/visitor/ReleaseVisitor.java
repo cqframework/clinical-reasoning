@@ -152,6 +152,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
                 canonicalVersionParams,
                 latestFromTxServer,
                 terminologyEndpoint.orElse(null));
+
         if (rootAdapter.get().fhirType().equals("Library")) {
             ((ILibraryAdapter) rootAdapter).setExpansionParameters(systemVersionParams, canonicalVersionParams);
         }
@@ -195,9 +196,14 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
             BundleHelper.addEntry(transactionBundle, entry);
         }
 
-        // update ArtifactComments referencing the old Canonical Reference
-        findArtifactCommentsToUpdate(rootLibrary, releaseVersion, repository)
-                .forEach(entry -> BundleHelper.addEntry(transactionBundle, entry));
+        try {
+            // update ArtifactComments referencing the old Canonical Reference
+            findArtifactCommentsToUpdate(rootLibrary, releaseVersion, repository)
+                    .forEach(entry -> BundleHelper.addEntry(transactionBundle, entry));
+        } catch (Exception e) {
+            logger.error("Error encountered attempting to update ArtifactComments: {}", e.getMessage());
+        }
+
         rootAdapter.setRelatedArtifact(distinctResolvedRelatedArtifacts);
 
         return repository.transaction(transactionBundle);
@@ -329,6 +335,12 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
                     if (maybeAdapter.isPresent()) {
                         dependencyAdapter = maybeAdapter.get();
                         alreadyUpdatedDependencies.put(dependencyAdapter.getUrl(), dependencyAdapter.get());
+                        var url = Canonicals.getUrl(dependencyAdapter.getUrl()) + "|" + dependencyAdapter.getVersion();
+                        var existingArtifactsForUrl =
+                                SearchHelper.searchRepositoryByCanonicalWithPaging(repository, url);
+                        if (BundleHelper.getEntry(existingArtifactsForUrl).isEmpty()) {
+                            repository.create(dependencyAdapter.get());
+                        }
                     } else {
                         alreadyUpdatedDependencies.put(dependencyUrl, null);
                     }
@@ -364,6 +376,19 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
                     rootAdapter.setRelatedArtifact(updatedRelatedArtifacts);
                 }
             }
+
+            extractMeasureDirectReferenceCodes(rootAdapter, artifactAdapter);
+        }
+    }
+
+    private void extractMeasureDirectReferenceCodes(
+            IKnowledgeArtifactAdapter rootAdapter, IKnowledgeArtifactAdapter artifactAdapter) {
+        if (artifactAdapter instanceof org.opencds.cqf.fhir.utility.adapter.r4.MeasureAdapter measureAdapter) {
+            org.opencds.cqf.fhir.cr.visitor.r4.ReleaseVisitor.extractDirectReferenceCodes(
+                    rootAdapter, measureAdapter.get());
+        } else if (artifactAdapter instanceof org.opencds.cqf.fhir.utility.adapter.r5.MeasureAdapter measureAdapter) {
+            org.opencds.cqf.fhir.cr.visitor.r5.ReleaseVisitor.extractDirectReferenceCodes(
+                    rootAdapter, measureAdapter.get());
         }
     }
 
@@ -604,6 +629,10 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
             throw new PreconditionFailedException(String.format(
                     "Resource with ID: '%s' does not have a status of 'draft'.",
                     artifact.get().getIdElement().getIdPart()));
+        }
+        if (artifact.getDate() == null) {
+            throw new PreconditionFailedException(
+                    "The artifact must have a last modified date (indicated by date) before it is eligible for release.");
         }
         if (approvalDate == null) {
             throw new PreconditionFailedException(

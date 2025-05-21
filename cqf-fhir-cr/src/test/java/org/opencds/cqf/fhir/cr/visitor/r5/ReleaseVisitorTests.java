@@ -22,6 +22,7 @@ import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Optional;
@@ -249,6 +250,41 @@ class ReleaseVisitorTests {
         // this should be 73, but we're not handling contained reference correctly
         assertEquals(72, dependenciesOnReleasedArtifact.size());
         assertEquals(2, componentsOnReleasedArtifact.size());
+    }
+
+    @Test
+    void measureDirectReferenceCodesIncludedInReleaseTest() {
+        Bundle bundle = (Bundle) jsonParser.parseResource(
+                org.opencds.cqf.fhir.cr.visitor.r5.ReleaseVisitorTests.class.getResourceAsStream(
+                        "Bundle-ecqm-qicore-2024-simplified.json"));
+        repo.transaction(bundle);
+        Library library = repo.read(Library.class, new IdType("Library/ecqm-update-2024-05-02"))
+                .copy();
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        Parameters params = new Parameters();
+        params.addParameter("version", "1.0.0");
+        params.addParameter("versionBehavior", new CodeType("default"));
+        var crmiEDRId = "exp-params-crmi-test";
+        var crmiEDRExtension = new Extension();
+        crmiEDRExtension.setUrl(Constants.CRMI_EFFECTIVE_DATA_REQUIREMENTS);
+        crmiEDRExtension.setValue(new CanonicalType("#" + crmiEDRId));
+        ReleaseVisitor releaseVisitor = new ReleaseVisitor(repo);
+        // Approval date is required to release an artifact
+        library.setApprovalDateElement(new DateType("2024-04-23"));
+
+        Bundle returnResource = (Bundle) libraryAdapter.accept(releaseVisitor, params);
+        assertNotNull(returnResource);
+        Optional<Bundle.BundleEntryComponent> maybeLib = returnResource.getEntry().stream()
+                .filter(entry -> entry.getResponse().getLocation().contains("Library"))
+                .findFirst();
+        assertTrue(maybeLib.isPresent());
+        Library releasedLibrary =
+                repo.read(Library.class, new IdType(maybeLib.get().getResponse().getLocation()));
+        var directReferenceExtensions = releasedLibrary.getExtension().stream()
+                .filter(ext -> ext.getUrl().equals(Constants.CQF_DIRECT_REFERENCE_EXTENSION))
+                .toList();
+
+        assertEquals(18, directReferenceExtensions.size());
     }
 
     @Test
@@ -552,6 +588,14 @@ class ReleaseVisitorTests {
         var library = repo.read(Library.class, new IdType("Library/ReleaseSpecificationLibrary"))
                 .copy();
         var libraryAdapter = new AdapterFactory().createLibrary(library);
+        try {
+            libraryAdapter.accept(releaseVisitor, params1);
+        } catch (Exception e) {
+            actualErrorMessage = e.getMessage();
+        }
+        assertTrue(actualErrorMessage.contains("last modified date (indicated by date)"));
+
+        libraryAdapter.setDate(new Date());
         try {
             libraryAdapter.accept(releaseVisitor, params1);
         } catch (Exception e) {

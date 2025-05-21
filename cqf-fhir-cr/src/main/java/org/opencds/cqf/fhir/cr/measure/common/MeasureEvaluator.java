@@ -384,8 +384,8 @@ public class MeasureEvaluator {
             if (!isBooleanBasis) {
                 // subject based observations don't have a parameter to pass in
                 context.getState()
-                        .push(new Variable()
-                                .withName(((FunctionDef) ed).getOperand().get(0).getName())
+                        .push(new Variable(
+                                        ((FunctionDef) ed).getOperand().get(0).getName())
                                 .withValue(resource));
             }
             result = context.getEvaluationVisitor().visitExpression(ed.getExpression(), context.getState());

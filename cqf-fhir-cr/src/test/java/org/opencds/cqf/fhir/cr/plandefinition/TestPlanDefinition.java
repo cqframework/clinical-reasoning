@@ -320,8 +320,8 @@ public class TestPlanDefinition {
         final IBaseBundle generatedBundle;
         final IParser jsonParser;
         final ModelResolver modelResolver;
-        IBaseResource questionnaire;
-        IBaseResource questionnaireResponse;
+        public IBaseResource questionnaire;
+        public IBaseResource questionnaireResponse;
         Map<String, IBaseBackboneElement> items;
 
         public GeneratedBundle(Repository repository, IBaseBundle generatedBundle) {

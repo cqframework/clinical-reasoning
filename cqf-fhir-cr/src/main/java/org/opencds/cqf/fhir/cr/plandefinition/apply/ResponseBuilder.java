@@ -1,7 +1,6 @@
 package org.opencds.cqf.fhir.cr.plandefinition.apply;
 
 import java.util.Collections;
-import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.fhir.cr.questionnaire.populate.IPopulateProcessor;
@@ -16,17 +15,12 @@ public class ResponseBuilder {
     }
 
     public IBaseResource generateRequestOrchestration(ApplyRequest request) {
-        switch (request.getFhirVersion()) {
-            case DSTU3:
-                return generateOrchestrationDstu3(request);
-            case R4:
-                return generateOrchestrationR4(request);
-            case R5:
-                return generateOrchestrationR5(request);
-
-            default:
-                return null;
-        }
+        return switch (request.getFhirVersion()) {
+            case DSTU3 -> generateOrchestrationDstu3(request);
+            case R4 -> generateOrchestrationR4(request);
+            case R5 -> generateOrchestrationR5(request);
+            default -> null;
+        };
     }
 
     protected String getCanonical(String url, String version) {
@@ -37,7 +31,7 @@ public class ResponseBuilder {
         var planDefinition = (org.hl7.fhir.dstu3.model.PlanDefinition) request.getPlanDefinition();
         var canonical = getCanonical(planDefinition.getUrl(), planDefinition.getVersion());
         var requestOrchestration = new org.hl7.fhir.dstu3.model.RequestGroup()
-                .setStatus(org.hl7.fhir.dstu3.model.RequestGroup.RequestStatus.DRAFT)
+                .setStatus(org.hl7.fhir.dstu3.model.RequestGroup.RequestStatus.ACTIVE)
                 .setIntent(org.hl7.fhir.dstu3.model.RequestGroup.RequestIntent.PROPOSAL)
                 .addDefinition(new org.hl7.fhir.dstu3.model.Reference(canonical))
                 .setSubject(new org.hl7.fhir.dstu3.model.Reference(request.getSubjectId()));
@@ -65,7 +59,7 @@ public class ResponseBuilder {
         var planDefinition = (org.hl7.fhir.r4.model.PlanDefinition) request.getPlanDefinition();
         var canonical = getCanonical(planDefinition.getUrl(), planDefinition.getVersion());
         var requestOrchestration = new org.hl7.fhir.r4.model.RequestGroup()
-                .setStatus(org.hl7.fhir.r4.model.RequestGroup.RequestStatus.DRAFT)
+                .setStatus(org.hl7.fhir.r4.model.RequestGroup.RequestStatus.ACTIVE)
                 .setIntent(org.hl7.fhir.r4.model.RequestGroup.RequestIntent.PROPOSAL)
                 .addInstantiatesCanonical(canonical)
                 .setSubject(new org.hl7.fhir.r4.model.Reference(request.getSubjectId()));
@@ -93,7 +87,7 @@ public class ResponseBuilder {
         var planDefinition = (org.hl7.fhir.r5.model.PlanDefinition) request.getPlanDefinition();
         var canonical = getCanonical(planDefinition.getUrl(), planDefinition.getVersion());
         var requestOrchestration = new org.hl7.fhir.r5.model.RequestOrchestration()
-                .setStatus(org.hl7.fhir.r5.model.Enumerations.RequestStatus.DRAFT)
+                .setStatus(org.hl7.fhir.r5.model.Enumerations.RequestStatus.ACTIVE)
                 .setIntent(org.hl7.fhir.r5.model.Enumerations.RequestIntent.PROPOSAL)
                 .addInstantiatesCanonical(canonical)
                 .setSubject(new org.hl7.fhir.r5.model.Reference(request.getSubjectId()));
@@ -118,17 +112,12 @@ public class ResponseBuilder {
     }
 
     public IBaseResource generateCarePlan(ApplyRequest request, IBaseResource requestOrchestration) {
-        switch (request.getFhirVersion()) {
-            case DSTU3:
-                return generateCarePlanDstu3(request, requestOrchestration);
-            case R4:
-                return generateCarePlanR4(request, requestOrchestration);
-            case R5:
-                return generateCarePlanR5(request, requestOrchestration);
-
-            default:
-                return null;
-        }
+        return switch (request.getFhirVersion()) {
+            case DSTU3 -> generateCarePlanDstu3(request, requestOrchestration);
+            case R4 -> generateCarePlanR4(request, requestOrchestration);
+            case R5 -> generateCarePlanR5(request, requestOrchestration);
+            default -> null;
+        };
     }
 
     protected IBaseResource generateCarePlanDstu3(ApplyRequest request, IBaseResource ro) {
@@ -136,7 +125,7 @@ public class ResponseBuilder {
         var carePlan = new org.hl7.fhir.dstu3.model.CarePlan()
                 .setDefinition(requestOrchestration.getDefinition())
                 .setSubject(requestOrchestration.getSubject())
-                .setStatus(org.hl7.fhir.dstu3.model.CarePlan.CarePlanStatus.DRAFT)
+                .setStatus(org.hl7.fhir.dstu3.model.CarePlan.CarePlanStatus.ACTIVE)
                 .setIntent(org.hl7.fhir.dstu3.model.CarePlan.CarePlanIntent.PROPOSAL);
         var carePlanId = Ids.newId(
                 request.getFhirVersion(),
@@ -161,7 +150,7 @@ public class ResponseBuilder {
 
         var operationOutcomes = request.getContained(requestOrchestration).stream()
                 .filter(r -> r.fhirType().equals(org.hl7.fhir.dstu3.model.ResourceType.OperationOutcome.name()))
-                .collect(Collectors.toList());
+                .toList();
         for (var operationOutcome : operationOutcomes) {
             carePlan.addExtension(
                     Constants.EXT_CRMI_MESSAGES,
@@ -187,7 +176,7 @@ public class ResponseBuilder {
         var carePlan = new org.hl7.fhir.r4.model.CarePlan()
                 .setInstantiatesCanonical(requestOrchestration.getInstantiatesCanonical())
                 .setSubject(requestOrchestration.getSubject())
-                .setStatus(org.hl7.fhir.r4.model.CarePlan.CarePlanStatus.DRAFT)
+                .setStatus(org.hl7.fhir.r4.model.CarePlan.CarePlanStatus.ACTIVE)
                 .setIntent(org.hl7.fhir.r4.model.CarePlan.CarePlanIntent.PROPOSAL);
         var carePlanId = Ids.newId(
                 request.getFhirVersion(),
@@ -212,7 +201,7 @@ public class ResponseBuilder {
 
         var operationOutcomes = request.getContained(requestOrchestration).stream()
                 .filter(r -> r.fhirType().equals(org.hl7.fhir.r4.model.ResourceType.OperationOutcome.name()))
-                .collect(Collectors.toList());
+                .toList();
         for (var operationOutcome : operationOutcomes) {
             carePlan.addExtension(
                     Constants.EXT_CRMI_MESSAGES,
@@ -242,7 +231,7 @@ public class ResponseBuilder {
         var carePlan = new org.hl7.fhir.r5.model.CarePlan()
                 .setInstantiatesCanonical(requestOrchestration.getInstantiatesCanonical())
                 .setSubject(requestOrchestration.getSubject())
-                .setStatus(org.hl7.fhir.r5.model.Enumerations.RequestStatus.DRAFT)
+                .setStatus(org.hl7.fhir.r5.model.Enumerations.RequestStatus.ACTIVE)
                 .setIntent(org.hl7.fhir.r5.model.CarePlan.CarePlanIntent.PROPOSAL);
         var carePlanId = Ids.newId(
                 request.getFhirVersion(),
@@ -267,7 +256,7 @@ public class ResponseBuilder {
 
         var operationOutcomes = request.getContained(requestOrchestration).stream()
                 .filter(r -> r.fhirType().equals(org.hl7.fhir.r5.model.ResourceType.OperationOutcome.name()))
-                .collect(Collectors.toList());
+                .toList();
         for (var operationOutcome : operationOutcomes) {
             carePlan.addExtension(
                     Constants.EXT_CRMI_MESSAGES,

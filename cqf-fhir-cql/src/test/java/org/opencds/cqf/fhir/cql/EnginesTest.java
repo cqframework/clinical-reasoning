@@ -310,8 +310,7 @@ class EnginesTest {
         bundleBuilder.addTransactionCreateEntry(new Encounter().setId("en1"));
         var additionalData = bundleBuilder.getBundle();
 
-        var engine = Engines.forRepository(
-                repository, settings, additionalData, NpmResourceInfoForCql.EMPTY, NpmPackageLoader.DEFAULT);
+        var engine = Engines.forRepository(repository, settings, additionalData);
 
         assertNotNull(engine.getState());
 
@@ -397,7 +396,6 @@ class EnginesTest {
 
     @Nonnull
     private CqlEngine getEngine(EvaluationSettings settings, IBaseBundle bundle) {
-        return Engines.forRepository(
-                repository, settings, bundle, NpmResourceInfoForCql.EMPTY, NpmPackageLoader.DEFAULT);
+        return Engines.forRepository(repository, settings, bundle);
     }
 }

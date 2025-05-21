@@ -1,8 +1,7 @@
 package org.opencds.cqf.fhir.cr.questionnaire;
 
 import static java.util.Objects.requireNonNull;
-import static org.opencds.cqf.fhir.utility.Parameters.newBooleanPart;
-import static org.opencds.cqf.fhir.utility.Parameters.newParameters;
+import static org.opencds.cqf.fhir.utility.PackageHelper.packageParameters;
 import static org.opencds.cqf.fhir.utility.repository.Repositories.createRestRepository;
 import static org.opencds.cqf.fhir.utility.repository.Repositories.proxy;
 
@@ -166,12 +165,7 @@ public class QuestionnaireProcessor {
 
     public <C extends IPrimitiveType<String>> IBaseBundle packageQuestionnaire(
             Either3<C, IIdType, IBaseResource> questionnaire, boolean isPut) {
-        return packageQuestionnaire(
-                questionnaire,
-                newParameters(
-                        repository.fhirContext(),
-                        "package-parameters",
-                        newBooleanPart(repository.fhirContext(), "isPut", isPut)));
+        return packageQuestionnaire(questionnaire, packageParameters(fhirVersion, null, isPut));
     }
 
     public <C extends IPrimitiveType<String>> IBaseBundle packageQuestionnaire(

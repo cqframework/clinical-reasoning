@@ -24,7 +24,7 @@ public class ServiceRequestResolver extends BaseRequestResourceResolver {
         logger.debug(RESOLVE_MESSAGE, activityDefinition.getId(), activityDefinition.getKind());
         // status, intent, code, and subject are required
         var serviceRequest = new ServiceRequest();
-        serviceRequest.setStatus(ServiceRequest.ServiceRequestStatus.DRAFT);
+        serviceRequest.setStatus(ServiceRequest.ServiceRequestStatus.ACTIVE);
         serviceRequest.setIntent(
                 activityDefinition.hasIntent()
                         ? ServiceRequest.ServiceRequestIntent.fromCode(

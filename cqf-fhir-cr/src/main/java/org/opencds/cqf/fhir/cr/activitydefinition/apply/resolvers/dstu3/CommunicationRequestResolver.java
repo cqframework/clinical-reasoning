@@ -20,7 +20,7 @@ public class CommunicationRequestResolver extends BaseRequestResourceResolver {
         logger.debug(RESOLVE_MESSAGE, activityDefinition.getId(), activityDefinition.getKind());
         var communicationRequest = new CommunicationRequest();
 
-        communicationRequest.setStatus(CommunicationRequest.CommunicationRequestStatus.DRAFT);
+        communicationRequest.setStatus(CommunicationRequest.CommunicationRequestStatus.ACTIVE);
         communicationRequest.setSubject(new Reference(request.getSubjectId()));
 
         if (request.hasEncounterId()) {

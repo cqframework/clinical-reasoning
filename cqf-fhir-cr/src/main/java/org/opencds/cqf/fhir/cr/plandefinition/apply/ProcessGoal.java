@@ -11,17 +11,12 @@ public class ProcessGoal {
 
     public IBaseResource convertGoal(ApplyRequest request, IBaseBackboneElement goal) {
         var fhirVersion = request.getFhirVersion();
-        switch (fhirVersion) {
-            case DSTU3:
-                return convertDstu3Goal(request.getSubjectId(), goal);
-            case R4:
-                return convertR4Goal(request.getSubjectId(), goal);
-            case R5:
-                return convertR5Goal(request.getSubjectId(), goal);
-
-            default:
-                return null;
-        }
+        return switch (fhirVersion) {
+            case DSTU3 -> convertDstu3Goal(request.getSubjectId(), goal);
+            case R4 -> convertR4Goal(request.getSubjectId(), goal);
+            case R5 -> convertR5Goal(request.getSubjectId(), goal);
+            default -> null;
+        };
     }
 
     private IBaseResource convertDstu3Goal(IIdType subjectId, IBaseBackboneElement element) {
@@ -44,7 +39,7 @@ public class ProcessGoal {
                             myTarget.setExtension(target.getExtension());
                             return myTarget;
                         })
-                        .collect(Collectors.toList())
+                        .toList()
                         .get(0)
                 : null;
         myGoal.setTarget(goalTarget);

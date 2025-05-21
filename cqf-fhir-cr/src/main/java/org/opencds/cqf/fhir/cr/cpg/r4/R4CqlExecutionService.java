@@ -16,15 +16,13 @@ import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.cpg.CqlExecutionProcessor;
-import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
-import org.opencds.cqf.fhir.utility.npm.NpmResourceInfoForCql;
 import org.opencds.cqf.fhir.utility.repository.Repositories;
 
+@SuppressWarnings("squid:S107")
 public class R4CqlExecutionService {
 
     protected Repository repository;
     protected EvaluationSettings evaluationSettings;
-    protected NpmPackageLoader npmPackageLoader;
 
     public R4CqlExecutionService(Repository repository, EvaluationSettings evaluationSettings) {
         this.repository = repository;

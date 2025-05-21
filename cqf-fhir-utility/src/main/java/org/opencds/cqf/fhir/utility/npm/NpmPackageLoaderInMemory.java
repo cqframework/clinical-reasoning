@@ -219,7 +219,7 @@ public class NpmPackageLoaderInMemory implements NpmPackageLoader {
 
     private ILibraryAdapter findMatchingLibrary(IMeasureAdapter measure, List<ILibraryAdapter> libraries) {
         return libraries.stream()
-                .filter(library -> measure.getLibraryValues().stream()
+                .filter(library -> measure.getLibrary().stream()
                         .anyMatch(measureLibraryUrl -> doMeasureUrlAndLibraryMatch(measureLibraryUrl, library)))
                 .findFirst()
                 .orElse(null);

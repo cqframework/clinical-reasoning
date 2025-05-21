@@ -316,7 +316,7 @@ public abstract class BaseNpmResourceInfoForCqlTest {
                 getExpectedFhirVersion(), measure.fhirContext().getVersion().getVersion());
         assertEquals(measureUrl, measure.getUrl());
 
-        final List<String> libraryUrls = measure.getLibraryValues();
+        final List<String> libraryUrls = measure.getLibrary();
         assertEquals(1, libraryUrls.size());
         final String libraryUrl = libraryUrls.get(0);
         assertEquals(expectedLibraryUrl, libraryUrl);

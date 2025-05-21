@@ -52,7 +52,7 @@ public class MeasureAdapter extends KnowledgeArtifactAdapter implements IMeasure
     private LibraryAdapter effectiveDataRequirementsAdapter;
 
     @Override
-    public List<String> getLibraryValues() {
+    public List<String> getLibrary() {
         return getMeasure().getLibrary().stream()
                 .map(PrimitiveType::getValueAsString)
                 .toList();

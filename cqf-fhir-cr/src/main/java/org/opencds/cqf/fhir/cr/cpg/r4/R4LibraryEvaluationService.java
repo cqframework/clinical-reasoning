@@ -54,9 +54,7 @@ public class R4LibraryEvaluationService {
         }
         var libraryEngine = new LibraryEngine(repository, this.evaluationSettings);
         var library = repository.read(Library.class, id);
-        // for now we can't process NPM packages in this scenario
-        var engine = Engines.forRepository(
-                repository, evaluationSettings, data, NpmResourceInfoForCql.EMPTY, NpmPackageLoader.DEFAULT);
+        var engine = Engines.forRepository(repository, evaluationSettings, null);
         var libraryManager = engine.getEnvironment().getLibraryManager();
         var libraryIdentifier = baseCqlExecutionProcessor.resolveLibraryIdentifier(null, library, libraryManager);
 

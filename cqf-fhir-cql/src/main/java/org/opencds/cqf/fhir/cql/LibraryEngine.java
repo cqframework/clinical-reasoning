@@ -158,9 +158,7 @@ public class LibraryEngine {
 
         var requestSettings = new EvaluationSettings(settings);
         requestSettings.getLibrarySourceProviders().add(new StringLibrarySourceProvider(Lists.newArrayList(cql)));
-
-        var engine = Engines.forRepository(
-                repository, requestSettings, bundle, NpmResourceInfoForCql.EMPTY, NpmPackageLoader.DEFAULT);
+        var engine = Engines.forRepository(repository, requestSettings, bundle);
 
         var evaluationParameters = cqlFhirParametersConverter.toCqlParameters(parameters);
         if (contextParameter != null) {
@@ -345,9 +343,7 @@ public class LibraryEngine {
         }
         // engine context built externally of LibraryEngine?
         if (engine == null) {
-            // for now we can't process NPM packages in this scenario
-            engine = Engines.forRepository(
-                    repository, settings, additionalData, NpmResourceInfoForCql.EMPTY, NpmPackageLoader.DEFAULT);
+            engine = Engines.forRepository(repository, settings, additionalData);
         }
 
         var evaluationParameters = cqlFhirParametersConverter.toCqlParameters(parameters);

@@ -81,9 +81,7 @@ public class R4CqlExecutionService {
                         null);
             }
 
-            // for now we can't process NPM packages in this scenario
-            var engine = Engines.forRepository(
-                    repository, evaluationSettings, null, NpmResourceInfoForCql.EMPTY, NpmPackageLoader.DEFAULT);
+            var engine = Engines.forRepository(repository, evaluationSettings, null);
             var libraryManager = engine.getEnvironment().getLibraryManager();
             var libraryIdentifier = baseCqlExecutionProcessor.resolveLibraryIdentifier(content, null, libraryManager);
 

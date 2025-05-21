@@ -54,6 +54,10 @@ public class Engines {
 
     public static CqlEngine forRepository(Repository repository, EvaluationSettings settings) {
         return forRepository(repository, settings, null, NpmResourceInfoForCql.EMPTY, NpmPackageLoader.DEFAULT);
+}
+
+public static CqlEngine forRepository(Repository repository, EvaluationSettings settings, IBaseBundle additionalData) {
+    return forRepository(repository, settings, additionalData, NpmResourceInfoForCql.EMPTY, NpmPackageLoader.DEFAULT);
     }
 
     public static CqlEngine forRepository(

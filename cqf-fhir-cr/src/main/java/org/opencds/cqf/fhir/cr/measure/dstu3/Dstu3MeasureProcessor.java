@@ -91,12 +91,7 @@ public class Dstu3MeasureProcessor {
 
         var id = new VersionedIdentifier().withId(library.getName()).withVersion(library.getVersion());
         var context = Engines.forRepository(
-                this.repository,
-                this.measureEvaluationOptions.getEvaluationSettings(),
-                additionalData,
-                // we currently don't have a need for NPM Packages in DSTU3
-                NpmResourceInfoForCql.EMPTY,
-                NpmPackageLoader.DEFAULT);
+                this.repository, this.measureEvaluationOptions.getEvaluationSettings(), additionalData);
 
         CompiledLibrary lib;
         try {

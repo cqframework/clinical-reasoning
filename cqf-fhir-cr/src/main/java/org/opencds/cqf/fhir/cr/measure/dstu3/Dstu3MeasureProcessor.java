@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.cqframework.cql.cql2elm.CqlIncludeException;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
@@ -31,6 +30,7 @@ import org.opencds.cqf.fhir.cr.measure.helper.DateHelper;
 import org.opencds.cqf.fhir.utility.repository.FederatedRepository;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
+@SuppressWarnings({"squid:S1135", "squid:S107"})
 public class Dstu3MeasureProcessor {
     private final Repository repository;
     private final MeasureEvaluationOptions measureEvaluationOptions;
@@ -132,7 +132,7 @@ public class Dstu3MeasureProcessor {
                                 ? MeasureEvalType.POPULATION
                                 : MeasureEvalType.SUBJECT);
 
-        var subjects = subjectProvider.getSubjects(actualRepo, subjectIds).collect(Collectors.toList());
+        var subjects = subjectProvider.getSubjects(actualRepo, subjectIds).toList();
         var libraryEngine = new LibraryEngine(repository, this.measureEvaluationOptions.getEvaluationSettings());
         Dstu3MeasureEvaluation measureEvaluator = new Dstu3MeasureEvaluation(context, measure, libraryEngine, id);
         return measureEvaluator.evaluate(evalType, subjects, measurementPeriod, libraryEngine, id);
@@ -140,11 +140,9 @@ public class Dstu3MeasureProcessor {
 
     protected MeasureReportType evalTypeToReportType(MeasureEvalType measureEvalType) {
         switch (measureEvalType) {
-            case PATIENT:
-            case SUBJECT:
+            case PATIENT, SUBJECT:
                 return MeasureReportType.INDIVIDUAL;
-            case PATIENTLIST:
-            case SUBJECTLIST:
+            case PATIENTLIST, SUBJECTLIST:
                 return MeasureReportType.PATIENTLIST;
             case POPULATION:
                 return MeasureReportType.SUMMARY;
@@ -178,20 +176,25 @@ public class Dstu3MeasureProcessor {
                     value = modelResolver.toJavaPrimitive(((IPrimitiveType<?>) value).getValue(), value);
                 }
             }
-            if (parameterMap.containsKey(param.getName())) {
-                if (parameterMap.get(param.getName()) instanceof List) {
-                    if (value != null) {
-                        @SuppressWarnings("unchecked")
-                        var list = (List<Object>) parameterMap.get(param.getName());
-                        list.add(value);
-                    }
-                } else {
-                    parameterMap.put(param.getName(), Arrays.asList(parameterMap.get(param.getName()), value));
-                }
-            } else {
-                parameterMap.put(param.getName(), value);
-            }
+            enhanceParameterMapIfNeeded(param, parameterMap, value);
         });
         return parameterMap;
+    }
+
+    private void enhanceParameterMapIfNeeded(
+            Parameters.ParametersParameterComponent param, Map<String, Object> parameterMap, Object value) {
+        if (parameterMap.containsKey(param.getName())) {
+            if (parameterMap.get(param.getName()) instanceof List) {
+                if (value != null) {
+                    @SuppressWarnings("unchecked")
+                    var list = (List<Object>) parameterMap.get(param.getName());
+                    list.add(value);
+                }
+            } else {
+                parameterMap.put(param.getName(), Arrays.asList(parameterMap.get(param.getName()), value));
+            }
+        } else {
+            parameterMap.put(param.getName(), value);
+        }
     }
 }

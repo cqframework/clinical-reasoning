@@ -1,9 +1,9 @@
 package org.opencds.cqf.fhir.cr.visitor.r5;
 
-import static org.junit.Assert.assertSame;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -26,6 +26,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r5.model.Bundle;
@@ -62,6 +63,7 @@ import org.opencds.cqf.fhir.utility.r5.MetadataResourceHelper;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.slf4j.event.Level;
 
+@SuppressWarnings("UnstableApiUsage")
 class ReleaseVisitorTests {
     private final FhirContext fhirContext = FhirContext.forR5Cached();
     private IRepository repo;
@@ -139,12 +141,12 @@ class ReleaseVisitorTests {
             }
             // expansion params versions should be used
             if (Canonicals.getUrl(dependency.getResource()) != null
-                    && Canonicals.getUrl(dependency.getResource()).equals("http://loinc.org")) {
+                    && Objects.equals(Canonicals.getUrl(dependency.getResource()), "http://loinc.org")) {
                 assertNotNull(Canonicals.getVersion(dependency.getResource()));
                 assertEquals("2.76", Canonicals.getVersion(dependency.getResource()));
             }
             if (Canonicals.getUrl(dependency.getResource()) != null
-                    && Canonicals.getUrl(dependency.getResource()).equals("http://snomed.info/sct")) {
+                    && Objects.equals(Canonicals.getUrl(dependency.getResource()), "http://snomed.info/sct")) {
                 assertNotNull(Canonicals.getVersion(dependency.getResource()));
                 assertEquals(
                         "http://snomed.info/sct/731000124108/version/20230901",
@@ -313,7 +315,7 @@ class ReleaseVisitorTests {
         // versionBehaviour == 'default' so version should be
         // existingVersion and not the new version provided in
         // the parameters
-        assertEquals(releasedLibrary.getVersion(), existingVersion);
+        assertEquals(existingVersion, releasedLibrary.getVersion());
         var expectedErsdTestArtifactDependencies = Arrays.asList(
                 "http://ersd.aimsplatform.org/fhir/PlanDefinition/us-ecr-specification|" + existingVersion,
                 "http://ersd.aimsplatform.org/fhir/Library/rctc|" + existingVersion,
@@ -349,8 +351,7 @@ class ReleaseVisitorTests {
         var expansionParameters =
                 new AdapterFactory().createLibrary(releasedLibrary).getExpansionParameters();
         var canonicalVersionParams = expansionParameters
-                .map(p -> VisitorHelper.getStringListParameter(Constants.CANONICAL_VERSION, p)
-                        .orElse(null))
+                .flatMap(p -> VisitorHelper.getStringListParameter(Constants.CANONICAL_VERSION, p))
                 .orElse(new ArrayList<String>());
         assertEquals(0, canonicalVersionParams.size());
     }
@@ -378,7 +379,7 @@ class ReleaseVisitorTests {
         assertTrue(maybeLib.isPresent());
         Library releasedLibrary =
                 repo.read(Library.class, new IdType(maybeLib.get().getResponse().getLocation()));
-        assertEquals(releasedLibrary.getVersion(), newVersionToForce);
+        assertEquals(newVersionToForce, releasedLibrary.getVersion());
     }
 
     @Test
@@ -723,8 +724,9 @@ class ReleaseVisitorTests {
                 repo.read(Library.class, new IdType(maybeLib.get().getResponse().getLocation()));
         for (final var originalRelatedArtifact : originalLibrary.getRelatedArtifact()) {
             releasedLibrary.getRelatedArtifact().forEach(releasedRelatedArtifact -> {
-                if (Canonicals.getUrl(releasedRelatedArtifact.getResource())
-                                .equals(Canonicals.getUrl(originalRelatedArtifact.getResource()))
+                if (Objects.equals(
+                                Canonicals.getUrl(releasedRelatedArtifact.getResource()),
+                                Canonicals.getUrl(originalRelatedArtifact.getResource()))
                         && originalRelatedArtifact.getType() == releasedRelatedArtifact.getType()) {
                     assertEquals(
                             releasedRelatedArtifact.getExtension().size(),

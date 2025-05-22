@@ -154,7 +154,7 @@ public class ReleaseVisitor {
                 .findFirst();
         if (effectiveDataRequirementsExt.isPresent()) {
             Reference ref = effectiveDataRequirementsExt.get().getValueReference();
-            Library effectiveDataRequirementsLib = (Library) measure.getContained("#" + ref.getReference());
+            Library effectiveDataRequirementsLib = (Library) measure.getContained(ref.getReference());
             if (effectiveDataRequirementsLib != null) {
                 effectiveDataRequirementsLib.getExtension().stream()
                         .filter(ext -> ext.getUrl().equals(Constants.CQF_DIRECT_REFERENCE_EXTENSION))

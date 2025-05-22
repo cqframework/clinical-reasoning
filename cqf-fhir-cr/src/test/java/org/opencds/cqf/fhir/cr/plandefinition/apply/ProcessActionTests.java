@@ -12,7 +12,6 @@ import static org.opencds.cqf.fhir.utility.Constants.CQF_APPLICABILITY_BEHAVIOR;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.repository.IRepository;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;

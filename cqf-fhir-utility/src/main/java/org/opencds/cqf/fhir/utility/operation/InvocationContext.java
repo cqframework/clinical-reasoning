@@ -2,9 +2,9 @@ package org.opencds.cqf.fhir.utility.operation;
 
 import static java.util.Objects.requireNonNull;
 
+import ca.uhn.fhir.repository.IRepository;
 import jakarta.annotation.Nonnull;
 import java.util.function.Function;
-import org.opencds.cqf.fhir.api.Repository;
 
 /*
  * The InvocationContext is a wrapper around a method annotated with @Operation. It contains a reference to the method
@@ -16,9 +16,9 @@ import org.opencds.cqf.fhir.api.Repository;
 class InvocationContext<T> {
 
     private final MethodBinder methodBinder;
-    private final Function<Repository, T> factory;
+    private final Function<IRepository, T> factory;
 
-    InvocationContext(Function<Repository, T> factory, MethodBinder methodBinder) {
+    InvocationContext(Function<IRepository, T> factory, MethodBinder methodBinder) {
         this.factory = requireNonNull(factory, "factory cannot be null");
         this.methodBinder = requireNonNull(methodBinder, "methodBinder cannot be null");
     }
@@ -29,7 +29,7 @@ class InvocationContext<T> {
     }
 
     @Nonnull
-    Function<Repository, T> factory() {
+    Function<IRepository, T> factory() {
         return this.factory;
     }
 }

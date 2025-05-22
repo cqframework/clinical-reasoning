@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -25,7 +26,6 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.io.TempDir;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.test.Resources;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.search.Searches;
@@ -33,7 +33,7 @@ import org.opencds.cqf.fhir.utility.search.Searches;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class IgRepositoryPrefixTest {
 
-    private static Repository repository;
+    private static IRepository repository;
 
     @TempDir
     static Path tempDir;

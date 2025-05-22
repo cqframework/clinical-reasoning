@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.visitor.r4;
 
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.ArrayList;
@@ -24,7 +25,6 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.ValueSet;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.visitor.r4.CRMIReleaseExperimentalBehavior.CRMIReleaseExperimentalBehaviorCodes;
 import org.opencds.cqf.fhir.cr.visitor.r4.CRMIReleaseVersionBehavior.CRMIReleaseVersionBehaviorCodes;
 import org.opencds.cqf.fhir.utility.Constants;
@@ -41,7 +41,7 @@ public class ReleaseVisitor {
     public static void checkNonExperimental(
             MetadataResource resource,
             CRMIReleaseExperimentalBehaviorCodes experimentalBehavior,
-            Repository repository,
+            IRepository repository,
             Logger log)
             throws UnprocessableEntityException {
         if (CRMIReleaseExperimentalBehaviorCodes.NULL != experimentalBehavior
@@ -94,7 +94,7 @@ public class ReleaseVisitor {
         }
     }
 
-    public static Bundle searchArtifactAssessmentForArtifact(IIdType reference, Repository repository) {
+    public static Bundle searchArtifactAssessmentForArtifact(IIdType reference, IRepository repository) {
         Map<String, List<IQueryParameterType>> searchParams = new HashMap<>();
         List<IQueryParameterType> urlList = new ArrayList<>();
         urlList.add(new ReferenceParam(reference.getResourceType() + "/" + reference.getIdPart()));
@@ -133,7 +133,7 @@ public class ReleaseVisitor {
 
     @SuppressWarnings("squid:S1612")
     public static List<BundleEntryComponent> findArtifactCommentsToUpdate(
-            MetadataResource rootArtifact, String releaseVersion, Repository repository) {
+            MetadataResource rootArtifact, String releaseVersion, IRepository repository) {
         List<BundleEntryComponent> returnEntries = new ArrayList<>();
         // find any artifact assessments and update those as part of the bundle
         searchArtifactAssessmentForArtifact(rootArtifact.getIdElement(), repository).getEntry().stream()
@@ -167,7 +167,7 @@ public class ReleaseVisitor {
                 .findFirst();
         if (effectiveDataRequirementsExt.isPresent()) {
             Reference ref = (Reference) effectiveDataRequirementsExt.get().getValue();
-            Library effectiveDataRequirementsLib = (Library) measure.getContained("#" + ref.getReference());
+            Library effectiveDataRequirementsLib = (Library) measure.getContained(ref.getReference());
             if (effectiveDataRequirementsLib != null) {
                 effectiveDataRequirementsLib.getExtension().stream()
                         .filter(ext -> ext.getUrl().equals(Constants.CQFM_DIRECT_REFERENCE_EXTENSION))

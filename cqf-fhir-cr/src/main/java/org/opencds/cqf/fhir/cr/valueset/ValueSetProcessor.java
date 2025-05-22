@@ -4,13 +4,13 @@ import static java.util.Objects.requireNonNull;
 import static org.opencds.cqf.fhir.utility.PackageHelper.packageParameters;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.repository.IRepository;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cr.common.DataRequirementsProcessor;
 import org.opencds.cqf.fhir.cr.common.IDataRequirementsProcessor;
@@ -25,19 +25,19 @@ public class ValueSetProcessor {
     protected final FhirVersionEnum fhirVersion;
     protected IPackageProcessor packageProcessor;
     protected IDataRequirementsProcessor dataRequirementsProcessor;
-    protected Repository repository;
+    protected IRepository repository;
     protected EvaluationSettings evaluationSettings;
 
-    public ValueSetProcessor(Repository repository) {
+    public ValueSetProcessor(IRepository repository) {
         this(repository, EvaluationSettings.getDefault());
     }
 
-    public ValueSetProcessor(Repository repository, EvaluationSettings evaluationSettings) {
+    public ValueSetProcessor(IRepository repository, EvaluationSettings evaluationSettings) {
         this(repository, evaluationSettings, null, null);
     }
 
     public ValueSetProcessor(
-            Repository repository,
+            IRepository repository,
             EvaluationSettings evaluationSettings,
             IPackageProcessor packageProcessor,
             IDataRequirementsProcessor dataRequirementsProcessor) {

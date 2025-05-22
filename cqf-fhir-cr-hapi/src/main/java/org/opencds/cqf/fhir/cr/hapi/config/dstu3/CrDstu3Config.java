@@ -2,10 +2,10 @@ package org.opencds.cqf.fhir.cr.hapi.config.dstu3;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.rest.api.server.IRepositoryFactory;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import java.util.Arrays;
 import java.util.Map;
-import org.opencds.cqf.fhir.cr.hapi.common.IRepositoryFactory;
 import org.opencds.cqf.fhir.cr.hapi.config.CrBaseConfig;
 import org.opencds.cqf.fhir.cr.hapi.config.ProviderLoader;
 import org.opencds.cqf.fhir.cr.hapi.config.ProviderSelector;

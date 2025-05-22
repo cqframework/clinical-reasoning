@@ -12,6 +12,7 @@ import static org.opencds.cqf.fhir.cr.helpers.RequestHelpers.newPopulateRequestF
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.repository.IRepository;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
@@ -24,7 +25,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.common.ExpressionProcessor;
 import org.opencds.cqf.fhir.utility.CqfExpression;
@@ -32,7 +32,7 @@ import org.opencds.cqf.fhir.utility.CqfExpression;
 @ExtendWith(MockitoExtension.class)
 class ProcessItemTests {
     @Mock
-    private Repository repository;
+    private IRepository repository;
 
     @Mock
     private ExpressionProcessor expressionProcessor;

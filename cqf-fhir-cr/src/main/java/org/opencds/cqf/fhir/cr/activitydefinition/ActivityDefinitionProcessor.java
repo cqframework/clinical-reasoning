@@ -6,6 +6,7 @@ import static org.opencds.cqf.fhir.utility.repository.Repositories.proxy;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.repository.IRepository;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
@@ -14,7 +15,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.ExtensionResolver;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
@@ -35,19 +35,19 @@ public class ActivityDefinitionProcessor implements IActivityDefinitionProcessor
     protected final ResourceResolver resourceResolver;
     protected IApplyProcessor applyProcessor;
     protected IRequestResolverFactory requestResolverFactory;
-    protected Repository repository;
+    protected IRepository repository;
     protected ExtensionResolver extensionResolver;
 
-    public ActivityDefinitionProcessor(Repository repository) {
+    public ActivityDefinitionProcessor(IRepository repository) {
         this(repository, EvaluationSettings.getDefault());
     }
 
-    public ActivityDefinitionProcessor(Repository repository, EvaluationSettings evaluationSettings) {
+    public ActivityDefinitionProcessor(IRepository repository, EvaluationSettings evaluationSettings) {
         this(repository, evaluationSettings, null, null);
     }
 
     public ActivityDefinitionProcessor(
-            Repository repository,
+            IRepository repository,
             EvaluationSettings evaluationSettings,
             IApplyProcessor applyProcessor,
             IRequestResolverFactory requestResolverFactory) {
@@ -142,9 +142,9 @@ public class ActivityDefinitionProcessor implements IActivityDefinitionProcessor
             IBaseParameters parameters,
             boolean useServerData,
             IBaseBundle data,
-            Repository dataRepository,
-            Repository contentRepository,
-            Repository terminologyRepository) {
+            IRepository dataRepository,
+            IRepository contentRepository,
+            IRepository terminologyRepository) {
         repository = proxy(repository, useServerData, dataRepository, contentRepository, terminologyRepository);
         return apply(
                 activityDefinition,

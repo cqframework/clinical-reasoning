@@ -3,15 +3,15 @@ package org.opencds.cqf.fhir.cr.library.evaluate;
 import static org.opencds.cqf.fhir.utility.Parameters.newParameters;
 import static org.opencds.cqf.fhir.utility.Parameters.newPart;
 
+import ca.uhn.fhir.repository.IRepository;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 
 public class EvaluateProcessor implements IEvaluateProcessor {
-    protected Repository repository;
+    protected IRepository repository;
     protected EvaluationSettings evaluationSettings;
 
-    public EvaluateProcessor(Repository repository, EvaluationSettings evaluationSettings) {
+    public EvaluateProcessor(IRepository repository, EvaluationSettings evaluationSettings) {
         this.repository = repository;
         this.evaluationSettings = evaluationSettings;
     }

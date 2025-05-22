@@ -5,6 +5,7 @@ import static org.opencds.cqf.fhir.utility.repository.Repositories.proxy;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.repository.IRepository;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -13,7 +14,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.common.ResourceResolver;
@@ -34,19 +34,19 @@ public class QuestionnaireResponseProcessor {
     protected final ModelResolver modelResolver;
     protected final EvaluationSettings evaluationSettings;
     protected final FhirVersionEnum fhirVersion;
-    protected Repository repository;
+    protected IRepository repository;
     protected IExtractProcessor extractProcessor;
 
-    public QuestionnaireResponseProcessor(Repository repository) {
+    public QuestionnaireResponseProcessor(IRepository repository) {
         this(repository, EvaluationSettings.getDefault());
     }
 
-    public QuestionnaireResponseProcessor(Repository repository, EvaluationSettings evaluationSettings) {
+    public QuestionnaireResponseProcessor(IRepository repository, EvaluationSettings evaluationSettings) {
         this(repository, evaluationSettings, null);
     }
 
     public QuestionnaireResponseProcessor(
-            Repository repository, EvaluationSettings evaluationSettings, IExtractProcessor extractProcessor) {
+            IRepository repository, EvaluationSettings evaluationSettings, IExtractProcessor extractProcessor) {
         this.repository = requireNonNull(repository, "repository can not be null");
         this.evaluationSettings = requireNonNull(evaluationSettings, "evaluationSettings can not be null");
         this.questionnaireResponseResolver = new ResourceResolver("QuestionnaireResponse", this.repository);
@@ -131,7 +131,7 @@ public class QuestionnaireResponseProcessor {
             IBaseParameters parameters,
             IBaseBundle data,
             boolean useServerData) {
-        repository = proxy(repository, useServerData, (Repository) null, null, null);
+        repository = proxy(repository, useServerData, (IRepository) null, null, null);
         return extract(
                 questionnaireResponseId,
                 questionnaireId,

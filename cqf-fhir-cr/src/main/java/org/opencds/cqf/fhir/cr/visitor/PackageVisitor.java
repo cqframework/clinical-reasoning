@@ -5,6 +5,7 @@ import static org.opencds.cqf.fhir.cr.visitor.VisitorHelper.processCanonicals;
 import static org.opencds.cqf.fhir.utility.Parameters.newParameters;
 import static org.opencds.cqf.fhir.utility.adapter.IAdapterFactory.createAdapterForResource;
 
+import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.ArrayList;
@@ -25,7 +26,6 @@ import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.PackageHelper;
@@ -51,15 +51,15 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
 
     protected Map<String, List<?>> resourceTypes = new HashMap<>();
 
-    public PackageVisitor(Repository repository) {
+    public PackageVisitor(IRepository repository) {
         this(repository, null, null);
     }
 
-    public PackageVisitor(Repository repository, TerminologyServerClient client) {
+    public PackageVisitor(IRepository repository, TerminologyServerClient client) {
         this(repository, client, null);
     }
 
-    public PackageVisitor(Repository repository, TerminologyServerClient client, IValueSetExpansionCache cache) {
+    public PackageVisitor(IRepository repository, TerminologyServerClient client, IValueSetExpansionCache cache) {
         super(repository, cache);
         if (client == null) {
             terminologyServerClient = new TerminologyServerClient(fhirContext());

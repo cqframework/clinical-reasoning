@@ -86,40 +86,30 @@ public class ProcessDefinition {
         logger.debug("Resolving definition {}", definition.getValue());
 
         var resourceName = resolveResourceName(request, definition);
-        switch (FHIRTypes.fromCode(requireNonNull(resourceName))) {
-            case PLANDEFINITION:
-                return applyNestedPlanDefinition(request, definition);
-            case ACTIVITYDEFINITION:
-                return applyActivityDefinition(request, definition);
-            case QUESTIONNAIRE:
-                return applyQuestionnaireDefinition(request, definition);
-            default:
-                throw new FHIRException(String.format("Unknown action definition: %s", definition.getValue()));
-        }
+        return switch (FHIRTypes.fromCode(requireNonNull(resourceName))) {
+            case PLANDEFINITION -> applyNestedPlanDefinition(request, definition);
+            case ACTIVITYDEFINITION -> applyActivityDefinition(request, definition);
+            case QUESTIONNAIRE -> applyQuestionnaireDefinition(request, definition);
+            default -> throw new FHIRException(String.format("Unknown action definition: %s", definition.getValue()));
+        };
     }
 
     protected Boolean isDefinitionCanonical(ApplyRequest request, IBase definition) {
         requireNonNull(request);
-        switch (request.getFhirVersion()) {
-            case R4:
-                return definition instanceof org.hl7.fhir.r4.model.CanonicalType;
-            case R5:
-                return definition instanceof org.hl7.fhir.r5.model.CanonicalType;
-            default:
-                return definition != null;
-        }
+        return switch (request.getFhirVersion()) {
+            case R4 -> definition instanceof org.hl7.fhir.r4.model.CanonicalType;
+            case R5 -> definition instanceof org.hl7.fhir.r5.model.CanonicalType;
+            default -> definition != null;
+        };
     }
 
     protected Boolean isDefinitionUri(ApplyRequest request, IBase definition) {
         requireNonNull(request);
-        switch (request.getFhirVersion()) {
-            case R4:
-                return definition instanceof org.hl7.fhir.r4.model.UriType;
-            case R5:
-                return definition instanceof org.hl7.fhir.r5.model.UriType;
-            default:
-                return Boolean.FALSE;
-        }
+        return switch (request.getFhirVersion()) {
+            case R4 -> definition instanceof org.hl7.fhir.r4.model.UriType;
+            case R5 -> definition instanceof org.hl7.fhir.r5.model.UriType;
+            default -> Boolean.FALSE;
+        };
     }
 
     protected IBaseResource applyQuestionnaireDefinition(ApplyRequest request, IPrimitiveType<String> definition) {

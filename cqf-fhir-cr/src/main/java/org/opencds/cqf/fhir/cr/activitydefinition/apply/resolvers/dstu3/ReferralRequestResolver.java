@@ -21,7 +21,7 @@ public class ReferralRequestResolver extends BaseRequestResourceResolver {
         logger.debug(RESOLVE_MESSAGE, activityDefinition.getId(), activityDefinition.getKind());
         // status, intent, code, and subject are required
         var referralRequest = new ReferralRequest();
-        referralRequest.setStatus(ReferralRequest.ReferralRequestStatus.DRAFT);
+        referralRequest.setStatus(ReferralRequest.ReferralRequestStatus.ACTIVE);
         referralRequest.setIntent(ReferralRequest.ReferralCategory.ORDER);
         referralRequest.setSubject(new Reference(request.getSubjectId()));
 

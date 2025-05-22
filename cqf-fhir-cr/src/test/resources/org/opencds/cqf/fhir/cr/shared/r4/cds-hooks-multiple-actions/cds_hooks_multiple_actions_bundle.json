@@ -10,7 +10,7 @@
         "instantiatesCanonical": [
           "http://example.com/PlanDefinition/CdsHooksMultipleActions-PlanDefinition-1.0.0"
         ],
-        "status": "draft",
+        "status": "active",
         "intent": "proposal",
         "subject": {
           "reference": "Patient/patient-CdsHooksMultipleActions"

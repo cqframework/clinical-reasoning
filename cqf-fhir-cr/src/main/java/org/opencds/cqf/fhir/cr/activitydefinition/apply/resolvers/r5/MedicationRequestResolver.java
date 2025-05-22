@@ -24,7 +24,7 @@ public class MedicationRequestResolver extends BaseRequestResourceResolver {
         logger.debug(RESOLVE_MESSAGE, activityDefinition.getId(), activityDefinition.getKind());
         // intent, medication, and subject are required
         var medicationRequest = new MedicationRequest();
-        medicationRequest.setStatus(MedicationrequestStatus.DRAFT);
+        medicationRequest.setStatus(MedicationrequestStatus.ACTIVE);
         medicationRequest.setIntent(
                 activityDefinition.hasIntent()
                         ? MedicationRequest.MedicationRequestIntent.fromCode(

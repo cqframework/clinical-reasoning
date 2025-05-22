@@ -8,7 +8,7 @@
       "instantiatesCanonical": [
         "http://fhir.org/guides/who/anc-cds/PlanDefinition/ANCDT17"
       ],
-      "status": "draft",
+      "status": "active",
       "intent": "proposal",
       "subject": {
         "reference": "Patient/5946f880-b197-400b-9caa-a3c661d23041"
@@ -94,7 +94,7 @@
   "instantiatesCanonical": [
     "http://fhir.org/guides/who/anc-cds/PlanDefinition/ANCDT17"
   ],
-  "status": "draft",
+  "status": "active",
   "intent": "proposal",
   "subject": {
     "reference": "Patient/5946f880-b197-400b-9caa-a3c661d23041"

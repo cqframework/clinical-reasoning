@@ -8,7 +8,7 @@
       "instantiatesCanonical": [
         "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/prepopulate|1.0.0"
       ],
-      "status": "draft",
+      "status": "active",
       "intent": "proposal",
       "subject": {
         "reference": "Patient/OPA-Patient1"
@@ -834,7 +834,7 @@
           "reference": "RequestGroup/prepopulate"
         }
       ],
-      "status": "draft",
+      "status": "ready",
       "intent": "proposal",
       "description": "Create a task to complete a Questionnaire.",
       "focus": {
@@ -848,7 +848,7 @@
   "instantiatesCanonical": [
     "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/prepopulate|1.0.0"
   ],
-  "status": "draft",
+  "status": "active",
   "intent": "proposal",
   "subject": {
     "reference": "Patient/OPA-Patient1"

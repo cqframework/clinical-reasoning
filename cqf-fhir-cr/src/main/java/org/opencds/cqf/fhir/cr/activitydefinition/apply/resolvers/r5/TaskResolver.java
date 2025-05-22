@@ -8,6 +8,7 @@ import org.hl7.fhir.r5.model.Extension;
 import org.hl7.fhir.r5.model.Reference;
 import org.hl7.fhir.r5.model.StringType;
 import org.hl7.fhir.r5.model.Task;
+import org.hl7.fhir.r5.model.Task.TaskStatus;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.BaseRequestResourceResolver;
 import org.opencds.cqf.fhir.cr.common.ICpgRequest;
 
@@ -43,7 +44,7 @@ public class TaskResolver extends BaseRequestResourceResolver {
                         "Extension {} should have a value of type {}", TARGET_STATUS_URL, StringType.class.getName());
             }
         } else {
-            task.setStatus(Task.TaskStatus.DRAFT);
+            task.setStatus(TaskStatus.READY);
         }
 
         task.setIntent(

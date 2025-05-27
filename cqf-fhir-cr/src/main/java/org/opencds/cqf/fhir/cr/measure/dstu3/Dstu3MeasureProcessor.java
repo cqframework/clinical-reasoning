@@ -1,13 +1,13 @@
 package org.opencds.cqf.fhir.cr.measure.dstu3;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import org.apache.commons.lang3.StringUtils;
 import org.cqframework.cql.cql2elm.CqlIncludeException;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.hl7.elm.r1.VersionedIdentifier;
@@ -18,6 +18,7 @@ import org.hl7.fhir.dstu3.model.MeasureReport;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.fhir.model.Dstu3FhirModelResolver;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.fhir.api.Repository;
@@ -25,9 +26,9 @@ import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorUtils;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
 import org.opencds.cqf.fhir.cr.measure.common.SubjectProvider;
-import org.opencds.cqf.fhir.cr.measure.helper.DateHelper;
 import org.opencds.cqf.fhir.utility.repository.FederatedRepository;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
@@ -35,6 +36,7 @@ public class Dstu3MeasureProcessor {
     private final Repository repository;
     private final MeasureEvaluationOptions measureEvaluationOptions;
     private final SubjectProvider subjectProvider;
+    private final MeasureProcessorUtils measureProcessorUtils = new MeasureProcessorUtils();
 
     public Dstu3MeasureProcessor(Repository repository, MeasureEvaluationOptions measureEvaluationOptions) {
         this(repository, measureEvaluationOptions, new Dstu3RepositorySubjectProvider());
@@ -73,23 +75,70 @@ public class Dstu3MeasureProcessor {
             IBaseBundle additionalData,
             Parameters parameters) {
 
-        if (!measure.hasLibrary()) {
-            throw new InvalidRequestException(
-                    String.format("Measure %s does not have a primary library specified", measure.getUrl()));
+        checkMeasureLibrary(measure);
+
+        Interval measurementPeriodParams = measureProcessorUtils.buildMeasurementPeriod(periodStart, periodEnd);
+
+        // setup MeasureDef
+        var measureDef = new Dstu3MeasureDefBuilder().build(measure);
+
+        var actualRepo = this.repository;
+        if (additionalData != null) {
+            actualRepo = new FederatedRepository(
+                    this.repository, new InMemoryFhirRepository(this.repository.fhirContext(), additionalData));
         }
-
-        Interval measurementPeriod = null;
-        if (StringUtils.isNotBlank(periodStart) && StringUtils.isNotBlank(periodEnd)) {
-            measurementPeriod = this.buildMeasurementPeriod(periodStart, periodEnd);
-        }
-
-        var reference = measure.getLibrary().get(0);
-
-        var library = this.repository.read(Library.class, reference.getReferenceElement());
-
-        var id = new VersionedIdentifier().withId(library.getName()).withVersion(library.getVersion());
+        var subjects = subjectProvider.getSubjects(actualRepo, subjectIds).collect(Collectors.toList());
+        var evalType = getMeasureEvalType(reportType, subjects);
         var context = Engines.forRepository(
                 this.repository, this.measureEvaluationOptions.getEvaluationSettings(), additionalData);
+
+        var libraryVersionIdentifier = getLibraryVersionIdentifier(measure);
+        var libraryEngine = getLibraryEngine(parameters, libraryVersionIdentifier, context);
+        // set measurement Period from CQL if operation parameters are empty
+        measureProcessorUtils.setMeasurementPeriod(measureDef, measurementPeriodParams, context);
+        // extract measurement Period from CQL to pass to report Builder
+        Interval measurementPeriod =
+                measureProcessorUtils.getDefaultMeasurementPeriod(measurementPeriodParams, context);
+        // set offset of operation parameter measurement period
+        ZonedDateTime zonedMeasurementPeriod = MeasureProcessorUtils.getZonedTimeZoneForEval(measurementPeriod);
+        // populate results from Library $evaluate
+        if (!subjects.isEmpty()) {
+            var results = measureProcessorUtils.getEvaluationResults(
+                    subjectIds, measureDef, zonedMeasurementPeriod, context, libraryEngine, libraryVersionIdentifier);
+
+            // Process Criteria Expression Results
+            measureProcessorUtils.processResults(
+                    results,
+                    measureDef,
+                    evalType,
+                    measureEvaluationOptions.getApplyScoringSetMembership(),
+                    new Dstu3PopulationBasisValidator());
+        }
+        // Populate populationDefs that require MeasureDef results
+        measureProcessorUtils.continuousVariableObservation(measureDef, context);
+
+        // Build Measure Report with Results
+        return new Dstu3MeasureReportBuilder()
+                .build(measure, measureDef, evalTypeToReportType(evalType), measurementPeriod, subjects);
+    }
+
+    protected MeasureReportType evalTypeToReportType(MeasureEvalType measureEvalType) {
+        switch (measureEvalType) {
+            case PATIENT:
+            case SUBJECT:
+                return MeasureReportType.INDIVIDUAL;
+            case PATIENTLIST:
+            case SUBJECTLIST:
+                return MeasureReportType.PATIENTLIST;
+            case POPULATION:
+                return MeasureReportType.SUMMARY;
+            default:
+                throw new InvalidRequestException(
+                        String.format("Unsupported MeasureEvalType: %s", measureEvalType.toCode()));
+        }
+    }
+
+    protected LibraryEngine getLibraryEngine(Parameters parameters, VersionedIdentifier id, CqlEngine context) {
 
         CompiledLibrary lib;
         try {
@@ -97,7 +146,7 @@ public class Dstu3MeasureProcessor {
         } catch (CqlIncludeException e) {
             throw new IllegalStateException(
                     String.format(
-                            "Unable to load CQL/ELM for library: %s. Verify that the Library has CQL/ELM content embedded.",
+                            "Unable to load CQL/ELM for library: %s. Verify that the Library resource is available in your environment and has CQL/ELM content embedded.",
                             id.getId()),
                     e);
         }
@@ -120,47 +169,30 @@ public class Dstu3MeasureProcessor {
             }
         }
 
-        var actualRepo = this.repository;
-        if (additionalData != null) {
-            actualRepo = new FederatedRepository(
-                    this.repository, new InMemoryFhirRepository(this.repository.fhirContext(), additionalData));
-        }
+        return new LibraryEngine(repository, this.measureEvaluationOptions.getEvaluationSettings());
+    }
 
-        var evalType = MeasureEvalType.fromCode(reportType)
+    private VersionedIdentifier getLibraryVersionIdentifier(Measure measure) {
+        var reference = measure.getLibrary().get(0);
+
+        var library = this.repository.read(Library.class, reference.getReferenceElement());
+
+        return new VersionedIdentifier().withId(library.getName()).withVersion(library.getVersion());
+    }
+
+    private MeasureEvalType getMeasureEvalType(String reportType, List<String> subjectIds) {
+        return MeasureEvalType.fromCode(reportType)
                 .orElse(
                         subjectIds == null || subjectIds.isEmpty() || subjectIds.get(0) == null
                                 ? MeasureEvalType.POPULATION
                                 : MeasureEvalType.SUBJECT);
-
-        var subjects = subjectProvider.getSubjects(actualRepo, subjectIds).collect(Collectors.toList());
-        var libraryEngine = new LibraryEngine(repository, this.measureEvaluationOptions.getEvaluationSettings());
-        Dstu3MeasureEvaluation measureEvaluator = new Dstu3MeasureEvaluation(context, measure, libraryEngine, id);
-        return measureEvaluator.evaluate(evalType, subjects, measurementPeriod, libraryEngine, id);
     }
 
-    protected MeasureReportType evalTypeToReportType(MeasureEvalType measureEvalType) {
-        switch (measureEvalType) {
-            case PATIENT:
-            case SUBJECT:
-                return MeasureReportType.INDIVIDUAL;
-            case PATIENTLIST:
-            case SUBJECTLIST:
-                return MeasureReportType.PATIENTLIST;
-            case POPULATION:
-                return MeasureReportType.SUMMARY;
-            default:
-                throw new InvalidRequestException(
-                        String.format("Unsupported MeasureEvalType: %s", measureEvalType.toCode()));
+    private void checkMeasureLibrary(Measure measure) {
+        if (!measure.hasLibrary()) {
+            throw new InvalidRequestException(
+                    String.format("Measure %s does not have a primary library specified", measure.getUrl()));
         }
-    }
-
-    private Interval buildMeasurementPeriod(String periodStart, String periodEnd) {
-        // resolve the measurement period
-        return new Interval(
-                DateHelper.resolveRequestDate(periodStart, true),
-                true,
-                DateHelper.resolveRequestDate(periodEnd, false),
-                true);
     }
 
     private Map<String, Object> resolveParameterMap(Parameters parameters) {

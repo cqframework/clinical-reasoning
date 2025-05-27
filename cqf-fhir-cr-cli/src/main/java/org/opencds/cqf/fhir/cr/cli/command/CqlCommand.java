@@ -265,12 +265,11 @@ public class CqlCommand implements Callable<Integer> {
         evaluationOptions.setEvaluationSettings(evaluationSettings);
         R4MeasureProcessor measureProcessor = new R4MeasureProcessor(repository, evaluationOptions, new R4RepositorySubjectProvider(new SubjectProviderOptions()), new R4MeasureServiceUtils(repository));
 
-
+        // hack to bring in Measure
+        IParser parser = fhirContext.newJsonParser();
 
         Measure measure = null;
-        if(measureName != null) {
-            // hack to bring in Measure
-            IParser parser = fhirContext.newJsonParser();
+        if(!measureName.contains("null") && measureName != null) {
             InputStream is = new FileInputStream(measurePath + measureName + ".json");
             measure = (org.hl7.fhir.r4.model.Measure)
                 parser.parseResource(is);
@@ -314,39 +313,36 @@ public class CqlCommand implements Callable<Integer> {
             Map<String, EvaluationResult> result = new HashMap<>();
             result.put(subjectId, cqlResult);
 
-//            // generate MeasureReport from ExpressionResult
-//            if(measure != null) {
-//                String jsonReport;
-//                if(periodStart != null && periodEnd != null) {
-//                    var report = measureProcessor.evaluateMeasureResults(
-//                        measure,
-//                        LocalDate.parse(periodStart, DateTimeFormatter.ISO_LOCAL_DATE)
-//                            .atStartOfDay(ZoneId.systemDefault()),
-//                        LocalDate.parse(periodEnd, DateTimeFormatter.ISO_LOCAL_DATE)
-//                            .atTime(LocalTime.MAX)
-//                            .atZone(ZoneId.systemDefault()),
-//                        "subject",
-//                        Collections.singletonList(subjectId),
-//                        result);
-//
-//                    jsonReport = parser.encodeResourceToString(report);
-//                } else {
-//                    var report = measureProcessor.evaluateMeasureResults(
-//                        measure,
-//                        LocalDate.parse(periodStart, DateTimeFormatter.ISO_LOCAL_DATE)
-//                            .atStartOfDay(ZoneId.systemDefault()),
-//                        LocalDate.parse(periodEnd, DateTimeFormatter.ISO_LOCAL_DATE)
-//                            .atTime(LocalTime.MAX)
-//                            .atZone(ZoneId.systemDefault()),
-//                        "subject",
-//                        Collections.singletonList(subjectId),
-//                        result);
-//                     jsonReport = parser.encodeResourceToString(report);
-//                }
-//
-//                writeJsonToFile(jsonReport, e.context.contextValue,
-//                    basePath + this.library.libraryName + "/measurereports");
-//            }
+            // generate MeasureReport from ExpressionResult
+            if(measure != null) {
+                String jsonReport;
+                if(periodStart != null && periodEnd != null) {
+                    var report = measureProcessor.evaluateMeasureResults(
+                        measure,
+                        LocalDate.parse(periodStart, DateTimeFormatter.ISO_LOCAL_DATE)
+                            .atStartOfDay(ZoneId.systemDefault()),
+                        LocalDate.parse(periodEnd, DateTimeFormatter.ISO_LOCAL_DATE)
+                            .atTime(LocalTime.MAX)
+                            .atZone(ZoneId.systemDefault()),
+                        "subject",
+                        Collections.singletonList(subjectId),
+                        result);
+
+                    jsonReport = parser.encodeResourceToString(report);
+                } else {
+                    var report = measureProcessor.evaluateMeasureResults(
+                        measure,
+                        null,
+                        null,
+                        "subject",
+                        Collections.singletonList(subjectId),
+                        result);
+                     jsonReport = parser.encodeResourceToString(report);
+                }
+
+                writeJsonToFile(jsonReport, e.context.contextValue,
+                    basePath + this.library.libraryName + "/measurereports");
+            }
             if(singleFile) {
                 // ✅ Write TXT result
                 writeResultToFile(cqlResult, e.context.contextValue,

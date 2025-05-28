@@ -120,14 +120,14 @@ class HedisCliTest {
         String measureCode = "COA";
         var testPatientId = "patient.2024.coa.0.95635";
         var directory = "/Users/justinmckelvy/Documents/DCSv2/";
-        var suffix = "/Sample/v0_tests/tests/Patient";
+        var suffix = "/Sample/v0_tests/tests/Patient/";
         var patientPath = "/Users/justinmckelvy/Documents/DCSv2/";
         var cqlContentDirectory = "/Users/justinmckelvy/alphora/DCS-HEDIS-2024-v2";
         var resultsPath = patientPath + "_Results8/";
         String patientBundles = directory + measureCode + suffix;
 
         run(measureCode + "_Reporting",
-            patientBundles, 250000, cqlContentDirectory, resultsPath, null, null, null, null, testPatientId);
+            patientBundles + testPatientId, 250000, cqlContentDirectory, resultsPath, null, null, null, null, testPatientId);
 
 
 

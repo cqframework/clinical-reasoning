@@ -20,7 +20,7 @@ public class ProcedureRequestResolver extends BaseRequestResourceResolver {
         logger.debug(RESOLVE_MESSAGE, activityDefinition.getId(), activityDefinition.getKind());
         // status, intent, code, and subject are required
         var procedureRequest = new ProcedureRequest();
-        procedureRequest.setStatus(ProcedureRequest.ProcedureRequestStatus.DRAFT);
+        procedureRequest.setStatus(ProcedureRequest.ProcedureRequestStatus.ACTIVE);
         procedureRequest.setIntent(ProcedureRequest.ProcedureRequestIntent.PROPOSAL);
         procedureRequest.setSubject(new Reference(request.getSubjectId()));
 

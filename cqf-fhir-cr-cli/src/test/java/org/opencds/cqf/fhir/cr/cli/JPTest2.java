@@ -59,7 +59,7 @@ class JPTest2 {
         var testingPath = "/Sample/v0_tests"; //test deck data path suffix
         var cqlContentDirectory = "/Users/justinmckelvy/alphora/DCS-HEDIS-2024-v2"; // the CQL that will be used for test
         var resultsPath = patientPath + "_Results7/"; // the path where results will save
-        measureCodes.add("EDU"); //measure(s) to evaluate, add more if wanting to test multiple
+        measureCodes.add("LBP"); //measure(s) to evaluate, add more if wanting to test multiple
 
 
         for (String measureCode : measureCodes) {
@@ -75,7 +75,7 @@ class JPTest2 {
         var testingPath = "/Sample/v0_tests";
         var cqlContentDirectory = "/Users/justinmckelvy/alphora/DCS-HEDIS-2024-v2";
         var resultsPath = patientPath + "_Results7/";
-        measureCodes.add("FUH");
+        measureCodes.add("IMAE");
 
         for (String measureCode : measureCodes) {
             run(measureCode + "_Reporting",
@@ -90,7 +90,7 @@ class JPTest2 {
         var testingPath = "/Sample/v0_tests";
         var cqlContentDirectory = "/Users/justinmckelvy/alphora/DCS-HEDIS-2024-v2";
         var resultsPath = patientPath + "_Results7/";
-        measureCodes.add("DRRE");
+        measureCodes.add("HFS");
 
         for (String measureCode : measureCodes) {
             run(measureCode + "_Reporting",

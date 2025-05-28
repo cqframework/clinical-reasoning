@@ -117,8 +117,8 @@ class HedisCliTest {
 
     @Test
     public void testOnePatient() throws Exception {
-        String measureCode = "AAB";
-        var testPatientId = "patient.2024.aab.0.145275";
+        String measureCode = "COA";
+        var testPatientId = "patient.2024.coa.0.95635";
         var directory = "/Users/justinmckelvy/Documents/DCSv2/";
         var suffix = "/Sample/v0_tests/tests/Patient";
         String patientBundles = directory + measureCode + suffix;

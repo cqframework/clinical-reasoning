@@ -269,7 +269,7 @@ public class CqlCommand implements Callable<Integer> {
         IParser parser = fhirContext.newJsonParser();
 
         Measure measure = null;
-        if(!measureName.contains("null") && measureName != null) {
+        if(measureName != null && !measureName.contains("null")) {
             InputStream is = new FileInputStream(measurePath + measureName + ".json");
             measure = (org.hl7.fhir.r4.model.Measure)
                 parser.parseResource(is);

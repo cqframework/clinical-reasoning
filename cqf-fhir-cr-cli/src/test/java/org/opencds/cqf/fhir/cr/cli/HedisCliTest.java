@@ -121,47 +121,40 @@ class HedisCliTest {
         var testPatientId = "patient.2024.coa.0.95635";
         var directory = "/Users/justinmckelvy/Documents/DCSv2/";
         var suffix = "/Sample/v0_tests/tests/Patient";
+        var patientPath = "/Users/justinmckelvy/Documents/DCSv2/";
+        var cqlContentDirectory = "/Users/justinmckelvy/alphora/DCS-HEDIS-2024-v2";
+        var resultsPath = patientPath + "_Results8/";
         String patientBundles = directory + measureCode + suffix;
-        String libraryName = measureCode + "_Reporting";
-        singleRun(libraryName, patientBundles, testPatientId, 100000, measureCode);
+
+        run(measureCode + "_Reporting",
+            patientBundles, 250000, cqlContentDirectory, resultsPath, null, null, null, null, testPatientId);
 
 
 
         }
-    void singleRun(String libraryName, String patientPath, String patientId, int count, String measureCode) throws IOException {
-
+    void run(String libraryName, String patientPath, int count, String cqlContentDirectory, String resultsPath, String measurePath, String measure, String periodStart, String periodEnd, String patientId) throws IOException {
         var baseArgs = Stream.of(
             "cql",
             "-fv=R4",
-            "-rd=/Users/justinmckelvy/alphora/DCS-HEDIS-2024-v2",
-            "-lu=/Users/justinmckelvy/alphora/DCS-HEDIS-2024-v2/input/cql",
+            "-rd=" + cqlContentDirectory,
+            "-lu=" + cqlContentDirectory + "/input/cql",
             "-ln=" + libraryName,
             "-lv=2024.2.0",
             "-m=FHIR",
-            "-mu=" + patientPath + "/" + patientId,
-            "-c=Patient",
-            "-cv=" + patientId,
-            "-resultsPath=/Users/justinmckelvy/Documents/DCSv2/_Results8/",
+            "-mu=" + patientPath,
+            "-resultsPath=" + resultsPath,
             "-singleFile=" + true,
-//            "-measurePath=/Users/justinmckelvy/alphora/DCS-HEDIS-2024-v2/input/resources/Measure/",
-//            "-measure=" + measureCode + "-Reporting",
-//            "-periodStart=2024-01-01",
-//            "-periodEnd=2024-12-31",
-            "-t=/Users/justinmckelvy/alphora/DCS-HEDIS-2024-v2/input/vocabulary/valueset");
+            "-t=" + cqlContentDirectory + "/input/vocabulary/valueset",
+            "-measurePath=" + measurePath,
+            "-measure=" + measure,
+            "-periodStart=" + periodStart,
+            "-periodEnd=" + periodEnd,
+            "-c=Patient",
+            "-cv=" + patientId
+        );
 
-        //var patientArgs = allPatients(patientPath, count, patientId).flatMap(id -> Stream.of("-c=Patient", "-cv=" + id));
-
-        //var args = Stream.concat(baseArgs, patientArgs).toArray(String[]::new);
         var args = baseArgs.toArray(String[]::new);
         Main.run(args);
     }
 
-    Stream<String> allPatients(String dataPath, int count, String patientId) throws IOException {
-        return Files.list(Path.of(dataPath, ""))
-            .filter(Files::isDirectory)
-            .limit(count)
-            .map(Path::getFileName)
-            .map(Path::toString)
-            .filter(string -> string.equals(patientId));
-    }
 }

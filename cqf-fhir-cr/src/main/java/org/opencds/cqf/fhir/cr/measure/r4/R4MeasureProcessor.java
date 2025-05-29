@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.cqframework.cql.cql2elm.CqlIncludeException;
@@ -44,7 +45,10 @@ import org.opencds.cqf.fhir.cr.measure.common.SubjectProvider;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4DateHelper;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.Canonicals;
+import org.opencds.cqf.fhir.utility.adapter.IMeasureAdapter;
 import org.opencds.cqf.fhir.utility.monad.Either3;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
+import org.opencds.cqf.fhir.utility.npm.NpmResourceInfoForCql;
 import org.opencds.cqf.fhir.utility.repository.FederatedRepository;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.search.Searches;
@@ -54,18 +58,21 @@ public class R4MeasureProcessor {
     private final MeasureEvaluationOptions measureEvaluationOptions;
     private final SubjectProvider subjectProvider;
     private final R4MeasureServiceUtils r4MeasureServiceUtils;
+    private final NpmPackageLoader npmPackageLoader;
     private final MeasureProcessorUtils measureProcessorUtils = new MeasureProcessorUtils();
 
     public R4MeasureProcessor(
             Repository repository,
             MeasureEvaluationOptions measureEvaluationOptions,
             SubjectProvider subjectProvider,
-            R4MeasureServiceUtils r4MeasureServiceUtils) {
+            R4MeasureServiceUtils r4MeasureServiceUtils,
+            NpmPackageLoader npmPackageLoader) {
         this.repository = Objects.requireNonNull(repository);
         this.measureEvaluationOptions =
                 measureEvaluationOptions != null ? measureEvaluationOptions : MeasureEvaluationOptions.defaultOptions();
         this.subjectProvider = subjectProvider;
         this.r4MeasureServiceUtils = r4MeasureServiceUtils;
+        this.npmPackageLoader = npmPackageLoader;
     }
 
     public MeasureReport evaluateMeasure(
@@ -99,9 +106,22 @@ public class R4MeasureProcessor {
             IBaseBundle additionalData,
             Parameters parameters,
             MeasureEvalType evalType) {
-        var m = measure.fold(this::resolveByUrl, this::resolveById, Function.identity());
-        return this.evaluateMeasure(
-                m, periodStart, periodEnd, reportType, subjectIds, additionalData, parameters, evalType);
+        var npmResourceHolder = measure.isLeft()
+                ? npmPackageLoader.loadNpmResources(measure.leftOrThrow())
+                : NpmResourceInfoForCql.EMPTY;
+
+        var retrievedMeasure = getMeasure(measure, npmResourceHolder);
+
+        return evaluateMeasure(
+                retrievedMeasure,
+                periodStart,
+                periodEnd,
+                reportType,
+                subjectIds,
+                additionalData,
+                parameters,
+                evalType,
+                npmResourceHolder);
     }
 
     /**
@@ -173,7 +193,8 @@ public class R4MeasureProcessor {
             List<String> subjectIds,
             IBaseBundle additionalData,
             Parameters parameters,
-            MeasureEvalType evalType) {
+            MeasureEvalType evalType,
+            NpmResourceInfoForCql npmResourceInfoForCql) {
 
         checkMeasureLibrary(measure);
 
@@ -186,9 +207,13 @@ public class R4MeasureProcessor {
 
         // CQL Engine context
         var context = Engines.forRepository(
-                this.repository, this.measureEvaluationOptions.getEvaluationSettings(), additionalData);
+                this.repository,
+                this.measureEvaluationOptions.getEvaluationSettings(),
+                additionalData,
+                npmResourceInfoForCql,
+                npmPackageLoader);
 
-        var libraryVersionIdentifier = getLibraryVersionIdentifier(measure);
+        var libraryVersionIdentifier = getLibraryVersionIdentifier(measure, npmResourceInfoForCql);
         // library engine setup
         var libraryEngine = getLibraryEngine(parameters, libraryVersionIdentifier, context);
 
@@ -262,13 +287,17 @@ public class R4MeasureProcessor {
      * @param measure resource that has desired Library
      * @return version identifier of Library
      */
-    protected VersionedIdentifier getLibraryVersionIdentifier(Measure measure) {
+    protected VersionedIdentifier getLibraryVersionIdentifier(
+            Measure measure, NpmResourceInfoForCql npmResourceInfoForCql) {
         var url = measure.getLibrary().get(0).asStringValue();
 
-        Bundle b = this.repository.search(Bundle.class, Library.class, Searches.byCanonical(url), null);
-        if (b.getEntry().isEmpty()) {
-            var errorMsg = String.format("Unable to find Library with url: %s", url);
-            throw new ResourceNotFoundException(errorMsg);
+        // Check to see if this Library exists in an NPM Package.  If not, search the Repository
+        if (npmResourceInfoForCql.getOptMainLibrary().isEmpty()) {
+            Bundle b = this.repository.search(Bundle.class, Library.class, Searches.byCanonical(url), null);
+            if (b.getEntry().isEmpty()) {
+                var errorMsg = String.format("Unable to find Library with url: %s", url);
+                throw new ResourceNotFoundException(errorMsg);
+            }
         }
         return VersionedIdentifiers.forUrl(url);
     }
@@ -385,5 +414,15 @@ public class R4MeasureProcessor {
             measurementPeriod = helper.buildMeasurementPeriodInterval(periodStart, periodEnd);
         }
         return measurementPeriod;
+    }
+
+    private Measure getMeasure(
+            Either3<CanonicalType, IdType, Measure> measure, NpmResourceInfoForCql npmResourceInfoForCql) {
+        final Optional<IMeasureAdapter> optMeasure = npmResourceInfoForCql.getMeasure();
+        if (optMeasure.isPresent() && optMeasure.get().get() instanceof Measure measureFromNpm) {
+            return measureFromNpm;
+        }
+
+        return measure.fold(this::resolveByUrl, this::resolveById, Function.identity());
     }
 }

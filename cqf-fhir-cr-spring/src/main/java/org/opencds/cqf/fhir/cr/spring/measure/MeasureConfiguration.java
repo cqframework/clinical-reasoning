@@ -6,6 +6,7 @@ import org.opencds.cqf.fhir.cr.measure.common.SubjectProvider;
 import org.opencds.cqf.fhir.cr.measure.dstu3.Dstu3MeasureProcessor;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureProcessor;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -25,7 +26,9 @@ public class MeasureConfiguration {
             Repository repository,
             MeasureEvaluationOptions measureEvaluationOptions,
             SubjectProvider subjectProvider,
-            R4MeasureServiceUtils measureServiceUtils) {
-        return new R4MeasureProcessor(repository, measureEvaluationOptions, subjectProvider, measureServiceUtils);
+            R4MeasureServiceUtils measureServiceUtils,
+            NpmPackageLoader npmPackageLoader) {
+        return new R4MeasureProcessor(
+                repository, measureEvaluationOptions, subjectProvider, measureServiceUtils, npmPackageLoader);
     }
 }

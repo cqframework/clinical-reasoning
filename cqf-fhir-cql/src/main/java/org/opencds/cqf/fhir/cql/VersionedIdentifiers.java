@@ -1,8 +1,10 @@
 package org.opencds.cqf.fhir.cql;
 
+import java.util.regex.Pattern;
 import org.hl7.elm.r1.VersionedIdentifier;
 
 public class VersionedIdentifiers {
+    private static final Pattern LIBRARY_SPLIT_PATTERN = Pattern.compile("Library/");
 
     private VersionedIdentifiers() {
         // empty
@@ -14,13 +16,13 @@ public class VersionedIdentifiers {
                     "Invalid resource type for determining library version identifier: Library");
         }
 
-        String[] urlSplit = url.split("Library/");
-        if (urlSplit.length > 2) {
+        final String[] urlSplitByLibrary = LIBRARY_SPLIT_PATTERN.split(url);
+        if (urlSplitByLibrary.length > 2) {
             throw new IllegalArgumentException(
                     "Invalid url, Library.url SHALL be <CQL namespace url>/Library/<CQL library name>");
         }
 
-        String cqlName = urlSplit.length == 1 ? urlSplit[0] : urlSplit[1];
+        final String cqlName = urlSplitByLibrary.length == 1 ? urlSplitByLibrary[0] : urlSplitByLibrary[1];
         VersionedIdentifier versionedIdentifier = new VersionedIdentifier();
         if (cqlName.contains("|")) {
             String[] nameVersion = cqlName.split("\\|");

@@ -32,6 +32,7 @@ import org.opencds.cqf.fhir.cr.measure.common.SubjectProvider;
 import org.opencds.cqf.fhir.utility.repository.FederatedRepository;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
+@SuppressWarnings({"squid:S1135", "squid:S107"})
 public class Dstu3MeasureProcessor {
     private final Repository repository;
     private final MeasureEvaluationOptions measureEvaluationOptions;

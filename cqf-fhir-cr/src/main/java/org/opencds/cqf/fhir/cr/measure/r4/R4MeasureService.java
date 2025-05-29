@@ -70,7 +70,7 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
         R4MeasureServiceUtils r4MeasureServiceUtils = new R4MeasureServiceUtils(repository);
         r4MeasureServiceUtils.ensureSupplementalDataElementSearchParameter();
 
-        MeasureReport measureReport = null;
+        MeasureReport measureReport;
 
         if (StringUtils.isNotBlank(practitioner)) {
             if (!practitioner.contains("/")) {

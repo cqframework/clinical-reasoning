@@ -107,21 +107,21 @@ public class R4MeasureProcessor {
             Parameters parameters,
             MeasureEvalType evalType) {
         var npmResourceHolder = measure.isLeft()
-            ? npmPackageLoader.loadNpmResources(measure.leftOrThrow())
-            : NpmResourceInfoForCql.EMPTY;
+                ? npmPackageLoader.loadNpmResources(measure.leftOrThrow())
+                : NpmResourceInfoForCql.EMPTY;
 
         var retrievedMeasure = getMeasure(measure, npmResourceHolder);
 
         return evaluateMeasure(
-            retrievedMeasure,
-            periodStart,
-            periodEnd,
-            reportType,
-            subjectIds,
-            additionalData,
-            parameters,
-            evalType,
-            npmResourceHolder);
+                retrievedMeasure,
+                periodStart,
+                periodEnd,
+                reportType,
+                subjectIds,
+                additionalData,
+                parameters,
+                evalType,
+                npmResourceHolder);
     }
 
     /**
@@ -288,8 +288,7 @@ public class R4MeasureProcessor {
      * @return version identifier of Library
      */
     protected VersionedIdentifier getLibraryVersionIdentifier(
-            Measure measure,
-            NpmResourceInfoForCql npmResourceInfoForCql) {
+            Measure measure, NpmResourceInfoForCql npmResourceInfoForCql) {
         var url = measure.getLibrary().get(0).asStringValue();
 
         // Check to see if this Library exists in an NPM Package.  If not, search the Repository
@@ -418,7 +417,7 @@ public class R4MeasureProcessor {
     }
 
     private Measure getMeasure(
-        Either3<CanonicalType, IdType, Measure> measure, NpmResourceInfoForCql npmResourceInfoForCql) {
+            Either3<CanonicalType, IdType, Measure> measure, NpmResourceInfoForCql npmResourceInfoForCql) {
         final Optional<IMeasureAdapter> optMeasure = npmResourceInfoForCql.getMeasure();
         if (optMeasure.isPresent() && optMeasure.get().get() instanceof Measure measureFromNpm) {
             return measureFromNpm;

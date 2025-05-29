@@ -16,8 +16,7 @@ class CdsCrServiceDstu3Test extends BaseCdsCrServiceTest {
     void beforeEach() {
         fhirContext = FhirContext.forDstu3Cached();
         repository = new InMemoryFhirRepository(fhirContext);
-        cdsConfigService = getCdsConfigService();
-        testSubject = new CdsCrService(REQUEST_DETAILS, repository, cdsConfigService);
+        testSubject = new CdsCrService(REQUEST_DETAILS, repository);
     }
 
     @Test

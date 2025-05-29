@@ -10,6 +10,7 @@ import static org.opencds.cqf.fhir.utility.BundleHelper.newEntryWithResource;
 import static org.opencds.cqf.fhir.utility.VersionUtilities.stringTypeForVersion;
 import static org.opencds.cqf.fhir.utility.VersionUtilities.uriTypeForVersion;
 
+import ca.uhn.fhir.repository.IRepository;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collections;
@@ -20,7 +21,6 @@ import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.common.ExtensionProcessor;
 import org.opencds.cqf.fhir.cr.common.ICpgRequest;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.GenerateProcessor;
@@ -42,7 +42,7 @@ public class ApplyProcessor implements IApplyProcessor {
             Constants.CQFM_LOGIC_DEFINITION,
             Constants.CQFM_EFFECTIVE_DATA_REQUIREMENTS);
 
-    protected final Repository repository;
+    protected final IRepository repository;
     protected final ModelResolver modelResolver;
     protected final ExtensionProcessor extensionProcessor;
     protected final GenerateProcessor generateProcessor;
@@ -54,7 +54,7 @@ public class ApplyProcessor implements IApplyProcessor {
     protected final org.opencds.cqf.fhir.cr.activitydefinition.apply.IApplyProcessor activityProcessor;
 
     public ApplyProcessor(
-            Repository repository,
+            IRepository repository,
             ModelResolver modelResolver,
             org.opencds.cqf.fhir.cr.activitydefinition.apply.IApplyProcessor activityProcessor) {
         this.repository = repository;

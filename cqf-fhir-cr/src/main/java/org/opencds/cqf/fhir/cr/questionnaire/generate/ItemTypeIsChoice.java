@@ -4,9 +4,9 @@ import static org.opencds.cqf.fhir.utility.SearchHelper.searchRepositoryByCanoni
 import static org.opencds.cqf.fhir.utility.VersionUtilities.canonicalTypeForVersion;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.repository.IRepository;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IDomainResource;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.ICodingAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IElementDefinitionAdapter;
@@ -18,10 +18,10 @@ import org.slf4j.LoggerFactory;
 
 public class ItemTypeIsChoice {
     protected static final Logger logger = LoggerFactory.getLogger(ItemTypeIsChoice.class);
-    protected final Repository repository;
+    protected final IRepository repository;
     protected final IAdapterFactory adapterFactory;
 
-    public ItemTypeIsChoice(Repository repository) {
+    public ItemTypeIsChoice(IRepository repository) {
         this.repository = repository;
         adapterFactory = IAdapterFactory.forFhirContext(repository.fhirContext());
     }

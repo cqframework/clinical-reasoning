@@ -30,6 +30,7 @@ import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Resource;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.cql.engine.data.SystemDataProvider;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
@@ -264,6 +265,8 @@ class EnginesTest {
     }
 
     @Test
+    // TODO: Needs new cql engine version
+    @Disabled
     void npmProcessor() {
         var resourceDirectory = ResourceDirectoryResolver.getResourceDirectory();
         var ini = resourceDirectory.resolve("org/opencds/cqf/fhir/cql/npm/ig.ini");

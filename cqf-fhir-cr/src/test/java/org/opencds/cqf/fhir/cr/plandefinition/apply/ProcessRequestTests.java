@@ -8,6 +8,7 @@ import static org.opencds.cqf.fhir.cr.helpers.RequestHelpers.newPDApplyRequestFo
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.repository.IRepository;
 import org.hl7.fhir.dstu3.model.CarePlan;
 import org.hl7.fhir.dstu3.model.RequestGroup;
 import org.hl7.fhir.r5.model.RequestOrchestration;
@@ -16,14 +17,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.questionnaire.populate.IPopulateProcessor;
 
 @ExtendWith(MockitoExtension.class)
 class ProcessRequestTests {
     @Mock
-    Repository repository;
+    IRepository repository;
 
     @Mock
     LibraryEngine libraryEngine;

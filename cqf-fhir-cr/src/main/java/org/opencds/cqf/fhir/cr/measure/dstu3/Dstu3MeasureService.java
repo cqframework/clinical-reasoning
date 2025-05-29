@@ -8,6 +8,7 @@ import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.ME
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.US_COUNTRY_CODE;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.US_COUNTRY_DISPLAY;
 
+import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.util.BundleBuilder;
 import java.util.Collections;
 import java.util.List;
@@ -24,14 +25,13 @@ import org.hl7.fhir.dstu3.model.MeasureReport;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.SearchParameter;
 import org.hl7.fhir.dstu3.model.StringType;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 
 public class Dstu3MeasureService implements Dstu3MeasureEvaluatorSingle {
-    private final Repository repository;
+    private final IRepository repository;
     private final MeasureEvaluationOptions measureEvaluationOptions;
 
-    public Dstu3MeasureService(Repository repository, MeasureEvaluationOptions measureEvaluationOptions) {
+    public Dstu3MeasureService(IRepository repository, MeasureEvaluationOptions measureEvaluationOptions) {
         this.repository = repository;
         this.measureEvaluationOptions = measureEvaluationOptions;
     }

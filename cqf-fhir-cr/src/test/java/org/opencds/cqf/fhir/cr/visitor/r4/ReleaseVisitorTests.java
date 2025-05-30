@@ -263,10 +263,6 @@ class ReleaseVisitorTests {
         Parameters params = new Parameters();
         params.addParameter("version", "1.0.0");
         params.addParameter("versionBehavior", new CodeType("default"));
-        var crmiEDRId = "exp-params-crmi-test";
-        var crmiEDRExtension = new Extension();
-        crmiEDRExtension.setUrl(Constants.CRMI_EFFECTIVE_DATA_REQUIREMENTS);
-        crmiEDRExtension.setValue(new CanonicalType("#" + crmiEDRId));
         ReleaseVisitor releaseVisitor = new ReleaseVisitor(repo);
         // Approval date is required to release an artifact
         library.setApprovalDateElement(new DateType("2024-04-23"));

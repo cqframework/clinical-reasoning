@@ -15,6 +15,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r5.model.ArtifactAssessment;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.r5.model.CanonicalType;
 import org.hl7.fhir.r5.model.Extension;
 import org.hl7.fhir.r5.model.Library;
 import org.hl7.fhir.r5.model.Measure;
@@ -150,11 +151,16 @@ public class ReleaseVisitor {
 
     public static void extractDirectReferenceCodes(IKnowledgeArtifactAdapter rootAdapter, Measure measure) {
         Optional<Extension> effectiveDataRequirementsExt = measure.getExtension().stream()
-                .filter(ext -> ext.getUrl().equals(Constants.CQFM_EFFECTIVE_DATA_REQUIREMENTS))
+                .filter(ext -> ext.getUrl().equals(Constants.CQFM_EFFECTIVE_DATA_REQUIREMENTS)
+                        || ext.getUrl().equals(Constants.CRMI_EFFECTIVE_DATA_REQUIREMENTS))
                 .findFirst();
         if (effectiveDataRequirementsExt.isPresent()) {
-            Reference ref = effectiveDataRequirementsExt.get().getValueReference();
-            Library effectiveDataRequirementsLib = (Library) measure.getContained("#" + ref.getReference());
+            Library effectiveDataRequirementsLib = null;
+            if (effectiveDataRequirementsExt.get().getValue() instanceof Reference ref) {
+                effectiveDataRequirementsLib = (Library) measure.getContained("#" + ref.getReference());
+            } else if (effectiveDataRequirementsExt.get().getValue() instanceof CanonicalType canonicalType) {
+                effectiveDataRequirementsLib = (Library) measure.getContained("#" + canonicalType.getCanonical());
+            }
             if (effectiveDataRequirementsLib != null) {
                 effectiveDataRequirementsLib.getExtension().stream()
                         .filter(ext -> ext.getUrl().equals(Constants.CQF_DIRECT_REFERENCE_EXTENSION))

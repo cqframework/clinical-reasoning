@@ -33,8 +33,8 @@ public class FhirVersions {
         } else if (packageName.contains("ca.uhn.fhir.model.dstu2")) {
             return FhirVersionEnum.DSTU2;
         } else {
-            throw new IllegalArgumentException(String.format(
-                    "Unable to determine FHIR version for IBaseResource type: %s", baseTypeClass.getName()));
+            throw new IllegalArgumentException(
+                    "Unable to determine FHIR version for IBaseResource type: %s".formatted(baseTypeClass.getName()));
         }
     }
 }

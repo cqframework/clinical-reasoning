@@ -62,7 +62,7 @@ public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         // between versions
         if (measureScoring == null && measure.hasGroup()) {
             throw new InvalidRequestException(
-                    String.format("MeasureScoring must be specified on Measure: %s", measure.getUrl()));
+                    "MeasureScoring must be specified on Measure: %s".formatted(measure.getUrl()));
         }
         List<GroupDef> groups = new ArrayList<>();
         for (MeasureGroupComponent group : measure.getGroup()) {
@@ -154,9 +154,9 @@ public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
             boolean hasValidCode = IMPROVEMENT_NOTATION_SYSTEM_INCREASE.equals(code)
                     || IMPROVEMENT_NOTATION_SYSTEM_DECREASE.equals(code);
             if (!hasValidCode) {
-                throw new IllegalArgumentException(String.format(
-                        "ImprovementNotation Coding has invalid code: %s, combination for Measure: %s",
-                        code, measure.getUrl()));
+                throw new IllegalArgumentException(
+                        "ImprovementNotation Coding has invalid code: %s, combination for Measure: %s"
+                                .formatted(code, measure.getUrl()));
             }
         }
     }

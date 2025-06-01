@@ -32,9 +32,9 @@ public class Dstu3MeasureReportScorer extends BaseMeasureReportScorer<MeasureRep
 
         // validate scoring
         if (measureScoring == null) {
-            throw new InvalidRequestException(String.format(
-                    "Measure: %s does not have a scoring methodology defined. Add a \"scoring\" property to the measure definition or the group definition.",
-                    measureUrl));
+            throw new InvalidRequestException(
+                    "Measure: %s does not have a scoring methodology defined. Add a \"scoring\" property to the measure definition or the group definition."
+                            .formatted(measureUrl));
         }
 
         for (MeasureReportGroupComponent mrgc : measureReport.getGroup()) {

@@ -50,8 +50,7 @@ public class Try<T> extends Either<Exception, T> {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof Try<?>) {
-            Try<?> other = (Try<?>) obj;
+        if (obj instanceof Try<?> other) {
             return super.equals(other);
         }
 

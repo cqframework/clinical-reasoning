@@ -45,7 +45,7 @@ public class MedicationRequestResolver extends BaseRequestResourceResolver {
         } else if (activityDefinition.hasProductReference()) {
             medicationRequest.setMedication(new CodeableReference(activityDefinition.getProductReference()));
         } else if (!activityDefinition.hasDynamicValue()) {
-            throw new FHIRException(String.format(MISSING_PRODUCT_PROPERTY, "MedicationRequest"));
+            throw new FHIRException(MISSING_PRODUCT_PROPERTY.formatted("MedicationRequest"));
         }
 
         if (activityDefinition.hasDosage()) {

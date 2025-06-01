@@ -50,15 +50,14 @@ public class DynamicModelResolver extends CachingModelResolverDecorator {
         try {
             pathResult = super.resolvePath(target, path);
         } catch (Exception e) {
-            logger.error(String.format("Error encountered resolving path: %s", path), e);
+            logger.error("Error encountered resolving path: %s".formatted(path), e);
         }
         return pathResult;
     }
 
     @Override
     public Object as(Object value, Class<?> type, boolean isStrict) {
-        if (value instanceof org.hl7.fhir.dstu3.model.StringType) {
-            var stringType = (org.hl7.fhir.dstu3.model.StringType) value;
+        if (value instanceof org.hl7.fhir.dstu3.model.StringType stringType) {
             switch (type.getSimpleName()) {
                 case CODEABLECONCEPT:
                     return stringType.castToCodeableConcept(stringType.castToCode(stringType));
@@ -69,8 +68,7 @@ public class DynamicModelResolver extends CachingModelResolverDecorator {
             }
         }
 
-        if (value instanceof org.hl7.fhir.dstu3.model.Coding) {
-            var coding = (org.hl7.fhir.dstu3.model.Coding) value;
+        if (value instanceof org.hl7.fhir.dstu3.model.Coding coding) {
             switch (type.getSimpleName()) {
                 case CODE:
                 case PRIMITIVE:
@@ -80,8 +78,7 @@ public class DynamicModelResolver extends CachingModelResolverDecorator {
             }
         }
 
-        if (value instanceof org.hl7.fhir.r4.model.StringType) {
-            var stringType = (org.hl7.fhir.r4.model.StringType) value;
+        if (value instanceof org.hl7.fhir.r4.model.StringType stringType) {
             switch (type.getSimpleName()) {
                 case CODEABLECONCEPT:
                     return stringType.castToCodeableConcept(stringType.castToCode(stringType));
@@ -92,8 +89,7 @@ public class DynamicModelResolver extends CachingModelResolverDecorator {
             }
         }
 
-        if (value instanceof org.hl7.fhir.r4.model.Coding) {
-            var coding = (org.hl7.fhir.r4.model.Coding) value;
+        if (value instanceof org.hl7.fhir.r4.model.Coding coding) {
             switch (type.getSimpleName()) {
                 case CODE:
                 case PRIMITIVE:
@@ -103,8 +99,7 @@ public class DynamicModelResolver extends CachingModelResolverDecorator {
             }
         }
 
-        if (value instanceof org.hl7.fhir.r5.model.StringType) {
-            var stringType = (org.hl7.fhir.r5.model.StringType) value;
+        if (value instanceof org.hl7.fhir.r5.model.StringType stringType) {
             switch (type.getSimpleName()) {
                 case CODEABLECONCEPT:
                     return new org.hl7.fhir.r5.model.CodeableConcept(
@@ -116,8 +111,7 @@ public class DynamicModelResolver extends CachingModelResolverDecorator {
             }
         }
 
-        if (value instanceof org.hl7.fhir.r5.model.Coding) {
-            var coding = (org.hl7.fhir.r5.model.Coding) value;
+        if (value instanceof org.hl7.fhir.r5.model.Coding coding) {
             switch (type.getSimpleName()) {
                 case CODE:
                 case PRIMITIVE:
@@ -137,15 +131,15 @@ public class DynamicModelResolver extends CachingModelResolverDecorator {
             return;
         }
 
-        if (target instanceof IBaseEnumeration && path.equals("value")) {
-            ((IBaseEnumeration<?>) target).setValueAsString((String) value);
+        if (target instanceof IBaseEnumeration<?> enumeration && path.equals("value")) {
+            enumeration.setValueAsString((String) value);
             return;
         }
 
         IBase base = (IBase) target;
         BaseRuntimeElementCompositeDefinition<?> definition;
-        if (base instanceof IPrimitiveType) {
-            ((FhirModelResolver) this.getInnerResolver()).setPrimitiveValue(value, (IPrimitiveType) base);
+        if (base instanceof IPrimitiveType type) {
+            ((FhirModelResolver) this.getInnerResolver()).setPrimitiveValue(value, type);
             return;
         } else {
             definition = resolveRuntimeDefinition(base);
@@ -175,17 +169,16 @@ public class DynamicModelResolver extends CachingModelResolverDecorator {
 
     @SuppressWarnings("unchecked")
     protected <T extends IBase> BaseRuntimeElementCompositeDefinition<T> resolveRuntimeDefinition(IBase base) {
-        if (base instanceof IAnyResource) {
-            return (BaseRuntimeElementCompositeDefinition<T>) fhirContext.getResourceDefinition((IAnyResource) base);
+        if (base instanceof IAnyResource resource) {
+            return (BaseRuntimeElementCompositeDefinition<T>) fhirContext.getResourceDefinition(resource);
         } else if (base instanceof IBaseBackboneElement || base instanceof IBaseElement) {
             return (BaseRuntimeElementCompositeDefinition<T>) fhirContext.getElementDefinition(base.getClass());
         } else if (base instanceof ICompositeType) {
             return (BaseRuntimeElementCompositeDefinition<T>) fhirContext.getElementDefinition(base.getClass());
         }
 
-        throw new UnknownType(String.format(
-                "Unable to resolve the runtime definition for %s",
-                base.getClass().getName()));
+        throw new UnknownType("Unable to resolve the runtime definition for %s"
+                .formatted(base.getClass().getName()));
     }
 
     public void setNestedValue(IBase target, String path, Object value, BaseRuntimeElementCompositeDefinition<?> def) {
@@ -287,7 +280,7 @@ public class DynamicModelResolver extends CachingModelResolverDecorator {
             retVal = (E) clazz.getDeclaredConstructor().newInstance();
         } catch (Exception e) {
             throw new org.opencds.cqf.cql.engine.fhir.exception.UnknownType(
-                    String.format("Failed to instantiate %s", className));
+                    "Failed to instantiate %s".formatted(className));
         }
         return retVal;
     }

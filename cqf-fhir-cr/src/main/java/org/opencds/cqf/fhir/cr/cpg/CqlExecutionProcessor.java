@@ -23,9 +23,9 @@ public class CqlExecutionProcessor {
             String name = null;
             String url = null;
             for (Object parameters : includedLibraries) {
-                if (parameters instanceof org.hl7.fhir.dstu3.model.Parameters) {
+                if (parameters instanceof org.hl7.fhir.dstu3.model.Parameters parameters1) {
                     for (org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent parameterComponent :
-                            ((org.hl7.fhir.dstu3.model.Parameters) parameters).getParameter()) {
+                            parameters1.getParameter()) {
                         if (parameterComponent.getName().equalsIgnoreCase("url")) {
                             url = parameterComponent.getValue().primitiveValue();
                         }

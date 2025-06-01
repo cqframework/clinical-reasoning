@@ -11,7 +11,7 @@ import ca.uhn.fhir.context.FhirContext;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Map;
 import org.cqframework.cql.cql2elm.LibraryContentType;
@@ -42,7 +42,7 @@ class LibraryEngineTests {
 
     @BeforeEach
     public void beforeEach() {
-        repository = new IgRepository(FhirContext.forR4Cached(), Paths.get(getResourcePath(LibraryEngineTests.class)));
+        repository = new IgRepository(FhirContext.forR4Cached(), Path.of(getResourcePath(LibraryEngineTests.class)));
         libraryEngine = new LibraryEngine(repository, EvaluationSettings.getDefault());
     }
 
@@ -120,16 +120,18 @@ class LibraryEngineTests {
         assertEquals("I am a test", ((StringType) result.get(0)).getValue());
     }
 
-    String libraryCql = "library MyLibrary version '1.0.0'\n"
-            + "\n"
-            + "using FHIR version '4.0.1'\n"
-            + "\n"
-            + "include FHIRHelpers version '4.0.1' called FHIRHelpers\n"
-            + "\n"
-            + "context Patient\n"
-            + "\n"
-            + "define \"MyNameReturner\":\n"
-            + " Patient.name.given";
+    String libraryCql =
+            """
+            library MyLibrary version '1.0.0'
+
+            using FHIR version '4.0.1'
+
+            include FHIRHelpers version '4.0.1' called FHIRHelpers
+
+            context Patient
+
+            define "MyNameReturner":
+             Patient.name.given""";
 
     @Test
     void expressionWithLibraryResourceProvider() {

@@ -40,7 +40,7 @@ public class ReferralRequestResolver extends BaseRequestResourceResolver {
         if (activityDefinition.hasCode()) {
             referralRequest.setServiceRequested(Collections.singletonList(activityDefinition.getCode()));
         } else if (!activityDefinition.hasDynamicValue()) {
-            throw new FHIRException(String.format(MISSING_CODE_PROPERTY, "ReferralRequest"));
+            throw new FHIRException(MISSING_CODE_PROPERTY.formatted("ReferralRequest"));
         }
 
         return referralRequest;

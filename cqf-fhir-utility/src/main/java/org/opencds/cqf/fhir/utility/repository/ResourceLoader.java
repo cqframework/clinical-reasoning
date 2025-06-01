@@ -38,7 +38,7 @@ public interface ResourceLoader {
                 break;
             default:
                 throw new IllegalArgumentException(
-                        String.format("Expected encoding xml, or json.  %s is not a valid encoding", encoding));
+                        "Expected encoding xml, or json.  %s is not a valid encoding".formatted(encoding));
         }
 
         return parser.parseResource(resourceString);
@@ -69,7 +69,7 @@ public interface ResourceLoader {
             }
             return IOUtils.toString(is, StandardCharsets.UTF_8);
         } catch (Exception e) {
-            throw new RuntimeException(String.format("Error loading resource from %s", location), e);
+            throw new RuntimeException("Error loading resource from %s".formatted(location), e);
         }
     }
 }

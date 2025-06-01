@@ -121,7 +121,7 @@ public class CqfExpression {
         if (referencedLibraries != null && !referencedLibraries.isEmpty()) {
             return referencedLibraries.values().stream().findFirst().get();
         }
-        throw new IllegalArgumentException(String.format("No Library reference found for expression: %s", expr));
+        throw new IllegalArgumentException("No Library reference found for expression: %s".formatted(expr));
     }
 
     public String getName() {

@@ -58,9 +58,9 @@ public interface IOperationRequest {
         var issues = resolvePathList(getOperationOutcome(), "issue");
         if (issues != null && !issues.isEmpty()) {
             getOperationOutcome()
-                    .setId(String.format(
-                            "%s-outcome-%s",
-                            getOperationName(), resource.getIdElement().getIdPart()));
+                    .setId("%s-outcome-%s"
+                            .formatted(
+                                    getOperationName(), resource.getIdElement().getIdPart()));
             getModelResolver().setValue(resource, "contained", Collections.singletonList(getOperationOutcome()));
             getModelResolver()
                     .setValue(

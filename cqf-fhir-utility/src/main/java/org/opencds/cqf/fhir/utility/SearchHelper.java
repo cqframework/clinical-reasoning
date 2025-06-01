@@ -249,8 +249,8 @@ public class SearchHelper {
         var searchResult = repository.search(getBundleClass(repository), resourceType, searchParams);
         var result = getEntryResourceFirstRep(searchResult);
         if (result == null) {
-            throw new FHIRException(String.format(
-                    "No resource of type %s found for url: %s|%s", resourceType.getSimpleName(), url, version));
+            throw new FHIRException("No resource of type %s found for url: %s|%s"
+                    .formatted(resourceType.getSimpleName(), url, version));
         }
 
         return result;
@@ -436,7 +436,7 @@ public class SearchHelper {
 
             default:
                 throw new IllegalArgumentException(
-                        String.format("Unsupported version of FHIR: %s", fhirVersion.getFhirVersionString()));
+                        "Unsupported version of FHIR: %s".formatted(fhirVersion.getFhirVersionString()));
         }
     }
 

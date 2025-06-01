@@ -140,7 +140,7 @@ class QuestionnaireResponseProcessorTests {
                 .getBundle();
         var organization = (Organization) BundleHelper.getEntryResourceFirstRep(bundle);
         assertNotNull(organization);
-        assertEquals(String.format("extract-%s", questionnaireResponseId), organization.getIdPart());
+        assertEquals("extract-%s".formatted(questionnaireResponseId), organization.getIdPart());
         assertEquals("Acme Clinic", organization.getName());
     }
 

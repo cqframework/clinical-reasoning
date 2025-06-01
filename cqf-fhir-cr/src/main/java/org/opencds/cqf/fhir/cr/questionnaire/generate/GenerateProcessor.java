@@ -51,8 +51,7 @@ public class GenerateProcessor implements IGenerateProcessor {
                 generate(id == null ? request.getProfile().getIdElement().getIdPart() : id));
         var formatter = new SimpleDateFormat("yyyy-MM-dd-hh.mm.ss");
         request.getQuestionnaireAdapter()
-                .setVersion(
-                        String.format("%s-%s", request.getProfileAdapter().getVersion(), formatter.format(new Date())));
+                .setVersion("%s-%s".formatted(request.getProfileAdapter().getVersion(), formatter.format(new Date())));
         var item = generateItem(request);
         if (item != null) {
             request.addQuestionnaireItem(item.getLeft());

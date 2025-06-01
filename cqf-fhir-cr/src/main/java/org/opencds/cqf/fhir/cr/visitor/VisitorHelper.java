@@ -111,18 +111,18 @@ public class VisitorHelper {
                 .forEach(r -> {
                     switch (version) {
                         case DSTU3:
-                            if (r instanceof org.hl7.fhir.dstu3.model.MetadataResource) {
-                                resourceList.add((IDomainResource) r);
+                            if (r instanceof IDomainResource resource) {
+                                resourceList.add(resource);
                             }
                             break;
                         case R4:
-                            if (r instanceof org.hl7.fhir.r4.model.MetadataResource) {
-                                resourceList.add((IDomainResource) r);
+                            if (r instanceof IDomainResource resource) {
+                                resourceList.add(resource);
                             }
                             break;
                         case R5:
-                            if (r instanceof org.hl7.fhir.r5.model.MetadataResource) {
-                                resourceList.add((IDomainResource) r);
+                            if (r instanceof IDomainResource resource) {
+                                resourceList.add(resource);
                             }
                             break;
                         default:
@@ -142,15 +142,14 @@ public class VisitorHelper {
             if (knowledgeCapabilityExtension.isEmpty()) {
                 // consider resource unsupported if it's knowledgeCapability is undefined
                 throw new PreconditionFailedException(
-                        String.format("Resource with url: '%s' does not specify capability.", resource.getUrl()));
+                        "Resource with url: '%s' does not specify capability.".formatted(resource.getUrl()));
             }
             knowledgeCapabilityExtension.stream()
                     .filter(ext -> !capability.contains(((IPrimitiveType<?>) ext.getValue()).getValue()))
                     .findAny()
                     .ifPresent(ext -> {
-                        throw new PreconditionFailedException(String.format(
-                                "Resource with url: '%s' is not one of '%s'.",
-                                resource.getUrl(), String.join(", ", capability)));
+                        throw new PreconditionFailedException("Resource with url: '%s' is not one of '%s'."
+                                .formatted(resource.getUrl(), String.join(", ", capability)));
                     });
         }
     }
@@ -165,9 +164,9 @@ public class VisitorHelper {
             // check throws an error
             findVersionInListMatchingResource(checkArtifactVersion, resource).ifPresent(version -> {
                 if (!resource.getVersion().equals(version)) {
-                    throw new PreconditionFailedException(String.format(
-                            "Resource with url '%s' has version '%s' but checkVersion specifies '%s'",
-                            resource.getUrl(), resource.getVersion(), version));
+                    throw new PreconditionFailedException(
+                            "Resource with url '%s' has version '%s' but checkVersion specifies '%s'"
+                                    .formatted(resource.getUrl(), resource.getVersion(), version));
                 }
             });
         } else if (forceArtifactVersion != null && !forceArtifactVersion.isEmpty()) {

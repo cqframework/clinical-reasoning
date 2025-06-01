@@ -109,7 +109,7 @@ public class ItemGenerator {
             }
             return new ImmutablePair<>(questionnaireItem, launchContextExts);
         } catch (Exception ex) {
-            final String message = String.format(ITEM_CREATION_ERROR, ex.getMessage());
+            final String message = ITEM_CREATION_ERROR.formatted(ex.getMessage());
             logger.error(message);
             return new ImmutablePair<>(createErrorItem(request, linkId, message), new ArrayList<>());
         }
@@ -141,7 +141,7 @@ public class ItemGenerator {
 
                 IBaseBackboneElement item;
                 childCount++;
-                var childLinkId = String.format(CHILD_LINK_ID_FORMAT, itemLinkId, childCount);
+                var childLinkId = CHILD_LINK_ID_FORMAT.formatted(itemLinkId, childCount);
                 item = processElement(request, caseFeature, element, childLinkId);
                 if (item == null) {
                     childCount--;
@@ -227,7 +227,7 @@ public class ItemGenerator {
             }
             return item;
         } catch (Exception ex) {
-            final String message = String.format(ITEM_CREATION_ERROR, ex.getMessage());
+            final String message = ITEM_CREATION_ERROR.formatted(ex.getMessage());
             logger.warn(message);
             return createErrorItem(request, childLinkId, message);
         }

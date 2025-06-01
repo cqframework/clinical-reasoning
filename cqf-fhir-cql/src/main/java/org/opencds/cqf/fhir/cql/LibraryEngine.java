@@ -115,7 +115,7 @@ public class LibraryEngine {
             var split = fhirType.split("\\.");
             fhirType = Arrays.stream(split).map(StringUtils::capitalize).collect(Collectors.joining("."));
         }
-        return String.format("FHIR.%s", fhirType);
+        return "FHIR.%s".formatted(fhirType);
     }
 
     public IBaseParameters evaluateExpression(
@@ -283,7 +283,7 @@ public class LibraryEngine {
                 });
                 break;
             default:
-                throw new IllegalArgumentException(String.format("unsupported FHIR version: %s", fhirContext));
+                throw new IllegalArgumentException("unsupported FHIR version: %s".formatted(fhirContext));
         }
 
         return returnValues;

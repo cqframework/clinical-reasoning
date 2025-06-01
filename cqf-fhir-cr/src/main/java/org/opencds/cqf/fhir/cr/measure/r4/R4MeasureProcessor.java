@@ -234,9 +234,12 @@ public class R4MeasureProcessor {
             // Measure Observation defined?
             if (groupDef.measureScoring().equals(MeasureScoring.CONTINUOUSVARIABLE)
                     && groupDef.getSingle(MeasurePopulationType.MEASUREOBSERVATION) != null) {
-                throw new InvalidRequestException(String.format(
-                        "Measure Evaluation Mode does not have CQL engine context to support: Measure Scoring Type: %s, Measure Population Type: %s, for Measure: %s",
-                        MeasureScoring.CONTINUOUSVARIABLE, MeasurePopulationType.MEASUREOBSERVATION, measure.getUrl()));
+                throw new InvalidRequestException(
+                        "Measure Evaluation Mode does not have CQL engine context to support: Measure Scoring Type: %s, Measure Population Type: %s, for Measure: %s"
+                                .formatted(
+                                        MeasureScoring.CONTINUOUSVARIABLE,
+                                        MeasurePopulationType.MEASUREOBSERVATION,
+                                        measure.getUrl()));
             }
         }
     }
@@ -252,8 +255,8 @@ public class R4MeasureProcessor {
             case SUBJECT -> MeasureReportType.INDIVIDUAL;
             case SUBJECTLIST -> MeasureReportType.SUBJECTLIST;
             case POPULATION -> MeasureReportType.SUMMARY;
-            default -> throw new InvalidRequestException(String.format(
-                    "Unsupported MeasureEvalType: %s for Measure: %s", measureEvalType.toCode(), measure.getUrl()));
+            default -> throw new InvalidRequestException("Unsupported MeasureEvalType: %s for Measure: %s"
+                    .formatted(measureEvalType.toCode(), measure.getUrl()));
         };
     }
 
@@ -267,7 +270,7 @@ public class R4MeasureProcessor {
 
         Bundle b = this.repository.search(Bundle.class, Library.class, Searches.byCanonical(url), null);
         if (b.getEntry().isEmpty()) {
-            var errorMsg = String.format("Unable to find Library with url: %s", url);
+            var errorMsg = "Unable to find Library with url: %s".formatted(url);
             throw new ResourceNotFoundException(errorMsg);
         }
         return VersionedIdentifiers.forUrl(url);
@@ -287,9 +290,8 @@ public class R4MeasureProcessor {
             lib = context.getEnvironment().getLibraryManager().resolveLibrary(id);
         } catch (CqlIncludeException e) {
             throw new IllegalStateException(
-                    String.format(
-                            "Unable to load CQL/ELM for library: %s. Verify that the Library resource is available in your environment and has CQL/ELM content embedded.",
-                            id.getId()),
+                    "Unable to load CQL/ELM for library: %s. Verify that the Library resource is available in your environment and has CQL/ELM content embedded."
+                            .formatted(id.getId()),
                     e);
         }
 
@@ -303,7 +305,7 @@ public class R4MeasureProcessor {
     protected void checkMeasureLibrary(Measure measure) {
         if (!measure.hasLibrary()) {
             throw new InvalidRequestException(
-                    String.format("Measure %s does not have a primary library specified", measure.getUrl()));
+                    "Measure %s does not have a primary library specified".formatted(measure.getUrl()));
         }
     }
 
@@ -354,10 +356,10 @@ public class R4MeasureProcessor {
                 value = param.getResource();
             } else {
                 value = param.getValue();
-                if (value instanceof IPrimitiveType) {
+                if (value instanceof IPrimitiveType<?> type) {
                     // TODO: handle Code, CodeableConcept, Quantity, etc
                     // resolves Date/Time values
-                    value = modelResolver.toJavaPrimitive(((IPrimitiveType<?>) value).getValue(), value);
+                    value = modelResolver.toJavaPrimitive(type.getValue(), value);
                 }
             }
             if (parameterMap.containsKey(param.getName())) {

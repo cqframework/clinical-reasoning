@@ -61,12 +61,12 @@ public class PackageHelper {
                     BundleHelper.setEntryFullUrl(fhirVersion, entry, url + "|" + adapter.getVersion());
                     if (!isPut) {
                         BundleHelper.setRequestIfNoneExist(
-                                fhirVersion, request, String.format("url=%s&version=%s", url, adapter.getVersion()));
+                                fhirVersion, request, "url=%s&version=%s".formatted(url, adapter.getVersion()));
                     }
                 } else {
                     BundleHelper.setEntryFullUrl(fhirVersion, entry, url);
                     if (!isPut) {
-                        BundleHelper.setRequestIfNoneExist(fhirVersion, request, String.format("url=%s", url));
+                        BundleHelper.setRequestIfNoneExist(fhirVersion, request, "url=%s".formatted(url));
                     }
                 }
             }

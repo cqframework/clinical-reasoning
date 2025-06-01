@@ -144,8 +144,7 @@ public class R4CollectDataService {
                     .getClass();
             IBaseResource resource = repository.read(resourceType, resourceId);
 
-            if (resource instanceof Resource) {
-                Resource resourceBase = (Resource) resource;
+            if (resource instanceof Resource resourceBase) {
                 parameters.addParameter(part("resource-" + subject, resourceBase));
             }
         });

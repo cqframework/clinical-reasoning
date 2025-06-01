@@ -43,8 +43,8 @@ public class ResourceMatcherR4 implements ResourceMatcher {
 
     @Override
     public DateRangeParam getDateRange(ICompositeType type) {
-        if (type instanceof Period) {
-            return new DateRangeParam(((Period) type).getStart(), ((Period) type).getEnd());
+        if (type instanceof Period period) {
+            return new DateRangeParam(period.getStart(), period.getEnd());
         } else if (type instanceof Timing) {
             throw new NotImplementedException("Timing resolution has not yet been implemented");
         } else {
@@ -56,17 +56,14 @@ public class ResourceMatcherR4 implements ResourceMatcher {
     @Override
     public List<TokenParam> getCodes(IBase codeElement) {
         List<TokenParam> resolvedCodes = new ArrayList<>();
-        if (codeElement instanceof Coding) {
-            var c = (Coding) codeElement;
+        if (codeElement instanceof Coding c) {
             resolvedCodes.add(new TokenParam(c.getSystem(), c.getCode()));
-        } else if (codeElement instanceof CodeType) {
-            var c = (CodeType) codeElement;
+        } else if (codeElement instanceof CodeType c) {
             resolvedCodes.add(new TokenParam(c.getValue()));
-        } else if (codeElement instanceof CodeableConcept) {
-            resolvedCodes = ((CodeableConcept) codeElement)
-                    .getCoding().stream()
-                            .map(code -> new TokenParam(code.getSystem(), code.getCode()))
-                            .collect(Collectors.toList());
+        } else if (codeElement instanceof CodeableConcept concept) {
+            resolvedCodes = concept.getCoding().stream()
+                    .map(code -> new TokenParam(code.getSystem(), code.getCode()))
+                    .collect(Collectors.toList());
         }
 
         return resolvedCodes;
@@ -83,20 +80,10 @@ public class ResourceMatcherR4 implements ResourceMatcher {
             return true;
         }
 
-        if (pathResult instanceof IIdType) {
-            var id = (IIdType) pathResult;
+        if (pathResult instanceof IIdType id) {
             return param.getValue().equals(id.getIdPart());
         }
-        if (pathResult instanceof Identifier) {
-            // [parameter]=[code]: the value of [code] matches a Coding.code or Identifier.value irrespective of the
-            // value of the system property
-            // [parameter]=[system]|[code]: the value of [code] matches a Coding.code or Identifier.value, and the value
-            // of [system] matches the system property of the Identifier or Coding
-            // [parameter]=|[code]: the value of [code] matches a Coding.code or Identifier.value, and the
-            // Coding/Identifier has no system property
-            // [parameter]=[system]|: any element where the value of [system] matches the system property of the
-            // Identifier or Coding
-            var identifier = (Identifier) pathResult;
+        if (pathResult instanceof Identifier identifier) {
             var system = identifier.getSystem();
             var value = identifier.getValue();
 
@@ -114,12 +101,12 @@ public class ResourceMatcherR4 implements ResourceMatcher {
             }
         }
 
-        if (pathResult instanceof IBaseEnumeration) {
-            return param.getValue().equals(((IBaseEnumeration<?>) pathResult).getValueAsString());
+        if (pathResult instanceof IBaseEnumeration<?> enumeration) {
+            return param.getValue().equals(enumeration.getValueAsString());
         }
 
-        if (pathResult instanceof IPrimitiveType) {
-            return param.getValue().equals(((IPrimitiveType<?>) pathResult).getValue());
+        if (pathResult instanceof IPrimitiveType<?> type) {
+            return param.getValue().equals(type.getValue());
         }
 
         return false;

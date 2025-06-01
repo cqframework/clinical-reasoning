@@ -334,8 +334,7 @@ public class Either3<L, M, R> {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof Either3<?, ?, ?>) {
-            Either3<?, ?, ?> other = (Either3<?, ?, ?>) obj;
+        if (obj instanceof Either3<?, ?, ?> other) {
             return (this.left == other.left && this.right == other.right && this.middle == other.middle)
                     || (this.left != null && other.left != null && this.left.equals(other.left))
                     || (this.middle != null && other.middle != null && this.middle.equals(other.middle))

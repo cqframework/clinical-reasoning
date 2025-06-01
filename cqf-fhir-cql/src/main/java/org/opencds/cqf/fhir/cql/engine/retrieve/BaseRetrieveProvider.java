@@ -73,7 +73,7 @@ public abstract class BaseRetrieveProvider implements RetrieveProvider {
         }
 
         if (templateId == null
-                || templateId.startsWith(String.format("http://hl7.org/fhir/StructureDefinition/%s", dataType))) {
+                || templateId.startsWith("http://hl7.org/fhir/StructureDefinition/%s".formatted(dataType))) {
             logger.debug("No profile-specific template id specified. Returning unfiltered resources.");
             return resource -> true;
         }
@@ -102,7 +102,7 @@ public abstract class BaseRetrieveProvider implements RetrieveProvider {
         // Should never see TRUST, since that should be handled by the repository.
         // ENFORCED is not yet supported.
 
-        throw new UnsupportedOperationException(String.format("%s profile mode is not yet supported.", profileMode));
+        throw new UnsupportedOperationException("%s profile mode is not yet supported.".formatted(profileMode));
     }
 
     public Predicate<IBaseResource> filterByContext(
@@ -159,7 +159,7 @@ public abstract class BaseRetrieveProvider implements RetrieveProvider {
                 }
             } else {
                 final Optional<IBase> reference = this.fhirPath.evaluateFirst(res, "reference", IBase.class);
-                if (!reference.isPresent()) {
+                if (reference.isEmpty()) {
                     logger.debug("Found {} resource unrelated to context. Skipping.", dataType);
                     return false;
                 }
@@ -276,8 +276,7 @@ public abstract class BaseRetrieveProvider implements RetrieveProvider {
         // "Medication/med-id"
         final String primitiveString = code.getValueAsString().replace(dataType + "/", "");
         for (final Object c : codes) {
-            if (c instanceof String) {
-                final String s = (String) c;
+            if (c instanceof String s) {
                 if (s.equals(primitiveString)) {
                     return true;
                 }
@@ -303,7 +302,7 @@ public abstract class BaseRetrieveProvider implements RetrieveProvider {
             Map<String, List<IQueryParameterType>> searchParams, final String dataType, final String templateId) {
         if (getRetrieveSettings().getProfileMode() != PROFILE_MODE.OFF
                 && StringUtils.isNotBlank(templateId)
-                && !templateId.startsWith(String.format("http://hl7.org/fhir/StructureDefinition/%s", dataType))) {
+                && !templateId.startsWith("http://hl7.org/fhir/StructureDefinition/%s".formatted(dataType))) {
             var profileParam = getFhirVersion().isOlderThan(FhirVersionEnum.R5)
                     ? new UriParam(templateId)
                     : new ReferenceParam(templateId);
@@ -350,8 +349,7 @@ public abstract class BaseRetrieveProvider implements RetrieveProvider {
             // TODO: Fix up the RetrieveProvider API in the engine
             // This is stupid hacky
             for (Object code : codes) {
-                if (code instanceof Code) {
-                    var c = (Code) code;
+                if (code instanceof Code c) {
                     codeList.add(new TokenParam(
                             new InternalCodingDt().setSystem(c.getSystem()).setCode(c.getCode())));
                 } else if (code != null) {

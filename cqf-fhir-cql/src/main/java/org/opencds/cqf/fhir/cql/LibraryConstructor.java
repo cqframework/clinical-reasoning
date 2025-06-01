@@ -34,11 +34,7 @@ public class LibraryConstructor {
             List<CqlParameterDefinition> parameters) {
         logger.debug("Constructing expression for local evaluation");
         return constructCqlLibrary(
-                name,
-                version,
-                List.of(String.format("%ndefine \"return\":%n       %s", expression)),
-                libraries,
-                parameters);
+                name, version, List.of("%ndefine \"return\":%n       %s".formatted(expression)), libraries, parameters);
     }
 
     public String constructCqlLibrary(
@@ -56,7 +52,7 @@ public class LibraryConstructor {
         constructParameters(sb, parameters);
         constructContext(sb, null);
         for (var expression : expressions) {
-            sb.append(String.format("%s%n%n", expression));
+            sb.append("%s%n%n".formatted(expression));
         }
 
         String cql = sb.toString();
@@ -71,18 +67,17 @@ public class LibraryConstructor {
     }
 
     private void constructIncludes(StringBuilder sb, Map<String, String> libraries) {
-        sb.append(String.format(
-                "include FHIRHelpers version '%s' called FHIRHelpers%n",
-                getFhirVersionString(fhirContext.getVersion().getVersion())));
+        sb.append("include FHIRHelpers version '%s' called FHIRHelpers%n"
+                .formatted(getFhirVersionString(fhirContext.getVersion().getVersion())));
 
         if (libraries != null) {
             for (var library : libraries.entrySet()) {
                 var vi = VersionedIdentifiers.forUrl(library.getValue());
-                sb.append(String.format("include \"%s\"", vi.getId()));
+                sb.append("include \"%s\"".formatted(vi.getId()));
                 if (vi.getVersion() != null) {
-                    sb.append(String.format(" version '%s'", vi.getVersion()));
+                    sb.append(" version '%s'".formatted(vi.getVersion()));
                 }
-                sb.append(String.format(" called \"%s\"", library.getKey()));
+                sb.append(" called \"%s\"".formatted(library.getKey()));
                 sb.append("\n");
             }
         }
@@ -99,7 +94,7 @@ public class LibraryConstructor {
                     .append(cpd.getName())
                     .append("\" ")
                     .append(this.getTypeDeclaration(cpd.getType(), cpd.getIsList()))
-                    .append(String.format("%n"));
+                    .append("%n".formatted());
         }
     }
 
@@ -114,17 +109,17 @@ public class LibraryConstructor {
     }
 
     private void constructUsings(StringBuilder sb) {
-        sb.append(String.format(
-                "using FHIR version '%s'%n%n",
-                getFhirVersionString(fhirContext.getVersion().getVersion())));
+        sb.append("using FHIR version '%s'%n%n"
+                .formatted(getFhirVersionString(fhirContext.getVersion().getVersion())));
     }
 
     private void constructHeader(StringBuilder sb, String name, String version) {
-        sb.append(String.format("library %s version '%s'%n%n", name, version));
+        sb.append("library %s version '%s'%n%n".formatted(name, version));
     }
 
     private void constructContext(StringBuilder sb, String contextType) {
-        sb.append(String.format(
-                String.format("context %s%n%n", StringUtils.isBlank(contextType) ? "Patient" : contextType)));
+        sb.append("context %s%n%n"
+                .formatted(StringUtils.isBlank(contextType) ? "Patient" : contextType)
+                .formatted());
     }
 }

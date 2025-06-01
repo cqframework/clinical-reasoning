@@ -88,17 +88,17 @@ public class R4MeasureServiceUtils {
             .setDate(MEASUREREPORT_SUPPLEMENTALDATA_SEARCHPARAMETER_DEFINITION_DATE)
             .setPublisher("HL7 International - Clinical Quality Information Work Group")
             .setContact(CQI_CONTACTDETAIL)
-            .setDescription(String.format(
-                    "Returns resources (supplemental data) from references on extensions on the MeasureReport with urls matching %s.",
-                    MEASUREREPORT_MEASURE_SUPPLEMENTALDATA_EXTENSION))
+            .setDescription(
+                    "Returns resources (supplemental data) from references on extensions on the MeasureReport with urls matching %s."
+                            .formatted(MEASUREREPORT_MEASURE_SUPPLEMENTALDATA_EXTENSION))
             .setJurisdiction(US_JURISDICTION_CODING)
             .addBase("MeasureReport")
             .setCode("supplemental-data")
             .setType(Enumerations.SearchParamType.REFERENCE)
-            .setExpression(String.format(
-                    "MeasureReport.extension('%s').value", MEASUREREPORT_MEASURE_SUPPLEMENTALDATA_EXTENSION))
-            .setXpath(String.format(
-                    "f:MeasureReport/f:extension[@url='%s'].value", MEASUREREPORT_MEASURE_SUPPLEMENTALDATA_EXTENSION))
+            .setExpression(
+                    "MeasureReport.extension('%s').value".formatted(MEASUREREPORT_MEASURE_SUPPLEMENTALDATA_EXTENSION))
+            .setXpath("f:MeasureReport/f:extension[@url='%s'].value"
+                    .formatted(MEASUREREPORT_MEASURE_SUPPLEMENTALDATA_EXTENSION))
             .setXpathUsage(SearchParameter.XPathUsageType.NORMAL)
             .setTitle("Supplemental Data")
             .setId("deqm-measurereport-supplemental-data");
@@ -111,7 +111,7 @@ public class R4MeasureServiceUtils {
     }
 
     public static String getFullUrl(String serverAddress, String fhirType, String elementId) {
-        return String.format("%s%s/%s", serverAddress + (serverAddress.endsWith("/") ? "" : "/"), fhirType, elementId);
+        return "%s%s/%s".formatted(serverAddress + (serverAddress.endsWith("/") ? "" : "/"), fhirType, elementId);
     }
 
     public void ensureSupplementalDataElementSearchParameter() {
@@ -215,13 +215,12 @@ public class R4MeasureServiceUtils {
 
         if (bundle != null && !bundle.getEntry().isEmpty()) {
             if (bundle.getEntry().size() > 1) {
-                var msg = String.format(
-                        "Measure Identifier: %s, found more than one matching measure resource", identifier);
+                var msg = "Measure Identifier: %s, found more than one matching measure resource".formatted(identifier);
                 throw new InvalidRequestException(msg);
             }
             return (Measure) bundle.getEntryFirstRep().getResource();
         } else {
-            var msg = String.format("Measure Identifier: %s, found no matching measure resources", identifier);
+            var msg = "Measure Identifier: %s, found no matching measure resources".formatted(identifier);
             throw new InvalidRequestException(msg);
         }
     }
@@ -297,8 +296,8 @@ public class R4MeasureServiceUtils {
             return getMeasureGroupScoringTypes(measure);
         } else {
             if (!measure.hasScoring()) {
-                throw new InvalidRequestException(String.format(
-                        "Measure: %s, does not have a defined Measure Scoring Type.", measure.getIdPart()));
+                throw new InvalidRequestException(
+                        "Measure: %s, does not have a defined Measure Scoring Type.".formatted(measure.getIdPart()));
             }
             return Collections.singletonList(MeasureScoring.fromCode(
                     measure.getScoring().getCodingFirstRep().getCode()));

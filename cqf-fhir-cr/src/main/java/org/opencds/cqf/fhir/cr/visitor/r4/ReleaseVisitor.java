@@ -47,9 +47,9 @@ public class ReleaseVisitor {
             throws UnprocessableEntityException {
         if (CRMIReleaseExperimentalBehaviorCodes.NULL != experimentalBehavior
                 && CRMIReleaseExperimentalBehaviorCodes.NONE != experimentalBehavior) {
-            String nonExperimentalError = String.format(
-                    "Root artifact is not Experimental, but references an Experimental resource with URL '%s'.",
-                    resource.getUrl());
+            String nonExperimentalError =
+                    "Root artifact is not Experimental, but references an Experimental resource with URL '%s'."
+                            .formatted(resource.getUrl());
             if (CRMIReleaseExperimentalBehaviorCodes.WARN == experimentalBehavior && resource.getExperimental()) {
                 log.warn(nonExperimentalError);
             } else if (CRMIReleaseExperimentalBehaviorCodes.ERROR == experimentalBehavior
@@ -124,9 +124,9 @@ public class ReleaseVisitor {
                 releaseVersion = Optional.ofNullable(version);
             } else if (CRMIReleaseVersionBehaviorCodes.CHECK == versionBehaviorCode
                     && !replaceDraftInExisting.equals(version)) {
-                throw new UnprocessableEntityException(String.format(
-                        "versionBehavior specified is 'check' and the version provided ('%s') does not match the version currently specified on the root artifact ('%s').",
-                        version, existingVersion));
+                throw new UnprocessableEntityException(
+                        "versionBehavior specified is 'check' and the version provided ('%s') does not match the version currently specified on the root artifact ('%s')."
+                                .formatted(version, existingVersion));
             }
         }
         return releaseVersion;
@@ -156,7 +156,7 @@ public class ReleaseVisitor {
                 })
                 .forEach(artifactComment -> {
                     artifactComment.setDerivedFromContentRelatedArtifact(
-                            String.format("%s|%s", rootArtifact.getUrl(), releaseVersion));
+                            "%s|%s".formatted(rootArtifact.getUrl(), releaseVersion));
                     returnEntries.add((BundleEntryComponent) PackageHelper.createEntry(artifactComment, true));
                 });
         return returnEntries;

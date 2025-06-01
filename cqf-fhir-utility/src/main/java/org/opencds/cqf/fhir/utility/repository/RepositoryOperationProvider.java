@@ -81,7 +81,7 @@ public class RepositoryOperationProvider implements IRepositoryOperationProvider
 
                 default:
                     throw new IllegalArgumentException(
-                            String.format("(%s) operation not supported for type (%s)", operationName, resourceType));
+                            "(%s) operation not supported for type (%s)".formatted(operationName, resourceType));
             }
         }
         return null;

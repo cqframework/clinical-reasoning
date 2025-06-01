@@ -133,8 +133,8 @@ public class DataRequirementsVisitor extends BaseKnowledgeArtifactVisitor {
                 yield adapterFactory.createLibrary(versionConvertor4050.convertResource(r5Library));
             }
             case R5 -> adapterFactory.createLibrary(r5Library);
-            default -> throw new IllegalArgumentException(String.format(
-                    "FHIR version %s is not supported.", fhirVersion().getFhirVersionString()));
+            default -> throw new IllegalArgumentException(
+                    "FHIR version %s is not supported.".formatted(fhirVersion().getFhirVersionString()));
         };
     }
 
@@ -143,8 +143,7 @@ public class DataRequirementsVisitor extends BaseKnowledgeArtifactVisitor {
         try {
             translator = CqlTranslator.fromStream(cqlStream, libraryManager);
         } catch (IOException e) {
-            throw new IllegalArgumentException(
-                    String.format("Errors occurred translating library: %s", e.getMessage()));
+            throw new IllegalArgumentException("Errors occurred translating library: %s".formatted(e.getMessage()));
         }
 
         return translator;
@@ -154,7 +153,7 @@ public class DataRequirementsVisitor extends BaseKnowledgeArtifactVisitor {
         CqlTranslator translator = getTranslator(
                 new ByteArrayInputStream(Libraries.getContent(library, "text/cql")
                         .orElseThrow(() -> new UnprocessableEntityException(
-                                String.format("No CQL content found for Library: %s", Libraries.getName(library))))),
+                                "No CQL content found for Library: %s".formatted(Libraries.getName(library))))),
                 libraryManager);
         if (!translator.getErrors().isEmpty()) {
             throw new UnprocessableEntityException(translator.getErrors().get(0).getMessage());

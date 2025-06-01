@@ -134,7 +134,7 @@ public class Dstu3MeasureProcessor {
                 return MeasureReportType.SUMMARY;
             default:
                 throw new InvalidRequestException(
-                        String.format("Unsupported MeasureEvalType: %s", measureEvalType.toCode()));
+                        "Unsupported MeasureEvalType: %s".formatted(measureEvalType.toCode()));
         }
     }
 
@@ -145,9 +145,8 @@ public class Dstu3MeasureProcessor {
             lib = context.getEnvironment().getLibraryManager().resolveLibrary(id);
         } catch (CqlIncludeException e) {
             throw new IllegalStateException(
-                    String.format(
-                            "Unable to load CQL/ELM for library: %s. Verify that the Library resource is available in your environment and has CQL/ELM content embedded.",
-                            id.getId()),
+                    "Unable to load CQL/ELM for library: %s. Verify that the Library resource is available in your environment and has CQL/ELM content embedded."
+                            .formatted(id.getId()),
                     e);
         }
 
@@ -191,7 +190,7 @@ public class Dstu3MeasureProcessor {
     private void checkMeasureLibrary(Measure measure) {
         if (!measure.hasLibrary()) {
             throw new InvalidRequestException(
-                    String.format("Measure %s does not have a primary library specified", measure.getUrl()));
+                    "Measure %s does not have a primary library specified".formatted(measure.getUrl()));
         }
     }
 
@@ -204,10 +203,10 @@ public class Dstu3MeasureProcessor {
                 value = param.getResource();
             } else {
                 value = param.getValue();
-                if (value instanceof IPrimitiveType) {
+                if (value instanceof IPrimitiveType<?> type) {
                     // TODO: handle Code, CodeableConcept, Quantity, etc
                     // resolves Date/Time values
-                    value = modelResolver.toJavaPrimitive(((IPrimitiveType<?>) value).getValue(), value);
+                    value = modelResolver.toJavaPrimitive(type.getValue(), value);
                 }
             }
             if (parameterMap.containsKey(param.getName())) {

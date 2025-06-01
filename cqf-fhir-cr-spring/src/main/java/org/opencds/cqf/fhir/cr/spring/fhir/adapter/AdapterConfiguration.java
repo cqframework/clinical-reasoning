@@ -21,9 +21,8 @@ public class AdapterConfiguration {
             case DSTU2_1:
             case DSTU2_HL7ORG:
             default:
-                throw new UnsupportedOperationException(String.format(
-                        "FHIR version %s is not supported.",
-                        fhirContext.getVersion().getVersion().toString()));
+                throw new UnsupportedOperationException("FHIR version %s is not supported."
+                        .formatted(fhirContext.getVersion().getVersion().toString()));
         }
     }
 }

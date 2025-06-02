@@ -20,6 +20,7 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -585,8 +586,14 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             List<String> subjectIds,
             PopulationDef populationDef,
             GroupDef groupDef) {
-        var resourceType =
-                ResourceType.fromCode(groupDef.getPopulationBasis().code()).toString();
+
+        String resourceType;
+        try {
+            resourceType = ResourceType.fromCode(groupDef.getPopulationBasis().code()).toString();
+        }
+        catch (FHIRException e) {
+            resourceType = null;
+        }
         boolean isResourceType = resourceType != null;
         List<String> resourceIds = new ArrayList<>();
         assert populationDef != null;

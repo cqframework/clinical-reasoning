@@ -43,8 +43,7 @@ public class R4SubmitDataService {
         if (resources != null) {
             for (IBaseResource res : resources) {
                 // Unpack nested Bundles
-                if (res instanceof Bundle) {
-                    Bundle nestedBundle = (Bundle) res;
+                if (res instanceof Bundle nestedBundle) {
                     for (Bundle.BundleEntryComponent entry : nestedBundle.getEntry()) {
                         transactionBundle.addEntry(createEntry(entry.getResource()));
                     }

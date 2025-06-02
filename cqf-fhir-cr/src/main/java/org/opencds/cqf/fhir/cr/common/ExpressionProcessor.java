@@ -39,7 +39,7 @@ public class ExpressionProcessor {
             return getExpressionResult(request, expression, parameters, rawParameters);
         } catch (Exception ex) {
             final String message =
-                    String.format(EXCEPTION_MESSAGE_TEMPLATE, expression.getExpression(), itemLinkId, ex.getMessage());
+                    EXCEPTION_MESSAGE_TEMPLATE.formatted(expression.getExpression(), itemLinkId, ex.getMessage());
             throw new UnprocessableEntityException(message);
         }
     }

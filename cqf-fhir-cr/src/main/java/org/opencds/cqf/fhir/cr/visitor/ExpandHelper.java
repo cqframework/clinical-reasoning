@@ -198,9 +198,9 @@ public class ExpandHelper {
                         try {
                             addCodeToExpansion(fhirContext(), expansion, code);
                         } catch (Exception ex) {
-                            throw new UnprocessableEntityException(String.format(
-                                    "Encountered exception attempting to expand ValueSet %s: %s",
-                                    includedVS.get().getId(), ex.getMessage()));
+                            throw new UnprocessableEntityException(
+                                    "Encountered exception attempting to expand ValueSet %s: %s"
+                                            .formatted(includedVS.get().getId(), ex.getMessage()));
                         }
                     }
                 }));

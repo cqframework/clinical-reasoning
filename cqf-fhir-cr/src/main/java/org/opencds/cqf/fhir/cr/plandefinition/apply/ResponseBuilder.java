@@ -24,7 +24,7 @@ public class ResponseBuilder {
     }
 
     protected String getCanonical(String url, String version) {
-        return StringUtils.isBlank(version) ? url : String.format("%s|%s", url, version);
+        return StringUtils.isBlank(version) ? url : "%s|%s".formatted(url, version);
     }
 
     protected IBaseResource generateOrchestrationDstu3(ApplyRequest request) {

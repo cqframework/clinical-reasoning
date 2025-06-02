@@ -48,12 +48,12 @@ public class ProcessDefinition {
             if (resource != null) {
                 var actionId = request.resolvePathString(action, "id");
                 if (actionId != null) {
-                    resource.setId(String.format(
-                            "%s-%s", actionId, resource.getIdElement().getIdPart()));
+                    resource.setId(
+                            "%s-%s".formatted(actionId, resource.getIdElement().getIdPart()));
                 }
                 actionResolver.resolveAction(request, requestOrchestration, resource, action);
                 var reference = Boolean.TRUE.equals(request.getContainResources())
-                        ? String.format("#%s", resource.getIdElement().getIdPart())
+                        ? "#%s".formatted(resource.getIdElement().getIdPart())
                         : resource.getIdElement().getValue();
                 request.getModelResolver()
                         .setValue(requestAction, "resource", buildReference(request.getFhirVersion(), reference));
@@ -90,7 +90,7 @@ public class ProcessDefinition {
             case PLANDEFINITION -> applyNestedPlanDefinition(request, definition);
             case ACTIVITYDEFINITION -> applyActivityDefinition(request, definition);
             case QUESTIONNAIRE -> applyQuestionnaireDefinition(request, definition);
-            default -> throw new FHIRException(String.format("Unknown action definition: %s", definition.getValue()));
+            default -> throw new FHIRException("Unknown action definition: %s".formatted(definition.getValue()));
         };
     }
 
@@ -123,9 +123,8 @@ public class ProcessDefinition {
                 result = resolveRepository(definition);
             }
         } catch (Exception e) {
-            var message = String.format(
-                    "ERROR: Questionnaire %s could not be applied and threw exception %s",
-                    definition.getValue(), e.toString());
+            var message = "ERROR: Questionnaire %s could not be applied and threw exception %s"
+                    .formatted(definition.getValue(), e.toString());
             logger.error(message);
             request.logException(message);
         }
@@ -153,9 +152,8 @@ public class ProcessDefinition {
             result.setId(activityDefinitionId);
             activityRequest.resolveOperationOutcome(result);
         } catch (Exception e) {
-            var message = String.format(
-                    "ERROR: ActivityDefinition %s could not be applied and threw exception %s",
-                    definition.getValue(), e.toString());
+            var message = "ERROR: ActivityDefinition %s could not be applied and threw exception %s"
+                    .formatted(definition.getValue(), e.toString());
             logger.error(message);
             request.logException(message);
         }
@@ -177,9 +175,8 @@ public class ProcessDefinition {
             request.setQuestionnaire(nestedRequest.getQuestionnaire());
             return result;
         } catch (Exception e) {
-            var message = String.format(
-                    "ERROR: PlanDefinition %s could not be applied and threw exception %s",
-                    definition.getValue(), e.toString());
+            var message = "ERROR: PlanDefinition %s could not be applied and threw exception %s"
+                    .formatted(definition.getValue(), e.toString());
             logger.error(message);
             request.logException(message);
             return null;

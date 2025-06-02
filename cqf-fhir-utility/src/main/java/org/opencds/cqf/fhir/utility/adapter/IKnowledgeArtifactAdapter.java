@@ -74,11 +74,11 @@ public interface IKnowledgeArtifactAdapter extends IResourceAdapter {
     }
 
     default String getDescriptor() {
-        return String.format(
-                "%s %s%s",
-                this.get().fhirType(),
-                this.hasTitle() ? this.getTitle() : this.getName(),
-                this.hasVersion() ? ", " + this.getVersion() : "");
+        return "%s %s%s"
+                .formatted(
+                        this.get().fhirType(),
+                        this.hasTitle() ? this.getTitle() : this.getName(),
+                        this.hasVersion() ? ", " + this.getVersion() : "");
     }
 
     default boolean hasUrl() {
@@ -113,7 +113,7 @@ public interface IKnowledgeArtifactAdapter extends IResourceAdapter {
         if (!hasUrl()) {
             return getId().getValueAsString();
         }
-        return getUrl().concat(hasVersion() ? String.format("|%s", getVersion()) : "");
+        return getUrl().concat(hasVersion() ? "|%s".formatted(getVersion()) : "");
     }
 
     List<IDependencyInfo> getDependencies();
@@ -219,32 +219,24 @@ public interface IKnowledgeArtifactAdapter extends IResourceAdapter {
     }
 
     static <T extends ICompositeType & IBaseHasExtensions> String getRelatedArtifactReference(T relatedArtifact) {
-        if (relatedArtifact instanceof org.hl7.fhir.dstu3.model.RelatedArtifact) {
-            return ((org.hl7.fhir.dstu3.model.RelatedArtifact) relatedArtifact)
-                    .getResource()
-                    .getReference();
-        } else if (relatedArtifact instanceof org.hl7.fhir.r4.model.RelatedArtifact) {
-            return ((org.hl7.fhir.r4.model.RelatedArtifact) relatedArtifact).getResource();
-        } else if (relatedArtifact instanceof org.hl7.fhir.r5.model.RelatedArtifact) {
-            return ((org.hl7.fhir.r5.model.RelatedArtifact) relatedArtifact).getResource();
+        if (relatedArtifact instanceof org.hl7.fhir.dstu3.model.RelatedArtifact artifact2) {
+            return artifact2.getResource().getReference();
+        } else if (relatedArtifact instanceof org.hl7.fhir.r4.model.RelatedArtifact artifact1) {
+            return artifact1.getResource();
+        } else if (relatedArtifact instanceof org.hl7.fhir.r5.model.RelatedArtifact artifact) {
+            return artifact.getResource();
         } else {
             throw new UnprocessableEntityException(VALID_RELATED_ARTIFACT);
         }
     }
 
     static <T extends ICompositeType & IBaseHasExtensions> String getRelatedArtifactType(T relatedArtifact) {
-        if (relatedArtifact instanceof org.hl7.fhir.dstu3.model.RelatedArtifact) {
-            return ((org.hl7.fhir.dstu3.model.RelatedArtifact) relatedArtifact)
-                    .getType()
-                    .toCode();
-        } else if (relatedArtifact instanceof org.hl7.fhir.r4.model.RelatedArtifact) {
-            return ((org.hl7.fhir.r4.model.RelatedArtifact) relatedArtifact)
-                    .getType()
-                    .toCode();
-        } else if (relatedArtifact instanceof org.hl7.fhir.r5.model.RelatedArtifact) {
-            return ((org.hl7.fhir.r5.model.RelatedArtifact) relatedArtifact)
-                    .getType()
-                    .toCode();
+        if (relatedArtifact instanceof org.hl7.fhir.dstu3.model.RelatedArtifact artifact2) {
+            return artifact2.getType().toCode();
+        } else if (relatedArtifact instanceof org.hl7.fhir.r4.model.RelatedArtifact artifact1) {
+            return artifact1.getType().toCode();
+        } else if (relatedArtifact instanceof org.hl7.fhir.r5.model.RelatedArtifact artifact) {
+            return artifact.getType().toCode();
         } else {
             throw new UnprocessableEntityException(VALID_RELATED_ARTIFACT);
         }
@@ -252,19 +244,12 @@ public interface IKnowledgeArtifactAdapter extends IResourceAdapter {
 
     static <T extends ICompositeType & IBaseHasExtensions> void setRelatedArtifactReference(
             T relatedArtifact, String reference, String display) {
-        if (relatedArtifact instanceof org.hl7.fhir.dstu3.model.RelatedArtifact) {
-            ((org.hl7.fhir.dstu3.model.RelatedArtifact) relatedArtifact)
-                    .getResource()
-                    .setReference(reference)
-                    .setDisplay(display);
-        } else if (relatedArtifact instanceof org.hl7.fhir.r4.model.RelatedArtifact) {
-            ((org.hl7.fhir.r4.model.RelatedArtifact) relatedArtifact)
-                    .setResource(reference)
-                    .setDisplay(display);
-        } else if (relatedArtifact instanceof org.hl7.fhir.r5.model.RelatedArtifact) {
-            ((org.hl7.fhir.r5.model.RelatedArtifact) relatedArtifact)
-                    .setResource(reference)
-                    .setDisplay(display);
+        if (relatedArtifact instanceof org.hl7.fhir.dstu3.model.RelatedArtifact artifact2) {
+            artifact2.getResource().setReference(reference).setDisplay(display);
+        } else if (relatedArtifact instanceof org.hl7.fhir.r4.model.RelatedArtifact artifact1) {
+            artifact1.setResource(reference).setDisplay(display);
+        } else if (relatedArtifact instanceof org.hl7.fhir.r5.model.RelatedArtifact artifact) {
+            artifact.setResource(reference).setDisplay(display);
         } else {
             throw new UnprocessableEntityException(VALID_RELATED_ARTIFACT);
         }

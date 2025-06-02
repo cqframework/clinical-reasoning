@@ -55,16 +55,16 @@ public class DraftVisitor extends BaseKnowledgeArtifactVisitor {
         // This check is performed here to facilitate that different treatment
         // for the root artifact and those referenced by it.
         if (!"active".equals(adapter.getStatus())) {
-            throw new PreconditionFailedException(String.format(
-                    "Drafts can only be created from artifacts with status of 'active'. Resource '%s' has a status of: '%s'",
-                    adapter.getUrl(), adapter.getStatus()));
+            throw new PreconditionFailedException(
+                    "Drafts can only be created from artifacts with status of 'active'. Resource '%s' has a status of: '%s'"
+                            .formatted(adapter.getUrl(), adapter.getStatus()));
         }
         // Ensure only one resource exists with this URL
         var existingArtifactsForUrl = SearchHelper.searchRepositoryByCanonicalWithPaging(repository, draftVersionUrl);
         if (!BundleHelper.getEntry(existingArtifactsForUrl).isEmpty()) {
-            throw new PreconditionFailedException(String.format(
-                    "A draft of Program '%s' already exists with version: '%s'. Only one draft of a program version can exist at a time.",
-                    adapter.getUrl(), draftVersionUrl));
+            throw new PreconditionFailedException(
+                    "A draft of Program '%s' already exists with version: '%s'. Only one draft of a program version can exist at a time."
+                            .formatted(adapter.getUrl(), draftVersionUrl));
         }
         // create draft resources
         List<IDomainResource> resourcesToCreate = createDraftsOfArtifactAndRelated(libRes, version, new ArrayList<>());

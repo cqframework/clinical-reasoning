@@ -52,17 +52,17 @@ public class Dstu3MeasureService implements Dstu3MeasureEvaluatorSingle {
             .setDate(MEASUREREPORT_SUPPLEMENTALDATA_SEARCHPARAMETER_DEFINITION_DATE)
             .setPublisher("HL7 International - Clinical Quality Information Work Group")
             .setContact(CQI_CONTACT_DETAIL)
-            .setDescription(String.format(
-                    "Returns resources (supplemental data) from references on extensions on the MeasureReport with urls matching %s.",
-                    MEASUREREPORT_MEASURE_SUPPLEMENTALDATA_EXTENSION))
+            .setDescription(
+                    "Returns resources (supplemental data) from references on extensions on the MeasureReport with urls matching %s."
+                            .formatted(MEASUREREPORT_MEASURE_SUPPLEMENTALDATA_EXTENSION))
             .setJurisdiction(US_JURISDICTION_CODING)
             .addBase("MeasureReport")
             .setCode("supplemental-data")
             .setType(Enumerations.SearchParamType.REFERENCE)
-            .setExpression(String.format(
-                    "MeasureReport.extension('%s').value", MEASUREREPORT_MEASURE_SUPPLEMENTALDATA_EXTENSION))
-            .setXpath(String.format(
-                    "f:MeasureReport/f:extension[@url='%s'].value", MEASUREREPORT_MEASURE_SUPPLEMENTALDATA_EXTENSION))
+            .setExpression(
+                    "MeasureReport.extension('%s').value".formatted(MEASUREREPORT_MEASURE_SUPPLEMENTALDATA_EXTENSION))
+            .setXpath("f:MeasureReport/f:extension[@url='%s'].value"
+                    .formatted(MEASUREREPORT_MEASURE_SUPPLEMENTALDATA_EXTENSION))
             .setXpathUsage(SearchParameter.XPathUsageType.NORMAL)
             .setTitle("Supplemental Data")
             .setId("deqm-measurereport-supplemental-data");

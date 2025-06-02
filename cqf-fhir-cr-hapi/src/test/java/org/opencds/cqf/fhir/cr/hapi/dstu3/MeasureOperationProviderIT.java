@@ -28,9 +28,10 @@ class MeasureOperationProviderIT extends BaseCrDstu3TestServer {
         assertNotNull(expected, "expected MeasureReport can not be null");
         assertNotNull(actual, "actual MeasureReport can not be null");
 
-        String errorLocator = String.format(
-                "Measure: %s, Subject: %s",
-                expected.getMeasure().getReference(), expected.getPatient().getReference());
+        String errorLocator = "Measure: %s, Subject: %s"
+                .formatted(
+                        expected.getMeasure().getReference(),
+                        expected.getPatient().getReference());
 
         assertThat(actual.hasGroup()).as(errorLocator).isEqualTo(expected.hasGroup());
         assertThat(actual.getGroup()).as(errorLocator).hasSameSizeAs(expected.getGroup());
@@ -41,11 +42,11 @@ class MeasureOperationProviderIT extends BaseCrDstu3TestServer {
                             && x.getId().equals(mrgcExpected.getIdentifier().getValue()))
                     .findFirst();
 
-            errorLocator = String.format(
-                    "Measure: %s, Subject: %s, Group: %s",
-                    expected.getMeasure().getReference(),
-                    expected.getPatient().getReference(),
-                    mrgcExpected.getIdentifier().getValue());
+            errorLocator = "Measure: %s, Subject: %s, Group: %s"
+                    .formatted(
+                            expected.getMeasure().getReference(),
+                            expected.getPatient().getReference(),
+                            mrgcExpected.getIdentifier().getValue());
             assertTrue(mrgcActualOptional.isPresent(), errorLocator);
 
             MeasureReportGroupComponent mrgcActual = mrgcActualOptional.get();

@@ -63,21 +63,21 @@ public abstract class BaseKnowledgeArtifactVisitor implements IKnowledgeArtifact
 
     protected List<IBaseBackboneElement> findArtifactCommentsToUpdate(
             IBaseResource artifact, String releaseVersion, Repository repository) {
-        if (artifact instanceof org.hl7.fhir.dstu3.model.MetadataResource) {
+        if (artifact instanceof org.hl7.fhir.dstu3.model.MetadataResource resource2) {
             return org.opencds.cqf.fhir.cr.visitor.dstu3.ReleaseVisitor.findArtifactCommentsToUpdate(
-                            (org.hl7.fhir.dstu3.model.MetadataResource) artifact, releaseVersion, repository)
+                            resource2, releaseVersion, repository)
                     .stream()
                     .map(r -> (IBaseBackboneElement) r)
                     .collect(Collectors.toList());
-        } else if (artifact instanceof org.hl7.fhir.r4.model.MetadataResource) {
+        } else if (artifact instanceof org.hl7.fhir.r4.model.MetadataResource resource1) {
             return org.opencds.cqf.fhir.cr.visitor.r4.ReleaseVisitor.findArtifactCommentsToUpdate(
-                            (org.hl7.fhir.r4.model.MetadataResource) artifact, releaseVersion, repository)
+                            resource1, releaseVersion, repository)
                     .stream()
                     .map(r -> (IBaseBackboneElement) r)
                     .collect(Collectors.toList());
-        } else if (artifact instanceof org.hl7.fhir.r5.model.MetadataResource) {
+        } else if (artifact instanceof org.hl7.fhir.r5.model.MetadataResource resource) {
             return org.opencds.cqf.fhir.cr.visitor.r5.ReleaseVisitor.findArtifactCommentsToUpdate(
-                            (org.hl7.fhir.r5.model.MetadataResource) artifact, releaseVersion, repository)
+                            resource, releaseVersion, repository)
                     .stream()
                     .map(r -> (IBaseBackboneElement) r)
                     .collect(Collectors.toList());
@@ -188,7 +188,7 @@ public abstract class BaseKnowledgeArtifactVisitor implements IKnowledgeArtifact
             return;
         }
         var reference = adapter.hasVersion()
-                ? adapter.getUrl().concat(String.format("|%s", adapter.getVersion()))
+                ? adapter.getUrl().concat("|%s".formatted(adapter.getVersion()))
                 : adapter.getUrl();
         if (relatedArtifacts.stream().noneMatch(ra -> IKnowledgeArtifactAdapter.getRelatedArtifactReference(ra)
                 .equals(reference))) {

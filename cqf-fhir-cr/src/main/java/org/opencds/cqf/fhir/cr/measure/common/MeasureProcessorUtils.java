@@ -66,7 +66,7 @@ public class MeasureProcessorUtils {
             } catch (Exception e) {
                 // Catch Exceptions from evaluation per subject, but allow rest of subjects to be processed (if
                 // applicable)
-                var error = String.format("Exception for subjectId: %s, Message: %s", subjectId, e.getMessage());
+                var error = "Exception for subjectId: %s, Message: %s".formatted(subjectId, e.getMessage());
                 // Capture error for MeasureReportBuilder
                 measureDef.addError(error);
                 logger.error(error, e);
@@ -226,12 +226,8 @@ public class MeasureProcessorUtils {
         final Object startAsObject = interval.getStart();
         final Object endAsObject = interval.getEnd();
 
-        if (startAsObject instanceof DateTime && endAsObject instanceof DateTime) {
-            return new Interval(
-                    cloneDateTimeWithUtc((DateTime) startAsObject),
-                    true,
-                    cloneDateTimeWithUtc((DateTime) endAsObject),
-                    true);
+        if (startAsObject instanceof DateTime time && endAsObject instanceof DateTime time1) {
+            return new Interval(cloneDateTimeWithUtc(time), true, cloneDateTimeWithUtc(time1), true);
         }
 
         // Give up and just return the original Interval
@@ -268,9 +264,9 @@ public class MeasureProcessorUtils {
                     interval.getHighClosed());
         }
 
-        throw new InvalidRequestException(String.format(
-                "The interval type of %s did not match the expected type of %s and no conversion was possible for MeasureDef: %s.",
-                sourceType, targetType, measureDef.url()));
+        throw new InvalidRequestException(
+                "The interval type of %s did not match the expected type of %s and no conversion was possible for MeasureDef: %s."
+                        .formatted(sourceType, targetType, measureDef.url()));
     }
 
     public Date truncateDateTime(DateTime dateTime) {
@@ -317,8 +313,8 @@ public class MeasureProcessorUtils {
                 criteriaExpression, context.getState().getCurrentLibrary());
 
         if (!(ed instanceof FunctionDef)) {
-            throw new InvalidRequestException(String.format(
-                    "Measure observation %s does not reference a function definition", criteriaExpression));
+            throw new InvalidRequestException(
+                    "Measure observation %s does not reference a function definition".formatted(criteriaExpression));
         }
 
         Object result;
@@ -378,7 +374,7 @@ public class MeasureProcessorUtils {
             } catch (Exception e) {
                 // Catch Exceptions from evaluation per subject, but allow rest of subjects to be processed (if
                 // applicable)
-                var error = String.format("Exception for subjectId: %s, Message: %s", subjectId, e.getMessage());
+                var error = "Exception for subjectId: %s, Message: %s".formatted(subjectId, e.getMessage());
                 // Capture error for MeasureReportBuilder
                 measureDef.addError(error);
                 logger.error(error, e);
@@ -393,9 +389,9 @@ public class MeasureProcessorUtils {
             String[] subjectIdParts = subjectId.split("/");
             return Pair.of(subjectIdParts[0], subjectIdParts[1]);
         } else {
-            throw new InvalidRequestException(String.format(
-                    "Unable to determine Subject type for id: %s. SubjectIds must be in the format {subjectType}/{subjectId} (e.g. Patient/123)",
-                    subjectId));
+            throw new InvalidRequestException(
+                    "Unable to determine Subject type for id: %s. SubjectIds must be in the format {subjectType}/{subjectId} (e.g. Patient/123)"
+                            .formatted(subjectId));
         }
     }
 

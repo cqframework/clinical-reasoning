@@ -109,10 +109,10 @@ class MeasureOperationProviderIT extends BaseCrR4TestServer {
                                 && x.getCode().getCoding().get(0).getCode().equals(populationName))
                         .findFirst();
         assertThat(population)
-                .as(String.format("population \"%s\" not found in report", populationName))
+                .as("population \"%s\" not found in report".formatted(populationName))
                 .isPresent();
         assertThat(population.get().getCount())
-                .as(String.format("expected count for population \"%s\" did not match", populationName))
+                .as("expected count for population \"%s\" did not match".formatted(populationName))
                 .isEqualTo(expectedCount);
     }
 }

@@ -17,7 +17,7 @@ public interface IRequestResolverFactory {
                 return new org.opencds.cqf.fhir.cr.activitydefinition.apply.resolvers.R5ResolverFactory();
             default:
                 throw new IllegalArgumentException(
-                        String.format("No default resolver factory exists for FHIR version: %s", fhirVersion));
+                        "No default resolver factory exists for FHIR version: %s".formatted(fhirVersion));
         }
     }
 }

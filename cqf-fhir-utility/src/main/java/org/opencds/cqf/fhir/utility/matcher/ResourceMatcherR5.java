@@ -39,8 +39,8 @@ public class ResourceMatcherR5 implements ResourceMatcher {
 
     @Override
     public DateRangeParam getDateRange(ICompositeType type) {
-        if (type instanceof Period) {
-            return new DateRangeParam(((Period) type).getStart(), ((Period) type).getEnd());
+        if (type instanceof Period period) {
+            return new DateRangeParam(period.getStart(), period.getEnd());
         } else if (type instanceof Timing) {
             throw new NotImplementedException("Timing resolution has not yet been implemented");
         } else {
@@ -52,17 +52,14 @@ public class ResourceMatcherR5 implements ResourceMatcher {
     @Override
     public List<TokenParam> getCodes(IBase codeElement) {
         List<TokenParam> resolvedCodes = new ArrayList<>();
-        if (codeElement instanceof Coding) {
-            var c = (Coding) codeElement;
+        if (codeElement instanceof Coding c) {
             resolvedCodes.add(new TokenParam(c.getSystem(), c.getCode()));
-        } else if (codeElement instanceof CodeType) {
-            var c = (CodeType) codeElement;
+        } else if (codeElement instanceof CodeType c) {
             resolvedCodes.add(new TokenParam(c.getValue()));
-        } else if (codeElement instanceof CodeableConcept) {
-            resolvedCodes = ((CodeableConcept) codeElement)
-                    .getCoding().stream()
-                            .map(code -> new TokenParam(code.getSystem(), code.getCode()))
-                            .collect(Collectors.toList());
+        } else if (codeElement instanceof CodeableConcept concept) {
+            resolvedCodes = concept.getCoding().stream()
+                    .map(code -> new TokenParam(code.getSystem(), code.getCode()))
+                    .collect(Collectors.toList());
         }
 
         return resolvedCodes;

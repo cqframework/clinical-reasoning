@@ -541,7 +541,7 @@ public class ValueSets {
             IBase expansion, IFhirPath fhirPath, String filterExpression) {
         // String expression = "expansion.parameter";
         // if (filterExpression != null) { expression = expression + filterExpression; }
-        String expression = String.format("parameter%s", filterExpression);
+        String expression = "parameter%s".formatted(filterExpression);
         // String expression = (filterExpression == null) ? "expansion.parameter" :
         // "expansion.parameter" + filterExpression;
         return fhirPath.evaluate(expansion, expression, IBase.class);

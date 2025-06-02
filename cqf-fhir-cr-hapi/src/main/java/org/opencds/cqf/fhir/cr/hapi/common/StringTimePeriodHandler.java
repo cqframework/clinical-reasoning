@@ -165,8 +165,8 @@ public class StringTimePeriodHandler {
                 .orElseThrow(() -> {
                     ourLog.warn("Period {}: {} has an unsupported format", isStart ? "start" : "end", period);
 
-                    return new InvalidRequestException(String.format(
-                            "Period %s: %s has an unsupported format", isStart ? "start" : "end", period));
+                    return new InvalidRequestException(
+                            "Period %s: %s has an unsupported format".formatted(isStart ? "start" : "end", period));
                 });
     }
 
@@ -178,7 +178,7 @@ public class StringTimePeriodHandler {
             ourLog.warn("Unsupported Date/Time format for input: {}", inputDateTimeString);
 
             throw new InvalidRequestException(
-                    String.format("Unsupported Date/Time format for input: %s", inputDateTimeString));
+                    "Unsupported Date/Time format for input: %s".formatted(inputDateTimeString));
         }
 
         return dateTimeFormatter;
@@ -193,7 +193,7 @@ public class StringTimePeriodHandler {
             } catch (Exception exception) {
                 ourLog.warn("Invalid value for Timezone header: {}", clientTimezoneString);
                 throw new InvalidRequestException(
-                        String.format("Invalid value for Timezone header: %s", clientTimezoneString));
+                        "Invalid value for Timezone header: %s".formatted(clientTimezoneString));
             }
         }
 

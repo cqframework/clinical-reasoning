@@ -3,7 +3,7 @@ package org.opencds.cqf.fhir.cr.activitydefinition;
 import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.fhir.api.Repository;
@@ -33,7 +33,7 @@ public class RequestResourceResolver {
 
         public Given repositoryFor(FhirContext fhirContext, String repositoryPath) {
             this.repository = new IgRepository(
-                    fhirContext, Paths.get(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
+                    fhirContext, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
             this.resolverFactory =
                     IRequestResolverFactory.getDefault(fhirContext.getVersion().getVersion());
             return this;

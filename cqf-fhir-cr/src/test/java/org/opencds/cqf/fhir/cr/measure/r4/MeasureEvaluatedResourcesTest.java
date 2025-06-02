@@ -3,7 +3,7 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Period;
 import org.junit.jupiter.api.BeforeAll;
@@ -26,7 +26,7 @@ class MeasureEvaluatedResourcesTest {
     private static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/measure/r4";
     private static final Repository repository = new IgRepository(
             FhirContext.forR4Cached(),
-            Paths.get(getResourcePath(MeasureEvaluatedResourcesTest.class) + "/" + CLASS_PATH + "/" + "MeasureTest"));
+            Path.of(getResourcePath(MeasureEvaluatedResourcesTest.class) + "/" + CLASS_PATH + "/" + "MeasureTest"));
     private final Given given = Measure.given().repository(repository);
     private static final TestDataGenerator testDataGenerator = new TestDataGenerator(repository);
 

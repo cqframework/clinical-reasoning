@@ -11,7 +11,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -30,7 +30,7 @@ public class TestQuestionnaireResponse {
     public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/shared";
 
     public static InputStream open(String asset) {
-        var path = Paths.get(getResourcePath(TestQuestionnaireResponse.class) + "/" + CLASS_PATH + "/" + asset);
+        var path = Path.of(getResourcePath(TestQuestionnaireResponse.class) + "/" + CLASS_PATH + "/" + asset);
         var file = path.toFile();
         try {
             return new FileInputStream(file);
@@ -62,7 +62,7 @@ public class TestQuestionnaireResponse {
 
         public Given repositoryFor(FhirContext fhirContext, String repositoryPath) {
             this.repository = new IgRepository(
-                    fhirContext, Paths.get(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
+                    fhirContext, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
             return this;
         }
 

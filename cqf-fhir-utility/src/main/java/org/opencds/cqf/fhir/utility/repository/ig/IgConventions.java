@@ -161,7 +161,7 @@ public final class IgConventions {
                 return false;
             }
 
-            return contents.toUpperCase().contains(String.format("\"RESOURCETYPE\": \"%s\"", claimedFhirType.name()));
+            return contents.toUpperCase().contains("\"RESOURCETYPE\": \"%s\"".formatted(claimedFhirType.name()));
         } catch (IOException e) {
             return false;
         }
@@ -205,8 +205,7 @@ public final class IgConventions {
 
     @Override
     public String toString() {
-        return String.format(
-                "IGConventions [typeLayout=%s, categoryLayout=%s, filenameMode=%s]",
-                typeLayout, categoryLayout, filenameMode);
+        return "IGConventions [typeLayout=%s, categoryLayout=%s, filenameMode=%s]"
+                .formatted(typeLayout, categoryLayout, filenameMode);
     }
 }

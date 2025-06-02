@@ -29,8 +29,8 @@ public class SearchHelper {
         var searchParams = version == null ? Searches.byUrl(url) : Searches.byUrlAndVersion(url, version);
         var searchResult = repository.search(Bundle.class, resourceType, searchParams);
         if (!searchResult.hasEntry()) {
-            throw new FHIRException(String.format(
-                    "No resource of type %s found for url: %s|%s", resourceType.getSimpleName(), url, version));
+            throw new FHIRException("No resource of type %s found for url: %s|%s"
+                    .formatted(resourceType.getSimpleName(), url, version));
         }
 
         return searchResult.getEntryFirstRep().getResource();

@@ -139,15 +139,13 @@ public class ApplyProcessor implements IApplyProcessor {
                                 "version",
                                 stringTypeForVersion(
                                         request.getFhirVersion(),
-                                        version.concat(
-                                                String.format("-%s-%s", subject, formatter.format(new Date())))));
+                                        version.concat("-%s-%s".formatted(subject, formatter.format(new Date())))));
             }
             request.setQuestionnaire(questionnaire);
             request.addCqlLibraryExtension();
         } else {
-            request.logException(String.format(
-                    "PlanDefinition %s is missing a canonical url.",
-                    request.getPlanDefinition().getIdElement().getValue()));
+            request.logException("PlanDefinition %s is missing a canonical url."
+                    .formatted(request.getPlanDefinition().getIdElement().getValue()));
         }
         extractQuestionnaireResponse(request);
     }
@@ -176,9 +174,8 @@ public class ApplyProcessor implements IApplyProcessor {
                         // request.getExtractedResources().add(getEntryResource(request.getFhirVersion(), entry))
                     }
                 } catch (Exception e) {
-                    request.logException(String.format(
-                            "Error encountered extracting %s: %s",
-                            questionnaireResponse.getIdElement().getIdPart(), e.getMessage()));
+                    request.logException("Error encountered extracting %s: %s"
+                            .formatted(questionnaireResponse.getIdElement().getIdPart(), e.getMessage()));
                 }
             }
         }

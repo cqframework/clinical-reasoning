@@ -3,7 +3,7 @@ package org.opencds.cqf.fhir.benchmark.questionnaire;
 import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -34,7 +34,7 @@ public class TestQuestionnaire {
 
         public Given repositoryFor(FhirContext fhirContext, String repositoryPath) {
             this.repository = new IgRepository(
-                    fhirContext, Paths.get(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
+                    fhirContext, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
             return this;
         }
 

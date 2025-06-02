@@ -102,7 +102,7 @@ public class R4RepositorySubjectProvider implements SubjectProvider {
             } else if (subjectId.startsWith("Organization")) {
                 subjects.addAll(getOrganizationSubjectIds(subjectId, repository));
             } else {
-                throw new IllegalArgumentException(String.format("Unsupported subjectId: %s", subjectIds));
+                throw new IllegalArgumentException("Unsupported subjectId: %s".formatted(subjectIds));
             }
         });
 

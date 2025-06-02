@@ -83,6 +83,14 @@ public class ResourceMatcherR4 implements ResourceMatcher {
         if (pathResult instanceof IIdType id) {
             return param.getValue().equals(id.getIdPart());
         }
+
+        // [parameter]=[code]: the value of [code] matches a Coding.code or Identifier.value irrespective of the
+        // value of the system property
+        // [parameter]=[system]|[code]: the value of [code] matches a Coding.code or Identifier.value, and the value
+        // of [system] matches the system property of the Identifier or Coding
+        // [parameter]=|[code]: the value of [code] matches a Coding.code or Identifier.value, and the
+        // Coding/Identifier has no system property
+        // [parameter]=[system]|: any
         if (pathResult instanceof Identifier identifier) {
             var system = identifier.getSystem();
             var value = identifier.getValue();

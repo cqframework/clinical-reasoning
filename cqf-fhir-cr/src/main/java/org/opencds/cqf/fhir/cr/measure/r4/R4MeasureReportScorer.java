@@ -156,6 +156,8 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
                         getCountFromGroupPopulation(mrgc.getPopulation(), DENOMINATOR)
                                 - getCountFromGroupPopulation(mrgc.getPopulation(), DENOMINATOR_EXCLUSION)
                                 - getCountFromGroupPopulation(mrgc.getPopulation(), DENOMINATOR_EXCEPTION));
+                // When applySetMembership=false, this value can receive strange values
+                // This should prevent scoring in certain scenarios like <0
                 if (score != null && score >=0) {
                     if (isIncreaseImprovementNotation) {
                         mrgc.setMeasureScore(new Quantity(score));

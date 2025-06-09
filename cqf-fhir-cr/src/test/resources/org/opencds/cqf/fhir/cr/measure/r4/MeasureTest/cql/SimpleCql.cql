@@ -151,3 +151,18 @@ define "Matching General Practitioner":
 
 define "Age":
     AgeInYearsAt(start of "Measurement Period")
+
+define "Date":
+    Interval[@2024-02-01T00:00:00, @2024-10-31T23:59:59]
+
+define "ip date":
+    "Date"
+
+define "den date":
+    "Date"
+
+define "num date":
+    "Date"
+
+define "exc date":
+    "Date"

@@ -30,7 +30,6 @@ import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Resource;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.cql.engine.data.SystemDataProvider;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;

@@ -36,9 +36,9 @@ import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 class QuestionnaireProcessorTests {
     private final FhirContext fhirContextR4 = FhirContext.forR4Cached();
     private final FhirContext fhirContextR5 = FhirContext.forR5Cached();
-    private final Repository repositoryR4 =
+    private final IRepository repositoryR4 =
             new IgRepository(fhirContextR4, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r4"));
-    private final Repository repositoryR5 =
+    private final IRepository repositoryR5 =
             new IgRepository(fhirContextR5, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r5"));
 
     @Test

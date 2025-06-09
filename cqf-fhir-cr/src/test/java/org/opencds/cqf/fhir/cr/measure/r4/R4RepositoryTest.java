@@ -13,6 +13,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.util.List;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -25,7 +26,7 @@ import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 class R4RepositoryTest {
 
-    Repository repository;
+    IRepository repository;
     Path path = Path.of(getResourcePath(R4RepositoryTest.class));
 
     public R4RepositoryTest() {

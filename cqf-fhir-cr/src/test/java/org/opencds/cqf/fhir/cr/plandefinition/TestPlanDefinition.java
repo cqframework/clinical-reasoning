@@ -98,7 +98,7 @@ public class TestPlanDefinition {
             return this;
         }
 
-        public PlanDefinitionProcessor buildProcessor(Repository repository) {
+        public PlanDefinitionProcessor buildProcessor(IRepository repository) {
             if (repository instanceof IgRepository igRepository) {
                 igRepository.setOperationProvider(TestOperationProvider.newProvider(repository.fhirContext()));
             }

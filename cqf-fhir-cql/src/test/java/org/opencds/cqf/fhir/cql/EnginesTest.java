@@ -265,8 +265,6 @@ class EnginesTest {
     }
 
     @Test
-    // TODO: Needs new cql engine version
-    @Disabled
     void npmProcessor() {
         var resourceDirectory = ResourceDirectoryResolver.getResourceDirectory();
         var ini = resourceDirectory.resolve("org/opencds/cqf/fhir/cql/npm/ig.ini");

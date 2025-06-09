@@ -87,7 +87,7 @@ public class TestLibrary {
             return this;
         }
 
-        public LibraryProcessor buildProcessor(Repository repository) {
+        public LibraryProcessor buildProcessor(IRepository repository) {
             if (repository instanceof IgRepository igRepository) {
                 igRepository.setOperationProvider(TestOperationProvider.newProvider(repository.fhirContext()));
             }

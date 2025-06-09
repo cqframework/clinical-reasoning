@@ -590,9 +590,9 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         try {
             // when this method is checked with a primitive value and not ResourceType it returns an error
             // this try/catch is to prevent the exception thrown from setting the correct value
-            resourceType = ResourceType.fromCode(groupDef.getPopulationBasis().code()).toString();
-        }
-        catch (FHIRException e) {
+            resourceType =
+                    ResourceType.fromCode(groupDef.getPopulationBasis().code()).toString();
+        } catch (FHIRException e) {
             resourceType = null;
         }
         // only ResourceType fhirType should return true here

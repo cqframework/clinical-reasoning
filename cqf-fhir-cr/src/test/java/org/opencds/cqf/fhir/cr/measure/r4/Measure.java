@@ -108,8 +108,12 @@ public class Measure {
         }
     }
 
+    public static Given given(@Nullable Boolean applyScoringSetMembership) {
+        return new Given(applyScoringSetMembership);
+    }
+
     public static Given given() {
-        return new Given();
+        return new Given(true);
     }
 
     public static class Given {
@@ -118,8 +122,16 @@ public class Measure {
         private final MeasurePeriodValidator measurePeriodValidator;
         private final R4MeasureServiceUtils measureServiceUtils;
 
-        public Given() {
+        public Given(@Nullable Boolean applyScoringSetMembership) {
             this.evaluationOptions = MeasureEvaluationOptions.defaultOptions();
+            if (applyScoringSetMembership != null && !applyScoringSetMembership) {
+                MeasureEvaluationOptions options = MeasureEvaluationOptions.defaultOptions();
+                options.setApplyScoringSetMembership(false);
+                this.evaluationOptions = options;
+            } else {
+                this.evaluationOptions = MeasureEvaluationOptions.defaultOptions();
+            }
+
             this.evaluationOptions
                     .getEvaluationSettings()
                     .getRetrieveSettings()
@@ -803,6 +815,11 @@ public class Measure {
 
         public SelectedGroup hasScore(String score) {
             MeasureValidationUtils.validateGroupScore(this.value(), score);
+            return this;
+        }
+
+        public SelectedGroup hasMeasureScore(boolean hasScore) {
+            assertEquals(hasScore, this.value().hasMeasureScore());
             return this;
         }
 

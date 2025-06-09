@@ -34,6 +34,7 @@ import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
 import org.opencds.cqf.fhir.utility.client.TerminologyServerClient;
 
+@SuppressWarnings({"unchecked", "UnstableApiUsage"})
 class ExpandHelperTest {
     private final IAdapterFactory factory = IAdapterFactory.forFhirVersion(FhirVersionEnum.R4);
     // we need to test that when expanding a grouper, we actually add child codes to the expansion.contains
@@ -148,7 +149,6 @@ class ExpandHelperTest {
         assertNotNull(childExpParams.getParameter(TerminologyServerClient.urlParamName));
         // leaf is expanded with Leaf url not Grouper url
 
-        @SuppressWarnings("unchecked")
         var url = ((IPrimitiveType<String>)
                         (childExpParams.getParameter(TerminologyServerClient.urlParamName)).getValue())
                 .getValue();

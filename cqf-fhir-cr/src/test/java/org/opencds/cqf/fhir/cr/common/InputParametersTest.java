@@ -37,6 +37,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.Ids;
 
+@SuppressWarnings({"unchecked", "UnstableApiUsage"})
 @ExtendWith(MockitoExtension.class)
 class InputParametersTest {
     private final FhirContext fhirContextDstu3 = FhirContext.forDstu3Cached();

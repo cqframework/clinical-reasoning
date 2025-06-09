@@ -71,6 +71,7 @@ class RepositoryTerminologyProviderTest {
         return mockRepositoryWithValueSet(vs);
     }
 
+    @SuppressWarnings("unchecked")
     IRepository mockRepositoryWithValueSet(ValueSet valueSet) {
         var mockRepository = mock(IRepository.class);
         when(mockRepository.fhirContext()).thenReturn(FhirContext.forR4Cached());

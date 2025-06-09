@@ -56,7 +56,7 @@ public class PartitionHelper implements BeforeEachCallback, AfterEachCallback {
                 ourLog.info("useful breakpoint :-)");
             }
             assertNotNull(requestDetails);
-            return RequestPartitionId.defaultPartition();
+            return RequestPartitionId.fromPartitionId(null);
         }
 
         public void clear() {
@@ -69,7 +69,7 @@ public class PartitionHelper implements BeforeEachCallback, AfterEachCallback {
 
         @Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE)
         RequestPartitionId partitionIdentifyCreate(RequestDetails requestDetails) {
-            return RequestPartitionId.defaultPartition();
+            return RequestPartitionId.fromPartitionId(null);
         }
     }
 }

@@ -13,7 +13,8 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class SearchHelperTest {
+@SuppressWarnings({"unchecked", "UnstableApiUsage"})
+class SearchHelperTest {
     private IRepository r4mockRepository;
     private IRepository r5mockRepository;
     private IRepository dstu3mockRepository;

@@ -135,7 +135,12 @@ public class MeasureEvaluator {
             }
         }
 
-        return (Iterable<Object>) expressionResult.value();
+        Object value = expressionResult.value();
+        if (value instanceof Iterable<?>) {
+            return (Iterable<Object>) value;
+        } else {
+            return Collections.singletonList(value);
+        }
     }
 
     protected PopulationDef evaluatePopulationMembership(
@@ -187,8 +192,7 @@ public class MeasureEvaluator {
         // Evaluate Population Expressions
         initialPopulation = evaluatePopulationMembership(subjectType, subjectId, initialPopulation, evaluationResult);
         denominator = evaluatePopulationMembership(subjectType, subjectId, denominator, evaluationResult);
-        numerator = evaluatePopulationMembership(subjectType, subjectId, numerator,
-            evaluationResult);
+        numerator = evaluatePopulationMembership(subjectType, subjectId, numerator, evaluationResult);
         if (applyScoring) {
             // remove denominator values not in IP
             denominator.getResources().retainAll(initialPopulation.getResources());
@@ -200,18 +204,15 @@ public class MeasureEvaluator {
         // Evaluate Exclusions and Exception Populations
         if (denominatorExclusion != null) {
             denominatorExclusion =
-                evaluatePopulationMembership(subjectType, subjectId, denominatorExclusion,
-                    evaluationResult);
+                    evaluatePopulationMembership(subjectType, subjectId, denominatorExclusion, evaluationResult);
         }
         if (denominatorException != null) {
             denominatorException =
-                evaluatePopulationMembership(subjectType, subjectId, denominatorException,
-                    evaluationResult);
+                    evaluatePopulationMembership(subjectType, subjectId, denominatorException, evaluationResult);
         }
         if (numeratorExclusion != null) {
             numeratorExclusion =
-                evaluatePopulationMembership(subjectType, subjectId, numeratorExclusion,
-                    evaluationResult);
+                    evaluatePopulationMembership(subjectType, subjectId, numeratorExclusion, evaluationResult);
         }
         // Apply Exclusions and Exceptions
         if (groupDef.isBooleanBasis()) {

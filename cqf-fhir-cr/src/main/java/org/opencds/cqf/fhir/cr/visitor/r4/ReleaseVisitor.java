@@ -170,9 +170,9 @@ public class ReleaseVisitor {
         if (effectiveDataRequirementsExt.isPresent()) {
             Library effectiveDataRequirementsLib = null;
             if (effectiveDataRequirementsExt.get().getValue() instanceof Reference ref) {
-                effectiveDataRequirementsLib = (Library) measure.getContained("#" + ref.getReference());
+                effectiveDataRequirementsLib = (Library) measure.getContained(ref.getReference());
             } else if (effectiveDataRequirementsExt.get().getValue() instanceof CanonicalType canonicalType) {
-                effectiveDataRequirementsLib = (Library) measure.getContained("#" + canonicalType.asStringValue());
+                effectiveDataRequirementsLib = (Library) measure.getContained(canonicalType.asStringValue());
             }
 
             if (effectiveDataRequirementsLib != null) {

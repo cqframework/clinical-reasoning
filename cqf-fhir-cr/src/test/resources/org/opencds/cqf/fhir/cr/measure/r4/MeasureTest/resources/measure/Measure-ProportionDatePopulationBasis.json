@@ -87,6 +87,22 @@
             "expression": "num date"
           }
         }
+      ],
+      "stratifier": [
+        {
+          "id": "stratifier-1",
+          "criteria": {
+            "language": "text/cql.identifier",
+            "expression": "boolean strat not finished"
+          }
+        },
+        {
+          "id": "stratifier-2",
+          "criteria": {
+            "language": "text/cql.identifier",
+            "expression": "Gender Stratification"
+          }
+        }
       ]
     }
   ]

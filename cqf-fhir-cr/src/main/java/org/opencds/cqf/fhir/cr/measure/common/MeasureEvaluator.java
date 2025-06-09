@@ -187,7 +187,7 @@ public class MeasureEvaluator {
 
         initialPopulation = evaluatePopulationMembership(subjectType, subjectId, initialPopulation, evaluationResult);
 
-        if (initialPopulation.getSubjects().contains(subjectId)) {
+        //if (initialPopulation.getSubjects().contains(subjectId)) {
             // Evaluate Population Expressions
             denominator = evaluatePopulationMembership(subjectType, subjectId, denominator, evaluationResult);
             numerator = evaluatePopulationMembership(subjectType, subjectId, numerator, evaluationResult);
@@ -272,7 +272,7 @@ public class MeasureEvaluator {
                 var doc = evaluateDateOfCompliance(dateOfCompliance, evaluationResult);
                 dateOfCompliance.addResource(doc);
             }
-        }
+        //}
     }
 
     protected void evaluateContinuousVariable(

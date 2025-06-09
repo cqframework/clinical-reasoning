@@ -117,17 +117,21 @@ class HedisCliTest {
 
     @Test
     public void testOnePatient() throws Exception {
-        String measureCode = "COA";
-        var testPatientId = "patient.2024.coa.0.95635";
-        var directory = "/Users/justinmckelvy/Documents/DCSv2/";
+        String measureCode = "GSD";
+        var testPatientId = "patient.2024.gsd.0.100009";
+        var directory = "/Volumes/ExternalDrive/DCSv2/";
         var suffix = "/Sample/v0_tests/tests/Patient/";
-        var patientPath = "/Users/justinmckelvy/Documents/DCSv2/";
+        var patientPath = "/Volumes/ExternalDrive/DCSv2/";
         var cqlContentDirectory = "/Users/justinmckelvy/alphora/DCS-HEDIS-2024-v2";
         var resultsPath = patientPath + "_Results8/";
+        var measurePath = cqlContentDirectory + "/input/resources/Measure/";
+        var measureId = measureCode + "-Reporting";
+        var periodStart = "2024-01-01";
+        var periodEnd = "2024-12-31";
         String patientBundles = directory + measureCode + suffix;
 
         run(measureCode + "_Reporting",
-            patientBundles + testPatientId, 250000, cqlContentDirectory, resultsPath, null, null, null, null, testPatientId);
+            patientBundles + testPatientId, 250000, cqlContentDirectory, resultsPath, measurePath, measureId, periodStart, periodEnd, testPatientId);
 
 
 

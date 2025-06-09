@@ -23,7 +23,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -57,7 +57,7 @@ public class TestPlanDefinition {
     public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/shared";
 
     private static InputStream open(String asset) {
-        var path = Paths.get(getResourcePath(TestPlanDefinition.class) + "/" + CLASS_PATH + "/" + asset);
+        var path = Path.of(getResourcePath(TestPlanDefinition.class) + "/" + CLASS_PATH + "/" + asset);
         var file = path.toFile();
         try {
             return new FileInputStream(file);
@@ -89,7 +89,7 @@ public class TestPlanDefinition {
 
         public Given repositoryFor(FhirContext fhirContext, String repositoryPath) {
             this.repository = new IgRepository(
-                    fhirContext, Paths.get(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
+                    fhirContext, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
             return this;
         }
 
@@ -98,10 +98,9 @@ public class TestPlanDefinition {
             return this;
         }
 
-        public PlanDefinitionProcessor buildProcessor(IRepository repository) {
-            if (repository instanceof IgRepository) {
-                ((IgRepository) repository)
-                        .setOperationProvider(TestOperationProvider.newProvider(repository.fhirContext()));
+        public PlanDefinitionProcessor buildProcessor(Repository repository) {
+            if (repository instanceof IgRepository igRepository) {
+                igRepository.setOperationProvider(TestOperationProvider.newProvider(repository.fhirContext()));
             }
             if (evaluationSettings == null) {
                 evaluationSettings = EvaluationSettings.getDefault();
@@ -414,11 +413,10 @@ public class TestPlanDefinition {
         @SuppressWarnings("unchecked")
         public GeneratedBundle hasQuestionnaireResponseItemValue(String linkId, String value) {
             var answerPath = modelResolver.resolvePath(items.get(linkId), "answer");
-            var answers = answerPath instanceof List<?>
-                    ? ((List<?>) answerPath)
-                            .stream()
-                                    .map(a -> (IPrimitiveType<String>) modelResolver.resolvePath(a, "value"))
-                                    .toList()
+            var answers = answerPath instanceof List<?> l
+                    ? l.stream()
+                            .map(a -> (IPrimitiveType<String>) modelResolver.resolvePath(a, "value"))
+                            .toList()
                     : null;
             assertNotNull(answers);
             assertTrue(

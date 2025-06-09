@@ -123,7 +123,7 @@ class ProcessActionTests {
         assertTrue(oc.getIssueFirstRep()
                 .getDiagnosticsElement()
                 .getValue()
-                .contains(String.format("Condition expression %s encountered exception:", expression)));
+                .contains("Condition expression %s encountered exception:".formatted(expression)));
     }
 
     @Test

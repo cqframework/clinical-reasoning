@@ -87,9 +87,9 @@ public class ProcessAction {
                 applicabilityBehavior = CqfApplicabilityBehavior.valueOf(
                         primitiveType.getValueAsString().toUpperCase());
             } catch (IllegalArgumentException e) {
-                var message = String.format(
-                        "Encountered invalid value for applicabilityBehavior extension %s.  Expected `all` or `any`.",
-                        primitiveType.getValueAsString());
+                var message =
+                        "Encountered invalid value for applicabilityBehavior extension %s.  Expected `all` or `any`."
+                                .formatted(primitiveType.getValueAsString());
                 logger.error(message);
                 request.logException(message);
             }
@@ -135,8 +135,8 @@ public class ProcessAction {
                 }
             }
         } catch (Exception e) {
-            var message = String.format(
-                    "An error occurred while generating Questionnaire items for action input: %s", e.getMessage());
+            var message = "An error occurred while generating Questionnaire items for action input: %s"
+                    .formatted(e.getMessage());
             request.logException(message);
         }
     }
@@ -172,9 +172,8 @@ public class ProcessAction {
                             expressionProcessor.getExpressionResult(request, conditionExpression, inputParams, null);
                     result = expressionResult.isEmpty() ? null : expressionResult.get(0);
                 } catch (Exception e) {
-                    var message = String.format(
-                            "Condition expression %s encountered exception: %s",
-                            conditionExpression.getExpression(), e.getMessage());
+                    var message = "Condition expression %s encountered exception: %s"
+                            .formatted(conditionExpression.getExpression(), e.getMessage());
                     logger.error(message);
                     request.logException(message);
                 }

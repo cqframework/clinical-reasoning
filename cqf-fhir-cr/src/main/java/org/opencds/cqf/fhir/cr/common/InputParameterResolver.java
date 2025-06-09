@@ -228,7 +228,7 @@ public class InputParameterResolver implements IInputParameterResolver {
             }
 
             var parameter = adapterFactory.createParametersParameter(
-                    (IBaseBackboneElement) newPart(fhirContext(), "%" + String.format("%s", req.getId())));
+                    (IBaseBackboneElement) newPart(fhirContext(), "%" + "%s".formatted(req.getId())));
             resolveCodeFilters(req, parameter);
             params.addParameter(parameter.get());
         }

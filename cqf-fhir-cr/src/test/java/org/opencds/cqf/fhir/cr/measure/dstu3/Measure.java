@@ -6,7 +6,7 @@ import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.repository.IRepository;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -78,7 +78,7 @@ public class Measure {
         public Given repositoryFor(String repositoryPath) {
             this.repository = new IgRepository(
                     FhirContext.forDstu3Cached(),
-                    Paths.get(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
+                    Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
             return this;
         }
 
@@ -297,8 +297,8 @@ public class Measure {
             public SelectedReference<T> hasPopulations(String... population) {
                 var ex = this.reference.getExtensionsByUrl(MeasureConstants.EXT_CRITERIA_REFERENCE_URL);
                 if (ex.isEmpty()) {
-                    throw new IllegalStateException(String.format(
-                            "no evaluated resource extensions were found, and expected %s", population.length));
+                    throw new IllegalStateException("no evaluated resource extensions were found, and expected %s"
+                            .formatted(population.length));
                 }
 
                 @SuppressWarnings("unchecked")
@@ -309,9 +309,8 @@ public class Measure {
                 for (var p : population) {
                     assertTrue(
                             set.contains(p),
-                            String.format(
-                                    "population: %s was not found in the evaluated resources criteria reference extension list",
-                                    p));
+                            "population: %s was not found in the evaluated resources criteria reference extension list"
+                                    .formatted(p));
                 }
 
                 return this;

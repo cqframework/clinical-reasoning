@@ -137,7 +137,7 @@ public class R4CareGapsProcessor implements R4CareGapsProcessorInterface {
     public List<String> getSubjects(String subject) {
         var subjects = subjectProvider.getSubjects(repository, subject).collect(Collectors.toList());
         if (!subjects.isEmpty()) {
-            ourLog.info(String.format("care-gaps report requested for: %s subjects.", subjects.size()));
+            ourLog.info("care-gaps report requested for: %s subjects.".formatted(subjects.size()));
         } else {
             ourLog.info("care-gaps report requested for: 0 subjects.");
         }
@@ -152,9 +152,8 @@ public class R4CareGapsProcessor implements R4CareGapsProcessorInterface {
         // validate resource
         checkNotNull(
                 resource,
-                String.format(
-                        "The %s Resource is configured as the %s but the Resource could not be read.",
-                        careGapsProperties.getCareGapsReporter(), key));
+                "The %s Resource is configured as the %s but the Resource could not be read."
+                        .formatted(careGapsProperties.getCareGapsReporter(), key));
 
         // add resource to configured resources
         configuredResources.put(key, resource);
@@ -184,9 +183,9 @@ public class R4CareGapsProcessor implements R4CareGapsProcessorInterface {
                     && !CareGapsStatusCode.OPEN_GAP.toString().equals(status)
                     && !CareGapsStatusCode.NOT_APPLICABLE.toString().equals(status)
                     && !CareGapsStatusCode.PROSPECTIVE_GAP.toString().equals(status)) {
-                throw new InvalidRequestException(String.format(
-                        "CareGap status parameter: %s, is not an accepted value for Measure: %s",
-                        status, printEithers(measure)));
+                throw new InvalidRequestException(
+                        "CareGap status parameter: %s, is not an accepted value for Measure: %s"
+                                .formatted(status, printEithers(measure)));
             }
         }
     }
@@ -203,7 +202,7 @@ public class R4CareGapsProcessor implements R4CareGapsProcessorInterface {
 
     @Override
     public void checkMeasureBasis(Measure measure) {
-        var msg = String.format("CareGaps can't process Measure: %s, it is not Boolean basis.", measure.getIdPart());
+        var msg = "CareGaps can't process Measure: %s, it is not Boolean basis.".formatted(measure.getIdPart());
         R4MeasureDefBuilder measureDefBuilder = new R4MeasureDefBuilder();
         var measureDef = measureDefBuilder.build(measure);
 
@@ -240,9 +239,9 @@ public class R4CareGapsProcessor implements R4CareGapsProcessorInterface {
         for (MeasureScoring measureScoringType : scoringTypes) {
             if (!MeasureScoring.PROPORTION.equals(measureScoringType)
                     && !MeasureScoring.RATIO.equals(measureScoringType)) {
-                throw new InvalidRequestException(String.format(
-                        "MeasureScoring type: %s, is not an accepted Type for care-gaps service for Measure: %s",
-                        measureScoringType.getDisplay(), measure.getUrl()));
+                throw new InvalidRequestException(
+                        "MeasureScoring type: %s, is not an accepted Type for care-gaps service for Measure: %s"
+                                .formatted(measureScoringType.getDisplay(), measure.getUrl()));
             }
         }
     }

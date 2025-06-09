@@ -31,7 +31,7 @@ public class DiagnosticReportResolver extends BaseRequestResourceResolver {
         if (activityDefinition.hasCode()) {
             diagnosticReport.setCode(activityDefinition.getCode());
         } else if (!activityDefinition.hasDynamicValue()) {
-            throw new FHIRException(String.format(MISSING_CODE_PROPERTY, "DiagnosticReport"));
+            throw new FHIRException(MISSING_CODE_PROPERTY.formatted("DiagnosticReport"));
         }
 
         if (activityDefinition.hasRelatedArtifact()) {

@@ -56,14 +56,14 @@ public class ExpandRunner implements Runnable {
                 if (result.isDone() && expandedValueSet != null) {
                     return expandedValueSet;
                 } else {
-                    throw new UnprocessableEntityException(String.format(
-                            "Terminology Server expansion failed for ValueSet (%s) - Server could not process expansion requests.",
-                            valueSetUrl));
+                    throw new UnprocessableEntityException(
+                            "Terminology Server expansion failed for ValueSet (%s) - Server could not process expansion requests."
+                                    .formatted(valueSetUrl));
                 }
             } else {
-                throw new UnprocessableEntityException(String.format(
-                        "Terminology Server expansion took longer than the allotted timeout: %s",
-                        terminologyServerClientSettings.getTimeoutSeconds()));
+                throw new UnprocessableEntityException(
+                        "Terminology Server expansion took longer than the allotted timeout: %s"
+                                .formatted(terminologyServerClientSettings.getTimeoutSeconds()));
             }
         } catch (Exception e) {
             scheduler.shutdown();

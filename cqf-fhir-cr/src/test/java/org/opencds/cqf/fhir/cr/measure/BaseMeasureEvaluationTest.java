@@ -35,9 +35,8 @@ public abstract class BaseMeasureEvaluationTest {
     }
 
     public String library_header() {
-        return String.format(
-                "library Test version '1.0.0'%n%nusing FHIR version '%1$s'%ninclude FHIRHelpers version '%1$s'%n%n",
-                getFhirVersion());
+        return "library Test version '1.0.0'%n%nusing FHIR version '%1$s'%ninclude FHIRHelpers version '%1$s'%n%n"
+                .formatted(getFhirVersion());
     }
 
     public String measurement_period_date() {
@@ -75,9 +74,9 @@ public abstract class BaseMeasureEvaluationTest {
             TrackBack tb = error.getLocator();
             String lines = tb == null
                     ? "[n/a]"
-                    : String.format(
-                            "[%d:%d, %d:%d]", tb.getStartLine(), tb.getStartChar(), tb.getEndLine(), tb.getEndChar());
-            msg.append(String.format("%s %s%n", lines, error.getMessage()));
+                    : "[%d:%d, %d:%d]"
+                            .formatted(tb.getStartLine(), tb.getStartChar(), tb.getEndLine(), tb.getEndChar());
+            msg.append("%s %s%n".formatted(lines, error.getMessage()));
         }
         return msg.toString();
     }

@@ -58,8 +58,8 @@ class ParametersAdapter extends ResourceAdapter implements IParametersAdapter {
 
     @Override
     public void addParameter(String name, IBase value) {
-        if (value instanceof Type) {
-            getParameters().addParameter(addParameter().setName(name).setValue((Type) value));
+        if (value instanceof Type type) {
+            getParameters().addParameter(addParameter().setName(name).setValue(type));
         } else {
             throw new IllegalArgumentException("element passed as value argument is not a valid type");
         }
@@ -67,8 +67,8 @@ class ParametersAdapter extends ResourceAdapter implements IParametersAdapter {
 
     @Override
     public void addParameter(String name, IBaseResource resource) {
-        if (resource instanceof Resource) {
-            getParameters().addParameter().setName(name).setResource((Resource) resource);
+        if (resource instanceof Resource resource1) {
+            getParameters().addParameter().setName(name).setResource(resource1);
         } else {
             throw new IllegalArgumentException("element passed as value argument is not a valid data type");
         }
@@ -76,8 +76,8 @@ class ParametersAdapter extends ResourceAdapter implements IParametersAdapter {
 
     @Override
     public void addParameter(IBase parameter) {
-        if (parameter instanceof ParametersParameterComponent) {
-            getParameters().addParameter((ParametersParameterComponent) parameter);
+        if (parameter instanceof ParametersParameterComponent component) {
+            getParameters().addParameter(component);
         } else {
             throw new IllegalArgumentException(
                     "element passed as parameter argument is not a valid parameter component");

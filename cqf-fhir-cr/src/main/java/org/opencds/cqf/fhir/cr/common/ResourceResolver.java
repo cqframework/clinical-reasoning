@@ -63,9 +63,9 @@ public class ResourceResolver {
             throws FHIRException {
         var baseResource = resource.fold(this::resolveByUrl, this::resolveById, Function.identity());
 
-        requireNonNull(baseResource, String.format("Unable to resolve %s", resourceType));
+        requireNonNull(baseResource, "Unable to resolve %s".formatted(resourceType));
 
-        return (T) castOrThrow(baseResource, clazz, String.format(invalidResourceType, resourceType))
+        return (T) castOrThrow(baseResource, clazz, invalidResourceType.formatted(resourceType))
                 .orElse(null);
     }
 
@@ -73,9 +73,9 @@ public class ResourceResolver {
     public <T extends IBaseResource> T resolve(Either<IIdType, T> resource) {
         var baseResource = resource.fold(this::resolveById, Function.identity());
 
-        requireNonNull(baseResource, String.format("Unable to resolve %s", resourceType));
+        requireNonNull(baseResource, "Unable to resolve %s".formatted(resourceType));
 
-        return (T) castOrThrow(baseResource, clazz, String.format(invalidResourceType, resourceType))
+        return (T) castOrThrow(baseResource, clazz, invalidResourceType.formatted(resourceType))
                 .orElse(null);
     }
 }

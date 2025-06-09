@@ -4,7 +4,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.repository.IRepository;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -154,7 +153,7 @@ public class CqlCommand implements Callable<Integer> {
             case DSTU3:
                 return "3.0.2";
             default:
-                throw new IllegalArgumentException(String.format("Unsupported FHIR version %s", fhirVersion));
+                throw new IllegalArgumentException("Unsupported FHIR version %s".formatted(fhirVersion));
         }
     }
 
@@ -235,7 +234,7 @@ public class CqlCommand implements Callable<Integer> {
         }
 
         if (terminologyUrl != null) {
-            terminology = new IgRepository(fhirContext, Paths.get(terminologyUrl));
+            terminology = new IgRepository(fhirContext, Path.of(terminologyUrl));
         }
 
         return new ProxyRepository(data, null, terminology);
@@ -257,9 +256,8 @@ public class CqlCommand implements Callable<Integer> {
         }
 
         String result = "";
-        if (value instanceof Iterable) {
+        if (value instanceof Iterable<?> values) {
             result += "[";
-            Iterable<?> values = (Iterable<?>) value;
             for (Object o : values) {
                 result += (tempConvert(o) + ", ");
             }
@@ -269,17 +267,16 @@ public class CqlCommand implements Callable<Integer> {
             }
 
             result += "]";
-        } else if (value instanceof IBaseResource) {
-            IBaseResource resource = (IBaseResource) value;
+        } else if (value instanceof IBaseResource resource) {
             result = resource.fhirType()
                     + (resource.getIdElement() != null
                                     && resource.getIdElement().hasIdPart()
                             ? "(id=" + resource.getIdElement().getIdPart() + ")"
                             : "");
-        } else if (value instanceof IBase) {
-            result = ((IBase) value).fhirType();
-        } else if (value instanceof IBaseDatatype) {
-            result = ((IBaseDatatype) value).fhirType();
+        } else if (value instanceof IBase base) {
+            result = base.fhirType();
+        } else if (value instanceof IBaseDatatype datatype) {
+            result = datatype.fhirType();
         } else {
             result = value.toString();
         }

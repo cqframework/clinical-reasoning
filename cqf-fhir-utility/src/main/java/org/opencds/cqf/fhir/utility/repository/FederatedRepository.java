@@ -57,7 +57,7 @@ public class FederatedRepository implements IRepository {
         }
 
         if (result == null) {
-            throw new ResourceNotFoundException(String.format("No resource found with id: %s", id.getValue()));
+            throw new ResourceNotFoundException("No resource found with id: %s".formatted(id.getValue()));
         }
 
         return (T) result;

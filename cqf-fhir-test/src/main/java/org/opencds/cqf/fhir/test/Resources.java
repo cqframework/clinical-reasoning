@@ -10,7 +10,6 @@ import java.nio.file.FileSystems;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
@@ -123,7 +122,7 @@ public class Resources {
         public static PathReference getPath(final URI resPath) throws IOException {
             try {
                 // first try getting a path via existing file systems
-                return new PathReference(Paths.get(resPath), null);
+                return new PathReference(Path.of(resPath), null);
             } catch (final FileSystemNotFoundException e) {
                 /*
                  * not directly on file system, so then it's somewhere else (e.g.: JAR)

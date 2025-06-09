@@ -35,9 +35,8 @@ public class TaskResolver extends BaseRequestResourceResolver {
                     .getExtensionsByUrl(TARGET_STATUS_URL)
                     .get(0)
                     .getValue();
-            if (value instanceof StringType) {
-                task.setStatus(Task.TaskStatus.valueOf(
-                        ((StringType) value).asStringValue().toUpperCase()));
+            if (value instanceof StringType type) {
+                task.setStatus(Task.TaskStatus.valueOf(type.asStringValue().toUpperCase()));
             } else {
                 logger.debug(
                         "Extension {} should have a value of type {}", TARGET_STATUS_URL, StringType.class.getName());

@@ -18,7 +18,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -46,7 +46,7 @@ public class TestLibrary {
     public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/shared";
 
     private static InputStream open(String asset) {
-        var path = Paths.get(getResourcePath(TestLibrary.class) + "/" + CLASS_PATH + "/" + asset);
+        var path = Path.of(getResourcePath(TestLibrary.class) + "/" + CLASS_PATH + "/" + asset);
         var file = path.toFile();
         try {
             return new FileInputStream(file);
@@ -78,7 +78,7 @@ public class TestLibrary {
 
         public Given repositoryFor(FhirContext fhirContext, String repositoryPath) {
             this.repository = new IgRepository(
-                    fhirContext, Paths.get(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
+                    fhirContext, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
             return this;
         }
 
@@ -87,10 +87,9 @@ public class TestLibrary {
             return this;
         }
 
-        public LibraryProcessor buildProcessor(IRepository repository) {
-            if (repository instanceof IgRepository) {
-                ((IgRepository) repository)
-                        .setOperationProvider(TestOperationProvider.newProvider(repository.fhirContext()));
+        public LibraryProcessor buildProcessor(Repository repository) {
+            if (repository instanceof IgRepository igRepository) {
+                igRepository.setOperationProvider(TestOperationProvider.newProvider(repository.fhirContext()));
             }
             if (evaluationSettings == null) {
                 evaluationSettings = EvaluationSettings.getDefault();

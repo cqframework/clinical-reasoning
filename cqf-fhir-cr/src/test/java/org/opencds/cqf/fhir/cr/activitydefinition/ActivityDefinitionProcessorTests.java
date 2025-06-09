@@ -12,7 +12,7 @@ import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.repository.IRepository;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import org.hl7.fhir.dstu3.model.ProcedureRequest;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -54,8 +54,7 @@ class ActivityDefinitionProcessorTests {
 
     private IRepository createRepository(FhirContext fhirContext, String version) {
         return new IgRepository(
-                fhirContext,
-                Paths.get(getResourcePath(this.getClass()) + "/org/opencds/cqf/fhir/cr/shared/" + version));
+                fhirContext, Path.of(getResourcePath(this.getClass()) + "/org/opencds/cqf/fhir/cr/shared/" + version));
     }
 
     private ActivityDefinitionProcessor createProcessor(IRepository repository) {

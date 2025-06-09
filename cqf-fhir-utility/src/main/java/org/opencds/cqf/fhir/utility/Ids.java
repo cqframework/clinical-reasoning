@@ -24,7 +24,7 @@ public class Ids {
     public static String ensureIdType(String id, String resourceType) {
         checkNotNull(id);
         checkNotNull(resourceType);
-        return id.contains("/") ? id : String.format("%s/%s", resourceType, id);
+        return id.contains("/") ? id : "%s/%s".formatted(resourceType, id);
     }
 
     /**
@@ -228,8 +228,8 @@ public class Ids {
             case R5:
                 return (IdType) new org.hl7.fhir.r5.model.IdType(id);
             default:
-                throw new IllegalArgumentException(String.format(
-                        "newId does not support FHIR version %s", fhirVersionEnum.getFhirVersionString()));
+                throw new IllegalArgumentException(
+                        "newId does not support FHIR version %s".formatted(fhirVersionEnum.getFhirVersionString()));
         }
     }
 }

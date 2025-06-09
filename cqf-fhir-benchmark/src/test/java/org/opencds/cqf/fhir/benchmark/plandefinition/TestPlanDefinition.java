@@ -23,7 +23,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -70,7 +70,7 @@ public class TestPlanDefinition {
     }
 
     private static InputStream open(String asset) {
-        var path = Paths.get(String.format("%s/%s/%s", getResourcePath(TestPlanDefinition.class), CLASS_PATH, asset));
+        var path = Path.of("%s/%s/%s".formatted(getResourcePath(TestPlanDefinition.class), CLASS_PATH, asset));
         var file = path.toFile();
         try {
             return new FileInputStream(file);
@@ -110,7 +110,7 @@ public class TestPlanDefinition {
         public Given repositoryFor(FhirContext fhirContext, String repositoryPath) {
             this.repository = new IgRepository(
                     fhirContext,
-                    Paths.get(String.format("%s/%s/%s", getResourcePath(this.getClass()), CLASS_PATH, repositoryPath)));
+                    Path.of("%s/%s/%s".formatted(getResourcePath(this.getClass()), CLASS_PATH, repositoryPath)));
             return this;
         }
 
@@ -433,11 +433,10 @@ public class TestPlanDefinition {
         @SuppressWarnings({"unchecked", "squid:S2259"})
         public GeneratedBundle hasQuestionnaireResponseItemValue(String linkId, String value) {
             var answerPath = modelResolver.resolvePath(items.get(linkId), "answer");
-            var answers = answerPath instanceof List<?>
-                    ? ((List<?>) answerPath)
-                            .stream()
-                                    .map(a -> (IPrimitiveType<String>) modelResolver.resolvePath(a, "value"))
-                                    .toList()
+            var answers = answerPath instanceof List<?> l
+                    ? l.stream()
+                            .map(a -> (IPrimitiveType<String>) modelResolver.resolvePath(a, "value"))
+                            .toList()
                     : null;
             assertNotNull(answers);
             assertTrue(

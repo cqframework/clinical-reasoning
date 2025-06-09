@@ -270,8 +270,7 @@ public class Either<L, R> {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof Either<?, ?>) {
-            Either<?, ?> other = (Either<?, ?>) obj;
+        if (obj instanceof Either<?, ?> other) {
             return (this.left == other.left && this.right == other.right)
                     || (this.left != null && other.left != null && this.left.equals(other.left))
                     || (this.right != null && other.right != null && this.right.equals(other.right));

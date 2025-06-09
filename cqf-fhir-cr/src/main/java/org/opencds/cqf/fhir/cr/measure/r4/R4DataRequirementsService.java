@@ -159,8 +159,7 @@ public class R4DataRequirementsService {
         try {
             translator = CqlTranslator.fromStream(cqlStream, libraryManager);
         } catch (IOException e) {
-            throw new IllegalArgumentException(
-                    String.format("Errors occurred translating library: %s", e.getMessage()));
+            throw new IllegalArgumentException("Errors occurred translating library: %s".formatted(e.getMessage()));
         }
 
         return translator;
@@ -484,13 +483,13 @@ public class R4DataRequirementsService {
     private static SubjectContext getContextForSubject(Type subject) {
         String contextType = "Patient";
 
-        if (subject instanceof CodeableConcept) {
-            for (Coding c : ((CodeableConcept) subject).getCoding()) {
+        if (subject instanceof CodeableConcept concept) {
+            for (Coding c : concept.getCoding()) {
                 if ("http://hl7.org/fhir/resource-types".equals(c.getSystem())) {
                     contextType = c.getCode();
                 }
             }
         }
-        return new SubjectContext(contextType, String.format("{{context.%sId}}", contextType.toLowerCase()));
+        return new SubjectContext(contextType, "{{context.%sId}}".formatted(contextType.toLowerCase()));
     }
 }

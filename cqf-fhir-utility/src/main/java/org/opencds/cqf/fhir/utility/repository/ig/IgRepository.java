@@ -353,10 +353,9 @@ public class IgRepository implements IRepository {
         } catch (FileNotFoundException e) {
             return Optional.empty();
         } catch (DataFormatException e) {
-            throw new ResourceNotFoundException(String.format("Found empty or invalid content at path %s", path));
+            throw new ResourceNotFoundException("Found empty or invalid content at path %s".formatted(path));
         } catch (IOException e) {
-            throw new UnclassifiedServerFailureException(
-                    500, String.format("Unable to read resource from path %s", path));
+            throw new UnclassifiedServerFailureException(500, "Unable to read resource from path %s".formatted(path));
         }
     }
 
@@ -391,8 +390,7 @@ public class IgRepository implements IRepository {
                 this.resourceCache.put(path, Optional.of(resource));
             }
         } catch (IOException | SecurityException e) {
-            throw new UnclassifiedServerFailureException(
-                    500, String.format("Unable to write resource to path %s", path));
+            throw new UnclassifiedServerFailureException(500, "Unable to write resource to path %s".formatted(path));
         }
     }
 
@@ -466,8 +464,7 @@ public class IgRepository implements IRepository {
             paths.filter(resourceFileFilter)
                     .sorted()
                     .map(this::cachedReadResource)
-                    .filter(Optional::isPresent)
-                    .map(Optional::get)
+                    .flatMap(Optional::stream)
                     .forEach(r -> {
                         if (!r.fhirType().equals(resourceClass.getSimpleName())) {
                             return;
@@ -478,8 +475,7 @@ public class IgRepository implements IRepository {
                     });
 
         } catch (IOException e) {
-            throw new UnclassifiedServerFailureException(
-                    500, String.format("Unable to read resources from path: %s", path));
+            throw new UnclassifiedServerFailureException(500, "Unable to read resources from path: %s".formatted(path));
         }
 
         return resources;
@@ -576,28 +572,34 @@ public class IgRepository implements IRepository {
         var path = (Path) resource.getUserData(SOURCE_PATH_TAG);
 
         if (!resourceType.getSimpleName().equals(resource.fhirType())) {
-            throw new ResourceNotFoundException(String.format(
-                    "Expected to find a resource with type: %s at path: %s. Found resource with type %s instead.",
-                    resourceType.getSimpleName(), path, resource.fhirType()));
+            throw new ResourceNotFoundException(
+                    "Expected to find a resource with type: %s at path: %s. Found resource with type %s instead."
+                            .formatted(resourceType.getSimpleName(), path, resource.fhirType()));
         }
 
         if (!resource.getIdElement().hasIdPart()) {
-            throw new ResourceNotFoundException(String.format(
-                    "Expected to find a resource with id: %s at path: %s. Found resource without an id instead.",
-                    id.toUnqualifiedVersionless(), path));
+            throw new ResourceNotFoundException(
+                    "Expected to find a resource with id: %s at path: %s. Found resource without an id instead."
+                            .formatted(id.toUnqualifiedVersionless(), path));
         }
 
         if (!id.getIdPart().equals(resource.getIdElement().getIdPart())) {
-            throw new ResourceNotFoundException(String.format(
-                    "Expected to find a resource with id: %s at path: %s. Found resource with an id %s instead.",
-                    id.getIdPart(), path, resource.getIdElement().getIdPart()));
+            throw new ResourceNotFoundException(
+                    "Expected to find a resource with id: %s at path: %s. Found resource with an id %s instead."
+                            .formatted(
+                                    id.getIdPart(),
+                                    path,
+                                    resource.getIdElement().getIdPart()));
         }
 
         if (id.hasVersionIdPart()
                 && !id.getVersionIdPart().equals(resource.getIdElement().getVersionIdPart())) {
-            throw new ResourceNotFoundException(String.format(
-                    "Expected to find a resource with version: %s at path: %s. Found resource with version %s instead.",
-                    id.getVersionIdPart(), path, resource.getIdElement().getVersionIdPart()));
+            throw new ResourceNotFoundException(
+                    "Expected to find a resource with version: %s at path: %s. Found resource with version %s instead."
+                            .formatted(
+                                    id.getVersionIdPart(),
+                                    path,
+                                    resource.getIdElement().getVersionIdPart()));
         }
 
         return resourceType.cast(resource);
@@ -635,9 +637,9 @@ public class IgRepository implements IRepository {
         }
 
         if (isExternalPath(actual)) {
-            throw new ForbiddenOperationException(String.format(
-                    "Unable to create or update: %s. Resource is marked as external, and external resources are read-only.",
-                    resource.getIdElement().toUnqualifiedVersionless()));
+            throw new ForbiddenOperationException(
+                    "Unable to create or update: %s. Resource is marked as external, and external resources are read-only."
+                            .formatted(resource.getIdElement().toUnqualifiedVersionless()));
         }
 
         // If the preferred path and the actual path are different, and the encoding
@@ -648,8 +650,7 @@ public class IgRepository implements IRepository {
             try {
                 Files.deleteIfExists(actual);
             } catch (IOException e) {
-                throw new UnclassifiedServerFailureException(
-                        500, String.format("Couldn't change encoding for %s", actual));
+                throw new UnclassifiedServerFailureException(500, "Couldn't change encoding for %s".formatted(actual));
             }
 
             actual = preferred;
@@ -697,7 +698,7 @@ public class IgRepository implements IRepository {
                     break;
                 }
             } catch (IOException e) {
-                throw new UnclassifiedServerFailureException(500, String.format("Couldn't delete %s", path));
+                throw new UnclassifiedServerFailureException(500, "Couldn't delete %s".formatted(path));
             }
         }
 

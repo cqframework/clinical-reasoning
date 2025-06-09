@@ -60,7 +60,7 @@ public class TestDataGenerator {
                 }
             }
         }
-        ourLog.info(String.format("Patients created: %s", i));
+        ourLog.info("Patients created: %s".formatted(i));
     }
 
     public void createPatient(String patientId, String practitionerId, String organization, int count) {

@@ -9,7 +9,7 @@ import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import org.hl7.fhir.r4.model.Library;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,7 +38,7 @@ class LibraryProcessorTests {
     @Test
     void defaultSettings() {
         var repository =
-                new IgRepository(fhirContextR4, Paths.get(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r4"));
+                new IgRepository(fhirContextR4, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r4"));
         var processor = new LibraryProcessor(repository);
         assertNotNull(processor.evaluationSettings());
     }
@@ -55,7 +55,7 @@ class LibraryProcessorTests {
     @Test
     void processor() {
         var repository =
-                new IgRepository(fhirContextR5, Paths.get(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r5"));
+                new IgRepository(fhirContextR5, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r5"));
         var packageProcessor = new PackageProcessor(repository);
         var dataRequirementsProcessor = new DataRequirementsProcessor(repository);
         var evaluateProcessor = new EvaluateProcessor(repository, EvaluationSettings.getDefault());

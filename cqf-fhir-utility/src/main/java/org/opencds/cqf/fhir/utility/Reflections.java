@@ -55,7 +55,7 @@ public class Reflections {
         IAccessor accessor = getAccessor(baseTypeClass, childName);
         return r -> {
             Optional<IBase> value = accessor.getFirstValueOrNull(r);
-            if (!value.isPresent()) {
+            if (value.isEmpty()) {
                 return null;
             } else {
                 @SuppressWarnings("unchecked")

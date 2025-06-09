@@ -65,7 +65,7 @@ public class Dstu3RepositorySubjectProvider implements SubjectProvider {
                 }
 
             } else {
-                throw new IllegalArgumentException(String.format("Unsupported subjectId: %s", subjectIds));
+                throw new IllegalArgumentException("Unsupported subjectId: %s".formatted(subjectIds));
             }
         });
 

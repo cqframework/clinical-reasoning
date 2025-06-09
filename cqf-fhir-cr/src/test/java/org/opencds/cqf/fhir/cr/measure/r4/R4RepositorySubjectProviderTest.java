@@ -252,6 +252,6 @@ class R4RepositorySubjectProviderTest {
     }
 
     private static String resourcify(ResourceType resourceType, String rawId) {
-        return String.format("%s/%s", resourceType.toString(), rawId);
+        return "%s/%s".formatted(resourceType.toString(), rawId);
     }
 }

@@ -127,8 +127,7 @@ public class RepositoryTerminologyProvider implements TerminologyProvider {
 
         var expansion = this.valueSetIndex.computeIfAbsent(url, k -> tryExpand(valueSet));
         if (expansion == null) {
-            throw new IllegalArgumentException(
-                    String.format("Unable to get expansion for ValueSet %s", valueSet.getId()));
+            throw new IllegalArgumentException("Unable to get expansion for ValueSet %s".formatted(valueSet.getId()));
         }
 
         return expansion;
@@ -168,7 +167,7 @@ public class RepositoryTerminologyProvider implements TerminologyProvider {
         if (codes == null
                 && this.terminologySettings.getValuesetExpansionMode()
                         == VALUESET_EXPANSION_MODE.USE_EXPAND_OPERATION) {
-            throw new IllegalArgumentException(String.format("Failed to expand ValueSet %s", valueSet.getId()));
+            throw new IllegalArgumentException("Failed to expand ValueSet %s".formatted(valueSet.getId()));
         }
 
         return codes;
@@ -177,9 +176,9 @@ public class RepositoryTerminologyProvider implements TerminologyProvider {
     private List<Code> tryNaiveExpansion(IBaseResource vs, ValueSetInfo valueSet) {
 
         if (containsExpansionLogic(vs)) {
-            throw new IllegalArgumentException(String.format(
-                    "ValueSet %s requires $expand to support correctly, and $expand is not available",
-                    valueSet.getId()));
+            throw new IllegalArgumentException(
+                    "ValueSet %s requires $expand to support correctly, and $expand is not available"
+                            .formatted(valueSet.getId()));
         }
 
         logger.warn(
@@ -189,7 +188,7 @@ public class RepositoryTerminologyProvider implements TerminologyProvider {
         var codes = ValueSets.getCodesInCompose(fhirContext, vs);
 
         if (codes == null) {
-            throw new IllegalArgumentException(String.format("Failed to expand ValueSet %s", valueSet.getId()));
+            throw new IllegalArgumentException("Failed to expand ValueSet %s".formatted(valueSet.getId()));
         }
 
         return codes;
@@ -207,11 +206,11 @@ public class RepositoryTerminologyProvider implements TerminologyProvider {
         var resources = BundleUtil.toListOfResources(fhirContext, results);
 
         if (resources.isEmpty()) {
-            throw new IllegalArgumentException(String.format("Unable to locate ValueSet %s", valueSet.getId()));
+            throw new IllegalArgumentException("Unable to locate ValueSet %s".formatted(valueSet.getId()));
         }
 
         if (resources.size() > 1) {
-            throw new IllegalArgumentException(String.format("Multiple ValueSets resolved for %s", valueSet.getId()));
+            throw new IllegalArgumentException("Multiple ValueSets resolved for %s".formatted(valueSet.getId()));
         }
 
         var vs = resources.get(0);
@@ -236,9 +235,9 @@ public class RepositoryTerminologyProvider implements TerminologyProvider {
         var codes = ValueSets.getCodesInExpansion(this.fhirContext, vs);
         if (codes == null
                 && this.terminologySettings.getValuesetPreExpansionMode() == VALUESET_PRE_EXPANSION_MODE.REQUIRE) {
-            throw new IllegalArgumentException(String.format(
-                    "ValueSet PreExpansion mode was set to REQUIRE, and valueSet %s did not have an expansion",
-                    valueSet.getId()));
+            throw new IllegalArgumentException(
+                    "ValueSet PreExpansion mode was set to REQUIRE, and valueSet %s did not have an expansion"
+                            .formatted(valueSet.getId()));
         }
 
         if (codes != null && Boolean.TRUE.equals(isNaiveExpansion(vs))) {
@@ -312,8 +311,8 @@ public class RepositoryTerminologyProvider implements TerminologyProvider {
         IBase expansion = ValueSets.getExpansion(this.fhirContext, resource);
         if (expansion != null) {
             Object object = ValueSets.getExpansionParameters(expansion, fhirPath, ".where(name = 'naive').value");
-            if (object instanceof IBase) {
-                return resolveNaiveBoolean((IBase) object);
+            if (object instanceof IBase base) {
+                return resolveNaiveBoolean(base);
             } else if (object instanceof Iterable) {
                 List<IBase> naiveParameters = (List<IBase>) object;
                 for (IBase param : naiveParameters) {

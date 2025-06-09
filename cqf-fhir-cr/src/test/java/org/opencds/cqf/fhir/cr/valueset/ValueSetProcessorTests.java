@@ -6,8 +6,7 @@ import static org.opencds.cqf.fhir.cr.valueset.TestValueSet.given;
 import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.repository.IRepository;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.common.DataRequirementsProcessor;
 import org.opencds.cqf.fhir.cr.common.PackageProcessor;
@@ -19,12 +18,12 @@ class ValueSetProcessorTests {
     private final FhirContext fhirContextDstu3 = FhirContext.forDstu3Cached();
     private final FhirContext fhirContextR4 = FhirContext.forR4Cached();
     private final FhirContext fhirContextR5 = FhirContext.forR5Cached();
-    private final IRepository repositoryDstu3 = new IgRepository(
-            fhirContextDstu3, Paths.get(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/dstu3"));
-    private final IRepository repositoryR4 =
-            new IgRepository(fhirContextR4, Paths.get(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r4"));
-    private final IRepository repositoryR5 =
-            new IgRepository(fhirContextR5, Paths.get(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r5"));
+    private final Repository repositoryDstu3 =
+            new IgRepository(fhirContextDstu3, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/dstu3"));
+    private final Repository repositoryR4 =
+            new IgRepository(fhirContextR4, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r4"));
+    private final Repository repositoryR5 =
+            new IgRepository(fhirContextR5, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r5"));
 
     @Test
     void processors() {

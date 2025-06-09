@@ -110,7 +110,7 @@ public interface IResourceLoader extends IDaoRegistryUser {
                     case "json" -> getFhirContext().newJsonParser();
                     case "xml" -> getFhirContext().newXmlParser();
                     default -> throw new IllegalArgumentException(
-                            String.format("Expected encoding xml, or json.  %s is not a valid encoding", encoding));
+                            "Expected encoding xml, or json.  %s is not a valid encoding".formatted(encoding));
                 };
 
         return parser.parseResource(resourceString);
@@ -128,7 +128,7 @@ public interface IResourceLoader extends IDaoRegistryUser {
             }
             return IOUtils.toString(is, StandardCharsets.UTF_8);
         } catch (Exception e) {
-            throw new RuntimeException(String.format("Error loading resource from %s", theLocation), e);
+            throw new RuntimeException("Error loading resource from %s".formatted(theLocation), e);
         }
     }
 }

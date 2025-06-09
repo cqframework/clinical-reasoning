@@ -82,7 +82,7 @@ public class CdsServiceInterceptor implements IResourceChangeListener {
                 }
 
             } catch (Exception e) {
-                ourLog.info(String.format("Failed to create service for %s", serviceId));
+                ourLog.info("Failed to create service for %s".formatted(serviceId));
             }
         }
     }
@@ -92,7 +92,7 @@ public class CdsServiceInterceptor implements IResourceChangeListener {
             delete(updatedIds);
             insert(updatedIds);
         } catch (Exception e) {
-            ourLog.info(String.format("Failed to update service(s) for %s", updatedIds));
+            ourLog.info("Failed to update service(s) for %s".formatted(updatedIds));
         }
     }
 

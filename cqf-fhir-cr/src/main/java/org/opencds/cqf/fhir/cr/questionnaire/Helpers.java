@@ -14,7 +14,7 @@ public class Helpers {
                 return parseR5ItemType(typeCode, hasBinding, isGroup);
 
             default:
-                throw new IllegalArgumentException(String.format("unsupported FHIR version: %s", fhirVersion));
+                throw new IllegalArgumentException("unsupported FHIR version: %s".formatted(fhirVersion));
         }
     }
 

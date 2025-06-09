@@ -129,8 +129,8 @@ public class ApproveVisitor extends BaseKnowledgeArtifactVisitor {
                     return r5ArtifactAssessment;
 
                 default:
-                    throw new UnprocessableEntityException(String.format(
-                            "Unsupported version of FHIR: %s", fhirVersion().getFhirVersionString()));
+                    throw new UnprocessableEntityException("Unsupported version of FHIR: %s"
+                            .formatted(fhirVersion().getFhirVersionString()));
             }
         } catch (FHIRException e) {
             throw new UnprocessableEntityException(e.getMessage());
@@ -152,7 +152,7 @@ public class ApproveVisitor extends BaseKnowledgeArtifactVisitor {
 
             default:
                 throw new UnprocessableEntityException(
-                        String.format("Unsupported version of FHIR: %s", fhirVersion.getFhirVersionString()));
+                        "Unsupported version of FHIR: %s".formatted(fhirVersion.getFhirVersionString()));
         }
     }
 }

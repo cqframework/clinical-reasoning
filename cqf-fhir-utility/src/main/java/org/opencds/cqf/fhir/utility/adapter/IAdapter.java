@@ -146,7 +146,7 @@ public interface IAdapter<T extends IBase> {
             case R5:
                 return (T) new org.hl7.fhir.r5.model.Period();
             default:
-                throw new UnprocessableEntityException(String.format(UNSUPPORTED_VERSION, version.toString()));
+                throw new UnprocessableEntityException(UNSUPPORTED_VERSION.formatted(version.toString()));
         }
     }
 
@@ -160,7 +160,7 @@ public interface IAdapter<T extends IBase> {
             case R5:
                 return (T) new org.hl7.fhir.r5.model.StringType(string);
             default:
-                throw new UnprocessableEntityException(String.format(UNSUPPORTED_VERSION, version.toString()));
+                throw new UnprocessableEntityException(UNSUPPORTED_VERSION.formatted(version.toString()));
         }
     }
 
@@ -174,7 +174,7 @@ public interface IAdapter<T extends IBase> {
             case R5:
                 return (T) new org.hl7.fhir.r5.model.UriType(string);
             default:
-                throw new UnprocessableEntityException(String.format(UNSUPPORTED_VERSION, version.toString()));
+                throw new UnprocessableEntityException(UNSUPPORTED_VERSION.formatted(version.toString()));
         }
     }
 
@@ -188,7 +188,7 @@ public interface IAdapter<T extends IBase> {
             case R5:
                 return (T) new org.hl7.fhir.r5.model.UrlType(string);
             default:
-                throw new UnprocessableEntityException(String.format(UNSUPPORTED_VERSION, version.toString()));
+                throw new UnprocessableEntityException(UNSUPPORTED_VERSION.formatted(version.toString()));
         }
     }
 
@@ -202,7 +202,7 @@ public interface IAdapter<T extends IBase> {
             case R5:
                 return (T) new org.hl7.fhir.r5.model.DateType(date);
             default:
-                throw new UnprocessableEntityException(String.format(UNSUPPORTED_VERSION, version.toString()));
+                throw new UnprocessableEntityException(UNSUPPORTED_VERSION.formatted(version.toString()));
         }
     }
 
@@ -216,7 +216,7 @@ public interface IAdapter<T extends IBase> {
             case R5:
                 return (T) new org.hl7.fhir.r5.model.DateTimeType(date);
             default:
-                throw new UnprocessableEntityException(String.format(UNSUPPORTED_VERSION, version.toString()));
+                throw new UnprocessableEntityException(UNSUPPORTED_VERSION.formatted(version.toString()));
         }
     }
 }

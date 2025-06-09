@@ -207,11 +207,10 @@ public class R4CareGapsBundleBuilder {
 
     private Composition.SectionComponent getSection(
             Measure measure, MeasureReport measureReport, DetectedIssue detectedIssue, CareGapsStatusCode gapStatus) {
-        String narrative = String.format(
-                HTML_DIV_PARAGRAPH_CONTENT,
+        String narrative = HTML_DIV_PARAGRAPH_CONTENT.formatted(
                 gapStatus == CareGapsStatusCode.CLOSED_GAP
                         ? "No detected issues."
-                        : String.format("Issues detected.  See %s for details.", Ids.simple(detectedIssue)));
+                        : "Issues detected.  See %s for details.".formatted(Ids.simple(detectedIssue)));
         return new CompositionSectionComponentBuilder<>(Composition.SectionComponent.class)
                 .withTitle(measure.hasTitle() ? measure.getTitle() : measure.getUrl())
                 .withFocus(Ids.simple(measureReport))
@@ -300,8 +299,7 @@ public class R4CareGapsBundleBuilder {
                     .getClass();
             IBaseResource resource = repository.read(resourceType, resourceId);
 
-            if (resource instanceof Resource) {
-                Resource resourceBase = (Resource) resource;
+            if (resource instanceof Resource resourceBase) {
                 resources.put(Ids.simple(resourceId), resourceBase);
             }
         });
@@ -325,8 +323,7 @@ public class R4CareGapsBundleBuilder {
                                     .newInstance()
                                     .getClass();
                             IBaseResource resource = repository.read(resourceType, sdeId);
-                            if (resource instanceof Resource) {
-                                Resource resourceBase = (Resource) resource;
+                            if (resource instanceof Resource resourceBase) {
                                 resources.put(Ids.simple(sdeId), resourceBase);
                             }
                         }

@@ -19,6 +19,7 @@ import static org.opencds.cqf.fhir.utility.r5.Parameters.part;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.Arrays;
@@ -50,7 +51,6 @@ import org.mockito.Mockito;
 import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.visitor.IValueSetExpansionCache;
 import org.opencds.cqf.fhir.cr.visitor.PackageVisitor;
 import org.opencds.cqf.fhir.utility.Constants;
@@ -68,7 +68,7 @@ import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 class PackageVisitorTests {
     private final FhirContext fhirContext = FhirContext.forR5Cached();
     private final IParser jsonParser = fhirContext.newJsonParser();
-    private Repository repo;
+    private IRepository repo;
 
     @BeforeEach
     void setup() {

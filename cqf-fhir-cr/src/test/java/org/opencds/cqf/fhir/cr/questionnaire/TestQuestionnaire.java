@@ -10,6 +10,7 @@ import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.repository.IRepository;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,7 +25,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.json.JSONException;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
@@ -53,14 +53,14 @@ public class TestQuestionnaire {
     }
 
     public static class Given {
-        private Repository repository;
+        private IRepository repository;
         private EvaluationSettings evaluationSettings;
         private IGenerateProcessor generateProcessor;
         private IPackageProcessor packageProcessor;
         private IDataRequirementsProcessor dataRequirementsProcessor;
         private IPopulateProcessor populateProcessor;
 
-        public Given repository(Repository repository) {
+        public Given repository(IRepository repository) {
             this.repository = repository;
             return this;
         }
@@ -96,7 +96,7 @@ public class TestQuestionnaire {
             return this;
         }
 
-        public QuestionnaireProcessor buildProcessor(Repository repository) {
+        public QuestionnaireProcessor buildProcessor(IRepository repository) {
             if (evaluationSettings == null) {
                 evaluationSettings = EvaluationSettings.getDefault();
                 evaluationSettings
@@ -123,7 +123,7 @@ public class TestQuestionnaire {
     }
 
     public static class When {
-        private final Repository repository;
+        private final IRepository repository;
         private final QuestionnaireProcessor processor;
         private IPrimitiveType<String> questionnaireUrl;
         private IIdType questionnaireId;
@@ -137,7 +137,7 @@ public class TestQuestionnaire {
         private Boolean isPut;
         private IIdType profileId;
 
-        When(Repository repository, QuestionnaireProcessor processor) {
+        When(IRepository repository, QuestionnaireProcessor processor) {
             this.repository = repository;
             this.processor = processor;
             useServerData = true;
@@ -265,7 +265,7 @@ public class TestQuestionnaire {
 
     public static class GeneratedQuestionnaire {
         public IBaseResource questionnaire;
-        Repository repository;
+        IRepository repository;
         IParser jsonParser;
         GenerateRequest request;
         List<IBaseBackboneElement> items;
@@ -281,7 +281,7 @@ public class TestQuestionnaire {
             }
         }
 
-        public GeneratedQuestionnaire(Repository repository, GenerateRequest request, IBaseResource questionnaire) {
+        public GeneratedQuestionnaire(IRepository repository, GenerateRequest request, IBaseResource questionnaire) {
             this.repository = repository;
             this.request = request;
             this.questionnaire = questionnaire;
@@ -335,7 +335,7 @@ public class TestQuestionnaire {
     }
 
     public static class GeneratedQuestionnaireResponse {
-        Repository repository;
+        IRepository repository;
         IParser jsonParser;
         PopulateRequest request;
         IBaseResource questionnaireResponse;
@@ -356,7 +356,7 @@ public class TestQuestionnaire {
         }
 
         public GeneratedQuestionnaireResponse(
-                Repository repository, PopulateRequest request, IBaseResource questionnaireResponse) {
+                IRepository repository, PopulateRequest request, IBaseResource questionnaireResponse) {
             this.repository = repository;
             this.request = request;
             this.questionnaireResponse = questionnaireResponse;

@@ -9,19 +9,19 @@ import static org.opencds.cqf.fhir.cr.helpers.RequestHelpers.newPDApplyRequestFo
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.repository.IRepository;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 
 @ExtendWith(MockitoExtension.class)
 class ProcessGoalTests {
     @Mock
-    Repository repository;
+    IRepository repository;
 
     @Mock
     LibraryEngine libraryEngine;

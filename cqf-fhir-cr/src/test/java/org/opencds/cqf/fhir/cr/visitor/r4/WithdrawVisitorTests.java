@@ -6,6 +6,7 @@ import static org.opencds.cqf.fhir.utility.r4.Parameters.part;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
@@ -14,7 +15,6 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.visitor.WithdrawVisitor;
 import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactVisitor;
 import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
@@ -23,7 +23,7 @@ import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
 class WithdrawVisitorTests {
     private final FhirContext fhirContext = FhirContext.forR4Cached();
-    private Repository repo;
+    private IRepository repo;
     private final IParser jsonParser = fhirContext.newJsonParser();
 
     @BeforeEach

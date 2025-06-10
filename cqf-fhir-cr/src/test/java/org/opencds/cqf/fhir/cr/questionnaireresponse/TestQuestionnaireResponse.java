@@ -6,6 +6,7 @@ import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.repository.IRepository;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -17,7 +18,6 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cr.questionnaireresponse.extract.IExtractProcessor;
 import org.opencds.cqf.fhir.utility.Ids;
@@ -52,10 +52,10 @@ public class TestQuestionnaireResponse {
     }
 
     public static class Given {
-        private Repository repository;
+        private IRepository repository;
         private IExtractProcessor extractProcessor;
 
-        public Given repository(Repository repository) {
+        public Given repository(IRepository repository) {
             this.repository = repository;
             return this;
         }
@@ -138,12 +138,12 @@ public class TestQuestionnaireResponse {
     }
 
     public static class Extract {
-        private final Repository repository;
+        private final IRepository repository;
         private final IBaseBundle bundle;
         private final IParser jsonParser;
         private final ModelResolver modelResolver;
 
-        public Extract(Repository repository, IBaseBundle bundle) {
+        public Extract(IRepository repository, IBaseBundle bundle) {
             this.repository = repository;
             this.bundle = bundle;
             jsonParser = repository.fhirContext().newJsonParser().setPrettyPrint(true);

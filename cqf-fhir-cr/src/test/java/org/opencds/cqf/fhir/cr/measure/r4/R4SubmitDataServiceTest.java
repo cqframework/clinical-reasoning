@@ -6,6 +6,7 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.repository.IRepository;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -21,7 +22,6 @@ import org.hl7.fhir.r4.model.Procedure;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.search.Searches;
 
@@ -37,7 +37,7 @@ class R4SubmitDataServiceTest {
     private static final String ENCOUNTER_ID = "Encounter-62912";
     private static final String PROCEDURE_ID = "Procedure-89972";
 
-    private final Repository repository = new InMemoryFhirRepository(FhirContext.forR4Cached());
+    private final IRepository repository = new InMemoryFhirRepository(FhirContext.forR4Cached());
     private final R4SubmitDataService testSubject = new R4SubmitDataService(repository);
 
     @Test

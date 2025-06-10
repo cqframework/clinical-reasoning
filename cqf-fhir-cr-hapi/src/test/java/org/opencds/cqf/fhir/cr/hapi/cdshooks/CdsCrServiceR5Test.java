@@ -16,8 +16,7 @@ class CdsCrServiceR5Test extends BaseCdsCrServiceTest {
     void beforeEach() {
         fhirContext = FhirContext.forR5Cached();
         repository = new InMemoryFhirRepository(fhirContext);
-        cdsConfigService = getCdsConfigService();
-        testSubject = new CdsCrService(REQUEST_DETAILS, repository, cdsConfigService);
+        testSubject = new CdsCrService(REQUEST_DETAILS, repository);
     }
 
     @Test

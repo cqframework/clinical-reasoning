@@ -12,11 +12,11 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r5.model.Coding;
 import org.hl7.fhir.r5.model.ArtifactAssessment;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r5.model.CanonicalType;
+import org.hl7.fhir.r5.model.Coding;
 import org.hl7.fhir.r5.model.Extension;
 import org.hl7.fhir.r5.model.Library;
 import org.hl7.fhir.r5.model.Measure;
@@ -164,22 +164,24 @@ public class ReleaseVisitor {
             }
             if (effectiveDataRequirementsLib != null) {
                 var proposedExtensions = effectiveDataRequirementsLib.getExtension().stream()
-                    .filter(ext -> ext.getUrl().equals(Constants.CQFM_DIRECT_REFERENCE_EXTENSION))
-                    .map(ext -> ext.setUrl(Constants.CQF_DIRECT_REFERENCE_EXTENSION)).toList();
+                        .filter(ext -> ext.getUrl().equals(Constants.CQFM_DIRECT_REFERENCE_EXTENSION))
+                        .map(ext -> ext.setUrl(Constants.CQF_DIRECT_REFERENCE_EXTENSION))
+                        .toList();
 
-                var existingRootAdapterExtensions =
-                    rootAdapter.getExtension().stream().filter(ext ->
-                        ext.getUrl().equals(Constants.CQFM_DIRECT_REFERENCE_EXTENSION)
-                            || ext.getUrl().equals(Constants.CQF_DIRECT_REFERENCE_EXTENSION)).toList();
+                var existingRootAdapterExtensions = rootAdapter.getExtension().stream()
+                        .filter(ext -> ext.getUrl().equals(Constants.CQFM_DIRECT_REFERENCE_EXTENSION)
+                                || ext.getUrl().equals(Constants.CQF_DIRECT_REFERENCE_EXTENSION))
+                        .toList();
 
                 for (var proposedExt : proposedExtensions) {
                     boolean shouldAddExtension = true;
-                    Coding proposedCoding = (Coding)proposedExt.getValue();
+                    Coding proposedCoding = (Coding) proposedExt.getValue();
                     for (var existingExt : existingRootAdapterExtensions) {
-                        Coding existingCoding = (Coding)existingExt.getValue();
+                        Coding existingCoding = (Coding) existingExt.getValue();
                         boolean systemMatches = proposedCoding.getSystem().equals(existingCoding.getSystem());
                         boolean codeMatches = proposedCoding.getCode().equals(existingCoding.getCode());
-                        boolean versionMatches = proposedCoding.getVersion() == null || proposedCoding.getVersion().equals(existingCoding.getVersion());
+                        boolean versionMatches = proposedCoding.getVersion() == null
+                                || proposedCoding.getVersion().equals(existingCoding.getVersion());
 
                         if (systemMatches && codeMatches && versionMatches) {
                             shouldAddExtension = false;

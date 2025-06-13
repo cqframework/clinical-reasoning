@@ -16,6 +16,8 @@ import org.hl7.fhir.r4.model.Basic;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.CanonicalType;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Measure;
@@ -176,10 +178,34 @@ public class ReleaseVisitor {
             }
 
             if (effectiveDataRequirementsLib != null) {
-                effectiveDataRequirementsLib.getExtension().stream()
-                        .filter(ext -> ext.getUrl().equals(Constants.CQFM_DIRECT_REFERENCE_EXTENSION))
-                        .map(ext -> ext.setUrl(Constants.CQF_DIRECT_REFERENCE_EXTENSION))
-                        .forEach(rootAdapter::addExtension);
+                var proposedExtensions = effectiveDataRequirementsLib.getExtension().stream()
+                    .filter(ext -> ext.getUrl().equals(Constants.CQFM_DIRECT_REFERENCE_EXTENSION))
+                    .map(ext -> ext.setUrl(Constants.CQF_DIRECT_REFERENCE_EXTENSION)).toList();
+
+                var existingRootAdapterExtensions =
+                    rootAdapter.getExtension().stream().filter(ext ->
+                        ext.getUrl().equals(Constants.CQFM_DIRECT_REFERENCE_EXTENSION)
+                            || ext.getUrl().equals(Constants.CQF_DIRECT_REFERENCE_EXTENSION)).toList();
+
+                for (var proposedExt : proposedExtensions) {
+                    boolean shouldAddExtension = true;
+                    Coding proposedCoding = (Coding)proposedExt.getValue();
+                    for (var existingExt : existingRootAdapterExtensions) {
+                        Coding existingCoding = (Coding)existingExt.getValue();
+                        boolean systemMatches = proposedCoding.getSystem().equals(existingCoding.getSystem());
+                        boolean codeMatches = proposedCoding.getCode().equals(existingCoding.getCode());
+                        boolean versionMatches = proposedCoding.getVersion() == null || proposedCoding.getVersion().equals(existingCoding.getVersion());
+
+                        if (systemMatches && codeMatches && versionMatches) {
+                            shouldAddExtension = false;
+                            break;
+                        }
+                    }
+
+                    if (shouldAddExtension) {
+                        rootAdapter.addExtension(proposedExt);
+                    }
+                }
             }
         }
     }

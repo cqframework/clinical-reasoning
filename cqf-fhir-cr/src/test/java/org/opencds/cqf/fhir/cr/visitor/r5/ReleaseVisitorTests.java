@@ -280,7 +280,7 @@ class ReleaseVisitorTests {
                 .filter(ext -> ext.getUrl().equals(Constants.CQF_DIRECT_REFERENCE_EXTENSION))
                 .toList();
 
-        assertEquals(18, directReferenceExtensions.size());
+        assertEquals(12, directReferenceExtensions.size());
     }
 
     @Test

@@ -16,6 +16,7 @@ import org.hl7.fhir.r5.model.ArtifactAssessment;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r5.model.CanonicalType;
+import org.hl7.fhir.r5.model.Coding;
 import org.hl7.fhir.r5.model.Extension;
 import org.hl7.fhir.r5.model.Library;
 import org.hl7.fhir.r5.model.Measure;
@@ -161,10 +162,37 @@ public class ReleaseVisitor {
             } else if (effectiveDataRequirementsExt.get().getValue() instanceof CanonicalType canonicalType) {
                 effectiveDataRequirementsLib = (Library) measure.getContained("#" + canonicalType.getCanonical());
             }
+
             if (effectiveDataRequirementsLib != null) {
-                effectiveDataRequirementsLib.getExtension().stream()
+                var proposedExtensions = effectiveDataRequirementsLib.getExtension().stream()
                         .filter(ext -> ext.getUrl().equals(Constants.CQF_DIRECT_REFERENCE_EXTENSION))
-                        .forEach(rootAdapter::addExtension);
+                        .toList();
+
+                var existingRootAdapterExtensions = rootAdapter.getExtension().stream()
+                        .filter(ext -> ext.getUrl().equals(Constants.CQFM_DIRECT_REFERENCE_EXTENSION)
+                                || ext.getUrl().equals(Constants.CQF_DIRECT_REFERENCE_EXTENSION))
+                        .toList();
+
+                for (var proposedExt : proposedExtensions) {
+                    boolean shouldAddExtension = true;
+                    Coding proposedCoding = (Coding) proposedExt.getValue();
+                    for (var existingExt : existingRootAdapterExtensions) {
+                        Coding existingCoding = (Coding) existingExt.getValue();
+                        boolean systemMatches = proposedCoding.getSystem().equals(existingCoding.getSystem());
+                        boolean codeMatches = proposedCoding.getCode().equals(existingCoding.getCode());
+                        boolean versionMatches = proposedCoding.getVersion() == null
+                                || proposedCoding.getVersion().equals(existingCoding.getVersion());
+
+                        if (systemMatches && codeMatches && versionMatches) {
+                            shouldAddExtension = false;
+                            break;
+                        }
+                    }
+
+                    if (shouldAddExtension) {
+                        rootAdapter.addExtension(proposedExt);
+                    }
+                }
             }
         }
     }

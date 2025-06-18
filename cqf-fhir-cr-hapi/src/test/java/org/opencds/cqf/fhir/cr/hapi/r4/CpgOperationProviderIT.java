@@ -179,14 +179,9 @@ class CpgOperationProviderIT extends BaseCrR4TestServer {
         assertTrue(results.hasParameter());
         assertTrue(results.getParameterFirstRep().hasName());
         assertEquals("return", results.getParameterFirstRep().getName());
-        // The error is no longer being returned as an OperationOutcome from the engine
-        //        assertTrue(results.getParameterFirstRep().hasResource());
-        //        assertTrue(results.getParameterFirstRep().getResource() instanceof OperationOutcome);
-        //        assertThat(((OperationOutcome) results.getParameterFirstRep().getResource())
-        //                        .getIssueFirstRep()
-        //                        .getDetails()
-        //                        .getText())
-        //                .isEqualTo("Unsupported interval point type for FHIR conversion java.lang.Integer");
+        var value = assertInstanceOf(
+                StringType.class, results.getParameterFirstRep().getValue());
+        assertEquals("Interval[1, 5]", value.toString());
     }
 
     public Parameters runCqlExecution(Parameters parameters) {

@@ -1,6 +1,8 @@
 package org.opencds.cqf.fhir.cr.cpg.r4;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.parameters;
@@ -89,16 +91,16 @@ class LibraryEvaluationServiceTest {
         var report = when.then().parameters();
         assertTrue(report.hasParameter());
         assertTrue(report.getParameterFirstRep().hasName());
-        assertEquals("Error", report.getParameterFirstRep().getName());
-        // The error is no longer being returned as an OperationOutcome from the engine
-        //        assertTrue(report.getParameterFirstRep().hasResource());
-        //        assertTrue(report.getParameterFirstRep().getResource() instanceof OperationOutcome);
-        //        assertEquals(
-        //                "Unsupported interval point type for FHIR conversion java.lang.Integer",
-        //                ((OperationOutcome) report.getParameterFirstRep().getResource())
-        //                        .getIssueFirstRep()
-        //                        .getDetails()
-        //                        .getText());
+        assertEquals("evaluation error", report.getParameterFirstRep().getName());
+        var outcome = assertInstanceOf(
+                OperationOutcome.class, report.getParameterFirstRep().getResource());
+        assertFalse(outcome.getIssue().isEmpty());
+        var issue = outcome.getIssueFirstRep();
+        assertEquals(OperationOutcome.IssueSeverity.ERROR, issue.getSeverity());
+        assertEquals(
+                "Example Failure Code: This is an error message\n",
+                issue.getDetails().getText());
+        assertEquals("This is an error message", issue.getDiagnostics());
     }
 
     @Test

@@ -9,6 +9,7 @@ import static org.opencds.cqf.fhir.utility.r4.Parameters.parameters;
 
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.IntegerType;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
@@ -113,7 +114,7 @@ class CqlEvaluationServiceTest {
     }
 
     @Test
-    void libraryEvaluationService_ErrorLibrary() {
+    void libraryEvaluationService_IntegerInterval() {
         var expression = "Interval[1,5]";
         var when = Library.given()
                 .repositoryFor("libraryeval")
@@ -127,5 +128,29 @@ class CqlEvaluationServiceTest {
         var value =
                 assertInstanceOf(StringType.class, report.getParameterFirstRep().getValue());
         assertEquals("Interval[1, 5]", value.toString());
+    }
+
+    @Test
+    void libraryEvaluationService_Error() {
+        var expression =
+                "Message('Return Value If Not Error', true, 'Example Failure Code', 'Error', 'This is an error message')";
+        var when = Library.given()
+                .repositoryFor("libraryeval")
+                .when()
+                .expression(expression)
+                .evaluateCql();
+        var report = when.then().parameters();
+        assertTrue(report.hasParameter());
+        assertTrue(report.getParameterFirstRep().hasName());
+        assertEquals("evaluation error", report.getParameterFirstRep().getName());
+        var outcome = assertInstanceOf(
+                OperationOutcome.class, report.getParameterFirstRep().getResource());
+        assertFalse(outcome.getIssue().isEmpty());
+        var issue = outcome.getIssueFirstRep();
+        assertEquals(OperationOutcome.IssueSeverity.ERROR, issue.getSeverity());
+        assertEquals(
+                "Example Failure Code: This is an error message\n",
+                issue.getDetails().getText());
+        assertEquals("This is an error message", issue.getDiagnostics());
     }
 }

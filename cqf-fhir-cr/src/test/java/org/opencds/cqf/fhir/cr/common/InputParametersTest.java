@@ -9,8 +9,10 @@ import static org.opencds.cqf.fhir.utility.Parameters.newPart;
 import static org.opencds.cqf.fhir.utility.Parameters.newStringPart;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.repository.IRepository;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.r4.model.Bundle;
@@ -32,10 +34,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.Ids;
 
+@SuppressWarnings({"unchecked", "UnstableApiUsage"})
 @ExtendWith(MockitoExtension.class)
 class InputParametersTest {
     private final FhirContext fhirContextDstu3 = FhirContext.forDstu3Cached();
@@ -54,7 +56,7 @@ class InputParametersTest {
     private final String studyId = "study1";
 
     @Mock
-    Repository repository;
+    IRepository repository;
 
     @Test
     void testResolveParametersDstu3() {
@@ -540,8 +542,8 @@ class InputParametersTest {
         var obsBundle = new Bundle().addEntry(new BundleEntryComponent().setResource(obs));
         doReturn(fhirContextR4).when(repository).fhirContext();
         doReturn(patient).when(repository).read(org.hl7.fhir.r4.model.Patient.class, patient.getIdElement());
-        doReturn(valueSetBundle).when(repository).search(eq(Bundle.class), eq(ValueSet.class), any());
-        doReturn(obsBundle).when(repository).search(eq(Bundle.class), eq(Observation.class), any(), any());
+        doReturn(valueSetBundle).when(repository).search(eq(Bundle.class), eq(ValueSet.class), any(Map.class));
+        doReturn(obsBundle).when(repository).search(eq(Bundle.class), eq(Observation.class), any(Map.class), any());
         var resolver = IInputParameterResolver.createResolver(
                 repository, patient.getIdElement(), null, null, null, null, null, null);
         var inputReq = new DataRequirement()

@@ -2,13 +2,13 @@ package org.opencds.cqf.fhir.cr.common;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import ca.uhn.fhir.repository.IRepository;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.adapter.IParametersParameterComponentAdapter;
 
 /**
@@ -21,7 +21,7 @@ public interface IInputParameterResolver {
     public <T extends ICompositeType> IBaseParameters resolveInputParameters(List<T> dataRequirement);
 
     public static <T extends IInputParameterResolver> T createResolver(
-            Repository repository,
+            IRepository repository,
             IIdType subjectId,
             IIdType encounterId,
             IIdType practitionerId,
@@ -32,7 +32,7 @@ public interface IInputParameterResolver {
 
     @SuppressWarnings("unchecked")
     public static <T extends IInputParameterResolver> T createResolver(
-            Repository repository,
+            IRepository repository,
             IIdType subjectId,
             IIdType encounterId,
             IIdType practitionerId,

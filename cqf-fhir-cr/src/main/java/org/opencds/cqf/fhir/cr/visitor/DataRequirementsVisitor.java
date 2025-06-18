@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.visitor;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -28,7 +29,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r5.model.Library;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.cql2elm.content.RepositoryFhirLibrarySourceProvider;
@@ -42,7 +42,7 @@ public class DataRequirementsVisitor extends BaseKnowledgeArtifactVisitor {
     protected DataRequirementsProcessor dataRequirementsProcessor;
     protected EvaluationSettings evaluationSettings;
 
-    public DataRequirementsVisitor(Repository repository, EvaluationSettings evaluationSettings) {
+    public DataRequirementsVisitor(IRepository repository, EvaluationSettings evaluationSettings) {
         super(repository);
         dataRequirementsProcessor = new DataRequirementsProcessor();
         this.evaluationSettings = evaluationSettings;

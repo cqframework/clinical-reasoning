@@ -1,10 +1,10 @@
 package org.opencds.cqf.fhir.utility.repository;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import org.apache.commons.lang3.NotImplementedException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.client.Clients;
 import org.opencds.cqf.fhir.utility.matcher.ResourceMatcher;
 import org.opencds.cqf.fhir.utility.matcher.ResourceMatcherDSTU3;
@@ -17,7 +17,7 @@ public class Repositories {
         // intentionally empty
     }
 
-    public static ProxyRepository proxy(Repository data, Repository content, Repository terminology) {
+    public static ProxyRepository proxy(IRepository data, IRepository content, IRepository terminology) {
         return new ProxyRepository(data, content, terminology);
     }
 
@@ -32,12 +32,12 @@ public class Repositories {
         };
     }
 
-    public static Repository createRestRepository(FhirContext fhirContext, IBaseResource endpoint) {
+    public static IRepository createRestRepository(FhirContext fhirContext, IBaseResource endpoint) {
         return endpoint == null ? null : new RestRepository(createClient(fhirContext, endpoint));
     }
 
-    public static Repository proxy(
-            Repository localRepository,
+    public static IRepository proxy(
+            IRepository localRepository,
             Boolean useLocalData,
             IBaseResource dataEndpoint,
             IBaseResource contentEndpoint,
@@ -50,12 +50,12 @@ public class Repositories {
                 createRestRepository(localRepository.fhirContext(), terminologyEndpoint));
     }
 
-    public static Repository proxy(
-            Repository localRepository,
+    public static IRepository proxy(
+            IRepository localRepository,
             Boolean useServerData,
-            Repository dataRepository,
-            Repository contentRepository,
-            Repository terminologyRepository) {
+            IRepository dataRepository,
+            IRepository contentRepository,
+            IRepository terminologyRepository) {
         var useLocalData = useServerData == null ? Boolean.TRUE : useServerData;
         if (dataRepository == null
                 && contentRepository == null

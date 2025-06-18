@@ -287,6 +287,27 @@ public class BundleHelper {
     }
 
     /**
+     * Gets request url if present
+     *
+     * @param fhirVersion FhirVersionEnum
+     * @param entry IBaseBackboneElement type
+     * @return url of request
+     */
+    public static String getEntryRequestUrl(FhirVersionEnum fhirVersion, IBaseBackboneElement entry) {
+        return switch (fhirVersion) {
+            case DSTU3 -> ((Bundle.BundleEntryComponent) entry).getRequest().getUrl();
+            case R4 -> ((org.hl7.fhir.r4.model.Bundle.BundleEntryComponent) entry)
+                    .getRequest()
+                    .getUrl();
+            case R5 -> ((org.hl7.fhir.r5.model.Bundle.BundleEntryComponent) entry)
+                    .getRequest()
+                    .getUrl();
+            default -> throw new IllegalArgumentException(
+                    String.format(UNSUPPORTED_VERSION_OF_FHIR, fhirVersion.getFhirVersionString()));
+        };
+    }
+
+    /**
      * Sets the list of entries of the Bundle
      *
      * @param bundle IBaseBundle type

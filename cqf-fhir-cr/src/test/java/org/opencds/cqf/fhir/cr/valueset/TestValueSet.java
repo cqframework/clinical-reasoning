@@ -3,12 +3,12 @@ package org.opencds.cqf.fhir.cr.valueset;
 import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.repository.IRepository;
 import java.nio.file.Path;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
@@ -28,12 +28,12 @@ public class TestValueSet {
     }
 
     public static class Given {
-        private Repository repository;
+        private IRepository repository;
         private EvaluationSettings evaluationSettings;
         private IPackageProcessor packageProcessor;
         private IDataRequirementsProcessor dataRequirementsProcessor;
 
-        public Given repository(Repository repository) {
+        public Given repository(IRepository repository) {
             this.repository = repository;
             return this;
         }
@@ -59,7 +59,7 @@ public class TestValueSet {
             return this;
         }
 
-        public ValueSetProcessor buildProcessor(Repository repository) {
+        public ValueSetProcessor buildProcessor(IRepository repository) {
             if (evaluationSettings == null) {
                 evaluationSettings = EvaluationSettings.getDefault();
                 evaluationSettings
@@ -80,7 +80,7 @@ public class TestValueSet {
     }
 
     public static class When {
-        private final Repository repository;
+        private final IRepository repository;
         private final ValueSetProcessor processor;
         private IPrimitiveType<String> valueSetUrl;
         private IIdType valueSetId;
@@ -88,7 +88,7 @@ public class TestValueSet {
         private IBaseParameters parameters;
         private Boolean isPut;
 
-        When(Repository repository, ValueSetProcessor processor) {
+        When(IRepository repository, ValueSetProcessor processor) {
             this.repository = repository;
             this.processor = processor;
         }

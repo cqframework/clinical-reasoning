@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -43,7 +44,6 @@ import org.opencds.cqf.cql.engine.fhir.searchparam.SearchParameterResolver;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.cql2elm.content.RepositoryFhirLibrarySourceProvider;
 import org.opencds.cqf.fhir.cql.cql2elm.util.LibraryVersionSelector;
 import org.opencds.cqf.fhir.cql.engine.terminology.RepositoryTerminologyProvider;
@@ -62,12 +62,12 @@ import org.slf4j.LoggerFactory;
 
 public class R4DataRequirementsService {
     private static final Logger ourLog = LoggerFactory.getLogger(R4DataRequirementsService.class);
-    private final Repository repository;
+    private final IRepository repository;
     private final MeasureEvaluationOptions measureEvaluationOptions;
     private static final String EXTENSION_URL_FHIR_QUERY_PATTERN =
             "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-fhirQueryPattern";
 
-    public R4DataRequirementsService(Repository repository, MeasureEvaluationOptions measureEvaluationOptions) {
+    public R4DataRequirementsService(IRepository repository, MeasureEvaluationOptions measureEvaluationOptions) {
         this.repository = repository;
         this.measureEvaluationOptions = measureEvaluationOptions;
     }
@@ -126,7 +126,7 @@ public class R4DataRequirementsService {
         return library;
     }
 
-    private static LibrarySourceProvider buildLibrarySource(Repository repository) {
+    private static LibrarySourceProvider buildLibrarySource(IRepository repository) {
         AdapterFactory adapterFactory = new AdapterFactory();
         return new RepositoryFhirLibrarySourceProvider(
                 repository, adapterFactory, new LibraryVersionSelector(adapterFactory));

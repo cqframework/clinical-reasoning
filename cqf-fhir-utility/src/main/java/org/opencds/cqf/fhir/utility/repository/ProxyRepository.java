@@ -4,7 +4,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import com.google.common.collect.Multimap;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -15,20 +17,19 @@ import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.opencds.cqf.fhir.api.Repository;
 
-public class ProxyRepository implements Repository {
+public class ProxyRepository implements IRepository {
 
     // One data server, one terminology server (content defaults to data)
     // One data server, one content server (terminology defaults to data)
     // One data server, one content server, one terminology server
 
-    private final Repository data;
-    private final Repository content;
-    private final Repository terminology;
+    private final IRepository data;
+    private final IRepository content;
+    private final IRepository terminology;
 
     public ProxyRepository(
-            Repository local, Boolean useLocalData, Repository data, Repository content, Repository terminology) {
+            IRepository local, Boolean useLocalData, IRepository data, IRepository content, IRepository terminology) {
         checkNotNull(local);
 
         if (data == null) {
@@ -48,7 +49,7 @@ public class ProxyRepository implements Repository {
         this.terminology = terminology == null ? local : terminology;
     }
 
-    public ProxyRepository(Repository data, Repository content, Repository terminology) {
+    public ProxyRepository(IRepository data, IRepository content, IRepository terminology) {
         checkNotNull(data);
 
         this.data = data;
@@ -95,7 +96,7 @@ public class ProxyRepository implements Repository {
     public <B extends IBaseBundle, T extends IBaseResource> B search(
             Class<B> bundleType,
             Class<T> resourceType,
-            Map<String, List<IQueryParameterType>> searchParameters,
+            Multimap<String, List<IQueryParameterType>> searchParameters,
             Map<String, String> headers) {
         if (isTerminologyResource(resourceType.getSimpleName())) {
             return terminology.search(bundleType, resourceType, searchParameters, headers);

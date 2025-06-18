@@ -10,6 +10,7 @@ import static org.opencds.cqf.fhir.utility.dstu3.Parameters.part;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.Arrays;
@@ -27,7 +28,6 @@ import org.hl7.fhir.dstu3.model.RelatedArtifact;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.visitor.DraftVisitor;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
@@ -38,7 +38,7 @@ import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
 class DraftVisitorTests {
     private final FhirContext fhirContext = FhirContext.forDstu3Cached();
-    private Repository repo;
+    private IRepository repo;
     private final IParser jsonParser = fhirContext.newJsonParser();
     private final String specificationLibReference = "Library/SpecificationLibrary";
     private final List<String> badVersionList = Arrays.asList(

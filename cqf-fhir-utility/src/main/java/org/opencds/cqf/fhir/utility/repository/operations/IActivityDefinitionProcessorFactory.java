@@ -1,8 +1,8 @@
 package org.opencds.cqf.fhir.utility.repository.operations;
 
-import org.opencds.cqf.fhir.api.Repository;
+import ca.uhn.fhir.repository.IRepository;
 
 @FunctionalInterface
 public interface IActivityDefinitionProcessorFactory {
-    IActivityDefinitionProcessor create(Repository repository);
+    IActivityDefinitionProcessor create(IRepository repository);
 }

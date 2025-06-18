@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.utility.dstu3;
 
+import ca.uhn.fhir.repository.IRepository;
 import java.util.List;
 import java.util.function.Consumer;
 import org.hl7.fhir.dstu3.model.ActivityDefinition;
@@ -9,13 +10,12 @@ import org.hl7.fhir.dstu3.model.Library;
 import org.hl7.fhir.dstu3.model.Measure;
 import org.hl7.fhir.dstu3.model.PlanDefinition;
 import org.hl7.fhir.dstu3.model.ValueSet;
-import org.opencds.cqf.fhir.api.Repository;
 
 public class MetadataResourceHelper {
     public static void forEachMetadataResource(
             List<BundleEntryComponent> entries,
             Consumer<org.hl7.fhir.dstu3.model.MetadataResource> callback,
-            Repository repository) {
+            IRepository repository) {
         entries.stream()
                 .map(entry -> entry.getResponse().getLocation())
                 .map(location -> {

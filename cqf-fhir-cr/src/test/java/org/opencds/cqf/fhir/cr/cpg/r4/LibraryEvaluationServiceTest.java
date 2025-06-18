@@ -1,6 +1,8 @@
 package org.opencds.cqf.fhir.cr.cpg.r4;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.parameters;
@@ -90,14 +92,14 @@ class LibraryEvaluationServiceTest {
         assertTrue(report.hasParameter());
         assertTrue(report.getParameterFirstRep().hasName());
         assertEquals("evaluation error", report.getParameterFirstRep().getName());
-        assertTrue(report.getParameterFirstRep().hasResource());
-        assertTrue(report.getParameterFirstRep().getResource() instanceof OperationOutcome);
+        var outcome = assertInstanceOf(
+                OperationOutcome.class, report.getParameterFirstRep().getResource());
+        assertFalse(outcome.getIssue().isEmpty());
+        var issue = outcome.getIssueFirstRep();
+        assertEquals(OperationOutcome.IssueSeverity.ERROR, issue.getSeverity());
         assertEquals(
-                "Unsupported interval point type for FHIR conversion java.lang.Integer",
-                ((OperationOutcome) report.getParameterFirstRep().getResource())
-                        .getIssueFirstRep()
-                        .getDetails()
-                        .getText());
+                "Example Failure Code: This is an error message",
+                issue.getDetails().getText().replaceAll("[\\r\\n]", ""));
     }
 
     @Test

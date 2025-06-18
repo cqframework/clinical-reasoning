@@ -5,6 +5,7 @@ import static org.opencds.cqf.fhir.cr.common.ExtensionBuilders.buildReference;
 import static org.opencds.cqf.fhir.utility.SearchHelper.searchRepositoryByCanonical;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.repository.IRepository;
 import java.util.Collections;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -12,7 +13,6 @@ import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r5.model.Enumerations.FHIRTypes;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,11 +20,11 @@ import org.slf4j.LoggerFactory;
 public class ProcessDefinition {
     private static final Logger logger = LoggerFactory.getLogger(ProcessDefinition.class);
 
-    final Repository repository;
+    final IRepository repository;
     final ApplyProcessor applyProcessor;
     final ActionResolver actionResolver;
 
-    public ProcessDefinition(Repository repository, ApplyProcessor applyProcessor) {
+    public ProcessDefinition(IRepository repository, ApplyProcessor applyProcessor) {
         requireNonNull(repository);
         requireNonNull(applyProcessor);
         this.repository = repository;
@@ -205,9 +205,14 @@ public class ProcessDefinition {
     protected IBaseResource resolveContained(ApplyRequest request, String id) {
         requireNonNull(id);
         var contained = request.resolvePathList(request.getPlanDefinition(), "contained", IBaseResource.class);
+        var containedId = getContainedId(id);
         var first = contained.stream()
-                .filter(r -> r.getIdElement().getIdPart().equals(id))
+                .filter(r -> getContainedId(r.getIdElement().getIdPart()).equals(containedId))
                 .findFirst();
         return first.orElse(null);
+    }
+
+    private String getContainedId(String id) {
+        return id.replaceFirst("#", "");
     }
 }

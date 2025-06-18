@@ -6,6 +6,7 @@ import static org.opencds.cqf.fhir.utility.ValueSets.getCodesInExpansion;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Date;
@@ -15,7 +16,6 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.Parameters;
@@ -28,12 +28,12 @@ import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
 import org.opencds.cqf.fhir.utility.client.TerminologyServerClient;
 
 public class ExpandHelper {
-    private final Repository repository;
+    private final IRepository repository;
     private final IAdapterFactory adapterFactory;
     private final TerminologyServerClient terminologyServerClient;
     public static final List<String> unsupportedParametersToRemove = List.of(Constants.CANONICAL_VERSION);
 
-    public ExpandHelper(Repository repository, TerminologyServerClient server) {
+    public ExpandHelper(IRepository repository, TerminologyServerClient server) {
         this.repository = repository;
         adapterFactory = IAdapterFactory.forFhirContext(this.repository.fhirContext());
         terminologyServerClient = server;
@@ -122,7 +122,7 @@ public class ExpandHelper {
             Optional<IEndpointAdapter> terminologyEndpoint,
             List<IValueSetAdapter> valueSets,
             List<String> expandedList,
-            Repository repository,
+            IRepository repository,
             Date expansionTimestamp) {
         var expansion = expandIncludes(
                 valueSet,
@@ -152,7 +152,7 @@ public class ExpandHelper {
             Optional<IEndpointAdapter> terminologyEndpoint,
             List<IValueSetAdapter> valueSets,
             List<String> expandedList,
-            Repository repository,
+            IRepository repository,
             Date expansionTimestamp) {
         var expansion = valueSet.newExpansion();
         valueSet.getValueSetIncludes().forEach(reference -> {
@@ -209,7 +209,7 @@ public class ExpandHelper {
     private IValueSetAdapter getIncludedValueSet(
             Optional<IEndpointAdapter> terminologyEndpoint,
             List<IValueSetAdapter> valueSets,
-            Repository repository,
+            IRepository repository,
             String reference,
             String url,
             String version) {

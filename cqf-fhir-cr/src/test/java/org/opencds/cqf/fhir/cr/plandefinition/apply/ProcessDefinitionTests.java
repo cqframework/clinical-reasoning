@@ -9,6 +9,7 @@ import static org.opencds.cqf.fhir.cr.helpers.RequestHelpers.newPDApplyRequestFo
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.repository.IRepository;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.OperationOutcome;
@@ -20,7 +21,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 
 @ExtendWith(MockitoExtension.class)
@@ -33,7 +33,7 @@ class ProcessDefinitionTests {
     private final FhirContext fhirContextR4 = FhirContext.forR4Cached();
 
     @Mock
-    Repository repository;
+    IRepository repository;
 
     @Mock
     LibraryEngine libraryEngine;

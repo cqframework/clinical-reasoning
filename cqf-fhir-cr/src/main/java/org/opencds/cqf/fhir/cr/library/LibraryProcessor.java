@@ -6,6 +6,7 @@ import static org.opencds.cqf.fhir.utility.repository.Repositories.createRestRep
 import static org.opencds.cqf.fhir.utility.repository.Repositories.proxy;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.repository.IRepository;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
@@ -15,7 +16,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.common.DataRequirementsProcessor;
@@ -36,19 +36,19 @@ public class LibraryProcessor {
     protected IPackageProcessor packageProcessor;
     protected IDataRequirementsProcessor dataRequirementsProcessor;
     protected IEvaluateProcessor evaluateProcessor;
-    protected Repository repository;
+    protected IRepository repository;
     protected EvaluationSettings evaluationSettings;
 
-    public LibraryProcessor(Repository repository) {
+    public LibraryProcessor(IRepository repository) {
         this(repository, EvaluationSettings.getDefault());
     }
 
-    public LibraryProcessor(Repository repository, EvaluationSettings evaluationSettings) {
+    public LibraryProcessor(IRepository repository, EvaluationSettings evaluationSettings) {
         this(repository, evaluationSettings, null, null, null);
     }
 
     public LibraryProcessor(
-            Repository repository,
+            IRepository repository,
             EvaluationSettings evaluationSettings,
             IPackageProcessor packageProcessor,
             IDataRequirementsProcessor dataRequirementsProcessor,
@@ -154,9 +154,9 @@ public class LibraryProcessor {
             boolean useServerData,
             IBaseBundle data,
             List<? extends IBaseBackboneElement> prefetchData,
-            Repository dataRepository,
-            Repository contentRepository,
-            Repository terminologyRepository) {
+            IRepository dataRepository,
+            IRepository contentRepository,
+            IRepository terminologyRepository) {
         repository = proxy(repository, useServerData, dataRepository, contentRepository, terminologyRepository);
         return evaluate(
                 library,

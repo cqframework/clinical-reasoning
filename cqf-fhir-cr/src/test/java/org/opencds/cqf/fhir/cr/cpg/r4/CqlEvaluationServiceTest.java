@@ -10,6 +10,7 @@ import static org.opencds.cqf.fhir.utility.r4.Parameters.parameters;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
 
 class CqlEvaluationServiceTest {
@@ -123,14 +124,8 @@ class CqlEvaluationServiceTest {
         assertTrue(report.hasParameter());
         assertTrue(report.getParameterFirstRep().hasName());
         assertEquals("return", report.getParameterFirstRep().getName());
-        // The error is no longer being returned as an OperationOutcome from the engine
-        //        assertTrue(report.getParameterFirstRep().hasResource());
-        //        assertInstanceOf(OperationOutcome.class, report.getParameterFirstRep().getResource());
-        //        assertEquals(
-        //                "Unsupported interval point type for FHIR conversion java.lang.Integer",
-        //                ((OperationOutcome) report.getParameterFirstRep().getResource())
-        //                        .getIssueFirstRep()
-        //                        .getDetails()
-        //                        .getText());
+        var value =
+                assertInstanceOf(StringType.class, report.getParameterFirstRep().getValue());
+        assertEquals("Interval[1, 5]", value.toString());
     }
 }

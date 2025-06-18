@@ -140,13 +140,12 @@ class ReleaseVisitorTests {
                 assertEquals("Measure Cervical Cancer ScreeningFHIR, 0.0.001", dependency.getDisplay());
             }
             // expansion params versions should be used
-            if (Canonicals.getUrl(dependency.getResource()) != null
-                    && Objects.equals(Canonicals.getUrl(dependency.getResource()), "http://loinc.org")) {
+            var canonicalUrl = Canonicals.getUrl(dependency.getResource());
+            if ("http://loinc.org".equals(canonicalUrl)) {
                 assertNotNull(Canonicals.getVersion(dependency.getResource()));
                 assertEquals("2.76", Canonicals.getVersion(dependency.getResource()));
             }
-            if (Canonicals.getUrl(dependency.getResource()) != null
-                    && Objects.equals(Canonicals.getUrl(dependency.getResource()), "http://snomed.info/sct")) {
+            if ("http://snomed.info/sct".equals(canonicalUrl)) {
                 assertNotNull(Canonicals.getVersion(dependency.getResource()));
                 assertEquals(
                         "http://snomed.info/sct/731000124108/version/20230901",

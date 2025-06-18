@@ -74,6 +74,12 @@ public class RestRepository implements IRepository {
             Map<String, String> headers) {
         var params = new HashMap<String, List<IQueryParameterType>>();
         if (searchParameters != null) {
+            for (var key : searchParameters.keySet()) {
+                var flattenLists =
+                        searchParameters.get(key).stream().flatMap(List::stream).toList();
+
+                params.put(key, flattenLists);
+            }
             searchParameters.entries().forEach(p -> params.put(p.getKey(), p.getValue()));
         }
         return search(bundleType, resourceType, params, Collections.emptyMap());

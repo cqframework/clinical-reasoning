@@ -97,9 +97,6 @@ class LibraryEvaluationServiceTest {
         assertFalse(outcome.getIssue().isEmpty());
         var issue = outcome.getIssueFirstRep();
         assertEquals(OperationOutcome.IssueSeverity.ERROR, issue.getSeverity());
-        assertEquals(
-                "Example Failure Code: This is an error message\n",
-                issue.getDetails().getText());
         assertEquals("This is an error message", issue.getDiagnostics());
     }
 

@@ -6,7 +6,6 @@ import ca.uhn.fhir.parser.IParser;
 import com.google.common.base.Stopwatch;
 import java.io.BufferedWriter;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -24,8 +23,6 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.lang3.tuple.Pair;
-import org.cqframework.cql.cql2elm.CqlCompiler;
-import org.cqframework.cql.cql2elm.CqlCompilerOptions;
 import org.cqframework.cql.cql2elm.CqlCompilerOptions.Options;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptionsMapper;
@@ -263,17 +260,20 @@ public class CqlCommand implements Callable<Integer> {
         MeasureEvaluationOptions evaluationOptions = new MeasureEvaluationOptions();
         evaluationOptions.setApplyScoringSetMembership(false);
         evaluationOptions.setEvaluationSettings(evaluationSettings);
-        R4MeasureProcessor measureProcessor = new R4MeasureProcessor(repository, evaluationOptions, new R4RepositorySubjectProvider(new SubjectProviderOptions()), new R4MeasureServiceUtils(repository));
+        R4MeasureProcessor measureProcessor = new R4MeasureProcessor(
+                repository,
+                evaluationOptions,
+                new R4RepositorySubjectProvider(new SubjectProviderOptions()),
+                new R4MeasureServiceUtils(repository));
 
         // hack to bring in Measure
         IParser parser = fhirContext.newJsonParser();
 
         Measure measure = null;
-        if(measureName != null && !measureName.contains("null")) {
+        if (measureName != null && !measureName.contains("null")) {
             InputStream is = new FileInputStream(measurePath + measureName + ".json");
-            measure = (org.hl7.fhir.r4.model.Measure)
-                parser.parseResource(is);
-            if(measure == null) {
+            measure = (org.hl7.fhir.r4.model.Measure) parser.parseResource(is);
+            if (measure == null) {
                 throw new IllegalArgumentException(String.format("measureName: %s not found", measureName));
             }
         }
@@ -283,8 +283,7 @@ public class CqlCommand implements Callable<Integer> {
         AtomicInteger counter = new AtomicInteger(0);
         for (var e : evaluations) {
             String basePath = resultsPath;
-            Path filepath = Paths.get(
-                basePath + this.library.libraryName + "/" + e.context.contextValue + ".txt");
+            Path filepath = Paths.get(basePath + this.library.libraryName + "/" + e.context.contextValue + ".txt");
 
             // ✅ Skip if already written
             if (Files.exists(filepath)) {
@@ -295,7 +294,7 @@ public class CqlCommand implements Callable<Integer> {
             var engine = Engines.forRepository(repository, evaluationSettings);
             // enable return all and equivalence
             engine.getState().getEngineOptions().add(CqlEngine.Options.EnableHedisCompatibilityMode);
-            //engine.getState().getEngineOptions().add(CqlCompilerOptions.EnableResultTypes);
+            // engine.getState().getEngineOptions().add(CqlCompilerOptions.EnableResultTypes);
             if (library.libraryUrl != null) {
                 var provider = new DefaultLibrarySourceProvider(Path.of(library.libraryUrl));
                 engine.getEnvironment()
@@ -314,39 +313,34 @@ public class CqlCommand implements Callable<Integer> {
             result.put(subjectId, cqlResult);
 
             // generate MeasureReport from ExpressionResult
-            if(measure != null) {
+            if (measure != null) {
                 String jsonReport;
-                if(periodStart != null && periodEnd != null) {
+                if (periodStart != null && periodEnd != null) {
                     var report = measureProcessor.evaluateMeasureResults(
-                        measure,
-                        LocalDate.parse(periodStart, DateTimeFormatter.ISO_LOCAL_DATE)
-                            .atStartOfDay(ZoneId.systemDefault()),
-                        LocalDate.parse(periodEnd, DateTimeFormatter.ISO_LOCAL_DATE)
-                            .atTime(LocalTime.MAX)
-                            .atZone(ZoneId.systemDefault()),
-                        "subject",
-                        Collections.singletonList(subjectId),
-                        result);
+                            measure,
+                            LocalDate.parse(periodStart, DateTimeFormatter.ISO_LOCAL_DATE)
+                                    .atStartOfDay(ZoneId.systemDefault()),
+                            LocalDate.parse(periodEnd, DateTimeFormatter.ISO_LOCAL_DATE)
+                                    .atTime(LocalTime.MAX)
+                                    .atZone(ZoneId.systemDefault()),
+                            "subject",
+                            Collections.singletonList(subjectId),
+                            result);
 
                     jsonReport = parser.encodeResourceToString(report);
                 } else {
                     var report = measureProcessor.evaluateMeasureResults(
-                        measure,
-                        null,
-                        null,
-                        "subject",
-                        Collections.singletonList(subjectId),
-                        result);
-                     jsonReport = parser.encodeResourceToString(report);
+                            measure, null, null, "subject", Collections.singletonList(subjectId), result);
+                    jsonReport = parser.encodeResourceToString(report);
                 }
 
-                writeJsonToFile(jsonReport, e.context.contextValue,
-                    basePath + this.library.libraryName + "/measurereports");
+                writeJsonToFile(
+                        jsonReport, e.context.contextValue, basePath + this.library.libraryName + "/measurereports");
             }
-            if(singleFile) {
+            if (singleFile) {
                 // ✅ Write TXT result
-                writeResultToFile(cqlResult, e.context.contextValue,
-                    basePath + this.library.libraryName + "/txtresults");
+                writeResultToFile(
+                        cqlResult, e.context.contextValue, basePath + this.library.libraryName + "/txtresults");
             } else {
                 writeResult(cqlResult);
             }

@@ -2,13 +2,6 @@ package org.opencds.cqf.fhir.cr.cli;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
-import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.TestInstance.Lifecycle;
-import org.junit.jupiter.api.io.TempDir;
-import org.opencds.cqf.fhir.test.Resources;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import picocli.CommandLine.Option;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -18,17 +11,20 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.TestInstance.Lifecycle;
+import org.junit.jupiter.api.io.TempDir;
+import org.opencds.cqf.fhir.test.Resources;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @TestInstance(Lifecycle.PER_CLASS)
 class HedisCliTest {
 
     @TempDir
     private static Path tempDir;
+
     protected static final Logger ourLog = LoggerFactory.getLogger(HedisCliTest.class);
 
     private ByteArrayOutputStream outContent;
@@ -69,50 +65,45 @@ class HedisCliTest {
         System.err.println(sysError);
     }
 
-
     @Test
     public void testParseBundles() throws Exception {
         var test_deck_dir = "/Users/justinmckelvy/Documents/DCSv2/";
         List<String> measureCodes = new ArrayList<>();
-//        measureCodes.add("DAE");
-//        measureCodes.add("DBO"); // partially unwrapped
-//        measureCodes.add("DDE");
-//        measureCodes.add("DMH");
-//        measureCodes.add("DMSE");
-//        measureCodes.add("DRRE");
-//        measureCodes.add("DSFE");
-//        measureCodes.add("DSU");
-//        measureCodes.add("EDH");
-//        measureCodes.add("EDU");
+        //        measureCodes.add("DAE");
+        //        measureCodes.add("DBO"); // partially unwrapped
+        //        measureCodes.add("DDE");
+        //        measureCodes.add("DMH");
+        //        measureCodes.add("DMSE");
+        //        measureCodes.add("DRRE");
+        //        measureCodes.add("DSFE");
+        //        measureCodes.add("DSU");
+        //        measureCodes.add("EDH");
+        //        measureCodes.add("EDU");
 
         for (String measureCode : measureCodes) {
             String patientBundles = test_deck_dir + measureCode + "/Sample/v0_tests/tests/Patient";
-            //"/Users/justinmckelvy/Documents/BulkImport_raw/AAB/AAB-Sample/test";
-            //String libraryName = measureCode + "_Reporting";
+            // "/Users/justinmckelvy/Documents/BulkImport_raw/AAB/AAB-Sample/test";
+            // String libraryName = measureCode + "_Reporting";
             // Data staging
             Path dirPath = Paths.get(test_deck_dir + measureCode + "/Sample/deck"); // ← replace with your directory
 
             processNDJSON(patientBundles, dirPath);
         }
-
-
     }
 
     public void processNDJSON(String patientBundles, Path dirPath) throws Exception {
         Path output = Paths.get(patientBundles);
         try (Stream<Path> paths = Files.list(dirPath)) {
-            paths
-                .filter(Files::isRegularFile) // skip subdirectories
-                .forEach(path -> {
-                    Path fullPath = path.toAbsolutePath();
-                    try {
-                        NdjsonBundleExtractor.extractBundlesToDirs(fullPath, output);
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                });
+            paths.filter(Files::isRegularFile) // skip subdirectories
+                    .forEach(path -> {
+                        Path fullPath = path.toAbsolutePath();
+                        try {
+                            NdjsonBundleExtractor.extractBundlesToDirs(fullPath, output);
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
         }
-
     }
 
     @Test
@@ -130,35 +121,51 @@ class HedisCliTest {
         var periodEnd = "2024-12-31";
         String patientBundles = directory + measureCode + suffix;
 
-        run(measureCode + "_Reporting",
-            patientBundles + testPatientId, 250000, cqlContentDirectory, resultsPath, measurePath, measureId, periodStart, periodEnd, testPatientId);
+        run(
+                measureCode + "_Reporting",
+                patientBundles + testPatientId,
+                250000,
+                cqlContentDirectory,
+                resultsPath,
+                measurePath,
+                measureId,
+                periodStart,
+                periodEnd,
+                testPatientId);
+    }
 
-
-
-        }
-    void run(String libraryName, String patientPath, int count, String cqlContentDirectory, String resultsPath, String measurePath, String measure, String periodStart, String periodEnd, String patientId) throws IOException {
+    void run(
+            String libraryName,
+            String patientPath,
+            int count,
+            String cqlContentDirectory,
+            String resultsPath,
+            String measurePath,
+            String measure,
+            String periodStart,
+            String periodEnd,
+            String patientId)
+            throws IOException {
         var baseArgs = Stream.of(
-            "cql",
-            "-fv=R4",
-            "-rd=" + cqlContentDirectory,
-            "-lu=" + cqlContentDirectory + "/input/cql",
-            "-ln=" + libraryName,
-            "-lv=2024.2.0",
-            "-m=FHIR",
-            "-mu=" + patientPath,
-            "-resultsPath=" + resultsPath,
-            "-singleFile=" + true,
-            "-t=" + cqlContentDirectory + "/input/vocabulary/valueset",
-            "-measurePath=" + measurePath,
-            "-measure=" + measure,
-            "-periodStart=" + periodStart,
-            "-periodEnd=" + periodEnd,
-            "-c=Patient",
-            "-cv=" + patientId
-        );
+                "cql",
+                "-fv=R4",
+                "-rd=" + cqlContentDirectory,
+                "-lu=" + cqlContentDirectory + "/input/cql",
+                "-ln=" + libraryName,
+                "-lv=2024.2.0",
+                "-m=FHIR",
+                "-mu=" + patientPath,
+                "-resultsPath=" + resultsPath,
+                "-singleFile=" + true,
+                "-t=" + cqlContentDirectory + "/input/vocabulary/valueset",
+                "-measurePath=" + measurePath,
+                "-measure=" + measure,
+                "-periodStart=" + periodStart,
+                "-periodEnd=" + periodEnd,
+                "-c=Patient",
+                "-cv=" + patientId);
 
         var args = baseArgs.toArray(String[]::new);
         Main.run(args);
     }
-
 }

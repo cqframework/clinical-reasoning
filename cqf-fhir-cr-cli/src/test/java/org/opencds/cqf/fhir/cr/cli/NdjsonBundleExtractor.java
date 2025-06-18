@@ -2,8 +2,6 @@ package org.opencds.cqf.fhir.cr.cli;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Resource;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -11,6 +9,8 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.zip.GZIPInputStream;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Resource;
 
 public class NdjsonBundleExtractor {
 
@@ -18,8 +18,8 @@ public class NdjsonBundleExtractor {
     private static final IParser parser = fhirContext.newJsonParser().setPrettyPrint(true);
 
     public static void extractBundlesToDirs(Path ndjsonGzFile, Path outputRootDir) throws IOException {
-        try (BufferedReader reader = new BufferedReader(
-            new InputStreamReader(new GZIPInputStream(Files.newInputStream(ndjsonGzFile))))) {
+        try (BufferedReader reader =
+                new BufferedReader(new InputStreamReader(new GZIPInputStream(Files.newInputStream(ndjsonGzFile))))) {
 
             int bundleIndex = 0;
             String line;

@@ -48,6 +48,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
     private Logger logger = LoggerFactory.getLogger(ReleaseVisitor.class);
     private static final String DEPENDSON = "depends-on";
     private static final String VALUESET = "ValueSet";
+    private static final String CODESYSTEM = "CodeSystem";
     protected final TerminologyServerClient terminologyServerClient;
 
     public ReleaseVisitor(Repository repository) {
@@ -308,9 +309,19 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
                         fhirVersion(),
                         DEPENDSON,
                         maybeLatest
-                                .map(r -> r.getCanonical())
+                                .map(IKnowledgeArtifactAdapter::getCanonical)
                                 .orElse(IKnowledgeArtifactAdapter.getRelatedArtifactReference(component)),
-                        maybeLatest.map(a -> a.getDescriptor()).orElse(null));
+                        maybeLatest
+                                .map(IKnowledgeArtifactAdapter::getDescriptor)
+                                .orElse(null));
+
+                var resourceType = maybeLatest
+                        .map(r -> Canonicals.getResourceType(r.getCanonical()))
+                        .orElse(Canonicals.getResourceType(
+                                IKnowledgeArtifactAdapter.getRelatedArtifactReference(component)));
+
+                ensureResourceTypeExtension(resourceType, componentToDependency);
+
                 // add to dependencies
                 var updatedRelatedArtifacts = artifactAdapter.getRelatedArtifact();
                 updatedRelatedArtifacts.add(componentToDependency);
@@ -371,6 +382,9 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
                             DEPENDSON,
                             dependency.getReference(),
                             dependencyAdapter != null ? dependencyAdapter.getDescriptor() : null);
+
+                    ensureResourceTypeExtension(getResourceType(dependency), newDep);
+
                     var updatedRelatedArtifacts = rootAdapter.getRelatedArtifact();
                     updatedRelatedArtifacts.add(newDep);
                     rootAdapter.setRelatedArtifact(updatedRelatedArtifacts);
@@ -378,6 +392,20 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
             }
 
             extractMeasureDirectReferenceCodes(rootAdapter, artifactAdapter);
+        }
+    }
+
+    private void ensureResourceTypeExtension(String resourceType, ICompositeType newDep) {
+        if (resourceType != null && (resourceType.equals(VALUESET) || resourceType.equals(CODESYSTEM))) {
+            if (this.fhirVersion().equals(FhirVersionEnum.R4)) {
+                ((org.hl7.fhir.r4.model.RelatedArtifact) newDep)
+                        .getResourceElement()
+                        .addExtension(Constants.CQF_RESOURCETYPE, new org.hl7.fhir.r4.model.CodeType(resourceType));
+            } else if (this.fhirVersion().equals(FhirVersionEnum.R5)) {
+                ((org.hl7.fhir.r5.model.RelatedArtifact) newDep)
+                        .getResourceElement()
+                        .addExtension(Constants.CQF_RESOURCETYPE, new org.hl7.fhir.r5.model.CodeType(resourceType));
+            }
         }
     }
 
@@ -484,7 +512,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
             List<String> systemVersionExpansionParameters) {
         Optional<String> expansionParametersVersion = Optional.empty();
         // assume if we can't figure out the resource type it's a CodeSystem
-        if (resourceType == null || resourceType.equals("CodeSystem")) {
+        if (resourceType == null || resourceType.equals(CODESYSTEM)) {
             expansionParametersVersion = systemVersionExpansionParameters.stream()
                     .filter(canonical -> !StringUtils.isBlank(Canonicals.getUrl(canonical)))
                     .filter(canonical -> Canonicals.getUrl(canonical).equals(dependency.getReference()))

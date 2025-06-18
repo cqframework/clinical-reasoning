@@ -135,7 +135,12 @@ public class MeasureEvaluator {
             }
         }
 
-        return (Iterable<Object>) expressionResult.value();
+        Object value = expressionResult.value();
+        if (value instanceof Iterable<?>) {
+            return (Iterable<Object>) value;
+        } else {
+            return Collections.singletonList(value);
+        }
     }
 
     protected PopulationDef evaluatePopulationMembership(
@@ -184,93 +189,90 @@ public class MeasureEvaluator {
         // add resources
         // add subject
 
+        // Evaluate Population Expressions
         initialPopulation = evaluatePopulationMembership(subjectType, subjectId, initialPopulation, evaluationResult);
+        denominator = evaluatePopulationMembership(subjectType, subjectId, denominator, evaluationResult);
+        numerator = evaluatePopulationMembership(subjectType, subjectId, numerator, evaluationResult);
+        if (applyScoring) {
+            // remove denominator values not in IP
+            denominator.getResources().retainAll(initialPopulation.getResources());
+            denominator.getSubjects().retainAll(initialPopulation.getSubjects());
+            // remove numerator values if not in Denominator
+            numerator.getSubjects().retainAll(denominator.getSubjects());
+            numerator.getResources().retainAll(denominator.getResources());
+        }
+        // Evaluate Exclusions and Exception Populations
+        if (denominatorExclusion != null) {
+            denominatorExclusion =
+                    evaluatePopulationMembership(subjectType, subjectId, denominatorExclusion, evaluationResult);
+        }
+        if (denominatorException != null) {
+            denominatorException =
+                    evaluatePopulationMembership(subjectType, subjectId, denominatorException, evaluationResult);
+        }
+        if (numeratorExclusion != null) {
+            numeratorExclusion =
+                    evaluatePopulationMembership(subjectType, subjectId, numeratorExclusion, evaluationResult);
+        }
+        // Apply Exclusions and Exceptions
+        if (groupDef.isBooleanBasis()) {
+            // Remove Subject and Resource Exclusions
+            if (denominatorExclusion != null && applyScoring) {
+                // numerator should not include den-exclusions
+                numerator.getSubjects().removeAll(denominatorExclusion.getSubjects());
+                numerator.removeOverlaps(denominatorExclusion.getSubjectResources());
 
-        if (initialPopulation.getSubjects().contains(subjectId)) {
-            // Evaluate Population Expressions
-            denominator = evaluatePopulationMembership(subjectType, subjectId, denominator, evaluationResult);
-            numerator = evaluatePopulationMembership(subjectType, subjectId, numerator, evaluationResult);
-            if (applyScoring) {
-                // remove denominator values not in IP
-                denominator.getResources().retainAll(initialPopulation.getResources());
-                denominator.getSubjects().retainAll(initialPopulation.getSubjects());
-                // remove numerator values if not in Denominator
-                numerator.getSubjects().retainAll(denominator.getSubjects());
-                numerator.getResources().retainAll(denominator.getResources());
+                // verify exclusion results are found in denominator
+                denominatorExclusion.getResources().retainAll(denominator.getResources());
+                denominatorExclusion.getSubjects().retainAll(denominator.getSubjects());
+                denominatorExclusion.retainOverlaps(denominator.getSubjectResources());
             }
-            // Evaluate Exclusions and Exception Populations
-            if (denominatorExclusion != null) {
-                denominatorExclusion =
-                        evaluatePopulationMembership(subjectType, subjectId, denominatorExclusion, evaluationResult);
+            if (numeratorExclusion != null && applyScoring) {
+                // verify results are in Numerator
+                numeratorExclusion.getResources().retainAll(numerator.getResources());
+                numeratorExclusion.getSubjects().retainAll(numerator.getSubjects());
+                numeratorExclusion.retainOverlaps(numerator.getSubjectResources());
             }
-            if (denominatorException != null) {
-                denominatorException =
-                        evaluatePopulationMembership(subjectType, subjectId, denominatorException, evaluationResult);
-            }
-            if (numeratorExclusion != null) {
-                numeratorExclusion =
-                        evaluatePopulationMembership(subjectType, subjectId, numeratorExclusion, evaluationResult);
-            }
-            // Apply Exclusions and Exceptions
-            if (groupDef.isBooleanBasis()) {
-                // Remove Subject and Resource Exclusions
-                if (denominatorExclusion != null && applyScoring) {
-                    // numerator should not include den-exclusions
-                    numerator.getSubjects().removeAll(denominatorExclusion.getSubjects());
-                    numerator.removeOverlaps(denominatorExclusion.getSubjectResources());
+            if (denominatorException != null && applyScoring) {
+                // Remove Subjects Exceptions that are present in Numerator
+                denominatorException.getSubjects().removeAll(numerator.getSubjects());
+                denominatorException.getResources().removeAll(numerator.getResources());
+                denominatorException.removeOverlaps(numerator.getSubjectResources());
 
-                    // verify exclusion results are found in denominator
-                    denominatorExclusion.getResources().retainAll(denominator.getResources());
-                    denominatorExclusion.getSubjects().retainAll(denominator.getSubjects());
-                    denominatorExclusion.retainOverlaps(denominator.getSubjectResources());
-                }
-                if (numeratorExclusion != null && applyScoring) {
-                    // verify results are in Numerator
-                    numeratorExclusion.getResources().retainAll(numerator.getResources());
-                    numeratorExclusion.getSubjects().retainAll(numerator.getSubjects());
-                    numeratorExclusion.retainOverlaps(numerator.getSubjectResources());
-                }
-                if (denominatorException != null && applyScoring) {
-                    // Remove Subjects Exceptions that are present in Numerator
-                    denominatorException.getSubjects().removeAll(numerator.getSubjects());
-                    denominatorException.getResources().removeAll(numerator.getResources());
-                    denominatorException.removeOverlaps(numerator.getSubjectResources());
-
-                    // verify exception results are found in denominator
-                    denominatorException.getResources().retainAll(denominator.getResources());
-                    denominatorException.getSubjects().retainAll(denominator.getSubjects());
-                    denominatorException.retainOverlaps(denominator.getSubjectResources());
-                }
-            } else {
-                // Remove Only Resource Exclusions
-                // * Multiple resources can be from one subject and represented in multiple populations
-                // * This is why we only remove resources and not subjects too for `Resource Basis`.
-                if (denominatorExclusion != null && applyScoring) {
-                    // remove any denominator-exception subjects/resources found in Numerator
-                    numerator.getResources().removeAll(denominatorExclusion.getResources());
-                    numerator.removeOverlaps(denominatorExclusion.getSubjectResources());
-                    // verify exclusion results are found in denominator
-                    denominatorExclusion.getResources().retainAll(denominator.getResources());
-                    denominatorExclusion.retainOverlaps(denominator.getSubjectResources());
-                }
-                if (numeratorExclusion != null && applyScoring) {
-                    // verify exclusion results are found in numerator results, otherwise remove
-                    numeratorExclusion.getResources().retainAll(numerator.getResources());
-                    numeratorExclusion.retainOverlaps(numerator.getSubjectResources());
-                }
-                if (denominatorException != null && applyScoring) {
-                    // Remove Resource Exceptions that are present in Numerator
-                    denominatorException.getResources().removeAll(numerator.getResources());
-                    denominatorException.removeOverlaps(numerator.getSubjectResources());
-                    // verify exception results are found in denominator
-                    denominatorException.getResources().retainAll(denominator.getResources());
-                    denominatorException.retainOverlaps(denominator.getSubjectResources());
-                }
+                // verify exception results are found in denominator
+                denominatorException.getResources().retainAll(denominator.getResources());
+                denominatorException.getSubjects().retainAll(denominator.getSubjects());
+                denominatorException.retainOverlaps(denominator.getSubjectResources());
             }
-            if (reportType.equals(MeasureReportType.INDIVIDUAL) && dateOfCompliance != null) {
-                var doc = evaluateDateOfCompliance(dateOfCompliance, evaluationResult);
-                dateOfCompliance.addResource(doc);
+        } else {
+            // Remove Only Resource Exclusions
+            // * Multiple resources can be from one subject and represented in multiple populations
+            // * This is why we only remove resources and not subjects too for `Resource Basis`.
+            if (denominatorExclusion != null && applyScoring) {
+                // remove any denominator-exception subjects/resources found in Numerator
+                numerator.getResources().removeAll(denominatorExclusion.getResources());
+                numerator.removeOverlaps(denominatorExclusion.getSubjectResources());
+                // verify exclusion results are found in denominator
+                denominatorExclusion.getResources().retainAll(denominator.getResources());
+                denominatorExclusion.retainOverlaps(denominator.getSubjectResources());
             }
+            if (numeratorExclusion != null && applyScoring) {
+                // verify exclusion results are found in numerator results, otherwise remove
+                numeratorExclusion.getResources().retainAll(numerator.getResources());
+                numeratorExclusion.retainOverlaps(numerator.getSubjectResources());
+            }
+            if (denominatorException != null && applyScoring) {
+                // Remove Resource Exceptions that are present in Numerator
+                denominatorException.getResources().removeAll(numerator.getResources());
+                denominatorException.removeOverlaps(numerator.getSubjectResources());
+                // verify exception results are found in denominator
+                denominatorException.getResources().retainAll(denominator.getResources());
+                denominatorException.retainOverlaps(denominator.getSubjectResources());
+            }
+        }
+        if (reportType.equals(MeasureReportType.INDIVIDUAL) && dateOfCompliance != null) {
+            var doc = evaluateDateOfCompliance(dateOfCompliance, evaluationResult);
+            dateOfCompliance.addResource(doc);
         }
     }
 

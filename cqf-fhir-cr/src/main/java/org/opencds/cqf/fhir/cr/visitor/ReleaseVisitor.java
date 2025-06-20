@@ -391,7 +391,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
                 }
             }
 
-            extractMeasureDirectReferenceCodes(rootAdapter, artifactAdapter);
+            extractMeasureDirectReferenceCodes(rootAdapter, artifactAdapter, endpoint);
         }
     }
 
@@ -410,13 +410,15 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
     }
 
     private void extractMeasureDirectReferenceCodes(
-            IKnowledgeArtifactAdapter rootAdapter, IKnowledgeArtifactAdapter artifactAdapter) {
+            IKnowledgeArtifactAdapter rootAdapter,
+            IKnowledgeArtifactAdapter artifactAdapter,
+            IEndpointAdapter endpoint) {
         if (artifactAdapter instanceof org.opencds.cqf.fhir.utility.adapter.r4.MeasureAdapter measureAdapter) {
             org.opencds.cqf.fhir.cr.visitor.r4.ReleaseVisitor.extractDirectReferenceCodes(
-                    rootAdapter, measureAdapter.get());
+                    rootAdapter, measureAdapter.get(), endpoint);
         } else if (artifactAdapter instanceof org.opencds.cqf.fhir.utility.adapter.r5.MeasureAdapter measureAdapter) {
             org.opencds.cqf.fhir.cr.visitor.r5.ReleaseVisitor.extractDirectReferenceCodes(
-                    rootAdapter, measureAdapter.get());
+                    rootAdapter, measureAdapter.get(), endpoint);
         }
     }
 

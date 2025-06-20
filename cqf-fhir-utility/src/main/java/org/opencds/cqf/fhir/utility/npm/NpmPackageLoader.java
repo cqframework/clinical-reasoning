@@ -7,9 +7,9 @@ import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.hl7.cql.model.ModelIdentifier;
 import org.hl7.cql.model.NamespaceInfo;
+import ca.uhn.fhir.repository.IRepository;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
 
 /**
@@ -21,7 +21,7 @@ import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
  * <p/>
  * A downstream app from clinical-reasoning will be able to maintain Measures and Libraries loaded
  * from NPM packages.  Such Measures and Libraries will, for those clients implementing this
- * feature, no longer be maintained in {@link Repository} storage, unlike all other FHIR resources,
+ * feature, no longer be maintained in {@link IRepository} storage, unlike all other FHIR resources,
  * such as Patients.
  * <p/>
  * Downstream apps are responsible for loading and retrieving such packages from implementations

@@ -17,9 +17,8 @@ import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.repository.IRepository;
-import java.nio.file.Path;
 import jakarta.annotation.Nonnull;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;

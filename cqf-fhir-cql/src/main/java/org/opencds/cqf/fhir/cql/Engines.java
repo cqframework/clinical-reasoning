@@ -60,15 +60,15 @@ public class Engines {
     public static CqlEngine forRepository(
             IRepository repository, EvaluationSettings settings, IBaseBundle additionalData) {
         return forRepository(
-            repository, settings, additionalData, NpmResourceInfoForCql.EMPTY, NpmPackageLoader.DEFAULT);
+                repository, settings, additionalData, NpmResourceInfoForCql.EMPTY, NpmPackageLoader.DEFAULT);
     }
 
     public static CqlEngine forRepository(
-        IRepository repository,
-        EvaluationSettings settings,
-        IBaseBundle additionalData,
-        NpmResourceInfoForCql npmResourceInfoForCql,
-        NpmPackageLoader npmPackageLoader) {
+            IRepository repository,
+            EvaluationSettings settings,
+            IBaseBundle additionalData,
+            NpmResourceInfoForCql npmResourceInfoForCql,
+            NpmPackageLoader npmPackageLoader) {
         checkNotNull(settings);
         checkNotNull(repository);
 

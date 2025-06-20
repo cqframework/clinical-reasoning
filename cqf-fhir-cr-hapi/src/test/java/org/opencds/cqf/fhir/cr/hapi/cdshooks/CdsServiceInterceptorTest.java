@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cr.hapi.cdshooks;
 import static ca.uhn.fhir.jpa.cache.ResourceChangeEvent.fromCreatedUpdatedDeletedResourceIds;
 import static java.util.Collections.emptyList;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -81,7 +82,7 @@ class CdsServiceInterceptorTest {
 
         fixture.handleChange(resourceChangeEvent);
 
-        inOrder.verify(cdsServiceRegistry, times(1)).unregisterService(ID, CDS_CR_MODULE_ID);
+        inOrder.verify(cdsServiceRegistry, times(1)).unregisterService(eq(ID), eq(CDS_CR_MODULE_ID));
 
         assertInsertInteractions();
     }
@@ -93,17 +94,17 @@ class CdsServiceInterceptorTest {
 
         fixture.handleChange(resourceChangeEvent);
 
-        verify(cdsServiceRegistry, times(1)).unregisterService(ID, CDS_CR_MODULE_ID);
+        verify(cdsServiceRegistry, times(1)).unregisterService(eq(ID), eq(CDS_CR_MODULE_ID));
         verifyNoInteractions(crServiceFactory, discoveryServiceFactory);
     }
 
     private void initializeCrDiscoveryServiceFactoryMock() {
-        when(discoveryServiceFactory.create(ID))
+        when(discoveryServiceFactory.create(eq(ID)))
                 .thenAnswer(theInvocationOnMock -> (ICrDiscoveryService) CdsServiceJson::new);
     }
 
     private void assertInsertInteractions() {
-        inOrder.verify(discoveryServiceFactory, times(1)).create(ID);
-        inOrder.verify(cdsServiceRegistry, times(1)).registerService(ID, any(), any(), true, CDS_CR_MODULE_ID);
+        inOrder.verify(discoveryServiceFactory, times(1)).create(eq(ID));
+        inOrder.verify(cdsServiceRegistry, times(1)).registerService(eq(ID), any(), any(), eq(true), eq(CDS_CR_MODULE_ID));
     }
 }

@@ -8,7 +8,6 @@ import ca.uhn.fhir.jpa.cache.ResourceChangeEvent;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseJson;
 import ca.uhn.hapi.fhir.cdshooks.svc.CdsServiceRegistryImpl;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -28,17 +27,13 @@ public class CdsServiceInterceptor implements IResourceChangeListener {
 
     private final ICdsCrServiceFactory crServiceFactory;
 
-    private final ObjectMapper om;
-
     public CdsServiceInterceptor(
             CdsServiceRegistryImpl cdsServiceRegistry,
             ICrDiscoveryServiceFactory discoveryServiceFactory,
-            ICdsCrServiceFactory crServiceFactory,
-            ObjectMapper om) {
+            ICdsCrServiceFactory crServiceFactory) {
         this.cdsServiceRegistry = cdsServiceRegistry;
         this.discoveryServiceFactory = discoveryServiceFactory;
         this.crServiceFactory = crServiceFactory;
-        this.om = om;
     }
 
     @Override
@@ -73,7 +68,7 @@ public class CdsServiceInterceptor implements IResourceChangeListener {
 
                     cdsServiceRegistry.registerService(
                             serviceId,
-                            x -> (CdsServiceResponseJson) cdsCrServiceMethod.invoke(om, x, serviceId),
+                            x -> (CdsServiceResponseJson) cdsCrServiceMethod.invoke(x, serviceId),
                             cdsServiceJson,
                             true,
                             CDS_CR_MODULE_ID);

@@ -98,12 +98,12 @@ class CdsServiceInterceptorTest {
     }
 
     private void initializeCrDiscoveryServiceFactoryMock() {
-        when(discoveryServiceFactory.create(ID)).thenAnswer(theInvocationOnMock -> (ICrDiscoveryService) CdsServiceJson::new);
+        when(discoveryServiceFactory.create(ID))
+                .thenAnswer(theInvocationOnMock -> (ICrDiscoveryService) CdsServiceJson::new);
     }
 
     private void assertInsertInteractions() {
         inOrder.verify(discoveryServiceFactory, times(1)).create(ID);
-        inOrder.verify(cdsServiceRegistry, times(1))
-                .registerService(ID, any(), any(), true, CDS_CR_MODULE_ID);
+        inOrder.verify(cdsServiceRegistry, times(1)).registerService(ID, any(), any(), true, CDS_CR_MODULE_ID);
     }
 }

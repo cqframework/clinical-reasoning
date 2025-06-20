@@ -53,7 +53,7 @@ public class Engines {
         return forRepository(repository, EvaluationSettings.getDefault());
     }
 
-    public static CqlEngine forRepository(Repository repository, EvaluationSettings settings) {
+    public static CqlEngine forRepository(IRepository repository, EvaluationSettings settings) {
         return forRepository(repository, settings, null, NpmResourceInfoForCql.EMPTY, NpmPackageLoader.DEFAULT);
     }
 

@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import org.apache.commons.lang3.ObjectUtils;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.fhir.cr.hapi.cdshooks.discovery.ICrDiscoveryServiceFactory;
 import org.slf4j.Logger;
@@ -49,18 +50,15 @@ public class CdsServiceInterceptor implements IResourceChangeListener {
     @Override
     public void handleChange(IResourceChangeEvent resourceChangeEvent) {
         if (resourceChangeEvent == null) return;
-        if (resourceChangeEvent.getCreatedResourceIds() != null
-                && !resourceChangeEvent.getCreatedResourceIds().isEmpty()) {
-            insert(resourceChangeEvent.getCreatedResourceIds());
-        }
-        if (resourceChangeEvent.getUpdatedResourceIds() != null
-                && !resourceChangeEvent.getUpdatedResourceIds().isEmpty()) {
-            update(resourceChangeEvent.getUpdatedResourceIds());
-        }
-        if (resourceChangeEvent.getDeletedResourceIds() != null
-                && !resourceChangeEvent.getDeletedResourceIds().isEmpty()) {
-            delete(resourceChangeEvent.getDeletedResourceIds());
-        }
+
+        List<IIdType> resourceIds = getChangedResourceIds(resourceChangeEvent.getCreatedResourceIds());
+        insert(resourceIds);
+
+        resourceIds = getChangedResourceIds(resourceChangeEvent.getUpdatedResourceIds());
+        update(resourceIds);
+
+        resourceIds = getChangedResourceIds(resourceChangeEvent.getDeletedResourceIds());
+        delete(resourceIds);
     }
 
     private void insert(List<IIdType> createdIds) {
@@ -100,5 +98,9 @@ public class CdsServiceInterceptor implements IResourceChangeListener {
         for (IIdType id : deletedIds) {
             cdsServiceRegistry.unregisterService(id.getIdPart(), CDS_CR_MODULE_ID);
         }
+    }
+
+    private List<IIdType> getChangedResourceIds(List<IIdType> resourceIds) {
+        return ObjectUtils.defaultIfNull(resourceIds, Collections.emptyList());
     }
 }

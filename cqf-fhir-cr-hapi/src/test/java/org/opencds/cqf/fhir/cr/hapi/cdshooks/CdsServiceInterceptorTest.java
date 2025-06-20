@@ -105,6 +105,7 @@ class CdsServiceInterceptorTest {
 
     private void assertInsertInteractions() {
         inOrder.verify(discoveryServiceFactory, times(1)).create(eq(ID));
-        inOrder.verify(cdsServiceRegistry, times(1)).registerService(eq(ID), any(), any(), eq(true), eq(CDS_CR_MODULE_ID));
+        inOrder.verify(cdsServiceRegistry, times(1))
+                .registerService(eq(ID), any(), any(), eq(true), eq(CDS_CR_MODULE_ID));
     }
 }

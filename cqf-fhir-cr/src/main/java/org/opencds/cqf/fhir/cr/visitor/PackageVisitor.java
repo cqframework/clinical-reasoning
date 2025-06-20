@@ -439,7 +439,8 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
 
     protected static IBaseParameters getExpansionParams(ILibraryAdapter rootSpecificationLibrary, String reference) {
         Optional<? extends IBaseResource> expansionParamResource = rootSpecificationLibrary.getContained().stream()
-                .filter(contained -> contained.getIdElement().getValue().equals(reference))
+                .filter(contained ->
+                        reference.equals("#" + contained.getIdElement().getValue()))
                 .findFirst();
         return (IBaseParameters) expansionParamResource.orElse(null);
     }

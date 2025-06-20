@@ -25,6 +25,8 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.builder.BundleBuilder;
+import org.opencds.cqf.fhir.utility.monad.Eithers;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.repository.Repositories;
 
 /**
@@ -36,28 +38,31 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
     private IRepository repository;
     private final MeasureEvaluationOptions measureEvaluationOptions;
     private final MeasurePeriodValidator measurePeriodValidator;
-    private String serverBase;
+    private final String serverBase;
 
     private final R4RepositorySubjectProvider subjectProvider;
 
     private R4MeasureProcessor r4Processor;
 
     private R4MeasureServiceUtils r4MeasureServiceUtils;
+    private final NpmPackageLoader npmPackageLoader;
 
     public R4MultiMeasureService(
             IRepository repository,
             MeasureEvaluationOptions measureEvaluationOptions,
             String serverBase,
-            MeasurePeriodValidator measurePeriodValidator) {
+            MeasurePeriodValidator measurePeriodValidator,
+            NpmPackageLoader npmPackageLoader) {
         this.repository = repository;
         this.measureEvaluationOptions = measureEvaluationOptions;
         this.measurePeriodValidator = measurePeriodValidator;
         this.serverBase = serverBase;
+        this.npmPackageLoader = npmPackageLoader;
 
         subjectProvider = new R4RepositorySubjectProvider(measureEvaluationOptions.getSubjectProviderOptions());
 
         r4Processor = new R4MeasureProcessor(
-                repository, this.measureEvaluationOptions, subjectProvider, r4MeasureServiceUtils);
+                repository, this.measureEvaluationOptions, subjectProvider, r4MeasureServiceUtils, npmPackageLoader);
 
         r4MeasureServiceUtils = new R4MeasureServiceUtils(repository);
     }
@@ -86,7 +91,11 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
             repository = Repositories.proxy(repository, true, dataEndpoint, contentEndpoint, terminologyEndpoint);
 
             r4Processor = new R4MeasureProcessor(
-                    repository, this.measureEvaluationOptions, subjectProvider, r4MeasureServiceUtils);
+                    repository,
+                    this.measureEvaluationOptions,
+                    subjectProvider,
+                    r4MeasureServiceUtils,
+                    npmPackageLoader);
 
             r4MeasureServiceUtils = new R4MeasureServiceUtils(repository);
         }
@@ -157,7 +166,14 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
             MeasureReport measureReport;
             // evaluate each measure
             measureReport = r4Processor.evaluateMeasure(
-                    measure, periodStart, periodEnd, reportType, subjects, additionalData, parameters, evalType);
+                    Eithers.forRight3(measure),
+                    periodStart,
+                    periodEnd,
+                    reportType,
+                    subjects,
+                    additionalData,
+                    parameters,
+                    evalType);
 
             // add ProductLine after report is generated
             measureReport = r4MeasureServiceUtils.addProductLineExtension(measureReport, productLine);
@@ -212,7 +228,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
                 MeasureReport measureReport;
                 // evaluate each measure
                 measureReport = r4Processor.evaluateMeasure(
-                        measure,
+                        Eithers.forRight3(measure),
                         periodStart,
                         periodEnd,
                         reportType,

@@ -3,13 +3,13 @@ package org.opencds.cqf.fhir.benchmark.measure.r4;
 import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
-import java.nio.file.Paths;
+import ca.uhn.fhir.repository.IRepository;
+import java.nio.file.Path;
 import java.time.ZonedDateTime;
 import java.util.function.Supplier;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MeasureReport;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
@@ -46,7 +46,7 @@ public class Measure {
     }
 
     public static class Given {
-        private Repository repository;
+        private IRepository repository;
         private MeasureEvaluationOptions evaluationOptions;
         private final MeasurePeriodValidator measurePeriodValidator;
         private final R4MeasureServiceUtils measureServiceUtils;
@@ -75,7 +75,7 @@ public class Measure {
         public Given repositoryFor(String repositoryPath) {
             this.repository = new IgRepository(
                     FhirContext.forR4Cached(),
-                    Paths.get(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
+                    Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
 
             return this;
         }

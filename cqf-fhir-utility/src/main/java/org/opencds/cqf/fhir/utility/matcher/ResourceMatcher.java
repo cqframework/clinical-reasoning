@@ -84,8 +84,8 @@ public interface ResourceMatcher {
             s = this.getCustomParameters().get(name);
         }
         if (s == null) {
-            throw new RuntimeException(String.format(
-                    "The SearchParameter %s for Resource %s is not supported.", name, resource.fhirType()));
+            throw new RuntimeException(
+                    "The SearchParameter %s for Resource %s is not supported.".formatted(name, resource.fhirType()));
         }
 
         var path = s.getPath();
@@ -102,18 +102,16 @@ public interface ResourceMatcher {
                     return getEngine().parse(p.path());
                 } catch (Exception e) {
                     throw new RuntimeException(
-                            String.format(
-                                    "Parsing SearchParameter %s for Resource %s resulted in an error.",
-                                    name, resource.fhirType()),
+                            "Parsing SearchParameter %s for Resource %s resulted in an error."
+                                    .formatted(name, resource.fhirType()),
                             e);
                 }
             });
             pathResult = getEngine().evaluate(resource, parsed, IBase.class);
         } catch (Exception e) {
             throw new RuntimeException(
-                    String.format(
-                            "Evaluating SearchParameter %s for Resource %s resulted in an error.",
-                            name, resource.fhirType()),
+                    "Evaluating SearchParameter %s for Resource %s resulted in an error."
+                            .formatted(name, resource.fhirType()),
                     e);
         }
 
@@ -170,26 +168,18 @@ public interface ResourceMatcher {
     }
 
     default boolean isMatchReference(IQueryParameterType param, IBase pathResult) {
-        if (pathResult instanceof IBaseReference) {
-            return ((IBaseReference) pathResult)
-                    .getReferenceElement()
-                    .getValue()
-                    .equals(((ReferenceParam) param).getValue());
-        } else if (pathResult instanceof IPrimitiveType) {
-            return ((IPrimitiveType<?>) pathResult).getValueAsString().equals(((ReferenceParam) param).getValue());
-        } else if (pathResult instanceof Iterable) {
-            for (var element : (Iterable<?>) pathResult) {
-                if (element instanceof IBaseReference
-                        && ((IBaseReference) element)
-                                .getReferenceElement()
-                                .getValue()
-                                .equals(((ReferenceParam) param).getValue())) {
+        if (pathResult instanceof IBaseReference reference1) {
+            return reference1.getReferenceElement().getValue().equals(((ReferenceParam) param).getValue());
+        } else if (pathResult instanceof IPrimitiveType<?> type1) {
+            return type1.getValueAsString().equals(((ReferenceParam) param).getValue());
+        } else if (pathResult instanceof Iterable<?> iterable) {
+            for (var element : iterable) {
+                if (element instanceof IBaseReference reference
+                        && reference.getReferenceElement().getValue().equals(((ReferenceParam) param).getValue())) {
                     return true;
                 }
-                if (element instanceof IPrimitiveType
-                        && ((IPrimitiveType<?>) element)
-                                .getValueAsString()
-                                .equals(((ReferenceParam) param).getValue())) {
+                if (element instanceof IPrimitiveType<?> type
+                        && type.getValueAsString().equals(((ReferenceParam) param).getValue())) {
                     return true;
                 }
             }
@@ -203,16 +193,16 @@ public interface ResourceMatcher {
     default boolean isMatchDate(DateParam param, IBase pathResult) {
         DateRangeParam dateRange;
         // date, dateTime and instant are PrimitiveType<Date>
-        if (pathResult instanceof IPrimitiveType) {
-            var result = ((IPrimitiveType<?>) pathResult).getValue();
-            if (result instanceof Date) {
-                dateRange = new DateRangeParam((Date) result, (Date) result);
+        if (pathResult instanceof IPrimitiveType<?> type1) {
+            var result = type1.getValue();
+            if (result instanceof Date date) {
+                dateRange = new DateRangeParam(date, date);
             } else {
                 throw new UnsupportedOperationException(
                         "Expected date, found " + pathResult.getClass().getSimpleName());
             }
-        } else if (pathResult instanceof ICompositeType) {
-            dateRange = getDateRange((ICompositeType) pathResult);
+        } else if (pathResult instanceof ICompositeType type) {
+            dateRange = getDateRange(type);
         } else {
             throw new UnsupportedOperationException(
                     "Expected element of type date, dateTime, instant, Timing or Period, found "
@@ -226,17 +216,16 @@ public interface ResourceMatcher {
             return true;
         }
 
-        if (pathResult instanceof IIdType) {
-            var id = (IIdType) pathResult;
+        if (pathResult instanceof IIdType id) {
             return param.getValue().equals(id.getIdPart());
         }
 
-        if (pathResult instanceof IBaseEnumeration) {
-            return param.getValue().equals(((IBaseEnumeration<?>) pathResult).getValueAsString());
+        if (pathResult instanceof IBaseEnumeration<?> enumeration) {
+            return param.getValue().equals(enumeration.getValueAsString());
         }
 
-        if (pathResult instanceof IPrimitiveType) {
-            return param.getValue().equals(((IPrimitiveType<?>) pathResult).getValue());
+        if (pathResult instanceof IPrimitiveType<?> type) {
+            return param.getValue().equals(type.getValue());
         }
 
         return false;
@@ -263,16 +252,16 @@ public interface ResourceMatcher {
     }
 
     default boolean isMatchUri(UriParam param, IBase pathResult) {
-        if (pathResult instanceof IPrimitiveType) {
-            return param.getValue().equals(((IPrimitiveType<?>) pathResult).getValue());
+        if (pathResult instanceof IPrimitiveType<?> type) {
+            return param.getValue().equals(type.getValue());
         }
         throw new UnsupportedOperationException("Expected element of type url or uri, found "
                 + pathResult.getClass().getSimpleName());
     }
 
     default boolean isMatchString(StringParam param, Object pathResult) {
-        if (pathResult instanceof IPrimitiveType) {
-            return param.getValue().equals(((IPrimitiveType<?>) pathResult).getValue());
+        if (pathResult instanceof IPrimitiveType<?> type) {
+            return param.getValue().equals(type.getValue());
         }
         throw new UnsupportedOperationException("Expected element of type string, found "
                 + pathResult.getClass().getSimpleName());

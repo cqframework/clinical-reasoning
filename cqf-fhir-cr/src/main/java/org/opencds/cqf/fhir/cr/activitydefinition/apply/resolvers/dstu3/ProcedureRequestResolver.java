@@ -40,7 +40,7 @@ public class ProcedureRequestResolver extends BaseRequestResourceResolver {
         if (activityDefinition.hasCode()) {
             procedureRequest.setCode(activityDefinition.getCode());
         } else if (!activityDefinition.hasDynamicValue()) {
-            throw new FHIRException(String.format(MISSING_CODE_PROPERTY, "Procedure"));
+            throw new FHIRException(MISSING_CODE_PROPERTY.formatted("Procedure"));
         }
 
         if (activityDefinition.hasBodySite()) {

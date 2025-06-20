@@ -42,7 +42,7 @@ public class BundleHelper {
 
             default:
                 throw new IllegalArgumentException(
-                        String.format(UNSUPPORTED_VERSION_OF_FHIR, fhirVersion.getFhirVersionString()));
+                        UNSUPPORTED_VERSION_OF_FHIR.formatted(fhirVersion.getFhirVersionString()));
         }
     }
 
@@ -67,7 +67,7 @@ public class BundleHelper {
 
             default:
                 throw new IllegalArgumentException(
-                        String.format(UNSUPPORTED_VERSION_OF_FHIR, fhirVersion.getFhirVersionString()));
+                        UNSUPPORTED_VERSION_OF_FHIR.formatted(fhirVersion.getFhirVersionString()));
         }
     }
 
@@ -108,7 +108,7 @@ public class BundleHelper {
 
             default:
                 throw new IllegalArgumentException(
-                        String.format(UNSUPPORTED_VERSION_OF_FHIR, fhirVersion.getFhirVersionString()));
+                        UNSUPPORTED_VERSION_OF_FHIR.formatted(fhirVersion.getFhirVersionString()));
         }
 
         return resources;
@@ -132,7 +132,7 @@ public class BundleHelper {
 
             default:
                 throw new IllegalArgumentException(
-                        String.format(UNSUPPORTED_VERSION_OF_FHIR, fhirVersion.getFhirVersionString()));
+                        UNSUPPORTED_VERSION_OF_FHIR.formatted(fhirVersion.getFhirVersionString()));
         }
     }
 
@@ -163,7 +163,7 @@ public class BundleHelper {
 
             default:
                 throw new IllegalArgumentException(
-                        String.format(UNSUPPORTED_VERSION_OF_FHIR, fhirVersion.getFhirVersionString()));
+                        UNSUPPORTED_VERSION_OF_FHIR.formatted(fhirVersion.getFhirVersionString()));
         }
     }
 
@@ -194,7 +194,7 @@ public class BundleHelper {
 
             default:
                 throw new IllegalArgumentException(
-                        String.format(UNSUPPORTED_VERSION_OF_FHIR, fhirVersion.getFhirVersionString()));
+                        UNSUPPORTED_VERSION_OF_FHIR.formatted(fhirVersion.getFhirVersionString()));
         }
     }
 
@@ -225,7 +225,7 @@ public class BundleHelper {
 
             default:
                 throw new IllegalArgumentException(
-                        String.format(UNSUPPORTED_VERSION_OF_FHIR, fhirVersion.getFhirVersionString()));
+                        UNSUPPORTED_VERSION_OF_FHIR.formatted(fhirVersion.getFhirVersionString()));
         }
     }
 
@@ -248,7 +248,7 @@ public class BundleHelper {
 
             default:
                 throw new IllegalArgumentException(
-                        String.format(UNSUPPORTED_VERSION_OF_FHIR, fhirVersion.getFhirVersionString()));
+                        UNSUPPORTED_VERSION_OF_FHIR.formatted(fhirVersion.getFhirVersionString()));
         }
     }
 
@@ -282,8 +282,29 @@ public class BundleHelper {
 
             default:
                 throw new IllegalArgumentException(
-                        String.format(UNSUPPORTED_VERSION_OF_FHIR, fhirVersion.getFhirVersionString()));
+                        UNSUPPORTED_VERSION_OF_FHIR.formatted(fhirVersion.getFhirVersionString()));
         }
+    }
+
+    /**
+     * Gets request url if present
+     *
+     * @param fhirVersion FhirVersionEnum
+     * @param entry IBaseBackboneElement type
+     * @return url of request
+     */
+    public static String getEntryRequestUrl(FhirVersionEnum fhirVersion, IBaseBackboneElement entry) {
+        return switch (fhirVersion) {
+            case DSTU3 -> ((Bundle.BundleEntryComponent) entry).getRequest().getUrl();
+            case R4 -> ((org.hl7.fhir.r4.model.Bundle.BundleEntryComponent) entry)
+                    .getRequest()
+                    .getUrl();
+            case R5 -> ((org.hl7.fhir.r5.model.Bundle.BundleEntryComponent) entry)
+                    .getRequest()
+                    .getUrl();
+            default -> throw new IllegalArgumentException(
+                    String.format(UNSUPPORTED_VERSION_OF_FHIR, fhirVersion.getFhirVersionString()));
+        };
     }
 
     /**
@@ -310,7 +331,7 @@ public class BundleHelper {
                 break;
             default:
                 throw new IllegalArgumentException(
-                        String.format(UNSUPPORTED_VERSION_OF_FHIR, fhirVersion.getFhirVersionString()));
+                        UNSUPPORTED_VERSION_OF_FHIR.formatted(fhirVersion.getFhirVersionString()));
         }
     }
 
@@ -339,7 +360,7 @@ public class BundleHelper {
 
             default:
                 throw new IllegalArgumentException(
-                        String.format(UNSUPPORTED_VERSION_OF_FHIR, fhirVersion.getFhirVersionString()));
+                        UNSUPPORTED_VERSION_OF_FHIR.formatted(fhirVersion.getFhirVersionString()));
         }
 
         return bundle;
@@ -398,7 +419,7 @@ public class BundleHelper {
 
             default:
                 throw new IllegalArgumentException(
-                        String.format(UNSUPPORTED_VERSION_OF_FHIR, fhirVersion.getFhirVersionString()));
+                        UNSUPPORTED_VERSION_OF_FHIR.formatted(fhirVersion.getFhirVersionString()));
         }
     }
 
@@ -423,7 +444,7 @@ public class BundleHelper {
 
             default:
                 throw new IllegalArgumentException(
-                        String.format(UNSUPPORTED_VERSION_OF_FHIR, fhirVersion.getFhirVersionString()));
+                        UNSUPPORTED_VERSION_OF_FHIR.formatted(fhirVersion.getFhirVersionString()));
         }
     }
 
@@ -445,7 +466,7 @@ public class BundleHelper {
 
             default:
                 throw new IllegalArgumentException(
-                        String.format(UNSUPPORTED_VERSION_OF_FHIR, fhirVersion.getFhirVersionString()));
+                        UNSUPPORTED_VERSION_OF_FHIR.formatted(fhirVersion.getFhirVersionString()));
         }
     }
 
@@ -465,7 +486,7 @@ public class BundleHelper {
 
             default:
                 throw new IllegalArgumentException(
-                        String.format(UNSUPPORTED_VERSION_OF_FHIR, fhirVersion.getFhirVersionString()));
+                        UNSUPPORTED_VERSION_OF_FHIR.formatted(fhirVersion.getFhirVersionString()));
         }
     }
 
@@ -489,7 +510,7 @@ public class BundleHelper {
 
             default:
                 throw new IllegalArgumentException(
-                        String.format(UNSUPPORTED_VERSION_OF_FHIR, fhirVersion.getFhirVersionString()));
+                        UNSUPPORTED_VERSION_OF_FHIR.formatted(fhirVersion.getFhirVersionString()));
         }
     }
 
@@ -514,7 +535,7 @@ public class BundleHelper {
 
             default:
                 throw new IllegalArgumentException(
-                        String.format(UNSUPPORTED_VERSION_OF_FHIR, fhirVersion.getFhirVersionString()));
+                        UNSUPPORTED_VERSION_OF_FHIR.formatted(fhirVersion.getFhirVersionString()));
         }
     }
 
@@ -535,7 +556,7 @@ public class BundleHelper {
 
             default:
                 throw new IllegalArgumentException(
-                        String.format(UNSUPPORTED_VERSION_OF_FHIR, fhirVersion.getFhirVersionString()));
+                        UNSUPPORTED_VERSION_OF_FHIR.formatted(fhirVersion.getFhirVersionString()));
         }
     }
 
@@ -563,7 +584,7 @@ public class BundleHelper {
 
             default:
                 throw new IllegalArgumentException(
-                        String.format(UNSUPPORTED_VERSION_OF_FHIR, fhirVersion.getFhirVersionString()));
+                        UNSUPPORTED_VERSION_OF_FHIR.formatted(fhirVersion.getFhirVersionString()));
         }
     }
 
@@ -587,7 +608,7 @@ public class BundleHelper {
 
             default:
                 throw new IllegalArgumentException(
-                        String.format(UNSUPPORTED_VERSION_OF_FHIR, fhirVersion.getFhirVersionString()));
+                        UNSUPPORTED_VERSION_OF_FHIR.formatted(fhirVersion.getFhirVersionString()));
         }
     }
 
@@ -613,7 +634,7 @@ public class BundleHelper {
 
             default:
                 throw new IllegalArgumentException(
-                        String.format(UNSUPPORTED_VERSION_OF_FHIR, fhirVersion.getFhirVersionString()));
+                        UNSUPPORTED_VERSION_OF_FHIR.formatted(fhirVersion.getFhirVersionString()));
         }
     }
 
@@ -640,7 +661,7 @@ public class BundleHelper {
 
             default:
                 throw new IllegalArgumentException(
-                        String.format(UNSUPPORTED_VERSION_OF_FHIR, fhirVersion.getFhirVersionString()));
+                        UNSUPPORTED_VERSION_OF_FHIR.formatted(fhirVersion.getFhirVersionString()));
         }
     }
 
@@ -666,7 +687,7 @@ public class BundleHelper {
 
             default:
                 throw new IllegalArgumentException(
-                        String.format(UNSUPPORTED_VERSION_OF_FHIR, fhirVersion.getFhirVersionString()));
+                        UNSUPPORTED_VERSION_OF_FHIR.formatted(fhirVersion.getFhirVersionString()));
         }
     }
 
@@ -690,29 +711,29 @@ public class BundleHelper {
             case DSTU3:
                 if (request != null
                         && !(request instanceof org.hl7.fhir.dstu3.model.Bundle.BundleEntryRequestComponent)) {
-                    throw new IllegalArgumentException(String.format(
-                            requestTypeError, "org.hl7.fhir.dstu3.model.Bundle.BundleEntryRequestComponent"));
+                    throw new IllegalArgumentException(
+                            requestTypeError.formatted("org.hl7.fhir.dstu3.model.Bundle.BundleEntryRequestComponent"));
                 }
                 return ((org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent) entry)
                         .setRequest((org.hl7.fhir.dstu3.model.Bundle.BundleEntryRequestComponent) request);
             case R4:
                 if (request != null && !(request instanceof org.hl7.fhir.r4.model.Bundle.BundleEntryRequestComponent)) {
-                    throw new IllegalArgumentException(String.format(
-                            requestTypeError, "org.hl7.fhir.r4.model.Bundle.BundleEntryRequestComponent"));
+                    throw new IllegalArgumentException(
+                            requestTypeError.formatted("org.hl7.fhir.r4.model.Bundle.BundleEntryRequestComponent"));
                 }
                 return ((org.hl7.fhir.r4.model.Bundle.BundleEntryComponent) entry)
                         .setRequest((org.hl7.fhir.r4.model.Bundle.BundleEntryRequestComponent) request);
             case R5:
                 if (request != null && !(request instanceof org.hl7.fhir.r5.model.Bundle.BundleEntryRequestComponent)) {
-                    throw new IllegalArgumentException(String.format(
-                            requestTypeError, "org.hl7.fhir.r5.model.Bundle.BundleEntryRequestComponent"));
+                    throw new IllegalArgumentException(
+                            requestTypeError.formatted("org.hl7.fhir.r5.model.Bundle.BundleEntryRequestComponent"));
                 }
                 return ((org.hl7.fhir.r5.model.Bundle.BundleEntryComponent) entry)
                         .setRequest((org.hl7.fhir.r5.model.Bundle.BundleEntryRequestComponent) request);
 
             default:
                 throw new IllegalArgumentException(
-                        String.format(UNSUPPORTED_VERSION_OF_FHIR, fhirVersion.getFhirVersionString()));
+                        UNSUPPORTED_VERSION_OF_FHIR.formatted(fhirVersion.getFhirVersionString()));
         }
     }
 
@@ -765,7 +786,7 @@ public class BundleHelper {
 
             default:
                 throw new IllegalArgumentException(
-                        String.format(UNSUPPORTED_VERSION_OF_FHIR, fhirVersion.getFhirVersionString()));
+                        UNSUPPORTED_VERSION_OF_FHIR.formatted(fhirVersion.getFhirVersionString()));
         }
     }
 }

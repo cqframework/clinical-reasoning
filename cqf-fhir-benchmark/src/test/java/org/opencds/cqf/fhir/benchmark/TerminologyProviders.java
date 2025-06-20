@@ -1,7 +1,7 @@
 package org.opencds.cqf.fhir.benchmark;
 
 import ca.uhn.fhir.context.FhirContext;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.concurrent.TimeUnit;
 import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.cql.engine.terminology.ValueSetInfo;
@@ -43,7 +43,7 @@ public class TerminologyProviders {
     @Setup(Level.Trial)
     public void setupTrial() throws Exception {
         var repository =
-                new IgRepository(FhirContext.forR4Cached(), Paths.get(Measure.CLASS_PATH + "/CaseRepresentation101"));
+                new IgRepository(FhirContext.forR4Cached(), Path.of(Measure.CLASS_PATH + "/CaseRepresentation101"));
         this.terminologyProvider = new RepositoryTerminologyProvider(repository);
     }
 

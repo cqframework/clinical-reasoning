@@ -5,6 +5,7 @@ import static org.opencds.cqf.fhir.cr.common.ExtensionBuilders.buildReference;
 import static org.opencds.cqf.fhir.utility.SearchHelper.searchRepositoryByCanonical;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.repository.IRepository;
 import java.util.Collections;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -12,7 +13,6 @@ import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r5.model.Enumerations.FHIRTypes;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,11 +20,11 @@ import org.slf4j.LoggerFactory;
 public class ProcessDefinition {
     private static final Logger logger = LoggerFactory.getLogger(ProcessDefinition.class);
 
-    final Repository repository;
+    final IRepository repository;
     final ApplyProcessor applyProcessor;
     final ActionResolver actionResolver;
 
-    public ProcessDefinition(Repository repository, ApplyProcessor applyProcessor) {
+    public ProcessDefinition(IRepository repository, ApplyProcessor applyProcessor) {
         requireNonNull(repository);
         requireNonNull(applyProcessor);
         this.repository = repository;
@@ -48,12 +48,12 @@ public class ProcessDefinition {
             if (resource != null) {
                 var actionId = request.resolvePathString(action, "id");
                 if (actionId != null) {
-                    resource.setId(String.format(
-                            "%s-%s", actionId, resource.getIdElement().getIdPart()));
+                    resource.setId(
+                            "%s-%s".formatted(actionId, resource.getIdElement().getIdPart()));
                 }
                 actionResolver.resolveAction(request, requestOrchestration, resource, action);
                 var reference = Boolean.TRUE.equals(request.getContainResources())
-                        ? String.format("#%s", resource.getIdElement().getIdPart())
+                        ? "#%s".formatted(resource.getIdElement().getIdPart())
                         : resource.getIdElement().getValue();
                 request.getModelResolver()
                         .setValue(requestAction, "resource", buildReference(request.getFhirVersion(), reference));
@@ -90,7 +90,7 @@ public class ProcessDefinition {
             case PLANDEFINITION -> applyNestedPlanDefinition(request, definition);
             case ACTIVITYDEFINITION -> applyActivityDefinition(request, definition);
             case QUESTIONNAIRE -> applyQuestionnaireDefinition(request, definition);
-            default -> throw new FHIRException(String.format("Unknown action definition: %s", definition.getValue()));
+            default -> throw new FHIRException("Unknown action definition: %s".formatted(definition.getValue()));
         };
     }
 
@@ -123,9 +123,8 @@ public class ProcessDefinition {
                 result = resolveRepository(definition);
             }
         } catch (Exception e) {
-            var message = String.format(
-                    "ERROR: Questionnaire %s could not be applied and threw exception %s",
-                    definition.getValue(), e.toString());
+            var message = "ERROR: Questionnaire %s could not be applied and threw exception %s"
+                    .formatted(definition.getValue(), e.toString());
             logger.error(message);
             request.logException(message);
         }
@@ -153,9 +152,8 @@ public class ProcessDefinition {
             result.setId(activityDefinitionId);
             activityRequest.resolveOperationOutcome(result);
         } catch (Exception e) {
-            var message = String.format(
-                    "ERROR: ActivityDefinition %s could not be applied and threw exception %s",
-                    definition.getValue(), e.toString());
+            var message = "ERROR: ActivityDefinition %s could not be applied and threw exception %s"
+                    .formatted(definition.getValue(), e.toString());
             logger.error(message);
             request.logException(message);
         }
@@ -177,9 +175,8 @@ public class ProcessDefinition {
             request.setQuestionnaire(nestedRequest.getQuestionnaire());
             return result;
         } catch (Exception e) {
-            var message = String.format(
-                    "ERROR: PlanDefinition %s could not be applied and threw exception %s",
-                    definition.getValue(), e.toString());
+            var message = "ERROR: PlanDefinition %s could not be applied and threw exception %s"
+                    .formatted(definition.getValue(), e.toString());
             logger.error(message);
             request.logException(message);
             return null;
@@ -208,9 +205,14 @@ public class ProcessDefinition {
     protected IBaseResource resolveContained(ApplyRequest request, String id) {
         requireNonNull(id);
         var contained = request.resolvePathList(request.getPlanDefinition(), "contained", IBaseResource.class);
+        var containedId = getContainedId(id);
         var first = contained.stream()
-                .filter(r -> r.getIdElement().getIdPart().equals(id))
+                .filter(r -> getContainedId(r.getIdElement().getIdPart()).equals(containedId))
                 .findFirst();
         return first.orElse(null);
+    }
+
+    private String getContainedId(String id) {
+        return id.replaceFirst("#", "");
     }
 }

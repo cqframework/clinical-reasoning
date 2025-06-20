@@ -6,6 +6,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -16,6 +17,7 @@ import ca.uhn.fhir.util.BundleBuilder;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Multimap;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -34,7 +36,6 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.matcher.ResourceMatcher;
 import org.opencds.cqf.fhir.utility.repository.Repositories;
@@ -88,7 +89,7 @@ import org.opencds.cqf.fhir.utility.repository.operations.IRepositoryOperationPr
  * <li>Utilizes caching for efficient resource access.</li>
  * </ul>
  */
-public class IgRepository implements Repository {
+public class IgRepository implements IRepository {
     private final FhirContext fhirContext;
     private final Path root;
     private final IgConventions conventions;
@@ -352,10 +353,9 @@ public class IgRepository implements Repository {
         } catch (FileNotFoundException e) {
             return Optional.empty();
         } catch (DataFormatException e) {
-            throw new ResourceNotFoundException(String.format("Found empty or invalid content at path %s", path));
+            throw new ResourceNotFoundException("Found empty or invalid content at path %s".formatted(path));
         } catch (IOException e) {
-            throw new UnclassifiedServerFailureException(
-                    500, String.format("Unable to read resource from path %s", path));
+            throw new UnclassifiedServerFailureException(500, "Unable to read resource from path %s".formatted(path));
         }
     }
 
@@ -390,8 +390,7 @@ public class IgRepository implements Repository {
                 this.resourceCache.put(path, Optional.of(resource));
             }
         } catch (IOException | SecurityException e) {
-            throw new UnclassifiedServerFailureException(
-                    500, String.format("Unable to write resource to path %s", path));
+            throw new UnclassifiedServerFailureException(500, "Unable to write resource to path %s".formatted(path));
         }
     }
 
@@ -465,8 +464,7 @@ public class IgRepository implements Repository {
             paths.filter(resourceFileFilter)
                     .sorted()
                     .map(this::cachedReadResource)
-                    .filter(Optional::isPresent)
-                    .map(Optional::get)
+                    .flatMap(Optional::stream)
                     .forEach(r -> {
                         if (!r.fhirType().equals(resourceClass.getSimpleName())) {
                             return;
@@ -477,8 +475,7 @@ public class IgRepository implements Repository {
                     });
 
         } catch (IOException e) {
-            throw new UnclassifiedServerFailureException(
-                    500, String.format("Unable to read resources from path: %s", path));
+            throw new UnclassifiedServerFailureException(500, "Unable to read resources from path: %s".formatted(path));
         }
 
         return resources;
@@ -575,28 +572,34 @@ public class IgRepository implements Repository {
         var path = (Path) resource.getUserData(SOURCE_PATH_TAG);
 
         if (!resourceType.getSimpleName().equals(resource.fhirType())) {
-            throw new ResourceNotFoundException(String.format(
-                    "Expected to find a resource with type: %s at path: %s. Found resource with type %s instead.",
-                    resourceType.getSimpleName(), path, resource.fhirType()));
+            throw new ResourceNotFoundException(
+                    "Expected to find a resource with type: %s at path: %s. Found resource with type %s instead."
+                            .formatted(resourceType.getSimpleName(), path, resource.fhirType()));
         }
 
         if (!resource.getIdElement().hasIdPart()) {
-            throw new ResourceNotFoundException(String.format(
-                    "Expected to find a resource with id: %s at path: %s. Found resource without an id instead.",
-                    id.toUnqualifiedVersionless(), path));
+            throw new ResourceNotFoundException(
+                    "Expected to find a resource with id: %s at path: %s. Found resource without an id instead."
+                            .formatted(id.toUnqualifiedVersionless(), path));
         }
 
         if (!id.getIdPart().equals(resource.getIdElement().getIdPart())) {
-            throw new ResourceNotFoundException(String.format(
-                    "Expected to find a resource with id: %s at path: %s. Found resource with an id %s instead.",
-                    id.getIdPart(), path, resource.getIdElement().getIdPart()));
+            throw new ResourceNotFoundException(
+                    "Expected to find a resource with id: %s at path: %s. Found resource with an id %s instead."
+                            .formatted(
+                                    id.getIdPart(),
+                                    path,
+                                    resource.getIdElement().getIdPart()));
         }
 
         if (id.hasVersionIdPart()
                 && !id.getVersionIdPart().equals(resource.getIdElement().getVersionIdPart())) {
-            throw new ResourceNotFoundException(String.format(
-                    "Expected to find a resource with version: %s at path: %s. Found resource with version %s instead.",
-                    id.getVersionIdPart(), path, resource.getIdElement().getVersionIdPart()));
+            throw new ResourceNotFoundException(
+                    "Expected to find a resource with version: %s at path: %s. Found resource with version %s instead."
+                            .formatted(
+                                    id.getVersionIdPart(),
+                                    path,
+                                    resource.getIdElement().getVersionIdPart()));
         }
 
         return resourceType.cast(resource);
@@ -634,9 +637,9 @@ public class IgRepository implements Repository {
         }
 
         if (isExternalPath(actual)) {
-            throw new ForbiddenOperationException(String.format(
-                    "Unable to create or update: %s. Resource is marked as external, and external resources are read-only.",
-                    resource.getIdElement().toUnqualifiedVersionless()));
+            throw new ForbiddenOperationException(
+                    "Unable to create or update: %s. Resource is marked as external, and external resources are read-only."
+                            .formatted(resource.getIdElement().toUnqualifiedVersionless()));
         }
 
         // If the preferred path and the actual path are different, and the encoding
@@ -647,8 +650,7 @@ public class IgRepository implements Repository {
             try {
                 Files.deleteIfExists(actual);
             } catch (IOException e) {
-                throw new UnclassifiedServerFailureException(
-                        500, String.format("Couldn't change encoding for %s", actual));
+                throw new UnclassifiedServerFailureException(500, "Couldn't change encoding for %s".formatted(actual));
             }
 
             actual = preferred;
@@ -696,7 +698,7 @@ public class IgRepository implements Repository {
                     break;
                 }
             } catch (IOException e) {
-                throw new UnclassifiedServerFailureException(500, String.format("Couldn't delete %s", path));
+                throw new UnclassifiedServerFailureException(500, "Couldn't delete %s".formatted(path));
             }
         }
 
@@ -734,7 +736,7 @@ public class IgRepository implements Repository {
     public <B extends IBaseBundle, T extends IBaseResource> B search(
             Class<B> bundleType,
             Class<T> resourceType,
-            Map<String, List<IQueryParameterType>> searchParameters,
+            Multimap<String, List<IQueryParameterType>> searchParameters,
             Map<String, String> headers) {
         BundleBuilder builder = new BundleBuilder(this.fhirContext);
         builder.setType("searchset");
@@ -748,23 +750,8 @@ public class IgRepository implements Repository {
         Collection<T> candidates;
         if (searchParameters.containsKey("_id")) {
             // We are consuming the _id parameter in this if statement
-            var idQueries = searchParameters.get("_id");
-            searchParameters.remove("_id");
-
-            var idResources = new ArrayList<T>(idQueries.size());
-            for (var idQuery : idQueries) {
-                var idToken = (TokenParam) idQuery;
-                // Need to construct the equivalent "UnqualifiedVersionless" id that the map is
-                // indexed by. If an id has a version it won't match. Need apples-to-apples Id
-                // types
-                var id = Ids.newId(fhirContext, resourceType.getSimpleName(), idToken.getValue());
-                var resource = resourceIdMap.get(id);
-                if (resource != null) {
-                    idResources.add(resource);
-                }
-            }
-
-            candidates = idResources;
+            candidates = getIdCandidates(searchParameters.get("_id"), resourceIdMap, resourceType);
+            searchParameters.removeAll("_id");
         } else {
             candidates = resourceIdMap.values();
         }
@@ -778,9 +765,29 @@ public class IgRepository implements Repository {
         return (B) builder.getBundle();
     }
 
+    private <T extends IBaseResource> List<T> getIdCandidates(
+            Collection<List<IQueryParameterType>> idQueries, Map<IIdType, T> resourceIdMap, Class<T> resourceType) {
+        var idResources = new ArrayList<T>();
+        for (var idQuery : idQueries) {
+            for (var query : idQuery) {
+                if (query instanceof TokenParam idToken) {
+                    // Need to construct the equivalent "UnqualifiedVersionless" id that the map is
+                    // indexed by. If an id has a version it won't match. Need apples-to-apples Id
+                    // types
+                    var id = Ids.newId(fhirContext, resourceType.getSimpleName(), idToken.getValue());
+                    var resource = resourceIdMap.get(id);
+                    if (resource != null) {
+                        idResources.add(resource);
+                    }
+                }
+            }
+        }
+        return idResources;
+    }
+
     private boolean allParametersMatch(
-            Map<String, List<IQueryParameterType>> searchParameters, IBaseResource resource) {
-        for (var nextEntry : searchParameters.entrySet()) {
+            Multimap<String, List<IQueryParameterType>> searchParameters, IBaseResource resource) {
+        for (var nextEntry : searchParameters.entries()) {
             var paramName = nextEntry.getKey();
             if (!resourceMatcher.matches(paramName, nextEntry.getValue(), resource)) {
                 return false;

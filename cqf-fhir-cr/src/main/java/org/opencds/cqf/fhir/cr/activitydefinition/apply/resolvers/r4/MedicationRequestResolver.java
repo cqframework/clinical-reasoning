@@ -36,7 +36,7 @@ public class MedicationRequestResolver extends BaseRequestResourceResolver {
             medicationRequest.setInstantiatesCanonical(
                     Collections.singletonList(new CanonicalType(activityDefinition.getUrl()
                             + (activityDefinition.hasVersion()
-                                    ? String.format("|%s", activityDefinition.getVersion())
+                                    ? "|%s".formatted(activityDefinition.getVersion())
                                     : ""))));
         }
 
@@ -51,7 +51,7 @@ public class MedicationRequestResolver extends BaseRequestResourceResolver {
         if (activityDefinition.hasProduct()) {
             medicationRequest.setMedication(activityDefinition.getProduct());
         } else if (!activityDefinition.hasDynamicValue()) {
-            throw new FHIRException(String.format(MISSING_PRODUCT_PROPERTY, "MedicationRequest"));
+            throw new FHIRException(MISSING_PRODUCT_PROPERTY.formatted("MedicationRequest"));
         }
 
         if (activityDefinition.hasDosage()) {

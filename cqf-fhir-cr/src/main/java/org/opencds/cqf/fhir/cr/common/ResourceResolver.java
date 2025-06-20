@@ -3,13 +3,13 @@ package org.opencds.cqf.fhir.cr.common;
 import static java.util.Objects.requireNonNull;
 import static org.opencds.cqf.fhir.utility.Resources.castOrThrow;
 
+import ca.uhn.fhir.repository.IRepository;
 import java.util.function.Function;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.iterable.BundleMappingIterable;
 import org.opencds.cqf.fhir.utility.monad.Either;
 import org.opencds.cqf.fhir.utility.monad.Either3;
@@ -18,12 +18,12 @@ import org.opencds.cqf.fhir.utility.search.Searches;
 public class ResourceResolver {
     final String invalidResourceType = "The resource passed in was not a valid instance of %s.class";
     final String resourceType;
-    final Repository repository;
+    final IRepository repository;
     final Class<? extends IBaseResource> clazz;
     final Class<? extends IBaseBundle> bundleClazz;
 
     @SuppressWarnings("unchecked")
-    public ResourceResolver(String resourceType, Repository repository) {
+    public ResourceResolver(String resourceType, IRepository repository) {
         this.resourceType = resourceType;
         this.repository = repository;
         try {
@@ -63,9 +63,9 @@ public class ResourceResolver {
             throws FHIRException {
         var baseResource = resource.fold(this::resolveByUrl, this::resolveById, Function.identity());
 
-        requireNonNull(baseResource, String.format("Unable to resolve %s", resourceType));
+        requireNonNull(baseResource, "Unable to resolve %s".formatted(resourceType));
 
-        return (T) castOrThrow(baseResource, clazz, String.format(invalidResourceType, resourceType))
+        return (T) castOrThrow(baseResource, clazz, invalidResourceType.formatted(resourceType))
                 .orElse(null);
     }
 
@@ -73,9 +73,9 @@ public class ResourceResolver {
     public <T extends IBaseResource> T resolve(Either<IIdType, T> resource) {
         var baseResource = resource.fold(this::resolveById, Function.identity());
 
-        requireNonNull(baseResource, String.format("Unable to resolve %s", resourceType));
+        requireNonNull(baseResource, "Unable to resolve %s".formatted(resourceType));
 
-        return (T) castOrThrow(baseResource, clazz, String.format(invalidResourceType, resourceType))
+        return (T) castOrThrow(baseResource, clazz, invalidResourceType.formatted(resourceType))
                 .orElse(null);
     }
 }

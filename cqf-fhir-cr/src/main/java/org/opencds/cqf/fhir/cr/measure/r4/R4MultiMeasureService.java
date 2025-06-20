@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 
 import static org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils.getFullUrl;
 
+import ca.uhn.fhir.repository.IRepository;
 import com.google.common.base.Strings;
 import jakarta.annotation.Nullable;
 import java.time.ZonedDateTime;
@@ -18,7 +19,6 @@ import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Resource;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
@@ -35,7 +35,7 @@ import org.opencds.cqf.fhir.utility.repository.Repositories;
  */
 public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(R4MultiMeasureService.class);
-    private Repository repository;
+    private IRepository repository;
     private final MeasureEvaluationOptions measureEvaluationOptions;
     private final MeasurePeriodValidator measurePeriodValidator;
     private final String serverBase;
@@ -48,7 +48,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
     private final NpmPackageLoader npmPackageLoader;
 
     public R4MultiMeasureService(
-            Repository repository,
+            IRepository repository,
             MeasureEvaluationOptions measureEvaluationOptions,
             String serverBase,
             MeasurePeriodValidator measurePeriodValidator,

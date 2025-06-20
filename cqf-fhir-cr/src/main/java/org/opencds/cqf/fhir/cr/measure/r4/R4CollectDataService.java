@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 
 import static org.opencds.cqf.fhir.utility.r4.Parameters.part;
 
+import ca.uhn.fhir.repository.IRepository;
 import jakarta.annotation.Nullable;
 import java.time.ZonedDateTime;
 import java.util.Collections;
@@ -14,7 +15,6 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Resource;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
@@ -23,14 +23,14 @@ import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 
 public class R4CollectDataService {
-    private final Repository repository;
+    private final IRepository repository;
     private final MeasureEvaluationOptions measureEvaluationOptions;
     private final R4RepositorySubjectProvider subjectProvider;
     private final R4MeasureServiceUtils measureServiceUtils;
     private final NpmPackageLoader npmPackageLoader;
 
     public R4CollectDataService(
-            Repository repository,
+            IRepository repository,
             MeasureEvaluationOptions measureEvaluationOptions,
             R4MeasureServiceUtils measureServiceUtils,
             NpmPackageLoader npmPackageLoader) {
@@ -152,8 +152,7 @@ public class R4CollectDataService {
                     .getClass();
             IBaseResource resource = repository.read(resourceType, resourceId);
 
-            if (resource instanceof Resource) {
-                Resource resourceBase = (Resource) resource;
+            if (resource instanceof Resource resourceBase) {
                 parameters.addParameter(part("resource-" + subject, resourceBase));
             }
         });

@@ -3841,10 +3841,8 @@
         "extension": [
           {
             "id": "effective-data-requirements",
-            "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-effectiveDataRequirements",
-            "valueReference": {
-              "reference": "#effective-data-requirements"
-            }
+            "url": "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-effectiveDataRequirements",
+            "valueCanonical": "#effective-data-requirements"
           },
           {
             "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem",

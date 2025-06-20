@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cr.cpg.r4;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.parameters;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.part;
 
+import ca.uhn.fhir.repository.IRepository;
 import java.util.Collections;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
@@ -11,7 +12,6 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
@@ -21,10 +21,10 @@ import org.opencds.cqf.fhir.utility.repository.Repositories;
 @SuppressWarnings("squid:S107")
 public class R4CqlExecutionService {
 
-    protected Repository repository;
+    protected IRepository repository;
     protected EvaluationSettings evaluationSettings;
 
-    public R4CqlExecutionService(Repository repository, EvaluationSettings evaluationSettings) {
+    public R4CqlExecutionService(IRepository repository, EvaluationSettings evaluationSettings) {
         this.repository = repository;
         this.evaluationSettings = evaluationSettings;
     }

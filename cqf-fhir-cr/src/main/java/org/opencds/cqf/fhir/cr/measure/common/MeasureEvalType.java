@@ -57,8 +57,7 @@ public enum MeasureEvalType {
     public static Optional<MeasureEvalType> fromCode(String code) {
         MeasureEvalType evalType = lookup.get(code);
         if (code != null && evalType == null) {
-            throw new InvalidRequestException(
-                    String.format("ReportType: %s, is not an accepted EvalType value.", code));
+            throw new InvalidRequestException("ReportType: %s, is not an accepted EvalType value.".formatted(code));
         }
         return Optional.ofNullable(evalType);
     }

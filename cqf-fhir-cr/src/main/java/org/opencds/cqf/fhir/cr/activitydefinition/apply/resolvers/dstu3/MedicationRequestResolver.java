@@ -30,7 +30,7 @@ public class MedicationRequestResolver extends BaseRequestResourceResolver {
         if (activityDefinition.hasProduct()) {
             medicationRequest.setMedication(activityDefinition.getProduct());
         } else if (!activityDefinition.hasDynamicValue()) {
-            throw new FHIRException(String.format(MISSING_PRODUCT_PROPERTY, "MedicationRequest"));
+            throw new FHIRException(MISSING_PRODUCT_PROPERTY.formatted("MedicationRequest"));
         }
 
         if (activityDefinition.hasDosage()) {

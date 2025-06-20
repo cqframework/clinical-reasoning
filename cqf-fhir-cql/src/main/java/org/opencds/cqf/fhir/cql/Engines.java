@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cql;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.repository.IRepository;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -48,7 +49,7 @@ public class Engines {
 
     private Engines() {}
 
-    public static CqlEngine forRepository(Repository repository) {
+    public static CqlEngine forRepository(IRepository repository) {
         return forRepository(repository, EvaluationSettings.getDefault());
     }
 
@@ -57,17 +58,17 @@ public class Engines {
     }
 
     public static CqlEngine forRepository(
-            Repository repository, EvaluationSettings settings, IBaseBundle additionalData) {
+            IRepository repository, EvaluationSettings settings, IBaseBundle additionalData) {
         return forRepository(
-                repository, settings, additionalData, NpmResourceInfoForCql.EMPTY, NpmPackageLoader.DEFAULT);
+            repository, settings, additionalData, NpmResourceInfoForCql.EMPTY, NpmPackageLoader.DEFAULT);
     }
 
     public static CqlEngine forRepository(
-            Repository repository,
-            EvaluationSettings settings,
-            IBaseBundle additionalData,
-            NpmResourceInfoForCql npmResourceInfoForCql,
-            NpmPackageLoader npmPackageLoader) {
+        IRepository repository,
+        EvaluationSettings settings,
+        IBaseBundle additionalData,
+        NpmResourceInfoForCql npmResourceInfoForCql,
+        NpmPackageLoader npmPackageLoader) {
         checkNotNull(settings);
         checkNotNull(repository);
 
@@ -81,7 +82,7 @@ public class Engines {
     }
 
     private static Environment buildEnvironment(
-            Repository repository,
+            IRepository repository,
             EvaluationSettings settings,
             TerminologyProvider terminologyProvider,
             Map<String, DataProvider> dataProviders,
@@ -103,7 +104,7 @@ public class Engines {
     }
 
     private static void registerLibrarySourceProviders(
-            EvaluationSettings settings, LibraryManager manager, Repository repository) {
+            EvaluationSettings settings, LibraryManager manager, IRepository repository) {
         var loader = manager.getLibrarySourceLoader();
         loader.clearProviders();
 
@@ -128,12 +129,10 @@ public class Engines {
         ILibraryReader reader = new org.cqframework.fhir.npm.LibraryLoader(
                 npmProcessor.getIgContext().getFhirVersion());
         LoggerAdapter adapter = new LoggerAdapter(logger);
-
         libraryManager
                 .getLibrarySourceLoader()
                 .registerProvider(new NpmLibrarySourceProvider(
                         npmProcessor.getPackageManager().getNpmList(), reader, adapter));
-
         modelManager
                 .getModelInfoLoader()
                 .registerModelInfoProvider(new NpmModelInfoProvider(
@@ -154,14 +153,14 @@ public class Engines {
         }
     }
 
-    private static LibrarySourceProvider buildLibrarySource(Repository repository) {
+    private static LibrarySourceProvider buildLibrarySource(IRepository repository) {
         var adapterFactory = IAdapterFactory.forFhirContext(repository.fhirContext());
         return new RepositoryFhirLibrarySourceProvider(
                 repository, adapterFactory, new LibraryVersionSelector(adapterFactory));
     }
 
     private static Map<String, DataProvider> buildDataProviders(
-            Repository repository,
+            IRepository repository,
             IBaseBundle additionalData,
             TerminologyProvider terminologyProvider,
             RetrieveSettings retrieveSettings) {

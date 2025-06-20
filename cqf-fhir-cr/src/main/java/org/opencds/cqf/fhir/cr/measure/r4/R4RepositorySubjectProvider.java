@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import jakarta.annotation.Nullable;
@@ -19,7 +20,6 @@ import org.hl7.fhir.r4.model.Group.GroupType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.ResourceType;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.measure.SubjectProviderOptions;
 import org.opencds.cqf.fhir.cr.measure.common.SubjectProvider;
 import org.opencds.cqf.fhir.utility.iterable.BundleIterator;
@@ -34,12 +34,12 @@ public class R4RepositorySubjectProvider implements SubjectProvider {
     }
 
     @Override
-    public Stream<String> getSubjects(Repository repository, @Nullable String subjectId) {
+    public Stream<String> getSubjects(IRepository repository, @Nullable String subjectId) {
         return getSubjects(repository, Collections.singletonList(subjectId));
     }
 
     @Override
-    public Stream<String> getSubjects(Repository repository, List<String> subjectIds) {
+    public Stream<String> getSubjects(IRepository repository, List<String> subjectIds) {
         // All patients in system
         if (subjectIds == null
                 || subjectIds.isEmpty()
@@ -102,7 +102,7 @@ public class R4RepositorySubjectProvider implements SubjectProvider {
             } else if (subjectId.startsWith("Organization")) {
                 subjects.addAll(getOrganizationSubjectIds(subjectId, repository));
             } else {
-                throw new IllegalArgumentException(String.format("Unsupported subjectId: %s", subjectIds));
+                throw new IllegalArgumentException("Unsupported subjectId: %s".formatted(subjectIds));
             }
         });
 
@@ -119,7 +119,7 @@ public class R4RepositorySubjectProvider implements SubjectProvider {
         return members;
     }
 
-    public void addPractitionerSubjectIds(String practitioner, Repository repository, List<String> patients) {
+    public void addPractitionerSubjectIds(String practitioner, IRepository repository, List<String> patients) {
         Map<String, List<IQueryParameterType>> map = new HashMap<>();
 
         map.put(
@@ -138,7 +138,7 @@ public class R4RepositorySubjectProvider implements SubjectProvider {
         }
     }
 
-    private List<String> getOrganizationSubjectIds(String organization, Repository repository) {
+    private List<String> getOrganizationSubjectIds(String organization, IRepository repository) {
 
         return Stream.concat(
                         getManagingOrganizationSubjectIds(organization, repository),
@@ -146,7 +146,7 @@ public class R4RepositorySubjectProvider implements SubjectProvider {
                 .collect(Collectors.toList());
     }
 
-    private Stream<String> getManagingOrganizationSubjectIds(String organization, Repository repository) {
+    private Stream<String> getManagingOrganizationSubjectIds(String organization, IRepository repository) {
         final Map<String, List<IQueryParameterType>> searchParams = new HashMap<>();
 
         searchParams.put("organization", Collections.singletonList(new ReferenceParam(organization)));
@@ -154,7 +154,7 @@ public class R4RepositorySubjectProvider implements SubjectProvider {
         return handlePatientBundle(repository, searchParams);
     }
 
-    private Stream<String> getPartOfSubjectIds(String organization, Repository repository) {
+    private Stream<String> getPartOfSubjectIds(String organization, IRepository repository) {
 
         if (!subjectProviderOptions.isPartOfEnabled()) {
             return Stream.empty();
@@ -170,7 +170,7 @@ public class R4RepositorySubjectProvider implements SubjectProvider {
     }
 
     private static Stream<String> handlePatientBundle(
-            Repository repository, Map<String, List<IQueryParameterType>> searchParam) {
+            IRepository repository, Map<String, List<IQueryParameterType>> searchParam) {
         var bundle = repository.search(Bundle.class, Patient.class, searchParam);
 
         var bundleEntries = bundle.getEntry();

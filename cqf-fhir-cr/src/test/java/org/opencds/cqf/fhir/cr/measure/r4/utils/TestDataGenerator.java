@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.r4.utils;
 
+import ca.uhn.fhir.repository.IRepository;
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.time.ZoneId;
@@ -11,7 +12,6 @@ import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Reference;
-import org.opencds.cqf.fhir.api.Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,10 +19,10 @@ import org.slf4j.LoggerFactory;
  * This class was created in order to generate test data in memory for a variety of use cases.
  */
 public class TestDataGenerator {
-    private final Repository repository;
+    private final IRepository repository;
     private final Logger ourLog = LoggerFactory.getLogger(TestDataGenerator.class);
 
-    public TestDataGenerator(Repository repository) {
+    public TestDataGenerator(IRepository repository) {
         this.repository = repository;
     }
 
@@ -60,7 +60,7 @@ public class TestDataGenerator {
                 }
             }
         }
-        ourLog.info(String.format("Patients created: %s", i));
+        ourLog.info("Patients created: %s".formatted(i));
     }
 
     public void createPatient(String patientId, String practitionerId, String organization, int count) {

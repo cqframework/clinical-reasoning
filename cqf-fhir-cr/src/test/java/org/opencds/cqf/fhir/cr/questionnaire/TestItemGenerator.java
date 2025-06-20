@@ -9,10 +9,11 @@ import static org.opencds.cqf.fhir.utility.SearchHelper.readRepository;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.repository.IRepository;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,7 +26,6 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.json.JSONException;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
@@ -52,20 +52,20 @@ public class TestItemGenerator {
     }
 
     public static class Given {
-        private Repository repository;
+        private IRepository repository;
 
-        public Given repository(Repository repository) {
+        public Given repository(IRepository repository) {
             this.repository = repository;
             return this;
         }
 
         public Given repositoryFor(FhirContext fhirContext, String repositoryPath) {
             this.repository = new IgRepository(
-                    fhirContext, Paths.get(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
+                    fhirContext, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
             return this;
         }
 
-        public static QuestionnaireProcessor buildProcessor(Repository repository) {
+        public static QuestionnaireProcessor buildProcessor(IRepository repository) {
             return new QuestionnaireProcessor(repository);
         }
 
@@ -75,14 +75,14 @@ public class TestItemGenerator {
     }
 
     public static class When {
-        private final Repository repository;
+        private final IRepository repository;
         private final QuestionnaireProcessor processor;
         private IIdType profileId;
         private IPrimitiveType<String> profileUrl;
         private IBaseResource profile;
         private String id;
 
-        When(Repository repository, QuestionnaireProcessor itemGenerator) {
+        When(IRepository repository, QuestionnaireProcessor itemGenerator) {
             this.repository = repository;
             this.processor = itemGenerator;
         }
@@ -119,13 +119,13 @@ public class TestItemGenerator {
     }
 
     public static class GeneratedItem {
-        final Repository repository;
+        final IRepository repository;
         final IBaseResource questionnaire;
         final IParser jsonParser;
         final ModelResolver modelResolver;
         final Map<String, IBaseBackboneElement> items;
 
-        public GeneratedItem(Repository repository, IBaseResource questionnaire) {
+        public GeneratedItem(IRepository repository, IBaseResource questionnaire) {
             this.repository = repository;
             this.questionnaire = questionnaire;
             jsonParser = this.repository.fhirContext().newJsonParser().setPrettyPrint(true);

@@ -49,9 +49,8 @@ public class DynamicValueProcessor {
             try {
                 resolveDynamicValue(request, dynamicValue, context, resource, requestAction);
             } catch (Exception e) {
-                var message = String.format(
-                        "DynamicValue resolution for path %s encountered exception: %s",
-                        request.resolvePathString(dynamicValue, "path"), e.getMessage());
+                var message = "DynamicValue resolution for path %s encountered exception: %s"
+                        .formatted(request.resolvePathString(dynamicValue, "path"), e.getMessage());
                 logger.error(message);
                 request.logException(message);
             }
@@ -87,16 +86,17 @@ public class DynamicValueProcessor {
         if (cqfExpression != null) {
             var result = getDynamicValueExpressionResult(request, cqfExpression, context, resource);
             if (result == null || result.isEmpty()) {
-                logger.warn(String.format(
-                        "Null value received when evaluating dynamic value expression: %s",
-                        cqfExpression.getExpression()));
+                var warning = "Null value received when evaluating dynamic value expression: %s"
+                        .formatted(cqfExpression.getExpression());
+                logger.warn(warning);
                 return;
             }
             var value = result.size() == 1 ? result.get(0) : result;
             if (requiresRequestAction(path, resource)) {
                 if (requestAction == null) {
-                    throw new IllegalArgumentException(String.format(
-                            "Error resolving dynamicValue with path %s: expected requestAction not found", path));
+                    throw new IllegalArgumentException(
+                            "Error resolving dynamicValue with path %s: expected requestAction not found"
+                                    .formatted(path));
                 }
                 if (isPriorityExtension(path)) {
                     // Custom logic to handle setting the indicator of a CDS Card because RequestGroup.action does not

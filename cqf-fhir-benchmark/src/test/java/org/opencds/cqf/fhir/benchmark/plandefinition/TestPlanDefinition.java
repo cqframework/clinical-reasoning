@@ -17,12 +17,13 @@ import static org.opencds.cqf.fhir.utility.SearchHelper.readRepository;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.repository.IRepository;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -36,7 +37,6 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.json.JSONException;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.benchmark.TestOperationProvider;
 import org.opencds.cqf.fhir.benchmark.helpers.DataRequirementsLibrary;
 import org.opencds.cqf.fhir.benchmark.helpers.GeneratedPackage;
@@ -70,7 +70,7 @@ public class TestPlanDefinition {
     }
 
     private static InputStream open(String asset) {
-        var path = Paths.get(String.format("%s/%s/%s", getResourcePath(TestPlanDefinition.class), CLASS_PATH, asset));
+        var path = Path.of("%s/%s/%s".formatted(getResourcePath(TestPlanDefinition.class), CLASS_PATH, asset));
         var file = path.toFile();
         try {
             return new FileInputStream(file);
@@ -99,10 +99,10 @@ public class TestPlanDefinition {
     }
 
     public static class Given {
-        private Repository repository;
+        private IRepository repository;
         private EvaluationSettings evaluationSettings;
 
-        public Given repository(Repository repository) {
+        public Given repository(IRepository repository) {
             this.repository = repository;
             return this;
         }
@@ -110,7 +110,7 @@ public class TestPlanDefinition {
         public Given repositoryFor(FhirContext fhirContext, String repositoryPath) {
             this.repository = new IgRepository(
                     fhirContext,
-                    Paths.get(String.format("%s/%s/%s", getResourcePath(this.getClass()), CLASS_PATH, repositoryPath)));
+                    Path.of("%s/%s/%s".formatted(getResourcePath(this.getClass()), CLASS_PATH, repositoryPath)));
             return this;
         }
 
@@ -119,7 +119,7 @@ public class TestPlanDefinition {
             return this;
         }
 
-        public PlanDefinitionProcessor buildProcessor(Repository repository) {
+        public PlanDefinitionProcessor buildProcessor(IRepository repository) {
             if (repository instanceof IgRepository igRepository) {
                 igRepository.setOperationProvider(TestOperationProvider.newProvider(repository.fhirContext()));
             }
@@ -143,7 +143,7 @@ public class TestPlanDefinition {
     }
 
     public static class When {
-        private final Repository repository;
+        private final IRepository repository;
         private final PlanDefinitionProcessor processor;
         private final IParser jsonParser;
 
@@ -154,16 +154,16 @@ public class TestPlanDefinition {
         private String practitionerId;
         private String organizationId;
         private boolean useServerData;
-        private Repository dataRepository;
-        private Repository contentRepository;
-        private Repository terminologyRepository;
+        private IRepository dataRepository;
+        private IRepository contentRepository;
+        private IRepository terminologyRepository;
         private IBaseBundle additionalData;
         private IIdType additionalDataId;
         private List<? extends IBaseBackboneElement> prefetchData;
         private IBaseParameters parameters;
         private boolean isPackagePut;
 
-        public When(Repository repository, PlanDefinitionProcessor processor) {
+        public When(IRepository repository, PlanDefinitionProcessor processor) {
             this.repository = repository;
             this.processor = processor;
             jsonParser = repository.fhirContext().newJsonParser();
@@ -335,7 +335,7 @@ public class TestPlanDefinition {
     }
 
     public static class GeneratedBundle {
-        final Repository repository;
+        final IRepository repository;
         final IBaseBundle generatedBundleInner;
         final IParser jsonParser;
         final ModelResolver modelResolver;
@@ -343,7 +343,7 @@ public class TestPlanDefinition {
         IBaseResource questionnaireResponse;
         Map<String, IBaseBackboneElement> items;
 
-        public GeneratedBundle(Repository repository, IBaseBundle generatedBundleInner) {
+        public GeneratedBundle(IRepository repository, IBaseBundle generatedBundleInner) {
             this.repository = repository;
             this.generatedBundleInner = generatedBundleInner;
             jsonParser = this.repository.fhirContext().newJsonParser().setPrettyPrint(true);
@@ -433,11 +433,10 @@ public class TestPlanDefinition {
         @SuppressWarnings({"unchecked", "squid:S2259"})
         public GeneratedBundle hasQuestionnaireResponseItemValue(String linkId, String value) {
             var answerPath = modelResolver.resolvePath(items.get(linkId), "answer");
-            var answers = answerPath instanceof List<?>
-                    ? ((List<?>) answerPath)
-                            .stream()
-                                    .map(a -> (IPrimitiveType<String>) modelResolver.resolvePath(a, "value"))
-                                    .toList()
+            var answers = answerPath instanceof List<?> l
+                    ? l.stream()
+                            .map(a -> (IPrimitiveType<String>) modelResolver.resolvePath(a, "value"))
+                            .toList()
                     : null;
             assertNotNull(answers);
             assertTrue(
@@ -467,12 +466,12 @@ public class TestPlanDefinition {
     }
 
     public static class GeneratedCarePlan {
-        final Repository repository;
+        final IRepository repository;
         final IBaseResource generatedCarePlanInner;
         final IParser jsonParser;
         final ModelResolver modelResolver;
 
-        public GeneratedCarePlan(Repository repository, IBaseResource generatedCarePlanInner) {
+        public GeneratedCarePlan(IRepository repository, IBaseResource generatedCarePlanInner) {
             this.repository = repository;
             this.generatedCarePlanInner = generatedCarePlanInner;
             jsonParser = this.repository.fhirContext().newJsonParser().setPrettyPrint(true);

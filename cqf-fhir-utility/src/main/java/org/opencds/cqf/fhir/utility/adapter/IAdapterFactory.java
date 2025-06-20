@@ -20,7 +20,7 @@ public interface IAdapterFactory {
             case R4 -> new org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory();
             case R5 -> new org.opencds.cqf.fhir.utility.adapter.r5.AdapterFactory();
             default -> throw new IllegalArgumentException(
-                    String.format("Unsupported FHIR version: %s", fhirVersion.toString()));
+                    "Unsupported FHIR version: %s".formatted(fhirVersion.toString()));
         };
     }
 

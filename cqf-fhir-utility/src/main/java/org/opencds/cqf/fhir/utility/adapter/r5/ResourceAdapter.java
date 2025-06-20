@@ -53,7 +53,7 @@ class ResourceAdapter extends BaseResourceAdapter {
         }
 
         if (values.length > 1) {
-            throw new IllegalArgumentException(String.format("more than one value found for property: %s", name));
+            throw new IllegalArgumentException("more than one value found for property: %s".formatted(name));
         }
 
         return values[0];

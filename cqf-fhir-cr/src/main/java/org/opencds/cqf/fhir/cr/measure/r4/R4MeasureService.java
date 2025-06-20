@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
+import ca.uhn.fhir.repository.IRepository;
 import jakarta.annotation.Nullable;
 import java.time.ZonedDateTime;
 import java.util.Collections;
@@ -11,7 +12,6 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Parameters;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
@@ -20,7 +20,7 @@ import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.repository.Repositories;
 
 public class R4MeasureService implements R4MeasureEvaluatorSingle {
-    private final Repository repository;
+    private final IRepository repository;
     private final MeasureEvaluationOptions measureEvaluationOptions;
     private final MeasurePeriodValidator measurePeriodValidator;
     private final R4RepositorySubjectProvider subjectProvider;
@@ -28,7 +28,7 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
     private final NpmPackageLoader npmPackageLoader;
 
     public R4MeasureService(
-            Repository repository,
+            IRepository repository,
             MeasureEvaluationOptions measureEvaluationOptions,
             MeasurePeriodValidator measurePeriodValidator,
             R4MeasureServiceUtils measureServiceUtils,

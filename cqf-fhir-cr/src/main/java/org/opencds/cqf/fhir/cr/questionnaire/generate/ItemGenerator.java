@@ -4,6 +4,7 @@ import static org.opencds.cqf.fhir.cr.common.ExtensionBuilders.buildSdcLaunchCon
 import static org.opencds.cqf.fhir.utility.SearchHelper.searchRepositoryByCanonical;
 import static org.opencds.cqf.fhir.utility.VersionUtilities.canonicalTypeForVersion;
 
+import ca.uhn.fhir.repository.IRepository;
 import jakarta.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,7 +20,6 @@ import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cr.common.ExpressionProcessor;
 import org.opencds.cqf.fhir.cr.common.ExtensionProcessor;
@@ -40,14 +40,14 @@ public class ItemGenerator {
     protected static final String ITEM_CREATION_ERROR = "An error occurred during item creation: %s";
     protected static final String CHILD_LINK_ID_FORMAT = "%s.%s";
 
-    protected final Repository repository;
+    protected final IRepository repository;
     protected final CqlEngine engine;
     protected final ExpressionProcessor expressionProcessor;
     protected final ExtensionProcessor extensionProcessor;
     protected final ElementHasCaseFeature elementHasCaseFeature;
     protected final ItemTypeIsChoice itemTypeIsChoice;
 
-    public ItemGenerator(Repository repository) {
+    public ItemGenerator(IRepository repository) {
         this.repository = repository;
         engine = Engines.forRepository(this.repository);
         expressionProcessor = new ExpressionProcessor();
@@ -109,7 +109,7 @@ public class ItemGenerator {
             }
             return new ImmutablePair<>(questionnaireItem, launchContextExts);
         } catch (Exception ex) {
-            final String message = String.format(ITEM_CREATION_ERROR, ex.getMessage());
+            final String message = ITEM_CREATION_ERROR.formatted(ex.getMessage());
             logger.error(message);
             return new ImmutablePair<>(createErrorItem(request, linkId, message), new ArrayList<>());
         }
@@ -141,7 +141,7 @@ public class ItemGenerator {
 
                 IBaseBackboneElement item;
                 childCount++;
-                var childLinkId = String.format(CHILD_LINK_ID_FORMAT, itemLinkId, childCount);
+                var childLinkId = CHILD_LINK_ID_FORMAT.formatted(itemLinkId, childCount);
                 item = processElement(request, caseFeature, element, childLinkId);
                 if (item == null) {
                     childCount--;
@@ -227,7 +227,7 @@ public class ItemGenerator {
             }
             return item;
         } catch (Exception ex) {
-            final String message = String.format(ITEM_CREATION_ERROR, ex.getMessage());
+            final String message = ITEM_CREATION_ERROR.formatted(ex.getMessage());
             logger.warn(message);
             return createErrorItem(request, childLinkId, message);
         }

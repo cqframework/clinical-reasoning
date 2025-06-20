@@ -14,6 +14,7 @@ import static org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils.get
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.repository.IRepository;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import jakarta.annotation.Nullable;
@@ -41,7 +42,6 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.measure.CareGapsProperties;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
@@ -68,7 +68,7 @@ public class R4CareGapsBundleBuilder {
             "http://terminology.hl7.org/CodeSystem/v3-ActCode/CAREGAP",
             new CodeableConceptSettings()
                     .add("http://terminology.hl7.org/CodeSystem/v3-ActCode", "CAREGAP", "Care Gaps"));
-    private final Repository repository;
+    private final IRepository repository;
     private final Map<String, Resource> configuredResources;
     private static final FhirContext fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
     private final CareGapsProperties careGapsProperties;
@@ -78,7 +78,7 @@ public class R4CareGapsBundleBuilder {
 
     public R4CareGapsBundleBuilder(
             CareGapsProperties careGapsProperties,
-            Repository repository,
+            IRepository repository,
             MeasureEvaluationOptions measureEvaluationOptions,
             String serverBase,
             Map<String, Resource> configuredResources,
@@ -209,11 +209,10 @@ public class R4CareGapsBundleBuilder {
 
     private Composition.SectionComponent getSection(
             Measure measure, MeasureReport measureReport, DetectedIssue detectedIssue, CareGapsStatusCode gapStatus) {
-        String narrative = String.format(
-                HTML_DIV_PARAGRAPH_CONTENT,
+        String narrative = HTML_DIV_PARAGRAPH_CONTENT.formatted(
                 gapStatus == CareGapsStatusCode.CLOSED_GAP
                         ? "No detected issues."
-                        : String.format("Issues detected.  See %s for details.", Ids.simple(detectedIssue)));
+                        : "Issues detected.  See %s for details.".formatted(Ids.simple(detectedIssue)));
         return new CompositionSectionComponentBuilder<>(Composition.SectionComponent.class)
                 .withTitle(measure.hasTitle() ? measure.getTitle() : measure.getUrl())
                 .withFocus(Ids.simple(measureReport))
@@ -302,8 +301,7 @@ public class R4CareGapsBundleBuilder {
                     .getClass();
             IBaseResource resource = repository.read(resourceType, resourceId);
 
-            if (resource instanceof Resource) {
-                Resource resourceBase = (Resource) resource;
+            if (resource instanceof Resource resourceBase) {
                 resources.put(Ids.simple(resourceId), resourceBase);
             }
         });
@@ -327,8 +325,7 @@ public class R4CareGapsBundleBuilder {
                                     .newInstance()
                                     .getClass();
                             IBaseResource resource = repository.read(resourceType, sdeId);
-                            if (resource instanceof Resource) {
-                                Resource resourceBase = (Resource) resource;
+                            if (resource instanceof Resource resourceBase) {
                                 resources.put(Ids.simple(sdeId), resourceBase);
                             }
                         }

@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
+import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.annotation.Nullable;
 import java.time.ZonedDateTime;
@@ -12,7 +13,6 @@ import java.util.stream.Collectors;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.measure.CareGapsProperties;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
@@ -28,7 +28,7 @@ public class R4CareGapsService implements R4CareGapsServiceInterface {
 
     public R4CareGapsService(
             CareGapsProperties careGapsProperties,
-            Repository repository,
+            IRepository repository,
             MeasureEvaluationOptions measureEvaluationOptions,
             String serverBase,
             MeasurePeriodValidator measurePeriodEvaluator,

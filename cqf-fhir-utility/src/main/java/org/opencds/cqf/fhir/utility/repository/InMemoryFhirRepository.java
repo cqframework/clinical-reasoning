@@ -7,6 +7,7 @@ import static org.opencds.cqf.fhir.utility.BundleHelper.newBundle;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
@@ -15,6 +16,7 @@ import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.BundleUtil;
+import com.google.common.collect.Multimap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -27,15 +29,13 @@ import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.matcher.ResourceMatcher;
 import org.opencds.cqf.fhir.utility.operation.OperationRegistry;
 
-public class InMemoryFhirRepository implements Repository {
+public class InMemoryFhirRepository implements IRepository {
 
     private final Map<String, Map<IIdType, IBaseResource>> resourceMap;
     private final FhirContext context;
@@ -130,7 +130,7 @@ public class InMemoryFhirRepository implements Repository {
     public <B extends IBaseBundle, T extends IBaseResource> B search(
             Class<B> bundleType,
             Class<T> resourceType,
-            Map<String, List<IQueryParameterType>> searchParameters,
+            Multimap<String, List<IQueryParameterType>> searchParameters,
             Map<String, String> headers) {
         BundleBuilder builder = new BundleBuilder(this.context);
         var resourceIdMap = resourceMap.computeIfAbsent(resourceType.getSimpleName(), r -> new HashMap<>());
@@ -145,22 +145,25 @@ public class InMemoryFhirRepository implements Repository {
         if (searchParameters.containsKey("_id")) {
             // We are consuming the _id parameter in this if statement
             var idQueries = searchParameters.get("_id");
-            searchParameters.remove("_id");
 
             // The _id param can be a list of ids
             var idResources = new ArrayList<IBaseResource>(idQueries.size());
             for (var idQuery : idQueries) {
-                var idToken = (TokenParam) idQuery;
-                // Need to construct the equivalent "UnqualifiedVersionless" id that the map is
-                // indexed by. If an id has a version it won't match. Need apples-to-apples Ids types
-                var id = Ids.newId(context, resourceType.getSimpleName(), idToken.getValue());
-                var r = resourceIdMap.get(id);
-                if (r != null) {
-                    idResources.add(r);
+                for (var query : idQuery) {
+                    if (query instanceof TokenParam idToken) {
+                        // Need to construct the equivalent "UnqualifiedVersionless" id that the map is
+                        // indexed by. If an id has a version it won't match. Need apples-to-apples Ids types
+                        var id = Ids.newId(context, resourceType.getSimpleName(), idToken.getValue());
+                        var r = resourceIdMap.get(id);
+                        if (r != null) {
+                            idResources.add(r);
+                        }
+                    }
                 }
             }
 
             candidates = idResources;
+            searchParameters.removeAll("_id");
         } else {
             candidates = resourceIdMap.values();
         }
@@ -168,7 +171,7 @@ public class InMemoryFhirRepository implements Repository {
         // Apply the rest of the filters
         for (var resource : candidates) {
             boolean include = true;
-            for (var nextEntry : searchParameters.entrySet()) {
+            for (var nextEntry : searchParameters.entries()) {
                 var paramName = nextEntry.getKey();
                 if (!this.resourceMatcher.matches(paramName, nextEntry.getValue(), resource)) {
                     include = false;
@@ -218,8 +221,7 @@ public class InMemoryFhirRepository implements Repository {
                                 version, BundleHelper.newResponseWithLocation(version, location)));
             } else if (BundleHelper.isEntryRequestDelete(version, e)) {
                 if (BundleHelper.getEntryRequestId(version, e).isPresent()) {
-                    var resourceType = Canonicals.getResourceType(
-                            ((BundleEntryComponent) e).getRequest().getUrl());
+                    var resourceType = Canonicals.getResourceType(BundleHelper.getEntryRequestUrl(version, e));
                     var resourceClass =
                             this.context.getResourceDefinition(resourceType).getImplementingClass();
                     var res = this.delete(
@@ -352,7 +354,7 @@ public class InMemoryFhirRepository implements Repository {
      * @param clazz the operation class
      * @param factory a factory function that will create an instance of the operation class
      */
-    public <T> void registerOperation(Class<T> clazz, Function<Repository, T> factory) {
+    public <T> void registerOperation(Class<T> clazz, Function<IRepository, T> factory) {
         requireNonNull(clazz, "clazz can not be null");
         requireNonNull(factory, "factory can not be null");
         operationRegistry.register(clazz, factory);

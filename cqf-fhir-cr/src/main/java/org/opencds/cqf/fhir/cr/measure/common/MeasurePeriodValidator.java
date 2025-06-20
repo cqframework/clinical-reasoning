@@ -19,21 +19,21 @@ public class MeasurePeriodValidator {
         }
 
         if ((periodStart == null || periodEnd == null)) {
-            throw new InvalidInterval(String.format(
-                    "Invalid Period - Either both or neither should be null: start date: %s and end date: %s",
-                    periodStart, periodEnd));
+            throw new InvalidInterval(
+                    "Invalid Period - Either both or neither should be null: start date: %s and end date: %s"
+                            .formatted(periodStart, periodEnd));
         }
 
         // This should probably never happen
         if (periodStart.isEqual(periodEnd)) {
-            throw new InvalidInterval(String.format(
-                    "Invalid Period - Start date: %s is the same as end date: %s", periodStart, periodEnd));
+            throw new InvalidInterval(
+                    "Invalid Period - Start date: %s is the same as end date: %s".formatted(periodStart, periodEnd));
         }
 
         if (periodStart.isAfter(periodEnd)) {
-            throw new InvalidInterval(String.format(
-                    "Invalid Period - the ending boundary: %s must be greater than or equal to the starting boundary: %s",
-                    periodEnd, periodStart));
+            throw new InvalidInterval(
+                    "Invalid Period - the ending boundary: %s must be greater than or equal to the starting boundary: %s"
+                            .formatted(periodEnd, periodStart));
         }
     }
 }

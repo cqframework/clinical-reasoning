@@ -64,7 +64,7 @@ public class DirectoryBundler {
                 uri = new URI(path);
             }
         } catch (Exception e) {
-            logger.error(String.format("error parsing uri from path: %s", path), e);
+            logger.error("error parsing uri from path: %s".formatted(path), e);
             throw new RuntimeException(e);
         }
 
@@ -89,7 +89,7 @@ public class DirectoryBundler {
                         .collect(Collectors.toList());
             }
         } catch (Exception e) {
-            logger.error(String.format("error attempting to list jar: %s", uri.toString()));
+            logger.error("error attempting to list jar: %s".formatted(uri.toString()));
             throw new RuntimeException(e);
         }
     }
@@ -98,7 +98,7 @@ public class DirectoryBundler {
         File resourceDirectory = new File(path);
         if (!resourceDirectory.getAbsoluteFile().exists()) {
             throw new IllegalArgumentException(
-                    String.format("The specified path to resource files does not exist: %s", path));
+                    "The specified path to resource files does not exist: %s".formatted(path));
         }
 
         if (resourceDirectory.getAbsoluteFile().isDirectory()) {
@@ -107,7 +107,7 @@ public class DirectoryBundler {
             return Collections.singletonList(resourceDirectory);
         } else {
             throw new IllegalArgumentException(
-                    String.format("path was not a directory or a recognized FHIR file format (XML, JSON) : %s", path));
+                    "path was not a directory or a recognized FHIR file format (XML, JSON) : %s".formatted(path));
         }
     }
 
@@ -121,8 +121,8 @@ public class DirectoryBundler {
                 continue;
             }
 
-            if (resource instanceof IBaseBundle) {
-                List<IBaseResource> innerResources = flatten(this.fhirContext, (IBaseBundle) resource);
+            if (resource instanceof IBaseBundle bundle) {
+                List<IBaseResource> innerResources = flatten(this.fhirContext, bundle);
                 resources.addAll(innerResources);
             } else {
                 resources.add(resource);
@@ -174,8 +174,8 @@ public class DirectoryBundler {
 
         List<IBaseResource> bundleResources = BundleUtil.toListOfResources(fhirContext, bundle);
         for (IBaseResource r : bundleResources) {
-            if (r instanceof IBaseBundle) {
-                List<IBaseResource> innerResources = flatten(fhirContext, (IBaseBundle) r);
+            if (r instanceof IBaseBundle baseBundle) {
+                List<IBaseResource> innerResources = flatten(fhirContext, baseBundle);
                 resources.addAll(innerResources);
             } else {
                 resources.add(r);

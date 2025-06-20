@@ -28,7 +28,7 @@ public class ProcedureResolver extends BaseRequestResourceResolver {
 
         if (activityDefinition.hasUrl()) {
             procedure.setInstantiatesCanonical(Collections.singletonList(new CanonicalType(activityDefinition.getUrl()
-                    + (activityDefinition.hasVersion() ? String.format("|%s", activityDefinition.getVersion()) : ""))));
+                    + (activityDefinition.hasVersion() ? "|%s".formatted(activityDefinition.getVersion()) : ""))));
         }
 
         if (activityDefinition.hasCode()) {

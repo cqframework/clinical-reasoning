@@ -10,6 +10,7 @@ import static org.opencds.cqf.fhir.utility.BundleHelper.newEntryWithResource;
 import static org.opencds.cqf.fhir.utility.VersionUtilities.stringTypeForVersion;
 import static org.opencds.cqf.fhir.utility.VersionUtilities.uriTypeForVersion;
 
+import ca.uhn.fhir.repository.IRepository;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collections;
@@ -20,7 +21,6 @@ import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.common.ExtensionProcessor;
 import org.opencds.cqf.fhir.cr.common.ICpgRequest;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.GenerateProcessor;
@@ -42,7 +42,7 @@ public class ApplyProcessor implements IApplyProcessor {
             Constants.CQFM_LOGIC_DEFINITION,
             Constants.CQFM_EFFECTIVE_DATA_REQUIREMENTS);
 
-    protected final Repository repository;
+    protected final IRepository repository;
     protected final ModelResolver modelResolver;
     protected final ExtensionProcessor extensionProcessor;
     protected final GenerateProcessor generateProcessor;
@@ -54,7 +54,7 @@ public class ApplyProcessor implements IApplyProcessor {
     protected final org.opencds.cqf.fhir.cr.activitydefinition.apply.IApplyProcessor activityProcessor;
 
     public ApplyProcessor(
-            Repository repository,
+            IRepository repository,
             ModelResolver modelResolver,
             org.opencds.cqf.fhir.cr.activitydefinition.apply.IApplyProcessor activityProcessor) {
         this.repository = repository;
@@ -139,15 +139,13 @@ public class ApplyProcessor implements IApplyProcessor {
                                 "version",
                                 stringTypeForVersion(
                                         request.getFhirVersion(),
-                                        version.concat(
-                                                String.format("-%s-%s", subject, formatter.format(new Date())))));
+                                        version.concat("-%s-%s".formatted(subject, formatter.format(new Date())))));
             }
             request.setQuestionnaire(questionnaire);
             request.addCqlLibraryExtension();
         } else {
-            request.logException(String.format(
-                    "PlanDefinition %s is missing a canonical url.",
-                    request.getPlanDefinition().getIdElement().getValue()));
+            request.logException("PlanDefinition %s is missing a canonical url."
+                    .formatted(request.getPlanDefinition().getIdElement().getValue()));
         }
         extractQuestionnaireResponse(request);
     }
@@ -176,9 +174,8 @@ public class ApplyProcessor implements IApplyProcessor {
                         // request.getExtractedResources().add(getEntryResource(request.getFhirVersion(), entry))
                     }
                 } catch (Exception e) {
-                    request.logException(String.format(
-                            "Error encountered extracting %s: %s",
-                            questionnaireResponse.getIdElement().getIdPart(), e.getMessage()));
+                    request.logException("Error encountered extracting %s: %s"
+                            .formatted(questionnaireResponse.getIdElement().getIdPart(), e.getMessage()));
                 }
             }
         }

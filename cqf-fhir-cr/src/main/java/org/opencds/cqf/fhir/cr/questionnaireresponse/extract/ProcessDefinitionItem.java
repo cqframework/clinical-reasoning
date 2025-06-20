@@ -91,8 +91,7 @@ public class ProcessDefinitionItem {
                 resourceType = split[split.length - 1];
             } else {
                 if (definition == null) {
-                    throw new IllegalArgumentException(
-                            String.format("Unable to retrieve definition for item: %s", linkId));
+                    throw new IllegalArgumentException("Unable to retrieve definition for item: %s".formatted(linkId));
                 }
                 resourceType = getDefinitionType(definition);
             }
@@ -169,7 +168,7 @@ public class ProcessDefinitionItem {
             var id = request.getExtractId();
             var linkId = request.getItemLinkId(item.getResponseItem());
             if (StringUtils.isNotBlank(linkId)) {
-                id = id.concat(String.format("-%s", linkId));
+                id = id.concat("-%s".formatted(linkId));
             }
             // casting here to identify the signature
             resource.setId((IIdType) Ids.newId(request.getFhirVersion(), id));
@@ -261,8 +260,7 @@ public class ProcessDefinitionItem {
                         request.getAdapterFactory().createKnowledgeArtifactAdapter((IDomainResource)
                                 searchRepositoryByCanonical(request.getRepository(), canonical)));
             } catch (Exception e) {
-                logger.error(
-                        String.format("Encountered error retrieving profile %s: %s", canonical, e.getMessage()), e);
+                logger.error("Encountered error retrieving profile %s: %s".formatted(canonical, e.getMessage()), e);
             }
         }
         return Optional.empty();
@@ -334,8 +332,8 @@ public class ProcessDefinitionItem {
             return;
         }
         if (!definition.contains("#")) {
-            throw new IllegalArgumentException(String.format(
-                    "Invalid definition encountered for item %s", request.getItemLinkId(itemPair.getResponseItem())));
+            throw new IllegalArgumentException("Invalid definition encountered for item %s"
+                    .formatted(request.getItemLinkId(itemPair.getResponseItem())));
         }
         var pathAdapter = getPathAdapter(request, profile, definition);
         var path = pathAdapter.left;
@@ -451,9 +449,8 @@ public class ProcessDefinitionItem {
             String[] identifiers,
             HashMap<String, BaseRuntimeChildDefinition> propertyDefs) {
         if (profile == null) {
-            throw new IllegalArgumentException(String.format(
-                    "Unable to parse slice element without a profile for definition: %s",
-                    String.join(".", identifiers)));
+            throw new IllegalArgumentException("Unable to parse slice element without a profile for definition: %s"
+                    .formatted(String.join(".", identifiers)));
         }
         var sliceIndex = -1;
         for (int i = 0; i < identifiers.length; i++) {
@@ -479,8 +476,7 @@ public class ProcessDefinitionItem {
                 var sliceValue = newBase(sliceClass);
                 setAnswerValue(request, sliceValue, propertyDefs.get(answerPath), answerPath, answerValue, profile);
                 for (var slice : sliceElements) {
-                    var sliceElementPath =
-                            slice.getId().replace(String.format("%s.%s.", profile.getType(), sliceName), "");
+                    var sliceElementPath = slice.getId().replace("%s.%s.".formatted(profile.getType(), sliceName), "");
                     var sliceElementValue = slice.getDefaultOrFixedOrPattern();
                     setAnswerValue(
                             request,
@@ -534,11 +530,10 @@ public class ProcessDefinitionItem {
                             answerPath,
                             transformAnswer(request, pathDefinition, answerValue, answerPath, profile));
         } catch (Exception e) {
-            if (pathDefinition instanceof RuntimeChildPrimitiveDatatypeDefinition
-                    && answerValue instanceof IPrimitiveType) {
-                var newValue = (IPrimitiveType<?>)
-                        newBase(((RuntimeChildPrimitiveDatatypeDefinition) pathDefinition).getDatatype());
-                newValue.setValueAsString(((IPrimitiveType<?>) answerValue).getValueAsString());
+            if (pathDefinition instanceof RuntimeChildPrimitiveDatatypeDefinition definition
+                    && answerValue instanceof IPrimitiveType<?> type) {
+                var newValue = (IPrimitiveType<?>) newBase(definition.getDatatype());
+                newValue.setValueAsString(type.getValueAsString());
                 request.getModelResolver().setValue(parent, answerPath, newValue);
             }
         }
@@ -577,7 +572,7 @@ public class ProcessDefinitionItem {
     protected IBase getElement(ExtractRequest request, IBase parent, String path) {
         var elementPath = path.split("\\.")[0];
         var value = request.resolveRawPath(parent, elementPath);
-        return (IBase) (value instanceof ArrayList ? ((ArrayList<?>) value).get(0) : value);
+        return (IBase) (value instanceof ArrayList<?> al ? al.get(0) : value);
     }
 
     protected List<Class<? extends IBase>> getChoices(BaseRuntimeChildDefinition pathDefinition) {
@@ -623,7 +618,7 @@ public class ProcessDefinitionItem {
     protected String getDefinitionType(String definition) {
         if (!definition.contains("#")) {
             throw new IllegalArgumentException(
-                    String.format("Unable to determine resource type from item definition: %s", definition));
+                    "Unable to determine resource type from item definition: %s".formatted(definition));
         }
         return definition.split("#")[1];
     }

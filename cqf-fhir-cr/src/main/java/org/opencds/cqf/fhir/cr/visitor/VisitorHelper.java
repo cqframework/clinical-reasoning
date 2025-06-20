@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.visitor;
 
+import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -14,7 +15,6 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.SearchHelper;
@@ -111,18 +111,18 @@ public class VisitorHelper {
                 .forEach(r -> {
                     switch (version) {
                         case DSTU3:
-                            if (r instanceof org.hl7.fhir.dstu3.model.MetadataResource) {
-                                resourceList.add((IDomainResource) r);
+                            if (r instanceof IDomainResource resource) {
+                                resourceList.add(resource);
                             }
                             break;
                         case R4:
-                            if (r instanceof org.hl7.fhir.r4.model.MetadataResource) {
-                                resourceList.add((IDomainResource) r);
+                            if (r instanceof IDomainResource resource) {
+                                resourceList.add(resource);
                             }
                             break;
                         case R5:
-                            if (r instanceof org.hl7.fhir.r5.model.MetadataResource) {
-                                resourceList.add((IDomainResource) r);
+                            if (r instanceof IDomainResource resource) {
+                                resourceList.add(resource);
                             }
                             break;
                         default:
@@ -142,15 +142,14 @@ public class VisitorHelper {
             if (knowledgeCapabilityExtension.isEmpty()) {
                 // consider resource unsupported if it's knowledgeCapability is undefined
                 throw new PreconditionFailedException(
-                        String.format("Resource with url: '%s' does not specify capability.", resource.getUrl()));
+                        "Resource with url: '%s' does not specify capability.".formatted(resource.getUrl()));
             }
             knowledgeCapabilityExtension.stream()
                     .filter(ext -> !capability.contains(((IPrimitiveType<?>) ext.getValue()).getValue()))
                     .findAny()
                     .ifPresent(ext -> {
-                        throw new PreconditionFailedException(String.format(
-                                "Resource with url: '%s' is not one of '%s'.",
-                                resource.getUrl(), String.join(", ", capability)));
+                        throw new PreconditionFailedException("Resource with url: '%s' is not one of '%s'."
+                                .formatted(resource.getUrl(), String.join(", ", capability)));
                     });
         }
     }
@@ -165,9 +164,9 @@ public class VisitorHelper {
             // check throws an error
             findVersionInListMatchingResource(checkArtifactVersion, resource).ifPresent(version -> {
                 if (!resource.getVersion().equals(version)) {
-                    throw new PreconditionFailedException(String.format(
-                            "Resource with url '%s' has version '%s' but checkVersion specifies '%s'",
-                            resource.getUrl(), resource.getVersion(), version));
+                    throw new PreconditionFailedException(
+                            "Resource with url '%s' has version '%s' but checkVersion specifies '%s'"
+                                    .formatted(resource.getUrl(), resource.getVersion(), version));
                 }
             });
         } else if (forceArtifactVersion != null && !forceArtifactVersion.isEmpty()) {
@@ -188,7 +187,7 @@ public class VisitorHelper {
     }
 
     public static Optional<IKnowledgeArtifactAdapter> tryGetLatestVersion(
-            String inputReference, Repository repository) {
+            String inputReference, IRepository repository) {
         return IKnowledgeArtifactAdapter.findLatestVersion(
                         SearchHelper.searchRepositoryByCanonicalWithPaging(repository, inputReference))
                 .map(res -> IAdapterFactory.forFhirVersion(res.getStructureFhirVersionEnum())
@@ -196,7 +195,7 @@ public class VisitorHelper {
     }
 
     public static Optional<IKnowledgeArtifactAdapter> tryGetLatestVersionWithStatus(
-            String inputReference, Repository repository, String status) {
+            String inputReference, IRepository repository, String status) {
         return IKnowledgeArtifactAdapter.findLatestVersion(SearchHelper.searchRepositoryByCanonicalWithPagingWithParams(
                         repository, inputReference, Searches.byStatus(status)))
                 .map(res -> IAdapterFactory.forFhirVersion(res.getStructureFhirVersionEnum())
@@ -204,7 +203,7 @@ public class VisitorHelper {
     }
 
     public static Optional<IKnowledgeArtifactAdapter> tryGetLatestVersionExceptStatus(
-            String inputReference, Repository repository, String status) {
+            String inputReference, IRepository repository, String status) {
         return IKnowledgeArtifactAdapter.findLatestVersion(SearchHelper.searchRepositoryByCanonicalWithPagingWithParams(
                         repository, inputReference, Searches.exceptStatus(status)))
                 .map(res -> IAdapterFactory.forFhirVersion(res.getStructureFhirVersionEnum())

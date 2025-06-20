@@ -39,8 +39,8 @@ public class AdapterFactory implements IAdapterFactory {
 
     @Override
     public IResourceAdapter createResource(IBaseResource resource) {
-        if (resource instanceof MetadataResource) {
-            return createKnowledgeArtifactAdapter((IDomainResource) resource);
+        if (resource instanceof MetadataResource metadataResource) {
+            return createKnowledgeArtifactAdapter(metadataResource);
         } else if (resource instanceof Endpoint) {
             return createEndpoint(resource);
         } else if (resource instanceof Parameters parameters) {
@@ -72,7 +72,7 @@ public class AdapterFactory implements IAdapterFactory {
                 adapter = new KnowledgeArtifactAdapter(metadataResource);
             } else {
                 throw new UnprocessableEntityException(
-                        String.format("Resource must be instance of %s", MetadataResource.class.getName()));
+                        "Resource must be instance of %s".formatted(MetadataResource.class.getName()));
             }
         }
         return adapter;

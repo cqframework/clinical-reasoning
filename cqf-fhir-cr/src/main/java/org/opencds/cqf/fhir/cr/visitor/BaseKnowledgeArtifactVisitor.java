@@ -6,6 +6,7 @@ import static org.opencds.cqf.fhir.cr.visitor.VisitorHelper.processCanonicals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -22,7 +23,6 @@ import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.PackageHelper;
@@ -36,15 +36,15 @@ import org.opencds.cqf.fhir.utility.client.TerminologyServerClient;
 
 public abstract class BaseKnowledgeArtifactVisitor implements IKnowledgeArtifactVisitor {
     String isOwnedUrl = "http://hl7.org/fhir/StructureDefinition/artifact-isOwned";
-    protected final Repository repository;
+    protected final IRepository repository;
     protected final Optional<IValueSetExpansionCache> valueSetExpansionCache;
 
-    protected BaseKnowledgeArtifactVisitor(Repository repository) {
+    protected BaseKnowledgeArtifactVisitor(IRepository repository) {
         this.repository = repository;
         this.valueSetExpansionCache = Optional.empty();
     }
 
-    protected BaseKnowledgeArtifactVisitor(Repository repository, IValueSetExpansionCache valueSetExpansionCache) {
+    protected BaseKnowledgeArtifactVisitor(IRepository repository, IValueSetExpansionCache valueSetExpansionCache) {
         this.repository = repository;
         this.valueSetExpansionCache = Optional.ofNullable(valueSetExpansionCache);
     }
@@ -62,22 +62,22 @@ public abstract class BaseKnowledgeArtifactVisitor implements IKnowledgeArtifact
     }
 
     protected List<IBaseBackboneElement> findArtifactCommentsToUpdate(
-            IBaseResource artifact, String releaseVersion, Repository repository) {
-        if (artifact instanceof org.hl7.fhir.dstu3.model.MetadataResource) {
+            IBaseResource artifact, String releaseVersion, IRepository repository) {
+        if (artifact instanceof org.hl7.fhir.dstu3.model.MetadataResource resource2) {
             return org.opencds.cqf.fhir.cr.visitor.dstu3.ReleaseVisitor.findArtifactCommentsToUpdate(
-                            (org.hl7.fhir.dstu3.model.MetadataResource) artifact, releaseVersion, repository)
+                            resource2, releaseVersion, repository)
                     .stream()
                     .map(r -> (IBaseBackboneElement) r)
                     .collect(Collectors.toList());
-        } else if (artifact instanceof org.hl7.fhir.r4.model.MetadataResource) {
+        } else if (artifact instanceof org.hl7.fhir.r4.model.MetadataResource resource1) {
             return org.opencds.cqf.fhir.cr.visitor.r4.ReleaseVisitor.findArtifactCommentsToUpdate(
-                            (org.hl7.fhir.r4.model.MetadataResource) artifact, releaseVersion, repository)
+                            resource1, releaseVersion, repository)
                     .stream()
                     .map(r -> (IBaseBackboneElement) r)
                     .collect(Collectors.toList());
-        } else if (artifact instanceof org.hl7.fhir.r5.model.MetadataResource) {
+        } else if (artifact instanceof org.hl7.fhir.r5.model.MetadataResource resource) {
             return org.opencds.cqf.fhir.cr.visitor.r5.ReleaseVisitor.findArtifactCommentsToUpdate(
-                            (org.hl7.fhir.r5.model.MetadataResource) artifact, releaseVersion, repository)
+                            resource, releaseVersion, repository)
                     .stream()
                     .map(r -> (IBaseBackboneElement) r)
                     .collect(Collectors.toList());
@@ -87,7 +87,7 @@ public abstract class BaseKnowledgeArtifactVisitor implements IKnowledgeArtifact
     }
 
     protected List<IDomainResource> getComponents(
-            IKnowledgeArtifactAdapter adapter, Repository repository, ArrayList<IDomainResource> resourcesToUpdate) {
+            IKnowledgeArtifactAdapter adapter, IRepository repository, ArrayList<IDomainResource> resourcesToUpdate) {
         adapter.getOwnedRelatedArtifacts().stream().forEach(c -> {
             final var preReleaseReference = IKnowledgeArtifactAdapter.getRelatedArtifactReference(c);
             Optional<IKnowledgeArtifactAdapter> maybeArtifact =
@@ -188,7 +188,7 @@ public abstract class BaseKnowledgeArtifactVisitor implements IKnowledgeArtifact
             return;
         }
         var reference = adapter.hasVersion()
-                ? adapter.getUrl().concat(String.format("|%s", adapter.getVersion()))
+                ? adapter.getUrl().concat("|%s".formatted(adapter.getVersion()))
                 : adapter.getUrl();
         if (relatedArtifacts.stream().noneMatch(ra -> IKnowledgeArtifactAdapter.getRelatedArtifactReference(ra)
                 .equals(reference))) {

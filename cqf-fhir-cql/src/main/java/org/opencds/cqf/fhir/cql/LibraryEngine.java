@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cql;
 import static java.util.Objects.requireNonNull;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.util.ParametersUtil;
 import com.google.common.collect.Lists;
 import jakarta.annotation.Nullable;
@@ -24,7 +25,6 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.engine.parameters.CqlFhirParametersConverter;
 import org.opencds.cqf.fhir.cql.engine.parameters.CqlParameterDefinition;
 import org.opencds.cqf.fhir.utility.CqfExpression;
@@ -36,17 +36,17 @@ public class LibraryEngine {
 
     private static final Logger logger = LoggerFactory.getLogger(LibraryEngine.class);
 
-    protected final Repository repository;
+    protected final IRepository repository;
     protected final FhirContext fhirContext;
     protected final EvaluationSettings settings;
 
-    public LibraryEngine(Repository repository, EvaluationSettings evaluationSettings) {
+    public LibraryEngine(IRepository repository, EvaluationSettings evaluationSettings) {
         this.repository = requireNonNull(repository, "repository can not be null");
         this.settings = requireNonNull(evaluationSettings, "evaluationSettings can not be null");
         fhirContext = repository.fhirContext();
     }
 
-    public Repository getRepository() {
+    public IRepository getRepository() {
         return repository;
     }
 
@@ -116,7 +116,7 @@ public class LibraryEngine {
             var split = fhirType.split("\\.");
             fhirType = Arrays.stream(split).map(StringUtils::capitalize).collect(Collectors.joining("."));
         }
-        return String.format("FHIR.%s", fhirType);
+        return "FHIR.%s".formatted(fhirType);
     }
 
     public IBaseParameters evaluateExpression(
@@ -278,7 +278,7 @@ public class LibraryEngine {
                 });
                 break;
             default:
-                throw new IllegalArgumentException(String.format("unsupported FHIR version: %s", fhirContext));
+                throw new IllegalArgumentException("unsupported FHIR version: %s".formatted(fhirContext));
         }
 
         return returnValues;

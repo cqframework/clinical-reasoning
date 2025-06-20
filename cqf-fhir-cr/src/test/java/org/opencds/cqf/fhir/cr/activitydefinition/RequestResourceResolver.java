@@ -3,10 +3,10 @@ package org.opencds.cqf.fhir.cr.activitydefinition;
 import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
-import java.nio.file.Paths;
+import ca.uhn.fhir.repository.IRepository;
+import java.nio.file.Path;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.ApplyRequest;
@@ -21,10 +21,10 @@ public class RequestResourceResolver {
 
     public static class Given {
         private IRequestResolverFactory resolverFactory;
-        private Repository repository;
+        private IRepository repository;
         private String activityDefinitionId;
 
-        public Given repository(Repository repository) {
+        public Given repository(IRepository repository) {
             this.repository = repository;
             this.resolverFactory = IRequestResolverFactory.getDefault(
                     repository.fhirContext().getVersion().getVersion());
@@ -33,7 +33,7 @@ public class RequestResourceResolver {
 
         public Given repositoryFor(FhirContext fhirContext, String repositoryPath) {
             this.repository = new IgRepository(
-                    fhirContext, Paths.get(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
+                    fhirContext, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
             this.resolverFactory =
                     IRequestResolverFactory.getDefault(fhirContext.getVersion().getVersion());
             return this;
@@ -60,7 +60,7 @@ public class RequestResourceResolver {
     }
 
     public static class When {
-        private final Repository repository;
+        private final IRepository repository;
         private final IBaseResource activityDefinition;
         private final BaseRequestResourceResolver resolver;
         private IIdType subjectId;
@@ -68,7 +68,7 @@ public class RequestResourceResolver {
         private IIdType practitionerId;
         private IIdType organizationId;
 
-        When(Repository repository, IBaseResource activityDefinition, BaseRequestResourceResolver resolver) {
+        When(IRepository repository, IBaseResource activityDefinition, BaseRequestResourceResolver resolver) {
             this.repository = repository;
             this.activityDefinition = activityDefinition;
             this.resolver = resolver;

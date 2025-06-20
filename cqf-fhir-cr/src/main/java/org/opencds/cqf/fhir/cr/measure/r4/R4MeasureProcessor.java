@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
+import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import jakarta.annotation.Nonnull;
@@ -29,7 +30,6 @@ import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.fhir.model.R4FhirModelResolver;
 import org.opencds.cqf.cql.engine.runtime.Interval;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cql.VersionedIdentifiers;
@@ -54,7 +54,7 @@ import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.search.Searches;
 
 public class R4MeasureProcessor {
-    private final Repository repository;
+    private final IRepository repository;
     private final MeasureEvaluationOptions measureEvaluationOptions;
     private final SubjectProvider subjectProvider;
     private final R4MeasureServiceUtils r4MeasureServiceUtils;
@@ -62,7 +62,7 @@ public class R4MeasureProcessor {
     private final MeasureProcessorUtils measureProcessorUtils = new MeasureProcessorUtils();
 
     public R4MeasureProcessor(
-            Repository repository,
+            IRepository repository,
             MeasureEvaluationOptions measureEvaluationOptions,
             SubjectProvider subjectProvider,
             R4MeasureServiceUtils r4MeasureServiceUtils,
@@ -259,9 +259,12 @@ public class R4MeasureProcessor {
             // Measure Observation defined?
             if (groupDef.measureScoring().equals(MeasureScoring.CONTINUOUSVARIABLE)
                     && groupDef.getSingle(MeasurePopulationType.MEASUREOBSERVATION) != null) {
-                throw new InvalidRequestException(String.format(
-                        "Measure Evaluation Mode does not have CQL engine context to support: Measure Scoring Type: %s, Measure Population Type: %s, for Measure: %s",
-                        MeasureScoring.CONTINUOUSVARIABLE, MeasurePopulationType.MEASUREOBSERVATION, measure.getUrl()));
+                throw new InvalidRequestException(
+                        "Measure Evaluation Mode does not have CQL engine context to support: Measure Scoring Type: %s, Measure Population Type: %s, for Measure: %s"
+                                .formatted(
+                                        MeasureScoring.CONTINUOUSVARIABLE,
+                                        MeasurePopulationType.MEASUREOBSERVATION,
+                                        measure.getUrl()));
             }
         }
     }
@@ -277,8 +280,8 @@ public class R4MeasureProcessor {
             case SUBJECT -> MeasureReportType.INDIVIDUAL;
             case SUBJECTLIST -> MeasureReportType.SUBJECTLIST;
             case POPULATION -> MeasureReportType.SUMMARY;
-            default -> throw new InvalidRequestException(String.format(
-                    "Unsupported MeasureEvalType: %s for Measure: %s", measureEvalType.toCode(), measure.getUrl()));
+            default -> throw new InvalidRequestException("Unsupported MeasureEvalType: %s for Measure: %s"
+                    .formatted(measureEvalType.toCode(), measure.getUrl()));
         };
     }
 
@@ -295,7 +298,7 @@ public class R4MeasureProcessor {
         if (npmResourceInfoForCql.getOptMainLibrary().isEmpty()) {
             Bundle b = this.repository.search(Bundle.class, Library.class, Searches.byCanonical(url), null);
             if (b.getEntry().isEmpty()) {
-                var errorMsg = String.format("Unable to find Library with url: %s", url);
+                var errorMsg = "Unable to find Library with url: %s".formatted(url);
                 throw new ResourceNotFoundException(errorMsg);
             }
         }
@@ -316,9 +319,8 @@ public class R4MeasureProcessor {
             lib = context.getEnvironment().getLibraryManager().resolveLibrary(id);
         } catch (CqlIncludeException e) {
             throw new IllegalStateException(
-                    String.format(
-                            "Unable to load CQL/ELM for library: %s. Verify that the Library resource is available in your environment and has CQL/ELM content embedded.",
-                            id.getId()),
+                    "Unable to load CQL/ELM for library: %s. Verify that the Library resource is available in your environment and has CQL/ELM content embedded."
+                            .formatted(id.getId()),
                     e);
         }
 
@@ -332,7 +334,7 @@ public class R4MeasureProcessor {
     protected void checkMeasureLibrary(Measure measure) {
         if (!measure.hasLibrary()) {
             throw new InvalidRequestException(
-                    String.format("Measure %s does not have a primary library specified", measure.getUrl()));
+                    "Measure %s does not have a primary library specified".formatted(measure.getUrl()));
         }
     }
 
@@ -383,10 +385,10 @@ public class R4MeasureProcessor {
                 value = param.getResource();
             } else {
                 value = param.getValue();
-                if (value instanceof IPrimitiveType) {
+                if (value instanceof IPrimitiveType<?> type) {
                     // TODO: handle Code, CodeableConcept, Quantity, etc
                     // resolves Date/Time values
-                    value = modelResolver.toJavaPrimitive(((IPrimitiveType<?>) value).getValue(), value);
+                    value = modelResolver.toJavaPrimitive(type.getValue(), value);
                 }
             }
             if (parameterMap.containsKey(param.getName())) {

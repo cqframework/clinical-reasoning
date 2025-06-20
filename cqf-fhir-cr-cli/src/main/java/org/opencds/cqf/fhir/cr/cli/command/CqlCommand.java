@@ -2,8 +2,8 @@ package org.opencds.cqf.fhir.cr.cli.command;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.repository.IRepository;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -17,10 +17,9 @@ import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r5.context.IWorkerContext.ILoggingService;
+import org.hl7.fhir.r5.context.ILoggingService;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.CqlOptions;
 import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
@@ -154,7 +153,7 @@ public class CqlCommand implements Callable<Integer> {
             case DSTU3:
                 return "3.0.2";
             default:
-                throw new IllegalArgumentException(String.format("Unsupported FHIR version %s", fhirVersion));
+                throw new IllegalArgumentException("Unsupported FHIR version %s".formatted(fhirVersion));
         }
     }
 
@@ -224,10 +223,10 @@ public class CqlCommand implements Callable<Integer> {
         return 0;
     }
 
-    private Repository createRepository(
+    private IRepository createRepository(
             FhirContext fhirContext, String terminologyUrl, String modelUrl, String contextValue) {
-        Repository data = null;
-        Repository terminology = null;
+        IRepository data = null;
+        IRepository terminology = null;
 
         if (modelUrl != null) {
             Path path = Path.of(modelUrl);
@@ -235,7 +234,7 @@ public class CqlCommand implements Callable<Integer> {
         }
 
         if (terminologyUrl != null) {
-            terminology = new IgRepository(fhirContext, Paths.get(terminologyUrl));
+            terminology = new IgRepository(fhirContext, Path.of(terminologyUrl));
         }
 
         return new ProxyRepository(data, null, terminology);
@@ -257,9 +256,8 @@ public class CqlCommand implements Callable<Integer> {
         }
 
         String result = "";
-        if (value instanceof Iterable) {
+        if (value instanceof Iterable<?> values) {
             result += "[";
-            Iterable<?> values = (Iterable<?>) value;
             for (Object o : values) {
                 result += (tempConvert(o) + ", ");
             }
@@ -269,17 +267,16 @@ public class CqlCommand implements Callable<Integer> {
             }
 
             result += "]";
-        } else if (value instanceof IBaseResource) {
-            IBaseResource resource = (IBaseResource) value;
+        } else if (value instanceof IBaseResource resource) {
             result = resource.fhirType()
                     + (resource.getIdElement() != null
                                     && resource.getIdElement().hasIdPart()
                             ? "(id=" + resource.getIdElement().getIdPart() + ")"
                             : "");
-        } else if (value instanceof IBase) {
-            result = ((IBase) value).fhirType();
-        } else if (value instanceof IBaseDatatype) {
-            result = ((IBaseDatatype) value).fhirType();
+        } else if (value instanceof IBase base) {
+            result = base.fhirType();
+        } else if (value instanceof IBaseDatatype datatype) {
+            result = datatype.fhirType();
         } else {
             result = value.toString();
         }

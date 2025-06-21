@@ -26,11 +26,11 @@ class CdsCrServiceMethodTest {
     @Mock
     private ICdsCrService cdsCrService;
 
-    private CdsCrServiceMethod fixture;
+    private CdsCrServiceMethod testSubject;
 
     @BeforeEach
     void beforeEach() {
-        fixture = new CdsCrServiceMethod(cdsServiceJson, cdsCrServiceFactory);
+        testSubject = new CdsCrServiceMethod(cdsServiceJson, cdsCrServiceFactory);
     }
 
     @Test
@@ -38,24 +38,24 @@ class CdsCrServiceMethodTest {
         when(cdsCrServiceFactory.create(serviceId)).thenReturn(cdsCrService);
         IModelJson cdsServiceRequestJson = new CdsServiceRequestJson();
 
-        fixture.invoke(cdsServiceRequestJson, serviceId);
+        testSubject.invoke(cdsServiceRequestJson, serviceId);
 
         verify(cdsCrService, times(1)).invoke(cdsServiceRequestJson);
     }
 
     @Test
     void testCreateCdsCrServiceWithServiceFactory() {
-        fixture.createCdsCrService(serviceId);
+        testSubject.createCdsCrService(serviceId);
         verify(cdsCrServiceFactory, times(1)).create(serviceId);
     }
 
     @Test
     void testGetCdsServiceJson() {
-        assertThat(fixture.getCdsServiceJson()).isEqualTo(cdsServiceJson);
+        assertThat(testSubject.getCdsServiceJson()).isEqualTo(cdsServiceJson);
     }
 
     @Test
     void testisAllowAutoFhirClientPrefetch() {
-        assertThat(fixture.isAllowAutoFhirClientPrefetch()).isTrue();
+        assertThat(testSubject.isAllowAutoFhirClientPrefetch()).isTrue();
     }
 }

@@ -40,7 +40,7 @@ class CdsServiceInterceptorTest {
     private ICdsCrServiceFactory crServiceFactory;
 
     @InjectMocks
-    private CdsServiceInterceptor fixture;
+    private CdsServiceInterceptor testSubject;
 
     private InOrder inOrder;
 
@@ -57,7 +57,7 @@ class CdsServiceInterceptorTest {
     void testHandleInit_willRegisterServices() {
         initializeCrDiscoveryServiceFactoryMock();
 
-        fixture.handleInit(ID_TYPE_LIST);
+        testSubject.handleInit(ID_TYPE_LIST);
 
         assertInsertInteractions();
     }
@@ -68,7 +68,7 @@ class CdsServiceInterceptorTest {
         ResourceChangeEvent resourceChangeEvent =
                 fromCreatedUpdatedDeletedResourceIds(ID_TYPE_LIST, emptyList(), emptyList());
 
-        fixture.handleChange(resourceChangeEvent);
+        testSubject.handleChange(resourceChangeEvent);
 
         assertInsertInteractions();
     }
@@ -80,7 +80,7 @@ class CdsServiceInterceptorTest {
         ResourceChangeEvent resourceChangeEvent =
                 fromCreatedUpdatedDeletedResourceIds(emptyList(), ID_TYPE_LIST, emptyList());
 
-        fixture.handleChange(resourceChangeEvent);
+        testSubject.handleChange(resourceChangeEvent);
 
         inOrder.verify(cdsServiceRegistry, times(1)).unregisterService(eq(ID), eq(CDS_CR_MODULE_ID));
 
@@ -92,7 +92,7 @@ class CdsServiceInterceptorTest {
         ResourceChangeEvent resourceChangeEvent =
                 fromCreatedUpdatedDeletedResourceIds(emptyList(), emptyList(), ID_TYPE_LIST);
 
-        fixture.handleChange(resourceChangeEvent);
+        testSubject.handleChange(resourceChangeEvent);
 
         verify(cdsServiceRegistry, times(1)).unregisterService(eq(ID), eq(CDS_CR_MODULE_ID));
         verifyNoInteractions(crServiceFactory, discoveryServiceFactory);

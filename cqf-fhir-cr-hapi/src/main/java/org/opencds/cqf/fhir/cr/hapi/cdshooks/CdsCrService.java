@@ -22,7 +22,6 @@ import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseLinkJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseSuggestionActionJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseSuggestionJson;
-import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseSystemActionJson;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -264,17 +263,6 @@ public class CdsCrService implements ICdsCrService {
         }
 
         return indicator;
-    }
-
-    protected void resolveSystemAction(IRequestActionAdapter action) {
-        if (action.hasType()
-                && action.getType().hasCoding()
-                && action.getType().getCoding().get(0).hasCode()
-                && !action.getType().getCoding().get(0).getCode().equals("fire-event")) {
-            serviceResponse.addServiceAction(new CdsServiceResponseSystemActionJson()
-                    .setResource(resolveResource(action.getResource()))
-                    .setType(action.getType().getCoding().get(0).getCode()));
-        }
     }
 
     protected CdsServiceResponseCardSourceJson resolveSource(IRequestActionAdapter action) {

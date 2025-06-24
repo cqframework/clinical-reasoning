@@ -45,8 +45,6 @@ import org.opencds.cqf.fhir.utility.repository.ig.IgConventions.CompartmentLayou
 import org.opencds.cqf.fhir.utility.repository.ig.IgConventions.FhirTypeLayout;
 import org.opencds.cqf.fhir.utility.repository.ig.IgConventions.FilenameMode;
 import org.opencds.cqf.fhir.utility.repository.operations.IRepositoryOperationProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Provides access to FHIR resources stored in a directory structure following
@@ -94,7 +92,6 @@ import org.slf4j.LoggerFactory;
  */
 public class IgRepository implements IRepository {
 
-    private static final Logger log = LoggerFactory.getLogger(IgRepository.class);
     private final FhirContext fhirContext;
     private final Path root;
     private final IgConventions conventions;
@@ -542,8 +539,6 @@ public class IgRepository implements IRepository {
         requireNonNull(resourceType, "resourceType cannot be null");
         requireNonNull(id, "id cannot be null");
 
-        log.info("IGRepository: read()");
-
         var compartment = compartmentFrom(headers);
 
         var paths = this.potentialPathsForResource(resourceType, id, compartment);
@@ -769,8 +764,6 @@ public class IgRepository implements IRepository {
             Class<T> resourceType,
             Multimap<String, List<IQueryParameterType>> searchParameters,
             Map<String, String> headers) {
-        System.out.println("IGRepository: search() for resource type: " + resourceType.getSimpleName());
-        log.info("IGRepository: search()");
         BundleBuilder builder = new BundleBuilder(this.fhirContext);
         builder.setType("searchset");
 

@@ -15,7 +15,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureScoringTypePopulations;
@@ -38,7 +37,7 @@ import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureScoringTypePopulations;
  * @see <a href=
  *      "http://www.hl7.org/implement/standards/product_brief.cfm?product_id=97">http://www.hl7.org/implement/standards/product_brief.cfm?product_id=97</a>
  */
-@SuppressWarnings("removal")
+@SuppressWarnings({"removal", "squid:S1135", "squid:S3776"})
 public class MeasureEvaluator {
     private final PopulationBasisValidator populationBasisValidator;
 
@@ -57,8 +56,7 @@ public class MeasureEvaluator {
         Objects.requireNonNull(subjectId, "subjectIds is a required argument");
 
         switch (measureEvalType) {
-            case PATIENT:
-            case SUBJECT:
+            case PATIENT, SUBJECT:
                 return this.evaluateSubject(
                         measureDef,
                         subjectType,
@@ -174,8 +172,7 @@ public class MeasureEvaluator {
             boolean applyScoring) {
         // check populations
         R4MeasureScoringTypePopulations.validateScoringTypePopulations(
-                groupDef.populations().stream().map(PopulationDef::type).collect(Collectors.toList()),
-                groupDef.measureScoring());
+                groupDef.populations().stream().map(PopulationDef::type).toList(), groupDef.measureScoring());
 
         PopulationDef initialPopulation = groupDef.getSingle(INITIALPOPULATION);
         PopulationDef numerator = groupDef.getSingle(NUMERATOR);
@@ -287,8 +284,7 @@ public class MeasureEvaluator {
         PopulationDef measurePopulationExclusion = groupDef.getSingle(MEASUREPOPULATIONEXCLUSION);
         // Validate Required Populations are Present
         R4MeasureScoringTypePopulations.validateScoringTypePopulations(
-                groupDef.populations().stream().map(PopulationDef::type).collect(Collectors.toList()),
-                MeasureScoring.CONTINUOUSVARIABLE);
+                groupDef.populations().stream().map(PopulationDef::type).toList(), MeasureScoring.CONTINUOUSVARIABLE);
 
         initialPopulation = evaluatePopulationMembership(subjectType, subjectId, initialPopulation, evaluationResult);
         if (initialPopulation.getSubjects().contains(subjectId)) {
@@ -309,16 +305,11 @@ public class MeasureEvaluator {
     }
 
     protected void evaluateCohort(
-            GroupDef groupDef,
-            String subjectType,
-            String subjectId,
-            EvaluationResult evaluationResult,
-            boolean applyScoring) {
+            GroupDef groupDef, String subjectType, String subjectId, EvaluationResult evaluationResult) {
         PopulationDef initialPopulation = groupDef.getSingle(INITIALPOPULATION);
         // Validate Required Populations are Present
         R4MeasureScoringTypePopulations.validateScoringTypePopulations(
-                groupDef.populations().stream().map(PopulationDef::type).collect(Collectors.toList()),
-                MeasureScoring.COHORT);
+                groupDef.populations().stream().map(PopulationDef::type).toList(), MeasureScoring.COHORT);
         // Evaluate Population
         evaluatePopulationMembership(subjectType, subjectId, initialPopulation, evaluationResult);
     }
@@ -339,15 +330,14 @@ public class MeasureEvaluator {
 
         var scoring = groupDef.measureScoring();
         switch (scoring) {
-            case PROPORTION:
-            case RATIO:
+            case PROPORTION, RATIO:
                 evaluateProportion(groupDef, subjectType, subjectId, reportType, evaluationResult, applyScoring);
                 break;
             case CONTINUOUSVARIABLE:
                 evaluateContinuousVariable(groupDef, subjectType, subjectId, evaluationResult, applyScoring);
                 break;
             case COHORT:
-                evaluateCohort(groupDef, subjectType, subjectId, evaluationResult, applyScoring);
+                evaluateCohort(groupDef, subjectType, subjectId, evaluationResult);
                 break;
         }
     }

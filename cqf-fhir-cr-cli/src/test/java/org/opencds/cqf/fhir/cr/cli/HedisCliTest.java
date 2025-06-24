@@ -6,13 +6,13 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.URISyntaxException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.stream.Stream;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.io.TempDir;
 import org.opencds.cqf.fhir.test.Resources;
@@ -41,7 +41,7 @@ class HedisCliTest {
     void setup() throws URISyntaxException, IOException, ClassNotFoundException {
         Resources.copyFromJar("/", tempDir);
         testResourcePath = tempDir.toAbsolutePath().toString();
-        System.out.println(String.format("Test resource directory: %s", testResourcePath));
+        ourLog.info("Test resource directory: {}", testResourcePath);
     }
 
     @BeforeEach
@@ -66,48 +66,7 @@ class HedisCliTest {
     }
 
     @Test
-    public void testParseBundles() throws Exception {
-        var test_deck_dir = "/Users/justinmckelvy/Documents/DCSv2/";
-        List<String> measureCodes = new ArrayList<>();
-        //        measureCodes.add("DAE");
-        //        measureCodes.add("DBO"); // partially unwrapped
-        //        measureCodes.add("DDE");
-        //        measureCodes.add("DMH");
-        //        measureCodes.add("DMSE");
-        //        measureCodes.add("DRRE");
-        //        measureCodes.add("DSFE");
-        //        measureCodes.add("DSU");
-        //        measureCodes.add("EDH");
-        //        measureCodes.add("EDU");
-
-        for (String measureCode : measureCodes) {
-            String patientBundles = test_deck_dir + measureCode + "/Sample/v0_tests/tests/Patient";
-            // "/Users/justinmckelvy/Documents/BulkImport_raw/AAB/AAB-Sample/test";
-            // String libraryName = measureCode + "_Reporting";
-            // Data staging
-            Path dirPath = Paths.get(test_deck_dir + measureCode + "/Sample/deck"); // ← replace with your directory
-
-            processNDJSON(patientBundles, dirPath);
-        }
-    }
-
-    public void processNDJSON(String patientBundles, Path dirPath) throws Exception {
-        Path output = Paths.get(patientBundles);
-        try (Stream<Path> paths = Files.list(dirPath)) {
-            paths.filter(Files::isRegularFile) // skip subdirectories
-                    .forEach(path -> {
-                        Path fullPath = path.toAbsolutePath();
-                        try {
-                            NdjsonBundleExtractor.extractBundlesToDirs(fullPath, output);
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
-        }
-    }
-
-    @Test
-    public void testOnePatient() throws Exception {
+    void testOnePatient() {
         String measureCode = "GSD";
         var testPatientId = "patient.2024.gsd.0.100009";
         var directory = "/Volumes/ExternalDrive/DCSv2/";
@@ -124,7 +83,6 @@ class HedisCliTest {
         run(
                 measureCode + "_Reporting",
                 patientBundles + testPatientId,
-                250000,
                 cqlContentDirectory,
                 resultsPath,
                 measurePath,
@@ -137,15 +95,13 @@ class HedisCliTest {
     void run(
             String libraryName,
             String patientPath,
-            int count,
             String cqlContentDirectory,
             String resultsPath,
             String measurePath,
             String measure,
             String periodStart,
             String periodEnd,
-            String patientId)
-            throws IOException {
+            String patientId) {
         var baseArgs = Stream.of(
                 "cql",
                 "-fv=R4",

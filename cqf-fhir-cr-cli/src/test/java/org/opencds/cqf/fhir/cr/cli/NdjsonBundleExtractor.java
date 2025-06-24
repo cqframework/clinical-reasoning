@@ -32,7 +32,7 @@ public class NdjsonBundleExtractor {
                 }
 
                 // Identify patient ID for directory name
-                String patientIdDir = "bundle" + String.format("%02d", bundleIndex);
+                String patientIdDir = "bundle" + "%02d".formatted(bundleIndex);
                 for (Bundle.BundleEntryComponent entry : bundle.getEntry()) {
                     Resource res = entry.getResource();
                     if (res != null && "Patient".equals(res.getResourceType().name())) {

@@ -19,6 +19,7 @@ import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.io.TempDir;
 import org.opencds.cqf.fhir.test.Resources;
 
+@SuppressWarnings("squid:S1135")
 @TestInstance(Lifecycle.PER_CLASS)
 class CliTest {
 
@@ -73,7 +74,6 @@ class CliTest {
         Main.run(args);
         String output = outContent.toString();
         assertTrue(output.startsWith("Usage:"));
-        // assertTrue(output.endsWith("Patient=123\n"));
     }
 
     @Test
@@ -82,18 +82,12 @@ class CliTest {
         Main.run(args);
         String output = errContent.toString();
         assertTrue(output.startsWith("Missing required subcommand"));
-        // assertTrue(output.endsWith("Patient=123\n"));
     }
 
     @Test
     void testNull() {
-        assertThrows(NullPointerException.class, () -> {
-            Main.run(null);
-        });
+        assertThrows(NullPointerException.class, () -> Main.run(null));
     }
-
-    @Test
-    void dstu3() {}
 
     @Test
     void argFile() {
@@ -226,12 +220,9 @@ class CliTest {
         assertTrue(output.contains("TestPatientDeceasedAsDateTime=null"));
         // TODO: This is because the engine is not validating on profile-based
         // retrieve...
-        // assertTrue(output.contains("TestSlices=[Observation(id=blood-pressure)]"));
         assertTrue(output.contains("TestSimpleExtensions=Patient(id=example)"));
         assertTrue(output.contains("TestComplexExtensions=Patient(id=example)"));
         assertTrue(output.contains("TestEncounterDiagnosisCardinality=true"));
-        // assertTrue(output.contains("TestProcedureNotDoneElements=[Procedure(id=negation-example),
-        // Procedure(id=negation-with-code-example)]"));
         // NOTE: Testing combinations here because ordering is not guaranteed
         assertTrue(
                 output.contains(
@@ -317,9 +308,7 @@ class CliTest {
         assertTrue(output.contains("Testplus=-8"));
     }
 
-    // LUKETODO:  this is the only test left that's failing
     @Test
-    @Disabled
     void optionsFailure() {
         String[] args = new String[] {
             "cql",
@@ -337,7 +326,6 @@ class CliTest {
         Main.run(args);
 
         String errOutput = errContent.toString();
-        System.out.println("errOutput = " + errOutput);
         assertTrue(errOutput.contains("library FluentFunctions loaded, but had errors"));
     }
 

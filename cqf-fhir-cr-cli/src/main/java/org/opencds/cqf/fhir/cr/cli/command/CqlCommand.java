@@ -4,20 +4,22 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.repository.IRepository;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.base.Stopwatch;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import java.io.BufferedWriter;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -40,7 +42,6 @@ import org.hl7.fhir.r5.context.ILoggingService;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
-import org.opencds.cqf.fhir.cql.CqlEngineOptions;
 import org.opencds.cqf.fhir.cql.CqlOptions;
 import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
@@ -117,7 +118,7 @@ public class CqlCommand implements Callable<Integer> {
     @ArgGroup(multiplicity = "0..*", exclusive = false)
     public List<EvaluationParameter> evaluations;
 
-    static class NamespaceParameter {
+    public static class NamespaceParameter {
         @Option(names = {"-nn", "--namespace-name"})
         public String namespaceName;
 
@@ -125,7 +126,7 @@ public class CqlCommand implements Callable<Integer> {
         public String namespaceUri;
     }
 
-    static class LibraryParameter {
+    public static class LibraryParameter {
         @Option(
                 names = {"-lu", "--library-url"},
                 required = true)
@@ -143,14 +144,14 @@ public class CqlCommand implements Callable<Integer> {
         public String[] expression;
     }
 
-    static class EvaluationParameter {
+    public static class EvaluationParameter {
         @ArgGroup(multiplicity = "0..*", exclusive = false)
         public List<ParameterParameter> parameters;
 
         @ArgGroup(multiplicity = "0..1", exclusive = false)
         public ContextParameter context;
 
-        static class ContextParameter {
+        public static class ContextParameter {
             @Option(names = {"-c", "--context"})
             public String contextName;
 
@@ -158,7 +159,7 @@ public class CqlCommand implements Callable<Integer> {
             public String contextValue;
         }
 
-        static class ModelParameter {
+        public static class ModelParameter {
             @Option(names = {"-m", "--model"})
             public String modelName;
 
@@ -166,7 +167,7 @@ public class CqlCommand implements Callable<Integer> {
             public String modelUrl;
         }
 
-        static class ParameterParameter {
+        public static class ParameterParameter {
             @Option(names = {"-p", "--parameter"})
             public String parameterName;
 
@@ -197,100 +198,45 @@ public class CqlCommand implements Callable<Integer> {
     }
 
     private String toVersionNumber(FhirVersionEnum fhirVersion) {
-        switch (fhirVersion) {
-            case R4:
-                return "4.0.1";
-            case R5:
-                return "5.0.0-ballot";
-            case DSTU3:
-                return "3.0.2";
-            default:
-                throw new IllegalArgumentException("Unsupported FHIR version %s".formatted(fhirVersion));
-        }
+        return switch (fhirVersion) {
+            case R4 -> "4.0.1";
+            case R5 -> "5.0.0-ballot";
+            case DSTU3 -> "3.0.2";
+            default -> throw new IllegalArgumentException("Unsupported FHIR version %s".formatted(fhirVersion));
+        };
     }
 
     @Override
     public Integer call() throws Exception {
-        printParams();
-
         var watch = Stopwatch.createStarted();
         FhirVersionEnum fhirVersionEnum = FhirVersionEnum.valueOf(fhirVersion);
 
         FhirContext fhirContext = FhirContext.forCached(fhirVersionEnum);
 
-        IGContext igContext = null;
-        if (rootDir != null && igPath != null) {
-            igContext = new IGContext(new Logger());
-            igContext.initializeFromIg(rootDir, igPath, toVersionNumber(fhirVersionEnum));
-        }
-
-        CqlOptions cqlOptions = CqlOptions.defaultOptions();
-
-        CqlTranslatorOptions options;
-
-        if (optionsPath != null) {
-            options = CqlTranslatorOptionsMapper.fromFile(optionsPath);
-        } else {
-            options = CqlTranslatorOptions.defaultOptions();
-        }
-
-        options.getCqlCompilerOptions().getOptions().add(Options.EnableResultTypes);
-        cqlOptions.setCqlCompilerOptions(options.getCqlCompilerOptions());
-
-        var terminologySettings = new TerminologySettings();
-        terminologySettings.setValuesetExpansionMode(VALUESET_EXPANSION_MODE.PERFORM_NAIVE_EXPANSION);
-        terminologySettings.setValuesetPreExpansionMode(VALUESET_PRE_EXPANSION_MODE.USE_IF_PRESENT);
-        terminologySettings.setValuesetMembershipMode(VALUESET_MEMBERSHIP_MODE.USE_EXPANSION);
-        terminologySettings.setCodeLookupMode(CODE_LOOKUP_MODE.USE_CODESYSTEM_URL);
-
-        var retrieveSettings = new RetrieveSettings();
-        retrieveSettings.setTerminologyParameterMode(TERMINOLOGY_FILTER_MODE.FILTER_IN_MEMORY);
-        retrieveSettings.setSearchParameterMode(SEARCH_FILTER_MODE.FILTER_IN_MEMORY);
-        retrieveSettings.setProfileMode(PROFILE_MODE.DECLARED);
-
-        var evaluationSettings = EvaluationSettings.getDefault();
-        evaluationSettings.setCqlOptions(cqlOptions);
-        evaluationSettings.setTerminologySettings(terminologySettings);
-        evaluationSettings.setRetrieveSettings(retrieveSettings);
-        evaluationSettings.setNpmProcessor(new NpmProcessor(igContext));
+        var evaluationSettings = setupOptions(fhirVersionEnum);
 
         var repository = createRepository(fhirContext, terminologyUrl, model.modelUrl);
         VersionedIdentifier identifier = new VersionedIdentifier().withId(library.libraryName);
 
-        MeasureEvaluationOptions evaluationOptions = new MeasureEvaluationOptions();
-        evaluationOptions.setApplyScoringSetMembership(false);
-        evaluationOptions.setEvaluationSettings(evaluationSettings);
-        R4MeasureProcessor measureProcessor = new R4MeasureProcessor(
-                repository,
-                evaluationOptions,
-                new R4RepositorySubjectProvider(new SubjectProviderOptions()),
-                new R4MeasureServiceUtils(repository));
+        var measureProcessor = getR4MeasureProcessor(evaluationSettings, repository);
 
         // hack to bring in Measure
         IParser parser = fhirContext.newJsonParser();
 
-        Measure measure = null;
-        if (measureName != null && !measureName.contains("null")) {
-            InputStream is = new FileInputStream(measurePath + measureName + ".json");
-            measure = (org.hl7.fhir.r4.model.Measure) parser.parseResource(is);
-            if (measure == null) {
-                throw new IllegalArgumentException(String.format("measureName: %s not found", measureName));
-            }
-        }
+        var measure = getMeasure(parser);
 
         var initTime = watch.elapsed().toMillis();
-        log.error("initialized in {} millis", initTime);
+        log.info("initialized in {} millis", initTime);
         AtomicInteger counter = new AtomicInteger(0);
         for (var e : evaluations) {
             String basePath = resultsPath;
-            Path filepath = Paths.get(basePath + this.library.libraryName + "/" + e.context.contextValue + ".txt");
+            Path filepath = Path.of(basePath + this.library.libraryName, e.context.contextValue + ".txt");
 
             // ✅ Skip if already written
             if (Files.exists(filepath)) {
-                System.out.println("⏭️ Skipping " + e.context.contextValue + " (already processed)");
+                log.info("⏭️ Skipping {} (already processed)", e.context.contextValue);
                 continue;
             }
-            // evaluations.parallelStream().forEach(e -> {
             var engine = Engines.forRepository(repository, evaluationSettings);
             // enable return all and equivalence
             engine.getState().getEngineOptions().add(CqlEngine.Options.EnableHedisCompatibilityMode);
@@ -302,14 +248,11 @@ public class CqlCommand implements Callable<Integer> {
                         .registerProvider(provider);
             }
             var subjectId = e.context.contextName + "/" + e.context.contextValue;
-            log.error("evaluating: {}", subjectId);
+            log.info("evaluating: {}", subjectId);
 
             var evalStart = watch.elapsed().toMillis();
             var contextParameter = Pair.<String, Object>of(e.context.contextName, e.context.contextValue);
-            log.error("evaluating identifier: {}, context parameter: {}", identifier.toString(), contextParameter);
             var cqlResult = engine.evaluate(identifier, contextParameter);
-
-            printResults(cqlResult);
 
             Map<String, EvaluationResult> result = new HashMap<>();
             result.put(subjectId, cqlResult);
@@ -350,80 +293,84 @@ public class CqlCommand implements Callable<Integer> {
             var count = counter.incrementAndGet();
 
             var evalEnd = watch.elapsed().toMillis();
-            log.error("evaluated #{} in {} millis", count, evalEnd - evalStart);
-            log.error("avg (amortized across threads) {} millis", (evalEnd - initTime) / count);
+            log.info("evaluated #{} in {} millis", count, evalEnd - evalStart);
+            log.info("avg (amortized across threads) {} millis", (evalEnd - initTime) / count);
         }
 
         var finalTime = watch.elapsed().toMillis();
         var elapsedTime = finalTime - initTime;
-        log.error("evaluated in {} millis", elapsedTime);
-        log.error("total time in {} millis", finalTime);
-        log.error("per patient time in {} millis", elapsedTime / evaluations.size());
+        log.info("evaluated in {} millis", elapsedTime);
+        log.info("total time in {} millis", finalTime);
+        log.info("per patient time in {} millis", elapsedTime / evaluations.size());
 
         return 0;
     }
-    private void printParams() {
-        log.error("fhirVersion: {}", fhirVersion);
-        log.error("optionsPath: {}", optionsPath);
-        if (namespace != null) {
-            log.error("namespaceName: {}", namespace.namespaceName);
-            log.error("namespaceUri: {}", namespace.namespaceUri);
-        }
-        log.error("rootDir: {}", rootDir);
-        log.error("igPath: {}", igPath);
-        log.error("terminologyUrl: {}", terminologyUrl);
-        log.error("measureName: {}", measureName);
-        log.error("periodStart: {}", periodStart);
-        log.error("periodEnd: {}", periodEnd);
-        log.error("measurePath: {}", measurePath);
-        log.error("singleFile: {}", singleFile);
-        log.error("resultsPath: {}", resultsPath);
 
-        if (library != null) {
-            log.error("libraryUrl: {}", library.libraryUrl);
-            log.error("libraryName: {}", library.libraryName);
-            log.error("libraryVersion: {}", library.libraryVersion);
-            if (library.expression != null) {
-                for (String expr : library.expression) {
-                    log.error("expression: {}", expr);
-                }
+    @Nullable
+    private Measure getMeasure(IParser parser) throws FileNotFoundException {
+        Measure measure = null;
+        if (measureName != null && !measureName.contains("null")) {
+            InputStream is = new FileInputStream(measurePath + measureName + ".json");
+            measure = (Measure) parser.parseResource(is);
+            if (measure == null) {
+                throw new IllegalArgumentException("measureName: %s not found".formatted(measureName));
             }
         }
+        return measure;
+    }
 
-        if (model != null) {
-            log.error("modelName: {}", model.modelName);
-            log.error("modelUrl: {}", model.modelUrl);
+    @Nonnull
+    private R4MeasureProcessor getR4MeasureProcessor(EvaluationSettings evaluationSettings, IRepository repository) {
+
+        MeasureEvaluationOptions evaluationOptions = new MeasureEvaluationOptions();
+        evaluationOptions.setApplyScoringSetMembership(false);
+        evaluationOptions.setEvaluationSettings(evaluationSettings);
+
+        return new R4MeasureProcessor(
+                repository,
+                evaluationOptions,
+                new R4RepositorySubjectProvider(new SubjectProviderOptions()),
+                new R4MeasureServiceUtils(repository));
+    }
+
+    @Nonnull
+    private EvaluationSettings setupOptions(FhirVersionEnum fhirVersionEnum) {
+        IGContext igContext = null;
+        if (rootDir != null && igPath != null) {
+            igContext = new IGContext(new Logger());
+            igContext.initializeFromIg(rootDir, igPath, toVersionNumber(fhirVersionEnum));
         }
 
-        if (evaluations != null) {
-            for (EvaluationParameter evaluation : evaluations) {
-                if (evaluation.parameters != null) {
-                    for (EvaluationParameter.ParameterParameter parameter : evaluation.parameters) {
-                        log.error(
-                                "parameterName: {}, parameterValue: {}",
-                                parameter.parameterName,
-                                parameter.parameterValue);
-                    }
-                }
-                if (evaluation.context != null) {
-                    log.error(
-                            "contextName: {}, contextValue: {}",
-                            evaluation.context.contextName,
-                            evaluation.context.contextValue);
-                }
-            }
+        CqlOptions cqlOptions = CqlOptions.defaultOptions();
+
+        final CqlTranslatorOptions options;
+        if (optionsPath != null) {
+            options = CqlTranslatorOptionsMapper.fromFile(optionsPath);
+        } else {
+            options = CqlTranslatorOptions.defaultOptions();
         }
 
-//        "cql",
-//            "-fv=R4",
-//            "-lu=" + testResourcePath + "/compartment/cql",
-//            "-ln=Example",
-//            "-m=FHIR",
-//            "-mu=" + testResourcePath + "/compartment",
-//            "-c=Patient",
-//            "-cv=123",
-//            "-c=Patient",
-//            "-cv=456"
+        options.getCqlCompilerOptions().getOptions().add(Options.EnableResultTypes);
+        cqlOptions.setCqlCompilerOptions(options.getCqlCompilerOptions());
+
+        var terminologySettings = new TerminologySettings();
+        terminologySettings.setValuesetExpansionMode(VALUESET_EXPANSION_MODE.PERFORM_NAIVE_EXPANSION);
+        terminologySettings.setValuesetPreExpansionMode(VALUESET_PRE_EXPANSION_MODE.USE_IF_PRESENT);
+        terminologySettings.setValuesetMembershipMode(VALUESET_MEMBERSHIP_MODE.USE_EXPANSION);
+        terminologySettings.setCodeLookupMode(CODE_LOOKUP_MODE.USE_CODESYSTEM_URL);
+
+        var retrieveSettings = new RetrieveSettings();
+        retrieveSettings.setTerminologyParameterMode(TERMINOLOGY_FILTER_MODE.FILTER_IN_MEMORY);
+        retrieveSettings.setSearchParameterMode(SEARCH_FILTER_MODE.FILTER_IN_MEMORY);
+        retrieveSettings.setProfileMode(PROFILE_MODE.DECLARED);
+
+        var evaluationSettings = EvaluationSettings.getDefault();
+        evaluationSettings.setCqlOptions(cqlOptions);
+        evaluationSettings.setTerminologySettings(terminologySettings);
+        evaluationSettings.setRetrieveSettings(retrieveSettings);
+        evaluationSettings.setNpmProcessor(new NpmProcessor(igContext));
+
+        return evaluationSettings;
     }
 
     private IRepository createRepository(FhirContext fhirContext, String terminologyUrl, String modelUrl) {
@@ -455,7 +402,7 @@ public class CqlCommand implements Callable<Integer> {
     }
 
     private void writeJsonToFile(String json, String patientId, String path) {
-        Path outputPath = Paths.get(path, patientId + ".json");
+        Path outputPath = Path.of(path, patientId + ".json");
 
         try {
             // Ensure parent directories exist
@@ -464,21 +411,20 @@ public class CqlCommand implements Callable<Integer> {
             // Write JSON to file
             try (OutputStream out = Files.newOutputStream(outputPath)) {
                 out.write(json.getBytes());
-                // LUKETODO:
-                System.out.println("✅ Saved MeasureReport to: " + outputPath.toAbsolutePath());
+                log.info("✅ Saved MeasureReport to: {}", outputPath.toAbsolutePath());
             }
 
-        } catch (IOException e) {
-            // LUKETODO:
-            System.err.println("❌ Failed to write result for patient " + patientId);
-            // LUKETODO:
-            e.printStackTrace();
+        } catch (IOException exception) {
+            log.error("❌ Failed to write result for patient: {} to outputPath: {}", patientId, outputPath);
+
+            throw new InvalidRequestException(
+                    "Failed to write result for patient: %s to outputPath: %s".formatted(patientId, outputPath),
+                    exception);
         }
     }
 
     private void writeResultToFile(EvaluationResult result, String patientId, String path) {
-        // LUKETODO:
-        Path outputPath = Paths.get(path, patientId + ".txt");
+        Path outputPath = Path.of(path, patientId + ".txt");
 
         try {
             // Ensure parent directories exist
@@ -493,14 +439,14 @@ public class CqlCommand implements Callable<Integer> {
                 }
             }
 
-            // LUKETODO:
-            System.out.println("✅ Wrote result to: " + outputPath.toAbsolutePath());
+            log.info("✅ Wrote result to: {}", outputPath.toAbsolutePath());
 
-        } catch (IOException e) {
-            // LUKETODO:
-            System.err.println("❌ Failed to write result for patient " + patientId);
-            // LUKETODO:
-            e.printStackTrace();
+        } catch (IOException exception) {
+            log.error("❌ Failed to write result for patient: {} to outputPath: {}", patientId, outputPath);
+
+            throw new InvalidRequestException(
+                    "Failed to write result for patient: %s to outputPath: %s".formatted(patientId, outputPath),
+                    exception);
         }
     }
 
@@ -509,74 +455,32 @@ public class CqlCommand implements Callable<Integer> {
             return "null";
         }
 
-        String result = "";
+        StringBuilder result = new StringBuilder();
         if (value instanceof Iterable<?> values) {
-            result += "[";
+            result.append("[");
             for (Object o : values) {
-                result += (tempConvert(o) + ", ");
+                result.append(tempConvert(o)).append(", ");
             }
 
             if (result.length() > 1) {
-                result = result.substring(0, result.length() - 2);
+                result = new StringBuilder(result.substring(0, result.length() - 2));
             }
 
-            result += "]";
+            result.append("]");
         } else if (value instanceof IBaseResource resource) {
-            result = resource.fhirType()
+            result = new StringBuilder(resource.fhirType()
                     + (resource.getIdElement() != null
                                     && resource.getIdElement().hasIdPart()
                             ? "(id=" + resource.getIdElement().getIdPart() + ")"
-                            : "");
-        } else if (value instanceof IBase base) {
-            result = base.fhirType();
+                            : ""));
         } else if (value instanceof IBaseDatatype datatype) {
-            result = datatype.fhirType();
+            result = new StringBuilder(datatype.fhirType());
+        } else if (value instanceof IBase base) {
+            result = new StringBuilder(base.fhirType());
         } else {
-            result = value.toString();
+            result = new StringBuilder(value.toString());
         }
 
-        return result;
-    }
-
-    private void printResults(EvaluationResult cqlResult) {
-        log.error("---------------------------");
-        final Map<String, ExpressionResult> expressionResults = cqlResult.expressionResults;
-
-        for (String key : expressionResults.keySet()) {
-            log.error("key = " + key);
-            final ExpressionResult expressionResult = expressionResults.get(key);
-
-            for (Object evaluatedResources : expressionResult.evaluatedResources()) {
-                if (evaluatedResources == null) {
-                    log.error(key + " evaluatedResources=null");
-                    continue;
-                }
-
-                if (evaluatedResources instanceof IBaseResource resource) {
-                    log.error(key + " evaluatedResource=" + resource.fhirType()
-                        + (resource.getIdElement() != null
-                        && resource.getIdElement().hasIdPart()
-                        ? "(id=" + resource.getIdElement().getIdPart() + ")"
-                        : ""));
-                }
-
-                if (evaluatedResources instanceof Collection<?> evaluatedResourcesCollection) {
-                    for (Object evaluatedResource : evaluatedResourcesCollection) {
-                        if (evaluatedResource instanceof IBaseResource resource) {
-                            log.error("{} evaluatedResources={}{}", key, resource.fhirType(),
-                                resource.getIdElement() != null
-                                    && resource.getIdElement().hasIdPart()
-                                    ? "(id=" + resource.getIdElement().getIdPart() + ")"
-                                    : "");
-                        } else if (evaluatedResource instanceof IBase base) {
-                            log.error("{} evaluatedResources={}", key, base.fhirType());
-                        } else {
-                            log.error("{} evaluatedResources={}", key, evaluatedResource);
-                        }
-                    }
-                }
-            }
-        }
-        log.error("---------------------------");
+        return result.toString();
     }
 }

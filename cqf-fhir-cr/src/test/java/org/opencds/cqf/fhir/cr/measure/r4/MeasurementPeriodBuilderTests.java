@@ -94,9 +94,6 @@ class MeasurementPeriodBuilderTests {
 
     @Test
     void uberSimple_UsesMeasurementPeriodToExcludeResource() {
-        // LUKETODO:
-        // WTF????/Users/lukedegruchy/development/smilecdr/git/clinical-reasoning-repos/clinical-reasoning-only/cr1/cqf-fhir-cr/target/test-classes/org/opencds/cqf/fhir/cr/measure/r4/MinimalMeasureEvaluation/tests/patient/Patient-female-1914.json
-        // LUKETODO:  Patient-female-1914.json ????
         // Targeted Encounter "period": {
         //    "start": "2020-01-16T20:00:00Z",
         //    "end": "2020-01-16T21:00:00Z"

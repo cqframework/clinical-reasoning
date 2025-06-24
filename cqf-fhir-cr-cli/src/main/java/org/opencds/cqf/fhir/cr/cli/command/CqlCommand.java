@@ -2,12 +2,30 @@ package org.opencds.cqf.fhir.cr.cli.command;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.repository.IRepository;
+import com.google.common.base.Stopwatch;
+import java.io.BufferedWriter;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.lang3.tuple.Pair;
+import org.cqframework.cql.cql2elm.CqlCompilerOptions.Options;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptionsMapper;
 import org.cqframework.cql.cql2elm.DefaultLibrarySourceProvider;
@@ -17,9 +35,12 @@ import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r5.context.ILoggingService;
+import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
+import org.opencds.cqf.fhir.cql.CqlEngineOptions;
 import org.opencds.cqf.fhir.cql.CqlOptions;
 import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
@@ -32,6 +53,12 @@ import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.CODE_LOOK
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_MEMBERSHIP_MODE;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_PRE_EXPANSION_MODE;
+import org.opencds.cqf.fhir.cr.cli.command.CqlCommand.EvaluationParameter.ModelParameter;
+import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
+import org.opencds.cqf.fhir.cr.measure.SubjectProviderOptions;
+import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureProcessor;
+import org.opencds.cqf.fhir.cr.measure.r4.R4RepositorySubjectProvider;
+import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.repository.ProxyRepository;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 import org.slf4j.LoggerFactory;
@@ -41,6 +68,8 @@ import picocli.CommandLine.Option;
 
 @Command(name = "cql", mixinStandardHelpOptions = true)
 public class CqlCommand implements Callable<Integer> {
+    private static final org.slf4j.Logger log = LoggerFactory.getLogger(CqlCommand.class);
+
     @Option(
             names = {"-fv", "--fhir-version"},
             required = true)
@@ -52,6 +81,42 @@ public class CqlCommand implements Callable<Integer> {
     @ArgGroup(multiplicity = "0..1", exclusive = false)
     public NamespaceParameter namespace;
 
+    @Option(names = {"-rd", "--root-dir"})
+    public String rootDir;
+
+    @Option(names = {"-ig", "--ig-path"})
+    public String igPath;
+
+    @Option(names = {"-t", "--terminology-url"})
+    public String terminologyUrl;
+
+    @Option(names = {"-measure"})
+    public String measureName;
+
+    @Option(names = {"-periodStart"})
+    public String periodStart;
+
+    @Option(names = {"-periodEnd"})
+    public String periodEnd;
+
+    @Option(names = {"-measurePath"})
+    public String measurePath;
+
+    @Option(names = {"-singleFile"})
+    public boolean singleFile = false;
+
+    @Option(names = {"-resultsPath"})
+    public String resultsPath;
+
+    @ArgGroup(multiplicity = "1..1", exclusive = false)
+    LibraryParameter library;
+
+    @ArgGroup(multiplicity = "0..1", exclusive = false)
+    public ModelParameter model;
+
+    @ArgGroup(multiplicity = "0..*", exclusive = false)
+    public List<EvaluationParameter> evaluations;
+
     static class NamespaceParameter {
         @Option(names = {"-nn", "--namespace-name"})
         public String namespaceName;
@@ -59,15 +124,6 @@ public class CqlCommand implements Callable<Integer> {
         @Option(names = {"-nu", "--namespace-uri"})
         public String namespaceUri;
     }
-
-    @Option(names = {"-rd", "--root-dir"})
-    public String rootDir;
-
-    @Option(names = {"-ig", "--ig-path"})
-    public String igPath;
-
-    @ArgGroup(multiplicity = "1..*", exclusive = false)
-    List<LibraryParameter> libraries;
 
     static class LibraryParameter {
         @Option(
@@ -83,17 +139,13 @@ public class CqlCommand implements Callable<Integer> {
         @Option(names = {"-lv", "--library-version"})
         public String libraryVersion;
 
-        @Option(names = {"-t", "--terminology-url"})
-        public String terminologyUrl;
-
-        @ArgGroup(multiplicity = "0..1", exclusive = false)
-        public ModelParameter model;
-
-        @ArgGroup(multiplicity = "0..*", exclusive = false)
-        public List<ParameterParameter> parameters;
-
         @Option(names = {"-e", "--expression"})
         public String[] expression;
+    }
+
+    static class EvaluationParameter {
+        @ArgGroup(multiplicity = "0..*", exclusive = false)
+        public List<ParameterParameter> parameters;
 
         @ArgGroup(multiplicity = "0..1", exclusive = false)
         public ContextParameter context;
@@ -159,7 +211,9 @@ public class CqlCommand implements Callable<Integer> {
 
     @Override
     public Integer call() throws Exception {
+        printParams();
 
+        var watch = Stopwatch.createStarted();
         FhirVersionEnum fhirVersionEnum = FhirVersionEnum.valueOf(fhirVersion);
 
         FhirContext fhirContext = FhirContext.forCached(fhirVersionEnum);
@@ -172,10 +226,16 @@ public class CqlCommand implements Callable<Integer> {
 
         CqlOptions cqlOptions = CqlOptions.defaultOptions();
 
+        CqlTranslatorOptions options;
+
         if (optionsPath != null) {
-            CqlTranslatorOptions options = CqlTranslatorOptionsMapper.fromFile(optionsPath);
-            cqlOptions.setCqlCompilerOptions(options.getCqlCompilerOptions());
+            options = CqlTranslatorOptionsMapper.fromFile(optionsPath);
+        } else {
+            options = CqlTranslatorOptions.defaultOptions();
         }
+
+        options.getCqlCompilerOptions().getOptions().add(Options.EnableResultTypes);
+        cqlOptions.setCqlCompilerOptions(options.getCqlCompilerOptions());
 
         var terminologySettings = new TerminologySettings();
         terminologySettings.setValuesetExpansionMode(VALUESET_EXPANSION_MODE.PERFORM_NAIVE_EXPANSION);
@@ -194,11 +254,46 @@ public class CqlCommand implements Callable<Integer> {
         evaluationSettings.setRetrieveSettings(retrieveSettings);
         evaluationSettings.setNpmProcessor(new NpmProcessor(igContext));
 
-        for (LibraryParameter library : libraries) {
-            var repository = createRepository(
-                    fhirContext, library.terminologyUrl, library.model.modelUrl, library.context.contextValue);
-            var engine = Engines.forRepository(repository, evaluationSettings);
+        var repository = createRepository(fhirContext, terminologyUrl, model.modelUrl);
+        VersionedIdentifier identifier = new VersionedIdentifier().withId(library.libraryName);
 
+        MeasureEvaluationOptions evaluationOptions = new MeasureEvaluationOptions();
+        evaluationOptions.setApplyScoringSetMembership(false);
+        evaluationOptions.setEvaluationSettings(evaluationSettings);
+        R4MeasureProcessor measureProcessor = new R4MeasureProcessor(
+                repository,
+                evaluationOptions,
+                new R4RepositorySubjectProvider(new SubjectProviderOptions()),
+                new R4MeasureServiceUtils(repository));
+
+        // hack to bring in Measure
+        IParser parser = fhirContext.newJsonParser();
+
+        Measure measure = null;
+        if (measureName != null && !measureName.contains("null")) {
+            InputStream is = new FileInputStream(measurePath + measureName + ".json");
+            measure = (org.hl7.fhir.r4.model.Measure) parser.parseResource(is);
+            if (measure == null) {
+                throw new IllegalArgumentException(String.format("measureName: %s not found", measureName));
+            }
+        }
+
+        var initTime = watch.elapsed().toMillis();
+        log.error("initialized in {} millis", initTime);
+        AtomicInteger counter = new AtomicInteger(0);
+        for (var e : evaluations) {
+            String basePath = resultsPath;
+            Path filepath = Paths.get(basePath + this.library.libraryName + "/" + e.context.contextValue + ".txt");
+
+            // ✅ Skip if already written
+            if (Files.exists(filepath)) {
+                System.out.println("⏭️ Skipping " + e.context.contextValue + " (already processed)");
+                continue;
+            }
+            // evaluations.parallelStream().forEach(e -> {
+            var engine = Engines.forRepository(repository, evaluationSettings);
+            // enable return all and equivalence
+            engine.getState().getEngineOptions().add(CqlEngine.Options.EnableHedisCompatibilityMode);
             if (library.libraryUrl != null) {
                 var provider = new DefaultLibrarySourceProvider(Path.of(library.libraryUrl));
                 engine.getEnvironment()
@@ -206,25 +301,132 @@ public class CqlCommand implements Callable<Integer> {
                         .getLibrarySourceLoader()
                         .registerProvider(provider);
             }
+            var subjectId = e.context.contextName + "/" + e.context.contextValue;
+            log.error("evaluating: {}", subjectId);
 
-            VersionedIdentifier identifier = new VersionedIdentifier().withId(library.libraryName);
+            var evalStart = watch.elapsed().toMillis();
+            var contextParameter = Pair.<String, Object>of(e.context.contextName, e.context.contextValue);
+            log.error("evaluating identifier: {}, context parameter: {}", identifier.toString(), contextParameter);
+            var cqlResult = engine.evaluate(identifier, contextParameter);
 
-            Pair<String, Object> contextParameter = null;
+            printResults(cqlResult);
 
-            if (library.context != null) {
-                contextParameter = Pair.of(library.context.contextName, library.context.contextValue);
+            Map<String, EvaluationResult> result = new HashMap<>();
+            result.put(subjectId, cqlResult);
+
+            // generate MeasureReport from ExpressionResult
+            if (measure != null) {
+                String jsonReport;
+                if (periodStart != null && periodEnd != null) {
+                    var report = measureProcessor.evaluateMeasureResults(
+                            measure,
+                            LocalDate.parse(periodStart, DateTimeFormatter.ISO_LOCAL_DATE)
+                                    .atStartOfDay(ZoneId.systemDefault()),
+                            LocalDate.parse(periodEnd, DateTimeFormatter.ISO_LOCAL_DATE)
+                                    .atTime(LocalTime.MAX)
+                                    .atZone(ZoneId.systemDefault()),
+                            "subject",
+                            Collections.singletonList(subjectId),
+                            result);
+
+                    jsonReport = parser.encodeResourceToString(report);
+                } else {
+                    var report = measureProcessor.evaluateMeasureResults(
+                            measure, null, null, "subject", Collections.singletonList(subjectId), result);
+                    jsonReport = parser.encodeResourceToString(report);
+                }
+
+                writeJsonToFile(
+                        jsonReport, e.context.contextValue, basePath + this.library.libraryName + "/measurereports");
             }
 
-            EvaluationResult result = engine.evaluate(identifier, contextParameter);
+            if (singleFile) {
+                // ✅ Write TXT result
+                writeResultToFile(
+                        cqlResult, e.context.contextValue, basePath + this.library.libraryName + "/txtresults");
+            } else {
+                writeResult(cqlResult);
+            }
+            var count = counter.incrementAndGet();
 
-            writeResult(result);
+            var evalEnd = watch.elapsed().toMillis();
+            log.error("evaluated #{} in {} millis", count, evalEnd - evalStart);
+            log.error("avg (amortized across threads) {} millis", (evalEnd - initTime) / count);
         }
+
+        var finalTime = watch.elapsed().toMillis();
+        var elapsedTime = finalTime - initTime;
+        log.error("evaluated in {} millis", elapsedTime);
+        log.error("total time in {} millis", finalTime);
+        log.error("per patient time in {} millis", elapsedTime / evaluations.size());
 
         return 0;
     }
+    private void printParams() {
+        log.error("fhirVersion: {}", fhirVersion);
+        log.error("optionsPath: {}", optionsPath);
+        if (namespace != null) {
+            log.error("namespaceName: {}", namespace.namespaceName);
+            log.error("namespaceUri: {}", namespace.namespaceUri);
+        }
+        log.error("rootDir: {}", rootDir);
+        log.error("igPath: {}", igPath);
+        log.error("terminologyUrl: {}", terminologyUrl);
+        log.error("measureName: {}", measureName);
+        log.error("periodStart: {}", periodStart);
+        log.error("periodEnd: {}", periodEnd);
+        log.error("measurePath: {}", measurePath);
+        log.error("singleFile: {}", singleFile);
+        log.error("resultsPath: {}", resultsPath);
 
-    private IRepository createRepository(
-            FhirContext fhirContext, String terminologyUrl, String modelUrl, String contextValue) {
+        if (library != null) {
+            log.error("libraryUrl: {}", library.libraryUrl);
+            log.error("libraryName: {}", library.libraryName);
+            log.error("libraryVersion: {}", library.libraryVersion);
+            if (library.expression != null) {
+                for (String expr : library.expression) {
+                    log.error("expression: {}", expr);
+                }
+            }
+        }
+
+        if (model != null) {
+            log.error("modelName: {}", model.modelName);
+            log.error("modelUrl: {}", model.modelUrl);
+        }
+
+        if (evaluations != null) {
+            for (EvaluationParameter evaluation : evaluations) {
+                if (evaluation.parameters != null) {
+                    for (EvaluationParameter.ParameterParameter parameter : evaluation.parameters) {
+                        log.error(
+                                "parameterName: {}, parameterValue: {}",
+                                parameter.parameterName,
+                                parameter.parameterValue);
+                    }
+                }
+                if (evaluation.context != null) {
+                    log.error(
+                            "contextName: {}, contextValue: {}",
+                            evaluation.context.contextName,
+                            evaluation.context.contextValue);
+                }
+            }
+        }
+
+//        "cql",
+//            "-fv=R4",
+//            "-lu=" + testResourcePath + "/compartment/cql",
+//            "-ln=Example",
+//            "-m=FHIR",
+//            "-mu=" + testResourcePath + "/compartment",
+//            "-c=Patient",
+//            "-cv=123",
+//            "-c=Patient",
+//            "-cv=456"
+    }
+
+    private IRepository createRepository(FhirContext fhirContext, String terminologyUrl, String modelUrl) {
         IRepository data = null;
         IRepository terminology = null;
 
@@ -242,12 +444,64 @@ public class CqlCommand implements Callable<Integer> {
 
     @SuppressWarnings("java:S106") // We are intending to output to the console here as a CLI tool
     private void writeResult(EvaluationResult result) {
-        for (Map.Entry<String, ExpressionResult> libraryEntry : result.expressionResults.entrySet()) {
-            System.out.println(libraryEntry.getKey() + "="
-                    + this.tempConvert(libraryEntry.getValue().value()));
-        }
+        synchronized (System.out) {
+            for (Map.Entry<String, ExpressionResult> libraryEntry : result.expressionResults.entrySet()) {
+                System.out.println(libraryEntry.getKey() + "="
+                        + this.tempConvert(libraryEntry.getValue().value()));
+            }
 
-        System.out.println();
+            System.out.println();
+        }
+    }
+
+    private void writeJsonToFile(String json, String patientId, String path) {
+        Path outputPath = Paths.get(path, patientId + ".json");
+
+        try {
+            // Ensure parent directories exist
+            Files.createDirectories(outputPath.getParent());
+
+            // Write JSON to file
+            try (OutputStream out = Files.newOutputStream(outputPath)) {
+                out.write(json.getBytes());
+                // LUKETODO:
+                System.out.println("✅ Saved MeasureReport to: " + outputPath.toAbsolutePath());
+            }
+
+        } catch (IOException e) {
+            // LUKETODO:
+            System.err.println("❌ Failed to write result for patient " + patientId);
+            // LUKETODO:
+            e.printStackTrace();
+        }
+    }
+
+    private void writeResultToFile(EvaluationResult result, String patientId, String path) {
+        // LUKETODO:
+        Path outputPath = Paths.get(path, patientId + ".txt");
+
+        try {
+            // Ensure parent directories exist
+            Files.createDirectories(outputPath.getParent());
+
+            try (BufferedWriter writer = Files.newBufferedWriter(outputPath)) {
+                for (Map.Entry<String, ExpressionResult> libraryEntry : result.expressionResults.entrySet()) {
+                    String key = libraryEntry.getKey();
+                    Object value = this.tempConvert(libraryEntry.getValue().value());
+                    writer.write(key + "=" + value);
+                    writer.newLine();
+                }
+            }
+
+            // LUKETODO:
+            System.out.println("✅ Wrote result to: " + outputPath.toAbsolutePath());
+
+        } catch (IOException e) {
+            // LUKETODO:
+            System.err.println("❌ Failed to write result for patient " + patientId);
+            // LUKETODO:
+            e.printStackTrace();
+        }
     }
 
     private String tempConvert(Object value) {
@@ -282,5 +536,47 @@ public class CqlCommand implements Callable<Integer> {
         }
 
         return result;
+    }
+
+    private void printResults(EvaluationResult cqlResult) {
+        log.error("---------------------------");
+        final Map<String, ExpressionResult> expressionResults = cqlResult.expressionResults;
+
+        for (String key : expressionResults.keySet()) {
+            log.error("key = " + key);
+            final ExpressionResult expressionResult = expressionResults.get(key);
+
+            for (Object evaluatedResources : expressionResult.evaluatedResources()) {
+                if (evaluatedResources == null) {
+                    log.error(key + " evaluatedResources=null");
+                    continue;
+                }
+
+                if (evaluatedResources instanceof IBaseResource resource) {
+                    log.error(key + " evaluatedResource=" + resource.fhirType()
+                        + (resource.getIdElement() != null
+                        && resource.getIdElement().hasIdPart()
+                        ? "(id=" + resource.getIdElement().getIdPart() + ")"
+                        : ""));
+                }
+
+                if (evaluatedResources instanceof Collection<?> evaluatedResourcesCollection) {
+                    for (Object evaluatedResource : evaluatedResourcesCollection) {
+                        if (evaluatedResource instanceof IBaseResource resource) {
+                            log.error("{} evaluatedResources={}{}", key, resource.fhirType(),
+                                resource.getIdElement() != null
+                                    && resource.getIdElement().hasIdPart()
+                                    ? "(id=" + resource.getIdElement().getIdPart() + ")"
+                                    : "");
+                        } else if (evaluatedResource instanceof IBase base) {
+                            log.error("{} evaluatedResources={}", key, base.fhirType());
+                        } else {
+                            log.error("{} evaluatedResources={}", key, evaluatedResource);
+                        }
+                    }
+                }
+            }
+        }
+        log.error("---------------------------");
     }
 }

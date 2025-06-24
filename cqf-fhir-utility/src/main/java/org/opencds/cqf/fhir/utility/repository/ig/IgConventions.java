@@ -6,7 +6,10 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.Enumerations.FHIRAllTypes;
 import org.slf4j.Logger;
@@ -18,6 +21,7 @@ import org.slf4j.LoggerFactory;
  * or not the files are prefixed with the resource type.
  */
 public final class IgConventions {
+    private static final Logger log = LoggerFactory.getLogger(IgConventions.class);
 
     /**
      * Whether or not the files are organized by resource type.
@@ -36,6 +40,16 @@ public final class IgConventions {
     }
 
     /**
+     * Whether or not the files are organized by compartment.
+     * This is primarily used for tests to provide isolation
+     * between test cases.
+     */
+    public enum CompartmentLayout {
+        DIRECTORY_PER_COMPARTMENT,
+        FLAT
+    }
+
+    /**
      * Whether or not the files are prefixed with the resource type.
      */
     public enum FilenameMode {
@@ -43,12 +57,21 @@ public final class IgConventions {
         ID_ONLY
     }
 
-    public static final IgConventions FLAT =
-            new IgConventions(FhirTypeLayout.FLAT, CategoryLayout.FLAT, FilenameMode.TYPE_AND_ID);
+    public static final IgConventions FLAT = new IgConventions(
+            FhirTypeLayout.FLAT, CategoryLayout.FLAT, CompartmentLayout.FLAT, FilenameMode.TYPE_AND_ID);
     public static final IgConventions STANDARD = new IgConventions(
-            FhirTypeLayout.DIRECTORY_PER_TYPE, CategoryLayout.DIRECTORY_PER_CATEGORY, FilenameMode.ID_ONLY);
+            FhirTypeLayout.DIRECTORY_PER_TYPE,
+            CategoryLayout.DIRECTORY_PER_CATEGORY,
+            CompartmentLayout.FLAT,
+            FilenameMode.ID_ONLY);
 
     private static final Logger LOG = LoggerFactory.getLogger(IgConventions.class);
+
+    private static final List<String> FHIR_TYPE_NAMES = Stream.of(FHIRAllTypes.values())
+            .map(FHIRAllTypes::name)
+            .map(String::toLowerCase)
+            .distinct()
+            .toList();
 
     /**
      * Creates new IGConventions with the given typeLayout, categoryLayout, and filenameMode.
@@ -59,15 +82,21 @@ public final class IgConventions {
      * @param categoryLayout
      * @param filenameMode
      */
-    public IgConventions(FhirTypeLayout typeLayout, CategoryLayout categoryLayout, FilenameMode filenameMode) {
+    public IgConventions(
+            FhirTypeLayout typeLayout,
+            CategoryLayout categoryLayout,
+            CompartmentLayout compartmentLayout,
+            FilenameMode filenameMode) {
         this.typeLayout = typeLayout;
         this.categoryLayout = categoryLayout;
         this.filenameMode = filenameMode;
+        this.compartmentLayout = compartmentLayout;
     }
 
     private final FhirTypeLayout typeLayout;
     private final CategoryLayout categoryLayout;
     private final FilenameMode filenameMode;
+    private final CompartmentLayout compartmentLayout;
 
     FhirTypeLayout typeLayout() {
         return typeLayout;
@@ -75,6 +104,10 @@ public final class IgConventions {
 
     CategoryLayout categoryLayout() {
         return categoryLayout;
+    }
+
+    CompartmentLayout compartmentLayout() {
+        return compartmentLayout;
     }
 
     FilenameMode filenameMode() {
@@ -91,6 +124,8 @@ public final class IgConventions {
      * @return The IG conventions.
      */
     public static IgConventions autoDetect(Path path) {
+        System.out.println("autoDetect: path = " + path);
+        log.info("Auto-detect path: {}", path);
         if (path == null || !path.toFile().exists()) {
             return STANDARD;
         }
@@ -111,6 +146,36 @@ public final class IgConventions {
 
         var hasCategoryDirectory = !path.equals(categoryPath);
 
+        var hasCompartmentDirectory = false;
+
+        // Compartments can only exist for test data
+        if (hasCategoryDirectory) {
+            var tests = path.resolve("tests");
+            // A compartment under the tests looks like a set of subdirectories
+            // e.g. "input/tests/Patient", "input/tests/Practitioner"
+            // that themselvses contain subdirectories for each test case.
+            // e.g. "input/tests/Patient/test1", "input/tests/Patient/test2"
+            // Then within those, the structure may be flat (e.g. "input/tests/Patient/test1/123.json")
+            // or grouped by type (e.g. "input/tests/Patient/test1/Patient/123.json").
+            //
+            // The trick is that the in the case that the test cases are
+            // grouped by type, the compartment directory will be the same as the type directory.
+            // so we need to look at the resource type directory and check if the contents are files
+            // or more directories. If more directories exist, and the directory name is not a
+            // FHIR type, then we have a compartment directory.
+            if (tests.toFile().exists()) {
+                var compartments = FHIR_TYPE_NAMES.stream().map(tests::resolve).filter(x -> x.toFile()
+                        .exists());
+
+                // Check if any of the potential compartment directories
+                // have subdirectories that are not FHIR types (e.g. "input/tests/Patient/test1).
+                hasCompartmentDirectory = compartments
+                        .flatMap(x -> Stream.of(x.toFile().listFiles()))
+                        .filter(File::isDirectory)
+                        .anyMatch(x -> !FHIR_TYPE_NAMES.contains(x.getName().toLowerCase()));
+            }
+        }
+
         // A "type" may also exist in the igs file structure, where resources
         // are grouped by type into subdirectories.
         //
@@ -118,9 +183,7 @@ public final class IgConventions {
         //
         // Check all possible type paths and grab the first that exists,
         // or use the category directory if none exist
-        var typePath = Stream.of(FHIRAllTypes.values())
-                .map(FHIRAllTypes::name)
-                .map(String::toLowerCase)
+        var typePath = FHIR_TYPE_NAMES.stream()
                 .map(categoryPath::resolve)
                 .filter(x -> x.toFile().exists())
                 .findFirst()
@@ -136,16 +199,23 @@ public final class IgConventions {
         // A file "claims" to be a FHIR resource type if its filename starts with a valid FHIR type name.
         // For files that "claim" to be a FHIR resource type, we check to see if the contents of the file
         // have a resource that matches the claimed type.
-        var hasTypeFilename = Stream.of(potentialResourceFiles)
-                .filter(file -> claimedFhirType(file) != FHIRAllTypes.NULL)
-                .anyMatch(file -> contentsMatchClaimedType(file, claimedFhirType(file)));
+        // LUKETODO:  fix this once and for all in terns of the null warning
+                var hasTypeFilename = Optional.ofNullable(potentialResourceFiles).stream()
+                        .flatMap(Arrays::stream)
+                        .filter(file -> claimedFhirType(file) != FHIRAllTypes.NULL)
+                        .anyMatch(file -> contentsMatchClaimedType(file, claimedFhirType(file)));
+//        var hasTypeFilename = Stream.of(potentialResourceFiles)
+//                .filter(file -> claimedFhirType(file) != FHIRAllTypes.NULL)
+//                .anyMatch(file -> contentsMatchClaimedType(file, claimedFhirType(file)));
 
         var config = new IgConventions(
                 hasTypeDirectory ? FhirTypeLayout.DIRECTORY_PER_TYPE : FhirTypeLayout.FLAT,
                 hasCategoryDirectory ? CategoryLayout.DIRECTORY_PER_CATEGORY : CategoryLayout.FLAT,
+                hasCompartmentDirectory ? CompartmentLayout.DIRECTORY_PER_COMPARTMENT : CompartmentLayout.FLAT,
                 hasTypeFilename ? FilenameMode.TYPE_AND_ID : FilenameMode.ID_ONLY);
 
         LOG.info("Auto-detected repository configuration: {}", config);
+        System.out.println("auto-detect: config = " + config);
 
         return config;
     }
@@ -157,11 +227,18 @@ public final class IgConventions {
 
         try {
             var contents = Files.asCharSource(file, StandardCharsets.UTF_8).read();
-            if (contents == null || contents.isEmpty()) {
+            if (contents.isEmpty()) {
                 return false;
             }
 
-            return contents.toUpperCase().contains("\"RESOURCETYPE\": \"%s\"".formatted(claimedFhirType.name()));
+            var filename = file.getName();
+            var fileNameWithoutExtension = filename.substring(0, filename.lastIndexOf("."));
+            // Check that the contents contain the claimed type, and that the id is not the same as the filename
+            // NOTE: This does not work for XML files.
+            return contents.toUpperCase().contains("\"RESOURCETYPE\": \"%s\"".formatted(claimedFhirType.name()))
+                    && !contents.toUpperCase()
+                            .contains("\"ID\": \"%s\"".formatted(fileNameWithoutExtension.toUpperCase()));
+
         } catch (IOException e) {
             return false;
         }
@@ -188,6 +265,7 @@ public final class IgConventions {
         int result = 1;
         result = prime * result + ((typeLayout == null) ? 0 : typeLayout.hashCode());
         result = prime * result + ((categoryLayout == null) ? 0 : categoryLayout.hashCode());
+        result = prime * result + ((compartmentLayout == null) ? 0 : compartmentLayout.hashCode());
         result = prime * result + ((filenameMode == null) ? 0 : filenameMode.hashCode());
         return result;
     }
@@ -200,12 +278,14 @@ public final class IgConventions {
         IgConventions other = (IgConventions) obj;
         if (typeLayout != other.typeLayout) return false;
         if (categoryLayout != other.categoryLayout) return false;
+        if (compartmentLayout != other.compartmentLayout) return false;
         return filenameMode == other.filenameMode;
     }
 
     @Override
     public String toString() {
-        return "IGConventions [typeLayout=%s, categoryLayout=%s, filenameMode=%s]"
-                .formatted(typeLayout, categoryLayout, filenameMode);
+        return String.format(
+                "IGConventions [typeLayout=%s, categoryLayout=%s compartmentLayout=%s, filenameMode=%s]",
+                typeLayout, categoryLayout, compartmentLayout, filenameMode);
     }
 }

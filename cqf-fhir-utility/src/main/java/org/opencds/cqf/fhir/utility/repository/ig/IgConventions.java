@@ -77,7 +77,6 @@ public record IgConventions(
 
     private static final List<String> FHIR_TYPE_NAMES = Stream.of(FHIRAllTypes.values())
             .map(FHIRAllTypes::name)
-            .map(IgConventions::capitalizeFirstLetterAndLowercaseRest)
             .distinct()
             .toList();
 
@@ -90,11 +89,10 @@ public record IgConventions(
      */
     public static IgConventions autoDetect(Path path) {
 
-        System.out.printf("FHIRAllTypes: %s", Arrays.toString(FHIRAllTypes.values()));
         try {
             // Create an instance of our custom file visitor.
             IndentingFileVisitor visitor = new IndentingFileVisitor();
-            if (path != null || path.toFile().exists()) {
+            if (path != null && path.toFile().exists()) {
                 System.out.printf("1234: rootPath: %s", path);
                 // Start the traversal. Files.walkFileTree will handle the recursion.
                 java.nio.file.Files.walkFileTree(path, visitor);
@@ -182,7 +180,7 @@ public record IgConventions(
                 var compartments = FHIR_TYPE_NAMES
                     .stream()
 //                    .map(tests::resolve)
-                    .map(tests::resolve)
+                    .map(fhirType -> resolvePathCaseInsensitive(tests, fhirType))
                     .filter(x -> x.toFile()
                     .exists());
 
@@ -256,13 +254,25 @@ public record IgConventions(
         return config;
     }
 
-    private static String capitalizeFirstLetterAndLowercaseRest(String textWithOrWithoutCaps) {
-        if (textWithOrWithoutCaps == null || textWithOrWithoutCaps.isEmpty()) {
-            return textWithOrWithoutCaps;
+    private static Path resolvePathCaseInsensitive(Path rootPath, String finalSubdirectoryString) {
+        final Path resolvedPath = rootPath.resolve(finalSubdirectoryString);
+
+        if (java.nio.file.Files.exists(resolvedPath)) {
+            return resolvedPath;
         }
 
-        return Character.toUpperCase(textWithOrWithoutCaps.charAt(0)) +
-            textWithOrWithoutCaps.substring(1).toLowerCase();
+        // If the path does not exist, we need to check for case-insensitive matches
+        try (var fileWalkerSteam = java.nio.file.Files.walk(rootPath)) {
+            return fileWalkerSteam
+                    .filter(path -> path.getFileName().toString().equalsIgnoreCase(
+                        finalSubdirectoryString))
+                    .findFirst()
+                    .orElse(resolvedPath);
+        } catch (IOException e) {
+            // LUKETODO:  error handling
+            logger.error("Error resolving path case insensitively: {}", e.getMessage());
+            return resolvedPath; // Return the original path if an error occurs
+        }
     }
 
     // This method checks to see if the contents of a file match the type claimed by the filename

@@ -539,22 +539,16 @@ public class IgRepository implements IRepository {
         requireNonNull(resourceType, "resourceType cannot be null");
         requireNonNull(id, "id cannot be null");
 
-        System.out.printf("1234: reading %s with id %s%n", resourceType.getSimpleName(), id);
-
         var compartment = compartmentFrom(headers);
-
-        System.out.printf("1234: compartment: %s%n", compartment);
 
         var paths = this.potentialPathsForResource(resourceType, id, compartment);
         for (var path : paths) {
-            System.out.printf("1234: try to find path: %s%n", path);
             if (!path.toFile().exists()) {
                 continue;
             }
 
             var optionalResource = cachedReadResource(path);
             if (optionalResource.isPresent()) {
-                System.out.printf("1234: found path: %s%n", path);
                 var resource = optionalResource.get();
                 return validateResource(resourceType, resource, id);
             }

@@ -547,6 +547,7 @@ public class IgRepository implements IRepository {
 
         var paths = this.potentialPathsForResource(resourceType, id, compartment);
         for (var path : paths) {
+            System.out.printf("1234: try to find path: %s%n", path);
             if (!path.toFile().exists()) {
                 continue;
             }

@@ -158,7 +158,7 @@ class IgRepositoryCompartmentTest {
         var created = repository.read(Patient.class, o.getId(), header);
         assertNotNull(created);
 
-        var loc = tempDir.resolve("tests/patient/new-patient/Patient/new-patient.json");
+        var loc = tempDir.resolve("tests/Patient/new-patient/patient/new-patient.json");
         assertTrue(Files.exists(loc));
 
         repository.delete(Patient.class, created.getIdElement(), header);

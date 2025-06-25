@@ -118,7 +118,7 @@ public record IgConventions(
         // Check all possible category paths and grab the first that exists,
         // or use the IG path if none exist.
         var categoryPath = Stream.of("tests", "vocabulary", "resources")
-                .map(path::resolve)
+                .map(innerPath -> resolvePathCaseInsensitive(path, innerPath))
                 .filter(x -> x.toFile().exists())
                 .findFirst()
                 .orElse(path);
@@ -135,7 +135,7 @@ public record IgConventions(
 
         // Compartments can only exist for test data
         if (hasCategoryDirectory) {
-            var tests = path.resolve("tests");
+            var tests = resolvePathCaseInsensitive(path, "tests");
             // A compartment under the tests looks like a set of subdirectories
             // e.g. "input/tests/Patient", "input/tests/Practitioner"
             // that themselvses contain subdirectories for each test case.
@@ -149,37 +149,9 @@ public record IgConventions(
             // or more directories. If more directories exist, and the directory name is not a
             // FHIR type, then we have a compartment directory.
 
-            // LUKETODO: delete once Linux debugging is over
-            System.out.printf("1234: tests: %s\n", tests);
-
             if (tests.toFile().exists()) {
-                // LUKETODO:  this returns EMPTY on Linux, but not on MacOS   why?????????
-                // LUKETODO: START:  delete all of this once Linux debugging is over
-                for (String fhirTypeName : FHIR_TYPE_NAMES) {
-                    if (fhirTypeName == null) {
-                        continue;
-                    }
-                    final char firstChar = fhirTypeName.charAt(0);
-
-                    if (Character.isLowerCase(firstChar)) {
-
-                    }
-//                    System.out.printf("1234: fhirTypeName: %s\n", fhirTypeName);
-
-                    final Path resolvedPath = tests.resolve(fhirTypeName);
-
-                    if (resolvedPath.toString().contains("patient")) {
-                        System.out.printf("1234: resolvedPath: %s\n", resolvedPath);
-                        System.out.printf("1234: resolvedPath.toFile().exists(): %s\n", resolvedPath.toFile().exists());
-                        System.out.printf("1234: java.nio.file.Files.exists(resolvedPath): %s\n", java.nio.file.Files.exists(resolvedPath));
-                    }
-                }
-                // LUKETODO: END:  delete all of this once Linux debugging is over
-
-
                 var compartments = FHIR_TYPE_NAMES
                     .stream()
-//                    .map(tests::resolve)
                     .map(fhirType -> resolvePathCaseInsensitive(tests, fhirType))
                     .filter(x -> x.toFile()
                     .exists());
@@ -209,7 +181,7 @@ public record IgConventions(
         // Check all possible type paths and grab the first that exists,
         // or use the category directory if none exist
         var typePath = FHIR_TYPE_NAMES.stream()
-                .map(categoryPath::resolve)
+                .map(innerPath -> resolvePathCaseInsensitive(categoryPath, innerPath))
                 .filter(x -> x.toFile().exists())
                 .findFirst()
                 .orElse(categoryPath);

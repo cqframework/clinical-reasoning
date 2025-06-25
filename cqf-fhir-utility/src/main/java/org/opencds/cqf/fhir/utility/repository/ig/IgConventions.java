@@ -87,6 +87,8 @@ public record IgConventions(
      */
     public static IgConventions autoDetect(Path path) {
         if (path == null || !path.toFile().exists()) {
+            // LUKETODO: delete once Linux debugging is over
+            System.out.println("1234: STANDARD");
             return STANDARD;
         }
 
@@ -104,7 +106,13 @@ public record IgConventions(
                 .findFirst()
                 .orElse(path);
 
+        // LUKETODO: delete once Linux debugging is over
+        System.out.printf("1234: categoryPath: %s\n", categoryPath);
+
         var hasCategoryDirectory = !path.equals(categoryPath);
+
+        // LUKETODO: delete once Linux debugging is over
+        System.out.printf("1234: hasCategoryDirectory: %s\n", hasCategoryDirectory);
 
         var hasCompartmentDirectory = false;
 
@@ -123,16 +131,28 @@ public record IgConventions(
             // so we need to look at the resource type directory and check if the contents are files
             // or more directories. If more directories exist, and the directory name is not a
             // FHIR type, then we have a compartment directory.
+
+            // LUKETODO: delete once Linux debugging is over
+            System.out.printf("1234: tests: %s\n", tests);
+
             if (tests.toFile().exists()) {
                 var compartments = FHIR_TYPE_NAMES.stream().map(tests::resolve).filter(x -> x.toFile()
                         .exists());
 
+                final List<Path> compartmentsList = compartments.toList();
+
+                // LUKETODO: delete once Linux debugging is over
+                System.out.printf("1234: compartments: %s\n", compartmentsList);
+
                 // Check if any of the potential compartment directories
                 // have subdirectories that are not FHIR types (e.g. "input/tests/Patient/test1).
-                hasCompartmentDirectory = compartments
+                hasCompartmentDirectory = compartmentsList.stream()
                         .flatMap(x -> Stream.of(x.toFile().listFiles()))
                         .filter(File::isDirectory)
                         .anyMatch(x -> !FHIR_TYPE_NAMES.contains(x.getName().toLowerCase()));
+
+                // LUKETODO: delete once Linux debugging is over
+                System.out.printf("1234: hasCompartmentDirectory: %s\n", hasCompartmentDirectory);
             }
         }
 
@@ -149,12 +169,21 @@ public record IgConventions(
                 .findFirst()
                 .orElse(categoryPath);
 
+        // LUKETODO: delete once Linux debugging is over
+        System.out.printf("1234: typePath: %s\n", typePath);
+
         var hasTypeDirectory = !categoryPath.equals(typePath);
+
+        // LUKETODO: delete once Linux debugging is over
+        System.out.printf("1234: hasTypeDirectory: %s\n", hasTypeDirectory);
 
         // Potential resource files are files that contain a "." and have a valid FHIR file extension.
         FilenameFilter resourceFileFilter = (dir, name) -> name.contains(".")
                 && IgRepository.FILE_EXTENSIONS.containsValue(name.toLowerCase().substring(name.lastIndexOf('.') + 1));
         var potentialResourceFiles = typePath.toFile().listFiles(resourceFileFilter);
+
+        // LUKETODO: delete once Linux debugging is over
+        System.out.printf("1234: potentialResourceFiles: %s\n", Arrays.toString(potentialResourceFiles));
 
         // A file "claims" to be a FHIR resource type if its filename starts with a valid FHIR type name.
         // For files that "claim" to be a FHIR resource type, we check to see if the contents of the file
@@ -164,6 +193,9 @@ public record IgConventions(
                 .filter(file -> claimedFhirType(file) != FHIRAllTypes.NULL)
                 .anyMatch(file -> contentsMatchClaimedType(file, claimedFhirType(file)));
 
+        // LUKETODO: delete once Linux debugging is over
+        System.out.printf("1234: hasTypeFilename: %s\n", hasTypeFilename);
+
         var config = new IgConventions(
                 hasTypeDirectory ? FhirTypeLayout.DIRECTORY_PER_TYPE : FhirTypeLayout.FLAT,
                 hasCategoryDirectory ? CategoryLayout.DIRECTORY_PER_CATEGORY : CategoryLayout.FLAT,
@@ -171,6 +203,8 @@ public record IgConventions(
                 hasTypeFilename ? FilenameMode.TYPE_AND_ID : FilenameMode.ID_ONLY);
 
         logger.info("Auto-detected repository configuration: {}", config);
+        // LUKETODO: delete once Linux debugging is over
+        System.out.printf("1234: config: %s\n", config);
 
         return config;
     }

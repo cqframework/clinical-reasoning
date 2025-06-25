@@ -6,6 +6,7 @@ import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import java.util.List;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Endpoint;
@@ -17,7 +18,6 @@ import org.opencds.cqf.fhir.cr.hapi.common.StringTimePeriodHandler;
 import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureEvaluatorMultipleFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureEvaluatorSingleFactory;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
-import java.util.List;
 
 @SuppressWarnings("java:S107")
 public class MeasureOperationsProvider {
@@ -110,22 +110,21 @@ public class MeasureOperationsProvider {
             RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
         return r4MultiMeasureServiceFactory
-            .create(requestDetails)
-            .evaluate(
-                measureId, // List<IdType>
-                measureUrl, // List<String>
-                measureIdentifier, // List<Identifier>
-                stringTimePeriodHandler.getStartZonedDateTime(periodStart, requestDetails),
-                stringTimePeriodHandler.getEndZonedDateTime(periodEnd, requestDetails),
-                reportType,
-                subject,
-                null,
-                terminologyEndpoint,
-                null,
-                additionalData,
-                parameters,
-                productLine,
-                reporter
-            );
+                .create(requestDetails)
+                .evaluate(
+                        measureId, // List<IdType>
+                        measureUrl, // List<String>
+                        measureIdentifier, // List<Identifier>
+                        stringTimePeriodHandler.getStartZonedDateTime(periodStart, requestDetails),
+                        stringTimePeriodHandler.getEndZonedDateTime(periodEnd, requestDetails),
+                        reportType,
+                        subject,
+                        null,
+                        terminologyEndpoint,
+                        null,
+                        additionalData,
+                        parameters,
+                        productLine,
+                        reporter);
     }
 }

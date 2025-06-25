@@ -33,7 +33,6 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.r4.R4CareGapsService;
 import org.opencds.cqf.fhir.cr.measure.r4.R4CollectDataService;
 import org.opencds.cqf.fhir.cr.measure.r4.R4DataRequirementsService;
-import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureEvaluatorMultiple;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureService;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MultiMeasureService;
 import org.opencds.cqf.fhir.cr.measure.r4.R4SubmitDataService;
@@ -66,10 +65,7 @@ public class CrR4Config {
             MeasureEvaluationOptions evaluationOptions,
             MeasurePeriodValidator measurePeriodValidator) {
         return rd -> new R4MultiMeasureService(
-                repositoryFactory.create(rd),
-                evaluationOptions,
-                rd.getFhirServerBase(),
-                measurePeriodValidator);
+                repositoryFactory.create(rd), evaluationOptions, rd.getFhirServerBase(), measurePeriodValidator);
     }
 
     @Bean
@@ -151,8 +147,8 @@ public class CrR4Config {
             R4MeasureEvaluatorSingleFactory r4MeasureServiceFactory,
             R4MeasureEvaluatorMultipleFactory r4MultiMeasureServiceFactory,
             StringTimePeriodHandler stringTimePeriodHandler) {
-        return new MeasureOperationsProvider(r4MeasureServiceFactory, r4MultiMeasureServiceFactory,
-            stringTimePeriodHandler);
+        return new MeasureOperationsProvider(
+                r4MeasureServiceFactory, r4MultiMeasureServiceFactory, stringTimePeriodHandler);
     }
 
     @Bean

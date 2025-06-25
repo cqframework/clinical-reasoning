@@ -541,7 +541,6 @@ class CliTest {
         assertFalse(output.contains("Observation(id=blood-pressure)"));
     }
 
-
     @Test
     @Disabled("Only run locally")
     void testCQLIT544() {
@@ -564,13 +563,13 @@ class CliTest {
         Main.run(args);
 
         String output = outContent.toString();
-//        assertTrue(output.contains("Patient=Patient(id=example)"));
-//        assertTrue(output.contains("Observation(id=example)"));
-//        assertTrue(output.contains("Observation(id=negation-example)"));
-//        assertTrue(output.contains("Observation(id=pediatric-bmi-example)"));
-//        assertTrue(output.contains("Observation(id=pediatric-wt-example)"));
-//        assertTrue(output.contains("Observation(id=satO2-fiO2)"));
-//        assertFalse(output.contains("Observation(id=blood-glucose)"));
-//        assertFalse(output.contains("Observation(id=blood-pressure)"));
+        //        assertTrue(output.contains("Patient=Patient(id=example)"));
+        //        assertTrue(output.contains("Observation(id=example)"));
+        //        assertTrue(output.contains("Observation(id=negation-example)"));
+        //        assertTrue(output.contains("Observation(id=pediatric-bmi-example)"));
+        //        assertTrue(output.contains("Observation(id=pediatric-wt-example)"));
+        //        assertTrue(output.contains("Observation(id=satO2-fiO2)"));
+        //        assertFalse(output.contains("Observation(id=blood-glucose)"));
+        //        assertFalse(output.contains("Observation(id=blood-pressure)"));
     }
 }

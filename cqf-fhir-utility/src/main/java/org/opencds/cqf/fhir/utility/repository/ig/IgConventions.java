@@ -1,19 +1,14 @@
 package org.opencds.cqf.fhir.utility.repository.ig;
 
 import jakarta.annotation.Nonnull;
-import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import jakarta.annotation.Nullable;
 import org.hl7.fhir.r4.model.Enumerations.FHIRAllTypes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,7 +67,6 @@ public record IgConventions(
             CompartmentLayout.FLAT,
             FilenameMode.ID_ONLY);
 
-
     private static final List<String> FHIR_TYPE_NAMES = Stream.of(FHIRAllTypes.values())
             .map(FHIRAllTypes::name)
             .map(String::toLowerCase)
@@ -128,11 +122,8 @@ public record IgConventions(
             // FHIR type, then we have a compartment directory.
 
             if (tests.toFile().exists()) {
-                var compartments = FHIR_TYPE_NAMES
-                    .stream()
-                    .map(tests::resolve)
-                    .filter(x -> x.toFile()
-                    .exists());
+                var compartments = FHIR_TYPE_NAMES.stream().map(tests::resolve).filter(x -> x.toFile()
+                        .exists());
 
                 final List<Path> compartmentsList = compartments.toList();
 
@@ -160,15 +151,10 @@ public record IgConventions(
 
         var hasTypeDirectory = !categoryPath.equals(typePath);
 
-        var potentialResourceFiles = getPotentialResourceFiles(typePath);
-
         // A file "claims" to be a FHIR resource type if its filename starts with a valid FHIR type name.
         // For files that "claim" to be a FHIR resource type, we check to see if the contents of the file
         // have a resource that matches the claimed type.
-        var hasTypeFilename = Optional.ofNullable(potentialResourceFiles).stream()
-                .flatMap(Arrays::stream)
-                .filter(file -> claimedFhirType(file.toPath()) != FHIRAllTypes.NULL)
-                .anyMatch(file -> contentsMatchClaimedType(file.toPath(), claimedFhirType(file.toPath())));
+        var hasTypeFilename = hasTypeFilename(typePath);
 
         var config = new IgConventions(
                 hasTypeDirectory ? FhirTypeLayout.DIRECTORY_PER_TYPE : FhirTypeLayout.FLAT,
@@ -181,16 +167,26 @@ public record IgConventions(
         return config;
     }
 
-    @Nullable
-    private static File[] getPotentialResourceFiles(Path typePath) {
-        // Potential resource files are files that contain a "." and have a valid FHIR file extension.
-        FilenameFilter resourceFileFilter = (dir, name) -> name.contains(".")
-                && IgRepository.FILE_EXTENSIONS.containsValue(name.toLowerCase().substring(name.lastIndexOf('.') + 1));
-        return typePath.toFile().listFiles(resourceFileFilter);
+    private static boolean hasTypeFilename(Path typePath) {
+        try (var fileStream = Files.list(typePath)) {
+            return fileStream
+                    .filter(IgConventions::fileNameMatchesType)
+                    .filter(filePath -> claimedFhirType(filePath) != FHIRAllTypes.NULL)
+                    .anyMatch(filePath -> contentsMatchClaimedType(filePath, claimedFhirType(filePath)));
+        } catch (IOException exception) {
+            logger.error("Error listing files in path: {}", typePath, exception);
+            return false;
+        }
+    }
+
+    private static boolean fileNameMatchesType(Path innerFile) {
+        Objects.requireNonNull(innerFile);
+        var fileName = innerFile.getFileName().toString();
+        return FHIR_TYPE_NAMES.stream().anyMatch(type -> fileName.toLowerCase().startsWith(type));
     }
 
     private static boolean matchesAnyResource(Path innerFile) {
-        return ! FHIR_TYPE_NAMES.contains(innerFile.getFileName().toString().toLowerCase());
+        return !FHIR_TYPE_NAMES.contains(innerFile.getFileName().toString().toLowerCase());
     }
 
     @Nonnull

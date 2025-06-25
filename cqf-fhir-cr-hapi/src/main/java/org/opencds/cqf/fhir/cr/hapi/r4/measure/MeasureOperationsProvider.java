@@ -14,18 +14,24 @@ import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Parameters;
 import org.opencds.cqf.fhir.cr.hapi.common.StringTimePeriodHandler;
+import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureEvaluatorMultipleFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureEvaluatorSingleFactory;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
+import java.util.List;
 
 @SuppressWarnings("java:S107")
 public class MeasureOperationsProvider {
 
     private final R4MeasureEvaluatorSingleFactory r4MeasureServiceFactory;
+    private final R4MeasureEvaluatorMultipleFactory r4MultiMeasureServiceFactory;
     private final StringTimePeriodHandler stringTimePeriodHandler;
 
     public MeasureOperationsProvider(
-            R4MeasureEvaluatorSingleFactory r4MeasureServiceFactory, StringTimePeriodHandler stringTimePeriodHandler) {
+            R4MeasureEvaluatorSingleFactory r4MeasureServiceFactory,
+            R4MeasureEvaluatorMultipleFactory r4MultiMeasureServiceFactory,
+            StringTimePeriodHandler stringTimePeriodHandler) {
         this.r4MeasureServiceFactory = r4MeasureServiceFactory;
+        this.r4MultiMeasureServiceFactory = r4MultiMeasureServiceFactory;
         this.stringTimePeriodHandler = stringTimePeriodHandler;
     }
 
@@ -83,5 +89,43 @@ public class MeasureOperationsProvider {
                         parameters,
                         productLine,
                         practitioner);
+    }
+
+    public Bundle evaluate(
+            @OperationParam(name = "measureId") List<IdType> measureId,
+            @OperationParam(name = "measureUrl") List<String> measureUrl,
+            @OperationParam(name = "measureIdentifier") List<String> measureIdentifier,
+            @OperationParam(name = "measure") List<String> measure,
+            @OperationParam(name = "periodStart") String periodStart,
+            @OperationParam(name = "periodEnd") String periodEnd,
+            @OperationParam(name = "reportType") String reportType,
+            @OperationParam(name = "subject") String subject,
+            @OperationParam(name = "practitioner") String practitioner,
+            @OperationParam(name = "lastReceivedOn") String lastReceivedOn,
+            @OperationParam(name = "productLine") String productLine,
+            @OperationParam(name = "additionalData") Bundle additionalData,
+            @OperationParam(name = "terminologyEndpoint") Endpoint terminologyEndpoint,
+            @OperationParam(name = "parameters") Parameters parameters,
+            @OperationParam(name = "reporter") String reporter,
+            RequestDetails requestDetails)
+            throws InternalErrorException, FHIRException {
+        return r4MultiMeasureServiceFactory
+            .create(requestDetails)
+            .evaluate(
+                measureId, // List<IdType>
+                measureUrl, // List<String>
+                measureIdentifier, // List<Identifier>
+                stringTimePeriodHandler.getStartZonedDateTime(periodStart, requestDetails),
+                stringTimePeriodHandler.getEndZonedDateTime(periodEnd, requestDetails),
+                reportType,
+                subject,
+                null,
+                terminologyEndpoint,
+                null,
+                additionalData,
+                parameters,
+                productLine,
+                reporter
+            );
     }
 }

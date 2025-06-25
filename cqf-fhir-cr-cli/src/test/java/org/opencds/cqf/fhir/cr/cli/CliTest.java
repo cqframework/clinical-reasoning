@@ -540,4 +540,37 @@ class CliTest {
         assertFalse(output.contains("Observation(id=blood-glucose)"));
         assertFalse(output.contains("Observation(id=blood-pressure)"));
     }
+
+
+    @Test
+    @Disabled("Only run locally")
+    void testCQLIT544() {
+        String igRootPath = "C:\\Users\\Bryn\\Documents\\Src\\CMS\\CQLIT-554";
+        String[] args = new String[] {
+            "cql",
+            "-fv=R4",
+            "-rd=" + igRootPath,
+            "-ig=" + "input/mycontentig.xml",
+            "-lu=" + igRootPath + "\\input\\cql",
+            "-ln=CMSFHIR844HybridHospitalWideMortality",
+            "-lv=0.5.001",
+            "-m=FHIR",
+            "-mu=" + igRootPath + "\\input\\tests\\CMS844FHIRHybridHospitalWideMortality-v0.5.001",
+            "-t=" + igRootPath + "\\input",
+            "-c=Patient",
+            "-cv=02eb94f6-fd0e-474c-b20b-c040072d92f9"
+        };
+
+        Main.run(args);
+
+        String output = outContent.toString();
+//        assertTrue(output.contains("Patient=Patient(id=example)"));
+//        assertTrue(output.contains("Observation(id=example)"));
+//        assertTrue(output.contains("Observation(id=negation-example)"));
+//        assertTrue(output.contains("Observation(id=pediatric-bmi-example)"));
+//        assertTrue(output.contains("Observation(id=pediatric-wt-example)"));
+//        assertTrue(output.contains("Observation(id=satO2-fiO2)"));
+//        assertFalse(output.contains("Observation(id=blood-glucose)"));
+//        assertFalse(output.contains("Observation(id=blood-pressure)"));
+    }
 }

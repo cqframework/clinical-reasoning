@@ -118,7 +118,9 @@ public record IgConventions(
         // Check all possible category paths and grab the first that exists,
         // or use the IG path if none exist.
         var categoryPath = Stream.of("tests", "vocabulary", "resources")
-                .map(innerPath -> resolvePathCaseInsensitive(path, innerPath))
+            // LUKETODO:  flipping back to this makes the LibraryEngineTests pass???
+//            .map(innerPath -> resolvePathCaseInsensitive(path, innerPath))
+                .map(path::resolve)
                 .filter(x -> x.toFile().exists())
                 .findFirst()
                 .orElse(path);
@@ -167,11 +169,11 @@ public record IgConventions(
                         .flatMap(x -> Stream.of(x.toFile().listFiles()))
                         .filter(File::isDirectory)
                         .anyMatch(x -> !FHIR_TYPE_NAMES.contains(x.getName().toLowerCase()));
-
-                // LUKETODO: delete once Linux debugging is over
-                System.out.printf("1234: hasCompartmentDirectory: %s\n", hasCompartmentDirectory);
             }
         }
+
+        // LUKETODO: delete once Linux debugging is over
+        System.out.printf("1234: hasCompartmentDirectory: %s\n", hasCompartmentDirectory);
 
         // A "type" may also exist in the igs file structure, where resources
         // are grouped by type into subdirectories.
@@ -181,7 +183,9 @@ public record IgConventions(
         // Check all possible type paths and grab the first that exists,
         // or use the category directory if none exist
         var typePath = FHIR_TYPE_NAMES.stream()
-                .map(innerPath -> resolvePathCaseInsensitive(categoryPath, innerPath))
+//            .map(innerPath -> resolvePathCaseInsensitive(categoryPath, innerPath))
+            // LUKETODO:  flipping back to this makes the LibraryEngineTests pass???
+                .map(categoryPath::resolve)
                 .filter(x -> x.toFile().exists())
                 .findFirst()
                 .orElse(categoryPath);

@@ -136,6 +136,22 @@ public record IgConventions(
             System.out.printf("1234: tests: %s\n", tests);
 
             if (tests.toFile().exists()) {
+                // LUKETODO:  this returns EMPTY on Linux, but not on MacOS   why?????????
+                // LUKETODO: START:  delete all of this once Linux debugging is over
+                for (String fhirTypeName : FHIR_TYPE_NAMES) {
+//                    System.out.printf("1234: fhirTypeName: %s\n", fhirTypeName);
+
+                    final Path resolvedPath = tests.resolve(fhirTypeName);
+
+                    if (resolvedPath.toString().contains("patient")) {
+                        System.out.printf("1234: resolvedPath: %s\n", resolvedPath);
+                        System.out.printf("1234: resolvedPath.toFile().exists(): %s\n", resolvedPath.toFile().exists());
+                        System.out.printf("1234: java.nio.file.Files.exists(resolvedPath): %s\n", java.nio.file.Files.exists(resolvedPath));
+                    }
+                }
+                // LUKETODO: END:  delete all of this once Linux debugging is over
+
+
                 var compartments = FHIR_TYPE_NAMES.stream().map(tests::resolve).filter(x -> x.toFile()
                         .exists());
 

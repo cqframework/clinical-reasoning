@@ -6,7 +6,10 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -74,7 +77,7 @@ public record IgConventions(
 
     private static final List<String> FHIR_TYPE_NAMES = Stream.of(FHIRAllTypes.values())
             .map(FHIRAllTypes::name)
-            .map(String::toLowerCase)
+            .map(IgConventions::capitalizeFirstLetterAndLowercaseRest)
             .distinct()
             .toList();
 
@@ -86,6 +89,22 @@ public record IgConventions(
      * @return The IG conventions.
      */
     public static IgConventions autoDetect(Path path) {
+
+        System.out.printf("FHIRAllTypes: %s", Arrays.toString(FHIRAllTypes.values()));
+        try {
+            // Create an instance of our custom file visitor.
+            IndentingFileVisitor visitor = new IndentingFileVisitor();
+            if (path != null || path.toFile().exists()) {
+                System.out.printf("1234: rootPath: %s", path);
+                // Start the traversal. Files.walkFileTree will handle the recursion.
+                java.nio.file.Files.walkFileTree(path, visitor);
+            }
+        } catch (IOException e) {
+            // Handle potential IO exceptions during traversal.
+            System.err.println("An I/O error occurred: " + e.getMessage());
+            throw new RuntimeException("An I/O error occurred: " + e.getMessage());
+        }
+
         if (path == null || !path.toFile().exists()) {
             // LUKETODO: delete once Linux debugging is over
             System.out.println("1234: STANDARD");
@@ -139,6 +158,14 @@ public record IgConventions(
                 // LUKETODO:  this returns EMPTY on Linux, but not on MacOS   why?????????
                 // LUKETODO: START:  delete all of this once Linux debugging is over
                 for (String fhirTypeName : FHIR_TYPE_NAMES) {
+                    if (fhirTypeName == null) {
+                        continue;
+                    }
+                    final char firstChar = fhirTypeName.charAt(0);
+
+                    if (Character.isLowerCase(firstChar)) {
+
+                    }
 //                    System.out.printf("1234: fhirTypeName: %s\n", fhirTypeName);
 
                     final Path resolvedPath = tests.resolve(fhirTypeName);
@@ -152,8 +179,12 @@ public record IgConventions(
                 // LUKETODO: END:  delete all of this once Linux debugging is over
 
 
-                var compartments = FHIR_TYPE_NAMES.stream().map(tests::resolve).filter(x -> x.toFile()
-                        .exists());
+                var compartments = FHIR_TYPE_NAMES
+                    .stream()
+//                    .map(tests::resolve)
+                    .map(tests::resolve)
+                    .filter(x -> x.toFile()
+                    .exists());
 
                 final List<Path> compartmentsList = compartments.toList();
 
@@ -225,6 +256,15 @@ public record IgConventions(
         return config;
     }
 
+    private static String capitalizeFirstLetterAndLowercaseRest(String textWithOrWithoutCaps) {
+        if (textWithOrWithoutCaps == null || textWithOrWithoutCaps.isEmpty()) {
+            return textWithOrWithoutCaps;
+        }
+
+        return Character.toUpperCase(textWithOrWithoutCaps.charAt(0)) +
+            textWithOrWithoutCaps.substring(1).toLowerCase();
+    }
+
     // This method checks to see if the contents of a file match the type claimed by the filename
     private static boolean contentsMatchClaimedType(File file, FHIRAllTypes claimedFhirType) {
         Objects.requireNonNull(file);
@@ -269,5 +309,94 @@ public record IgConventions(
     public String toString() {
         return "IGConventions [typeLayout=%s, categoryLayout=%s compartmentLayout=%s, filenameMode=%s]"
                 .formatted(typeLayout, categoryLayout, compartmentLayout, filenameMode);
+    }
+
+
+    /**
+     * A custom FileVisitor that prints the file tree with indentation.
+     * It extends SimpleFileVisitor to avoid having to implement all methods
+     * of the FileVisitor interface.
+     */
+    private static class IndentingFileVisitor extends SimpleFileVisitor<Path> {
+
+        // The current indentation level.
+        private int indentLevel = 0;
+
+        /**
+         * Generates an indentation string based on the current level.
+         * Each level consists of "  ├── "
+         * @return A string with the correct indentation.
+         */
+        private String getIndentString() {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < indentLevel; i++) {
+                // Use a visual indicator for nesting level.
+                sb.append("  ");
+            }
+            return sb.toString();
+        }
+
+        /**
+         * Called before visiting a directory's entries.
+         *
+         * @param dir   The path to the directory.
+         * @param attrs The basic attributes of the directory.
+         * @return The visit result, always CONTINUE in this case.
+         */
+        @Override
+        public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+            // Print the directory name with the current indentation.
+            // We use getFileName() to avoid printing the full path.
+            System.out.println(getIndentString() + "📁 " + dir.getFileName());
+            // Increase the indentation level for the contents of this directory.
+            indentLevel++;
+            return FileVisitResult.CONTINUE;
+        }
+
+        /**
+         * Called after all entries in a directory have been visited.
+         *
+         * @param dir The path to the directory.
+         * @param exc An IOException if an error occurred, or null otherwise.
+         * @return The visit result, always CONTINUE in this case.
+         */
+        @Override
+        public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+            // We are done with this directory, so decrease the indentation level.
+            indentLevel--;
+            if (exc != null) {
+                // If an error occurred while visiting the directory, re-throw it.
+                throw exc;
+            }
+            return FileVisitResult.CONTINUE;
+        }
+
+        /**
+         * Called when a file is visited.
+         *
+         * @param file  The path to the file.
+         * @param attrs The basic attributes of the file.
+         * @return The visit result, always CONTINUE in this case.
+         */
+        @Override
+        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+            // Print the file name with the current indentation.
+            System.out.println(getIndentString() + "📄 " + file.getFileName());
+            return FileVisitResult.CONTINUE;
+        }
+
+        /**
+         * Called when a file cannot be visited.
+         *
+         * @param file The path to the file that could not be visited.
+         * @param exc  The IOException that occurred.
+         * @return The visit result, always CONTINUE in this case.
+         */
+        @Override
+        public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
+            // Handle cases where a file cannot be accessed (e.g., due to permissions).
+            System.err.println("Failed to visit file: " + file + " (" + exc.getMessage() + ")");
+            return FileVisitResult.CONTINUE;
+        }
     }
 }

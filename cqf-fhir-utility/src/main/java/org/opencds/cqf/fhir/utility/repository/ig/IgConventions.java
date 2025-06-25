@@ -77,6 +77,7 @@ public record IgConventions(
 
     private static final List<String> FHIR_TYPE_NAMES = Stream.of(FHIRAllTypes.values())
             .map(FHIRAllTypes::name)
+            .map(String::toLowerCase)
             .distinct()
             .toList();
 
@@ -117,6 +118,8 @@ public record IgConventions(
         //
         // Check all possible category paths and grab the first that exists,
         // or use the IG path if none exist.
+
+        // LUKETODO: for some reason, on Linux, we have a top-level "tests" directory, which is not present on macOS.
         var categoryPath = Stream.of("tests", "vocabulary", "resources")
             // LUKETODO:  flipping back to this makes the LibraryEngineTests pass???
 //            .map(innerPath -> resolvePathCaseInsensitive(path, innerPath))
@@ -137,7 +140,8 @@ public record IgConventions(
 
         // Compartments can only exist for test data
         if (hasCategoryDirectory) {
-            var tests = resolvePathCaseInsensitive(path, "tests");
+//            var tests = resolvePathCaseInsensitive(path, "tests");
+            var tests = path.resolve("tests");
             // A compartment under the tests looks like a set of subdirectories
             // e.g. "input/tests/Patient", "input/tests/Practitioner"
             // that themselvses contain subdirectories for each test case.
@@ -154,7 +158,9 @@ public record IgConventions(
             if (tests.toFile().exists()) {
                 var compartments = FHIR_TYPE_NAMES
                     .stream()
-                    .map(fhirType -> resolvePathCaseInsensitive(tests, fhirType))
+                    // LUKETODO:
+//                    .map(fhirType -> resolvePathCaseInsensitive(tests, fhirType))
+                    .map(tests::resolve)
                     .filter(x -> x.toFile()
                     .exists());
 
@@ -182,6 +188,7 @@ public record IgConventions(
         //
         // Check all possible type paths and grab the first that exists,
         // or use the category directory if none exist
+
         var typePath = FHIR_TYPE_NAMES.stream()
 //            .map(innerPath -> resolvePathCaseInsensitive(categoryPath, innerPath))
             // LUKETODO:  flipping back to this makes the LibraryEngineTests pass???
@@ -239,6 +246,7 @@ public record IgConventions(
 
         // If the path does not exist, we need to check for case-insensitive matches
         try (var fileWalkerSteam = java.nio.file.Files.walk(rootPath)) {
+            // LUKETODO: this is too permissive:  we need to only check the last segment of the path
             return fileWalkerSteam
                     .filter(path -> path.getFileName().toString().equalsIgnoreCase(
                         finalSubdirectoryString))

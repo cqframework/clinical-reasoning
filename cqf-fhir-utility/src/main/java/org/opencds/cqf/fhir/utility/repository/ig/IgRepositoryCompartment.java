@@ -5,8 +5,10 @@ import static java.util.Objects.requireNonNull;
 import java.util.Objects;
 import java.util.StringJoiner;
 
-// Class that represents the compartment context for a given request.
-public class Compartment {
+/**
+ * Class that represents the compartment context for a given request within {@link IgRepository} only.
+ */
+public class IgRepositoryCompartment {
 
     private final String type;
     private final String id;
@@ -20,19 +22,20 @@ public class Compartment {
     }
 
     // Empty context (i.e. no compartment context)
-    public Compartment() {
+    public IgRepositoryCompartment() {
         this.type = null;
         this.id = null;
     }
 
     // Context in the format ResourceType/Id
-    public Compartment(String context) {
+    public IgRepositoryCompartment(String context) {
         this(typeOfContext(context), idOfContext(context));
     }
 
     // Context in the format type and id
-    public Compartment(String type, String id) {
-        this.type = requireNonNullOrEmpty("type", type);
+    public IgRepositoryCompartment(String type, String id) {
+        // Make this lowercase so the path will resolve on Linux (FYI: macOS is case-insensitive)
+        this.type = requireNonNullOrEmpty("type", type).toLowerCase();
         this.id = requireNonNullOrEmpty("id", id);
     }
 
@@ -61,7 +64,7 @@ public class Compartment {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        Compartment that = (Compartment) o;
+        IgRepositoryCompartment that = (IgRepositoryCompartment) o;
         return Objects.equals(type, that.type) && Objects.equals(id, that.id);
     }
 
@@ -72,7 +75,7 @@ public class Compartment {
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", Compartment.class.getSimpleName() + "[", "]")
+        return new StringJoiner(", ", IgRepositoryCompartment.class.getSimpleName() + "[", "]")
                 .add("type='" + type + "'")
                 .add("id='" + id + "'")
                 .toString();

@@ -9,10 +9,8 @@ import com.google.common.base.Stopwatch;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import java.io.BufferedWriter;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -20,12 +18,16 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.StringJoiner;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import org.apache.commons.lang3.tuple.Pair;
 import org.cqframework.cql.cql2elm.CqlCompilerOptions.Options;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
@@ -310,10 +312,14 @@ public class CqlCommand implements Callable<Integer> {
     private Measure getMeasure(IParser parser) throws FileNotFoundException {
         Measure measure = null;
         if (measureName != null && !measureName.contains("null")) {
-            InputStream is = new FileInputStream(measurePath + measureName + ".json");
-            measure = (Measure) parser.parseResource(is);
-            if (measure == null) {
-                throw new IllegalArgumentException("measureName: %s not found".formatted(measureName));
+            var measurePath = Path.of(this.measurePath, measureName + ".json");
+            try(var is = Files.newInputStream(measurePath)) {
+                measure = (Measure) parser.parseResource(is);
+                if (measure == null) {
+                    throw new IllegalArgumentException("measureName: %s not found".formatted(measureName));
+                }
+            } catch (IOException e) {
+                throw new IllegalArgumentException("measurePath: %s not found".formatted(measurePath));
             }
         }
         return measure;
@@ -455,32 +461,29 @@ public class CqlCommand implements Callable<Integer> {
             return "null";
         }
 
-        StringBuilder result = new StringBuilder();
         if (value instanceof Iterable<?> values) {
-            result.append("[");
-            for (Object o : values) {
-                result.append(tempConvert(o)).append(", ");
-            }
-
-            if (result.length() > 1) {
-                result = new StringBuilder(result.substring(0, result.length() - 2));
-            }
-
-            result.append("]");
-        } else if (value instanceof IBaseResource resource) {
-            result = new StringBuilder(resource.fhirType()
-                    + (resource.getIdElement() != null
-                                    && resource.getIdElement().hasIdPart()
-                            ? "(id=" + resource.getIdElement().getIdPart() + ")"
-                            : ""));
-        } else if (value instanceof IBaseDatatype datatype) {
-            result = new StringBuilder(datatype.fhirType());
-        } else if (value instanceof IBase base) {
-            result = new StringBuilder(base.fhirType());
-        } else {
-            result = new StringBuilder(value.toString());
+            return StreamSupport.stream(values.spliterator(), false)
+                .map(this::tempConvert)
+                .collect(Collectors.joining(", ", "[", "]"));
         }
 
-        return result.toString();
+        if (value instanceof IBaseResource resource) {
+            return resource.fhirType()
+                + (resource.getIdElement() != null
+                && resource.getIdElement().hasIdPart()
+                ? "(id=" + resource.getIdElement().getIdPart() + ")"
+                : "");
+
+        }
+
+        if (value instanceof IBaseDatatype datatype) {
+            return datatype.fhirType();
+        }
+
+        if (value instanceof IBase base) {
+            return base.fhirType();
+        }
+
+        return value.toString();
     }
 }

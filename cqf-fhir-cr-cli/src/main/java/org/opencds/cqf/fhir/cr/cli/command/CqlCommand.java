@@ -18,12 +18,10 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.StringJoiner;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -313,7 +311,7 @@ public class CqlCommand implements Callable<Integer> {
         Measure measure = null;
         if (measureName != null && !measureName.contains("null")) {
             var measurePath = Path.of(this.measurePath, measureName + ".json");
-            try(var is = Files.newInputStream(measurePath)) {
+            try (var is = Files.newInputStream(measurePath)) {
                 measure = (Measure) parser.parseResource(is);
                 if (measure == null) {
                     throw new IllegalArgumentException("measureName: %s not found".formatted(measureName));
@@ -463,17 +461,16 @@ public class CqlCommand implements Callable<Integer> {
 
         if (value instanceof Iterable<?> values) {
             return StreamSupport.stream(values.spliterator(), false)
-                .map(this::tempConvert)
-                .collect(Collectors.joining(", ", "[", "]"));
+                    .map(this::tempConvert)
+                    .collect(Collectors.joining(", ", "[", "]"));
         }
 
         if (value instanceof IBaseResource resource) {
             return resource.fhirType()
-                + (resource.getIdElement() != null
-                && resource.getIdElement().hasIdPart()
-                ? "(id=" + resource.getIdElement().getIdPart() + ")"
-                : "");
-
+                    + (resource.getIdElement() != null
+                                    && resource.getIdElement().hasIdPart()
+                            ? "(id=" + resource.getIdElement().getIdPart() + ")"
+                            : "");
         }
 
         if (value instanceof IBaseDatatype datatype) {

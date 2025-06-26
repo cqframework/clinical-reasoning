@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.cql;
 
 import java.util.EnumSet;
 import java.util.Set;
+import java.util.StringJoiner;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 
 // TODO: Eventually, the cql-engine needs to expose these itself.
@@ -74,5 +75,18 @@ public class CqlEngineOptions {
         CqlEngineOptions result = new CqlEngineOptions();
         result.options.add(CqlEngine.Options.EnableExpressionCaching);
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", CqlEngineOptions.class.getSimpleName() + "[", "]")
+                .add("options=" + options)
+                .add("isDebugLoggingEnabled=" + isDebugLoggingEnabled)
+                .add("shouldExpandValueSets=" + shouldExpandValueSets)
+                .add("pageSize=" + pageSize)
+                .add("maxCodesPerQuery=" + maxCodesPerQuery)
+                .add("queryBatchThreshold=" + queryBatchThreshold)
+                .add("enableHedisCompatibilityMode=" + enableHedisCompatibilityMode)
+                .toString();
     }
 }

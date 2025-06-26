@@ -239,6 +239,23 @@ public record IgConventions(
     }
 
     @Override
+    public boolean equals(Object other) {
+        if (other == null || getClass() != other.getClass()) {
+            return false;
+        }
+        IgConventions that = (IgConventions) other;
+        return typeLayout == that.typeLayout
+                && filenameMode == that.filenameMode
+                && categoryLayout == that.categoryLayout
+                && compartmentLayout == that.compartmentLayout;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(typeLayout, categoryLayout, compartmentLayout, filenameMode);
+    }
+
+    @Override
     @Nonnull
     public String toString() {
         return "IGConventions [typeLayout=%s, categoryLayout=%s compartmentLayout=%s, filenameMode=%s]"

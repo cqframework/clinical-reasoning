@@ -9,7 +9,6 @@ import com.google.common.base.Stopwatch;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import java.io.BufferedWriter;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
@@ -307,17 +306,17 @@ public class CqlCommand implements Callable<Integer> {
     }
 
     @Nullable
-    private Measure getMeasure(IParser parser) throws FileNotFoundException {
+    private Measure getMeasure(IParser parser) {
         Measure measure = null;
         if (measureName != null && !measureName.contains("null")) {
-            var measurePath = Path.of(this.measurePath, measureName + ".json");
-            try (var is = Files.newInputStream(measurePath)) {
+            var measureJsonFilePath = Path.of(this.measurePath, measureName + ".json");
+            try (var is = Files.newInputStream(measureJsonFilePath)) {
                 measure = (Measure) parser.parseResource(is);
                 if (measure == null) {
                     throw new IllegalArgumentException("measureName: %s not found".formatted(measureName));
                 }
             } catch (IOException e) {
-                throw new IllegalArgumentException("measurePath: %s not found".formatted(measurePath));
+                throw new IllegalArgumentException("measurePath: %s not found".formatted(measureJsonFilePath));
             }
         }
         return measure;

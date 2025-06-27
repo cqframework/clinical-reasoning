@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.cr.spring.measure;
 
 import ca.uhn.fhir.repository.IRepository;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorUtils;
 import org.opencds.cqf.fhir.cr.measure.common.SubjectProvider;
 import org.opencds.cqf.fhir.cr.measure.dstu3.Dstu3MeasureProcessor;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureProcessor;
@@ -27,7 +28,8 @@ public class MeasureConfiguration {
             IRepository repository,
             MeasureEvaluationOptions measureEvaluationOptions,
             SubjectProvider subjectProvider,
-            R4MeasureServiceUtils measureServiceUtils) {
-        return new R4MeasureProcessor(repository, measureEvaluationOptions, subjectProvider, measureServiceUtils);
+            R4MeasureServiceUtils measureServiceUtils,
+            MeasureProcessorUtils measureProcessorUtils) {
+        return new R4MeasureProcessor(repository, measureEvaluationOptions, subjectProvider, measureServiceUtils, measureProcessorUtils);
     }
 }

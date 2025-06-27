@@ -175,7 +175,6 @@ public class CqlCommand implements Callable<Integer> {
         }
     }
 
-    @SuppressWarnings("removal")
     private static class Logger implements ILoggingService {
 
         private final org.slf4j.Logger log = LoggerFactory.getLogger(Logger.class);
@@ -279,15 +278,19 @@ public class CqlCommand implements Callable<Integer> {
                 }
 
                 writeJsonToFile(
-                        jsonReport, e.context.contextValue, basePath + this.library.libraryName + "/measurereports");
+                        jsonReport,
+                        e.context.contextValue,
+                        getResultsPath(basePath).resolve("measurereports"));
             }
 
             if (singleFile) {
                 // ✅ Write TXT result
                 writeResultToFile(
-                        cqlResult, e.context.contextValue, basePath + this.library.libraryName + "/txtresults");
+                        cqlResult,
+                        e.context.contextValue,
+                        getResultsPath(basePath).resolve("txtresults"));
             } else {
-                writeResult(cqlResult);
+                writeResultToStdOut(cqlResult);
             }
             var count = counter.incrementAndGet();
 
@@ -303,6 +306,15 @@ public class CqlCommand implements Callable<Integer> {
         log.info("per patient time in {} millis", elapsedTime / evaluations.size());
 
         return 0;
+    }
+
+    @Nonnull
+    private Path getResultsPath(String basePath) {
+        if (basePath == null || basePath.isBlank()) {
+            basePath = System.getProperty("user.dir");
+        }
+
+        return Path.of(basePath, this.library.libraryName);
     }
 
     @Nullable
@@ -393,7 +405,7 @@ public class CqlCommand implements Callable<Integer> {
     }
 
     @SuppressWarnings("java:S106") // We are intending to output to the console here as a CLI tool
-    private void writeResult(EvaluationResult result) {
+    private void writeResultToStdOut(EvaluationResult result) {
         synchronized (System.out) {
             for (Map.Entry<String, ExpressionResult> libraryEntry : result.expressionResults.entrySet()) {
                 System.out.println(libraryEntry.getKey() + "="
@@ -404,8 +416,8 @@ public class CqlCommand implements Callable<Integer> {
         }
     }
 
-    private void writeJsonToFile(String json, String patientId, String path) {
-        Path outputPath = Path.of(path, patientId + ".json");
+    private void writeJsonToFile(String json, String patientId, Path path) {
+        Path outputPath = path.resolve(patientId + ".json");
 
         try {
             // Ensure parent directories exist
@@ -426,8 +438,8 @@ public class CqlCommand implements Callable<Integer> {
         }
     }
 
-    private void writeResultToFile(EvaluationResult result, String patientId, String path) {
-        Path outputPath = Path.of(path, patientId + ".txt");
+    private void writeResultToFile(EvaluationResult result, String patientId, Path path) {
+        Path outputPath = path.resolve(patientId + ".txt");
 
         try {
             // Ensure parent directories exist

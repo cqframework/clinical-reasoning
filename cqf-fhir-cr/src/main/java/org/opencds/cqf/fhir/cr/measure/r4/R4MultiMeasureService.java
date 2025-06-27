@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
+import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Measure;
@@ -22,9 +23,12 @@ import org.hl7.fhir.r4.model.Resource;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorUtils;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.builder.BundleBuilder;
+import org.opencds.cqf.fhir.utility.monad.Either3;
+import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.repository.Repositories;
 
 /**
@@ -33,10 +37,11 @@ import org.opencds.cqf.fhir.utility.repository.Repositories;
  */
 public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(R4MultiMeasureService.class);
-    private IRepository repository;
+    private final IRepository repository;
     private final MeasureEvaluationOptions measureEvaluationOptions;
     private final MeasurePeriodValidator measurePeriodValidator;
-    private String serverBase;
+    private final MeasureProcessorUtils measureProcessorUtils = new MeasureProcessorUtils();
+    private final String serverBase;
 
     private final R4RepositorySubjectProvider subjectProvider;
 
@@ -57,7 +62,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
         subjectProvider = new R4RepositorySubjectProvider(measureEvaluationOptions.getSubjectProviderOptions());
 
         r4Processor = new R4MeasureProcessor(
-                repository, this.measureEvaluationOptions, subjectProvider, r4MeasureServiceUtils);
+                repository, this.measureEvaluationOptions, subjectProvider, r4MeasureServiceUtils, measureProcessorUtils);
 
         r4MeasureServiceUtils = new R4MeasureServiceUtils(repository);
     }
@@ -83,12 +88,13 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
 
         if (dataEndpoint != null && contentEndpoint != null && terminologyEndpoint != null) {
             // if needing to use proxy repository, override constructors
-            repository = Repositories.proxy(repository, true, dataEndpoint, contentEndpoint, terminologyEndpoint);
+            var repositoryToUse = Repositories.proxy(repository, true, dataEndpoint, contentEndpoint, terminologyEndpoint);
 
             r4Processor = new R4MeasureProcessor(
-                    repository, this.measureEvaluationOptions, subjectProvider, r4MeasureServiceUtils);
+                repositoryToUse, this.measureEvaluationOptions, subjectProvider, r4MeasureServiceUtils,
+                measureProcessorUtils);
 
-            r4MeasureServiceUtils = new R4MeasureServiceUtils(repository);
+            r4MeasureServiceUtils = new R4MeasureServiceUtils(repositoryToUse);
         }
         r4MeasureServiceUtils.ensureSupplementalDataElementSearchParameter();
         List<Measure> measures = r4MeasureServiceUtils.getMeasures(measureId, measureIdentifier, measureUrl);
@@ -106,7 +112,8 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
 
         // evaluate Measures
         if (evalType.equals(MeasureEvalType.POPULATION) || evalType.equals(MeasureEvalType.SUBJECTLIST)) {
-            populationMeasureReport(
+//            populationMeasureReport(
+            populationMeasureReportSubjectsDriven(
                     bundle,
                     measures,
                     periodStart,
@@ -151,6 +158,8 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
             String productLine,
             String reporter) {
 
+        System.out.println("subjects = " + subjects);
+
         // one aggregated MeasureReport per Measure
         var totalMeasures = measures.size();
         for (Measure measure : measures) {
@@ -187,6 +196,70 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
         }
     }
 
+    protected void populationMeasureReportSubjectsDriven(
+        Bundle bundle,
+        List<Measure> measures,
+        @Nullable ZonedDateTime periodStart,
+        @Nullable ZonedDateTime periodEnd,
+        String reportType,
+        MeasureEvalType evalType,
+        String subjectParam,
+        List<String> subjects,
+        Parameters parameters,
+        Bundle additionalData,
+        String productLine,
+        String reporter) {
+
+        System.out.println("subjects = " + subjects);
+
+        // We have the list of subjects here, so figure out the measure eval type now
+        var measureEvalType = measureProcessorUtils.getEvalType(evalType, reportType, subjects);
+
+        // one aggregated MeasureReport per Measure
+        var totalMeasures = measures.size();
+        // LUKETODO:  flip the logic here to go over each subject instead
+        for (String subject : subjects) {
+            // LUKETODO: this is gross:  do I really need to do this?
+            final List<Either3<CanonicalType, IdType, Measure>> eithers = measures.stream()
+                .map(measure -> {
+                    Either3<CanonicalType, IdType, Measure> either = Eithers.forRight3(measure);
+                    return either;
+                })
+                .toList();
+            var measureReports = r4Processor.evaluateMeasureSubjectsDriven(
+                eithers, periodStart, periodEnd, subject, additionalData, parameters, measureEvalType);
+
+            // LUKETODO: are we supposed to merge the measure reports among subjects?
+            for (MeasureReport measureReport : measureReports) {
+                // add ProductLine after report is generated
+                measureReport = r4MeasureServiceUtils.addProductLineExtension(measureReport, productLine);
+
+                // add subject reference for non-individual reportTypes
+                measureReport = r4MeasureServiceUtils.addSubjectReference(measureReport, null, subjectParam);
+
+                // add reporter if available
+                if (reporter != null && !reporter.isEmpty()) {
+                    measureReport.setReporter(
+                        r4MeasureServiceUtils.getReporter(reporter).orElse(null));
+                }
+                // add id to measureReport
+                initializeReport(measureReport);
+
+                // add report to bundle
+                bundle.addEntry(getBundleEntry(serverBase, measureReport));
+
+                // progress feedback
+                var measureUrl = measureReport.getMeasure();
+                if (!measureUrl.isEmpty()) {
+                    log.debug(
+                        "Completed evaluation for Measure: {}, Measures remaining to evaluate: {}",
+                        measureUrl,
+                        totalMeasures--);
+                }
+            }
+        }
+    }
+
     protected void subjectMeasureReport(
             Bundle bundle,
             List<Measure> measures,
@@ -207,8 +280,8 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
                 "Evaluating individual MeasureReports for {} patients, and {} measures",
                 subjects.size(),
                 measures.size());
-        for (Measure measure : measures) {
-            for (String subject : subjects) {
+        for (String subject : subjects) {
+            for (Measure measure : measures) {
                 MeasureReport measureReport;
                 // evaluate each measure
                 measureReport = r4Processor.evaluateMeasure(
@@ -240,12 +313,12 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
                 if (!measureUrl.isEmpty()) {
                     log.debug("MeasureReports remaining to evaluate {}", totalReports--);
                 }
-            }
-            if (measure.hasUrl()) {
-                log.info(
+                if (measure.hasUrl()) {
+                    log.info(
                         "Completed evaluation for Measure: {}, Measures remaining to evaluate: {}",
                         measure.getUrl(),
                         totalMeasures--);
+                }
             }
         }
     }

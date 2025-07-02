@@ -5,6 +5,7 @@ import static org.opencds.cqf.fhir.utility.r4.Parameters.part;
 import ca.uhn.fhir.repository.IRepository;
 import jakarta.annotation.Nullable;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -82,7 +83,8 @@ public class R4CollectDataService {
         // LUKETODO:  reuse  this within measureServiceUtils
         var measureDef = new R4MeasureDefBuilder().build(foldedMeasure);
 
-        var evaluationResults =
+        // LUKETODO:  in the old world, we call this for each subject in a loop.  in the new world, we do all 4 at once
+        var evaluationResultsOuter =
             Map.of(foldedMeasure.getId(),
                 processor.evaluateMeasureWithCqlEngine(
                 subjectList,
@@ -95,12 +97,27 @@ public class R4CollectDataService {
 
         if (!subjectList.isEmpty()) {
             for (String patient : subjectList) {
+                // LUKETODO:  in the old world, we call this for each subject in a loop.  in the new world, we do all 4 at once
                 var subjects = Collections.singletonList(patient);
+
+                var mutableList = new ArrayList<>(subjects);
+
+                var evaluationResults =
+                    Map.of(foldedMeasure.getId(),
+                        processor.evaluateMeasureWithCqlEngine(
+                            mutableList,
+                            foldedMeasure,
+                            periodStart,
+                            periodEnd,
+                            parameters,
+                            measureDef,
+                            null));
+
                 // add resources per subject to Parameters
                 addReports(processor, measureId, periodStart, periodEnd, subjects, parameters, evaluationResults);
             }
         } else {
-            addReports(processor, measureId, periodStart, periodEnd, subjectList, parameters, evaluationResults);
+            addReports(processor, measureId, periodStart, periodEnd, subjectList, parameters, evaluationResultsOuter);
         }
         return parameters;
     }

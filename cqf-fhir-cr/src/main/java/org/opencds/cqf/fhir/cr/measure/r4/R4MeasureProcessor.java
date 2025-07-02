@@ -189,8 +189,8 @@ public class R4MeasureProcessor {
 
         // Process Criteria Expression Results
         measureProcessorUtils.processResults(
-            resultsFromNewCqlEngine2,
-//                evaluateMeasureResults.get(measure.getId()),
+//            resultsFromNewCqlEngine2,
+                evaluateMeasureResults.get(measure.getId()),
                 measureDef,
                 evaluationType,
                 this.measureEvaluationOptions.getApplyScoringSetMembership(),
@@ -209,30 +209,36 @@ public class R4MeasureProcessor {
                         subjectIds);
     }
 
+
+    // LUKETODO: multiple measures:
+    // LUKETODO: single subject
     public Map<String, EvaluationResult> evaluateMeasureWithCqlEngine(
-            List<String> subjects,
-            Measure measure,
+            String subject,
+            List<Measure> measures,
             @Nullable ZonedDateTime periodStart,
             @Nullable ZonedDateTime periodEnd,
             Parameters parameters,
             MeasureDef measureDef,
             @Nullable IBaseBundle additionalData) {
 
+        // LUKETODO:  make this a parameter
         var context = Engines.forRepository(
             this.repository, this.measureEvaluationOptions.getEvaluationSettings(), additionalData);
 
         var measurementPeriodParams = buildMeasurementPeriod(periodStart, periodEnd);
         var zonedMeasurementPeriod = MeasureProcessorUtils.getZonedTimeZoneForEval(
             measureProcessorUtils.getDefaultMeasurementPeriod(measurementPeriodParams, context));
-        final VersionedIdentifier libraryVersionIdentifier = getLibraryVersionIdentifier(measure);
+        final List<VersionedIdentifier> libraryVersionIdentifiers = measures.stream().map(
+            this::getLibraryVersionIdentifier).toList();
 
-        var libraryEngine = getLibraryEngine(parameters, libraryVersionIdentifier, context);
+        // LUKETODO: pass in only LibraryEngine logic to the other method
+        List<libraryEngine> libraryEngines = getLibraryEngine(parameters, libraryVersionIdentifier, context);
 
         // set measurement Period from CQL if operation parameters are empty
         measureProcessorUtils.setMeasurementPeriod(measureDef, measurementPeriodParams, context);
 
         // populate results from Library $evaluate
-        return measureProcessorUtils.getEvaluationResults(subjects, measureDef, zonedMeasurementPeriod, context, libraryEngine, libraryVersionIdentifier);
+        return measureProcessorUtils.getEvaluationResults(List.of(subject), measureDef, zonedMeasurementPeriod, context, libraryEngine, libraryVersionIdentifier);
     }
 
     private String cqlEngineToString(CqlEngine cqlEngine) {

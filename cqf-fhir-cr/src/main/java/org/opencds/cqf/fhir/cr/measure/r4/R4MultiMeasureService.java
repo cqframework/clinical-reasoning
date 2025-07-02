@@ -226,6 +226,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
                 subjects.size(),
                 measures.size());
 
+        // measureId -> Map<String, EvaluationResult>
         var evaluateMeasureResultsByMeasureId = new HashMap<String, Map<String, EvaluationResult>>();
 
         for (Measure measure : measures) {
@@ -238,8 +239,8 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
             evaluateMeasureResultsByMeasureId.put(measure.getId(), evaluationResults);
         }
 
-        for (Measure measure : measures) {
-            for (String subject : subjects) {
+        for (String subject : subjects) {
+            for (Measure measure : measures) {
                 MeasureReport measureReport;
                 // evaluate each measure
                 measureReport = r4Processor.evaluateMeasure(

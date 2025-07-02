@@ -347,37 +347,44 @@ public class MeasureProcessorUtils {
      * @param id library Version identifier used by library engine
      * @return CQL results for Library defined in the Measure resource
      */
-    public Map<String, EvaluationResult> getEvaluationResults(
+    public Map<String,Map<String, EvaluationResult>> getEvaluationResults(
             List<String> subjectIds,
+            // LUKETODO: pass down the measure ID
             MeasureDef measureDef,
             ZonedDateTime zonedMeasurementPeriod,
             CqlEngine context,
-            LibraryEngine libraryEngine,
-            VersionedIdentifier id) {
+            List<Pair<VersionedIdentifier,LibraryEngine>> idsToLib) {
 
-        Map<String, EvaluationResult> result = new HashMap<>();
+        // measure -> subject -> results
+        Map<String,Map<String, EvaluationResult>> result = new HashMap<>();
 
         // Library $evaluate each subject
         for (String subjectId : subjectIds) {
             if (subjectId == null) {
                 throw new NullPointerException("SubjectId is required in order to calculate.");
             }
-            Pair<String, String> subjectInfo = this.getSubjectTypeAndId(subjectId);
-            String subjectTypePart = subjectInfo.getLeft();
-            String subjectIdPart = subjectInfo.getRight();
-            context.getState().setContextValue(subjectTypePart, subjectIdPart);
-            try {
-                result.put(
+            for (Pair<VersionedIdentifier, LibraryEngine> pair : idsToLib) {
+                var innerMap = new HashMap<String, EvaluationResult>();
+                Pair<String, String> subjectInfo = this.getSubjectTypeAndId(subjectId);
+                String subjectTypePart = subjectInfo.getLeft();
+                String subjectIdPart = subjectInfo.getRight();
+                context.getState().setContextValue(subjectTypePart, subjectIdPart);
+                try {
+                    innerMap.put(
                         subjectId,
-                        libraryEngine.getEvaluationResult(
-                                id, subjectId, null, null, null, null, null, zonedMeasurementPeriod, context));
-            } catch (Exception e) {
-                // Catch Exceptions from evaluation per subject, but allow rest of subjects to be processed (if
-                // applicable)
-                var error = "Exception for subjectId: %s, Message: %s".formatted(subjectId, e.getMessage());
-                // Capture error for MeasureReportBuilder
-                measureDef.addError(error);
-                logger.error(error, e);
+                        pair.getRight().getEvaluationResult(
+                            pair.getLeft(), subjectId, null, null, null, null, null, zonedMeasurementPeriod, context));
+                } catch (Exception e) {
+                    // Catch Exceptions from evaluation per subject, but allow rest of subjects to be processed (if
+                    // applicable)
+                    var error = "Exception for subjectId: %s, Message: %s".formatted(subjectId, e.getMessage());
+                    // LUKETODO: figure out another way to capture errors
+                    // Capture error for MeasureReportBuilder
+                    measureDef.addError(error);
+                    logger.error(error, e);
+                }
+                // LUKETODO: consider url insetead
+                result.put(measureDef.id(), innerMap);
             }
         }
 

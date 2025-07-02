@@ -36,6 +36,7 @@ import javax.annotation.Nonnull;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ContactDetail;
@@ -52,7 +53,10 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureEvalType;
+import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.Ids;
+import org.opencds.cqf.fhir.utility.monad.Either3;
+import org.opencds.cqf.fhir.utility.search.Searches;
 
 public class R4MeasureServiceUtils {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(R4MeasureServiceUtils.class);
@@ -338,5 +342,24 @@ public class R4MeasureServiceUtils {
 
     public boolean isSubjectListEffectivelyEmpty(List<String> subjectIds) {
         return subjectIds == null || subjectIds.isEmpty() || subjectIds.get(0) == null;
+    }
+
+    // LUKETODO:  code reuse?
+    public Measure foldMeasure(Either3<CanonicalType, IdType, Measure> measure, IRepository repository) {
+        return measure.fold(
+            measureCanonicalType -> resolveByUrl(measureCanonicalType, repository),
+            measureIdType -> resolveById(measureIdType, repository),
+            Function.identity());
+    }
+
+    private Measure resolveByUrl(CanonicalType url, IRepository repository) {
+        var parts = Canonicals.getParts(url);
+        var result = repository.search(
+            Bundle.class, Measure.class, Searches.byNameAndVersion(parts.idPart(), parts.version()));
+        return (Measure) result.getEntryFirstRep().getResource();
+    }
+
+    private Measure resolveById(IdType id, IRepository repository) {
+        return repository.read(Measure.class, id);
     }
 }

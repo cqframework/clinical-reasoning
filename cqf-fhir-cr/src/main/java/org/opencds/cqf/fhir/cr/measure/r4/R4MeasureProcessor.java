@@ -6,7 +6,6 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -78,65 +77,12 @@ public class R4MeasureProcessor {
             String reportType,
             List<String> subjectIds,
             IBaseBundle additionalData,
-            Parameters parameters) {
-
-        var evalType = r4MeasureServiceUtils.getMeasureEvalType(reportType, subjectIds);
-
-        var actualRepo = this.repository;
-        if (additionalData != null) {
-            actualRepo = new FederatedRepository(
-                    this.repository, new InMemoryFhirRepository(this.repository.fhirContext(), additionalData));
-        }
-        var subjects = subjectProvider.getSubjects(actualRepo, subjectIds).collect(Collectors.toList());
-
-        return this.evaluateMeasure(
-                measure, periodStart, periodEnd, reportType, subjects, additionalData, parameters, evalType);
-    }
-
-    public MeasureReport evaluateMeasure(
-            Either3<CanonicalType, IdType, Measure> measure,
-            @Nullable ZonedDateTime periodStart,
-            @Nullable ZonedDateTime periodEnd,
-            String reportType,
-            List<String> subjectIds,
-            IBaseBundle additionalData,
             Parameters parameters,
-            MeasureEvalType evalType) {
+            MeasureEvalType evalType,
+            Map<String, Map<String, EvaluationResult>> evaluateMeasureResults) {
         var m = measure.fold(this::resolveByUrl, this::resolveById, Function.identity());
         return this.evaluateMeasure(
-                m, periodStart, periodEnd, reportType, subjectIds, additionalData, parameters, evalType);
-    }
-
-    public List<MeasureReport> evaluateMeasureSubjectsDriven(
-            List<Either3<CanonicalType, IdType, Measure>> measures,
-            @Nullable ZonedDateTime periodStart,
-            @Nullable ZonedDateTime periodEnd,
-            String subjectId,
-            IBaseBundle additionalData,
-            Parameters parameters,
-            MeasureEvalType measureEvalType) {
-
-        var foldedMeasures = measures.stream().map(measure -> measure.fold(this::resolveByUrl, this::resolveById, Function.identity()))
-            .toList();
-
-        foldedMeasures.forEach(this::checkMeasureLibrary);
-
-        // Measurement Period: operation parameter defined measurement period
-        var measurementPeriodParams = buildMeasurementPeriod(periodStart, periodEnd);
-
-        // CQL Engine context
-        var context = Engines.forRepository(
-            this.repository, this.measureEvaluationOptions.getEvaluationSettings(), additionalData);
-
-        // extract measurement Period from CQL to pass to report Builder
-        Interval measurementPeriod =
-            measureProcessorUtils.getDefaultMeasurementPeriod(measurementPeriodParams, context);
-
-        // set offset of operation parameter measurement period
-        ZonedDateTime zonedMeasurementPeriod = MeasureProcessorUtils.getZonedTimeZoneForEval(measurementPeriod);
-
-        return this.evaluateMeasureSubjectsDriven(
-            foldedMeasures, zonedMeasurementPeriod, measurementPeriod , subjectId, context, parameters, measureEvalType);
+                m, periodStart, periodEnd, reportType, subjectIds, additionalData, parameters, evalType, evaluateMeasureResults);
     }
 
     // LUKETODO:  this is no doubt used by CQL-CLI
@@ -189,58 +135,6 @@ public class R4MeasureProcessor {
                         subjectIds);
     }
 
-    protected List<MeasureReport> evaluateMeasureSubjectsDriven(
-            List<Measure> measures,
-            ZonedDateTime zonedMeasurementPeriod,
-            Interval measurementPeriod,
-            String subjectId,
-            CqlEngine context,
-            Parameters parameters,
-            MeasureEvalType measureEvalType) {
-
-        var measureReports = new ArrayList<MeasureReport>();
-
-        for (Measure measure : measures) {
-
-            // setup MeasureDef
-            var measureDef = new R4MeasureDefBuilder().build(measure);
-
-            var libraryVersionIdentifier = getLibraryVersionIdentifier(measure);
-            // library engine setup
-            var libraryEngine = getLibraryEngine(parameters, libraryVersionIdentifier, context);
-
-            // populate results from Library $evaluate
-            var results = measureProcessorUtils.getEvaluationResults(
-                List.of(subjectId), measureDef, zonedMeasurementPeriod, context, libraryEngine, libraryVersionIdentifier);
-
-            // Process Criteria Expression Results
-            measureProcessorUtils.processResults(
-                results,
-                measureDef,
-                measureEvalType,
-                this.measureEvaluationOptions.getApplyScoringSetMembership(),
-                new R4PopulationBasisValidator());
-
-            // Populate populationDefs that require MeasureDef results
-            measureProcessorUtils.continuousVariableObservation(measureDef, context);
-
-            // LUKETODO:  how do we combine with multiple measures?
-            // LUKETODO:  do we just return a List of MeasureReports here?
-            // Build Measure Report with Results
-            var measureReport = new R4MeasureReportBuilder()
-                .build(
-                    measure,
-                    measureDef,
-                    r4EvalTypeToReportType(measureEvalType, measure),
-                    measurementPeriod,
-                    List.of(subjectId));
-            measureReports.add(measureReport);
-        }
-
-
-        return measureReports;
-    }
-
     /**
      * Evaluation method that generates CQL results, Processes results, builds Measure Report
      * @param measure Measure resource
@@ -261,10 +155,12 @@ public class R4MeasureProcessor {
             List<String> subjectIds,
             IBaseBundle additionalData,
             Parameters parameters,
-            MeasureEvalType evalType) {
+            MeasureEvalType evalType,
+            Map<String, Map<String, EvaluationResult>> evaluateMeasureResults) {
 
         // LUKETODO: group the pre-measure engine setup tasks before the measure-specific tasks
 
+        // LUKETODO:  push this up
         checkMeasureLibrary(measure);
 
         MeasureEvalType evaluationType = measureProcessorUtils.getEvalType(evalType, reportType, subjectIds);
@@ -282,20 +178,19 @@ public class R4MeasureProcessor {
         // library engine setup
         var libraryEngine = getLibraryEngine(parameters, libraryVersionIdentifier, context);
 
-        // set measurement Period from CQL if operation parameters are empty
         measureProcessorUtils.setMeasurementPeriod(measureDef, measurementPeriodParams, context);
         // extract measurement Period from CQL to pass to report Builder
         Interval measurementPeriod =
                 measureProcessorUtils.getDefaultMeasurementPeriod(measurementPeriodParams, context);
-        // set offset of operation parameter measurement period
-        ZonedDateTime zonedMeasurementPeriod = MeasureProcessorUtils.getZonedTimeZoneForEval(measurementPeriod);
+        System.out.println("EVALUATE MEASURE LATE!");
         // populate results from Library $evaluate
-        var results = measureProcessorUtils.getEvaluationResults(
-                subjectIds, measureDef, zonedMeasurementPeriod, context, libraryEngine, libraryVersionIdentifier);
+        Map<String, EvaluationResult> resultsFromNewCqlEngine2 =
+            evaluateMeasureWithCqlEngine(subjectIds, measure, periodStart, periodEnd, parameters, measureDef, additionalData);
 
         // Process Criteria Expression Results
         measureProcessorUtils.processResults(
-                results,
+            resultsFromNewCqlEngine2,
+//                evaluateMeasureResults.get(measure.getId()),
                 measureDef,
                 evaluationType,
                 this.measureEvaluationOptions.getApplyScoringSetMembership(),
@@ -313,6 +208,55 @@ public class R4MeasureProcessor {
                         measurementPeriod,
                         subjectIds);
     }
+
+    public Map<String, EvaluationResult> evaluateMeasureWithCqlEngine(
+            List<String> subjects,
+            Measure measure,
+            @Nullable ZonedDateTime periodStart,
+            @Nullable ZonedDateTime periodEnd,
+            Parameters parameters,
+            MeasureDef measureDef,
+            @Nullable IBaseBundle additionalData) {
+
+        var context = Engines.forRepository(
+            this.repository, this.measureEvaluationOptions.getEvaluationSettings(), additionalData);
+
+        var measurementPeriodParams = buildMeasurementPeriod(periodStart, periodEnd);
+        var zonedMeasurementPeriod = MeasureProcessorUtils.getZonedTimeZoneForEval(
+            measureProcessorUtils.getDefaultMeasurementPeriod(measurementPeriodParams, context));
+        final VersionedIdentifier libraryVersionIdentifier = getLibraryVersionIdentifier(measure);
+
+        var libraryEngine = getLibraryEngine(parameters, libraryVersionIdentifier, context);
+
+        // set measurement Period from CQL if operation parameters are empty
+        measureProcessorUtils.setMeasurementPeriod(measureDef, measurementPeriodParams, context);
+
+        // populate results from Library $evaluate
+        return measureProcessorUtils.getEvaluationResults(subjects, measureDef, zonedMeasurementPeriod, context, libraryEngine, libraryVersionIdentifier);
+    }
+
+    private String cqlEngineToString(CqlEngine cqlEngine) {
+        return "CqlEngine{environment=%s, state=%s}"
+            .formatted(cqlEngine.getEnvironment(), cqlEngine.getState());
+    }
+
+    private String measureDefToString(MeasureDef measureDef) {
+        return "MeasureDef{id='%s', url='%s', version='%s', defaultMeasurementPeriod=%s, groups=%s, sdes=%s, errors=%s}"
+            .formatted(
+                measureDef.id(),
+                measureDef.url(),
+                measureDef.version(),
+                measureDef.getDefaultMeasurementPeriod(),
+                measureDef.groups().stream().map(Object::hashCode).toList(),
+                measureDef.sdes(),
+                measureDef.errors());
+    }
+
+//    private String groupDefToString(GroupDef groupDef) {
+//        return "GroupDef{id='%s', measureScoring=%s, populations=%s, stratifiers=%s, measurePopulationType=%s}"
+//            .formatted(groupDef.id(), groupDef.measureScoring(), groupDef.populations(), groupDef.stratifiers(),
+//                groupDef.get
+//    }
 
     /**  Temporary check for Measures that are being blocked from use by evaluateResults method
      *

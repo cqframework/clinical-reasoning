@@ -4,6 +4,10 @@ import ca.uhn.fhir.repository.IRepository;
 import jakarta.annotation.Nullable;
 import java.time.ZonedDateTime;
 import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CanonicalType;
@@ -17,6 +21,8 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorUtils;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.monad.Either3;
+import org.opencds.cqf.fhir.utility.repository.FederatedRepository;
+import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.repository.Repositories;
 
 public class R4MeasureService implements R4MeasureEvaluatorSingle {
@@ -65,6 +71,13 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
         R4MeasureServiceUtils r4MeasureServiceUtils = new R4MeasureServiceUtils(repository);
         r4MeasureServiceUtils.ensureSupplementalDataElementSearchParameter();
 
+        var foldedMeasure = measureServiceUtils.foldMeasure(measure, repo);
+
+        processor.checkMeasureLibrary(foldedMeasure);
+
+        // LUKETODO:  reuse  this within measureServiceUtils
+        var measureDef = new R4MeasureDefBuilder().build(foldedMeasure);
+
         MeasureReport measureReport;
 
         if (StringUtils.isNotBlank(practitioner)) {
@@ -74,14 +87,44 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
             subjectId = practitioner;
         }
 
+        var actualRepo = repo;
+        if (additionalData != null) {
+            actualRepo = new FederatedRepository(
+                this.repository, new InMemoryFhirRepository(this.repository.fhirContext(), additionalData));
+        }
+
+        var evalType =
+            r4MeasureServiceUtils.getMeasureEvalType(
+                reportType,
+                Optional.ofNullable(subjectId).map(List::of).orElse(List.of()));
+
+        var subjects = subjectProvider.getSubjects(
+            actualRepo,
+            Optional.ofNullable(subjectId)
+                .map(List::of)
+                .orElse(List.of()))
+            .toList();
+
+        var evaluationResults =
+            processor.evaluateMeasureWithCqlEngine(
+                subjects,
+                foldedMeasure,
+                periodStart,
+                periodEnd,
+                parameters,
+                measureDef,
+                additionalData);
+
         measureReport = processor.evaluateMeasure(
                 measure,
                 periodStart,
                 periodEnd,
                 reportType,
-                Collections.singletonList(subjectId),
+                subjects,
                 additionalData,
-                parameters);
+                parameters,
+                evalType,
+                Map.of(foldedMeasure.getId(), evaluationResults));
 
         // add ProductLine after report is generated
         measureReport = r4MeasureServiceUtils.addProductLineExtension(measureReport, productLine);

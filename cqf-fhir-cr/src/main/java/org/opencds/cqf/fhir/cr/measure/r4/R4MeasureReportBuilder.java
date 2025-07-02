@@ -16,11 +16,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.StringJoiner;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -209,6 +211,72 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                     .setDiagnostics(errorMsg);
             return op;
         }
+    }
+
+    // LUKETODO: rename
+    public static class MeasureReportBuilderMeasureDetails {
+        private final Measure measure;
+        private final MeasureDef measureDef;
+        private final MeasureReportType measureReportType;
+        private final Interval measurementPeriod;
+
+        public MeasureReportBuilderMeasureDetails(Measure measure, MeasureDef measureDef,
+            MeasureReportType measureReportType, Interval measurementPeriod) {
+            this.measure = measure;
+            this.measureDef = measureDef;
+            this.measureReportType = measureReportType;
+            this.measurementPeriod = measurementPeriod;
+        }
+
+        public Measure getMeasure() {
+            return measure;
+        }
+
+        public MeasureDef getMeasureDef() {
+            return measureDef;
+        }
+
+        public MeasureReportType getMeasureReportType() {
+            return measureReportType;
+        }
+
+        public Interval getMeasurementPeriod() {
+            return measurementPeriod;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            MeasureReportBuilderMeasureDetails that = (MeasureReportBuilderMeasureDetails) o;
+            return Objects.equals(measure, that.measure) && Objects.equals(measureDef,
+                that.measureDef) && measureReportType == that.measureReportType && Objects.equals(
+                measurementPeriod, that.measurementPeriod);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(measure, measureDef, measureReportType, measurementPeriod);
+        }
+
+        @Override
+        public String toString() {
+            return new StringJoiner(", ", MeasureReportBuilderMeasureDetails.class.getSimpleName() + "[", "]")
+                .add("measure=" + measure)
+                .add("measureDef=" + measureDef)
+                .add("measureReportType=" + measureReportType)
+                .add("measurementPeriod=" + measurementPeriod)
+                .toString();
+        }
+    }
+
+    public MeasureReport build2(MeasureReportBuilderMeasureDetails measureDetails) {
+        final MeasureReport measureReport = createMeasureReport(measureDetails.getMeasure(),
+            measureDetails.getMeasureDef(), measureDetails.getMeasureReportType(), List.of(),
+            measureDetails.getMeasurementPeriod());
+
+        return measureReport;
     }
 
     @Override
@@ -674,9 +742,13 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             PopulationDef populationDef,
             GroupDef groupDef) {
 
+        System.out.printf("1234: boolean basis = %s populationDef subjects: %s, populationDef resources: %s\n", groupDef.isBooleanBasis(), populationDef.getSubjects(), populationDef.getResources().stream().filter(
+            IBaseResource.class::isInstance).map(IBaseResource.class::cast).map(IBaseResource::getIdElement).toList());
+
         reportPopulation.setCode(measurePopulation.getCode());
         reportPopulation.setId(measurePopulation.getId());
 
+        // LUKETODO:  here, we are returning an initial-population of 0 instead of 1 because this is a boolean basis and the population def subjects is empty
         if (groupDef.isBooleanBasis()) {
             reportPopulation.setCount(populationDef.getSubjects().size());
         } else {

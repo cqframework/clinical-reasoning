@@ -14,7 +14,6 @@ import org.opencds.cqf.fhir.cr.measure.r4.MultiMeasure.Given;
 class MultiMeasureServiceTest {
     private static final Given GIVEN_REPO = MultiMeasure.given().repositoryFor("MinimalMeasureEvaluation");
 
-    // LUKETODO:  this test fails because we expect 2 measure reports but we got 20
     @Test
     void MultiMeasure_AllSubjects_MeasureIdentifier() {
         var when = GIVEN_REPO
@@ -29,7 +28,6 @@ class MultiMeasureServiceTest {
         when.then().hasMeasureReportCount(2).report();
     }
 
-    // LUKETODO:  this test fails because we expect 7 measure reports but we got 70
     @Test
     void MultiMeasure_EightMeasures_AllSubjects_MeasureId() {
         var when = GIVEN_REPO
@@ -168,7 +166,6 @@ class MultiMeasureServiceTest {
                 .up();
     }
 
-    // LUKETODO:  this test fails because we expect 7 measure reports but we got 70
     @Test
     void MultiMeasure_EightMeasures_AllSubjects_MeasureUrl() {
         var when = GIVEN_REPO
@@ -588,7 +585,6 @@ class MultiMeasureServiceTest {
                 .up();
     }
 
-    // LUKETODO:  expected count for initial-population is 1, but we got 0
     @Test
     void MultiMeasure_EightMeasures_SubjectList() {
         var when = GIVEN_REPO
@@ -756,7 +752,6 @@ class MultiMeasureServiceTest {
                 .up();
     }
 
-    // LUKETODO: expected count for population "initial-population" did not match  expected: 1, actual: 0
     @Test
     void MultiMeasure_EightMeasures_Practitioner() {
         var when = GIVEN_REPO

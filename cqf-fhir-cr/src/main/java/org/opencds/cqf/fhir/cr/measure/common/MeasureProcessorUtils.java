@@ -282,18 +282,18 @@ public class MeasureProcessorUtils {
 
         if (sourceType.equals("DateTime") && targetType.equals("Date")) {
             logger.debug(
-                "A DateTime interval was provided and a Date interval was expected. The DateTime will be truncated.");
+                    "A DateTime interval was provided and a Date interval was expected. The DateTime will be truncated.");
             return new Interval(
-                truncateDateTime((DateTime) interval.getLow()),
-                interval.getLowClosed(),
-                truncateDateTime((DateTime) interval.getHigh()),
-                interval.getHighClosed());
+                    truncateDateTime((DateTime) interval.getLow()),
+                    interval.getLowClosed(),
+                    truncateDateTime((DateTime) interval.getHigh()),
+                    interval.getHighClosed());
         }
 
         // LUKETODO:  is there some other context we can pass in here?
         throw new InvalidRequestException(
-            "The interval type of %s did not match the expected type of %s and no conversion was possible"
-                .formatted(sourceType, targetType));
+                "The interval type of %s did not match the expected type of %s and no conversion was possible"
+                        .formatted(sourceType, targetType));
     }
 
     public Date truncateDateTime(DateTime dateTime) {
@@ -397,17 +397,27 @@ public class MeasureProcessorUtils {
                 context.getState().setContextValue(subjectTypePart, subjectIdPart);
                 try {
                     resultsBuilder.addResult(
-                        measureLibraryIdEngine.measureId(),
-                        subjectId,
-                        measureLibraryIdEngine.engine().getEvaluationResult(
-                            measureLibraryIdEngine.libraryId(), subjectId, null, null, null, null, null, zonedMeasurementPeriod, context));
+                            measureLibraryIdEngine.measureId(),
+                            subjectId,
+                            measureLibraryIdEngine
+                                    .engine()
+                                    .getEvaluationResult(
+                                            measureLibraryIdEngine.libraryId(),
+                                            subjectId,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            zonedMeasurementPeriod,
+                                            context));
                 } catch (Exception e) {
                     // Catch Exceptions from evaluation per subject, but allow rest of subjects to be processed (if
                     // applicable)
                     var error = "Exception for subjectId: %s, Message: %s".formatted(subjectId, e.getMessage());
                     // LUKETODO: figure out another way to capture errors
                     // Capture error for MeasureReportBuilder
-//                    measureDef.addError(error);
+                    //                    measureDef.addError(error);
                     logger.error(error, e);
                 }
             }
@@ -418,12 +428,12 @@ public class MeasureProcessorUtils {
 
     // LUKETODO:  get rid of this when all is said and done
     public Map<String, EvaluationResult> getEvaluationResultsOld(
-        List<String> subjectIds,
-        MeasureDef measureDef,
-        ZonedDateTime zonedMeasurementPeriod,
-        CqlEngine context,
-        LibraryEngine libraryEngine,
-        VersionedIdentifier id) {
+            List<String> subjectIds,
+            MeasureDef measureDef,
+            ZonedDateTime zonedMeasurementPeriod,
+            CqlEngine context,
+            LibraryEngine libraryEngine,
+            VersionedIdentifier id) {
 
         Map<String, EvaluationResult> result = new HashMap<>();
 
@@ -438,9 +448,9 @@ public class MeasureProcessorUtils {
             context.getState().setContextValue(subjectTypePart, subjectIdPart);
             try {
                 result.put(
-                    subjectId,
-                    libraryEngine.getEvaluationResult(
-                        id, subjectId, null, null, null, null, null, zonedMeasurementPeriod, context));
+                        subjectId,
+                        libraryEngine.getEvaluationResult(
+                                id, subjectId, null, null, null, null, null, zonedMeasurementPeriod, context));
             } catch (Exception e) {
                 // Catch Exceptions from evaluation per subject, but allow rest of subjects to be processed (if
                 // applicable)

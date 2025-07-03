@@ -82,7 +82,15 @@ public class R4MeasureProcessor {
             CompositeEvaluationResultsPerMeasure compositeEvaluationResultsPerMeasure) {
         var m = measure.fold(this::resolveByUrl, this::resolveById, Function.identity());
         return this.evaluateMeasure(
-                m, periodStart, periodEnd, reportType, subjectIds, additionalData, parameters, evalType, compositeEvaluationResultsPerMeasure);
+                m,
+                periodStart,
+                periodEnd,
+                reportType,
+                subjectIds,
+                additionalData,
+                parameters,
+                evalType,
+                compositeEvaluationResultsPerMeasure);
     }
 
     // LUKETODO:  this is no doubt used by CQL-CLI
@@ -184,17 +192,17 @@ public class R4MeasureProcessor {
                 measureProcessorUtils.getDefaultMeasurementPeriod(measurementPeriodParams, context);
         System.out.println("EVALUATE MEASURE LATE!");
         // populate results from Library $evaluate
-        Map<String, EvaluationResult> resultsFromNewCqlEngine2 =
-            evaluateMeasureWithCqlEngineOld(subjectIds, measure, periodStart, periodEnd, parameters, measureDef, additionalData);
+        Map<String, EvaluationResult> resultsFromNewCqlEngine2 = evaluateMeasureWithCqlEngineOld(
+                subjectIds, measure, periodStart, periodEnd, parameters, measureDef, additionalData);
 
         // Process Criteria Expression Results
         final IIdType measureId = measure.getIdElement().toUnqualifiedVersionless();
         final Map<String, EvaluationResult> resultForThisMeasure =
-            compositeEvaluationResultsPerMeasure.getResultForMeasure(measureId);
+                compositeEvaluationResultsPerMeasure.getResultForMeasure(measureId);
 
         measureProcessorUtils.processResults(
-//            resultsFromNewCqlEngine2,
-            resultForThisMeasure,
+                //            resultsFromNewCqlEngine2,
+                resultForThisMeasure,
                 measureDef,
                 evaluationType,
                 this.measureEvaluationOptions.getApplyScoringSetMembership(),
@@ -214,20 +222,20 @@ public class R4MeasureProcessor {
     }
 
     public Map<String, EvaluationResult> evaluateMeasureWithCqlEngineOld(
-        List<String> subjects,
-        Measure measure,
-        @Nullable ZonedDateTime periodStart,
-        @Nullable ZonedDateTime periodEnd,
-        Parameters parameters,
-        MeasureDef measureDef,
-        @Nullable IBaseBundle additionalData) {
+            List<String> subjects,
+            Measure measure,
+            @Nullable ZonedDateTime periodStart,
+            @Nullable ZonedDateTime periodEnd,
+            Parameters parameters,
+            MeasureDef measureDef,
+            @Nullable IBaseBundle additionalData) {
 
         var context = Engines.forRepository(
-            this.repository, this.measureEvaluationOptions.getEvaluationSettings(), additionalData);
+                this.repository, this.measureEvaluationOptions.getEvaluationSettings(), additionalData);
 
         var measurementPeriodParams = buildMeasurementPeriod(periodStart, periodEnd);
         var zonedMeasurementPeriod = MeasureProcessorUtils.getZonedTimeZoneForEval(
-            measureProcessorUtils.getDefaultMeasurementPeriod(measurementPeriodParams, context));
+                measureProcessorUtils.getDefaultMeasurementPeriod(measurementPeriodParams, context));
 
         final VersionedIdentifier libraryVersionIdentifier = getLibraryVersionIdentifier(measure);
 
@@ -237,12 +245,13 @@ public class R4MeasureProcessor {
         measureProcessorUtils.setMeasurementPeriod(measurementPeriodParams, context);
 
         // populate results from Library $evaluate
-        return measureProcessorUtils.getEvaluationResultsOld(subjects, measureDef, zonedMeasurementPeriod, context, libraryEngine, libraryVersionIdentifier);
+        return measureProcessorUtils.getEvaluationResultsOld(
+                subjects, measureDef, zonedMeasurementPeriod, context, libraryEngine, libraryVersionIdentifier);
     }
 
     // LUKETODO:  consider a single measure variant
     public CompositeEvaluationResultsPerMeasure evaluateMeasureWithCqlEngineNew(
-            List<String> subjects,  // LUKETODO:  I have a doubt about whether this should be a single subject or a list
+            List<String> subjects, // LUKETODO:  I have a doubt about whether this should be a single subject or a list
             List<Measure> measures,
             @Nullable ZonedDateTime periodStart,
             @Nullable ZonedDateTime periodEnd,
@@ -251,37 +260,42 @@ public class R4MeasureProcessor {
 
         // LUKETODO:  make this a parameter
         var context = Engines.forRepository(
-            this.repository, this.measureEvaluationOptions.getEvaluationSettings(), additionalData);
+                this.repository, this.measureEvaluationOptions.getEvaluationSettings(), additionalData);
 
         var measurementPeriodParams = buildMeasurementPeriod(periodStart, periodEnd);
         var zonedMeasurementPeriod = MeasureProcessorUtils.getZonedTimeZoneForEval(
-            measureProcessorUtils.getDefaultMeasurementPeriod(measurementPeriodParams, context));
+                measureProcessorUtils.getDefaultMeasurementPeriod(measurementPeriodParams, context));
 
-        final List<MeasureLibraryIdEngineDetails> measureLibraryIdEngineDetailsList =
-            measures.stream()
-                .map( measure -> buildLibraryIdEngineDetails(measure, parameters, context))
+        final List<MeasureLibraryIdEngineDetails> measureLibraryIdEngineDetailsList = measures.stream()
+                .map(measure -> buildLibraryIdEngineDetails(measure, parameters, context))
                 .toList();
 
         // set measurement Period from CQL if operation parameters are empty
         measureProcessorUtils.setMeasurementPeriod(measurementPeriodParams, context);
 
         // populate results from Library $evaluate
-        return measureProcessorUtils.getEvaluationResults(subjects, zonedMeasurementPeriod, context, measureLibraryIdEngineDetailsList);
+        return measureProcessorUtils.getEvaluationResults(
+                subjects, zonedMeasurementPeriod, context, measureLibraryIdEngineDetailsList);
     }
 
     // Ideally this would be done in MeasureProcessorUtils, but it's too much work to change for now
-    private MeasureLibraryIdEngineDetails buildLibraryIdEngineDetails(Measure measure, Parameters parameters, CqlEngine context) {
+    private MeasureLibraryIdEngineDetails buildLibraryIdEngineDetails(
+            Measure measure, Parameters parameters, CqlEngine context) {
         var libraryVersionIdentifier = getLibraryVersionIdentifier(measure);
-        return new MeasureLibraryIdEngineDetails(measure.getIdElement(), libraryVersionIdentifier, getLibraryEngine(parameters, libraryVersionIdentifier, context));
+        return new MeasureLibraryIdEngineDetails(
+                measure.getIdElement(),
+                libraryVersionIdentifier,
+                getLibraryEngine(parameters, libraryVersionIdentifier, context));
     }
 
-    public record MeasureLibraryIdEngineDetails(IIdType measureId, VersionedIdentifier libraryId, LibraryEngine engine) {}
+    public record MeasureLibraryIdEngineDetails(
+            IIdType measureId, VersionedIdentifier libraryId, LibraryEngine engine) {}
 
-//    private String groupDefToString(GroupDef groupDef) {
-//        return "GroupDef{id='%s', measureScoring=%s, populations=%s, stratifiers=%s, measurePopulationType=%s}"
-//            .formatted(groupDef.id(), groupDef.measureScoring(), groupDef.populations(), groupDef.stratifiers(),
-//                groupDef.get
-//    }
+    //    private String groupDefToString(GroupDef groupDef) {
+    //        return "GroupDef{id='%s', measureScoring=%s, populations=%s, stratifiers=%s, measurePopulationType=%s}"
+    //            .formatted(groupDef.id(), groupDef.measureScoring(), groupDef.populations(), groupDef.stratifiers(),
+    //                groupDef.get
+    //    }
 
     /**  Temporary check for Measures that are being blocked from use by evaluateResults method
      *
@@ -429,8 +443,10 @@ public class R4MeasureProcessor {
                         list.add(value);
                     }
                 } else {
-                    // We need a mutable list here, otherwise, retrieving the list above will fail with UnsupportedOperationException
-                    parameterMap.put(param.getName(), new ArrayList<>(Arrays.asList(parameterMap.get(param.getName()), value)));
+                    // We need a mutable list here, otherwise, retrieving the list above will fail with
+                    // UnsupportedOperationException
+                    parameterMap.put(
+                            param.getName(), new ArrayList<>(Arrays.asList(parameterMap.get(param.getName()), value)));
                 }
             } else {
                 parameterMap.put(param.getName(), value);

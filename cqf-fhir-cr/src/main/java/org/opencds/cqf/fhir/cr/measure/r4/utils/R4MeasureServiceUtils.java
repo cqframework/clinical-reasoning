@@ -347,19 +347,19 @@ public class R4MeasureServiceUtils {
     // LUKETODO:  code reuse?
     public Measure foldMeasure(Either3<CanonicalType, IdType, Measure> measure, IRepository repository) {
         return measure.fold(
-            measureCanonicalType -> resolveByUrl(measureCanonicalType, repository),
-            measureIdType -> resolveById(measureIdType, repository),
-            Function.identity());
+                measureCanonicalType -> resolveByUrl(measureCanonicalType, repository),
+                measureIdType -> resolveById(measureIdType, repository),
+                Function.identity());
     }
 
     private Measure resolveByUrl(CanonicalType url, IRepository repository) {
         var parts = Canonicals.getParts(url);
         var result = repository.search(
-            Bundle.class, Measure.class, Searches.byNameAndVersion(parts.idPart(), parts.version()));
+                Bundle.class, Measure.class, Searches.byNameAndVersion(parts.idPart(), parts.version()));
         return (Measure) result.getEntryFirstRep().getResource();
     }
 
-    private Measure resolveById(IdType id, IRepository repository) {
+    public Measure resolveById(IdType id, IRepository repository) {
         return repository.read(Measure.class, id);
     }
 }

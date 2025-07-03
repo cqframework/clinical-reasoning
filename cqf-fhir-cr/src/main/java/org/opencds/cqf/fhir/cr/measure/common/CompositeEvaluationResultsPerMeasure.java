@@ -11,12 +11,9 @@ public class CompositeEvaluationResultsPerMeasure {
     private final Map<IIdType, Map<String, EvaluationResult>> resultsPerMeasure;
 
     private CompositeEvaluationResultsPerMeasure(Builder builder) {
-        this.resultsPerMeasure = builder.resultsPerMeasure.entrySet()
-            .stream()
-            .collect(ImmutableMap.toImmutableMap(
-                Map.Entry::getKey,
-                entry -> ImmutableMap.copyOf(entry.getValue())
-            ));
+        this.resultsPerMeasure = builder.resultsPerMeasure.entrySet().stream()
+                .collect(
+                        ImmutableMap.toImmutableMap(Map.Entry::getKey, entry -> ImmutableMap.copyOf(entry.getValue())));
     }
 
     public static Builder builder() {
@@ -36,7 +33,7 @@ public class CompositeEvaluationResultsPerMeasure {
 
         public void addResult(IIdType measureId, String subjectId, EvaluationResult evaluationResult) {
             var resultPerMeasure =
-                resultsPerMeasure.computeIfAbsent( measureId.toUnqualifiedVersionless(), k -> new HashMap<>());
+                    resultsPerMeasure.computeIfAbsent(measureId.toUnqualifiedVersionless(), k -> new HashMap<>());
 
             resultPerMeasure.put(subjectId, evaluationResult);
         }

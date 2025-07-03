@@ -30,6 +30,7 @@ public class MeasureConfiguration {
             SubjectProvider subjectProvider,
             R4MeasureServiceUtils measureServiceUtils,
             MeasureProcessorUtils measureProcessorUtils) {
-        return new R4MeasureProcessor(repository, measureEvaluationOptions, subjectProvider, measureServiceUtils, measureProcessorUtils);
+        return new R4MeasureProcessor(
+                repository, measureEvaluationOptions, subjectProvider, measureServiceUtils, measureProcessorUtils);
     }
 }

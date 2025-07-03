@@ -70,8 +70,11 @@ public class R4CollectDataService {
 
         Parameters parameters = new Parameters();
         var processor = new R4MeasureProcessor(
-                this.repository, this.measureEvaluationOptions, this.subjectProvider, this.measureServiceUtils,
-            measureProcessorUtils);
+                this.repository,
+                this.measureEvaluationOptions,
+                this.subjectProvider,
+                this.measureServiceUtils,
+                measureProcessorUtils);
 
         // LUKETODO:  subjectList should be null but we get a list of subjects here:
         // getSubjects
@@ -81,32 +84,21 @@ public class R4CollectDataService {
 
         if (!subjectList.isEmpty()) {
             for (String patient : subjectList) {
-                // LUKETODO:  in the old world, we call this for each subject in a loop.  in the new world, we do all 4 at once
+                // LUKETODO:  in the old world, we call this for each subject in a loop.  in the new world, we do all 4
+                // at once
                 var subjects = Collections.singletonList(patient);
 
                 var mutableList = new ArrayList<>(subjects);
 
-                var evaluationResults =
-                        processor.evaluateMeasureWithCqlEngineNew(
-                            mutableList,
-                            List.of(foldedMeasure),
-                            periodStart,
-                            periodEnd,
-                            parameters,
-                            null);
+                var evaluationResults = processor.evaluateMeasureWithCqlEngineNew(
+                        mutableList, List.of(foldedMeasure), periodStart, periodEnd, parameters, null);
 
                 // add resources per subject to Parameters
                 addReports(processor, measureId, periodStart, periodEnd, subjects, parameters, evaluationResults);
             }
         } else {
-            var evaluationResults =
-                processor.evaluateMeasureWithCqlEngineNew(
-                    subjectList,
-                    List.of(foldedMeasure),
-                    periodStart,
-                    periodEnd,
-                    parameters,
-                    null);
+            var evaluationResults = processor.evaluateMeasureWithCqlEngineNew(
+                    subjectList, List.of(foldedMeasure), periodStart, periodEnd, parameters, null);
             addReports(processor, measureId, periodStart, periodEnd, subjectList, parameters, evaluationResults);
         }
         return parameters;

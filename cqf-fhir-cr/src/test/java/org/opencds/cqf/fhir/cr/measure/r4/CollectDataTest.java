@@ -57,18 +57,6 @@ class CollectDataTest {
                 .report();
     }
 
-    // LUKETODO: fix this:
-    /*
-    java.lang.UnsupportedOperationException
-	at java.base/java.util.AbstractList.add(AbstractList.java:155)
-	at java.base/java.util.AbstractList.add(AbstractList.java:113)
-	at org.opencds.cqf.fhir.cr.measure.r4.R4MeasureProcessor.lambda$resolveParameterMap$3(R4MeasureProcessor.java:428)
-	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
-	at org.opencds.cqf.fhir.cr.measure.r4.R4MeasureProcessor.resolveParameterMap(R4MeasureProcessor.java:411)
-	at org.opencds.cqf.fhir.cr.measure.r4.R4MeasureProcessor.setArgParameters(R4MeasureProcessor.java:379)
-	at org.opencds.cqf.fhir.cr.measure.r4.R4MeasureProcessor.getLibraryEngine(R4MeasureProcessor.java:358)
-	at org.opencds.cqf.fhir.cr.measure.r4.R4MeasureProcessor.buildLibraryIdEngineDetails(R4MeasureProcessor.java:274)
-     */
     @Test
     void collectData_resourceBasisMeasure_population() {
         CollectData.Given given = CollectData.given().repositoryFor("DischargedonAntithromboticTherapyFHIR");

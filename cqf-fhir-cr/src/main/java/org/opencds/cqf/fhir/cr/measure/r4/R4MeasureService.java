@@ -62,8 +62,11 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
 
         var repo = Repositories.proxy(repository, true, dataEndpoint, contentEndpoint, terminologyEndpoint);
         var processor = new R4MeasureProcessor(
-                repo, this.measureEvaluationOptions, this.subjectProvider, this.measureServiceUtils,
-            measureProcessorUtils);
+                repo,
+                this.measureEvaluationOptions,
+                this.subjectProvider,
+                this.measureServiceUtils,
+                measureProcessorUtils);
 
         R4MeasureServiceUtils r4MeasureServiceUtils = new R4MeasureServiceUtils(repository);
         r4MeasureServiceUtils.ensureSupplementalDataElementSearchParameter();
@@ -87,29 +90,19 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
         var actualRepo = repo;
         if (additionalData != null) {
             actualRepo = new FederatedRepository(
-                this.repository, new InMemoryFhirRepository(this.repository.fhirContext(), additionalData));
+                    this.repository, new InMemoryFhirRepository(this.repository.fhirContext(), additionalData));
         }
 
-        var evalType =
-            r4MeasureServiceUtils.getMeasureEvalType(
-                reportType,
-                Optional.ofNullable(subjectId).map(List::of).orElse(List.of()));
+        var evalType = r4MeasureServiceUtils.getMeasureEvalType(
+                reportType, Optional.ofNullable(subjectId).map(List::of).orElse(List.of()));
 
-        var subjects = subjectProvider.getSubjects(
-            actualRepo,
-            Optional.ofNullable(subjectId)
-                .map(List::of)
-                .orElse(List.of()))
-            .toList();
+        var subjects = subjectProvider
+                .getSubjects(
+                        actualRepo, Optional.ofNullable(subjectId).map(List::of).orElse(List.of()))
+                .toList();
 
-        var evaluationResults =
-            processor.evaluateMeasureWithCqlEngineNew(
-                subjects,
-                List.of(foldedMeasure),
-                periodStart,
-                periodEnd,
-                parameters,
-                additionalData);
+        var evaluationResults = processor.evaluateMeasureWithCqlEngineNew(
+                subjects, List.of(foldedMeasure), periodStart, periodEnd, parameters, additionalData);
 
         measureReport = processor.evaluateMeasure(
                 measure,

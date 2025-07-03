@@ -146,6 +146,7 @@ public class MeasureProcessorUtils {
         return null;
     }
 
+    // LUKETODO:  update javadoc
     /**
      * method to set measurement period on cql engine context.
      * Priority is operation parameter defined value, otherwise default CQL value is used

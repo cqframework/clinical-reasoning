@@ -56,6 +56,7 @@ public class R4MeasureProcessor {
             IRepository repository,
             MeasureEvaluationOptions measureEvaluationOptions,
             MeasureProcessorUtils measureProcessorUtils) {
+
         this.repository = Objects.requireNonNull(repository);
         this.measureEvaluationOptions =
                 measureEvaluationOptions != null ? measureEvaluationOptions : MeasureEvaluationOptions.defaultOptions();
@@ -182,18 +183,16 @@ public class R4MeasureProcessor {
         // extract measurement Period from CQL to pass to report Builder
         Interval measurementPeriod =
                 measureProcessorUtils.getDefaultMeasurementPeriod(measurementPeriodParams, context);
-        System.out.println("EVALUATE MEASURE LATE!");
-        // populate results from Library $evaluate
-        Map<String, EvaluationResult> resultsFromNewCqlEngine2 = evaluateMeasureWithCqlEngineOld(
-                subjectIds, measure, periodStart, periodEnd, parameters, measureDef, additionalData);
 
         // Process Criteria Expression Results
         final IIdType measureId = measure.getIdElement().toUnqualifiedVersionless();
+        // populate results from Library $evaluate
         final Map<String, EvaluationResult> resultForThisMeasure =
                 compositeEvaluationResultsPerMeasure.getResultForMeasure(measureId);
 
+        // LUKETODO: process MeasureDef error here!
+
         measureProcessorUtils.processResults(
-                //            resultsFromNewCqlEngine2,
                 resultForThisMeasure,
                 measureDef,
                 evaluationType,
@@ -213,6 +212,8 @@ public class R4MeasureProcessor {
                         subjectIds);
     }
 
+    // LUKETODO:  delete this once I no longer need to reference it
+    /*
     public Map<String, EvaluationResult> evaluateMeasureWithCqlEngineOld(
             List<String> subjects,
             Measure measure,
@@ -240,6 +241,7 @@ public class R4MeasureProcessor {
         return measureProcessorUtils.getEvaluationResultsOld(
                 subjects, measureDef, zonedMeasurementPeriod, context, libraryEngine, libraryVersionIdentifier);
     }
+    */
 
     // LUKETODO:  consider a single measure variant
     public CompositeEvaluationResultsPerMeasure evaluateMeasureWithCqlEngine(
@@ -266,8 +268,9 @@ public class R4MeasureProcessor {
         measureProcessorUtils.setMeasurementPeriod(measurementPeriodParams, context);
 
         // populate results from Library $evaluate
+
         return measureProcessorUtils.getEvaluationResults(
-                subjects, zonedMeasurementPeriod, context, measureLibraryIdEngineDetailsList);
+            subjects, zonedMeasurementPeriod, context, measureLibraryIdEngineDetailsList);
     }
 
     // Ideally this would be done in MeasureProcessorUtils, but it's too much work to change for now
@@ -280,6 +283,7 @@ public class R4MeasureProcessor {
                 getLibraryEngine(parameters, libraryVersionIdentifier, context));
     }
 
+    // LUKETODO:  find a better place for this
     public record MeasureLibraryIdEngineDetails(
             IIdType measureId, VersionedIdentifier libraryId, LibraryEngine engine) {}
 

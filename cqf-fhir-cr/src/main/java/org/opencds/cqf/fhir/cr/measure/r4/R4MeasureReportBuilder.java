@@ -21,7 +21,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -674,16 +673,6 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             MeasureReportGroupPopulationComponent reportPopulation,
             PopulationDef populationDef,
             GroupDef groupDef) {
-
-        System.out.printf(
-                "1234: boolean basis = %s populationDef subjects: %s, populationDef resources: %s\n",
-                groupDef.isBooleanBasis(),
-                populationDef.getSubjects(),
-                populationDef.getResources().stream()
-                        .filter(IBaseResource.class::isInstance)
-                        .map(IBaseResource.class::cast)
-                        .map(IBaseResource::getIdElement)
-                        .toList());
 
         reportPopulation.setCode(measurePopulation.getCode());
         reportPopulation.setId(measurePopulation.getId());

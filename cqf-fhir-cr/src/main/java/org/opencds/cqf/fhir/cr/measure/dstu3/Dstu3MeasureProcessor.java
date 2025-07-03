@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.cqframework.cql.cql2elm.CqlIncludeException;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
@@ -97,7 +98,10 @@ public class Dstu3MeasureProcessor {
         var libraryVersionIdentifier = getLibraryVersionIdentifier(measure);
         var libraryEngine = getLibraryEngine(parameters, libraryVersionIdentifier, context);
         // set measurement Period from CQL if operation parameters are empty
-        measureProcessorUtils.setMeasurementPeriod(measurementPeriodParams, context, List.of(measure.getUrl()));
+        measureProcessorUtils.setMeasurementPeriod(
+                measurementPeriodParams,
+                context,
+                Optional.ofNullable(measure.getUrl()).map(List::of).orElse(List.of("Unknown Measure URL")));
         // extract measurement Period from CQL to pass to report Builder
         Interval measurementPeriod =
                 measureProcessorUtils.getDefaultMeasurementPeriod(measurementPeriodParams, context);

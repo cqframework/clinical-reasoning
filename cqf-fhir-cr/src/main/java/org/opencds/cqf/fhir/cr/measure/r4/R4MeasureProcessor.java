@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import org.cqframework.cql.cql2elm.CqlIncludeException;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.hl7.elm.r1.VersionedIdentifier;
@@ -178,7 +179,11 @@ public class R4MeasureProcessor {
         // library engine setup
         var libraryEngine = getLibraryEngine(parameters, libraryVersionIdentifier, context);
 
-        measureProcessorUtils.setMeasurementPeriod(measurementPeriodParams, context);
+        measureProcessorUtils.setMeasurementPeriod(
+                measurementPeriodParams,
+                context,
+                Optional.ofNullable(measure.getUrl()).map(List::of).orElse(List.of("Unknown Measure URL")));
+
         // extract measurement Period from CQL to pass to report Builder
         Interval measurementPeriod =
                 measureProcessorUtils.getDefaultMeasurementPeriod(measurementPeriodParams, context);
@@ -264,7 +269,13 @@ public class R4MeasureProcessor {
                 .toList();
 
         // set measurement Period from CQL if operation parameters are empty
-        measureProcessorUtils.setMeasurementPeriod(measurementPeriodParams, context);
+        measureProcessorUtils.setMeasurementPeriod(
+                measurementPeriodParams,
+                context,
+                measures.stream()
+                        .map(Measure::getUrl)
+                        .map(url -> Optional.ofNullable(url).orElse("Unknown Measure URL"))
+                        .toList());
 
         // populate results from Library $evaluate
 

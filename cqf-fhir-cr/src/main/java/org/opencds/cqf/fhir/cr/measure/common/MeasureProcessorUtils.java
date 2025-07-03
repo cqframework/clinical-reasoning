@@ -273,30 +273,6 @@ public class MeasureProcessorUtils {
                                 measureUrls.stream().limit(5).toList()));
     }
 
-    // LUKETODO:  rename
-    public Interval convertIntervalSansMeasureDef(Interval interval, String targetType) {
-        String sourceTypeQualified = interval.getPointType().getTypeName();
-        String sourceType = sourceTypeQualified.substring(sourceTypeQualified.lastIndexOf(".") + 1);
-        if (sourceType.equals(targetType)) {
-            return interval;
-        }
-
-        if (sourceType.equals("DateTime") && targetType.equals("Date")) {
-            logger.debug(
-                    "A DateTime interval was provided and a Date interval was expected. The DateTime will be truncated.");
-            return new Interval(
-                    truncateDateTime((DateTime) interval.getLow()),
-                    interval.getLowClosed(),
-                    truncateDateTime((DateTime) interval.getHigh()),
-                    interval.getHighClosed());
-        }
-
-        // LUKETODO:  is there some other context we can pass in here?
-        throw new InvalidRequestException(
-                "The interval type of %s did not match the expected type of %s and no conversion was possible"
-                        .formatted(sourceType, targetType));
-    }
-
     public Date truncateDateTime(DateTime dateTime) {
         OffsetDateTime odt = dateTime.getDateTime();
         return new Date(odt.getYear(), odt.getMonthValue(), odt.getDayOfMonth());

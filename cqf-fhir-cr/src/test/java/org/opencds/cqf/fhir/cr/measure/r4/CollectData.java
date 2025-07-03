@@ -97,7 +97,7 @@ public class CollectData {
         }
 
         private R4CollectDataService buildR4CollectDataService() {
-            return new R4CollectDataService(repository, evaluationOptions, measureServiceUtils);
+            return new R4CollectDataService(repository, evaluationOptions);
         }
 
         public When when() {

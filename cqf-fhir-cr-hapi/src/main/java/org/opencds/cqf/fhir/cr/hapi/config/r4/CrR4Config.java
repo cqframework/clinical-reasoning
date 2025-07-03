@@ -90,8 +90,7 @@ public class CrR4Config {
             IRepositoryFactory repositoryFactory,
             MeasureEvaluationOptions measureEvaluationOptions,
             R4MeasureServiceUtilsFactory r4MeasureServiceUtilsFactory) {
-        return rd -> new R4CollectDataService(
-                repositoryFactory.create(rd), measureEvaluationOptions, r4MeasureServiceUtilsFactory.create(rd));
+        return rd -> new R4CollectDataService(repositoryFactory.create(rd), measureEvaluationOptions);
     }
 
     @Bean

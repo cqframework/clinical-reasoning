@@ -55,10 +55,8 @@ import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_PRE_EXPANSION_MODE;
 import org.opencds.cqf.fhir.cr.cli.command.CqlCommand.EvaluationParameter.ModelParameter;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
-import org.opencds.cqf.fhir.cr.measure.SubjectProviderOptions;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorUtils;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureProcessor;
-import org.opencds.cqf.fhir.cr.measure.r4.R4RepositorySubjectProvider;
-import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.repository.ProxyRepository;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 import org.slf4j.LoggerFactory;
@@ -341,11 +339,7 @@ public class CqlCommand implements Callable<Integer> {
         evaluationOptions.setApplyScoringSetMembership(false);
         evaluationOptions.setEvaluationSettings(evaluationSettings);
 
-        return new R4MeasureProcessor(
-                repository,
-                evaluationOptions,
-                new R4RepositorySubjectProvider(new SubjectProviderOptions()),
-                new R4MeasureServiceUtils(repository));
+        return new R4MeasureProcessor(repository, evaluationOptions, new MeasureProcessorUtils());
     }
 
     @Nonnull

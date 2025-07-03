@@ -275,49 +275,6 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
                 }
             }
         }
-
-        //        for (String subject : subjects) {
-        //            for (Measure measure : measures) {
-        //                MeasureReport measureReport;
-        //                // evaluate each measure
-        //                measureReport = r4Processor.evaluateMeasure(
-        //                        measure,
-        //                        periodStart,
-        //                        periodEnd,
-        //                        reportType,
-        //                        Collections.singletonList(subject),
-        //                        additionalData,
-        //                        parameters,
-        //                        evalType,
-        //                        evaluateMeasureResultsByMeasureId);
-        //
-        //                // add ProductLine after report is generated
-        //                measureReport = r4MeasureServiceUtils.addProductLineExtension(measureReport, productLine);
-        //
-        //                // add reporter if available
-        //                if (reporter != null && !reporter.isEmpty()) {
-        //                    measureReport.setReporter(
-        //                            r4MeasureServiceUtils.getReporter(reporter).orElse(null));
-        //                }
-        //                // add id to measureReport
-        //                initializeReport(measureReport);
-        //
-        //                // add report to bundle
-        //                bundle.addEntry(getBundleEntry(serverBase, measureReport));
-        //
-        //                // progress feedback
-        //                var measureUrl = measureReport.getMeasure();
-        //                if (!measureUrl.isEmpty()) {
-        //                    log.debug("MeasureReports remaining to evaluate {}", totalReports--);
-        //                }
-        //                if (measure.hasUrl()) {
-        //                    log.info(
-        //                        "Completed evaluation for Measure: {}, Measures remaining to evaluate: {}",
-        //                        measure.getUrl(),
-        //                        totalMeasures--);
-        //                }
-        //            }
-        //        }
     }
 
     protected List<String> getSubjects(R4RepositorySubjectProvider subjectProvider, String subjectId) {

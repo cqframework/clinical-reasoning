@@ -26,21 +26,17 @@ import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 
+@SuppressWarnings("squid:S107")
 public class R4CollectDataService {
     private final IRepository repository;
     private final MeasureEvaluationOptions measureEvaluationOptions;
     private final R4RepositorySubjectProvider subjectProvider;
-    private final R4MeasureServiceUtils measureServiceUtils;
     private final MeasureProcessorUtils measureProcessorUtils = new MeasureProcessorUtils();
 
-    public R4CollectDataService(
-            IRepository repository,
-            MeasureEvaluationOptions measureEvaluationOptions,
-            R4MeasureServiceUtils measureServiceUtils) {
+    public R4CollectDataService(IRepository repository, MeasureEvaluationOptions measureEvaluationOptions) {
         this.repository = repository;
         this.measureEvaluationOptions = measureEvaluationOptions;
         this.subjectProvider = new R4RepositorySubjectProvider(measureEvaluationOptions.getSubjectProviderOptions());
-        this.measureServiceUtils = measureServiceUtils;
     }
 
     /**

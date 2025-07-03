@@ -161,7 +161,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
         // This is basically a Map of measure -> subject -> EvaluationResult
         final CompositeEvaluationResultsPerMeasure compositeEvaluationResultsPerMeasure =
                 r4Processor.evaluateMultiMeasuresWithCqlEngine(
-                        subjects, measures, periodStart, periodEnd, parameters, context, additionalData);
+                        subjects, measures, periodStart, periodEnd, parameters, context);
 
         var totalMeasures = measures.size();
         for (Measure measure : measures) {
@@ -173,8 +173,6 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
                     periodEnd,
                     reportType,
                     subjects,
-                    additionalData,
-                    parameters,
                     evalType,
                     context,
                     compositeEvaluationResultsPerMeasure);
@@ -234,7 +232,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
         // This is basically a Map of measure -> subject -> EvaluationResult
         final CompositeEvaluationResultsPerMeasure compositeEvaluationResultsPerMeasure =
                 r4Processor.evaluateMultiMeasuresWithCqlEngine(
-                        subjects, measures, periodStart, periodEnd, parameters, context, additionalData);
+                        subjects, measures, periodStart, periodEnd, parameters, context);
 
         for (Measure measure : measures) {
             for (String subject : subjects) {
@@ -246,8 +244,6 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
                         periodEnd,
                         reportType,
                         Collections.singletonList(subject),
-                        additionalData,
-                        parameters,
                         evalType,
                         context,
                         compositeEvaluationResultsPerMeasure);

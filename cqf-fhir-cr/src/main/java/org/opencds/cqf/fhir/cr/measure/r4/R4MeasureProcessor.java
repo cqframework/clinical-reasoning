@@ -16,7 +16,6 @@ import java.util.Optional;
 import org.cqframework.cql.cql2elm.CqlIncludeException;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.hl7.elm.r1.VersionedIdentifier;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -70,8 +69,6 @@ public class R4MeasureProcessor {
             @Nullable ZonedDateTime periodEnd,
             String reportType,
             List<String> subjectIds,
-            IBaseBundle additionalData,
-            Parameters parameters,
             MeasureEvalType evalType,
             CqlEngine context,
             CompositeEvaluationResultsPerMeasure compositeEvaluationResultsPerMeasure) {
@@ -81,8 +78,6 @@ public class R4MeasureProcessor {
                 periodEnd,
                 reportType,
                 subjectIds,
-                additionalData,
-                parameters,
                 evalType,
                 context,
                 compositeEvaluationResultsPerMeasure);
@@ -144,8 +139,6 @@ public class R4MeasureProcessor {
      * @param periodEnd end date of Measurement Period
      * @param reportType type of report that defines MeasureReport Type
      * @param subjectIds the subjectIds to process
-     * @param additionalData external bundle to process with results
-     * @param parameters cql parameters specified in parameters resource
      * @param evalType the type of evaluation to process, this is an output of reportType param
      * @return Measure Report resource
      */
@@ -155,8 +148,6 @@ public class R4MeasureProcessor {
             @Nullable ZonedDateTime periodEnd,
             String reportType,
             List<String> subjectIds,
-            IBaseBundle additionalData,
-            Parameters parameters,
             MeasureEvalType evalType,
             CqlEngine context,
             CompositeEvaluationResultsPerMeasure compositeEvaluationResultsPerMeasure) {
@@ -167,27 +158,6 @@ public class R4MeasureProcessor {
 
         // setup MeasureDef
         var measureDef = new R4MeasureDefBuilder().build(measure);
-
-        //        // CQL Engine context
-        //        var context = Engines.forRepository(
-        //                this.repository, this.measureEvaluationOptions.getEvaluationSettings(), additionalData);
-
-        //        var libraryEngine = getLibraryEngine(parameters, getLibraryVersionIdentifier(measure), context);
-
-        //        java.lang.NullPointerException: Cannot invoke "org.hl7.elm.r1.Library.getParameters()" because "lib"
-        // is null
-        //
-        //        at
-        // org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorUtils.getMeasurementPeriodParameterDef(MeasureProcessorUtils.java:135)
-        //        at
-        // org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorUtils.setMeasurementPeriod(MeasureProcessorUtils.java:158)
-        //        at org.opencds.cqf.fhir.cr.measure.r4.R4MeasureProcessor.evaluateMeasure(R4MeasureProcessor.java:178)
-        //        at org.opencds.cqf.fhir.cr.measure.r4.R4MeasureProcessor.evaluateMeasure(R4MeasureProcessor.java:78)
-        //        at org.opencds.cqf.fhir.cr.measure.r4.R4MeasureService.evaluate(R4MeasureService.java:97)
-        //        at org.opencds.cqf.fhir.cr.measure.r4.Measure$When.lambda$evaluate$0(Measure.java:255)
-        //        at org.opencds.cqf.fhir.cr.measure.r4.Measure$When.then(Measure.java:278)
-        //        at
-        // org.opencds.cqf.fhir.cr.measure.r4.MeasureConditionCategoryPOCTest.measure_eval_non_retrieve_resource(MeasureConditionCategoryPOCTest.java:25)
 
         measureProcessorUtils.setMeasurementPeriod(
                 measurementPeriodParams,
@@ -230,8 +200,7 @@ public class R4MeasureProcessor {
             @Nullable ZonedDateTime periodStart,
             @Nullable ZonedDateTime periodEnd,
             Parameters parameters,
-            CqlEngine context,
-            @Nullable IBaseBundle additionalData) {
+            CqlEngine context) {
 
         return evaluateMultiMeasuresWithCqlEngine(
                 subjects,
@@ -239,8 +208,7 @@ public class R4MeasureProcessor {
                 periodStart,
                 periodEnd,
                 parameters,
-                context,
-                additionalData);
+                context);
     }
 
     public CompositeEvaluationResultsPerMeasure evaluateMeasureWithCqlEngine(
@@ -249,21 +217,19 @@ public class R4MeasureProcessor {
             @Nullable ZonedDateTime periodStart,
             @Nullable ZonedDateTime periodEnd,
             Parameters parameters,
-            CqlEngine context,
-            @Nullable IBaseBundle additionalData) {
+            CqlEngine context) {
+
         return evaluateMultiMeasuresWithCqlEngine(
-                subjects, List.of(measure), periodStart, periodEnd, parameters, context, additionalData);
+                subjects, List.of(measure), periodStart, periodEnd, parameters, context);
     }
 
-    // LUKETODO: cleanup any parameters that are not needed
     public CompositeEvaluationResultsPerMeasure evaluateMultiMeasuresWithCqlEngine(
             List<String> subjects,
             List<Measure> measures,
             @Nullable ZonedDateTime periodStart,
             @Nullable ZonedDateTime periodEnd,
             Parameters parameters,
-            CqlEngine context,
-            @Nullable IBaseBundle additionalData) {
+            CqlEngine context) {
 
         measures.forEach(this::checkMeasureLibrary);
 

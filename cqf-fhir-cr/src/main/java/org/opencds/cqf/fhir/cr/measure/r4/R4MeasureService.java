@@ -61,13 +61,15 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
 
         measurePeriodValidator.validatePeriodStartAndEnd(periodStart, periodEnd);
 
-        var repo = Repositories.proxy(repository, true, dataEndpoint, contentEndpoint, terminologyEndpoint);
-        var processor = new R4MeasureProcessor(repo, this.measureEvaluationOptions, measureProcessorUtils);
+        var proxyRepoForMeasureProcessor =
+                Repositories.proxy(repository, true, dataEndpoint, contentEndpoint, terminologyEndpoint);
+        var processor = new R4MeasureProcessor(
+                proxyRepoForMeasureProcessor, this.measureEvaluationOptions, measureProcessorUtils);
 
         R4MeasureServiceUtils r4MeasureServiceUtils = new R4MeasureServiceUtils(repository);
         r4MeasureServiceUtils.ensureSupplementalDataElementSearchParameter();
 
-        var foldedMeasure = R4MeasureServiceUtils.foldMeasure(measure, repo);
+        var foldedMeasure = R4MeasureServiceUtils.foldMeasure(measure, proxyRepoForMeasureProcessor);
 
         MeasureReport measureReport;
 
@@ -78,7 +80,7 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
             subjectId = practitioner;
         }
 
-        var actualRepo = repo;
+        var actualRepo = proxyRepoForMeasureProcessor;
         if (additionalData != null) {
             actualRepo = new FederatedRepository(
                     this.repository, new InMemoryFhirRepository(this.repository.fhirContext(), additionalData));
@@ -92,24 +94,16 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
                         actualRepo, Optional.ofNullable(subjectId).map(List::of).orElse(List.of()))
                 .toList();
 
-        // LUKETODO:  which repository should we use for the context?
+        // Replicate the old logic of using the repository used to initialize the measure processor
+        // as the repository for the CQL engine context.
         var context = Engines.forRepository(
-                this.repository, this.measureEvaluationOptions.getEvaluationSettings(), additionalData);
+                proxyRepoForMeasureProcessor, this.measureEvaluationOptions.getEvaluationSettings(), additionalData);
 
         var evaluationResults = processor.evaluateMeasureWithCqlEngine(
-                subjects, foldedMeasure, periodStart, periodEnd, parameters, context, additionalData);
+                subjects, foldedMeasure, periodStart, periodEnd, parameters, context);
 
         measureReport = processor.evaluateMeasure(
-                measure,
-                periodStart,
-                periodEnd,
-                reportType,
-                subjects,
-                additionalData,
-                parameters,
-                evalType,
-                context,
-                evaluationResults);
+                measure, periodStart, periodEnd, reportType, subjects, evalType, context, evaluationResults);
 
         // add ProductLine after report is generated
         measureReport = r4MeasureServiceUtils.addProductLineExtension(measureReport, productLine);

@@ -88,7 +88,7 @@ public class R4CollectDataService {
                 var mutableList = new ArrayList<>(subjects);
 
                 var evaluationResults = processor.evaluateMeasureWithCqlEngine(
-                        mutableList, foldedMeasure, periodStart, periodEnd, parameters, context, null);
+                        mutableList, foldedMeasure, periodStart, periodEnd, parameters, context);
 
                 // add resources per subject to Parameters
                 addReports(
@@ -96,7 +96,7 @@ public class R4CollectDataService {
             }
         } else {
             var evaluationResults = processor.evaluateMeasureWithCqlEngine(
-                    subjectList, foldedMeasure, periodStart, periodEnd, parameters, context, null);
+                    subjectList, foldedMeasure, periodStart, periodEnd, parameters, context);
             addReports(
                     processor, measureId, periodStart, periodEnd, subjectList, parameters, context, evaluationResults);
         }
@@ -119,8 +119,6 @@ public class R4CollectDataService {
                 periodEnd,
                 MeasureEvalType.SUBJECT.toCode(),
                 subjects,
-                null,
-                null,
                 null,
                 context,
                 evaluateMeasureResults);

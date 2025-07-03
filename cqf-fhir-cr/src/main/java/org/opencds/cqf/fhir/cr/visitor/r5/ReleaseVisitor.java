@@ -22,17 +22,20 @@ import org.hl7.fhir.r5.model.Extension;
 import org.hl7.fhir.r5.model.Library;
 import org.hl7.fhir.r5.model.Measure;
 import org.hl7.fhir.r5.model.MetadataResource;
+import org.hl7.fhir.r5.model.Parameters;
 import org.hl7.fhir.r5.model.Period;
 import org.hl7.fhir.r5.model.Reference;
 import org.hl7.fhir.r5.model.RelatedArtifact.RelatedArtifactType;
 import org.hl7.fhir.r5.model.ResourceType;
 import org.hl7.fhir.r5.model.StringType;
+import org.hl7.fhir.r5.model.UriType;
 import org.hl7.fhir.r5.model.ValueSet;
 import org.opencds.cqf.fhir.cr.visitor.r5.CRMIReleaseExperimentalBehavior.CRMIReleaseExperimentalBehaviorCodes;
 import org.opencds.cqf.fhir.cr.visitor.r5.CRMIReleaseVersionBehavior.CRMIReleaseVersionBehaviorCodes;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.PackageHelper;
 import org.opencds.cqf.fhir.utility.SearchHelper;
+import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
 import org.slf4j.Logger;
 
@@ -150,7 +153,8 @@ public class ReleaseVisitor {
         return returnEntries;
     }
 
-    public static void extractDirectReferenceCodes(IKnowledgeArtifactAdapter rootAdapter, Measure measure) {
+    public static void extractDirectReferenceCodes(
+            IKnowledgeArtifactAdapter rootAdapter, Measure measure, IEndpointAdapter endpointAdapter) {
         Optional<Extension> effectiveDataRequirementsExt = measure.getExtension().stream()
                 .filter(ext -> ext.getUrl().equals(Constants.CQFM_EFFECTIVE_DATA_REQUIREMENTS)
                         || ext.getUrl().equals(Constants.CRMI_EFFECTIVE_DATA_REQUIREMENTS))
@@ -173,9 +177,21 @@ public class ReleaseVisitor {
                                 || ext.getUrl().equals(Constants.CQF_DIRECT_REFERENCE_EXTENSION))
                         .toList();
 
+                var expansionParams = rootAdapter.getExpansionParameters().map(p -> ((Parameters) p));
+                List<UriType> systemVersions = new ArrayList<>();
+                if (expansionParams.isPresent()) {
+                    systemVersions = expansionParams.get().getParameter().stream()
+                            .filter(param -> param.getName().equals(Constants.SYSTEM_VERSION))
+                            .map(sysVerParam -> (UriType) sysVerParam.getValue())
+                            .toList();
+                }
+
                 for (var proposedExt : proposedExtensions) {
                     boolean shouldAddExtension = true;
                     Coding proposedCoding = (Coding) proposedExt.getValue();
+
+                    setCodeSystemVersion(endpointAdapter, proposedCoding, systemVersions);
+
                     for (var existingExt : existingRootAdapterExtensions) {
                         Coding existingCoding = (Coding) existingExt.getValue();
                         boolean systemMatches = proposedCoding.getSystem().equals(existingCoding.getSystem());
@@ -194,6 +210,24 @@ public class ReleaseVisitor {
                     }
                 }
             }
+        }
+    }
+
+    private static void setCodeSystemVersion(
+            IEndpointAdapter endpointAdapter, Coding proposedCoding, List<UriType> systemVersions) {
+        if (proposedCoding.getVersion() == null && !systemVersions.isEmpty()) {
+            for (var sysVer : systemVersions) {
+                var idParts = sysVer.getValue().split("\\|");
+                if (idParts[0].equals(proposedCoding.getSystem())) {
+                    proposedCoding.setVersion(idParts[1]);
+                    break;
+                }
+            }
+        }
+
+        // version can still be null after trying to set via expansionParams
+        if (proposedCoding.getVersion() == null && endpointAdapter != null) {
+            // use TxServer to set version
         }
     }
 }

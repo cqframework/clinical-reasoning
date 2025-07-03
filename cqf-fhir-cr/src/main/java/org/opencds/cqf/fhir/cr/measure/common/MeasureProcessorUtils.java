@@ -267,7 +267,10 @@ public class MeasureProcessorUtils {
 
         throw new InvalidRequestException(
                 "The interval type of %s did not match the expected type of %s and no conversion was possible for measure URLs (first 5 only shown): %s."
-                        .formatted(sourceType, targetType, measureUrls.stream().limit(5).toList()));
+                        .formatted(
+                                sourceType,
+                                targetType,
+                                measureUrls.stream().limit(5).toList()));
     }
 
     // LUKETODO:  rename

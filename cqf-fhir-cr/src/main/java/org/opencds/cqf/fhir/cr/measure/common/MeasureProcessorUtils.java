@@ -36,6 +36,8 @@ import org.slf4j.LoggerFactory;
 
 public class MeasureProcessorUtils {
     private static final Logger logger = LoggerFactory.getLogger(MeasureProcessorUtils.class);
+    private static final String EXCEPTION_FOR_SUBJECT_ID_MESSAGE_TEMPLATE = "Exception for subjectId: %s, Message: %s";
+
     /**
      * Method that processes CQL Results into Measure defined fields that reference associated CQL expressions
      * @param results criteria expression results
@@ -67,7 +69,7 @@ public class MeasureProcessorUtils {
             } catch (Exception e) {
                 // Catch Exceptions from evaluation per subject, but allow rest of subjects to be processed (if
                 // applicable)
-                var error = "Exception for subjectId: %s, Message: %s".formatted(subjectId, e.getMessage());
+                var error = EXCEPTION_FOR_SUBJECT_ID_MESSAGE_TEMPLATE.formatted(subjectId, e.getMessage());
                 // Capture error for MeasureReportBuilder
                 measureDef.addError(error);
                 logger.error(error, e);
@@ -386,7 +388,7 @@ public class MeasureProcessorUtils {
                 } catch (Exception e) {
                     // Catch Exceptions from evaluation per subject, but allow rest of subjects to be processed (if
                     // applicable)
-                    var error = "Exception for subjectId: %s, Message: %s".formatted(subjectId, e.getMessage());
+                    var error = EXCEPTION_FOR_SUBJECT_ID_MESSAGE_TEMPLATE.formatted(subjectId, e.getMessage());
                     resultsBuilder.addError(measureLibraryIdEngine.measureId(), error);
                     logger.error(error, e);
                 }
@@ -427,7 +429,7 @@ public class MeasureProcessorUtils {
             } catch (Exception e) {
                 // Catch Exceptions from evaluation per subject, but allow rest of subjects to be processed (if
                 // applicable)
-                var error = "Exception for subjectId: %s, Message: %s".formatted(subjectId, e.getMessage());
+                var error = EXCEPTION_FOR_SUBJECT_ID_MESSAGE_TEMPLATE.formatted(subjectId, e.getMessage());
                 // Capture error for MeasureReportBuilder
                 measureDef.addError(error);
                 logger.error(error, e);

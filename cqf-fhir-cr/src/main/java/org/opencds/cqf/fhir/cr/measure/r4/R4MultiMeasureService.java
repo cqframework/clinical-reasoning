@@ -154,46 +154,6 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
             String productLine,
             String reporter) {
 
-        /*
-         * subject1, subject2, subject3
-         *
-         * measureA, measureB
-         *
-         * subject 1 ->
-         * measureA -> subject1 -> result1
-         * measureB -> subject1 -> result2
-         * subject 2 ->
-         * measureA -> subject2 -> result3
-         * measureB -> subject2 -> result4
-         * subject 3 ->
-         * measureA -> subject3 -> result5
-         * measureB -> subject3 -> result6
-         *
-         * measureReport1 -> measureA
-         * measureReport2 -> measureB
-         */
-
-        /*
-        population/summary
-
-        compositeResultsPerMeasure = cqlEvaluate(measures, subjects)
-
-        foreach measure in measures:
-            processedResults = processResults(compositeResultsPerMeasure.get(measure.getId()))
-            measureReport = builder.buildMeasureReport(processedResults)
-         */
-
-        /*
-        subject/individual
-
-        compositeResultsPerMeasure = cqlEvaluate(measures, subjects)
-
-        foreach measure in measures:
-            foreach subject in subjects:
-                MeasureReport = processResults(compositeResultsPerMeasure.get(measure.getId()))
-
-         */
-
         // This is basically a Map of measure -> subject -> EvaluationResult
         final CompositeEvaluationResultsPerMeasure compositeEvaluationResultsPerMeasure =
                 r4Processor.evaluateMultiMeasuresWithCqlEngine(

@@ -170,10 +170,6 @@ public class R4MeasureProcessor {
         var context = Engines.forRepository(
                 this.repository, this.measureEvaluationOptions.getEvaluationSettings(), additionalData);
 
-        var libraryVersionIdentifier = getLibraryVersionIdentifier(measure);
-        // library engine setup
-        var libraryEngine = getLibraryEngine(parameters, libraryVersionIdentifier, context);
-
         measureProcessorUtils.setMeasurementPeriod(
                 measurementPeriodParams,
                 context,
@@ -269,7 +265,6 @@ public class R4MeasureProcessor {
                         .toList());
 
         // populate results from Library $evaluate
-
         return measureProcessorUtils.getEvaluationResults(
                 subjects, zonedMeasurementPeriod, context, measureLibraryIdEngineDetailsList);
     }

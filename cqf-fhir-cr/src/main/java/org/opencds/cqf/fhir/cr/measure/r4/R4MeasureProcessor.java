@@ -6,6 +6,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -428,7 +429,8 @@ public class R4MeasureProcessor {
                         list.add(value);
                     }
                 } else {
-                    parameterMap.put(param.getName(), Arrays.asList(parameterMap.get(param.getName()), value));
+                    // We need a mutable list here, otherwise, retrieving the list above will fail with UnsupportedOperationException
+                    parameterMap.put(param.getName(), new ArrayList<>(Arrays.asList(parameterMap.get(param.getName()), value)));
                 }
             } else {
                 parameterMap.put(param.getName(), value);

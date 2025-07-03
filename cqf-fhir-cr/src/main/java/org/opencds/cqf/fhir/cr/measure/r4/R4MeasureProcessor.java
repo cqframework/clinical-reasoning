@@ -12,11 +12,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import org.cqframework.cql.cql2elm.CqlIncludeException;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CanonicalType;
@@ -33,6 +33,7 @@ import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cql.VersionedIdentifiers;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
+import org.opencds.cqf.fhir.cr.measure.common.CompositeEvaluationResultsPerMeasure;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
@@ -45,8 +46,6 @@ import org.opencds.cqf.fhir.cr.measure.r4.utils.R4DateHelper;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.monad.Either3;
-import org.opencds.cqf.fhir.utility.repository.FederatedRepository;
-import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.search.Searches;
 
 public class R4MeasureProcessor {
@@ -79,10 +78,10 @@ public class R4MeasureProcessor {
             IBaseBundle additionalData,
             Parameters parameters,
             MeasureEvalType evalType,
-            Map<String, Map<String, EvaluationResult>> evaluateMeasureResults) {
+            CompositeEvaluationResultsPerMeasure compositeEvaluationResultsPerMeasure) {
         var m = measure.fold(this::resolveByUrl, this::resolveById, Function.identity());
         return this.evaluateMeasure(
-                m, periodStart, periodEnd, reportType, subjectIds, additionalData, parameters, evalType, evaluateMeasureResults);
+                m, periodStart, periodEnd, reportType, subjectIds, additionalData, parameters, evalType, compositeEvaluationResultsPerMeasure);
     }
 
     // LUKETODO:  this is no doubt used by CQL-CLI
@@ -156,7 +155,7 @@ public class R4MeasureProcessor {
             IBaseBundle additionalData,
             Parameters parameters,
             MeasureEvalType evalType,
-            Map<String, Map<String, EvaluationResult>> evaluateMeasureResults) {
+            CompositeEvaluationResultsPerMeasure compositeEvaluationResultsPerMeasure) {
 
         // LUKETODO: group the pre-measure engine setup tasks before the measure-specific tasks
 
@@ -178,19 +177,23 @@ public class R4MeasureProcessor {
         // library engine setup
         var libraryEngine = getLibraryEngine(parameters, libraryVersionIdentifier, context);
 
-        measureProcessorUtils.setMeasurementPeriod(measureDef, measurementPeriodParams, context);
+        measureProcessorUtils.setMeasurementPeriod(measurementPeriodParams, context);
         // extract measurement Period from CQL to pass to report Builder
         Interval measurementPeriod =
                 measureProcessorUtils.getDefaultMeasurementPeriod(measurementPeriodParams, context);
         System.out.println("EVALUATE MEASURE LATE!");
         // populate results from Library $evaluate
         Map<String, EvaluationResult> resultsFromNewCqlEngine2 =
-            evaluateMeasureWithCqlEngine(subjectIds, measure, periodStart, periodEnd, parameters, measureDef, additionalData);
+            evaluateMeasureWithCqlEngineOld(subjectIds, measure, periodStart, periodEnd, parameters, measureDef, additionalData);
 
         // Process Criteria Expression Results
+        final IIdType measureId = measure.getIdElement().toUnqualifiedVersionless();
+        final Map<String, EvaluationResult> resultForThisMeasure =
+            compositeEvaluationResultsPerMeasure.getResultForMeasure(measureId);
+
         measureProcessorUtils.processResults(
 //            resultsFromNewCqlEngine2,
-                evaluateMeasureResults.get(measure.getId()),
+            resultForThisMeasure,
                 measureDef,
                 evaluationType,
                 this.measureEvaluationOptions.getApplyScoringSetMembership(),
@@ -209,16 +212,40 @@ public class R4MeasureProcessor {
                         subjectIds);
     }
 
+    public Map<String, EvaluationResult> evaluateMeasureWithCqlEngineOld(
+        List<String> subjects,
+        Measure measure,
+        @Nullable ZonedDateTime periodStart,
+        @Nullable ZonedDateTime periodEnd,
+        Parameters parameters,
+        MeasureDef measureDef,
+        @Nullable IBaseBundle additionalData) {
 
-    // LUKETODO: multiple measures:
-    // LUKETODO: single subject
-    public Map<String, EvaluationResult> evaluateMeasureWithCqlEngine(
-            String subject,
+        var context = Engines.forRepository(
+            this.repository, this.measureEvaluationOptions.getEvaluationSettings(), additionalData);
+
+        var measurementPeriodParams = buildMeasurementPeriod(periodStart, periodEnd);
+        var zonedMeasurementPeriod = MeasureProcessorUtils.getZonedTimeZoneForEval(
+            measureProcessorUtils.getDefaultMeasurementPeriod(measurementPeriodParams, context));
+
+        final VersionedIdentifier libraryVersionIdentifier = getLibraryVersionIdentifier(measure);
+
+        var libraryEngine = getLibraryEngine(parameters, libraryVersionIdentifier, context);
+
+        // set measurement Period from CQL if operation parameters are empty
+        measureProcessorUtils.setMeasurementPeriod(measurementPeriodParams, context);
+
+        // populate results from Library $evaluate
+        return measureProcessorUtils.getEvaluationResultsOld(subjects, measureDef, zonedMeasurementPeriod, context, libraryEngine, libraryVersionIdentifier);
+    }
+
+    // LUKETODO:  consider a single measure variant
+    public CompositeEvaluationResultsPerMeasure evaluateMeasureWithCqlEngineNew(
+            List<String> subjects,  // LUKETODO:  I have a doubt about whether this should be a single subject or a list
             List<Measure> measures,
             @Nullable ZonedDateTime periodStart,
             @Nullable ZonedDateTime periodEnd,
             Parameters parameters,
-            MeasureDef measureDef,
             @Nullable IBaseBundle additionalData) {
 
         // LUKETODO:  make this a parameter
@@ -228,35 +255,26 @@ public class R4MeasureProcessor {
         var measurementPeriodParams = buildMeasurementPeriod(periodStart, periodEnd);
         var zonedMeasurementPeriod = MeasureProcessorUtils.getZonedTimeZoneForEval(
             measureProcessorUtils.getDefaultMeasurementPeriod(measurementPeriodParams, context));
-        final List<VersionedIdentifier> libraryVersionIdentifiers = measures.stream().map(
-            this::getLibraryVersionIdentifier).toList();
 
-        // LUKETODO: pass in only LibraryEngine logic to the other method
-        List<libraryEngine> libraryEngines = getLibraryEngine(parameters, libraryVersionIdentifier, context);
+        final List<MeasureLibraryIdEngineDetails> measureLibraryIdEngineDetailsList =
+            measures.stream()
+                .map( measure -> buildLibraryIdEngineDetails(measure, parameters, context))
+                .toList();
 
         // set measurement Period from CQL if operation parameters are empty
-        measureProcessorUtils.setMeasurementPeriod(measureDef, measurementPeriodParams, context);
+        measureProcessorUtils.setMeasurementPeriod(measurementPeriodParams, context);
 
         // populate results from Library $evaluate
-        return measureProcessorUtils.getEvaluationResults(List.of(subject), measureDef, zonedMeasurementPeriod, context, libraryEngine, libraryVersionIdentifier);
+        return measureProcessorUtils.getEvaluationResults(subjects, zonedMeasurementPeriod, context, measureLibraryIdEngineDetailsList);
     }
 
-    private String cqlEngineToString(CqlEngine cqlEngine) {
-        return "CqlEngine{environment=%s, state=%s}"
-            .formatted(cqlEngine.getEnvironment(), cqlEngine.getState());
+    // Ideally this would be done in MeasureProcessorUtils, but it's too much work to change for now
+    private MeasureLibraryIdEngineDetails buildLibraryIdEngineDetails(Measure measure, Parameters parameters, CqlEngine context) {
+        var libraryVersionIdentifier = getLibraryVersionIdentifier(measure);
+        return new MeasureLibraryIdEngineDetails(measure.getIdElement(), libraryVersionIdentifier, getLibraryEngine(parameters, libraryVersionIdentifier, context));
     }
 
-    private String measureDefToString(MeasureDef measureDef) {
-        return "MeasureDef{id='%s', url='%s', version='%s', defaultMeasurementPeriod=%s, groups=%s, sdes=%s, errors=%s}"
-            .formatted(
-                measureDef.id(),
-                measureDef.url(),
-                measureDef.version(),
-                measureDef.getDefaultMeasurementPeriod(),
-                measureDef.groups().stream().map(Object::hashCode).toList(),
-                measureDef.sdes(),
-                measureDef.errors());
-    }
+    public record MeasureLibraryIdEngineDetails(IIdType measureId, VersionedIdentifier libraryId, LibraryEngine engine) {}
 
 //    private String groupDefToString(GroupDef groupDef) {
 //        return "GroupDef{id='%s', measureScoring=%s, populations=%s, stratifiers=%s, measurePopulationType=%s}"

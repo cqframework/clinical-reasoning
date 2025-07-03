@@ -8,6 +8,7 @@ import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 public class MeasureConditionCategoryPOCTest {
     protected static Given given = Measure.given().repositoryFor("ConditionCategoryPoc");
 
+    // LUKETODO:  fix with MeasureDef error logic that we removed
     /**
      * This is a POC Measure that creates a resource in CQL based on patient chart data
      * This test only validates that an SDE can create an inline resource based on patient data.

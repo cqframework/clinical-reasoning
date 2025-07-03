@@ -7,9 +7,7 @@ import com.google.common.base.Strings;
 import jakarta.annotation.Nullable;
 import java.time.ZonedDateTime;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -21,8 +19,8 @@ import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Resource;
-import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
+import org.opencds.cqf.fhir.cr.measure.common.CompositeEvaluationResultsPerMeasure;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorUtils;
@@ -157,52 +155,119 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
             String productLine,
             String reporter) {
 
-        var evaluateMeasureResultsByMeasureId = new HashMap<String, Map<String, EvaluationResult>>();
+        /*
+         * subject1, subject2, subject3
+         *
+         * measureA, measureB
+         *
+         * subject 1 ->
+                 * measureA -> subject1 -> result1
+                 * measureB -> subject1 -> result2
+         * subject 2 ->
+                 * measureA -> subject2 -> result3
+                 * measureB -> subject2 -> result4
+         * subject 3 ->
+                 * measureA -> subject3 -> result5
+                 * measureB -> subject3 -> result6
+         *
+         * measureReport1 -> measureA
+         * measureReport2 -> measureB
+         */
 
-        // LUKETODO: comment on exactly what this is for and what it does:
-        for (Measure measure : measures) {
-            var measureDef = new R4MeasureDefBuilder().build(measure);
+        /*
+        population/summary
 
-            var evaluationResults =
-                r4Processor.evaluateMeasureWithCqlEngine(subjects, measure, periodStart, periodEnd, parameters, measureDef, additionalData);
+        compositeResultsPerMeasure = cqlEvaluate(measures, subjects)
 
-            evaluateMeasureResultsByMeasureId.put(measure.getId(), evaluationResults);
-        }
+        foreach measure in measures:
+            processedResults = processResults(compositeResultsPerMeasure.get(measure.getId()))
+            measureReport = builder.buildMeasureReport(processedResults)
+         */
 
-        // one aggregated MeasureReport per Measure
-        var totalMeasures = measures.size();
-        for (Measure measure : measures) {
-            MeasureReport measureReport;
-            // evaluate each measure
-            measureReport = r4Processor.evaluateMeasure(
-                    measure, periodStart, periodEnd, reportType, subjects, additionalData, parameters, evalType, evaluateMeasureResultsByMeasureId);
+        /*
+        subject/individual
 
-            // add ProductLine after report is generated
-            measureReport = r4MeasureServiceUtils.addProductLineExtension(measureReport, productLine);
+        compositeResultsPerMeasure = cqlEvaluate(measures, subjects)
 
-            // add subject reference for non-individual reportTypes
-            measureReport = r4MeasureServiceUtils.addSubjectReference(measureReport, null, subjectParam);
+        foreach measure in measures:
+            foreach subject in subjects:
+                MeasureReport = processResults(compositeResultsPerMeasure.get(measure.getId()))
 
-            // add reporter if available
-            if (reporter != null && !reporter.isEmpty()) {
-                measureReport.setReporter(
+         */
+
+        // This is basically a Map of measure -> subject -> EvaluationResult
+        final CompositeEvaluationResultsPerMeasure compositeEvaluationResultsPerMeasure = r4Processor.evaluateMeasureWithCqlEngineNew(
+            subjects, measures, periodStart, periodEnd, parameters, additionalData);
+
+            // LUKETODO: think about how this is used and how to log more effectively or to just leave it as is
+            var totalMeasures = measures.size();
+            for (Measure measure : measures) {
+                MeasureReport measureReport;
+                // evaluate each measure
+                measureReport = r4Processor.evaluateMeasure(
+                    measure, periodStart, periodEnd, reportType, subjects, additionalData, parameters, evalType, compositeEvaluationResultsPerMeasure);
+
+                // add ProductLine after report is generated
+                measureReport = r4MeasureServiceUtils.addProductLineExtension(measureReport, productLine);
+
+                // add subject reference for non-individual reportTypes
+                measureReport = r4MeasureServiceUtils.addSubjectReference(measureReport, null, subjectParam);
+
+                // add reporter if available
+                if (reporter != null && !reporter.isEmpty()) {
+                    measureReport.setReporter(
                         r4MeasureServiceUtils.getReporter(reporter).orElse(null));
-            }
-            // add id to measureReport
-            initializeReport(measureReport);
+                }
+                // add id to measureReport
+                initializeReport(measureReport);
 
-            // add report to bundle
-            bundle.addEntry(getBundleEntry(serverBase, measureReport));
+                // add report to bundle
+                bundle.addEntry(getBundleEntry(serverBase, measureReport));
 
-            // progress feedback
-            var measureUrl = measureReport.getMeasure();
-            if (!measureUrl.isEmpty()) {
-                log.debug(
+                // progress feedback
+                var measureUrl = measureReport.getMeasure();
+                if (!measureUrl.isEmpty()) {
+                    log.debug(
                         "Completed evaluation for Measure: {}, Measures remaining to evaluate: {}",
                         measureUrl,
                         totalMeasures--);
+                }
             }
-        }
+
+//        // one aggregated MeasureReport per Measure
+//        var totalMeasures = measures.size();
+//        for (Measure measure : measures) {
+//            MeasureReport measureReport;
+//            // evaluate each measure
+//            measureReport = r4Processor.evaluateMeasure(
+//                    measure, periodStart, periodEnd, reportType, subjects, additionalData, parameters, evalType, evaluateMeasureResultsByMeasureId);
+//
+//            // add ProductLine after report is generated
+//            measureReport = r4MeasureServiceUtils.addProductLineExtension(measureReport, productLine);
+//
+//            // add subject reference for non-individual reportTypes
+//            measureReport = r4MeasureServiceUtils.addSubjectReference(measureReport, null, subjectParam);
+//
+//            // add reporter if available
+//            if (reporter != null && !reporter.isEmpty()) {
+//                measureReport.setReporter(
+//                        r4MeasureServiceUtils.getReporter(reporter).orElse(null));
+//            }
+//            // add id to measureReport
+//            initializeReport(measureReport);
+//
+//            // add report to bundle
+//            bundle.addEntry(getBundleEntry(serverBase, measureReport));
+//
+//            // progress feedback
+//            var measureUrl = measureReport.getMeasure();
+//            if (!measureUrl.isEmpty()) {
+//                log.debug(
+//                        "Completed evaluation for Measure: {}, Measures remaining to evaluate: {}",
+//                        measureUrl,
+//                        totalMeasures--);
+//            }
+//        }
     }
 
     protected void subjectMeasureReport(
@@ -226,33 +291,25 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
                 subjects.size(),
                 measures.size());
 
-        // measureId -> Map<String, EvaluationResult>
-        var evaluateMeasureResultsByMeasureId = new HashMap<String, Map<String, EvaluationResult>>();
+        // This is basically a Map of measure -> subject -> EvaluationResult
+        final CompositeEvaluationResultsPerMeasure compositeEvaluationResultsPerMeasure = r4Processor.evaluateMeasureWithCqlEngineNew(
+            subjects, measures, periodStart, periodEnd, parameters, additionalData);
 
+//        // LUKETODO: comment on exactly what this is for and what it does:
         for (Measure measure : measures) {
-            var measureDef = new R4MeasureDefBuilder().build(measure);
-
-            System.out.println("PRE EVALUATE MEASURE WITH CQL ENGINE 2");
-            var evaluationResults =
-                r4Processor.evaluateMeasureWithCqlEngine(subjects, measure, periodStart, periodEnd, parameters, measureDef, additionalData);
-
-            evaluateMeasureResultsByMeasureId.put(measure.getId(), evaluationResults);
-        }
-
-        for (String subject : subjects) {
-            for (Measure measure : measures) {
+            for (String subject : subjects) {
                 MeasureReport measureReport;
                 // evaluate each measure
                 measureReport = r4Processor.evaluateMeasure(
-                        measure,
-                        periodStart,
-                        periodEnd,
-                        reportType,
-                        Collections.singletonList(subject),
-                        additionalData,
-                        parameters,
-                        evalType,
-                        evaluateMeasureResultsByMeasureId);
+                    measure,
+                    periodStart,
+                    periodEnd,
+                    reportType,
+                    Collections.singletonList(subject),
+                    additionalData,
+                    parameters,
+                    evalType,
+                    compositeEvaluationResultsPerMeasure);
 
                 // add ProductLine after report is generated
                 measureReport = r4MeasureServiceUtils.addProductLineExtension(measureReport, productLine);
@@ -260,7 +317,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
                 // add reporter if available
                 if (reporter != null && !reporter.isEmpty()) {
                     measureReport.setReporter(
-                            r4MeasureServiceUtils.getReporter(reporter).orElse(null));
+                        r4MeasureServiceUtils.getReporter(reporter).orElse(null));
                 }
                 // add id to measureReport
                 initializeReport(measureReport);
@@ -281,6 +338,50 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
                 }
             }
         }
+
+
+//        for (String subject : subjects) {
+//            for (Measure measure : measures) {
+//                MeasureReport measureReport;
+//                // evaluate each measure
+//                measureReport = r4Processor.evaluateMeasure(
+//                        measure,
+//                        periodStart,
+//                        periodEnd,
+//                        reportType,
+//                        Collections.singletonList(subject),
+//                        additionalData,
+//                        parameters,
+//                        evalType,
+//                        evaluateMeasureResultsByMeasureId);
+//
+//                // add ProductLine after report is generated
+//                measureReport = r4MeasureServiceUtils.addProductLineExtension(measureReport, productLine);
+//
+//                // add reporter if available
+//                if (reporter != null && !reporter.isEmpty()) {
+//                    measureReport.setReporter(
+//                            r4MeasureServiceUtils.getReporter(reporter).orElse(null));
+//                }
+//                // add id to measureReport
+//                initializeReport(measureReport);
+//
+//                // add report to bundle
+//                bundle.addEntry(getBundleEntry(serverBase, measureReport));
+//
+//                // progress feedback
+//                var measureUrl = measureReport.getMeasure();
+//                if (!measureUrl.isEmpty()) {
+//                    log.debug("MeasureReports remaining to evaluate {}", totalReports--);
+//                }
+//                if (measure.hasUrl()) {
+//                    log.info(
+//                        "Completed evaluation for Measure: {}, Measures remaining to evaluate: {}",
+//                        measure.getUrl(),
+//                        totalMeasures--);
+//                }
+//            }
+//        }
     }
 
     protected List<String> getSubjects(R4RepositorySubjectProvider subjectProvider, String subjectId) {

@@ -97,7 +97,7 @@ public class Dstu3MeasureProcessor {
         var libraryVersionIdentifier = getLibraryVersionIdentifier(measure);
         var libraryEngine = getLibraryEngine(parameters, libraryVersionIdentifier, context);
         // set measurement Period from CQL if operation parameters are empty
-        measureProcessorUtils.setMeasurementPeriod(measureDef, measurementPeriodParams, context);
+        measureProcessorUtils.setMeasurementPeriod(measurementPeriodParams, context);
         // extract measurement Period from CQL to pass to report Builder
         Interval measurementPeriod =
                 measureProcessorUtils.getDefaultMeasurementPeriod(measurementPeriodParams, context);
@@ -105,7 +105,7 @@ public class Dstu3MeasureProcessor {
         ZonedDateTime zonedMeasurementPeriod = MeasureProcessorUtils.getZonedTimeZoneForEval(measurementPeriod);
         // populate results from Library $evaluate
         if (!subjects.isEmpty()) {
-            var results = measureProcessorUtils.getEvaluationResults(
+            var results = measureProcessorUtils.getEvaluationResultsOld(
                     subjectIds, measureDef, zonedMeasurementPeriod, context, libraryEngine, libraryVersionIdentifier);
 
             // Process Criteria Expression Results

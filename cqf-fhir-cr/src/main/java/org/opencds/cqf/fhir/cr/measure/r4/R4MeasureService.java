@@ -3,11 +3,8 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 import ca.uhn.fhir.repository.IRepository;
 import jakarta.annotation.Nullable;
 import java.time.ZonedDateTime;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CanonicalType;
@@ -106,13 +103,12 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
             .toList();
 
         var evaluationResults =
-            processor.evaluateMeasureWithCqlEngine(
+            processor.evaluateMeasureWithCqlEngineNew(
                 subjects,
-                foldedMeasure,
+                List.of(foldedMeasure),
                 periodStart,
                 periodEnd,
                 parameters,
-                measureDef,
                 additionalData);
 
         measureReport = processor.evaluateMeasure(
@@ -124,7 +120,7 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
                 additionalData,
                 parameters,
                 evalType,
-                Map.of(foldedMeasure.getId(), evaluationResults));
+                evaluationResults);
 
         // add ProductLine after report is generated
         measureReport = r4MeasureServiceUtils.addProductLineExtension(measureReport, productLine);

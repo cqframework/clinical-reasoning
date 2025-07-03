@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.cr.measure.common;
 
 import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.MEASUREPOPULATION;
 
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -30,6 +31,7 @@ import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.opencds.cqf.fhir.cr.measure.helper.DateHelper;
+import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureProcessor.MeasureLibraryIdEngineDetails;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -152,7 +154,7 @@ public class MeasureProcessorUtils {
      * @param context cql engine context used to set measurement period parameter
      */
     @SuppressWarnings({"deprecation", "removal"})
-    public void setMeasurementPeriod(MeasureDef measureDef, Interval measurementPeriod, CqlEngine context) {
+    public void setMeasurementPeriod(Interval measurementPeriod, CqlEngine context) {
         ParameterDef pd = this.getMeasurementPeriodParameterDef(context);
         if (pd == null) {
             logger.warn(
@@ -172,6 +174,7 @@ public class MeasureProcessorUtils {
 
         // Use the default, skip validation
         if (measurementPeriod == null) {
+            // LUKETODO:  what do we replace this with????
             measurementPeriod = (Interval) context.getEvaluationVisitor().visitParameterDef(pd, context.getState());
 
             context.getState()
@@ -194,7 +197,7 @@ public class MeasureProcessorUtils {
 
         NamedTypeSpecifier pointType = (NamedTypeSpecifier) intervalTypeSpecifier.getPointType();
         String targetType = pointType.getName().getLocalPart();
-        Interval convertedPeriod = convertInterval(measureDef, measurementPeriod, targetType);
+        Interval convertedPeriod = convertIntervalSansMeasureDef(measurementPeriod, targetType);
 
         context.getState().setParameter(null, MeasureConstants.MEASUREMENT_PERIOD_PARAMETER_NAME, convertedPeriod);
     }
@@ -269,6 +272,30 @@ public class MeasureProcessorUtils {
                         .formatted(sourceType, targetType, measureDef.url()));
     }
 
+    // LUKETODO:  rename
+    public Interval convertIntervalSansMeasureDef(Interval interval, String targetType) {
+        String sourceTypeQualified = interval.getPointType().getTypeName();
+        String sourceType = sourceTypeQualified.substring(sourceTypeQualified.lastIndexOf(".") + 1);
+        if (sourceType.equals(targetType)) {
+            return interval;
+        }
+
+        if (sourceType.equals("DateTime") && targetType.equals("Date")) {
+            logger.debug(
+                "A DateTime interval was provided and a Date interval was expected. The DateTime will be truncated.");
+            return new Interval(
+                truncateDateTime((DateTime) interval.getLow()),
+                interval.getLowClosed(),
+                truncateDateTime((DateTime) interval.getHigh()),
+                interval.getHighClosed());
+        }
+
+        // LUKETODO:  is there some other context we can pass in here?
+        throw new InvalidRequestException(
+            "The interval type of %s did not match the expected type of %s and no conversion was possible"
+                .formatted(sourceType, targetType));
+    }
+
     public Date truncateDateTime(DateTime dateTime) {
         OffsetDateTime odt = dateTime.getDateTime();
         return new Date(odt.getYear(), odt.getMonthValue(), odt.getDayOfMonth());
@@ -337,6 +364,7 @@ public class MeasureProcessorUtils {
         return result;
     }
 
+    // LUKETODO:  update javadoc
     /**
      * method used to execute generate CQL results via Library $evaluate
      * @param subjectIds subjects to generate results for
@@ -347,44 +375,79 @@ public class MeasureProcessorUtils {
      * @param id library Version identifier used by library engine
      * @return CQL results for Library defined in the Measure resource
      */
-    public Map<String,Map<String, EvaluationResult>> getEvaluationResults(
+    public CompositeEvaluationResultsPerMeasure getEvaluationResults(
             List<String> subjectIds,
             // LUKETODO: pass down the measure ID
-            MeasureDef measureDef,
             ZonedDateTime zonedMeasurementPeriod,
             CqlEngine context,
-            List<Pair<VersionedIdentifier,LibraryEngine>> idsToLib) {
+            List<MeasureLibraryIdEngineDetails> measureLibraryIdEngineDetailsList) {
 
         // measure -> subject -> results
-        Map<String,Map<String, EvaluationResult>> result = new HashMap<>();
+        var resultsBuilder = CompositeEvaluationResultsPerMeasure.builder();
 
         // Library $evaluate each subject
         for (String subjectId : subjectIds) {
             if (subjectId == null) {
-                throw new NullPointerException("SubjectId is required in order to calculate.");
+                throw new InternalErrorException("SubjectId is required in order to calculate.");
             }
-            for (Pair<VersionedIdentifier, LibraryEngine> pair : idsToLib) {
-                var innerMap = new HashMap<String, EvaluationResult>();
+            for (var measureLibraryIdEngine : measureLibraryIdEngineDetailsList) {
                 Pair<String, String> subjectInfo = this.getSubjectTypeAndId(subjectId);
                 String subjectTypePart = subjectInfo.getLeft();
                 String subjectIdPart = subjectInfo.getRight();
                 context.getState().setContextValue(subjectTypePart, subjectIdPart);
                 try {
-                    innerMap.put(
+                    resultsBuilder.addResult(
+                        measureLibraryIdEngine.measureId(),
                         subjectId,
-                        pair.getRight().getEvaluationResult(
-                            pair.getLeft(), subjectId, null, null, null, null, null, zonedMeasurementPeriod, context));
+                        measureLibraryIdEngine.engine().getEvaluationResult(
+                            measureLibraryIdEngine.libraryId(), subjectId, null, null, null, null, null, zonedMeasurementPeriod, context));
                 } catch (Exception e) {
                     // Catch Exceptions from evaluation per subject, but allow rest of subjects to be processed (if
                     // applicable)
                     var error = "Exception for subjectId: %s, Message: %s".formatted(subjectId, e.getMessage());
                     // LUKETODO: figure out another way to capture errors
                     // Capture error for MeasureReportBuilder
-                    measureDef.addError(error);
+//                    measureDef.addError(error);
                     logger.error(error, e);
                 }
-                // LUKETODO: consider url insetead
-                result.put(measureDef.id(), innerMap);
+            }
+        }
+
+        return resultsBuilder.build();
+    }
+
+    // LUKETODO:  get rid of this when all is said and done
+    public Map<String, EvaluationResult> getEvaluationResultsOld(
+        List<String> subjectIds,
+        MeasureDef measureDef,
+        ZonedDateTime zonedMeasurementPeriod,
+        CqlEngine context,
+        LibraryEngine libraryEngine,
+        VersionedIdentifier id) {
+
+        Map<String, EvaluationResult> result = new HashMap<>();
+
+        // Library $evaluate each subject
+        for (String subjectId : subjectIds) {
+            if (subjectId == null) {
+                throw new NullPointerException("SubjectId is required in order to calculate.");
+            }
+            Pair<String, String> subjectInfo = this.getSubjectTypeAndId(subjectId);
+            String subjectTypePart = subjectInfo.getLeft();
+            String subjectIdPart = subjectInfo.getRight();
+            context.getState().setContextValue(subjectTypePart, subjectIdPart);
+            try {
+                result.put(
+                    subjectId,
+                    libraryEngine.getEvaluationResult(
+                        id, subjectId, null, null, null, null, null, zonedMeasurementPeriod, context));
+            } catch (Exception e) {
+                // Catch Exceptions from evaluation per subject, but allow rest of subjects to be processed (if
+                // applicable)
+                var error = "Exception for subjectId: %s, Message: %s".formatted(subjectId, e.getMessage());
+                // Capture error for MeasureReportBuilder
+                measureDef.addError(error);
+                logger.error(error, e);
             }
         }
 

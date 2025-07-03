@@ -8,7 +8,6 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -17,8 +16,8 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Resource;
-import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
+import org.opencds.cqf.fhir.cr.measure.common.CompositeEvaluationResultsPerMeasure;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorUtils;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
@@ -80,21 +79,6 @@ public class R4CollectDataService {
 
         var foldedMeasure = measureServiceUtils.foldMeasure(Eithers.forMiddle3(measureId), repository);
 
-        // LUKETODO:  reuse  this within measureServiceUtils
-        var measureDef = new R4MeasureDefBuilder().build(foldedMeasure);
-
-        // LUKETODO:  in the old world, we call this for each subject in a loop.  in the new world, we do all 4 at once
-        var evaluationResultsOuter =
-            Map.of(foldedMeasure.getId(),
-                processor.evaluateMeasureWithCqlEngine(
-                subjectList,
-                foldedMeasure,
-                periodStart,
-                periodEnd,
-                parameters,
-                measureDef,
-                null));
-
         if (!subjectList.isEmpty()) {
             for (String patient : subjectList) {
                 // LUKETODO:  in the old world, we call this for each subject in a loop.  in the new world, we do all 4 at once
@@ -103,21 +87,27 @@ public class R4CollectDataService {
                 var mutableList = new ArrayList<>(subjects);
 
                 var evaluationResults =
-                    Map.of(foldedMeasure.getId(),
-                        processor.evaluateMeasureWithCqlEngine(
+                        processor.evaluateMeasureWithCqlEngineNew(
                             mutableList,
-                            foldedMeasure,
+                            List.of(foldedMeasure),
                             periodStart,
                             periodEnd,
                             parameters,
-                            measureDef,
-                            null));
+                            null);
 
                 // add resources per subject to Parameters
                 addReports(processor, measureId, periodStart, periodEnd, subjects, parameters, evaluationResults);
             }
         } else {
-            addReports(processor, measureId, periodStart, periodEnd, subjectList, parameters, evaluationResultsOuter);
+            var evaluationResults =
+                processor.evaluateMeasureWithCqlEngineNew(
+                    subjectList,
+                    List.of(foldedMeasure),
+                    periodStart,
+                    periodEnd,
+                    parameters,
+                    null);
+            addReports(processor, measureId, periodStart, periodEnd, subjectList, parameters, evaluationResults);
         }
         return parameters;
     }
@@ -129,7 +119,7 @@ public class R4CollectDataService {
             @Nullable ZonedDateTime periodEnd,
             List<String> subjects,
             Parameters parameters,
-            Map<String, Map<String, EvaluationResult>> evaluateMeasureResults) {
+            CompositeEvaluationResultsPerMeasure evaluateMeasureResults) {
 
         MeasureReport report = processor.evaluateMeasure(
                 Eithers.forMiddle3(measureId),

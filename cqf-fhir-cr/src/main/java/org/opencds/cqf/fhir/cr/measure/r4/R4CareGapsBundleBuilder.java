@@ -56,6 +56,7 @@ import org.opencds.cqf.fhir.utility.builder.CompositionBuilder;
 import org.opencds.cqf.fhir.utility.builder.CompositionSectionComponentBuilder;
 import org.opencds.cqf.fhir.utility.builder.DetectedIssueBuilder;
 import org.opencds.cqf.fhir.utility.builder.NarrativeSettings;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 
 /**
  * Care Gaps Bundle Builder houses the logic for constructing a Care-Gaps Document Bundle for a Patient per Measures requested
@@ -81,15 +82,16 @@ public class R4CareGapsBundleBuilder {
             MeasureEvaluationOptions measureEvaluationOptions,
             String serverBase,
             Map<String, Resource> configuredResources,
-            MeasurePeriodValidator measurePeriodValidator) {
+            MeasurePeriodValidator measurePeriodValidator,
+            NpmPackageLoader npmPackageLoader) {
         this.repository = repository;
         this.careGapsProperties = careGapsProperties;
         this.serverBase = serverBase;
         this.configuredResources = configuredResources;
 
         r4MeasureServiceUtils = new R4MeasureServiceUtils(repository);
-        r4MultiMeasureService =
-                new R4MultiMeasureService(repository, measureEvaluationOptions, serverBase, measurePeriodValidator);
+        r4MultiMeasureService = new R4MultiMeasureService(
+                repository, measureEvaluationOptions, serverBase, measurePeriodValidator, npmPackageLoader);
     }
 
     public List<Parameters.ParametersParameterComponent> makePatientBundles(

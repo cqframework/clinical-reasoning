@@ -88,7 +88,8 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
             var repositoryToUse =
                     Repositories.proxy(repository, true, dataEndpoint, contentEndpoint, terminologyEndpoint);
 
-            r4Processor = new R4MeasureProcessor(repositoryToUse, this.measureEvaluationOptions, this.measureProcessorUtils);
+            r4Processor =
+                    new R4MeasureProcessor(repositoryToUse, this.measureEvaluationOptions, this.measureProcessorUtils);
 
             r4MeasureServiceUtils = new R4MeasureServiceUtils(repositoryToUse);
         }
@@ -196,7 +197,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
         // This is basically a Map of measure -> subject -> EvaluationResult
         final CompositeEvaluationResultsPerMeasure compositeEvaluationResultsPerMeasure =
                 r4Processor.evaluateMeasureWithCqlEngine(
-                    subjects, measures, periodStart, periodEnd, parameters, additionalData);
+                        subjects, measures, periodStart, periodEnd, parameters, additionalData);
 
         var totalMeasures = measures.size();
         for (Measure measure : measures) {

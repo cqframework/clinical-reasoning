@@ -61,20 +61,14 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
         measurePeriodValidator.validatePeriodStartAndEnd(periodStart, periodEnd);
 
         var repo = Repositories.proxy(repository, true, dataEndpoint, contentEndpoint, terminologyEndpoint);
-        var processor = new R4MeasureProcessor(
-                repo,
-                this.measureEvaluationOptions,
-            measureProcessorUtils);
+        var processor = new R4MeasureProcessor(repo, this.measureEvaluationOptions, measureProcessorUtils);
 
         R4MeasureServiceUtils r4MeasureServiceUtils = new R4MeasureServiceUtils(repository);
         r4MeasureServiceUtils.ensureSupplementalDataElementSearchParameter();
 
-        var foldedMeasure = measureServiceUtils.foldMeasure(measure, repo);
+        var foldedMeasure = R4MeasureServiceUtils.foldMeasure(measure, repo);
 
         processor.checkMeasureLibrary(foldedMeasure);
-
-        // LUKETODO:  reuse  this within measureServiceUtils
-        var measureDef = new R4MeasureDefBuilder().build(foldedMeasure);
 
         MeasureReport measureReport;
 

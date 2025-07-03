@@ -69,7 +69,8 @@ public class R4CollectDataService {
             String practitioner) {
 
         Parameters parameters = new Parameters();
-        var processor = new R4MeasureProcessor(this.repository, this.measureEvaluationOptions, this.measureProcessorUtils);
+        var processor =
+                new R4MeasureProcessor(this.repository, this.measureEvaluationOptions, this.measureProcessorUtils);
 
         // LUKETODO:  subjectList should be null but we get a list of subjects here:
         // getSubjects

@@ -12,7 +12,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.Function;
 import org.cqframework.cql.cql2elm.CqlIncludeException;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.hl7.elm.r1.VersionedIdentifier;
@@ -43,6 +42,7 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorUtils;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4DateHelper;
+import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.monad.Either3;
 import org.opencds.cqf.fhir.utility.search.Searches;
@@ -73,9 +73,8 @@ public class R4MeasureProcessor {
             Parameters parameters,
             MeasureEvalType evalType,
             CompositeEvaluationResultsPerMeasure compositeEvaluationResultsPerMeasure) {
-        var m = measure.fold(this::resolveByUrl, this::resolveById, Function.identity());
         return this.evaluateMeasure(
-                m,
+                R4MeasureServiceUtils.foldMeasure(measure, this.repository),
                 periodStart,
                 periodEnd,
                 reportType,
@@ -188,7 +187,7 @@ public class R4MeasureProcessor {
         final IIdType measureId = measure.getIdElement().toUnqualifiedVersionless();
         // populate results from Library $evaluate
         final Map<String, EvaluationResult> resultForThisMeasure =
-                compositeEvaluationResultsPerMeasure.getResultForMeasure(measureId);
+                compositeEvaluationResultsPerMeasure.processMeasureForSuccessOrFailure(measureId, measureDef);
 
         // LUKETODO: process MeasureDef error here!
 
@@ -270,7 +269,7 @@ public class R4MeasureProcessor {
         // populate results from Library $evaluate
 
         return measureProcessorUtils.getEvaluationResults(
-            subjects, zonedMeasurementPeriod, context, measureLibraryIdEngineDetailsList);
+                subjects, zonedMeasurementPeriod, context, measureLibraryIdEngineDetailsList);
     }
 
     // Ideally this would be done in MeasureProcessorUtils, but it's too much work to change for now
@@ -286,12 +285,6 @@ public class R4MeasureProcessor {
     // LUKETODO:  find a better place for this
     public record MeasureLibraryIdEngineDetails(
             IIdType measureId, VersionedIdentifier libraryId, LibraryEngine engine) {}
-
-    //    private String groupDefToString(GroupDef groupDef) {
-    //        return "GroupDef{id='%s', measureScoring=%s, populations=%s, stratifiers=%s, measurePopulationType=%s}"
-    //            .formatted(groupDef.id(), groupDef.measureScoring(), groupDef.populations(), groupDef.stratifiers(),
-    //                groupDef.get
-    //    }
 
     /**  Temporary check for Measures that are being blocked from use by evaluateResults method
      *

@@ -415,9 +415,7 @@ public class MeasureProcessorUtils {
                     // Catch Exceptions from evaluation per subject, but allow rest of subjects to be processed (if
                     // applicable)
                     var error = "Exception for subjectId: %s, Message: %s".formatted(subjectId, e.getMessage());
-                    // LUKETODO: figure out another way to capture errors
-                    // Capture error for MeasureReportBuilder
-                    //                    measureDef.addError(error);
+                    resultsBuilder.addError(measureLibraryIdEngine.measureId(), error);
                     logger.error(error, e);
                 }
             }

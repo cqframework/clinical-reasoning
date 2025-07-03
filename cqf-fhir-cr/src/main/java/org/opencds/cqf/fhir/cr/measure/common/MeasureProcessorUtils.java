@@ -368,7 +368,6 @@ public class MeasureProcessorUtils {
     /**
      * method used to execute generate CQL results via Library $evaluate
      * @param subjectIds subjects to generate results for
-     * @param measureDef Measure definition object used to store results of criteria expressions
      * @param zonedMeasurementPeriod offset defined measurement period for evaluation
      * @param context cql engine context
      * @param libraryEngine library engine to use for evaluation of cql

@@ -69,12 +69,7 @@ public class R4CollectDataService {
             String practitioner) {
 
         Parameters parameters = new Parameters();
-        var processor = new R4MeasureProcessor(
-                this.repository,
-                this.measureEvaluationOptions,
-                this.subjectProvider,
-                this.measureServiceUtils,
-                measureProcessorUtils);
+        var processor = new R4MeasureProcessor(this.repository, this.measureEvaluationOptions, measureProcessorUtils);
 
         // LUKETODO:  subjectList should be null but we get a list of subjects here:
         // getSubjects
@@ -90,14 +85,14 @@ public class R4CollectDataService {
 
                 var mutableList = new ArrayList<>(subjects);
 
-                var evaluationResults = processor.evaluateMeasureWithCqlEngineNew(
+                var evaluationResults = processor.evaluateMeasureWithCqlEngine(
                         mutableList, List.of(foldedMeasure), periodStart, periodEnd, parameters, null);
 
                 // add resources per subject to Parameters
                 addReports(processor, measureId, periodStart, periodEnd, subjects, parameters, evaluationResults);
             }
         } else {
-            var evaluationResults = processor.evaluateMeasureWithCqlEngineNew(
+            var evaluationResults = processor.evaluateMeasureWithCqlEngine(
                     subjectList, List.of(foldedMeasure), periodStart, periodEnd, parameters, null);
             addReports(processor, measureId, periodStart, periodEnd, subjectList, parameters, evaluationResults);
         }

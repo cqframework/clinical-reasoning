@@ -62,8 +62,6 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
         r4Processor = new R4MeasureProcessor(
                 repository,
                 this.measureEvaluationOptions,
-                subjectProvider,
-                r4MeasureServiceUtils,
                 measureProcessorUtils);
 
         r4MeasureServiceUtils = new R4MeasureServiceUtils(repository);
@@ -93,12 +91,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
             var repositoryToUse =
                     Repositories.proxy(repository, true, dataEndpoint, contentEndpoint, terminologyEndpoint);
 
-            r4Processor = new R4MeasureProcessor(
-                    repositoryToUse,
-                    this.measureEvaluationOptions,
-                    subjectProvider,
-                    r4MeasureServiceUtils,
-                    measureProcessorUtils);
+            r4Processor = new R4MeasureProcessor(repositoryToUse, this.measureEvaluationOptions, measureProcessorUtils);
 
             r4MeasureServiceUtils = new R4MeasureServiceUtils(repositoryToUse);
         }
@@ -205,10 +198,9 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
 
         // This is basically a Map of measure -> subject -> EvaluationResult
         final CompositeEvaluationResultsPerMeasure compositeEvaluationResultsPerMeasure =
-                r4Processor.evaluateMeasureWithCqlEngineNew(
+                r4Processor.evaluateMeasureWithCqlEngine(
                         subjects, measures, periodStart, periodEnd, parameters, additionalData);
 
-        // LUKETODO: think about how this is used and how to log more effectively or to just leave it as is
         var totalMeasures = measures.size();
         for (Measure measure : measures) {
             MeasureReport measureReport;
@@ -311,10 +303,9 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
 
         // This is basically a Map of measure -> subject -> EvaluationResult
         final CompositeEvaluationResultsPerMeasure compositeEvaluationResultsPerMeasure =
-                r4Processor.evaluateMeasureWithCqlEngineNew(
+                r4Processor.evaluateMeasureWithCqlEngine(
                         subjects, measures, periodStart, periodEnd, parameters, additionalData);
 
-        //        // LUKETODO: comment on exactly what this is for and what it does:
         for (Measure measure : measures) {
             for (String subject : subjects) {
                 MeasureReport measureReport;

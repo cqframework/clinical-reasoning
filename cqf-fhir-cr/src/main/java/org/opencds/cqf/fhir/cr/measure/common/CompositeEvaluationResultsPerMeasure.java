@@ -43,13 +43,11 @@ public class CompositeEvaluationResultsPerMeasure {
     // measureDef will occasionally be prepended with the version, which means we need to parse it into an IIdType which
     // is too much work, so pass in the measureId directly
     public Map<String, EvaluationResult> processMeasureForSuccessOrFailure(IIdType measureId, MeasureDef measureDef) {
-        var hasFoundErrors = errorsPerMeasure.entrySet().stream()
+        errorsPerMeasure.entrySet().stream()
                 .filter(entry -> isMeasureDefFound(entry.getKey(), measureId))
                 .map(Entry::getValue)
                 .flatMap(List::stream)
-                .peek(measureDef::addError)
-                .findAny()
-                .isPresent();
+                .forEach(measureDef::addError);
 
         var resultForMeasure = resultsPerMeasure.entrySet().stream()
                 .filter(entry -> isMeasureDefFound(entry.getKey(), measureId))

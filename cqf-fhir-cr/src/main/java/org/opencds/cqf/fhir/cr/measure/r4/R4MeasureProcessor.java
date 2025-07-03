@@ -170,6 +170,11 @@ public class R4MeasureProcessor {
         var context = Engines.forRepository(
                 this.repository, this.measureEvaluationOptions.getEvaluationSettings(), additionalData);
 
+        // LUKETODO: why does this prevent errors?
+        var libraryVersionIdentifier = getLibraryVersionIdentifier(measure);
+        // library engine setup
+        var libraryEngine = getLibraryEngine(parameters, libraryVersionIdentifier, context);
+
         measureProcessorUtils.setMeasurementPeriod(
                 measurementPeriodParams,
                 context,

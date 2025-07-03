@@ -86,7 +86,6 @@ public class R4MeasureProcessor {
                 compositeEvaluationResultsPerMeasure);
     }
 
-    // LUKETODO:  this is no doubt used by CQL-CLI
     /**
      * Evaluation method that consumes pre-calculated CQL results, Processes results, builds Measure Report
      * @param measure Measure resource
@@ -159,11 +158,6 @@ public class R4MeasureProcessor {
             MeasureEvalType evalType,
             CompositeEvaluationResultsPerMeasure compositeEvaluationResultsPerMeasure) {
 
-        // LUKETODO: group the pre-measure engine setup tasks before the measure-specific tasks
-
-        // LUKETODO:  push this up
-        checkMeasureLibrary(measure);
-
         MeasureEvalType evaluationType = measureProcessorUtils.getEvalType(evalType, reportType, subjectIds);
         // Measurement Period: operation parameter defined measurement period
         Interval measurementPeriodParams = buildMeasurementPeriod(periodStart, periodEnd);
@@ -193,8 +187,6 @@ public class R4MeasureProcessor {
         // populate results from Library $evaluate
         final Map<String, EvaluationResult> resultForThisMeasure =
                 compositeEvaluationResultsPerMeasure.processMeasureForSuccessOrFailure(measureId, measureDef);
-
-        // LUKETODO: process MeasureDef error here!
 
         measureProcessorUtils.processResults(
                 resultForThisMeasure,
@@ -247,14 +239,26 @@ public class R4MeasureProcessor {
     }
     */
 
-    // LUKETODO:  consider a single measure variant
     public CompositeEvaluationResultsPerMeasure evaluateMeasureWithCqlEngine(
-            List<String> subjects, // LUKETODO:  I have a doubt about whether this should be a single subject or a list
+            List<String> subjects,
+            Measure measure,
+            @Nullable ZonedDateTime periodStart,
+            @Nullable ZonedDateTime periodEnd,
+            Parameters parameters,
+            @Nullable IBaseBundle additionalData) {
+        return evaluateMultiMeasuresWithCqlEngine(
+                subjects, List.of(measure), periodStart, periodEnd, parameters, additionalData);
+    }
+
+    public CompositeEvaluationResultsPerMeasure evaluateMultiMeasuresWithCqlEngine(
+            List<String> subjects,
             List<Measure> measures,
             @Nullable ZonedDateTime periodStart,
             @Nullable ZonedDateTime periodEnd,
             Parameters parameters,
             @Nullable IBaseBundle additionalData) {
+
+        measures.forEach(this::checkMeasureLibrary);
 
         // LUKETODO:  make this a parameter
         var context = Engines.forRepository(

@@ -9,8 +9,17 @@ import java.util.Map.Entry;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 
-// LUKETODO:  javadoc
-// This is basically a Map of measure -> subject -> EvaluationResult
+/**
+ * Container meant to hold the results or an early and cached CQL measure evaluation that holds
+ * two data points:
+ * <ol>
+ * <li>To hold the results of a measure evaluation, grouped by measure ID, with each measure evaluation grouped by Subject ID</li>
+ * <li>To hold any errors that occurred during the evaluation, grouped by measure ID</li>
+ * </ol>
+ * These data points are not mutually exclusive, meaning a measure may have both successful results and errors.
+ * <p/>
+ * This class also allows the caller to mutate a {@link MeasureDef} with the errors that occurred during the evaluation
+ */
 public class CompositeEvaluationResultsPerMeasure {
     // The same measure may have successful results AND errors, so account for both
     private final Map<IIdType, Map<String, EvaluationResult>> resultsPerMeasure;

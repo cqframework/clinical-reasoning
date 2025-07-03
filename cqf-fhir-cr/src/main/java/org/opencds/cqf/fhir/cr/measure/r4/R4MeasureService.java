@@ -68,8 +68,6 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
 
         var foldedMeasure = R4MeasureServiceUtils.foldMeasure(measure, repo);
 
-        processor.checkMeasureLibrary(foldedMeasure);
-
         MeasureReport measureReport;
 
         if (StringUtils.isNotBlank(practitioner)) {
@@ -94,7 +92,7 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
                 .toList();
 
         var evaluationResults = processor.evaluateMeasureWithCqlEngine(
-                subjects, List.of(foldedMeasure), periodStart, periodEnd, parameters, additionalData);
+                subjects, foldedMeasure, periodStart, periodEnd, parameters, additionalData);
 
         measureReport = processor.evaluateMeasure(
                 measure,

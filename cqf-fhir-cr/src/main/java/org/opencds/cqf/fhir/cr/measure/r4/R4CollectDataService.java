@@ -72,29 +72,25 @@ public class R4CollectDataService {
         var processor =
                 new R4MeasureProcessor(this.repository, this.measureEvaluationOptions, this.measureProcessorUtils);
 
-        // LUKETODO:  subjectList should be null but we get a list of subjects here:
-        // getSubjects
         List<String> subjectList = getSubjects(subject, practitioner, subjectProvider);
 
-        var foldedMeasure = measureServiceUtils.foldMeasure(Eithers.forMiddle3(measureId), repository);
+        var foldedMeasure = R4MeasureServiceUtils.foldMeasure(Eithers.forMiddle3(measureId), repository);
 
         if (!subjectList.isEmpty()) {
             for (String patient : subjectList) {
-                // LUKETODO:  in the old world, we call this for each subject in a loop.  in the new world, we do all 4
-                // at once
                 var subjects = Collections.singletonList(patient);
 
                 var mutableList = new ArrayList<>(subjects);
 
                 var evaluationResults = processor.evaluateMeasureWithCqlEngine(
-                        mutableList, List.of(foldedMeasure), periodStart, periodEnd, parameters, null);
+                        mutableList, foldedMeasure, periodStart, periodEnd, parameters, null);
 
                 // add resources per subject to Parameters
                 addReports(processor, measureId, periodStart, periodEnd, subjects, parameters, evaluationResults);
             }
         } else {
             var evaluationResults = processor.evaluateMeasureWithCqlEngine(
-                    subjectList, List.of(foldedMeasure), periodStart, periodEnd, parameters, null);
+                    subjectList, foldedMeasure, periodStart, periodEnd, parameters, null);
             addReports(processor, measureId, periodStart, periodEnd, subjectList, parameters, evaluationResults);
         }
         return parameters;

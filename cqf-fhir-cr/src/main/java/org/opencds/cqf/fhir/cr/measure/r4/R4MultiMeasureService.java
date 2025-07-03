@@ -196,7 +196,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
 
         // This is basically a Map of measure -> subject -> EvaluationResult
         final CompositeEvaluationResultsPerMeasure compositeEvaluationResultsPerMeasure =
-                r4Processor.evaluateMeasureWithCqlEngine(
+                r4Processor.evaluateMultiMeasuresWithCqlEngine(
                         subjects, measures, periodStart, periodEnd, parameters, additionalData);
 
         var totalMeasures = measures.size();
@@ -301,7 +301,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
 
         // This is basically a Map of measure -> subject -> EvaluationResult
         final CompositeEvaluationResultsPerMeasure compositeEvaluationResultsPerMeasure =
-                r4Processor.evaluateMeasureWithCqlEngine(
+                r4Processor.evaluateMultiMeasuresWithCqlEngine(
                         subjects, measures, periodStart, periodEnd, parameters, additionalData);
 
         for (Measure measure : measures) {

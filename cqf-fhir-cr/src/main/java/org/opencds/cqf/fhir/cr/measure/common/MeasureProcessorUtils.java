@@ -341,19 +341,16 @@ public class MeasureProcessorUtils {
         return result;
     }
 
-    // LUKETODO:  update javadoc
     /**
      * method used to execute generate CQL results via Library $evaluate
      * @param subjectIds subjects to generate results for
      * @param zonedMeasurementPeriod offset defined measurement period for evaluation
      * @param context cql engine context
-     * @param libraryEngine library engine to use for evaluation of cql
-     * @param id library Version identifier used by library engine
+     * @param measureLibraryIdEngineDetailsList contains details of measureId, libraryId, and LibraryEngine
      * @return CQL results for Library defined in the Measure resource
      */
     public CompositeEvaluationResultsPerMeasure getEvaluationResults(
             List<String> subjectIds,
-            // LUKETODO: pass down the measure ID
             ZonedDateTime zonedMeasurementPeriod,
             CqlEngine context,
             List<MeasureLibraryIdEngineDetails> measureLibraryIdEngineDetailsList) {

@@ -42,9 +42,7 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorUtils;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
-import org.opencds.cqf.fhir.cr.measure.common.SubjectProvider;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4DateHelper;
-import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.monad.Either3;
 import org.opencds.cqf.fhir.utility.search.Searches;
@@ -52,21 +50,15 @@ import org.opencds.cqf.fhir.utility.search.Searches;
 public class R4MeasureProcessor {
     private final IRepository repository;
     private final MeasureEvaluationOptions measureEvaluationOptions;
-    private final SubjectProvider subjectProvider;
-    private final R4MeasureServiceUtils r4MeasureServiceUtils;
     private final MeasureProcessorUtils measureProcessorUtils;
 
     public R4MeasureProcessor(
             IRepository repository,
             MeasureEvaluationOptions measureEvaluationOptions,
-            SubjectProvider subjectProvider,
-            R4MeasureServiceUtils r4MeasureServiceUtils,
             MeasureProcessorUtils measureProcessorUtils) {
         this.repository = Objects.requireNonNull(repository);
         this.measureEvaluationOptions =
                 measureEvaluationOptions != null ? measureEvaluationOptions : MeasureEvaluationOptions.defaultOptions();
-        this.subjectProvider = subjectProvider;
-        this.r4MeasureServiceUtils = r4MeasureServiceUtils;
         this.measureProcessorUtils = measureProcessorUtils;
     }
 
@@ -250,7 +242,7 @@ public class R4MeasureProcessor {
     }
 
     // LUKETODO:  consider a single measure variant
-    public CompositeEvaluationResultsPerMeasure evaluateMeasureWithCqlEngineNew(
+    public CompositeEvaluationResultsPerMeasure evaluateMeasureWithCqlEngine(
             List<String> subjects, // LUKETODO:  I have a doubt about whether this should be a single subject or a list
             List<Measure> measures,
             @Nullable ZonedDateTime periodStart,

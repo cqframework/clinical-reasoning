@@ -64,9 +64,7 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
         var processor = new R4MeasureProcessor(
                 repo,
                 this.measureEvaluationOptions,
-                this.subjectProvider,
-                this.measureServiceUtils,
-                measureProcessorUtils);
+            measureProcessorUtils);
 
         R4MeasureServiceUtils r4MeasureServiceUtils = new R4MeasureServiceUtils(repository);
         r4MeasureServiceUtils.ensureSupplementalDataElementSearchParameter();
@@ -101,7 +99,7 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
                         actualRepo, Optional.ofNullable(subjectId).map(List::of).orElse(List.of()))
                 .toList();
 
-        var evaluationResults = processor.evaluateMeasureWithCqlEngineNew(
+        var evaluationResults = processor.evaluateMeasureWithCqlEngine(
                 subjects, List.of(foldedMeasure), periodStart, periodEnd, parameters, additionalData);
 
         measureReport = processor.evaluateMeasure(

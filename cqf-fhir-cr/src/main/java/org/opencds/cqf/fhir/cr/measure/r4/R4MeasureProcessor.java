@@ -30,7 +30,6 @@ import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.fhir.model.R4FhirModelResolver;
 import org.opencds.cqf.cql.engine.runtime.Interval;
-import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cql.VersionedIdentifiers;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
@@ -74,6 +73,7 @@ public class R4MeasureProcessor {
             IBaseBundle additionalData,
             Parameters parameters,
             MeasureEvalType evalType,
+            CqlEngine context,
             CompositeEvaluationResultsPerMeasure compositeEvaluationResultsPerMeasure) {
         return this.evaluateMeasure(
                 R4MeasureServiceUtils.foldMeasure(measure, this.repository),
@@ -84,6 +84,7 @@ public class R4MeasureProcessor {
                 additionalData,
                 parameters,
                 evalType,
+                context,
                 compositeEvaluationResultsPerMeasure);
     }
 
@@ -157,6 +158,7 @@ public class R4MeasureProcessor {
             IBaseBundle additionalData,
             Parameters parameters,
             MeasureEvalType evalType,
+            CqlEngine context,
             CompositeEvaluationResultsPerMeasure compositeEvaluationResultsPerMeasure) {
 
         MeasureEvalType evaluationType = measureProcessorUtils.getEvalType(evalType, reportType, subjectIds);
@@ -166,14 +168,26 @@ public class R4MeasureProcessor {
         // setup MeasureDef
         var measureDef = new R4MeasureDefBuilder().build(measure);
 
-        // CQL Engine context
-        var context = Engines.forRepository(
-                this.repository, this.measureEvaluationOptions.getEvaluationSettings(), additionalData);
+        //        // CQL Engine context
+        //        var context = Engines.forRepository(
+        //                this.repository, this.measureEvaluationOptions.getEvaluationSettings(), additionalData);
 
-        // LUKETODO: why does this prevent errors?
-        var libraryVersionIdentifier = getLibraryVersionIdentifier(measure);
-        // library engine setup
-        var libraryEngine = getLibraryEngine(parameters, libraryVersionIdentifier, context);
+        //        var libraryEngine = getLibraryEngine(parameters, getLibraryVersionIdentifier(measure), context);
+
+        //        java.lang.NullPointerException: Cannot invoke "org.hl7.elm.r1.Library.getParameters()" because "lib"
+        // is null
+        //
+        //        at
+        // org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorUtils.getMeasurementPeriodParameterDef(MeasureProcessorUtils.java:135)
+        //        at
+        // org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorUtils.setMeasurementPeriod(MeasureProcessorUtils.java:158)
+        //        at org.opencds.cqf.fhir.cr.measure.r4.R4MeasureProcessor.evaluateMeasure(R4MeasureProcessor.java:178)
+        //        at org.opencds.cqf.fhir.cr.measure.r4.R4MeasureProcessor.evaluateMeasure(R4MeasureProcessor.java:78)
+        //        at org.opencds.cqf.fhir.cr.measure.r4.R4MeasureService.evaluate(R4MeasureService.java:97)
+        //        at org.opencds.cqf.fhir.cr.measure.r4.Measure$When.lambda$evaluate$0(Measure.java:255)
+        //        at org.opencds.cqf.fhir.cr.measure.r4.Measure$When.then(Measure.java:278)
+        //        at
+        // org.opencds.cqf.fhir.cr.measure.r4.MeasureConditionCategoryPOCTest.measure_eval_non_retrieve_resource(MeasureConditionCategoryPOCTest.java:25)
 
         measureProcessorUtils.setMeasurementPeriod(
                 measurementPeriodParams,
@@ -216,6 +230,7 @@ public class R4MeasureProcessor {
             @Nullable ZonedDateTime periodStart,
             @Nullable ZonedDateTime periodEnd,
             Parameters parameters,
+            CqlEngine context,
             @Nullable IBaseBundle additionalData) {
 
         return evaluateMultiMeasuresWithCqlEngine(
@@ -224,6 +239,7 @@ public class R4MeasureProcessor {
                 periodStart,
                 periodEnd,
                 parameters,
+                context,
                 additionalData);
     }
 
@@ -233,24 +249,23 @@ public class R4MeasureProcessor {
             @Nullable ZonedDateTime periodStart,
             @Nullable ZonedDateTime periodEnd,
             Parameters parameters,
+            CqlEngine context,
             @Nullable IBaseBundle additionalData) {
         return evaluateMultiMeasuresWithCqlEngine(
-                subjects, List.of(measure), periodStart, periodEnd, parameters, additionalData);
+                subjects, List.of(measure), periodStart, periodEnd, parameters, context, additionalData);
     }
 
+    // LUKETODO: cleanup any parameters that are not needed
     public CompositeEvaluationResultsPerMeasure evaluateMultiMeasuresWithCqlEngine(
             List<String> subjects,
             List<Measure> measures,
             @Nullable ZonedDateTime periodStart,
             @Nullable ZonedDateTime periodEnd,
             Parameters parameters,
+            CqlEngine context,
             @Nullable IBaseBundle additionalData) {
 
         measures.forEach(this::checkMeasureLibrary);
-
-        // LUKETODO:  make this a parameter
-        var context = Engines.forRepository(
-                this.repository, this.measureEvaluationOptions.getEvaluationSettings(), additionalData);
 
         var measurementPeriodParams = buildMeasurementPeriod(periodStart, periodEnd);
         var zonedMeasurementPeriod = MeasureProcessorUtils.getZonedTimeZoneForEval(

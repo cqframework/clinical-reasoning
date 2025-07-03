@@ -13,6 +13,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Parameters;
+import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorUtils;
@@ -91,8 +92,12 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
                         actualRepo, Optional.ofNullable(subjectId).map(List::of).orElse(List.of()))
                 .toList();
 
+        // LUKETODO:  which repository should we use for the context?
+        var context = Engines.forRepository(
+                this.repository, this.measureEvaluationOptions.getEvaluationSettings(), additionalData);
+
         var evaluationResults = processor.evaluateMeasureWithCqlEngine(
-                subjects, foldedMeasure, periodStart, periodEnd, parameters, additionalData);
+                subjects, foldedMeasure, periodStart, periodEnd, parameters, context, additionalData);
 
         measureReport = processor.evaluateMeasure(
                 measure,
@@ -103,6 +108,7 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
                 additionalData,
                 parameters,
                 evalType,
+                context,
                 evaluationResults);
 
         // add ProductLine after report is generated

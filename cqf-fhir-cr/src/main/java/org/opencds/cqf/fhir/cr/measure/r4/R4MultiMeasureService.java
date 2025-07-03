@@ -19,6 +19,7 @@ import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Resource;
+import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.CompositeEvaluationResultsPerMeasure;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
@@ -154,10 +155,13 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
             String productLine,
             String reporter) {
 
+        var context = Engines.forRepository(
+                this.repository, this.measureEvaluationOptions.getEvaluationSettings(), additionalData);
+
         // This is basically a Map of measure -> subject -> EvaluationResult
         final CompositeEvaluationResultsPerMeasure compositeEvaluationResultsPerMeasure =
                 r4Processor.evaluateMultiMeasuresWithCqlEngine(
-                        subjects, measures, periodStart, periodEnd, parameters, additionalData);
+                        subjects, measures, periodStart, periodEnd, parameters, context, additionalData);
 
         var totalMeasures = measures.size();
         for (Measure measure : measures) {
@@ -172,6 +176,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
                     additionalData,
                     parameters,
                     evalType,
+                    context,
                     compositeEvaluationResultsPerMeasure);
 
             // add ProductLine after report is generated
@@ -200,42 +205,6 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
                         totalMeasures--);
             }
         }
-
-        //        // one aggregated MeasureReport per Measure
-        //        var totalMeasures = measures.size();
-        //        for (Measure measure : measures) {
-        //            MeasureReport measureReport;
-        //            // evaluate each measure
-        //            measureReport = r4Processor.evaluateMeasure(
-        //                    measure, periodStart, periodEnd, reportType, subjects, additionalData, parameters,
-        // evalType, evaluateMeasureResultsByMeasureId);
-        //
-        //            // add ProductLine after report is generated
-        //            measureReport = r4MeasureServiceUtils.addProductLineExtension(measureReport, productLine);
-        //
-        //            // add subject reference for non-individual reportTypes
-        //            measureReport = r4MeasureServiceUtils.addSubjectReference(measureReport, null, subjectParam);
-        //
-        //            // add reporter if available
-        //            if (reporter != null && !reporter.isEmpty()) {
-        //                measureReport.setReporter(
-        //                        r4MeasureServiceUtils.getReporter(reporter).orElse(null));
-        //            }
-        //            // add id to measureReport
-        //            initializeReport(measureReport);
-        //
-        //            // add report to bundle
-        //            bundle.addEntry(getBundleEntry(serverBase, measureReport));
-        //
-        //            // progress feedback
-        //            var measureUrl = measureReport.getMeasure();
-        //            if (!measureUrl.isEmpty()) {
-        //                log.debug(
-        //                        "Completed evaluation for Measure: {}, Measures remaining to evaluate: {}",
-        //                        measureUrl,
-        //                        totalMeasures--);
-        //            }
-        //        }
     }
 
     protected void subjectMeasureReport(
@@ -259,10 +228,13 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
                 subjects.size(),
                 measures.size());
 
+        var context = Engines.forRepository(
+                this.repository, this.measureEvaluationOptions.getEvaluationSettings(), additionalData);
+
         // This is basically a Map of measure -> subject -> EvaluationResult
         final CompositeEvaluationResultsPerMeasure compositeEvaluationResultsPerMeasure =
                 r4Processor.evaluateMultiMeasuresWithCqlEngine(
-                        subjects, measures, periodStart, periodEnd, parameters, additionalData);
+                        subjects, measures, periodStart, periodEnd, parameters, context, additionalData);
 
         for (Measure measure : measures) {
             for (String subject : subjects) {
@@ -277,6 +249,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
                         additionalData,
                         parameters,
                         evalType,
+                        context,
                         compositeEvaluationResultsPerMeasure);
 
                 // add ProductLine after report is generated

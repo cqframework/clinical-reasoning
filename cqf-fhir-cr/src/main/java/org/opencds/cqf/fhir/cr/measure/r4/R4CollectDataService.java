@@ -16,6 +16,8 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Resource;
+import org.opencds.cqf.cql.engine.execution.CqlEngine;
+import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.CompositeEvaluationResultsPerMeasure;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
@@ -74,6 +76,9 @@ public class R4CollectDataService {
 
         List<String> subjectList = getSubjects(subject, practitioner, subjectProvider);
 
+        var context =
+                Engines.forRepository(this.repository, this.measureEvaluationOptions.getEvaluationSettings(), null);
+
         var foldedMeasure = R4MeasureServiceUtils.foldMeasure(Eithers.forMiddle3(measureId), repository);
 
         if (!subjectList.isEmpty()) {
@@ -83,15 +88,17 @@ public class R4CollectDataService {
                 var mutableList = new ArrayList<>(subjects);
 
                 var evaluationResults = processor.evaluateMeasureWithCqlEngine(
-                        mutableList, foldedMeasure, periodStart, periodEnd, parameters, null);
+                        mutableList, foldedMeasure, periodStart, periodEnd, parameters, context, null);
 
                 // add resources per subject to Parameters
-                addReports(processor, measureId, periodStart, periodEnd, subjects, parameters, evaluationResults);
+                addReports(
+                        processor, measureId, periodStart, periodEnd, subjects, parameters, context, evaluationResults);
             }
         } else {
             var evaluationResults = processor.evaluateMeasureWithCqlEngine(
-                    subjectList, foldedMeasure, periodStart, periodEnd, parameters, null);
-            addReports(processor, measureId, periodStart, periodEnd, subjectList, parameters, evaluationResults);
+                    subjectList, foldedMeasure, periodStart, periodEnd, parameters, context, null);
+            addReports(
+                    processor, measureId, periodStart, periodEnd, subjectList, parameters, context, evaluationResults);
         }
         return parameters;
     }
@@ -103,6 +110,7 @@ public class R4CollectDataService {
             @Nullable ZonedDateTime periodEnd,
             List<String> subjects,
             Parameters parameters,
+            CqlEngine context,
             CompositeEvaluationResultsPerMeasure evaluateMeasureResults) {
 
         MeasureReport report = processor.evaluateMeasure(
@@ -114,6 +122,7 @@ public class R4CollectDataService {
                 null,
                 null,
                 null,
+                context,
                 evaluateMeasureResults);
 
         report.setType(MeasureReport.MeasureReportType.DATACOLLECTION);

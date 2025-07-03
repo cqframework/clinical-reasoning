@@ -31,7 +31,6 @@ import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.opencds.cqf.fhir.cr.measure.helper.DateHelper;
-import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureProcessor.MeasureLibraryIdEngineDetails;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -397,8 +396,11 @@ public class MeasureProcessorUtils {
         return resultsBuilder.build();
     }
 
-    // LUKETODO:  get rid of this when all is said and done
-    public Map<String, EvaluationResult> getEvaluationResultsOld(
+    /**
+     * This is the legacy CQL measure evaluation logic that at this point should be used only
+     * by DSTU3, but it should never be used by R4 or later.
+     */
+    public Map<String, EvaluationResult> getEvaluationResultsLegacy(
             List<String> subjectIds,
             MeasureDef measureDef,
             ZonedDateTime zonedMeasurementPeriod,

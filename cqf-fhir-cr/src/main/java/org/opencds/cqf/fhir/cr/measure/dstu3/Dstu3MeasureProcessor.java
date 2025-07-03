@@ -109,7 +109,7 @@ public class Dstu3MeasureProcessor {
         ZonedDateTime zonedMeasurementPeriod = MeasureProcessorUtils.getZonedTimeZoneForEval(measurementPeriod);
         // populate results from Library $evaluate
         if (!subjects.isEmpty()) {
-            var results = measureProcessorUtils.getEvaluationResultsOld(
+            var results = measureProcessorUtils.getEvaluationResultsLegacy(
                     subjectIds, measureDef, zonedMeasurementPeriod, context, libraryEngine, libraryVersionIdentifier);
 
             // Process Criteria Expression Results

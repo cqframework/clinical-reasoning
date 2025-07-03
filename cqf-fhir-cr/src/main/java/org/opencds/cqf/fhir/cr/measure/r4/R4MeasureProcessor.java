@@ -38,6 +38,7 @@ import org.opencds.cqf.fhir.cr.measure.common.CompositeEvaluationResultsPerMeasu
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureLibraryIdEngineDetails;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorUtils;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
@@ -208,36 +209,22 @@ public class R4MeasureProcessor {
                         subjectIds);
     }
 
-    // LUKETODO:  delete this once I no longer need to reference it
-    /*
-    public Map<String, EvaluationResult> evaluateMeasureWithCqlEngineOld(
+    public CompositeEvaluationResultsPerMeasure evaluateMeasureIdWithCqlEngine(
             List<String> subjects,
-            Measure measure,
+            IIdType measureId,
             @Nullable ZonedDateTime periodStart,
             @Nullable ZonedDateTime periodEnd,
             Parameters parameters,
-            MeasureDef measureDef,
             @Nullable IBaseBundle additionalData) {
 
-        var context = Engines.forRepository(
-                this.repository, this.measureEvaluationOptions.getEvaluationSettings(), additionalData);
-
-        var measurementPeriodParams = buildMeasurementPeriod(periodStart, periodEnd);
-        var zonedMeasurementPeriod = MeasureProcessorUtils.getZonedTimeZoneForEval(
-                measureProcessorUtils.getDefaultMeasurementPeriod(measurementPeriodParams, context));
-
-        final VersionedIdentifier libraryVersionIdentifier = getLibraryVersionIdentifier(measure);
-
-        var libraryEngine = getLibraryEngine(parameters, libraryVersionIdentifier, context);
-
-        // set measurement Period from CQL if operation parameters are empty
-        measureProcessorUtils.setMeasurementPeriod(measurementPeriodParams, context);
-
-        // populate results from Library $evaluate
-        return measureProcessorUtils.getEvaluationResultsOld(
-                subjects, measureDef, zonedMeasurementPeriod, context, libraryEngine, libraryVersionIdentifier);
+        return evaluateMultiMeasuresWithCqlEngine(
+                subjects,
+                List.of(R4MeasureServiceUtils.resolveById(measureId, repository)),
+                periodStart,
+                periodEnd,
+                parameters,
+                additionalData);
     }
-    */
 
     public CompositeEvaluationResultsPerMeasure evaluateMeasureWithCqlEngine(
             List<String> subjects,
@@ -296,10 +283,6 @@ public class R4MeasureProcessor {
                 libraryVersionIdentifier,
                 getLibraryEngine(parameters, libraryVersionIdentifier, context));
     }
-
-    // LUKETODO:  find a better place for this
-    public record MeasureLibraryIdEngineDetails(
-            IIdType measureId, VersionedIdentifier libraryId, LibraryEngine engine) {}
 
     /**  Temporary check for Measures that are being blocked from use by evaluateResults method
      *

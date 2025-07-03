@@ -35,6 +35,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -358,7 +359,7 @@ public class R4MeasureServiceUtils {
         return (Measure) result.getEntryFirstRep().getResource();
     }
 
-    public static Measure resolveById(IdType id, IRepository repository) {
+    public static Measure resolveById(IIdType id, IRepository repository) {
         return repository.read(Measure.class, id);
     }
 }

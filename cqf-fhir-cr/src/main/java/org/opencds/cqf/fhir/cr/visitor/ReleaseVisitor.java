@@ -50,6 +50,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
     private static final String VALUESET = "ValueSet";
     private static final String CODESYSTEM = "CodeSystem";
     protected final TerminologyServerClient terminologyServerClient;
+    private IKnowledgeArtifactAdapter artifactBeingReleasedAdapter;
 
     public ReleaseVisitor(IRepository repository) {
         super(repository);
@@ -64,6 +65,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
     @SuppressWarnings("unchecked")
     @Override
     public IBase visit(IKnowledgeArtifactAdapter rootAdapter, IBaseParameters operationParameters) {
+        artifactBeingReleasedAdapter = rootAdapter;
         // Setup and parameter validation
         final var rootLibrary = rootAdapter.get();
         final var current = new Date();
@@ -130,16 +132,9 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
         noDeps.removeIf(
                 ra -> IKnowledgeArtifactAdapter.getRelatedArtifactType(ra).equalsIgnoreCase(DEPENDSON));
         rootAdapter.setRelatedArtifact(noDeps);
+
         // extract expansion parameters
-        var expansionParameters = rootAdapter.getExpansionParameters();
-        var systemVersionParams = expansionParameters
-                .map(p -> VisitorHelper.getStringListParameter(Constants.SYSTEM_VERSION, p)
-                        .orElse(null))
-                .orElse(new ArrayList<>());
-        var canonicalVersionParams = expansionParameters
-                .map(p -> VisitorHelper.getStringListParameter(Constants.CANONICAL_VERSION, p)
-                        .orElse(null))
-                .orElse(new ArrayList<>());
+        var expansionParameters = rootAdapter.getExpansionParameters().orElse(null);
 
         // Report all dependencies, resolving unversioned dependencies to the latest known version, recursively
         var gatheredResources = new HashSet<String>();
@@ -149,13 +144,12 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
                 gatheredResources,
                 updatedComponents,
                 new HashMap<>(),
-                systemVersionParams,
-                canonicalVersionParams,
+                expansionParameters,
                 latestFromTxServer,
                 terminologyEndpoint.orElse(null));
 
         if (rootAdapter.get().fhirType().equals("Library")) {
-            ((ILibraryAdapter) rootAdapter).setExpansionParameters(systemVersionParams, canonicalVersionParams);
+            ((ILibraryAdapter) rootAdapter).setExpansionParameters(expansionParameters);
         }
 
         // remove duplicates and add
@@ -292,8 +286,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
             Set<String> gatheredResources,
             List<IDomainResource> releasedResources,
             Map<String, IDomainResource> alreadyUpdatedDependencies,
-            List<String> systemVersionExpansionParameters,
-            List<String> canonicalVersionExpansionParameters,
+            IBaseParameters expansionParameters,
             boolean latestFromTxServer,
             IEndpointAdapter endpoint) {
         if (artifactAdapter == null) {
@@ -337,12 +330,8 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
                     dependencyUrl = dependency.getReference();
                 }
                 if (!alreadyUpdatedDependencies.containsKey(dependencyUrl)) {
-                    var maybeAdapter = tryResolveDependency(
-                            dependency,
-                            canonicalVersionExpansionParameters,
-                            systemVersionExpansionParameters,
-                            latestFromTxServer,
-                            endpoint);
+                    var maybeAdapter =
+                            tryResolveDependency(dependency, expansionParameters, latestFromTxServer, endpoint);
                     if (maybeAdapter.isPresent()) {
                         dependencyAdapter = maybeAdapter.get();
                         alreadyUpdatedDependencies.put(dependencyAdapter.getUrl(), dependencyAdapter.get());
@@ -370,8 +359,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
                             gatheredResources,
                             releasedResources,
                             alreadyUpdatedDependencies,
-                            systemVersionExpansionParameters,
-                            canonicalVersionExpansionParameters,
+                            expansionParameters,
                             latestFromTxServer,
                             endpoint);
                 }
@@ -384,6 +372,11 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
                             dependencyAdapter != null ? dependencyAdapter.getDescriptor() : null);
 
                     ensureResourceTypeExtension(getResourceType(dependency), newDep);
+                    //                    ensureExpansionParametersEntry(getResourceType(dependency),
+                    // dependency.getReference());
+                    if (rootAdapter.get().fhirType().equals("Library")) {
+                        ((ILibraryAdapter) rootAdapter).setExpansionParameters(expansionParameters);
+                    }
 
                     var updatedRelatedArtifacts = rootAdapter.getRelatedArtifact();
                     updatedRelatedArtifacts.add(newDep);
@@ -409,6 +402,33 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
         }
     }
 
+    //    private void ensureExpansionParametersEntry(String resourceType, String canonical) {
+    //        // extract expansion parameters
+    //        var expansionParameters = artifactBeingReleasedAdapter.getExpansionParameters();
+    //
+    //        if (expansionParameters.isEmpty()) {
+    //            expansionParameters = new Parameters();
+    //
+    //        } else
+    ////
+    ////        expansionParameters.ifPresent(ep -> ep.get)
+    //
+    ////        var systemVersionParams = expansionParameters
+    ////            .map(p -> VisitorHelper.getStringListParameter(Constants.SYSTEM_VERSION, p)
+    ////                .orElse(null))
+    ////            .orElse(new ArrayList<>());
+    ////        var canonicalVersionParams = expansionParameters
+    ////            .map(p -> VisitorHelper.getStringListParameter(Constants.CANONICAL_VERSION, p)
+    ////                .orElse(null))
+    ////            .orElse(new ArrayList<>());
+    //
+    ////        if (resourceType != null && (resourceType.equals(VALUESET))) {
+    ////            if ()
+    ////        } else if (resourceType.equals(CODESYSTEM)) {
+    ////
+    ////        }
+    //    }
+
     private void extractMeasureDirectReferenceCodes(
             IKnowledgeArtifactAdapter rootAdapter, IKnowledgeArtifactAdapter artifactAdapter) {
         if (artifactAdapter instanceof org.opencds.cqf.fhir.utility.adapter.r4.MeasureAdapter measureAdapter) {
@@ -422,38 +442,47 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
 
     private Optional<IKnowledgeArtifactAdapter> tryResolveDependency(
             IDependencyInfo dependency,
-            List<String> canonicalVersionExpansionParameters,
-            List<String> systemVersionExpansionParameters,
+            IBaseParameters expansionParameters,
             boolean latestFromTxServer,
             IEndpointAdapter endpoint) {
         // try to get versions from expansion parameters if they are available
         String resourceType = getResourceType(dependency);
         if (StringUtils.isBlank(Canonicals.getVersion(dependency.getReference()))) {
             // This needs to be updated once we support requireVersionedDependencies
-            getExpansionParametersVersion(
-                            dependency,
-                            resourceType,
-                            canonicalVersionExpansionParameters,
-                            systemVersionExpansionParameters)
+            getExpansionParametersVersion(dependency, resourceType, expansionParameters)
                     .map(Canonicals::getVersion)
                     .ifPresent(version -> dependency.setReference(dependency.getReference() + "|" + version));
         }
 
-        Optional<IKnowledgeArtifactAdapter> maybeAdapter = Optional.empty();
-        // if not available in expansion parameters then try to find the latest version and update the
-        // dependency
+        Optional<IKnowledgeArtifactAdapter> maybeAdapter;
+        // if not available in expansion parameters then try to find the latest version and
+        // update the dependency
         if (!StringUtils.isBlank(Canonicals.getVersion(dependency.getReference()))) {
             maybeAdapter = Optional.ofNullable(getArtifactByCanonical(dependency.getReference(), repository));
         } else {
             maybeAdapter =
                     tryFindLatestDependency(dependency.getReference(), resourceType, latestFromTxServer, endpoint);
         }
+
+        if (maybeAdapter.isPresent()) {
+            ((ILibraryAdapter) artifactBeingReleasedAdapter)
+                    .ensureExpansionParametersEntry(
+                            resourceType,
+                            maybeAdapter.get().getUrl() + "|"
+                                    + maybeAdapter.get().getVersion());
+        }
+
+        ;
+        // TODO: Since the version wasn't pinned or specified in the expansion parameters, we need to pin it in the
+        // expansion parameters
+        // now that it's been determined.
+
         return maybeAdapter;
     }
 
     private Optional<IKnowledgeArtifactAdapter> tryFindLatestDependency(
             String reference, String resourceType, boolean latestFromTxServer, IEndpointAdapter endpoint) {
-        Optional<IKnowledgeArtifactAdapter> maybeAdapter = Optional.empty();
+        Optional<IKnowledgeArtifactAdapter> maybeAdapter;
         // we trust in this case that the Endpoint URL matches up with the Authoritative Source in the ValueSet
         // if this assumption is faulty the only consequence is that the VSet doesn't get resolved
         if (resourceType != null && resourceType.equals(VALUESET) && latestFromTxServer) {
@@ -473,9 +502,8 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
             List<IDomainResource> releasedResources,
             Map<String, IDomainResource> alreadyUpdatedDependencies) {
         var maybeLatest = getLatestArtifactAndThrowErrorIfOwnedMissing(component, releasedResources);
-        if (maybeLatest.isPresent()) {
-            updateCacheAndReference(component, maybeLatest.get(), alreadyUpdatedDependencies);
-        }
+        maybeLatest.ifPresent(iKnowledgeArtifactAdapter ->
+                updateCacheAndReference(component, iKnowledgeArtifactAdapter, alreadyUpdatedDependencies));
         return maybeLatest;
     }
 
@@ -483,8 +511,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
             Optional<IKnowledgeArtifactAdapter> getLatestArtifactAndThrowErrorIfOwnedMissing(
                     T component, List<IDomainResource> releasedResources) {
         var reference = IKnowledgeArtifactAdapter.getRelatedArtifactReference(component);
-        var resource = Optional.ofNullable(reference)
-                .map(r -> checkIfReferenceInList(r, releasedResources).orElse(null));
+        var resource = Optional.ofNullable(reference).flatMap(r -> checkIfReferenceInList(r, releasedResources));
         if (IKnowledgeArtifactAdapter.checkIfRelatedArtifactIsOwned(component) && resource.isEmpty()) {
             // should never happen since we check all references as part of `internalRelease`
             throw new InternalErrorException("Owned resource reference not found during release: " + reference);
@@ -506,22 +533,33 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
     }
 
     private Optional<String> getExpansionParametersVersion(
-            IDependencyInfo dependency,
-            String resourceType,
-            List<String> canonicalVersionExpansionParameters,
-            List<String> systemVersionExpansionParameters) {
+            IDependencyInfo dependency, String resourceType, IBaseParameters expansionParameters) {
+
         Optional<String> expansionParametersVersion = Optional.empty();
-        // assume if we can't figure out the resource type it's a CodeSystem
-        if (resourceType == null || resourceType.equals(CODESYSTEM)) {
-            expansionParametersVersion = systemVersionExpansionParameters.stream()
-                    .filter(canonical -> !StringUtils.isBlank(Canonicals.getUrl(canonical)))
-                    .filter(canonical -> Canonicals.getUrl(canonical).equals(dependency.getReference()))
-                    .findAny();
-        } else if (resourceType.equals(VALUESET)) {
-            expansionParametersVersion = canonicalVersionExpansionParameters.stream()
-                    .filter(canonical -> Canonicals.getUrl(canonical).equals(dependency.getReference()))
-                    .findAny();
+        if (expansionParameters != null && !expansionParameters.isEmpty()) {
+            // assume if we can't figure out the resource type it's a CodeSystem. This may be a
+            // TODO: it may be better to assume default_canonical_version if it is null, or require it.
+            if (resourceType == null || resourceType.equals(CODESYSTEM)) {
+                var systemVersionExpansionParameters =
+                        VisitorHelper.getStringListParameter(Constants.SYSTEM_VERSION, expansionParameters);
+
+                if (systemVersionExpansionParameters.isPresent()) {
+                    expansionParametersVersion = systemVersionExpansionParameters.get().stream()
+                            .filter(svp -> svp.equals(dependency.getReference()))
+                            .findAny();
+                }
+            } else if (resourceType.equals(VALUESET)) {
+                var valueSetVersionExpansionParameters =
+                        VisitorHelper.getStringListParameter(Constants.DEFAULT_VALUESET_VERSION, expansionParameters);
+
+                if (valueSetVersionExpansionParameters.isPresent()) {
+                    expansionParametersVersion = valueSetVersionExpansionParameters.get().stream()
+                            .filter(svp -> svp.equals(dependency.getReference()))
+                            .findAny();
+                }
+            }
         }
+
         return expansionParametersVersion;
     }
 

@@ -19,6 +19,7 @@ import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.RelatedArtifact;
+import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.dstu3.model.UsageContext;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -184,7 +185,7 @@ public class LibraryAdapter extends KnowledgeArtifactAdapter implements ILibrary
 
     @Override
     public Optional<IBaseParameters> getExpansionParameters() {
-        return getLibrary().getExtension().stream()
+        var expansionParameters = getLibrary().getExtension().stream()
                 .filter(ext -> ext.getUrl().equals(Constants.CQF_EXPANSION_PARAMETERS))
                 .findAny()
                 .map(ext -> ((Reference) ext.getValue()).getReference())
@@ -199,40 +200,176 @@ public class LibraryAdapter extends KnowledgeArtifactAdapter implements ILibrary
                     }
                     return null;
                 });
-    }
 
-    @Override
-    public void setExpansionParameters(
-            List<String> systemVersionExpansionParameters, List<String> canonicalVersionExpansionParameters) {
-        var newParameters = new ArrayList<ParametersParameterComponent>();
-        if (systemVersionExpansionParameters != null && !systemVersionExpansionParameters.isEmpty()) {
-            for (String parameter : systemVersionExpansionParameters) {
-                var param = new ParametersParameterComponent();
-                param.setName(Constants.SYSTEM_VERSION);
-                param.setValue(new UriType(parameter));
-                newParameters.add(param);
-            }
-        }
-        if (canonicalVersionExpansionParameters != null && !canonicalVersionExpansionParameters.isEmpty()) {
-            for (String parameter : canonicalVersionExpansionParameters) {
-                var param = new ParametersParameterComponent();
-                param.setName(Constants.CANONICAL_VERSION);
-                param.setValue(new UriType(parameter));
-                newParameters.add(param);
-            }
-        }
-        var existingExpansionParameters = getExpansionParameters();
-        if (existingExpansionParameters.isPresent()) {
-            ((Parameters) existingExpansionParameters.get()).setParameter(newParameters);
+        if (expansionParameters.isPresent()) {
+            return expansionParameters;
         } else {
             var id = "exp-params";
             var newExpansionParameters = new Parameters();
-            newExpansionParameters.setParameter(newParameters);
             newExpansionParameters.setId(id);
             getLibrary().addContained(newExpansionParameters);
             var expansionParamsExt = getLibrary().addExtension();
             expansionParamsExt.setUrl(Constants.CQF_EXPANSION_PARAMETERS);
             expansionParamsExt.setValue(new Reference("#" + id));
+            setExpansionParameters(newExpansionParameters);
+            return Optional.of(newExpansionParameters);
         }
     }
+
+    @Override
+    public void setExpansionParameters(IBaseParameters expansionParameters) {
+        if (expansionParameters != null
+                && !((Parameters) expansionParameters).getParameter().isEmpty()) {
+            var newParameters = new ArrayList<Parameters.ParametersParameterComponent>();
+
+            for (Parameters.ParametersParameterComponent parameter :
+                    ((Parameters) expansionParameters).getParameter()) {
+                var param = new ParametersParameterComponent();
+                param.setName(parameter.getName());
+                param.setValue(parameter.getValue());
+                newParameters.add(param);
+            }
+
+            var existingExpansionParameters = getExpansionParameters();
+            existingExpansionParameters.ifPresent(parameters -> ((Parameters) parameters).setParameter(newParameters));
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public void ensureExpansionParametersEntry(String resourceType, String canonical) {
+        // extract expansion parameters
+        var expansionParameters = getExpansionParameters();
+
+        String parameterName;
+
+        if (resourceType.equals("ValueSet")) {
+            parameterName = Constants.DEFAULT_VALUESET_VERSION;
+        } else if (resourceType.equals("CodeSystem")) {
+            parameterName = Constants.SYSTEM_VERSION;
+        } else {
+            parameterName = Constants.DEFAULT_CANONICAL_VERSION;
+        }
+
+        if (expansionParameters.isPresent()) {
+            List<ParametersParameterComponent> parametersWithName = new ArrayList<>();
+
+            for (ParametersParameterComponent param : ((Parameters) expansionParameters.get()).getParameter()) {
+                if (parameterName.equals(param.getName())) {
+                    parametersWithName.add(param);
+                }
+            }
+
+            if (!parametersWithName.isEmpty()
+                    && parametersWithName.stream().noneMatch(p -> ((IPrimitiveType<String>) p.getValue())
+                            .getValueAsString()
+                            .equals(canonical))) {
+                var parameterToAdd = new ParametersParameterComponent();
+                parameterToAdd.setName(parameterName);
+                parameterToAdd.setValue(new UriType(canonical));
+                expansionParameters.ifPresent(ep -> ((Parameters) ep).addParameter(parameterToAdd));
+            }
+        }
+    }
+
+    //    @Override
+    //    public void setExpansionParameters(Parameters expansionParameters) {
+    //        if (expansionParameters != null && !expansionParameters.getParameter().isEmpty()) {
+    //
+    //
+    //            var newParameters = new ArrayList<Parameters.ParametersParameterComponent>();
+    //
+    //            for (ParametersParameterComponent parameter : expansionParameters.getParameter()) {
+    //                String key = entry.getKey();
+    //                List<String> parameterValues = entry.getValue();
+    //
+    //                for (String parameter : parameterValues) {
+    //                    var param = new ParametersParameterComponent();
+    //                    param.setName(key);
+    //                    param.setValue(new UriType(parameter));
+    //                    newParameters.add(param);
+    //                }
+    //            }
+    //
+    //            var existingExpansionParameters = getExpansionParameters();
+    //            if (existingExpansionParameters.isPresent()) {
+    //                ((Parameters) existingExpansionParameters.get()).setParameter(newParameters);
+    //            } else {
+    //                var id = "exp-params";
+    //                var newExpansionParameters = new Parameters();
+    //                newExpansionParameters.setParameter(newParameters);
+    //                newExpansionParameters.setId(id);
+    //                getLibrary().addContained(newExpansionParameters);
+    //                var expansionParamsExt = getLibrary().addExtension();
+    //                expansionParamsExt.setUrl(Constants.CQF_EXPANSION_PARAMETERS);
+    //                expansionParamsExt.setValue(new Reference("#" + id));
+    //            }
+    //        }
+    //    }
+
+    //    @Override
+    //    public void setExpansionParameters(Map<String, List<String>> parameterTypeEntries) {
+    //        if (parameterTypeEntries != null && !parameterTypeEntries.isEmpty()) {
+    //            var newParameters = new ArrayList<Parameters.ParametersParameterComponent>();
+    //
+    //            for (Map.Entry<String, List<String>> entry : parameterTypeEntries.entrySet()) {
+    //                String key = entry.getKey();
+    //                List<String> parameterValues = entry.getValue();
+    //
+    //                for (String parameter : parameterValues) {
+    //                    var param = new ParametersParameterComponent();
+    //                    param.setName(key);
+    //                    param.setValue(new UriType(parameter));
+    //                    newParameters.add(param);
+    //                }
+    //            }
+    //
+    //            var existingExpansionParameters = getExpansionParameters();
+    //            if (existingExpansionParameters.isPresent()) {
+    //                ((Parameters) existingExpansionParameters.get()).setParameter(newParameters);
+    //            } else {
+    //                var id = "exp-params";
+    //                var newExpansionParameters = new Parameters();
+    //                newExpansionParameters.setParameter(newParameters);
+    //                newExpansionParameters.setId(id);
+    //                getLibrary().addContained(newExpansionParameters);
+    //                var expansionParamsExt = getLibrary().addExtension();
+    //                expansionParamsExt.setUrl(Constants.CQF_EXPANSION_PARAMETERS);
+    //                expansionParamsExt.setValue(new Reference("#" + id));
+    //            }
+    //        }
+    //    }
+    //    @Override
+    //    public void setExpansionParameters(
+    //            List<String> systemVersionExpansionParameters, List<String> canonicalVersionExpansionParameters) {
+    //        var newParameters = new ArrayList<ParametersParameterComponent>();
+    //        if (systemVersionExpansionParameters != null && !systemVersionExpansionParameters.isEmpty()) {
+    //            for (String parameter : systemVersionExpansionParameters) {
+    //                var param = new ParametersParameterComponent();
+    //                param.setName(Constants.SYSTEM_VERSION);
+    //                param.setValue(new UriType(parameter));
+    //                newParameters.add(param);
+    //            }
+    //        }
+    //        if (canonicalVersionExpansionParameters != null && !canonicalVersionExpansionParameters.isEmpty()) {
+    //            for (String parameter : canonicalVersionExpansionParameters) {
+    //                var param = new ParametersParameterComponent();
+    //                param.setName(Constants.DEFAULT_CANONICAL_VERSION);
+    //                param.setValue(new UriType(parameter));
+    //                newParameters.add(param);
+    //            }
+    //        }
+    //        var existingExpansionParameters = getExpansionParameters();
+    //        if (existingExpansionParameters.isPresent()) {
+    //            ((Parameters) existingExpansionParameters.get()).setParameter(newParameters);
+    //        } else {
+    //            var id = "exp-params";
+    //            var newExpansionParameters = new Parameters();
+    //            newExpansionParameters.setParameter(newParameters);
+    //            newExpansionParameters.setId(id);
+    //            getLibrary().addContained(newExpansionParameters);
+    //            var expansionParamsExt = getLibrary().addExtension();
+    //            expansionParamsExt.setUrl(Constants.CQF_EXPANSION_PARAMETERS);
+    //            expansionParamsExt.setValue(new Reference("#" + id));
+    //        }
+    //    }
 }

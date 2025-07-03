@@ -945,7 +945,6 @@ class MultiMeasureServiceTest {
                 .hasSubjectReference("Organization/organization-linked-by-managingOrganization");
     }
 
-    // LUKETODO:  fix error handling so this test will pass
     /**
      * Test designed to show how error messages are captured in a Measure Report, when encountered.
      * The associated Encounter has an invalid period that prevents evaluation and will populate an

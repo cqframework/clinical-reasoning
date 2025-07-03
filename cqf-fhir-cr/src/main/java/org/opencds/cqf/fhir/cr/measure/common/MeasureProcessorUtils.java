@@ -146,16 +146,14 @@ public class MeasureProcessorUtils {
         return null;
     }
 
-    // LUKETODO:  update javadoc
     /**
      * method to set measurement period on cql engine context.
      * Priority is operation parameter defined value, otherwise default CQL value is used
-     * @param measureDef Measure defined objects to populate with criteria results
      * @param measurementPeriod Interval defined by operation parameters to override default CQL value
      * @param context cql engine context used to set measurement period parameter
      */
     @SuppressWarnings({"deprecation", "removal"})
-    public void setMeasurementPeriod(Interval measurementPeriod, CqlEngine context) {
+    public void setMeasurementPeriod(Interval measurementPeriod, CqlEngine context, List<String> measureUrls) {
         ParameterDef pd = this.getMeasurementPeriodParameterDef(context);
         if (pd == null) {
             logger.warn(
@@ -175,7 +173,6 @@ public class MeasureProcessorUtils {
 
         // Use the default, skip validation
         if (measurementPeriod == null) {
-            // LUKETODO:  what do we replace this with????
             measurementPeriod = (Interval) context.getEvaluationVisitor().visitParameterDef(pd, context.getState());
 
             context.getState()
@@ -198,7 +195,7 @@ public class MeasureProcessorUtils {
 
         NamedTypeSpecifier pointType = (NamedTypeSpecifier) intervalTypeSpecifier.getPointType();
         String targetType = pointType.getName().getLocalPart();
-        Interval convertedPeriod = convertIntervalSansMeasureDef(measurementPeriod, targetType);
+        Interval convertedPeriod = convertInterval(measurementPeriod, targetType, measureUrls);
 
         context.getState().setParameter(null, MeasureConstants.MEASUREMENT_PERIOD_PARAMETER_NAME, convertedPeriod);
     }
@@ -251,7 +248,7 @@ public class MeasureProcessorUtils {
         return newDateTime;
     }
 
-    public Interval convertInterval(MeasureDef measureDef, Interval interval, String targetType) {
+    public Interval convertInterval(Interval interval, String targetType, List<String> measureUrls) {
         String sourceTypeQualified = interval.getPointType().getTypeName();
         String sourceType = sourceTypeQualified.substring(sourceTypeQualified.lastIndexOf(".") + 1);
         if (sourceType.equals(targetType)) {
@@ -269,8 +266,8 @@ public class MeasureProcessorUtils {
         }
 
         throw new InvalidRequestException(
-                "The interval type of %s did not match the expected type of %s and no conversion was possible for MeasureDef: %s."
-                        .formatted(sourceType, targetType, measureDef.url()));
+                "The interval type of %s did not match the expected type of %s and no conversion was possible for measure URLs (first 5 only shown): %s."
+                        .formatted(sourceType, targetType, measureUrls.stream().limit(5).toList()));
     }
 
     // LUKETODO:  rename

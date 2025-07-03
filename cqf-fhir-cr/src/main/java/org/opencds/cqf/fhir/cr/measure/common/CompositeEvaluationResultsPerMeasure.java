@@ -10,6 +10,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 
 // LUKETODO:  javadoc
+// This is basically a Map of measure -> subject -> EvaluationResult
 public class CompositeEvaluationResultsPerMeasure {
     // The same measure may have successful results AND errors, so account for both
     private final Map<IIdType, Map<String, EvaluationResult>> resultsPerMeasure;
@@ -28,10 +29,6 @@ public class CompositeEvaluationResultsPerMeasure {
         builder.errorsPerMeasure.forEach((key, value) -> errorsBuilder.put(key, List.copyOf(value)));
 
         errorsPerMeasure = errorsBuilder.build();
-    }
-
-    public static Builder builder() {
-        return new Builder();
     }
 
     // measureDef will occasionally be prepended with the version, which means we need to parse it into an IIdType which
@@ -57,6 +54,10 @@ public class CompositeEvaluationResultsPerMeasure {
 
     private boolean isMeasureDefFound(IIdType entryKey, IIdType measureId) {
         return measureId.toUnqualifiedVersionless().equals(entryKey.toUnqualifiedVersionless());
+    }
+
+    public static Builder builder() {
+        return new Builder();
     }
 
     public static class Builder {

@@ -97,7 +97,7 @@ public class Dstu3MeasureProcessor {
         var libraryVersionIdentifier = getLibraryVersionIdentifier(measure);
         var libraryEngine = getLibraryEngine(parameters, libraryVersionIdentifier, context);
         // set measurement Period from CQL if operation parameters are empty
-        measureProcessorUtils.setMeasurementPeriod(measurementPeriodParams, context);
+        measureProcessorUtils.setMeasurementPeriod(measurementPeriodParams, context, List.of(measure.getUrl()));
         // extract measurement Period from CQL to pass to report Builder
         Interval measurementPeriod =
                 measureProcessorUtils.getDefaultMeasurementPeriod(measurementPeriodParams, context);

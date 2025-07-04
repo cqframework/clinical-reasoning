@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cr.measure.dstu3;
 import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -96,8 +97,10 @@ public class Dstu3MeasureProcessor {
         var context = Engines.forRepository(
                 this.repository, this.measureEvaluationOptions.getEvaluationSettings(), additionalData);
 
-        var libraryVersionIdentifier = getLibraryVersionIdentifier(measure);
-        var libraryEngine = getLibraryEngine(parameters, libraryVersionIdentifier, context);
+        // Note that we must build the LibraryEngine BEFORE we call
+        // measureProcessorUtils.setMeasurementPeriod(), otherwise, we get an NPE.
+        var measureLibraryIdEngineDetails = buildLibraryIdEngineDetails(measure, parameters, context);
+
         // set measurement Period from CQL if operation parameters are empty
         measureProcessorUtils.setMeasurementPeriod(
                 measurementPeriodParams,
@@ -111,10 +114,7 @@ public class Dstu3MeasureProcessor {
         // populate results from Library $evaluate
         if (!subjects.isEmpty()) {
             var results = measureProcessorUtils.getEvaluationResults(
-                    subjectIds,
-                    zonedMeasurementPeriod,
-                    context,
-                    buildLibraryIdEngineDetails(measure, parameters, context));
+                    subjectIds, zonedMeasurementPeriod, context, measureLibraryIdEngineDetails);
 
             // Process Criteria Expression Results
             measureProcessorUtils.processResults(
@@ -237,7 +237,10 @@ public class Dstu3MeasureProcessor {
                         list.add(value);
                     }
                 } else {
-                    parameterMap.put(param.getName(), Arrays.asList(parameterMap.get(param.getName()), value));
+                    // We need a mutable list here, otherwise, retrieving the list above will fail with
+                    // UnsupportedOperationException
+                    parameterMap.put(
+                            param.getName(), new ArrayList<>(Arrays.asList(parameterMap.get(param.getName()), value)));
                 }
             } else {
                 parameterMap.put(param.getName(), value);

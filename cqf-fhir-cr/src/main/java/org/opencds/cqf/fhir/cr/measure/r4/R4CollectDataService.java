@@ -80,18 +80,32 @@ public class R4CollectDataService {
             for (String patient : subjectList) {
                 var subjects = Collections.singletonList(patient);
 
-                var evaluationResults = processor.evaluateMeasureWithCqlEngine(
+                var compositeEvaluationResultsPerMeasure = processor.evaluateMeasureWithCqlEngine(
                         subjects, foldedMeasure, periodStart, periodEnd, parameters, context);
 
                 // add resources per subject to Parameters
                 addReports(
-                        processor, measureId, periodStart, periodEnd, subjects, parameters, context, evaluationResults);
+                        processor,
+                        measureId,
+                        periodStart,
+                        periodEnd,
+                        subjects,
+                        parameters,
+                        context,
+                        compositeEvaluationResultsPerMeasure);
             }
         } else {
-            var evaluationResults = processor.evaluateMeasureWithCqlEngine(
+            var compositeEvaluationResultsPerMeasure = processor.evaluateMeasureWithCqlEngine(
                     subjectList, foldedMeasure, periodStart, periodEnd, parameters, context);
             addReports(
-                    processor, measureId, periodStart, periodEnd, subjectList, parameters, context, evaluationResults);
+                    processor,
+                    measureId,
+                    periodStart,
+                    periodEnd,
+                    subjectList,
+                    parameters,
+                    context,
+                    compositeEvaluationResultsPerMeasure);
         }
         return parameters;
     }

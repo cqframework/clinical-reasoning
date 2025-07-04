@@ -28,19 +28,16 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
     private final MeasureEvaluationOptions measureEvaluationOptions;
     private final MeasurePeriodValidator measurePeriodValidator;
     private final R4RepositorySubjectProvider subjectProvider;
-    private final R4MeasureServiceUtils measureServiceUtils;
     private final MeasureProcessorUtils measureProcessorUtils = new MeasureProcessorUtils();
 
     public R4MeasureService(
             IRepository repository,
             MeasureEvaluationOptions measureEvaluationOptions,
-            MeasurePeriodValidator measurePeriodValidator,
-            R4MeasureServiceUtils measureServiceUtils) {
+            MeasurePeriodValidator measurePeriodValidator) {
         this.repository = repository;
         this.measureEvaluationOptions = measureEvaluationOptions;
         this.measurePeriodValidator = measurePeriodValidator;
         this.subjectProvider = new R4RepositorySubjectProvider(measureEvaluationOptions.getSubjectProviderOptions());
-        this.measureServiceUtils = measureServiceUtils;
     }
 
     @Override
@@ -68,8 +65,6 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
 
         R4MeasureServiceUtils r4MeasureServiceUtils = new R4MeasureServiceUtils(repository);
         r4MeasureServiceUtils.ensureSupplementalDataElementSearchParameter();
-
-        var foldedMeasure = R4MeasureServiceUtils.foldMeasure(measure, proxyRepoForMeasureProcessor);
 
         MeasureReport measureReport;
 
@@ -99,8 +94,8 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
         var context = Engines.forRepository(
                 proxyRepoForMeasureProcessor, this.measureEvaluationOptions.getEvaluationSettings(), additionalData);
 
-        var evaluationResults = processor.evaluateMeasureWithCqlEngine(
-                subjects, foldedMeasure, periodStart, periodEnd, parameters, context);
+        var evaluationResults = processor.evaluateMeasureEitherWithCqlEngine(
+                subjects, measure, periodStart, periodEnd, parameters, context);
 
         measureReport = processor.evaluateMeasure(
                 measure, periodStart, periodEnd, reportType, subjects, evalType, context, evaluationResults);

@@ -63,6 +63,12 @@ public class R4MeasureProcessor {
         this.measureProcessorUtils = measureProcessorUtils;
     }
 
+    // Expose this so CQL measure evaluation can use the same Repository as the one passed to the
+    // processor: this may be some sort of federated proxy repository initialized at runtime
+    public IRepository getRepository() {
+        return repository;
+    }
+
     public MeasureReport evaluateMeasure(
             Either3<CanonicalType, IdType, Measure> measure,
             @Nullable ZonedDateTime periodStart,
@@ -194,6 +200,23 @@ public class R4MeasureProcessor {
                         subjectIds);
     }
 
+    public CompositeEvaluationResultsPerMeasure evaluateMeasureEitherWithCqlEngine(
+            List<String> subjects,
+            Either3<CanonicalType, IdType, Measure> measureEither,
+            @Nullable ZonedDateTime periodStart,
+            @Nullable ZonedDateTime periodEnd,
+            Parameters parameters,
+            CqlEngine context) {
+
+        return evaluateMultiMeasuresWithCqlEngine(
+                subjects,
+                List.of(R4MeasureServiceUtils.foldMeasure(measureEither, repository)),
+                periodStart,
+                periodEnd,
+                parameters,
+                context);
+    }
+
     public CompositeEvaluationResultsPerMeasure evaluateMeasureIdWithCqlEngine(
             List<String> subjects,
             IIdType measureId,
@@ -258,7 +281,9 @@ public class R4MeasureProcessor {
     // Ideally this would be done in MeasureProcessorUtils, but it's too much work to change for now
     private MeasureLibraryIdEngineDetails buildLibraryIdEngineDetails(
             Measure measure, Parameters parameters, CqlEngine context) {
+
         var libraryVersionIdentifier = getLibraryVersionIdentifier(measure);
+
         return new MeasureLibraryIdEngineDetails(
                 measure.getIdElement(),
                 libraryVersionIdentifier,

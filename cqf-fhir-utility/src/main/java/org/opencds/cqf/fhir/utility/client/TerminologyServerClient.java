@@ -6,6 +6,7 @@ import static java.util.Objects.requireNonNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.api.IRestfulClientFactory;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseEnumFactory;
@@ -43,6 +44,12 @@ public class TerminologyServerClient {
                 ? terminologyServerClientSettings
                 : new TerminologyServerClientSettings();
     }
+
+//    public org.hl7.fhir.r4.model.TerminologyCapabilities getTerminologyCapabilities(IEndpointAdapter endpoint) {
+//        org.hl7.fhir.r4.model.TerminologyCapabilities capabilities = new org.hl7.fhir.r4.model.TerminologyCapabilities();
+//        var fhirClient = initializeClientWithAuth(endpoint);
+//
+//    }
 
     public IBaseResource expand(IValueSetAdapter valueSet, IEndpointAdapter endpoint, IParametersAdapter parameters) {
         checkNotNull(valueSet, "expected non-null value for valueSet");
@@ -102,7 +109,11 @@ public class TerminologyServerClient {
                 .findFirst()
                 .map(ext -> ext.getValue().toString())
                 .orElseThrow(() -> new UnprocessableEntityException("Cannot expand ValueSet without VSAC API Key."));
+
         var fhirClient = fhirContext.newRestfulGenericClient(getAddressBase(endpoint.getAddress()));
+        // TODO: Expose socketTimeout as a configuration parameter
+        fhirClient.getFhirContext().getRestfulClientFactory().setSocketTimeout(600 * 1000);
+
         Clients.registerAdditionalRequestHeadersAuth(fhirClient, username, apiKey);
         return fhirClient;
     }

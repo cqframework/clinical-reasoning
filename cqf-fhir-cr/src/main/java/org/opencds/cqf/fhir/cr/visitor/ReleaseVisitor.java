@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -547,7 +548,8 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
 
                 if (systemVersionExpansionParameters.isPresent()) {
                     expansionParametersVersion = systemVersionExpansionParameters.get().stream()
-                            .filter(svp -> svp.equals(dependency.getReference()))
+                            .filter(svp -> Canonicals.getUrl(svp) != null && Objects.equals(
+                                Canonicals.getUrl(svp), dependency.getReference()))
                             .findAny();
                 }
             } else if (resourceType.equals(VALUESET)) {
@@ -556,7 +558,8 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
 
                 if (valueSetVersionExpansionParameters.isPresent()) {
                     expansionParametersVersion = valueSetVersionExpansionParameters.get().stream()
-                            .filter(svp -> svp.equals(dependency.getReference()))
+                            .filter(svp -> Canonicals.getUrl(svp) != null && Objects.equals(
+                                Canonicals.getUrl(svp), dependency.getReference()))
                             .findAny();
                 }
             }

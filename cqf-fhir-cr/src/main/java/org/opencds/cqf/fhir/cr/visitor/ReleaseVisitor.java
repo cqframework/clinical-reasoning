@@ -403,33 +403,6 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
         }
     }
 
-    //    private void ensureExpansionParametersEntry(String resourceType, String canonical) {
-    //        // extract expansion parameters
-    //        var expansionParameters = artifactBeingReleasedAdapter.getExpansionParameters();
-    //
-    //        if (expansionParameters.isEmpty()) {
-    //            expansionParameters = new Parameters();
-    //
-    //        } else
-    ////
-    ////        expansionParameters.ifPresent(ep -> ep.get)
-    //
-    ////        var systemVersionParams = expansionParameters
-    ////            .map(p -> VisitorHelper.getStringListParameter(Constants.SYSTEM_VERSION, p)
-    ////                .orElse(null))
-    ////            .orElse(new ArrayList<>());
-    ////        var canonicalVersionParams = expansionParameters
-    ////            .map(p -> VisitorHelper.getStringListParameter(Constants.CANONICAL_VERSION, p)
-    ////                .orElse(null))
-    ////            .orElse(new ArrayList<>());
-    //
-    ////        if (resourceType != null && (resourceType.equals(VALUESET))) {
-    ////            if ()
-    ////        } else if (resourceType.equals(CODESYSTEM)) {
-    ////
-    ////        }
-    //    }
-
     private void extractMeasureDirectReferenceCodes(
             IKnowledgeArtifactAdapter rootAdapter,
             IKnowledgeArtifactAdapter artifactAdapter,
@@ -548,8 +521,8 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
 
                 if (systemVersionExpansionParameters.isPresent()) {
                     expansionParametersVersion = systemVersionExpansionParameters.get().stream()
-                            .filter(svp -> Canonicals.getUrl(svp) != null && Objects.equals(
-                                Canonicals.getUrl(svp), dependency.getReference()))
+                            .filter(svp -> Canonicals.getUrl(svp) != null
+                                    && Objects.equals(Canonicals.getUrl(svp), dependency.getReference()))
                             .findAny();
                 }
             } else if (resourceType.equals(VALUESET)) {
@@ -558,8 +531,8 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
 
                 if (valueSetVersionExpansionParameters.isPresent()) {
                     expansionParametersVersion = valueSetVersionExpansionParameters.get().stream()
-                            .filter(svp -> Canonicals.getUrl(svp) != null && Objects.equals(
-                                Canonicals.getUrl(svp), dependency.getReference()))
+                            .filter(svp -> Canonicals.getUrl(svp) != null
+                                    && Objects.equals(Canonicals.getUrl(svp), dependency.getReference()))
                             .findAny();
                 }
             }

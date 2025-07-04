@@ -12,7 +12,6 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r5.model.UriType;
 import org.hl7.fhir.r5.model.Attachment;
 import org.hl7.fhir.r5.model.CodeableConcept;
 import org.hl7.fhir.r5.model.Coding;
@@ -24,6 +23,7 @@ import org.hl7.fhir.r5.model.Parameters;
 import org.hl7.fhir.r5.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r5.model.Reference;
 import org.hl7.fhir.r5.model.RelatedArtifact;
+import org.hl7.fhir.r5.model.UriType;
 import org.hl7.fhir.r5.model.UsageContext;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
@@ -248,81 +248,14 @@ public class LibraryAdapter extends KnowledgeArtifactAdapter implements ILibrary
 
         if (expansionParameters.isPresent()) {
             var parametersWithName = ((Parameters) expansionParameters.get()).getParameters(parameterName);
-            if (parametersWithName != null && !parametersWithName.isEmpty()) {
-                if (parametersWithName.stream().noneMatch(p -> ((IPrimitiveType<String>) p.getValue())
-                        .getValueAsString()
-                        .equals(canonical))) {
-                    expansionParameters.ifPresent(ep -> ((Parameters) ep).addParameter(parameterName, new UriType(canonical)));
-                }
+            if (parametersWithName != null
+                    && !parametersWithName.isEmpty()
+                    && parametersWithName.stream().noneMatch(p -> ((IPrimitiveType<String>) p.getValue())
+                            .getValueAsString()
+                            .equals(canonical))) {
+                expansionParameters.ifPresent(
+                        ep -> ((Parameters) ep).addParameter(parameterName, new UriType(canonical)));
             }
         }
     }
-
-    //    @Override
-    //    public void setExpansionParameters(Map<String, List<String>> parameterTypeEntries) {
-    //        if (parameterTypeEntries != null && !parameterTypeEntries.isEmpty()) {
-    //            var newParameters = new ArrayList<ParametersParameterComponent>();
-    //
-    //            for (Map.Entry<String, List<String>> entry : parameterTypeEntries.entrySet()) {
-    //                String key = entry.getKey();
-    //                List<String> parameterValues = entry.getValue();
-    //
-    //                for (String parameter : parameterValues) {
-    //                    var param = new ParametersParameterComponent();
-    //                    param.setName(key);
-    //                    param.setValue(new UriType(parameter));
-    //                    newParameters.add(param);
-    //                }
-    //            }
-    //
-    //            var existingExpansionParameters = getExpansionParameters();
-    //            if (existingExpansionParameters.isPresent()) {
-    //                ((Parameters) existingExpansionParameters.get()).setParameter(newParameters);
-    //            } else {
-    //                var id = "exp-params";
-    //                var newExpansionParameters = new Parameters();
-    //                newExpansionParameters.setParameter(newParameters);
-    //                newExpansionParameters.setId(id);
-    //                getLibrary().addContained(newExpansionParameters);
-    //                var expansionParamsExt = getLibrary().addExtension();
-    //                expansionParamsExt.setUrl(Constants.CQF_EXPANSION_PARAMETERS);
-    //                expansionParamsExt.setValue(new Reference("#" + id));
-    //            }
-    //        }
-    //    }
-
-    //    @Override
-    //    public void setExpansionParameters(
-    //            List<String> systemVersionExpansionParameters, List<String> canonicalVersionExpansionParameters) {
-    //        var newParameters = new ArrayList<ParametersParameterComponent>();
-    //        if (systemVersionExpansionParameters != null && !systemVersionExpansionParameters.isEmpty()) {
-    //            for (String parameter : systemVersionExpansionParameters) {
-    //                var param = new ParametersParameterComponent();
-    //                param.setName(Constants.SYSTEM_VERSION);
-    //                param.setValue(new UriType(parameter));
-    //                newParameters.add(param);
-    //            }
-    //        }
-    //        if (canonicalVersionExpansionParameters != null && !canonicalVersionExpansionParameters.isEmpty()) {
-    //            for (String parameter : canonicalVersionExpansionParameters) {
-    //                var param = new ParametersParameterComponent();
-    //                param.setName(Constants.DEFAULT_CANONICAL_VERSION);
-    //                param.setValue(new UriType(parameter));
-    //                newParameters.add(param);
-    //            }
-    //        }
-    //        var existingExpansionParameters = getExpansionParameters();
-    //        if (existingExpansionParameters.isPresent()) {
-    //            ((Parameters) existingExpansionParameters.get()).setParameter(newParameters);
-    //        } else {
-    //            var id = "exp-params";
-    //            var newExpansionParameters = new Parameters();
-    //            newExpansionParameters.setParameter(newParameters);
-    //            newExpansionParameters.setId(id);
-    //            getLibrary().addContained(newExpansionParameters);
-    //            var expansionParamsExt = getLibrary().addExtension();
-    //            expansionParamsExt.setUrl(Constants.CQF_EXPANSION_PARAMETERS);
-    //            expansionParamsExt.setValue(new Reference("#" + id));
-    //        }
-    //    }
 }

@@ -19,7 +19,6 @@ import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.RelatedArtifact;
-import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.dstu3.model.UsageContext;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -270,106 +269,4 @@ public class LibraryAdapter extends KnowledgeArtifactAdapter implements ILibrary
             }
         }
     }
-
-    //    @Override
-    //    public void setExpansionParameters(Parameters expansionParameters) {
-    //        if (expansionParameters != null && !expansionParameters.getParameter().isEmpty()) {
-    //
-    //
-    //            var newParameters = new ArrayList<Parameters.ParametersParameterComponent>();
-    //
-    //            for (ParametersParameterComponent parameter : expansionParameters.getParameter()) {
-    //                String key = entry.getKey();
-    //                List<String> parameterValues = entry.getValue();
-    //
-    //                for (String parameter : parameterValues) {
-    //                    var param = new ParametersParameterComponent();
-    //                    param.setName(key);
-    //                    param.setValue(new UriType(parameter));
-    //                    newParameters.add(param);
-    //                }
-    //            }
-    //
-    //            var existingExpansionParameters = getExpansionParameters();
-    //            if (existingExpansionParameters.isPresent()) {
-    //                ((Parameters) existingExpansionParameters.get()).setParameter(newParameters);
-    //            } else {
-    //                var id = "exp-params";
-    //                var newExpansionParameters = new Parameters();
-    //                newExpansionParameters.setParameter(newParameters);
-    //                newExpansionParameters.setId(id);
-    //                getLibrary().addContained(newExpansionParameters);
-    //                var expansionParamsExt = getLibrary().addExtension();
-    //                expansionParamsExt.setUrl(Constants.CQF_EXPANSION_PARAMETERS);
-    //                expansionParamsExt.setValue(new Reference("#" + id));
-    //            }
-    //        }
-    //    }
-
-    //    @Override
-    //    public void setExpansionParameters(Map<String, List<String>> parameterTypeEntries) {
-    //        if (parameterTypeEntries != null && !parameterTypeEntries.isEmpty()) {
-    //            var newParameters = new ArrayList<Parameters.ParametersParameterComponent>();
-    //
-    //            for (Map.Entry<String, List<String>> entry : parameterTypeEntries.entrySet()) {
-    //                String key = entry.getKey();
-    //                List<String> parameterValues = entry.getValue();
-    //
-    //                for (String parameter : parameterValues) {
-    //                    var param = new ParametersParameterComponent();
-    //                    param.setName(key);
-    //                    param.setValue(new UriType(parameter));
-    //                    newParameters.add(param);
-    //                }
-    //            }
-    //
-    //            var existingExpansionParameters = getExpansionParameters();
-    //            if (existingExpansionParameters.isPresent()) {
-    //                ((Parameters) existingExpansionParameters.get()).setParameter(newParameters);
-    //            } else {
-    //                var id = "exp-params";
-    //                var newExpansionParameters = new Parameters();
-    //                newExpansionParameters.setParameter(newParameters);
-    //                newExpansionParameters.setId(id);
-    //                getLibrary().addContained(newExpansionParameters);
-    //                var expansionParamsExt = getLibrary().addExtension();
-    //                expansionParamsExt.setUrl(Constants.CQF_EXPANSION_PARAMETERS);
-    //                expansionParamsExt.setValue(new Reference("#" + id));
-    //            }
-    //        }
-    //    }
-    //    @Override
-    //    public void setExpansionParameters(
-    //            List<String> systemVersionExpansionParameters, List<String> canonicalVersionExpansionParameters) {
-    //        var newParameters = new ArrayList<ParametersParameterComponent>();
-    //        if (systemVersionExpansionParameters != null && !systemVersionExpansionParameters.isEmpty()) {
-    //            for (String parameter : systemVersionExpansionParameters) {
-    //                var param = new ParametersParameterComponent();
-    //                param.setName(Constants.SYSTEM_VERSION);
-    //                param.setValue(new UriType(parameter));
-    //                newParameters.add(param);
-    //            }
-    //        }
-    //        if (canonicalVersionExpansionParameters != null && !canonicalVersionExpansionParameters.isEmpty()) {
-    //            for (String parameter : canonicalVersionExpansionParameters) {
-    //                var param = new ParametersParameterComponent();
-    //                param.setName(Constants.DEFAULT_CANONICAL_VERSION);
-    //                param.setValue(new UriType(parameter));
-    //                newParameters.add(param);
-    //            }
-    //        }
-    //        var existingExpansionParameters = getExpansionParameters();
-    //        if (existingExpansionParameters.isPresent()) {
-    //            ((Parameters) existingExpansionParameters.get()).setParameter(newParameters);
-    //        } else {
-    //            var id = "exp-params";
-    //            var newExpansionParameters = new Parameters();
-    //            newExpansionParameters.setParameter(newParameters);
-    //            newExpansionParameters.setId(id);
-    //            getLibrary().addContained(newExpansionParameters);
-    //            var expansionParamsExt = getLibrary().addExtension();
-    //            expansionParamsExt.setUrl(Constants.CQF_EXPANSION_PARAMETERS);
-    //            expansionParamsExt.setValue(new Reference("#" + id));
-    //        }
-    //    }
 }

@@ -260,7 +260,9 @@ public class R4MeasureProcessor {
         var zonedMeasurementPeriod = MeasureProcessorUtils.getZonedTimeZoneForEval(
                 measureProcessorUtils.getDefaultMeasurementPeriod(measurementPeriodParams, context));
 
-        final List<MeasureLibraryIdEngineDetails> measureLibraryIdEngineDetailsList = measures.stream()
+        // Note that we must build the LibraryEngine BEFORE we call
+        // measureProcessorUtils.setMeasurementPeriod(), otherwise, we get an NPE.
+        var measureLibraryIdEngineDetailsList = measures.stream()
                 .map(measure -> buildLibraryIdEngineDetails(measure, parameters, context))
                 .toList();
 

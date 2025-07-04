@@ -167,7 +167,7 @@ public class Measure {
         }
 
         private R4MeasureService buildMeasureService() {
-            return new R4MeasureService(repository, evaluationOptions, measurePeriodValidator, measureServiceUtils);
+            return new R4MeasureService(repository, evaluationOptions, measurePeriodValidator);
         }
 
         public When when() {

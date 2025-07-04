@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.cr.measure.common;
 
 import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.MEASUREPOPULATION;
 
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -9,7 +10,6 @@ import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -19,7 +19,6 @@ import org.hl7.elm.r1.FunctionDef;
 import org.hl7.elm.r1.IntervalTypeSpecifier;
 import org.hl7.elm.r1.NamedTypeSpecifier;
 import org.hl7.elm.r1.ParameterDef;
-import org.hl7.elm.r1.VersionedIdentifier;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.Libraries;
@@ -27,7 +26,6 @@ import org.opencds.cqf.cql.engine.execution.Variable;
 import org.opencds.cqf.cql.engine.runtime.Date;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.engine.runtime.Interval;
-import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.opencds.cqf.fhir.cr.measure.helper.DateHelper;
 import org.slf4j.Logger;
@@ -35,6 +33,8 @@ import org.slf4j.LoggerFactory;
 
 public class MeasureProcessorUtils {
     private static final Logger logger = LoggerFactory.getLogger(MeasureProcessorUtils.class);
+    private static final String EXCEPTION_FOR_SUBJECT_ID_MESSAGE_TEMPLATE = "Exception for subjectId: %s, Message: %s";
+
     /**
      * Method that processes CQL Results into Measure defined fields that reference associated CQL expressions
      * @param results criteria expression results
@@ -66,7 +66,7 @@ public class MeasureProcessorUtils {
             } catch (Exception e) {
                 // Catch Exceptions from evaluation per subject, but allow rest of subjects to be processed (if
                 // applicable)
-                var error = "Exception for subjectId: %s, Message: %s".formatted(subjectId, e.getMessage());
+                var error = EXCEPTION_FOR_SUBJECT_ID_MESSAGE_TEMPLATE.formatted(subjectId, e.getMessage());
                 // Capture error for MeasureReportBuilder
                 measureDef.addError(error);
                 logger.error(error, e);
@@ -147,12 +147,11 @@ public class MeasureProcessorUtils {
     /**
      * method to set measurement period on cql engine context.
      * Priority is operation parameter defined value, otherwise default CQL value is used
-     * @param measureDef Measure defined objects to populate with criteria results
      * @param measurementPeriod Interval defined by operation parameters to override default CQL value
      * @param context cql engine context used to set measurement period parameter
      */
     @SuppressWarnings({"deprecation", "removal"})
-    public void setMeasurementPeriod(MeasureDef measureDef, Interval measurementPeriod, CqlEngine context) {
+    public void setMeasurementPeriod(Interval measurementPeriod, CqlEngine context, List<String> measureUrls) {
         ParameterDef pd = this.getMeasurementPeriodParameterDef(context);
         if (pd == null) {
             logger.warn(
@@ -194,7 +193,7 @@ public class MeasureProcessorUtils {
 
         NamedTypeSpecifier pointType = (NamedTypeSpecifier) intervalTypeSpecifier.getPointType();
         String targetType = pointType.getName().getLocalPart();
-        Interval convertedPeriod = convertInterval(measureDef, measurementPeriod, targetType);
+        Interval convertedPeriod = convertInterval(measurementPeriod, targetType, measureUrls);
 
         context.getState().setParameter(null, MeasureConstants.MEASUREMENT_PERIOD_PARAMETER_NAME, convertedPeriod);
     }
@@ -247,7 +246,7 @@ public class MeasureProcessorUtils {
         return newDateTime;
     }
 
-    public Interval convertInterval(MeasureDef measureDef, Interval interval, String targetType) {
+    public Interval convertInterval(Interval interval, String targetType, List<String> measureUrls) {
         String sourceTypeQualified = interval.getPointType().getTypeName();
         String sourceType = sourceTypeQualified.substring(sourceTypeQualified.lastIndexOf(".") + 1);
         if (sourceType.equals(targetType)) {
@@ -265,8 +264,11 @@ public class MeasureProcessorUtils {
         }
 
         throw new InvalidRequestException(
-                "The interval type of %s did not match the expected type of %s and no conversion was possible for MeasureDef: %s."
-                        .formatted(sourceType, targetType, measureDef.url()));
+                "The interval type of %s did not match the expected type of %s and no conversion was possible for measure URLs (first 5 only shown): %s."
+                        .formatted(
+                                sourceType,
+                                targetType,
+                                measureUrls.stream().limit(5).toList()));
     }
 
     public Date truncateDateTime(DateTime dateTime) {
@@ -337,51 +339,70 @@ public class MeasureProcessorUtils {
         return result;
     }
 
+    public CompositeEvaluationResultsPerMeasure getEvaluationResults(
+            List<String> subjectIds,
+            ZonedDateTime zonedMeasurementPeriod,
+            CqlEngine context,
+            MeasureLibraryIdEngineDetails measureLibraryIdEngineDetails) {
+
+        return getEvaluationResults(
+                subjectIds, zonedMeasurementPeriod, context, List.of(measureLibraryIdEngineDetails));
+    }
+
     /**
      * method used to execute generate CQL results via Library $evaluate
      * @param subjectIds subjects to generate results for
-     * @param measureDef Measure definition object used to store results of criteria expressions
      * @param zonedMeasurementPeriod offset defined measurement period for evaluation
      * @param context cql engine context
-     * @param libraryEngine library engine to use for evaluation of cql
-     * @param id library Version identifier used by library engine
+     * @param measureLibraryIdEngineDetailsList contains details of measureId, libraryId, and LibraryEngine
      * @return CQL results for Library defined in the Measure resource
      */
-    public Map<String, EvaluationResult> getEvaluationResults(
+    public CompositeEvaluationResultsPerMeasure getEvaluationResults(
             List<String> subjectIds,
-            MeasureDef measureDef,
             ZonedDateTime zonedMeasurementPeriod,
             CqlEngine context,
-            LibraryEngine libraryEngine,
-            VersionedIdentifier id) {
+            List<MeasureLibraryIdEngineDetails> measureLibraryIdEngineDetailsList) {
 
-        Map<String, EvaluationResult> result = new HashMap<>();
+        // measure -> subject -> results
+        var resultsBuilder = CompositeEvaluationResultsPerMeasure.builder();
 
         // Library $evaluate each subject
         for (String subjectId : subjectIds) {
             if (subjectId == null) {
-                throw new NullPointerException("SubjectId is required in order to calculate.");
+                throw new InternalErrorException("SubjectId is required in order to calculate.");
             }
-            Pair<String, String> subjectInfo = this.getSubjectTypeAndId(subjectId);
-            String subjectTypePart = subjectInfo.getLeft();
-            String subjectIdPart = subjectInfo.getRight();
-            context.getState().setContextValue(subjectTypePart, subjectIdPart);
-            try {
-                result.put(
-                        subjectId,
-                        libraryEngine.getEvaluationResult(
-                                id, subjectId, null, null, null, null, null, zonedMeasurementPeriod, context));
-            } catch (Exception e) {
-                // Catch Exceptions from evaluation per subject, but allow rest of subjects to be processed (if
-                // applicable)
-                var error = "Exception for subjectId: %s, Message: %s".formatted(subjectId, e.getMessage());
-                // Capture error for MeasureReportBuilder
-                measureDef.addError(error);
-                logger.error(error, e);
+            for (var measureLibraryIdEngine : measureLibraryIdEngineDetailsList) {
+                Pair<String, String> subjectInfo = this.getSubjectTypeAndId(subjectId);
+                String subjectTypePart = subjectInfo.getLeft();
+                String subjectIdPart = subjectInfo.getRight();
+                context.getState().setContextValue(subjectTypePart, subjectIdPart);
+                try {
+                    resultsBuilder.addResult(
+                            measureLibraryIdEngine.measureId(),
+                            subjectId,
+                            measureLibraryIdEngine
+                                    .engine()
+                                    .getEvaluationResult(
+                                            measureLibraryIdEngine.libraryId(),
+                                            subjectId,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            zonedMeasurementPeriod,
+                                            context));
+                } catch (Exception e) {
+                    // Catch Exceptions from evaluation per subject, but allow rest of subjects to be processed (if
+                    // applicable)
+                    var error = EXCEPTION_FOR_SUBJECT_ID_MESSAGE_TEMPLATE.formatted(subjectId, e.getMessage());
+                    resultsBuilder.addError(measureLibraryIdEngine.measureId(), error);
+                    logger.error(error, e);
+                }
             }
         }
 
-        return result;
+        return resultsBuilder.build();
     }
 
     public Pair<String, String> getSubjectTypeAndId(String subjectId) {

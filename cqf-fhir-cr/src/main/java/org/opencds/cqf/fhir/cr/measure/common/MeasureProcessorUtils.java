@@ -10,7 +10,6 @@ import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -20,7 +19,6 @@ import org.hl7.elm.r1.FunctionDef;
 import org.hl7.elm.r1.IntervalTypeSpecifier;
 import org.hl7.elm.r1.NamedTypeSpecifier;
 import org.hl7.elm.r1.ParameterDef;
-import org.hl7.elm.r1.VersionedIdentifier;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.Libraries;
@@ -28,7 +26,6 @@ import org.opencds.cqf.cql.engine.execution.Variable;
 import org.opencds.cqf.cql.engine.runtime.Date;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.engine.runtime.Interval;
-import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.opencds.cqf.fhir.cr.measure.helper.DateHelper;
 import org.slf4j.Logger;
@@ -342,6 +339,16 @@ public class MeasureProcessorUtils {
         return result;
     }
 
+    public CompositeEvaluationResultsPerMeasure getEvaluationResults(
+            List<String> subjectIds,
+            ZonedDateTime zonedMeasurementPeriod,
+            CqlEngine context,
+            MeasureLibraryIdEngineDetails measureLibraryIdEngineDetails) {
+
+        return getEvaluationResults(
+                subjectIds, zonedMeasurementPeriod, context, List.of(measureLibraryIdEngineDetails));
+    }
+
     /**
      * method used to execute generate CQL results via Library $evaluate
      * @param subjectIds subjects to generate results for
@@ -396,47 +403,6 @@ public class MeasureProcessorUtils {
         }
 
         return resultsBuilder.build();
-    }
-
-    /**
-     * This is the legacy CQL measure evaluation logic that at this point should be used only
-     * by DSTU3, but it should never be used by R4 or later.
-     */
-    public Map<String, EvaluationResult> getEvaluationResultsLegacy(
-            List<String> subjectIds,
-            MeasureDef measureDef,
-            ZonedDateTime zonedMeasurementPeriod,
-            CqlEngine context,
-            LibraryEngine libraryEngine,
-            VersionedIdentifier id) {
-
-        Map<String, EvaluationResult> result = new HashMap<>();
-
-        // Library $evaluate each subject
-        for (String subjectId : subjectIds) {
-            if (subjectId == null) {
-                throw new NullPointerException("SubjectId is required in order to calculate.");
-            }
-            Pair<String, String> subjectInfo = this.getSubjectTypeAndId(subjectId);
-            String subjectTypePart = subjectInfo.getLeft();
-            String subjectIdPart = subjectInfo.getRight();
-            context.getState().setContextValue(subjectTypePart, subjectIdPart);
-            try {
-                result.put(
-                        subjectId,
-                        libraryEngine.getEvaluationResult(
-                                id, subjectId, null, null, null, null, null, zonedMeasurementPeriod, context));
-            } catch (Exception e) {
-                // Catch Exceptions from evaluation per subject, but allow rest of subjects to be processed (if
-                // applicable)
-                var error = EXCEPTION_FOR_SUBJECT_ID_MESSAGE_TEMPLATE.formatted(subjectId, e.getMessage());
-                // Capture error for MeasureReportBuilder
-                measureDef.addError(error);
-                logger.error(error, e);
-            }
-        }
-
-        return result;
     }
 
     public Pair<String, String> getSubjectTypeAndId(String subjectId) {

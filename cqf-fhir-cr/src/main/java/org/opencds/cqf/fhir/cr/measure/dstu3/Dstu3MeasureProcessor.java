@@ -27,6 +27,7 @@ import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureLibraryIdEngineDetails;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorUtils;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
 import org.opencds.cqf.fhir.cr.measure.common.SubjectProvider;
@@ -109,12 +110,15 @@ public class Dstu3MeasureProcessor {
         ZonedDateTime zonedMeasurementPeriod = MeasureProcessorUtils.getZonedTimeZoneForEval(measurementPeriod);
         // populate results from Library $evaluate
         if (!subjects.isEmpty()) {
-            var results = measureProcessorUtils.getEvaluationResultsLegacy(
-                    subjectIds, measureDef, zonedMeasurementPeriod, context, libraryEngine, libraryVersionIdentifier);
+            var results = measureProcessorUtils.getEvaluationResults(
+                    subjectIds,
+                    zonedMeasurementPeriod,
+                    context,
+                    buildLibraryIdEngineDetails(measure, parameters, context));
 
             // Process Criteria Expression Results
             measureProcessorUtils.processResults(
-                    results,
+                    results.processMeasureForSuccessOrFailure(measure.getIdElement(), measureDef),
                     measureDef,
                     evalType,
                     measureEvaluationOptions.getApplyScoringSetMembership(),
@@ -126,6 +130,18 @@ public class Dstu3MeasureProcessor {
         // Build Measure Report with Results
         return new Dstu3MeasureReportBuilder()
                 .build(measure, measureDef, evalTypeToReportType(evalType), measurementPeriod, subjects);
+    }
+
+    // Ideally this would be done in MeasureProcessorUtils, but it's too much work to change for now
+    private MeasureLibraryIdEngineDetails buildLibraryIdEngineDetails(
+            Measure measure, Parameters parameters, CqlEngine context) {
+
+        var libraryVersionIdentifier = getLibraryVersionIdentifier(measure);
+
+        return new MeasureLibraryIdEngineDetails(
+                measure.getIdElement(),
+                libraryVersionIdentifier,
+                getLibraryEngine(parameters, libraryVersionIdentifier, context));
     }
 
     protected MeasureReportType evalTypeToReportType(MeasureEvalType measureEvalType) {

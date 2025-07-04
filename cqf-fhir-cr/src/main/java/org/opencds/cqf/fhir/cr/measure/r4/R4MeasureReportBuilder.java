@@ -81,7 +81,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         this.measureReportScorer = new R4MeasureReportScorer();
     }
 
-    protected static class BuilderContext {
+    private static class BuilderContext {
         private final Measure measure;
         private final MeasureDef measureDef;
         private final MeasureReport measureReport;

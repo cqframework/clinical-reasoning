@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import org.cqframework.cql.cql2elm.CqlIncludeException;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.hl7.elm.r1.VersionedIdentifier;
@@ -34,6 +33,7 @@ import org.opencds.cqf.fhir.cr.measure.common.SubjectProvider;
 import org.opencds.cqf.fhir.utility.repository.FederatedRepository;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
+@SuppressWarnings("squid:S1135")
 public class Dstu3MeasureProcessor {
     private final IRepository repository;
     private final MeasureEvaluationOptions measureEvaluationOptions;
@@ -91,7 +91,7 @@ public class Dstu3MeasureProcessor {
             actualRepo = new FederatedRepository(
                     this.repository, new InMemoryFhirRepository(this.repository.fhirContext(), additionalData));
         }
-        var subjects = subjectProvider.getSubjects(actualRepo, subjectIds).collect(Collectors.toList());
+        var subjects = subjectProvider.getSubjects(actualRepo, subjectIds).toList();
         var evalType = getMeasureEvalType(reportType, subjects);
         var context = Engines.forRepository(
                 this.repository, this.measureEvaluationOptions.getEvaluationSettings(), additionalData);
@@ -146,11 +146,9 @@ public class Dstu3MeasureProcessor {
 
     protected MeasureReportType evalTypeToReportType(MeasureEvalType measureEvalType) {
         switch (measureEvalType) {
-            case PATIENT:
-            case SUBJECT:
+            case PATIENT, SUBJECT:
                 return MeasureReportType.INDIVIDUAL;
-            case PATIENTLIST:
-            case SUBJECTLIST:
+            case PATIENTLIST, SUBJECTLIST:
                 return MeasureReportType.PATIENTLIST;
             case POPULATION:
                 return MeasureReportType.SUMMARY;

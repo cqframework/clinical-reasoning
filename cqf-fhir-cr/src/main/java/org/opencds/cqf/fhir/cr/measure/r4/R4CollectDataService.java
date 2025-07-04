@@ -5,7 +5,6 @@ import static org.opencds.cqf.fhir.utility.r4.Parameters.part;
 import ca.uhn.fhir.repository.IRepository;
 import jakarta.annotation.Nullable;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -81,10 +80,8 @@ public class R4CollectDataService {
             for (String patient : subjectList) {
                 var subjects = Collections.singletonList(patient);
 
-                var mutableList = new ArrayList<>(subjects);
-
                 var evaluationResults = processor.evaluateMeasureWithCqlEngine(
-                        mutableList, foldedMeasure, periodStart, periodEnd, parameters, context);
+                        subjects, foldedMeasure, periodStart, periodEnd, parameters, context);
 
                 // add resources per subject to Parameters
                 addReports(

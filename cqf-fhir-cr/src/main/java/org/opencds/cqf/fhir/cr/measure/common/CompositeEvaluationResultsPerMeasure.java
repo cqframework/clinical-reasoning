@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 
@@ -29,38 +28,34 @@ public class CompositeEvaluationResultsPerMeasure {
     private CompositeEvaluationResultsPerMeasure(Builder builder) {
 
         var resultsBuilder = ImmutableMap.<IIdType, Map<String, EvaluationResult>>builder();
-        var errorsBuilder = ImmutableMap.<IIdType, List<String>>builder();
-
         builder.resultsPerMeasure.forEach((key, value) -> resultsBuilder.put(key, ImmutableMap.copyOf(value)));
-
         resultsPerMeasure = resultsBuilder.build();
 
+        var errorsBuilder = ImmutableMap.<IIdType, List<String>>builder();
         builder.errorsPerMeasure.forEach((key, value) -> errorsBuilder.put(key, List.copyOf(value)));
-
         errorsPerMeasure = errorsBuilder.build();
     }
 
-    // measureDef will occasionally be prepended with the version, which means we need to parse it into an IIdType which
-    // is too much work, so pass in the measureId directly
+    /**
+     * Retrieves results and populates errors for a given measure.
+     * This method uses direct map lookups for efficient data retrieval.
+     * measureDef will occasionally be prepended with the version, which means we need to parse it into an IIdType which
+     * is too much work, so pass in the measureId directly
+     *
+     * @param measureId the ID of the measure to process
+     * @param measureDef the MeasureDef to populate with errors
+     *
+     * @return a map of evaluation results per subject, or an empty map if none exist
+     */
     public Map<String, EvaluationResult> processMeasureForSuccessOrFailure(IIdType measureId, MeasureDef measureDef) {
-        errorsPerMeasure.entrySet().stream()
-                .filter(entry -> isMeasureDefFound(entry.getKey(), measureId))
-                .map(Entry::getValue)
-                .flatMap(List::stream)
-                .forEach(measureDef::addError);
+        var unqualifiedMeasureId = measureId.toUnqualifiedVersionless();
 
-        var resultForMeasure = resultsPerMeasure.entrySet().stream()
-                .filter(entry -> isMeasureDefFound(entry.getKey(), measureId))
-                .map(Entry::getValue)
-                .findFirst();
+        errorsPerMeasure.getOrDefault(unqualifiedMeasureId, List.of())
+            .forEach(measureDef::addError);
 
-        // We are explicitly maintaining the logic of accepting the lack of any sort of results
+        // We are explicitly maintaining the logic of accepting the lack of any sort of results,
         // either errors or successes, and returning an empty map.
-        return resultForMeasure.orElseGet(Map::of);
-    }
-
-    private boolean isMeasureDefFound(IIdType entryKey, IIdType measureId) {
-        return measureId.toUnqualifiedVersionless().equals(entryKey.toUnqualifiedVersionless());
+        return resultsPerMeasure.getOrDefault(unqualifiedMeasureId, Map.of());
     }
 
     public static Builder builder() {

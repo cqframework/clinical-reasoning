@@ -50,8 +50,7 @@ public class CompositeEvaluationResultsPerMeasure {
     public Map<String, EvaluationResult> processMeasureForSuccessOrFailure(IIdType measureId, MeasureDef measureDef) {
         var unqualifiedMeasureId = measureId.toUnqualifiedVersionless();
 
-        errorsPerMeasure.getOrDefault(unqualifiedMeasureId, List.of())
-            .forEach(measureDef::addError);
+        errorsPerMeasure.getOrDefault(unqualifiedMeasureId, List.of()).forEach(measureDef::addError);
 
         // We are explicitly maintaining the logic of accepting the lack of any sort of results,
         // either errors or successes, and returning an empty map.

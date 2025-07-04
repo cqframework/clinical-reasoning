@@ -22,6 +22,7 @@ import org.opencds.cqf.fhir.utility.monad.Either3;
 import org.opencds.cqf.fhir.utility.repository.FederatedRepository;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.repository.Repositories;
+import javax.annotation.Nonnull;
 
 public class R4MeasureService implements R4MeasureEvaluatorSingle {
     private final IRepository repository;
@@ -75,19 +76,10 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
             subjectId = practitioner;
         }
 
-        var actualRepo = proxyRepoForMeasureProcessor;
-        if (additionalData != null) {
-            actualRepo = new FederatedRepository(
-                    this.repository, new InMemoryFhirRepository(this.repository.fhirContext(), additionalData));
-        }
-
         var evalType = r4MeasureServiceUtils.getMeasureEvalType(
                 reportType, Optional.ofNullable(subjectId).map(List::of).orElse(List.of()));
 
-        var subjects = subjectProvider
-                .getSubjects(
-                        actualRepo, Optional.ofNullable(subjectId).map(List::of).orElse(List.of()))
-                .toList();
+        var subjects = getSubjects(subjectId, proxyRepoForMeasureProcessor, additionalData);
 
         // Replicate the old logic of using the repository used to initialize the measure processor
         // as the repository for the CQL engine context.
@@ -105,5 +97,22 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
 
         // add subject reference for non-individual reportTypes
         return r4MeasureServiceUtils.addSubjectReference(measureReport, practitioner, subjectId);
+    }
+
+    @Nonnull
+    private List<String> getSubjects(String subjectId, IRepository proxyRepoForMeasureProcessor, Bundle additionalData) {
+        final IRepository repoToUseForSubjectProvider;
+        if (additionalData != null) {
+            repoToUseForSubjectProvider = new FederatedRepository(
+                this.repository, new InMemoryFhirRepository(this.repository.fhirContext(), additionalData));
+        } else {
+            repoToUseForSubjectProvider = proxyRepoForMeasureProcessor;
+        }
+
+        return subjectProvider
+            .getSubjects(
+                repoToUseForSubjectProvider,
+                Optional.ofNullable(subjectId).map(List::of).orElse(List.of()))
+            .toList();
     }
 }

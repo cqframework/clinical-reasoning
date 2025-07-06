@@ -1,0 +1,17 @@
+{
+    "resourceType": "Library",
+    "id": "DEF-LIB",
+    "url": "http://example.com/Library/DEF-LIB",
+    "name": "DEF-LIB",
+    "status": "active",
+    "type": {
+      "coding": [ {
+        "system": "http://terminology.hl7.org/CodeSystem/library-type",
+        "code": "logic-library"
+      } ]
+    },
+    "content": [ {
+      "contentType": "text/cql",
+      "url": "../../cql/DEF-LIB.cql"
+    } ]
+}

@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.cpg;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.repository.IRepository;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,7 +12,6 @@ import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Library;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.Canonicals;
 
 public class CqlExecutionProcessor {
@@ -23,9 +23,9 @@ public class CqlExecutionProcessor {
             String name = null;
             String url = null;
             for (Object parameters : includedLibraries) {
-                if (parameters instanceof org.hl7.fhir.dstu3.model.Parameters) {
+                if (parameters instanceof org.hl7.fhir.dstu3.model.Parameters parameters1) {
                     for (org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent parameterComponent :
-                            ((org.hl7.fhir.dstu3.model.Parameters) parameters).getParameter()) {
+                            parameters1.getParameter()) {
                         if (parameterComponent.getName().equalsIgnoreCase("url")) {
                             url = parameterComponent.getValue().primitiveValue();
                         }
@@ -76,7 +76,7 @@ public class CqlExecutionProcessor {
         }
     }
 
-    public IBaseOperationOutcome createIssue(String severity, String details, Repository repository) {
+    public IBaseOperationOutcome createIssue(String severity, String details, IRepository repository) {
         if (repository.fhirContext().getVersion().getVersion() == FhirVersionEnum.DSTU3) {
             return new org.hl7.fhir.dstu3.model.OperationOutcome()
                     .addIssue(new org.hl7.fhir.dstu3.model.OperationOutcome.OperationOutcomeIssueComponent()

@@ -210,9 +210,9 @@ public class PopulateRequest implements IQuestionnaireRequest {
                 };
         if (response == null) {
             throw new IllegalArgumentException(
-                    String.format("Unsupported FHIR version: %s", fhirVersion.getFhirVersionString()));
+                    "Unsupported FHIR version: %s".formatted(fhirVersion.getFhirVersionString()));
         }
-        response.setId(String.format("%s-%s", questionnaireAdapter.getId().getIdPart(), subjectId.getIdPart()));
+        response.setId("%s-%s".formatted(questionnaireAdapter.getId().getIdPart(), subjectId.getIdPart()));
         return response;
     }
 

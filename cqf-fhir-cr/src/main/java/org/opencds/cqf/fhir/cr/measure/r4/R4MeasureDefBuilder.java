@@ -95,9 +95,8 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                 var expressionType = (Expression) group.getExtensionByUrl(CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL)
                         .getValue();
                 if (!expressionType.hasExpression()) {
-                    throw new InvalidRequestException(String.format(
-                            "no expression was listed for extension: %s for Measure: %s",
-                            CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL, measure.getUrl()));
+                    throw new InvalidRequestException("no expression was listed for extension: %s for Measure: %s"
+                            .formatted(CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL, measure.getUrl()));
                 }
                 var expression = expressionType.getExpression();
                 populations.add(new PopulationDef(
@@ -122,9 +121,9 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                 }
 
                 if (!components.isEmpty() && mgsc.getCriteria().getExpression() != null) {
-                    throw new InvalidRequestException(String.format(
-                            "Measure stratifier: %s, has both component and stratifier criteria expression defined. Only one should be specified",
-                            mgsc.getId()));
+                    throw new InvalidRequestException(
+                            "Measure stratifier: %s, has both component and stratifier criteria expression defined. Only one should be specified"
+                                    .formatted(mgsc.getId()));
                 }
 
                 var stratifierDef = new StratifierDef(
@@ -170,9 +169,8 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                 .filter(t -> t.getCodingFirstRep().getCode().equals(SDE_USAGE_CODE))
                 .collect(Collectors.toList());
         if (hasUsage == null || hasUsage.isEmpty()) {
-            throw new InvalidRequestException(String.format(
-                    "SupplementalDataComponent usage is missing code: %s for Measure: %s",
-                    SDE_USAGE_CODE, measure.getUrl()));
+            throw new InvalidRequestException("SupplementalDataComponent usage is missing code: %s for Measure: %s"
+                    .formatted(SDE_USAGE_CODE, measure.getUrl()));
         }
     }
 
@@ -209,9 +207,9 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         if (scoringCode != null) {
             var code = MeasureScoring.fromCode(scoringCode);
             if (code == null) {
-                throw new InvalidRequestException(String.format(
-                        "Measure Scoring code: %s, is not a valid Measure Scoring Type for measure: %s.",
-                        scoringCode, measure.getUrl()));
+                throw new InvalidRequestException(
+                        "Measure Scoring code: %s, is not a valid Measure Scoring Type for measure: %s."
+                                .formatted(scoringCode, measure.getUrl()));
             } else {
                 return code;
             }
@@ -231,9 +229,9 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         boolean hasValidCode =
                 IMPROVEMENT_NOTATION_SYSTEM_INCREASE.equals(code) || IMPROVEMENT_NOTATION_SYSTEM_DECREASE.equals(code);
         if (!hasValidCode || !hasValidSystem) {
-            throw new InvalidRequestException(String.format(
-                    "ImprovementNotation Coding has invalid System: %s, code: %s, combination for Measure: %s",
-                    system, code, measure.getUrl()));
+            throw new InvalidRequestException(
+                    "ImprovementNotation Coding has invalid System: %s, code: %s, combination for Measure: %s"
+                            .formatted(system, code, measure.getUrl()));
         }
     }
 
@@ -270,8 +268,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         var ext = group.getExtensionByUrl(MEASUREREPORT_IMPROVEMENT_NOTATION_EXTENSION);
         if (ext != null) {
             var value = ext.getValue();
-            if (value instanceof CodeableConcept) {
-                CodeableConcept coding = (CodeableConcept) value;
+            if (value instanceof CodeableConcept coding) {
                 var codeDef = new CodeDef(
                         coding.getCodingFirstRep().getSystem(),
                         coding.getCodingFirstRep().getCode());

@@ -1,9 +1,9 @@
 package org.opencds.cqf.fhir.cr.visitor.r4;
 
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -15,6 +15,7 @@ import static org.opencds.cqf.fhir.utility.r4.Parameters.part;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import com.github.valfirst.slf4jtest.LoggingEvent;
@@ -25,6 +26,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Bundle;
@@ -47,7 +49,6 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.visitor.ReleaseVisitor;
 import org.opencds.cqf.fhir.cr.visitor.VisitorHelper;
 import org.opencds.cqf.fhir.utility.Canonicals;
@@ -62,9 +63,10 @@ import org.opencds.cqf.fhir.utility.r4.MetadataResourceHelper;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.slf4j.event.Level;
 
+@SuppressWarnings("UnstableApiUsage")
 class ReleaseVisitorTests {
     private final FhirContext fhirContext = FhirContext.forR4Cached();
-    private Repository repo;
+    private IRepository repo;
     private final IParser jsonParser = fhirContext.newJsonParser();
     private final List<String> badVersionList = Arrays.asList(
             "11asd1",
@@ -138,13 +140,12 @@ class ReleaseVisitorTests {
                 assertEquals("Measure Cervical Cancer ScreeningFHIR, 0.0.001", dependency.getDisplay());
             }
             // expansion params versions should be used
-            if (Canonicals.getUrl(dependency.getResource()) != null
-                    && Canonicals.getUrl(dependency.getResource()).equals("http://loinc.org")) {
+            var canonicalUrl = Canonicals.getUrl(dependency.getResource());
+            if ("http://loinc.org".equals(canonicalUrl)) {
                 assertNotNull(Canonicals.getVersion(dependency.getResource()));
                 assertEquals("2.76", Canonicals.getVersion(dependency.getResource()));
             }
-            if (Canonicals.getUrl(dependency.getResource()) != null
-                    && Canonicals.getUrl(dependency.getResource()).equals("http://snomed.info/sct")) {
+            if ("http://snomed.info/sct".equals(canonicalUrl)) {
                 assertNotNull(Canonicals.getVersion(dependency.getResource()));
                 assertEquals(
                         "http://snomed.info/sct/731000124108/version/20230901",
@@ -263,10 +264,6 @@ class ReleaseVisitorTests {
         Parameters params = new Parameters();
         params.addParameter("version", "1.0.0");
         params.addParameter("versionBehavior", new CodeType("default"));
-        var crmiEDRId = "exp-params-crmi-test";
-        var crmiEDRExtension = new Extension();
-        crmiEDRExtension.setUrl(Constants.CRMI_EFFECTIVE_DATA_REQUIREMENTS);
-        crmiEDRExtension.setValue(new CanonicalType("#" + crmiEDRId));
         ReleaseVisitor releaseVisitor = new ReleaseVisitor(repo);
         // Approval date is required to release an artifact
         library.setApprovalDateElement(new DateType("2024-04-23"));
@@ -280,10 +277,11 @@ class ReleaseVisitorTests {
         Library releasedLibrary =
                 repo.read(Library.class, new IdType(maybeLib.get().getResponse().getLocation()));
         var directReferenceExtensions = releasedLibrary.getExtension().stream()
-                .filter(ext -> ext.getUrl().equals(Constants.CQF_DIRECT_REFERENCE_EXTENSION))
+                .filter(ext -> ext.getUrl().equals(Constants.CQF_DIRECT_REFERENCE_EXTENSION)
+                        || ext.getUrl().equals(Constants.CQFM_DIRECT_REFERENCE_EXTENSION))
                 .toList();
 
-        assertEquals(18, directReferenceExtensions.size());
+        assertEquals(12, directReferenceExtensions.size());
     }
 
     @Test
@@ -314,7 +312,7 @@ class ReleaseVisitorTests {
         // versionBehaviour == 'default' so version should be
         // existingVersion and not the new version provided in
         // the parameters
-        assertEquals(releasedLibrary.getVersion(), existingVersion);
+        assertEquals(existingVersion, releasedLibrary.getVersion());
         var expectedErsdTestArtifactDependencies = Arrays.asList(
                 "http://ersd.aimsplatform.org/fhir/PlanDefinition/us-ecr-specification|" + existingVersion,
                 "http://ersd.aimsplatform.org/fhir/Library/rctc|" + existingVersion,
@@ -350,8 +348,7 @@ class ReleaseVisitorTests {
         var expansionParameters =
                 new AdapterFactory().createLibrary(releasedLibrary).getExpansionParameters();
         var canonicalVersionParams = expansionParameters
-                .map(p -> VisitorHelper.getStringListParameter(Constants.CANONICAL_VERSION, p)
-                        .orElse(null))
+                .flatMap(p -> VisitorHelper.getStringListParameter(Constants.CANONICAL_VERSION, p))
                 .orElse(new ArrayList<>());
         assertEquals(0, canonicalVersionParams.size());
     }
@@ -379,7 +376,7 @@ class ReleaseVisitorTests {
         assertTrue(maybeLib.isPresent());
         Library releasedLibrary =
                 repo.read(Library.class, new IdType(maybeLib.get().getResponse().getLocation()));
-        assertEquals(releasedLibrary.getVersion(), newVersionToForce);
+        assertEquals(newVersionToForce, releasedLibrary.getVersion());
     }
 
     @Test
@@ -498,7 +495,7 @@ class ReleaseVisitorTests {
                         int month = calendar.get(Calendar.MONTH) + 1;
                         int day = calendar.get(Calendar.DAY_OF_MONTH);
                         String startString = year + "-" + month + "-" + day;
-                        assertEquals(startString, effectivePeriodToPropagate);
+                        assertEquals(effectivePeriodToPropagate, startString);
                     }
                 },
                 repo);
@@ -557,7 +554,7 @@ class ReleaseVisitorTests {
         return endpoint;
     }
 
-    void removeVersionsFromLibraryAndGrouperAndUpdate(Repository repo, String leafOid) {
+    void removeVersionsFromLibraryAndGrouperAndUpdate(IRepository repo, String leafOid) {
         // remove versions from references
         var library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"));
         library.getRelatedArtifact().forEach(ra -> {
@@ -655,7 +652,7 @@ class ReleaseVisitorTests {
                 .filter(ext -> ext.getUrl().equals(IKnowledgeArtifactAdapter.RELEASE_LABEL_URL))
                 .findFirst();
         assertTrue(maybeReleaseLabel.isPresent());
-        assertEquals(((StringType) maybeReleaseLabel.get().getValue()).getValue(), releaseLabel);
+        assertEquals(releaseLabel, ((StringType) maybeReleaseLabel.get().getValue()).getValue());
     }
 
     @Test
@@ -695,9 +692,7 @@ class ReleaseVisitorTests {
                     part("version", new StringType("1.2.3")), part("versionBehavior", new CodeType(versionBehaviour)));
             try {
                 libraryAdapter.accept(releaseVisitor, params);
-            } catch (FHIRException e) {
-                maybeException = e;
-            } catch (UnprocessableEntityException e) {
+            } catch (FHIRException | UnprocessableEntityException e) {
                 maybeException = e;
             }
             assertNotNull(maybeException);
@@ -725,8 +720,9 @@ class ReleaseVisitorTests {
                 repo.read(Library.class, new IdType(maybeLib.get().getResponse().getLocation()));
         for (final var originalRelatedArtifact : originalLibrary.getRelatedArtifact()) {
             releasedLibrary.getRelatedArtifact().forEach(releasedRelatedArtifact -> {
-                if (Canonicals.getUrl(releasedRelatedArtifact.getResource())
-                                .equals(Canonicals.getUrl(originalRelatedArtifact.getResource()))
+                if (Objects.equals(
+                                Canonicals.getUrl(releasedRelatedArtifact.getResource()),
+                                Canonicals.getUrl(originalRelatedArtifact.getResource()))
                         && originalRelatedArtifact.getType() == releasedRelatedArtifact.getType()) {
                     assertEquals(
                             releasedRelatedArtifact.getExtension().size(),

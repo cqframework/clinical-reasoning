@@ -4,6 +4,7 @@ import static org.opencds.cqf.fhir.utility.BundleHelper.getEntryResourceFirstRep
 
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.Collections;
 import java.util.List;
@@ -17,7 +18,6 @@ import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 import org.opencds.cqf.fhir.utility.search.Searches;
 
@@ -26,7 +26,7 @@ public class SearchHelper {
     private SearchHelper() {}
 
     @SuppressWarnings("unchecked")
-    protected static Class<IBaseBundle> getBundleClass(Repository repository) {
+    protected static Class<IBaseBundle> getBundleClass(IRepository repository) {
         return (Class<IBaseBundle>)
                 repository.fhirContext().getResourceDefinition("Bundle").getImplementingClass();
     }
@@ -39,7 +39,7 @@ public class SearchHelper {
      * @return
      */
     @SuppressWarnings("unchecked")
-    public static Class<IBaseResource> getResourceClass(Repository repository, String resourceType) {
+    public static Class<IBaseResource> getResourceClass(IRepository repository, String resourceType) {
         return (Class<IBaseResource>)
                 repository.fhirContext().getResourceDefinition(resourceType).getImplementingClass();
     }
@@ -51,7 +51,7 @@ public class SearchHelper {
      * @param id IIdType of the resource
      * @return
      */
-    public static IBaseResource readRepository(Repository repository, IIdType id) {
+    public static IBaseResource readRepository(IRepository repository, IIdType id) {
         return repository.read(getResourceClass(repository, id.getResourceType()), id);
     }
 
@@ -64,7 +64,7 @@ public class SearchHelper {
      * @return
      */
     public static <CanonicalType extends IPrimitiveType<String>> IBaseResource searchRepositoryByCanonical(
-            Repository repository, CanonicalType canonical) {
+            IRepository repository, CanonicalType canonical) {
 
         var resourceType = getResourceType(repository, canonical);
         return searchRepositoryByCanonical(repository, canonical, resourceType);
@@ -86,7 +86,7 @@ public class SearchHelper {
      * @return
      */
     public static <CanonicalType extends IPrimitiveType<String>> Class<? extends IBaseResource> getResourceType(
-            Repository repository, CanonicalType canonical) {
+            IRepository repository, CanonicalType canonical) {
         Class<? extends IBaseResource> resourceType = null;
         try {
             var resourceTypeString = Canonicals.getResourceType(canonical);
@@ -136,7 +136,7 @@ public class SearchHelper {
      * @return
      */
     public static Class<? extends IBaseResource> getResourceType(
-            Repository repository, IDependencyInfo dependencyInfo) {
+            IRepository repository, IDependencyInfo dependencyInfo) {
         Class<? extends IBaseResource> resourceType = null;
         try {
             var resourceTypeString = Canonicals.getResourceType(dependencyInfo.getReference());
@@ -213,7 +213,7 @@ public class SearchHelper {
      * @param canonical
      * @return
      */
-    private static Class<? extends IBaseResource> getResourceType(Repository repository, String canonical) {
+    private static Class<? extends IBaseResource> getResourceType(IRepository repository, String canonical) {
         Class<? extends IBaseResource> resourceType = null;
         try {
             resourceType = repository
@@ -242,15 +242,15 @@ public class SearchHelper {
      */
     public static <CanonicalType extends IPrimitiveType<String>, R extends IBaseResource>
             IBaseResource searchRepositoryByCanonical(
-                    Repository repository, CanonicalType canonical, Class<R> resourceType) {
+                    IRepository repository, CanonicalType canonical, Class<R> resourceType) {
         var url = Canonicals.getUrl(canonical);
         var version = Canonicals.getVersion(canonical);
         var searchParams = version == null ? Searches.byUrl(url) : Searches.byUrlAndVersion(url, version);
         var searchResult = repository.search(getBundleClass(repository), resourceType, searchParams);
         var result = getEntryResourceFirstRep(searchResult);
         if (result == null) {
-            throw new FHIRException(String.format(
-                    "No resource of type %s found for url: %s|%s", resourceType.getSimpleName(), url, version));
+            throw new FHIRException("No resource of type %s found for url: %s|%s"
+                    .formatted(resourceType.getSimpleName(), url, version));
         }
 
         return result;
@@ -265,7 +265,7 @@ public class SearchHelper {
      * @return
      */
     public static <CanonicalType extends IPrimitiveType<String>> IBaseBundle searchRepositoryByCanonicalWithPaging(
-            Repository repository, CanonicalType canonical) {
+            IRepository repository, CanonicalType canonical) {
         var resourceType = getResourceType(repository, canonical);
 
         return searchRepositoryByCanonicalWithPaging(repository, canonical, resourceType);
@@ -280,7 +280,7 @@ public class SearchHelper {
      * @return
      */
     public static <CanonicalType extends IPrimitiveType<String>> IBaseBundle searchRepositoryByCanonicalWithPaging(
-            Repository repository, String canonical) {
+            IRepository repository, String canonical) {
         var resourceType = getResourceType(repository, canonical);
 
         return searchRepositoryByCanonicalWithPaging(repository, canonical, resourceType);
@@ -295,7 +295,7 @@ public class SearchHelper {
      * @return
      */
     public static IBaseBundle searchRepositoryByCanonicalWithPagingWithParams(
-            Repository repository, String canonical, Map<String, List<IQueryParameterType>> additionalSearchParams) {
+            IRepository repository, String canonical, Map<String, List<IQueryParameterType>> additionalSearchParams) {
         var resourceType = getResourceType(repository, canonical);
         return searchRepositoryByCanonicalWithPagingWithParams(
                 repository, canonical, resourceType, additionalSearchParams);
@@ -313,7 +313,7 @@ public class SearchHelper {
      */
     public static <CanonicalType extends IPrimitiveType<String>, R extends IBaseResource>
             IBaseBundle searchRepositoryByCanonicalWithPaging(
-                    Repository repository, CanonicalType canonical, Class<R> resourceType) {
+                    IRepository repository, CanonicalType canonical, Class<R> resourceType) {
         return searchRepositoryByCanonicalWithPagingWithParams(repository, canonical, resourceType, null);
     }
 
@@ -330,7 +330,7 @@ public class SearchHelper {
      */
     public static <CanonicalType extends IPrimitiveType<String>, R extends IBaseResource>
             IBaseBundle searchRepositoryByCanonicalWithPagingWithParams(
-                    Repository repository,
+                    IRepository repository,
                     CanonicalType canonical,
                     Class<R> resourceType,
                     Map<String, List<IQueryParameterType>> additionalSearchParams) {
@@ -355,7 +355,7 @@ public class SearchHelper {
      * @return
      */
     public static <R extends IBaseResource> IBaseBundle searchRepositoryByCanonicalWithPaging(
-            Repository repository, String canonical, Class<R> resourceType) {
+            IRepository repository, String canonical, Class<R> resourceType) {
         return searchRepositoryByCanonicalWithPagingWithParams(repository, canonical, resourceType, null);
     }
 
@@ -370,7 +370,7 @@ public class SearchHelper {
      * @return
      */
     public static <R extends IBaseResource> IBaseBundle searchRepositoryByCanonicalWithPagingWithParams(
-            Repository repository,
+            IRepository repository,
             String canonical,
             Class<R> resourceType,
             Map<String, List<IQueryParameterType>> additionalSearchParams) {
@@ -398,7 +398,7 @@ public class SearchHelper {
      */
     @SuppressWarnings("unchecked")
     public static <T extends IBaseResource, R extends IBaseBundle> R searchRepositoryWithPaging(
-            Repository repository,
+            IRepository repository,
             Class<T> resourceType,
             Map<String, List<IQueryParameterType>> searchParameters,
             Map<String, String> headers) {
@@ -409,7 +409,7 @@ public class SearchHelper {
         return (R) result;
     }
 
-    private static void handlePaging(Repository repository, IBaseBundle bundle) {
+    private static void handlePaging(IRepository repository, IBaseBundle bundle) {
         var fhirVersion = repository.fhirContext().getVersion().getVersion();
         switch (fhirVersion) {
             case DSTU3:
@@ -436,12 +436,12 @@ public class SearchHelper {
 
             default:
                 throw new IllegalArgumentException(
-                        String.format("Unsupported version of FHIR: %s", fhirVersion.getFhirVersionString()));
+                        "Unsupported version of FHIR: %s".formatted(fhirVersion.getFhirVersionString()));
         }
     }
 
     private static void getNextPageDstu3(
-            Repository repository, org.hl7.fhir.dstu3.model.Bundle bundle, String nextUrl) {
+            IRepository repository, org.hl7.fhir.dstu3.model.Bundle bundle, String nextUrl) {
         var nextBundle =
                 (org.hl7.fhir.dstu3.model.Bundle) repository.link(org.hl7.fhir.dstu3.model.Bundle.class, nextUrl);
         nextBundle.getEntry().forEach(bundle::addEntry);
@@ -451,7 +451,7 @@ public class SearchHelper {
         }
     }
 
-    private static void getNextPageR4(Repository repository, org.hl7.fhir.r4.model.Bundle bundle, String nextUrl) {
+    private static void getNextPageR4(IRepository repository, org.hl7.fhir.r4.model.Bundle bundle, String nextUrl) {
         var nextBundle = repository.link(org.hl7.fhir.r4.model.Bundle.class, nextUrl);
         nextBundle.getEntry().forEach(bundle::addEntry);
         var next = nextBundle.getLink(IBaseBundle.LINK_NEXT);
@@ -460,7 +460,7 @@ public class SearchHelper {
         }
     }
 
-    private static void getNextPageR5(Repository repository, org.hl7.fhir.r5.model.Bundle bundle, String nextUrl) {
+    private static void getNextPageR5(IRepository repository, org.hl7.fhir.r5.model.Bundle bundle, String nextUrl) {
         var nextBundle = repository.link(org.hl7.fhir.r5.model.Bundle.class, nextUrl);
         nextBundle.getEntry().forEach(bundle::addEntry);
         var next = nextBundle.getLink(IBaseBundle.LINK_NEXT);

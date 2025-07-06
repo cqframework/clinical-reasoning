@@ -80,8 +80,8 @@ public class Resources {
     @SuppressWarnings("unchecked")
     public static <T extends IBase> Class<T> getClassForTypeAndVersion(String type, FhirVersionEnum fhirVersion) {
         try {
-            return (Class<T>) Class.forName(String.format(
-                    "org.hl7.fhir.%s.model.%s", fhirVersion.toString().toLowerCase(), type));
+            return (Class<T>) Class.forName(
+                    "org.hl7.fhir.%s.model.%s".formatted(fhirVersion.toString().toLowerCase(), type));
         } catch (Exception e) {
             throw new IllegalArgumentException(e);
         }

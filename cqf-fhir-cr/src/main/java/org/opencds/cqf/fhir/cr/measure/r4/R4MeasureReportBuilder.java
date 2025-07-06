@@ -1033,58 +1033,52 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
         public String getKey() {
             String key = null;
-            if (value instanceof Coding) {
-                Coding c = ((Coding) value);
+            if (value instanceof Coding coding) {
+                Coding c = coding;
                 // ASSUMPTION: We won't have different systems with the same code
                 // within a given stratifier / sde
                 key = joinValues("coding", c.getCode());
-            } else if (value instanceof CodeableConcept) {
-                CodeableConcept c = ((CodeableConcept) value);
+            } else if (value instanceof CodeableConcept concept) {
+                CodeableConcept c = concept;
                 key = joinValues("codeable-concept", c.getCodingFirstRep().getCode());
-            } else if (value instanceof Code) {
-                Code c = (Code) value;
+            } else if (value instanceof Code c) {
                 key = joinValues("code", c.getCode());
-            } else if (value instanceof Enum) {
-                Enum<?> e = (Enum<?>) value;
+            } else if (value instanceof Enum<?> e) {
                 key = joinValues("enum", e.toString());
-            } else if (value instanceof IPrimitiveType<?>) {
-                IPrimitiveType<?> p = (IPrimitiveType<?>) value;
+            } else if (value instanceof IPrimitiveType<?> p) {
                 key = joinValues("primitive", p.getValueAsString());
-            } else if (value instanceof Identifier) {
-                key = ((Identifier) value).getValue();
-            } else if (value instanceof Resource) {
-                key = ((Resource) value).getIdElement().toVersionless().getValue();
+            } else if (value instanceof Identifier identifier) {
+                key = identifier.getValue();
+            } else if (value instanceof Resource resource) {
+                key = resource.getIdElement().toVersionless().getValue();
             } else if (value != null) {
                 key = value.toString();
             }
 
             if (key == null) {
-                throw new InvalidRequestException(String.format("found a null key for the wrapped value: %s", value));
+                throw new InvalidRequestException("found a null key for the wrapped value: %s".formatted(value));
             }
 
             return key;
         }
 
         public String getValueAsString() {
-            if (value instanceof Coding) {
-                Coding c = ((Coding) value);
+            if (value instanceof Coding coding) {
+                Coding c = coding;
                 return c.getCode();
-            } else if (value instanceof CodeableConcept) {
-                CodeableConcept c = ((CodeableConcept) value);
+            } else if (value instanceof CodeableConcept concept) {
+                CodeableConcept c = concept;
                 return c.getCodingFirstRep().getCode();
-            } else if (value instanceof Code) {
-                Code c = (Code) value;
+            } else if (value instanceof Code c) {
                 return c.getCode();
-            } else if (value instanceof Enum) {
-                Enum<?> e = (Enum<?>) value;
+            } else if (value instanceof Enum<?> e) {
                 return e.toString();
-            } else if (value instanceof IPrimitiveType<?>) {
-                IPrimitiveType<?> p = (IPrimitiveType<?>) value;
+            } else if (value instanceof IPrimitiveType<?> p) {
                 return p.getValueAsString();
-            } else if (value instanceof Identifier) {
-                return ((Identifier) value).getValue();
-            } else if (value instanceof Resource) {
-                return ((Resource) value).getIdElement().toVersionless().getValue();
+            } else if (value instanceof Identifier identifier) {
+                return identifier.getValue();
+            } else if (value instanceof Resource resource) {
+                return resource.getIdElement().toVersionless().getValue();
             } else if (value != null) {
                 return value.toString();
             } else {
@@ -1093,27 +1087,24 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         }
 
         public String getDescription() {
-            if (value instanceof Coding) {
-                Coding c = ((Coding) value);
+            if (value instanceof Coding coding) {
+                Coding c = coding;
                 return c.hasDisplay() ? c.getDisplay() : c.getCode();
-            } else if (value instanceof CodeableConcept) {
-                CodeableConcept c = ((CodeableConcept) value);
+            } else if (value instanceof CodeableConcept concept) {
+                CodeableConcept c = concept;
                 return c.getCodingFirstRep().hasDisplay()
                         ? c.getCodingFirstRep().getDisplay()
                         : c.getCodingFirstRep().getCode();
-            } else if (value instanceof Code) {
-                Code c = (Code) value;
+            } else if (value instanceof Code c) {
                 return c.getDisplay() != null ? c.getDisplay() : c.getCode();
-            } else if (value instanceof Enum) {
-                Enum<?> e = (Enum<?>) value;
+            } else if (value instanceof Enum<?> e) {
                 return e.toString();
-            } else if (value instanceof IPrimitiveType<?>) {
-                IPrimitiveType<?> p = (IPrimitiveType<?>) value;
+            } else if (value instanceof IPrimitiveType<?> p) {
                 return p.getValueAsString();
-            } else if (value instanceof Identifier) {
-                return ((Identifier) value).getValue();
-            } else if (value instanceof Resource) {
-                return ((Resource) value).getIdElement().toVersionless().getValue();
+            } else if (value instanceof Identifier identifier) {
+                return identifier.getValue();
+            } else if (value instanceof Resource resource) {
+                return resource.getIdElement().toVersionless().getValue();
             } else if (value != null) {
                 return value.toString();
             } else {

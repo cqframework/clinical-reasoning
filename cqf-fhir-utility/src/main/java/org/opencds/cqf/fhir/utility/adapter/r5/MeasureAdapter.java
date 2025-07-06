@@ -77,8 +77,8 @@ public class MeasureAdapter extends KnowledgeArtifactAdapter implements IMeasure
                 for (var c : getMeasure().getContained()) {
                     if (c.hasId()
                             && (edrReference.equals(c.getId()) || edrReference.equals("#" + c.getId()))
-                            && c instanceof Library) {
-                        effectiveDataRequirements = (Library) c;
+                            && c instanceof Library library) {
+                        effectiveDataRequirements = library;
                         effectiveDataRequirementsAdapter = new LibraryAdapter(effectiveDataRequirements);
                     }
                 }

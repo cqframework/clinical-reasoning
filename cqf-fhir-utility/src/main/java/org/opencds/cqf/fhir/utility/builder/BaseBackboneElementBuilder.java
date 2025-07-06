@@ -48,9 +48,8 @@ public abstract class BaseBackboneElementBuilder<
                 initializeR5(backboneElement);
                 break;
             default:
-                throw new IllegalArgumentException(String.format(
-                        "ResourceBuilder.initializeResource does not support FHIR version %s",
-                        FhirVersions.forClass(resourceClass).getFhirVersionString()));
+                throw new IllegalArgumentException("ResourceBuilder.initializeResource does not support FHIR version %s"
+                        .formatted(FhirVersions.forClass(resourceClass).getFhirVersionString()));
         }
 
         return backboneElement;

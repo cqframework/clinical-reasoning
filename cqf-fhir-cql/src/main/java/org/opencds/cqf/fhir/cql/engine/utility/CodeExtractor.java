@@ -38,8 +38,8 @@ public class CodeExtractor {
 
     public List<Code> getElmCodesFromObject(Object object) {
         var codes = new ArrayList<Code>();
-        if (object instanceof Iterable) {
-            for (Object innerObject : (Iterable<?>) object) {
+        if (object instanceof Iterable<?> iterable) {
+            for (Object innerObject : iterable) {
                 List<Code> elmCodes = getElmCodesFromObject(innerObject);
                 if (elmCodes != null) {
                     codes.addAll(elmCodes);
@@ -58,16 +58,15 @@ public class CodeExtractor {
         List<Code> codes = new ArrayList<>();
         if (object == null) {
             return codes;
-        } else if (object instanceof IBase) {
-            List<Code> innerCodes = getCodesFromBase((IBase) object);
+        } else if (object instanceof IBase base) {
+            List<Code> innerCodes = getCodesFromBase(base);
             if (innerCodes != null) {
                 codes.addAll(innerCodes);
             }
-        } else if (object instanceof Code) {
-            codes.add((Code) object);
+        } else if (object instanceof Code code) {
+            codes.add(code);
         } else {
-            throw new IllegalArgumentException(
-                    String.format("Unable to extract codes from object %s", object.toString()));
+            throw new IllegalArgumentException("Unable to extract codes from object %s".formatted(object.toString()));
         }
 
         return codes;
@@ -84,8 +83,7 @@ public class CodeExtractor {
             return this.generateCodes(Collections.singletonList(object));
         }
 
-        throw new IllegalArgumentException(
-                String.format("Unable to extract codes from fhirType %s", object.fhirType()));
+        throw new IllegalArgumentException("Unable to extract codes from fhirType %s".formatted(object.fhirType()));
     }
 
     private List<Code> getCodeFromEnumeration(IBaseEnumeration<Enum<?>> enumeration) {

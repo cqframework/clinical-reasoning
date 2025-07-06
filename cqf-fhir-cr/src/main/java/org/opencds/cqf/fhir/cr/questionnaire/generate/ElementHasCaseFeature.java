@@ -39,16 +39,18 @@ public class ElementHasCaseFeature {
                             var filterPath = StringUtils.join(filterIdentifiers, ".");
                             var filterValue = slice.getDefaultOrFixedOrPattern();
 
-                            filter.append(String.format(
-                                    "%s = '%s'",
-                                    filterPath,
-                                    request.getFhirContext().newJsonParser().encodeToString(filterValue)));
+                            filter.append("%s = '%s'"
+                                    .formatted(
+                                            filterPath,
+                                            request.getFhirContext()
+                                                    .newJsonParser()
+                                                    .encodeToString(filterValue)));
                         });
                 filter.append(").single()");
                 path = path.replace(":" + sliceName, filter);
             }
         }
-        var expression = "%" + String.format("%s%s", caseFeature.getName(), path);
+        var expression = "%" + "%s%s".formatted(caseFeature.getName(), path);
         var expressionType = createExpression(request.getFhirVersion(), expression, null);
         if (expressionType != null) {
             var initialExpressionExt = questionnaireItem.addExtension();

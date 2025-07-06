@@ -59,8 +59,8 @@ class MeasurePeriodValidatorTest {
         try {
             testSubject.validatePeriodStartAndEnd(periodStart, periodEnd);
             if (expectedException != null) {
-                fail(String.format(
-                        "Expected the following exception: %s but the method did not throw one", expectedException));
+                fail("Expected the following exception: %s but the method did not throw one"
+                        .formatted(expectedException));
             }
         } catch (Exception actualException) {
             if (expectedException == null) {

@@ -64,8 +64,8 @@ public class ProcessItem {
                     addAuthorExtension(request, responseItem);
                 }
             } catch (Exception e) {
-                var message = String.format(
-                        "Encountered error evaluating initial expression for item %s: %s", itemLinkId, e.getMessage());
+                var message = "Encountered error evaluating initial expression for item %s: %s"
+                        .formatted(itemLinkId, e.getMessage());
                 logger.error(message);
                 request.logException(message);
                 results = new ArrayList<>();

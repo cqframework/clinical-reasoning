@@ -139,7 +139,7 @@ public class ExtensionBuilders {
                 break;
 
             default:
-                throw new IllegalArgumentException(String.format("Unrecognized launch context code: %s", code));
+                throw new IllegalArgumentException("Unrecognized launch context code: %s".formatted(code));
         }
         switch (fhirVersion) {
             case R4:

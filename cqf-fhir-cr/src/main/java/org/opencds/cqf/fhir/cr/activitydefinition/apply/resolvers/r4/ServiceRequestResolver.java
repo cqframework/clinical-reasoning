@@ -36,7 +36,7 @@ public class ServiceRequestResolver extends BaseRequestResourceResolver {
             serviceRequest.setInstantiatesCanonical(
                     Collections.singletonList(new CanonicalType(activityDefinition.getUrl()
                             + (activityDefinition.hasVersion()
-                                    ? String.format("|%s", activityDefinition.getVersion())
+                                    ? "|%s".formatted(activityDefinition.getVersion())
                                     : ""))));
         }
 
@@ -53,7 +53,7 @@ public class ServiceRequestResolver extends BaseRequestResourceResolver {
         if (activityDefinition.hasCode()) {
             serviceRequest.setCode(activityDefinition.getCode());
         } else if (!activityDefinition.hasDynamicValue()) {
-            throw new FHIRException(String.format(MISSING_CODE_PROPERTY, "ServiceRequest"));
+            throw new FHIRException(MISSING_CODE_PROPERTY.formatted("ServiceRequest"));
         }
 
         if (activityDefinition.hasBodySite()) {

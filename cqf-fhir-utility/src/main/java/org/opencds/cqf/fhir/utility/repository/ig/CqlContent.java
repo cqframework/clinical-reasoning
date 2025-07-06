@@ -42,7 +42,7 @@ public class CqlContent {
                 break;
             default:
                 throw new IllegalArgumentException(
-                        String.format("Unsupported FHIR version: %s", resource.getStructureFhirVersionEnum()));
+                        "Unsupported FHIR version: %s".formatted(resource.getStructureFhirVersionEnum()));
         }
 
         readAndAttachCqlContent(resource, resourcePath, cqlPathExtractor, cqlContentAttacher);
@@ -67,7 +67,7 @@ public class CqlContent {
         try {
             return new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
         } catch (IOException e) {
-            throw new ResourceNotFoundException(String.format("Unable to read CQL content from path: %s", path));
+            throw new ResourceNotFoundException("Unable to read CQL content from path: %s".formatted(path));
         }
     }
 }

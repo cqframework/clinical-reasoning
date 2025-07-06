@@ -4,6 +4,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.repository.IRepository;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -22,7 +23,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.measure.SubjectProviderOptions;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
@@ -49,7 +49,7 @@ class R4RepositorySubjectProviderTest {
     private static final R4RepositorySubjectProvider TEST_SUBJECT_DISABLE_PART_OF =
             new R4RepositorySubjectProvider(new SubjectProviderOptions().setPartOfEnabled(false));
 
-    private final Repository repository = new InMemoryFhirRepository(FhirContext.forR4Cached());
+    private final IRepository repository = new InMemoryFhirRepository(FhirContext.forR4Cached());
 
     @BeforeEach
     void beforeEach() {
@@ -252,6 +252,6 @@ class R4RepositorySubjectProviderTest {
     }
 
     private static String resourcify(ResourceType resourceType, String rawId) {
-        return String.format("%s/%s", resourceType.toString(), rawId);
+        return "%s/%s".formatted(resourceType.toString(), rawId);
     }
 }

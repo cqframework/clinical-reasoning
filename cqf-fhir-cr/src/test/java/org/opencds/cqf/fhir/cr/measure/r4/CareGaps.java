@@ -11,7 +11,8 @@ import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
-import java.nio.file.Paths;
+import ca.uhn.fhir.repository.IRepository;
+import java.nio.file.Path;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +33,6 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ResourceType;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
@@ -88,7 +88,7 @@ public class CareGaps {
     }
 
     public static class Given {
-        private Repository repository;
+        private IRepository repository;
         private MeasureEvaluationOptions evaluationOptions;
         private CareGapsProperties careGapsProperties;
         private final String serverBase;
@@ -115,7 +115,7 @@ public class CareGaps {
             this.measurePeriodEvaluator = new MeasurePeriodValidator();
         }
 
-        public CareGaps.Given repository(Repository repository) {
+        public CareGaps.Given repository(IRepository repository) {
             this.repository = repository;
             return this;
         }
@@ -123,7 +123,7 @@ public class CareGaps {
         public CareGaps.Given repositoryFor(String repositoryPath) {
             this.repository = new IgRepository(
                     FhirContext.forR4Cached(),
-                    Paths.get(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
+                    Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
             return this;
         }
 

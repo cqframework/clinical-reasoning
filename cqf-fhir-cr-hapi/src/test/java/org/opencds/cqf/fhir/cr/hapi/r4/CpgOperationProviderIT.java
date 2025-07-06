@@ -20,7 +20,6 @@ import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Observation;
-import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Period;
@@ -179,14 +178,10 @@ class CpgOperationProviderIT extends BaseCrR4TestServer {
 
         assertTrue(results.hasParameter());
         assertTrue(results.getParameterFirstRep().hasName());
-        assertEquals("evaluation error", results.getParameterFirstRep().getName());
-        assertTrue(results.getParameterFirstRep().hasResource());
-        assertTrue(results.getParameterFirstRep().getResource() instanceof OperationOutcome);
-        assertThat(((OperationOutcome) results.getParameterFirstRep().getResource())
-                        .getIssueFirstRep()
-                        .getDetails()
-                        .getText())
-                .isEqualTo("Unsupported interval point type for FHIR conversion java.lang.Integer");
+        assertEquals("return", results.getParameterFirstRep().getName());
+        var value = assertInstanceOf(
+                StringType.class, results.getParameterFirstRep().getValue());
+        assertEquals("Interval[1, 5]", value.toString());
     }
 
     public Parameters runCqlExecution(Parameters parameters) {

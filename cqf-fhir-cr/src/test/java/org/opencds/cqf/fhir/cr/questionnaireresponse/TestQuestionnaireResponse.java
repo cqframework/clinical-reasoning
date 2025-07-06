@@ -6,18 +6,18 @@ import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.repository.IRepository;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cr.questionnaireresponse.extract.IExtractProcessor;
 import org.opencds.cqf.fhir.utility.Ids;
@@ -30,7 +30,7 @@ public class TestQuestionnaireResponse {
     public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/shared";
 
     public static InputStream open(String asset) {
-        var path = Paths.get(getResourcePath(TestQuestionnaireResponse.class) + "/" + CLASS_PATH + "/" + asset);
+        var path = Path.of(getResourcePath(TestQuestionnaireResponse.class) + "/" + CLASS_PATH + "/" + asset);
         var file = path.toFile();
         try {
             return new FileInputStream(file);
@@ -52,17 +52,17 @@ public class TestQuestionnaireResponse {
     }
 
     public static class Given {
-        private Repository repository;
+        private IRepository repository;
         private IExtractProcessor extractProcessor;
 
-        public Given repository(Repository repository) {
+        public Given repository(IRepository repository) {
             this.repository = repository;
             return this;
         }
 
         public Given repositoryFor(FhirContext fhirContext, String repositoryPath) {
             this.repository = new IgRepository(
-                    fhirContext, Paths.get(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
+                    fhirContext, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
             return this;
         }
 
@@ -138,12 +138,12 @@ public class TestQuestionnaireResponse {
     }
 
     public static class Extract {
-        private final Repository repository;
+        private final IRepository repository;
         private final IBaseBundle bundle;
         private final IParser jsonParser;
         private final ModelResolver modelResolver;
 
-        public Extract(Repository repository, IBaseBundle bundle) {
+        public Extract(IRepository repository, IBaseBundle bundle) {
             this.repository = repository;
             this.bundle = bundle;
             jsonParser = repository.fhirContext().newJsonParser().setPrettyPrint(true);

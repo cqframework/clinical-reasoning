@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cr.visitor;
 import static org.opencds.cqf.fhir.utility.adapter.IAdapterFactory.createAdapterForResource;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
@@ -26,7 +27,6 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.Constants;
@@ -48,14 +48,15 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
     private Logger logger = LoggerFactory.getLogger(ReleaseVisitor.class);
     private static final String DEPENDSON = "depends-on";
     private static final String VALUESET = "ValueSet";
+    private static final String CODESYSTEM = "CodeSystem";
     protected final TerminologyServerClient terminologyServerClient;
 
-    public ReleaseVisitor(Repository repository) {
+    public ReleaseVisitor(IRepository repository) {
         super(repository);
         terminologyServerClient = new TerminologyServerClient(fhirContext());
     }
 
-    public ReleaseVisitor(Repository repository, TerminologyServerClient terminologyServerClient) {
+    public ReleaseVisitor(IRepository repository, TerminologyServerClient terminologyServerClient) {
         super(repository);
         this.terminologyServerClient = terminologyServerClient;
     }
@@ -71,7 +72,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
         final Optional<IEndpointAdapter> terminologyEndpoint = VisitorHelper.getResourceParameter(
                         "terminologyEndpoint", operationParameters)
                 .map(r -> (IEndpointAdapter) createAdapterForResource(r));
-        if (latestFromTxServer && !terminologyEndpoint.isPresent()) {
+        if (latestFromTxServer && terminologyEndpoint.isEmpty()) {
             throw new UnprocessableEntityException("latestFromTxServer = true but no terminologyEndpoint is available");
         }
         final var version = VisitorHelper.getStringParameter("version", operationParameters)
@@ -308,9 +309,19 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
                         fhirVersion(),
                         DEPENDSON,
                         maybeLatest
-                                .map(r -> r.getCanonical())
+                                .map(IKnowledgeArtifactAdapter::getCanonical)
                                 .orElse(IKnowledgeArtifactAdapter.getRelatedArtifactReference(component)),
-                        maybeLatest.map(a -> a.getDescriptor()).orElse(null));
+                        maybeLatest
+                                .map(IKnowledgeArtifactAdapter::getDescriptor)
+                                .orElse(null));
+
+                var resourceType = maybeLatest
+                        .map(r -> Canonicals.getResourceType(r.getCanonical()))
+                        .orElse(Canonicals.getResourceType(
+                                IKnowledgeArtifactAdapter.getRelatedArtifactReference(component)));
+
+                ensureResourceTypeExtension(resourceType, componentToDependency);
+
                 // add to dependencies
                 var updatedRelatedArtifacts = artifactAdapter.getRelatedArtifact();
                 updatedRelatedArtifacts.add(componentToDependency);
@@ -371,6 +382,9 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
                             DEPENDSON,
                             dependency.getReference(),
                             dependencyAdapter != null ? dependencyAdapter.getDescriptor() : null);
+
+                    ensureResourceTypeExtension(getResourceType(dependency), newDep);
+
                     var updatedRelatedArtifacts = rootAdapter.getRelatedArtifact();
                     updatedRelatedArtifacts.add(newDep);
                     rootAdapter.setRelatedArtifact(updatedRelatedArtifacts);
@@ -378,6 +392,20 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
             }
 
             extractMeasureDirectReferenceCodes(rootAdapter, artifactAdapter);
+        }
+    }
+
+    private void ensureResourceTypeExtension(String resourceType, ICompositeType newDep) {
+        if (resourceType != null && (resourceType.equals(VALUESET) || resourceType.equals(CODESYSTEM))) {
+            if (this.fhirVersion().equals(FhirVersionEnum.R4)) {
+                ((org.hl7.fhir.r4.model.RelatedArtifact) newDep)
+                        .getResourceElement()
+                        .addExtension(Constants.CQF_RESOURCETYPE, new org.hl7.fhir.r4.model.CodeType(resourceType));
+            } else if (this.fhirVersion().equals(FhirVersionEnum.R5)) {
+                ((org.hl7.fhir.r5.model.RelatedArtifact) newDep)
+                        .getResourceElement()
+                        .addExtension(Constants.CQF_RESOURCETYPE, new org.hl7.fhir.r5.model.CodeType(resourceType));
+            }
         }
     }
 
@@ -457,7 +485,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
         var reference = IKnowledgeArtifactAdapter.getRelatedArtifactReference(component);
         var resource = Optional.ofNullable(reference)
                 .map(r -> checkIfReferenceInList(r, releasedResources).orElse(null));
-        if (IKnowledgeArtifactAdapter.checkIfRelatedArtifactIsOwned(component) && !resource.isPresent()) {
+        if (IKnowledgeArtifactAdapter.checkIfRelatedArtifactIsOwned(component) && resource.isEmpty()) {
             // should never happen since we check all references as part of `internalRelease`
             throw new InternalErrorException("Owned resource reference not found during release: " + reference);
         }
@@ -484,7 +512,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
             List<String> systemVersionExpansionParameters) {
         Optional<String> expansionParametersVersion = Optional.empty();
         // assume if we can't figure out the resource type it's a CodeSystem
-        if (resourceType == null || resourceType.equals("CodeSystem")) {
+        if (resourceType == null || resourceType.equals(CODESYSTEM)) {
             expansionParametersVersion = systemVersionExpansionParameters.stream()
                     .filter(canonical -> !StringUtils.isBlank(Canonicals.getUrl(canonical)))
                     .filter(canonical -> Canonicals.getUrl(canonical).equals(dependency.getReference()))
@@ -504,32 +532,32 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
     }
 
     private void checkNonExperimental(
-            IDomainResource resource, Optional<String> experimentalBehavior, Repository repository)
+            IDomainResource resource, Optional<String> experimentalBehavior, IRepository repository)
             throws UnprocessableEntityException {
-        if (resource instanceof org.hl7.fhir.dstu3.model.MetadataResource) {
+        if (resource instanceof org.hl7.fhir.dstu3.model.MetadataResource metadataResource2) {
             var code = experimentalBehavior.isPresent()
                     ? org.opencds.cqf.fhir.cr.visitor.dstu3.CRMIReleaseExperimentalBehavior
                             .CRMIReleaseExperimentalBehaviorCodes.fromCode(experimentalBehavior.get())
                     : org.opencds.cqf.fhir.cr.visitor.dstu3.CRMIReleaseExperimentalBehavior
                             .CRMIReleaseExperimentalBehaviorCodes.NULL;
             org.opencds.cqf.fhir.cr.visitor.dstu3.ReleaseVisitor.checkNonExperimental(
-                    (org.hl7.fhir.dstu3.model.MetadataResource) resource, code, repository, logger);
-        } else if (resource instanceof org.hl7.fhir.r4.model.MetadataResource) {
+                    metadataResource2, code, repository, logger);
+        } else if (resource instanceof org.hl7.fhir.r4.model.MetadataResource metadataResource1) {
             var code = experimentalBehavior.isPresent()
                     ? org.opencds.cqf.fhir.cr.visitor.r4.CRMIReleaseExperimentalBehavior
                             .CRMIReleaseExperimentalBehaviorCodes.fromCode(experimentalBehavior.get())
                     : org.opencds.cqf.fhir.cr.visitor.r4.CRMIReleaseExperimentalBehavior
                             .CRMIReleaseExperimentalBehaviorCodes.NULL;
             org.opencds.cqf.fhir.cr.visitor.r4.ReleaseVisitor.checkNonExperimental(
-                    (org.hl7.fhir.r4.model.MetadataResource) resource, code, repository, logger);
-        } else if (resource instanceof org.hl7.fhir.r5.model.MetadataResource) {
+                    metadataResource1, code, repository, logger);
+        } else if (resource instanceof org.hl7.fhir.r5.model.MetadataResource metadataResource) {
             var code = experimentalBehavior.isPresent()
                     ? org.opencds.cqf.fhir.cr.visitor.r5.CRMIReleaseExperimentalBehavior
                             .CRMIReleaseExperimentalBehaviorCodes.fromCode(experimentalBehavior.get())
                     : org.opencds.cqf.fhir.cr.visitor.r5.CRMIReleaseExperimentalBehavior
                             .CRMIReleaseExperimentalBehaviorCodes.NULL;
             org.opencds.cqf.fhir.cr.visitor.r5.ReleaseVisitor.checkNonExperimental(
-                    (org.hl7.fhir.r5.model.MetadataResource) resource, code, repository, logger);
+                    metadataResource, code, repository, logger);
         } else {
             throw new UnprocessableEntityException(resource.getClass().getName() + NOT_SUPPORTED);
         }
@@ -537,22 +565,19 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
 
     private static void propagateEffectivePeriod(
             ICompositeType rootEffectivePeriod, IKnowledgeArtifactAdapter artifactAdapter) {
-        if (rootEffectivePeriod instanceof org.hl7.fhir.dstu3.model.Period) {
-            org.opencds.cqf.fhir.cr.visitor.dstu3.ReleaseVisitor.propagateEffectivePeriod(
-                    (org.hl7.fhir.dstu3.model.Period) rootEffectivePeriod, artifactAdapter);
-        } else if (rootEffectivePeriod instanceof org.hl7.fhir.r4.model.Period) {
-            org.opencds.cqf.fhir.cr.visitor.r4.ReleaseVisitor.propagateEffectivePeriod(
-                    (org.hl7.fhir.r4.model.Period) rootEffectivePeriod, artifactAdapter);
-        } else if (rootEffectivePeriod instanceof org.hl7.fhir.r5.model.Period) {
-            org.opencds.cqf.fhir.cr.visitor.r5.ReleaseVisitor.propagateEffectivePeriod(
-                    (org.hl7.fhir.r5.model.Period) rootEffectivePeriod, artifactAdapter);
+        if (rootEffectivePeriod instanceof org.hl7.fhir.dstu3.model.Period period2) {
+            org.opencds.cqf.fhir.cr.visitor.dstu3.ReleaseVisitor.propagateEffectivePeriod(period2, artifactAdapter);
+        } else if (rootEffectivePeriod instanceof org.hl7.fhir.r4.model.Period period1) {
+            org.opencds.cqf.fhir.cr.visitor.r4.ReleaseVisitor.propagateEffectivePeriod(period1, artifactAdapter);
+        } else if (rootEffectivePeriod instanceof org.hl7.fhir.r5.model.Period period) {
+            org.opencds.cqf.fhir.cr.visitor.r5.ReleaseVisitor.propagateEffectivePeriod(period, artifactAdapter);
         } else {
             throw new UnprocessableEntityException(
                     rootEffectivePeriod.getClass().getName() + NOT_SUPPORTED);
         }
     }
 
-    private IKnowledgeArtifactAdapter getArtifactByCanonical(String inputReference, Repository repository) {
+    private IKnowledgeArtifactAdapter getArtifactByCanonical(String inputReference, IRepository repository) {
         List<IKnowledgeArtifactAdapter> matchingResources = VisitorHelper.getMetadataResourcesFromBundle(
                         SearchHelper.searchRepositoryByCanonicalWithPaging(repository, inputReference))
                 .stream()
@@ -584,20 +609,17 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
             case DSTU2, DSTU2_1, DSTU2_HL7ORG:
             default:
                 throw new UnprocessableEntityException(
-                        String.format("Unsupported version of FHIR: %s", fhirVersion.getFhirVersionString()));
+                        "Unsupported version of FHIR: %s".formatted(fhirVersion.getFhirVersionString()));
         }
     }
 
     private void updateReleaseLabel(IBaseResource artifact, String releaseLabel) throws IllegalArgumentException {
-        if (artifact instanceof org.hl7.fhir.dstu3.model.MetadataResource) {
-            org.opencds.cqf.fhir.cr.visitor.dstu3.ReleaseVisitor.updateReleaseLabel(
-                    (org.hl7.fhir.dstu3.model.MetadataResource) artifact, releaseLabel);
-        } else if (artifact instanceof org.hl7.fhir.r4.model.MetadataResource) {
-            org.opencds.cqf.fhir.cr.visitor.r4.ReleaseVisitor.updateReleaseLabel(
-                    (org.hl7.fhir.r4.model.MetadataResource) artifact, releaseLabel);
-        } else if (artifact instanceof org.hl7.fhir.r5.model.MetadataResource) {
-            org.opencds.cqf.fhir.cr.visitor.r5.ReleaseVisitor.updateReleaseLabel(
-                    (org.hl7.fhir.r5.model.MetadataResource) artifact, releaseLabel);
+        if (artifact instanceof org.hl7.fhir.dstu3.model.MetadataResource resource2) {
+            org.opencds.cqf.fhir.cr.visitor.dstu3.ReleaseVisitor.updateReleaseLabel(resource2, releaseLabel);
+        } else if (artifact instanceof org.hl7.fhir.r4.model.MetadataResource resource1) {
+            org.opencds.cqf.fhir.cr.visitor.r4.ReleaseVisitor.updateReleaseLabel(resource1, releaseLabel);
+        } else if (artifact instanceof org.hl7.fhir.r5.model.MetadataResource resource) {
+            org.opencds.cqf.fhir.cr.visitor.r5.ReleaseVisitor.updateReleaseLabel(resource, releaseLabel);
         } else {
             throw new UnprocessableEntityException(artifact.getClass().getName() + NOT_SUPPORTED);
         }
@@ -626,9 +648,8 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
         }
 
         if (!artifact.getStatus().equals(DRAFT)) {
-            throw new PreconditionFailedException(String.format(
-                    "Resource with ID: '%s' does not have a status of 'draft'.",
-                    artifact.get().getIdElement().getIdPart()));
+            throw new PreconditionFailedException("Resource with ID: '%s' does not have a status of 'draft'."
+                    .formatted(artifact.get().getIdElement().getIdPart()));
         }
         if (artifact.getDate() == null) {
             throw new PreconditionFailedException(
@@ -639,15 +660,15 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
                     "The artifact must be approved (indicated by approvalDate) before it is eligible for release.");
         }
         if (approvalDate.before(artifact.getDate())) {
-            throw new PreconditionFailedException(String.format(
-                    "The artifact was approved on '%s', but was last modified on '%s'. An approval must be provided after the most-recent update.",
-                    approvalDate, artifact.getDate()));
+            throw new PreconditionFailedException(
+                    "The artifact was approved on '%s', but was last modified on '%s'. An approval must be provided after the most-recent update."
+                            .formatted(approvalDate, artifact.getDate()));
         }
     }
 
     private void checkReleaseVersion(String version, Optional<String> versionBehavior)
             throws UnprocessableEntityException {
-        if (!versionBehavior.isPresent()) {
+        if (versionBehavior.isEmpty()) {
             throw new UnprocessableEntityException(
                     "'versionBehavior' must be provided as an argument to the $release operation. Valid values are 'default', 'check', 'force'.");
         }

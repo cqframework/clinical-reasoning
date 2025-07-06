@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.visitor.dstu3;
 
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.ArrayList;
@@ -21,7 +22,6 @@ import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.visitor.dstu3.CRMIReleaseExperimentalBehavior.CRMIReleaseExperimentalBehaviorCodes;
 import org.opencds.cqf.fhir.cr.visitor.dstu3.CRMIReleaseVersionBehavior.CRMIReleaseVersionBehaviorCodes;
 import org.opencds.cqf.fhir.utility.PackageHelper;
@@ -37,14 +37,14 @@ public class ReleaseVisitor {
     public static void checkNonExperimental(
             MetadataResource resource,
             CRMIReleaseExperimentalBehaviorCodes experimentalBehavior,
-            Repository repository,
+            IRepository repository,
             Logger log)
             throws UnprocessableEntityException {
         if (CRMIReleaseExperimentalBehaviorCodes.NULL != experimentalBehavior
                 && CRMIReleaseExperimentalBehaviorCodes.NONE != experimentalBehavior) {
-            String nonExperimentalError = String.format(
-                    "Root artifact is not Experimental, but references an Experimental resource with URL '%s'.",
-                    resource.getUrl());
+            String nonExperimentalError =
+                    "Root artifact is not Experimental, but references an Experimental resource with URL '%s'."
+                            .formatted(resource.getUrl());
             if (CRMIReleaseExperimentalBehaviorCodes.WARN == experimentalBehavior && resource.getExperimental()) {
                 log.warn(nonExperimentalError);
             } else if (CRMIReleaseExperimentalBehaviorCodes.ERROR == experimentalBehavior
@@ -90,7 +90,7 @@ public class ReleaseVisitor {
         }
     }
 
-    public static Bundle searchArtifactAssessmentForArtifact(IIdType reference, Repository repository) {
+    public static Bundle searchArtifactAssessmentForArtifact(IIdType reference, IRepository repository) {
         Map<String, List<IQueryParameterType>> searchParams = new HashMap<>();
         List<IQueryParameterType> urlList = new ArrayList<>();
         urlList.add(new ReferenceParam(reference));
@@ -119,9 +119,9 @@ public class ReleaseVisitor {
                 releaseVersion = Optional.ofNullable(version);
             } else if (CRMIReleaseVersionBehaviorCodes.CHECK == versionBehaviorCode
                     && !replaceDraftInExisting.equals(version)) {
-                throw new UnprocessableEntityException(String.format(
-                        "versionBehavior specified is 'check' and the version provided ('%s') does not match the version currently specified on the root artifact ('%s').",
-                        version, existingVersion));
+                throw new UnprocessableEntityException(
+                        "versionBehavior specified is 'check' and the version provided ('%s') does not match the version currently specified on the root artifact ('%s')."
+                                .formatted(version, existingVersion));
             }
         }
         return releaseVersion;
@@ -129,7 +129,7 @@ public class ReleaseVisitor {
 
     @SuppressWarnings("squid:S1612")
     public static List<BundleEntryComponent> findArtifactCommentsToUpdate(
-            MetadataResource rootArtifact, String releaseVersion, Repository repository) {
+            MetadataResource rootArtifact, String releaseVersion, IRepository repository) {
         var returnEntries = new ArrayList<BundleEntryComponent>();
         // find any artifact assessments and update those as part of the bundle
         searchArtifactAssessmentForArtifact(rootArtifact.getIdElement(), repository).getEntry().stream()
@@ -151,7 +151,7 @@ public class ReleaseVisitor {
                 })
                 .forEach(artifactComment -> {
                     artifactComment.setDerivedFromContentRelatedArtifact(
-                            String.format("%s|%s", rootArtifact.getUrl(), releaseVersion));
+                            "%s|%s".formatted(rootArtifact.getUrl(), releaseVersion));
                     returnEntries.add((BundleEntryComponent) PackageHelper.createEntry(artifactComment, true));
                 });
         return returnEntries;

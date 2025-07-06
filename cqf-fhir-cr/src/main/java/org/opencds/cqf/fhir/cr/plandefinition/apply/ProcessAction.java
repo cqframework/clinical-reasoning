@@ -5,6 +5,7 @@ import static org.opencds.cqf.fhir.utility.SearchHelper.searchRepositoryByCanoni
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.IElement;
+import ca.uhn.fhir.repository.IRepository;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Map;
@@ -16,7 +17,6 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cr.common.DynamicValueProcessor;
 import org.opencds.cqf.fhir.cr.common.ExpressionProcessor;
 import org.opencds.cqf.fhir.cr.common.ExtensionProcessor;
@@ -29,14 +29,14 @@ import org.slf4j.LoggerFactory;
 public class ProcessAction {
     private static final Logger logger = LoggerFactory.getLogger(ProcessAction.class);
 
-    final Repository repository;
+    final IRepository repository;
     final ProcessDefinition processDefinition;
     final GenerateProcessor generateProcessor;
     final ExtensionProcessor extensionProcessor;
     final ExpressionProcessor expressionProcessor;
     final DynamicValueProcessor dynamicValueProcessor;
 
-    public ProcessAction(Repository repository, ApplyProcessor applyProcessor, GenerateProcessor generateProcessor) {
+    public ProcessAction(IRepository repository, ApplyProcessor applyProcessor, GenerateProcessor generateProcessor) {
         this.repository = repository;
         this.generateProcessor = generateProcessor;
         this.processDefinition = new ProcessDefinition(repository, applyProcessor);
@@ -87,9 +87,9 @@ public class ProcessAction {
                 applicabilityBehavior = CqfApplicabilityBehavior.valueOf(
                         primitiveType.getValueAsString().toUpperCase());
             } catch (IllegalArgumentException e) {
-                var message = String.format(
-                        "Encountered invalid value for applicabilityBehavior extension %s.  Expected `all` or `any`.",
-                        primitiveType.getValueAsString());
+                var message =
+                        "Encountered invalid value for applicabilityBehavior extension %s.  Expected `all` or `any`."
+                                .formatted(primitiveType.getValueAsString());
                 logger.error(message);
                 request.logException(message);
             }
@@ -135,8 +135,8 @@ public class ProcessAction {
                 }
             }
         } catch (Exception e) {
-            var message = String.format(
-                    "An error occurred while generating Questionnaire items for action input: %s", e.getMessage());
+            var message = "An error occurred while generating Questionnaire items for action input: %s"
+                    .formatted(e.getMessage());
             request.logException(message);
         }
     }
@@ -172,9 +172,8 @@ public class ProcessAction {
                             expressionProcessor.getExpressionResult(request, conditionExpression, inputParams, null);
                     result = expressionResult.isEmpty() ? null : expressionResult.get(0);
                 } catch (Exception e) {
-                    var message = String.format(
-                            "Condition expression %s encountered exception: %s",
-                            conditionExpression.getExpression(), e.getMessage());
+                    var message = "Condition expression %s encountered exception: %s"
+                            .formatted(conditionExpression.getExpression(), e.getMessage());
                     logger.error(message);
                     request.logException(message);
                 }

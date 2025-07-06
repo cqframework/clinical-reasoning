@@ -38,8 +38,8 @@ public class ExtensionResolver {
                 resolveExtensions(resource, nestedExtensions, referencedLibraries);
             }
             var value = extension.getValue();
-            if (value instanceof IBaseHasExtensions) {
-                var valueExtensions = ((IBaseHasExtensions) value).getExtension();
+            if (value instanceof IBaseHasExtensions hasExtensions) {
+                var valueExtensions = hasExtensions.getExtension();
                 if (valueExtensions != null) {
                     var expressionExtensions = valueExtensions.stream()
                             .filter(e -> e.getUrl() != null && e.getUrl().equals(Constants.CQF_EXPRESSION))

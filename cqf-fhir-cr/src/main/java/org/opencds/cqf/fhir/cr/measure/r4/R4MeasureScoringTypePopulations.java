@@ -36,9 +36,9 @@ public class R4MeasureScoringTypePopulations {
             var populationSet = getPopulations();
             for (MeasurePopulationType popType : populations) {
                 if (!populationSet.contains(popType)) {
-                    throw new UnsupportedOperationException(String.format(
-                            "MeasurePopulationType: %s, is not a member of allowed 'proportion' populations.",
-                            popType.toCode()));
+                    throw new UnsupportedOperationException(
+                            "MeasurePopulationType: %s, is not a member of allowed 'proportion' populations."
+                                    .formatted(popType.toCode()));
                 }
             }
         }
@@ -67,8 +67,8 @@ public class R4MeasureScoringTypePopulations {
         public static void validateRequired(List<MeasurePopulationType> populations) {
             for (MeasurePopulationType requiredPop : getPopulations()) {
                 if (!populations.contains(requiredPop)) {
-                    throw new UnsupportedOperationException(String.format(
-                            "'proportion' measure is missing required population: %s.", requiredPop.toCode()));
+                    throw new UnsupportedOperationException(
+                            "'proportion' measure is missing required population: %s.".formatted(requiredPop.toCode()));
                 }
             }
         }
@@ -101,9 +101,9 @@ public class R4MeasureScoringTypePopulations {
             var populationSet = getPopulations();
             for (MeasurePopulationType popType : populations) {
                 if (!populationSet.contains(popType)) {
-                    throw new UnsupportedOperationException(String.format(
-                            "MeasurePopulationType: %s, is not a member of allowed 'ratio' populations.",
-                            popType.toCode()));
+                    throw new UnsupportedOperationException(
+                            "MeasurePopulationType: %s, is not a member of allowed 'ratio' populations."
+                                    .formatted(popType.toCode()));
                 }
             }
         }
@@ -132,7 +132,7 @@ public class R4MeasureScoringTypePopulations {
             for (MeasurePopulationType requiredPop : getPopulations()) {
                 if (!populations.contains(requiredPop)) {
                     throw new UnsupportedOperationException(
-                            String.format("'ratio' measure is missing required population: %s.", requiredPop.toCode()));
+                            "'ratio' measure is missing required population: %s.".formatted(requiredPop.toCode()));
                 }
             }
         }
@@ -165,9 +165,9 @@ public class R4MeasureScoringTypePopulations {
             var populationSet = getPopulations();
             for (MeasurePopulationType popType : populations) {
                 if (!populationSet.contains(popType)) {
-                    throw new UnsupportedOperationException(String.format(
-                            "MeasurePopulationType: %s, is not a member of allowed 'continuous-variable' populations.",
-                            popType.toCode()));
+                    throw new UnsupportedOperationException(
+                            "MeasurePopulationType: %s, is not a member of allowed 'continuous-variable' populations."
+                                    .formatted(popType.toCode()));
                 }
             }
         }
@@ -197,8 +197,9 @@ public class R4MeasureScoringTypePopulations {
         public static void validateRequired(List<MeasurePopulationType> populations) {
             for (MeasurePopulationType requiredPop : getPopulations()) {
                 if (!populations.contains(requiredPop)) {
-                    throw new UnsupportedOperationException(String.format(
-                            "'continuous-variable' measure is missing required population: %s.", requiredPop.toCode()));
+                    throw new UnsupportedOperationException(
+                            "'continuous-variable' measure is missing required population: %s."
+                                    .formatted(requiredPop.toCode()));
                 }
             }
         }
@@ -225,9 +226,9 @@ public class R4MeasureScoringTypePopulations {
             var populationSet = getPopulations();
             for (MeasurePopulationType popType : populations) {
                 if (!populationSet.contains(popType)) {
-                    throw new UnsupportedOperationException(String.format(
-                            "MeasurePopulationType: %s, is not a member of allowed 'cohort' populations.",
-                            popType.toCode()));
+                    throw new UnsupportedOperationException(
+                            "MeasurePopulationType: %s, is not a member of allowed 'cohort' populations."
+                                    .formatted(popType.toCode()));
                 }
             }
         }
@@ -253,8 +254,8 @@ public class R4MeasureScoringTypePopulations {
         public static void validateRequired(List<MeasurePopulationType> populations) {
             for (MeasurePopulationType requiredPop : getPopulations()) {
                 if (!populations.contains(requiredPop)) {
-                    throw new UnsupportedOperationException(String.format(
-                            "'cohort' measure is missing required population: %s.", requiredPop.toCode()));
+                    throw new UnsupportedOperationException(
+                            "'cohort' measure is missing required population: %s.".formatted(requiredPop.toCode()));
                 }
             }
         }
@@ -286,7 +287,7 @@ public class R4MeasureScoringTypePopulations {
                 break;
             default:
                 throw new UnsupportedOperationException(
-                        String.format("Measure scoring type: %s, is not an accepted value", measureScoring.toCode()));
+                        "Measure scoring type: %s, is not an accepted value".formatted(measureScoring.toCode()));
         }
     }
 }

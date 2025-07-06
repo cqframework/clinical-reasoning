@@ -11,6 +11,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.opencds.cqf.fhir.utility.Constants.CQF_APPLICABILITY_BEHAVIOR;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.repository.IRepository;
 import java.util.HashMap;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
@@ -31,7 +32,6 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.common.IInputParameterResolver;
 import org.opencds.cqf.fhir.cr.helpers.RequestHelpers;
@@ -40,7 +40,7 @@ import org.opencds.cqf.fhir.cr.questionnaire.generate.GenerateProcessor;
 @ExtendWith(MockitoExtension.class)
 class ProcessActionTests {
     @Mock
-    Repository repository;
+    IRepository repository;
 
     @Mock
     LibraryEngine libraryEngine;
@@ -123,7 +123,7 @@ class ProcessActionTests {
         assertTrue(oc.getIssueFirstRep()
                 .getDiagnosticsElement()
                 .getValue()
-                .contains(String.format("Condition expression %s encountered exception:", expression)));
+                .contains("Condition expression %s encountered exception:".formatted(expression)));
     }
 
     @Test

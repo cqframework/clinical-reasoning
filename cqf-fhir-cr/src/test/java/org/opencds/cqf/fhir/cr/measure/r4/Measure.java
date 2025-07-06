@@ -16,7 +16,8 @@ import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.SD
 import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
-import java.nio.file.Paths;
+import ca.uhn.fhir.repository.IRepository;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -52,7 +53,6 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
@@ -117,7 +117,7 @@ public class Measure {
     }
 
     public static class Given {
-        private Repository repository;
+        private IRepository repository;
         private MeasureEvaluationOptions evaluationOptions;
         private final MeasurePeriodValidator measurePeriodValidator;
         private final R4MeasureServiceUtils measureServiceUtils;
@@ -148,7 +148,7 @@ public class Measure {
             this.measureServiceUtils = new R4MeasureServiceUtils(repository);
         }
 
-        public Given repository(Repository repository) {
+        public Given repository(IRepository repository) {
             this.repository = repository;
             return this;
         }
@@ -156,7 +156,7 @@ public class Measure {
         public Given repositoryFor(String repositoryPath) {
             this.repository = new IgRepository(
                     FhirContext.forR4Cached(),
-                    Paths.get(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
+                    Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
 
             return this;
         }
@@ -414,9 +414,8 @@ public class Measure {
             assertEquals(
                     periodStart,
                     period.getStart(),
-                    String.format(
-                            "Expected period start of %s but was: %s",
-                            formatDate(periodStart), formatDate(period.getStart())));
+                    "Expected period start of %s but was: %s"
+                            .formatted(formatDate(periodStart), formatDate(period.getStart())));
             return this;
         }
 
@@ -425,9 +424,8 @@ public class Measure {
             assertEquals(
                     periodEnd,
                     period.getEnd(),
-                    String.format(
-                            "Expected period start of %s but was: %s",
-                            formatDate(periodEnd), formatDate(period.getEnd())));
+                    "Expected period start of %s but was: %s"
+                            .formatted(formatDate(periodEnd), formatDate(period.getEnd())));
             return this;
         }
 
@@ -921,7 +919,7 @@ public class Measure {
                 var ex = this.value().getExtensionsByUrl(EXT_CRITERIA_REFERENCE_URL);
                 if (ex.isEmpty()) {
                     throw new IllegalStateException(
-                            String.format("no evaluated resource extensions were found, and expected %s", extValueRef));
+                            "no evaluated resource extensions were found, and expected %s".formatted(extValueRef));
                 }
                 String foundRef = null;
                 for (Extension extension : ex) {
@@ -940,8 +938,8 @@ public class Measure {
             public SelectedReference hasPopulations(String... population) {
                 var ex = this.value().getExtensionsByUrl(EXT_CRITERIA_REFERENCE_URL);
                 if (ex.isEmpty()) {
-                    throw new IllegalStateException(String.format(
-                            "no evaluated resource extensions were found, and expected %s", population.length));
+                    throw new IllegalStateException("no evaluated resource extensions were found, and expected %s"
+                            .formatted(population.length));
                 }
 
                 @SuppressWarnings("unchecked")
@@ -952,9 +950,8 @@ public class Measure {
                 for (var p : population) {
                     assertTrue(
                             set.contains(p),
-                            String.format(
-                                    "population: %s was not found in the evaluated resources criteria reference extension list",
-                                    p));
+                            "population: %s was not found in the evaluated resources criteria reference extension list"
+                                    .formatted(p));
                 }
 
                 return this;

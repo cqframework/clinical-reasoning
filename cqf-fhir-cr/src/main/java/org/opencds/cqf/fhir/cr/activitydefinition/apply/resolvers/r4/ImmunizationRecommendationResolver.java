@@ -36,7 +36,7 @@ public class ImmunizationRecommendationResolver extends BaseRequestResourceResol
                             "due",
                             "Due"))));
         } else if (!activityDefinition.hasDynamicValue()) {
-            throw new FHIRException(String.format(MISSING_PRODUCT_PROPERTY, "ImmunizationRecommendation"));
+            throw new FHIRException(MISSING_PRODUCT_PROPERTY.formatted("ImmunizationRecommendation"));
         }
 
         return immunizationRecommendation;

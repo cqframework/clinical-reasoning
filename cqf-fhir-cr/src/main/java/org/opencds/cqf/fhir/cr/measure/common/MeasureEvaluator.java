@@ -88,9 +88,8 @@ public class MeasureEvaluator {
                         measureDef, subjectType, subjectId, MeasureReportType.SUMMARY, evaluationResult, applyScoring);
             default:
                 // never hit because this value is set upstream
-                throw new InvalidRequestException(String.format(
-                        "Unsupported Measure Evaluation type: %s for MeasureDef: %s",
-                        measureEvalType.getDisplay(), measureDef.url()));
+                throw new InvalidRequestException("Unsupported Measure Evaluation type: %s for MeasureDef: %s"
+                        .formatted(measureEvalType.getDisplay(), measureDef.url()));
         }
     }
 
@@ -310,7 +309,11 @@ public class MeasureEvaluator {
     }
 
     protected void evaluateCohort(
-            GroupDef groupDef, String subjectType, String subjectId, EvaluationResult evaluationResult, boolean applyScoring) {
+            GroupDef groupDef,
+            String subjectType,
+            String subjectId,
+            EvaluationResult evaluationResult,
+            boolean applyScoring) {
         PopulationDef initialPopulation = groupDef.getSingle(INITIALPOPULATION);
         // Validate Required Populations are Present
         R4MeasureScoringTypePopulations.validateScoringTypePopulations(
@@ -358,7 +361,7 @@ public class MeasureEvaluator {
             var expressionResult = evaluationResult.forExpression(sde.expression());
             Object result = expressionResult.value();
             // TODO: This is a hack-around for an cql engine bug. Need to investigate.
-            if ((result instanceof List) && (((List<?>) result).size() == 1) && ((List<?>) result).get(0) == null) {
+            if ((result instanceof List<?> list) && (list.size() == 1) && list.get(0) == null) {
                 result = null;
             }
 
@@ -367,8 +370,8 @@ public class MeasureEvaluator {
     }
 
     protected Object addStratifierResult(Object result, String subjectId) {
-        if (result instanceof Iterable) {
-            var resultIter = ((Iterable<?>) result).iterator();
+        if (result instanceof Iterable<?> iterable) {
+            var resultIter = iterable.iterator();
             if (!resultIter.hasNext()) {
                 result = null;
             } else {

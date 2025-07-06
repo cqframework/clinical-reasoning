@@ -71,7 +71,7 @@ public class AdapterFactory implements IAdapterFactory {
                 adapter = new KnowledgeArtifactAdapter(metadataResource);
             } else {
                 throw new UnprocessableEntityException(
-                        String.format("Resource must be instance of %s", MetadataResource.class.getName()));
+                        "Resource must be instance of %s".formatted(MetadataResource.class.getName()));
             }
         }
         return adapter;

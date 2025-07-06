@@ -6,7 +6,7 @@
 
     <groupId>org.opencds.cqf.fhir</groupId>
     <artifactId>cqf-fhir</artifactId>
-    <version>3.22.0-SNAPSHOT</version>
+    <version>3.23.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>FHIR Clinical Reasoning</name>
     <description>FHIR Clinical Reasoning Implementations</description>
@@ -22,10 +22,10 @@
 
         <junit.version>5.10.2</junit.version>
         <slf4j.version>2.0.4</slf4j.version>
-        <cql.version>3.25.2-SNAPSHOT</cql.version>
+        <cql.version>3.26.0</cql.version>
         <jmh.version>1.36</jmh.version>
         <spring.version>6.1.14</spring.version>
-        <hapi.version>8.0.0</hapi.version>
+        <hapi.version>8.2.0</hapi.version>
         <picocli.version>4.6.1</picocli.version>
         <guava.version>33.2.1-jre</guava.version>
         <error-prone.version>2.35.1</error-prone.version>
@@ -253,7 +253,7 @@
                 <groupId>commons-codec</groupId>
                 <artifactId>commons-codec</artifactId>
                 <!-- Specific version needed for cqf-fhir-storage-cr tests -->
-                <version>1.15</version>
+                <version>1.17.2</version>
             </dependency>
 
             <!-- Logging -->
@@ -351,6 +351,7 @@
         <dependency>
             <groupId>jakarta.annotation</groupId>
             <artifactId>jakarta.annotation-api</artifactId>
+      <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -391,7 +392,7 @@
                     <?m2e execute onConfiguration,onIncremental?>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-checkstyle-plugin</artifactId>
-                    <version>3.3.1</version>
+                    <version>3.6.0</version>
                     <configuration>
                         <excludeGeneratedSources>true</excludeGeneratedSources>
                         <configLocation>config/checkstyle.xml</configLocation>
@@ -432,7 +433,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.13.0</version>
+                    <version>3.14.0</version>
                     <configuration>
                         <failOnWarning>true</failOnWarning>
                         <showWarnings>true</showWarnings>
@@ -597,7 +598,7 @@
                 <plugin>
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
-                    <version>0.8.12</version>
+                    <version>0.8.13</version>
                     <executions>
                         <execution>
                             <goals>

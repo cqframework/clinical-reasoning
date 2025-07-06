@@ -117,9 +117,8 @@ public abstract class BaseResourceBuilder<SELF, T extends IBaseResource> {
                 initializeR5(resource);
                 break;
             default:
-                throw new IllegalArgumentException(String.format(
-                        "ResourceBuilder.initializeResource does not support FHIR version %s",
-                        resource.getStructureFhirVersionEnum().getFhirVersionString()));
+                throw new IllegalArgumentException("ResourceBuilder.initializeResource does not support FHIR version %s"
+                        .formatted(resource.getStructureFhirVersionEnum().getFhirVersionString()));
         }
 
         return resource;

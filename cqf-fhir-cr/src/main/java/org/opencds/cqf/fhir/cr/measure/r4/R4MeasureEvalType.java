@@ -44,7 +44,7 @@ public enum R4MeasureEvalType {
         R4MeasureEvalType evalType = lookup.get(code);
         if (code != null && evalType == null) {
             throw new UnsupportedOperationException(
-                    String.format("ReportType: %s, is not an accepted R4 EvalType value.", code));
+                    "ReportType: %s, is not an accepted R4 EvalType value.".formatted(code));
         }
         return Optional.ofNullable(evalType);
     }

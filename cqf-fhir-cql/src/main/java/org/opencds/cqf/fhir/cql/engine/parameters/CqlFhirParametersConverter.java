@@ -118,15 +118,14 @@ public class CqlFhirParametersConverter {
                 continue;
             }
 
-            if (value instanceof Iterable) {
-                var iterable = (Iterable<?>) value;
+            if (value instanceof Iterable<?> iterable) {
                 if (!iterable.iterator().hasNext()) {
                     // Empty list
                     var emptyListValue =
                             emptyBooleanWithExtension(fhirContext, EMPTY_LIST_EXT_URL, booleanType(fhirContext, true));
                     addPart(pa, name, emptyListValue);
                 }
-                Iterable<?> values = (Iterable<?>) value;
+                Iterable<?> values = iterable;
                 for (Object o : values) {
                     this.addPart(pa, name, o);
                 }
@@ -178,9 +177,8 @@ public class CqlFhirParametersConverter {
             var ppca = this.addPart(pa, name);
             ppca.setResource(resource);
         } else {
-            throw new IllegalArgumentException(String.format(
-                    "unknown type when trying to convert to parameters: %s",
-                    value.getClass().getSimpleName()));
+            throw new IllegalArgumentException("unknown type when trying to convert to parameters: %s"
+                    .formatted(value.getClass().getSimpleName()));
         }
     }
 
@@ -214,14 +212,13 @@ public class CqlFhirParametersConverter {
             value = this.fhirTypeConverter.toFhirType(value);
         }
 
-        if (value instanceof IBaseDatatype) {
-            ppca.setValue((IBaseDatatype) value);
-        } else if (value instanceof IBaseResource) {
-            ppca.setResource((IBaseResource) value);
+        if (value instanceof IBaseDatatype datatype) {
+            ppca.setValue(datatype);
+        } else if (value instanceof IBaseResource resource) {
+            ppca.setResource(resource);
         } else {
-            throw new IllegalArgumentException(String.format(
-                    "unknown type when trying to convert to parameters: %s",
-                    value.getClass().getSimpleName()));
+            throw new IllegalArgumentException("unknown type when trying to convert to parameters: %s"
+                    .formatted(value.getClass().getSimpleName()));
         }
     }
 
@@ -264,9 +261,9 @@ public class CqlFhirParametersConverter {
             // So infer based on the values.
             if (isList == null) {
                 if (values.isEmpty()) {
-                    throw new IllegalArgumentException(String.format(
-                            "Unable to determine if parameter %s is meant to be collection. Use the http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-parameterDefinition extension to specify metadata.",
-                            entry.getKey()));
+                    throw new IllegalArgumentException(
+                            "Unable to determine if parameter %s is meant to be collection. Use the http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-parameterDefinition extension to specify metadata."
+                                    .formatted(entry.getKey()));
                 } else if (values.size() == 1) {
                     isList = false;
                 } else {
@@ -275,9 +272,9 @@ public class CqlFhirParametersConverter {
             }
 
             if (!isList && entry.getValue().size() > 1) {
-                throw new IllegalArgumentException(String.format(
-                        "The parameter %s was defined as a single value but multiple values were passed",
-                        entry.getKey()));
+                throw new IllegalArgumentException(
+                        "The parameter %s was defined as a single value but multiple values were passed"
+                                .formatted(entry.getKey()));
             }
 
             String type = null;
@@ -291,9 +288,9 @@ public class CqlFhirParametersConverter {
             }
 
             if (type == null) {
-                throw new IllegalArgumentException(String.format(
-                        "Unable to infer type for parameter %s. Use the http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-parameterDefinition extension to specify metadata.",
-                        entry.getKey()));
+                throw new IllegalArgumentException(
+                        "Unable to infer type for parameter %s. Use the http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-parameterDefinition extension to specify metadata."
+                                .formatted(entry.getKey()));
             }
 
             Object value = null;
@@ -328,8 +325,8 @@ public class CqlFhirParametersConverter {
         // Optional<IPrimitiveType> type = this.fhirPath
         // .evaluateFirst(parameterDefinitionExtension.getValue(), "type", IPrimitiveType.class);
         // if (type.isPresent()) {
-        if (type instanceof IPrimitiveType) {
-            return ((IPrimitiveType<?>) type).getValueAsString();
+        if (type instanceof IPrimitiveType<?> primitiveType) {
+            return primitiveType.getValueAsString();
         }
 
         return null;
@@ -341,8 +338,8 @@ public class CqlFhirParametersConverter {
         // Optional<IPrimitiveType> max = this.fhirPath
         // .evaluateFirst(parameterDefinitionExtension.getValue(), "max", IPrimitiveType.class);
         // if (max.isPresent()) {
-        if (max instanceof IPrimitiveType) {
-            String maxString = ((IPrimitiveType<?>) max).getValueAsString();
+        if (max instanceof IPrimitiveType<?> type) {
+            String maxString = type.getValueAsString();
 
             return !maxString.equals("1");
         }

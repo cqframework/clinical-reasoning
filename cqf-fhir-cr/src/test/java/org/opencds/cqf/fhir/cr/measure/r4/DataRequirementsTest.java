@@ -18,7 +18,7 @@ class DataRequirementsTest {
                 .then()
                 .hasDataRequirementCount(28)
                 .hasParameterDefCount(10)
-                .hasRelatedArtifactCount(24)
+                .hasRelatedArtifactCount(25)
                 .report();
     }
 
@@ -73,7 +73,7 @@ class DataRequirementsTest {
                 .then()
                 .hasDataRequirementCount(1)
                 .hasParameterDefCount(7)
-                .hasRelatedArtifactCount(0)
+                .hasRelatedArtifactCount(1)
                 .report();
     }
 
@@ -100,7 +100,7 @@ class DataRequirementsTest {
                 .then()
                 .hasDataRequirementCount(1)
                 .hasParameterDefCount(1)
-                .hasRelatedArtifactCount(0)
+                .hasRelatedArtifactCount(1)
                 .report();
     }
 }

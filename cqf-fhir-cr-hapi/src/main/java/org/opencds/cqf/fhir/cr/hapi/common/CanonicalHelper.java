@@ -9,7 +9,7 @@ public class CanonicalHelper {
 
     public static <C extends IPrimitiveType<String>> C getCanonicalType(
             FhirVersionEnum fhirVersion, String canonical, String url, String version) {
-        String urlToUse = version == null ? url : String.format("%s|%s", url, version);
+        String urlToUse = version == null ? url : "%s|%s".formatted(url, version);
         String canonicalToUse = canonical == null ? urlToUse : canonical;
         return newCanonicalType(fhirVersion, canonicalToUse);
     }

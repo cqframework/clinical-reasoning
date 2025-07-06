@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -18,7 +19,6 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import org.opencds.cqf.fhir.api.Repository;
 import org.opencds.cqf.fhir.test.Resources;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.repository.ig.EncodingBehavior.PreserveEncoding;
@@ -26,7 +26,7 @@ import org.opencds.cqf.fhir.utility.search.Searches;
 
 class IgRepositoryXmlWriteTest {
 
-    private static Repository repository;
+    private static IRepository repository;
 
     @TempDir
     static Path tempDir;

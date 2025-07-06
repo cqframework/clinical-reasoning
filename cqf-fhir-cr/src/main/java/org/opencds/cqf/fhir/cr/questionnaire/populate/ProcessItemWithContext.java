@@ -53,7 +53,7 @@ public class ProcessItemWithContext extends ProcessItem {
                 profile = searchRepositoryByCanonical(
                         request.getRepository(), canonicalTypeForVersion(request.getFhirVersion(), profileUrl));
             } catch (Exception e) {
-                var message = String.format("No profile found for definition: %s", profileUrl);
+                var message = "No profile found for definition: %s".formatted(profileUrl);
                 logger.error(message);
                 request.logException(message);
             }
@@ -74,9 +74,9 @@ public class ProcessItemWithContext extends ProcessItem {
                                 if (r instanceof IBaseResource baseResource) {
                                     return baseResource;
                                 } else {
-                                    var message = String.format(
-                                            "Encountered error populating item (%s): Context value is expected to be a resource.",
-                                            itemLinkId);
+                                    var message =
+                                            "Encountered error populating item (%s): Context value is expected to be a resource."
+                                                    .formatted(itemLinkId);
                                     logger.error(message);
                                     request.logException(message);
                                     return null;

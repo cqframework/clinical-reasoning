@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.RuntimeSearchParam.RuntimeSearchParamStatusEnum;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
+import jakarta.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -16,6 +17,7 @@ import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryRequestComponent;
 import org.hl7.fhir.r5.model.PrimitiveType;
 
@@ -75,7 +77,7 @@ public class BundleHelper {
      * Returns a list of resources from the Bundle entries
      *
      * @param bundle IBaseBundle type
-     * @return
+     * @return List of IBaseResource
      */
     public static List<IBaseResource> getEntryResources(IBaseBundle bundle) {
         List<IBaseResource> resources = new ArrayList<>();
@@ -83,27 +85,21 @@ public class BundleHelper {
         switch (fhirVersion) {
             case DSTU3:
                 var dstu3Entry = ((org.hl7.fhir.dstu3.model.Bundle) bundle).getEntry();
-                for (var entry : dstu3Entry) {
-                    if (entry.hasResource()) {
-                        resources.add(entry.getResource());
-                    }
-                }
+                dstu3Entry.stream()
+                        .filter(Bundle.BundleEntryComponent::hasResource)
+                        .forEach(entry -> resources.add(entry.getResource()));
                 break;
             case R4:
                 var r4Entry = ((org.hl7.fhir.r4.model.Bundle) bundle).getEntry();
-                for (var entry : r4Entry) {
-                    if (entry.hasResource()) {
-                        resources.add(entry.getResource());
-                    }
-                }
+                r4Entry.stream()
+                        .filter(BundleEntryComponent::hasResource)
+                        .forEach(entry -> resources.add(entry.getResource()));
                 break;
             case R5:
                 var r5Entry = ((org.hl7.fhir.r5.model.Bundle) bundle).getEntry();
-                for (var entry : r5Entry) {
-                    if (entry.hasResource()) {
-                        resources.add(entry.getResource());
-                    }
-                }
+                r5Entry.stream()
+                        .filter(org.hl7.fhir.r5.model.Bundle.BundleEntryComponent::hasResource)
+                        .forEach(entry -> resources.add(entry.getResource()));
                 break;
 
             default:
@@ -303,7 +299,7 @@ public class BundleHelper {
                     .getRequest()
                     .getUrl();
             default -> throw new IllegalArgumentException(
-                    String.format(UNSUPPORTED_VERSION_OF_FHIR, fhirVersion.getFhirVersionString()));
+                    UNSUPPORTED_VERSION_OF_FHIR.formatted(fhirVersion.getFhirVersionString()));
         };
     }
 
@@ -387,40 +383,53 @@ public class BundleHelper {
     public static IBaseBundle newBundle(FhirVersionEnum fhirVersion, String id, String type) {
         switch (fhirVersion) {
             case DSTU3:
-                var dstu3Bundle = new org.hl7.fhir.dstu3.model.Bundle();
-                if (id != null && !id.isEmpty()) {
-                    dstu3Bundle.setId(id);
-                }
-                dstu3Bundle.setType(
-                        type == null || type.isEmpty()
-                                ? org.hl7.fhir.dstu3.model.Bundle.BundleType.COLLECTION
-                                : org.hl7.fhir.dstu3.model.Bundle.BundleType.fromCode(type));
-                return dstu3Bundle;
+                return newDstu3Bundle(id, type);
             case R4:
-                var r4Bundle = new org.hl7.fhir.r4.model.Bundle();
-                if (id != null && !id.isEmpty()) {
-                    r4Bundle.setId(id);
-                }
-                r4Bundle.setType(
-                        type == null || type.isEmpty()
-                                ? org.hl7.fhir.r4.model.Bundle.BundleType.COLLECTION
-                                : org.hl7.fhir.r4.model.Bundle.BundleType.fromCode(type));
-                return r4Bundle;
+                return newR4Bundle(id, type);
             case R5:
-                var r5Bundle = new org.hl7.fhir.r5.model.Bundle();
-                if (id != null && !id.isEmpty()) {
-                    r5Bundle.setId(id);
-                }
-                r5Bundle.setType(
-                        type == null || type.isEmpty()
-                                ? org.hl7.fhir.r5.model.Bundle.BundleType.COLLECTION
-                                : org.hl7.fhir.r5.model.Bundle.BundleType.fromCode(type));
-                return r5Bundle;
+                return newR5Bundle(id, type);
 
             default:
                 throw new IllegalArgumentException(
                         UNSUPPORTED_VERSION_OF_FHIR.formatted(fhirVersion.getFhirVersionString()));
         }
+    }
+
+    @Nonnull
+    private static org.hl7.fhir.r5.model.Bundle newR5Bundle(String id, String type) {
+        var r5Bundle = new org.hl7.fhir.r5.model.Bundle();
+        if (id != null && !id.isEmpty()) {
+            r5Bundle.setId(id);
+        }
+        r5Bundle.setType(
+                type == null || type.isEmpty()
+                        ? org.hl7.fhir.r5.model.Bundle.BundleType.COLLECTION
+                        : org.hl7.fhir.r5.model.Bundle.BundleType.fromCode(type));
+        return r5Bundle;
+    }
+
+    @Nonnull
+    private static org.hl7.fhir.r4.model.Bundle newR4Bundle(String id, String type) {
+        var r4Bundle = new org.hl7.fhir.r4.model.Bundle();
+        if (id != null && !id.isEmpty()) {
+            r4Bundle.setId(id);
+        }
+        r4Bundle.setType(
+                type == null || type.isEmpty()
+                        ? org.hl7.fhir.r4.model.Bundle.BundleType.COLLECTION
+                        : org.hl7.fhir.r4.model.Bundle.BundleType.fromCode(type));
+        return r4Bundle;
+    }
+
+    @Nonnull
+    private static Bundle newDstu3Bundle(String id, String type) {
+        var dstu3Bundle = new Bundle();
+        if (id != null && !id.isEmpty()) {
+            dstu3Bundle.setId(id);
+        }
+        dstu3Bundle.setType(
+                type == null || type.isEmpty() ? Bundle.BundleType.COLLECTION : Bundle.BundleType.fromCode(type));
+        return dstu3Bundle;
     }
 
     /**
@@ -752,7 +761,7 @@ public class BundleHelper {
                         null,
                         res.getTarget().stream().map(StringType::toString).collect(Collectors.toSet()),
                         RuntimeSearchParamStatusEnum.ACTIVE,
-                        res.getBase().stream().map(StringType::toString).collect(Collectors.toList()));
+                        res.getBase().stream().map(StringType::toString).toList());
             case R4:
                 var resR4 = (org.hl7.fhir.r4.model.SearchParameter) resource;
                 return new RuntimeSearchParam(
@@ -769,7 +778,7 @@ public class BundleHelper {
                         RuntimeSearchParamStatusEnum.ACTIVE,
                         resR4.getBase().stream()
                                 .map(org.hl7.fhir.r4.model.StringType::toString)
-                                .collect(Collectors.toList()));
+                                .toList());
             case R5:
                 var resR5 = (org.hl7.fhir.r5.model.SearchParameter) resource;
                 return new RuntimeSearchParam(
@@ -782,7 +791,7 @@ public class BundleHelper {
                         null,
                         resR5.getTarget().stream().map(PrimitiveType::toString).collect(Collectors.toSet()),
                         RuntimeSearchParamStatusEnum.ACTIVE,
-                        resR5.getBase().stream().map(PrimitiveType::toString).collect(Collectors.toList()));
+                        resR5.getBase().stream().map(PrimitiveType::toString).toList());
 
             default:
                 throw new IllegalArgumentException(

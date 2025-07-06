@@ -1,14 +1,30 @@
 package org.opencds.cqf.fhir.cr.cli;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.IParser;
+import com.google.common.collect.ImmutableListMultimap;
+import com.google.common.collect.ListMultimap;
+import jakarta.annotation.Nonnull;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import org.apache.commons.lang3.tuple.Pair;
+import org.hl7.fhir.r4.model.MeasureReport;
+import org.hl7.fhir.r4.model.MeasureReport.MeasureReportStatus;
+import org.hl7.fhir.r4.model.MeasureReport.MeasureReportType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,10 +33,17 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.opencds.cqf.fhir.test.Resources;
 
+@SuppressWarnings("squid:S1135")
 @TestInstance(Lifecycle.PER_CLASS)
 class CliTest {
+
+    private static final IParser JSON_PARSER = FhirContext.forR4().newJsonParser();
+    private static final String MEASUREREPORTS_FOLDER = "measurereports";
+    private static final String TXTRESULTS_FOLDER = "txtresults";
 
     @TempDir
     private static Path tempDir;
@@ -31,12 +54,14 @@ class CliTest {
     private final PrintStream originalErr = System.err;
 
     private static String testResourcePath = null;
+    private static String testResultsPath = null;
 
     @BeforeAll
     void setup() throws URISyntaxException, IOException, ClassNotFoundException {
         Resources.copyFromJar("/", tempDir);
         testResourcePath = tempDir.toAbsolutePath().toString();
         System.out.printf("Test resource directory: %s%n", testResourcePath);
+        testResultsPath = testResourcePath + "/results";
     }
 
     @BeforeEach
@@ -73,7 +98,6 @@ class CliTest {
         Main.run(args);
         String output = outContent.toString();
         assertTrue(output.startsWith("Usage:"));
-        // assertTrue(output.endsWith("Patient=123\n"));
     }
 
     @Test
@@ -82,18 +106,12 @@ class CliTest {
         Main.run(args);
         String output = errContent.toString();
         assertTrue(output.startsWith("Missing required subcommand"));
-        // assertTrue(output.endsWith("Patient=123\n"));
     }
 
     @Test
     void testNull() {
-        assertThrows(NullPointerException.class, () -> {
-            Main.run(null);
-        });
+        assertThrows(NullPointerException.class, () -> Main.run(null));
     }
-
-    @Test
-    void dstu3() {}
 
     @Test
     void argFile() {
@@ -226,12 +244,9 @@ class CliTest {
         assertTrue(output.contains("TestPatientDeceasedAsDateTime=null"));
         // TODO: This is because the engine is not validating on profile-based
         // retrieve...
-        // assertTrue(output.contains("TestSlices=[Observation(id=blood-pressure)]"));
         assertTrue(output.contains("TestSimpleExtensions=Patient(id=example)"));
         assertTrue(output.contains("TestComplexExtensions=Patient(id=example)"));
         assertTrue(output.contains("TestEncounterDiagnosisCardinality=true"));
-        // assertTrue(output.contains("TestProcedureNotDoneElements=[Procedure(id=negation-example),
-        // Procedure(id=negation-with-code-example)]"));
         // NOTE: Testing combinations here because ordering is not guaranteed
         assertTrue(
                 output.contains(
@@ -534,6 +549,69 @@ class CliTest {
         assertTrue(output.contains("Encounters=[Encounter(id=DEF)]"));
     }
 
+    @ParameterizedTest
+    @CsvSource({"ABC-LIB,ABC", "DEF-LIB,DEF"})
+    void measureEvaluationTest(String libraryName, String measureId) {
+        var expectedMeasureId = "http://example.com/Measure/%s".formatted(measureId);
+        var subjectId1 = "Patient/123";
+        var subjectId2 = "Patient/456";
+
+        var expectedTxtResult123 =
+                """
+            Encounters=[Encounter(id=ABC)]
+            Patient=Patient(id=123)
+            """;
+
+        var expectedTxtResult456 =
+                """
+            Encounters=[Encounter(id=DEF)]
+            Patient=Patient(id=456)
+            """;
+
+        String[] args = new String[] {
+            "cql",
+            "-fv=R4",
+            "-lu=" + testResourcePath + "/compartment/cql",
+            "-ln=%s".formatted(libraryName),
+            "-m=FHIR",
+            "-mu=" + testResourcePath + "/compartment",
+            "-c=Patient",
+            "-cv=123",
+            "-c=Patient",
+            "-cv=456",
+            "-singleFile",
+            "-measurePath=" + testResourcePath + "/compartment/resources/measure/",
+            "-measure=%s".formatted(measureId),
+            "-resultsPath=" + testResultsPath
+        };
+
+        Main.run(args);
+
+        var resultsMap = getFilenameToTxtResultsMap(libraryName, MEASUREREPORTS_FOLDER, TXTRESULTS_FOLDER);
+
+        final List<Pair<Path, String>> measureReportJsons = resultsMap.get(MEASUREREPORTS_FOLDER);
+        assertEquals(2, measureReportJsons.size());
+
+        final Optional<MeasureReport> measureReport123 = getMeasureReportForSubject(measureReportJsons, "123.json");
+        assertTrue(measureReport123.isPresent());
+        assertMeasureReport(measureReport123.get(), expectedMeasureId, subjectId1);
+
+        final Optional<MeasureReport> measureReport456 = getMeasureReportForSubject(measureReportJsons, "456.json");
+        assertTrue(measureReport456.isPresent());
+        assertMeasureReport(measureReport456.get(), expectedMeasureId, subjectId2);
+
+        final List<Pair<Path, String>> txtResults = resultsMap.get(TXTRESULTS_FOLDER);
+        assertEquals(2, txtResults.size());
+
+        final Optional<String> txtResult123 = getTxtResultsForSubject(txtResults, "123.txt");
+        assertTrue(txtResult123.isPresent());
+        assertEquals(expectedTxtResult123.trim(), txtResult123.get().trim());
+
+        final Optional<String> txtResult456 = getTxtResultsForSubject(txtResults, "456.txt");
+        assertTrue(txtResult456.isPresent());
+        assertEquals(expectedTxtResult456.trim(), txtResult456.get().trim());
+    }
+
     @Test
     @Disabled("This test is failing on the CI Server for reasons unknown. Need to debug that.")
     void sampleContentIG() {
@@ -563,5 +641,55 @@ class CliTest {
         assertTrue(output.contains("Observation(id=satO2-fiO2)"));
         assertFalse(output.contains("Observation(id=blood-glucose)"));
         assertFalse(output.contains("Observation(id=blood-pressure)"));
+    }
+
+    @Nonnull
+    private Optional<String> getTxtResultsForSubject(List<Pair<Path, String>> txtResults, String file) {
+        return txtResults.stream()
+                .filter(pair -> Path.of(file).equals(pair.getKey()))
+                .map(Pair::getValue)
+                .findFirst();
+    }
+
+    @Nonnull
+    private Optional<MeasureReport> getMeasureReportForSubject(
+            List<Pair<Path, String>> measureReportJsons, String first) {
+        return measureReportJsons.stream()
+                .filter(pair -> Path.of(first).equals(pair.getKey()))
+                .map(Pair::getValue)
+                .map(json -> JSON_PARSER.parseResource(MeasureReport.class, json))
+                .findFirst();
+    }
+
+    private void assertMeasureReport(MeasureReport measureReport, String expectedMeasureId, String expectedSubjectId) {
+        assertEquals(expectedMeasureId, measureReport.getMeasure());
+        assertEquals(MeasureReportStatus.COMPLETE, measureReport.getStatus());
+        assertEquals(expectedSubjectId, measureReport.getSubject().getReference());
+        assertEquals(MeasureReportType.INDIVIDUAL, measureReport.getType());
+    }
+
+    private ListMultimap<String, Pair<Path, String>> getFilenameToTxtResultsMap(
+            String libraryName, String... resultTypes) {
+        final ImmutableListMultimap.Builder<String, Pair<Path, String>> multimapBuilder =
+                ImmutableListMultimap.builder();
+        try {
+            for (String resultType : resultTypes) {
+                var resultsPath = Path.of(testResultsPath, libraryName, resultType);
+                assertTrue(Files.exists(resultsPath));
+                assertTrue(Files.isDirectory(resultsPath));
+                try (Stream<Path> pathsStream = Files.list(resultsPath)) {
+                    for (Path filePath : pathsStream.toList()) {
+                        try (var lines = Files.lines(filePath, StandardCharsets.UTF_8)) {
+                            var fileContents = lines.collect(Collectors.joining("\n"));
+                            multimapBuilder.put(resultType, Pair.of(filePath.getFileName(), fileContents));
+                        }
+                    }
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return multimapBuilder.build();
     }
 }

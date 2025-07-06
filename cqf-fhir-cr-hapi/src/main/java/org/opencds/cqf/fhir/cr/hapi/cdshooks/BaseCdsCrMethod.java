@@ -13,9 +13,14 @@ abstract class BaseCdsCrMethod implements ICdsMethod {
         this.cdsCrServiceFactory = cdsCrServiceFactory;
     }
 
+    protected ICdsCrService createCdsCrService(String serviceId) {
+        return cdsCrServiceFactory.create(serviceId);
+    }
+
+    @Override
     public Object invoke(ObjectMapper objectMapper, IModelJson json, String serviceId) {
         try {
-            return cdsCrServiceFactory.create(serviceId).invoke(json);
+            return createCdsCrService(serviceId).invoke(json);
         } catch (Exception e) {
             if (e.getCause() instanceof BaseServerResponseException baseServerResponseException) {
                 throw baseServerResponseException;

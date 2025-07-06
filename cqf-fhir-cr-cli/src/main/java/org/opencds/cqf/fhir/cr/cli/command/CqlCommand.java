@@ -5,14 +5,13 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.repository.IRepository;
 import com.google.common.base.Stopwatch;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import java.io.BufferedWriter;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
@@ -35,7 +34,7 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Measure;
-import org.hl7.fhir.r5.context.IWorkerContext.ILoggingService;
+import org.hl7.fhir.r5.context.ILoggingService;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
@@ -153,12 +152,12 @@ public class CqlCommand implements Callable<Integer> {
 
     static class EvaluationArgument {
         @ArgGroup(multiplicity = "0..*", exclusive = false)
-        public List<ParameterParameter> parameters;
+        public List<ParameterArgument> parameters;
 
         @ArgGroup(multiplicity = "0..1", exclusive = false)
-        public ContextParameter context;
+        public ContextArgument context;
 
-        static class ContextParameter {
+        public static class ContextArgument {
             @Option(names = {"-c", "--context"})
             public String contextName;
 
@@ -166,7 +165,7 @@ public class CqlCommand implements Callable<Integer> {
             public String contextValue;
         }
 
-        static class ParameterParameter {
+        static class ParameterArgument {
             @Option(names = {"-p", "--parameter"})
             public String parameterName;
 
@@ -180,11 +179,7 @@ public class CqlCommand implements Callable<Integer> {
         public boolean hedisCompatibilityMode;
     }
 
-    @SuppressWarnings("removal")
     private static class Logger implements ILoggingService {
-
-        private final org.slf4j.Logger log = LoggerFactory.getLogger(Logger.class);
-
         @Override
         public void logMessage(String s) {
             log.warn(s);
@@ -222,6 +217,142 @@ public class CqlCommand implements Callable<Integer> {
         FhirVersionEnum fhirVersionEnum = FhirVersionEnum.valueOf(fhirVersion);
         FhirContext fhirContext = FhirContext.forCached(fhirVersionEnum);
 
+        var evaluationSettings = setupOptions(fhirVersionEnum);
+
+        var repository = createRepository(fhirContext, terminologyUrl, modelArgument.modelUrl);
+        VersionedIdentifier identifier = new VersionedIdentifier().withId(libraryArgument.libraryName);
+
+        var measureProcessor = getR4MeasureProcessor(evaluationSettings, repository);
+
+        // hack to bring in Measure
+        IParser parser = fhirContext.newJsonParser();
+
+        var measure = getMeasure(parser);
+
+        var initTime = watch.elapsed().toMillis();
+        log.info("initialized in {} millis", initTime);
+        AtomicInteger counter = new AtomicInteger(0);
+        for (var e : evaluationArguments) {
+            String basePath = resultsPath;
+            Path filepath = Path.of(basePath + this.libraryArgument.libraryName, e.context.contextValue + ".txt");
+
+            if (Files.exists(filepath)) {
+                log.info("Skipping {} (already processed)", e.context.contextValue);
+                continue;
+            }
+            var engine = Engines.forRepository(repository, evaluationSettings);
+
+            if (libraryArgument.libraryUrl != null) {
+                var provider = new DefaultLibrarySourceProvider(Path.of(libraryArgument.libraryUrl));
+                engine.getEnvironment()
+                        .getLibraryManager()
+                        .getLibrarySourceLoader()
+                        .registerProvider(provider);
+            }
+            var subjectId = e.context.contextName + "/" + e.context.contextValue;
+            log.info("evaluating: {}", subjectId);
+
+            var evalStart = watch.elapsed().toMillis();
+            var contextParameter = Pair.<String, Object>of(e.context.contextName, e.context.contextValue);
+            var cqlResult = engine.evaluate(identifier, contextParameter);
+
+            Map<String, EvaluationResult> result = new HashMap<>();
+            result.put(subjectId, cqlResult);
+
+            // generate MeasureReport from ExpressionResult
+            if (measure != null) {
+                String jsonReport;
+                if (periodStart != null && periodEnd != null) {
+                    var report = measureProcessor.evaluateMeasureResults(
+                            measure,
+                            LocalDate.parse(periodStart, DateTimeFormatter.ISO_LOCAL_DATE)
+                                    .atStartOfDay(ZoneId.systemDefault()),
+                            LocalDate.parse(periodEnd, DateTimeFormatter.ISO_LOCAL_DATE)
+                                    .atTime(LocalTime.MAX)
+                                    .atZone(ZoneId.systemDefault()),
+                            "subject",
+                            Collections.singletonList(subjectId),
+                            result);
+
+                    jsonReport = parser.encodeResourceToString(report);
+                } else {
+                    var report = measureProcessor.evaluateMeasureResults(
+                            measure, null, null, "subject", Collections.singletonList(subjectId), result);
+                    jsonReport = parser.encodeResourceToString(report);
+                }
+
+                writeJsonToFile(
+                        jsonReport,
+                        e.context.contextValue,
+                        getResultsPath(basePath).resolve("measurereports"));
+            }
+
+            if (singleFile) {
+                writeResultToFile(
+                        cqlResult,
+                        e.context.contextValue,
+                        getResultsPath(basePath).resolve("txtresults"));
+            } else {
+                writeResult(cqlResult);
+            }
+            var count = counter.incrementAndGet();
+
+            var evalEnd = watch.elapsed().toMillis();
+            log.info("evaluated #{} in {} millis", count, evalEnd - evalStart);
+            log.info("avg (amortized across threads) {} millis", (evalEnd - initTime) / count);
+        }
+
+        var finalTime = watch.elapsed().toMillis();
+        var elapsedTime = finalTime - initTime;
+        log.info("evaluated in {} millis", elapsedTime);
+        log.info("total time in {} millis", finalTime);
+        log.info("per patient time in {} millis", elapsedTime / evaluationArguments.size());
+
+        return 0;
+    }
+
+    @Nonnull
+    private Path getResultsPath(String basePath) {
+        if (basePath == null || basePath.isBlank()) {
+            basePath = System.getProperty("user.dir");
+        }
+
+        return Path.of(basePath, this.libraryArgument.libraryName);
+    }
+
+    @Nullable
+    private Measure getMeasure(IParser parser) {
+        Measure measure = null;
+        if (measureName != null && !measureName.contains("null")) {
+            var measureJsonFilePath = Path.of(this.measurePath, measureName + ".json");
+            try (var is = Files.newInputStream(measureJsonFilePath)) {
+                measure = (Measure) parser.parseResource(is);
+                if (measure == null) {
+                    throw new IllegalArgumentException("measureName: %s not found".formatted(measureName));
+                }
+            } catch (IOException e) {
+                throw new IllegalArgumentException("measurePath: %s not found".formatted(measureJsonFilePath));
+            }
+        }
+        return measure;
+    }
+
+    @Nonnull
+    private R4MeasureProcessor getR4MeasureProcessor(EvaluationSettings evaluationSettings, IRepository repository) {
+
+        MeasureEvaluationOptions evaluationOptions = new MeasureEvaluationOptions();
+        evaluationOptions.setApplyScoringSetMembership(false);
+        evaluationOptions.setEvaluationSettings(evaluationSettings);
+
+        return new R4MeasureProcessor(
+                repository,
+                evaluationOptions,
+                new R4RepositorySubjectProvider(new SubjectProviderOptions()),
+                new R4MeasureServiceUtils(repository));
+    }
+
+    @Nonnull
+    private EvaluationSettings setupOptions(FhirVersionEnum fhirVersionEnum) {
         IGContext igContext = null;
         if (rootDir != null && igPath != null) {
             igContext = new IGContext(new Logger());
@@ -258,110 +389,8 @@ public class CqlCommand implements Callable<Integer> {
         evaluationSettings.setTerminologySettings(terminologySettings);
         evaluationSettings.setRetrieveSettings(retrieveSettings);
         evaluationSettings.setNpmProcessor(new NpmProcessor(igContext));
-
-        var repository = createRepository(fhirContext, terminologyUrl, modelArgument.modelUrl);
-        VersionedIdentifier identifier = new VersionedIdentifier().withId(libraryArgument.libraryName);
-
-        MeasureEvaluationOptions evaluationOptions = new MeasureEvaluationOptions();
-        evaluationOptions.setApplyScoringSetMembership(false);
-        evaluationOptions.setEvaluationSettings(evaluationSettings);
-        R4MeasureProcessor measureProcessor = new R4MeasureProcessor(
-                repository,
-                evaluationOptions,
-                new R4RepositorySubjectProvider(new SubjectProviderOptions()),
-                new R4MeasureServiceUtils(repository));
-
-        // hack to bring in Measure
-        IParser parser = fhirContext.newJsonParser();
-
-        Measure measure = null;
-        if (measureName != null && !measureName.contains("null")) {
-            InputStream is = new FileInputStream(measurePath + measureName + ".json");
-            measure = (org.hl7.fhir.r4.model.Measure) parser.parseResource(is);
-            if (measure == null) {
-                throw new IllegalArgumentException(String.format("measureName: %s not found", measureName));
-            }
-        }
-
-        var initTime = watch.elapsed().toMillis();
-        log.error("initialized in {} millis", initTime);
-        AtomicInteger counter = new AtomicInteger(0);
-        for (var e : evaluationArguments) {
-            String basePath = resultsPath;
-            Path filepath =
-                    Paths.get(basePath + this.libraryArgument.libraryName + "/" + e.context.contextValue + ".txt");
-
-            if (Files.exists(filepath)) {
-                continue;
-            }
-            // evaluations.parallelStream().forEach(e -> {
-            var engine = Engines.forRepository(repository, evaluationSettings);
-            // enable return all and equivalence
-            if (libraryArgument.libraryUrl != null) {
-                var provider = new DefaultLibrarySourceProvider(Path.of(libraryArgument.libraryUrl));
-                engine.getEnvironment()
-                        .getLibraryManager()
-                        .getLibrarySourceLoader()
-                        .registerProvider(provider);
-            }
-            var subjectId = e.context.contextName + "/" + e.context.contextValue;
-            log.error("evaluating: {}", subjectId);
-
-            var evalStart = watch.elapsed().toMillis();
-            var contextParameter = Pair.<String, Object>of(e.context.contextName, e.context.contextValue);
-            var cqlResult = engine.evaluate(identifier, contextParameter);
-
-            Map<String, EvaluationResult> result = new HashMap<>();
-            result.put(subjectId, cqlResult);
-
-            // generate MeasureReport from ExpressionResult
-            if (measure != null) {
-                String jsonReport;
-                if (periodStart != null && periodEnd != null) {
-                    var report = measureProcessor.evaluateMeasureResults(
-                            measure,
-                            LocalDate.parse(periodStart, DateTimeFormatter.ISO_LOCAL_DATE)
-                                    .atStartOfDay(ZoneId.systemDefault()),
-                            LocalDate.parse(periodEnd, DateTimeFormatter.ISO_LOCAL_DATE)
-                                    .atTime(LocalTime.MAX)
-                                    .atZone(ZoneId.systemDefault()),
-                            "subject",
-                            Collections.singletonList(subjectId),
-                            result);
-
-                    jsonReport = parser.encodeResourceToString(report);
-                } else {
-                    var report = measureProcessor.evaluateMeasureResults(
-                            measure, null, null, "subject", Collections.singletonList(subjectId), result);
-                    jsonReport = parser.encodeResourceToString(report);
-                }
-
-                writeJsonToFile(
-                        jsonReport,
-                        e.context.contextValue,
-                        basePath + this.libraryArgument.libraryName + "/measurereports");
-            }
-            if (singleFile) {
-                writeResultToFile(
-                        cqlResult, e.context.contextValue, basePath + this.libraryArgument.libraryName + "/txtresults");
-            } else {
-                writeResult(cqlResult);
-            }
-            var count = counter.incrementAndGet();
-
-            var evalEnd = watch.elapsed().toMillis();
-            log.error("evaluated #{} in {} millis", count, evalEnd - evalStart);
-            log.error("avg (amortized across threads) {} millis", (evalEnd - initTime) / count);
-        }
-        // });
-
-        var finalTime = watch.elapsed().toMillis();
-        var elapsedTime = finalTime - initTime;
-        log.error("evaluated in {} millis", elapsedTime);
-        log.error("total time in {} millis", finalTime);
-        log.error("per patient time in {} millis", elapsedTime / evaluationArguments.size());
-
-        return 0;
+        
+        return evaluationSettings;
     }
 
     private IRepository createRepository(FhirContext fhirContext, String terminologyUrl, String modelUrl) {
@@ -392,8 +421,8 @@ public class CqlCommand implements Callable<Integer> {
         }
     }
 
-    private void writeJsonToFile(String json, String patientId, String path) {
-        Path outputPath = Paths.get(path, patientId + ".json");
+    private void writeJsonToFile(String json, String patientId, Path path) {
+        Path outputPath = path.resolve(patientId + ".json");
 
         try {
             // Ensure parent directories exist
@@ -410,8 +439,8 @@ public class CqlCommand implements Callable<Integer> {
         }
     }
 
-    private void writeResultToFile(EvaluationResult result, String patientId, String path) {
-        Path outputPath = Paths.get(path, patientId + ".txt");
+    private void writeResultToFile(EvaluationResult result, String patientId, Path path) {
+        Path outputPath = path.resolve(patientId + ".txt");
 
         try {
             // Ensure parent directories exist
@@ -463,6 +492,14 @@ public class CqlCommand implements Callable<Integer> {
             result = value.toString();
         }
 
-        return result;
+        if (value instanceof IBaseDatatype datatype) {
+            return datatype.fhirType();
+        }
+
+        if (value instanceof IBase base) {
+            return base.fhirType();
+        }
+
+        return value.toString();
     }
 }

@@ -128,17 +128,12 @@ public class IgRepository implements IRepository {
     public static final String FHIR_COMPARTMENT_HEADER = "X-FHIR-Compartment";
 
     private static IParser parserForEncoding(FhirContext fhirContext, EncodingEnum encodingEnum) {
-        switch (encodingEnum) {
-            case JSON:
-                return fhirContext.newJsonParser();
-            case XML:
-                return fhirContext.newXmlParser();
-            case RDF:
-                return fhirContext.newRDFParser();
-            case NDJSON:
-            default:
-                throw new IllegalArgumentException("NDJSON is not supported");
-        }
+        return switch (encodingEnum) {
+            case JSON -> fhirContext.newJsonParser();
+            case XML -> fhirContext.newXmlParser();
+            case RDF -> fhirContext.newRDFParser();
+            default -> throw new IllegalArgumentException("NDJSON is not supported");
+        };
     }
 
     /**
@@ -221,8 +216,8 @@ public class IgRepository implements IRepository {
      *         resource.
      */
     protected <T extends IBaseResource, I extends IIdType> Path preferredPathForResource(
-            Class<T> resourceType, I id, Compartment compartment) {
-        var directory = directoryForResource(resourceType, compartment);
+            Class<T> resourceType, I id, IgRepositoryCompartment igRepositoryCompartment) {
+        var directory = directoryForResource(resourceType, igRepositoryCompartment);
         var fileName = fileNameForResource(
                 resourceType.getSimpleName(), id.getIdPart(), this.encodingBehavior.preferredEncoding());
         return directory.resolve(fileName);
@@ -235,14 +230,14 @@ public class IgRepository implements IRepository {
      * @param <I>          The type of the resource identifier.
      * @param resourceType The class representing the FHIR resource type.
      * @param id           The identifier of the resource.
-     * @param compartment  The compartment context to use
+     * @param igRepositoryCompartment  The compartment context to use
      * @return A list of potential paths for the resource.
      */
     protected <T extends IBaseResource, I extends IIdType> List<Path> potentialPathsForResource(
-            Class<T> resourceType, I id, Compartment compartment) {
+            Class<T> resourceType, I id, IgRepositoryCompartment igRepositoryCompartment) {
 
         var potentialDirectories = new ArrayList<Path>();
-        var directory = directoryForResource(resourceType, compartment);
+        var directory = directoryForResource(resourceType, igRepositoryCompartment);
         potentialDirectories.add(directory);
 
         // Currently, only terminology resources are allowed to be external
@@ -291,10 +286,11 @@ public class IgRepository implements IRepository {
      *
      * @param <T>          The type of the FHIR resource.
      * @param resourceType The class representing the FHIR resource type.
-     * @param compartment The compartment context to use
+     * @param igRepositoryCompartment The compartment context to use
      * @return The path representing the directory for the resource category.
      */
-    protected <T extends IBaseResource> Path directoryForCategory(Class<T> resourceType, Compartment compartment) {
+    protected <T extends IBaseResource> Path directoryForCategory(
+            Class<T> resourceType, IgRepositoryCompartment igRepositoryCompartment) {
         if (this.conventions.categoryLayout() == CategoryLayout.FLAT) {
             return this.root;
         }
@@ -304,7 +300,7 @@ public class IgRepository implements IRepository {
         var path = root.resolve(directory);
         if (category == ResourceCategory.DATA
                 && this.conventions.compartmentLayout() == CompartmentLayout.DIRECTORY_PER_COMPARTMENT) {
-            path = path.resolve(pathForCompartment(compartment));
+            path = path.resolve(pathForCompartment(igRepositoryCompartment));
         }
 
         return path;
@@ -330,11 +326,12 @@ public class IgRepository implements IRepository {
      *
      * @param <T>          The type of the FHIR resource.
      * @param resourceType The class representing the FHIR resource type.
-     * @param compartment The compartment context to use
+     * @param igRepositoryCompartment The compartment context to use
      * @return The path representing the directory for the resource type.
      */
-    protected <T extends IBaseResource> Path directoryForResource(Class<T> resourceType, Compartment compartment) {
-        var directory = directoryForCategory(resourceType, compartment);
+    protected <T extends IBaseResource> Path directoryForResource(
+            Class<T> resourceType, IgRepositoryCompartment igRepositoryCompartment) {
+        var directory = directoryForCategory(resourceType, igRepositoryCompartment);
         if (this.conventions.typeLayout() == FhirTypeLayout.FLAT) {
             return directory;
         }
@@ -459,20 +456,12 @@ public class IgRepository implements IRepository {
      * - Flat layout: resources are located in the root directory (e.g.,
      * "/path/to/ig/root/")
      * - Directory for category: resources are in subdirectories (e.g.,
-     * "/resources/patient/")
-     *
-     * Filenames depend on conventions:
-     * - ID_ONLY: "123.json"
-     * - TYPE_AND_ID: "Patient-123.json"
-     *
-     * @param <T>           The resource type.
-     * @param resourceClass The resource class.
-     * @param compartment The compartment context to use
+     * @param igRepositoryCompartment The compartment context to use
      * @return Map of resource IDs to resources.
      */
     protected <T extends IBaseResource> Map<IIdType, T> readDirectoryForResourceType(
-            Class<T> resourceClass, Compartment compartment) {
-        var path = this.directoryForResource(resourceClass, compartment);
+            Class<T> resourceClass, IgRepositoryCompartment igRepositoryCompartment) {
+        var path = this.directoryForResource(resourceClass, igRepositoryCompartment);
         if (!path.toFile().exists()) {
             return Collections.emptyMap();
         }
@@ -882,73 +871,24 @@ public class IgRepository implements IRepository {
         return operationProvider.invokeOperation(this, id, resourceType, operationName, parameters);
     }
 
-    // Class that represents the compartment context for a given request.
-    class Compartment {
-        private final String type;
-        private final String id;
-
-        private static String typeOfContext(String context) {
-            return context.split("/")[0];
-        }
-
-        private static String idOfContext(String context) {
-            return context.split("/")[1];
-        }
-
-        // Empty context (i.e. no compartment context)
-        public Compartment() {
-            this.type = null;
-            this.id = null;
-        }
-
-        // Context in the format ResourceType/Id
-        public Compartment(String context) {
-            this(typeOfContext(context), idOfContext(context));
-        }
-
-        // Context in the format type and id
-        public Compartment(String type, String id) {
-            this.type = requireNonNullOrEmpty("type", type);
-            this.id = requireNonNullOrEmpty("id", id);
-        }
-
-        public String getType() {
-            return this.type;
-        }
-
-        public String getId() {
-            return this.id;
-        }
-
-        public boolean isEmpty() {
-            return this.type == null || this.id == null;
-        }
-
-        private static String requireNonNullOrEmpty(String name, String value) {
-            requireNonNull(name, "name cannot be null");
-            if (value == null || value.isEmpty()) {
-                throw new IllegalArgumentException(name + " cannot be null or empty");
-            }
-            return value;
-        }
-    }
-
-    protected Compartment compartmentFrom(Map<String, String> headers) {
+    protected IgRepositoryCompartment compartmentFrom(Map<String, String> headers) {
         if (headers == null) {
-            return new Compartment();
+            return new IgRepositoryCompartment();
         }
 
         var compartmentHeader = headers.get(FHIR_COMPARTMENT_HEADER);
-        return compartmentHeader == null ? new Compartment() : new Compartment(compartmentHeader);
+        return compartmentHeader == null
+                ? new IgRepositoryCompartment()
+                : new IgRepositoryCompartment(compartmentHeader);
     }
 
     // Patient context is a special-case. We don't tack the compartment context on
     // the end of the path. We just use the id as the directory.
-    protected String pathForCompartment(Compartment compartment) {
-        if (compartment.isEmpty()) {
+    protected String pathForCompartment(IgRepositoryCompartment igRepositoryCompartment) {
+        if (igRepositoryCompartment.isEmpty()) {
             return "";
         }
 
-        return compartment.getType() + "/" + compartment.getId();
+        return igRepositoryCompartment.getType() + "/" + igRepositoryCompartment.getId();
     }
 }

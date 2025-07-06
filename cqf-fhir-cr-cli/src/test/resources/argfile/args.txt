@@ -6,6 +6,6 @@ cql
 -m=FHIR
 -mu=src/test/resources/r4/example
 -c=Patient
--cv=example 
+-cv=example
 -c=Patient
 -cv=example

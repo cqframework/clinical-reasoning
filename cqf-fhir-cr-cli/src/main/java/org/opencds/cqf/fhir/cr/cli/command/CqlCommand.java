@@ -39,7 +39,6 @@ import org.hl7.fhir.r5.context.IWorkerContext.ILoggingService;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
-import org.opencds.cqf.fhir.cql.CqlEngineOptions;
 import org.opencds.cqf.fhir.cql.CqlOptions;
 import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
@@ -74,10 +73,10 @@ public class CqlCommand implements Callable<Integer> {
     public String fhirVersion;
 
     @Option(names = {"-op", "--options-path"})
-    public String optionsPath;
+    public String compilerOptionsPath;
 
     @ArgGroup(multiplicity = "0..1", exclusive = false)
-    public NamespaceParameter namespace;
+    public NamespaceArgument namespaceArgument;
 
     @Option(names = {"-rd", "--root-dir"})
     public String rootDir;
@@ -107,15 +106,18 @@ public class CqlCommand implements Callable<Integer> {
     public String resultsPath;
 
     @ArgGroup(multiplicity = "1..1", exclusive = false)
-    LibraryParameter library;
+    LibraryArgument libraryArgument;
 
     @ArgGroup(multiplicity = "0..1", exclusive = false)
-    public ModelParameter model;
+    public ModelArgument modelArgument;
 
     @ArgGroup(multiplicity = "0..*", exclusive = false)
-    public List<EvaluationParameter> evaluations;
+    public List<EvaluationArgument> evaluationArguments;
 
-    static class NamespaceParameter {
+    @ArgGroup(multiplicity = "0..1", exclusive = false)
+    public CqlEngineArguments cqlEngineArguments;
+
+    static class NamespaceArgument {
         @Option(names = {"-nn", "--namespace-name"})
         public String namespaceName;
 
@@ -123,7 +125,7 @@ public class CqlCommand implements Callable<Integer> {
         public String namespaceUri;
     }
 
-    static class LibraryParameter {
+    static class LibraryArgument {
         @Option(
                 names = {"-lu", "--library-url"},
                 required = true)
@@ -141,7 +143,7 @@ public class CqlCommand implements Callable<Integer> {
         public String[] expression;
     }
 
-    static class ModelParameter {
+    static class ModelArgument {
         @Option(names = {"-m", "--model"})
         public String modelName;
 
@@ -149,7 +151,7 @@ public class CqlCommand implements Callable<Integer> {
         public String modelUrl;
     }
 
-    static class EvaluationParameter {
+    static class EvaluationArgument {
         @ArgGroup(multiplicity = "0..*", exclusive = false)
         public List<ParameterParameter> parameters;
 
@@ -171,6 +173,11 @@ public class CqlCommand implements Callable<Integer> {
             @Option(names = {"-pv", "--parameter-value"})
             public String parameterValue;
         }
+    }
+
+    static class CqlEngineArguments {
+        @Option(names = {"--enable-hedis-compatibility-mode"})
+        public boolean hedisCompatibilityMode;
     }
 
     @SuppressWarnings("removal")
@@ -213,7 +220,6 @@ public class CqlCommand implements Callable<Integer> {
         log.error("initializing");
         var watch = Stopwatch.createStarted();
         FhirVersionEnum fhirVersionEnum = FhirVersionEnum.valueOf(fhirVersion);
-
         FhirContext fhirContext = FhirContext.forCached(fhirVersionEnum);
 
         IGContext igContext = null;
@@ -221,21 +227,20 @@ public class CqlCommand implements Callable<Integer> {
             igContext = new IGContext(new Logger());
             igContext.initializeFromIg(rootDir, igPath, toVersionNumber(fhirVersionEnum));
         }
-        CqlOptions cqlOptions = CqlOptions.defaultOptions();
-        CqlEngineOptions cqlEngineOptions = CqlEngineOptions.defaultOptions();
-        cqlEngineOptions.setEnableHedisCompatibilityMode(true);
 
-        if (optionsPath != null) {
-            CqlTranslatorOptions options = CqlTranslatorOptionsMapper.fromFile(optionsPath);
-            var compiler = options.getCqlCompilerOptions();
-            compiler.getOptions().add(Options.EnableResultTypes);
-            cqlOptions.setCqlCompilerOptions(compiler);
+        CqlOptions cqlOptions = CqlOptions.defaultOptions();
+        if (cqlEngineArguments != null && cqlEngineArguments.hedisCompatibilityMode) {
+            cqlOptions.getCqlEngineOptions().getOptions().add(CqlEngine.Options.EnableHedisCompatibilityMode);
         }
-        CqlTranslatorOptions options = CqlTranslatorOptions.defaultOptions();
-        var compiler = options.getCqlCompilerOptions();
-        compiler.getOptions().add(Options.EnableResultTypes);
-        cqlOptions.setCqlCompilerOptions(compiler);
-        cqlOptions.setCqlEngineOptions(cqlEngineOptions);
+
+        if (compilerOptionsPath != null) {
+            CqlTranslatorOptions options = CqlTranslatorOptionsMapper.fromFile(compilerOptionsPath);
+            cqlOptions.setCqlCompilerOptions(options.getCqlCompilerOptions());
+        }
+
+        // Always add results types, since correct behavior of the CQL engine
+        // depends on it.
+        cqlOptions.getCqlCompilerOptions().getOptions().add(Options.EnableResultTypes);
 
         var terminologySettings = new TerminologySettings();
         terminologySettings.setValuesetExpansionMode(VALUESET_EXPANSION_MODE.PERFORM_NAIVE_EXPANSION);
@@ -254,8 +259,8 @@ public class CqlCommand implements Callable<Integer> {
         evaluationSettings.setRetrieveSettings(retrieveSettings);
         evaluationSettings.setNpmProcessor(new NpmProcessor(igContext));
 
-        var repository = createRepository(fhirContext, terminologyUrl, model.modelUrl);
-        VersionedIdentifier identifier = new VersionedIdentifier().withId(library.libraryName);
+        var repository = createRepository(fhirContext, terminologyUrl, modelArgument.modelUrl);
+        VersionedIdentifier identifier = new VersionedIdentifier().withId(libraryArgument.libraryName);
 
         MeasureEvaluationOptions evaluationOptions = new MeasureEvaluationOptions();
         evaluationOptions.setApplyScoringSetMembership(false);
@@ -281,9 +286,10 @@ public class CqlCommand implements Callable<Integer> {
         var initTime = watch.elapsed().toMillis();
         log.error("initialized in {} millis", initTime);
         AtomicInteger counter = new AtomicInteger(0);
-        for (var e : evaluations) {
+        for (var e : evaluationArguments) {
             String basePath = resultsPath;
-            Path filepath = Paths.get(basePath + this.library.libraryName + "/" + e.context.contextValue + ".txt");
+            Path filepath =
+                    Paths.get(basePath + this.libraryArgument.libraryName + "/" + e.context.contextValue + ".txt");
 
             if (Files.exists(filepath)) {
                 continue;
@@ -291,10 +297,8 @@ public class CqlCommand implements Callable<Integer> {
             // evaluations.parallelStream().forEach(e -> {
             var engine = Engines.forRepository(repository, evaluationSettings);
             // enable return all and equivalence
-            engine.getState().getEngineOptions().add(CqlEngine.Options.EnableHedisCompatibilityMode);
-            // engine.getState().getEngineOptions().add(CqlCompilerOptions.EnableResultTypes);
-            if (library.libraryUrl != null) {
-                var provider = new DefaultLibrarySourceProvider(Path.of(library.libraryUrl));
+            if (libraryArgument.libraryUrl != null) {
+                var provider = new DefaultLibrarySourceProvider(Path.of(libraryArgument.libraryUrl));
                 engine.getEnvironment()
                         .getLibraryManager()
                         .getLibrarySourceLoader()
@@ -333,11 +337,13 @@ public class CqlCommand implements Callable<Integer> {
                 }
 
                 writeJsonToFile(
-                        jsonReport, e.context.contextValue, basePath + this.library.libraryName + "/measurereports");
+                        jsonReport,
+                        e.context.contextValue,
+                        basePath + this.libraryArgument.libraryName + "/measurereports");
             }
             if (singleFile) {
                 writeResultToFile(
-                        cqlResult, e.context.contextValue, basePath + this.library.libraryName + "/txtresults");
+                        cqlResult, e.context.contextValue, basePath + this.libraryArgument.libraryName + "/txtresults");
             } else {
                 writeResult(cqlResult);
             }
@@ -353,13 +359,12 @@ public class CqlCommand implements Callable<Integer> {
         var elapsedTime = finalTime - initTime;
         log.error("evaluated in {} millis", elapsedTime);
         log.error("total time in {} millis", finalTime);
-        log.error("per patient time in {} millis", elapsedTime / evaluations.size());
+        log.error("per patient time in {} millis", elapsedTime / evaluationArguments.size());
 
         return 0;
     }
 
-    private IRepository createRepository(
-            FhirContext fhirContext, String terminologyUrl, String modelUrl) {
+    private IRepository createRepository(FhirContext fhirContext, String terminologyUrl, String modelUrl) {
         IRepository data = null;
         IRepository terminology = null;
 
@@ -421,7 +426,7 @@ public class CqlCommand implements Callable<Integer> {
                 }
             }
 
-        log.info("Wrote result to: " + outputPath.toAbsolutePath());
+            log.info("Wrote result to: " + outputPath.toAbsolutePath());
         } catch (IOException e) {
             log.error("Failed to write result for patient " + patientId);
         }

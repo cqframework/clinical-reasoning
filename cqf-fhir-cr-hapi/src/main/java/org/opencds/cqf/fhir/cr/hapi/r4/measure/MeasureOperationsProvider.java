@@ -91,6 +91,31 @@ public class MeasureOperationsProvider {
                         practitioner);
     }
 
+    /**
+     * Implements the <a href=
+     * "https://hl7.org/fhir/us/davinci-deqm/STU5/OperationDefinition-evaluate.html">$evaluate</a>
+     * operation found in the
+     * <a href="https://hl7.org/fhir/us/davinci-deqm/STU5/index.html">DEQM IG</a>.
+     *
+     * @param measureId       the ids of the Measures to evaluate
+     * @param measureUrl      the urls of the Measures to evaluate
+     * @param measureIdentifier the identifiers of the Measures to evaluate
+     * @param measure         the references to the Measures to evaluate
+     * @param periodStart     The start of the reporting period
+     * @param periodEnd       The end of the reporting period
+     * @param reportType      The type of MeasureReport to generate
+     * @param subject         the subject to use for the evaluation
+     * @param practitioner    the practitioner to use for the evaluation
+     * @param lastReceivedOn  the date the results of this measure were last received.
+     * @param productLine     the productLine (e.g. Medicare, Medicaid, etc) to use for
+     *                          the evaluation. This is a non-standard parameter.
+     * @param additionalData  the data bundle containing additional data
+     * @param terminologyEndpoint The endpoint for terminology services
+     * @param parameters      additional parameters for evaluation
+     * @param reporter        The reporter for this evaluation, if applicable.
+     * @return a Bundle containing multiple MeasureReports, one for each Measure evaluated.
+     */
+    @Operation(name = ProviderConstants.CR_OPERATION_EVALUATE, idempotent = true)
     public Bundle evaluate(
             @OperationParam(name = "measureId") List<IdType> measureId,
             @OperationParam(name = "measureUrl") List<String> measureUrl,

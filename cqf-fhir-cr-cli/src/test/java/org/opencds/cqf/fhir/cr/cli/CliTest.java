@@ -643,25 +643,6 @@ class CliTest {
         assertFalse(output.contains("Observation(id=blood-pressure)"));
     }
 
-    @Test
-    @Disabled("Only run locally")
-    void testCQLIT544() {
-        String igRootPath = "C:\\Users\\Bryn\\Documents\\Src\\CMS\\CQLIT-554";
-        String[] args = new String[] {
-            "cql",
-            "-fv=R4",
-            "-rd=" + igRootPath,
-            "-ig=" + "input/mycontentig.xml",
-            "-lu=" + igRootPath + "\\input\\cql",
-            "-ln=CMSFHIR844HybridHospitalWideMortality",
-            "-lv=0.5.001",
-            "-m=FHIR",
-            "-mu=" + igRootPath + "\\input\\tests\\CMS844FHIRHybridHospitalWideMortality-v0.5.001",
-            "-t=" + igRootPath + "\\input",
-            "-c=Patient",
-            "-cv=02eb94f6-fd0e-474c-b20b-c040072d92f9"
-        };
-
     @Nonnull
     private Optional<String> getTxtResultsForSubject(List<Pair<Path, String>> txtResults, String file) {
         return txtResults.stream()

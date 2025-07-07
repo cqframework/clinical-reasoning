@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
 import ca.uhn.fhir.repository.IRepository;
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -22,7 +23,6 @@ import org.opencds.cqf.fhir.utility.monad.Either3;
 import org.opencds.cqf.fhir.utility.repository.FederatedRepository;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.repository.Repositories;
-import javax.annotation.Nonnull;
 
 public class R4MeasureService implements R4MeasureEvaluatorSingle {
     private final IRepository repository;
@@ -100,19 +100,20 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
     }
 
     @Nonnull
-    private List<String> getSubjects(String subjectId, IRepository proxyRepoForMeasureProcessor, Bundle additionalData) {
+    private List<String> getSubjects(
+            String subjectId, IRepository proxyRepoForMeasureProcessor, Bundle additionalData) {
         final IRepository repoToUseForSubjectProvider;
         if (additionalData != null) {
             repoToUseForSubjectProvider = new FederatedRepository(
-                this.repository, new InMemoryFhirRepository(this.repository.fhirContext(), additionalData));
+                    this.repository, new InMemoryFhirRepository(this.repository.fhirContext(), additionalData));
         } else {
             repoToUseForSubjectProvider = proxyRepoForMeasureProcessor;
         }
 
         return subjectProvider
-            .getSubjects(
-                repoToUseForSubjectProvider,
-                Optional.ofNullable(subjectId).map(List::of).orElse(List.of()))
-            .toList();
+                .getSubjects(
+                        repoToUseForSubjectProvider,
+                        Optional.ofNullable(subjectId).map(List::of).orElse(List.of()))
+                .toList();
     }
 }

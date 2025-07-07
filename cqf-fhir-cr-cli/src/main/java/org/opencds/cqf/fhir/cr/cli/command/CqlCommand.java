@@ -19,17 +19,28 @@ import org.opencds.cqf.fhir.cr.cli.argument.CqlArgument;
 import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Command;
 
-@Command(name = "cql", mixinStandardHelpOptions = true)
+@Command(name = "cql", mixinStandardHelpOptions = true, description = "Evaluate CQL libraries against FHIR resources.")
 public class CqlCommand implements Callable<Integer> {
     @ArgGroup(multiplicity = "1..1", exclusive = false)
     public CqlArgument cql;
 
     public static Map<String, EvaluationResult> evaluate(CqlArgument arguments) {
         FhirContext fhirContext = FhirContext.forCached(FhirVersionEnum.valueOf(arguments.fhir.fhirVersion));
+
         var context = new IGContext();
-        // TODO:
-        // context.initializeFromIg(null, null, null);
+        if (arguments.fhir.implementationGuidePath != null && arguments.fhir.rootDirectory != null) {
+            try {
+                context.initializeFromIg(
+                        arguments.fhir.rootDirectory,
+                        arguments.fhir.implementationGuidePath,
+                        fhirContext.getVersion().getVersion().getFhirVersionString());
+            } catch (Exception e) {
+                throw new IllegalArgumentException("Failed to initialize IGContext from provided path", e);
+            }
+        }
+
         var npmProcessor = new NpmProcessor(context);
+
         var evaluationSettings = Utilities.createEvaluationSettings(arguments.library.libraryUrl, arguments.runtime);
         evaluationSettings.setNpmProcessor(npmProcessor);
 

@@ -12,18 +12,26 @@ public class EvaluationParameterArgument {
     public ContextArgument context;
 
     public static class ContextArgument {
-        @Option(names = {"-c", "--context"})
+        @Option(
+                names = {"-c", "--context"},
+                description = "Specifies the CQL context to set (e.g Patient, Encounter).")
         public String contextName;
 
-        @Option(names = {"-cv", "--context-value"})
+        @Option(
+                names = {"-cv", "--context-value"},
+                description = "Specifies the CQL context value (e.g. Patient ID, Encounter ID).")
         public String contextValue;
     }
 
     static class ParameterArgument {
-        @Option(names = {"-p", "--parameter"})
+        @Option(
+                names = {"-p", "--parameter"},
+                description = "Specifies the name of CQL parameter to set.")
         public String parameterName;
 
-        @Option(names = {"-pv", "--parameter-value"})
+        @Option(
+                names = {"-pv", "--parameter-value"},
+                description = "Specifies the value of CQL parameter to set.")
         public String parameterValue;
     }
 }

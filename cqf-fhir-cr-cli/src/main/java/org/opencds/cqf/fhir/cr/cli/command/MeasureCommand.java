@@ -28,7 +28,10 @@ import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
-@Command(name = "measure", mixinStandardHelpOptions = true)
+@Command(
+        name = "measure",
+        mixinStandardHelpOptions = true,
+        description = "Evaluate FHIR Measures against FHIR resources.")
 public class MeasureCommand implements Callable<Integer> {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(MeasureCommand.class);
 
@@ -39,22 +42,34 @@ public class MeasureCommand implements Callable<Integer> {
     public MeasureArgument measure;
 
     static class MeasureArgument {
-        @Option(names = {"-msr", "--measure"})
+        @Option(
+                names = {"-msr", "--measure"},
+                description = "Provides the name of the measure to evaluate.")
         public String measureName;
 
-        @Option(names = {"-ps", "--period-start"})
+        @Option(
+                names = {"-ps", "--period-start"},
+                description = "Specifies the start of the evaluation period.")
         public String periodStart;
 
-        @Option(names = {"-pe", "--period-end"})
+        @Option(
+                names = {"-pe", "--period-end"},
+                description = "Specifies the end of the evaluation period.")
         public String periodEnd;
 
-        @Option(names = {"--measure-path"})
+        @Option(
+                names = {"--measure-path"},
+                description = "Specifies the path to the measure resource.")
         public String measurePath;
 
-        @Option(names = {"--single-file"})
+        @Option(
+                names = {"--single-file"},
+                description = "Indicates whether to use a single output file for the evaluation results.")
         public boolean singleFile;
 
-        @Option(names = {"--report-path"})
+        @Option(
+                names = {"--report-path"},
+                description = "Specifies the path to the report output directory.")
         public String reportPath;
     }
 

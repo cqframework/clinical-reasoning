@@ -23,9 +23,13 @@ public class CqlArgument {
     @ArgGroup(multiplicity = "0..1", exclusive = false)
     public RuntimeArgument runtime;
 
-    @Option(names = {"-op", "--output-path"})
+    @Option(
+            names = {"-op", "--output-path"},
+            description = "Specifies the path where the CQL output files will be written.")
     public String outputPath;
 
-    @Option(names = {"-t", "--terminology-url"})
+    @Option(
+            names = {"-t", "--terminology-url"},
+            description = "Specifies the location of the terminology to be used for CQL evaluation.")
     public String terminologyUrl;
 }

@@ -8,6 +8,9 @@ public class FhirArgument {
             required = true)
     public String fhirVersion;
 
-    @Option(names = {"-rd", "--root-dir"})
-    public String rootDir;
+    @Option(names = {"-rd", "--root-directory"})
+    public String rootDirectory;
+
+    @Option(names = {"-ig", "--implementation-guide-path"})
+    public String implementationGuidePath;
 }

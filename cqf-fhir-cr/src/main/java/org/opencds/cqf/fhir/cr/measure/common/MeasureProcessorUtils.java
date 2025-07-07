@@ -351,6 +351,7 @@ public class MeasureProcessorUtils {
 
     /**
      * method used to execute generate CQL results via Library $evaluate
+     *
      * @param subjectIds subjects to generate results for
      * @param zonedMeasurementPeriod offset defined measurement period for evaluation
      * @param context cql engine context
@@ -367,6 +368,9 @@ public class MeasureProcessorUtils {
         var resultsBuilder = CompositeEvaluationResultsPerMeasure.builder();
 
         // Library $evaluate each subject
+        // The goal here is to do each measure/library evaluation within the context of a single subject.
+        // This means that we will not switch between subject contexts while evaluating measures.
+        // Once we've switched to a different subject context, the previous expression cache is dropped.
         for (String subjectId : subjectIds) {
             if (subjectId == null) {
                 throw new InternalErrorException("SubjectId is required in order to calculate.");

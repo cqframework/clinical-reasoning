@@ -37,6 +37,7 @@ import org.opencds.cqf.fhir.utility.PackageHelper;
 import org.opencds.cqf.fhir.utility.SearchHelper;
 import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
+import org.opencds.cqf.fhir.utility.client.TerminologyServerClient;
 import org.slf4j.Logger;
 
 public class ReleaseVisitor {
@@ -154,7 +155,10 @@ public class ReleaseVisitor {
     }
 
     public static void extractDirectReferenceCodes(
-            IKnowledgeArtifactAdapter rootAdapter, Measure measure, IEndpointAdapter endpointAdapter) {
+            IKnowledgeArtifactAdapter rootAdapter,
+            Measure measure,
+            IEndpointAdapter endpointAdapter,
+            TerminologyServerClient terminologyServerClient) {
         Optional<Extension> effectiveDataRequirementsExt = measure.getExtension().stream()
                 .filter(ext -> ext.getUrl().equals(Constants.CQFM_EFFECTIVE_DATA_REQUIREMENTS)
                         || ext.getUrl().equals(Constants.CRMI_EFFECTIVE_DATA_REQUIREMENTS))
@@ -190,7 +194,7 @@ public class ReleaseVisitor {
                     boolean shouldAddExtension = true;
                     Coding proposedCoding = (Coding) proposedExt.getValue();
 
-                    setCodeSystemVersion(endpointAdapter, proposedCoding, systemVersions);
+                    setCodeSystemVersion(endpointAdapter, terminologyServerClient, proposedCoding, systemVersions);
 
                     for (var existingExt : existingRootAdapterExtensions) {
                         Coding existingCoding = (Coding) existingExt.getValue();
@@ -214,7 +218,10 @@ public class ReleaseVisitor {
     }
 
     private static void setCodeSystemVersion(
-            IEndpointAdapter endpointAdapter, Coding proposedCoding, List<UriType> systemVersions) {
+            IEndpointAdapter endpointAdapter,
+            TerminologyServerClient terminologyServerClient,
+            Coding proposedCoding,
+            List<UriType> systemVersions) {
         if (proposedCoding.getVersion() == null && !systemVersions.isEmpty()) {
             for (var sysVer : systemVersions) {
                 var idParts = sysVer.getValue().split("\\|");
@@ -228,6 +235,20 @@ public class ReleaseVisitor {
         // version can still be null after trying to set via expansionParams
         if (proposedCoding.getVersion() == null && endpointAdapter != null) {
             // use TxServer to set version
+            // TODO:: VSAC doesn't support R5?
+            /*TerminologyCapabilities terminologyCapabilities =
+                terminologyServerClient.getR5TerminologyCapabilities(endpointAdapter);
+
+            Optional<TerminologyCapabilitiesCodeSystemComponent> terminologyCodeSystem =
+                terminologyCapabilities.getCodeSystem().stream()
+                    .filter(codeSystem -> codeSystem.getUri().equals(proposedCoding.getSystem()))
+                    .findFirst();
+            terminologyCodeSystem
+                .flatMap(terminologyCodeSystemComponent ->
+                    terminologyCodeSystemComponent.getVersion().stream().findFirst())
+                .ifPresent(terminologyCodeSystemVersion ->
+                    proposedCoding.setVersion(terminologyCodeSystemVersion.getCode()));*/
+
         }
     }
 }

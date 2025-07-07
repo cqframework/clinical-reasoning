@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import org.apache.commons.lang3.tuple.Pair;
 import org.cqframework.cql.cql2elm.CqlCompilerOptions.Options;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
@@ -389,7 +391,7 @@ public class CqlCommand implements Callable<Integer> {
         evaluationSettings.setTerminologySettings(terminologySettings);
         evaluationSettings.setRetrieveSettings(retrieveSettings);
         evaluationSettings.setNpmProcessor(new NpmProcessor(igContext));
-        
+
         return evaluationSettings;
     }
 
@@ -466,30 +468,18 @@ public class CqlCommand implements Callable<Integer> {
             return "null";
         }
 
-        String result = "";
         if (value instanceof Iterable<?> values) {
-            result += "[";
-            for (Object o : values) {
-                result += (tempConvert(o) + ", ");
-            }
+            return StreamSupport.stream(values.spliterator(), false)
+                    .map(this::tempConvert)
+                    .collect(Collectors.joining(", ", "[", "]"));
+        }
 
-            if (result.length() > 1) {
-                result = result.substring(0, result.length() - 2);
-            }
-
-            result += "]";
-        } else if (value instanceof IBaseResource resource) {
-            result = resource.fhirType()
+        if (value instanceof IBaseResource resource) {
+            return resource.fhirType()
                     + (resource.getIdElement() != null
                                     && resource.getIdElement().hasIdPart()
                             ? "(id=" + resource.getIdElement().getIdPart() + ")"
                             : "");
-        } else if (value instanceof IBase base) {
-            result = base.fhirType();
-        } else if (value instanceof IBaseDatatype datatype) {
-            result = datatype.fhirType();
-        } else {
-            result = value.toString();
         }
 
         if (value instanceof IBaseDatatype datatype) {

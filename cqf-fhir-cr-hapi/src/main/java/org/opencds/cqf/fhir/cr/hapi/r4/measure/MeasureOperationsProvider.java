@@ -115,7 +115,7 @@ public class MeasureOperationsProvider {
      * @param reporter        The reporter for this evaluation, if applicable.
      * @return a Bundle containing multiple MeasureReports, one for each Measure evaluated.
      */
-    @Operation(name = ProviderConstants.CR_OPERATION_EVALUATE, idempotent = true)
+    @Operation(name = ProviderConstants.CR_OPERATION_EVALUATE, idempotent = true, type = Measure.class)
     public Bundle evaluate(
             @OperationParam(name = "measureId") List<IdType> measureId,
             @OperationParam(name = "measureUrl") List<String> measureUrl,

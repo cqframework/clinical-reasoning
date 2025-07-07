@@ -4,6 +4,9 @@ import java.util.List;
 import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Option;
 
+/**
+ * Arguments required for the `cql` command
+ */
 public class CqlArgument {
     @ArgGroup(multiplicity = "1..1", exclusive = false)
     public FhirArgument fhir;

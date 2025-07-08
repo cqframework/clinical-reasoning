@@ -375,17 +375,21 @@ public class MeasureProcessorUtils {
             if (subjectId == null) {
                 throw new InternalErrorException("SubjectId is required in order to calculate.");
             }
+            // LUKETODO:  we reset the cache outside of the measure loop
+            Pair<String, String> subjectInfo = this.getSubjectTypeAndId(subjectId);
+            String subjectTypePart = subjectInfo.getLeft();
+            String subjectIdPart = subjectInfo.getRight();
+            context.getState().setContextValue(subjectTypePart, subjectIdPart);
             for (var measureLibraryIdEngine : measureLibraryIdEngineDetailsList) {
-                Pair<String, String> subjectInfo = this.getSubjectTypeAndId(subjectId);
-                String subjectTypePart = subjectInfo.getLeft();
-                String subjectIdPart = subjectInfo.getRight();
-                context.getState().setContextValue(subjectTypePart, subjectIdPart);
                 try {
                     resultsBuilder.addResult(
                             measureLibraryIdEngine.measureId(),
                             subjectId,
                             measureLibraryIdEngine
                                     .engine()
+                                // LUKETODO:  make CQL CqlEngine changes to take multiple versioned identifiers and then initState for mulitple libraries
+                                // this seems to also reset the cache
+                                // LUKETODO:  call the new mulitple versionidentifier method once it's available in CQL
                                     .getEvaluationResult(
                                             measureLibraryIdEngine.libraryId(),
                                             subjectId,

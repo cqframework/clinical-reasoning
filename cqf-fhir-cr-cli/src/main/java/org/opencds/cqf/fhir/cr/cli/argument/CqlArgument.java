@@ -23,8 +23,13 @@ public class CqlArgument {
     @ArgGroup(multiplicity = "0..*", exclusive = false)
     public List<EvaluationParameterArgument> evaluation;
 
-    @ArgGroup(multiplicity = "0..1", exclusive = false)
-    public RuntimeArgument runtime;
+    @Option(
+            names = {"--enable-hedis-compatibility-mode"},
+            required = false,
+            defaultValue = "false",
+            description =
+                    "Enable HEDIS compatibility mode, which changes the CQL evaluation behavior to match HEDIS expectations (as of 2025).")
+    public boolean hedisCompatibilityMode;
 
     @Option(
             names = {"-op", "--output-path"},

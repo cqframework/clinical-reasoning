@@ -27,21 +27,23 @@ public class CqlCommand implements Callable<Integer> {
     public static Map<String, EvaluationResult> evaluate(CqlArgument arguments) {
         FhirContext fhirContext = FhirContext.forCached(FhirVersionEnum.valueOf(arguments.fhir.fhirVersion));
 
-        var context = new IGContext();
+        var evaluationSettings =
+                Utilities.createEvaluationSettings(arguments.library.libraryUrl, arguments.hedisCompatibilityMode);
+
+        NpmProcessor npmProcessor = null;
         if (arguments.fhir.implementationGuidePath != null && arguments.fhir.rootDirectory != null) {
             try {
+                var context = new IGContext();
                 context.initializeFromIg(
                         arguments.fhir.rootDirectory,
                         arguments.fhir.implementationGuidePath,
                         fhirContext.getVersion().getVersion().getFhirVersionString());
+                npmProcessor = new NpmProcessor(context);
             } catch (Exception e) {
                 throw new IllegalArgumentException("Failed to initialize IGContext from provided path", e);
             }
         }
 
-        var npmProcessor = new NpmProcessor(context);
-
-        var evaluationSettings = Utilities.createEvaluationSettings(arguments.library.libraryUrl, arguments.runtime);
         evaluationSettings.setNpmProcessor(npmProcessor);
 
         var repository = Utilities.createRepository(fhirContext, arguments.terminologyUrl, arguments.model.modelUrl);

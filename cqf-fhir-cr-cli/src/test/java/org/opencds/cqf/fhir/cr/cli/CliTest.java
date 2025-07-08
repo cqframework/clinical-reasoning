@@ -313,7 +313,6 @@ class CliTest {
         String[] args = new String[] {
             "cql",
             "-fv=R4",
-            "-op=" + testResourcePath + "/options/cql-options.json",
             "-lu=" + testResourcePath + "/options",
             "-ln=FluentFunctions",
             "-m=FHIR",
@@ -358,7 +357,6 @@ class CliTest {
         String[] args = new String[] {
             "cql",
             "-fv=R4",
-            "-op=" + testResourcePath + "/vscast/cql-options.json",
             "-lu=" + testResourcePath + "/vscast",
             "-ln=TestVSCastFunction",
             "-m=FHIR",
@@ -381,7 +379,6 @@ class CliTest {
         String[] args = new String[] {
             "cql",
             "-fv=R4",
-            "-op=" + testResourcePath + "/vscast15/cql-options.json",
             "-lu=" + testResourcePath + "/vscast15",
             "-ln=TestVSCastFunction",
             "-m=FHIR",

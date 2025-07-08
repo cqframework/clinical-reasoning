@@ -81,7 +81,7 @@ public class MeasureCommand implements Callable<Integer> {
         var parser = fhirContext.newJsonParser();
         var resource = getMeasure(parser, measure.measurePath, measure.measureName);
         var processor = getR4MeasureProcessor(
-                Utilities.createEvaluationSettings(cql.library.libraryUrl, cql.runtime),
+                Utilities.createEvaluationSettings(cql.library.libraryUrl, cql.hedisCompatibilityMode),
                 Utilities.createRepository(fhirContext, cql.terminologyUrl, cql.model.modelUrl));
 
         var start = measure.periodStart != null

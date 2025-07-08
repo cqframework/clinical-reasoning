@@ -32,7 +32,6 @@ import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.CODE_LOOK
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_MEMBERSHIP_MODE;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_PRE_EXPANSION_MODE;
-import org.opencds.cqf.fhir.cr.cli.argument.RuntimeArgument;
 import org.opencds.cqf.fhir.utility.repository.ProxyRepository;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
@@ -47,12 +46,13 @@ public class Utilities {
      * additional CQL compiler options.
      *
      * @param cqlPath the directory path where the CQL files are located
-     * @param runtimeArgument the runtime arguments that may include options like HEDIS compatibility mode
+     * @param runtime the runtime arguments that may include options like HEDIS compatibility mode
+     * @param fhir the FHIR arguments that may include FHIR version and other settings
      * @return the configured {@link EvaluationSettings}
      */
-    public static EvaluationSettings createEvaluationSettings(String cqlPath, RuntimeArgument runtimeArgument) {
+    public static EvaluationSettings createEvaluationSettings(String cqlPath, boolean enableHedisCompatibilityMode) {
         CqlOptions cqlOptions = CqlOptions.defaultOptions();
-        if (runtimeArgument.hedisCompatibilityMode) {
+        if (enableHedisCompatibilityMode) {
             cqlOptions.getCqlEngineOptions().getOptions().add(CqlEngine.Options.EnableHedisCompatibilityMode);
         }
 
@@ -81,6 +81,7 @@ public class Utilities {
         evaluationSettings.setCqlOptions(cqlOptions);
         evaluationSettings.setTerminologySettings(terminologySettings);
         evaluationSettings.setRetrieveSettings(retrieveSettings);
+
         return evaluationSettings;
     }
 

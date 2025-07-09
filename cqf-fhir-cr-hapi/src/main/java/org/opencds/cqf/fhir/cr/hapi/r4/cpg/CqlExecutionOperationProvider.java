@@ -100,7 +100,7 @@ public class CqlExecutionOperationProvider {
     @Description(
             shortDefinition = "$cql",
             value =
-                    "Evaluates a CQL expression and returns the results as a Parameters resource. Defined: http://build.fhir.org/ig/HL7/cqf-recommendations/OperationDefinition-cpg-source.html",
+                    "Evaluates a CQL expression and returns the results as a Parameters resource. Defined: http://build.fhir.org/ig/HL7/cqf-recommendations/OperationDefinition-cpg-cql.html",
             example = "$cql?expression=5*5")
     public Parameters evaluate(
             RequestDetails requestDetails,

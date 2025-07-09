@@ -4,12 +4,12 @@ import java.util.List;
 import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Option;
 
-public class EvaluationParameterArgument {
+public class ParametersArgument {
     @ArgGroup(multiplicity = "0..*", exclusive = false)
     public List<ParameterArgument> parameters;
 
-    @ArgGroup(multiplicity = "0..1", exclusive = false)
-    public ContextArgument context;
+    @ArgGroup(multiplicity = "0..*", exclusive = false)
+    public List<ContextArgument> context;
 
     public static class ContextArgument {
         @Option(

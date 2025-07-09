@@ -2,12 +2,13 @@ package org.opencds.cqf.fhir.cr.cli.command;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
+import java.nio.file.StandardOpenOption;
 import java.util.concurrent.Callable;
+import java.util.stream.Stream;
 import org.apache.commons.lang3.tuple.Pair;
 import org.cqframework.cql.cql2elm.DefaultLibrarySourceProvider;
 import org.cqframework.fhir.npm.NpmProcessor;
@@ -15,20 +16,47 @@ import org.cqframework.fhir.utilities.IGContext;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.fhir.cql.Engines;
-import org.opencds.cqf.fhir.cr.cli.argument.CqlArgument;
+import org.opencds.cqf.fhir.cr.cli.argument.CqlCommandArgument;
 import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Command;
 
 @Command(name = "cql", mixinStandardHelpOptions = true, description = "Evaluate CQL libraries against FHIR resources.")
 public class CqlCommand implements Callable<Integer> {
     @ArgGroup(multiplicity = "1..1", exclusive = false)
-    public CqlArgument cql;
+    public CqlCommandArgument args;
 
-    public static Map<String, EvaluationResult> evaluate(CqlArgument arguments) {
+    @Override
+    public Integer call() throws IOException {
+        var results = evaluate(this.args);
+
+        if (args.outputPath != null) {
+            Files.createDirectories(Path.of(args.outputPath));
+        }
+
+        OutputStream os = args.outputPath == null
+                ? System.out
+                : Files.newOutputStream(
+                        Path.of(args.outputPath),
+                        StandardOpenOption.TRUNCATE_EXISTING,
+                        StandardOpenOption.WRITE,
+                        StandardOpenOption.CREATE);
+
+        results.forEach(r -> Utilities.writeResult(r.result(), os));
+
+        if (os != System.out) {
+            os.close();
+        }
+
+        return 0;
+    }
+
+    record SubjectAndResult(String subjectId, EvaluationResult result) {}
+
+    public static Stream<SubjectAndResult> evaluate(CqlCommandArgument arguments) {
         FhirContext fhirContext = FhirContext.forCached(FhirVersionEnum.valueOf(arguments.fhir.fhirVersion));
 
         var evaluationSettings =
-                Utilities.createEvaluationSettings(arguments.library.libraryUrl, arguments.hedisCompatibilityMode);
+                Utilities.createEvaluationSettings(arguments.content.cqlPath, arguments.hedisCompatibilityMode);
 
         NpmProcessor npmProcessor = null;
         if (arguments.fhir.implementationGuidePath != null && arguments.fhir.rootDirectory != null) {
@@ -45,16 +73,13 @@ public class CqlCommand implements Callable<Integer> {
         }
 
         evaluationSettings.setNpmProcessor(npmProcessor);
+        var repository = Utilities.createRepository(fhirContext, arguments.fhir.terminologyUrl, arguments.fhir.dataUrl);
+        VersionedIdentifier identifier = new VersionedIdentifier().withId(arguments.content.name);
 
-        var repository = Utilities.createRepository(fhirContext, arguments.terminologyUrl, arguments.model.modelUrl);
-        VersionedIdentifier identifier = new VersionedIdentifier().withId(arguments.library.libraryName);
-
-        var results = new HashMap<String, EvaluationResult>();
-        for (var e : arguments.evaluation) {
+        return arguments.parameters.context.stream().map(c -> {
             var engine = Engines.forRepository(repository, evaluationSettings);
-
-            if (arguments.library.libraryUrl != null) {
-                var provider = new DefaultLibrarySourceProvider(Path.of(arguments.library.libraryUrl));
+            if (arguments.content.cqlPath != null) {
+                var provider = new DefaultLibrarySourceProvider(Path.of(arguments.content.cqlPath));
                 engine.getEnvironment()
                         .getLibraryManager()
                         .getLibrarySourceLoader()
@@ -64,29 +89,10 @@ public class CqlCommand implements Callable<Integer> {
             // This is incorrect because cql supports multiple context parameters
             // Encounter=123 and Patient=456 can be set simultaneously.
             // For now, we assume only one context parameter is provided.
-            var contextParameter = Pair.<String, Object>of(e.context.contextName, e.context.contextValue);
+            var subjectId = c.contextName + "/" + c.contextValue;
+            var contextParameter = Pair.<String, Object>of(c.contextName, c.contextValue);
             var cqlResult = engine.evaluate(identifier, contextParameter);
-
-            var subjectId = e.context.contextName + "/" + e.context.contextValue;
-            results.put(subjectId, cqlResult);
-        }
-
-        return results;
-    }
-
-    @Override
-    public Integer call() throws Exception {
-        var results = evaluate(this.cql);
-
-        OutputStream os = System.out;
-        if (cql.outputPath != null) {
-            os = Files.newOutputStream(Path.of(cql.outputPath));
-        }
-
-        for (var r : results.values()) {
-            Utilities.writeResult(r, os);
-        }
-
-        return 0;
+            return new SubjectAndResult(subjectId, cqlResult);
+        });
     }
 }

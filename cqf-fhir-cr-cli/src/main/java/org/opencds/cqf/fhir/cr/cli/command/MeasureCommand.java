@@ -10,15 +10,21 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.Measure;
+import org.hl7.fhir.r4.model.MeasureReport;
+import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
-import org.opencds.cqf.fhir.cr.cli.argument.CqlArgument;
+import org.opencds.cqf.fhir.cr.cli.argument.MeasureCommandArgument;
+import org.opencds.cqf.fhir.cr.cli.command.CqlCommand.SubjectAndResult;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.SubjectProviderOptions;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureProcessor;
@@ -26,7 +32,6 @@ import org.opencds.cqf.fhir.cr.measure.r4.R4RepositorySubjectProvider;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Command;
-import picocli.CommandLine.Option;
 
 @Command(
         name = "measure",
@@ -35,84 +40,85 @@ import picocli.CommandLine.Option;
 public class MeasureCommand implements Callable<Integer> {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(MeasureCommand.class);
 
-    @ArgGroup(multiplicity = "1..1", exclusive = false)
-    public CqlArgument cql;
-
-    @ArgGroup(multiplicity = "1..1", exclusive = false)
-    public MeasureArgument measure;
-
-    static class MeasureArgument {
-        @Option(
-                names = {"-msr", "--measure"},
-                description = "Provides the name of the measure to evaluate.")
-        public String measureName;
-
-        @Option(
-                names = {"-ps", "--period-start"},
-                description = "Specifies the start of the evaluation period.")
-        public String periodStart;
-
-        @Option(
-                names = {"-pe", "--period-end"},
-                description = "Specifies the end of the evaluation period.")
-        public String periodEnd;
-
-        @Option(
-                names = {"--measure-path"},
-                description = "Specifies the path to the measure resource.")
-        public String measurePath;
-
-        @Option(
-                names = {"--single-file"},
-                description = "Indicates whether to use a single output file for the evaluation results.")
-        public boolean singleFile;
-
-        @Option(
-                names = {"--report-path"},
-                description = "Specifies the path to the report output directory.")
-        public String reportPath;
-    }
+    @ArgGroup(multiplicity = "1", exclusive = false)
+    public MeasureCommandArgument args;
 
     @Override
     public Integer call() throws IOException {
-        var results = CqlCommand.evaluate(this.cql);
+        var results = MeasureCommand.evaluate(this.args);
 
-        var fhirContext = FhirContext.forCached(FhirVersionEnum.valueOf(cql.fhir.fhirVersion));
-        var parser = fhirContext.newJsonParser();
-        var resource = getMeasure(parser, measure.measurePath, measure.measureName);
-        var processor = getR4MeasureProcessor(
-                Utilities.createEvaluationSettings(cql.library.libraryUrl, cql.hedisCompatibilityMode),
-                Utilities.createRepository(fhirContext, cql.terminologyUrl, cql.model.modelUrl));
-
-        var start = measure.periodStart != null
-                ? LocalDate.parse(measure.periodStart, DateTimeFormatter.ISO_LOCAL_DATE)
-                        .atStartOfDay(ZoneId.systemDefault())
-                : null;
-
-        var end = measure.periodEnd != null
-                ? LocalDate.parse(measure.periodEnd, DateTimeFormatter.ISO_LOCAL_DATE)
-                        .atTime(LocalTime.MAX)
-                        .atZone(ZoneId.systemDefault())
-                : null;
-
-        for (var e : results.entrySet()) {
-            var subjectId = e.getKey();
-
-            // Something is incorrect here we should not be getting one single
-            // MeasureReport per measure, but rather one per subject when the type
-            // is subject.
-            var report = processor.evaluateMeasureResults(
-                    resource, start, end, "subject", Collections.singletonList(subjectId), results);
-
-            var json = parser.encodeResourceToString(report);
-            writeJsonToFile(json, subjectId, Path.of(measure.reportPath).resolve("measurereports"));
+        if (args.cql.outputPath != null) {
+            Files.createDirectories(Path.of(args.cql.outputPath));
         }
+
+        var fhirContext = FhirContext.forCached(FhirVersionEnum.valueOf(args.cql.fhir.fhirVersion));
+        var parser = fhirContext.newJsonParser();
+        results.forEach(r -> {
+            var json = parser.encodeResourceToString(r.measureReport);
+            if (args.reportPath != null) {
+                writeJsonToFile(json, r.subjectId, Path.of(args.reportPath));
+            } else {
+                System.out.println(json);
+            }
+
+            if (args.cql.outputPath != null) {
+                try {
+                    var path = Path.of(args.cql.outputPath, r.subjectId + ".txt");
+                    Files.createDirectories(path.getParent());
+                    OutputStream out = Files.newOutputStream(
+                            path,
+                            StandardOpenOption.CREATE,
+                            StandardOpenOption.TRUNCATE_EXISTING,
+                            StandardOpenOption.WRITE);
+                    out.write(json.getBytes());
+                    out.close();
+                    log.info("Cql for patient " + r.subjectId + " written to: " + path);
+                } catch (IOException e) {
+                    log.error("Failed to write cql for patient " + r.subjectId, e);
+                }
+            }
+        });
 
         return 0; // Return an appropriate exit code
     }
 
+    record SubjectAndReport(String subjectId, EvaluationResult result, MeasureReport measureReport) {}
+
+    public static Stream<SubjectAndReport> evaluate(MeasureCommandArgument args) throws IOException {
+        var cqlArgs = args.cql;
+        var results = CqlCommand.evaluate(cqlArgs);
+        var fhirContext = FhirContext.forCached(FhirVersionEnum.valueOf(cqlArgs.fhir.fhirVersion));
+        var parser = fhirContext.newJsonParser();
+        var resource = getMeasure(parser, args.measurePath, args.measureName);
+        var processor = getR4MeasureProcessor(
+                Utilities.createEvaluationSettings(cqlArgs.content.cqlPath, cqlArgs.hedisCompatibilityMode),
+                Utilities.createRepository(fhirContext, cqlArgs.fhir.terminologyUrl, cqlArgs.fhir.dataUrl));
+
+        var start = args.periodStart != null
+                ? LocalDate.parse(args.periodStart, DateTimeFormatter.ISO_LOCAL_DATE)
+                        .atStartOfDay(ZoneId.systemDefault())
+                : null;
+
+        var end = args.periodEnd != null
+                ? LocalDate.parse(args.periodEnd, DateTimeFormatter.ISO_LOCAL_DATE)
+                        .atTime(LocalTime.MAX)
+                        .atZone(ZoneId.systemDefault())
+                : null;
+
+        // Something askew here, we should get one result per subject for subject report.
+        // Probably need to refactor the evaluateMeasureResults method to handle this.
+        // "subject" and "summary" need separate overloads, possibly with different parameter types.
+        var map = results.collect(Collectors.toMap(SubjectAndResult::subjectId, SubjectAndResult::result));
+
+        return map.entrySet().stream().map(entry -> {
+            var report = processor.evaluateMeasureResults(
+                    resource, start, end, "subject", Collections.singletonList(entry.getKey()), map);
+            return new SubjectAndReport(entry.getKey(), entry.getValue(), report);
+        });
+    }
+
     @Nullable
-    private Measure getMeasure(IParser parser, String measurePath, String measureName) {
+    private static Measure getMeasure(IParser parser, String measurePath, String measureName) {
         if (measureName == null || measurePath == null) {
             return null;
         }
@@ -126,7 +132,8 @@ public class MeasureCommand implements Callable<Integer> {
     }
 
     @Nonnull
-    private R4MeasureProcessor getR4MeasureProcessor(EvaluationSettings evaluationSettings, IRepository repository) {
+    private static R4MeasureProcessor getR4MeasureProcessor(
+            EvaluationSettings evaluationSettings, IRepository repository) {
 
         MeasureEvaluationOptions evaluationOptions = new MeasureEvaluationOptions();
         evaluationOptions.setApplyScoringSetMembership(false);
@@ -147,9 +154,13 @@ public class MeasureCommand implements Callable<Integer> {
             Files.createDirectories(outputPath.getParent());
 
             // Write JSON to file
-            try (OutputStream out = Files.newOutputStream(outputPath)) {
+            try (OutputStream out = Files.newOutputStream(
+                    outputPath,
+                    StandardOpenOption.CREATE,
+                    StandardOpenOption.TRUNCATE_EXISTING,
+                    StandardOpenOption.WRITE)) {
                 out.write(json.getBytes());
-                log.info(path + " written to: " + outputPath.toAbsolutePath());
+                log.info("report for patient " + patientId + " written to: " + outputPath.toAbsolutePath());
             }
 
         } catch (IOException e) {

@@ -156,7 +156,10 @@ public class Utilities {
      * @throws RuntimeException if an I/O error occurs while writing to the output stream
      */
     public static void writeResult(EvaluationResult result, OutputStream outputStream) {
-        try (var writer = new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8))) {
+        // Inentionally not using try-with-resources here to avoid closing the
+        // output stream, which may be managed by the caller
+        var writer = new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8));
+        try {
             // Write the result to the output stream
             for (Map.Entry<String, ExpressionResult> libraryEntry : result.expressionResults.entrySet()) {
                 String key = libraryEntry.getKey();
@@ -164,6 +167,8 @@ public class Utilities {
                 writer.write(key + "=" + value);
                 writer.newLine();
             }
+
+            writer.flush();
         } catch (IOException e) {
             throw new RuntimeException("Failed to write evaluation result", e);
         }

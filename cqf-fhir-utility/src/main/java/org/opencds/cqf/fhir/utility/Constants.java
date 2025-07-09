@@ -12,7 +12,7 @@ public class Constants {
 
     public static final String HL7_FHIR_REST = "hl7-fhir-rest";
     public static final String HL7_FHIR_FILES = "hl7-fhir-files";
-    public static final String HL7_CQL_FILES = "hl7-cql-files";
+    public static final String HL7_CQL_FILES = "hl7-source-files";
 
     public static final Tag HL7_FHIR_REST_CODE = new Tag(null, HL7_FHIR_REST);
     public static final Tag HL7_FHIR_FILES_CODE = new Tag(null, HL7_FHIR_FILES);
@@ -71,7 +71,7 @@ public class Constants {
 
     // DSTU3 CQF Extensions
     public static final String CQIF_LIBRARY = "http://hl7.org/fhir/StructureDefinition/cqif-library";
-    public static final String CQIF_CQL_EXPRESSION = "http://hl7.org/fhir/StructureDefinition/cqif-cqlExpression";
+    public static final String CQIF_CQL_EXPRESSION = "http://hl7.org/fhir/StructureDefinition/cqif-sourceExpression";
 
     public static final String CQF_APPLICABILITY_BEHAVIOR =
             "http://hl7.org/fhir/StructureDefinition/cqf-applicabilityBehavior";
@@ -81,7 +81,7 @@ public class Constants {
         ANY
     }
 
-    public static final String CQF_CQL_OPTIONS = "http://hl7.org/fhir/StructureDefinition/cqf-cqlOptions";
+    public static final String CQF_CQL_OPTIONS = "http://hl7.org/fhir/StructureDefinition/cqf-sourceOptions";
     public static final String CQF_EXPANSION_PARAMETERS =
             "http://hl7.org/fhir/StructureDefinition/cqf-expansionParameters";
     public static final String CQF_EXPRESSION = "http://hl7.org/fhir/StructureDefinition/cqf-expression";

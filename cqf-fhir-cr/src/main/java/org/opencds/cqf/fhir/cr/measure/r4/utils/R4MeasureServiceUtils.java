@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -255,9 +256,9 @@ public class R4MeasureServiceUtils {
     public static <T, K> List<T> distinctByKey(List<T> list, Function<T, K> keyExtractor) {
         Set<K> seen = new HashSet<>();
         return list.stream()
-                .filter(element -> element != null)
+                .filter(Objects::nonNull)
                 .filter(element -> seen.add(keyExtractor.apply(element)))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public List<MeasureScoring> getMeasureGroupScoringTypes(Measure measure) {
@@ -268,7 +269,7 @@ public class R4MeasureServiceUtils {
         // extract measureScoring Type from components
         return groupScoringCodes.stream()
                 .map(t -> MeasureScoring.fromCode(t.getCodingFirstRep().getCode()))
-                .collect(Collectors.toList());
+                .toList();
     }
     /*]
     // TODO: add logic for handling multi-rate Measures for care-gaps

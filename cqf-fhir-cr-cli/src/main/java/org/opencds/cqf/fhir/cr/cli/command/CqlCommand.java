@@ -198,7 +198,7 @@ public class CqlCommand implements Callable<Integer> {
     private String toVersionNumber(FhirVersionEnum fhirVersion) {
         return switch (fhirVersion) {
             case R4 -> "4.0.1";
-            case R5 -> "5.0.0-ballot";
+            case R5 -> "5.0.0";
             case DSTU3 -> "3.0.2";
             default -> throw new IllegalArgumentException("Unsupported FHIR version %s".formatted(fhirVersion));
         };

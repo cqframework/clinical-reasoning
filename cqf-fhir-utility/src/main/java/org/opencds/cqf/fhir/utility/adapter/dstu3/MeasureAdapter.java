@@ -111,7 +111,7 @@ public class MeasureAdapter extends KnowledgeArtifactAdapter
          extension[cqfm-inputParameters][]
          extension[cqfm-expansionParameters][]
          extension[cqfm-effectiveDataRequirements]
-         extension[cqfm-sourceOptions]
+         extension[cqfm-cqlOptions]
          extension[cqfm-component][].resource
          extension[crmi-effectiveDataRequirements]
         */
@@ -140,7 +140,7 @@ public class MeasureAdapter extends KnowledgeArtifactAdapter
 
         // extension[cqfm-inputParameters][]
         // extension[cqfm-expansionParameters][]
-        // extension[cqfm-sourceOptions]
+        // extension[cqfm-cqlOptions]
         get().getExtension().stream()
                 .filter(e -> REFERENCE_EXTENSIONS.contains(e.getUrl()))
                 .forEach(referenceExt -> references.add(new DependencyInfo(

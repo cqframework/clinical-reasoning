@@ -120,7 +120,6 @@ public record IgConventions(
             // so we need to look at the resource type directory and check if the contents are files
             // or more directories. If more directories exist, and the directory name is not a
             // FHIR type, then we have a compartment directory.
-
             if (tests.toFile().exists()) {
                 var compartments = FHIR_TYPE_NAMES.stream().map(tests::resolve).filter(x -> x.toFile()
                         .exists());

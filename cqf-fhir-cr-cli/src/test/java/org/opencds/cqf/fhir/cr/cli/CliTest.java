@@ -492,7 +492,7 @@ class CliTest {
     }
 
     @Test
-    void hedisTests() {
+    void hedisCompatibilityModeTest() {
         // TODO: this test exposes an issue, which is that we don't support
         // evaluating arbitrary CQL libraries without context/data in the CLI.
         String[] args = new String[] {
@@ -509,6 +509,26 @@ class CliTest {
 
         String output = outContent.toString();
         assertTrue(output.contains("Return=[1, 1, 1, 2, 2]"));
+    }
+
+    @Test
+    void expressionTest() {
+        String[] args = new String[] {
+            "cql",
+            "-source=" + testResourcePath + "/expression",
+            "-data=" + testResourcePath + "/expression",
+            "-name=ExpressionTest",
+            "-c=Patient",
+            "-cv=ABC",
+            "--expression=One",
+        };
+
+        Main.run(args);
+
+        String output = outContent.toString();
+        assertTrue(output.contains("One=1"));
+        // We do not expect "Two" to be evaluated because we specified a single expression
+        assertFalse(output.contains("Two=2"));
     }
 
     @Test

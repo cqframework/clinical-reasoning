@@ -7,6 +7,7 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.stream.Stream;
 import org.apache.commons.lang3.tuple.Pair;
@@ -76,6 +77,8 @@ public class CqlCommand implements Callable<Integer> {
         var repository = Utilities.createRepository(fhirContext, arguments.fhir.terminologyUrl, arguments.fhir.dataUrl);
         VersionedIdentifier identifier = new VersionedIdentifier().withId(arguments.content.name);
 
+        Set<String> expressions = arguments.content.expression != null ? Set.of(arguments.content.expression) : null;
+
         return arguments.parameters.context.stream().map(c -> {
             var engine = Engines.forRepository(repository, evaluationSettings);
             if (arguments.content.cqlPath != null) {
@@ -91,7 +94,7 @@ public class CqlCommand implements Callable<Integer> {
             // For now, we assume only one context parameter is provided.
             var subjectId = c.contextName + "/" + c.contextValue;
             var contextParameter = Pair.<String, Object>of(c.contextName, c.contextValue);
-            var cqlResult = engine.evaluate(identifier, contextParameter);
+            var cqlResult = engine.evaluate(identifier, expressions, contextParameter);
             return new SubjectAndResult(subjectId, cqlResult);
         });
     }

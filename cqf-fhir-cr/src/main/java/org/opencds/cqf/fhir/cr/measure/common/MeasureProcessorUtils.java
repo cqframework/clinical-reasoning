@@ -312,24 +312,24 @@ public class MeasureProcessorUtils {
         var ed = Libraries.resolveExpressionRef(
                 criteriaExpression, context.getState().getCurrentLibrary());
 
-        if (!(ed instanceof FunctionDef)) {
+        if (!(ed instanceof FunctionDef functionDef)) {
             throw new InvalidRequestException(
                     "Measure observation %s does not reference a function definition".formatted(criteriaExpression));
         }
 
         Object result;
-        context.getState().pushWindow();
+        context.getState().pushActivationFrame(functionDef, functionDef.getContext());
         try {
             if (!isBooleanBasis) {
                 // subject based observations don't have a parameter to pass in
                 context.getState()
                         .push(new Variable(
-                                        ((FunctionDef) ed).getOperand().get(0).getName())
+                                        functionDef.getOperand().get(0).getName())
                                 .withValue(resource));
             }
             result = context.getEvaluationVisitor().visitExpression(ed.getExpression(), context.getState());
         } finally {
-            context.getState().popWindow();
+            context.getState().popActivationFrame();
         }
 
         captureEvaluatedResources(outEvaluatedResources, context);

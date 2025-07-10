@@ -117,20 +117,26 @@ class HedisCliTest {
 
     @Test
     public void testOnePatient() throws Exception {
-        String measureCode = "GSD";
-        var testPatientId = "patient.2024.gsd.0.100009";
-        var directory = "/Volumes/ExternalDrive/DCSv2/";
-        var suffix = "/Sample/v0_tests/tests/Patient/";
-        var patientPath = "/Volumes/ExternalDrive/DCSv2/";
+        String measureCode = "AAB";
+        var testPatientId = "patient.2024.aab.1.96302";
+//        95134 - palliative care exclusion criteria
+//        95270 - palliative care exclusion criteria
+//        95338 - palliative care exclusion criteria
+//        95474
+//        95610
+        var directory = "/Users/justinmckelvy/Documents/DCSv2-Cert-A/";
+        var suffix = "/A/v0_tests/tests/Patient/";
+//            "/Sample/v0_tests/tests/Patient/";
+        var patientPath = "/Users/justinmckelvy/Documents/DCSv2-Cert-A/";
         var cqlContentDirectory = "/Users/justinmckelvy/alphora/DCS-HEDIS-2024-v2";
-        var resultsPath = patientPath + "_Results8/";
-        var measurePath = cqlContentDirectory + "/input/resources/Measure/";
-        var measureId = measureCode + "-Reporting";
+        var resultsPath = patientPath + "_Results_single/";
+        var measurePath = cqlContentDirectory + "/src/Measure/";
+        var measureId = measureCode + "Reporting";
         var periodStart = "2024-01-01";
         var periodEnd = "2024-12-31";
         String patientBundles = directory + measureCode + suffix;
 
-        run(measureCode + "_Reporting",
+        run(measureCode + "Reporting",
             patientBundles + testPatientId, 250000, cqlContentDirectory, resultsPath, measurePath, measureId, periodStart, periodEnd, testPatientId);
 
 
@@ -141,14 +147,14 @@ class HedisCliTest {
             "cql",
             "-fv=R4",
             "-rd=" + cqlContentDirectory,
-            "-lu=" + cqlContentDirectory + "/input/cql",
+            "-lu=" + cqlContentDirectory + "/src/cql",
             "-ln=" + libraryName,
             "-lv=2024.2.0",
             "-m=FHIR",
             "-mu=" + patientPath,
             "-resultsPath=" + resultsPath,
             "-singleFile=" + true,
-            "-t=" + cqlContentDirectory + "/input/vocabulary/valueset",
+            "-t=" + cqlContentDirectory + "/src/valueset",
             "-measurePath=" + measurePath,
             "-measure=" + measure,
             "-periodStart=" + periodStart,

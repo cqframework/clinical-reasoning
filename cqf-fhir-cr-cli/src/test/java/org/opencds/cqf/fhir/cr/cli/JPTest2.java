@@ -16,9 +16,9 @@ class JPTest2 {
         var patientPath = "/Users/justinmckelvy/Documents/DCSv2-Cert-A/"; //where your test deck data is
         var testingPath = "/A/v0_tests"; //test deck data path suffix
         var cqlContentDirectory = "/Users/justinmckelvy/alphora/DCS-HEDIS-2024-v2"; // the CQL that will be used for test
-        var resultsPath = patientPath + "_Results2/"; // the path where results will save
-        var measurePath = cqlContentDirectory + "/input/resources/Measure/";
-        var measureCode = "DAE";
+        var resultsPath = patientPath + "_Results/"; // the path where results will save
+        var measurePath = cqlContentDirectory + "/src/Measure/";
+        var measureCode = "AAB";
         var measureId = measureCode + "Reporting";
         var periodStart = "2024-01-01";
         var periodEnd = "2024-12-31";
@@ -37,9 +37,9 @@ class JPTest2 {
         var patientPath = "/Users/justinmckelvy/Documents/DCSv2-Cert-A/"; //where your test deck data is
         var testingPath = "/A/v0_tests"; //test deck data path suffix
         var cqlContentDirectory = "/Users/justinmckelvy/alphora/DCS-HEDIS-2024-v2"; // the CQL that will be used for test
-        var resultsPath = patientPath + "_Results2/"; // the path where results will save
-        var measurePath = cqlContentDirectory + "/input/resources/Measure/";
-        var measureCode = "DSU";
+        var resultsPath = patientPath + "_Results/"; // the path where results will save
+        var measurePath = cqlContentDirectory + "/src/Measure/";
+        var measureCode = "BCSE";
         var measureId = measureCode + "Reporting";
         var periodStart = "2024-01-01";
         var periodEnd = "2024-12-31";
@@ -48,7 +48,7 @@ class JPTest2 {
 
         for (String measure : measureCodes) {
             run(measureCode + "Reporting",
-                patientPath + measure + testingPath, 100000, cqlContentDirectory, resultsPath, measurePath, measureId, periodStart, periodEnd);
+                patientPath + measure + testingPath, 200000, cqlContentDirectory, resultsPath, measurePath, measureId, periodStart, periodEnd);
         }
     }
 
@@ -58,9 +58,9 @@ class JPTest2 {
         var patientPath = "/Users/justinmckelvy/Documents/DCSv2-Cert-A/"; //where your test deck data is
         var testingPath = "/A/v0_tests"; //test deck data path suffix
         var cqlContentDirectory = "/Users/justinmckelvy/alphora/DCS-HEDIS-2024-v2"; // the CQL that will be used for test
-        var resultsPath = patientPath + "_Results2/"; // the path where results will save
-        var measurePath = cqlContentDirectory + "/input/resources/Measure/";
-        var measureCode = "DDE";
+        var resultsPath = patientPath + "_Results/"; // the path where results will save
+        var measurePath = cqlContentDirectory + "/src/Measure/";
+        var measureCode = "GSD";
         var measureId = measureCode + "Reporting";
         var periodStart = "2024-01-01";
         var periodEnd = "2024-12-31";
@@ -69,7 +69,28 @@ class JPTest2 {
 
         for (String measure : measureCodes) {
             run(measureCode + "Reporting",
-                    patientPath + measure + testingPath, 100000, cqlContentDirectory, resultsPath, measurePath, measureId, periodStart, periodEnd);
+                    patientPath + measure + testingPath, 200000, cqlContentDirectory, resultsPath, measurePath, measureId, periodStart, periodEnd);
+        }
+    }
+
+    @Test
+    void hedis_DCSv2CertDeck4() throws IOException {
+        List<String> measureCodes = new ArrayList<>();
+        var patientPath = "/Users/justinmckelvy/Documents/DCSv2-Cert-A/"; //where your test deck data is
+        var testingPath = "/A/v0_tests"; //test deck data path suffix
+        var cqlContentDirectory = "/Users/justinmckelvy/alphora/DCS-HEDIS-2024-v2"; // the CQL that will be used for test
+        var resultsPath = patientPath + "_Results/"; // the path where results will save
+        var measurePath = cqlContentDirectory + "/src/Measure/";
+        var measureCode = "IMAE";
+        var measureId = measureCode + "Reporting";
+        var periodStart = "2024-01-01";
+        var periodEnd = "2024-12-31";
+        measureCodes.add(measureCode); //measure(s) to evaluate, add more if wanting to test multiple
+
+
+        for (String measure : measureCodes) {
+            run(measureCode + "Reporting",
+                patientPath + measure + testingPath, 200000, cqlContentDirectory, resultsPath, measurePath, measureId, periodStart, periodEnd);
         }
     }
 
@@ -79,12 +100,12 @@ class JPTest2 {
         var patientPath = "/Users/justinmckelvy/Documents/DCSv2/"; //where your test deck data is
         var testingPath = "/Sample/v0_tests"; //test deck data path suffix
         var cqlContentDirectory = "/Users/justinmckelvy/alphora/DCS-HEDIS-2024-v2"; // the CQL that will be used for test
-        var resultsPath = patientPath + "_Results7/"; // the path where results will save
-        measureCodes.add("LBP"); //measure(s) to evaluate, add more if wanting to test multiple
+        var resultsPath = patientPath + "_Results/"; // the path where results will save
+        measureCodes.add("COU"); //measure(s) to evaluate, add more if wanting to test multiple
 
 
         for (String measureCode : measureCodes) {
-            run(measureCode + "_Reporting",
+            run(measureCode + "Reporting",
                 patientPath + measureCode + testingPath, 250000, cqlContentDirectory, resultsPath, null, null, null, null);
         }
     }
@@ -95,11 +116,11 @@ class JPTest2 {
         var patientPath = "/Users/justinmckelvy/Documents/DCSv2/";
         var testingPath = "/Sample/v0_tests";
         var cqlContentDirectory = "/Users/justinmckelvy/alphora/DCS-HEDIS-2024-v2";
-        var resultsPath = patientPath + "_Results7/";
-        measureCodes.add("IMAE");
+        var resultsPath = patientPath + "_Results/";
+        measureCodes.add("SPC");
 
         for (String measureCode : measureCodes) {
-            run(measureCode + "_Reporting",
+            run(measureCode + "Reporting",
                 patientPath + measureCode + testingPath, 250000, cqlContentDirectory, resultsPath, null, null, null, null);
         }
     }
@@ -110,11 +131,11 @@ class JPTest2 {
         var patientPath = "/Users/justinmckelvy/Documents/DCSv2/";
         var testingPath = "/Sample/v0_tests";
         var cqlContentDirectory = "/Users/justinmckelvy/alphora/DCS-HEDIS-2024-v2";
-        var resultsPath = patientPath + "_Results7/";
-        measureCodes.add("HFS");
+        var resultsPath = patientPath + "_Results/";
+        measureCodes.add("SPD");
 
         for (String measureCode : measureCodes) {
-            run(measureCode + "_Reporting",
+            run(measureCode + "Reporting",
                 patientPath + measureCode + testingPath, 250000, cqlContentDirectory, resultsPath, null, null, null, null);
         }
     }
@@ -125,14 +146,14 @@ class JPTest2 {
                 "cql",
                 "-fv=R4",
                 "-rd=" + cqlContentDirectory,
-                "-lu=" + cqlContentDirectory + "/input/cql",
+                "-lu=" + cqlContentDirectory + "/src/cql",
                 "-ln=" + libraryName,
                 "-lv=2024.2.0",
                 "-m=FHIR",
                 "-mu=" + patientPath,
                 "-resultsPath=" + resultsPath,
                 "-singleFile=" + true,
-                "-t=" + cqlContentDirectory + "/input/vocabulary/valueset",
+                "-t=" + cqlContentDirectory + "/src/valueset",
             "-measurePath=" + measurePath,
             "-measure=" + measure,
             "-periodStart=" + periodStart,

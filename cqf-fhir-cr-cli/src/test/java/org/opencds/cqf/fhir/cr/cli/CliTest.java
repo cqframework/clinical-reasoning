@@ -552,7 +552,7 @@ class CliTest {
         var resultsMap = getFilenameToTxtResultsMap(libraryName, MEASUREREPORTS_FOLDER, TXTRESULTS_FOLDER);
 
         final List<Pair<Path, String>> measureReportJsons = resultsMap.get(MEASUREREPORTS_FOLDER);
-        // assertEquals(2, measureReportJsons.size());
+        assertEquals(2, measureReportJsons.size());
 
         final Optional<MeasureReport> measureReport123 = getMeasureReportForSubject(measureReportJsons, "123.json");
         assertTrue(measureReport123.isPresent());
@@ -572,6 +572,31 @@ class CliTest {
         final Optional<String> txtResult456 = getTxtResultsForSubject(txtResults, "456.txt");
         assertTrue(txtResult456.isPresent());
         assertEquals(expectedTxtResult456.trim(), txtResult456.get().trim());
+    }
+
+    @ParameterizedTest
+    @CsvSource({"ABCLIB,ABC", "DEFLIB,DEF"})
+    void measureEvaluationTestSystemOut(String libraryName, String measureId) throws IOException {
+        String[] args = new String[] {
+            "measure",
+            "-source=" + testResourcePath + "/compartment/cql",
+            "-name=%s".formatted(libraryName),
+            "-data=" + testResourcePath + "/compartment",
+            "-c=Patient",
+            "-cv=123",
+            "-c=Patient",
+            "-cv=456",
+            "--measure-path=" + testResourcePath + "/compartment/resources/measure/",
+            "--measure=%s".formatted(measureId),
+        };
+
+        Main.run(args);
+
+        // Should be two MeasureReports printed to the console
+        String output = outContent.toString();
+        assertTrue(output.contains("\"resourceType\":\"MeasureReport\""));
+        assertTrue(output.contains("\"subject\":{\"reference\":\"Patient/123\""));
+        assertTrue(output.contains("\"subject\":{\"reference\":\"Patient/456\""));
     }
 
     @Test

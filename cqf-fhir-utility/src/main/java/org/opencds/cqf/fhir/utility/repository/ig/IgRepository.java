@@ -20,6 +20,7 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Multimap;
+import jakarta.annotation.Nullable;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -31,6 +32,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -346,6 +348,7 @@ public class IgRepository implements IRepository {
      * @return An {@code Optional} containing the resource if found; otherwise,
      *         empty.
      */
+    @Nullable
     protected IBaseResource readResource(Path path) {
         var file = path.toFile();
         if (!file.exists()) {
@@ -482,7 +485,7 @@ public class IgRepository implements IRepository {
             paths.filter(resourceFileFilter)
                     .parallel()
                     .map(this::cachedReadResource)
-                    .filter(x -> x != null)
+                    .filter(Objects::nonNull)
                     .forEach(r -> {
                         if (!r.fhirType().equals(resourceClass.getSimpleName())) {
                             return;

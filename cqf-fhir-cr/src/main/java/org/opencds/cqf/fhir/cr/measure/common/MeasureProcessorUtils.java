@@ -314,13 +314,18 @@ public class MeasureProcessorUtils {
         var ed = Libraries.resolveExpressionRef(
                 criteriaExpression, context.getState().getCurrentLibrary());
 
-        if (!(ed instanceof FunctionDef)) {
+        if (!(ed instanceof FunctionDef functionDef)) {
             throw new InvalidRequestException(
                     "Measure observation %s does not reference a function definition".formatted(criteriaExpression));
         }
 
         Object result;
-        context.getState().pushWindow();
+
+
+        context.getState().pushActivationFrame(functionDef, functionDef.getContext());
+        // LUKETODO:  get rid of this
+//        context.getState().pushWindow();
+
         try {
             if (!isBooleanBasis) {
                 // subject based observations don't have a parameter to pass in
@@ -331,7 +336,7 @@ public class MeasureProcessorUtils {
             }
             result = context.getEvaluationVisitor().visitExpression(ed.getExpression(), context.getState());
         } finally {
-            context.getState().popWindow();
+            context.getState().popActivationFrame();
         }
 
         captureEvaluatedResources(outEvaluatedResources, context);
@@ -408,6 +413,60 @@ public class MeasureProcessorUtils {
                     logger.error(error, e);
                 }
             }
+        }
+
+        return resultsBuilder.build();
+    }
+
+    public CompositeEvaluationResultsPerMeasure getEvaluationResults2(
+        List<String> subjectIds,
+        ZonedDateTime zonedMeasurementPeriod,
+        CqlEngine context) {
+
+        // measure -> subject -> results
+        var resultsBuilder = CompositeEvaluationResultsPerMeasure.builder();
+
+        // Library $evaluate each subject
+        // The goal here is to do each measure/library evaluation within the context of a single subject.
+        // This means that we will not switch between subject contexts while evaluating measures.
+        // Once we've switched to a different subject context, the previous expression cache is dropped.
+        for (String subjectId : subjectIds) {
+            if (subjectId == null) {
+                throw new InternalErrorException("SubjectId is required in order to calculate.");
+            }
+            // LUKETODO:  we reset the cache outside of the measure loop
+            Pair<String, String> subjectInfo = this.getSubjectTypeAndId(subjectId);
+            String subjectTypePart = subjectInfo.getLeft();
+            String subjectIdPart = subjectInfo.getRight();
+            context.getState().setContextValue(subjectTypePart, subjectIdPart);
+//            for (var measureLibraryIdEngine : measureLibraryIdEngineDetailsList) {
+//                try {
+//                    resultsBuilder.addResult(
+//                        measureLibraryIdEngine.measureId(),
+//                        subjectId,
+//                        measureLibraryIdEngine
+//                            .engine()
+//                            // LUKETODO:  make CQL CqlEngine changes to take multiple versioned identifiers and then initState for mulitple libraries
+//                            // this seems to also reset the cache
+//                            // LUKETODO:  call the new mulitple versionidentifier method once it's available in CQL
+//                            .getEvaluationResult(
+//                                measureLibraryIdEngine.libraryId(),
+//                                subjectId,
+//                                null,
+//                                null,
+//                                null,
+//                                null,
+//                                null,
+//                                zonedMeasurementPeriod,
+//                                context));
+//                } catch (Exception e) {
+//                    // Catch Exceptions from evaluation per subject, but allow rest of subjects to be processed (if
+//                    // applicable)
+//                    var error = EXCEPTION_FOR_SUBJECT_ID_MESSAGE_TEMPLATE.formatted(subjectId, e.getMessage());
+//                    resultsBuilder.addError(measureLibraryIdEngine.measureId(), error);
+//                    logger.error(error, e);
+//                }
+//            }
         }
 
         return resultsBuilder.build();

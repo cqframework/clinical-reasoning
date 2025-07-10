@@ -370,6 +370,34 @@ public class R4MeasureProcessor {
         return new LibraryEngine(repository, this.measureEvaluationOptions.getEvaluationSettings());
     }
 
+    protected LibraryEngine getLibraryEngine(Parameters parameters, List<VersionedIdentifier> ids, CqlEngine context) {
+
+        var compileLibraries = ids.stream()
+            .map(id -> getCompiledLibrary(id, context))
+            .toList();
+
+         var libraries = compileLibraries.stream()
+            .map(CompiledLibrary::getLibrary)
+            .toList();
+
+        context.getState().init(libraries);
+
+        setArgParameters(parameters, context, compileLibraries);
+
+        return new LibraryEngine(repository, this.measureEvaluationOptions.getEvaluationSettings());
+    }
+
+    private CompiledLibrary getCompiledLibrary(VersionedIdentifier id, CqlEngine context) {
+        try {
+            return context.getEnvironment().getLibraryManager().resolveLibrary(id);
+        } catch (CqlIncludeException e) {
+            throw new IllegalStateException(
+                    "Unable to load CQL/ELM for library: %s. Verify that the Library resource is available in your environment and has CQL/ELM content embedded."
+                            .formatted(id.getId()),
+                    e);
+        }
+    }
+
     protected void checkMeasureLibrary(Measure measure) {
         if (!measure.hasLibrary()) {
             throw new InvalidRequestException(
@@ -398,6 +426,25 @@ public class R4MeasureProcessor {
             }
         }
     }
+
+    // LUKETODO:  javadoc
+    protected void setArgParameters(Parameters parameters, CqlEngine context, List<CompiledLibrary> libs) {
+        if (parameters != null) {
+            Map<String, Object> paramMap = resolveParameterMap(parameters);
+            for (CompiledLibrary lib : libs) {
+                context.getState().setParameters(lib.getLibrary(), paramMap);
+
+                if (lib.getLibrary().getIncludes() != null) {
+                    lib.getLibrary()
+                        .getIncludes()
+                        .getDef()
+                        .forEach(includeDef -> paramMap.forEach((paramKey, paramValue) -> context.getState()
+                            .setParameter(includeDef.getLocalIdentifier(), paramKey, paramValue)));
+                }
+            }
+        }
+    }
+
 
     protected Measure resolveByUrl(CanonicalType url) {
         var parts = Canonicals.getParts(url);

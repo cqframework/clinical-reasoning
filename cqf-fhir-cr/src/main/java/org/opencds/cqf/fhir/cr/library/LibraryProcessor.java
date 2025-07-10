@@ -21,12 +21,15 @@ import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.common.DataRequirementsProcessor;
 import org.opencds.cqf.fhir.cr.common.IDataRequirementsProcessor;
 import org.opencds.cqf.fhir.cr.common.IPackageProcessor;
+import org.opencds.cqf.fhir.cr.common.IReleaseProcessor;
 import org.opencds.cqf.fhir.cr.common.PackageProcessor;
+import org.opencds.cqf.fhir.cr.common.ReleaseProcessor;
 import org.opencds.cqf.fhir.cr.common.ResourceResolver;
 import org.opencds.cqf.fhir.cr.library.evaluate.EvaluateProcessor;
 import org.opencds.cqf.fhir.cr.library.evaluate.EvaluateRequest;
 import org.opencds.cqf.fhir.cr.library.evaluate.IEvaluateProcessor;
 import org.opencds.cqf.fhir.utility.Ids;
+import org.opencds.cqf.fhir.utility.client.TerminologyServerClientSettings;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.monad.Either3;
 
@@ -34,32 +37,38 @@ public class LibraryProcessor {
     protected final ModelResolver modelResolver;
     protected final FhirVersionEnum fhirVersion;
     protected IPackageProcessor packageProcessor;
+    protected IReleaseProcessor releaseProcessor;
     protected IDataRequirementsProcessor dataRequirementsProcessor;
     protected IEvaluateProcessor evaluateProcessor;
     protected IRepository repository;
     protected EvaluationSettings evaluationSettings;
+    protected TerminologyServerClientSettings terminologyServerClientSettings;
 
     public LibraryProcessor(IRepository repository) {
-        this(repository, EvaluationSettings.getDefault());
+        this(repository, EvaluationSettings.getDefault(), new TerminologyServerClientSettings());
     }
 
-    public LibraryProcessor(IRepository repository, EvaluationSettings evaluationSettings) {
-        this(repository, evaluationSettings, null, null, null);
+    public LibraryProcessor(IRepository repository, EvaluationSettings evaluationSettings, TerminologyServerClientSettings terminologyServerClientSettings) {
+        this(repository, evaluationSettings, null, null, null, null, terminologyServerClientSettings);
     }
 
     public LibraryProcessor(
             IRepository repository,
             EvaluationSettings evaluationSettings,
             IPackageProcessor packageProcessor,
+            IReleaseProcessor releaseProcessor,
             IDataRequirementsProcessor dataRequirementsProcessor,
-            IEvaluateProcessor evaluateProcessor) {
+            IEvaluateProcessor evaluateProcessor,
+            TerminologyServerClientSettings terminologyServerClientSettings) {
         this.repository = requireNonNull(repository, "repository can not be null");
         this.evaluationSettings = requireNonNull(evaluationSettings, "evaluationSettings can not be null");
         fhirVersion = this.repository.fhirContext().getVersion().getVersion();
         modelResolver = FhirModelResolverCache.resolverForVersion(fhirVersion);
         this.packageProcessor = packageProcessor;
+        this.releaseProcessor = releaseProcessor;
         this.dataRequirementsProcessor = dataRequirementsProcessor;
         this.evaluateProcessor = evaluateProcessor;
+        this.terminologyServerClientSettings = terminologyServerClientSettings;
     }
 
     public EvaluationSettings evaluationSettings() {
@@ -89,6 +98,16 @@ public class LibraryProcessor {
     public IBaseBundle packageLibrary(IBaseResource library, IBaseParameters parameters) {
         var processor = packageProcessor != null ? packageProcessor : new PackageProcessor(repository);
         return processor.packageResource(library, parameters);
+    }
+
+    public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseBundle releaseLibrary(
+        Either3<C, IIdType, R> library, IBaseParameters parameters) {
+        return releaseLibrary(resolveLibrary(library), parameters);
+    }
+
+    public IBaseBundle releaseLibrary(IBaseResource library, IBaseParameters parameters) {
+        var processor = releaseProcessor != null ? releaseProcessor : new ReleaseProcessor(repository, terminologyServerClientSettings);
+        return processor.releaseResource(library, parameters);
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource dataRequirements(

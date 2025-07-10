@@ -39,6 +39,7 @@ import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
 import org.opencds.cqf.fhir.utility.client.TerminologyServerClient;
+import org.opencds.cqf.fhir.utility.client.TerminologyServerClientSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,6 +62,11 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
     public ReleaseVisitor(IRepository repository, TerminologyServerClient terminologyServerClient) {
         super(repository);
         this.terminologyServerClient = terminologyServerClient;
+    }
+
+    public ReleaseVisitor(IRepository repository, TerminologyServerClientSettings terminologyServerClientSettings) {
+        super(repository);
+        terminologyServerClient = new TerminologyServerClient(fhirContext(), terminologyServerClientSettings);
     }
 
     @SuppressWarnings("unchecked")

@@ -5,7 +5,7 @@ public class TerminologyServerClientSettings {
     private int maxRetryCount = 3;
     private long retryIntervalMillis = 1000;
     private int timeoutSeconds = 30;
-
+    private int socketTimeout = 60;
     /*
      * Default constructor for TerminologySettings
      */
@@ -21,6 +21,7 @@ public class TerminologyServerClientSettings {
         this.maxRetryCount = terminologyServerClientSettings.maxRetryCount;
         this.retryIntervalMillis = terminologyServerClientSettings.retryIntervalMillis;
         this.timeoutSeconds = terminologyServerClientSettings.timeoutSeconds;
+        this.socketTimeout = terminologyServerClientSettings.socketTimeout;
     }
 
     public int getMaxRetryCount() {
@@ -47,6 +48,13 @@ public class TerminologyServerClientSettings {
 
     public TerminologyServerClientSettings setTimeoutSeconds(int timeoutSeconds) {
         this.timeoutSeconds = timeoutSeconds;
+        return this;
+    }
+
+    public int getSocketTimeout() { return socketTimeout; }
+
+    public TerminologyServerClientSettings setSocketTimeout(int socketTimeout) {
+        this.socketTimeout = socketTimeout;
         return this;
     }
 }

@@ -6,6 +6,7 @@ import ca.uhn.fhir.rest.api.server.IRepositoryFactory;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import java.util.List;
 import java.util.Map;
+import org.opencds.cqf.fhir.cr.hapi.common.ILibraryProcessorFactory;
 import org.opencds.cqf.fhir.cr.hapi.config.ProviderLoader;
 import org.opencds.cqf.fhir.cr.hapi.config.ProviderSelector;
 import org.opencds.cqf.fhir.cr.hapi.r4.library.LibraryReleaseProvider;
@@ -16,8 +17,8 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ReleaseOperationConfig {
     @Bean
-    LibraryReleaseProvider r4LibraryReleaseProvider(IRepositoryFactory repositoryFactory) {
-        return new LibraryReleaseProvider(repositoryFactory);
+    LibraryReleaseProvider r4LibraryReleaseProvider(ILibraryProcessorFactory libraryProcessorFactory) {
+        return new LibraryReleaseProvider(libraryProcessorFactory);
     }
 
     @Bean(name = "releaseOperationLoader")

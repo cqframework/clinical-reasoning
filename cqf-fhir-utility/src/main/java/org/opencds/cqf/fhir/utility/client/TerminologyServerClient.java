@@ -44,6 +44,10 @@ public class TerminologyServerClient {
                 : new TerminologyServerClientSettings();
     }
 
+    public TerminologyServerClientSettings getTerminologyServerClientSettings() {
+        return this.terminologyServerClientSettings;
+    }
+
     // TODO:: better way to manage versions
     public org.hl7.fhir.r4.model.TerminologyCapabilities getR4TerminologyCapabilities(IEndpointAdapter endpoint) {
         // TODO:: switch back to Auth'd client when moving from UAT to prod VSAC
@@ -123,8 +127,7 @@ public class TerminologyServerClient {
                 .orElseThrow(() -> new UnprocessableEntityException("Cannot expand ValueSet without VSAC API Key."));
 
         var fhirClient = fhirContext.newRestfulGenericClient(getAddressBase(endpoint.getAddress()));
-        // TODO: Expose socketTimeout as a configuration parameter
-        fhirClient.getFhirContext().getRestfulClientFactory().setSocketTimeout(600 * 1000);
+        fhirClient.getFhirContext().getRestfulClientFactory().setSocketTimeout(terminologyServerClientSettings.getSocketTimeout() * 1000);
 
         Clients.registerAdditionalRequestHeadersAuth(fhirClient, username, apiKey);
         return fhirClient;

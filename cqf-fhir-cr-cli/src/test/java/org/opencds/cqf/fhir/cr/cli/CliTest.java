@@ -492,6 +492,26 @@ class CliTest {
     }
 
     @Test
+    void hedisTests() {
+        // TODO: this test exposes an issue, which is that we don't support
+        // evaluating arbitrary CQL libraries without context/data in the CLI.
+        String[] args = new String[] {
+            "cql",
+            "-source=" + testResourcePath + "/hedis",
+            "-data=" + testResourcePath + "/hedis",
+            "-name=ReturnTest",
+            "-c=Patient",
+            "-cv=ABC",
+            "--enable-hedis-compatibility-mode",
+        };
+
+        Main.run(args);
+
+        String output = outContent.toString();
+        assertTrue(output.contains("Return=[1, 1, 1, 2, 2]"));
+    }
+
+    @Test
     void compartmentalizedTests() {
         String[] args = new String[] {
             "cql",
@@ -522,15 +542,15 @@ class CliTest {
 
         var expectedTxtResult123 =
                 """
-            Encounters=[Encounter(id=ABC)]
-            Patient=Patient(id=123)
-            """;
+                Encounters=[Encounter(id=ABC)]
+                Patient=Patient(id=123)
+                """;
 
         var expectedTxtResult456 =
                 """
-            Encounters=[Encounter(id=DEF)]
-            Patient=Patient(id=456)
-            """;
+                Encounters=[Encounter(id=DEF)]
+                Patient=Patient(id=456)
+                """;
 
         String[] args = new String[] {
             "measure",

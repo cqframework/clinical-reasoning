@@ -22,7 +22,7 @@ import picocli.CommandLine.Command;
 
 @Command(name = "cql", mixinStandardHelpOptions = true, description = "Evaluate CQL libraries against FHIR resources.")
 public class CqlCommand implements Callable<Integer> {
-    @ArgGroup(multiplicity = "1..1", exclusive = false)
+    @ArgGroup(multiplicity = "1", exclusive = false)
     public CqlCommandArgument args;
 
     @Override

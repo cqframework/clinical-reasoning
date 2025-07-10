@@ -72,9 +72,9 @@ public class MeasureCommand implements Callable<Integer> {
                             StandardOpenOption.WRITE);
                     Utilities.writeResult(r.result, out);
                     out.close();
-                    log.info("Cql for patient " + r.subjectId + " written to: " + path);
+                    log.info("Cql for patient {} written to: {}", r.subjectId, path);
                 } catch (IOException e) {
-                    log.error("Failed to write cql for patient " + r.subjectId, e);
+                    log.error("Failed to write cql for {}", r.subjectId, e);
                 }
             }
         });
@@ -160,7 +160,7 @@ public class MeasureCommand implements Callable<Integer> {
                     StandardOpenOption.TRUNCATE_EXISTING,
                     StandardOpenOption.WRITE)) {
                 out.write(json.getBytes());
-                log.info("report for patient {} written to: {}", patientId, outputPath.toAbsolutePath());
+                log.info("report for patient {} written to: {}", patientId, outputPath);
             }
 
         } catch (IOException e) {

@@ -53,7 +53,7 @@ class IgRepositoryBadDataTest {
 
     @Test
     void searchThrowsBecauseOfInvalidContent() {
-        // IF there's any invalid content in the directory, the search will fail
+        // If there's any invalid content in the directory, the search will fail
         assertThrows(
                 ResourceNotFoundException.class, () -> repository.search(Bundle.class, Patient.class, Searches.ALL));
     }

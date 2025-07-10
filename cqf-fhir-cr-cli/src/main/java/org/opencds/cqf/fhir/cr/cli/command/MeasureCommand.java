@@ -70,7 +70,7 @@ public class MeasureCommand implements Callable<Integer> {
                             StandardOpenOption.CREATE,
                             StandardOpenOption.TRUNCATE_EXISTING,
                             StandardOpenOption.WRITE);
-                    out.write(json.getBytes());
+                    Utilities.writeResult(r.result, out);
                     out.close();
                     log.info("Cql for patient " + r.subjectId + " written to: " + path);
                 } catch (IOException e) {

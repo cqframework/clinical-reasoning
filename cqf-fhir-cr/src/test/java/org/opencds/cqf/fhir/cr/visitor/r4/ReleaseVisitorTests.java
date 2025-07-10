@@ -225,11 +225,13 @@ class ReleaseVisitorTests {
         crmiEDRCervical.setId(crmiEDRId);
         cervicalCancerScreeningFHIR.addContained(crmiEDRCervical);
         cervicalCancerScreeningFHIR.addExtension(crmiEDRExtension);
+
         var crmiEDRBreastCancer =
                 breastCancerScreeningFHIR.getContained().get(0).copy();
         crmiEDRBreastCancer.setId(crmiEDRId);
         breastCancerScreeningFHIR.addContained(crmiEDRBreastCancer);
         breastCancerScreeningFHIR.addExtension(crmiEDRExtension);
+
         repo.update(cervicalCancerScreeningFHIR);
         repo.update(breastCancerScreeningFHIR);
 

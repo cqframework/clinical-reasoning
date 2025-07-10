@@ -84,7 +84,7 @@ public class MeasureCommand implements Callable<Integer> {
 
     record SubjectAndReport(String subjectId, EvaluationResult result, MeasureReport measureReport) {}
 
-    public static Stream<SubjectAndReport> evaluate(MeasureCommandArgument args) throws IOException {
+    public static Stream<SubjectAndReport> evaluate(MeasureCommandArgument args) {
         var cqlArgs = args.cql;
         var results = CqlCommand.evaluate(cqlArgs);
         var fhirContext = FhirContext.forCached(FhirVersionEnum.valueOf(cqlArgs.fhir.fhirVersion));
@@ -160,11 +160,11 @@ public class MeasureCommand implements Callable<Integer> {
                     StandardOpenOption.TRUNCATE_EXISTING,
                     StandardOpenOption.WRITE)) {
                 out.write(json.getBytes());
-                log.info("report for patient " + patientId + " written to: " + outputPath.toAbsolutePath());
+                log.info("report for patient {} written to: {}", patientId, outputPath.toAbsolutePath());
             }
 
         } catch (IOException e) {
-            log.error("Failed to write JSON for patient " + patientId, e);
+            log.error("Failed to write JSON for patient {}", patientId, e);
         }
     }
 }

@@ -549,11 +549,9 @@ public class IgRepository implements IRepository {
             }
 
             var resource = cachedReadResource(path);
-            if (resource == null) {
-                continue;
+            if (resource != null) {
+                return validateResource(resourceType, resource, id);
             }
-
-            return validateResource(resourceType, resource, id);
         }
 
         throw new ResourceNotFoundException(id);

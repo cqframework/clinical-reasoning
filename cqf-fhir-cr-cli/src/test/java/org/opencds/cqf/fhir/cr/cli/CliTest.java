@@ -576,7 +576,7 @@ class CliTest {
 
     @ParameterizedTest
     @CsvSource({"ABCLIB,ABC", "DEFLIB,DEF"})
-    void measureEvaluationTestSystemOut(String libraryName, String measureId) throws IOException {
+    void measureEvaluationTestSystemOut(String libraryName, String measureId) {
         String[] args = new String[] {
             "measure",
             "-source=" + testResourcePath + "/compartment/cql",

@@ -1,8 +1,8 @@
 {
     "resourceType": "Library",
-    "id": "DEF-LIB",
+    "id": "DEFLIB",
     "url": "http://example.com/Library/DEF-LIB",
-    "name": "DEF-LIB",
+    "name": "DEFLIB",
     "status": "active",
     "type": {
       "coding": [ {
@@ -12,6 +12,6 @@
     },
     "content": [ {
       "contentType": "text/cql",
-      "url": "../../cql/DEF-LIB.cql"
+      "url": "../../cql/DEFLIB.cql"
     } ]
 }

@@ -14,23 +14,26 @@ import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnclassifiedServerFailureException;
 import ca.uhn.fhir.util.BundleBuilder;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Multimap;
-import java.io.FileInputStream;
+import jakarta.annotation.Nullable;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -91,7 +94,6 @@ import org.opencds.cqf.fhir.utility.repository.operations.IRepositoryOperationPr
  * </ul>
  */
 public class IgRepository implements IRepository {
-
     private final FhirContext fhirContext;
     private final Path root;
     private final IgConventions conventions;
@@ -99,7 +101,8 @@ public class IgRepository implements IRepository {
     private final ResourceMatcher resourceMatcher;
     private IRepositoryOperationProvider operationProvider;
 
-    private final Map<Path, Optional<IBaseResource>> resourceCache = new HashMap<>();
+    private final Cache<Path, IBaseResource> resourceCache =
+            CacheBuilder.newBuilder().concurrencyLevel(10).maximumSize(500).build();
 
     // Metadata fields attached to resources that are read from the repository
     // This fields are used to determine if a resource is external, and to
@@ -180,7 +183,7 @@ public class IgRepository implements IRepository {
     }
 
     public void clearCache() {
-        this.resourceCache.clear();
+        this.resourceCache.invalidateAll();
     }
 
     private boolean isExternalPath(Path path) {
@@ -345,28 +348,30 @@ public class IgRepository implements IRepository {
      * @return An {@code Optional} containing the resource if found; otherwise,
      *         empty.
      */
-    protected Optional<IBaseResource> readResource(Path path) {
+    @Nullable
+    protected IBaseResource readResource(Path path) {
         var file = path.toFile();
         if (!file.exists()) {
-            return Optional.empty();
+            return null;
         }
 
         var extension = fileExtension(path);
         if (extension == null) {
-            return Optional.empty();
+            return null;
         }
 
         var encoding = FILE_EXTENSIONS.inverse().get(extension);
 
-        try (var stream = new FileInputStream(file)) {
-            var resource = parserForEncoding(fhirContext, encoding).parseResource(stream);
+        try {
+            String s = new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
+            var resource = parserForEncoding(fhirContext, encoding).parseResource(s);
 
             resource.setUserData(SOURCE_PATH_TAG, path);
             CqlContent.loadCqlContent(resource, path.getParent());
 
-            return Optional.of(resource);
+            return resource;
         } catch (FileNotFoundException e) {
-            return Optional.empty();
+            return null;
         } catch (DataFormatException e) {
             throw new ResourceNotFoundException("Found empty or invalid content at path %s".formatted(path));
         } catch (IOException e) {
@@ -374,8 +379,15 @@ public class IgRepository implements IRepository {
         }
     }
 
-    protected Optional<IBaseResource> cachedReadResource(Path path) {
-        return this.resourceCache.computeIfAbsent(path, this::readResource);
+    protected IBaseResource cachedReadResource(Path path) {
+        var o = this.resourceCache.getIfPresent(path);
+        if (o != null) {
+            return o;
+        } else {
+            var resource = readResource(path);
+            this.resourceCache.put(path, resource);
+            return resource;
+        }
     }
 
     protected EncodingEnum encodingForPath(Path path) {
@@ -402,7 +414,7 @@ public class IgRepository implements IRepository {
                         .encodeResourceToString(resource);
                 stream.write(result.getBytes());
                 resource.setUserData(SOURCE_PATH_TAG, path);
-                this.resourceCache.put(path, Optional.of(resource));
+                this.resourceCache.put(path, resource);
             }
         } catch (IOException | SecurityException e) {
             throw new UnclassifiedServerFailureException(500, "Unable to write resource to path %s".formatted(path));
@@ -447,14 +459,6 @@ public class IgRepository implements IRepository {
      * - Flat layout: resources are located in the root directory (e.g.,
      * "/path/to/ig/root/")
      * - Directory for category: resources are in subdirectories (e.g.,
-     * "/resources/patient/")
-     *
-     * Filenames depend on conventions:
-     * - ID_ONLY: "123.json"
-     * - TYPE_AND_ID: "Patient-123.json"
-     *
-     * @param <T>           The resource type.
-     * @param resourceClass The resource class.
      * @param igRepositoryCompartment The compartment context to use
      * @return Map of resource IDs to resources.
      */
@@ -465,7 +469,7 @@ public class IgRepository implements IRepository {
             return Collections.emptyMap();
         }
 
-        var resources = new HashMap<IIdType, T>();
+        var resources = new ConcurrentHashMap<IIdType, T>();
         Predicate<Path> resourceFileFilter;
         switch (this.conventions.filenameMode()) {
             case ID_ONLY:
@@ -479,9 +483,9 @@ public class IgRepository implements IRepository {
 
         try (var paths = Files.walk(path)) {
             paths.filter(resourceFileFilter)
-                    .sorted()
+                    .parallel()
                     .map(this::cachedReadResource)
-                    .flatMap(Optional::stream)
+                    .filter(Objects::nonNull)
                     .forEach(r -> {
                         if (!r.fhirType().equals(resourceClass.getSimpleName())) {
                             return;
@@ -544,9 +548,8 @@ public class IgRepository implements IRepository {
                 continue;
             }
 
-            var optionalResource = cachedReadResource(path);
-            if (optionalResource.isPresent()) {
-                var resource = optionalResource.get();
+            var resource = cachedReadResource(path);
+            if (resource != null) {
                 return validateResource(resourceType, resource, id);
             }
         }

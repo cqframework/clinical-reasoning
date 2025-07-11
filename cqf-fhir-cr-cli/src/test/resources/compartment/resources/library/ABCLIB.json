@@ -1,8 +1,8 @@
 {
     "resourceType": "Library",
-    "id": "ABC-LIB",
+    "id": "ABCLIB",
     "url": "http://example.com/Library/ABC-LIB",
-    "name": "ABC-LIB",
+    "name": "ABCLIB",
     "status": "active",
     "type": {
       "coding": [ {
@@ -12,6 +12,6 @@
     },
     "content": [ {
       "contentType": "text/cql",
-      "url": "../../cql/ABC-LIB.cql"
+      "url": "../../cql/ABCLIB.cql"
     } ]
 }

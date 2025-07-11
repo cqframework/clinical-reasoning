@@ -29,7 +29,7 @@ class ValueSetProcessorTests {
     @Test
     void processors() {
         var when = given().repository(repositoryR4)
-                .packageProcessor(new PackageProcessor(repositoryR4))
+                .packageProcessor(new PackageProcessor(repositoryR4, null))
                 .dataRequirementsProcessor(new DataRequirementsProcessor(repositoryR4))
                 .when()
                 .valueSetId(Ids.newId(fhirContextR4, "ValueSet", "AdministrativeGender"))

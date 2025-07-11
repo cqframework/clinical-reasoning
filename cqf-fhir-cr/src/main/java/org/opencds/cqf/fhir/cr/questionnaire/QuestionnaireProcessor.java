@@ -174,7 +174,7 @@ public class QuestionnaireProcessor {
     }
 
     public IBaseBundle packageQuestionnaire(IBaseResource questionnaire, IBaseParameters parameters) {
-        var processor = packageProcessor != null ? packageProcessor : new PackageProcessor(repository);
+        var processor = packageProcessor != null ? packageProcessor : new PackageProcessor(repository, null);
         return processor.packageResource(questionnaire, parameters);
     }
 

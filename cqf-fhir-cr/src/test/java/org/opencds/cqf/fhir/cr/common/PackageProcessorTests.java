@@ -29,7 +29,7 @@ class PackageProcessorTests {
     @BeforeEach
     void setup() {
         doReturn(fhirContext).when(repository).fhirContext();
-        packageProcessor = new PackageProcessor(repository);
+        packageProcessor = new PackageProcessor(repository, null);
     }
 
     @Test

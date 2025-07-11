@@ -96,7 +96,7 @@ public class LibraryProcessor {
     }
 
     public IBaseBundle packageLibrary(IBaseResource library, IBaseParameters parameters) {
-        var processor = packageProcessor != null ? packageProcessor : new PackageProcessor(repository);
+        var processor = packageProcessor != null ? packageProcessor : new PackageProcessor(repository, terminologyServerClientSettings);
         return processor.packageResource(library, parameters);
     }
 

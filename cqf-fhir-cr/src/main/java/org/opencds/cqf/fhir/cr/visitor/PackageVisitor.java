@@ -37,6 +37,7 @@ import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IParametersParameterComponentAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
 import org.opencds.cqf.fhir.utility.client.TerminologyServerClient;
+import org.opencds.cqf.fhir.utility.client.TerminologyServerClientSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,6 +58,13 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
 
     public PackageVisitor(IRepository repository, TerminologyServerClient client) {
         this(repository, client, null);
+    }
+
+    public PackageVisitor(IRepository repository, TerminologyServerClientSettings terminologyServerClientSettings) {
+        super(repository);
+        this.terminologyServerClient = new TerminologyServerClient(fhirContext(), terminologyServerClientSettings);
+        this.expandHelper = new ExpandHelper(this.repository, terminologyServerClient);
+        setupResourceTypes();
     }
 
     public PackageVisitor(IRepository repository, TerminologyServerClient client, IValueSetExpansionCache cache) {

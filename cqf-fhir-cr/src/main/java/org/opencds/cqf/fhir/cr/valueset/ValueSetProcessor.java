@@ -17,6 +17,7 @@ import org.opencds.cqf.fhir.cr.common.IDataRequirementsProcessor;
 import org.opencds.cqf.fhir.cr.common.IPackageProcessor;
 import org.opencds.cqf.fhir.cr.common.PackageProcessor;
 import org.opencds.cqf.fhir.cr.common.ResourceResolver;
+import org.opencds.cqf.fhir.utility.client.TerminologyServerClientSettings;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.monad.Either3;
 
@@ -27,26 +28,29 @@ public class ValueSetProcessor {
     protected IDataRequirementsProcessor dataRequirementsProcessor;
     protected IRepository repository;
     protected EvaluationSettings evaluationSettings;
+    protected TerminologyServerClientSettings terminologyServerClientSettings;
 
     public ValueSetProcessor(IRepository repository) {
-        this(repository, EvaluationSettings.getDefault());
+        this(repository, EvaluationSettings.getDefault(), new TerminologyServerClientSettings());
     }
 
-    public ValueSetProcessor(IRepository repository, EvaluationSettings evaluationSettings) {
-        this(repository, evaluationSettings, null, null);
+    public ValueSetProcessor(IRepository repository, EvaluationSettings evaluationSettings, TerminologyServerClientSettings terminologyServerClientSettings) {
+        this(repository, evaluationSettings, null, null, terminologyServerClientSettings);
     }
 
     public ValueSetProcessor(
             IRepository repository,
             EvaluationSettings evaluationSettings,
             IPackageProcessor packageProcessor,
-            IDataRequirementsProcessor dataRequirementsProcessor) {
+            IDataRequirementsProcessor dataRequirementsProcessor,
+            TerminologyServerClientSettings terminologyServerClientSettings) {
         this.repository = requireNonNull(repository, "repository can not be null");
         this.evaluationSettings = requireNonNull(evaluationSettings, "evaluationSettings can not be null");
         fhirVersion = this.repository.fhirContext().getVersion().getVersion();
         modelResolver = FhirModelResolverCache.resolverForVersion(fhirVersion);
         this.packageProcessor = packageProcessor;
         this.dataRequirementsProcessor = dataRequirementsProcessor;
+        this.terminologyServerClientSettings = terminologyServerClientSettings;
     }
 
     public EvaluationSettings evaluationSettings() {
@@ -74,7 +78,7 @@ public class ValueSetProcessor {
     }
 
     public IBaseBundle packageValueSet(IBaseResource valueSet, IBaseParameters parameters) {
-        var processor = packageProcessor != null ? packageProcessor : new PackageProcessor(repository);
+        var processor = packageProcessor != null ? packageProcessor : new PackageProcessor(repository, terminologyServerClientSettings);
         return processor.packageResource(valueSet, parameters);
     }
 

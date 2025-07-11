@@ -29,7 +29,7 @@ public class CrProcessorConfig {
     @Bean
     IPlanDefinitionProcessorFactory planDefinitionProcessorFactory(
             IRepositoryFactory repositoryFactory, EvaluationSettings evaluationSettings) {
-        return rd -> new PlanDefinitionProcessor(repositoryFactory.create(rd), evaluationSettings);
+        return rd -> new PlanDefinitionProcessor(repositoryFactory.create(rd), evaluationSettings, null);
     }
 
     @Bean
@@ -52,7 +52,7 @@ public class CrProcessorConfig {
 
     @Bean
     IValueSetProcessorFactory valueSetProcessorFactory(
-            IRepositoryFactory repositoryFactory, EvaluationSettings evaluationSettings) {
-        return rd -> new ValueSetProcessor(repositoryFactory.create(rd), evaluationSettings);
+            IRepositoryFactory repositoryFactory, EvaluationSettings evaluationSettings, TerminologyServerClientSettings terminologyServerClientSettings) {
+        return rd -> new ValueSetProcessor(repositoryFactory.create(rd), evaluationSettings, terminologyServerClientSettings);
     }
 }

@@ -387,8 +387,8 @@
                         <publishingServerId>central</publishingServerId>
                         <deploymentName>clinical-reasoning</deploymentName>
                         <excludeArtifacts>
-                            <excludeArtifact>cqf-fhir-cr-benchmark</excludeArtifact>
-                            <excludeArtifact>cqf-fhir-cr-docs</excludeArtifact>
+                            <excludeArtifact>cqf-fhir-benchmark</excludeArtifact>
+                            <excludeArtifact>docs</excludeArtifact>
                         </excludeArtifacts>
                         <autoPublish>true</autoPublish>
                         <waitUntil>published</waitUntil>

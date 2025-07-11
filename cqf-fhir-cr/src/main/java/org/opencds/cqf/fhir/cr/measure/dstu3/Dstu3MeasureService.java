@@ -74,7 +74,7 @@ public class Dstu3MeasureService implements Dstu3MeasureEvaluatorSingle {
 
     /**
      * Implements the <a href=
-     * "https://www.hl7.org/fhir/operation-measure-evaluate-measure.html">$evaluate-measure</a>
+     * "https://www.hl7.org/fhir/operation-measure-evaluate-measure.html">&#36;evaluate-measure</a>
      * operation found in the
      * <a href="http://www.hl7.org/fhir/clinicalreasoning-module.html">FHIR Clinical
      * Reasoning Module</a>. This implementation aims to be compatible with the CQF

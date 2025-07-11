@@ -46,8 +46,7 @@ public class Utilities {
      * additional CQL compiler options.
      *
      * @param cqlPath the directory path where the CQL files are located
-     * @param runtime the runtime arguments that may include options like HEDIS compatibility mode
-     * @param fhir the FHIR arguments that may include FHIR version and other settings
+     * @param enableHedisCompatibilityMode true to enable HEDIS compatibility mode
      * @return the configured {@link EvaluationSettings}
      */
     public static EvaluationSettings createEvaluationSettings(String cqlPath, boolean enableHedisCompatibilityMode) {

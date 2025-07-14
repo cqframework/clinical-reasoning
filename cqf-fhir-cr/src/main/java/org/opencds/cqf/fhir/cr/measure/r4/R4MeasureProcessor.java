@@ -372,13 +372,11 @@ public class R4MeasureProcessor {
 
     protected LibraryEngine getLibraryEngine(Parameters parameters, List<VersionedIdentifier> ids, CqlEngine context) {
 
-        var compileLibraries = ids.stream()
-            .map(id -> getCompiledLibrary(id, context))
-            .toList();
+        var compileLibraries =
+                ids.stream().map(id -> getCompiledLibrary(id, context)).toList();
 
-         var libraries = compileLibraries.stream()
-            .map(CompiledLibrary::getLibrary)
-            .toList();
+        var libraries =
+                compileLibraries.stream().map(CompiledLibrary::getLibrary).toList();
 
         context.getState().init(libraries);
 
@@ -436,15 +434,14 @@ public class R4MeasureProcessor {
 
                 if (lib.getLibrary().getIncludes() != null) {
                     lib.getLibrary()
-                        .getIncludes()
-                        .getDef()
-                        .forEach(includeDef -> paramMap.forEach((paramKey, paramValue) -> context.getState()
-                            .setParameter(includeDef.getLocalIdentifier(), paramKey, paramValue)));
+                            .getIncludes()
+                            .getDef()
+                            .forEach(includeDef -> paramMap.forEach((paramKey, paramValue) -> context.getState()
+                                    .setParameter(includeDef.getLocalIdentifier(), paramKey, paramValue)));
                 }
             }
         }
     }
-
 
     protected Measure resolveByUrl(CanonicalType url) {
         var parts = Canonicals.getParts(url);

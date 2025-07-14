@@ -321,10 +321,9 @@ public class MeasureProcessorUtils {
 
         Object result;
 
-
         context.getState().pushActivationFrame(functionDef, functionDef.getContext());
         // LUKETODO:  get rid of this
-//        context.getState().pushWindow();
+        //        context.getState().pushWindow();
 
         try {
             if (!isBooleanBasis) {
@@ -392,9 +391,11 @@ public class MeasureProcessorUtils {
                             subjectId,
                             measureLibraryIdEngine
                                     .engine()
-                                // LUKETODO:  make CQL CqlEngine changes to take multiple versioned identifiers and then initState for mulitple libraries
-                                // this seems to also reset the cache
-                                // LUKETODO:  call the new mulitple versionidentifier method once it's available in CQL
+                                    // LUKETODO:  make CQL CqlEngine changes to take multiple versioned identifiers and
+                                    // then initState for mulitple libraries
+                                    // this seems to also reset the cache
+                                    // LUKETODO:  call the new mulitple versionidentifier method once it's available in
+                                    // CQL
                                     .getEvaluationResult(
                                             measureLibraryIdEngine.libraryId(),
                                             subjectId,
@@ -419,9 +420,7 @@ public class MeasureProcessorUtils {
     }
 
     public CompositeEvaluationResultsPerMeasure getEvaluationResults2(
-        List<String> subjectIds,
-        ZonedDateTime zonedMeasurementPeriod,
-        CqlEngine context) {
+            List<String> subjectIds, ZonedDateTime zonedMeasurementPeriod, CqlEngine context) {
 
         // measure -> subject -> results
         var resultsBuilder = CompositeEvaluationResultsPerMeasure.builder();
@@ -439,34 +438,38 @@ public class MeasureProcessorUtils {
             String subjectTypePart = subjectInfo.getLeft();
             String subjectIdPart = subjectInfo.getRight();
             context.getState().setContextValue(subjectTypePart, subjectIdPart);
-//            for (var measureLibraryIdEngine : measureLibraryIdEngineDetailsList) {
-//                try {
-//                    resultsBuilder.addResult(
-//                        measureLibraryIdEngine.measureId(),
-//                        subjectId,
-//                        measureLibraryIdEngine
-//                            .engine()
-//                            // LUKETODO:  make CQL CqlEngine changes to take multiple versioned identifiers and then initState for mulitple libraries
-//                            // this seems to also reset the cache
-//                            // LUKETODO:  call the new mulitple versionidentifier method once it's available in CQL
-//                            .getEvaluationResult(
-//                                measureLibraryIdEngine.libraryId(),
-//                                subjectId,
-//                                null,
-//                                null,
-//                                null,
-//                                null,
-//                                null,
-//                                zonedMeasurementPeriod,
-//                                context));
-//                } catch (Exception e) {
-//                    // Catch Exceptions from evaluation per subject, but allow rest of subjects to be processed (if
-//                    // applicable)
-//                    var error = EXCEPTION_FOR_SUBJECT_ID_MESSAGE_TEMPLATE.formatted(subjectId, e.getMessage());
-//                    resultsBuilder.addError(measureLibraryIdEngine.measureId(), error);
-//                    logger.error(error, e);
-//                }
-//            }
+            //            for (var measureLibraryIdEngine : measureLibraryIdEngineDetailsList) {
+            //                try {
+            //                    resultsBuilder.addResult(
+            //                        measureLibraryIdEngine.measureId(),
+            //                        subjectId,
+            //                        measureLibraryIdEngine
+            //                            .engine()
+            //                            // LUKETODO:  make CQL CqlEngine changes to take multiple versioned
+            // identifiers and then initState for mulitple libraries
+            //                            // this seems to also reset the cache
+            //                            // LUKETODO:  call the new mulitple versionidentifier method once it's
+            // available in CQL
+            //                            .getEvaluationResult(
+            //                                measureLibraryIdEngine.libraryId(),
+            //                                subjectId,
+            //                                null,
+            //                                null,
+            //                                null,
+            //                                null,
+            //                                null,
+            //                                zonedMeasurementPeriod,
+            //                                context));
+            //                } catch (Exception e) {
+            //                    // Catch Exceptions from evaluation per subject, but allow rest of subjects to be
+            // processed (if
+            //                    // applicable)
+            //                    var error = EXCEPTION_FOR_SUBJECT_ID_MESSAGE_TEMPLATE.formatted(subjectId,
+            // e.getMessage());
+            //                    resultsBuilder.addError(measureLibraryIdEngine.measureId(), error);
+            //                    logger.error(error, e);
+            //                }
+            //            }
         }
 
         return resultsBuilder.build();

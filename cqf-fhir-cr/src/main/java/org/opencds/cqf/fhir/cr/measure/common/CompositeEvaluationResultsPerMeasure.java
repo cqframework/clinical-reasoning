@@ -92,8 +92,8 @@ public class CompositeEvaluationResultsPerMeasure {
             }
 
             errorsPerMeasure
-                .computeIfAbsent(measureId.toUnqualifiedVersionless(), k -> new ArrayList<>())
-                .add(error);
+                    .computeIfAbsent(measureId.toUnqualifiedVersionless(), k -> new ArrayList<>())
+                    .add(error);
         }
     }
 }

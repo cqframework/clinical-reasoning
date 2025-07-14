@@ -425,7 +425,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             // standard Stratifier
             // one criteria expression defined, one set of criteria results
             Map<String, CriteriaResult> subjectValues = stratifierDef.getResults();
-            nonComponentStratifier(bc, reportStratifier, populations, groupDef, subjectValues, stratifierDef);
+            nonComponentStratifier(bc, reportStratifier, populations, groupDef, subjectValues);
         }
     }
 
@@ -489,8 +489,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             MeasureReportGroupStratifierComponent reportStratifier,
             List<MeasureGroupPopulationComponent> populations,
             GroupDef groupDef,
-            Map<String, CriteriaResult> subjectValues,
-            StratifierDef stratifierDef) {
+            Map<String, CriteriaResult> subjectValues) {
 
         Map<ValueWrapper, List<String>> subjectsByValue = subjectValues.keySet().stream()
                 .collect(Collectors.groupingBy(

@@ -503,6 +503,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                     .map(t -> ResourceType.Patient.toString().concat("/").concat(t))
                     .collect(Collectors.toList());
             // build the stratum for each unique value
+            // non-component stratifiers will populate a 'null' for componentStratifierDef
             Set<Pair<ValueWrapper, StratifierComponentDef>> stratValues = Set.of(Pair.of(stratValue.getKey(), null));
             buildStratum(bc, reportStratum, stratValues, patients, populations, groupDef);
         }

@@ -76,14 +76,24 @@ public class CompositeEvaluationResultsPerMeasure {
             resultPerMeasure.put(subjectId, evaluationResult);
         }
 
+        public void addErrors(List<? extends IIdType> measureIds, String error) {
+            if (error == null || error.isEmpty()) {
+                return;
+            }
+
+            for (IIdType measureId : measureIds) {
+                addError(measureId, error);
+            }
+        }
+
         public void addError(IIdType measureId, String error) {
             if (error == null || error.isBlank()) {
                 return;
             }
 
             errorsPerMeasure
-                    .computeIfAbsent(measureId.toUnqualifiedVersionless(), k -> new ArrayList<>())
-                    .add(error);
+                .computeIfAbsent(measureId.toUnqualifiedVersionless(), k -> new ArrayList<>())
+                .add(error);
         }
     }
 }

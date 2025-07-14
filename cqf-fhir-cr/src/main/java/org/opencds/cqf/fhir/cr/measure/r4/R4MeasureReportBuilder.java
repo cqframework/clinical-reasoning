@@ -20,6 +20,7 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CanonicalType;
@@ -400,13 +401,20 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         }
 
         if (!stratifierDef.components().isEmpty()) {
+            // StratifierComponentDef (expression name, id) -> Map<Subject String, Expression Result>
+
             // Component Stratifier
             // one or more criteria expression defined, one set of criteria results per component specified
             // results of component stratifier are an intersection of membership to both component result sets
-
-            List<Map<String, CriteriaResult>> subjectCompValues = stratifierDef.components().stream()
-                    .map(StratifierComponentDef::getResults)
-                    .toList();
+            List<Map<String, Pair<CriteriaResult, StratifierComponentDef>>> subjectCompValues =
+                    stratifierDef.components().stream()
+                            .map(component -> {
+                                Map<String, CriteriaResult> results = component.getResults();
+                                return results.entrySet().stream()
+                                        .collect(Collectors.toMap(
+                                                Map.Entry::getKey, entry -> Pair.of(entry.getValue(), component)));
+                            })
+                            .toList();
 
             // Stratifiers should be of the same basis as population
             // Split subjects by result values
@@ -417,7 +425,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             // standard Stratifier
             // one criteria expression defined, one set of criteria results
             Map<String, CriteriaResult> subjectValues = stratifierDef.getResults();
-            nonComponentStratifier(bc, reportStratifier, populations, groupDef, subjectValues);
+            nonComponentStratifier(bc, reportStratifier, populations, groupDef, subjectValues, stratifierDef);
         }
     }
 
@@ -434,26 +442,28 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             List<MeasureGroupPopulationComponent> populations,
             GroupDef groupDef,
             StratifierDef stratifierDef,
-            List<Map<String, CriteriaResult>> subjectCompValues) {
-        Map<ValueWrapper, List<String>> subjectsByValue = new HashMap<>();
-        Map<String, Set<ValueWrapper>> subjectComponents = new HashMap<>();
+            List<Map<String, Pair<CriteriaResult, StratifierComponentDef>>> subjectCompValues) {
+        Map<Pair<ValueWrapper, StratifierComponentDef>, List<String>> subjectsByValue = new HashMap<>();
+        Map<String, Set<Pair<ValueWrapper, StratifierComponentDef>>> subjectComponents = new HashMap<>();
 
         // Process each subject map
-        for (Map<String, CriteriaResult> subjectMap : subjectCompValues) {
+        for (Map<String, Pair<CriteriaResult, StratifierComponentDef>> subjectMap : subjectCompValues) {
             // Extract and store subject IDs based on their criteria results
             subjectMap.forEach((subjectId, criteriaResult) -> {
+                CriteriaResult result = criteriaResult.getLeft();
+                var componentStratifier = criteriaResult.getRight();
                 String patientReference = ResourceType.Patient + "/" + subjectId;
-                ValueWrapper valueWrapper = new ValueWrapper(criteriaResult.rawValue());
-
+                ValueWrapper valueWrapper = new ValueWrapper(result.rawValue());
+                Pair<ValueWrapper, StratifierComponentDef> valuePair = Pair.of(valueWrapper, componentStratifier);
                 // Update subjectsByValue map
                 subjectsByValue
-                        .computeIfAbsent(valueWrapper, k -> new ArrayList<>())
+                        .computeIfAbsent(valuePair, k -> new ArrayList<>())
                         .add(patientReference);
 
                 // Update subjectComponents map
                 subjectComponents
                         .computeIfAbsent(patientReference, k -> new HashSet<>())
-                        .add(valueWrapper);
+                        .add(valuePair);
             });
         }
 
@@ -462,9 +472,10 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         subjectComponents.entrySet().removeIf(entry -> entry.getValue().size() < componentSize);
 
         // Group subjects by unique component sets
-        Map<Set<ValueWrapper>, List<String>> componentSubjects = subjectComponents.entrySet().stream()
-                .collect(Collectors.groupingBy(
-                        Map.Entry::getValue, Collectors.mapping(Map.Entry::getKey, Collectors.toList())));
+        Map<Set<Pair<ValueWrapper, StratifierComponentDef>>, List<String>> componentSubjects =
+                subjectComponents.entrySet().stream()
+                        .collect(Collectors.groupingBy(
+                                Map.Entry::getValue, Collectors.mapping(Map.Entry::getKey, Collectors.toList())));
 
         // Build stratums for each unique value set
         componentSubjects.forEach((valueSet, subjects) -> {
@@ -478,7 +489,8 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             MeasureReportGroupStratifierComponent reportStratifier,
             List<MeasureGroupPopulationComponent> populations,
             GroupDef groupDef,
-            Map<String, CriteriaResult> subjectValues) {
+            Map<String, CriteriaResult> subjectValues,
+            StratifierDef stratifierDef) {
 
         Map<ValueWrapper, List<String>> subjectsByValue = subjectValues.keySet().stream()
                 .collect(Collectors.groupingBy(
@@ -492,8 +504,8 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                     .map(t -> ResourceType.Patient.toString().concat("/").concat(t))
                     .collect(Collectors.toList());
             // build the stratum for each unique value
-            buildStratum(
-                    bc, reportStratum, Collections.singleton(stratValue.getKey()), patients, populations, groupDef);
+            Set<Pair<ValueWrapper, StratifierComponentDef>> stratValues = Set.of(Pair.of(stratValue.getKey(), null));
+            buildStratum(bc, reportStratum, stratValues, patients, populations, groupDef);
         }
     }
 
@@ -521,18 +533,25 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
     private void buildStratum(
             BuilderContext bc,
             StratifierGroupComponent stratum,
-            Set<ValueWrapper> values,
+            Set<Pair<ValueWrapper, StratifierComponentDef>> values,
             List<String> subjectIds,
             List<MeasureGroupPopulationComponent> populations,
             GroupDef groupDef) {
         boolean isComponent = values.size() > 1;
-        for (ValueWrapper value : values) {
+        for (Pair<ValueWrapper, StratifierComponentDef> valuePair : values) {
+            ValueWrapper value = valuePair.getLeft();
+            var componentDef = valuePair.getRight();
             // Set Stratum value to indicate which value is displaying results
             // ex. for Gender stratifier, code 'Male'
             if (value.getValueClass().equals(CodeableConcept.class)) {
                 if (isComponent) {
                     StratifierGroupComponentComponent sgcc = new StratifierGroupComponentComponent();
-                    sgcc.setCode((CodeableConcept) value.getValue());
+                    // value being stratified
+                    sgcc.setValue(new CodeableConcept().setText(value.getValueAsString()));
+                    // code specified
+                    sgcc.setCode(
+                            new CodeableConcept().setText(componentDef.code().text()));
+
                     stratum.addComponent(sgcc);
                 } else {
                     stratum.setValue((CodeableConcept) value.getValue());
@@ -540,7 +559,11 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             } else {
                 if (isComponent) {
                     StratifierGroupComponentComponent sgcc = new StratifierGroupComponentComponent();
-                    sgcc.setCode(new CodeableConcept().setText(value.getValueAsString()));
+                    // value being stratified
+                    sgcc.setValue(new CodeableConcept().setText(value.getValueAsString()));
+                    // code specified
+                    sgcc.setCode(
+                            new CodeableConcept().setText(componentDef.code().text()));
                     stratum.addComponent(sgcc);
                 } else {
                     stratum.setValue(new CodeableConcept().setText(value.getValueAsString()));

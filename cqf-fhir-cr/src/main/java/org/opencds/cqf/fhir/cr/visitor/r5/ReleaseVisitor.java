@@ -233,22 +233,8 @@ public class ReleaseVisitor {
         }
 
         // version can still be null after trying to set via expansionParams
-        if (proposedCoding.getVersion() == null && endpointAdapter != null) {
-            // use TxServer to set version
-            // TODO:: VSAC doesn't support R5?
-            /*TerminologyCapabilities terminologyCapabilities =
-                terminologyServerClient.getR5TerminologyCapabilities(endpointAdapter);
-
-            Optional<TerminologyCapabilitiesCodeSystemComponent> terminologyCodeSystem =
-                terminologyCapabilities.getCodeSystem().stream()
-                    .filter(codeSystem -> codeSystem.getUri().equals(proposedCoding.getSystem()))
-                    .findFirst();
-            terminologyCodeSystem
-                .flatMap(terminologyCodeSystemComponent ->
-                    terminologyCodeSystemComponent.getVersion().stream().findFirst())
-                .ifPresent(terminologyCodeSystemVersion ->
-                    proposedCoding.setVersion(terminologyCodeSystemVersion.getCode()));*/
-
-        }
+        /*if (proposedCoding.getVersion() == null && endpointAdapter != null) {
+            // use TxServer to set version - VSAC doesn't support R5
+        }*/
     }
 }

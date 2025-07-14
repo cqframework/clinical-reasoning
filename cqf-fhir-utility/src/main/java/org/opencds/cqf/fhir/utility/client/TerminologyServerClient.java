@@ -48,23 +48,11 @@ public class TerminologyServerClient {
         return this.terminologyServerClientSettings;
     }
 
-    // TODO:: better way to manage versions
     public org.hl7.fhir.r4.model.TerminologyCapabilities getR4TerminologyCapabilities(IEndpointAdapter endpoint) {
-        // TODO:: switch back to Auth'd client when moving from UAT to prod VSAC
-        // var fhirClient = initializeClientWithAuth(endpoint);
-        var fhirClient = fhirContext.newRestfulGenericClient(getAddressBase(endpoint.getAddress()));
+        var fhirClient = initializeClientWithAuth(endpoint);
 
         return fhirClient.fetchResourceFromUrl(
                 org.hl7.fhir.r4.model.TerminologyCapabilities.class, "/metadata?mode=terminology");
-    }
-
-    public org.hl7.fhir.r5.model.TerminologyCapabilities getR5TerminologyCapabilities(IEndpointAdapter endpoint) {
-        // TODO:: switch back to Auth'd client when moving from UAT to prod VSAC
-        // var fhirClient = initializeClientWithAuth(endpoint);
-        var fhirClient = fhirContext.newRestfulGenericClient(getAddressBase(endpoint.getAddress()));
-
-        return fhirClient.fetchResourceFromUrl(
-                org.hl7.fhir.r5.model.TerminologyCapabilities.class, "/metadata?mode=terminology");
     }
 
     public IBaseResource expand(IValueSetAdapter valueSet, IEndpointAdapter endpoint, IParametersAdapter parameters) {

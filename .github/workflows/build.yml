@@ -28,7 +28,8 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
           cache: 'maven'
-          server-id: ossrh
+          server-id: central
+          server-url: https://repo1.maven.org/maven2
           server-username: MAVEN_USERNAME
           server-password: MAVEN_PASSWORD
       - name: Publish snapshot

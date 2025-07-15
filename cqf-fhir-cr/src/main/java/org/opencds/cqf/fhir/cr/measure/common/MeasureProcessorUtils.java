@@ -454,32 +454,9 @@ public class MeasureProcessorUtils {
                 var libraryIdentifiers = List.copyOf(versionedIdMeasureIdPairs.keySet());
                 // LUKETODO:  try to do one library at a time and see if there are the same errors:
 
-                for (VersionedIdentifier libraryVersionedIdentifier : libraryIdentifiers) {
-                    var evaluationResultsPerLibraryIdentifier = libraryEngineForMultipleLibraries.getEvaluationResult(
-                        libraryVersionedIdentifier,
-                        subjectId,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        zonedMeasurementPeriod,
-                        context);
-
-                    var measureIds = versionedIdMeasureIdPairs.get(libraryVersionedIdentifier);
-
-                    for (IIdType measureId : measureIds) {
-                        resultsBuilder.addResult(
-                            measureId,
-                            subjectId,
-                            evaluationResultsPerLibraryIdentifier);
-                    }
-                }
-
-                // LUKETODO: look into the right way to implement this later?
-                // LUKETODO: if we do it this way, we get invalid interval CQL errors among others:  why??????
-//                var evaluationResultsPerLibraryIdentifier = libraryEngineForMultipleLibraries.getEvaluationResult(
-//                        libraryIdentifiers,
+//                for (VersionedIdentifier libraryVersionedIdentifier : libraryIdentifiers) {
+//                    var evaluationResultsPerLibraryIdentifier = libraryEngineForMultipleLibraries.getEvaluationResult(
+//                        libraryVersionedIdentifier,
 //                        subjectId,
 //                        null,
 //                        null,
@@ -489,22 +466,45 @@ public class MeasureProcessorUtils {
 //                        zonedMeasurementPeriod,
 //                        context);
 //
-//                for (var libraryVersionedIdentifier: libraryIdentifiers) {
-//                    validateEvaluationResultExistsForIdentifier(
-//                        libraryVersionedIdentifier,
-//                        evaluationResultsPerLibraryIdentifier);
-//
-//                    var evaluationResultForLibraryIdentifier = evaluationResultsPerLibraryIdentifier.get(SearchableLibraryIdentifier.fromIdentifier(libraryVersionedIdentifier));
-//
 //                    var measureIds = versionedIdMeasureIdPairs.get(libraryVersionedIdentifier);
 //
 //                    for (IIdType measureId : measureIds) {
 //                        resultsBuilder.addResult(
 //                            measureId,
 //                            subjectId,
-//                            evaluationResultForLibraryIdentifier);
+//                            evaluationResultsPerLibraryIdentifier);
 //                    }
 //                }
+
+                // LUKETODO: look into the right way to implement this later?
+                // LUKETODO: if we do it this way, we get invalid interval CQL errors among others:  why??????
+                var evaluationResultsPerLibraryIdentifier = libraryEngineForMultipleLibraries.getEvaluationResult(
+                        libraryIdentifiers,
+                        subjectId,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        zonedMeasurementPeriod,
+                        context);
+
+                for (var libraryVersionedIdentifier: libraryIdentifiers) {
+                    validateEvaluationResultExistsForIdentifier(
+                        libraryVersionedIdentifier,
+                        evaluationResultsPerLibraryIdentifier);
+
+                    var evaluationResultForLibraryIdentifier = evaluationResultsPerLibraryIdentifier.get(SearchableLibraryIdentifier.fromIdentifier(libraryVersionedIdentifier));
+
+                    var measureIds = versionedIdMeasureIdPairs.get(libraryVersionedIdentifier);
+
+                    for (IIdType measureId : measureIds) {
+                        resultsBuilder.addResult(
+                            measureId,
+                            subjectId,
+                            evaluationResultForLibraryIdentifier);
+                    }
+                }
 
             } catch (Exception e) {
                 // Catch Exceptions from evaluation per subject, but allow rest of subjects to be processed (if

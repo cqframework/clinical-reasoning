@@ -304,6 +304,12 @@ class MultiMeasureServiceTest {
                 .up();
     }
 
+    // LUKETODO: this test is failing because we've exposed an issue with the Encounter for Patient/female-1988-2
+    // this encounter has an invalid period, the start later than the end
+    // we need to remove that encounter (and possibly patient) and add them to a different "IG" and put into a
+    // different set of failing tests
+    // then we need to adjust the assertions on this test to cover one less encounter and possibly one less patient
+    // it's a mystery as to why this test fails under the new caching code but not under the old per library CQL evaluation
     @Test
     void MultiMeasure_EightMeasures_SubjectEvalType_AllSubjects() {
         var when = GIVEN_REPO
@@ -427,6 +433,8 @@ class MultiMeasureServiceTest {
                 .hasReportType("Individual");
     }
 
+    // LUKETODO:  this test is not failing because of the invalid interval on the Encounter
+    // it's failing because evaluatedResourceCount is 3 and not 1, as expected:  debug this to figure out why
     @Test
     void MultiMeasure_EightMeasures_Patient() {
         var when = GIVEN_REPO

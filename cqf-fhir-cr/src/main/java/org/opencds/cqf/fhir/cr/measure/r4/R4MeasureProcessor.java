@@ -3,16 +3,22 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableListMultimap;
+import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.ListMultimap;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import org.apache.commons.lang3.tuple.Pair;
 import org.cqframework.cql.cql2elm.CqlIncludeException;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.hl7.elm.r1.VersionedIdentifier;
@@ -275,9 +281,84 @@ public class R4MeasureProcessor {
                         .map(url -> Optional.ofNullable(url).orElse("Unknown Measure URL"))
                         .toList());
 
+        var libraryVersionedIdentifiers =
+                measures.stream().map(this::getLibraryVersionIdentifier).toList();
+
+        var libraryEngineForMultipleLibraries = getLibraryEngine(parameters, libraryVersionedIdentifiers, context);
+
+        final List<? extends IIdType> measureIds =
+                measures.stream().map(Measure::getIdElement).toList();
+
+//        var versionedIdMeasureIdPairs = getPairs(measures);
+//        var versionedIdMeasureIdPairs = getPairs2(measures);
+//        var versionedIdMeasureIdPairs = getPairs3(measures);
+        var versionedIdMeasureIdPairs = getPairs4(measures);
+
         // populate results from Library $evaluate
-        return measureProcessorUtils.getEvaluationResults(
-                subjects, zonedMeasurementPeriod, context, measureLibraryIdEngineDetailsList);
+        return getEvaluationResults(
+                subjects,
+                zonedMeasurementPeriod,
+                context,
+                measureLibraryIdEngineDetailsList,
+                libraryEngineForMultipleLibraries,
+                versionedIdMeasureIdPairs);
+    }
+
+    private CompositeEvaluationResultsPerMeasure getEvaluationResults(
+            List<String> subjects,
+            ZonedDateTime zonedMeasurementPeriod,
+            CqlEngine context,
+            List<MeasureLibraryIdEngineDetails> measureLibraryIdEngineDetailsList,
+            LibraryEngine libraryEngineForMultipleLibraries,
+            ListMultimap<VersionedIdentifier,IIdType> versionedIdMeasureIdPairs){
+        // LUKETODO:  flip between these to test
+//        return measureProcessorUtils.getEvaluationResults(
+//            subjects, zonedMeasurementPeriod, context, measureLibraryIdEngineDetailsList);
+                return measureProcessorUtils.getEvaluationResults2(
+                        subjects,
+                        zonedMeasurementPeriod,
+                        context,
+                        libraryEngineForMultipleLibraries,
+                        versionedIdMeasureIdPairs);
+    }
+
+    private List<Pair<VersionedIdentifier, IIdType>> getPairs(List<Measure> measures) {
+        return measures.stream()
+                .map(measure -> Pair.of(getLibraryVersionIdentifier(measure), (IIdType) measure.getIdElement()))
+                .toList();
+    }
+
+    private ListMultimap<VersionedIdentifier, IIdType> getPairs2(List<Measure> measures) {
+        return measures.stream()
+            .map(measure ->
+                Map.entry(getLibraryVersionIdentifier(measure),
+                    (IIdType) measure.getIdElement()))
+
+            .collect(ImmutableListMultimap.toImmutableListMultimap(
+                Map.Entry::getKey,
+                Map.Entry::getValue));
+    }
+
+    private LinkedHashMap<VersionedIdentifier, List<IIdType>> getPairs3(List<Measure> measures) {
+        var result = new LinkedHashMap<VersionedIdentifier, List<IIdType>>();
+
+        for (Measure measure : measures) {
+            var libraryVersionIdentifier = getLibraryVersionIdentifier(measure);
+            var measureIds =
+                result.computeIfAbsent(libraryVersionIdentifier, k -> new ArrayList<>());
+
+            measureIds.add(measure.getIdElement());
+        }
+
+        return result;
+    }
+
+    private ListMultimap<VersionedIdentifier, IIdType> getPairs4(List<Measure> measures) {
+        return measures.stream()
+            .collect(ImmutableListMultimap.toImmutableListMultimap(
+                this::getLibraryVersionIdentifier, // Key extractor
+                Measure::getIdElement              // Value extractor
+            ));
     }
 
     // Ideally this would be done in MeasureProcessorUtils, but it's too much work to change for now

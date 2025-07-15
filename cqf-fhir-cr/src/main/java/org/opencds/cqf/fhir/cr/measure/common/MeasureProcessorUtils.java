@@ -4,6 +4,7 @@ import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.MEASU
 
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import com.google.common.collect.ListMultimap;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import java.time.LocalDateTime;
@@ -14,18 +15,24 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import org.apache.commons.collections4.keyvalue.DefaultMapEntry;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.elm.r1.FunctionDef;
 import org.hl7.elm.r1.IntervalTypeSpecifier;
 import org.hl7.elm.r1.NamedTypeSpecifier;
 import org.hl7.elm.r1.ParameterDef;
+import org.hl7.elm.r1.VersionedIdentifier;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
+import org.opencds.cqf.cql.engine.execution.ExpressionResult;
 import org.opencds.cqf.cql.engine.execution.Libraries;
+import org.opencds.cqf.cql.engine.execution.SearchableLibraryIdentifier;
 import org.opencds.cqf.cql.engine.execution.Variable;
 import org.opencds.cqf.cql.engine.runtime.Date;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.engine.runtime.Interval;
+import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.opencds.cqf.fhir.cr.measure.helper.DateHelper;
 import org.slf4j.Logger;
@@ -322,8 +329,6 @@ public class MeasureProcessorUtils {
         Object result;
 
         context.getState().pushActivationFrame(functionDef, functionDef.getContext());
-        // LUKETODO:  get rid of this
-        //        context.getState().pushWindow();
 
         try {
             if (!isBooleanBasis) {
@@ -353,6 +358,7 @@ public class MeasureProcessorUtils {
                 subjectIds, zonedMeasurementPeriod, context, List.of(measureLibraryIdEngineDetails));
     }
 
+    // LUKETODO: redo javadoc
     /**
      * method used to execute generate CQL results via Library $evaluate
      *
@@ -386,26 +392,27 @@ public class MeasureProcessorUtils {
             context.getState().setContextValue(subjectTypePart, subjectIdPart);
             for (var measureLibraryIdEngine : measureLibraryIdEngineDetailsList) {
                 try {
-                    resultsBuilder.addResult(
-                            measureLibraryIdEngine.measureId(),
+                    var libraryId = measureLibraryIdEngine.libraryId();
+                    logger.info("1234: libraryId: {}", libraryId.getId());
+                    var evaluationResult = measureLibraryIdEngine
+                        .engine()
+                        // LUKETODO:  make CQL CqlEngine changes to take multiple versioned identifiers and
+                        // then initState for mulitple libraries
+                        // this seems to also reset the cache
+                        // LUKETODO:  call the new mulitple versionidentifier method once it's available in
+                        // CQL
+                        .getEvaluationResult(
+                            libraryId,
                             subjectId,
-                            measureLibraryIdEngine
-                                    .engine()
-                                    // LUKETODO:  make CQL CqlEngine changes to take multiple versioned identifiers and
-                                    // then initState for mulitple libraries
-                                    // this seems to also reset the cache
-                                    // LUKETODO:  call the new mulitple versionidentifier method once it's available in
-                                    // CQL
-                                    .getEvaluationResult(
-                                            measureLibraryIdEngine.libraryId(),
-                                            subjectId,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            zonedMeasurementPeriod,
-                                            context));
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            zonedMeasurementPeriod,
+                            context);
+
+                    resultsBuilder.addResult(measureLibraryIdEngine.measureId(), subjectId, evaluationResult);
                 } catch (Exception e) {
                     // Catch Exceptions from evaluation per subject, but allow rest of subjects to be processed (if
                     // applicable)
@@ -420,7 +427,11 @@ public class MeasureProcessorUtils {
     }
 
     public CompositeEvaluationResultsPerMeasure getEvaluationResults2(
-            List<String> subjectIds, ZonedDateTime zonedMeasurementPeriod, CqlEngine context) {
+            List<String> subjectIds,
+            ZonedDateTime zonedMeasurementPeriod,
+            CqlEngine context,
+            LibraryEngine libraryEngineForMultipleLibraries,
+            ListMultimap<VersionedIdentifier,IIdType> versionedIdMeasureIdPairs) {// LUKETODO: rename
 
         // measure -> subject -> results
         var resultsBuilder = CompositeEvaluationResultsPerMeasure.builder();
@@ -438,41 +449,107 @@ public class MeasureProcessorUtils {
             String subjectTypePart = subjectInfo.getLeft();
             String subjectIdPart = subjectInfo.getRight();
             context.getState().setContextValue(subjectTypePart, subjectIdPart);
-            //            for (var measureLibraryIdEngine : measureLibraryIdEngineDetailsList) {
-            //                try {
-            //                    resultsBuilder.addResult(
-            //                        measureLibraryIdEngine.measureId(),
-            //                        subjectId,
-            //                        measureLibraryIdEngine
-            //                            .engine()
-            //                            // LUKETODO:  make CQL CqlEngine changes to take multiple versioned
-            // identifiers and then initState for mulitple libraries
-            //                            // this seems to also reset the cache
-            //                            // LUKETODO:  call the new mulitple versionidentifier method once it's
-            // available in CQL
-            //                            .getEvaluationResult(
-            //                                measureLibraryIdEngine.libraryId(),
-            //                                subjectId,
-            //                                null,
-            //                                null,
-            //                                null,
-            //                                null,
-            //                                null,
-            //                                zonedMeasurementPeriod,
-            //                                context));
-            //                } catch (Exception e) {
-            //                    // Catch Exceptions from evaluation per subject, but allow rest of subjects to be
-            // processed (if
-            //                    // applicable)
-            //                    var error = EXCEPTION_FOR_SUBJECT_ID_MESSAGE_TEMPLATE.formatted(subjectId,
-            // e.getMessage());
-            //                    resultsBuilder.addError(measureLibraryIdEngine.measureId(), error);
-            //                    logger.error(error, e);
-            //                }
-            //            }
+            try {
+                // LUKETODO:  is library identifier ordering important here?
+                var libraryIdentifiers = List.copyOf(versionedIdMeasureIdPairs.keySet());
+                // LUKETODO:  try to do one library at a time and see if there are the same errors:
+
+                for (VersionedIdentifier libraryVersionedIdentifier : libraryIdentifiers) {
+                    var evaluationResultsPerLibraryIdentifier = libraryEngineForMultipleLibraries.getEvaluationResult(
+                        libraryVersionedIdentifier,
+                        subjectId,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        zonedMeasurementPeriod,
+                        context);
+
+                    var measureIds = versionedIdMeasureIdPairs.get(libraryVersionedIdentifier);
+
+                    for (IIdType measureId : measureIds) {
+                        resultsBuilder.addResult(
+                            measureId,
+                            subjectId,
+                            evaluationResultsPerLibraryIdentifier);
+                    }
+                }
+
+                // LUKETODO: look into the right way to implement this later?
+                // LUKETODO: if we do it this way, we get invalid interval CQL errors among others:  why??????
+//                var evaluationResultsPerLibraryIdentifier = libraryEngineForMultipleLibraries.getEvaluationResult(
+//                        libraryIdentifiers,
+//                        subjectId,
+//                        null,
+//                        null,
+//                        null,
+//                        null,
+//                        null,
+//                        zonedMeasurementPeriod,
+//                        context);
+//
+//                for (var libraryVersionedIdentifier: libraryIdentifiers) {
+//                    validateEvaluationResultExistsForIdentifier(
+//                        libraryVersionedIdentifier,
+//                        evaluationResultsPerLibraryIdentifier);
+//
+//                    var evaluationResultForLibraryIdentifier = evaluationResultsPerLibraryIdentifier.get(SearchableLibraryIdentifier.fromIdentifier(libraryVersionedIdentifier));
+//
+//                    var measureIds = versionedIdMeasureIdPairs.get(libraryVersionedIdentifier);
+//
+//                    for (IIdType measureId : measureIds) {
+//                        resultsBuilder.addResult(
+//                            measureId,
+//                            subjectId,
+//                            evaluationResultForLibraryIdentifier);
+//                    }
+//                }
+
+            } catch (Exception e) {
+                // Catch Exceptions from evaluation per subject, but allow rest of subjects to be processed (if
+                // applicable)
+                var error = EXCEPTION_FOR_SUBJECT_ID_MESSAGE_TEMPLATE.formatted(subjectId, e.getMessage());
+                var measureIds = List.copyOf(versionedIdMeasureIdPairs.values());
+
+                resultsBuilder.addErrors(measureIds, error);
+                logger.error(error, e);
+            }
         }
 
         return resultsBuilder.build();
+    }
+
+    private void validateEvaluationResultExistsForIdentifier(
+            VersionedIdentifier versionedIdentifierFromQuery,
+            Map<SearchableLibraryIdentifier, EvaluationResult> evaluationResultsPerVersionedIdentifier) {
+
+        var doNoneMatch = evaluationResultsPerVersionedIdentifier.entrySet().stream()
+            .noneMatch( entry -> entry.getKey().matches(versionedIdentifierFromQuery));
+
+        if (doNoneMatch) {
+            throw new InternalErrorException(
+                "Evaluation result in versionless search not found for identifier with ID: %s"
+                    .formatted(versionedIdentifierFromQuery.getId()));
+        }
+    }
+
+    private static String printEvaluationResult(EvaluationResult evaluationResult) {
+        if (evaluationResult == null) {
+            return "null";
+        }
+        return "EvaluationResult{" +
+                "expressionResults=" + evaluationResult.expressionResults.entrySet().stream().map(entry -> new DefaultMapEntry<>(
+            entry.getKey(), printExpressionResult(entry.getValue()))).toList() + "}";
+    }
+
+    private static String printExpressionResult(ExpressionResult expressionResult) {
+        if (expressionResult == null) {
+            return "null";
+        }
+
+        return "ExpressionResult{value=" + expressionResult.value() +
+                ", type=" + expressionResult.evaluatedResources() + '}';
     }
 
     public Pair<String, String> getSubjectTypeAndId(String subjectId) {

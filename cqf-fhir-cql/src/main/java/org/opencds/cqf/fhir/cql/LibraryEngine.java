@@ -25,6 +25,7 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
+import org.opencds.cqf.cql.engine.execution.SearchableLibraryIdentifier;
 import org.opencds.cqf.fhir.cql.engine.parameters.CqlFhirParametersConverter;
 import org.opencds.cqf.fhir.cql.engine.parameters.CqlParameterDefinition;
 import org.opencds.cqf.fhir.utility.CqfExpression;
@@ -325,6 +326,37 @@ public class LibraryEngine {
         return result;
     }
 
+    public Map<SearchableLibraryIdentifier, EvaluationResult> getEvaluationResult(
+            List<VersionedIdentifier> ids,
+            String patientId,
+            IBaseParameters parameters,
+            Map<String, Object> rawParameters,
+            IBaseBundle additionalData,
+            Set<String> expressions,
+            CqlFhirParametersConverter cqlFhirParametersConverter,
+            @Nullable ZonedDateTime zonedDateTime,
+            CqlEngine engine) {
+
+        logger.info("ids: {}, patientId: {}, zonedDateTime: {}", ids.stream().map(
+            VersionedIdentifier::getId).toList(), patientId, zonedDateTime);
+
+        // LUKETODO: better name
+        var stuff = pre(parameters, rawParameters, additionalData, cqlFhirParametersConverter, engine);
+
+        // LUKETODO: better name
+        var idsCloned = ids.stream()
+                .map(id -> new VersionedIdentifier().withId(id.getId()))
+                .toList();
+
+        return stuff.engine().evaluate(
+                idsCloned,
+                expressions,
+                buildContextParameter(patientId),
+                stuff.evaluationParameters(),
+                null,
+            zonedDateTime);
+    }
+
     public EvaluationResult getEvaluationResult(
             VersionedIdentifier id,
             String patientId,
@@ -336,25 +368,50 @@ public class LibraryEngine {
             @Nullable ZonedDateTime zonedDateTime,
             CqlEngine engine) {
 
+        logger.info("id: {}, patientId: {}, zonedDateTime: {}", id.getId(), patientId, zonedDateTime);
+
+        var stuff = pre(parameters, rawParameters, additionalData, cqlFhirParametersConverter,
+            engine);
+
+        return stuff.engine().evaluate(
+                new VersionedIdentifier().withId(id.getId()),
+                expressions,
+                buildContextParameter(patientId),
+                stuff.evaluationParameters(),
+                null,
+                zonedDateTime);
+    }
+
+    private Stuff pre(
+            IBaseParameters parameters,
+            Map<String, Object> rawParameters,
+            IBaseBundle additionalData,
+            CqlFhirParametersConverter cqlFhirParametersConverter,
+            CqlEngine engine) {
+
+        final CqlFhirParametersConverter cqlFhirParametersConverterToUse;
         if (cqlFhirParametersConverter == null) {
-            cqlFhirParametersConverter = Engines.getCqlFhirParametersConverter(repository.fhirContext());
+            cqlFhirParametersConverterToUse = Engines.getCqlFhirParametersConverter(repository.fhirContext());
+        } else {
+            cqlFhirParametersConverterToUse = cqlFhirParametersConverter;
         }
         // engine context built externally of LibraryEngine?
+        final CqlEngine engineToUse;
         if (engine == null) {
-            engine = Engines.forRepository(repository, settings, additionalData);
+            engineToUse = Engines.forRepository(repository, settings, additionalData);
+        } else {
+            engineToUse = engine;
         }
 
-        var evaluationParameters = cqlFhirParametersConverter.toCqlParameters(parameters);
+        var evaluationParameters = cqlFhirParametersConverterToUse.toCqlParameters(parameters);
         if (rawParameters != null && !rawParameters.isEmpty()) {
             evaluationParameters.putAll(rawParameters);
         }
 
-        return engine.evaluate(
-                new VersionedIdentifier().withId(id.getId()),
-                expressions,
-                buildContextParameter(patientId),
-                evaluationParameters,
-                null,
-                zonedDateTime);
+        return new Stuff(engineToUse, evaluationParameters);
     }
+
+    // LUKETODO:
+    // LUKETODO: better name
+    private record Stuff(CqlEngine engine, Map<String,Object> evaluationParameters) {}
 }

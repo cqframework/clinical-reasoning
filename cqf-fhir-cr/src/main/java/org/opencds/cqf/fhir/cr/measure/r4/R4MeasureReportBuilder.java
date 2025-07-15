@@ -450,17 +450,24 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         for (Map<String, Pair<CriteriaResult, StratifierComponentDef>> subjectMap : subjectCompValues) {
             // Extract and store subject IDs based on their criteria results
             subjectMap.forEach((subjectId, criteriaResult) -> {
+                // Criteria result: Actual expression result
                 CriteriaResult result = criteriaResult.getLeft();
+                // componentStratifier = the definition object that stores code, id, results of component stratifier
                 var componentStratifier = criteriaResult.getRight();
+                // extract the underlying context subject that was evaluated for all expressions (most are currently
+                // patient)
+                // this allows resource based expressions or boolean to relate to underlying subject that was evaluated
+                // TODO: this should match CQL context, not only Patient
                 String patientReference = ResourceType.Patient + "/" + subjectId;
                 ValueWrapper valueWrapper = new ValueWrapper(result.rawValue());
                 Pair<ValueWrapper, StratifierComponentDef> valuePair = Pair.of(valueWrapper, componentStratifier);
-                // Update subjectsByValue map
+
+                // Creates a map of which subjects shared resulting stratifier value
                 subjectsByValue
                         .computeIfAbsent(valuePair, k -> new ArrayList<>())
                         .add(patientReference);
 
-                // Update subjectComponents map
+                // Creates an inverse map of which results are related to a subject
                 subjectComponents
                         .computeIfAbsent(patientReference, k -> new HashSet<>())
                         .add(valuePair);
@@ -468,16 +475,40 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         }
 
         // Remove subjects that don’t qualify for all stratifier components
+        // Example:
+        // stratifier component A: Gender ---> M, F
+        // stratifier component B: Age Range ---> 0-30, 31-60....etc
+        // Subject 1: Gender: M, Age: 31-60
+        // Subject 2: Gender: F, Age: 0-30
+        // Subject 3: Gender: M, Age: 31-60
+        // Subject 4: Gender: F, Age: 0-30
+
         int componentSize = stratifierDef.components().size();
         subjectComponents.entrySet().removeIf(entry -> entry.getValue().size() < componentSize);
 
-        // Group subjects by unique component sets
+        // Group subjects that share the same component results
+
+        // Remaining Subjects have a shared 'value' from each component stratifier, and are grouped together.
+
+        // Stratifier Component set 1
+        // Subject 3: Gender: M, Age: 31-60
+        // Subject 1: Gender: M, Age: 31-60
+
+        // Stratifier Component set 2
+        // Subject 2: Gender: F, Age: 0-30
+        // Subject 4: Gender: F, Age: 0-30
+
         Map<Set<Pair<ValueWrapper, StratifierComponentDef>>, List<String>> componentSubjects =
                 subjectComponents.entrySet().stream()
                         .collect(Collectors.groupingBy(
                                 Map.Entry::getValue, Collectors.mapping(Map.Entry::getKey, Collectors.toList())));
 
-        // Build stratums for each unique value set
+        // Build stratums for each unique 'set' of component stratifier values
+        // this populates which group.populations intersect with subjects that shared component stratifier results
+        // Stratum 1
+        // Gender: M, Age: 31-60
+        // Stratum 2
+        // Gender: F, Age: 0-30
         componentSubjects.forEach((valueSet, subjects) -> {
             var reportStratum = reportStratifier.addStratum();
             buildStratum(bc, reportStratum, valueSet, subjects, populations, groupDef);
@@ -490,20 +521,32 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             List<MeasureGroupPopulationComponent> populations,
             GroupDef groupDef,
             Map<String, CriteriaResult> subjectValues) {
+        // nonComponent stratifiers will have a single expression that can generate results, instead of grouping
+        // combinations of results
+        // example: 'gender' expression could produce values of 'M', 'F'
+        // subject1: 'gender'--> 'M'
+        // subject2: 'gender'--> 'F'
+        // stratifier criteria results are: 'M', 'F'
 
         Map<ValueWrapper, List<String>> subjectsByValue = subjectValues.keySet().stream()
                 .collect(Collectors.groupingBy(
                         x -> new ValueWrapper(subjectValues.get(x).rawValue())));
+        // Stratum 1
+        // Value: 'M'--> subjects: subject1
+        // Stratum 2
+        // Value: 'F'--> subjects: subject2
         // loop through each value key
         for (Map.Entry<ValueWrapper, List<String>> stratValue : subjectsByValue.entrySet()) {
             var reportStratum = reportStratifier.addStratum();
             // patch Patient values with prefix of ResourceType to match with incoming population subjects for stratum
-            // intersection
+            // TODO: should match context of CQL, not only Patient
             var patients = stratValue.getValue().stream()
                     .map(t -> ResourceType.Patient.toString().concat("/").concat(t))
                     .collect(Collectors.toList());
             // build the stratum for each unique value
-            // non-component stratifiers will populate a 'null' for componentStratifierDef
+            // non-component stratifiers will populate a 'null' for componentStratifierDef, since it doesn't have
+            // multiple criteria
+            // TODO: build out nonComponent stratum method
             Set<Pair<ValueWrapper, StratifierComponentDef>> stratValues = Set.of(Pair.of(stratValue.getKey(), null));
             buildStratum(bc, reportStratum, stratValues, patients, populations, groupDef);
         }
@@ -546,31 +589,48 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             if (value.getValueClass().equals(CodeableConcept.class)) {
                 if (isComponent) {
                     StratifierGroupComponentComponent sgcc = new StratifierGroupComponentComponent();
-                    // value being stratified
+                    // component stratifier example: code: "gender", value: 'M'
+                    // value being stratified: 'M'
                     sgcc.setValue(new CodeableConcept().setText(value.getValueAsString()));
-                    // code specified
+                    // code specified from componentDef: "gender"
                     sgcc.setCode(
                             new CodeableConcept().setText(componentDef.code().text()));
-
+                    // set component on MeasureReport
                     stratum.addComponent(sgcc);
                 } else {
+                    // non-component stratifiers only set stratified value, code is set on stratifier object
+                    // value being stratified: 'M'
                     stratum.setValue((CodeableConcept) value.getValue());
                 }
             } else {
                 if (isComponent) {
+                    // component stratifier example: code: "gender", value: 'M'
                     StratifierGroupComponentComponent sgcc = new StratifierGroupComponentComponent();
-                    // value being stratified
+                    // value being stratified: 'M'
                     sgcc.setValue(new CodeableConcept().setText(value.getValueAsString()));
-                    // code specified
+                    // code specified from componentDef: "gender"
                     sgcc.setCode(
                             new CodeableConcept().setText(componentDef.code().text()));
+                    // set component on MeasureReport
                     stratum.addComponent(sgcc);
                 } else {
+                    // non-component stratifiers only set stratified value, code is set on stratifier object
+                    // value being stratified: 'M'
                     stratum.setValue(new CodeableConcept().setText(value.getValueAsString()));
                 }
             }
         }
-        // add each population
+        // add stratum populations for stratifier
+        // Group.populations
+        // initial-population: subject1, subject 2
+        // ** stratifier value: 'M'
+        // ** subjects with stratifier value: 'M': subject1
+        // ** stratum.population
+        // ** ** initial-population: subject1
+        // ** stratifier value: 'F'
+        // ** subjects with stratifier value: 'F': subject2
+        // ** stratum.population
+        // ** ** initial-population: subject2
         for (MeasureGroupPopulationComponent mgpc : populations) {
             var stratumPopulation = stratum.addPopulation();
             buildStratumPopulation(bc, stratumPopulation, subjectIds, mgpc, groupDef);

@@ -261,15 +261,10 @@ class ReleaseVisitorTests {
         Library library = repo.read(Library.class, new IdType("Library/ecqm-update-2024-05-02"))
                 .copy();
         ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
-
-        final var authoritativeSource = "http://uat-cts.nlm.nih.gov/fhir/";
-        var endpoint = createEndpoint(authoritativeSource);
-        /*endpoint.addExtension(new Extension(Constants.VSAC_USERNAME, new StringType("")));
-        endpoint.addExtension(new Extension(Constants.APIKEY, new StringType("")));*/
+        
         Parameters params = parameters(
                 part("version", "1.0.0"),
-                part("versionBehavior", new CodeType("default")),
-                part("terminologyEndpoint", (org.hl7.fhir.r4.model.Endpoint) endpoint.get()));
+                part("versionBehavior", new CodeType("default")));
 
         ReleaseVisitor releaseVisitor = new ReleaseVisitor(repo);
         // Approval date is required to release an artifact

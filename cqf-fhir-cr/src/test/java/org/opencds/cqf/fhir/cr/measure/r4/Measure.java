@@ -76,7 +76,7 @@ public class Measure {
     }
 
     @FunctionalInterface
-    interface Selector<T, S> {
+    public interface Selector<T, S> {
         T select(S from);
     }
 

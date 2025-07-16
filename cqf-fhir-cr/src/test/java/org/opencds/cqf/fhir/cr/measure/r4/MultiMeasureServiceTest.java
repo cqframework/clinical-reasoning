@@ -69,6 +69,10 @@ class MultiMeasureServiceTest {
                 .up()
                 .hasScore("0.5714285714285714")
                 .up()
+                .hasMeasureReportStatus(MeasureReportStatus.ERROR)
+                .hasContainedOperationOutcome()
+                .hasContainedOperationOutcomeMsg("Patient/female-1988-2")
+                .hasContainedOperationOutcomeMsg("Invalid Interval")
                 .up()
                 .measureReport("http://example.com/Measure/MinimalProportionBooleanBasisSingleGroup")
                 .hasReportType("Summary")
@@ -207,6 +211,10 @@ class MultiMeasureServiceTest {
                 .up()
                 .hasScore("0.5714285714285714")
                 .up()
+                .hasMeasureReportStatus(MeasureReportStatus.ERROR)
+                .hasContainedOperationOutcome()
+                .hasContainedOperationOutcomeMsg("Patient/female-1988-2")
+                .hasContainedOperationOutcomeMsg("Invalid Interval")
                 .up()
                 .measureReport("http://example.com/Measure/MinimalProportionBooleanBasisSingleGroup")
                 .hasReportType("Summary")
@@ -298,10 +306,7 @@ class MultiMeasureServiceTest {
                 .hasCount(2)
                 .up()
                 .population("measure-observation")
-                .hasCount(10)
-                .up()
-                .up()
-                .up();
+                .hasCount(10);
     }
 
     // LUKETODO: this test is failing because we've exposed an issue with the Encounter for Patient/female-1988-2
@@ -310,6 +315,7 @@ class MultiMeasureServiceTest {
     // different set of failing tests
     // then we need to adjust the assertions on this test to cover one less encounter and possibly one less patient
     // it's a mystery as to why this test fails under the new caching code but not under the old per library CQL evaluation
+    // LUKETODO:  so this test does include the failure, but with the old code we swallow it but with the new code we blow up
     @Test
     void MultiMeasure_EightMeasures_SubjectEvalType_AllSubjects() {
         var when = GIVEN_REPO
@@ -337,7 +343,13 @@ class MultiMeasureServiceTest {
                 .hasMeasureReportCountPerUrl(
                         10, "http://example.com/Measure/MinimalContinuousVariableResourceBasisSingleGroup")
                 .getFirstMeasureReport()
-                .hasReportType("Individual");
+                .hasReportType("Individual")
+                .up()
+                .measureReport("http://example.com/Measure/MinimalProportionNoBasisSingleGroup", "Patient/female-1988-2")
+                .hasMeasureReportStatus(MeasureReportStatus.ERROR)
+                .hasContainedOperationOutcome()
+                .hasContainedOperationOutcomeMsg("Patient/female-1988-2")
+                .hasContainedOperationOutcomeMsg("Invalid Interval");
     }
 
     @Test

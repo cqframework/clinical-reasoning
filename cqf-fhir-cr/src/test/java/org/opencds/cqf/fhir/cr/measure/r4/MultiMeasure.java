@@ -55,7 +55,7 @@ class MultiMeasure {
     }
 
     @FunctionalInterface
-    interface Selector<T, S> {
+    public interface Selector<T, S> {
         T select(S from);
     }
 
@@ -294,6 +294,16 @@ class MultiMeasure {
                     measureUrl));
         }
 
+        public SelectedMeasureReport measureReport(String measureUrl, String subject) {
+            return this.measureReport(g -> resourceToMeasureReport(
+                g.getEntry().stream()
+                    .filter(x ->
+                        x.getResource().getResourceType().toString().equals("MeasureReport"))
+                    .toList(),
+                measureUrl,
+                subject));
+        }
+
         public SelectedMeasureReport getFirstMeasureReport() {
             var mr = (MeasureReport) report().getEntryFirstRep().getResource();
             return this.measureReport(g -> mr);
@@ -312,9 +322,23 @@ class MultiMeasure {
             }
             return matchedReport;
         }
+
+        public MeasureReport resourceToMeasureReport(List<BundleEntryComponent> entries, String measureUrl, String subject) {
+            IParser parser = FhirContext.forR4Cached().newJsonParser();
+            MeasureReport matchedReport = null;
+            for (int i = 0; i < entries.size(); i++) {
+                MeasureReport report = (MeasureReport) parser.parseResource(
+                    parser.encodeResourceToString(entries.get(i).getResource()));
+                if (report.getMeasure().equals(measureUrl) && report.getSubject().getReference().equals(subject)) {
+                    matchedReport = report;
+                    break;
+                }
+            }
+            return matchedReport;
+        }
     }
 
-    static class SelectedMeasureReport extends MultiMeasure.Selected<MeasureReport, SelectedReport> {
+    public static class SelectedMeasureReport extends MultiMeasure.Selected<MeasureReport, SelectedReport> {
         public MeasureReport report() {
             return this.value();
         }
@@ -502,7 +526,7 @@ class MultiMeasure {
         }
     }
 
-    static class SelectedReference<P> extends MultiMeasure.Selected<Reference, P> {
+    public static class SelectedReference<P> extends MultiMeasure.Selected<Reference, P> {
 
         public SelectedReference(Reference value, P parent) {
             super(value, parent);

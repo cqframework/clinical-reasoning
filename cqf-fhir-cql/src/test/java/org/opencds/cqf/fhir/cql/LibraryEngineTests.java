@@ -14,7 +14,11 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.cqframework.cql.cql2elm.LibraryContentType;
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.hl7.elm.r1.VersionedIdentifier;
@@ -191,5 +195,14 @@ class LibraryEngineTests {
         assertNull(((BooleanType) result2.get(0)).getValue());
         assertEquals(codeableConcept2, result3.get(0));
         assertEquals(codeableConcept2.getCodingFirstRep().getDisplay(), ((StringType) result4.get(0)).getValue());
+    }
+
+    @Test
+    void toQuantityConversionTest() {
+        var patientId = "Patient/Patient1";
+        var url = "http://fhir.test/Library/ToQuantityTest";
+        var expressions = new HashSet(List.of("Height in [in_i]"));
+        var result = libraryEngine.evaluate(url, patientId, null, null, null, null, expressions);
+        assertNotNull(result);
     }
 }

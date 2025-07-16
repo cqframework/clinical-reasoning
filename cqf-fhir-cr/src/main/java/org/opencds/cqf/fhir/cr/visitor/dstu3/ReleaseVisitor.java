@@ -17,13 +17,16 @@ import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.MetadataResource;
 import org.hl7.fhir.dstu3.model.Period;
+import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.ValueSet;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.cr.visitor.dstu3.CRMIReleaseExperimentalBehavior.CRMIReleaseExperimentalBehaviorCodes;
 import org.opencds.cqf.fhir.cr.visitor.dstu3.CRMIReleaseVersionBehavior.CRMIReleaseVersionBehaviorCodes;
+import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.PackageHelper;
 import org.opencds.cqf.fhir.utility.SearchHelper;
 import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
@@ -155,5 +158,13 @@ public class ReleaseVisitor {
                     returnEntries.add((BundleEntryComponent) PackageHelper.createEntry(artifactComment, true));
                 });
         return returnEntries;
+    }
+
+    public static void captureInputExpansionParams(IBaseParameters inputExpansionParams, IKnowledgeArtifactAdapter rootAdapter) {
+        if (inputExpansionParams != null) {
+            var inputExpansionParametersExtension = new Extension(Constants.CQF_INPUT_EXPANSION_PARAMETERS, new Reference("#input-exp-params"));
+            rootAdapter.addExtension(inputExpansionParametersExtension);
+            inputExpansionParams.setId("input-exp-params");
+        }
     }
 }

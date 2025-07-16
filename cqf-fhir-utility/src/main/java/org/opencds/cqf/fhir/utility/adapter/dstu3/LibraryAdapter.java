@@ -207,9 +207,11 @@ public class LibraryAdapter extends KnowledgeArtifactAdapter implements ILibrary
             var newExpansionParameters = new Parameters();
             newExpansionParameters.setId(id);
             getLibrary().addContained(newExpansionParameters);
-            var expansionParamsExt = getLibrary().addExtension();
-            expansionParamsExt.setUrl(Constants.CQF_EXPANSION_PARAMETERS);
-            expansionParamsExt.setValue(new Reference("#" + id));
+            if (getLibrary().getExtensionByUrl(Constants.CQF_EXPANSION_PARAMETERS) == null) {
+                var expansionParamsExt = getLibrary().addExtension();
+                expansionParamsExt.setUrl(Constants.CQF_EXPANSION_PARAMETERS);
+                expansionParamsExt.setValue(new Reference("#" + id));
+            }
             setExpansionParameters(newExpansionParameters);
             return Optional.of(newExpansionParameters);
         }
@@ -258,8 +260,7 @@ public class LibraryAdapter extends KnowledgeArtifactAdapter implements ILibrary
                 }
             }
 
-            if (!parametersWithName.isEmpty()
-                    && parametersWithName.stream().noneMatch(p -> ((IPrimitiveType<String>) p.getValue())
+            if (parametersWithName.stream().noneMatch(p -> ((IPrimitiveType<String>) p.getValue())
                             .getValueAsString()
                             .equals(canonical))) {
                 var parameterToAdd = new ParametersParameterComponent();

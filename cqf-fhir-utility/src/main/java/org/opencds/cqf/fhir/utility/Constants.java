@@ -86,6 +86,8 @@ public class Constants {
     public static final String CQF_CQL_OPTIONS = "http://hl7.org/fhir/StructureDefinition/cqf-cqlOptions";
     public static final String CQF_EXPANSION_PARAMETERS =
             "http://hl7.org/fhir/StructureDefinition/cqf-expansionParameters";
+    public static final String CQF_INPUT_EXPANSION_PARAMETERS =
+            "http://hl7.org/fhir/StructureDefinition/cqf-inputParameters";
     public static final String CQF_EXPRESSION = "http://hl7.org/fhir/StructureDefinition/cqf-expression";
     public static final String CQF_LIBRARY = "http://hl7.org/fhir/StructureDefinition/cqf-library";
     public static final String CQF_CALCULATED_VALUE = "http://hl7.org/fhir/StructureDefinition/cqf-calculatedValue";

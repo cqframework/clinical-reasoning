@@ -141,7 +141,10 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
         rootAdapter.setRelatedArtifact(noDeps);
 
         // extract expansion parameters
-        var expansionParameters = rootAdapter.getExpansionParameters().orElse(null);
+        var inputExpansionParams = rootAdapter.getExpansionParameters().orElse(null);
+
+        // specify authored expansion params as input expansion parameters
+        captureInputExpansionParams(inputExpansionParams, rootAdapter);
 
         // Report all dependencies, resolving unversioned dependencies to the latest known version, recursively
         var gatheredResources = new HashSet<String>();
@@ -151,13 +154,10 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
                 gatheredResources,
                 updatedComponents,
                 new HashMap<>(),
-                expansionParameters,
+                inputExpansionParams,
                 latestFromTxServer,
                 terminologyEndpoint.orElse(null));
 
-        if (rootAdapter.get().fhirType().equals("Library")) {
-            ((ILibraryAdapter) rootAdapter).setExpansionParameters(expansionParameters);
-        }
 
         // remove duplicates and add
         var relatedArtifacts = rootAdapter.getRelatedArtifact();
@@ -209,6 +209,16 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
         rootAdapter.setRelatedArtifact(distinctResolvedRelatedArtifacts);
 
         return repository.transaction(transactionBundle);
+    }
+
+    private void captureInputExpansionParams(IBaseParameters inputExpansionParams, IKnowledgeArtifactAdapter rootAdapter) {
+        if (this.fhirVersion().equals(FhirVersionEnum.DSTU3)) {
+            org.opencds.cqf.fhir.cr.visitor.dstu3.ReleaseVisitor.captureInputExpansionParams(inputExpansionParams, rootAdapter);
+        } else if (this.fhirVersion().equals(FhirVersionEnum.R4)) {
+            org.opencds.cqf.fhir.cr.visitor.r4.ReleaseVisitor.captureInputExpansionParams(inputExpansionParams, rootAdapter);
+        } else if (this.fhirVersion().equals(FhirVersionEnum.R5)) {
+            org.opencds.cqf.fhir.cr.visitor.r5.ReleaseVisitor.captureInputExpansionParams(inputExpansionParams, rootAdapter);
+        }
     }
 
     private static void updateMetadata(
@@ -293,7 +303,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
             Set<String> gatheredResources,
             List<IDomainResource> releasedResources,
             Map<String, IDomainResource> alreadyUpdatedDependencies,
-            IBaseParameters expansionParameters,
+            IBaseParameters inputExpansionParameters,
             boolean latestFromTxServer,
             IEndpointAdapter endpoint) {
         if (artifactAdapter == null) {
@@ -338,7 +348,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
                 }
                 if (!alreadyUpdatedDependencies.containsKey(dependencyUrl)) {
                     var maybeAdapter =
-                            tryResolveDependency(dependency, expansionParameters, latestFromTxServer, endpoint);
+                            tryResolveDependency(dependency, inputExpansionParameters, latestFromTxServer, endpoint);
                     if (maybeAdapter.isPresent()) {
                         dependencyAdapter = maybeAdapter.get();
                         alreadyUpdatedDependencies.put(dependencyAdapter.getUrl(), dependencyAdapter.get());
@@ -366,7 +376,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
                             gatheredResources,
                             releasedResources,
                             alreadyUpdatedDependencies,
-                            expansionParameters,
+                            inputExpansionParameters,
                             latestFromTxServer,
                             endpoint);
                 }
@@ -379,11 +389,6 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
                             dependencyAdapter != null ? dependencyAdapter.getDescriptor() : null);
 
                     ensureResourceTypeExtension(getResourceType(dependency), newDep);
-                    //                    ensureExpansionParametersEntry(getResourceType(dependency),
-                    // dependency.getReference());
-                    if (rootAdapter.get().fhirType().equals("Library")) {
-                        ((ILibraryAdapter) rootAdapter).setExpansionParameters(expansionParameters);
-                    }
 
                     var updatedRelatedArtifacts = rootAdapter.getRelatedArtifact();
                     updatedRelatedArtifacts.add(newDep);
@@ -424,21 +429,21 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
 
     private Optional<IKnowledgeArtifactAdapter> tryResolveDependency(
             IDependencyInfo dependency,
-            IBaseParameters expansionParameters,
+            IBaseParameters inputExpansionParameters,
             boolean latestFromTxServer,
             IEndpointAdapter endpoint) {
-        // try to get versions from expansion parameters if they are available
+        // try to get versions from input expansion parameters if they are available
         String resourceType = getResourceType(dependency);
         if (StringUtils.isBlank(Canonicals.getVersion(dependency.getReference()))) {
             // This needs to be updated once we support requireVersionedDependencies
-            getExpansionParametersVersion(dependency, resourceType, expansionParameters)
+            getExpansionParametersVersion(dependency, resourceType, inputExpansionParameters)
                     .map(Canonicals::getVersion)
                     .ifPresent(version -> dependency.setReference(dependency.getReference() + "|" + version));
         }
 
         Optional<IKnowledgeArtifactAdapter> maybeAdapter;
-        // if not available in expansion parameters then try to find the latest version and
-        // update the dependency
+        // if not available in input expansion parameters then try to find the latest version and
+        // update the dependency and add to runtime expansion params
         if (!StringUtils.isBlank(Canonicals.getVersion(dependency.getReference()))) {
             maybeAdapter = Optional.ofNullable(getArtifactByCanonical(dependency.getReference(), repository));
         } else {
@@ -453,11 +458,6 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
                             maybeAdapter.get().getUrl() + "|"
                                     + maybeAdapter.get().getVersion());
         }
-
-        ;
-        // TODO: Since the version wasn't pinned or specified in the expansion parameters, we need to pin it in the
-        // expansion parameters
-        // now that it's been determined.
 
         return maybeAdapter;
     }

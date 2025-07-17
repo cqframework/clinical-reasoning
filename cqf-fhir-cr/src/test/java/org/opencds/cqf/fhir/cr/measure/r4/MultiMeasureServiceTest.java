@@ -69,10 +69,6 @@ class MultiMeasureServiceTest {
                 .up()
                 .hasScore("0.5714285714285714")
                 .up()
-                .hasMeasureReportStatus(MeasureReportStatus.ERROR)
-                .hasContainedOperationOutcome()
-                .hasContainedOperationOutcomeMsg("Patient/female-1988-2")
-                .hasContainedOperationOutcomeMsg("Invalid Interval")
                 .up()
                 .measureReport("http://example.com/Measure/MinimalProportionBooleanBasisSingleGroup")
                 .hasReportType("Summary")
@@ -167,7 +163,10 @@ class MultiMeasureServiceTest {
                 .hasCount(10)
                 .up()
                 .up()
-                .up();
+                .hasMeasureReportStatus(MeasureReportStatus.ERROR)
+                .hasContainedOperationOutcome()
+                .hasContainedOperationOutcomeMsg("Patient/female-1988-2")
+                .hasContainedOperationOutcomeMsg("Invalid Interval");
     }
 
     @Test
@@ -211,10 +210,6 @@ class MultiMeasureServiceTest {
                 .up()
                 .hasScore("0.5714285714285714")
                 .up()
-                .hasMeasureReportStatus(MeasureReportStatus.ERROR)
-                .hasContainedOperationOutcome()
-                .hasContainedOperationOutcomeMsg("Patient/female-1988-2")
-                .hasContainedOperationOutcomeMsg("Invalid Interval")
                 .up()
                 .measureReport("http://example.com/Measure/MinimalProportionBooleanBasisSingleGroup")
                 .hasReportType("Summary")
@@ -295,6 +290,10 @@ class MultiMeasureServiceTest {
                 .up()
                 .up()
                 .measureReport("http://example.com/Measure/MinimalContinuousVariableResourceBasisSingleGroup")
+                .hasMeasureReportStatus(MeasureReportStatus.ERROR)
+                .hasContainedOperationOutcome()
+                .hasContainedOperationOutcomeMsg("Patient/female-1988-2")
+                .hasContainedOperationOutcomeMsg("Invalid Interval")
                 .firstGroup()
                 .population("initial-population")
                 .hasCount(10)
@@ -345,7 +344,9 @@ class MultiMeasureServiceTest {
                 .getFirstMeasureReport()
                 .hasReportType("Individual")
                 .up()
-                .measureReport("http://example.com/Measure/MinimalProportionNoBasisSingleGroup", "Patient/female-1988-2")
+                .measureReport(
+                        "http://example.com/Measure/MinimalContinuousVariableResourceBasisSingleGroup",
+                        "Patient/female-1988-2")
                 .hasMeasureReportStatus(MeasureReportStatus.ERROR)
                 .hasContainedOperationOutcome()
                 .hasContainedOperationOutcomeMsg("Patient/female-1988-2")

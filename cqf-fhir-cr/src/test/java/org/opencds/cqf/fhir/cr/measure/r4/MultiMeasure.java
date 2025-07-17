@@ -296,12 +296,12 @@ class MultiMeasure {
 
         public SelectedMeasureReport measureReport(String measureUrl, String subject) {
             return this.measureReport(g -> resourceToMeasureReport(
-                g.getEntry().stream()
-                    .filter(x ->
-                        x.getResource().getResourceType().toString().equals("MeasureReport"))
-                    .toList(),
-                measureUrl,
-                subject));
+                    g.getEntry().stream()
+                            .filter(x ->
+                                    x.getResource().getResourceType().toString().equals("MeasureReport"))
+                            .toList(),
+                    measureUrl,
+                    subject));
         }
 
         public SelectedMeasureReport getFirstMeasureReport() {
@@ -323,13 +323,15 @@ class MultiMeasure {
             return matchedReport;
         }
 
-        public MeasureReport resourceToMeasureReport(List<BundleEntryComponent> entries, String measureUrl, String subject) {
+        public MeasureReport resourceToMeasureReport(
+                List<BundleEntryComponent> entries, String measureUrl, String subject) {
             IParser parser = FhirContext.forR4Cached().newJsonParser();
             MeasureReport matchedReport = null;
             for (int i = 0; i < entries.size(); i++) {
                 MeasureReport report = (MeasureReport) parser.parseResource(
-                    parser.encodeResourceToString(entries.get(i).getResource()));
-                if (report.getMeasure().equals(measureUrl) && report.getSubject().getReference().equals(subject)) {
+                        parser.encodeResourceToString(entries.get(i).getResource()));
+                if (report.getMeasure().equals(measureUrl)
+                        && report.getSubject().getReference().equals(subject)) {
                     matchedReport = report;
                     break;
                 }

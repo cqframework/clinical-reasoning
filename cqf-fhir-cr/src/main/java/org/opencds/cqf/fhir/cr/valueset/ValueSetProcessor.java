@@ -34,7 +34,10 @@ public class ValueSetProcessor {
         this(repository, EvaluationSettings.getDefault(), new TerminologyServerClientSettings());
     }
 
-    public ValueSetProcessor(IRepository repository, EvaluationSettings evaluationSettings, TerminologyServerClientSettings terminologyServerClientSettings) {
+    public ValueSetProcessor(
+            IRepository repository,
+            EvaluationSettings evaluationSettings,
+            TerminologyServerClientSettings terminologyServerClientSettings) {
         this(repository, evaluationSettings, null, null, terminologyServerClientSettings);
     }
 
@@ -78,7 +81,9 @@ public class ValueSetProcessor {
     }
 
     public IBaseBundle packageValueSet(IBaseResource valueSet, IBaseParameters parameters) {
-        var processor = packageProcessor != null ? packageProcessor : new PackageProcessor(repository, terminologyServerClientSettings);
+        var processor = packageProcessor != null
+                ? packageProcessor
+                : new PackageProcessor(repository, terminologyServerClientSettings);
         return processor.packageResource(valueSet, parameters);
     }
 

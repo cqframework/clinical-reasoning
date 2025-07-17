@@ -25,6 +25,7 @@ public class ReleaseProcessor implements IReleaseProcessor {
 
     @Override
     public IBaseBundle releaseResource(IBaseResource resource, IBaseParameters parameters) {
-        return (IBaseBundle) visitor.visit(adapterFactory.createKnowledgeArtifactAdapter((IDomainResource) resource), parameters);
+        return (IBaseBundle)
+                visitor.visit(adapterFactory.createKnowledgeArtifactAdapter((IDomainResource) resource), parameters);
     }
 }

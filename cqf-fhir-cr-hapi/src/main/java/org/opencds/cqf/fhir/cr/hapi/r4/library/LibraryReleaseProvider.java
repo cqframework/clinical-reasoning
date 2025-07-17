@@ -57,9 +57,7 @@ public class LibraryReleaseProvider {
                 requireNonExperimental,
                 terminologyEndpoint,
                 releaseLabel);
-        return libraryProcessorFactory
-            .create(requestDetails)
-            .releaseLibrary(Eithers.for3(null, id, null), params);
+        return libraryProcessorFactory.create(requestDetails).releaseLibrary(Eithers.for3(null, id, null), params);
     }
 
     @Operation(name = "$release", idempotent = true, global = true, type = Library.class)
@@ -76,15 +74,13 @@ public class LibraryReleaseProvider {
             throws FHIRException {
         var idToUse = (IdType) getIdType(fhirVersion, "Library", id);
         var params = getReleaseParameters(
-            version,
-            versionBehavior,
-            latestFromTxServer,
-            requireNonExperimental,
-            terminologyEndpoint,
-            releaseLabel);
-        return libraryProcessorFactory
-            .create(requestDetails)
-            .releaseLibrary(Eithers.for3(null, idToUse, null), params);
+                version,
+                versionBehavior,
+                latestFromTxServer,
+                requireNonExperimental,
+                terminologyEndpoint,
+                releaseLabel);
+        return libraryProcessorFactory.create(requestDetails).releaseLibrary(Eithers.for3(null, idToUse, null), params);
     }
 
     private static Parameters getReleaseParameters(

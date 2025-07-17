@@ -234,9 +234,11 @@ public class ReleaseVisitor {
         }
     }
 
-    public static void captureInputExpansionParams(IBaseParameters inputExpansionParams, IKnowledgeArtifactAdapter rootAdapter) {
+    public static void captureInputExpansionParams(
+            IBaseParameters inputExpansionParams, IKnowledgeArtifactAdapter rootAdapter) {
         if (inputExpansionParams != null) {
-            var inputExpansionParametersExtension = new Extension(Constants.CQF_INPUT_EXPANSION_PARAMETERS, new Reference("#input-exp-params"));
+            var inputExpansionParametersExtension =
+                    new Extension(Constants.CQF_INPUT_EXPANSION_PARAMETERS, new Reference("#input-exp-params"));
             rootAdapter.addExtension(inputExpansionParametersExtension);
             inputExpansionParams.setId("input-exp-params");
         }

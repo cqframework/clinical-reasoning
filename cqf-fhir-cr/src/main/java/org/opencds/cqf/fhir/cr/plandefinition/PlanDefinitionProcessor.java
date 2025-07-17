@@ -53,7 +53,10 @@ public class PlanDefinitionProcessor {
         this(repository, EvaluationSettings.getDefault(), new TerminologyServerClientSettings());
     }
 
-    public PlanDefinitionProcessor(IRepository repository, EvaluationSettings evaluationSettings, TerminologyServerClientSettings terminologyServerClientSettings) {
+    public PlanDefinitionProcessor(
+            IRepository repository,
+            EvaluationSettings evaluationSettings,
+            TerminologyServerClientSettings terminologyServerClientSettings) {
         this(repository, evaluationSettings, null, null, null, null, null, terminologyServerClientSettings);
     }
 
@@ -116,7 +119,9 @@ public class PlanDefinitionProcessor {
     }
 
     public IBaseBundle packagePlanDefinition(IBaseResource planDefinition, IBaseParameters parameters) {
-        var processor = packageProcessor != null ? packageProcessor : new PackageProcessor(repository, terminologyServerClientSettings);
+        var processor = packageProcessor != null
+                ? packageProcessor
+                : new PackageProcessor(repository, terminologyServerClientSettings);
         return processor.packageResource(planDefinition, parameters);
     }
 

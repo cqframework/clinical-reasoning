@@ -158,7 +158,6 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
                 latestFromTxServer,
                 terminologyEndpoint.orElse(null));
 
-
         // remove duplicates and add
         var relatedArtifacts = rootAdapter.getRelatedArtifact();
         var distinctResolvedRelatedArtifacts = new ArrayList<>(relatedArtifacts);
@@ -211,13 +210,17 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
         return repository.transaction(transactionBundle);
     }
 
-    private void captureInputExpansionParams(IBaseParameters inputExpansionParams, IKnowledgeArtifactAdapter rootAdapter) {
+    private void captureInputExpansionParams(
+            IBaseParameters inputExpansionParams, IKnowledgeArtifactAdapter rootAdapter) {
         if (this.fhirVersion().equals(FhirVersionEnum.DSTU3)) {
-            org.opencds.cqf.fhir.cr.visitor.dstu3.ReleaseVisitor.captureInputExpansionParams(inputExpansionParams, rootAdapter);
+            org.opencds.cqf.fhir.cr.visitor.dstu3.ReleaseVisitor.captureInputExpansionParams(
+                    inputExpansionParams, rootAdapter);
         } else if (this.fhirVersion().equals(FhirVersionEnum.R4)) {
-            org.opencds.cqf.fhir.cr.visitor.r4.ReleaseVisitor.captureInputExpansionParams(inputExpansionParams, rootAdapter);
+            org.opencds.cqf.fhir.cr.visitor.r4.ReleaseVisitor.captureInputExpansionParams(
+                    inputExpansionParams, rootAdapter);
         } else if (this.fhirVersion().equals(FhirVersionEnum.R5)) {
-            org.opencds.cqf.fhir.cr.visitor.r5.ReleaseVisitor.captureInputExpansionParams(inputExpansionParams, rootAdapter);
+            org.opencds.cqf.fhir.cr.visitor.r5.ReleaseVisitor.captureInputExpansionParams(
+                    inputExpansionParams, rootAdapter);
         }
     }
 

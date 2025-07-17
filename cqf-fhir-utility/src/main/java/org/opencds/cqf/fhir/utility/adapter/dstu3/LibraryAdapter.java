@@ -261,8 +261,8 @@ public class LibraryAdapter extends KnowledgeArtifactAdapter implements ILibrary
             }
 
             if (parametersWithName.stream().noneMatch(p -> ((IPrimitiveType<String>) p.getValue())
-                            .getValueAsString()
-                            .equals(canonical))) {
+                    .getValueAsString()
+                    .equals(canonical))) {
                 var parameterToAdd = new ParametersParameterComponent();
                 parameterToAdd.setName(parameterName);
                 parameterToAdd.setValue(new UriType(canonical));

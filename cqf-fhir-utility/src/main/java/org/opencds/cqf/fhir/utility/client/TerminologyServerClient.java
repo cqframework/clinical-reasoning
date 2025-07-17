@@ -115,7 +115,10 @@ public class TerminologyServerClient {
                 .orElseThrow(() -> new UnprocessableEntityException("Cannot expand ValueSet without VSAC API Key."));
 
         var fhirClient = fhirContext.newRestfulGenericClient(getAddressBase(endpoint.getAddress()));
-        fhirClient.getFhirContext().getRestfulClientFactory().setSocketTimeout(terminologyServerClientSettings.getSocketTimeout() * 1000);
+        fhirClient
+                .getFhirContext()
+                .getRestfulClientFactory()
+                .setSocketTimeout(terminologyServerClientSettings.getSocketTimeout() * 1000);
 
         Clients.registerAdditionalRequestHeadersAuth(fhirClient, username, apiKey);
         return fhirClient;

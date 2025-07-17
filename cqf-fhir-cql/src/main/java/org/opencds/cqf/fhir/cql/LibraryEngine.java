@@ -24,8 +24,8 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
+import org.opencds.cqf.cql.engine.execution.CqlEngine.EvaluationResultsForMultiLib;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
-import org.opencds.cqf.cql.engine.execution.SearchableLibraryIdentifier;
 import org.opencds.cqf.fhir.cql.engine.parameters.CqlFhirParametersConverter;
 import org.opencds.cqf.fhir.cql.engine.parameters.CqlParameterDefinition;
 import org.opencds.cqf.fhir.utility.CqfExpression;
@@ -326,7 +326,7 @@ public class LibraryEngine {
         return result;
     }
 
-    public Map<SearchableLibraryIdentifier, EvaluationResult> getEvaluationResult(
+    public EvaluationResultsForMultiLib getEvaluationResult(
             List<VersionedIdentifier> ids,
             String patientId,
             IBaseParameters parameters,
@@ -337,8 +337,11 @@ public class LibraryEngine {
             @Nullable ZonedDateTime zonedDateTime,
             CqlEngine engine) {
 
-        logger.info("ids: {}, patientId: {}, zonedDateTime: {}", ids.stream().map(
-            VersionedIdentifier::getId).toList(), patientId, zonedDateTime);
+        logger.info(
+                "ids: {}, patientId: {}, zonedDateTime: {}",
+                ids.stream().map(VersionedIdentifier::getId).toList(),
+                patientId,
+                zonedDateTime);
 
         // LUKETODO: better name
         var stuff = pre(parameters, rawParameters, additionalData, cqlFhirParametersConverter, engine);
@@ -348,13 +351,14 @@ public class LibraryEngine {
                 .map(id -> new VersionedIdentifier().withId(id.getId()))
                 .toList();
 
-        return stuff.engine().evaluate(
-                idsCloned,
-                expressions,
-                buildContextParameter(patientId),
-                stuff.evaluationParameters(),
-                null,
-            zonedDateTime);
+        return stuff.engine()
+                .evaluate(
+                        idsCloned,
+                        expressions,
+                        buildContextParameter(patientId),
+                        stuff.evaluationParameters(),
+                        null,
+                        zonedDateTime);
     }
 
     public EvaluationResult getEvaluationResult(
@@ -370,16 +374,16 @@ public class LibraryEngine {
 
         logger.info("id: {}, patientId: {}, zonedDateTime: {}", id.getId(), patientId, zonedDateTime);
 
-        var stuff = pre(parameters, rawParameters, additionalData, cqlFhirParametersConverter,
-            engine);
+        var stuff = pre(parameters, rawParameters, additionalData, cqlFhirParametersConverter, engine);
 
-        return stuff.engine().evaluate(
-                new VersionedIdentifier().withId(id.getId()),
-                expressions,
-                buildContextParameter(patientId),
-                stuff.evaluationParameters(),
-                null,
-                zonedDateTime);
+        return stuff.engine()
+                .evaluate(
+                        new VersionedIdentifier().withId(id.getId()),
+                        expressions,
+                        buildContextParameter(patientId),
+                        stuff.evaluationParameters(),
+                        null,
+                        zonedDateTime);
     }
 
     private Stuff pre(
@@ -413,5 +417,5 @@ public class LibraryEngine {
 
     // LUKETODO:
     // LUKETODO: better name
-    private record Stuff(CqlEngine engine, Map<String,Object> evaluationParameters) {}
+    private record Stuff(CqlEngine engine, Map<String, Object> evaluationParameters) {}
 }

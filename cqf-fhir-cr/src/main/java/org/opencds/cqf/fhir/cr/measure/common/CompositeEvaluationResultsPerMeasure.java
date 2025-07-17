@@ -69,6 +69,12 @@ public class CompositeEvaluationResultsPerMeasure {
             return new CompositeEvaluationResultsPerMeasure(this);
         }
 
+        public void addResults(List<IIdType> measureIds, String subjectId, EvaluationResult evaluationResult) {
+            for (IIdType measureId : measureIds) {
+                addResult(measureId, subjectId, evaluationResult);
+            }
+        }
+
         public void addResult(IIdType measureId, String subjectId, EvaluationResult evaluationResult) {
             var resultPerMeasure =
                     resultsPerMeasure.computeIfAbsent(measureId.toUnqualifiedVersionless(), k -> new HashMap<>());

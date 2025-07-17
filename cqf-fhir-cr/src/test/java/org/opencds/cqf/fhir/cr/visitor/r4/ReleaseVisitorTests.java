@@ -41,6 +41,7 @@ import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Period;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.RelatedArtifact;
 import org.hl7.fhir.r4.model.RelatedArtifact.RelatedArtifactType;
 import org.hl7.fhir.r4.model.SearchParameter;
@@ -261,10 +262,8 @@ class ReleaseVisitorTests {
         Library library = repo.read(Library.class, new IdType("Library/ecqm-update-2024-05-02"))
                 .copy();
         ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
-        
-        Parameters params = parameters(
-                part("version", "1.0.0"),
-                part("versionBehavior", new CodeType("default")));
+
+        Parameters params = parameters(part("version", "1.0.0"), part("versionBehavior", new CodeType("default")));
 
         ReleaseVisitor releaseVisitor = new ReleaseVisitor(repo);
         // Approval date is required to release an artifact
@@ -806,5 +805,34 @@ class ReleaseVisitorTests {
                 maybeRetiredLeafRA.get().getResource());
         assertSame(PublicationStatus.RETIRED, retiredLeaf.getStatus());
         assertEquals("3.2.0", Canonicals.getVersion(maybeRetiredLeafRA.get().getResource()));
+    }
+
+    @Test
+    void release_should_capture_input_and_runtime_expansion_params() {
+        var bundle = (Bundle) jsonParser.parseResource(
+                ReleaseVisitorTests.class.getResourceAsStream("Bundle-versioned-and-unversioned-dependency.json"));
+        repo.transaction(bundle);
+        var releaseVisitor = new ReleaseVisitor(repo);
+        var originalLibrary = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
+                .copy();
+        var testLibrary = originalLibrary.copy();
+        var libraryAdapter = new AdapterFactory().createLibrary(testLibrary);
+        var params =
+                parameters(part("version", new StringType("1.2.3")), part("versionBehavior", new CodeType("force")));
+        var returnResource = (Bundle) libraryAdapter.accept(releaseVisitor, params);
+        var maybeLib = returnResource.getEntry().stream()
+                .filter(entry -> entry.getResponse().getLocation().contains("Library/SpecificationLibrary"))
+                .findFirst();
+        assertTrue(maybeLib.isPresent());
+        var releasedLibrary =
+                repo.read(Library.class, new IdType(maybeLib.get().getResponse().getLocation()));
+        var authoredExpansionParamsExt = releasedLibrary.getExtensionByUrl(Constants.CQF_INPUT_EXPANSION_PARAMETERS);
+        var runtimeExpansionParamsExt = releasedLibrary.getExtensionByUrl(Constants.CQF_EXPANSION_PARAMETERS);
+        var authoredExpansionParams = (Parameters)
+                releasedLibrary.getContained(((Reference) authoredExpansionParamsExt.getValue()).getReference());
+        var runtimeExpansionParams = (Parameters)
+                releasedLibrary.getContained(((Reference) runtimeExpansionParamsExt.getValue()).getReference());
+        assertEquals(1, authoredExpansionParams.getParameter().size());
+        assertEquals(2, runtimeExpansionParams.getParameter().size());
     }
 }

@@ -38,7 +38,7 @@ public class CrConfigCondition implements Condition {
             return false;
         }
 
-        try{
+        try {
             beanFactory.getBean(TerminologyServerClientSettings.class);
         } catch (Exception e) {
             ourLog.warn("CrConfigCondition not met: Missing TerminologyServerClientSettings bean");

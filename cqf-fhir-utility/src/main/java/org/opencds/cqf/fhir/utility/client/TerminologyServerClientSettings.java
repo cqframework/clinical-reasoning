@@ -51,7 +51,9 @@ public class TerminologyServerClientSettings {
         return this;
     }
 
-    public int getSocketTimeout() { return socketTimeout; }
+    public int getSocketTimeout() {
+        return socketTimeout;
+    }
 
     public TerminologyServerClientSettings setSocketTimeout(int socketTimeout) {
         this.socketTimeout = socketTimeout;

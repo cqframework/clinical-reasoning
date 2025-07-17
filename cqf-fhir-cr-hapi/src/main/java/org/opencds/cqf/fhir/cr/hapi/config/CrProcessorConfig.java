@@ -46,13 +46,19 @@ public class CrProcessorConfig {
 
     @Bean
     ILibraryProcessorFactory libraryProcessorFactory(
-            IRepositoryFactory repositoryFactory, EvaluationSettings evaluationSettings, TerminologyServerClientSettings terminologyServerClientSettings) {
-        return rd -> new LibraryProcessor(repositoryFactory.create(rd), evaluationSettings, terminologyServerClientSettings);
+            IRepositoryFactory repositoryFactory,
+            EvaluationSettings evaluationSettings,
+            TerminologyServerClientSettings terminologyServerClientSettings) {
+        return rd ->
+                new LibraryProcessor(repositoryFactory.create(rd), evaluationSettings, terminologyServerClientSettings);
     }
 
     @Bean
     IValueSetProcessorFactory valueSetProcessorFactory(
-            IRepositoryFactory repositoryFactory, EvaluationSettings evaluationSettings, TerminologyServerClientSettings terminologyServerClientSettings) {
-        return rd -> new ValueSetProcessor(repositoryFactory.create(rd), evaluationSettings, terminologyServerClientSettings);
+            IRepositoryFactory repositoryFactory,
+            EvaluationSettings evaluationSettings,
+            TerminologyServerClientSettings terminologyServerClientSettings) {
+        return rd -> new ValueSetProcessor(
+                repositoryFactory.create(rd), evaluationSettings, terminologyServerClientSettings);
     }
 }

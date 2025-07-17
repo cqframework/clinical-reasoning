@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Basic;
@@ -230,6 +231,16 @@ public class ReleaseVisitor {
                     }
                 }
             }
+        }
+    }
+
+    public static void captureInputExpansionParams(
+            IBaseParameters inputExpansionParams, IKnowledgeArtifactAdapter rootAdapter) {
+        if (inputExpansionParams != null) {
+            var inputExpansionParametersExtension =
+                    new Extension(Constants.CQF_INPUT_EXPANSION_PARAMETERS, new Reference("#input-exp-params"));
+            rootAdapter.addExtension(inputExpansionParametersExtension);
+            inputExpansionParams.setId("input-exp-params");
         }
     }
 

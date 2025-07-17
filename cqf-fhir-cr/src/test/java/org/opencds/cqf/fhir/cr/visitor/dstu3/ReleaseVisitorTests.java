@@ -804,4 +804,44 @@ class ReleaseVisitorTests {
                 "3.2.0",
                 Canonicals.getVersion(maybeRetiredLeafRA.get().getResource().getReference()));
     }
+
+    @Test
+    void release_should_capture_input_and_runtime_expansion_params() {
+        var bundle = (Bundle) jsonParser.parseResource(
+                org.opencds.cqf.fhir.cr.visitor.dstu3.ReleaseVisitorTests.class.getResourceAsStream(
+                        "Bundle-versioned-and-unversioned-dependency.json"));
+        repo.transaction(bundle);
+        var releaseVisitor = new ReleaseVisitor(repo);
+        var originalLibrary = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
+                .copy();
+        var testLibrary = originalLibrary.copy();
+        var libraryAdapter = new AdapterFactory().createLibrary(testLibrary);
+        var params =
+                parameters(part("version", new StringType("1.2.3")), part("versionBehavior", new CodeType("force")));
+        var returnResource = (Bundle) libraryAdapter.accept(releaseVisitor, params);
+        var maybeLib = returnResource.getEntry().stream()
+                .filter(entry -> entry.getResponse().getLocation().contains("Library/SpecificationLibrary"))
+                .findFirst();
+        assertTrue(maybeLib.isPresent());
+        var releasedLibrary =
+                repo.read(Library.class, new IdType(maybeLib.get().getResponse().getLocation()));
+        var authoredExpansionParamsExt = releasedLibrary.getExtensionByUrl(Constants.CQF_INPUT_EXPANSION_PARAMETERS);
+        var runtimeExpansionParamsExt = releasedLibrary.getExtensionByUrl(Constants.CQF_EXPANSION_PARAMETERS);
+        var authoredExpansionParams = (Parameters) releasedLibrary.getContained().stream()
+                .filter(cont -> cont.getId()
+                        .equals(((Reference) authoredExpansionParamsExt.getValue())
+                                .getReference()
+                                .substring(1)))
+                .findFirst()
+                .get();
+        var runtimeExpansionParams = (Parameters) releasedLibrary.getContained().stream()
+                .filter(cont -> cont.getId()
+                        .equals(((Reference) runtimeExpansionParamsExt.getValue())
+                                .getReference()
+                                .substring(1)))
+                .findFirst()
+                .get();
+        assertEquals(1, authoredExpansionParams.getParameter().size());
+        assertEquals(2, runtimeExpansionParams.getParameter().size());
+    }
 }

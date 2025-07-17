@@ -48,7 +48,10 @@ public class LibraryProcessor {
         this(repository, EvaluationSettings.getDefault(), new TerminologyServerClientSettings());
     }
 
-    public LibraryProcessor(IRepository repository, EvaluationSettings evaluationSettings, TerminologyServerClientSettings terminologyServerClientSettings) {
+    public LibraryProcessor(
+            IRepository repository,
+            EvaluationSettings evaluationSettings,
+            TerminologyServerClientSettings terminologyServerClientSettings) {
         this(repository, evaluationSettings, null, null, null, null, terminologyServerClientSettings);
     }
 
@@ -96,17 +99,21 @@ public class LibraryProcessor {
     }
 
     public IBaseBundle packageLibrary(IBaseResource library, IBaseParameters parameters) {
-        var processor = packageProcessor != null ? packageProcessor : new PackageProcessor(repository, terminologyServerClientSettings);
+        var processor = packageProcessor != null
+                ? packageProcessor
+                : new PackageProcessor(repository, terminologyServerClientSettings);
         return processor.packageResource(library, parameters);
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseBundle releaseLibrary(
-        Either3<C, IIdType, R> library, IBaseParameters parameters) {
+            Either3<C, IIdType, R> library, IBaseParameters parameters) {
         return releaseLibrary(resolveLibrary(library), parameters);
     }
 
     public IBaseBundle releaseLibrary(IBaseResource library, IBaseParameters parameters) {
-        var processor = releaseProcessor != null ? releaseProcessor : new ReleaseProcessor(repository, terminologyServerClientSettings);
+        var processor = releaseProcessor != null
+                ? releaseProcessor
+                : new ReleaseProcessor(repository, terminologyServerClientSettings);
         return processor.releaseResource(library, parameters);
     }
 

@@ -72,7 +72,12 @@ public class TestValueSet {
                         .getTerminologySettings()
                         .setValuesetExpansionMode(VALUESET_EXPANSION_MODE.PERFORM_NAIVE_EXPANSION);
             }
-            return new ValueSetProcessor(repository, evaluationSettings, packageProcessor, dataRequirementsProcessor, new TerminologyServerClientSettings());
+            return new ValueSetProcessor(
+                    repository,
+                    evaluationSettings,
+                    packageProcessor,
+                    dataRequirementsProcessor,
+                    new TerminologyServerClientSettings());
         }
 
         public When when() {

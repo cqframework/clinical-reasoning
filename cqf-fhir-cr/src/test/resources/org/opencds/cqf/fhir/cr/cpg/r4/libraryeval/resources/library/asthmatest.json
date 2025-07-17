@@ -2,7 +2,7 @@
 	"resourceType": "Library",
 	"id": "asthmatest",
 	"version": "1.0.0",
-	"name": "AsthmaTest",
+	"name": "asthmatest",
 	"status": "draft",
 	"type": {
 		"coding": [

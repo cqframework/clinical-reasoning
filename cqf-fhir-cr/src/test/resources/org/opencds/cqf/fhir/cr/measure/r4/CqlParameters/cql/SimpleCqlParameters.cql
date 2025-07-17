@@ -1,4 +1,7 @@
-library SimpleCql
+/*
+CQL to be used across a variety of tests involving CQL parameters.
+*/
+library SimpleCqlParameters
 
 using FHIR version '4.0.1'
 
@@ -7,6 +10,8 @@ include FHIRHelpers version '4.0.1' called FHIRHelpers
 parameter "Measurement Period" Interval<DateTime> default Interval[@2024-01-01T00:00:00, @2024-12-31T23:59:59]
 // cql parameter that can pass in fhir id of an encounter
 parameter practitionerParam String
+
+parameter encounterParam String
 
 context Patient
 
@@ -129,10 +134,6 @@ define "Encounter Cancelled":
     [Encounter] E
        where E.status = 'cancelled'
 
-define "Encounter Status":
-    [Encounter] E
-         return E.status
-
 define "Encounter InProgress":
     [Encounter] E
        where E.status = 'in-progress'
@@ -145,24 +146,16 @@ define "Encounter Not Finished":
     [Encounter] E
         where E.status != 'finished'
 
+define "Matching Either Practitioner Or Encounter":
+    exists ("Matching General Practitioner")
+        or exists ("Matching Patient By Encounter")
+
 define "Matching General Practitioner":
     [Patient] p
        where Last(Split(First(p.generalPractitioner.reference),'/')) = Last(Split(practitionerParam,'/'))
 
-define "Age":
-    AgeInYearsAt(start of "Measurement Period")
-
-define "Date":
-    Interval[@2024-02-01T00:00:00, @2024-10-31T23:59:59]
-
-define "ip date":
-    "Date"
-
-define "den date":
-    "Date"
-
-define "num date":
-    "Date"
-
-define "exc date":
-    "Date"
+define "Matching Patient By Encounter":
+    [Patient] p
+        with [Encounter] e
+            such that Last(Split(e.id,'')) = encounterParam
+                and Last(Split(e.subject.reference, '/')) = Last(Split(p.id,'/'))

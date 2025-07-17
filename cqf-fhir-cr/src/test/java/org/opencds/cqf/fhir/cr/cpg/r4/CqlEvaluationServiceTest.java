@@ -19,7 +19,7 @@ class CqlEvaluationServiceTest {
     void libraryEvaluationService_inlineAsthma() {
         var content =
                 """
-        library AsthmaTest version '1.0.0'
+        library asthmatest version '1.0.0'
 
         using FHIR version '4.0.1'
 
@@ -31,11 +31,11 @@ class CqlEvaluationServiceTest {
 
         context Patient
 
-        define "Asthma Diagnosis"
+        define "Asthma Diagnosis":
+          [Condition: "Asthma"]
 
-        [Condition: "Asthma"]
-            define "Has Asthma Diagnosis":
-                exists("Asthma Diagnosis")
+        define "Has Asthma Diagnosis":
+          exists("Asthma Diagnosis")
         """;
         var when = Library.given()
                 .repositoryFor("libraryeval")

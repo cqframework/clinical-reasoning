@@ -1014,7 +1014,15 @@ public class Measure {
                     .orElse(null));
         }
 
-        public SelectedStratum stratumByComponentText(String textValue) {
+        public SelectedStratum stratumByComponentValueText(String textValue) {
+            return stratum(s -> s.getStratum().stream()
+                    .filter(x -> x.getComponent().stream()
+                            .anyMatch(t -> t.getValue().getText().equals(textValue)))
+                    .findFirst()
+                    .get());
+        }
+
+        public SelectedStratum stratumByComponentCodeText(String textValue) {
             return stratum(s -> s.getStratum().stream()
                     .filter(x -> x.getComponent().stream()
                             .anyMatch(t -> t.getCode().getText().equals(textValue)))

@@ -24,6 +24,7 @@ import org.hl7.fhir.dstu3.model.PlanDefinition;
 import org.hl7.fhir.dstu3.model.PlanDefinition.PlanDefinitionActionComponent;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.RelatedArtifact;
+import org.hl7.fhir.dstu3.model.RelatedArtifact.RelatedArtifactType;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.UriType;
 import org.junit.jupiter.api.Test;
@@ -182,7 +183,9 @@ class PlanDefinitionAdapterTest {
                 "nestedActionDefinitionReference");
         var planDef = new PlanDefinition();
         planDef.getMeta().addProfile(dependencies.get(0));
-        planDef.getRelatedArtifactFirstRep().setResource(new Reference(dependencies.get(1)));
+        planDef.getRelatedArtifactFirstRep()
+                .setResource(new Reference(dependencies.get(1)))
+                .setType(RelatedArtifactType.DEPENDSON);
         planDef.getLibraryFirstRep().setReference(dependencies.get(2));
         var action = planDef.getActionFirstRep();
         action.getTriggerDefinitionFirstRep()
@@ -205,6 +208,55 @@ class PlanDefinitionAdapterTest {
         var adapter = adapterFactory.createKnowledgeArtifactAdapter(planDef);
         var extractedDependencies = adapter.getDependencies();
         assertEquals(extractedDependencies.size(), dependencies.size());
+        extractedDependencies.forEach(dep -> {
+            assertTrue(dependencies.contains(dep.getReference()));
+        });
+    }
+
+    @Test
+    void adapter_get_all_dependencies_with_non_depends_on_related_artifacts() {
+        var dependencies = List.of(
+                "profileRef",
+                "relatedArtifactRef",
+                "libraryRef",
+                "actionTriggerDataReqProfile",
+                "actionTriggerDataReqCodeFilterValueSet",
+                "actionInputProfile",
+                "actionInputCodeFilterValueSet",
+                "actionOutputProfile",
+                "actionOutputCodeFilterValueSet",
+                "actionDefinitionRef",
+                // no dependency test for action.condition.expression.reference and
+                // action.dynamicValue.expression.reference since these are not defined in DSTU3
+                // "actionConditionExpressionReference",
+                // "actionDynamicValueExpressionRef",
+                "cpgPartOfExtRef",
+                "nestedActionDefinitionReference");
+        var planDef = new PlanDefinition();
+        planDef.getMeta().addProfile(dependencies.get(0));
+        planDef.getRelatedArtifactFirstRep().setResource(new Reference(dependencies.get(1)));
+        planDef.getLibraryFirstRep().setReference(dependencies.get(2));
+        var action = planDef.getActionFirstRep();
+        action.getTriggerDefinitionFirstRep()
+                .getEventData()
+                .setProfile(List.of(new UriType(dependencies.get(3))))
+                .getCodeFilterFirstRep()
+                .setValueSet(new StringType(dependencies.get(4)));
+        action.getInputFirstRep()
+                .setProfile(List.of(new UriType(dependencies.get(5))))
+                .getCodeFilterFirstRep()
+                .setValueSet(new StringType(dependencies.get(6)));
+        action.getOutputFirstRep()
+                .setProfile(List.of(new UriType(dependencies.get(7))))
+                .getCodeFilterFirstRep()
+                .setValueSet(new StringType(dependencies.get(8)));
+        action.getDefinition().setReference(dependencies.get(9));
+        planDef.addExtension(new Extension(
+                "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-partOf", new UriType(dependencies.get(10))));
+        action.addAction().getDefinition().setReference(dependencies.get(11));
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(planDef);
+        var extractedDependencies = adapter.getDependencies();
+        assertEquals(extractedDependencies.size(), dependencies.size() - 1);
         extractedDependencies.forEach(dep -> {
             assertTrue(dependencies.contains(dep.getReference()));
         });

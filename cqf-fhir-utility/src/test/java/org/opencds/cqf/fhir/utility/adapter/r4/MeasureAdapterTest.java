@@ -195,7 +195,7 @@ class MeasureAdapterTest {
         var extractedDependencies = adapter.getDependencies();
         assertEquals(dependencies.size(), extractedDependencies.size());
         extractedDependencies.forEach(dep -> {
-            assertTrue(dependencies.indexOf(dep.getReference()) >= 0);
+            assertTrue(dependencies.contains(dep.getReference()));
         });
     }
 
@@ -225,7 +225,7 @@ class MeasureAdapterTest {
         // NOTE: The relatedArtifact is not of type 'depends-on' and shouldn't be included in the extraction
         assertEquals(dependencies.size() - 1, extractedDependencies.size());
         extractedDependencies.forEach(dep -> {
-            assertTrue(dependencies.indexOf(dep.getReference()) >= 0);
+            assertTrue(dependencies.contains(dep.getReference()));
         });
     }
 
@@ -254,7 +254,7 @@ class MeasureAdapterTest {
         var extractedDependencies = adapter.getDependencies();
         assertEquals(dependencies.size(), extractedDependencies.size());
         extractedDependencies.forEach(dep -> {
-            assertTrue(dependencies.indexOf(dep.getReference()) >= 0);
+            assertTrue(dependencies.contains(dep.getReference()));
         });
     }
 
@@ -272,9 +272,9 @@ class MeasureAdapterTest {
         measure.addExtension(Constants.CQFM_EFFECTIVE_DATA_REQUIREMENTS, new Reference("#test"));
         var adapter = adapterFactory.createKnowledgeArtifactAdapter(measure);
         var extractedDependencies = adapter.getDependencies();
-        assertEquals(dependencies.size() - 1, extractedDependencies.size());
+        assertEquals(0, extractedDependencies.size());
         extractedDependencies.forEach(dep -> {
-            assertTrue(dependencies.indexOf(dep.getReference()) >= 0);
+            assertTrue(dependencies.contains(dep.getReference()));
         });
     }
 }

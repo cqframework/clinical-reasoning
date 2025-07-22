@@ -6,11 +6,11 @@ import static java.util.stream.Collectors.toMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import org.hl7.fhir.r4.model.RelatedArtifact;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.PrimitiveType;
+import org.hl7.fhir.r4.model.RelatedArtifact;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IActivityDefinitionAdapter;
@@ -58,9 +58,9 @@ public class ActivityDefinitionAdapter extends KnowledgeArtifactAdapter implemen
 
         // relatedArtifact[].resource
         getRelatedArtifactsOfType(DEPENDSON).stream()
-            .filter(RelatedArtifact::hasResource)
-            .map(ra -> DependencyInfo.convertRelatedArtifact(ra, referenceSource))
-            .forEach(references::add);
+                .filter(RelatedArtifact::hasResource)
+                .map(ra -> DependencyInfo.convertRelatedArtifact(ra, referenceSource))
+                .forEach(references::add);
 
         // library[]
         if (hasLibrary()) {

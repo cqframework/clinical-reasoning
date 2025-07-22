@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.hl7.fhir.r4.model.RelatedArtifact;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CanonicalType;
@@ -19,6 +18,7 @@ import org.hl7.fhir.r4.model.PlanDefinition;
 import org.hl7.fhir.r4.model.PlanDefinition.PlanDefinitionActionConditionComponent;
 import org.hl7.fhir.r4.model.PlanDefinition.PlanDefinitionActionDynamicValueComponent;
 import org.hl7.fhir.r4.model.PrimitiveType;
+import org.hl7.fhir.r4.model.RelatedArtifact;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
@@ -76,10 +76,9 @@ public class PlanDefinitionAdapter extends KnowledgeArtifactAdapter implements I
 
         // relatedArtifact[].resource
         getRelatedArtifactsOfType(DEPENDSON).stream()
-            .filter(RelatedArtifact::hasResource)
-            .map(ra -> DependencyInfo.convertRelatedArtifact(ra, referenceSource))
-            .forEach(references::add);
-
+                .filter(RelatedArtifact::hasResource)
+                .map(ra -> DependencyInfo.convertRelatedArtifact(ra, referenceSource))
+                .forEach(references::add);
 
         // library[]
         List<CanonicalType> libraries = getPlanDefinition().getLibrary();

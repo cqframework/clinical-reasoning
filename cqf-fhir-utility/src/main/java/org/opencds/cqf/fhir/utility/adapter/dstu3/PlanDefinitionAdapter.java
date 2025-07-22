@@ -74,9 +74,9 @@ class PlanDefinitionAdapter extends KnowledgeArtifactAdapter implements IPlanDef
 
         // relatedArtifact[].resource
         getRelatedArtifactsOfType(DEPENDSON).stream()
-            .filter(RelatedArtifact::hasResource)
-            .map(ra -> DependencyInfo.convertRelatedArtifact(ra, referenceSource))
-            .forEach(references::add);
+                .filter(RelatedArtifact::hasResource)
+                .map(ra -> DependencyInfo.convertRelatedArtifact(ra, referenceSource))
+                .forEach(references::add);
 
         // library[]
         List<Reference> libraries = getPlanDefinition().getLibrary();

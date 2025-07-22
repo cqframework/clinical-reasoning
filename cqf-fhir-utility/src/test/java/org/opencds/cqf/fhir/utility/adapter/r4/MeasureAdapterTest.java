@@ -222,7 +222,7 @@ class MeasureAdapterTest {
         measure.addExtension(Constants.CQFM_EFFECTIVE_DATA_REQUIREMENTS, new Reference("#test"));
         var adapter = adapterFactory.createKnowledgeArtifactAdapter(measure);
         var extractedDependencies = adapter.getDependencies();
-        //NOTE: The relatedArtifact is not of type 'depends-on' and shouldn't be included in the extraction
+        // NOTE: The relatedArtifact is not of type 'depends-on' and shouldn't be included in the extraction
         assertEquals(dependencies.size() - 1, extractedDependencies.size());
         extractedDependencies.forEach(dep -> {
             assertTrue(dependencies.indexOf(dep.getReference()) >= 0);
@@ -232,20 +232,19 @@ class MeasureAdapterTest {
     @Test
     void adapter_get_all_dependencies_with_proper_depends_on_related_artifacts() {
         var dependencies = List.of(
-            "libraryProfileRef",
-            "relatedArtifactRef",
-            "dataRequirementProfileRef",
-            "dataRequirementCodeFilterRef",
-            "measureProfileRef");
+                "libraryProfileRef",
+                "relatedArtifactRef",
+                "dataRequirementProfileRef",
+                "dataRequirementCodeFilterRef",
+                "measureProfileRef");
         var library = new Library()
-            .setType(new CodeableConcept(new Coding(
-                "http://terminology.hl7.org/CodeSystem/library-type",
-                "module-definition",
-                "Module Definition")));
+                .setType(new CodeableConcept(new Coding(
+                        "http://terminology.hl7.org/CodeSystem/library-type",
+                        "module-definition",
+                        "Module Definition")));
         library.setId("test");
         library.getMeta().addProfile(dependencies.get(0));
-        library.getRelatedArtifactFirstRep().setResource(dependencies.get(1)).setType(
-            RelatedArtifactType.DEPENDSON);
+        library.getRelatedArtifactFirstRep().setResource(dependencies.get(1)).setType(RelatedArtifactType.DEPENDSON);
         library.addDataRequirement().addProfile(dependencies.get(2));
         library.addDataRequirement().addCodeFilter().setValueSet(dependencies.get(3));
         var measure = new Measure().addContained(new Patient()).addContained(library);
@@ -263,13 +262,12 @@ class MeasureAdapterTest {
     void adapter_get_all_dependencies_with_non_depends_on_related_artifacts() {
         var dependencies = List.of("relatedArtifactRef");
         var library = new Library()
-            .setType(new CodeableConcept(new Coding(
-                "http://terminology.hl7.org/CodeSystem/library-type",
-                "module-definition",
-                "Module Definition")));
+                .setType(new CodeableConcept(new Coding(
+                        "http://terminology.hl7.org/CodeSystem/library-type",
+                        "module-definition",
+                        "Module Definition")));
         library.setId("test");
-        library.getRelatedArtifactFirstRep().setResource(dependencies.get(0)).setType(
-            RelatedArtifactType.CITATION);
+        library.getRelatedArtifactFirstRep().setResource(dependencies.get(0)).setType(RelatedArtifactType.CITATION);
         var measure = new Measure().addContained(new Patient()).addContained(library);
         measure.addExtension(Constants.CQFM_EFFECTIVE_DATA_REQUIREMENTS, new Reference("#test"));
         var adapter = adapterFactory.createKnowledgeArtifactAdapter(measure);

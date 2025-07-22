@@ -88,9 +88,9 @@ public class LibraryAdapter extends KnowledgeArtifactAdapter implements ILibrary
 
         // relatedArtifact[].resource
         getRelatedArtifactsOfType(DEPENDSON).stream()
-            .filter(RelatedArtifact::hasResource)
-            .map(ra -> DependencyInfo.convertRelatedArtifact(ra, referenceSource))
-            .forEach(references::add);
+                .filter(RelatedArtifact::hasResource)
+                .map(ra -> DependencyInfo.convertRelatedArtifact(ra, referenceSource))
+                .forEach(references::add);
 
         getLibrary().getDataRequirement().forEach(dr -> {
             dr.getProfile().stream()

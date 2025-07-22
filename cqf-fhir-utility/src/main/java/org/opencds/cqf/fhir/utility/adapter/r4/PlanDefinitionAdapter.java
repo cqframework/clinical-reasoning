@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.hl7.fhir.r4.model.RelatedArtifact;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CanonicalType;
@@ -74,9 +75,11 @@ public class PlanDefinitionAdapter extends KnowledgeArtifactAdapter implements I
         */
 
         // relatedArtifact[].resource
-        references.addAll(getRelatedArtifact().stream()
-                .map(ra -> DependencyInfo.convertRelatedArtifact(ra, referenceSource))
-                .toList());
+        getRelatedArtifactsOfType(DEPENDSON).stream()
+            .filter(RelatedArtifact::hasResource)
+            .map(ra -> DependencyInfo.convertRelatedArtifact(ra, referenceSource))
+            .forEach(references::add);
+
 
         // library[]
         List<CanonicalType> libraries = getPlanDefinition().getLibrary();

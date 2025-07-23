@@ -21,6 +21,7 @@ import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.RelatedArtifact;
+import org.hl7.fhir.r4.model.RelatedArtifact.RelatedArtifactType;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.utility.adapter.IActivityDefinitionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.TestVisitor;
@@ -164,11 +165,29 @@ class ActivityDefinitionAdapterTest {
         var dependencies = List.of("profileRef", "relatedArtifactRef", "libraryRef");
         var activityDef = new ActivityDefinition();
         activityDef.getMeta().addProfile(dependencies.get(0));
-        activityDef.getRelatedArtifactFirstRep().setResource(dependencies.get(1));
+        activityDef
+                .getRelatedArtifactFirstRep()
+                .setResource(dependencies.get(1))
+                .setType(RelatedArtifactType.DEPENDSON);
         activityDef.addLibrary(dependencies.get(2));
         var adapter = adapterFactory.createKnowledgeArtifactAdapter(activityDef);
         var extractedDependencies = adapter.getDependencies();
         assertEquals(extractedDependencies.size(), dependencies.size());
+        extractedDependencies.forEach(dep -> {
+            assertTrue(dependencies.contains(dep.getReference()));
+        });
+    }
+
+    @Test
+    void adapter_get_all_dependencies_with_non_depends_on_related_artifacts() {
+        var dependencies = List.of("profileRef", "relatedArtifactRef", "libraryRef");
+        var activityDef = new ActivityDefinition();
+        activityDef.getMeta().addProfile(dependencies.get(0));
+        activityDef.getRelatedArtifactFirstRep().setResource(dependencies.get(1));
+        activityDef.addLibrary(dependencies.get(2));
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(activityDef);
+        var extractedDependencies = adapter.getDependencies();
+        assertEquals(extractedDependencies.size(), dependencies.size() - 1);
         extractedDependencies.forEach(dep -> {
             assertTrue(dependencies.contains(dep.getReference()));
         });

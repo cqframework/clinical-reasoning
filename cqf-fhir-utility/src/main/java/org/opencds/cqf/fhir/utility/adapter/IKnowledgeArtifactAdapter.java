@@ -40,6 +40,7 @@ import org.slf4j.LoggerFactory;
 
 public interface IKnowledgeArtifactAdapter extends IResourceAdapter {
     public static final Logger logger = LoggerFactory.getLogger(IKnowledgeArtifactAdapter.class);
+    static final String DEPENDSON = "depends-on";
 
     IDomainResource get();
 

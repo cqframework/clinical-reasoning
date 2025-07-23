@@ -3,6 +3,6 @@
     "url": "http://example.com/Measure/ABC",
     "resourceType" : "Measure",
     "library": [
-        "http://example.com/Library/ABC-LIB"
+        "http://example.com/Library/ABCLIB"
       ]
 }

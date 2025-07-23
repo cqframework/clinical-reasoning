@@ -318,7 +318,7 @@ public class MeasureProcessorUtils {
         }
 
         Object result;
-        context.getState().pushWindow();
+        context.getState().pushActivationFrame(ed);
         try {
             if (!isBooleanBasis) {
                 // subject based observations don't have a parameter to pass in
@@ -329,7 +329,7 @@ public class MeasureProcessorUtils {
             }
             result = context.getEvaluationVisitor().visitExpression(ed.getExpression(), context.getState());
         } finally {
-            context.getState().popWindow();
+            context.getState().popActivationFrame();
         }
 
         captureEvaluatedResources(outEvaluatedResources, context);

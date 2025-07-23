@@ -353,7 +353,7 @@ class ReleaseVisitorTests {
         var canonicalVersionParams = expansionParameters
                 .flatMap(p -> VisitorHelper.getStringListParameter(Constants.CANONICAL_VERSION, p))
                 .orElse(new ArrayList<>());
-        assertEquals(0, canonicalVersionParams.size());
+        assertEquals(1, canonicalVersionParams.size());
     }
 
     @Test

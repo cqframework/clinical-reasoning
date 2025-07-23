@@ -22,7 +22,6 @@
 
         <junit.version>5.10.2</junit.version>
         <slf4j.version>2.0.4</slf4j.version>
-        <cql.version>3.27.0-SNAPSHOT</cql.version>
         <cql.version>3.27.0</cql.version>
         <jmh.version>1.36</jmh.version>
         <spring.version>6.1.14</spring.version>

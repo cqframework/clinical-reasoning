@@ -6,7 +6,9 @@ import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_CRIT
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_SDE_REFERENCE_URL;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Table;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -18,9 +20,9 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CanonicalType;
@@ -401,25 +403,24 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         }
 
         if (!stratifierDef.components().isEmpty()) {
-            // StratifierComponentDef (expression name, id) -> Map<Subject String, Expression Result>
+
+            Table<String, ValueWrapper, StratifierComponentDef> subjectResultTable = HashBasedTable.create();
 
             // Component Stratifier
             // one or more criteria expression defined, one set of criteria results per component specified
             // results of component stratifier are an intersection of membership to both component result sets
-            List<Map<String, Pair<CriteriaResult, StratifierComponentDef>>> subjectCompValues =
-                    stratifierDef.components().stream()
-                            .map(component -> {
-                                Map<String, CriteriaResult> results = component.getResults();
-                                return results.entrySet().stream()
-                                        .collect(Collectors.toMap(
-                                                Map.Entry::getKey, entry -> Pair.of(entry.getValue(), component)));
-                            })
-                            .toList();
+
+            stratifierDef.components().forEach(component -> {
+                component.getResults().forEach((subject, result) -> {
+                    ValueWrapper valueWrapper = new ValueWrapper(result.rawValue());
+                    subjectResultTable.put(ResourceType.Patient + "/" + subject, valueWrapper, component);
+                });
+            });
 
             // Stratifiers should be of the same basis as population
             // Split subjects by result values
             // ex. all Male Patients and all Female Patients
-            componentStratifier(bc, reportStratifier, populations, groupDef, stratifierDef, subjectCompValues);
+            componentStratifier(bc, reportStratifier, populations, groupDef, subjectResultTable);
 
         } else {
             // standard Stratifier
@@ -436,73 +437,38 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         }
     }
 
+    public record ValueDef(ValueWrapper value, StratifierComponentDef def) {}
+
+    public static Map<Set<ValueDef>, List<String>> groupSubjectsByValueDefSet(
+            Table<String, ValueWrapper, StratifierComponentDef> table) {
+
+        // Step 1: Build Map<Subject, Set<ValueDef>>
+        Map<String, Set<ValueDef>> subjectToValueDefs = new HashMap<>();
+
+        for (Table.Cell<String, ValueWrapper, StratifierComponentDef> cell : table.cellSet()) {
+            subjectToValueDefs
+                    .computeIfAbsent(cell.getRowKey(), k -> new HashSet<>())
+                    .add(new ValueDef(cell.getColumnKey(), cell.getValue()));
+        }
+
+        // Step 2: Invert to Map<Set<ValueDef>, List<Subject>>
+        return subjectToValueDefs.entrySet().stream()
+                .collect(Collectors.groupingBy(
+                        Map.Entry::getValue,
+                        Collector.of(ArrayList::new, (list, e) -> list.add(e.getKey()), (l1, l2) -> {
+                            l1.addAll(l2);
+                            return l1;
+                        })));
+    }
+
     protected void componentStratifier(
             BuilderContext bc,
             MeasureReportGroupStratifierComponent reportStratifier,
             List<MeasureGroupPopulationComponent> populations,
             GroupDef groupDef,
-            StratifierDef stratifierDef,
-            List<Map<String, Pair<CriteriaResult, StratifierComponentDef>>> subjectCompValues) {
-        Map<Pair<ValueWrapper, StratifierComponentDef>, List<String>> subjectsByValue = new HashMap<>();
-        Map<String, Set<Pair<ValueWrapper, StratifierComponentDef>>> subjectComponents = new HashMap<>();
+            Table<String, ValueWrapper, StratifierComponentDef> subjectCompValues) {
 
-        // Process each subject map
-        for (Map<String, Pair<CriteriaResult, StratifierComponentDef>> subjectMap : subjectCompValues) {
-            // Extract and store subject IDs based on their criteria results
-            subjectMap.forEach((subjectId, criteriaResult) -> {
-                // Criteria result: Actual expression result
-                CriteriaResult result = criteriaResult.getLeft();
-                // componentStratifier = the definition object that stores code, id, results of component stratifier
-                var componentStratifier = criteriaResult.getRight();
-                // extract the underlying context subject that was evaluated for all expressions (most are currently
-                // patient)
-                // this allows resource based expressions or boolean to relate to underlying subject that was evaluated
-                // TODO: this should match CQL context, not only Patient
-                String patientReference = ResourceType.Patient + "/" + subjectId;
-                ValueWrapper valueWrapper = new ValueWrapper(result.rawValue());
-                Pair<ValueWrapper, StratifierComponentDef> valuePair = Pair.of(valueWrapper, componentStratifier);
-
-                // Creates a map of which subjects shared resulting stratifier value
-                subjectsByValue
-                        .computeIfAbsent(valuePair, k -> new ArrayList<>())
-                        .add(patientReference);
-
-                // Creates an inverse map of which results are related to a subject
-                subjectComponents
-                        .computeIfAbsent(patientReference, k -> new HashSet<>())
-                        .add(valuePair);
-            });
-        }
-
-        // Remove subjects that don’t qualify for all stratifier components
-        // Example:
-        // stratifier component A: Gender ---> M, F
-        // stratifier component B: Age Range ---> 0-30, 31-60....etc
-        // Subject 1: Gender: M, Age: 31-60
-        // Subject 2: Gender: F, Age: 0-30
-        // Subject 3: Gender: M, Age: 31-60
-        // Subject 4: Gender: F, Age: 0-30
-
-        int componentSize = stratifierDef.components().size();
-        subjectComponents.entrySet().removeIf(entry -> entry.getValue().size() < componentSize);
-
-        // Group subjects that share the same component results
-
-        // Remaining Subjects have a shared 'value' from each component stratifier, and are grouped together.
-
-        // Stratifier Component set 1
-        // Subject 3: Gender: M, Age: 31-60
-        // Subject 1: Gender: M, Age: 31-60
-
-        // Stratifier Component set 2
-        // Subject 2: Gender: F, Age: 0-30
-        // Subject 4: Gender: F, Age: 0-30
-
-        Map<Set<Pair<ValueWrapper, StratifierComponentDef>>, List<String>> componentSubjects =
-                subjectComponents.entrySet().stream()
-                        .collect(Collectors.groupingBy(
-                                Map.Entry::getValue, Collectors.mapping(Map.Entry::getKey, Collectors.toList())));
-
+        var componentSubjects = groupSubjectsByValueDefSet(subjectCompValues);
         // Build stratums for each unique 'set' of component stratifier values
         // this populates which group.populations intersect with subjects that shared component stratifier results
         // Stratum 1
@@ -547,7 +513,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             // non-component stratifiers will populate a 'null' for componentStratifierDef, since it doesn't have
             // multiple criteria
             // TODO: build out nonComponent stratum method
-            Set<Pair<ValueWrapper, StratifierComponentDef>> stratValues = Set.of(Pair.of(stratValue.getKey(), null));
+            Set<ValueDef> stratValues = Set.of(new ValueDef(stratValue.getKey(), null));
             buildStratum(bc, reportStratum, stratValues, patients, populations, groupDef);
         }
     }
@@ -576,14 +542,14 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
     private void buildStratum(
             BuilderContext bc,
             StratifierGroupComponent stratum,
-            Set<Pair<ValueWrapper, StratifierComponentDef>> values,
+            Set<ValueDef> values,
             List<String> subjectIds,
             List<MeasureGroupPopulationComponent> populations,
             GroupDef groupDef) {
         boolean isComponent = values.size() > 1;
-        for (Pair<ValueWrapper, StratifierComponentDef> valuePair : values) {
-            ValueWrapper value = valuePair.getLeft();
-            var componentDef = valuePair.getRight();
+        for (ValueDef valuePair : values) {
+            ValueWrapper value = valuePair.value;
+            var componentDef = valuePair.def;
             // Set Stratum value to indicate which value is displaying results
             // ex. for Gender stratifier, code 'Male'
             if (value.getValueClass().equals(CodeableConcept.class)) {

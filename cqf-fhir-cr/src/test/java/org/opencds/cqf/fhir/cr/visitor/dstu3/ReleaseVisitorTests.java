@@ -842,6 +842,6 @@ class ReleaseVisitorTests {
                 .findFirst()
                 .get();
         assertEquals(1, authoredExpansionParams.getParameter().size());
-        assertEquals(2, runtimeExpansionParams.getParameter().size());
+        assertEquals(3, runtimeExpansionParams.getParameter().size());
     }
 }

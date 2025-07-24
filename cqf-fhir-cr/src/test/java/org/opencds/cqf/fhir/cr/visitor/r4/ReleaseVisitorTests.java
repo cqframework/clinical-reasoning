@@ -835,6 +835,6 @@ class ReleaseVisitorTests {
         var runtimeExpansionParams = (Parameters)
                 releasedLibrary.getContained(((Reference) runtimeExpansionParamsExt.getValue()).getReference());
         assertEquals(1, authoredExpansionParams.getParameter().size());
-        assertEquals(2, runtimeExpansionParams.getParameter().size());
+        assertEquals(3, runtimeExpansionParams.getParameter().size());
     }
 }

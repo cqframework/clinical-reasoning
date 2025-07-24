@@ -228,7 +228,7 @@ public class ReleaseVisitor {
                 inputParametersCopy.setId("input-exp-params");
                 var inputExpansionParametersExtension = new Extension(
                         Constants.CQF_INPUT_EXPANSION_PARAMETERS,
-                        new org.hl7.fhir.r4.model.Reference("#input-exp-params"));
+                        new Reference("#input-exp-params"));
                 rootAdapter.addExtension(inputExpansionParametersExtension);
                 ((DomainResource) rootAdapter.get()).addContained(inputParametersCopy);
             } else {

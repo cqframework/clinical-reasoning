@@ -14,8 +14,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.Basic;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.dstu3.model.DomainResource;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.MetadataResource;
+import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.ResourceType;
@@ -163,10 +165,18 @@ public class ReleaseVisitor {
     public static void captureInputExpansionParams(
             IBaseParameters inputExpansionParams, IKnowledgeArtifactAdapter rootAdapter) {
         if (inputExpansionParams != null) {
-            var inputExpansionParametersExtension =
-                    new Extension(Constants.CQF_INPUT_EXPANSION_PARAMETERS, new Reference("#input-exp-params"));
-            rootAdapter.addExtension(inputExpansionParametersExtension);
-            inputExpansionParams.setId("input-exp-params");
+            if (inputExpansionParams instanceof Parameters parameters) {
+                // Deep copy of inputParameters
+                Parameters inputParametersCopy = parameters.copy();
+                inputParametersCopy.setId("input-exp-params");
+                var inputExpansionParametersExtension =
+                        new Extension(Constants.CQF_INPUT_EXPANSION_PARAMETERS, new Reference("#input-exp-params"));
+                rootAdapter.addExtension(inputExpansionParametersExtension);
+                ((DomainResource) rootAdapter.get()).addContained(inputParametersCopy);
+            } else {
+                throw new IllegalArgumentException(
+                        "Unsupported IBaseParameters implementation: " + inputExpansionParams.getClass());
+            }
         }
     }
 }

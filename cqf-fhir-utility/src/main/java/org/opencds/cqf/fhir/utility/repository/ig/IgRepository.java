@@ -19,7 +19,11 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Table;
+import com.nimbusds.jose.util.Resource;
+
 import jakarta.annotation.Nullable;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -109,13 +113,36 @@ public class IgRepository implements IRepository {
     // maintain the original encoding of the resource.
     static final String SOURCE_PATH_TAG = "sourcePath"; // Path
 
-    // Directory names
-    static final String EXTERNAL_DIRECTORY = "external";
-    static final Map<ResourceCategory, String> CATEGORY_DIRECTORIES = new ImmutableMap.Builder<
-                    ResourceCategory, String>()
-            .put(ResourceCategory.CONTENT, "resources")
-            .put(ResourceCategory.DATA, "tests")
-            .put(ResourceCategory.TERMINOLOGY, "vocabulary")
+    static final String EXTERNAL_DIRECTORY = "external"; // Directory name for external resources
+
+    // Set of directories that are used to store resources of a given category.
+    // The first path is the primary directory for the category, and any additional
+    // paths are considered secondary or fallback directories.
+    record Directories(String... paths) {
+        public int count() {
+            return paths.length;
+        }
+
+        public String get(int index) {
+            if (index < 0 || index >= paths.length) {
+                throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + paths.length);
+            }
+
+            return paths[index];
+        }
+    }
+
+    static final Table<CategoryLayout, ResourceCategory, Directories> TYPE_DIRECTORIES =
+            new ImmutableTable.Builder<CategoryLayout, ResourceCategory, Directories>()
+            .put(CategoryLayout.FLAT, ResourceCategory.CONTENT, new Directories( ""))
+            .put(CategoryLayout.FLAT, ResourceCategory.TERMINOLOGY, new Directories("", EXTERNAL_DIRECTORY))
+            .put(CategoryLayout.FLAT, ResourceCategory.DATA, new Directories(""))
+            .put(CategoryLayout.DIRECTORY_PER_CATEGORY, ResourceCategory.CONTENT, new Directories("resources", "tests"))
+            .put(CategoryLayout.DIRECTORY_PER_CATEGORY, ResourceCategory.TERMINOLOGY, new Directories("vocabulary", "vocabulary/" + EXTERNAL_DIRECTORY))
+            .put(CategoryLayout.DIRECTORY_PER_CATEGORY, ResourceCategory.DATA, new Directories("tests", "resources"))
+            .put(CategoryLayout.DEFINITIONAL_AND_DATA, ResourceCategory.CONTENT, new Directories("src/fhir", "tests/data/fhir"))
+            .put(CategoryLayout.DEFINITIONAL_AND_DATA, ResourceCategory.TERMINOLOGY, new Directories("src/fhir", "tests/data/fhir"))
+            .put(CategoryLayout.DEFINITIONAL_AND_DATA, ResourceCategory.DATA, new Directories("tests/data/fhir", "src/fhir"))
             .build();
 
     static final BiMap<EncodingEnum, String> FILE_EXTENSIONS = new ImmutableBiMap.Builder<EncodingEnum, String>()
@@ -291,21 +318,16 @@ public class IgRepository implements IRepository {
      * @param igRepositoryCompartment The compartment context to use
      * @return The path representing the directory for the resource category.
      */
-    protected <T extends IBaseResource> Path directoryForCategory(
+    protected <T extends IBaseResource> Path directoriesForCategory(
             Class<T> resourceType, IgRepositoryCompartment igRepositoryCompartment) {
-        if (this.conventions.categoryLayout() == CategoryLayout.FLAT) {
-            return this.root;
-        }
-
         var category = ResourceCategory.forType(resourceType.getSimpleName());
-        var directory = CATEGORY_DIRECTORIES.get(category);
-        var path = root.resolve(directory);
-        if (category == ResourceCategory.DATA
-                && this.conventions.compartmentLayout() == CompartmentLayout.DIRECTORY_PER_COMPARTMENT) {
-            path = path.resolve(pathForCompartment(igRepositoryCompartment));
-        }
+        var paths = TYPE_DIRECTORIES.rowMap()
+            .get(this.conventions.categoryLayout())
+            .get(category)
+            .paths();
 
-        return path;
+
+        return Path.of(paths[0]);
     }
 
     /**
@@ -333,7 +355,7 @@ public class IgRepository implements IRepository {
      */
     protected <T extends IBaseResource> Path directoryForResource(
             Class<T> resourceType, IgRepositoryCompartment igRepositoryCompartment) {
-        var directory = directoryForCategory(resourceType, igRepositoryCompartment);
+        var directory = directoriesForCategory(resourceType, igRepositoryCompartment);
         if (this.conventions.typeLayout() == FhirTypeLayout.FLAT) {
             return directory;
         }
@@ -355,12 +377,7 @@ public class IgRepository implements IRepository {
             return null;
         }
 
-        var extension = fileExtension(path);
-        if (extension == null) {
-            return null;
-        }
-
-        var encoding = FILE_EXTENSIONS.inverse().get(extension);
+        var encoding = encodingForPath(path);
 
         try {
             String s = new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
@@ -543,15 +560,14 @@ public class IgRepository implements IRepository {
         var compartment = compartmentFrom(headers);
 
         var paths = this.potentialPathsForResource(resourceType, id, compartment);
-        for (var path : paths) {
-            if (!path.toFile().exists()) {
-                continue;
-            }
+        var resource = paths.stream()
+                .filter(Files::exists)
+                .findFirst()
+                .map(this::cachedReadResource)
+                .orElse(null);
 
-            var resource = cachedReadResource(path);
-            if (resource != null) {
-                return validateResource(resourceType, resource, id);
-            }
+        if (resource != null) {
+            return validateResource(resourceType, resource, id);
         }
 
         throw new ResourceNotFoundException(id);

@@ -34,8 +34,8 @@ class IgConventionsTest {
 
     @Test
     void autoDetectDefault() {
-        assertEquals(IgConventions.STANDARD, IgConventions.autoDetect(null));
-        assertEquals(IgConventions.STANDARD, IgConventions.autoDetect(tempDir.resolve("does_not_exist")));
+        assertEquals(IgConventions.KALM, IgConventions.autoDetect(null));
+        assertEquals(IgConventions.KALM, IgConventions.autoDetect(tempDir.resolve("does_not_exist")));
     }
 
     @Test
@@ -79,6 +79,11 @@ class IgConventionsTest {
     @Test
     void autoDetectWithNonFhirFilename() {
         assertEquals(IgConventions.STANDARD, IgConventions.autoDetect(tempDir.resolve("nonFhirFilename")));
+    }
+
+    @Test
+    void autoDetectWithKalmProject() {
+        assertEquals(IgConventions.KALM, IgConventions.autoDetect(tempDir.resolve("kalm")));
     }
 
     @Test

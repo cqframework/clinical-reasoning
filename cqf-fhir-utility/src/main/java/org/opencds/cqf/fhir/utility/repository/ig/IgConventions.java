@@ -39,6 +39,7 @@ public record IgConventions(
      */
     public enum CategoryLayout {
         DIRECTORY_PER_CATEGORY,
+        DEFINITIONAL_AND_DATA,
         FLAT
     }
 
@@ -67,6 +68,12 @@ public record IgConventions(
             CompartmentLayout.FLAT,
             FilenameMode.ID_ONLY);
 
+    public static final IgConventions KALM = new IgConventions(
+            FhirTypeLayout.DIRECTORY_PER_TYPE,
+            CategoryLayout.DEFINITIONAL_AND_DATA,
+            CompartmentLayout.DIRECTORY_PER_COMPARTMENT,
+            FilenameMode.ID_ONLY);
+
     private static final List<String> FHIR_TYPE_NAMES = Stream.of(FHIRAllTypes.values())
             .map(FHIRAllTypes::name)
             .map(String::toLowerCase)
@@ -81,9 +88,31 @@ public record IgConventions(
      * @return The IG conventions.
      */
     public static IgConventions autoDetect(Path path) {
-
         if (path == null || !Files.exists(path)) {
-            return STANDARD;
+            return KALM;
+        }
+
+        if (Files.isDirectory(path)) {
+            try (var stream = Files.list(path)) {
+                if (!stream.findFirst().isPresent()) {
+                    return KALM; // Empty directory, return default
+                }
+            } catch (IOException e) {
+                logger.warn("Error listing files in path: {}", path, e);
+            }
+        }
+
+        // Check for a `src` directory, which is used for KALM projects.
+        var srcPath = path.resolve("src");
+        if (Files.exists(srcPath)) {
+            return KALM;
+        }
+
+        // Check for an `input` directory, which is used for standard IGs.
+        // If it exists, we will use that as the base path for further checks.
+        var inputPath = path.resolve("input");
+        if (Files.exists(inputPath)) {
+            path = inputPath;
         }
 
         // A "category" hierarchy may exist in the ig file structure,
@@ -94,7 +123,6 @@ public record IgConventions(
         //
         // Check all possible category paths and grab the first that exists,
         // or use the IG path if none exist.
-
         var categoryPath = Stream.of("tests", "vocabulary", "resources")
                 .map(path::resolve)
                 .filter(x -> x.toFile().exists())
@@ -131,7 +159,7 @@ public record IgConventions(
                 hasCompartmentDirectory = compartmentsList.stream()
                         .flatMap(IgConventions::listFiles)
                         .filter(Files::isDirectory)
-                        .anyMatch(IgConventions::matchesAnyResource);
+                        .anyMatch(IgConventions::matchesAnyResourceType);
             }
         }
 
@@ -184,7 +212,7 @@ public record IgConventions(
         return FHIR_TYPE_NAMES.stream().anyMatch(type -> fileName.toLowerCase().startsWith(type));
     }
 
-    private static boolean matchesAnyResource(Path innerFile) {
+    private static boolean matchesAnyResourceType(Path innerFile) {
         return !FHIR_TYPE_NAMES.contains(innerFile.getFileName().toString().toLowerCase());
     }
 

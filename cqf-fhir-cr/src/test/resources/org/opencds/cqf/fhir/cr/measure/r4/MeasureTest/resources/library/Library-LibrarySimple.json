@@ -12,6 +12,6 @@
   },
   "content": [ {
     "contentType": "text/cql",
-    "url": "../../cql/SimpleCql.cql"
+    "url": "../../cql/LibrarySimple.cql"
   } ]
 }

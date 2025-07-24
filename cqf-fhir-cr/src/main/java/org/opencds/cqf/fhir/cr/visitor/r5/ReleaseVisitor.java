@@ -226,9 +226,8 @@ public class ReleaseVisitor {
                 // Deep copy of inputParameters
                 Parameters inputParametersCopy = parameters.copy();
                 inputParametersCopy.setId("input-exp-params");
-                var inputExpansionParametersExtension = new Extension(
-                        Constants.CQF_INPUT_EXPANSION_PARAMETERS,
-                        new Reference("#input-exp-params"));
+                var inputExpansionParametersExtension =
+                        new Extension(Constants.CQF_INPUT_EXPANSION_PARAMETERS, new Reference("#input-exp-params"));
                 rootAdapter.addExtension(inputExpansionParametersExtension);
                 ((DomainResource) rootAdapter.get()).addContained(inputParametersCopy);
             } else {

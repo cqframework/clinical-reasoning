@@ -19,6 +19,7 @@ import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r5.model.CanonicalType;
 import org.hl7.fhir.r5.model.Coding;
+import org.hl7.fhir.r5.model.DomainResource;
 import org.hl7.fhir.r5.model.Extension;
 import org.hl7.fhir.r5.model.Library;
 import org.hl7.fhir.r5.model.Measure;
@@ -221,10 +222,18 @@ public class ReleaseVisitor {
     public static void captureInputExpansionParams(
             IBaseParameters inputExpansionParams, IKnowledgeArtifactAdapter rootAdapter) {
         if (inputExpansionParams != null) {
-            var inputExpansionParametersExtension =
-                    new Extension(Constants.CQF_INPUT_EXPANSION_PARAMETERS, new Reference("#input-exp-params"));
-            rootAdapter.addExtension(inputExpansionParametersExtension);
-            inputExpansionParams.setId("input-exp-params");
+            if (inputExpansionParams instanceof Parameters parameters) {
+                // Deep copy of inputParameters
+                Parameters inputParametersCopy = parameters.copy();
+                inputParametersCopy.setId("input-exp-params");
+                var inputExpansionParametersExtension =
+                        new Extension(Constants.CQF_INPUT_EXPANSION_PARAMETERS, new Reference("#input-exp-params"));
+                rootAdapter.addExtension(inputExpansionParametersExtension);
+                ((DomainResource) rootAdapter.get()).addContained(inputParametersCopy);
+            } else {
+                throw new IllegalArgumentException(
+                        "Unsupported IBaseParameters implementation: " + inputExpansionParams.getClass());
+            }
         }
     }
 

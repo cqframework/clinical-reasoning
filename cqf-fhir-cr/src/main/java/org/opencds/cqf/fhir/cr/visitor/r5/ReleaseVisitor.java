@@ -251,10 +251,5 @@ public class ReleaseVisitor {
                 }
             }
         }
-
-        // version can still be null after trying to set via expansionParams
-        /*if (proposedCoding.getVersion() == null && endpointAdapter != null) {
-            // use TxServer to set version - VSAC doesn't support R5
-        }*/
     }
 }

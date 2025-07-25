@@ -34,6 +34,7 @@ import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.DateType;
+import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IdType;
@@ -46,6 +47,9 @@ import org.hl7.fhir.r4.model.RelatedArtifact;
 import org.hl7.fhir.r4.model.RelatedArtifact.RelatedArtifactType;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.TerminologyCapabilities;
+import org.hl7.fhir.r4.model.TerminologyCapabilities.TerminologyCapabilitiesCodeSystemComponent;
+import org.hl7.fhir.r4.model.TerminologyCapabilities.TerminologyCapabilitiesCodeSystemVersionComponent;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -265,9 +269,23 @@ class ReleaseVisitorTests {
                 .copy();
         ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
 
-        Parameters params = parameters(part("version", "1.0.0"), part("versionBehavior", new CodeType("default")));
+        final var authoritativeSource = "http://cts.nlm.nih.gov/fhir/";
+        var endpoint = createEndpoint(authoritativeSource);
+        Parameters params = parameters(
+                part("version", "1.0.0"),
+                part("versionBehavior", new CodeType("default")),
+                part("terminologyEndpoint", (Endpoint) endpoint.get()));
 
-        ReleaseVisitor releaseVisitor = new ReleaseVisitor(repo);
+        var clientMock = mock(TerminologyServerClient.class, new ReturnsDeepStubs());
+        var terminologyCapabilities = new TerminologyCapabilities();
+        var codeSystemComponent = new TerminologyCapabilitiesCodeSystemComponent();
+        codeSystemComponent.setUri("http://terminology.hl7.org/CodeSystem/observation-category");
+        codeSystemComponent.setVersion(
+                List.of(new TerminologyCapabilitiesCodeSystemVersionComponent().setCode("1.2.3")));
+        terminologyCapabilities.addCodeSystem(codeSystemComponent);
+        when(clientMock.getR4TerminologyCapabilities(any())).thenReturn(terminologyCapabilities);
+
+        ReleaseVisitor releaseVisitor = new ReleaseVisitor(repo, clientMock);
         // Approval date is required to release an artifact
         library.setApprovalDateElement(new DateType("2024-04-23"));
 

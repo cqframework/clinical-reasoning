@@ -50,7 +50,7 @@ class MultiMeasure {
     public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/measure/r4";
 
     @FunctionalInterface
-    interface Validator<T> {
+    public interface Validator<T> {
         void validate(T value);
     }
 
@@ -480,7 +480,7 @@ class MultiMeasure {
         }
     }
 
-    static class SelectedGroup extends MultiMeasure.Selected<MeasureReportGroupComponent, SelectedMeasureReport> {
+    public static class SelectedGroup extends MultiMeasure.Selected<MeasureReportGroupComponent, SelectedMeasureReport> {
 
         public SelectedGroup(MeasureReportGroupComponent value, SelectedMeasureReport parent) {
             super(value, parent);
@@ -558,7 +558,7 @@ class MultiMeasure {
         }
     }
 
-    static class SelectedPopulation
+    public static class SelectedPopulation
             extends MultiMeasure.Selected<MeasureReportGroupPopulationComponent, SelectedGroup> {
 
         public SelectedPopulation(MeasureReportGroupPopulationComponent value, SelectedGroup parent) {

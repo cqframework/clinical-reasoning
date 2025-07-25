@@ -44,6 +44,17 @@ public class TerminologyServerClient {
                 : new TerminologyServerClientSettings();
     }
 
+    public TerminologyServerClientSettings getTerminologyServerClientSettings() {
+        return this.terminologyServerClientSettings;
+    }
+
+    public org.hl7.fhir.r4.model.TerminologyCapabilities getR4TerminologyCapabilities(IEndpointAdapter endpoint) {
+        var fhirClient = initializeClientWithAuth(endpoint);
+
+        return fhirClient.fetchResourceFromUrl(
+                org.hl7.fhir.r4.model.TerminologyCapabilities.class, "/metadata?mode=terminology");
+    }
+
     public IBaseResource expand(IValueSetAdapter valueSet, IEndpointAdapter endpoint, IParametersAdapter parameters) {
         checkNotNull(valueSet, "expected non-null value for valueSet");
         checkNotNull(endpoint, "expected non-null value for endpoint");
@@ -102,7 +113,13 @@ public class TerminologyServerClient {
                 .findFirst()
                 .map(ext -> ext.getValue().toString())
                 .orElseThrow(() -> new UnprocessableEntityException("Cannot expand ValueSet without VSAC API Key."));
+
         var fhirClient = fhirContext.newRestfulGenericClient(getAddressBase(endpoint.getAddress()));
+        fhirClient
+                .getFhirContext()
+                .getRestfulClientFactory()
+                .setSocketTimeout(terminologyServerClientSettings.getSocketTimeout() * 1000);
+
         Clients.registerAdditionalRequestHeadersAuth(fhirClient, username, apiKey);
         return fhirClient;
     }

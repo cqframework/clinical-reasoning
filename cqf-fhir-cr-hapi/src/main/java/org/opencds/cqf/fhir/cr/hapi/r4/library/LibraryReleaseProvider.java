@@ -7,31 +7,25 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
-import ca.uhn.fhir.rest.api.server.IRepositoryFactory;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.r4.model.BooleanType;
-import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Parameters;
-import org.opencds.cqf.fhir.cr.visitor.ReleaseVisitor;
-import org.opencds.cqf.fhir.utility.SearchHelper;
-import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
+import org.opencds.cqf.fhir.cr.hapi.common.ILibraryProcessorFactory;
+import org.opencds.cqf.fhir.utility.monad.Eithers;
 
 public class LibraryReleaseProvider {
-    private final IRepositoryFactory repositoryFactory;
+    private final ILibraryProcessorFactory libraryProcessorFactory;
     private final FhirVersionEnum fhirVersion;
-    private final IAdapterFactory adapterFactory;
 
-    public LibraryReleaseProvider(IRepositoryFactory repositoryFactory) {
-        this.repositoryFactory = repositoryFactory;
+    public LibraryReleaseProvider(ILibraryProcessorFactory libraryProcessorFactory) {
+        this.libraryProcessorFactory = libraryProcessorFactory;
         fhirVersion = FhirVersionEnum.R4;
-        adapterFactory = IAdapterFactory.forFhirVersion(fhirVersion);
     }
 
     /**
@@ -46,7 +40,7 @@ public class LibraryReleaseProvider {
      */
     @Operation(name = "$release", idempotent = true, global = true, type = Library.class)
     @Description(shortDefinition = "$release", value = "Release an existing draft artifact")
-    public Bundle releaseLibrary(
+    public IBaseBundle releaseLibrary(
             @IdParam IdType id,
             @OperationParam(name = "version") String version,
             @OperationParam(name = "versionBehavior") CodeType versionBehavior,
@@ -56,11 +50,6 @@ public class LibraryReleaseProvider {
             @OperationParam(name = "releaseLabel") String releaseLabel,
             RequestDetails requestDetails)
             throws FHIRException {
-        var repository = repositoryFactory.create(requestDetails);
-        var library = (Library) SearchHelper.readRepository(repository, id);
-        if (library == null) {
-            throw new ResourceNotFoundException(id);
-        }
         var params = getReleaseParameters(
                 version,
                 versionBehavior,
@@ -68,18 +57,12 @@ public class LibraryReleaseProvider {
                 requireNonExperimental,
                 terminologyEndpoint,
                 releaseLabel);
-        var adapter = adapterFactory.createKnowledgeArtifactAdapter(library);
-        try {
-            var visitor = new ReleaseVisitor(repository);
-            return (Bundle) adapter.accept(visitor, params);
-        } catch (Exception e) {
-            throw new UnprocessableEntityException(e.getMessage());
-        }
+        return libraryProcessorFactory.create(requestDetails).releaseLibrary(Eithers.for3(null, id, null), params);
     }
 
     @Operation(name = "$release", idempotent = true, global = true, type = Library.class)
     @Description(shortDefinition = "$release", value = "Release an existing draft artifact")
-    public Bundle releaseLibrary(
+    public IBaseBundle releaseLibrary(
             @OperationParam(name = "id") String id,
             @OperationParam(name = "version") String version,
             @OperationParam(name = "versionBehavior") CodeType versionBehavior,
@@ -90,15 +73,14 @@ public class LibraryReleaseProvider {
             RequestDetails requestDetails)
             throws FHIRException {
         var idToUse = (IdType) getIdType(fhirVersion, "Library", id);
-        return releaseLibrary(
-                idToUse,
+        var params = getReleaseParameters(
                 version,
                 versionBehavior,
                 latestFromTxServer,
                 requireNonExperimental,
                 terminologyEndpoint,
-                releaseLabel,
-                requestDetails);
+                releaseLabel);
+        return libraryProcessorFactory.create(requestDetails).releaseLibrary(Eithers.for3(null, idToUse, null), params);
     }
 
     private static Parameters getReleaseParameters(

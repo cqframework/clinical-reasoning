@@ -14,16 +14,21 @@ import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.Basic;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.dstu3.model.DomainResource;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.MetadataResource;
+import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Period;
+import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.ValueSet;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.cr.visitor.dstu3.CRMIReleaseExperimentalBehavior.CRMIReleaseExperimentalBehaviorCodes;
 import org.opencds.cqf.fhir.cr.visitor.dstu3.CRMIReleaseVersionBehavior.CRMIReleaseVersionBehaviorCodes;
+import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.PackageHelper;
 import org.opencds.cqf.fhir.utility.SearchHelper;
 import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
@@ -155,5 +160,23 @@ public class ReleaseVisitor {
                     returnEntries.add((BundleEntryComponent) PackageHelper.createEntry(artifactComment, true));
                 });
         return returnEntries;
+    }
+
+    public static void captureInputExpansionParams(
+            IBaseParameters inputExpansionParams, IKnowledgeArtifactAdapter rootAdapter) {
+        if (inputExpansionParams != null) {
+            if (inputExpansionParams instanceof Parameters parameters) {
+                // Deep copy of inputParameters
+                Parameters inputParametersCopy = parameters.copy();
+                inputParametersCopy.setId("input-exp-params");
+                var inputExpansionParametersExtension =
+                        new Extension(Constants.CQF_INPUT_EXPANSION_PARAMETERS, new Reference("#input-exp-params"));
+                rootAdapter.addExtension(inputExpansionParametersExtension);
+                ((DomainResource) rootAdapter.get()).addContained(inputParametersCopy);
+            } else {
+                throw new IllegalArgumentException(
+                        "Unsupported IBaseParameters implementation: " + inputExpansionParams.getClass());
+            }
+        }
     }
 }

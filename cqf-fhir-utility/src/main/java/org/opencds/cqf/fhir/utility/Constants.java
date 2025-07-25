@@ -81,9 +81,13 @@ public class Constants {
         ANY
     }
 
+    public static final String ARTIFACT_IS_OWNED_EXTENSION_URL =
+            "http://hl7.org/fhir/StructureDefinition/artifact-isOwned";
     public static final String CQF_CQL_OPTIONS = "http://hl7.org/fhir/StructureDefinition/cqf-cqlOptions";
     public static final String CQF_EXPANSION_PARAMETERS =
             "http://hl7.org/fhir/StructureDefinition/cqf-expansionParameters";
+    public static final String CQF_INPUT_EXPANSION_PARAMETERS =
+            "http://hl7.org/fhir/StructureDefinition/cqf-inputParameters";
     public static final String CQF_EXPRESSION = "http://hl7.org/fhir/StructureDefinition/cqf-expression";
     public static final String CQF_LIBRARY = "http://hl7.org/fhir/StructureDefinition/cqf-library";
     public static final String CQF_CALCULATED_VALUE = "http://hl7.org/fhir/StructureDefinition/cqf-calculatedValue";
@@ -180,8 +184,12 @@ public class Constants {
     public static final String US_PH_CONTEXT_URL = "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context";
     public static final String LIBRARY_TYPE = "http://terminology.hl7.org/CodeSystem/library-type";
     public static final String ASSET_COLLECTION = "asset-collection";
-    public static final String SYSTEM_VERSION = "system-version";
+    public static final String SYSTEM_VERSION = "system-version"; // For CodeSystems
     public static final String CANONICAL_VERSION = "canonical-version";
+    public static final String DEFAULT_CANONICAL_VERSION =
+            "default-canonical-version"; // For resources other than ValueSet and CodeSystem; Replaces
+    // 'canonical-version' in R6
+    public static final String DEFAULT_VALUESET_VERSION = "default-valueset-version"; // for ValueSets
 
     public static final String AUTHORITATIVE_SOURCE_URL =
             "http://hl7.org/fhir/StructureDefinition/valueset-authoritativeSource";

@@ -17,6 +17,7 @@ import org.opencds.cqf.fhir.cr.common.IDataRequirementsProcessor;
 import org.opencds.cqf.fhir.cr.common.IPackageProcessor;
 import org.opencds.cqf.fhir.cr.helpers.DataRequirementsLibrary;
 import org.opencds.cqf.fhir.cr.helpers.GeneratedPackage;
+import org.opencds.cqf.fhir.utility.client.TerminologyServerClientSettings;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
@@ -71,7 +72,12 @@ public class TestValueSet {
                         .getTerminologySettings()
                         .setValuesetExpansionMode(VALUESET_EXPANSION_MODE.PERFORM_NAIVE_EXPANSION);
             }
-            return new ValueSetProcessor(repository, evaluationSettings, packageProcessor, dataRequirementsProcessor);
+            return new ValueSetProcessor(
+                    repository,
+                    evaluationSettings,
+                    new TerminologyServerClientSettings(),
+                    packageProcessor,
+                    dataRequirementsProcessor);
         }
 
         public When when() {

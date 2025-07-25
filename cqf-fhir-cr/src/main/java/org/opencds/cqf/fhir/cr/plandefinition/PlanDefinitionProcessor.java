@@ -32,6 +32,7 @@ import org.opencds.cqf.fhir.cr.plandefinition.apply.IApplyProcessor;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.Resources;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
+import org.opencds.cqf.fhir.utility.client.TerminologyServerClientSettings;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.monad.Either3;
 
@@ -46,18 +47,23 @@ public class PlanDefinitionProcessor {
     protected IRequestResolverFactory requestResolverFactory;
     protected IRepository repository;
     protected EvaluationSettings evaluationSettings;
+    protected TerminologyServerClientSettings terminologyServerClientSettings;
 
     public PlanDefinitionProcessor(IRepository repository) {
-        this(repository, EvaluationSettings.getDefault());
-    }
-
-    public PlanDefinitionProcessor(IRepository repository, EvaluationSettings evaluationSettings) {
-        this(repository, evaluationSettings, null, null, null, null, null);
+        this(repository, EvaluationSettings.getDefault(), new TerminologyServerClientSettings());
     }
 
     public PlanDefinitionProcessor(
             IRepository repository,
             EvaluationSettings evaluationSettings,
+            TerminologyServerClientSettings terminologyServerClientSettings) {
+        this(repository, evaluationSettings, terminologyServerClientSettings, null, null, null, null, null);
+    }
+
+    public PlanDefinitionProcessor(
+            IRepository repository,
+            EvaluationSettings evaluationSettings,
+            TerminologyServerClientSettings terminologyServerClientSettings,
             IApplyProcessor applyProcessor,
             IPackageProcessor packageProcessor,
             IDataRequirementsProcessor dataRequirementsProcessor,
@@ -65,6 +71,10 @@ public class PlanDefinitionProcessor {
             IRequestResolverFactory requestResolverFactory) {
         this.repository = requireNonNull(repository, "repository can not be null");
         this.evaluationSettings = requireNonNull(evaluationSettings, "evaluationSettings can not be null");
+        if (packageProcessor == null) {
+            this.terminologyServerClientSettings =
+                    requireNonNull(terminologyServerClientSettings, "terminologyServerClientSettings can not be null");
+        }
         fhirVersion = this.repository.fhirContext().getVersion().getVersion();
         modelResolver = FhirModelResolverCache.resolverForVersion(fhirVersion);
         this.packageProcessor = packageProcessor;
@@ -112,7 +122,9 @@ public class PlanDefinitionProcessor {
     }
 
     public IBaseBundle packagePlanDefinition(IBaseResource planDefinition, IBaseParameters parameters) {
-        var processor = packageProcessor != null ? packageProcessor : new PackageProcessor(repository);
+        var processor = packageProcessor != null
+                ? packageProcessor
+                : new PackageProcessor(repository, terminologyServerClientSettings);
         return processor.packageResource(planDefinition, parameters);
     }
 

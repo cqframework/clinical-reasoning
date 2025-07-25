@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -38,6 +39,7 @@ import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
 import org.opencds.cqf.fhir.utility.client.TerminologyServerClient;
+import org.opencds.cqf.fhir.utility.client.TerminologyServerClientSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,6 +52,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
     private static final String VALUESET = "ValueSet";
     private static final String CODESYSTEM = "CodeSystem";
     protected final TerminologyServerClient terminologyServerClient;
+    private IKnowledgeArtifactAdapter artifactBeingReleasedAdapter;
 
     public ReleaseVisitor(IRepository repository) {
         super(repository);
@@ -61,9 +64,15 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
         this.terminologyServerClient = terminologyServerClient;
     }
 
+    public ReleaseVisitor(IRepository repository, TerminologyServerClientSettings terminologyServerClientSettings) {
+        super(repository);
+        this.terminologyServerClient = new TerminologyServerClient(fhirContext(), terminologyServerClientSettings);
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     public IBase visit(IKnowledgeArtifactAdapter rootAdapter, IBaseParameters operationParameters) {
+        artifactBeingReleasedAdapter = rootAdapter;
         // Setup and parameter validation
         final var rootLibrary = rootAdapter.get();
         final var current = new Date();
@@ -130,16 +139,12 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
         noDeps.removeIf(
                 ra -> IKnowledgeArtifactAdapter.getRelatedArtifactType(ra).equalsIgnoreCase(DEPENDSON));
         rootAdapter.setRelatedArtifact(noDeps);
+
         // extract expansion parameters
-        var expansionParameters = rootAdapter.getExpansionParameters();
-        var systemVersionParams = expansionParameters
-                .map(p -> VisitorHelper.getStringListParameter(Constants.SYSTEM_VERSION, p)
-                        .orElse(null))
-                .orElse(new ArrayList<>());
-        var canonicalVersionParams = expansionParameters
-                .map(p -> VisitorHelper.getStringListParameter(Constants.CANONICAL_VERSION, p)
-                        .orElse(null))
-                .orElse(new ArrayList<>());
+        var inputExpansionParams = rootAdapter.getExpansionParameters().orElse(null);
+
+        // specify authored expansion params as input expansion parameters
+        captureInputExpansionParams(inputExpansionParams, rootAdapter);
 
         // Report all dependencies, resolving unversioned dependencies to the latest known version, recursively
         var gatheredResources = new HashSet<String>();
@@ -149,14 +154,9 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
                 gatheredResources,
                 updatedComponents,
                 new HashMap<>(),
-                systemVersionParams,
-                canonicalVersionParams,
+                inputExpansionParams,
                 latestFromTxServer,
                 terminologyEndpoint.orElse(null));
-
-        if (rootAdapter.get().fhirType().equals("Library")) {
-            ((ILibraryAdapter) rootAdapter).setExpansionParameters(systemVersionParams, canonicalVersionParams);
-        }
 
         // remove duplicates and add
         var relatedArtifacts = rootAdapter.getRelatedArtifact();
@@ -208,6 +208,20 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
         rootAdapter.setRelatedArtifact(distinctResolvedRelatedArtifacts);
 
         return repository.transaction(transactionBundle);
+    }
+
+    private void captureInputExpansionParams(
+            IBaseParameters inputExpansionParams, IKnowledgeArtifactAdapter rootAdapter) {
+        if (this.fhirVersion().equals(FhirVersionEnum.DSTU3)) {
+            org.opencds.cqf.fhir.cr.visitor.dstu3.ReleaseVisitor.captureInputExpansionParams(
+                    inputExpansionParams, rootAdapter);
+        } else if (this.fhirVersion().equals(FhirVersionEnum.R4)) {
+            org.opencds.cqf.fhir.cr.visitor.r4.ReleaseVisitor.captureInputExpansionParams(
+                    inputExpansionParams, rootAdapter);
+        } else if (this.fhirVersion().equals(FhirVersionEnum.R5)) {
+            org.opencds.cqf.fhir.cr.visitor.r5.ReleaseVisitor.captureInputExpansionParams(
+                    inputExpansionParams, rootAdapter);
+        }
     }
 
     private static void updateMetadata(
@@ -292,8 +306,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
             Set<String> gatheredResources,
             List<IDomainResource> releasedResources,
             Map<String, IDomainResource> alreadyUpdatedDependencies,
-            List<String> systemVersionExpansionParameters,
-            List<String> canonicalVersionExpansionParameters,
+            IBaseParameters inputExpansionParameters,
             boolean latestFromTxServer,
             IEndpointAdapter endpoint) {
         if (artifactAdapter == null) {
@@ -337,12 +350,8 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
                     dependencyUrl = dependency.getReference();
                 }
                 if (!alreadyUpdatedDependencies.containsKey(dependencyUrl)) {
-                    var maybeAdapter = tryResolveDependency(
-                            dependency,
-                            canonicalVersionExpansionParameters,
-                            systemVersionExpansionParameters,
-                            latestFromTxServer,
-                            endpoint);
+                    var maybeAdapter =
+                            tryResolveDependency(dependency, inputExpansionParameters, latestFromTxServer, endpoint);
                     if (maybeAdapter.isPresent()) {
                         dependencyAdapter = maybeAdapter.get();
                         alreadyUpdatedDependencies.put(dependencyAdapter.getUrl(), dependencyAdapter.get());
@@ -370,8 +379,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
                             gatheredResources,
                             releasedResources,
                             alreadyUpdatedDependencies,
-                            systemVersionExpansionParameters,
-                            canonicalVersionExpansionParameters,
+                            inputExpansionParameters,
                             latestFromTxServer,
                             endpoint);
                 }
@@ -391,7 +399,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
                 }
             }
 
-            extractMeasureDirectReferenceCodes(rootAdapter, artifactAdapter);
+            extractMeasureDirectReferenceCodes(rootAdapter, artifactAdapter, endpoint);
         }
     }
 
@@ -410,10 +418,12 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
     }
 
     private void extractMeasureDirectReferenceCodes(
-            IKnowledgeArtifactAdapter rootAdapter, IKnowledgeArtifactAdapter artifactAdapter) {
+            IKnowledgeArtifactAdapter rootAdapter,
+            IKnowledgeArtifactAdapter artifactAdapter,
+            IEndpointAdapter endpoint) {
         if (artifactAdapter instanceof org.opencds.cqf.fhir.utility.adapter.r4.MeasureAdapter measureAdapter) {
             org.opencds.cqf.fhir.cr.visitor.r4.ReleaseVisitor.extractDirectReferenceCodes(
-                    rootAdapter, measureAdapter.get());
+                    rootAdapter, measureAdapter.get(), endpoint, terminologyServerClient);
         } else if (artifactAdapter instanceof org.opencds.cqf.fhir.utility.adapter.r5.MeasureAdapter measureAdapter) {
             org.opencds.cqf.fhir.cr.visitor.r5.ReleaseVisitor.extractDirectReferenceCodes(
                     rootAdapter, measureAdapter.get());
@@ -422,38 +432,42 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
 
     private Optional<IKnowledgeArtifactAdapter> tryResolveDependency(
             IDependencyInfo dependency,
-            List<String> canonicalVersionExpansionParameters,
-            List<String> systemVersionExpansionParameters,
+            IBaseParameters inputExpansionParameters,
             boolean latestFromTxServer,
             IEndpointAdapter endpoint) {
-        // try to get versions from expansion parameters if they are available
+        // try to get versions from input expansion parameters if they are available
         String resourceType = getResourceType(dependency);
         if (StringUtils.isBlank(Canonicals.getVersion(dependency.getReference()))) {
             // This needs to be updated once we support requireVersionedDependencies
-            getExpansionParametersVersion(
-                            dependency,
-                            resourceType,
-                            canonicalVersionExpansionParameters,
-                            systemVersionExpansionParameters)
+            getExpansionParametersVersion(dependency, resourceType, inputExpansionParameters)
                     .map(Canonicals::getVersion)
                     .ifPresent(version -> dependency.setReference(dependency.getReference() + "|" + version));
         }
 
-        Optional<IKnowledgeArtifactAdapter> maybeAdapter = Optional.empty();
-        // if not available in expansion parameters then try to find the latest version and update the
-        // dependency
+        Optional<IKnowledgeArtifactAdapter> maybeAdapter;
+        // if not available in input expansion parameters then try to find the latest version and
+        // update the dependency and add to runtime expansion params
         if (!StringUtils.isBlank(Canonicals.getVersion(dependency.getReference()))) {
             maybeAdapter = Optional.ofNullable(getArtifactByCanonical(dependency.getReference(), repository));
         } else {
             maybeAdapter =
                     tryFindLatestDependency(dependency.getReference(), resourceType, latestFromTxServer, endpoint);
         }
+
+        if (maybeAdapter.isPresent()) {
+            ((ILibraryAdapter) artifactBeingReleasedAdapter)
+                    .ensureExpansionParametersEntry(
+                            resourceType,
+                            maybeAdapter.get().getUrl() + "|"
+                                    + maybeAdapter.get().getVersion());
+        }
+
         return maybeAdapter;
     }
 
     private Optional<IKnowledgeArtifactAdapter> tryFindLatestDependency(
             String reference, String resourceType, boolean latestFromTxServer, IEndpointAdapter endpoint) {
-        Optional<IKnowledgeArtifactAdapter> maybeAdapter = Optional.empty();
+        Optional<IKnowledgeArtifactAdapter> maybeAdapter;
         // we trust in this case that the Endpoint URL matches up with the Authoritative Source in the ValueSet
         // if this assumption is faulty the only consequence is that the VSet doesn't get resolved
         if (resourceType != null && resourceType.equals(VALUESET) && latestFromTxServer) {
@@ -473,9 +487,8 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
             List<IDomainResource> releasedResources,
             Map<String, IDomainResource> alreadyUpdatedDependencies) {
         var maybeLatest = getLatestArtifactAndThrowErrorIfOwnedMissing(component, releasedResources);
-        if (maybeLatest.isPresent()) {
-            updateCacheAndReference(component, maybeLatest.get(), alreadyUpdatedDependencies);
-        }
+        maybeLatest.ifPresent(iKnowledgeArtifactAdapter ->
+                updateCacheAndReference(component, iKnowledgeArtifactAdapter, alreadyUpdatedDependencies));
         return maybeLatest;
     }
 
@@ -483,8 +496,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
             Optional<IKnowledgeArtifactAdapter> getLatestArtifactAndThrowErrorIfOwnedMissing(
                     T component, List<IDomainResource> releasedResources) {
         var reference = IKnowledgeArtifactAdapter.getRelatedArtifactReference(component);
-        var resource = Optional.ofNullable(reference)
-                .map(r -> checkIfReferenceInList(r, releasedResources).orElse(null));
+        var resource = Optional.ofNullable(reference).flatMap(r -> checkIfReferenceInList(r, releasedResources));
         if (IKnowledgeArtifactAdapter.checkIfRelatedArtifactIsOwned(component) && resource.isEmpty()) {
             // should never happen since we check all references as part of `internalRelease`
             throw new InternalErrorException("Owned resource reference not found during release: " + reference);
@@ -506,22 +518,34 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
     }
 
     private Optional<String> getExpansionParametersVersion(
-            IDependencyInfo dependency,
-            String resourceType,
-            List<String> canonicalVersionExpansionParameters,
-            List<String> systemVersionExpansionParameters) {
+            IDependencyInfo dependency, String resourceType, IBaseParameters expansionParameters) {
+
         Optional<String> expansionParametersVersion = Optional.empty();
-        // assume if we can't figure out the resource type it's a CodeSystem
-        if (resourceType == null || resourceType.equals(CODESYSTEM)) {
-            expansionParametersVersion = systemVersionExpansionParameters.stream()
-                    .filter(canonical -> !StringUtils.isBlank(Canonicals.getUrl(canonical)))
-                    .filter(canonical -> Canonicals.getUrl(canonical).equals(dependency.getReference()))
-                    .findAny();
-        } else if (resourceType.equals(VALUESET)) {
-            expansionParametersVersion = canonicalVersionExpansionParameters.stream()
-                    .filter(canonical -> Canonicals.getUrl(canonical).equals(dependency.getReference()))
-                    .findAny();
+        if (expansionParameters != null && !expansionParameters.isEmpty()) {
+            // assume if we can't figure out the resource type it's a CodeSystem. This may be a
+            if (resourceType == null || resourceType.equals(CODESYSTEM)) {
+                var systemVersionExpansionParameters =
+                        VisitorHelper.getStringListParameter(Constants.SYSTEM_VERSION, expansionParameters);
+
+                if (systemVersionExpansionParameters.isPresent()) {
+                    expansionParametersVersion = systemVersionExpansionParameters.get().stream()
+                            .filter(svp -> Canonicals.getUrl(svp) != null
+                                    && Objects.equals(Canonicals.getUrl(svp), dependency.getReference()))
+                            .findAny();
+                }
+            } else if (resourceType.equals(VALUESET)) {
+                var valueSetVersionExpansionParameters =
+                        VisitorHelper.getStringListParameter(Constants.DEFAULT_VALUESET_VERSION, expansionParameters);
+
+                if (valueSetVersionExpansionParameters.isPresent()) {
+                    expansionParametersVersion = valueSetVersionExpansionParameters.get().stream()
+                            .filter(svp -> Canonicals.getUrl(svp) != null
+                                    && Objects.equals(Canonicals.getUrl(svp), dependency.getReference()))
+                            .findAny();
+                }
+            }
         }
+
         return expansionParametersVersion;
     }
 

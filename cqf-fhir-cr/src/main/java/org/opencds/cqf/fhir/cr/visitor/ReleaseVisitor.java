@@ -426,7 +426,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
                     rootAdapter, measureAdapter.get(), endpoint, terminologyServerClient);
         } else if (artifactAdapter instanceof org.opencds.cqf.fhir.utility.adapter.r5.MeasureAdapter measureAdapter) {
             org.opencds.cqf.fhir.cr.visitor.r5.ReleaseVisitor.extractDirectReferenceCodes(
-                    rootAdapter, measureAdapter.get(), endpoint, terminologyServerClient);
+                    rootAdapter, measureAdapter.get());
         }
     }
 

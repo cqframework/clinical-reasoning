@@ -568,10 +568,6 @@ class ReleaseVisitorTests {
         var factory = IAdapterFactory.forFhirVersion(FhirVersionEnum.R4);
         var endpoint = factory.createEndpoint(new org.hl7.fhir.r4.model.Endpoint());
         endpoint.setAddress(authoritativeSource);
-        /*        endpoint.addExtension(new org.hl7.fhir.r4.model.Extension(
-                Constants.VSAC_USERNAME, new org.hl7.fhir.r4.model.StringType("username")));
-        endpoint.addExtension(new org.hl7.fhir.r4.model.Extension(
-                Constants.APIKEY, new org.hl7.fhir.r4.model.StringType("password")));*/
         return endpoint;
     }
 

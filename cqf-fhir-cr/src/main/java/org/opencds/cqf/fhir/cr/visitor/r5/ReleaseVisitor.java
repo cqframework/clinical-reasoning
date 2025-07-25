@@ -37,9 +37,7 @@ import org.opencds.cqf.fhir.cr.visitor.r5.CRMIReleaseVersionBehavior.CRMIRelease
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.PackageHelper;
 import org.opencds.cqf.fhir.utility.SearchHelper;
-import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
-import org.opencds.cqf.fhir.utility.client.TerminologyServerClient;
 import org.slf4j.Logger;
 
 public class ReleaseVisitor {
@@ -156,67 +154,66 @@ public class ReleaseVisitor {
         return returnEntries;
     }
 
-    public static void extractDirectReferenceCodes(
-            IKnowledgeArtifactAdapter rootAdapter,
-            Measure measure,
-            IEndpointAdapter endpointAdapter,
-            TerminologyServerClient terminologyServerClient) {
+    public static void extractDirectReferenceCodes(IKnowledgeArtifactAdapter rootAdapter, Measure measure) {
+        Library effectiveDataRequirementsLib = getEffectiveDataRequirementsLib(measure);
+
+        if (effectiveDataRequirementsLib != null) {
+            var proposedExtensions = effectiveDataRequirementsLib.getExtension().stream()
+                    .filter(ext -> ext.getUrl().equals(Constants.CQF_DIRECT_REFERENCE_EXTENSION))
+                    .toList();
+
+            var existingRootAdapterExtensions = rootAdapter.getExtension().stream()
+                    .filter(ext -> ext.getUrl().equals(Constants.CQFM_DIRECT_REFERENCE_EXTENSION)
+                            || ext.getUrl().equals(Constants.CQF_DIRECT_REFERENCE_EXTENSION))
+                    .toList();
+
+            var expansionParams = rootAdapter.getExpansionParameters().map(p -> ((Parameters) p));
+
+            for (var proposedExt : proposedExtensions) {
+                boolean shouldAddExtension = true;
+                Coding proposedCoding = (Coding) proposedExt.getValue();
+
+                setCodeSystemVersion(proposedCoding, expansionParams.orElse(null));
+
+                for (var existingExt : existingRootAdapterExtensions) {
+                    Coding existingCoding = (Coding) existingExt.getValue();
+
+                    if (codingsMatch(proposedCoding, existingCoding)) {
+                        shouldAddExtension = false;
+                        break;
+                    }
+                }
+
+                if (shouldAddExtension) {
+                    rootAdapter.addExtension(proposedExt);
+                }
+            }
+        }
+    }
+
+    private static Library getEffectiveDataRequirementsLib(Measure measure) {
         Optional<Extension> effectiveDataRequirementsExt = measure.getExtension().stream()
                 .filter(ext -> ext.getUrl().equals(Constants.CQFM_EFFECTIVE_DATA_REQUIREMENTS)
                         || ext.getUrl().equals(Constants.CRMI_EFFECTIVE_DATA_REQUIREMENTS))
                 .findFirst();
         if (effectiveDataRequirementsExt.isPresent()) {
-            Library effectiveDataRequirementsLib = null;
             if (effectiveDataRequirementsExt.get().getValue() instanceof Reference ref) {
-                effectiveDataRequirementsLib = (Library) measure.getContained(ref.getReference());
+                return (Library) measure.getContained(ref.getReference());
             } else if (effectiveDataRequirementsExt.get().getValue() instanceof CanonicalType canonicalType) {
-                effectiveDataRequirementsLib = (Library) measure.getContained(canonicalType.getCanonical());
+                return (Library) measure.getContained(canonicalType.asStringValue());
             }
-
-            if (effectiveDataRequirementsLib != null) {
-                var proposedExtensions = effectiveDataRequirementsLib.getExtension().stream()
-                        .filter(ext -> ext.getUrl().equals(Constants.CQF_DIRECT_REFERENCE_EXTENSION))
-                        .toList();
-
-                var existingRootAdapterExtensions = rootAdapter.getExtension().stream()
-                        .filter(ext -> ext.getUrl().equals(Constants.CQFM_DIRECT_REFERENCE_EXTENSION)
-                                || ext.getUrl().equals(Constants.CQF_DIRECT_REFERENCE_EXTENSION))
-                        .toList();
-
-                var expansionParams = rootAdapter.getExpansionParameters().map(p -> ((Parameters) p));
-                List<UriType> systemVersions = new ArrayList<>();
-                if (expansionParams.isPresent()) {
-                    systemVersions = expansionParams.get().getParameter().stream()
-                            .filter(param -> param.getName().equals(Constants.SYSTEM_VERSION))
-                            .map(sysVerParam -> (UriType) sysVerParam.getValue())
-                            .toList();
-                }
-
-                for (var proposedExt : proposedExtensions) {
-                    boolean shouldAddExtension = true;
-                    Coding proposedCoding = (Coding) proposedExt.getValue();
-
-                    setCodeSystemVersion(endpointAdapter, terminologyServerClient, proposedCoding, systemVersions);
-
-                    for (var existingExt : existingRootAdapterExtensions) {
-                        Coding existingCoding = (Coding) existingExt.getValue();
-                        boolean systemMatches = proposedCoding.getSystem().equals(existingCoding.getSystem());
-                        boolean codeMatches = proposedCoding.getCode().equals(existingCoding.getCode());
-                        boolean versionMatches = proposedCoding.getVersion() == null
-                                || proposedCoding.getVersion().equals(existingCoding.getVersion());
-
-                        if (systemMatches && codeMatches && versionMatches) {
-                            shouldAddExtension = false;
-                            break;
-                        }
-                    }
-
-                    if (shouldAddExtension) {
-                        rootAdapter.addExtension(proposedExt);
-                    }
-                }
-            }
+            return null;
         }
+        return null;
+    }
+
+    private static boolean codingsMatch(Coding proposedCoding, Coding existingCoding) {
+        boolean systemMatches = proposedCoding.getSystem().equals(existingCoding.getSystem());
+        boolean codeMatches = proposedCoding.getCode().equals(existingCoding.getCode());
+        boolean versionMatches = proposedCoding.getVersion() == null
+                || proposedCoding.getVersion().equals(existingCoding.getVersion());
+
+        return systemMatches && codeMatches && versionMatches;
     }
 
     public static void captureInputExpansionParams(
@@ -237,11 +234,14 @@ public class ReleaseVisitor {
         }
     }
 
-    private static void setCodeSystemVersion(
-            IEndpointAdapter endpointAdapter,
-            TerminologyServerClient terminologyServerClient,
-            Coding proposedCoding,
-            List<UriType> systemVersions) {
+    private static void setCodeSystemVersion(Coding proposedCoding, Parameters expansionParams) {
+        List<UriType> systemVersions = new ArrayList<>();
+        if (expansionParams != null) {
+            systemVersions = expansionParams.getParameter().stream()
+                    .filter(param -> param.getName().equals(Constants.SYSTEM_VERSION))
+                    .map(sysVerParam -> (UriType) sysVerParam.getValue())
+                    .toList();
+        }
         if (proposedCoding.getVersion() == null && !systemVersions.isEmpty()) {
             for (var sysVer : systemVersions) {
                 var idParts = sysVer.getValue().split("\\|");

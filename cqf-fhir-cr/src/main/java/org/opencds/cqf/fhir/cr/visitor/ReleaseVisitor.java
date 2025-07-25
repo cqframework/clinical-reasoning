@@ -523,7 +523,6 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
         Optional<String> expansionParametersVersion = Optional.empty();
         if (expansionParameters != null && !expansionParameters.isEmpty()) {
             // assume if we can't figure out the resource type it's a CodeSystem. This may be a
-            // TODO: it may be better to assume default_canonical_version if it is null, or require it.
             if (resourceType == null || resourceType.equals(CODESYSTEM)) {
                 var systemVersionExpansionParameters =
                         VisitorHelper.getStringListParameter(Constants.SYSTEM_VERSION, expansionParameters);

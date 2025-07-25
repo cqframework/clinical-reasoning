@@ -244,12 +244,10 @@ public class LibraryAdapter extends KnowledgeArtifactAdapter implements ILibrary
         String parameterName;
 
         if (resourceType.equals("ValueSet")) {
-            // TODO: Will transition to the new parameter name - "DEFAULT_VALUESET_VERSION" once it is supported.
             parameterName = Constants.CANONICAL_VERSION;
         } else if (resourceType.equals("CodeSystem")) {
             parameterName = Constants.SYSTEM_VERSION;
         } else {
-            // TODO: Will transition to the new parameter name - "DEFAULT_CANONICAL_VERSION" once it is supported.
             parameterName = Constants.CANONICAL_VERSION;
         }
 

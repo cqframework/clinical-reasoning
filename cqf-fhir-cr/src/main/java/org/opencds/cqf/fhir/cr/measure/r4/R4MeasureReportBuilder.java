@@ -489,12 +489,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             Table<String, ValueWrapper, StratifierComponentDef> subjectCompValues) {
 
         var componentSubjects = groupSubjectsByValueDefSet(subjectCompValues);
-        // Build stratums for each unique 'set' of component stratifier values
-        // this populates which group.populations intersect with subjects that shared component stratifier results
-        // Stratum 1
-        // Gender: M, Age: 31-60
-        // Stratum 2
-        // Gender: F, Age: 0-30
+
         componentSubjects.forEach((valueSet, subjects) -> {
             // converts table into component value combinations
             // | Stratum   | Set<ValueDef>           | List<Subjects(String)> |

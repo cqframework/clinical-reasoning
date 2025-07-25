@@ -11,10 +11,12 @@ import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.apache.commons.collections4.keyvalue.DefaultMapEntry;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.elm.r1.FunctionDef;
@@ -22,6 +24,7 @@ import org.hl7.elm.r1.IntervalTypeSpecifier;
 import org.hl7.elm.r1.NamedTypeSpecifier;
 import org.hl7.elm.r1.ParameterDef;
 import org.hl7.elm.r1.VersionedIdentifier;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.execution.CqlEngine.EvaluationResultsForMultiLib;
@@ -296,6 +299,7 @@ public class MeasureProcessorUtils {
         clearEvaluatedResources(context);
     }
 
+    // LUKETODO:  why do we bother if the next evaluation will flush them anyway?
     // reset evaluated resources followed by a context evaluation
     private void clearEvaluatedResources(CqlEngine context) {
         context.getState().clearEvaluatedResources();
@@ -337,9 +341,7 @@ public class MeasureProcessorUtils {
             if (!isBooleanBasis) {
                 // subject based observations don't have a parameter to pass in
                 context.getState()
-                        .push(new Variable(
-                                        ((FunctionDef) ed).getOperand().get(0).getName())
-                                .withValue(resource));
+                        .push(new Variable(functionDef.getOperand().get(0).getName()).withValue(resource));
             }
             result = context.getEvaluationVisitor().visitExpression(ed.getExpression(), context.getState());
         } finally {
@@ -459,7 +461,7 @@ public class MeasureProcessorUtils {
 
                 //                for (VersionedIdentifier libraryVersionedIdentifier : libraryIdentifiers) {
                 //                    var evaluationResultsForMultiLib =
-                // libraryEngineForMultipleLibraries.getEvaluationResult(
+                //                             libraryEngineForMultipleLibraries.getEvaluationResult(
                 //                        libraryVersionedIdentifier,
                 //                        subjectId,
                 //                        null,
@@ -496,14 +498,21 @@ public class MeasureProcessorUtils {
 
                     var evaluationResult = evaluationResultsForMultiLib
                             .getResults()
-                            .getOrDefault(searchableLibraryIdentifier, new EvaluationResult());
+                            .getOrDefault(
+                                    searchableLibraryIdentifier,
+                                    null); // LUKETODO:  I think this is the problem:  we pass an empty EvaluationResult
+                    // instead of doing what the old code did
+
+                    logger.info(
+                            "evalResult for id: {}: {}, ",
+                            libraryVersionedIdentifier.getId(),
+                            printEvaluationResult(evaluationResult));
 
                     var measureIds = versionedIdMeasureIdPairs.get(libraryVersionedIdentifier);
 
                     resultsBuilder.addResults(measureIds, subjectId, evaluationResult);
 
-                    var nullableError = errorsById.get(searchableLibraryIdentifier);
-
+                    // LUKETODO:  add this to the composite class instead?
                     Optional.ofNullable(errorsById.get(searchableLibraryIdentifier))
                             .map(nonNull -> EXCEPTION_FOR_SUBJECT_ID_MESSAGE_TEMPLATE.formatted(subjectId, nonNull))
                             .ifPresent(error -> resultsBuilder.addErrors(measureIds, error));
@@ -520,6 +529,16 @@ public class MeasureProcessorUtils {
         }
 
         return resultsBuilder.build();
+    }
+
+    private static String showEvaluatedResource(Object evaluatedResourceOrSomething) {
+        if (evaluatedResourceOrSomething instanceof IBaseResource resource) {
+            return resource.getIdElement().getValueAsString();
+        } else if (evaluatedResourceOrSomething != null) {
+            return evaluatedResourceOrSomething.toString();
+        } else {
+            return "null";
+        }
     }
 
     private void validateEvaluationResultExistsForIdentifier(
@@ -542,20 +561,37 @@ public class MeasureProcessorUtils {
         if (evaluationResult == null) {
             return "null";
         }
-        return "EvaluationResult{" + "expressionResults="
+        return "\nEvaluationResult{" + "expressionResults=\n"
                 + evaluationResult.expressionResults.entrySet().stream()
                         .map(entry -> new DefaultMapEntry<>(entry.getKey(), printExpressionResult(entry.getValue())))
-                        .toList()
-                + "}";
+                        .map(entry -> entry.getKey() + ": " + entry.getValue())
+                        .collect(Collectors.joining("\n"))
+                + "}\n";
     }
 
     private static String printExpressionResult(ExpressionResult expressionResult) {
         if (expressionResult == null) {
-            return "null";
+            return "\nnull";
         }
 
-        return "ExpressionResult{value=" + expressionResult.value() + ", type=" + expressionResult.evaluatedResources()
-                + '}';
+        return "\nExpressionResult{value=" + showValue(expressionResult.value()) + ", type="
+                + showEvaluatedResources(expressionResult.evaluatedResources()) + '}';
+    }
+
+    private static String showValue(Object valueOrCollection) {
+        if (valueOrCollection == null) {
+            return "null";
+        }
+        if (valueOrCollection instanceof Collection<?> collection) {
+            return showEvaluatedResources(collection);
+        }
+        return showEvaluatedResource(valueOrCollection);
+    }
+
+    public static String showEvaluatedResources(Collection<?> evaluatedResourcesOrSomethings) {
+        return evaluatedResourcesOrSomethings.stream()
+                .map(MeasureProcessorUtils::showEvaluatedResource)
+                .collect(Collectors.joining(", ", "[", "]"));
     }
 
     public Pair<String, String> getSubjectTypeAndId(String subjectId) {

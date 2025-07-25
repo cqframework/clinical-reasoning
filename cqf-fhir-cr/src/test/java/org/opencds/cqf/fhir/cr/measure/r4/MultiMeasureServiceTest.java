@@ -308,15 +308,6 @@ class MultiMeasureServiceTest {
                 .hasCount(10);
     }
 
-    // LUKETODO: this test is failing because we've exposed an issue with the Encounter for Patient/female-1988-2
-    // this encounter has an invalid period, the start later than the end
-    // we need to remove that encounter (and possibly patient) and add them to a different "IG" and put into a
-    // different set of failing tests
-    // then we need to adjust the assertions on this test to cover one less encounter and possibly one less patient
-    // it's a mystery as to why this test fails under the new caching code but not under the old per library CQL
-    // evaluation
-    // LUKETODO:  so this test does include the failure, but with the old code we swallow it but with the new code we
-    // blow up
     @Test
     void MultiMeasure_EightMeasures_SubjectEvalType_AllSubjects() {
         var when = GIVEN_REPO

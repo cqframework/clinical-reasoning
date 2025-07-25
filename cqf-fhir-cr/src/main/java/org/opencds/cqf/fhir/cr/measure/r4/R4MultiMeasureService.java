@@ -174,6 +174,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
             String productLine,
             String reporter) {
 
+        // LUKETODO: ensure this counter works correctly in the new world
         var totalMeasures = measures.size();
         for (Measure measure : measures) {
             MeasureReport measureReport;

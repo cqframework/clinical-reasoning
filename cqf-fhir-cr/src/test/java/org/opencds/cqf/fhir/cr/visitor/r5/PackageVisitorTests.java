@@ -446,7 +446,7 @@ class PackageVisitorTests {
                 .copy();
         var libraryAdapter = new AdapterFactory().createLibrary(library);
         var mockCache = Mockito.mock(IValueSetExpansionCache.class);
-        var packageVisitor = new PackageVisitor(repo, null, mockCache);
+        var packageVisitor = new PackageVisitor(repo, (TerminologyServerClient) null, mockCache);
 
         var canonical1 = "http://cts.nlm.nih.gov/fhir/ValueSet/123-this-will-be-routine|20210526";
         var mockValueSetAdapter1 = Mockito.mock(ValueSetAdapter.class);

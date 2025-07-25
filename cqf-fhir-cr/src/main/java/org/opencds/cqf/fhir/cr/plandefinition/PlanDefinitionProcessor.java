@@ -57,20 +57,24 @@ public class PlanDefinitionProcessor {
             IRepository repository,
             EvaluationSettings evaluationSettings,
             TerminologyServerClientSettings terminologyServerClientSettings) {
-        this(repository, evaluationSettings, null, null, null, null, null, terminologyServerClientSettings);
+        this(repository, evaluationSettings, terminologyServerClientSettings, null, null, null, null, null);
     }
 
     public PlanDefinitionProcessor(
             IRepository repository,
             EvaluationSettings evaluationSettings,
+            TerminologyServerClientSettings terminologyServerClientSettings,
             IApplyProcessor applyProcessor,
             IPackageProcessor packageProcessor,
             IDataRequirementsProcessor dataRequirementsProcessor,
             org.opencds.cqf.fhir.cr.activitydefinition.apply.IApplyProcessor activityProcessor,
-            IRequestResolverFactory requestResolverFactory,
-            TerminologyServerClientSettings terminologyServerClientSettings) {
+            IRequestResolverFactory requestResolverFactory) {
         this.repository = requireNonNull(repository, "repository can not be null");
         this.evaluationSettings = requireNonNull(evaluationSettings, "evaluationSettings can not be null");
+        if (packageProcessor == null) {
+            this.terminologyServerClientSettings =
+                    requireNonNull(terminologyServerClientSettings, "terminologyServerClientSettings can not be null");
+        }
         fhirVersion = this.repository.fhirContext().getVersion().getVersion();
         modelResolver = FhirModelResolverCache.resolverForVersion(fhirVersion);
         this.packageProcessor = packageProcessor;
@@ -78,7 +82,6 @@ public class PlanDefinitionProcessor {
         this.requestResolverFactory = requestResolverFactory;
         this.activityProcessor = activityProcessor;
         this.applyProcessor = applyProcessor;
-        this.terminologyServerClientSettings = terminologyServerClientSettings;
     }
 
     public EvaluationSettings evaluationSettings() {

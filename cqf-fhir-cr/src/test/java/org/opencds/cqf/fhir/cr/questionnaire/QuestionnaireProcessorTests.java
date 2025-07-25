@@ -45,7 +45,7 @@ class QuestionnaireProcessorTests {
     void processors() {
         var bundle = given().repository(repositoryR4)
                 .generateProcessor(new GenerateProcessor(repositoryR4))
-                .packageProcessor(new PackageProcessor(repositoryR4, null))
+                .packageProcessor(new PackageProcessor(repositoryR4))
                 .populateProcessor(new PopulateProcessor())
                 .when()
                 .questionnaireId(Ids.newId(fhirContextR4, "Questionnaire", "OutpatientPriorAuthorizationRequest"))

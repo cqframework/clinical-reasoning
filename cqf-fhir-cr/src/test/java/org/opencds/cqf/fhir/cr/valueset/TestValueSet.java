@@ -75,9 +75,9 @@ public class TestValueSet {
             return new ValueSetProcessor(
                     repository,
                     evaluationSettings,
+                    new TerminologyServerClientSettings(),
                     packageProcessor,
-                    dataRequirementsProcessor,
-                    new TerminologyServerClientSettings());
+                    dataRequirementsProcessor);
         }
 
         public When when() {

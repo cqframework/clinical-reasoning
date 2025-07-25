@@ -16,6 +16,13 @@ public class PackageProcessor implements IPackageProcessor {
     protected final PackageVisitor packageVisitor;
     protected final IAdapterFactory adapterFactory;
 
+    public PackageProcessor(IRepository repository) {
+        this.repository = repository;
+        fhirVersion = this.repository.fhirContext().getVersion().getVersion();
+        packageVisitor = new PackageVisitor(this.repository, new TerminologyServerClientSettings());
+        adapterFactory = IAdapterFactory.forFhirVersion(fhirVersion);
+    }
+
     public PackageProcessor(IRepository repository, TerminologyServerClientSettings terminologyServerClientSettings) {
         this.repository = repository;
         fhirVersion = this.repository.fhirContext().getVersion().getVersion();

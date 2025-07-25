@@ -23,6 +23,7 @@ import org.opencds.cqf.fhir.cr.common.ReleaseProcessor;
 import org.opencds.cqf.fhir.cr.helpers.RequestHelpers;
 import org.opencds.cqf.fhir.cr.library.evaluate.EvaluateProcessor;
 import org.opencds.cqf.fhir.utility.Ids;
+import org.opencds.cqf.fhir.utility.client.TerminologyServerClientSettings;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
@@ -57,18 +58,18 @@ class LibraryProcessorTests {
     void processor() {
         var repository =
                 new IgRepository(fhirContextR5, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r5"));
-        var packageProcessor = new PackageProcessor(repository, null);
-        var releaseProcessor = new ReleaseProcessor(repository, null);
+        var packageProcessor = new PackageProcessor(repository);
+        var releaseProcessor = new ReleaseProcessor(repository);
         var dataRequirementsProcessor = new DataRequirementsProcessor(repository);
         var evaluateProcessor = new EvaluateProcessor(repository, EvaluationSettings.getDefault());
         var processor = new LibraryProcessor(
                 repository,
                 EvaluationSettings.getDefault(),
+                new TerminologyServerClientSettings(),
                 packageProcessor,
                 releaseProcessor,
                 dataRequirementsProcessor,
-                evaluateProcessor,
-                null);
+                evaluateProcessor);
         assertNotNull(processor.evaluationSettings());
         var result = processor.resolveLibrary(Eithers.forMiddle3(
                 Ids.newId(repository.fhirContext(), "Library", "OutpatientPriorAuthorizationPrepopulation")));

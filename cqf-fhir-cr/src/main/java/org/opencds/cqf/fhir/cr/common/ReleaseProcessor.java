@@ -16,6 +16,13 @@ public class ReleaseProcessor implements IReleaseProcessor {
     protected final ReleaseVisitor visitor;
     protected final IAdapterFactory adapterFactory;
 
+    public ReleaseProcessor(IRepository repository) {
+        this.repository = repository;
+        this.fhirVersion = this.repository.fhirContext().getVersion().getVersion();
+        this.visitor = new ReleaseVisitor(this.repository, new TerminologyServerClientSettings());
+        this.adapterFactory = IAdapterFactory.forFhirVersion(this.fhirVersion);
+    }
+
     public ReleaseProcessor(IRepository repository, TerminologyServerClientSettings terminologyServerClientSettings) {
         this.repository = repository;
         this.fhirVersion = this.repository.fhirContext().getVersion().getVersion();

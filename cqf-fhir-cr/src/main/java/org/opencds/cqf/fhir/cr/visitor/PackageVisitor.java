@@ -53,7 +53,7 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
     protected Map<String, List<?>> resourceTypes = new HashMap<>();
 
     public PackageVisitor(IRepository repository) {
-        this(repository, null, null);
+        this(repository, (TerminologyServerClient) null, null);
     }
 
     public PackageVisitor(IRepository repository, TerminologyServerClient client) {
@@ -62,6 +62,16 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
 
     public PackageVisitor(IRepository repository, TerminologyServerClientSettings terminologyServerClientSettings) {
         super(repository);
+        this.terminologyServerClient = new TerminologyServerClient(fhirContext(), terminologyServerClientSettings);
+        this.expandHelper = new ExpandHelper(this.repository, terminologyServerClient);
+        setupResourceTypes();
+    }
+
+    public PackageVisitor(
+            IRepository repository,
+            TerminologyServerClientSettings terminologyServerClientSettings,
+            IValueSetExpansionCache cache) {
+        super(repository, cache);
         this.terminologyServerClient = new TerminologyServerClient(fhirContext(), terminologyServerClientSettings);
         this.expandHelper = new ExpandHelper(this.repository, terminologyServerClient);
         setupResourceTypes();

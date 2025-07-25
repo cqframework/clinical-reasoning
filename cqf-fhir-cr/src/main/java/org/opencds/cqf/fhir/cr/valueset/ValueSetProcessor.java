@@ -38,22 +38,23 @@ public class ValueSetProcessor {
             IRepository repository,
             EvaluationSettings evaluationSettings,
             TerminologyServerClientSettings terminologyServerClientSettings) {
-        this(repository, evaluationSettings, null, null, terminologyServerClientSettings);
+        this(repository, evaluationSettings, terminologyServerClientSettings, null, null);
     }
 
     public ValueSetProcessor(
             IRepository repository,
             EvaluationSettings evaluationSettings,
+            TerminologyServerClientSettings terminologyServerClientSettings,
             IPackageProcessor packageProcessor,
-            IDataRequirementsProcessor dataRequirementsProcessor,
-            TerminologyServerClientSettings terminologyServerClientSettings) {
+            IDataRequirementsProcessor dataRequirementsProcessor) {
         this.repository = requireNonNull(repository, "repository can not be null");
         this.evaluationSettings = requireNonNull(evaluationSettings, "evaluationSettings can not be null");
+        this.terminologyServerClientSettings =
+                requireNonNull(terminologyServerClientSettings, "terminologyServerClientSettings can not be null");
         fhirVersion = this.repository.fhirContext().getVersion().getVersion();
         modelResolver = FhirModelResolverCache.resolverForVersion(fhirVersion);
         this.packageProcessor = packageProcessor;
         this.dataRequirementsProcessor = dataRequirementsProcessor;
-        this.terminologyServerClientSettings = terminologyServerClientSettings;
     }
 
     public EvaluationSettings evaluationSettings() {

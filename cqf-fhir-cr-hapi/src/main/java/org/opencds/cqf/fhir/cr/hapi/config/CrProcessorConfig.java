@@ -28,8 +28,11 @@ public class CrProcessorConfig {
 
     @Bean
     IPlanDefinitionProcessorFactory planDefinitionProcessorFactory(
-            IRepositoryFactory repositoryFactory, EvaluationSettings evaluationSettings) {
-        return rd -> new PlanDefinitionProcessor(repositoryFactory.create(rd), evaluationSettings, null);
+            IRepositoryFactory repositoryFactory,
+            EvaluationSettings evaluationSettings,
+            TerminologyServerClientSettings terminologyServerClientSettings) {
+        return rd -> new PlanDefinitionProcessor(
+                repositoryFactory.create(rd), evaluationSettings, terminologyServerClientSettings);
     }
 
     @Bean

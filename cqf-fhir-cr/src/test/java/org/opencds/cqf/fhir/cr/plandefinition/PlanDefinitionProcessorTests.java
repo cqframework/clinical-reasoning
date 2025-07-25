@@ -25,6 +25,7 @@ import org.opencds.cqf.fhir.cr.common.PackageProcessor;
 import org.opencds.cqf.fhir.cr.plandefinition.apply.ApplyProcessor;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Ids;
+import org.opencds.cqf.fhir.utility.client.TerminologyServerClientSettings;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
@@ -50,18 +51,18 @@ class PlanDefinitionProcessorTests {
         var modelResolver = FhirModelResolverCache.resolverForVersion(FhirVersionEnum.R5);
         var activityProcessor = new org.opencds.cqf.fhir.cr.activitydefinition.apply.ApplyProcessor(
                 repository, IRequestResolverFactory.getDefault(FhirVersionEnum.R5));
-        var packageProcessor = new PackageProcessor(repository, null);
+        var packageProcessor = new PackageProcessor(repository);
         var dataRequirementsProcessor = new DataRequirementsProcessor(repository);
         var requestResolverFactory = IRequestResolverFactory.getDefault(FhirVersionEnum.R5);
         var processor = new PlanDefinitionProcessor(
                 repository,
                 EvaluationSettings.getDefault(),
+                new TerminologyServerClientSettings(),
                 new ApplyProcessor(repository, modelResolver, activityProcessor),
                 packageProcessor,
                 dataRequirementsProcessor,
                 activityProcessor,
-                requestResolverFactory,
-                null);
+                requestResolverFactory);
         assertNotNull(processor.evaluationSettings());
         var result = processor.apply(
                 Eithers.forMiddle3(Ids.newId(repository.fhirContext(), "PlanDefinition", "DischargeInstructionsPlan")),

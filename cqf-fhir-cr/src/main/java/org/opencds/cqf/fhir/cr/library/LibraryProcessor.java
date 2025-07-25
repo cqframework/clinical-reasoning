@@ -52,26 +52,27 @@ public class LibraryProcessor {
             IRepository repository,
             EvaluationSettings evaluationSettings,
             TerminologyServerClientSettings terminologyServerClientSettings) {
-        this(repository, evaluationSettings, null, null, null, null, terminologyServerClientSettings);
+        this(repository, evaluationSettings, terminologyServerClientSettings, null, null, null, null);
     }
 
     public LibraryProcessor(
             IRepository repository,
             EvaluationSettings evaluationSettings,
+            TerminologyServerClientSettings terminologyServerClientSettings,
             IPackageProcessor packageProcessor,
             IReleaseProcessor releaseProcessor,
             IDataRequirementsProcessor dataRequirementsProcessor,
-            IEvaluateProcessor evaluateProcessor,
-            TerminologyServerClientSettings terminologyServerClientSettings) {
+            IEvaluateProcessor evaluateProcessor) {
         this.repository = requireNonNull(repository, "repository can not be null");
         this.evaluationSettings = requireNonNull(evaluationSettings, "evaluationSettings can not be null");
+        this.terminologyServerClientSettings =
+                requireNonNull(terminologyServerClientSettings, "terminologyServerClientSettings can not be null");
         fhirVersion = this.repository.fhirContext().getVersion().getVersion();
         modelResolver = FhirModelResolverCache.resolverForVersion(fhirVersion);
         this.packageProcessor = packageProcessor;
         this.releaseProcessor = releaseProcessor;
         this.dataRequirementsProcessor = dataRequirementsProcessor;
         this.evaluateProcessor = evaluateProcessor;
-        this.terminologyServerClientSettings = terminologyServerClientSettings;
     }
 
     public EvaluationSettings evaluationSettings() {

@@ -441,6 +441,19 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
     public static Map<Set<ValueDef>, List<String>> groupSubjectsByValueDefSet(
             Table<String, ValueWrapper, StratifierComponentDef> table) {
+        // input format
+        // | Subject (String) | CriteriaResult (ValueWrapper) | StratifierComponentDef |
+        // | ---------------- | ----------------------------- | ---------------------- |
+        // | subject-a        | M                             | gender                 |
+        // | subject-b        | F                             | gender                 |
+        // | subject-c        | M                             | gender                 |
+        // | subject-d        | F                             | gender                 |
+        // | subject-e        | F                             | gender                 |
+        // | subject-a        | white                         | race                   |
+        // | subject-b        | hispanic/latino               | race                   |
+        // | subject-c        | hispanic/latino               | race                   |
+        // | subject-d        | black                         | race                   |
+        // | subject-e        | black                         | race                   |
 
         // Step 1: Build Map<Subject, Set<ValueDef>>
         Map<String, Set<ValueDef>> subjectToValueDefs = new HashMap<>();
@@ -450,6 +463,13 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                     .computeIfAbsent(cell.getRowKey(), k -> new HashSet<>())
                     .add(new ValueDef(cell.getColumnKey(), cell.getValue()));
         }
+        // output format:
+        // | Set<ValueDef>           | List<Subjects(String)> |
+        // | ----------------------- | ---------------------- |
+        // | <'M','White>            | [subject-a]            |
+        // | <'F','hispanic/latino'> | [subject-b]            |
+        // | <'M','hispanic/latino'> | [subject-c]            |
+        // | <'F','black'>           | [subject-d, subject-e] |
 
         // Step 2: Invert to Map<Set<ValueDef>, List<Subject>>
         return subjectToValueDefs.entrySet().stream()
@@ -476,6 +496,14 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         // Stratum 2
         // Gender: F, Age: 0-30
         componentSubjects.forEach((valueSet, subjects) -> {
+            // converts table into component value combinations
+            // | Stratum   | Set<ValueDef>           | List<Subjects(String)> |
+            // | --------- | ----------------------- | ---------------------- |
+            // | Stratum-1 | <'M','White>            | [subject-a]            |
+            // | Stratum-2 | <'F','hispanic/latino'> | [subject-b]            |
+            // | Stratum-3 | <'M','hispanic/latino'> | [subject-c]            |
+            // | Stratum-4 | <'F','black'>           | [subject-d, subject-e] |
+
             var reportStratum = reportStratifier.addStratum();
             buildStratum(bc, reportStratum, valueSet, subjects, populations, groupDef);
         });

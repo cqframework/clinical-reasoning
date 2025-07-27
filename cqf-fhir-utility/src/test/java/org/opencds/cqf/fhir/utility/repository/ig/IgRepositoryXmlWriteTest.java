@@ -53,7 +53,7 @@ class IgRepositoryXmlWriteTest {
         var created = repository.read(Library.class, o.getId());
         assertNotNull(created);
 
-        var loc = tempDir.resolve("resources/library/new-library.xml");
+        var loc = tempDir.resolve("input/resources/library/new-library.xml");
         assertTrue(Files.exists(loc));
 
         repository.delete(Library.class, created.getIdElement());
@@ -68,7 +68,7 @@ class IgRepositoryXmlWriteTest {
         var created = repository.read(Patient.class, o.getId());
         assertNotNull(created);
 
-        var loc = tempDir.resolve("tests/patient/new-patient.xml");
+        var loc = tempDir.resolve("input/tests/patient/new-patient.xml");
         assertTrue(Files.exists(loc));
 
         repository.delete(Patient.class, created.getIdElement());

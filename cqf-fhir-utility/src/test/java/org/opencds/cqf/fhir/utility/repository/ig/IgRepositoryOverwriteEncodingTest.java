@@ -58,7 +58,7 @@ class IgRepositoryOverwriteEncodingTest {
         lib.addAuthor().setName("Test Author");
 
         repository.update(lib);
-        assertFalse(tempDir.resolve("resources/library/123.json").toFile().exists());
-        assertTrue(tempDir.resolve("resources/library/123.xml").toFile().exists());
+        assertFalse(tempDir.resolve("input/resources/library/123.json").toFile().exists());
+        assertTrue(tempDir.resolve("input/resources/library/123.xml").toFile().exists());
     }
 }

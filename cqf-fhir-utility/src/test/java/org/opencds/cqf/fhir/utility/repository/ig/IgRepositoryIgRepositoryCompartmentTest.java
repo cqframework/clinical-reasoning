@@ -142,7 +142,7 @@ class IgRepositoryIgRepositoryCompartmentTest {
         var created = repository.read(Library.class, o.getId());
         assertNotNull(created);
 
-        var loc = tempDir.resolve("resources/library/new-library.json");
+        var loc = tempDir.resolve("input/resources/library/new-library.json");
         assertTrue(Files.exists(loc));
 
         repository.delete(Library.class, created.getIdElement());
@@ -158,7 +158,7 @@ class IgRepositoryIgRepositoryCompartmentTest {
         var created = repository.read(Patient.class, o.getId(), header);
         assertNotNull(created);
 
-        var loc = tempDir.resolve("tests/patient/new-patient/patient/new-patient.json");
+        var loc = tempDir.resolve("input/tests/patient/new-patient/patient/new-patient.json");
         assertTrue(Files.exists(loc));
 
         repository.delete(Patient.class, created.getIdElement(), header);
@@ -173,7 +173,7 @@ class IgRepositoryIgRepositoryCompartmentTest {
         var created = repository.read(ValueSet.class, o.getId());
         assertNotNull(created);
 
-        var loc = tempDir.resolve("vocabulary/valueset/new-valueset.json");
+        var loc = tempDir.resolve("input/vocabulary/valueset/new-valueset.json");
         assertTrue(Files.exists(loc));
 
         repository.delete(ValueSet.class, created.getIdElement());
@@ -226,7 +226,7 @@ class IgRepositoryIgRepositoryCompartmentTest {
     void resourceMissingWhenCacheCleared() throws IOException {
         var id = new IdType("Library", "ToDelete");
         var lib = new Library().setIdElement(id);
-        var path = tempDir.resolve("resources/library/ToDelete.json");
+        var path = tempDir.resolve("input/resources/library/ToDelete.json");
 
         repository.create(lib);
         assertTrue(path.toFile().exists());

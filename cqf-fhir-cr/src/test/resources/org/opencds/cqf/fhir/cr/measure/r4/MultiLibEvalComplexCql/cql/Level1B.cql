@@ -12,16 +12,16 @@ parameter "Measurement Period" Interval<DateTime> default Interval[@2021-07-01T0
 define "Encounters A":
     Level2."Encounters" E
         where E.status.value in { 'arrived', 'cancelled', 'in-progress', 'planned' } and
-              E.subject.reference in Level3B."Encounter Subjects"
+              E.meta.profile[0] in Level3B."Encounter Profiles"
     return E.id
 
 define "Encounters A Combined":
     Combine("Encounters A", ', ')
 
-define "Encounter B":
+define "Encounters B":
     Level2."Encounters" E
         where E.status.value in { 'finished', 'cancelled', 'in-progress', 'planned' } and
-              E.subject.reference in Level3B."Encounter Subjects"
+              E.meta.profile[0] in Level3B."Encounter Profiles"
     return E.id
 
 define "Encounters B Combined":

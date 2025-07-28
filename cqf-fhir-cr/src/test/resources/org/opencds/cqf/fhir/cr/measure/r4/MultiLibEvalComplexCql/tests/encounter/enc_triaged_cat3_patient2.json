@@ -1,9 +1,14 @@
 {
   "resourceType": "Encounter",
-  "id": "enc_triaged_patient1",
+  "id": "enc_triaged_cat3_patient2",
+  "meta": {
+    "profile": [
+      "http://example.com/category3"
+    ]
+  },
   "status": "triaged",
   "subject": {
-    "reference": "Patient/patient1"
+    "reference": "Patient/patient2"
   },
   "period": {
     "start": "2001-01-01T00:00:00-05:00",

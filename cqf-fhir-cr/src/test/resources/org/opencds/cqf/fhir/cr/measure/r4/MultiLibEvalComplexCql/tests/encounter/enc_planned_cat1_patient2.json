@@ -1,7 +1,12 @@
 {
   "resourceType": "Encounter",
-  "id": "enc_finished_patient2",
-  "status": "finished",
+  "id": "enc_planned_patient2",
+  "meta": {
+    "profile": [
+      "http://example.com/category1"
+    ]
+  },
+  "status": "planned",
   "subject": {
     "reference": "Patient/patient2"
   },

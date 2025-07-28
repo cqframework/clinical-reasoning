@@ -6,7 +6,7 @@ include FHIRHelpers version '4.0.1'
 
 include Level5 called Level5
 
-define "Encounter Subjects":
+define "Encounter Profiles":
     Level5."Encounters" E
-        where E.subject.reference != 'Patient/pat3'
-        return E.subject.reference
+        where not (E.meta.profile[0] in { 'http://example.com/category3' })
+    return E.meta.profile[0]

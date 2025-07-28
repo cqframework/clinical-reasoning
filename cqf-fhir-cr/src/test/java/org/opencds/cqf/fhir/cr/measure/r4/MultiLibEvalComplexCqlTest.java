@@ -21,7 +21,8 @@ class MultiLibEvalComplexCqlTest {
             .getFirstMeasureReport()
             .firstGroup()
             .firstStratifier()
-            .stratum("Encounters A");
+            .firstStratum()
+            .hasValue("arrived, planned");
     }
 
     @Test
@@ -29,13 +30,18 @@ class MultiLibEvalComplexCqlTest {
 
         var when = GIVEN_REPO
             .when()
-            .measureId("Level1A")
+            .measureId("Level1B")
             .reportType("population")
             .evaluate();
 
         when.then()
             .hasMeasureReportCount(1)
-            .getFirstMeasureReport();
+            .getFirstMeasureReport()
+            .firstGroup()
+            .firstStratifier()
+            .firstStratum()
+            // LUKETODO:  why is this:  enc_arrived_patient3, enc_planned_patient3
+            .hasValue("arrived, planned");
     }
 
     @Test

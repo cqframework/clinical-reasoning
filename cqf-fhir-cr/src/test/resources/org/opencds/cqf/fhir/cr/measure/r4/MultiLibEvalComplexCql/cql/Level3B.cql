@@ -6,6 +6,6 @@ include FHIRHelpers version '4.0.1'
 
 include Level4 called Level4
 
-define "Encounter Subjects":
-    Level4."Encounter Subjects" S
-        where S != 'Patient/pat2'
+define "Encounter Profiles":
+    Level4."Encounter Profiles" P
+        where not (P in { 'http://example.com/category2' })

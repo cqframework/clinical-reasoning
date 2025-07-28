@@ -1,7 +1,12 @@
 {
   "resourceType": "Encounter",
-  "id": "enc_planned_patient2",
-  "status": "planned",
+  "id": "enc_cancelled_cat3_patient2",
+  "meta": {
+    "profile": [
+      "http://example.com/category3"
+    ]
+  },
+  "status": "cancelled",
   "subject": {
     "reference": "Patient/patient2"
   },

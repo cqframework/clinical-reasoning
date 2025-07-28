@@ -627,6 +627,12 @@ class MultiMeasure {
             return this;
         }
 
+        public SelectedStratum hasValue(String text) {
+            assertEquals(text, value().getValue().getText());
+            return this;
+        }
+
+
         public SelectedStratumPopulation firstPopulation() {
             return population(MeasureReport.StratifierGroupComponent::getPopulationFirstRep);
         }

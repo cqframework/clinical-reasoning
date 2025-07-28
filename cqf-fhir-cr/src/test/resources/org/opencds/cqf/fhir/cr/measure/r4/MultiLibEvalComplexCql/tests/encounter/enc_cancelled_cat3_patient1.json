@@ -1,9 +1,14 @@
 {
   "resourceType": "Encounter",
-  "id": "enc_cancelled_patient2",
+  "id": "enc_cancelled_cat3_patient1",
+  "meta": {
+    "profile": [
+      "http://example.com/category3"
+    ]
+  },
   "status": "cancelled",
   "subject": {
-    "reference": "Patient/patient2"
+    "reference": "Patient/patient1"
   },
   "period": {
     "start": "2001-01-01T00:00:00-05:00",

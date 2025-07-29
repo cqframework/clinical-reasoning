@@ -4,6 +4,7 @@ import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.MEASU
 
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ListMultimap;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -294,7 +295,6 @@ public class MeasureProcessorUtils {
         clearEvaluatedResources(context);
     }
 
-    // LUKETODO:  why do we bother if the next evaluation will flush them anyway?
     // reset evaluated resources followed by a context evaluation
     private void clearEvaluatedResources(CqlEngine context) {
         context.getState().clearEvaluatedResources();
@@ -318,8 +318,6 @@ public class MeasureProcessorUtils {
             boolean isBooleanBasis,
             CqlEngine context) {
 
-        // LUKETODO:  org.opencds.cqf.cql.engine.exception.CqlException: Could not resolve expression reference
-        // 'MeasureObservation' in library 'MinimalProportionBooleanBasisSingleGroup'.
         var ed = Libraries.resolveExpressionRef(
                 criteriaExpression, context.getState().getCurrentLibrary());
 
@@ -348,6 +346,16 @@ public class MeasureProcessorUtils {
         return result;
     }
 
+    // LUKETODO: redo javadoc
+    // LUKETODO: redo contract with DSTU3
+    /**
+     * method used to execute generate CQL results via Library $evaluate
+     *
+     * @param subjectIds subjects to generate results for
+     * @param zonedMeasurementPeriod offset defined measurement period for evaluation
+     * @param context cql engine context
+     * @return CQL results for Library defined in the Measure resource
+     */
     public CompositeEvaluationResultsPerMeasure getEvaluationResults(
             List<String> subjectIds,
             ZonedDateTime zonedMeasurementPeriod,
@@ -355,75 +363,12 @@ public class MeasureProcessorUtils {
             MeasureLibraryIdEngineDetails measureLibraryIdEngineDetails) {
 
         return getEvaluationResults(
-                subjectIds, zonedMeasurementPeriod, context, List.of(measureLibraryIdEngineDetails));
-    }
-
-    // LUKETODO: redo javadoc
-    /**
-     * method used to execute generate CQL results via Library $evaluate
-     *
-     * @param subjectIds subjects to generate results for
-     * @param zonedMeasurementPeriod offset defined measurement period for evaluation
-     * @param context cql engine context
-     * @param measureLibraryIdEngineDetailsList contains details of measureId, libraryId, and LibraryEngine
-     * @return CQL results for Library defined in the Measure resource
-     */
-    public CompositeEvaluationResultsPerMeasure getEvaluationResults(
-            List<String> subjectIds,
-            ZonedDateTime zonedMeasurementPeriod,
-            CqlEngine context,
-            List<MeasureLibraryIdEngineDetails> measureLibraryIdEngineDetailsList) {
-
-        // measure -> subject -> results
-        var resultsBuilder = CompositeEvaluationResultsPerMeasure.builder();
-
-        // Library $evaluate each subject
-        // The goal here is to do each measure/library evaluation within the context of a single subject.
-        // This means that we will not switch between subject contexts while evaluating measures.
-        // Once we've switched to a different subject context, the previous expression cache is dropped.
-        for (String subjectId : subjectIds) {
-            if (subjectId == null) {
-                throw new InternalErrorException("SubjectId is required in order to calculate.");
-            }
-            // LUKETODO:  we reset the cache outside of the measure loop
-            Pair<String, String> subjectInfo = this.getSubjectTypeAndId(subjectId);
-            String subjectTypePart = subjectInfo.getLeft();
-            String subjectIdPart = subjectInfo.getRight();
-            context.getState().setContextValue(subjectTypePart, subjectIdPart);
-            for (var measureLibraryIdEngine : measureLibraryIdEngineDetailsList) {
-                try {
-                    var libraryId = measureLibraryIdEngine.libraryId();
-                    //                    logger.info("1234: libraryId: {}", libraryId.getId());
-                    var evaluationResult = measureLibraryIdEngine
-                            .engine()
-                            // LUKETODO:  make CQL CqlEngine changes to take multiple versioned identifiers and
-                            // then initState for mulitple libraries
-                            // this seems to also reset the cache
-                            // LUKETODO:  call the new mulitple versionidentifier method once it's available in
-                            // CQL
-                            .getEvaluationResult(
-                                    libraryId,
-                                    subjectId,
-                                    null,
-                                    null,
-                                    null,
-                                    null,
-                                    null,
-                                    zonedMeasurementPeriod,
-                                    context);
-
-                    resultsBuilder.addResult(measureLibraryIdEngine.measureId(), subjectId, evaluationResult);
-                } catch (Exception e) {
-                    // Catch Exceptions from evaluation per subject, but allow rest of subjects to be processed (if
-                    // applicable)
-                    var error = EXCEPTION_FOR_SUBJECT_ID_MESSAGE_TEMPLATE.formatted(subjectId, e.getMessage());
-                    resultsBuilder.addError(measureLibraryIdEngine.measureId(), error);
-                    logger.error(error, e);
-                }
-            }
-        }
-
-        return resultsBuilder.build();
+                subjectIds,
+                zonedMeasurementPeriod,
+                context,
+                measureLibraryIdEngineDetails.engine(),
+                ImmutableListMultimap.of(
+                        measureLibraryIdEngineDetails.libraryId(), measureLibraryIdEngineDetails.measureId()));
     }
 
     public CompositeEvaluationResultsPerMeasure getEvaluationResults(

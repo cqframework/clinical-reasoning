@@ -261,11 +261,12 @@ public class R4MeasureProcessor {
         var zonedMeasurementPeriod = MeasureProcessorUtils.getZonedTimeZoneForEval(
                 measureProcessorUtils.getDefaultMeasurementPeriod(measurementPeriodParams, context));
 
+        var libraryVersionedIdentifiers =
+                measures.stream().map(this::getLibraryVersionIdentifier).toList();
+
         // Note that we must build the LibraryEngine BEFORE we call
         // measureProcessorUtils.setMeasurementPeriod(), otherwise, we get an NPE.
-        var measureLibraryIdEngineDetailsList = measures.stream()
-                .map(measure -> buildLibraryIdEngineDetails(measure, parameters, context))
-                .toList();
+        var libraryEngineForMultipleLibraries = getLibraryEngine(parameters, libraryVersionedIdentifiers, context);
 
         // set measurement Period from CQL if operation parameters are empty
         measureProcessorUtils.setMeasurementPeriod(
@@ -276,10 +277,6 @@ public class R4MeasureProcessor {
                         .map(url -> Optional.ofNullable(url).orElse("Unknown Measure URL"))
                         .toList());
 
-        var libraryVersionedIdentifiers =
-                measures.stream().map(this::getLibraryVersionIdentifier).toList();
-
-        var libraryEngineForMultipleLibraries = getLibraryEngine(parameters, libraryVersionedIdentifiers, context);
         // LUKETODO:  this is awkward:  can we redo this?
         var versionedIdMeasureIdPairs = getPairs4(measures);
 

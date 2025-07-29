@@ -76,7 +76,6 @@ public class CompositeEvaluationResultsPerMeasure {
         }
 
         public void addResult(IIdType measureId, String subjectId, EvaluationResult evaluationResult) {
-            // LUKETODO:  figure out how to test this:
             // if we have no results, we don't need to add anything
             if (evaluationResult == null || evaluationResult.expressionResults.isEmpty()) {
                 return;

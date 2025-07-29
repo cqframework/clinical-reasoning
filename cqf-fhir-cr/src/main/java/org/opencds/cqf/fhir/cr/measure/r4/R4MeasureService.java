@@ -86,8 +86,8 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
         var context = Engines.forRepository(
                 proxyRepoForMeasureProcessor, this.measureEvaluationOptions.getEvaluationSettings(), additionalData);
 
-        var evaluationResults = processor.evaluateMeasureEitherWithCqlEngine(
-                subjects, measure, periodStart, periodEnd, parameters, context);
+        var evaluationResults =
+                processor.evaluateMeasureWithCqlEngine(subjects, measure, periodStart, periodEnd, parameters, context);
 
         measureReport = processor.evaluateMeasure(
                 measure, periodStart, periodEnd, reportType, subjects, evalType, context, evaluationResults);

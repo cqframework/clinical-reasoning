@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
@@ -343,22 +344,25 @@ public class LibraryEngine {
                 patientId,
                 zonedDateTime);
 
-        // LUKETODO: better name
-        var stuff = pre(parameters, rawParameters, additionalData, cqlFhirParametersConverter, engine);
+        final CqlFhirParametersConverter cqlFhirParametersConverterToUse = Objects.requireNonNullElseGet(
+                cqlFhirParametersConverter, () -> Engines.getCqlFhirParametersConverter(repository.fhirContext()));
+
+        // engine context built externally of LibraryEngine?
+        final CqlEngine engineToUse = Objects.requireNonNullElseGet(
+                engine, () -> Engines.forRepository(repository, settings, additionalData));
+
+        var evaluationParameters = cqlFhirParametersConverterToUse.toCqlParameters(parameters);
+        if (rawParameters != null && !rawParameters.isEmpty()) {
+            evaluationParameters.putAll(rawParameters);
+        }
 
         // LUKETODO: better name
         var idsCloned = ids.stream()
                 .map(id -> new VersionedIdentifier().withId(id.getId()))
                 .toList();
 
-        return stuff.engine()
-                .evaluate(
-                        idsCloned,
-                        expressions,
-                        buildContextParameter(patientId),
-                        stuff.evaluationParameters(),
-                        null,
-                        zonedDateTime);
+        return engineToUse.evaluate(
+                idsCloned, expressions, buildContextParameter(patientId), evaluationParameters, null, zonedDateTime);
     }
 
     public EvaluationResult getEvaluationResult(
@@ -374,48 +378,17 @@ public class LibraryEngine {
 
         logger.info("1234: id: {}, patientId: {}, zonedDateTime: {}", id.getId(), patientId, zonedDateTime);
 
-        var stuff = pre(parameters, rawParameters, additionalData, cqlFhirParametersConverter, engine);
+        var evaluationResultsForMultiLib = getEvaluationResult(
+                List.of(id),
+                patientId,
+                parameters,
+                rawParameters,
+                additionalData,
+                expressions,
+                cqlFhirParametersConverter,
+                zonedDateTime,
+                engine);
 
-        return stuff.engine()
-                .evaluate(
-                        new VersionedIdentifier().withId(id.getId()),
-                        expressions,
-                        buildContextParameter(patientId),
-                        stuff.evaluationParameters(),
-                        null,
-                        zonedDateTime);
+        return evaluationResultsForMultiLib.getSingleResultOrThrow();
     }
-
-    private Stuff pre(
-            IBaseParameters parameters,
-            Map<String, Object> rawParameters,
-            IBaseBundle additionalData,
-            CqlFhirParametersConverter cqlFhirParametersConverter,
-            CqlEngine engine) {
-
-        final CqlFhirParametersConverter cqlFhirParametersConverterToUse;
-        if (cqlFhirParametersConverter == null) {
-            cqlFhirParametersConverterToUse = Engines.getCqlFhirParametersConverter(repository.fhirContext());
-        } else {
-            cqlFhirParametersConverterToUse = cqlFhirParametersConverter;
-        }
-        // engine context built externally of LibraryEngine?
-        final CqlEngine engineToUse;
-        if (engine == null) {
-            engineToUse = Engines.forRepository(repository, settings, additionalData);
-        } else {
-            engineToUse = engine;
-        }
-
-        var evaluationParameters = cqlFhirParametersConverterToUse.toCqlParameters(parameters);
-        if (rawParameters != null && !rawParameters.isEmpty()) {
-            evaluationParameters.putAll(rawParameters);
-        }
-
-        return new Stuff(engineToUse, evaluationParameters);
-    }
-
-    // LUKETODO:
-    // LUKETODO: better name
-    private record Stuff(CqlEngine engine, Map<String, Object> evaluationParameters) {}
 }

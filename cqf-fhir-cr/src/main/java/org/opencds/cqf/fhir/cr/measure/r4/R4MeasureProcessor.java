@@ -204,7 +204,7 @@ public class R4MeasureProcessor {
                         subjectIds);
     }
 
-    public CompositeEvaluationResultsPerMeasure evaluateMeasureEitherWithCqlEngine(
+    public CompositeEvaluationResultsPerMeasure evaluateMeasureWithCqlEngine(
             List<String> subjects,
             Either3<CanonicalType, IdType, Measure> measureEither,
             @Nullable ZonedDateTime periodStart,

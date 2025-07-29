@@ -34,6 +34,10 @@ public class MultiLibraryIdMeasureEngineDetails {
         return new Builder(engine);
     }
 
+    public List<IIdType> getAllMeasureIds() {
+        return List.copyOf(libraryIdToMeasureIds.values());
+    }
+
     public static class Builder {
         private final LibraryEngine libraryEngine;
         private final ImmutableListMultimap.Builder<VersionedIdentifier, IIdType> libraryIdToMeasureIdsBuilder =

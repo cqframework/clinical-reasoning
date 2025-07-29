@@ -3,8 +3,6 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import com.google.common.collect.ImmutableListMultimap;
-import com.google.common.collect.ListMultimap;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import java.time.ZonedDateTime;
@@ -38,11 +36,11 @@ import org.opencds.cqf.fhir.cr.measure.common.CompositeEvaluationResultsPerMeasu
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
-import org.opencds.cqf.fhir.cr.measure.common.MeasureLibraryIdEngineDetails;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorUtils;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
+import org.opencds.cqf.fhir.cr.measure.common.MultiLibraryIdMeasureEngineDetails;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4DateHelper;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.monad.Either3;
@@ -261,12 +259,11 @@ public class R4MeasureProcessor {
         var zonedMeasurementPeriod = MeasureProcessorUtils.getZonedTimeZoneForEval(
                 measureProcessorUtils.getDefaultMeasurementPeriod(measurementPeriodParams, context));
 
-        var libraryVersionedIdentifiers =
-                measures.stream().map(this::getLibraryVersionIdentifier).toList();
 
         // Note that we must build the LibraryEngine BEFORE we call
         // measureProcessorUtils.setMeasurementPeriod(), otherwise, we get an NPE.
-        var libraryEngineForMultipleLibraries = getLibraryEngine(parameters, libraryVersionedIdentifiers, context);
+        var multiLibraryIdMeasureEngineDetails =
+            getMultiLibraryIdMeasureEngineDetails(measures, parameters, context);
 
         // set measurement Period from CQL if operation parameters are empty
         measureProcessorUtils.setMeasurementPeriod(
@@ -277,50 +274,35 @@ public class R4MeasureProcessor {
                         .map(url -> Optional.ofNullable(url).orElse("Unknown Measure URL"))
                         .toList());
 
-        // LUKETODO:  this is awkward:  can we redo this?
-        var versionedIdMeasureIdPairs = getPairs4(measures);
 
         // populate results from Library $evaluate
-        return getEvaluationResults(
-                subjects,
-                zonedMeasurementPeriod,
-                context,
-                libraryEngineForMultipleLibraries,
-                versionedIdMeasureIdPairs);
-    }
-
-    private CompositeEvaluationResultsPerMeasure getEvaluationResults(
-            List<String> subjects,
-            ZonedDateTime zonedMeasurementPeriod,
-            CqlEngine context,
-            LibraryEngine libraryEngineForMultipleLibraries,
-            ListMultimap<VersionedIdentifier, IIdType> versionedIdMeasureIdPairs) {
         return measureProcessorUtils.getEvaluationResults(
                 subjects,
                 zonedMeasurementPeriod,
                 context,
-                libraryEngineForMultipleLibraries,
-                versionedIdMeasureIdPairs);
+                multiLibraryIdMeasureEngineDetails);
     }
 
-    private ListMultimap<VersionedIdentifier, IIdType> getPairs4(List<Measure> measures) {
-        return measures.stream()
-                .collect(ImmutableListMultimap.toImmutableListMultimap(
-                        this::getLibraryVersionIdentifier, // Key extractor
-                        Measure::getIdElement // Value extractor
-                        ));
-    }
+    private MultiLibraryIdMeasureEngineDetails getMultiLibraryIdMeasureEngineDetails(
+            List<Measure> measures,
+            Parameters parameters,
+            CqlEngine context) {
+        var libraryVersionedIdentifiers =
+            measures.stream()
+                .map(this::getLibraryVersionIdentifier)
+                .toList();
 
-    // Ideally this would be done in MeasureProcessorUtils, but it's too much work to change for now
-    private MeasureLibraryIdEngineDetails buildLibraryIdEngineDetails(
-            Measure measure, Parameters parameters, CqlEngine context) {
+        var libraryEngine = getLibraryEngine(parameters, libraryVersionedIdentifiers, context);
 
-        var libraryVersionIdentifier = getLibraryVersionIdentifier(measure);
+        var builder = MultiLibraryIdMeasureEngineDetails.builder(libraryEngine);
 
-        return new MeasureLibraryIdEngineDetails(
-                measure.getIdElement(),
-                libraryVersionIdentifier,
-                getLibraryEngine(parameters, libraryVersionIdentifier, context));
+        measures.forEach(measure -> {
+           builder.addLibraryIdToMeasureId(
+               this.getLibraryVersionIdentifier(measure),
+               measure.getIdElement());
+        });
+
+        return builder.build();
     }
 
     /**  Temporary check for Measures that are being blocked from use by evaluateResults method

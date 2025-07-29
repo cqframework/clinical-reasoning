@@ -27,9 +27,9 @@ import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
-import org.opencds.cqf.fhir.cr.measure.common.MeasureLibraryIdEngineDetails;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorUtils;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
+import org.opencds.cqf.fhir.cr.measure.common.MultiLibraryIdMeasureEngineDetails;
 import org.opencds.cqf.fhir.cr.measure.common.SubjectProvider;
 import org.opencds.cqf.fhir.utility.repository.FederatedRepository;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
@@ -133,29 +133,27 @@ public class Dstu3MeasureProcessor {
     }
 
     // Ideally this would be done in MeasureProcessorUtils, but it's too much work to change for now
-    private MeasureLibraryIdEngineDetails buildLibraryIdEngineDetails(
+    private MultiLibraryIdMeasureEngineDetails buildLibraryIdEngineDetails(
             Measure measure, Parameters parameters, CqlEngine context) {
 
         var libraryVersionIdentifier = getLibraryVersionIdentifier(measure);
 
-        return new MeasureLibraryIdEngineDetails(
-                measure.getIdElement(),
-                libraryVersionIdentifier,
-                getLibraryEngine(parameters, libraryVersionIdentifier, context));
+        final LibraryEngine libraryEngine = getLibraryEngine(parameters, libraryVersionIdentifier,
+            context);
+
+        return MultiLibraryIdMeasureEngineDetails.builder(libraryEngine)
+            .addLibraryIdToMeasureId(
+                getLibraryVersionIdentifier(measure),
+                measure.getIdElement())
+            .build();
     }
 
     protected MeasureReportType evalTypeToReportType(MeasureEvalType measureEvalType) {
-        switch (measureEvalType) {
-            case PATIENT, SUBJECT:
-                return MeasureReportType.INDIVIDUAL;
-            case PATIENTLIST, SUBJECTLIST:
-                return MeasureReportType.PATIENTLIST;
-            case POPULATION:
-                return MeasureReportType.SUMMARY;
-            default:
-                throw new InvalidRequestException(
-                        "Unsupported MeasureEvalType: %s".formatted(measureEvalType.toCode()));
-        }
+        return switch (measureEvalType) {
+            case PATIENT, SUBJECT -> MeasureReportType.INDIVIDUAL;
+            case PATIENTLIST, SUBJECTLIST -> MeasureReportType.PATIENTLIST;
+            case POPULATION -> MeasureReportType.SUMMARY;
+        };
     }
 
     protected LibraryEngine getLibraryEngine(Parameters parameters, VersionedIdentifier id, CqlEngine context) {

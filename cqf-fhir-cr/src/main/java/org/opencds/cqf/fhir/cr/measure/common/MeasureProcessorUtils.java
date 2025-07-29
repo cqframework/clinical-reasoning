@@ -4,8 +4,6 @@ import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.MEASU
 
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import com.google.common.collect.ImmutableListMultimap;
-import com.google.common.collect.ListMultimap;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import java.time.LocalDateTime;
@@ -22,7 +20,6 @@ import org.hl7.elm.r1.IntervalTypeSpecifier;
 import org.hl7.elm.r1.NamedTypeSpecifier;
 import org.hl7.elm.r1.ParameterDef;
 import org.hl7.elm.r1.VersionedIdentifier;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.execution.CqlEngine.EvaluationResultsForMultiLib;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
@@ -32,7 +29,6 @@ import org.opencds.cqf.cql.engine.execution.Variable;
 import org.opencds.cqf.cql.engine.runtime.Date;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.engine.runtime.Interval;
-import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.opencds.cqf.fhir.cr.measure.helper.DateHelper;
 import org.slf4j.Logger;
@@ -360,23 +356,7 @@ public class MeasureProcessorUtils {
             List<String> subjectIds,
             ZonedDateTime zonedMeasurementPeriod,
             CqlEngine context,
-            MeasureLibraryIdEngineDetails measureLibraryIdEngineDetails) {
-
-        return getEvaluationResults(
-                subjectIds,
-                zonedMeasurementPeriod,
-                context,
-                measureLibraryIdEngineDetails.engine(),
-                ImmutableListMultimap.of(
-                        measureLibraryIdEngineDetails.libraryId(), measureLibraryIdEngineDetails.measureId()));
-    }
-
-    public CompositeEvaluationResultsPerMeasure getEvaluationResults(
-            List<String> subjectIds,
-            ZonedDateTime zonedMeasurementPeriod,
-            CqlEngine context,
-            LibraryEngine libraryEngineForMultipleLibraries,
-            ListMultimap<VersionedIdentifier, IIdType> versionedIdMeasureIdPairs) { // LUKETODO: rename
+            MultiLibraryIdMeasureEngineDetails multiLibraryIdMeasureEngineDetails) {
 
         // measure -> subject -> results
         var resultsBuilder = CompositeEvaluationResultsPerMeasure.builder();
@@ -394,9 +374,20 @@ public class MeasureProcessorUtils {
             String subjectIdPart = subjectInfo.getRight();
             context.getState().setContextValue(subjectTypePart, subjectIdPart);
             try {
-                var libraryIdentifiers = List.copyOf(versionedIdMeasureIdPairs.keySet());
-                var evaluationResultsForMultiLib = libraryEngineForMultipleLibraries.getEvaluationResult(
-                        libraryIdentifiers, subjectId, null, null, null, null, null, zonedMeasurementPeriod, context);
+                var libraryIdentifiers = multiLibraryIdMeasureEngineDetails.getLibraryIdentifiers();
+
+                var evaluationResultsForMultiLib =
+                    multiLibraryIdMeasureEngineDetails.getLibraryEngine()
+                        .getEvaluationResult(
+                            libraryIdentifiers,
+                                subjectId,
+                                null,
+                                null,
+                                null,
+                                null,
+                                null,
+                                zonedMeasurementPeriod,
+                                context);
 
                 var errorsById = evaluationResultsForMultiLib.getErrors();
 
@@ -410,7 +401,8 @@ public class MeasureProcessorUtils {
                     var evaluationResult =
                             evaluationResultsForMultiLib.getResults().getOrDefault(searchableLibraryIdentifier, null);
 
-                    var measureIds = versionedIdMeasureIdPairs.get(libraryVersionedIdentifier);
+                    var measureIds =
+                        multiLibraryIdMeasureEngineDetails.getMeasureIdsForLibrary(libraryVersionedIdentifier);
 
                     resultsBuilder.addResults(measureIds, subjectId, evaluationResult);
 
@@ -423,7 +415,7 @@ public class MeasureProcessorUtils {
             } catch (Exception e) {
                 // If there's any error we didn't anticipate, catch it here:
                 var error = EXCEPTION_FOR_SUBJECT_ID_MESSAGE_TEMPLATE.formatted(subjectId, e.getMessage());
-                var measureIds = List.copyOf(versionedIdMeasureIdPairs.values());
+                var measureIds = multiLibraryIdMeasureEngineDetails.getAllMeasureIds();
 
                 resultsBuilder.addErrors(measureIds, error);
                 logger.error(error, e);

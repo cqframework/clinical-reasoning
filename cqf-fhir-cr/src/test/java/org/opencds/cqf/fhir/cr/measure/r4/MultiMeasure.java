@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -309,6 +310,19 @@ class MultiMeasure {
             return this.measureReport(g -> mr);
         }
 
+        public SelectedMeasureReport getSecondMeasureReport() {
+            var entries = report().getEntry();
+            if (entries.size() < 2) {
+                fail("There are not enough entries in the report to get the second one.");
+            }
+            var secondEntryResource = entries.get(1).getResource();
+            if (!(secondEntryResource instanceof MeasureReport measureReport)) {
+                fail("The second entry in the report is not a MeasureReport resource.");
+                return null;
+            }
+            return this.measureReport(g -> measureReport);
+        }
+
         public MeasureReport resourceToMeasureReport(List<BundleEntryComponent> entries, String measureUrl) {
             IParser parser = FhirContext.forR4Cached().newJsonParser();
             MeasureReport matchedReport = null;
@@ -480,7 +494,8 @@ class MultiMeasure {
         }
     }
 
-    public static class SelectedGroup extends MultiMeasure.Selected<MeasureReportGroupComponent, SelectedMeasureReport> {
+    public static class SelectedGroup
+            extends MultiMeasure.Selected<MeasureReportGroupComponent, SelectedMeasureReport> {
 
         public SelectedGroup(MeasureReportGroupComponent value, SelectedMeasureReport parent) {
             super(value, parent);
@@ -512,7 +527,7 @@ class MultiMeasure {
         }
 
         public SelectedGroup hasStratifierCount(int count) {
-            assertEquals(this.value().getStratifier().size(), count);
+            assertEquals(count, this.value().getStratifier().size());
             return this;
         }
 
@@ -582,7 +597,7 @@ class MultiMeasure {
         }
     }
 
-    static class SelectedStratifier
+    public static class SelectedStratifier
             extends MultiMeasure.Selected<MeasureReportGroupStratifierComponent, SelectedGroup> {
 
         public SelectedStratifier(MeasureReportGroupStratifierComponent value, SelectedGroup parent) {
@@ -616,7 +631,7 @@ class MultiMeasure {
         }
     }
 
-    static class SelectedStratum extends MultiMeasure.Selected<StratifierGroupComponent, SelectedStratifier> {
+    public static class SelectedStratum extends MultiMeasure.Selected<StratifierGroupComponent, SelectedStratifier> {
 
         public SelectedStratum(MeasureReport.StratifierGroupComponent value, SelectedStratifier parent) {
             super(value, parent);
@@ -631,7 +646,6 @@ class MultiMeasure {
             assertEquals(text, value().getValue().getText());
             return this;
         }
-
 
         public SelectedStratumPopulation firstPopulation() {
             return population(MeasureReport.StratifierGroupComponent::getPopulationFirstRep);

@@ -10,6 +10,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Enumeration;
@@ -21,14 +22,19 @@ import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorUtils;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationBasisValidator;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Validates group populations and stratifiers against population basis-es for R4 only.
  */
 public class R4PopulationBasisValidator implements PopulationBasisValidator {
+
+    private static final Logger logger = LoggerFactory.getLogger(R4PopulationBasisValidator.class);
 
     private static final String BOOLEAN_BASIS = "boolean";
 
@@ -66,6 +72,8 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
 
     private void validateGroupPopulationBasisType(
             String url, GroupDef groupDef, PopulationDef populationDef, EvaluationResult evaluationResult) {
+
+        logger.info("1234: evaluationResult:\n{}", MeasureProcessorUtils.printEvaluationResult(evaluationResult));
 
         // PROPORTION
         var scoring = groupDef.measureScoring();
@@ -175,15 +183,24 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
             return Collections.emptyList();
         }
 
-        if (!(result instanceof List<?> list)) {
+        if (!(result instanceof Iterable<?> iterable)) {
             return Collections.singletonList(result.getClass());
         }
 
         // Need to this to return List<Class<?>> and get rid of Sonar warnings.
         final Stream<Class<?>> classStream =
-                list.stream().filter(Objects::nonNull).map(Object::getClass);
+                getStream(iterable).filter(Objects::nonNull).map(Object::getClass);
 
         return classStream.toList();
+    }
+
+    private Stream<?> getStream(Iterable<?> iterable) {
+        if (iterable instanceof List<?> list) {
+            return list.stream();
+        }
+
+        // It's entirely possible CQL returns an Iterable that is not a List, so we need to handle that case
+        return StreamSupport.stream(iterable.spliterator(), false);
     }
 
     private List<String> prettyClassNames(List<Class<?>> classes) {

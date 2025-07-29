@@ -11,12 +11,12 @@ import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import org.apache.commons.collections4.keyvalue.DefaultMapEntry;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.elm.r1.FunctionDef;
@@ -398,7 +398,7 @@ public class MeasureProcessorUtils {
             for (var measureLibraryIdEngine : measureLibraryIdEngineDetailsList) {
                 try {
                     var libraryId = measureLibraryIdEngine.libraryId();
-                    logger.info("1234: libraryId: {}", libraryId.getId());
+                    //                    logger.info("1234: libraryId: {}", libraryId.getId());
                     var evaluationResult = measureLibraryIdEngine
                             .engine()
                             // LUKETODO:  make CQL CqlEngine changes to take multiple versioned identifiers and
@@ -503,10 +503,10 @@ public class MeasureProcessorUtils {
                                     null); // LUKETODO:  I think this is the problem:  we pass an empty EvaluationResult
                     // instead of doing what the old code did
 
-                    logger.info(
-                            "evalResult for id: {}: {}, ",
-                            libraryVersionedIdentifier.getId(),
-                            printEvaluationResult(evaluationResult));
+                    //                    logger.info(
+                    //                            "1234: evalResult for id: {}: {}, ",
+                    //                            libraryVersionedIdentifier.getId(),
+                    //                            printEvaluationResult(evaluationResult));
 
                     var measureIds = versionedIdMeasureIdPairs.get(libraryVersionedIdentifier);
 
@@ -557,7 +557,8 @@ public class MeasureProcessorUtils {
         }
     }
 
-    private static String printEvaluationResult(EvaluationResult evaluationResult) {
+    // LUKETODO:  add these to another static class somewhere
+    public static String printEvaluationResult(EvaluationResult evaluationResult) {
         if (evaluationResult == null) {
             return "null";
         }
@@ -569,27 +570,27 @@ public class MeasureProcessorUtils {
                 + "}\n";
     }
 
-    private static String printExpressionResult(ExpressionResult expressionResult) {
+    public static String printExpressionResult(ExpressionResult expressionResult) {
         if (expressionResult == null) {
             return "\nnull";
         }
 
-        return "\nExpressionResult{value=" + showValue(expressionResult.value()) + ", type="
+        return "\nExpressionResult{\n    value=" + showValue(expressionResult.value()) + "\n    type="
                 + showEvaluatedResources(expressionResult.evaluatedResources()) + '}';
     }
 
-    private static String showValue(Object valueOrCollection) {
+    public static String showValue(Object valueOrCollection) {
         if (valueOrCollection == null) {
             return "null";
         }
-        if (valueOrCollection instanceof Collection<?> collection) {
-            return showEvaluatedResources(collection);
+        if (valueOrCollection instanceof Iterable<?> iterable) {
+            return showEvaluatedResources(iterable);
         }
         return showEvaluatedResource(valueOrCollection);
     }
 
-    public static String showEvaluatedResources(Collection<?> evaluatedResourcesOrSomethings) {
-        return evaluatedResourcesOrSomethings.stream()
+    public static String showEvaluatedResources(Iterable<?> evaluatedResourcesOrSomethings) {
+        return StreamSupport.stream(evaluatedResourcesOrSomethings.spliterator(), false)
                 .map(MeasureProcessorUtils::showEvaluatedResource)
                 .collect(Collectors.joining(", ", "[", "]"));
     }

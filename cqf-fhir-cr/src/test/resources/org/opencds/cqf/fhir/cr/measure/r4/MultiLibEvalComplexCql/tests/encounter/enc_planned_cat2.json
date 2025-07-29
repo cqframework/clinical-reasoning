@@ -1,12 +1,12 @@
 {
   "resourceType": "Encounter",
-  "id": "enc_triaged_patient1",
+  "id": "enc_planned_cat2",
   "meta": {
     "profile": [
-      "http://example.com/category3"
+      "http://example.com/category2"
     ]
   },
-  "status": "triaged",
+  "status": "planned",
   "subject": {
     "reference": "Patient/patient1"
   },

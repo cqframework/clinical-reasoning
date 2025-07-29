@@ -1,14 +1,14 @@
 {
   "resourceType": "Encounter",
-  "id": "enc_arrived_cat2_patient1",
+  "id": "enc_arrived_cat3_patient2",
   "meta": {
     "profile": [
-      "http://example.com/category2"
+      "http://example.com/category3"
     ]
   },
   "status": "arrived",
   "subject": {
-    "reference": "Patient/patient1"
+    "reference": "Patient/patient2"
   },
   "period": {
     "start": "2000-01-01T00:00:00-05:00",

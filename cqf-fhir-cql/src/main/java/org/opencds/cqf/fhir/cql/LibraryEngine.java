@@ -338,7 +338,7 @@ public class LibraryEngine {
             CqlEngine engine) {
 
         logger.info(
-                "ids: {}, patientId: {}, zonedDateTime: {}",
+                "1234: ids: {}, patientId: {}, zonedDateTime: {}",
                 ids.stream().map(VersionedIdentifier::getId).toList(),
                 patientId,
                 zonedDateTime);
@@ -372,7 +372,7 @@ public class LibraryEngine {
             @Nullable ZonedDateTime zonedDateTime,
             CqlEngine engine) {
 
-        logger.info("id: {}, patientId: {}, zonedDateTime: {}", id.getId(), patientId, zonedDateTime);
+        logger.info("1234: id: {}, patientId: {}, zonedDateTime: {}", id.getId(), patientId, zonedDateTime);
 
         var stuff = pre(parameters, rawParameters, additionalData, cqlFhirParametersConverter, engine);
 

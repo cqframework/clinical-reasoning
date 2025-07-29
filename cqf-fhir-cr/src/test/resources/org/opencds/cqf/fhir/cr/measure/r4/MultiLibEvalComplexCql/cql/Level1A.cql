@@ -11,18 +11,15 @@ include Level2 called Level2
 
 parameter "Measurement Period" Interval<DateTime> default Interval[@2021-01-01T00:00:00.000, @2022-01-01T00:00:00.000)
 
-define "Encounters A":
+context Patient
+
+define "Initial Population":
+    [Encounter]
+
+define "Denominator":
     Level2."Encounters" E
         where E.status.value in { 'arrived', 'cancelled', 'in-progress', 'planned' }
-    return E.id
 
-define "Encounters A Combined":
-    Combine("Encounters A", ', ')
-
-define "Encounters B":
+define "Numerator":
     Level2."Encounters" E
         where E.status.value in { 'cancelled', 'finished', 'in-progress', 'planned' }
-    return E.id
-
-define "Encounters B Combined":
-    Combine("Encounters B", ', ')

@@ -13,13 +13,13 @@
   } ],
   "extension": [ {
     "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-populationBasis",
-    "valueCode": "boolean"
+    "valueCode": "Encounter"
   } ],
   "scoring": {
     "coding": [
       {
         "system": "http://hl7.org/fhir/measure-scoring",
-        "code": "cohort"
+        "code": "proportion"
       }
     ]
   },
@@ -41,21 +41,37 @@
             "language": "text/cql-identifier",
             "expression": "Initial Population"
           }
-        }
-      ],
-      "stratifier": [
+        },
         {
-          "id": "stratifier-enc-a",
+          "id": "numerator",
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code": "numerator",
+                "display": "Numerator"
+              }
+            ]
+          },
           "criteria": {
-            "language": "text/cql.identifier",
-            "expression": "Encounters A Combined"
+            "language": "text/cql",
+            "expression": "Numerator"
           }
         },
         {
-          "id": "stratifier-enc-b",
+          "id": "denominator",
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code": "denominator",
+                "display": "Denominator"
+              }
+            ]
+          },
           "criteria": {
-            "language": "text/cql.identifier",
-            "expression": "Encounters B Combined"
+            "language": "text/cql",
+            "expression": "Denominator"
           }
         }
       ]

@@ -15,21 +15,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
-import org.apache.commons.collections4.keyvalue.DefaultMapEntry;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.elm.r1.FunctionDef;
 import org.hl7.elm.r1.IntervalTypeSpecifier;
 import org.hl7.elm.r1.NamedTypeSpecifier;
 import org.hl7.elm.r1.ParameterDef;
 import org.hl7.elm.r1.VersionedIdentifier;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.execution.CqlEngine.EvaluationResultsForMultiLib;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
-import org.opencds.cqf.cql.engine.execution.ExpressionResult;
 import org.opencds.cqf.cql.engine.execution.Libraries;
 import org.opencds.cqf.cql.engine.execution.SearchableLibraryIdentifier;
 import org.opencds.cqf.cql.engine.execution.Variable;
@@ -431,7 +426,7 @@ public class MeasureProcessorUtils {
         return resultsBuilder.build();
     }
 
-    public CompositeEvaluationResultsPerMeasure getEvaluationResults2(
+    public CompositeEvaluationResultsPerMeasure getEvaluationResults(
             List<String> subjectIds,
             ZonedDateTime zonedMeasurementPeriod,
             CqlEngine context,
@@ -449,41 +444,12 @@ public class MeasureProcessorUtils {
             if (subjectId == null) {
                 throw new InternalErrorException("SubjectId is required in order to calculate.");
             }
-            // LUKETODO:  we reset the cache outside of the measure loop
             Pair<String, String> subjectInfo = this.getSubjectTypeAndId(subjectId);
             String subjectTypePart = subjectInfo.getLeft();
             String subjectIdPart = subjectInfo.getRight();
             context.getState().setContextValue(subjectTypePart, subjectIdPart);
             try {
-                // LUKETODO:  is library identifier ordering important here?
                 var libraryIdentifiers = List.copyOf(versionedIdMeasureIdPairs.keySet());
-                // LUKETODO:  try to do one library at a time and see if there are the same errors:
-
-                //                for (VersionedIdentifier libraryVersionedIdentifier : libraryIdentifiers) {
-                //                    var evaluationResultsForMultiLib =
-                //                             libraryEngineForMultipleLibraries.getEvaluationResult(
-                //                        libraryVersionedIdentifier,
-                //                        subjectId,
-                //                        null,
-                //                        null,
-                //                        null,
-                //                        null,
-                //                        null,
-                //                        zonedMeasurementPeriod,
-                //                        context);
-                //
-                //                    var measureIds = versionedIdMeasureIdPairs.get(libraryVersionedIdentifier);
-                //
-                //                    for (IIdType measureId : measureIds) {
-                //                        resultsBuilder.addResult(
-                //                            measureId,
-                //                            subjectId,
-                //                            evaluationResultsForMultiLib);
-                //                    }
-                //                }
-
-                // LUKETODO: look into the right way to implement this later?
-                // LUKETODO: if we do it this way, we get invalid interval CQL errors among others:  why??????
                 var evaluationResultsForMultiLib = libraryEngineForMultipleLibraries.getEvaluationResult(
                         libraryIdentifiers, subjectId, null, null, null, null, null, zonedMeasurementPeriod, context);
 
@@ -496,17 +462,8 @@ public class MeasureProcessorUtils {
                     validateEvaluationResultExistsForIdentifier(
                             libraryVersionedIdentifier, evaluationResultsForMultiLib);
 
-                    var evaluationResult = evaluationResultsForMultiLib
-                            .getResults()
-                            .getOrDefault(
-                                    searchableLibraryIdentifier,
-                                    null); // LUKETODO:  I think this is the problem:  we pass an empty EvaluationResult
-                    // instead of doing what the old code did
-
-                    //                    logger.info(
-                    //                            "1234: evalResult for id: {}: {}, ",
-                    //                            libraryVersionedIdentifier.getId(),
-                    //                            printEvaluationResult(evaluationResult));
+                    var evaluationResult =
+                            evaluationResultsForMultiLib.getResults().getOrDefault(searchableLibraryIdentifier, null);
 
                     var measureIds = versionedIdMeasureIdPairs.get(libraryVersionedIdentifier);
 
@@ -531,16 +488,6 @@ public class MeasureProcessorUtils {
         return resultsBuilder.build();
     }
 
-    private static String showEvaluatedResource(Object evaluatedResourceOrSomething) {
-        if (evaluatedResourceOrSomething instanceof IBaseResource resource) {
-            return resource.getIdElement().getValueAsString();
-        } else if (evaluatedResourceOrSomething != null) {
-            return evaluatedResourceOrSomething.toString();
-        } else {
-            return "null";
-        }
-    }
-
     private void validateEvaluationResultExistsForIdentifier(
             VersionedIdentifier versionedIdentifierFromQuery,
             EvaluationResultsForMultiLib evaluationResultsForMultiLib) {
@@ -555,44 +502,6 @@ public class MeasureProcessorUtils {
                     "Evaluation result in versionless search not found for identifier with ID: %s"
                             .formatted(versionedIdentifierFromQuery.getId()));
         }
-    }
-
-    // LUKETODO:  add these to another static class somewhere
-    public static String printEvaluationResult(EvaluationResult evaluationResult) {
-        if (evaluationResult == null) {
-            return "null";
-        }
-        return "\nEvaluationResult{" + "expressionResults=\n"
-                + evaluationResult.expressionResults.entrySet().stream()
-                        .map(entry -> new DefaultMapEntry<>(entry.getKey(), printExpressionResult(entry.getValue())))
-                        .map(entry -> entry.getKey() + ": " + entry.getValue())
-                        .collect(Collectors.joining("\n"))
-                + "}\n";
-    }
-
-    public static String printExpressionResult(ExpressionResult expressionResult) {
-        if (expressionResult == null) {
-            return "\nnull";
-        }
-
-        return "\nExpressionResult{\n    value=" + showValue(expressionResult.value()) + "\n    type="
-                + showEvaluatedResources(expressionResult.evaluatedResources()) + '}';
-    }
-
-    public static String showValue(Object valueOrCollection) {
-        if (valueOrCollection == null) {
-            return "null";
-        }
-        if (valueOrCollection instanceof Iterable<?> iterable) {
-            return showEvaluatedResources(iterable);
-        }
-        return showEvaluatedResource(valueOrCollection);
-    }
-
-    public static String showEvaluatedResources(Iterable<?> evaluatedResourcesOrSomethings) {
-        return StreamSupport.stream(evaluatedResourcesOrSomethings.spliterator(), false)
-                .map(MeasureProcessorUtils::showEvaluatedResource)
-                .collect(Collectors.joining(", ", "[", "]"));
     }
 
     public Pair<String, String> getSubjectTypeAndId(String subjectId) {

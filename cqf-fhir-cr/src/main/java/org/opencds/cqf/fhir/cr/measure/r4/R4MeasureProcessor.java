@@ -11,12 +11,10 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import org.apache.commons.lang3.tuple.Pair;
 import org.cqframework.cql.cql2elm.CqlIncludeException;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.hl7.elm.r1.VersionedIdentifier;
@@ -47,7 +45,6 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4DateHelper;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
-import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.monad.Either3;
 import org.opencds.cqf.fhir.utility.search.Searches;
 
@@ -283,13 +280,7 @@ public class R4MeasureProcessor {
                 measures.stream().map(this::getLibraryVersionIdentifier).toList();
 
         var libraryEngineForMultipleLibraries = getLibraryEngine(parameters, libraryVersionedIdentifiers, context);
-
-        final List<? extends IIdType> measureIds =
-                measures.stream().map(Measure::getIdElement).toList();
-
-        //        var versionedIdMeasureIdPairs = getPairs(measures);
-        //        var versionedIdMeasureIdPairs = getPairs2(measures);
-        //        var versionedIdMeasureIdPairs = getPairs3(measures);
+        // LUKETODO:  this is awkward:  can we redo this?
         var versionedIdMeasureIdPairs = getPairs4(measures);
 
         // populate results from Library $evaluate
@@ -297,7 +288,6 @@ public class R4MeasureProcessor {
                 subjects,
                 zonedMeasurementPeriod,
                 context,
-                measureLibraryIdEngineDetailsList,
                 libraryEngineForMultipleLibraries,
                 versionedIdMeasureIdPairs);
     }
@@ -306,43 +296,14 @@ public class R4MeasureProcessor {
             List<String> subjects,
             ZonedDateTime zonedMeasurementPeriod,
             CqlEngine context,
-            List<MeasureLibraryIdEngineDetails> measureLibraryIdEngineDetailsList,
             LibraryEngine libraryEngineForMultipleLibraries,
             ListMultimap<VersionedIdentifier, IIdType> versionedIdMeasureIdPairs) {
-        // LUKETODO:  flip between these to test
-        //        return measureProcessorUtils.getEvaluationResults(
-        //            subjects, zonedMeasurementPeriod, context, measureLibraryIdEngineDetailsList);
-        return measureProcessorUtils.getEvaluationResults2(
+        return measureProcessorUtils.getEvaluationResults(
                 subjects,
                 zonedMeasurementPeriod,
                 context,
                 libraryEngineForMultipleLibraries,
                 versionedIdMeasureIdPairs);
-    }
-
-    private List<Pair<VersionedIdentifier, IIdType>> getPairs(List<Measure> measures) {
-        return measures.stream()
-                .map(measure -> Pair.of(getLibraryVersionIdentifier(measure), (IIdType) measure.getIdElement()))
-                .toList();
-    }
-
-    private ListMultimap<VersionedIdentifier, IIdType> getPairs2(List<Measure> measures) {
-        return measures.stream()
-                .map(measure -> Map.entry(getLibraryVersionIdentifier(measure), (IIdType) measure.getIdElement()))
-                .collect(ImmutableListMultimap.toImmutableListMultimap(Map.Entry::getKey, Map.Entry::getValue));
-    }
-
-    private LinkedHashMap<VersionedIdentifier, List<IIdType>> getPairs3(List<Measure> measures) {
-        var result = new LinkedHashMap<VersionedIdentifier, List<IIdType>>();
-
-        for (Measure measure : measures) {
-            var libraryVersionIdentifier = getLibraryVersionIdentifier(measure);
-            var measureIds = result.computeIfAbsent(libraryVersionIdentifier, k -> new ArrayList<>());
-
-            measureIds.add(measure.getIdElement());
-        }
-
-        return result;
     }
 
     private ListMultimap<VersionedIdentifier, IIdType> getPairs4(List<Measure> measures) {
@@ -484,21 +445,16 @@ public class R4MeasureProcessor {
      * @param context CQL engine generated
      */
     protected void setArgParameters(Parameters parameters, CqlEngine context, CompiledLibrary lib) {
-        if (parameters != null) {
-            Map<String, Object> paramMap = resolveParameterMap(parameters);
-            context.getState().setParameters(lib.getLibrary(), paramMap);
-
-            if (lib.getLibrary().getIncludes() != null) {
-                lib.getLibrary()
-                        .getIncludes()
-                        .getDef()
-                        .forEach(includeDef -> paramMap.forEach((paramKey, paramValue) -> context.getState()
-                                .setParameter(includeDef.getLocalIdentifier(), paramKey, paramValue)));
-            }
-        }
+        setArgParameters(parameters, context, List.of(lib));
     }
 
-    // LUKETODO:  javadoc
+    /**
+     * Set parameters for included libraries, which may be multiple
+     * Note: this may not be the optimal method (e.g. libraries with the same
+     * parameter name, but different values)
+     * @param parameters CQL parameters passed in from operation
+     * @param context CQL engine generated
+     */
     protected void setArgParameters(Parameters parameters, CqlEngine context, List<CompiledLibrary> libs) {
         if (parameters != null) {
             Map<String, Object> paramMap = resolveParameterMap(parameters);
@@ -514,17 +470,6 @@ public class R4MeasureProcessor {
                 }
             }
         }
-    }
-
-    protected Measure resolveByUrl(CanonicalType url) {
-        var parts = Canonicals.getParts(url);
-        var result = this.repository.search(
-                Bundle.class, Measure.class, Searches.byNameAndVersion(parts.idPart(), parts.version()));
-        return (Measure) result.getEntryFirstRep().getResource();
-    }
-
-    protected Measure resolveById(IdType id) {
-        return this.repository.read(Measure.class, id);
     }
 
     /**

@@ -356,13 +356,17 @@ public class LibraryEngine {
             evaluationParameters.putAll(rawParameters);
         }
 
-        // LUKETODO: better name
-        var idsCloned = ids.stream()
+        var versionlessIdentifiers = ids.stream()
                 .map(id -> new VersionedIdentifier().withId(id.getId()))
                 .toList();
 
         return engineToUse.evaluate(
-                idsCloned, expressions, buildContextParameter(patientId), evaluationParameters, null, zonedDateTime);
+                versionlessIdentifiers,
+                expressions,
+                buildContextParameter(patientId),
+                evaluationParameters,
+                null,
+                zonedDateTime);
     }
 
     public EvaluationResult getEvaluationResult(

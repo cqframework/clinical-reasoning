@@ -439,8 +439,6 @@ class MultiMeasureServiceTest {
                 .hasReportType("Individual");
     }
 
-    // LUKETODO:  this test is not failing because of the invalid interval on the Encounter
-    // it's failing because evaluatedResourceCount is 3 and not 1, as expected:  debug this to figure out why
     @Test
     void MultiMeasure_EightMeasures_Patient() {
         var when = GIVEN_REPO

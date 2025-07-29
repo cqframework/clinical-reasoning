@@ -20,9 +20,9 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.runtime.Code;
+import org.opencds.cqf.fhir.cr.measure.common.EvaluationResultsDisplay;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
-import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorUtils;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationBasisValidator;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
@@ -73,7 +73,7 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
     private void validateGroupPopulationBasisType(
             String url, GroupDef groupDef, PopulationDef populationDef, EvaluationResult evaluationResult) {
 
-        logger.info("1234: evaluationResult:\n{}", MeasureProcessorUtils.printEvaluationResult(evaluationResult));
+        logger.info("1234: evaluationResult:\n{}", EvaluationResultsDisplay.printEvaluationResult(evaluationResult));
 
         // PROPORTION
         var scoring = groupDef.measureScoring();

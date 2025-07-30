@@ -29,6 +29,7 @@ import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.builder.BundleBuilder;
 import org.opencds.cqf.fhir.utility.repository.Repositories;
+import org.opencds.cqf.fhir.utility.repository.RepositoryLoggingProxy;
 
 /**
  * Alternate MeasureService call to Process MeasureEvaluation for the selected population of subjects against n-number
@@ -53,7 +54,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
             MeasureEvaluationOptions measureEvaluationOptions,
             String serverBase,
             MeasurePeriodValidator measurePeriodValidator) {
-        this.repository = repository;
+        this.repository = RepositoryLoggingProxy.init(repository);
         this.measureEvaluationOptions = measureEvaluationOptions;
         this.measurePeriodValidator = measurePeriodValidator;
         this.serverBase = serverBase;

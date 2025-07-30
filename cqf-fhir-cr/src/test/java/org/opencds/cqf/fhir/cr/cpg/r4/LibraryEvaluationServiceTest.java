@@ -78,6 +78,8 @@ class LibraryEvaluationServiceTest {
         assertTrue(((BooleanType) report.getParameter("Numerator").getValue()).booleanValue());
     }
 
+    // LUKETODO: as an experiment, try the same type of test as MultiLibEvalComplexCqlTest.java
+
     @Test
     void libraryEvaluationService_ErrorLibrary() {
         Parameters params = parameters(stringPart("subject", "Patient/SimplePatient"));

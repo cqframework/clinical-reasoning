@@ -13,6 +13,7 @@ import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Attachment;
+import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DataRequirement;
@@ -23,7 +24,6 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.RelatedArtifact;
-import org.hl7.fhir.r4.model.UriType;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IDataRequirementAdapter;
@@ -249,7 +249,7 @@ public class LibraryAdapter extends KnowledgeArtifactAdapter implements ILibrary
                             .getValueAsString()
                             .equals(canonical))) {
                 expansionParameters.ifPresent(
-                        ep -> ((Parameters) ep).addParameter(parameterName, new UriType(canonical)));
+                        ep -> ((Parameters) ep).addParameter(parameterName, new CanonicalType(canonical)));
             }
         }
     }

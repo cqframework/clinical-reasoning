@@ -235,11 +235,11 @@ public class ReleaseVisitor {
     }
 
     private static void setCodeSystemVersion(Coding proposedCoding, Parameters expansionParams) {
-        List<UriType> systemVersions = new ArrayList<>();
+        List<CanonicalType> systemVersions = new ArrayList<>();
         if (expansionParams != null) {
             systemVersions = expansionParams.getParameter().stream()
                     .filter(param -> param.getName().equals(Constants.SYSTEM_VERSION))
-                    .map(sysVerParam -> (UriType) sysVerParam.getValue())
+                    .map(sysVerParam -> (CanonicalType) sysVerParam.getValue())
                     .toList();
         }
         if (proposedCoding.getVersion() == null && !systemVersions.isEmpty()) {

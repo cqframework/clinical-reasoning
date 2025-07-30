@@ -49,6 +49,9 @@
           "component": [
             {
               "id": "stratifier-comp-1",
+              "code" : {
+                "text": "Gender"
+              },
               "criteria": {
                 "language": "text/cql.identifier",
                 "expression": "Gender Stratification"
@@ -56,6 +59,9 @@
             },
             {
               "id": "stratifier-comp-2",
+              "code" : {
+                "text": "Age"
+              },
               "criteria": {
                 "language": "text/cql.identifier",
                 "expression": "Age"

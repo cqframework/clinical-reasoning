@@ -138,14 +138,11 @@ public class Dstu3MeasureProcessor {
 
         var libraryVersionIdentifier = getLibraryVersionIdentifier(measure);
 
-        final LibraryEngine libraryEngine = getLibraryEngine(parameters, libraryVersionIdentifier,
-            context);
+        final LibraryEngine libraryEngine = getLibraryEngine(parameters, libraryVersionIdentifier, context);
 
         return MultiLibraryIdMeasureEngineDetails.builder(libraryEngine)
-            .addLibraryIdToMeasureId(
-                getLibraryVersionIdentifier(measure),
-                measure.getIdElement())
-            .build();
+                .addLibraryIdToMeasureId(getLibraryVersionIdentifier(measure), measure.getIdElement())
+                .build();
     }
 
     protected MeasureReportType evalTypeToReportType(MeasureEvalType measureEvalType) {

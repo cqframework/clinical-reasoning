@@ -259,11 +259,9 @@ public class R4MeasureProcessor {
         var zonedMeasurementPeriod = MeasureProcessorUtils.getZonedTimeZoneForEval(
                 measureProcessorUtils.getDefaultMeasurementPeriod(measurementPeriodParams, context));
 
-
         // Note that we must build the LibraryEngine BEFORE we call
         // measureProcessorUtils.setMeasurementPeriod(), otherwise, we get an NPE.
-        var multiLibraryIdMeasureEngineDetails =
-            getMultiLibraryIdMeasureEngineDetails(measures, parameters, context);
+        var multiLibraryIdMeasureEngineDetails = getMultiLibraryIdMeasureEngineDetails(measures, parameters, context);
 
         // set measurement Period from CQL if operation parameters are empty
         measureProcessorUtils.setMeasurementPeriod(
@@ -274,32 +272,22 @@ public class R4MeasureProcessor {
                         .map(url -> Optional.ofNullable(url).orElse("Unknown Measure URL"))
                         .toList());
 
-
         // populate results from Library $evaluate
         return measureProcessorUtils.getEvaluationResults(
-                subjects,
-                zonedMeasurementPeriod,
-                context,
-                multiLibraryIdMeasureEngineDetails);
+                subjects, zonedMeasurementPeriod, context, multiLibraryIdMeasureEngineDetails);
     }
 
     private MultiLibraryIdMeasureEngineDetails getMultiLibraryIdMeasureEngineDetails(
-            List<Measure> measures,
-            Parameters parameters,
-            CqlEngine context) {
+            List<Measure> measures, Parameters parameters, CqlEngine context) {
         var libraryVersionedIdentifiers =
-            measures.stream()
-                .map(this::getLibraryVersionIdentifier)
-                .toList();
+                measures.stream().map(this::getLibraryVersionIdentifier).toList();
 
         var libraryEngine = getLibraryEngine(parameters, libraryVersionedIdentifiers, context);
 
         var builder = MultiLibraryIdMeasureEngineDetails.builder(libraryEngine);
 
         measures.forEach(measure -> {
-           builder.addLibraryIdToMeasureId(
-               this.getLibraryVersionIdentifier(measure),
-               measure.getIdElement());
+            builder.addLibraryIdToMeasureId(this.getLibraryVersionIdentifier(measure), measure.getIdElement());
         });
 
         return builder.build();

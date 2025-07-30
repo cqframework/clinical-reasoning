@@ -9,7 +9,6 @@ import org.opencds.cqf.cql.engine.execution.ExpressionResult;
 
 // LUKETODO:  consider deleting this once all is said and done
 public class EvaluationResultsDisplay {
-    // LUKETODO:  add these to another static class somewhere
     public static String printEvaluationResult(EvaluationResult evaluationResult) {
         if (evaluationResult == null) {
             return "null";

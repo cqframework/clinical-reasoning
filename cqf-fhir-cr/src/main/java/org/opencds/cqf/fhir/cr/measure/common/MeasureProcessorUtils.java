@@ -21,8 +21,8 @@ import org.hl7.elm.r1.NamedTypeSpecifier;
 import org.hl7.elm.r1.ParameterDef;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
-import org.opencds.cqf.cql.engine.execution.CqlEngine.EvaluationResultsForMultiLib;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
+import org.opencds.cqf.cql.engine.execution.EvaluationResultsForMultiLib;
 import org.opencds.cqf.cql.engine.execution.Libraries;
 import org.opencds.cqf.cql.engine.execution.SearchableLibraryIdentifier;
 import org.opencds.cqf.cql.engine.execution.Variable;
@@ -342,14 +342,13 @@ public class MeasureProcessorUtils {
         return result;
     }
 
-    // LUKETODO: redo javadoc
-    // LUKETODO: redo contract with DSTU3
     /**
      * method used to execute generate CQL results via Library $evaluate
      *
      * @param subjectIds subjects to generate results for
      * @param zonedMeasurementPeriod offset defined measurement period for evaluation
      * @param context cql engine context
+     * @param multiLibraryIdMeasureEngineDetails container for engine, library and measure IDs
      * @return CQL results for Library defined in the Measure resource
      */
     public CompositeEvaluationResultsPerMeasure getEvaluationResults(
@@ -376,10 +375,10 @@ public class MeasureProcessorUtils {
             try {
                 var libraryIdentifiers = multiLibraryIdMeasureEngineDetails.getLibraryIdentifiers();
 
-                var evaluationResultsForMultiLib =
-                    multiLibraryIdMeasureEngineDetails.getLibraryEngine()
+                var evaluationResultsForMultiLib = multiLibraryIdMeasureEngineDetails
+                        .getLibraryEngine()
                         .getEvaluationResult(
-                            libraryIdentifiers,
+                                libraryIdentifiers,
                                 subjectId,
                                 null,
                                 null,
@@ -402,7 +401,7 @@ public class MeasureProcessorUtils {
                             evaluationResultsForMultiLib.getResults().getOrDefault(searchableLibraryIdentifier, null);
 
                     var measureIds =
-                        multiLibraryIdMeasureEngineDetails.getMeasureIdsForLibrary(libraryVersionedIdentifier);
+                            multiLibraryIdMeasureEngineDetails.getMeasureIdsForLibrary(libraryVersionedIdentifier);
 
                     resultsBuilder.addResults(measureIds, subjectId, evaluationResult);
 

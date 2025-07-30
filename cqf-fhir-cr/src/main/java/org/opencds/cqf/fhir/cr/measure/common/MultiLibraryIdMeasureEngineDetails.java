@@ -2,10 +2,10 @@ package org.opencds.cqf.fhir.cr.measure.common;
 
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ListMultimap;
+import java.util.List;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
-import java.util.List;
 
 // LUKETODO: javadoc
 public class MultiLibraryIdMeasureEngineDetails {
@@ -41,7 +41,7 @@ public class MultiLibraryIdMeasureEngineDetails {
     public static class Builder {
         private final LibraryEngine libraryEngine;
         private final ImmutableListMultimap.Builder<VersionedIdentifier, IIdType> libraryIdToMeasureIdsBuilder =
-            ImmutableListMultimap.builder();
+                ImmutableListMultimap.builder();
 
         public Builder(LibraryEngine libraryEngine) {
             this.libraryEngine = libraryEngine;

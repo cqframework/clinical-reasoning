@@ -21,67 +21,67 @@
             "parameter": [
               {
                 "name": "system-version",
-                "valueUri": "http://snomed.info/sct|http://snomed.info/sct/731000124108/version/20230901"
+                "valueCanonical": "http://snomed.info/sct|http://snomed.info/sct/731000124108/version/20230901"
               },
               {
                 "name": "system-version",
-                "valueUri": "http://loinc.org|2.76"
+                "valueCanonical": "http://loinc.org|2.76"
               },
               {
                 "name": "system-version",
-                "valueUri": "http://terminology.hl7.org/CodeSystem/v3-ActCode|9.0.0"
+                "valueCanonical": "http://terminology.hl7.org/CodeSystem/v3-ActCode|9.0.0"
               },
               {
                 "name": "system-version",
-                "valueUri": "http://terminology.hl7.org/CodeSystem/v3-AdministrativeGender|3.0.0"
+                "valueCanonical": "http://terminology.hl7.org/CodeSystem/v3-AdministrativeGender|3.0.0"
               },
               {
                 "name": "system-version",
-                "valueUri": "http://terminology.hl7.org/CodeSystem/CD2|2.0.1"
+                "valueCanonical": "http://terminology.hl7.org/CodeSystem/CD2|2.0.1"
               },
               {
                 "name": "system-version",
-                "valueUri": "urn:oid:2.16.840.1.113883.6.238|1.2"
+                "valueCanonical": "urn:oid:2.16.840.1.113883.6.238|1.2"
               },
               {
                 "name": "system-version",
-                "valueUri": "http://www.ama-assn.org/go/cpt|3.0.1"
+                "valueCanonical": "http://www.ama-assn.org/go/cpt|3.0.1"
               },
               {
                 "name": "system-version",
-                "valueUri": "http://hl7.org/fhir/sid/cvx|4.0.0"
+                "valueCanonical": "http://hl7.org/fhir/sid/cvx|4.0.0"
               },
               {
                 "name": "system-version",
-                "valueUri": "http://terminology.hl7.org/CodeSystem/HCPCS-all-codes|3.0.0"
+                "valueCanonical": "http://terminology.hl7.org/CodeSystem/HCPCS-all-codes|3.0.0"
               },
               {
                 "name": "system-version",
-                "valueUri": "http://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets|1.0.2"
+                "valueCanonical": "http://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets|1.0.2"
               },
               {
                 "name": "system-version",
-                "valueUri": "http://hl7.org/fhir/sid/icd-10-cm|2.0.1"
+                "valueCanonical": "http://hl7.org/fhir/sid/icd-10-cm|2.0.1"
               },
               {
                 "name": "system-version",
-                "valueUri": "http://www.cms.gov/Medicare/Coding/ICD10|2.0.1"
+                "valueCanonical": "http://www.cms.gov/Medicare/Coding/ICD10|2.0.1"
               },
               {
                 "name": "system-version",
-                "valueUri": "http://terminology.hl7.org/CodeSystem/icd9cm|2.0.1"
+                "valueCanonical": "http://terminology.hl7.org/CodeSystem/icd9cm|2.0.1"
               },
               {
                 "name": "system-version",
-                "valueUri": "http://terminology.hl7.org/CodeSystem/v2-0895|2.2.0"
+                "valueCanonical": "http://terminology.hl7.org/CodeSystem/v2-0895|2.2.0"
               },
               {
                 "name": "system-version",
-                "valueUri": "http://www.nlm.nih.gov/research/umls/rxnorm|3.0.1"
+                "valueCanonical": "http://www.nlm.nih.gov/research/umls/rxnorm|3.0.1"
               },
               {
                 "name": "system-version",
-                "valueUri": "https://nahdo.org/sopt|1.0.1"
+                "valueCanonical": "https://nahdo.org/sopt|1.0.1"
               }
             ]
           }

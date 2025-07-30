@@ -24,11 +24,14 @@ import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.DataRequirement;
 import org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.dstu3.model.Library;
+import org.hl7.fhir.dstu3.model.Parameters;
+import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.PlanDefinition;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.RelatedArtifact;
 import org.hl7.fhir.dstu3.model.RelatedArtifact.RelatedArtifactType;
+import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.UsageContext;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.utility.adapter.IAdapter;
@@ -267,5 +270,29 @@ class LibraryAdapterTest {
         assertEquals(
                 library,
                 adapter.retrieveReferencedLibraries(null).get(libraryName).get());
+    }
+
+    @Test
+    void testSetExpansionParameters() {
+        var library = new Library();
+        var adapter = (LibraryAdapter) adapterFactory.createKnowledgeArtifactAdapter(library);
+        var params = new Parameters();
+        var paramComponent =
+                new ParametersParameterComponent().setName("paramName").setValue(new StringType("paramValue"));
+        params.addParameter(paramComponent);
+        adapter.setExpansionParameters(params);
+        assertTrue(adapter.getExpansionParameters().isPresent());
+        assertEquals(
+                ((Parameters) adapter.getExpansionParameters().get())
+                        .getParameter()
+                        .get(0)
+                        .getName(),
+                params.getParameter().get(0).getName());
+        assertEquals(
+                ((Parameters) adapter.getExpansionParameters().get())
+                        .getParameter()
+                        .get(0)
+                        .getValue(),
+                params.getParameter().get(0).getValue());
     }
 }

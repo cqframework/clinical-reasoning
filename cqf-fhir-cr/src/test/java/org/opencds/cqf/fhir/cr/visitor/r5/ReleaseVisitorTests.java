@@ -41,6 +41,7 @@ import org.hl7.fhir.r5.model.Library;
 import org.hl7.fhir.r5.model.Measure;
 import org.hl7.fhir.r5.model.Parameters;
 import org.hl7.fhir.r5.model.Period;
+import org.hl7.fhir.r5.model.Reference;
 import org.hl7.fhir.r5.model.RelatedArtifact;
 import org.hl7.fhir.r5.model.RelatedArtifact.RelatedArtifactType;
 import org.hl7.fhir.r5.model.SearchParameter;
@@ -348,7 +349,7 @@ class ReleaseVisitorTests {
         var canonicalVersionParams = expansionParameters
                 .flatMap(p -> VisitorHelper.getStringListParameter(Constants.CANONICAL_VERSION, p))
                 .orElse(new ArrayList<String>());
-        assertEquals(0, canonicalVersionParams.size());
+        assertEquals(1, canonicalVersionParams.size());
     }
 
     @Test
@@ -803,5 +804,35 @@ class ReleaseVisitorTests {
                 maybeRetiredLeafRA.get().getResource());
         assertSame(PublicationStatus.RETIRED, retiredLeaf.getStatus());
         assertEquals("3.2.0", Canonicals.getVersion(maybeRetiredLeafRA.get().getResource()));
+    }
+
+    @Test
+    void release_should_capture_input_and_runtime_expansion_params() {
+        var bundle = (Bundle) jsonParser.parseResource(
+                org.opencds.cqf.fhir.cr.visitor.r5.ReleaseVisitorTests.class.getResourceAsStream(
+                        "Bundle-versioned-and-unversioned-dependency.json"));
+        repo.transaction(bundle);
+        var releaseVisitor = new ReleaseVisitor(repo);
+        var originalLibrary = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
+                .copy();
+        var testLibrary = originalLibrary.copy();
+        var libraryAdapter = new AdapterFactory().createLibrary(testLibrary);
+        var params =
+                parameters(part("version", new StringType("1.2.3")), part("versionBehavior", new CodeType("force")));
+        var returnResource = (Bundle) libraryAdapter.accept(releaseVisitor, params);
+        var maybeLib = returnResource.getEntry().stream()
+                .filter(entry -> entry.getResponse().getLocation().contains("Library/SpecificationLibrary"))
+                .findFirst();
+        assertTrue(maybeLib.isPresent());
+        var releasedLibrary =
+                repo.read(Library.class, new IdType(maybeLib.get().getResponse().getLocation()));
+        var authoredExpansionParamsExt = releasedLibrary.getExtensionByUrl(Constants.CQF_INPUT_EXPANSION_PARAMETERS);
+        var runtimeExpansionParamsExt = releasedLibrary.getExtensionByUrl(Constants.CQF_EXPANSION_PARAMETERS);
+        var authoredExpansionParams = (Parameters)
+                releasedLibrary.getContained(((Reference) authoredExpansionParamsExt.getValue()).getReference());
+        var runtimeExpansionParams = (Parameters)
+                releasedLibrary.getContained(((Reference) runtimeExpansionParamsExt.getValue()).getReference());
+        assertEquals(1, authoredExpansionParams.getParameter().size());
+        assertEquals(3, runtimeExpansionParams.getParameter().size());
     }
 }

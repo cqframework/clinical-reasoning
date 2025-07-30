@@ -176,7 +176,7 @@ public class LibraryAdapter extends KnowledgeArtifactAdapter implements ILibrary
 
     @Override
     public Optional<IBaseParameters> getExpansionParameters() {
-        return getLibrary().getExtension().stream()
+        var expansionParameters = getLibrary().getExtension().stream()
                 .filter(ext -> ext.getUrl().equals(Constants.CQF_EXPANSION_PARAMETERS))
                 .findAny()
                 .map(ext -> ((Reference) ext.getValue()).getReference())
@@ -191,40 +191,66 @@ public class LibraryAdapter extends KnowledgeArtifactAdapter implements ILibrary
                     }
                     return null;
                 });
-    }
 
-    @Override
-    public void setExpansionParameters(
-            List<String> systemVersionExpansionParameters, List<String> canonicalVersionExpansionParameters) {
-        var newParameters = new ArrayList<ParametersParameterComponent>();
-        if (systemVersionExpansionParameters != null && !systemVersionExpansionParameters.isEmpty()) {
-            for (String parameter : systemVersionExpansionParameters) {
-                var param = new ParametersParameterComponent();
-                param.setName(Constants.SYSTEM_VERSION);
-                param.setValue(new UriType(parameter));
-                newParameters.add(param);
-            }
-        }
-        if (canonicalVersionExpansionParameters != null && !canonicalVersionExpansionParameters.isEmpty()) {
-            for (String parameter : canonicalVersionExpansionParameters) {
-                var param = new ParametersParameterComponent();
-                param.setName(Constants.CANONICAL_VERSION);
-                param.setValue(new UriType(parameter));
-                newParameters.add(param);
-            }
-        }
-        var existingExpansionParameters = getExpansionParameters();
-        if (existingExpansionParameters.isPresent()) {
-            ((Parameters) existingExpansionParameters.get()).setParameter(newParameters);
+        if (expansionParameters.isPresent()) {
+            return expansionParameters;
         } else {
             var id = "exp-params";
             var newExpansionParameters = new Parameters();
-            newExpansionParameters.setParameter(newParameters);
             newExpansionParameters.setId(id);
             getLibrary().addContained(newExpansionParameters);
-            var expansionParamsExt = getLibrary().addExtension();
-            expansionParamsExt.setUrl(Constants.CQF_EXPANSION_PARAMETERS);
-            expansionParamsExt.setValue(new Reference("#" + id));
+            if (getLibrary().getExtensionByUrl(Constants.CQF_EXPANSION_PARAMETERS) == null) {
+                var expansionParamsExt = getLibrary().addExtension();
+                expansionParamsExt.setUrl(Constants.CQF_EXPANSION_PARAMETERS);
+                expansionParamsExt.setValue(new Reference("#" + id));
+            }
+            setExpansionParameters(newExpansionParameters);
+            return Optional.of(newExpansionParameters);
+        }
+    }
+
+    @Override
+    public void setExpansionParameters(IBaseParameters expansionParameters) {
+        if (expansionParameters != null
+                && !((Parameters) expansionParameters).getParameter().isEmpty()) {
+            var newParameters = new ArrayList<ParametersParameterComponent>();
+
+            for (ParametersParameterComponent parameter : ((Parameters) expansionParameters).getParameter()) {
+                var param = new ParametersParameterComponent();
+                param.setName(parameter.getName());
+                param.setValue(parameter.getValue());
+                newParameters.add(param);
+            }
+
+            var existingExpansionParameters = getExpansionParameters();
+            existingExpansionParameters.ifPresent(parameters -> ((Parameters) parameters).setParameter(newParameters));
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public void ensureExpansionParametersEntry(String resourceType, String canonical) {
+        // extract expansion parameters
+        var expansionParameters = getExpansionParameters();
+
+        String parameterName;
+
+        if (resourceType.equals("ValueSet")) {
+            parameterName = Constants.CANONICAL_VERSION;
+        } else if (resourceType.equals("CodeSystem")) {
+            parameterName = Constants.SYSTEM_VERSION;
+        } else {
+            parameterName = Constants.CANONICAL_VERSION;
+        }
+
+        if (expansionParameters.isPresent()) {
+            var parametersWithName = ((Parameters) expansionParameters.get()).getParameters(parameterName);
+            if (parametersWithName != null
+                    && parametersWithName.stream().noneMatch(p -> ((IPrimitiveType<String>) p.getValue())
+                            .getValueAsString()
+                            .equals(canonical))) {
+                expansionParameters.ifPresent(
+                        ep -> ((Parameters) ep).addParameter(parameterName, new UriType(canonical)));
+            }
         }
     }
 }

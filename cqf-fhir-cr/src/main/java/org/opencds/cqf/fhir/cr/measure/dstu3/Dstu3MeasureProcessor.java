@@ -141,7 +141,12 @@ public class Dstu3MeasureProcessor {
         final LibraryEngine libraryEngine = getLibraryEngine(parameters, libraryVersionIdentifier, context);
 
         return MultiLibraryIdMeasureEngineDetails.builder(libraryEngine)
-                .addLibraryIdToMeasureId(getLibraryVersionIdentifier(measure), measure.getIdElement())
+                .addLibraryIdToMeasureId(
+                        new VersionedIdentifier()
+                                .withId(
+                                        libraryVersionIdentifier
+                                                .getId()), // LUKETODO:  is it wise to do this here and not later?
+                        measure.getIdElement())
                 .build();
     }
 

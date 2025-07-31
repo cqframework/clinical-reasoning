@@ -24,7 +24,6 @@ import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.EvaluationResultsForMultiLib;
 import org.opencds.cqf.cql.engine.execution.Libraries;
-import org.opencds.cqf.cql.engine.execution.SearchableLibraryIdentifier;
 import org.opencds.cqf.cql.engine.execution.Variable;
 import org.opencds.cqf.cql.engine.runtime.Date;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
@@ -388,27 +387,31 @@ public class MeasureProcessorUtils {
                                 zonedMeasurementPeriod,
                                 context);
 
-                var errorsById = evaluationResultsForMultiLib.getErrors();
-
                 for (var libraryVersionedIdentifier : libraryIdentifiers) {
-                    var searchableLibraryIdentifier =
-                            SearchableLibraryIdentifier.fromIdentifier(libraryVersionedIdentifier);
-
                     validateEvaluationResultExistsForIdentifier(
                             libraryVersionedIdentifier, evaluationResultsForMultiLib);
 
-                    var evaluationResult =
-                            evaluationResultsForMultiLib.getResults().getOrDefault(searchableLibraryIdentifier, null);
+                    var evaluationResult = evaluationResultsForMultiLib.getResultFor(libraryVersionedIdentifier);
 
                     var measureIds =
                             multiLibraryIdMeasureEngineDetails.getMeasureIdsForLibrary(libraryVersionedIdentifier);
 
                     resultsBuilder.addResults(measureIds, subjectId, evaluationResult);
 
+                    var error = evaluationResultsForMultiLib.getErrorFor(libraryVersionedIdentifier);
+
+                    Optional.ofNullable(error)
+                            .map(nonNullError ->
+                                    EXCEPTION_FOR_SUBJECT_ID_MESSAGE_TEMPLATE.formatted(subjectId, nonNullError))
+                            .ifPresent(nonNullError -> resultsBuilder.addErrors(measureIds, nonNullError));
+
+                    var exceptions = evaluationResultsForMultiLib.getExceptionsFor(libraryVersionedIdentifier);
+
                     // LUKETODO:  add this to the composite class instead?
-                    Optional.ofNullable(errorsById.get(searchableLibraryIdentifier))
-                            .map(nonNull -> EXCEPTION_FOR_SUBJECT_ID_MESSAGE_TEMPLATE.formatted(subjectId, nonNull))
-                            .ifPresent(error -> resultsBuilder.addErrors(measureIds, error));
+                    exceptions.stream()
+                            .map(exception -> EXCEPTION_FOR_SUBJECT_ID_MESSAGE_TEMPLATE.formatted(
+                                    subjectId, exception.getMessage()))
+                            .forEach(exception -> resultsBuilder.addErrors(measureIds, exception));
                 }
 
             } catch (Exception e) {
@@ -428,10 +431,8 @@ public class MeasureProcessorUtils {
             VersionedIdentifier versionedIdentifierFromQuery,
             EvaluationResultsForMultiLib evaluationResultsForMultiLib) {
 
-        var searchableLibraryIdentifier = SearchableLibraryIdentifier.fromIdentifier(versionedIdentifierFromQuery);
-
-        var containsResults = evaluationResultsForMultiLib.getResults().containsKey(searchableLibraryIdentifier);
-        var containsError = evaluationResultsForMultiLib.getErrors().containsKey(searchableLibraryIdentifier);
+        var containsResults = evaluationResultsForMultiLib.containsResultsFor(versionedIdentifierFromQuery);
+        var containsError = evaluationResultsForMultiLib.containsErrorsOrExceptionsFor(versionedIdentifierFromQuery);
 
         if (!containsResults && !containsError) {
             throw new InternalErrorException(

@@ -393,6 +393,6 @@ public class LibraryEngine {
                 zonedDateTime,
                 engine);
 
-        return evaluationResultsForMultiLib.getSingleResultOrThrow();
+        return evaluationResultsForMultiLib.getOnlyResultOrThrow();
     }
 }

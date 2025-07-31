@@ -78,8 +78,6 @@ class LibraryEvaluationServiceTest {
         assertTrue(((BooleanType) report.getParameter("Numerator").getValue()).booleanValue());
     }
 
-    // LUKETODO: as an experiment, try the same type of test as MultiLibEvalComplexCqlTest.java
-
     @Test
     void libraryEvaluationService_ErrorLibrary() {
         Parameters params = parameters(stringPart("subject", "Patient/SimplePatient"));
@@ -100,7 +98,7 @@ class LibraryEvaluationServiceTest {
         var issue = outcome.getIssueFirstRep();
         assertEquals(OperationOutcome.IssueSeverity.ERROR, issue.getSeverity());
         assertEquals(
-                "Exception for Library: ErrorLibrary, Message: Example Failure Code: This is an error message",
+                "Example Failure Code: This is an error message",
                 issue.getDetails().getText().replaceAll("[\\r\\n]", ""));
     }
 

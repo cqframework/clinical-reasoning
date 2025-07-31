@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import com.google.common.collect.ImmutableListMultimap;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import java.time.ZonedDateTime;
@@ -25,6 +26,7 @@ import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Resource;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.fhir.model.R4FhirModelResolver;
@@ -277,17 +279,24 @@ public class R4MeasureProcessor {
                 subjects, zonedMeasurementPeriod, context, multiLibraryIdMeasureEngineDetails);
     }
 
+    // LUKETODO:  this method is incoherent:  who gets the versioned identifiers?
     private MultiLibraryIdMeasureEngineDetails getMultiLibraryIdMeasureEngineDetails(
             List<Measure> measures, Parameters parameters, CqlEngine context) {
-        var libraryVersionedIdentifiers =
-                measures.stream().map(this::getLibraryVersionIdentifier).toList();
 
-        var libraryEngine = getLibraryEngine(parameters, libraryVersionedIdentifiers, context);
+        var libraryIdentifiersToMeasureIds = measures.stream()
+                .collect(ImmutableListMultimap.toImmutableListMultimap(
+                        this::getLibraryVersionIdentifier, // Key function
+                        Resource::getIdElement // Value function
+                        ));
+
+        var libraryEngine = getLibraryEngine(parameters, List.copyOf(libraryIdentifiersToMeasureIds.keySet()), context);
 
         var builder = MultiLibraryIdMeasureEngineDetails.builder(libraryEngine);
 
-        measures.forEach(measure -> {
-            builder.addLibraryIdToMeasureId(this.getLibraryVersionIdentifier(measure), measure.getIdElement());
+        libraryIdentifiersToMeasureIds.entries().forEach(entry -> {
+            builder.addLibraryIdToMeasureId(
+                    new VersionedIdentifier().withId(entry.getKey().getId()), // LUKETODO:  is it wise to do this here?
+                    entry.getValue());
         });
 
         return builder.build();

@@ -31,7 +31,6 @@ import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.TerminologyCapabilities;
 import org.hl7.fhir.r4.model.TerminologyCapabilities.TerminologyCapabilitiesCodeSystemComponent;
-import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.opencds.cqf.fhir.cr.visitor.r4.CRMIReleaseExperimentalBehavior.CRMIReleaseExperimentalBehaviorCodes;
 import org.opencds.cqf.fhir.cr.visitor.r4.CRMIReleaseVersionBehavior.CRMIReleaseVersionBehaviorCodes;
@@ -261,11 +260,11 @@ public class ReleaseVisitor {
             TerminologyServerClient terminologyServerClient,
             Coding proposedCoding,
             Parameters expansionParams) {
-        List<UriType> systemVersions = new ArrayList<>();
+        List<CanonicalType> systemVersions = new ArrayList<>();
         if (expansionParams != null) {
             systemVersions = expansionParams.getParameter().stream()
                     .filter(param -> param.getName().equals(Constants.SYSTEM_VERSION))
-                    .map(sysVerParam -> (UriType) sysVerParam.getValue())
+                    .map(sysVerParam -> (CanonicalType) sysVerParam.getValue())
                     .toList();
         }
 

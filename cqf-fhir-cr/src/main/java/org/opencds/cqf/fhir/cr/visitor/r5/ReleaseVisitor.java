@@ -30,7 +30,6 @@ import org.hl7.fhir.r5.model.Reference;
 import org.hl7.fhir.r5.model.RelatedArtifact.RelatedArtifactType;
 import org.hl7.fhir.r5.model.ResourceType;
 import org.hl7.fhir.r5.model.StringType;
-import org.hl7.fhir.r5.model.UriType;
 import org.hl7.fhir.r5.model.ValueSet;
 import org.opencds.cqf.fhir.cr.visitor.r5.CRMIReleaseExperimentalBehavior.CRMIReleaseExperimentalBehaviorCodes;
 import org.opencds.cqf.fhir.cr.visitor.r5.CRMIReleaseVersionBehavior.CRMIReleaseVersionBehaviorCodes;
@@ -235,11 +234,11 @@ public class ReleaseVisitor {
     }
 
     private static void setCodeSystemVersion(Coding proposedCoding, Parameters expansionParams) {
-        List<UriType> systemVersions = new ArrayList<>();
+        List<CanonicalType> systemVersions = new ArrayList<>();
         if (expansionParams != null) {
             systemVersions = expansionParams.getParameter().stream()
                     .filter(param -> param.getName().equals(Constants.SYSTEM_VERSION))
-                    .map(sysVerParam -> (UriType) sysVerParam.getValue())
+                    .map(sysVerParam -> (CanonicalType) sysVerParam.getValue())
                     .toList();
         }
         if (proposedCoding.getVersion() == null && !systemVersions.isEmpty()) {

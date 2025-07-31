@@ -17,6 +17,7 @@ import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.repository.IRepository;
+import jakarta.annotation.Nonnull;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -33,6 +34,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IdType;
@@ -60,8 +62,11 @@ import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.SelectedGroup.SelectedReference;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
+import org.opencds.cqf.fhir.utility.monad.Either3;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.r4.ContainedHelper;
+import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 @SuppressWarnings({"squid:S2699", "squid:S5960", "squid:S1135"})
@@ -121,6 +126,7 @@ public class Measure {
         private MeasureEvaluationOptions evaluationOptions;
         private final MeasurePeriodValidator measurePeriodValidator;
         private final R4MeasureServiceUtils measureServiceUtils;
+        private NpmPackageLoader npmPackageLoader;
 
         public Given(@Nullable Boolean applyScoringSetMembership) {
             this.evaluationOptions = MeasureEvaluationOptions.defaultOptions();
@@ -146,10 +152,18 @@ public class Measure {
             this.measurePeriodValidator = new MeasurePeriodValidator();
 
             this.measureServiceUtils = new R4MeasureServiceUtils(repository);
+
+            this.npmPackageLoader = NpmPackageLoader.DEFAULT;
         }
 
         public Given repository(IRepository repository) {
             this.repository = repository;
+            return this;
+        }
+
+        public Given npmPackageLoader(NpmPackageLoader npmPackageLoader) {
+            this.repository = new InMemoryFhirRepository(FhirContext.forR4Cached());
+            this.npmPackageLoader = npmPackageLoader;
             return this;
         }
 
@@ -166,8 +180,13 @@ public class Measure {
             return this;
         }
 
+        public IRepository getRepository() {
+            return repository;
+        }
+
         private R4MeasureService buildMeasureService() {
-            return new R4MeasureService(repository, evaluationOptions, measurePeriodValidator, measureServiceUtils);
+            return new R4MeasureService(
+                    repository, evaluationOptions, measurePeriodValidator, measureServiceUtils, npmPackageLoader);
         }
 
         public When when() {
@@ -183,6 +202,7 @@ public class Measure {
         }
 
         private String measureId;
+        private CanonicalType measureUrl;
         private ZonedDateTime periodStart;
         private ZonedDateTime periodEnd;
         private String subject;
@@ -196,6 +216,11 @@ public class Measure {
 
         public When measureId(String measureId) {
             this.measureId = measureId;
+            return this;
+        }
+
+        public When measureUrl(String measureUrl) {
+            this.measureUrl = new CanonicalType(measureUrl);
             return this;
         }
 
@@ -253,7 +278,7 @@ public class Measure {
 
         public When evaluate() {
             this.operation = () -> service.evaluate(
-                    Eithers.forMiddle3(new IdType("Measure", measureId)),
+                    deriveMeasureEither(measureId, measureUrl),
                     periodStart,
                     periodEnd,
                     reportType,
@@ -276,6 +301,20 @@ public class Measure {
             }
 
             return new SelectedReport(this.operation.get());
+        }
+
+        @Nonnull
+        private Either3<CanonicalType, IdType, org.hl7.fhir.r4.model.Measure> deriveMeasureEither(
+                @Nullable String measureId, @Nullable CanonicalType measureUrl) {
+            if (measureId != null) {
+                return Eithers.forMiddle3(new IdType("Measure", measureId));
+            }
+
+            if (measureUrl != null) {
+                return Eithers.forLeft3(measureUrl);
+            }
+
+            throw new IllegalStateException("Expected either a measure ID or a measure URL but there is neither");
         }
     }
 
@@ -958,7 +997,7 @@ public class Measure {
             }
         }
 
-        static class SelectedPopulation
+        public static class SelectedPopulation
                 extends Selected<MeasureReport.MeasureReportGroupPopulationComponent, SelectedGroup> {
 
             public SelectedPopulation(MeasureReportGroupPopulationComponent value, SelectedGroup parent) {

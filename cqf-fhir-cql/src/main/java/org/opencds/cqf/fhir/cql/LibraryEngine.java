@@ -31,6 +31,7 @@ import org.opencds.cqf.fhir.utility.CqfExpression;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@SuppressWarnings({"squid:S107", "squid:S1168"})
 public class LibraryEngine {
 
     private static final Logger logger = LoggerFactory.getLogger(LibraryEngine.class);
@@ -187,10 +188,7 @@ public class LibraryEngine {
         List<IBase> results = null;
         IBaseParameters parametersResult;
         switch (language) {
-            case "text/cql":
-            case "text/cql.expression":
-            case "text/cql-expression":
-            case "text/fhirpath":
+            case "text/cql", "text/cql.expression", "text/cql-expression", "text/fhirpath":
                 parametersResult = this.evaluateExpression(
                         expression,
                         parameters,
@@ -205,10 +203,7 @@ public class LibraryEngine {
                 results = resolveParameterValues(
                         ParametersUtil.getNamedParameters(fhirContext, parametersResult, "return"));
                 break;
-            case "text/cql-identifier":
-            case "text/cql.identifier":
-            case "text/cql.name":
-            case "text/cql-name":
+            case "text/cql-identifier", "text/cql.identifier", "text/cql.name", "text/cql-name":
                 validateLibrary(libraryToBeEvaluated);
                 parametersResult = this.evaluate(
                         libraryToBeEvaluated,

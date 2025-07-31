@@ -338,11 +338,11 @@ public class LibraryEngine {
             @Nullable ZonedDateTime zonedDateTime,
             CqlEngine engine) {
 
-        logger.info(
-                "1234: ids: {}, patientId: {}, zonedDateTime: {}",
-                ids.stream().map(VersionedIdentifier::getId).toList(),
-                patientId,
-                zonedDateTime);
+        //        logger.info(
+        //                "1234: ids: {}, patientId: {}, zonedDateTime: {}",
+        //                ids.stream().map(VersionedIdentifier::getId).toList(),
+        //                patientId,
+        //                zonedDateTime);
 
         final CqlFhirParametersConverter cqlFhirParametersConverterToUse = Objects.requireNonNullElseGet(
                 cqlFhirParametersConverter, () -> Engines.getCqlFhirParametersConverter(repository.fhirContext()));
@@ -380,7 +380,7 @@ public class LibraryEngine {
             @Nullable ZonedDateTime zonedDateTime,
             CqlEngine engine) {
 
-        logger.info("1234: id: {}, patientId: {}, zonedDateTime: {}", id.getId(), patientId, zonedDateTime);
+        //        logger.info("1234: id: {}, patientId: {}, zonedDateTime: {}", id.getId(), patientId, zonedDateTime);
 
         var evaluationResultsForMultiLib = getEvaluationResult(
                 List.of(id),

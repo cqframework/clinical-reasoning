@@ -1,12 +1,12 @@
 {
   "resourceType": "Encounter",
-  "id": "enc_in_progress_cat1_patient1",
+  "id": "enc_finished_cat3",
   "meta": {
     "profile": [
-      "http://example.com/category1"
+      "http://example.com/category3"
     ]
   },
-  "status": "in-progress",
+  "status": "finished",
   "subject": {
     "reference": "Patient/patient1"
   },

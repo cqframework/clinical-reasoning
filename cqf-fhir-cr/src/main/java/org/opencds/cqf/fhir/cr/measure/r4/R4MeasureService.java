@@ -23,7 +23,6 @@ import org.opencds.cqf.fhir.utility.monad.Either3;
 import org.opencds.cqf.fhir.utility.repository.FederatedRepository;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.repository.Repositories;
-import org.opencds.cqf.fhir.utility.repository.RepositoryLoggingProxy;
 
 public class R4MeasureService implements R4MeasureEvaluatorSingle {
     private final IRepository repository;
@@ -36,7 +35,8 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
             IRepository repository,
             MeasureEvaluationOptions measureEvaluationOptions,
             MeasurePeriodValidator measurePeriodValidator) {
-        this.repository = RepositoryLoggingProxy.init(repository);
+        //        this.repository = RepositoryLoggingProxy.init(repository);
+        this.repository = repository;
         this.measureEvaluationOptions = measureEvaluationOptions;
         this.measurePeriodValidator = measurePeriodValidator;
         this.subjectProvider = new R4RepositorySubjectProvider(measureEvaluationOptions.getSubjectProviderOptions());

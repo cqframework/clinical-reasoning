@@ -398,20 +398,13 @@ public class MeasureProcessorUtils {
 
                     resultsBuilder.addResults(measureIds, subjectId, evaluationResult);
 
-                    var error = evaluationResultsForMultiLib.getErrorFor(libraryVersionedIdentifier);
-
-                    Optional.ofNullable(error)
-                            .map(nonNullError ->
-                                    EXCEPTION_FOR_SUBJECT_ID_MESSAGE_TEMPLATE.formatted(subjectId, nonNullError))
-                            .ifPresent(nonNullError -> resultsBuilder.addErrors(measureIds, nonNullError));
-
-                    var exceptions = evaluationResultsForMultiLib.getExceptionsFor(libraryVersionedIdentifier);
-
-                    // LUKETODO:  add this to the composite class instead?
-                    exceptions.stream()
-                            .map(exception -> EXCEPTION_FOR_SUBJECT_ID_MESSAGE_TEMPLATE.formatted(
-                                    subjectId, exception.getMessage()))
-                            .forEach(exception -> resultsBuilder.addErrors(measureIds, exception));
+                    Optional.ofNullable(evaluationResultsForMultiLib.getExceptionFor(libraryVersionedIdentifier))
+                            .ifPresent(exception -> {
+                                var error = EXCEPTION_FOR_SUBJECT_ID_MESSAGE_TEMPLATE.formatted(
+                                        subjectId, exception.getMessage());
+                                resultsBuilder.addErrors(measureIds, error);
+                                logger.error(error, exception);
+                            });
                 }
 
             } catch (Exception e) {
@@ -432,9 +425,9 @@ public class MeasureProcessorUtils {
             EvaluationResultsForMultiLib evaluationResultsForMultiLib) {
 
         var containsResults = evaluationResultsForMultiLib.containsResultsFor(versionedIdentifierFromQuery);
-        var containsError = evaluationResultsForMultiLib.containsErrorsOrExceptionsFor(versionedIdentifierFromQuery);
+        var containsExceptions = evaluationResultsForMultiLib.containsExceptionsFor(versionedIdentifierFromQuery);
 
-        if (!containsResults && !containsError) {
+        if (!containsResults && !containsExceptions) {
             throw new InternalErrorException(
                     "Evaluation result in versionless search not found for identifier with ID: %s"
                             .formatted(versionedIdentifierFromQuery.getId()));

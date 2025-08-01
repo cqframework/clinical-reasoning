@@ -22,7 +22,8 @@ public record IgConventions(
         org.opencds.cqf.fhir.utility.repository.ig.IgConventions.FhirTypeLayout typeLayout,
         org.opencds.cqf.fhir.utility.repository.ig.IgConventions.CategoryLayout categoryLayout,
         org.opencds.cqf.fhir.utility.repository.ig.IgConventions.CompartmentLayout compartmentLayout,
-        org.opencds.cqf.fhir.utility.repository.ig.IgConventions.FilenameMode filenameMode) {
+        org.opencds.cqf.fhir.utility.repository.ig.IgConventions.FilenameMode filenameMode,
+        org.opencds.cqf.fhir.utility.repository.ig.EncodingBehavior encodingBehavior) {
 
     private static final Logger logger = LoggerFactory.getLogger(IgConventions.class);
 
@@ -61,18 +62,24 @@ public record IgConventions(
     }
 
     public static final IgConventions FLAT = new IgConventions(
-            FhirTypeLayout.FLAT, CategoryLayout.FLAT, CompartmentLayout.FLAT, FilenameMode.TYPE_AND_ID);
+            FhirTypeLayout.FLAT,
+            CategoryLayout.FLAT,
+            CompartmentLayout.FLAT,
+            FilenameMode.TYPE_AND_ID,
+            EncodingBehavior.DEFAULT);
     public static final IgConventions STANDARD = new IgConventions(
             FhirTypeLayout.DIRECTORY_PER_TYPE,
             CategoryLayout.DIRECTORY_PER_CATEGORY,
             CompartmentLayout.FLAT,
-            FilenameMode.ID_ONLY);
+            FilenameMode.ID_ONLY,
+            EncodingBehavior.DEFAULT);
 
     public static final IgConventions KALM = new IgConventions(
             FhirTypeLayout.DIRECTORY_PER_TYPE,
             CategoryLayout.DEFINITIONAL_AND_DATA,
             CompartmentLayout.DIRECTORY_PER_COMPARTMENT,
-            FilenameMode.ID_ONLY);
+            FilenameMode.ID_ONLY,
+            EncodingBehavior.KALM);
 
     private static final List<String> FHIR_TYPE_NAMES = Stream.of(FHIRAllTypes.values())
             .map(FHIRAllTypes::name)
@@ -183,11 +190,15 @@ public record IgConventions(
         // have a resource that matches the claimed type.
         var hasTypeFilename = hasTypeFilename(typePath);
 
+        // Should also check for all the file extension that are used in the IG
+        // e.g. .json, .xml, and add them to the enabled encodings.
+
         var config = new IgConventions(
                 hasTypeDirectory ? FhirTypeLayout.DIRECTORY_PER_TYPE : FhirTypeLayout.FLAT,
                 hasCategoryDirectory ? CategoryLayout.DIRECTORY_PER_CATEGORY : CategoryLayout.FLAT,
                 hasCompartmentDirectory ? CompartmentLayout.DIRECTORY_PER_COMPARTMENT : CompartmentLayout.FLAT,
-                hasTypeFilename ? FilenameMode.TYPE_AND_ID : FilenameMode.ID_ONLY);
+                hasTypeFilename ? FilenameMode.TYPE_AND_ID : FilenameMode.ID_ONLY,
+                EncodingBehavior.DEFAULT);
 
         logger.info("Auto-detected repository configuration: {}", config);
 
@@ -274,12 +285,15 @@ public record IgConventions(
         return typeLayout == that.typeLayout
                 && filenameMode == that.filenameMode
                 && categoryLayout == that.categoryLayout
-                && compartmentLayout == that.compartmentLayout;
+                && compartmentLayout == that.compartmentLayout
+                && (this.encodingBehavior != null
+                        ? encodingBehavior.equals(that.encodingBehavior)
+                        : that.encodingBehavior == null);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(typeLayout, categoryLayout, compartmentLayout, filenameMode);
+        return Objects.hash(typeLayout, categoryLayout, compartmentLayout, filenameMode, encodingBehavior);
     }
 
     @Override

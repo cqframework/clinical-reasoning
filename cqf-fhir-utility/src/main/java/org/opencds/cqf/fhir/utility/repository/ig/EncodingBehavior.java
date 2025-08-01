@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.utility.repository.ig;
 
 import ca.uhn.fhir.rest.api.EncodingEnum;
+import java.util.EnumSet;
 
 /**
  * This class is used to determine how to handle encoding when reading and writing resources. You can
@@ -8,7 +9,8 @@ import ca.uhn.fhir.rest.api.EncodingEnum;
  * the encoding to a preferred encoding when writing. New resources will always be written in the preferred
  * encoding.
  */
-public class EncodingBehavior {
+public record EncodingBehavior(
+        EncodingEnum preferredEncoding, PreserveEncoding preserveEncoding, EnumSet<EncodingEnum> enabledEncodings) {
 
     /**
      * When updating a resource, you can choose to preserve the original encoding of the resource
@@ -19,22 +21,16 @@ public class EncodingBehavior {
         OVERWRITE_WITH_PREFERRED_ENCODING
     }
 
-    public static final EncodingBehavior DEFAULT =
-            new EncodingBehavior(EncodingEnum.JSON, PreserveEncoding.PRESERVE_ORIGINAL_ENCODING);
+    private static final EnumSet<EncodingEnum> DEFAULT_ENABLED_ENCODINGS =
+            EnumSet.of(EncodingEnum.JSON, EncodingEnum.XML);
 
-    private final EncodingEnum preferredEncoding;
-    private final PreserveEncoding preserveEncoding;
+    public static final EncodingBehavior DEFAULT = new EncodingBehavior(
+            EncodingEnum.JSON, PreserveEncoding.PRESERVE_ORIGINAL_ENCODING, DEFAULT_ENABLED_ENCODINGS);
+
+    public static final EncodingBehavior KALM = new EncodingBehavior(
+            EncodingEnum.JSON, PreserveEncoding.PRESERVE_ORIGINAL_ENCODING, EnumSet.of(EncodingEnum.JSON));
 
     public EncodingBehavior(EncodingEnum preferredEncoding, PreserveEncoding preserveEncoding) {
-        this.preferredEncoding = preferredEncoding;
-        this.preserveEncoding = preserveEncoding;
-    }
-
-    EncodingEnum preferredEncoding() {
-        return preferredEncoding;
-    }
-
-    PreserveEncoding preserveEncoding() {
-        return preserveEncoding;
+        this(preferredEncoding, preserveEncoding, DEFAULT_ENABLED_ENCODINGS);
     }
 }

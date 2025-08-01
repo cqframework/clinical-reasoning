@@ -18,6 +18,8 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Library;
+import org.hl7.fhir.r4.model.Medication;
+import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.BeforeAll;
@@ -149,6 +151,41 @@ class IgRepositoryKalmTest {
         assertFalse(Files.exists(loc));
     }
 
+    // Organization does not exist within a Patient compartment
+    // So should be in a shared folder.
+    @Test
+    void createAndDeleteOrganizationWithoutCompartment() {
+        var org = new Organization();
+        org.setId("new-organization");
+        var o = repository.create(org);
+        var created = repository.read(Organization.class, o.getId());
+        assertNotNull(created);
+
+        var loc = tempDir.resolve("tests/data/fhir/shared/organization/new-organization.json");
+        assertTrue(Files.exists(loc));
+
+        repository.delete(Organization.class, created.getIdElement());
+        assertFalse(Files.exists(loc));
+    }
+
+    // Organization does not exist within a Patient compartment
+    // So should be in a shared folder.
+    @Test
+    void createAndDeleteOrganizationWithCompartment() {
+        var org = new Organization();
+        org.setId("new-organization");
+        var header = Map.of(IgRepository.FHIR_COMPARTMENT_HEADER, "Patient/new-patient");
+        var o = repository.create(org, header);
+        var created = repository.read(Organization.class, o.getId(), header);
+        assertNotNull(created);
+
+        var loc = tempDir.resolve("tests/data/fhir/shared/organization/new-organization.json");
+        assertTrue(Files.exists(loc));
+
+        repository.delete(Organization.class, created.getIdElement(), header);
+        assertFalse(Files.exists(loc));
+    }
+
     @Test
     void createAndDeletePatient() {
         var p = new Patient();
@@ -198,6 +235,40 @@ class IgRepositoryKalmTest {
     void deleteNonExistentPatient() {
         var id = Ids.newId(Patient.class, "DoesNotExist");
         assertThrows(ResourceNotFoundException.class, () -> repository.delete(Patient.class, id));
+    }
+
+    // "Shared" (non-compartment) test data is in a "shared" folder
+    @Test
+    void readMedicationWithCompartment() {
+        var id = Ids.newId(Medication.class, "456");
+        var m = repository.read(Medication.class, id, Map.of(IgRepository.FHIR_COMPARTMENT_HEADER, "Patient/123"));
+
+        assertNotNull(m);
+        assertEquals(m.getIdPart(), m.getIdElement().getIdPart());
+    }
+
+    @Test
+    void readMedicationWithoutCompartment() {
+        var id = Ids.newId(Medication.class, "456");
+        var m = repository.read(Medication.class, id, Map.of());
+
+        assertNotNull(m);
+        assertEquals(m.getIdPart(), m.getIdElement().getIdPart());
+    }
+
+    @Test
+    void searchMedicationWithCompartment() {
+        var sets = repository.search(
+                Bundle.class, Medication.class, Map.of(), Map.of(IgRepository.FHIR_COMPARTMENT_HEADER, "Patient/123"));
+        assertNotNull(sets);
+        assertEquals(1, sets.getEntry().size());
+    }
+
+    @Test
+    void searchMedicationWithoutCompartment() {
+        var sets = repository.search(Bundle.class, Medication.class, Map.of());
+        assertNotNull(sets);
+        assertEquals(1, sets.getEntry().size());
     }
 
     @Test

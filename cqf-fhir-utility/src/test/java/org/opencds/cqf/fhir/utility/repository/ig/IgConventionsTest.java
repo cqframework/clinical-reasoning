@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.utility.repository.ig;
 
+import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
@@ -93,5 +94,10 @@ class IgConventionsTest {
         assertEquals(CategoryLayout.DIRECTORY_PER_CATEGORY, config.categoryLayout());
         assertEquals(CompartmentLayout.DIRECTORY_PER_COMPARTMENT, config.compartmentLayout());
         assertEquals(FhirTypeLayout.DIRECTORY_PER_TYPE, config.typeLayout());
+    }
+
+    @Test
+    void autoDetectInvalidDirectory() {
+        assertThrows(IllegalArgumentException.class, () -> IgConventions.autoDetect(tempDir.resolve("notValidIg")));
     }
 }

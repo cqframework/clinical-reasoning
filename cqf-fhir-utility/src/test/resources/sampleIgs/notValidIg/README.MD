@@ -1,0 +1,1 @@
+Intentionally empty directory to represent an invalid directory for the IG Repository to target

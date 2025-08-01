@@ -220,7 +220,7 @@ class PlanDefinitionProcessorTests {
         var planDefinitionID = "DischargeInstructionsPlan";
         var patientID = "Patient/Patient1";
         var practitionerID = "Practitioner/Practitioner1";
-        var data = "r4/tests/Bundle-DischargeInstructions-Patient-Data.json";
+        var data = "r4/input/tests/Bundle-DischargeInstructions-Patient-Data.json";
         given().repositoryFor(fhirContextR4, "r4")
                 .when()
                 .planDefinitionId(planDefinitionID)
@@ -348,7 +348,7 @@ class PlanDefinitionProcessorTests {
         var planDefinitionID = "NestedActivity";
         var patientID = "Patient/Patient1";
         var practitionerID = "Practitioner/Practitioner1";
-        var data = "r4/tests/Bundle-DischargeInstructions-Patient-Data.json";
+        var data = "r4/input/tests/Bundle-DischargeInstructions-Patient-Data.json";
         given().repositoryFor(fhirContextR4, "r4")
                 .when()
                 .planDefinitionId(planDefinitionID)

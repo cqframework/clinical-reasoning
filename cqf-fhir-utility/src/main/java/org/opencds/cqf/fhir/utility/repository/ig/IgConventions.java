@@ -117,9 +117,9 @@ public record IgConventions(
 
         // Check for an `input` directory, which is used for standard IGs.
         // If it exists, we will use that as the base path for further checks.
-        var inputPath = path.resolve("input");
-        if (Files.exists(inputPath)) {
-            path = inputPath;
+        path = path.resolve("input");
+        if (!Files.exists(path)) {
+            throw new IllegalArgumentException("The provided path does not contain an 'input' directory: " + path);
         }
 
         // A "category" hierarchy may exist in the ig file structure,

@@ -78,8 +78,8 @@ class IgConventionsTest {
     }
 
     @Test
-    void autoDetectWithNonFhirFilename() {
-        assertEquals(IgConventions.STANDARD, IgConventions.autoDetect(tempDir.resolve("nonFhirFilename")));
+    void autoDetectWithNonFhirFileName() {
+        assertEquals(IgConventions.STANDARD, IgConventions.autoDetect(tempDir.resolve("nonFhirFileName")));
     }
 
     @Test

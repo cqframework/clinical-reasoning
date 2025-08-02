@@ -119,7 +119,8 @@ public record IgConventions(
         // If it exists, we will use that as the base path for further checks.
         path = path.resolve("input");
         if (!Files.exists(path)) {
-            throw new IllegalArgumentException("The provided path does not contain an 'input' directory: " + path);
+            throw new IllegalArgumentException(
+                    "The provided path does not contain an 'input' or 'src' directory: " + path);
         }
 
         // A "category" hierarchy may exist in the ig file structure,
@@ -180,6 +181,8 @@ public record IgConventions(
         var typePath = FHIR_TYPE_NAMES.stream()
                 .map(categoryPath::resolve)
                 .filter(Files::exists)
+                .filter(Files::isDirectory)
+                .filter(f -> containsOnlyFiles(f))
                 .findFirst()
                 .orElse(categoryPath);
 
@@ -208,6 +211,7 @@ public record IgConventions(
     private static boolean hasTypeFilename(Path typePath) {
         try (var fileStream = Files.list(typePath)) {
             return fileStream
+                    .filter(Files::isRegularFile)
                     .filter(IgConventions::fileNameMatchesType)
                     .filter(filePath -> claimedFhirType(filePath) != FHIRAllTypes.NULL)
                     .anyMatch(filePath -> contentsMatchClaimedType(filePath, claimedFhirType(filePath)));
@@ -234,6 +238,15 @@ public record IgConventions(
         } catch (IOException e) {
             logger.error("Error listing files in path: {}", innerPath, e);
             return Stream.empty();
+        }
+    }
+
+    private static boolean containsOnlyFiles(Path innerPath) {
+        try (var stream = Files.list(innerPath)) {
+            return stream.allMatch(Files::isRegularFile);
+        } catch (IOException e) {
+            logger.error("Error listing files in path: {}", innerPath, e);
+            return false;
         }
     }
 

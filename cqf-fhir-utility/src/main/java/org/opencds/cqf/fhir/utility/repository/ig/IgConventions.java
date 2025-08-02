@@ -164,10 +164,17 @@ public record IgConventions(
 
                 // Check if any of the potential compartment directories
                 // have subdirectories that are not FHIR types (e.g. "input/tests/patient/test1).
-                hasCompartmentDirectory = compartmentsList.stream()
+                var compartment = compartmentsList.stream()
                         .flatMap(IgConventions::listFiles)
                         .filter(Files::isDirectory)
-                        .anyMatch(IgConventions::matchesAnyResourceType);
+                        .filter(f -> !matchesAnyResourceType(f))
+                        .findFirst()
+                        .orElse(categoryPath);
+
+                hasCompartmentDirectory = !compartment.equals(categoryPath);
+                if (hasCompartmentDirectory) {
+                    categoryPath = compartment;
+                }
             }
         }
 
@@ -182,7 +189,6 @@ public record IgConventions(
                 .map(categoryPath::resolve)
                 .filter(Files::exists)
                 .filter(Files::isDirectory)
-                .filter(f -> containsOnlyFiles(f))
                 .findFirst()
                 .orElse(categoryPath);
 
@@ -228,7 +234,7 @@ public record IgConventions(
     }
 
     private static boolean matchesAnyResourceType(Path innerFile) {
-        return !FHIR_TYPE_NAMES.contains(innerFile.getFileName().toString().toLowerCase());
+        return FHIR_TYPE_NAMES.contains(innerFile.getFileName().toString().toLowerCase());
     }
 
     @Nonnull
@@ -238,15 +244,6 @@ public record IgConventions(
         } catch (IOException e) {
             logger.error("Error listing files in path: {}", innerPath, e);
             return Stream.empty();
-        }
-    }
-
-    private static boolean containsOnlyFiles(Path innerPath) {
-        try (var stream = Files.list(innerPath)) {
-            return stream.allMatch(Files::isRegularFile);
-        } catch (IOException e) {
-            logger.error("Error listing files in path: {}", innerPath, e);
-            return false;
         }
     }
 

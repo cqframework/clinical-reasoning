@@ -157,14 +157,13 @@ public record IgConventions(
             // or more directories. If more directories exist, and the directory name is not a
             // FHIR type, then we have a compartment directory.
             if (tests.toFile().exists()) {
-                var compartments = FHIR_TYPE_NAMES.stream().map(tests::resolve).filter(x -> x.toFile()
-                        .exists());
-
-                final List<Path> compartmentsList = compartments.toList();
+                var potentialCompartments = FHIR_TYPE_NAMES.stream()
+                        .map(tests::resolve)
+                        .filter(x -> x.toFile().exists());
 
                 // Check if any of the potential compartment directories
                 // have subdirectories that are not FHIR types (e.g. "input/tests/patient/test1).
-                var compartment = compartmentsList.stream()
+                var compartment = potentialCompartments
                         .flatMap(IgConventions::listFiles)
                         .filter(Files::isDirectory)
                         .filter(f -> !matchesAnyResourceType(f))

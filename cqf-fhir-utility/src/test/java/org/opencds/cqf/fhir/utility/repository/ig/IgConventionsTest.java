@@ -98,6 +98,7 @@ class IgConventionsTest {
 
     @Test
     void autoDetectInvalidDirectory() {
-        assertThrows(IllegalArgumentException.class, () -> IgConventions.autoDetect(tempDir.resolve("notValidIg")));
+        var notValidIg = tempDir.resolve("notValidIg");
+        assertThrows(IllegalArgumentException.class, () -> IgConventions.autoDetect(notValidIg));
     }
 }

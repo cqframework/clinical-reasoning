@@ -145,11 +145,11 @@ public record IgConventions(
         if (hasCategoryDirectory) {
             var tests = path.resolve("tests");
             // A compartment under the tests looks like a set of subdirectories
-            // e.g. "input/tests/Patient", "input/tests/Practitioner"
+            // e.g. "input/tests/patient", "input/tests/practitioner"
             // that themselves contain subdirectories for each test case.
-            // e.g. "input/tests/Patient/test1", "input/tests/Patient/test2"
-            // Then within those, the structure may be flat (e.g. "input/tests/Patient/test1/123.json")
-            // or grouped by type (e.g. "input/tests/Patient/test1/Patient/123.json").
+            // e.g. "input/tests/patient/test1", "input/tests/patient/test2"
+            // Then within those, the structure may be flat (e.g. "input/tests/patient/test1/123.json")
+            // or grouped by type (e.g. "input/tests/patient/test1/patient/123.json").
             //
             // The trick is that the in the case that the test cases are
             // grouped by type, the compartment directory will be the same as the type directory.
@@ -163,7 +163,7 @@ public record IgConventions(
                 final List<Path> compartmentsList = compartments.toList();
 
                 // Check if any of the potential compartment directories
-                // have subdirectories that are not FHIR types (e.g. "input/tests/Patient/test1).
+                // have subdirectories that are not FHIR types (e.g. "input/tests/patient/test1).
                 hasCompartmentDirectory = compartmentsList.stream()
                         .flatMap(IgConventions::listFiles)
                         .filter(Files::isDirectory)

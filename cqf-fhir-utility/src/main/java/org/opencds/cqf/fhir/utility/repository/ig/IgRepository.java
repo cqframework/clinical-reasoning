@@ -28,7 +28,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -140,13 +139,13 @@ public class IgRepository implements IRepository {
     // Set of directories that are used to store resources of a given category.
     // The first path is the primary directory for the category, and any additional
     // paths are considered secondary or fallback directories.
-    record Directories(String... paths) {
+    record Directories(List<String> paths) {
         public int count() {
-            return paths.length;
+            return paths.size();
         }
 
         public Stream<String> stream() {
-            return Arrays.stream(paths);
+            return paths.stream();
         }
     }
 
@@ -154,33 +153,33 @@ public class IgRepository implements IRepository {
     // These are relative to the root directory of the IG or the root directory of the KALM project
     static final Table<CategoryLayout, ResourceCategory, Directories> TYPE_DIRECTORIES = new ImmutableTable.Builder<
                     CategoryLayout, ResourceCategory, Directories>()
-            .put(CategoryLayout.FLAT, ResourceCategory.CONTENT, new Directories("input"))
-            .put(CategoryLayout.FLAT, ResourceCategory.TERMINOLOGY, new Directories("input"))
-            .put(CategoryLayout.FLAT, ResourceCategory.DATA, new Directories("input"))
+            .put(CategoryLayout.FLAT, ResourceCategory.CONTENT, new Directories(List.of("input")))
+            .put(CategoryLayout.FLAT, ResourceCategory.TERMINOLOGY, new Directories(List.of("input")))
+            .put(CategoryLayout.FLAT, ResourceCategory.DATA, new Directories(List.of("input")))
             .put(
                     CategoryLayout.DIRECTORY_PER_CATEGORY,
                     ResourceCategory.CONTENT,
-                    new Directories("input/resources", "input/tests"))
+                    new Directories(List.of("input/resources", "input/tests")))
             .put(
                     CategoryLayout.DIRECTORY_PER_CATEGORY,
                     ResourceCategory.TERMINOLOGY,
-                    new Directories("input/vocabulary"))
+                    new Directories(List.of("input/vocabulary")))
             .put(
                     CategoryLayout.DIRECTORY_PER_CATEGORY,
                     ResourceCategory.DATA,
-                    new Directories("input/tests", "input/resources"))
+                    new Directories(List.of("input/tests", "input/resources")))
             .put(
                     CategoryLayout.DEFINITIONAL_AND_DATA,
                     ResourceCategory.CONTENT,
-                    new Directories("src/fhir", "tests/data/fhir"))
+                    new Directories(List.of("src/fhir", "tests/data/fhir")))
             .put(
                     CategoryLayout.DEFINITIONAL_AND_DATA,
                     ResourceCategory.TERMINOLOGY,
-                    new Directories("src/fhir", "tests/data/fhir"))
+                    new Directories(List.of("src/fhir", "tests/data/fhir")))
             .put(
                     CategoryLayout.DEFINITIONAL_AND_DATA,
                     ResourceCategory.DATA,
-                    new Directories("tests/data/fhir", "src/fhir"))
+                    new Directories(List.of("tests/data/fhir", "src/fhir")))
             .build();
 
     static final BiMap<EncodingEnum, String> FILE_EXTENSIONS = new ImmutableBiMap.Builder<EncodingEnum, String>()
@@ -451,7 +450,7 @@ public class IgRepository implements IRepository {
 
             return Optional.of(resource);
         } catch (FileNotFoundException e) {
-            return null;
+            return Optional.empty();
         } catch (DataFormatException e) {
             throw new ResourceNotFoundException("Found empty or invalid content at path %s".formatted(path));
         } catch (IOException e) {

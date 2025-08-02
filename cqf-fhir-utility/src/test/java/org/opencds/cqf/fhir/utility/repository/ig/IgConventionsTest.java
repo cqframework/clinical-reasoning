@@ -88,7 +88,7 @@ class IgConventionsTest {
     }
 
     @Test
-    void autoDetectWitCompartments() {
+    void autoDetectWithCompartments() {
         var config = IgConventions.autoDetect(tempDir.resolve("compartment"));
         assertEquals(FilenameMode.ID_ONLY, config.filenameMode());
         assertEquals(CategoryLayout.DIRECTORY_PER_CATEGORY, config.categoryLayout());

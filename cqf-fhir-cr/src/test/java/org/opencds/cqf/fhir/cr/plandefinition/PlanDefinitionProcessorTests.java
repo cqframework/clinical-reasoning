@@ -25,6 +25,7 @@ import org.opencds.cqf.fhir.cr.common.PackageProcessor;
 import org.opencds.cqf.fhir.cr.plandefinition.apply.ApplyProcessor;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Ids;
+import org.opencds.cqf.fhir.utility.client.TerminologyServerClientSettings;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
@@ -56,6 +57,7 @@ class PlanDefinitionProcessorTests {
         var processor = new PlanDefinitionProcessor(
                 repository,
                 EvaluationSettings.getDefault(),
+                new TerminologyServerClientSettings(),
                 new ApplyProcessor(repository, modelResolver, activityProcessor),
                 packageProcessor,
                 dataRequirementsProcessor,

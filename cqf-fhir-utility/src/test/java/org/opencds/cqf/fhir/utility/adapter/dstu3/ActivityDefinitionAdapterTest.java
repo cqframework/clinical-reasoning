@@ -22,6 +22,7 @@ import org.hl7.fhir.dstu3.model.Library;
 import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.RelatedArtifact;
+import org.hl7.fhir.dstu3.model.RelatedArtifact.RelatedArtifactType;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.utility.adapter.IActivityDefinitionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.TestVisitor;
@@ -162,11 +163,29 @@ class ActivityDefinitionAdapterTest {
         var dependencies = List.of("profileRef", "relatedArtifactRef", "libraryRef");
         var activityDef = new ActivityDefinition();
         activityDef.getMeta().addProfile(dependencies.get(0));
-        activityDef.getRelatedArtifactFirstRep().setResource(new Reference(dependencies.get(1)));
+        activityDef
+                .getRelatedArtifactFirstRep()
+                .setResource(new Reference(dependencies.get(1)))
+                .setType(RelatedArtifactType.DEPENDSON);
         activityDef.getLibraryFirstRep().setReference(dependencies.get(2));
         var adapter = adapterFactory.createKnowledgeArtifactAdapter(activityDef);
         var extractedDependencies = adapter.getDependencies();
         assertEquals(extractedDependencies.size(), dependencies.size());
+        extractedDependencies.forEach(dep -> {
+            assertTrue(dependencies.contains(dep.getReference()));
+        });
+    }
+
+    @Test
+    void adapter_get_all_dependencies_with_non_depends_on_related_artifacts() {
+        var dependencies = List.of("profileRef", "relatedArtifactRef", "libraryRef");
+        var activityDef = new ActivityDefinition();
+        activityDef.getMeta().addProfile(dependencies.get(0));
+        activityDef.getRelatedArtifactFirstRep().setResource(new Reference(dependencies.get(1)));
+        activityDef.addLibrary(new Reference(dependencies.get(2)));
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(activityDef);
+        var extractedDependencies = adapter.getDependencies();
+        assertEquals(extractedDependencies.size(), dependencies.size() - 1);
         extractedDependencies.forEach(dep -> {
             assertTrue(dependencies.contains(dep.getReference()));
         });

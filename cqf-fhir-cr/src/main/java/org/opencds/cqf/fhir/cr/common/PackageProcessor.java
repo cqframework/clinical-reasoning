@@ -8,6 +8,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.opencds.cqf.fhir.cr.visitor.PackageVisitor;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
+import org.opencds.cqf.fhir.utility.client.TerminologyServerClientSettings;
 
 public class PackageProcessor implements IPackageProcessor {
     protected final IRepository repository;
@@ -18,7 +19,14 @@ public class PackageProcessor implements IPackageProcessor {
     public PackageProcessor(IRepository repository) {
         this.repository = repository;
         fhirVersion = this.repository.fhirContext().getVersion().getVersion();
-        packageVisitor = new PackageVisitor(this.repository);
+        packageVisitor = new PackageVisitor(this.repository, new TerminologyServerClientSettings());
+        adapterFactory = IAdapterFactory.forFhirVersion(fhirVersion);
+    }
+
+    public PackageProcessor(IRepository repository, TerminologyServerClientSettings terminologyServerClientSettings) {
+        this.repository = repository;
+        fhirVersion = this.repository.fhirContext().getVersion().getVersion();
+        packageVisitor = new PackageVisitor(this.repository, terminologyServerClientSettings);
         adapterFactory = IAdapterFactory.forFhirVersion(fhirVersion);
     }
 

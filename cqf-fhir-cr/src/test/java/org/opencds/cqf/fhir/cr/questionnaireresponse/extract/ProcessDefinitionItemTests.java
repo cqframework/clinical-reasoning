@@ -137,9 +137,9 @@ class ProcessDefinitionItemTests {
         var fhirVersion = FhirVersionEnum.R4;
         var parser = fhirContextR4.newJsonParser();
         var questionnaire = (Questionnaire)
-                parser.parseResource(open("r4/resources/Questionnaire-extract-defn-walkthrough-4.json"));
+                parser.parseResource(open("r4/input/resources/Questionnaire-extract-defn-walkthrough-4.json"));
         var response = (QuestionnaireResponse)
-                parser.parseResource(open("r4/tests/QuestionnaireResponse-extract-defn-walkthrough-4.json"));
+                parser.parseResource(open("r4/input/tests/QuestionnaireResponse-extract-defn-walkthrough-4.json"));
         var request = newExtractRequestForVersion(fhirVersion, libraryEngine, response, questionnaire);
         var itemPair = new ItemPair(null, null);
         var actual = fixture.processDefinitionItem(request, itemPair);

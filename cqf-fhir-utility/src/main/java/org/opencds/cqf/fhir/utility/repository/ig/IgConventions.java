@@ -22,7 +22,8 @@ public record IgConventions(
         org.opencds.cqf.fhir.utility.repository.ig.IgConventions.FhirTypeLayout typeLayout,
         org.opencds.cqf.fhir.utility.repository.ig.IgConventions.CategoryLayout categoryLayout,
         org.opencds.cqf.fhir.utility.repository.ig.IgConventions.CompartmentLayout compartmentLayout,
-        org.opencds.cqf.fhir.utility.repository.ig.IgConventions.FilenameMode filenameMode) {
+        org.opencds.cqf.fhir.utility.repository.ig.IgConventions.FilenameMode filenameMode,
+        org.opencds.cqf.fhir.utility.repository.ig.EncodingBehavior encodingBehavior) {
 
     private static final Logger logger = LoggerFactory.getLogger(IgConventions.class);
 
@@ -39,6 +40,7 @@ public record IgConventions(
      */
     public enum CategoryLayout {
         DIRECTORY_PER_CATEGORY,
+        DEFINITIONAL_AND_DATA,
         FLAT
     }
 
@@ -60,12 +62,24 @@ public record IgConventions(
     }
 
     public static final IgConventions FLAT = new IgConventions(
-            FhirTypeLayout.FLAT, CategoryLayout.FLAT, CompartmentLayout.FLAT, FilenameMode.TYPE_AND_ID);
+            FhirTypeLayout.FLAT,
+            CategoryLayout.FLAT,
+            CompartmentLayout.FLAT,
+            FilenameMode.TYPE_AND_ID,
+            EncodingBehavior.DEFAULT);
     public static final IgConventions STANDARD = new IgConventions(
             FhirTypeLayout.DIRECTORY_PER_TYPE,
             CategoryLayout.DIRECTORY_PER_CATEGORY,
             CompartmentLayout.FLAT,
-            FilenameMode.ID_ONLY);
+            FilenameMode.ID_ONLY,
+            EncodingBehavior.DEFAULT);
+
+    public static final IgConventions KALM = new IgConventions(
+            FhirTypeLayout.DIRECTORY_PER_TYPE,
+            CategoryLayout.DEFINITIONAL_AND_DATA,
+            CompartmentLayout.DIRECTORY_PER_COMPARTMENT,
+            FilenameMode.ID_ONLY,
+            EncodingBehavior.KALM);
 
     private static final List<String> FHIR_TYPE_NAMES = Stream.of(FHIRAllTypes.values())
             .map(FHIRAllTypes::name)
@@ -81,9 +95,32 @@ public record IgConventions(
      * @return The IG conventions.
      */
     public static IgConventions autoDetect(Path path) {
-
         if (path == null || !Files.exists(path)) {
-            return STANDARD;
+            return KALM;
+        }
+
+        if (Files.isDirectory(path)) {
+            try (var stream = Files.list(path)) {
+                if (!stream.findFirst().isPresent()) {
+                    return KALM; // Empty directory, return default
+                }
+            } catch (IOException e) {
+                logger.warn("Error listing files in path: {}", path, e);
+            }
+        }
+
+        // Check for a `src` directory, which is used for KALM projects.
+        var srcPath = path.resolve("src");
+        if (Files.exists(srcPath)) {
+            return KALM;
+        }
+
+        // Check for an `input` directory, which is used for standard IGs.
+        // If it exists, we will use that as the base path for further checks.
+        path = path.resolve("input");
+        if (!Files.exists(path)) {
+            throw new IllegalArgumentException(
+                    "The provided path does not contain an 'input' or 'src' directory: " + path);
         }
 
         // A "category" hierarchy may exist in the ig file structure,
@@ -94,7 +131,6 @@ public record IgConventions(
         //
         // Check all possible category paths and grab the first that exists,
         // or use the IG path if none exist.
-
         var categoryPath = Stream.of("tests", "vocabulary", "resources")
                 .map(path::resolve)
                 .filter(x -> x.toFile().exists())
@@ -109,11 +145,11 @@ public record IgConventions(
         if (hasCategoryDirectory) {
             var tests = path.resolve("tests");
             // A compartment under the tests looks like a set of subdirectories
-            // e.g. "input/tests/Patient", "input/tests/Practitioner"
+            // e.g. "input/tests/patient", "input/tests/practitioner"
             // that themselves contain subdirectories for each test case.
-            // e.g. "input/tests/Patient/test1", "input/tests/Patient/test2"
-            // Then within those, the structure may be flat (e.g. "input/tests/Patient/test1/123.json")
-            // or grouped by type (e.g. "input/tests/Patient/test1/Patient/123.json").
+            // e.g. "input/tests/patient/test1", "input/tests/patient/test2"
+            // Then within those, the structure may be flat (e.g. "input/tests/patient/test1/123.json")
+            // or grouped by type (e.g. "input/tests/patient/test1/patient/123.json").
             //
             // The trick is that the in the case that the test cases are
             // grouped by type, the compartment directory will be the same as the type directory.
@@ -121,17 +157,23 @@ public record IgConventions(
             // or more directories. If more directories exist, and the directory name is not a
             // FHIR type, then we have a compartment directory.
             if (tests.toFile().exists()) {
-                var compartments = FHIR_TYPE_NAMES.stream().map(tests::resolve).filter(x -> x.toFile()
-                        .exists());
-
-                final List<Path> compartmentsList = compartments.toList();
+                var potentialCompartments = FHIR_TYPE_NAMES.stream()
+                        .map(tests::resolve)
+                        .filter(x -> x.toFile().exists());
 
                 // Check if any of the potential compartment directories
-                // have subdirectories that are not FHIR types (e.g. "input/tests/Patient/test1).
-                hasCompartmentDirectory = compartmentsList.stream()
+                // have subdirectories that are not FHIR types (e.g. "input/tests/patient/test1).
+                var compartment = potentialCompartments
                         .flatMap(IgConventions::listFiles)
                         .filter(Files::isDirectory)
-                        .anyMatch(IgConventions::matchesAnyResource);
+                        .filter(f -> !matchesAnyResourceType(f))
+                        .findFirst()
+                        .orElse(categoryPath);
+
+                hasCompartmentDirectory = !compartment.equals(categoryPath);
+                if (hasCompartmentDirectory) {
+                    categoryPath = compartment;
+                }
             }
         }
 
@@ -145,6 +187,7 @@ public record IgConventions(
         var typePath = FHIR_TYPE_NAMES.stream()
                 .map(categoryPath::resolve)
                 .filter(Files::exists)
+                .filter(Files::isDirectory)
                 .findFirst()
                 .orElse(categoryPath);
 
@@ -155,11 +198,15 @@ public record IgConventions(
         // have a resource that matches the claimed type.
         var hasTypeFilename = hasTypeFilename(typePath);
 
+        // Should also check for all the file extension that are used in the IG
+        // e.g. .json, .xml, and add them to the enabled encodings.
+
         var config = new IgConventions(
                 hasTypeDirectory ? FhirTypeLayout.DIRECTORY_PER_TYPE : FhirTypeLayout.FLAT,
                 hasCategoryDirectory ? CategoryLayout.DIRECTORY_PER_CATEGORY : CategoryLayout.FLAT,
                 hasCompartmentDirectory ? CompartmentLayout.DIRECTORY_PER_COMPARTMENT : CompartmentLayout.FLAT,
-                hasTypeFilename ? FilenameMode.TYPE_AND_ID : FilenameMode.ID_ONLY);
+                hasTypeFilename ? FilenameMode.TYPE_AND_ID : FilenameMode.ID_ONLY,
+                EncodingBehavior.DEFAULT);
 
         logger.info("Auto-detected repository configuration: {}", config);
 
@@ -169,6 +216,7 @@ public record IgConventions(
     private static boolean hasTypeFilename(Path typePath) {
         try (var fileStream = Files.list(typePath)) {
             return fileStream
+                    .filter(Files::isRegularFile)
                     .filter(IgConventions::fileNameMatchesType)
                     .filter(filePath -> claimedFhirType(filePath) != FHIRAllTypes.NULL)
                     .anyMatch(filePath -> contentsMatchClaimedType(filePath, claimedFhirType(filePath)));
@@ -184,8 +232,8 @@ public record IgConventions(
         return FHIR_TYPE_NAMES.stream().anyMatch(type -> fileName.toLowerCase().startsWith(type));
     }
 
-    private static boolean matchesAnyResource(Path innerFile) {
-        return !FHIR_TYPE_NAMES.contains(innerFile.getFileName().toString().toLowerCase());
+    private static boolean matchesAnyResourceType(Path innerFile) {
+        return FHIR_TYPE_NAMES.contains(innerFile.getFileName().toString().toLowerCase());
     }
 
     @Nonnull
@@ -246,12 +294,15 @@ public record IgConventions(
         return typeLayout == that.typeLayout
                 && filenameMode == that.filenameMode
                 && categoryLayout == that.categoryLayout
-                && compartmentLayout == that.compartmentLayout;
+                && compartmentLayout == that.compartmentLayout
+                && (this.encodingBehavior != null
+                        ? encodingBehavior.equals(that.encodingBehavior)
+                        : that.encodingBehavior == null);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(typeLayout, categoryLayout, compartmentLayout, filenameMode);
+        return Objects.hash(typeLayout, categoryLayout, compartmentLayout, filenameMode, encodingBehavior);
     }
 
     @Override

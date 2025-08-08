@@ -1,6 +1,10 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
+import org.cqframework.cql.cql2elm.CqlCompilerOptions;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.cql.engine.execution.CqlEngine;
+import org.opencds.cqf.fhir.cql.CqlOptions;
+import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.r4.MultiMeasure.Given;
 import org.slf4j.Logger;
@@ -16,7 +20,7 @@ class MultiLibEvalComplexCqlTest {
             .setApplyScoringSetMembership(false);
 
     private static final Given GIVEN_REPO =
-            MultiMeasure.given().repositoryFor("MultiLibEvalComplexCql").evaluationOptions(EVALUATION_OPTIONS);
+            MultiMeasure.given().repositoryFor("MultiLibEvalComplexCql").evaluationOptions(getEvaluationOptions());
 
     @Test
     void singleLibraryTest_1A() {
@@ -96,5 +100,28 @@ class MultiLibEvalComplexCqlTest {
                 .up()
                 .population("numerator")
                 .hasCount(1);
+    }
+
+    private static MeasureEvaluationOptions getEvaluationOptions() {
+        return MeasureEvaluationOptions.defaultOptions()
+                .setApplyScoringSetMembership(false)
+                .setEvaluationSettings(getEvaluationSettings());
+    }
+
+    private static EvaluationSettings getEvaluationSettings() {
+        return EvaluationSettings.getDefault().withCqlOptions(getCqlOptions());
+    }
+
+    private static CqlOptions getCqlOptions() {
+        final CqlOptions cqlOptions = CqlOptions.defaultOptions();
+        cqlOptions.getCqlEngineOptions().getOptions().add(CqlEngine.Options.EnableHedisCompatibilityMode);
+        cqlOptions.setCqlCompilerOptions(getCqlCompilerOptions());
+        return cqlOptions;
+    }
+
+    private static CqlCompilerOptions getCqlCompilerOptions() {
+        final CqlCompilerOptions cqlCompilerOptions = new CqlCompilerOptions();
+        cqlCompilerOptions.setEnableCqlOnly(true);
+        return cqlCompilerOptions;
     }
 }

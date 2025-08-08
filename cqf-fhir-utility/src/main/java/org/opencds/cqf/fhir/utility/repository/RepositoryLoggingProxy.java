@@ -7,6 +7,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import com.google.common.collect.Multimap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -16,6 +17,13 @@ import org.slf4j.LoggerFactory;
 
 // LUKETODO:  this is temporary until performance testing is complete
 public class RepositoryLoggingProxy implements IRepository {
+    private static final AtomicLong searchCounter = new AtomicLong(0);
+    private static final AtomicLong readCounter = new AtomicLong(0);
+    private static final AtomicLong createCounter = new AtomicLong(0);
+    private static final AtomicLong updateCounter = new AtomicLong(0);
+    private static final AtomicLong deleteCounter = new AtomicLong(0);
+    private static final AtomicLong invoke1Counter = new AtomicLong(0);
+    private static final AtomicLong invoke2Counter = new AtomicLong(0);
 
     private static final Logger logger = LoggerFactory.getLogger(RepositoryLoggingProxy.class);
 
@@ -44,26 +52,30 @@ public class RepositoryLoggingProxy implements IRepository {
 
     @Override
     public <T extends IBaseResource, I extends IIdType> T read(Class<T> aClass, I i, Map<String, String> map) {
-        logger.info("1234567890 - read()");
+        final long readCount = readCounter.incrementAndGet();
+        logger.info("1234567890 - read() count: {}", readCount);
         return repository.read(aClass, i, map);
     }
 
     @Override
     public <T extends IBaseResource> MethodOutcome create(T t, Map<String, String> map) {
-        logger.info("1234567890 - create()");
+        final long createCount = createCounter.incrementAndGet();
+        logger.info("1234567890 - create() count: {}", createCount);
         return repository.create(t, map);
     }
 
     @Override
     public <T extends IBaseResource> MethodOutcome update(T t, Map<String, String> map) {
-        logger.info("1234567890 - update()");
+        final long updateCount = updateCounter.incrementAndGet();
+        logger.info("1234567890 - update() count: {}", updateCount);
         return repository.update(t, map);
     }
 
     @Override
     public <T extends IBaseResource, I extends IIdType> MethodOutcome delete(
             Class<T> aClass, I i, Map<String, String> map) {
-        logger.info("1234567890 - delete()");
+        final long deleteCount = deleteCounter.incrementAndGet();
+        logger.info("1234567890 - delete() count: {}", deleteCount);
         return repository.delete(aClass, i, map);
     }
 
@@ -73,22 +85,39 @@ public class RepositoryLoggingProxy implements IRepository {
             Class<T> aClass1,
             Multimap<String, List<IQueryParameterType>> multimap,
             Map<String, String> map) {
-        logger.info("1234567890 - search()");
+        final long searchCount = searchCounter.incrementAndGet();
+        logger.info(
+                "1234567890 - search() count: {}, resource class: {}, search params: {}",
+                searchCount,
+                aClass1,
+                multimap);
         return repository.search(aClass, aClass1, multimap, map);
     }
 
     @Override
     public <R extends IBaseResource, P extends IBaseParameters, T extends IBaseResource> R invoke(
             Class<T> aClass, String s, P p, Class<R> aClass1, Map<String, String> map) {
-        logger.info("1234567890 - invoke()");
+        final long invoke1Count = invoke1Counter.incrementAndGet();
+        logger.info("1234567890 - invoke1() count: {}", invoke1Count);
         return repository.invoke(aClass, s, p, aClass1, map);
     }
 
     @Override
     public <R extends IBaseResource, P extends IBaseParameters, I extends IIdType> R invoke(
             I i, String s, P p, Class<R> aClass, Map<String, String> map) {
-        logger.info("1234567890 - invoke()");
+        final long invoke2Count = invoke2Counter.incrementAndGet();
+        logger.info("1234567890 - invoke2() count: {}", invoke2Count);
         return repository.invoke(aClass, s, p, aClass, map);
+    }
+
+    @Override
+    public <B extends IBaseBundle> B transaction(B bundle, Map<String, String> headers) {
+        return repository.transaction(bundle, headers);
+    }
+
+    @Override
+    public <B extends IBaseBundle> B link(Class<B> bundleType, String url, Map<String, String> headers) {
+        return repository.link(bundleType, url, headers);
     }
 
     @Override

@@ -344,11 +344,11 @@ public class LibraryEngine {
         //                patientId,
         //                zonedDateTime);
 
-        final CqlFhirParametersConverter cqlFhirParametersConverterToUse = Objects.requireNonNullElseGet(
+        var cqlFhirParametersConverterToUse = Objects.requireNonNullElseGet(
                 cqlFhirParametersConverter, () -> Engines.getCqlFhirParametersConverter(repository.fhirContext()));
 
         // engine context built externally of LibraryEngine?
-        final CqlEngine engineToUse = Objects.requireNonNullElseGet(
+        var engineToUse = Objects.requireNonNullElseGet(
                 engine, () -> Engines.forRepository(repository, settings, additionalData));
 
         var evaluationParameters = cqlFhirParametersConverterToUse.toCqlParameters(parameters);

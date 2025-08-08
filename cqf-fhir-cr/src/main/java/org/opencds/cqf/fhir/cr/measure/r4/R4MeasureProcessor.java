@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.cqframework.cql.cql2elm.CqlIncludeException;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.hl7.elm.r1.VersionedIdentifier;
@@ -149,7 +150,7 @@ public class R4MeasureProcessor {
      * @param evalType the type of evaluation to process, this is an output of reportType param
      * @return Measure Report resource
      */
-    protected MeasureReport evaluateMeasure(
+    public MeasureReport evaluateMeasure(
             Measure measure,
             @Nullable ZonedDateTime periodStart,
             @Nullable ZonedDateTime periodEnd,
@@ -247,6 +248,26 @@ public class R4MeasureProcessor {
                 subjects, List.of(measure), periodStart, periodEnd, parameters, context);
     }
 
+    // LUKETODO:  is this called from downstream?
+    public CompositeEvaluationResultsPerMeasure evaluateMultiMeasureIdsWithCqlEngine(
+            List<String> subjects,
+            List<IdType> measureIds,
+            @Nullable ZonedDateTime periodStart,
+            @Nullable ZonedDateTime periodEnd,
+            Parameters parameters,
+            CqlEngine context) {
+        return evaluateMultiMeasuresWithCqlEngine(
+                subjects,
+                measureIds.stream()
+                        .map(IIdType::toUnqualifiedVersionless)
+                        .map(id -> R4MeasureServiceUtils.resolveById(id, repository))
+                        .toList(),
+                periodStart,
+                periodEnd,
+                parameters,
+                context);
+    }
+
     public CompositeEvaluationResultsPerMeasure evaluateMultiMeasuresWithCqlEngine(
             List<String> subjects,
             List<Measure> measures,
@@ -260,6 +281,11 @@ public class R4MeasureProcessor {
         var measurementPeriodParams = buildMeasurementPeriod(periodStart, periodEnd);
         var zonedMeasurementPeriod = MeasureProcessorUtils.getZonedTimeZoneForEval(
                 measureProcessorUtils.getDefaultMeasurementPeriod(measurementPeriodParams, context));
+
+        // LUKETODO: find a better way:
+        // Do this to be backwards compatible with the previous single-library evaluation:
+        // Trigger first-pass validation on measure scoring as well as other aspects of the Measures
+        measures.forEach(measure -> new R4MeasureDefBuilder().build(measure));
 
         // Note that we must build the LibraryEngine BEFORE we call
         // measureProcessorUtils.setMeasurementPeriod(), otherwise, we get an NPE.
@@ -382,19 +408,65 @@ public class R4MeasureProcessor {
 
     protected LibraryEngine getLibraryEngine(Parameters parameters, List<VersionedIdentifier> ids, CqlEngine context) {
 
-        var compileLibraries =
-                ids.stream().map(id -> getCompiledLibrary(id, context)).toList();
+        var compiledLibraries = getCompiledLibraries(ids, context);
 
         var libraries =
-                compileLibraries.stream().map(CompiledLibrary::getLibrary).toList();
+                compiledLibraries.stream().map(CompiledLibrary::getLibrary).toList();
 
         context.getState().init(libraries);
 
-        setArgParameters(parameters, context, compileLibraries);
+        // LUKETODO:  if we comment this out MeasureScorerTest and other tests will fail with NPEs
+        setArgParameters(parameters, context, compiledLibraries);
 
         return new LibraryEngine(repository, this.measureEvaluationOptions.getEvaluationSettings());
     }
 
+    private List<CompiledLibrary> getCompiledLibraries(List<VersionedIdentifier> ids, CqlEngine context) {
+        try {
+            var resolvedLibraryResults =
+                    context.getEnvironment().getLibraryManager().resolveLibraries(ids);
+
+            var allErrors = resolvedLibraryResults.allErrors();
+            if (resolvedLibraryResults.hasErrors() || ids.size() > allErrors.size()) {
+                return resolvedLibraryResults.allCompiledLibraries();
+            }
+
+            if (ids.size() == 1) {
+                final List<CqlCompilerException> cqlCompilerExceptions =
+                        resolvedLibraryResults.getErrorsFor(ids.get(0));
+
+                if (cqlCompilerExceptions.size() == 1) {
+                    throw new IllegalStateException(
+                            "Unable to load CQL/ELM for library: %s. Verify that the Library resource is available in your environment and has CQL/ELM content embedded."
+                                    .formatted(ids.get(0).getId()),
+                            cqlCompilerExceptions.get(0));
+                } else {
+                    throw new IllegalStateException(
+                            "Unable to load CQL/ELM for library: %s. Verify that the Library resource is available in your environment and has CQL/ELM content embedded. Errors: %s"
+                                    .formatted(
+                                            ids.get(0).getId(),
+                                            cqlCompilerExceptions.stream()
+                                                    .map(CqlCompilerException::getMessage)
+                                                    .reduce((s1, s2) -> s1 + "; " + s2)
+                                                    .orElse("No error messages found.")));
+                }
+            }
+
+            // LUKETODO:  handle multiple library errors here better:
+            throw new IllegalStateException(
+                    "Unable to load CQL/ELM for libraries: %s Verify that the Library resource is available in your environment and has CQL/ELM content embedded. Errors: %s"
+                            .formatted(ids, allErrors));
+
+        } catch (CqlIncludeException exception) {
+            throw new IllegalStateException(
+                    "Unable to load CQL/ELM for libraries: %s. Verify that the Library resource is available in your environment and has CQL/ELM content embedded."
+                            .formatted(
+                                    ids.stream().map(VersionedIdentifier::getId).toList()),
+                    exception);
+        }
+    }
+
+    // LUKETODO:  consider getting rid of this:
     private CompiledLibrary getCompiledLibrary(VersionedIdentifier id, CqlEngine context) {
         try {
             return context.getEnvironment().getLibraryManager().resolveLibrary(id);

@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r5.model.ArtifactAssessment;
@@ -18,10 +19,12 @@ import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r5.model.CanonicalType;
 import org.hl7.fhir.r5.model.Coding;
+import org.hl7.fhir.r5.model.DomainResource;
 import org.hl7.fhir.r5.model.Extension;
 import org.hl7.fhir.r5.model.Library;
 import org.hl7.fhir.r5.model.Measure;
 import org.hl7.fhir.r5.model.MetadataResource;
+import org.hl7.fhir.r5.model.Parameters;
 import org.hl7.fhir.r5.model.Period;
 import org.hl7.fhir.r5.model.Reference;
 import org.hl7.fhir.r5.model.RelatedArtifact.RelatedArtifactType;
@@ -151,47 +154,99 @@ public class ReleaseVisitor {
     }
 
     public static void extractDirectReferenceCodes(IKnowledgeArtifactAdapter rootAdapter, Measure measure) {
+        Library effectiveDataRequirementsLib = getEffectiveDataRequirementsLib(measure);
+
+        if (effectiveDataRequirementsLib != null) {
+            var proposedExtensions = effectiveDataRequirementsLib.getExtension().stream()
+                    .filter(ext -> ext.getUrl().equals(Constants.CQF_DIRECT_REFERENCE_EXTENSION))
+                    .toList();
+
+            var existingRootAdapterExtensions = rootAdapter.getExtension().stream()
+                    .filter(ext -> ext.getUrl().equals(Constants.CQFM_DIRECT_REFERENCE_EXTENSION)
+                            || ext.getUrl().equals(Constants.CQF_DIRECT_REFERENCE_EXTENSION))
+                    .toList();
+
+            var expansionParams = rootAdapter.getExpansionParameters().map(p -> ((Parameters) p));
+
+            for (var proposedExt : proposedExtensions) {
+                boolean shouldAddExtension = true;
+                Coding proposedCoding = (Coding) proposedExt.getValue();
+
+                setCodeSystemVersion(proposedCoding, expansionParams.orElse(null));
+
+                for (var existingExt : existingRootAdapterExtensions) {
+                    Coding existingCoding = (Coding) existingExt.getValue();
+
+                    if (codingsMatch(proposedCoding, existingCoding)) {
+                        shouldAddExtension = false;
+                        break;
+                    }
+                }
+
+                if (shouldAddExtension) {
+                    rootAdapter.addExtension(proposedExt);
+                }
+            }
+        }
+    }
+
+    private static Library getEffectiveDataRequirementsLib(Measure measure) {
         Optional<Extension> effectiveDataRequirementsExt = measure.getExtension().stream()
                 .filter(ext -> ext.getUrl().equals(Constants.CQFM_EFFECTIVE_DATA_REQUIREMENTS)
                         || ext.getUrl().equals(Constants.CRMI_EFFECTIVE_DATA_REQUIREMENTS))
                 .findFirst();
         if (effectiveDataRequirementsExt.isPresent()) {
-            Library effectiveDataRequirementsLib = null;
             if (effectiveDataRequirementsExt.get().getValue() instanceof Reference ref) {
-                effectiveDataRequirementsLib = (Library) measure.getContained(ref.getReference());
+                return (Library) measure.getContained(ref.getReference());
             } else if (effectiveDataRequirementsExt.get().getValue() instanceof CanonicalType canonicalType) {
-                effectiveDataRequirementsLib = (Library) measure.getContained(canonicalType.getCanonical());
+                return (Library) measure.getContained(canonicalType.asStringValue());
             }
+            return null;
+        }
+        return null;
+    }
 
-            if (effectiveDataRequirementsLib != null) {
-                var proposedExtensions = effectiveDataRequirementsLib.getExtension().stream()
-                        .filter(ext -> ext.getUrl().equals(Constants.CQF_DIRECT_REFERENCE_EXTENSION))
-                        .toList();
+    private static boolean codingsMatch(Coding proposedCoding, Coding existingCoding) {
+        boolean systemMatches = proposedCoding.getSystem().equals(existingCoding.getSystem());
+        boolean codeMatches = proposedCoding.getCode().equals(existingCoding.getCode());
+        boolean versionMatches = proposedCoding.getVersion() == null
+                || proposedCoding.getVersion().equals(existingCoding.getVersion());
 
-                var existingRootAdapterExtensions = rootAdapter.getExtension().stream()
-                        .filter(ext -> ext.getUrl().equals(Constants.CQFM_DIRECT_REFERENCE_EXTENSION)
-                                || ext.getUrl().equals(Constants.CQF_DIRECT_REFERENCE_EXTENSION))
-                        .toList();
+        return systemMatches && codeMatches && versionMatches;
+    }
 
-                for (var proposedExt : proposedExtensions) {
-                    boolean shouldAddExtension = true;
-                    Coding proposedCoding = (Coding) proposedExt.getValue();
-                    for (var existingExt : existingRootAdapterExtensions) {
-                        Coding existingCoding = (Coding) existingExt.getValue();
-                        boolean systemMatches = proposedCoding.getSystem().equals(existingCoding.getSystem());
-                        boolean codeMatches = proposedCoding.getCode().equals(existingCoding.getCode());
-                        boolean versionMatches = proposedCoding.getVersion() == null
-                                || proposedCoding.getVersion().equals(existingCoding.getVersion());
+    public static void captureInputExpansionParams(
+            IBaseParameters inputExpansionParams, IKnowledgeArtifactAdapter rootAdapter) {
+        if (inputExpansionParams != null) {
+            if (inputExpansionParams instanceof Parameters parameters) {
+                // Deep copy of inputParameters
+                Parameters inputParametersCopy = parameters.copy();
+                inputParametersCopy.setId("input-exp-params");
+                var inputExpansionParametersExtension =
+                        new Extension(Constants.CQF_INPUT_EXPANSION_PARAMETERS, new Reference("#input-exp-params"));
+                rootAdapter.addExtension(inputExpansionParametersExtension);
+                ((DomainResource) rootAdapter.get()).addContained(inputParametersCopy);
+            } else {
+                throw new IllegalArgumentException(
+                        "Unsupported IBaseParameters implementation: " + inputExpansionParams.getClass());
+            }
+        }
+    }
 
-                        if (systemMatches && codeMatches && versionMatches) {
-                            shouldAddExtension = false;
-                            break;
-                        }
-                    }
-
-                    if (shouldAddExtension) {
-                        rootAdapter.addExtension(proposedExt);
-                    }
+    private static void setCodeSystemVersion(Coding proposedCoding, Parameters expansionParams) {
+        List<CanonicalType> systemVersions = new ArrayList<>();
+        if (expansionParams != null) {
+            systemVersions = expansionParams.getParameter().stream()
+                    .filter(param -> param.getName().equals(Constants.SYSTEM_VERSION))
+                    .map(sysVerParam -> (CanonicalType) sysVerParam.getValue())
+                    .toList();
+        }
+        if (proposedCoding.getVersion() == null && !systemVersions.isEmpty()) {
+            for (var sysVer : systemVersions) {
+                var idParts = sysVer.getValue().split("\\|");
+                if (idParts[0].equals(proposedCoding.getSystem())) {
+                    proposedCoding.setVersion(idParts[1]);
+                    break;
                 }
             }
         }

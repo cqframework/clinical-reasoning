@@ -25,6 +25,7 @@ import org.opencds.cqf.fhir.cr.common.PackageProcessor;
 import org.opencds.cqf.fhir.cr.plandefinition.apply.ApplyProcessor;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Ids;
+import org.opencds.cqf.fhir.utility.client.TerminologyServerClientSettings;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
@@ -56,6 +57,7 @@ class PlanDefinitionProcessorTests {
         var processor = new PlanDefinitionProcessor(
                 repository,
                 EvaluationSettings.getDefault(),
+                new TerminologyServerClientSettings(),
                 new ApplyProcessor(repository, modelResolver, activityProcessor),
                 packageProcessor,
                 dataRequirementsProcessor,
@@ -220,7 +222,7 @@ class PlanDefinitionProcessorTests {
         var planDefinitionID = "DischargeInstructionsPlan";
         var patientID = "Patient/Patient1";
         var practitionerID = "Practitioner/Practitioner1";
-        var data = "r4/tests/Bundle-DischargeInstructions-Patient-Data.json";
+        var data = "r4/input/tests/Bundle-DischargeInstructions-Patient-Data.json";
         given().repositoryFor(fhirContextR4, "r4")
                 .when()
                 .planDefinitionId(planDefinitionID)
@@ -348,7 +350,7 @@ class PlanDefinitionProcessorTests {
         var planDefinitionID = "NestedActivity";
         var patientID = "Patient/Patient1";
         var practitionerID = "Practitioner/Practitioner1";
-        var data = "r4/tests/Bundle-DischargeInstructions-Patient-Data.json";
+        var data = "r4/input/tests/Bundle-DischargeInstructions-Patient-Data.json";
         given().repositoryFor(fhirContextR4, "r4")
                 .when()
                 .planDefinitionId(planDefinitionID)

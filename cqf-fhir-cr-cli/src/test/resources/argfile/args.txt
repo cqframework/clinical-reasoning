@@ -1,8 +1,7 @@
 cql
--source=src/test/resources/r4
+-source=src/test/resources/r4/input/cql
 -name=TestFHIR
--data=src/test/resources/r4/example
--terminology=src/test/resources/r4/vocabulary/valueset
+-data=src/test/resources/r4
 -c=Patient
 -cv=example
 -c=Patient

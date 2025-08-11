@@ -18,6 +18,7 @@ import org.hl7.fhir.r4.model.PlanDefinition;
 import org.hl7.fhir.r4.model.PlanDefinition.PlanDefinitionActionConditionComponent;
 import org.hl7.fhir.r4.model.PlanDefinition.PlanDefinitionActionDynamicValueComponent;
 import org.hl7.fhir.r4.model.PrimitiveType;
+import org.hl7.fhir.r4.model.RelatedArtifact;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
@@ -74,9 +75,10 @@ public class PlanDefinitionAdapter extends KnowledgeArtifactAdapter implements I
         */
 
         // relatedArtifact[].resource
-        references.addAll(getRelatedArtifact().stream()
+        getRelatedArtifactsOfType(DEPENDSON).stream()
+                .filter(RelatedArtifact::hasResource)
                 .map(ra -> DependencyInfo.convertRelatedArtifact(ra, referenceSource))
-                .toList());
+                .forEach(references::add);
 
         // library[]
         List<CanonicalType> libraries = getPlanDefinition().getLibrary();

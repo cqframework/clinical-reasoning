@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.utility.repository.ig;
 
+import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
@@ -34,8 +35,8 @@ class IgConventionsTest {
 
     @Test
     void autoDetectDefault() {
-        assertEquals(IgConventions.STANDARD, IgConventions.autoDetect(null));
-        assertEquals(IgConventions.STANDARD, IgConventions.autoDetect(tempDir.resolve("does_not_exist")));
+        assertEquals(IgConventions.KALM, IgConventions.autoDetect(null));
+        assertEquals(IgConventions.KALM, IgConventions.autoDetect(tempDir.resolve("does_not_exist")));
     }
 
     @Test
@@ -77,16 +78,27 @@ class IgConventionsTest {
     }
 
     @Test
-    void autoDetectWithNonFhirFilename() {
-        assertEquals(IgConventions.STANDARD, IgConventions.autoDetect(tempDir.resolve("nonFhirFilename")));
+    void autoDetectWithNonFhirFileName() {
+        assertEquals(IgConventions.STANDARD, IgConventions.autoDetect(tempDir.resolve("nonFhirFileName")));
     }
 
     @Test
-    void autoDetectWitCompartments() {
+    void autoDetectWithKalmProject() {
+        assertEquals(IgConventions.KALM, IgConventions.autoDetect(tempDir.resolve("kalm")));
+    }
+
+    @Test
+    void autoDetectWithCompartments() {
         var config = IgConventions.autoDetect(tempDir.resolve("compartment"));
         assertEquals(FilenameMode.ID_ONLY, config.filenameMode());
         assertEquals(CategoryLayout.DIRECTORY_PER_CATEGORY, config.categoryLayout());
         assertEquals(CompartmentLayout.DIRECTORY_PER_COMPARTMENT, config.compartmentLayout());
         assertEquals(FhirTypeLayout.DIRECTORY_PER_TYPE, config.typeLayout());
+    }
+
+    @Test
+    void autoDetectInvalidDirectory() {
+        var notValidIg = tempDir.resolve("notValidIg");
+        assertThrows(IllegalArgumentException.class, () -> IgConventions.autoDetect(notValidIg));
     }
 }

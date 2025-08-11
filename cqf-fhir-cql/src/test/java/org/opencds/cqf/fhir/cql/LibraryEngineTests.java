@@ -42,7 +42,8 @@ class LibraryEngineTests {
 
     @BeforeEach
     public void beforeEach() {
-        repository = new IgRepository(FhirContext.forR4Cached(), Path.of(getResourcePath(LibraryEngineTests.class)));
+        var path = Path.of(getResourcePath(LibraryEngineTests.class) + "/org/opencds/cqf/fhir/cql");
+        repository = new IgRepository(FhirContext.forR4Cached(), path);
         libraryEngine = new LibraryEngine(repository, EvaluationSettings.getDefault());
     }
 
@@ -153,7 +154,9 @@ class LibraryEngineTests {
         var evaluationSettings = EvaluationSettings.getDefault().withLibrarySourceProviders(libraryResourceProvider);
 
         libraryEngine = new LibraryEngine(repository, evaluationSettings);
-        repository.create(new Patient().addName(new HumanName().addGiven("me")).setId("Patient/Patient1"));
+        repository.create(
+                new Patient().addName(new HumanName().addGiven("me")).setId("Patient/Patient1"),
+                Map.of(IgRepository.FHIR_COMPARTMENT_HEADER, "Patient/Patient1"));
         var patientId = "Patient/Patient1";
         var expression = new CqfExpression(
                 "text/cql", "MyLibrary.MyNameReturner", Map.of("MyLibrary", "http://fhir.test/Library/MyLibrary"));

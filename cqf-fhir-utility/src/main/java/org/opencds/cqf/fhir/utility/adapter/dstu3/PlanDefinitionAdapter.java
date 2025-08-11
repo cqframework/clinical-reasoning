@@ -12,6 +12,7 @@ import org.hl7.fhir.dstu3.model.DataRequirement.DataRequirementCodeFilterCompone
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.PlanDefinition;
 import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.dstu3.model.RelatedArtifact;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.TriggerDefinition;
 import org.hl7.fhir.dstu3.model.UriType;
@@ -72,9 +73,10 @@ class PlanDefinitionAdapter extends KnowledgeArtifactAdapter implements IPlanDef
         */
 
         // relatedArtifact[].resource
-        references.addAll(getRelatedArtifact().stream()
+        getRelatedArtifactsOfType(DEPENDSON).stream()
+                .filter(RelatedArtifact::hasResource)
                 .map(ra -> DependencyInfo.convertRelatedArtifact(ra, referenceSource))
-                .toList());
+                .forEach(references::add);
 
         // library[]
         List<Reference> libraries = getPlanDefinition().getLibrary();

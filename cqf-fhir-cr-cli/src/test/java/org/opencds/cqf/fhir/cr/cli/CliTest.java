@@ -129,10 +129,9 @@ class CliTest {
     void r4() {
         String[] args = new String[] {
             "cql",
-            "-source=" + testResourcePath + "/r4",
+            "-source=" + testResourcePath + "/r4/input/cql",
             "-name=TestFHIR",
-            "-data=" + testResourcePath + "/r4/example",
-            "-terminology=" + testResourcePath + "/r4/vocabulary/valueset",
+            "-data=" + testResourcePath + "/r4",
             "-c=Patient",
             "-cv=example"
         };
@@ -159,10 +158,9 @@ class CliTest {
     void r4WithHelpers() {
         String[] args = new String[] {
             "cql",
-            "-source=" + testResourcePath + "/r4",
+            "-source=" + testResourcePath + "/r4/input/cql",
             "-name=TestFHIRWithHelpers",
-            "-data=" + testResourcePath + "/r4/example",
-            "-terminology=" + testResourcePath + "/r4/vocabulary/valueset",
+            "-data=" + testResourcePath + "/r4",
             "-c=Patient",
             "-cv=example"
         };
@@ -189,10 +187,9 @@ class CliTest {
     void uSCore() {
         String[] args = new String[] {
             "cql",
-            "-source=" + testResourcePath + "/uscore",
+            "-source=" + testResourcePath + "/uscore/input/cql",
             "-name=TestUSCore",
-            "-data=" + testResourcePath + "/uscore/example",
-            "-terminology=" + testResourcePath + "/uscore/vocabulary/valueset",
+            "-data=" + testResourcePath + "/uscore",
             "-c=Patient",
             "-cv=example"
         };
@@ -216,10 +213,9 @@ class CliTest {
     void qICore() {
         String[] args = new String[] {
             "cql",
-            "-source=" + testResourcePath + "/qicore",
+            "-source=" + testResourcePath + "/qicore/input/cql",
             "-name=TestQICore",
-            "-data=" + testResourcePath + "/qicore/example",
-            "-terminology=" + testResourcePath + "/qicore/vocabulary/valueset",
+            "-data=" + testResourcePath + "/qicore",
             "-c=Patient",
             "-cv=example"
         };
@@ -275,10 +271,9 @@ class CliTest {
     void qICoreCommon() {
         String[] args = new String[] {
             "cql",
-            "-source=" + testResourcePath + "/qicorecommon",
+            "-source=" + testResourcePath + "/qicorecommon/input/cql",
             "-name=QICoreCommonTests",
-            "-data=" + testResourcePath + "/qicorecommon/example",
-            "-terminology=" + testResourcePath + "/qicorecommon/vocabulary/valueset",
+            "-data=" + testResourcePath + "/qicorecommon",
             "-c=Patient",
             "-cv=example"
         };
@@ -302,10 +297,9 @@ class CliTest {
     void options() {
         String[] args = new String[] {
             "cql",
-            "-source=" + testResourcePath + "/options",
+            "-source=" + testResourcePath + "/options/input/cql",
             "-name=FluentFunctions",
-            "-data=" + testResourcePath + "/options/example",
-            "-terminology=" + testResourcePath + "/options/vocabulary/valueset",
+            "-data=" + testResourcePath + "/options",
             "-c=Patient",
             "-cv=example"
         };
@@ -323,10 +317,9 @@ class CliTest {
     void optionsFailure() {
         String[] args = new String[] {
             "cql",
-            "-source=" + testResourcePath + "/optionsFailure",
+            "-source=" + testResourcePath + "/optionsFailure/input/cql",
             "-name=FluentFunctions",
             "-data=" + testResourcePath + "/optionsFailure",
-            "-terminology=" + testResourcePath + "/optionsFailure/vocabulary/valueset",
             "-c=Patient",
             "-cv=example"
         };
@@ -341,10 +334,9 @@ class CliTest {
     void vSCastFunction14() {
         String[] args = new String[] {
             "cql",
-            "-source=" + testResourcePath + "/vscast",
+            "-source=" + testResourcePath + "/vscast/input/cql",
             "-name=TestVSCastFunction",
-            "-data=" + testResourcePath + "/vscast/Patient-17",
-            "-terminology=" + testResourcePath + "/vscast/vocabulary/valueset",
+            "-data=" + testResourcePath + "/vscast",
             "-c=Patient",
             "-cv=Patient-17"
         };
@@ -361,10 +353,9 @@ class CliTest {
     void vSCastFunction15() {
         String[] args = new String[] {
             "cql",
-            "-source=" + testResourcePath + "/vscast15",
+            "-source=" + testResourcePath + "/vscast15/input/cql",
             "-name=TestVSCastFunction",
-            "-data=" + testResourcePath + "/vscast15/Patient-17",
-            "-terminology=" + testResourcePath + "/vscast15/vocabulary/valueset",
+            "-data=" + testResourcePath + "/vscast15",
             "-c=Patient",
             "-cv=Patient-17"
         };
@@ -381,10 +372,9 @@ class CliTest {
     void qICoreSupplementalDataElements() {
         String[] args = new String[] {
             "cql",
-            "-source=" + testResourcePath + "/qicore",
+            "-source=" + testResourcePath + "/qicore/input/cql",
             "-name=SupplementalDataElements_QICore4",
-            "-data=" + testResourcePath + "/qicore/example",
-            "-terminology=" + testResourcePath + "/qicore/vocabulary/valueset",
+            "-data=" + testResourcePath + "/qicore",
             "-c=Patient",
             "-cv=example"
         };
@@ -411,10 +401,9 @@ class CliTest {
     void qICoreEXM124Example() {
         String[] args = new String[] {
             "cql",
-            "-source=" + testResourcePath + "/qicore",
+            "-source=" + testResourcePath + "/qicore/input/cql",
             "-name=EXM124_QICore4",
-            "-data=" + testResourcePath + "/qicore/example",
-            "-terminology=" + testResourcePath + "/qicore/vocabulary/valueset",
+            "-data=" + testResourcePath + "/qicore",
             "-c=Patient",
             "-cv=example"
         };
@@ -445,10 +434,9 @@ class CliTest {
     void qICoreEXM124Denom() {
         String[] args = new String[] {
             "cql",
-            "-source=" + testResourcePath + "/qicore",
+            "-source=" + testResourcePath + "/qicore/input/cql",
             "-name=EXM124_QICore4",
-            "-data=" + testResourcePath + "/qicore/denom-EXM124",
-            "-terminology=" + testResourcePath + "/qicore/vocabulary/valueset",
+            "-data=" + testResourcePath + "/qicore",
             "-c=Patient",
             "-cv=denom-EXM124"
         };
@@ -470,10 +458,9 @@ class CliTest {
     void qICoreEXM124Numer() {
         String[] args = new String[] {
             "cql",
-            "-source=" + testResourcePath + "/qicore",
+            "-source=" + testResourcePath + "/qicore/input/cql",
             "-name=EXM124_QICore4",
-            "-data=" + testResourcePath + "/qicore/numer-EXM124",
-            "-terminology=" + testResourcePath + "/qicore/vocabulary/valueset",
+            "-data=" + testResourcePath + "/qicore",
             "-c=Patient",
             "-cv=numer-EXM124"
         };
@@ -497,7 +484,7 @@ class CliTest {
         // evaluating arbitrary CQL libraries without context/data in the CLI.
         String[] args = new String[] {
             "cql",
-            "-source=" + testResourcePath + "/hedis",
+            "-source=" + testResourcePath + "/hedis/input/cql",
             "-data=" + testResourcePath + "/hedis",
             "-name=ReturnTest",
             "-c=Patient",
@@ -515,7 +502,7 @@ class CliTest {
     void expressionTest() {
         String[] args = new String[] {
             "cql",
-            "-source=" + testResourcePath + "/expression",
+            "-source=" + testResourcePath + "/expression/input/cql",
             "-data=" + testResourcePath + "/expression",
             "-name=ExpressionTest",
             "-c=Patient",
@@ -535,7 +522,7 @@ class CliTest {
     void compartmentalizedTests() {
         String[] args = new String[] {
             "cql",
-            "-source=" + testResourcePath + "/compartment/cql",
+            "-source=" + testResourcePath + "/compartment/input/cql",
             "-name=Example",
             "-data=" + testResourcePath + "/compartment",
             "-c=Patient",
@@ -574,14 +561,14 @@ class CliTest {
 
         String[] args = new String[] {
             "measure",
-            "-source=" + testResourcePath + "/compartment/cql",
+            "-source=" + testResourcePath + "/compartment/input/cql",
             "-name=%s".formatted(libraryName),
             "-data=" + testResourcePath + "/compartment",
             "-c=Patient",
             "-cv=123",
             "-c=Patient",
             "-cv=456",
-            "--measure-path=" + testResourcePath + "/compartment/resources/measure/",
+            "--measure-path=" + testResourcePath + "/compartment/input/resources/measure/",
             "--measure=%s".formatted(measureId),
             "--output-path=" + Path.of(testResultsPath, libraryName, TXTRESULTS_FOLDER),
             "--report-path=" + Path.of(testResultsPath, libraryName, MEASUREREPORTS_FOLDER),
@@ -619,14 +606,14 @@ class CliTest {
     void measureEvaluationTestSystemOut(String libraryName, String measureId) {
         String[] args = new String[] {
             "measure",
-            "-source=" + testResourcePath + "/compartment/cql",
+            "-source=" + testResourcePath + "/compartment/input/cql",
             "-name=%s".formatted(libraryName),
             "-data=" + testResourcePath + "/compartment",
             "-c=Patient",
             "-cv=123",
             "-c=Patient",
             "-cv=456",
-            "--measure-path=" + testResourcePath + "/compartment/resources/measure/",
+            "--measure-path=" + testResourcePath + "/compartment/input/resources/measure/",
             "--measure=%s".formatted(measureId),
         };
 

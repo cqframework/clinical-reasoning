@@ -117,9 +117,10 @@ public class MeasureAdapter extends KnowledgeArtifactAdapter
         */
 
         // relatedArtifact[].resource
-        references.addAll(getRelatedArtifact().stream()
+        getRelatedArtifactsOfType(DEPENDSON).stream()
+                .filter(RelatedArtifact::hasResource)
                 .map(ra -> DependencyInfo.convertRelatedArtifact(ra, referenceSource))
-                .collect(Collectors.toList()));
+                .forEach(references::add);
 
         // library[]
         for (var library : getMeasure().getLibrary()) {

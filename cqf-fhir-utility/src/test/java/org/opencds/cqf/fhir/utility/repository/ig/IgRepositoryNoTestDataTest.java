@@ -55,7 +55,7 @@ class IgRepositoryNoTestDataTest {
         var created = repository.read(Library.class, o.getId());
         assertNotNull(created);
 
-        var loc = tempDir.resolve("resources/library/new-library.json");
+        var loc = tempDir.resolve("input/resources/library/new-library.json");
         assertTrue(Files.exists(loc));
 
         repository.delete(Library.class, created.getIdElement());
@@ -70,7 +70,7 @@ class IgRepositoryNoTestDataTest {
         var created = repository.read(Measure.class, o.getId());
         assertNotNull(created);
 
-        var loc = tempDir.resolve("resources/measure/new-measure.json");
+        var loc = tempDir.resolve("input/resources/measure/new-measure.json");
         assertTrue(Files.exists(loc));
 
         repository.delete(Measure.class, created.getIdElement());
@@ -85,7 +85,7 @@ class IgRepositoryNoTestDataTest {
         var created = repository.read(Patient.class, o.getId());
         assertNotNull(created);
 
-        var loc = tempDir.resolve("tests/patient/new-patient.json");
+        var loc = tempDir.resolve("input/tests/patient/new-patient.json");
         assertTrue(Files.exists(loc));
 
         repository.delete(Patient.class, created.getIdElement());
@@ -100,7 +100,7 @@ class IgRepositoryNoTestDataTest {
         var created = repository.read(Condition.class, o.getId());
         assertNotNull(created);
 
-        var loc = tempDir.resolve("tests/condition/new-condition.json");
+        var loc = tempDir.resolve("input/tests/condition/new-condition.json");
         assertTrue(Files.exists(loc));
 
         repository.delete(Condition.class, created.getIdElement());
@@ -115,7 +115,7 @@ class IgRepositoryNoTestDataTest {
         var created = repository.read(ValueSet.class, o.getId());
         assertNotNull(created);
 
-        var loc = tempDir.resolve("vocabulary/valueset/new-valueset.json");
+        var loc = tempDir.resolve("input/vocabulary/valueset/new-valueset.json");
         assertTrue(Files.exists(loc));
 
         repository.delete(ValueSet.class, created.getIdElement());
@@ -130,7 +130,7 @@ class IgRepositoryNoTestDataTest {
         var created = repository.read(CodeSystem.class, o.getId());
         assertNotNull(created);
 
-        var loc = tempDir.resolve("vocabulary/codesystem/new-codesystem.json");
+        var loc = tempDir.resolve("input/vocabulary/codesystem/new-codesystem.json");
         assertTrue(Files.exists(loc));
 
         repository.delete(CodeSystem.class, created.getIdElement());

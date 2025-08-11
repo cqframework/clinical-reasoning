@@ -322,9 +322,7 @@ public class MeasureProcessorUtils {
         }
 
         Object result;
-
         context.getState().pushActivationFrame(functionDef, functionDef.getContext());
-
         try {
             if (!isBooleanBasis) {
                 // subject based observations don't have a parameter to pass in

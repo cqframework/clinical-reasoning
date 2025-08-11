@@ -1,6 +1,13 @@
 package org.opencds.cqf.fhir.utility.adapter.dstu3;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import ca.uhn.fhir.context.FhirVersionEnum;
+import java.util.List;
 import org.hl7.fhir.dstu3.model.IntegerType;
 import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.dstu3.model.Patient;
@@ -8,13 +15,6 @@ import org.hl7.fhir.dstu3.model.PlanDefinition.PlanDefinitionActionComponent;
 import org.hl7.fhir.dstu3.model.Quantity;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.junit.jupiter.api.Test;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ParametersParameterAdapterTest {
     private final org.opencds.cqf.fhir.utility.adapter.IAdapterFactory adapterFactory = new AdapterFactory();
@@ -60,7 +60,8 @@ class ParametersParameterAdapterTest {
         assertEquals(2, adapter.getPart().size());
         adapter.setPart(null);
         assertFalse(adapter.hasPart());
-        adapter.setPart(List.of(new ParametersParameterComponent().setName("test").setValue(new IntegerType(1))));
+        adapter.setPart(
+                List.of(new ParametersParameterComponent().setName("test").setValue(new IntegerType(1))));
         assertTrue(adapter.hasPart());
     }
 

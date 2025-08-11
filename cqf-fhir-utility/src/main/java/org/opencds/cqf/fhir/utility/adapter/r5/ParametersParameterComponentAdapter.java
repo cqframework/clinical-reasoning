@@ -76,11 +76,12 @@ class ParametersParameterComponentAdapter implements IParametersParameterCompone
     @Override
     public void setPart(List<IBaseBackboneElement> parametersParameterComponents) {
         this.getParametersParameterComponent()
-                .setPart(parametersParameterComponents == null
-                    ? null
-                    : parametersParameterComponents.stream()
-                        .map(x -> (ParametersParameterComponent) x)
-                        .collect(Collectors.toList()));
+                .setPart(
+                        parametersParameterComponents == null
+                                ? null
+                                : parametersParameterComponents.stream()
+                                        .map(x -> (ParametersParameterComponent) x)
+                                        .collect(Collectors.toList()));
     }
 
     @Override
@@ -131,8 +132,8 @@ class ParametersParameterComponentAdapter implements IParametersParameterCompone
     @Override
     public String getPrimitiveValue() {
         return hasPrimitiveValue()
-            ? this.getParametersParameterComponent().getValue().primitiveValue()
-            : null;
+                ? this.getParametersParameterComponent().getValue().primitiveValue()
+                : null;
     }
 
     @Override

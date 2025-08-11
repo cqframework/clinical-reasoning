@@ -20,10 +20,24 @@ public class CqlExpressionDefCachingOptimizationTest {
                 .reportType("population")
                 .evaluate();
 
-        when.then();
-        // LUKETODO:  assertions
+        when.then()
+                .hasMeasureReportCount(2)
+                .getFirstMeasureReport()
+                .hasMeasure("http://example.com/Measure/MeasureA")
+                .firstGroup()
+                .population("initial-population")
+                .hasCount(1)
+                .up()
+                .up()
+                .up()
+                .getSecondMeasureReport()
+                .hasMeasure("http://example.com/Measure/MeasureB")
+                .firstGroup()
+                .population("initial-population")
+                .hasCount(1);
     }
 
+    // The point of this chain of methods is to set HEDIS options and to disable ELM library compilation.
     private static MeasureEvaluationOptions getEvaluationOptions() {
         return MeasureEvaluationOptions.defaultOptions().setEvaluationSettings(getEvaluationSettings());
     }

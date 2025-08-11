@@ -248,7 +248,7 @@ public class R4MeasureProcessor {
                 subjects, List.of(measure), periodStart, periodEnd, parameters, context);
     }
 
-    // LUKETODO:  is this called from downstream?
+    // LUKETODO:  capture this with a unit test to get the code coverage up
     public CompositeEvaluationResultsPerMeasure evaluateMultiMeasureIdsWithCqlEngine(
             List<String> subjects,
             List<IdType> measureIds,
@@ -305,7 +305,6 @@ public class R4MeasureProcessor {
                 subjects, zonedMeasurementPeriod, context, multiLibraryIdMeasureEngineDetails);
     }
 
-    // LUKETODO:  this method is incoherent:  who gets the versioned identifiers?
     private MultiLibraryIdMeasureEngineDetails getMultiLibraryIdMeasureEngineDetails(
             List<Measure> measures, Parameters parameters, CqlEngine context) {
 
@@ -463,18 +462,6 @@ public class R4MeasureProcessor {
                             .formatted(
                                     ids.stream().map(VersionedIdentifier::getId).toList()),
                     exception);
-        }
-    }
-
-    // LUKETODO:  consider getting rid of this:
-    private CompiledLibrary getCompiledLibrary(VersionedIdentifier id, CqlEngine context) {
-        try {
-            return context.getEnvironment().getLibraryManager().resolveLibrary(id);
-        } catch (CqlIncludeException e) {
-            throw new IllegalStateException(
-                    "Unable to load CQL/ELM for library: %s. Verify that the Library resource is available in your environment and has CQL/ELM content embedded."
-                            .formatted(id.getId()),
-                    e);
         }
     }
 

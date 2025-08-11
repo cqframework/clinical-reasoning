@@ -7,7 +7,10 @@ import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 
-// LUKETODO: javadoc
+/**
+ * Convenience class to hold a library engine and a mapping of library IDs to measure IDs for
+ * library and measure evaluation.
+ */
 public class MultiLibraryIdMeasureEngineDetails {
     private final LibraryEngine libraryEngine;
     private final ListMultimap<VersionedIdentifier, IIdType> libraryIdToMeasureIds;

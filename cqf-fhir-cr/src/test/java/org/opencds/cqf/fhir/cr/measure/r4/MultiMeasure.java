@@ -382,6 +382,11 @@ class MultiMeasure {
             return this;
         }
 
+        public SelectedMeasureReport hasMeasure(String measureUrl) {
+            assertEquals(measureUrl, report().getMeasure());
+            return this;
+        }
+
         public SelectedReference<SelectedMeasureReport> reference(
                 org.opencds.cqf.fhir.cr.measure.r4.Measure.Selector<Reference, MeasureReport> referenceSelector) {
             var r = referenceSelector.select(value());

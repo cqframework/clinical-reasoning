@@ -35,7 +35,6 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
             IRepository repository,
             MeasureEvaluationOptions measureEvaluationOptions,
             MeasurePeriodValidator measurePeriodValidator) {
-        //        this.repository = RepositoryLoggingProxy.init(repository);
         this.repository = repository;
         this.measureEvaluationOptions = measureEvaluationOptions;
         this.measurePeriodValidator = measurePeriodValidator;

@@ -53,7 +53,6 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
             MeasureEvaluationOptions measureEvaluationOptions,
             String serverBase,
             MeasurePeriodValidator measurePeriodValidator) {
-        //        this.repository = RepositoryLoggingProxy.init(repository);
         this.repository = repository;
         this.measureEvaluationOptions = measureEvaluationOptions;
         this.measurePeriodValidator = measurePeriodValidator;
@@ -209,8 +208,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
             // progress feedback
             var measureUrl = measureReport.getMeasure();
             if (!measureUrl.isEmpty()) {
-                //                log.debug(
-                log.info(
+                log.debug(
                         "Completed evaluation for Measure: {}, Measures remaining to evaluate: {}",
                         measureUrl,
                         totalMeasures--);
@@ -240,7 +238,6 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
                 "Evaluating individual MeasureReports for {} patients, and {} measures",
                 subjects.size(),
                 measures.size());
-
         for (Measure measure : measures) {
             for (String subject : subjects) {
                 MeasureReport measureReport;

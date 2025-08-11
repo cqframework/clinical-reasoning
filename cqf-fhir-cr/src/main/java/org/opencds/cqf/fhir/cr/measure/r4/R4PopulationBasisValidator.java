@@ -25,15 +25,11 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationBasisValidator;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Validates group populations and stratifiers against population basis-es for R4 only.
  */
 public class R4PopulationBasisValidator implements PopulationBasisValidator {
-
-    private static final Logger logger = LoggerFactory.getLogger(R4PopulationBasisValidator.class);
 
     private static final String BOOLEAN_BASIS = "boolean";
 
@@ -71,9 +67,6 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
 
     private void validateGroupPopulationBasisType(
             String url, GroupDef groupDef, PopulationDef populationDef, EvaluationResult evaluationResult) {
-
-        //        logger.info("1234: evaluationResult:\n{}",
-        // EvaluationResultsDisplay.printEvaluationResult(evaluationResult));
 
         // PROPORTION
         var scoring = groupDef.measureScoring();

@@ -138,6 +138,16 @@ class MultiMeasure {
             return this;
         }
 
+        // Exposed for unit tests that only want to use part of this framework when passing in
+        // an IgRepository
+        public IRepository getRepository() {
+            if (this.repository == null) {
+                throw new IllegalStateException(
+                        "Repository has not been set. Use 'repository' or 'repositoryFor' to set it.");
+            }
+            return this.repository;
+        }
+
         private R4MultiMeasureService buildMeasureService() {
             return new R4MultiMeasureService(repository, evaluationOptions, serverBase, measurePeriodValidator);
         }

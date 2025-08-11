@@ -248,7 +248,6 @@ public class R4MeasureProcessor {
                 subjects, List.of(measure), periodStart, periodEnd, parameters, context);
     }
 
-    // LUKETODO:  capture this with a unit test to get the code coverage up
     public CompositeEvaluationResultsPerMeasure evaluateMultiMeasureIdsWithCqlEngine(
             List<String> subjects,
             List<IdType> measureIds,
@@ -282,10 +281,9 @@ public class R4MeasureProcessor {
         var zonedMeasurementPeriod = MeasureProcessorUtils.getZonedTimeZoneForEval(
                 measureProcessorUtils.getDefaultMeasurementPeriod(measurementPeriodParams, context));
 
-        // LUKETODO: find a better way:
         // Do this to be backwards compatible with the previous single-library evaluation:
         // Trigger first-pass validation on measure scoring as well as other aspects of the Measures
-        measures.forEach(measure -> new R4MeasureDefBuilder().build(measure));
+        R4MeasureDefBuilder.triggerFirstPassValidation(measures);
 
         // Note that we must build the LibraryEngine BEFORE we call
         // measureProcessorUtils.setMeasurementPeriod(), otherwise, we get an NPE.
@@ -320,8 +318,7 @@ public class R4MeasureProcessor {
 
         libraryIdentifiersToMeasureIds.entries().forEach(entry -> {
             builder.addLibraryIdToMeasureId(
-                    new VersionedIdentifier().withId(entry.getKey().getId()), // LUKETODO:  is it wise to do this here?
-                    entry.getValue());
+                    new VersionedIdentifier().withId(entry.getKey().getId()), entry.getValue());
         });
 
         return builder.build();
@@ -414,7 +411,7 @@ public class R4MeasureProcessor {
 
         context.getState().init(libraries);
 
-        // LUKETODO:  if we comment this out MeasureScorerTest and other tests will fail with NPEs
+        // if we comment this out MeasureScorerTest and other tests will fail with NPEs
         setArgParameters(parameters, context, compiledLibraries);
 
         return new LibraryEngine(repository, this.measureEvaluationOptions.getEvaluationSettings());
@@ -451,7 +448,6 @@ public class R4MeasureProcessor {
                 }
             }
 
-            // LUKETODO:  handle multiple library errors here better:
             throw new IllegalStateException(
                     "Unable to load CQL/ELM for libraries: %s Verify that the Library resource is available in your environment and has CQL/ELM content embedded. Errors: %s"
                             .formatted(ids, allErrors));

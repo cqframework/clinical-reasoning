@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.parameters;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.stringPart;
 
@@ -15,7 +14,6 @@ import java.util.stream.Collectors;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("squid:S1135")
@@ -209,12 +207,5 @@ class LibraryEvaluationServiceComplexDepsTest {
                         .map(Parameters.ParametersParameterComponent::getResource)
                         .map(r -> r.getIdElement().getIdPart())
                         .collect(Collectors.toUnmodifiableSet()));
-    }
-
-    @Disabled
-    @Test
-    void multipleLibraryTest_1A_and_1B() {
-        // LUKETODO:  how to do 2 libraries in one test?
-        fail("Not implemeted yet");
     }
 }

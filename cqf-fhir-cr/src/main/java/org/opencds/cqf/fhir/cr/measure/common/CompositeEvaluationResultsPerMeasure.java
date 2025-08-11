@@ -22,7 +22,6 @@ import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 public class CompositeEvaluationResultsPerMeasure {
     // The same measure may have successful results AND errors, so account for both
     private final Map<IIdType, Map<String, EvaluationResult>> resultsPerMeasure;
-    // LUKETODO:  Exceptions instead of Strings?
     // We may get several errors for a given measure
     private final Map<IIdType, List<String>> errorsPerMeasure;
 

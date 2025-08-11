@@ -149,6 +149,25 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         return new MeasureDef(measure.getId(), measure.getUrl(), measure.getVersion(), groups, sdes);
     }
 
+    public static void triggerFirstPassValidation(List<Measure> measures) {
+        measures.forEach(R4MeasureDefBuilder::triggerFirstPassValidation);
+    }
+
+    private static void triggerFirstPassValidation(Measure measure) {
+
+        checkId(measure);
+
+        // SDES
+        for (MeasureSupplementalDataComponent s : measure.getSupplementalData()) {
+            checkId(s);
+            checkSDEUsage(measure, s);
+        }
+        // scoring
+        getMeasureScoring(measure);
+
+        validateMeasureImprovementNotation(measure);
+    }
+
     private PopulationDef checkPopulationForCode(
             List<PopulationDef> populations, MeasurePopulationType measurePopType) {
         return populations.stream()
@@ -164,7 +183,8 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                 null);
     }
 
-    private void checkSDEUsage(Measure measure, MeasureSupplementalDataComponent measureSupplementalDataComponent) {
+    private static void checkSDEUsage(
+            Measure measure, MeasureSupplementalDataComponent measureSupplementalDataComponent) {
         var hasUsage = measureSupplementalDataComponent.getUsage().stream()
                 .filter(t -> t.getCodingFirstRep().getCode().equals(SDE_USAGE_CODE))
                 .collect(Collectors.toList());
@@ -191,19 +211,19 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         return new CodeDef(coding.getSystem(), coding.getVersion(), coding.getCode(), coding.getDisplay());
     }
 
-    private void checkId(Element e) {
+    private static void checkId(Element e) {
         if (e.getId() == null || StringUtils.isBlank(e.getId())) {
             throw new NullPointerException("id is required on all Elements of type: " + e.fhirType());
         }
     }
 
-    private void checkId(Resource r) {
+    private static void checkId(Resource r) {
         if (r.getId() == null || StringUtils.isBlank(r.getId())) {
             throw new NullPointerException("id is required on all Resources of type: " + r.fhirType());
         }
     }
 
-    private MeasureScoring getMeasureScoring(Measure measure, @Nullable String scoringCode) {
+    private static MeasureScoring getMeasureScoring(Measure measure, @Nullable String scoringCode) {
         if (scoringCode != null) {
             var code = MeasureScoring.fromCode(scoringCode);
             if (code == null) {
@@ -217,12 +237,12 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         return null;
     }
 
-    private MeasureScoring getMeasureScoring(Measure measure) {
+    private static MeasureScoring getMeasureScoring(Measure measure) {
         var scoringCode = measure.getScoring().getCodingFirstRep().getCode();
         return getMeasureScoring(measure, scoringCode);
     }
 
-    private void validateImprovementNotationCode(Measure measure, CodeDef improvementNotation) {
+    private static void validateImprovementNotationCode(Measure measure, CodeDef improvementNotation) {
         var code = improvementNotation.code();
         var system = improvementNotation.system();
         boolean hasValidSystem = system.equals(MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM);
@@ -262,6 +282,16 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
             return codeDef;
         }
         return null;
+    }
+
+    private static void validateMeasureImprovementNotation(Measure measure) {
+        if (measure.hasImprovementNotation()) {
+            var improvementNotationValue = measure.getImprovementNotation();
+            var codeDef = new CodeDef(
+                    improvementNotationValue.getCodingFirstRep().getSystem(),
+                    improvementNotationValue.getCodingFirstRep().getCode());
+            validateImprovementNotationCode(measure, codeDef);
+        }
     }
 
     public CodeDef getGroupImpNotation(Measure measure, MeasureGroupComponent group) {

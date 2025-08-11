@@ -559,7 +559,7 @@ class MultiMeasureServiceTest {
                 .measureReport("http://example.com/Measure/MinimalCohortResourceBasisSingleGroup")
                 .hasReportType("Individual")
                 .hasSubjectReference("Patient/female-1988")
-                .hasEvaluatedResourceCount(3)
+                .hasEvaluatedResourceCount(2)
                 .firstGroup()
                 .population("initial-population")
                 .hasCount(2)

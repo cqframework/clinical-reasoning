@@ -138,8 +138,7 @@ class MeasureEvaluatedResourcesTest {
                 .then()
                 .hasEvaluatedResourceCount(2) // resources touched in evaluation
                 .evaluatedResource("Patient/male-2022")
-                .hasEvaluatedResourceReferenceCount(
-                        4) // qty of expressions that touched resource
+                .hasEvaluatedResourceReferenceCount(4) // qty of expressions that touched resource
                 .up()
                 .evaluatedResource(
                         "Encounter/male-2022-encounter-1") // only initial-population & Denominator touches Encounter

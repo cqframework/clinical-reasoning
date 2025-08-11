@@ -141,8 +141,9 @@ class MeasureEvaluatedResourcesTest {
                 .hasEvaluatedResourceReferenceCount(
                         6) // qty of expressions that touched resource, Patient is needed for all
                 .up()
-                .evaluatedResource("Encounter/male-2022-encounter-1") // only initial-population touches Encounter
-                .hasEvaluatedResourceReferenceCount(1)
+                .evaluatedResource(
+                        "Encounter/male-2022-encounter-1") // only initial-population & Denominator touches Encounter
+                .hasEvaluatedResourceReferenceCount(2)
                 .up()
                 .report();
     }

@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r5.model.DataType;
 import org.hl7.fhir.r5.model.Parameters;
 import org.hl7.fhir.r5.model.Parameters.ParametersParameterComponent;
@@ -75,7 +76,9 @@ class ParametersParameterComponentAdapter implements IParametersParameterCompone
     @Override
     public void setPart(List<IBaseBackboneElement> parametersParameterComponents) {
         this.getParametersParameterComponent()
-                .setPart(parametersParameterComponents.stream()
+                .setPart(parametersParameterComponents == null
+                    ? null
+                    : parametersParameterComponents.stream()
                         .map(x -> (ParametersParameterComponent) x)
                         .collect(Collectors.toList()));
     }
@@ -112,7 +115,7 @@ class ParametersParameterComponentAdapter implements IParametersParameterCompone
 
     @Override
     public boolean hasPrimitiveValue() {
-        return this.getParametersParameterComponent().hasPrimitiveValue();
+        return hasValue() && getValue() instanceof IPrimitiveType<?>;
     }
 
     @Override
@@ -123,6 +126,13 @@ class ParametersParameterComponentAdapter implements IParametersParameterCompone
     @Override
     public IBaseDatatype getValue() {
         return this.getParametersParameterComponent().getValue();
+    }
+
+    @Override
+    public String getPrimitiveValue() {
+        return hasPrimitiveValue()
+            ? this.getParametersParameterComponent().getValue().primitiveValue()
+            : null;
     }
 
     @Override

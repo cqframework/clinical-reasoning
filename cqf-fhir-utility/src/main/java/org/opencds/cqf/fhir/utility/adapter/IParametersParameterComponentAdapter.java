@@ -33,6 +33,8 @@ public interface IParametersParameterComponentAdapter extends IAdapter<IBaseBack
 
     public boolean hasPrimitiveValue();
 
+    public String getPrimitiveValue();
+
     public void setValue(IBaseDatatype value);
 
     public IBaseDatatype getValue();

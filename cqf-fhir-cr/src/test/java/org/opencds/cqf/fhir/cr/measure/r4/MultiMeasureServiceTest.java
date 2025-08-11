@@ -461,7 +461,7 @@ class MultiMeasureServiceTest {
                 .measureReport("http://example.com/Measure/MinimalProportionNoBasisSingleGroup")
                 .hasReportType("Individual")
                 .hasSubjectReference("Patient/female-1988")
-                .hasEvaluatedResourceCount(1)
+                .hasEvaluatedResourceCount(3)
                 .firstGroup()
                 .population("initial-population")
                 .hasCount(1)

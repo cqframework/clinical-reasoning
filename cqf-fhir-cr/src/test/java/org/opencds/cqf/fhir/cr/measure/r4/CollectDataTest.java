@@ -81,7 +81,7 @@ class CollectDataTest {
                 .periodEnd("2020-01-01")
                 .collectData()
                 .then()
-                .hasParameterCount(2)
+                .hasParameterCount(3)
                 .hasMeasureReportCount(1)
                 .report();
     }

@@ -23,8 +23,9 @@
         <junit.version>5.10.2</junit.version>
         <slf4j.version>2.0.4</slf4j.version>
         <!-- LUKETODD:  change this once we publish a new stable release of CQL -->
-<!--        <cql.version>3.27.0-SNAPSHOT</cql.version>-->
-        <cql.version>3.29.0-SNAPSHOT</cql.version>
+<!--        <cql.version>3.27.0</cql.version>-->
+        <cql.version>3.28.0-SNAPSHOT</cql.version>
+<!--        <cql.version>3.29.0-SNAPSHOT</cql.version>-->
         <jmh.version>1.36</jmh.version>
         <spring.version>6.1.14</spring.version>
         <hapi.version>8.2.0</hapi.version>

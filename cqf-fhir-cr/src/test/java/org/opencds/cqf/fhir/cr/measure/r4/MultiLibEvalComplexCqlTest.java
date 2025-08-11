@@ -7,18 +7,9 @@ import org.opencds.cqf.fhir.cql.CqlOptions;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.r4.MultiMeasure.Given;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @SuppressWarnings({"java:S2699"})
 class MultiLibEvalComplexCqlTest {
-    private static final Logger logger = LoggerFactory.getLogger(MultiLibEvalComplexCqlTest.class);
-
-    private static final MeasureEvaluationOptions EVALUATION_OPTIONS = MeasureEvaluationOptions.defaultOptions()
-            // We're not doing this not necessarily for HEDIS but just so we can assert different counts for numerator
-            // and denominator
-            .setApplyScoringSetMembership(false);
-
     private static final Given GIVEN_REPO =
             MultiMeasure.given().repositoryFor("MultiLibEvalComplexCql").evaluationOptions(getEvaluationOptions());
 

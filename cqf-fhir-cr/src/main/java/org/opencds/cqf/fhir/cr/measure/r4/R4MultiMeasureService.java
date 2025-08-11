@@ -210,7 +210,8 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
             // progress feedback
             var measureUrl = measureReport.getMeasure();
             if (!measureUrl.isEmpty()) {
-                log.debug(
+                //                log.debug(
+                log.info(
                         "Completed evaluation for Measure: {}, Measures remaining to evaluate: {}",
                         measureUrl,
                         totalMeasures--);

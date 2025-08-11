@@ -10,6 +10,7 @@ import org.hl7.fhir.dstu3.model.Type;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IParametersParameterComponentAdapter;
@@ -74,9 +75,12 @@ class ParametersParameterComponentAdapter implements IParametersParameterCompone
 
     @Override
     public void setPart(List<IBaseBackboneElement> parametersParameterComponents) {
-        this.parametersParameterComponent.setPart(parametersParameterComponents.stream()
-                .map(x -> (ParametersParameterComponent) x)
-                .collect(Collectors.toList()));
+        this.parametersParameterComponent.setPart(
+                parametersParameterComponents == null
+                        ? null
+                        : parametersParameterComponents.stream()
+                                .map(x -> (ParametersParameterComponent) x)
+                                .collect(Collectors.toList()));
     }
 
     @Override
@@ -111,7 +115,7 @@ class ParametersParameterComponentAdapter implements IParametersParameterCompone
 
     @Override
     public boolean hasPrimitiveValue() {
-        return this.parametersParameterComponent.hasPrimitiveValue();
+        return hasValue() && getValue() instanceof IPrimitiveType<?>;
     }
 
     @Override
@@ -122,6 +126,13 @@ class ParametersParameterComponentAdapter implements IParametersParameterCompone
     @Override
     public IBaseDatatype getValue() {
         return this.parametersParameterComponent.getValue();
+    }
+
+    @Override
+    public String getPrimitiveValue() {
+        return hasPrimitiveValue()
+                ? this.parametersParameterComponent.getValue().primitiveValue()
+                : null;
     }
 
     @Override

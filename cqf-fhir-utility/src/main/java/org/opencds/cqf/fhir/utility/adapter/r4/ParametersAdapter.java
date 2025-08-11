@@ -62,9 +62,12 @@ class ParametersAdapter extends ResourceAdapter implements IParametersAdapter {
     @Override
     public void setParameter(List<IBaseBackboneElement> parametersParameterComponents) {
         this.getParameters()
-                .setParameter(parametersParameterComponents.stream()
-                        .map(x -> (ParametersParameterComponent) x)
-                        .collect(Collectors.toList()));
+                .setParameter(
+                        parametersParameterComponents == null
+                                ? null
+                                : parametersParameterComponents.stream()
+                                        .map(x -> (ParametersParameterComponent) x)
+                                        .collect(Collectors.toList()));
     }
 
     @Override

@@ -1,7 +1,6 @@
 package org.opencds.cqf.fhir.utility.adapter.r5;
 
 import java.util.List;
-import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -62,9 +61,12 @@ class ParametersAdapter extends ResourceAdapter implements IParametersAdapter {
     @Override
     public void setParameter(List<IBaseBackboneElement> parametersParameterComponents) {
         this.getParameters()
-                .setParameter(parametersParameterComponents.stream()
-                        .map(x -> (ParametersParameterComponent) x)
-                        .collect(Collectors.toList()));
+                .setParameter(
+                        parametersParameterComponents == null
+                                ? null
+                                : parametersParameterComponents.stream()
+                                        .map(x -> (ParametersParameterComponent) x)
+                                        .toList());
     }
 
     @Override

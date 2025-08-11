@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.hapi.r4.questionnaire;
 
 import static org.opencds.cqf.fhir.cr.hapi.common.CanonicalHelper.getCanonicalType;
+import static org.opencds.cqf.fhir.cr.hapi.common.EndpointHelper.getEndpoint;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -27,9 +28,11 @@ import org.opencds.cqf.fhir.utility.monad.Eithers;
 @SuppressWarnings("java:S107")
 public class QuestionnairePopulateProvider {
     private final IQuestionnaireProcessorFactory questionnaireProcessorFactory;
+    private final FhirVersionEnum fhirVersion;
 
     public QuestionnairePopulateProvider(IQuestionnaireProcessorFactory questionnaireProcessorFactory) {
         this.questionnaireProcessorFactory = questionnaireProcessorFactory;
+        fhirVersion = FhirVersionEnum.R4;
     }
 
     /**
@@ -51,10 +54,10 @@ public class QuestionnairePopulateProvider {
      * @param useServerData       Whether to use data from the server performing the evaluation.
      * @param data                Data to be made available during CQL evaluation.
      * @param bundle              Legacy support for data parameter.
-     * @param dataEndpoint        An endpoint to use to access data referenced by retrieve operations in libraries
+     * @param dataEndpoint        The FHIR {@link Endpoint} Endpoint resource or url to use to access data referenced by retrieve operations in libraries
      *                               referenced by the Questionnaire.
-     * @param contentEndpoint     An endpoint to use to access content (i.e. libraries) referenced by the Questionnaire.
-     * @param terminologyEndpoint An endpoint to use to access terminology (i.e. valuesets, codesystems, and membership testing)
+     * @param contentEndpoint     The FHIR {@link Endpoint} Endpoint resource or url to use to access content (i.e. libraries) referenced by the Questionnaire.
+     * @param terminologyEndpoint The FHIR {@link Endpoint} Endpoint resource or url to use to access terminology (i.e. valuesets, codesystems, and membership testing)
      *                               referenced by the Questionnaire.
      * @param requestDetails      The details (such as tenant) of this request. Usually
      *                               autopopulated HAPI.
@@ -75,14 +78,17 @@ public class QuestionnairePopulateProvider {
             @OperationParam(name = "useServerData") BooleanType useServerData,
             @OperationParam(name = "data") Bundle data,
             @OperationParam(name = "bundle") Bundle bundle,
-            @OperationParam(name = "dataEndpoint") Endpoint dataEndpoint,
-            @OperationParam(name = "contentEndpoint") Endpoint contentEndpoint,
-            @OperationParam(name = "terminologyEndpoint") Endpoint terminologyEndpoint,
+            @OperationParam(name = "dataEndpoint") Parameters.ParametersParameterComponent dataEndpoint,
+            @OperationParam(name = "contentEndpoint") Parameters.ParametersParameterComponent contentEndpoint,
+            @OperationParam(name = "terminologyEndpoint") Parameters.ParametersParameterComponent terminologyEndpoint,
             RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
-        CanonicalType canonicalType = getCanonicalType(FhirVersionEnum.R4, canonical, url, version);
+        CanonicalType canonicalType = getCanonicalType(fhirVersion, canonical, url, version);
         Bundle dataToUse = data == null ? bundle : data;
         var subjectId = subject == null ? null : subject.getReference();
+        var dataEndpointParam = getEndpoint(fhirVersion, dataEndpoint);
+        var contentEndpointParam = getEndpoint(fhirVersion, contentEndpoint);
+        var terminologyEndpointParam = getEndpoint(fhirVersion, terminologyEndpoint);
         return (QuestionnaireResponse) questionnaireProcessorFactory
                 .create(requestDetails)
                 .populate(
@@ -93,9 +99,9 @@ public class QuestionnairePopulateProvider {
                         parameters,
                         dataToUse,
                         isUseServerData(local, useServerData),
-                        dataEndpoint,
-                        contentEndpoint,
-                        terminologyEndpoint);
+                        dataEndpointParam,
+                        contentEndpointParam,
+                        terminologyEndpointParam);
     }
 
     @Operation(name = ProviderConstants.CR_OPERATION_POPULATE, idempotent = true, type = Questionnaire.class)
@@ -112,14 +118,17 @@ public class QuestionnairePopulateProvider {
             @OperationParam(name = "useServerData") BooleanType useServerData,
             @OperationParam(name = "data") Bundle data,
             @OperationParam(name = "bundle") Bundle bundle,
-            @OperationParam(name = "dataEndpoint") Endpoint dataEndpoint,
-            @OperationParam(name = "contentEndpoint") Endpoint contentEndpoint,
-            @OperationParam(name = "terminologyEndpoint") Endpoint terminologyEndpoint,
+            @OperationParam(name = "dataEndpoint") Parameters.ParametersParameterComponent dataEndpoint,
+            @OperationParam(name = "contentEndpoint") Parameters.ParametersParameterComponent contentEndpoint,
+            @OperationParam(name = "terminologyEndpoint") Parameters.ParametersParameterComponent terminologyEndpoint,
             RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
-        CanonicalType canonicalType = getCanonicalType(FhirVersionEnum.R4, canonical, url, version);
+        CanonicalType canonicalType = getCanonicalType(fhirVersion, canonical, url, version);
         Bundle dataToUse = data == null ? bundle : data;
         var subjectId = subject == null ? null : subject.getReference();
+        var dataEndpointParam = getEndpoint(fhirVersion, dataEndpoint);
+        var contentEndpointParam = getEndpoint(fhirVersion, contentEndpoint);
+        var terminologyEndpointParam = getEndpoint(fhirVersion, terminologyEndpoint);
         return (QuestionnaireResponse) questionnaireProcessorFactory
                 .create(requestDetails)
                 .populate(
@@ -130,9 +139,9 @@ public class QuestionnairePopulateProvider {
                         parameters,
                         dataToUse,
                         isUseServerData(local, useServerData),
-                        dataEndpoint,
-                        contentEndpoint,
-                        terminologyEndpoint);
+                        dataEndpointParam,
+                        contentEndpointParam,
+                        terminologyEndpointParam);
     }
 
     private boolean isUseServerData(BooleanType local, BooleanType useServerData) {

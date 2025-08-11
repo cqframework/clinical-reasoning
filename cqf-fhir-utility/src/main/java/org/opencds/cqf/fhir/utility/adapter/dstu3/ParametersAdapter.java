@@ -46,9 +46,12 @@ class ParametersAdapter extends ResourceAdapter implements IParametersAdapter {
     @Override
     public void setParameter(List<IBaseBackboneElement> parametersParameterComponents) {
         this.getParameters()
-                .setParameter(parametersParameterComponents.stream()
-                        .map(x -> (ParametersParameterComponent) x)
-                        .collect(Collectors.toList()));
+                .setParameter(
+                        parametersParameterComponents == null
+                                ? null
+                                : parametersParameterComponents.stream()
+                                        .map(x -> (ParametersParameterComponent) x)
+                                        .toList());
     }
 
     @Override
@@ -59,7 +62,7 @@ class ParametersAdapter extends ResourceAdapter implements IParametersAdapter {
     @Override
     public void addParameter(String name, IBase value) {
         if (value instanceof Type type) {
-            getParameters().addParameter(addParameter().setName(name).setValue(type));
+            getParameters().addParameter().setName(name).setValue(type);
         } else {
             throw new IllegalArgumentException("element passed as value argument is not a valid type");
         }

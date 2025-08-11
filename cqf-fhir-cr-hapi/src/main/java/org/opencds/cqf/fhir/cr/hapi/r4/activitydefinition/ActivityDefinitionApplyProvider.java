@@ -1,5 +1,9 @@
 package org.opencds.cqf.fhir.cr.hapi.r4.activitydefinition;
 
+import static org.opencds.cqf.fhir.cr.hapi.common.CanonicalHelper.getCanonicalType;
+import static org.opencds.cqf.fhir.cr.hapi.common.EndpointHelper.getEndpoint;
+
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -11,7 +15,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IdType;
@@ -24,9 +27,11 @@ import org.springframework.stereotype.Component;
 @SuppressWarnings("java:S107")
 public class ActivityDefinitionApplyProvider {
     private final IActivityDefinitionProcessorFactory activityDefinitionProcessorFactory;
+    private final FhirVersionEnum fhirVersion;
 
     public ActivityDefinitionApplyProvider(IActivityDefinitionProcessorFactory activityDefinitionProcessorFactory) {
         this.activityDefinitionProcessorFactory = activityDefinitionProcessorFactory;
+        fhirVersion = FhirVersionEnum.R4;
     }
 
     /**
@@ -38,8 +43,10 @@ public class ActivityDefinitionApplyProvider {
      * IG.
      *
      * @param id                  The id of the ActivityDefinition to apply
-     * @param canonical           The canonical identifier for the ActivityDefinition to apply (optionally version-specific)
      * @param activityDefinition  The ActivityDefinition to be applied
+     * @param canonical           The canonical identifier for the ActivityDefinition to apply (optionally version-specific)
+     * @param url             	  Canonical URL of the ActivityDefinition when invoked at the resource type level. This is exclusive with the activityDefinition and canonical parameters.
+     * @param version             Version of the ActivityDefinition when invoked at the resource type level. This is exclusive with the activityDefinition and canonical parameters.
      * @param subject             The subject(s) that is/are the target of the activity definition to be applied.
      * @param encounter           The encounter in context
      * @param practitioner        The practitioner in context
@@ -55,10 +62,10 @@ public class ActivityDefinitionApplyProvider {
      * @param parameters          Any input parameters defined in libraries referenced by the ActivityDefinition.
      * @param useServerData       Whether to use data from the server performing the evaluation.
      * @param data                Data to be made available to the ActivityDefinition evaluation.
-     * @param dataEndpoint        An endpoint to use to access data referenced by retrieve operations in libraries
+     * @param dataEndpoint        The FHIR {@link Endpoint} Endpoint resource or url to use to access data referenced by retrieve operations in libraries
      *                               referenced by the ActivityDefinition.
-     * @param contentEndpoint     An endpoint to use to access content (i.e. libraries) referenced by the ActivityDefinition.
-     * @param terminologyEndpoint An endpoint to use to access terminology (i.e. valuesets, codesystems, and membership testing)
+     * @param contentEndpoint     The FHIR {@link Endpoint} Endpoint resource or url to use to access content (i.e. libraries) referenced by the ActivityDefinition.
+     * @param terminologyEndpoint The FHIR {@link Endpoint} Endpoint resource or url to use to access terminology (i.e. valuesets, codesystems, and membership testing)
      *                               referenced by the ActivityDefinition.
      * @param requestDetails      The details (such as tenant) of this request. Usually
      *                               autopopulated HAPI.
@@ -67,8 +74,10 @@ public class ActivityDefinitionApplyProvider {
     @Operation(name = ProviderConstants.CR_OPERATION_APPLY, idempotent = true, type = ActivityDefinition.class)
     public IBaseResource apply(
             @IdParam IdType id,
-            @OperationParam(name = "canonical") String canonical,
             @OperationParam(name = "activityDefinition") ActivityDefinition activityDefinition,
+            @OperationParam(name = "canonical") String canonical,
+            @OperationParam(name = "url") String url,
+            @OperationParam(name = "version") String version,
             @OperationParam(name = "subject") String subject,
             @OperationParam(name = "encounter") String encounter,
             @OperationParam(name = "practitioner") String practitioner,
@@ -81,15 +90,19 @@ public class ActivityDefinitionApplyProvider {
             @OperationParam(name = "parameters") Parameters parameters,
             @OperationParam(name = "useServerData") BooleanType useServerData,
             @OperationParam(name = "data") Bundle data,
-            @OperationParam(name = "dataEndpoint") Endpoint dataEndpoint,
-            @OperationParam(name = "contentEndpoint") Endpoint contentEndpoint,
-            @OperationParam(name = "terminologyEndpoint") Endpoint terminologyEndpoint,
+            @OperationParam(name = "dataEndpoint") Parameters.ParametersParameterComponent dataEndpoint,
+            @OperationParam(name = "contentEndpoint") Parameters.ParametersParameterComponent contentEndpoint,
+            @OperationParam(name = "terminologyEndpoint") Parameters.ParametersParameterComponent terminologyEndpoint,
             RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
+        var canonicalType = getCanonicalType(fhirVersion, canonical, url, version);
+        var dataEndpointParam = getEndpoint(fhirVersion, dataEndpoint);
+        var contentEndpointParam = getEndpoint(fhirVersion, contentEndpoint);
+        var terminologyEndpointParam = getEndpoint(fhirVersion, terminologyEndpoint);
         return activityDefinitionProcessorFactory
                 .create(requestDetails)
                 .apply(
-                        Eithers.for3(canonical == null ? null : new CanonicalType(canonical), id, activityDefinition),
+                        Eithers.for3(canonicalType, id, activityDefinition),
                         subject,
                         encounter,
                         practitioner,
@@ -102,15 +115,17 @@ public class ActivityDefinitionApplyProvider {
                         parameters,
                         useServerData == null ? Boolean.TRUE : useServerData.booleanValue(),
                         data,
-                        dataEndpoint,
-                        contentEndpoint,
-                        terminologyEndpoint);
+                        dataEndpointParam,
+                        contentEndpointParam,
+                        terminologyEndpointParam);
     }
 
     @Operation(name = ProviderConstants.CR_OPERATION_APPLY, idempotent = true, type = ActivityDefinition.class)
     public IBaseResource apply(
-            @OperationParam(name = "canonical") String canonical,
             @OperationParam(name = "activityDefinition") ActivityDefinition activityDefinition,
+            @OperationParam(name = "canonical") String canonical,
+            @OperationParam(name = "url") String url,
+            @OperationParam(name = "version") String version,
             @OperationParam(name = "subject") String subject,
             @OperationParam(name = "encounter") String encounter,
             @OperationParam(name = "practitioner") String practitioner,
@@ -123,15 +138,19 @@ public class ActivityDefinitionApplyProvider {
             @OperationParam(name = "parameters") Parameters parameters,
             @OperationParam(name = "useServerData") BooleanType useServerData,
             @OperationParam(name = "data") Bundle data,
-            @OperationParam(name = "dataEndpoint") Endpoint dataEndpoint,
-            @OperationParam(name = "contentEndpoint") Endpoint contentEndpoint,
-            @OperationParam(name = "terminologyEndpoint") Endpoint terminologyEndpoint,
+            @OperationParam(name = "dataEndpoint") Parameters.ParametersParameterComponent dataEndpoint,
+            @OperationParam(name = "contentEndpoint") Parameters.ParametersParameterComponent contentEndpoint,
+            @OperationParam(name = "terminologyEndpoint") Parameters.ParametersParameterComponent terminologyEndpoint,
             RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
+        var canonicalType = getCanonicalType(fhirVersion, canonical, url, version);
+        var dataEndpointParam = getEndpoint(fhirVersion, dataEndpoint);
+        var contentEndpointParam = getEndpoint(fhirVersion, contentEndpoint);
+        var terminologyEndpointParam = getEndpoint(fhirVersion, terminologyEndpoint);
         return activityDefinitionProcessorFactory
                 .create(requestDetails)
                 .apply(
-                        Eithers.for3(canonical == null ? null : new CanonicalType(canonical), null, activityDefinition),
+                        Eithers.for3(canonicalType, null, activityDefinition),
                         subject,
                         encounter,
                         practitioner,
@@ -144,8 +163,8 @@ public class ActivityDefinitionApplyProvider {
                         parameters,
                         useServerData == null ? Boolean.TRUE : useServerData.booleanValue(),
                         data,
-                        dataEndpoint,
-                        contentEndpoint,
-                        terminologyEndpoint);
+                        dataEndpointParam,
+                        contentEndpointParam,
+                        terminologyEndpointParam);
     }
 }

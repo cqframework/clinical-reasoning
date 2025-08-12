@@ -389,7 +389,6 @@
                         <excludeArtifacts>
                             <excludeArtifact>cqf-fhir-benchmark</excludeArtifact>
                             <excludeArtifact>docs</excludeArtifact>
-                            <excludeArtifact>cqf-fhir-cr-cli</excludeArtifact>
                         </excludeArtifacts>
                         <autoPublish>true</autoPublish>
                         <waitUntil>validated</waitUntil>

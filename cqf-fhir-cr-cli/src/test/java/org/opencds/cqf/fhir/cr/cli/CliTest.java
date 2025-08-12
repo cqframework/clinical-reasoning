@@ -327,7 +327,7 @@ class CliTest {
         Main.run(args);
 
         String errOutput = errContent.toString();
-        assertTrue(errOutput.contains("library FluentFunctions loaded, but had errors"));
+        assertTrue(errOutput.contains("Library FluentFunctions loaded, but had errors"));
     }
 
     @Test

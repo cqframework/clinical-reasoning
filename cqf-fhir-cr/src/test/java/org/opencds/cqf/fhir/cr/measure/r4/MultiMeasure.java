@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -50,7 +51,7 @@ class MultiMeasure {
     public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/measure/r4";
 
     @FunctionalInterface
-    interface Validator<T> {
+    public interface Validator<T> {
         void validate(T value);
     }
 
@@ -135,6 +136,16 @@ class MultiMeasure {
         public MultiMeasure.Given serverBase(String serverBase) {
             this.serverBase = serverBase;
             return this;
+        }
+
+        // Exposed for unit tests that only want to use part of this framework when passing in
+        // an IgRepository
+        public IRepository getRepository() {
+            if (this.repository == null) {
+                throw new IllegalStateException(
+                        "Repository has not been set. Use 'repository' or 'repositoryFor' to set it.");
+            }
+            return this.repository;
         }
 
         private R4MultiMeasureService buildMeasureService() {
@@ -309,6 +320,19 @@ class MultiMeasure {
             return this.measureReport(g -> mr);
         }
 
+        public SelectedMeasureReport getSecondMeasureReport() {
+            var entries = report().getEntry();
+            if (entries.size() < 2) {
+                fail("There are not enough entries in the report to get the second one.");
+            }
+            var secondEntryResource = entries.get(1).getResource();
+            if (!(secondEntryResource instanceof MeasureReport measureReport)) {
+                fail("The second entry in the report is not a MeasureReport resource.");
+                return null;
+            }
+            return this.measureReport(g -> measureReport);
+        }
+
         public MeasureReport resourceToMeasureReport(List<BundleEntryComponent> entries, String measureUrl) {
             IParser parser = FhirContext.forR4Cached().newJsonParser();
             MeasureReport matchedReport = null;
@@ -365,6 +389,11 @@ class MultiMeasure {
         // reportType individual
         public SelectedMeasureReport measureReportTypeIndividual() {
             assertEquals(MeasureReportType.INDIVIDUAL, measureReport().getType());
+            return this;
+        }
+
+        public SelectedMeasureReport hasMeasure(String measureUrl) {
+            assertEquals(measureUrl, report().getMeasure());
             return this;
         }
 
@@ -480,7 +509,8 @@ class MultiMeasure {
         }
     }
 
-    static class SelectedGroup extends MultiMeasure.Selected<MeasureReportGroupComponent, SelectedMeasureReport> {
+    public static class SelectedGroup
+            extends MultiMeasure.Selected<MeasureReportGroupComponent, SelectedMeasureReport> {
 
         public SelectedGroup(MeasureReportGroupComponent value, SelectedMeasureReport parent) {
             super(value, parent);
@@ -512,7 +542,7 @@ class MultiMeasure {
         }
 
         public SelectedGroup hasStratifierCount(int count) {
-            assertEquals(this.value().getStratifier().size(), count);
+            assertEquals(count, this.value().getStratifier().size());
             return this;
         }
 
@@ -558,7 +588,7 @@ class MultiMeasure {
         }
     }
 
-    static class SelectedPopulation
+    public static class SelectedPopulation
             extends MultiMeasure.Selected<MeasureReportGroupPopulationComponent, SelectedGroup> {
 
         public SelectedPopulation(MeasureReportGroupPopulationComponent value, SelectedGroup parent) {
@@ -582,7 +612,7 @@ class MultiMeasure {
         }
     }
 
-    static class SelectedStratifier
+    public static class SelectedStratifier
             extends MultiMeasure.Selected<MeasureReportGroupStratifierComponent, SelectedGroup> {
 
         public SelectedStratifier(MeasureReportGroupStratifierComponent value, SelectedGroup parent) {
@@ -616,7 +646,7 @@ class MultiMeasure {
         }
     }
 
-    static class SelectedStratum extends MultiMeasure.Selected<StratifierGroupComponent, SelectedStratifier> {
+    public static class SelectedStratum extends MultiMeasure.Selected<StratifierGroupComponent, SelectedStratifier> {
 
         public SelectedStratum(MeasureReport.StratifierGroupComponent value, SelectedStratifier parent) {
             super(value, parent);
@@ -624,6 +654,11 @@ class MultiMeasure {
 
         public SelectedStratum hasScore(String score) {
             MeasureValidationUtils.validateStratumScore(value(), score);
+            return this;
+        }
+
+        public SelectedStratum hasValue(String text) {
+            assertEquals(text, value().getValue().getText());
             return this;
         }
 

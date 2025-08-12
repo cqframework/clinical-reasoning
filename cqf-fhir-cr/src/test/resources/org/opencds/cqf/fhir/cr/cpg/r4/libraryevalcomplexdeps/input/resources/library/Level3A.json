@@ -1,0 +1,17 @@
+{
+  "resourceType": "Library",
+  "id": "Level3A",
+  "url": "http://example.com/Library/Level3A",
+  "name": "Level3A",
+  "status": "active",
+  "type": {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/library-type",
+      "code": "logic-library"
+    } ]
+  },
+  "content": [ {
+    "contentType": "text/cql",
+    "url": "../../cql/Level3A.cql"
+  } ]
+}

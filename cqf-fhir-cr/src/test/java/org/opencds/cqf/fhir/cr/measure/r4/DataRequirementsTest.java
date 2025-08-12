@@ -56,7 +56,7 @@ class DataRequirementsTest {
                 .measureId("MinimalProportionBooleanBasisSingleGroup")
                 .DataRequirements()
                 .then()
-                .hasDataRequirementCount(1)
+                .hasDataRequirementCount(4)
                 .hasParameterDefCount(13)
                 .hasRelatedArtifactCount(1)
                 .report();
@@ -71,7 +71,7 @@ class DataRequirementsTest {
                 .periodEnd("2024-12-31")
                 .DataRequirements()
                 .then()
-                .hasDataRequirementCount(1)
+                .hasDataRequirementCount(3)
                 .hasParameterDefCount(7)
                 .hasRelatedArtifactCount(1)
                 .report();

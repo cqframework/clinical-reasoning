@@ -27,10 +27,9 @@ public class MeasureConfiguration {
     R4MeasureProcessor r4MeasureProcessor(
             IRepository repository,
             MeasureEvaluationOptions measureEvaluationOptions,
-            SubjectProvider subjectProvider,
             R4MeasureServiceUtils measureServiceUtils,
             NpmPackageLoader npmPackageLoader) {
         return new R4MeasureProcessor(
-                repository, measureEvaluationOptions, subjectProvider, measureServiceUtils, npmPackageLoader);
+                repository, measureEvaluationOptions, measureServiceUtils, npmPackageLoader);
     }
 }

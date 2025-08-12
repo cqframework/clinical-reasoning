@@ -51,14 +51,12 @@ public class CrR4Config {
             IRepositoryFactory repositoryFactory,
             MeasureEvaluationOptions evaluationOptions,
             MeasurePeriodValidator measurePeriodValidator,
-            R4MeasureServiceUtilsFactory r4MeasureServiceUtilsFactory,
             Optional<NpmPackageLoader> optNpmPackageLoader) {
         return rd -> new R4MeasureService(
-                repositoryFactory.create(rd),
-                evaluationOptions,
-                measurePeriodValidator,
-                r4MeasureServiceUtilsFactory.create(rd),
-                npmPackageLoader(optNpmPackageLoader));
+            repositoryFactory.create(rd),
+            evaluationOptions,
+            measurePeriodValidator,
+            npmPackageLoader(optNpmPackageLoader));
     }
 
     @Bean
@@ -98,7 +96,6 @@ public class CrR4Config {
         return rd -> new R4CollectDataService(
                 repositoryFactory.create(rd),
                 measureEvaluationOptions,
-                r4MeasureServiceUtilsFactory.create(rd),
                 npmPackageLoader(optNpmPackageLoader));
     }
 

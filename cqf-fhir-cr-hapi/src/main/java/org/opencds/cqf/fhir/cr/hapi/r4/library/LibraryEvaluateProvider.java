@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.hapi.r4.library;
 
 import static org.opencds.cqf.fhir.cr.hapi.common.CanonicalHelper.getCanonicalType;
+import static org.opencds.cqf.fhir.cr.hapi.common.EndpointHelper.getEndpoint;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -11,20 +12,22 @@ import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import java.util.List;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.opencds.cqf.fhir.cr.hapi.common.ILibraryProcessorFactory;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 
 @SuppressWarnings("java:S107")
 public class LibraryEvaluateProvider {
     private final ILibraryProcessorFactory libraryProcessorFactory;
+    private final FhirVersionEnum fhirVersion;
 
     public LibraryEvaluateProvider(ILibraryProcessorFactory libraryProcessorFactory) {
         this.libraryProcessorFactory = libraryProcessorFactory;
+        fhirVersion = FhirVersionEnum.R4;
     }
 
     /**
@@ -68,18 +71,18 @@ public class LibraryEvaluateProvider {
      *                            data as a single bundle, or provide data using
      *                            multiple bundles with prefetch descriptions)
      * @param prefetchData        ***Not Yet Implemented***
-     * @param dataEndpoint        An {@link Endpoint} endpoint to use to access data
+     * @param dataEndpoint        The FHIR {@link Endpoint} Endpoint resource or url to use to access data
      *                            referenced by retrieve operations in the library.
      *                            If provided, this endpoint is used after the data
      *                            or prefetchData bundles, and the server, if the
      *                            useServerData parameter is true.
-     * @param contentEndpoint     An {@link Endpoint} endpoint to use to access
+     * @param contentEndpoint     The FHIR {@link Endpoint} Endpoint resource or url to use to access
      *                            content (i.e. libraries) referenced by the
      *                            library. If no content endpoint is supplied, the
      *                            evaluation will attempt to retrieve content from
      *                            the server on which the operation is being
      *                            performed
-     * @param terminologyEndpoint An {@link Endpoint} endpoint to use to access
+     * @param terminologyEndpoint The FHIR {@link Endpoint} Endpoint resource or url to use to access
      *                            terminology (i.e. valuesets, codesystems, and
      *                            membership testing) referenced by the library. If
      *                            no terminology endpoint is supplied, the
@@ -107,11 +110,14 @@ public class LibraryEvaluateProvider {
             @OperationParam(name = "parameters") Parameters parameters,
             @OperationParam(name = "useServerData") BooleanType useServerData,
             @OperationParam(name = "data") Bundle data,
-            @OperationParam(name = "prefetchData") List<Parameters.ParametersParameterComponent> prefetchData,
-            @OperationParam(name = "dataEndpoint") Endpoint dataEndpoint,
-            @OperationParam(name = "contentEndpoint") Endpoint contentEndpoint,
-            @OperationParam(name = "terminologyEndpoint") Endpoint terminologyEndpoint,
+            @OperationParam(name = "prefetchData") List<ParametersParameterComponent> prefetchData,
+            @OperationParam(name = "dataEndpoint") ParametersParameterComponent dataEndpoint,
+            @OperationParam(name = "contentEndpoint") ParametersParameterComponent contentEndpoint,
+            @OperationParam(name = "terminologyEndpoint") ParametersParameterComponent terminologyEndpoint,
             RequestDetails requestDetails) {
+        var dataEndpointParam = getEndpoint(fhirVersion, dataEndpoint);
+        var contentEndpointParam = getEndpoint(fhirVersion, contentEndpoint);
+        var terminologyEndpointParam = getEndpoint(fhirVersion, terminologyEndpoint);
         return (Parameters) libraryProcessorFactory
                 .create(requestDetails)
                 .evaluate(
@@ -122,9 +128,9 @@ public class LibraryEvaluateProvider {
                         useServerData == null ? Boolean.TRUE : useServerData.booleanValue(),
                         data,
                         prefetchData,
-                        dataEndpoint,
-                        contentEndpoint,
-                        terminologyEndpoint);
+                        dataEndpointParam,
+                        contentEndpointParam,
+                        terminologyEndpointParam);
     }
 
     @Operation(name = ProviderConstants.CR_OPERATION_EVALUATE, idempotent = true, type = Library.class)
@@ -135,12 +141,15 @@ public class LibraryEvaluateProvider {
             @OperationParam(name = "parameters") Parameters parameters,
             @OperationParam(name = "useServerData") BooleanType useServerData,
             @OperationParam(name = "data") Bundle data,
-            @OperationParam(name = "prefetchData") List<Parameters.ParametersParameterComponent> prefetchData,
-            @OperationParam(name = "dataEndpoint") Endpoint dataEndpoint,
-            @OperationParam(name = "contentEndpoint") Endpoint contentEndpoint,
-            @OperationParam(name = "terminologyEndpoint") Endpoint terminologyEndpoint,
+            @OperationParam(name = "prefetchData") List<ParametersParameterComponent> prefetchData,
+            @OperationParam(name = "dataEndpoint") ParametersParameterComponent dataEndpoint,
+            @OperationParam(name = "contentEndpoint") ParametersParameterComponent contentEndpoint,
+            @OperationParam(name = "terminologyEndpoint") ParametersParameterComponent terminologyEndpoint,
             RequestDetails requestDetails) {
-        CanonicalType canonicalType = getCanonicalType(FhirVersionEnum.R4, library, null, null);
+        var canonicalType = getCanonicalType(fhirVersion, library, null, null);
+        var dataEndpointParam = getEndpoint(fhirVersion, dataEndpoint);
+        var contentEndpointParam = getEndpoint(fhirVersion, contentEndpoint);
+        var terminologyEndpointParam = getEndpoint(fhirVersion, terminologyEndpoint);
         return (Parameters) libraryProcessorFactory
                 .create(requestDetails)
                 .evaluate(
@@ -151,8 +160,8 @@ public class LibraryEvaluateProvider {
                         useServerData == null ? Boolean.TRUE : useServerData.booleanValue(),
                         data,
                         prefetchData,
-                        dataEndpoint,
-                        contentEndpoint,
-                        terminologyEndpoint);
+                        dataEndpointParam,
+                        contentEndpointParam,
+                        terminologyEndpointParam);
     }
 }

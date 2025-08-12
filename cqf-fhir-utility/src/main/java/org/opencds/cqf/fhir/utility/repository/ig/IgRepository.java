@@ -14,24 +14,27 @@ import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnclassifiedServerFailureException;
 import ca.uhn.fhir.util.BundleBuilder;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Multimap;
-import java.io.FileInputStream;
+import com.google.common.collect.Table;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -41,14 +44,15 @@ import org.opencds.cqf.fhir.utility.matcher.ResourceMatcher;
 import org.opencds.cqf.fhir.utility.repository.Repositories;
 import org.opencds.cqf.fhir.utility.repository.ig.EncodingBehavior.PreserveEncoding;
 import org.opencds.cqf.fhir.utility.repository.ig.IgConventions.CategoryLayout;
+import org.opencds.cqf.fhir.utility.repository.ig.IgConventions.CompartmentLayout;
 import org.opencds.cqf.fhir.utility.repository.ig.IgConventions.FhirTypeLayout;
 import org.opencds.cqf.fhir.utility.repository.ig.IgConventions.FilenameMode;
 import org.opencds.cqf.fhir.utility.repository.operations.IRepositoryOperationProvider;
 
 /**
  * Provides access to FHIR resources stored in a directory structure following
- * Implementation Guide (IG) conventions.
- * Supports CRUD operations and resource management based on IG directory and
+ * Implementation Guide (IG) conventions or KALM (Knowledge Artifact Lifecycle Management) conventions.
+ * Supports CRUD operations and resource management based on configurable directory and
  * file naming conventions.
  *
  * <p>
@@ -56,81 +60,147 @@ import org.opencds.cqf.fhir.utility.repository.operations.IRepositoryOperationPr
  * </p>
  *
  * <pre>
+ * Standard IG Layout:
  * /path/to/ig/root/          (CategoryLayout.FLAT)
  * ├── Patient-001.json
  * ├── Observation-002.json
  * ├── or
- * ├── [resources/]             (CategoryLayout.DIRECTORY_PER_CATEGORY)
- * │   ├── Patient-789.json       (FhirTypeLayout.FLAT)
- * │   ├── or
- * │   ├── [patient/]           (FhirTypeLayout.DIRECTORY_PER_TYPE)
- * │   │   ├── Patient-123.json   (FilenameMode.TYPE_AND_ID)
+ * ├── input/
+ * │   ├── [resources/]       (CategoryLayout.DIRECTORY_PER_CATEGORY)
+ * │   │   ├── Patient-789.json   (FhirTypeLayout.FLAT)
  * │   │   ├── or
- * │   │   ├── 456.json           (FilenameMode.ID_ONLY)
+ * │   │   ├── [patient/]     (FhirTypeLayout.DIRECTORY_PER_TYPE)
+ * │   │   │   ├── Patient-123.json   (FilenameMode.TYPE_AND_ID)
+ * │   │   │   ├── or
+ * │   │   │   ├── 456.json       (FilenameMode.ID_ONLY)
+ * │   │   │   └── ...
  * │   │   └── ...
- * │   └── ...
- * └── vocabulary/              (CategoryLayout.DIRECTORY_PER_CATEGORY)
- *     ├── ValueSet-abc.json
- *     ├── def.json
- *     └── external/            (External Resources - Read-only, Terminology-only)
- *         └── CodeSystem-external.json
+ * │   └── vocabulary/        (CategoryLayout.DIRECTORY_PER_CATEGORY)
+ * │       ├── ValueSet-abc.json
+ * │       ├── def.json
+ * │       └── external/      (External Resources - Read-only, Terminology-only)
+ * │           └── CodeSystem-external.json
+ * └── ...
+ *
+ * KALM Project Layout:
+ * /path/to/kalm/root/        (CategoryLayout.DEFINITIONAL_AND_DATA)
+ * ├── src/
+ * │   └── fhir/              (Definitional Resources)
+ * │       ├── [patient/]     (CompartmentLayout.DIRECTORY_PER_COMPARTMENT)
+ * │       │   └── Patient/123/
+ * │       │       └── Observation-456.json
+ * │       └── ...
+ * └── tests/
+ *     └── data/
+ *         └── fhir/          (Test Data Resources)
+ *             └── ...
  * </pre>
+ *
+ * <p>
+ * <strong>Compartment Support:</strong>
+ * </p>
+ * <p>
+ * The repository supports FHIR compartment contexts through the {@code X-FHIR-Compartment} header.
+ * When using {@code CompartmentLayout.DIRECTORY_PER_COMPARTMENT}, resources are organized by
+ * compartment type and ID (e.g., {@code Patient/123/}).
+ * </p>
+ *
  * <p>
  * <strong>Key Features:</strong>
  * </p>
  * <ul>
  * <li>Supports CRUD operations on FHIR resources.</li>
- * <li>Handles different directory layouts and filename conventions based on IG
- * conventions.</li>
- * <li>Annotates resources with metadata like source path and external
- * designation.</li>
- * <li>Supports invoking FHIR operations through an
- * {@link IRepositoryOperationProvider}.</li>
+ * <li>Handles multiple directory layouts: standard IG conventions and KALM project conventions.</li>
+ * <li>Supports compartment-based resource organization for patient-centric data management.</li>
+ * <li>Handles different filename conventions (TYPE_AND_ID vs ID_ONLY).</li>
+ * <li>Annotates resources with metadata like source path and external designation.</li>
+ * <li>Supports invoking FHIR operations through an {@link IRepositoryOperationProvider}.</li>
  * <li>Utilizes caching for efficient resource access.</li>
+ * <li>Auto-detects project conventions based on directory structure.</li>
  * </ul>
  */
 public class IgRepository implements IRepository {
     private final FhirContext fhirContext;
     private final Path root;
     private final IgConventions conventions;
-    private final EncodingBehavior encodingBehavior;
     private final ResourceMatcher resourceMatcher;
     private IRepositoryOperationProvider operationProvider;
 
-    private final Map<Path, Optional<IBaseResource>> resourceCache = new HashMap<>();
+    private final Cache<Path, Optional<IBaseResource>> resourceCache =
+            CacheBuilder.newBuilder().maximumSize(5000).build();
 
     // Metadata fields attached to resources that are read from the repository
     // This fields are used to determine if a resource is external, and to
     // maintain the original encoding of the resource.
     static final String SOURCE_PATH_TAG = "sourcePath"; // Path
 
-    // Directory names
-    static final String EXTERNAL_DIRECTORY = "external";
-    static final Map<ResourceCategory, String> CATEGORY_DIRECTORIES = new ImmutableMap.Builder<
-                    ResourceCategory, String>()
-            .put(ResourceCategory.CONTENT, "resources")
-            .put(ResourceCategory.DATA, "tests")
-            .put(ResourceCategory.TERMINOLOGY, "vocabulary")
+    static final String EXTERNAL_DIRECTORY = "external"; // Directory name for external resources
+
+    // Set of directories that are used to store resources of a given category.
+    // The first path is the primary directory for the category, and any additional
+    // paths are considered secondary or fallback directories.
+    record Directories(List<String> paths) {
+        public int count() {
+            return paths.size();
+        }
+
+        public Stream<String> stream() {
+            return paths.stream();
+        }
+    }
+
+    // Mapping of category layouts to resource categories and their corresponding directories.
+    // These are relative to the root directory of the IG or the root directory of the KALM project
+    static final Table<CategoryLayout, ResourceCategory, Directories> TYPE_DIRECTORIES = new ImmutableTable.Builder<
+                    CategoryLayout, ResourceCategory, Directories>()
+            .put(CategoryLayout.FLAT, ResourceCategory.CONTENT, new Directories(List.of("input")))
+            .put(CategoryLayout.FLAT, ResourceCategory.TERMINOLOGY, new Directories(List.of("input")))
+            .put(CategoryLayout.FLAT, ResourceCategory.DATA, new Directories(List.of("input")))
+            .put(
+                    CategoryLayout.DIRECTORY_PER_CATEGORY,
+                    ResourceCategory.CONTENT,
+                    new Directories(List.of("input/resources", "input/tests")))
+            .put(
+                    CategoryLayout.DIRECTORY_PER_CATEGORY,
+                    ResourceCategory.TERMINOLOGY,
+                    new Directories(List.of("input/vocabulary")))
+            .put(
+                    CategoryLayout.DIRECTORY_PER_CATEGORY,
+                    ResourceCategory.DATA,
+                    new Directories(List.of("input/tests", "input/resources")))
+            .put(
+                    CategoryLayout.DEFINITIONAL_AND_DATA,
+                    ResourceCategory.CONTENT,
+                    new Directories(List.of("src/fhir", "tests/data/fhir")))
+            .put(
+                    CategoryLayout.DEFINITIONAL_AND_DATA,
+                    ResourceCategory.TERMINOLOGY,
+                    new Directories(List.of("src/fhir", "tests/data/fhir")))
+            .put(
+                    CategoryLayout.DEFINITIONAL_AND_DATA,
+                    ResourceCategory.DATA,
+                    new Directories(List.of("tests/data/fhir", "src/fhir")))
             .build();
 
     static final BiMap<EncodingEnum, String> FILE_EXTENSIONS = new ImmutableBiMap.Builder<EncodingEnum, String>()
             .put(EncodingEnum.JSON, "json")
             .put(EncodingEnum.XML, "xml")
             .put(EncodingEnum.RDF, "rdf")
+            .put(EncodingEnum.NDJSON, "ndjson")
             .build();
 
+    // This header to used so that the user can pass current compartment context
+    // to the repository. Basically, this will effect how the repository will do reads/writes
+    // The expected format for this header is: ResourceType/Id (e.g. Patient/123)
+    public static final String FHIR_COMPARTMENT_HEADER = "X-FHIR-Compartment";
+
     private static IParser parserForEncoding(FhirContext fhirContext, EncodingEnum encodingEnum) {
-        switch (encodingEnum) {
-            case JSON:
-                return fhirContext.newJsonParser();
-            case XML:
-                return fhirContext.newXmlParser();
-            case RDF:
-                return fhirContext.newRDFParser();
-            case NDJSON:
-            default:
-                throw new IllegalArgumentException("NDJSON is not supported");
-        }
+        return switch (encodingEnum) {
+            case JSON -> fhirContext.newJsonParser();
+            case XML -> fhirContext.newXmlParser();
+            case RDF -> fhirContext.newRDFParser();
+            case NDJSON -> fhirContext.newNDJsonParser();
+        };
     }
 
     /**
@@ -144,7 +214,7 @@ public class IgRepository implements IRepository {
      * @see IgConventions#autoDetect(Path)
      */
     public IgRepository(FhirContext fhirContext, Path root) {
-        this(fhirContext, root, IgConventions.autoDetect(root), EncodingBehavior.DEFAULT, null);
+        this(fhirContext, root, IgConventions.autoDetect(root), null);
     }
 
     /**
@@ -163,12 +233,10 @@ public class IgRepository implements IRepository {
             FhirContext fhirContext,
             Path root,
             IgConventions conventions,
-            EncodingBehavior encodingBehavior,
             IRepositoryOperationProvider operationProvider) {
         this.fhirContext = requireNonNull(fhirContext, "fhirContext cannot be null");
         this.root = requireNonNull(root, "root cannot be null");
-        this.conventions = requireNonNull(conventions, "conventions is required");
-        this.encodingBehavior = requireNonNull(encodingBehavior, "encodingBehavior is required");
+        this.conventions = requireNonNull(conventions, "conventions cannot be null");
         this.resourceMatcher = Repositories.getResourceMatcher(this.fhirContext);
         this.operationProvider = operationProvider;
     }
@@ -178,7 +246,11 @@ public class IgRepository implements IRepository {
     }
 
     public void clearCache() {
-        this.resourceCache.clear();
+        this.resourceCache.invalidateAll();
+    }
+
+    public void clearCache(Iterable<Path> paths) {
+        this.resourceCache.invalidate(paths);
     }
 
     private boolean isExternalPath(Path path) {
@@ -188,68 +260,64 @@ public class IgRepository implements IRepository {
 
     /**
      * Determines the preferred file system path for storing or retrieving a FHIR
-     * resource based on its resource type and identifier.
+     * resource based on its resource type, identifier, and compartment context.
      *
      * <p>
-     * Example (based on conventions):
+     * Example paths (based on conventions and compartment):
      * </p>
      *
      * <pre>
-     * /path/to/ig/root/[[resources/]][[patient/]]Patient-123.json
+     * Standard IG Layout:
+     * /path/to/ig/root/input/[[resources/]][[patient/]]Patient-123.json
+     *
+     * KALM Layout with Compartment:
+     * /path/to/kalm/root/src/fhir/[[Patient/123/]]Observation-456.json
      * </pre>
      *
-     * - The presence of `resources/` depends on
-     * `CategoryLayout.DIRECTORY_PER_CATEGORY`.
-     * - The presence of `patient/` depends on `FhirTypeLayout.DIRECTORY_PER_TYPE`.
-     * - The filename format depends on `FilenameMode`:
-     * - `TYPE_AND_ID`: `Patient-123.json`
-     * - `ID_ONLY`: `123.json`
+     * Path components depend on configuration:
+     * - Category directory (e.g., `input/resources/`, `src/fhir/`) depends on `CategoryLayout`
+     * - Type directory (e.g., `patient/`) depends on `FhirTypeLayout.DIRECTORY_PER_TYPE`
+     * - Compartment directory (e.g., `Patient/123/`) depends on `CompartmentLayout.DIRECTORY_PER_COMPARTMENT`
+     * - Filename format depends on `FilenameMode`:
+     *   - `TYPE_AND_ID`: `Patient-123.json`
+     *   - `ID_ONLY`: `123.json`
      *
-     * @param <T>          The type of the FHIR resource.
-     * @param <I>          The type of the resource identifier.
-     * @param resourceType The class representing the FHIR resource type.
-     * @param id           The identifier of the resource.
+     * @param <T>                     The type of the FHIR resource.
+     * @param <I>                     The type of the resource identifier.
+     * @param resourceType            The class representing the FHIR resource type.
+     * @param id                      The identifier of the resource.
+     * @param igRepositoryCompartment The compartment context for organizing resources.
      * @return The {@code Path} representing the preferred location for the
      *         resource.
      */
-    protected <T extends IBaseResource, I extends IIdType> Path preferredPathForResource(Class<T> resourceType, I id) {
-        var directory = directoryForResource(resourceType);
+    protected <T extends IBaseResource, I extends IIdType> Path preferredPathForResource(
+            Class<T> resourceType, I id, IgRepositoryCompartment igRepositoryCompartment) {
+        var directory = directoryForResource(resourceType, igRepositoryCompartment);
         var fileName = fileNameForResource(
-                resourceType.getSimpleName(), id.getIdPart(), this.encodingBehavior.preferredEncoding());
-        return directory.resolve(fileName);
+                resourceType.getSimpleName(),
+                id.getIdPart(),
+                this.conventions.encodingBehavior().preferredEncoding());
+        return directory.findFirst().get().resolve(fileName);
     }
 
     /**
-     * Generates all possible file paths where a resource might be found.
+     * Generates all possible file paths where a resource might be found,
+     * considering different encoding formats and directory structures.
      *
-     * @param <T>          The type of the FHIR resource.
-     * @param <I>          The type of the resource identifier.
-     * @param resourceType The class representing the FHIR resource type.
-     * @param id           The identifier of the resource.
-     * @return A list of potential paths for the resource.
+     * @param <T>                     The type of the FHIR resource.
+     * @param <I>                     The type of the resource identifier.
+     * @param resourceType            The class representing the FHIR resource type.
+     * @param id                      The identifier of the resource.
+     * @param igRepositoryCompartment The compartment context to use for path resolution.
+     * @return A stream of potential paths for the resource.
      */
-    <T extends IBaseResource, I extends IIdType> List<Path> potentialPathsForResource(Class<T> resourceType, I id) {
+    protected <T extends IBaseResource, I extends IIdType> Stream<Path> potentialPathsForResource(
+            Class<T> resourceType, I id, IgRepositoryCompartment igRepositoryCompartment) {
 
-        var potentialDirectories = new ArrayList<Path>();
-        var directory = directoryForResource(resourceType);
-        potentialDirectories.add(directory);
-
-        // Currently, only terminology resources are allowed to be external
-        if (ResourceCategory.forType(resourceType.getSimpleName()) == ResourceCategory.TERMINOLOGY) {
-            var externalDirectory = directory.resolve(EXTERNAL_DIRECTORY);
-            potentialDirectories.add(externalDirectory);
-        }
-
-        var potentialPaths = new ArrayList<Path>();
-
-        for (var dir : potentialDirectories) {
-            for (var encoding : FILE_EXTENSIONS.keySet()) {
-                potentialPaths.add(
-                        dir.resolve(fileNameForResource(resourceType.getSimpleName(), id.getIdPart(), encoding)));
-            }
-        }
-
-        return potentialPaths;
+        var directories = directoryForResource(resourceType, igRepositoryCompartment);
+        var encodings = this.conventions.encodingBehavior().enabledEncodings();
+        return directories.flatMap(d -> encodings.stream()
+                .map(ext -> d.resolve(fileNameForResource(resourceType.getSimpleName(), id.getIdPart(), ext))));
     }
 
     /**
@@ -272,55 +340,90 @@ public class IgRepository implements IRepository {
     }
 
     /**
-     * Determines the directory path for a resource category.
+     * Determines the directory paths for a resource category, considering compartment layout.
      *
-     * - `CategoryLayout.FLAT`: Returns the root directory.
-     * - `CategoryLayout.DIRECTORY_PER_CATEGORY`: Returns the category-specific
-     * subdirectory (e.g., `/resources/`).
+     * <p>Directory selection based on layout:</p>
+     * <ul>
+     * <li>{@code CategoryLayout.FLAT}: Returns the root directory (e.g., `input/`)</li>
+     * <li>{@code CategoryLayout.DIRECTORY_PER_CATEGORY}: Returns category-specific
+     *     subdirectories (e.g., `input/resources/`, `input/vocabulary/`)</li>
+     * <li>{@code CategoryLayout.DEFINITIONAL_AND_DATA}: Returns KALM project directories
+     *     (e.g., `src/fhir/`, `tests/data/fhir/`)</li>
+     * </ul>
      *
-     * @param <T>          The type of the FHIR resource.
-     * @param resourceType The class representing the FHIR resource type.
-     * @return The path representing the directory for the resource category.
+     * <p>When {@code CompartmentLayout.DIRECTORY_PER_COMPARTMENT} is used with DATA resources,
+     * compartment path is appended (e.g., `tests/data/fhir/Patient/123/`).</p>
+     *
+     * @param <T>                     The type of the FHIR resource.
+     * @param resourceType            The class representing the FHIR resource type.
+     * @param igRepositoryCompartment The compartment context for path resolution.
+     * @return A stream of directory paths for the resource category.
      */
-    protected <T extends IBaseResource> Path directoryForCategory(Class<T> resourceType) {
-        if (this.conventions.categoryLayout() == CategoryLayout.FLAT) {
-            return this.root;
+    protected <T extends IBaseResource> Stream<Path> directoriesForCategory(
+            Class<T> resourceType, IgRepositoryCompartment igRepositoryCompartment) {
+        var category = ResourceCategory.forType(resourceType.getSimpleName());
+        var categoryPaths = TYPE_DIRECTORIES.rowMap().get(this.conventions.categoryLayout()).get(category).stream()
+                .map(path -> this.root.resolve(path));
+        if (category == ResourceCategory.DATA
+                && this.conventions.compartmentLayout() == CompartmentLayout.DIRECTORY_PER_COMPARTMENT) {
+            var compartmentPath = pathForCompartment(resourceType, this.fhirContext, igRepositoryCompartment);
+            return categoryPaths.map(path -> path.resolve(compartmentPath));
         }
 
-        var category = ResourceCategory.forType(resourceType.getSimpleName());
-        var directory = CATEGORY_DIRECTORIES.get(category);
-        return root.resolve(directory);
+        return categoryPaths;
     }
 
     /**
-     * Determines the directory path for a resource type.
+     * Determines the directory paths for a specific resource type, including external directories
+     * for terminology resources when applicable.
      *
-     * - If `FhirTypeLayout.FLAT`, returns the base directory (could be root or
-     * category directory).
-     * - If `FhirTypeLayout.DIRECTORY_PER_TYPE`, returns the type-specific
-     * subdirectory within the base directory.
+     * <p>Directory selection based on type layout:</p>
+     * <ul>
+     * <li>{@code FhirTypeLayout.FLAT}: Returns the base category directory</li>
+     * <li>{@code FhirTypeLayout.DIRECTORY_PER_TYPE}: Returns type-specific
+     *     subdirectories within the base directory (e.g., `patient/`, `observation/`)</li>
+     * </ul>
      *
      * <p>
-     * Example (based on `FhirTypeLayout`):
+     * Example paths (based on {@code FhirTypeLayout}):
      * </p>
      *
      * <pre>
-     * /path/to/ig/root/[[patient/]]
+     * Standard IG: /path/to/ig/root/input/resources/[[patient/]]
+     * KALM:        /path/to/kalm/root/src/fhir/[[patient/]]
      * </pre>
      *
-     * - `[[patient/]]` is present if `FhirTypeLayout.DIRECTORY_PER_TYPE` is used.
+     * <p>Special handling for terminology resources in non-KALM projects:</p>
+     * <ul>
+     * <li>Includes an additional `external/` directory for read-only terminology resources</li>
+     * <li>KALM projects use separate `src/` and `tests/` directories instead</li>
+     * </ul>
      *
-     * @param <T>          The type of the FHIR resource.
-     * @param resourceType The class representing the FHIR resource type.
-     * @return The path representing the directory for the resource type.
+     * @param <T>                     The type of the FHIR resource.
+     * @param resourceType            The class representing the FHIR resource type.
+     * @param igRepositoryCompartment The compartment context for path resolution.
+     * @return A stream of directory paths for the resource type.
      */
-    protected <T extends IBaseResource> Path directoryForResource(Class<T> resourceType) {
-        var directory = directoryForCategory(resourceType);
+    protected <T extends IBaseResource> Stream<Path> directoryForResource(
+            Class<T> resourceType, IgRepositoryCompartment igRepositoryCompartment) {
+        var directories = directoriesForCategory(resourceType, igRepositoryCompartment);
         if (this.conventions.typeLayout() == FhirTypeLayout.FLAT) {
-            return directory;
+            return directories;
         }
 
-        return directory.resolve(resourceType.getSimpleName().toLowerCase());
+        var resourceDirectories =
+                directories.map(dir -> dir.resolve(resourceType.getSimpleName().toLowerCase()));
+
+        var category = ResourceCategory.forType(resourceType.getSimpleName());
+        if (category == ResourceCategory.TERMINOLOGY
+                && this.conventions.categoryLayout() != CategoryLayout.DEFINITIONAL_AND_DATA) {
+            // Non-KALM projects support "external" directory for terminology resources data
+            // that is defined outside of the main IG structure, but included for convenience.
+            // KALM projects separate this into "src" and "test" directories, so the "external" directory is not used.
+            return resourceDirectories.flatMap(dir -> Stream.of(dir, dir.resolve(EXTERNAL_DIRECTORY)));
+        }
+
+        return resourceDirectories;
     }
 
     /**
@@ -336,15 +439,11 @@ public class IgRepository implements IRepository {
             return Optional.empty();
         }
 
-        var extension = fileExtension(path);
-        if (extension == null) {
-            return Optional.empty();
-        }
+        var encoding = encodingForPath(path);
 
-        var encoding = FILE_EXTENSIONS.inverse().get(extension);
-
-        try (var stream = new FileInputStream(file)) {
-            var resource = parserForEncoding(fhirContext, encoding).parseResource(stream);
+        try {
+            String s = new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
+            var resource = parserForEncoding(fhirContext, encoding).parseResource(s);
 
             resource.setUserData(SOURCE_PATH_TAG, path);
             CqlContent.loadCqlContent(resource, path.getParent());
@@ -360,7 +459,15 @@ public class IgRepository implements IRepository {
     }
 
     protected Optional<IBaseResource> cachedReadResource(Path path) {
-        return this.resourceCache.computeIfAbsent(path, this::readResource);
+        try {
+            return this.resourceCache.get(path, () -> this.readResource(path));
+        } catch (Exception e) {
+            if (e.getCause() instanceof RuntimeException re) {
+                throw re;
+            }
+
+            throw new UnclassifiedServerFailureException(500, "Unable to read resource from path %s".formatted(path));
+        }
     }
 
     protected EncodingEnum encodingForPath(Path path) {
@@ -411,7 +518,9 @@ public class IgRepository implements IRepository {
             return false;
         }
 
-        return FILE_EXTENSIONS.containsValue(extension);
+        return this.conventions.encodingBehavior().enabledEncodings().stream()
+                .map(e -> FILE_EXTENSIONS.get(e))
+                .anyMatch(ext -> ext.equalsIgnoreCase(extension));
     }
 
     // True if the file extension is one of the supported file extensions
@@ -426,29 +535,32 @@ public class IgRepository implements IRepository {
     }
 
     /**
-     * Reads all resources of a given type from the directory.
+     * Reads all resources of a given type from the appropriate directories based on
+     * repository conventions and compartment context.
      *
-     * Directory structure depends on conventions:
-     * - Flat layout: resources are located in the root directory (e.g.,
-     * "/path/to/ig/root/")
-     * - Directory for category: resources are in subdirectories (e.g.,
-     * "/resources/patient/")
+     * <p>Directory scanning behavior:</p>
+     * <ul>
+     * <li>Flat layout: Scans root/category directory for resources</li>
+     * <li>Type-specific directories: Scans type-specific subdirectories</li>
+     * <li>Compartment-aware: Includes compartment-specific paths when applicable</li>
+     * </ul>
      *
-     * Filenames depend on conventions:
-     * - ID_ONLY: "123.json"
-     * - TYPE_AND_ID: "Patient-123.json"
+     * <p>File filtering based on filename conventions:</p>
+     * <ul>
+     * <li>{@code FilenameMode.ID_ONLY}: Accepts any file with supported extension</li>
+     * <li>{@code FilenameMode.TYPE_AND_ID}: Accepts files matching pattern "ResourceType-*"</li>
+     * </ul>
      *
-     * @param <T>           The resource type.
-     * @param resourceClass The resource class.
-     * @return Map of resource IDs to resources.
+     * @param <T>                     The type of the FHIR resource.
+     * @param resourceClass           The class representing the FHIR resource type.
+     * @param igRepositoryCompartment The compartment context for directory resolution.
+     * @return Map of resource IDs to resources found in the directories.
      */
-    protected <T extends IBaseResource> Map<IIdType, T> readDirectoryForResourceType(Class<T> resourceClass) {
-        var path = this.directoryForResource(resourceClass);
-        if (!path.toFile().exists()) {
-            return Collections.emptyMap();
-        }
+    protected <T extends IBaseResource> Map<IIdType, T> readDirectoryForResourceType(
+            Class<T> resourceClass, IgRepositoryCompartment igRepositoryCompartment) {
+        var paths = this.directoryForResource(resourceClass, igRepositoryCompartment);
 
-        var resources = new HashMap<IIdType, T>();
+        var resources = new ConcurrentHashMap<IIdType, T>();
         Predicate<Path> resourceFileFilter;
         switch (this.conventions.filenameMode()) {
             case ID_ONLY:
@@ -460,22 +572,32 @@ public class IgRepository implements IRepository {
                 break;
         }
 
-        try (var paths = Files.walk(path)) {
-            paths.filter(resourceFileFilter)
-                    .sorted()
-                    .map(this::cachedReadResource)
-                    .flatMap(Optional::stream)
-                    .forEach(r -> {
-                        if (!r.fhirType().equals(resourceClass.getSimpleName())) {
-                            return;
-                        }
+        for (var dir : paths.toList()) {
+            if (!Files.exists(dir)) {
+                continue;
+            }
 
-                        T validatedResource = validateResource(resourceClass, r, r.getIdElement());
-                        resources.put(r.getIdElement().toUnqualifiedVersionless(), validatedResource);
-                    });
+            // Walk the directory and read all files that match the resource type
+            // and file extension
+            try (var pathsStream = Files.walk(dir)) {
+                pathsStream
+                        .filter(resourceFileFilter)
+                        .parallel()
+                        .map(this::cachedReadResource)
+                        .filter(Optional::isPresent)
+                        .forEach(r -> {
+                            if (!r.get().fhirType().equals(resourceClass.getSimpleName())) {
+                                return;
+                            }
 
-        } catch (IOException e) {
-            throw new UnclassifiedServerFailureException(500, "Unable to read resources from path: %s".formatted(path));
+                            T validatedResource = validateResource(
+                                    resourceClass, r.get(), r.get().getIdElement());
+                            resources.put(r.get().getIdElement().toUnqualifiedVersionless(), validatedResource);
+                        });
+            } catch (IOException e) {
+                throw new UnclassifiedServerFailureException(
+                        500, "Unable to read resources from path: %s".formatted(dir));
+            }
         }
 
         return resources;
@@ -487,11 +609,16 @@ public class IgRepository implements IRepository {
     }
 
     /**
-     * Reads a resource from the repository.
+     * Reads a resource from the repository, considering compartment context.
      *
-     * Locates files like:
-     * - ID_ONLY: "123.json" (in the appropriate directory based on layout)
-     * - TYPE_AND_ID: "Patient-123.json"
+     * <p>File location resolution:</p>
+     * <ul>
+     * <li>ID_ONLY: "123.json" (in the appropriate directory based on layout and compartment)</li>
+     * <li>TYPE_AND_ID: "Patient-123.json"</li>
+     * </ul>
+     *
+     * <p>Compartment context can be passed via the {@code X-FHIR-Compartment} header
+     * in the format "ResourceType/Id" (e.g., "Patient/123").</p>
      *
      * Utilizes cache to improve performance.
      *
@@ -500,16 +627,17 @@ public class IgRepository implements IRepository {
      * </p>
      *
      * <pre>{@code
-     * IIdType resourceId = new IdType("Patient", "12345");
+     * IIdType resourceId = new IdType("Observation", "obs-123");
      * Map<String, String> headers = new HashMap<>();
-     * Patient patient = repository.read(Patient.class, resourceId, headers);
+     * headers.put(FHIR_COMPARTMENT_HEADER, "Patient/patient-456");
+     * Observation observation = repository.read(Observation.class, resourceId, headers);
      * }</pre>
      *
      * @param <T>          The type of the FHIR resource.
      * @param <I>          The type of the resource identifier.
      * @param resourceType The class representing the FHIR resource type.
      * @param id           The identifier of the resource.
-     * @param headers      Additional headers (not used in this implementation).
+     * @param headers      Request headers, may include compartment context via {@code X-FHIR-Compartment}.
      * @return The resource if found.
      * @throws ResourceNotFoundException if the resource is not found.
      */
@@ -519,40 +647,43 @@ public class IgRepository implements IRepository {
         requireNonNull(resourceType, "resourceType cannot be null");
         requireNonNull(id, "id cannot be null");
 
-        var paths = this.potentialPathsForResource(resourceType, id);
-        for (var path : paths) {
-            if (!path.toFile().exists()) {
-                continue;
-            }
+        var compartment = compartmentFrom(headers);
 
-            var optionalResource = cachedReadResource(path);
-            if (optionalResource.isPresent()) {
-                var resource = optionalResource.get();
-                return validateResource(resourceType, resource, id);
-            }
+        var paths = this.potentialPathsForResource(resourceType, id, compartment);
+        var resource = paths.map(this::cachedReadResource)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .findFirst();
+
+        if (resource.isPresent()) {
+            return validateResource(resourceType, resource.get(), id);
         }
 
         throw new ResourceNotFoundException(id);
     }
 
     /**
-     * Creates a new resource in the repository.
+     * Creates a new resource in the repository, considering compartment context for file placement.
+     *
+     * <p>The resource will be written to the appropriate directory based on repository conventions
+     * and any compartment context provided in headers.</p>
      *
      * <p>
      * <strong>Example Usage:</strong>
      * </p>
      *
      * <pre>{@code
-     * Patient newPatient = new Patient();
-     * newPatient.setId("67890");
-     * newPatient.addName().setFamily("Doe").addGiven("John");
+     * Observation newObservation = new Observation();
+     * newObservation.setId("obs-789");
+     * newObservation.setSubject(new Reference("Patient/patient-123"));
      * Map<String, String> headers = new HashMap<>();
-     * MethodOutcome outcome = repository.create(newPatient, headers);
+     * headers.put(FHIR_COMPARTMENT_HEADER, "Patient/patient-123");
+     * MethodOutcome outcome = repository.create(newObservation, headers);
      * }</pre>
      *
      * @param <T>      The type of the FHIR resource.
      * @param resource The resource to create.
-     * @param headers  Additional headers (not used in this implementation).
+     * @param headers  Request headers, may include compartment context via {@code X-FHIR-Compartment}.
      * @return A {@link MethodOutcome} containing the outcome of the create
      *         operation.
      */
@@ -561,7 +692,9 @@ public class IgRepository implements IRepository {
         requireNonNull(resource, "resource cannot be null");
         requireNonNull(resource.getIdElement().getIdPart(), "resource id cannot be null");
 
-        var path = this.preferredPathForResource(resource.getClass(), resource.getIdElement());
+        var compartment = compartmentFrom(headers);
+
+        var path = this.preferredPathForResource(resource.getClass(), resource.getIdElement(), compartment);
         writeResource(resource, path);
 
         return new MethodOutcome(resource.getIdElement(), true);
@@ -630,7 +763,9 @@ public class IgRepository implements IRepository {
         requireNonNull(resource, "resource cannot be null");
         requireNonNull(resource.getIdElement().getIdPart(), "resource id cannot be null");
 
-        var preferred = this.preferredPathForResource(resource.getClass(), resource.getIdElement());
+        var compartment = compartmentFrom(headers);
+
+        var preferred = this.preferredPathForResource(resource.getClass(), resource.getIdElement(), compartment);
         var actual = (Path) resource.getUserData(SOURCE_PATH_TAG);
         if (actual == null) {
             actual = preferred;
@@ -646,7 +781,8 @@ public class IgRepository implements IRepository {
         // behavior is set to overwrite,
         // move the resource to the preferred path and delete the old one.
         if (!preferred.equals(actual)
-                && this.encodingBehavior.preserveEncoding() == PreserveEncoding.OVERWRITE_WITH_PREFERRED_ENCODING) {
+                && this.conventions.encodingBehavior().preserveEncoding()
+                        == PreserveEncoding.OVERWRITE_WITH_PREFERRED_ENCODING) {
             try {
                 Files.deleteIfExists(actual);
             } catch (IOException e) {
@@ -688,10 +824,10 @@ public class IgRepository implements IRepository {
         requireNonNull(resourceType, "resourceType cannot be null");
         requireNonNull(id, "id cannot be null");
 
-        var paths = this.potentialPathsForResource(resourceType, id);
-
+        var compartment = compartmentFrom(headers);
+        var paths = this.potentialPathsForResource(resourceType, id, compartment);
         boolean deleted = false;
-        for (var path : paths) {
+        for (var path : paths.toList()) {
             try {
                 deleted = Files.deleteIfExists(path);
                 if (deleted) {
@@ -738,10 +874,12 @@ public class IgRepository implements IRepository {
             Class<T> resourceType,
             Multimap<String, List<IQueryParameterType>> searchParameters,
             Map<String, String> headers) {
+        var compartment = compartmentFrom(headers);
+        var resourceIdMap = readDirectoryForResourceType(resourceType, compartment);
+
         BundleBuilder builder = new BundleBuilder(this.fhirContext);
         builder.setType("searchset");
 
-        var resourceIdMap = readDirectoryForResourceType(resourceType);
         if (searchParameters == null || searchParameters.isEmpty()) {
             resourceIdMap.values().forEach(builder::addCollectionEntry);
             return (B) builder.getBundle();
@@ -842,5 +980,33 @@ public class IgRepository implements IRepository {
             throw new IllegalArgumentException("No operation provider found. Unable to invoke operations.");
         }
         return operationProvider.invokeOperation(this, id, resourceType, operationName, parameters);
+    }
+
+    protected IgRepositoryCompartment compartmentFrom(Map<String, String> headers) {
+        if (headers == null) {
+            return new IgRepositoryCompartment();
+        }
+
+        var compartmentHeader = headers.get(FHIR_COMPARTMENT_HEADER);
+        return compartmentHeader == null
+                ? new IgRepositoryCompartment()
+                : new IgRepositoryCompartment(compartmentHeader);
+    }
+
+    protected String pathForCompartment(
+            Class<? extends IBaseResource> resourceType,
+            FhirContext fhirContext,
+            IgRepositoryCompartment igRepositoryCompartment) {
+        if (igRepositoryCompartment.isEmpty()
+                || !igRepositoryCompartment.resourceBelongsToCompartment(fhirContext, resourceType.getSimpleName())) {
+            if (this.conventions.categoryLayout() != CategoryLayout.DEFINITIONAL_AND_DATA) {
+                return "";
+            } else {
+                return "shared";
+            }
+        }
+
+        // resource names are lowercase as directories
+        return igRepositoryCompartment.getType().toLowerCase() + "/" + igRepositoryCompartment.getId();
     }
 }

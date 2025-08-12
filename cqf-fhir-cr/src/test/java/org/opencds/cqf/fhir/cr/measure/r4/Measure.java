@@ -17,7 +17,7 @@ import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.repository.IRepository;
-import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -31,7 +31,6 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import javax.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CanonicalType;
@@ -81,7 +80,7 @@ public class Measure {
     }
 
     @FunctionalInterface
-    interface Selector<T, S> {
+    public interface Selector<T, S> {
         T select(S from);
     }
 
@@ -185,8 +184,7 @@ public class Measure {
         }
 
         private R4MeasureService buildMeasureService() {
-            return new R4MeasureService(
-                    repository, evaluationOptions, measurePeriodValidator, measureServiceUtils, npmPackageLoader);
+            return new R4MeasureService(repository, evaluationOptions, measureServiceUtils, npmPackageLoader);
         }
 
         public When when() {
@@ -973,6 +971,11 @@ public class Measure {
                 return this;
             }
 
+            public SelectedReference hasEvaluatedResourceReferenceCount(int count) {
+                assertEquals(count, this.value().getExtension().size());
+                return this;
+            }
+
             // Hmm.. may need to rethink this one a bit.
             public SelectedReference hasPopulations(String... population) {
                 var ex = this.value().getExtensionsByUrl(EXT_CRITERIA_REFERENCE_URL);
@@ -1053,7 +1056,15 @@ public class Measure {
                     .orElse(null));
         }
 
-        public SelectedStratum stratumByComponentText(String textValue) {
+        public SelectedStratum stratumByComponentValueText(String textValue) {
+            return stratum(s -> s.getStratum().stream()
+                    .filter(x -> x.getComponent().stream()
+                            .anyMatch(t -> t.getValue().getText().equals(textValue)))
+                    .findFirst()
+                    .get());
+        }
+
+        public SelectedStratum stratumByComponentCodeText(String textValue) {
             return stratum(s -> s.getStratum().stream()
                     .filter(x -> x.getComponent().stream()
                             .anyMatch(t -> t.getCode().getText().equals(textValue)))

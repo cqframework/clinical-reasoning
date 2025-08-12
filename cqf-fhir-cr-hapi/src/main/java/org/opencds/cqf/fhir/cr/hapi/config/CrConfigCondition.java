@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cr.hapi.config;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
+import org.opencds.cqf.fhir.utility.client.TerminologyServerClientSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -34,6 +35,13 @@ public class CrConfigCondition implements Condition {
             beanFactory.getBean(EvaluationSettings.class);
         } catch (Exception e) {
             ourLog.warn("CrConfigCondition not met: Missing EvaluationSettings bean");
+            return false;
+        }
+
+        try {
+            beanFactory.getBean(TerminologyServerClientSettings.class);
+        } catch (Exception e) {
+            ourLog.warn("CrConfigCondition not met: Missing TerminologyServerClientSettings bean");
             return false;
         }
         return true;

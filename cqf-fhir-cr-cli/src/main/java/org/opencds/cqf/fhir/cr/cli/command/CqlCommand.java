@@ -2,285 +2,100 @@ package org.opencds.cqf.fhir.cr.cli.command;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.repository.IRepository;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
-import java.util.Map;
+import java.nio.file.StandardOpenOption;
+import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.stream.Stream;
 import org.apache.commons.lang3.tuple.Pair;
-import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
-import org.cqframework.cql.cql2elm.CqlTranslatorOptionsMapper;
 import org.cqframework.cql.cql2elm.DefaultLibrarySourceProvider;
 import org.cqframework.fhir.npm.NpmProcessor;
 import org.cqframework.fhir.utilities.IGContext;
 import org.hl7.elm.r1.VersionedIdentifier;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseDatatype;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r5.context.ILoggingService;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
-import org.opencds.cqf.cql.engine.execution.ExpressionResult;
-import org.opencds.cqf.fhir.cql.CqlOptions;
 import org.opencds.cqf.fhir.cql.Engines;
-import org.opencds.cqf.fhir.cql.EvaluationSettings;
-import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings;
-import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.PROFILE_MODE;
-import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
-import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
-import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings;
-import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.CODE_LOOKUP_MODE;
-import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
-import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_MEMBERSHIP_MODE;
-import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_PRE_EXPANSION_MODE;
-import org.opencds.cqf.fhir.utility.repository.ProxyRepository;
-import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
-import org.slf4j.LoggerFactory;
+import org.opencds.cqf.fhir.cr.cli.argument.CqlCommandArgument;
 import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Command;
-import picocli.CommandLine.Option;
 
-@Command(name = "cql", mixinStandardHelpOptions = true)
+@Command(name = "cql", mixinStandardHelpOptions = true, description = "Evaluate CQL libraries against FHIR resources.")
 public class CqlCommand implements Callable<Integer> {
-    @Option(
-            names = {"-fv", "--fhir-version"},
-            required = true)
-    public String fhirVersion;
-
-    @Option(names = {"-op", "--options-path"})
-    public String optionsPath;
-
-    @ArgGroup(multiplicity = "0..1", exclusive = false)
-    public NamespaceParameter namespace;
-
-    static class NamespaceParameter {
-        @Option(names = {"-nn", "--namespace-name"})
-        public String namespaceName;
-
-        @Option(names = {"-nu", "--namespace-uri"})
-        public String namespaceUri;
-    }
-
-    @Option(names = {"-rd", "--root-dir"})
-    public String rootDir;
-
-    @Option(names = {"-ig", "--ig-path"})
-    public String igPath;
-
-    @ArgGroup(multiplicity = "1..*", exclusive = false)
-    List<LibraryParameter> libraries;
-
-    static class LibraryParameter {
-        @Option(
-                names = {"-lu", "--library-url"},
-                required = true)
-        public String libraryUrl;
-
-        @Option(
-                names = {"-ln", "--library-name"},
-                required = true)
-        public String libraryName;
-
-        @Option(names = {"-lv", "--library-version"})
-        public String libraryVersion;
-
-        @Option(names = {"-t", "--terminology-url"})
-        public String terminologyUrl;
-
-        @ArgGroup(multiplicity = "0..1", exclusive = false)
-        public ModelParameter model;
-
-        @ArgGroup(multiplicity = "0..*", exclusive = false)
-        public List<ParameterParameter> parameters;
-
-        @Option(names = {"-e", "--expression"})
-        public String[] expression;
-
-        @ArgGroup(multiplicity = "0..1", exclusive = false)
-        public ContextParameter context;
-
-        static class ContextParameter {
-            @Option(names = {"-c", "--context"})
-            public String contextName;
-
-            @Option(names = {"-cv", "--context-value"})
-            public String contextValue;
-        }
-
-        static class ModelParameter {
-            @Option(names = {"-m", "--model"})
-            public String modelName;
-
-            @Option(names = {"-mu", "--model-url"})
-            public String modelUrl;
-        }
-
-        static class ParameterParameter {
-            @Option(names = {"-p", "--parameter"})
-            public String parameterName;
-
-            @Option(names = {"-pv", "--parameter-value"})
-            public String parameterValue;
-        }
-    }
-
-    @SuppressWarnings("removal")
-    private static class Logger implements ILoggingService {
-
-        private final org.slf4j.Logger log = LoggerFactory.getLogger(Logger.class);
-
-        @Override
-        public void logMessage(String s) {
-            log.warn(s);
-        }
-
-        @Override
-        public void logDebugMessage(LogCategory logCategory, String s) {
-            log.debug("{}: {}", logCategory, s);
-        }
-
-        @Override
-        public boolean isDebugLogging() {
-            return log.isDebugEnabled();
-        }
-    }
-
-    private String toVersionNumber(FhirVersionEnum fhirVersion) {
-        switch (fhirVersion) {
-            case R4:
-                return "4.0.1";
-            case R5:
-                return "5.0.0-ballot";
-            case DSTU3:
-                return "3.0.2";
-            default:
-                throw new IllegalArgumentException("Unsupported FHIR version %s".formatted(fhirVersion));
-        }
-    }
+    @ArgGroup(multiplicity = "1", exclusive = false)
+    public CqlCommandArgument args;
 
     @Override
-    public Integer call() throws Exception {
+    public Integer call() throws IOException {
+        var results = evaluate(this.args);
 
-        FhirVersionEnum fhirVersionEnum = FhirVersionEnum.valueOf(fhirVersion);
-
-        FhirContext fhirContext = FhirContext.forCached(fhirVersionEnum);
-
-        IGContext igContext = null;
-        if (rootDir != null && igPath != null) {
-            igContext = new IGContext(new Logger());
-            igContext.initializeFromIg(rootDir, igPath, toVersionNumber(fhirVersionEnum));
+        if (args.outputPath != null) {
+            Files.createDirectories(Path.of(args.outputPath));
         }
 
-        CqlOptions cqlOptions = CqlOptions.defaultOptions();
+        OutputStream os = args.outputPath == null
+                ? System.out
+                : Files.newOutputStream(
+                        Path.of(args.outputPath),
+                        StandardOpenOption.TRUNCATE_EXISTING,
+                        StandardOpenOption.WRITE,
+                        StandardOpenOption.CREATE);
 
-        if (optionsPath != null) {
-            CqlTranslatorOptions options = CqlTranslatorOptionsMapper.fromFile(optionsPath);
-            cqlOptions.setCqlCompilerOptions(options.getCqlCompilerOptions());
+        results.forEach(r -> Utilities.writeResult(r.result(), os));
+
+        if (os != System.out) {
+            os.close();
         }
 
-        var terminologySettings = new TerminologySettings();
-        terminologySettings.setValuesetExpansionMode(VALUESET_EXPANSION_MODE.PERFORM_NAIVE_EXPANSION);
-        terminologySettings.setValuesetPreExpansionMode(VALUESET_PRE_EXPANSION_MODE.USE_IF_PRESENT);
-        terminologySettings.setValuesetMembershipMode(VALUESET_MEMBERSHIP_MODE.USE_EXPANSION);
-        terminologySettings.setCodeLookupMode(CODE_LOOKUP_MODE.USE_CODESYSTEM_URL);
+        return 0;
+    }
 
-        var retrieveSettings = new RetrieveSettings();
-        retrieveSettings.setTerminologyParameterMode(TERMINOLOGY_FILTER_MODE.FILTER_IN_MEMORY);
-        retrieveSettings.setSearchParameterMode(SEARCH_FILTER_MODE.FILTER_IN_MEMORY);
-        retrieveSettings.setProfileMode(PROFILE_MODE.DECLARED);
+    record SubjectAndResult(String subjectId, EvaluationResult result) {}
 
-        var evaluationSettings = EvaluationSettings.getDefault();
-        evaluationSettings.setCqlOptions(cqlOptions);
-        evaluationSettings.setTerminologySettings(terminologySettings);
-        evaluationSettings.setRetrieveSettings(retrieveSettings);
-        evaluationSettings.setNpmProcessor(new NpmProcessor(igContext));
+    public static Stream<SubjectAndResult> evaluate(CqlCommandArgument arguments) {
+        FhirContext fhirContext = FhirContext.forCached(FhirVersionEnum.valueOf(arguments.fhir.fhirVersion));
 
-        for (LibraryParameter library : libraries) {
-            var repository = createRepository(
-                    fhirContext, library.terminologyUrl, library.model.modelUrl, library.context.contextValue);
+        var evaluationSettings =
+                Utilities.createEvaluationSettings(arguments.content.cqlPath, arguments.hedisCompatibilityMode);
+
+        NpmProcessor npmProcessor = null;
+        if (arguments.fhir.implementationGuidePath != null && arguments.fhir.rootDirectory != null) {
+            try {
+                var context = new IGContext();
+                context.initializeFromIg(
+                        arguments.fhir.rootDirectory,
+                        arguments.fhir.implementationGuidePath,
+                        fhirContext.getVersion().getVersion().getFhirVersionString());
+                npmProcessor = new NpmProcessor(context);
+            } catch (Exception e) {
+                throw new IllegalArgumentException("Failed to initialize IGContext from provided path", e);
+            }
+        }
+
+        evaluationSettings.setNpmProcessor(npmProcessor);
+        var repository = Utilities.createRepository(fhirContext, arguments.fhir.terminologyUrl, arguments.fhir.dataUrl);
+        VersionedIdentifier identifier = new VersionedIdentifier().withId(arguments.content.name);
+
+        Set<String> expressions = arguments.content.expression != null ? Set.of(arguments.content.expression) : null;
+
+        return arguments.parameters.context.stream().map(c -> {
             var engine = Engines.forRepository(repository, evaluationSettings);
-
-            if (library.libraryUrl != null) {
-                var provider = new DefaultLibrarySourceProvider(Path.of(library.libraryUrl));
+            if (arguments.content.cqlPath != null) {
+                var provider = new DefaultLibrarySourceProvider(Path.of(arguments.content.cqlPath));
                 engine.getEnvironment()
                         .getLibraryManager()
                         .getLibrarySourceLoader()
                         .registerProvider(provider);
             }
 
-            VersionedIdentifier identifier = new VersionedIdentifier().withId(library.libraryName);
-
-            Pair<String, Object> contextParameter = null;
-
-            if (library.context != null) {
-                contextParameter = Pair.of(library.context.contextName, library.context.contextValue);
-            }
-
-            EvaluationResult result = engine.evaluate(identifier, contextParameter);
-
-            writeResult(result);
-        }
-
-        return 0;
-    }
-
-    private IRepository createRepository(
-            FhirContext fhirContext, String terminologyUrl, String modelUrl, String contextValue) {
-        IRepository data = null;
-        IRepository terminology = null;
-
-        if (modelUrl != null) {
-            Path path = Path.of(modelUrl);
-            data = new IgRepository(fhirContext, path);
-        }
-
-        if (terminologyUrl != null) {
-            terminology = new IgRepository(fhirContext, Path.of(terminologyUrl));
-        }
-
-        return new ProxyRepository(data, null, terminology);
-    }
-
-    @SuppressWarnings("java:S106") // We are intending to output to the console here as a CLI tool
-    private void writeResult(EvaluationResult result) {
-        for (Map.Entry<String, ExpressionResult> libraryEntry : result.expressionResults.entrySet()) {
-            System.out.println(libraryEntry.getKey() + "="
-                    + this.tempConvert(libraryEntry.getValue().value()));
-        }
-
-        System.out.println();
-    }
-
-    private String tempConvert(Object value) {
-        if (value == null) {
-            return "null";
-        }
-
-        String result = "";
-        if (value instanceof Iterable<?> values) {
-            result += "[";
-            for (Object o : values) {
-                result += (tempConvert(o) + ", ");
-            }
-
-            if (result.length() > 1) {
-                result = result.substring(0, result.length() - 2);
-            }
-
-            result += "]";
-        } else if (value instanceof IBaseResource resource) {
-            result = resource.fhirType()
-                    + (resource.getIdElement() != null
-                                    && resource.getIdElement().hasIdPart()
-                            ? "(id=" + resource.getIdElement().getIdPart() + ")"
-                            : "");
-        } else if (value instanceof IBase base) {
-            result = base.fhirType();
-        } else if (value instanceof IBaseDatatype datatype) {
-            result = datatype.fhirType();
-        } else {
-            result = value.toString();
-        }
-
-        return result;
+            // This is incorrect because cql supports multiple context parameters
+            // Encounter=123 and Patient=456 can be set simultaneously.
+            // For now, we assume only one context parameter is provided.
+            var subjectId = c.contextName + "/" + c.contextValue;
+            var contextParameter = Pair.<String, Object>of(c.contextName, c.contextValue);
+            var cqlResult = engine.evaluate(identifier, expressions, contextParameter);
+            return new SubjectAndResult(subjectId, cqlResult);
+        });
     }
 }

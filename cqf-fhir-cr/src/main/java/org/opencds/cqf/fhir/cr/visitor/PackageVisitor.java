@@ -37,6 +37,7 @@ import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IParametersParameterComponentAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
 import org.opencds.cqf.fhir.utility.client.TerminologyServerClient;
+import org.opencds.cqf.fhir.utility.client.TerminologyServerClientSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,11 +53,28 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
     protected Map<String, List<?>> resourceTypes = new HashMap<>();
 
     public PackageVisitor(IRepository repository) {
-        this(repository, null, null);
+        this(repository, (TerminologyServerClient) null, null);
     }
 
     public PackageVisitor(IRepository repository, TerminologyServerClient client) {
         this(repository, client, null);
+    }
+
+    public PackageVisitor(IRepository repository, TerminologyServerClientSettings terminologyServerClientSettings) {
+        super(repository);
+        this.terminologyServerClient = new TerminologyServerClient(fhirContext(), terminologyServerClientSettings);
+        this.expandHelper = new ExpandHelper(this.repository, terminologyServerClient);
+        setupResourceTypes();
+    }
+
+    public PackageVisitor(
+            IRepository repository,
+            TerminologyServerClientSettings terminologyServerClientSettings,
+            IValueSetExpansionCache cache) {
+        super(repository, cache);
+        this.terminologyServerClient = new TerminologyServerClient(fhirContext(), terminologyServerClientSettings);
+        this.expandHelper = new ExpandHelper(this.repository, terminologyServerClient);
+        setupResourceTypes();
     }
 
     public PackageVisitor(IRepository repository, TerminologyServerClient client, IValueSetExpansionCache cache) {
@@ -439,7 +457,8 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
 
     protected static IBaseParameters getExpansionParams(ILibraryAdapter rootSpecificationLibrary, String reference) {
         Optional<? extends IBaseResource> expansionParamResource = rootSpecificationLibrary.getContained().stream()
-                .filter(contained -> contained.getIdElement().getValue().equals(reference))
+                .filter(contained ->
+                        reference.equals("#" + contained.getIdElement().getValue()))
                 .findFirst();
         return (IBaseParameters) expansionParamResource.orElse(null);
     }

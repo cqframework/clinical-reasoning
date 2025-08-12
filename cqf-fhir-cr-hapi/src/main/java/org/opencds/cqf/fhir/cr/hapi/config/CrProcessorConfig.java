@@ -14,6 +14,7 @@ import org.opencds.cqf.fhir.cr.plandefinition.PlanDefinitionProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.QuestionnaireProcessor;
 import org.opencds.cqf.fhir.cr.questionnaireresponse.QuestionnaireResponseProcessor;
 import org.opencds.cqf.fhir.cr.valueset.ValueSetProcessor;
+import org.opencds.cqf.fhir.utility.client.TerminologyServerClientSettings;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -27,8 +28,11 @@ public class CrProcessorConfig {
 
     @Bean
     IPlanDefinitionProcessorFactory planDefinitionProcessorFactory(
-            IRepositoryFactory repositoryFactory, EvaluationSettings evaluationSettings) {
-        return rd -> new PlanDefinitionProcessor(repositoryFactory.create(rd), evaluationSettings);
+            IRepositoryFactory repositoryFactory,
+            EvaluationSettings evaluationSettings,
+            TerminologyServerClientSettings terminologyServerClientSettings) {
+        return rd -> new PlanDefinitionProcessor(
+                repositoryFactory.create(rd), evaluationSettings, terminologyServerClientSettings);
     }
 
     @Bean
@@ -45,13 +49,19 @@ public class CrProcessorConfig {
 
     @Bean
     ILibraryProcessorFactory libraryProcessorFactory(
-            IRepositoryFactory repositoryFactory, EvaluationSettings evaluationSettings) {
-        return rd -> new LibraryProcessor(repositoryFactory.create(rd), evaluationSettings);
+            IRepositoryFactory repositoryFactory,
+            EvaluationSettings evaluationSettings,
+            TerminologyServerClientSettings terminologyServerClientSettings) {
+        return rd ->
+                new LibraryProcessor(repositoryFactory.create(rd), evaluationSettings, terminologyServerClientSettings);
     }
 
     @Bean
     IValueSetProcessorFactory valueSetProcessorFactory(
-            IRepositoryFactory repositoryFactory, EvaluationSettings evaluationSettings) {
-        return rd -> new ValueSetProcessor(repositoryFactory.create(rd), evaluationSettings);
+            IRepositoryFactory repositoryFactory,
+            EvaluationSettings evaluationSettings,
+            TerminologyServerClientSettings terminologyServerClientSettings) {
+        return rd -> new ValueSetProcessor(
+                repositoryFactory.create(rd), evaluationSettings, terminologyServerClientSettings);
     }
 }

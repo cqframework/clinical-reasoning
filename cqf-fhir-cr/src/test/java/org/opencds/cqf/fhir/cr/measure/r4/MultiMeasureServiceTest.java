@@ -163,7 +163,10 @@ class MultiMeasureServiceTest {
                 .hasCount(10)
                 .up()
                 .up()
-                .up();
+                .hasMeasureReportStatus(MeasureReportStatus.ERROR)
+                .hasContainedOperationOutcome()
+                .hasContainedOperationOutcomeMsg("Patient/female-1988-2")
+                .hasContainedOperationOutcomeMsg("Invalid Interval");
     }
 
     @Test
@@ -287,6 +290,10 @@ class MultiMeasureServiceTest {
                 .up()
                 .up()
                 .measureReport("http://example.com/Measure/MinimalContinuousVariableResourceBasisSingleGroup")
+                .hasMeasureReportStatus(MeasureReportStatus.ERROR)
+                .hasContainedOperationOutcome()
+                .hasContainedOperationOutcomeMsg("Patient/female-1988-2")
+                .hasContainedOperationOutcomeMsg("Invalid Interval")
                 .firstGroup()
                 .population("initial-population")
                 .hasCount(10)
@@ -298,10 +305,7 @@ class MultiMeasureServiceTest {
                 .hasCount(2)
                 .up()
                 .population("measure-observation")
-                .hasCount(10)
-                .up()
-                .up()
-                .up();
+                .hasCount(10);
     }
 
     @Test
@@ -331,7 +335,15 @@ class MultiMeasureServiceTest {
                 .hasMeasureReportCountPerUrl(
                         10, "http://example.com/Measure/MinimalContinuousVariableResourceBasisSingleGroup")
                 .getFirstMeasureReport()
-                .hasReportType("Individual");
+                .hasReportType("Individual")
+                .up()
+                .measureReport(
+                        "http://example.com/Measure/MinimalContinuousVariableResourceBasisSingleGroup",
+                        "Patient/female-1988-2")
+                .hasMeasureReportStatus(MeasureReportStatus.ERROR)
+                .hasContainedOperationOutcome()
+                .hasContainedOperationOutcomeMsg("Patient/female-1988-2")
+                .hasContainedOperationOutcomeMsg("Invalid Interval");
     }
 
     @Test
@@ -449,7 +461,7 @@ class MultiMeasureServiceTest {
                 .measureReport("http://example.com/Measure/MinimalProportionNoBasisSingleGroup")
                 .hasReportType("Individual")
                 .hasSubjectReference("Patient/female-1988")
-                .hasEvaluatedResourceCount(1)
+                .hasEvaluatedResourceCount(3)
                 .firstGroup()
                 .population("initial-population")
                 .hasCount(1)
@@ -475,7 +487,7 @@ class MultiMeasureServiceTest {
                 .measureReport("http://example.com/Measure/MinimalProportionBooleanBasisSingleGroup")
                 .hasReportType("Individual")
                 .hasSubjectReference("Patient/female-1988")
-                .hasEvaluatedResourceCount(1)
+                .hasEvaluatedResourceCount(3)
                 .firstGroup()
                 .population("initial-population")
                 .hasCount(1)
@@ -501,7 +513,7 @@ class MultiMeasureServiceTest {
                 .measureReport("http://example.com/Measure/MinimalRatioBooleanBasisSingleGroup")
                 .hasReportType("Individual")
                 .hasSubjectReference("Patient/female-1988")
-                .hasEvaluatedResourceCount(1)
+                .hasEvaluatedResourceCount(3)
                 .firstGroup()
                 .population("initial-population")
                 .hasCount(1)
@@ -547,7 +559,7 @@ class MultiMeasureServiceTest {
                 .measureReport("http://example.com/Measure/MinimalCohortResourceBasisSingleGroup")
                 .hasReportType("Individual")
                 .hasSubjectReference("Patient/female-1988")
-                .hasEvaluatedResourceCount(3)
+                .hasEvaluatedResourceCount(2)
                 .firstGroup()
                 .population("initial-population")
                 .hasCount(2)
@@ -557,7 +569,7 @@ class MultiMeasureServiceTest {
                 .measureReport("http://example.com/Measure/MinimalCohortBooleanBasisSingleGroup")
                 .hasReportType("Individual")
                 .hasSubjectReference("Patient/female-1988")
-                .hasEvaluatedResourceCount(1)
+                .hasEvaluatedResourceCount(2)
                 .firstGroup()
                 .population("initial-population")
                 .hasCount(1)

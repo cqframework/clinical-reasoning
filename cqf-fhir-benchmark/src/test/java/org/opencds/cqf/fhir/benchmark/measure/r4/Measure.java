@@ -87,7 +87,7 @@ public class Measure {
 
         private R4MeasureService buildMeasureService() {
             return new R4MeasureService(
-                    repository, evaluationOptions, measurePeriodValidator, measureServiceUtils, npmPackageLoader);
+                    repository, evaluationOptions, measurePeriodValidator, npmPackageLoader);
         }
 
         public When when() {

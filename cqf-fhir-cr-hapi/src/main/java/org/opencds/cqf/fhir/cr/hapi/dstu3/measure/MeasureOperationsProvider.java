@@ -1,5 +1,8 @@
 package org.opencds.cqf.fhir.cr.hapi.dstu3.measure;
 
+import static org.opencds.cqf.fhir.cr.hapi.common.EndpointHelper.getEndpoint;
+
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -12,6 +15,7 @@ import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Measure;
 import org.hl7.fhir.dstu3.model.MeasureReport;
 import org.hl7.fhir.dstu3.model.Parameters;
+import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.opencds.cqf.fhir.cr.hapi.dstu3.IMeasureServiceFactory;
 import org.springframework.stereotype.Component;
@@ -20,9 +24,11 @@ import org.springframework.stereotype.Component;
 @SuppressWarnings("java:S107")
 public class MeasureOperationsProvider {
     private final IMeasureServiceFactory dstu3MeasureProcessorFactory;
+    private final FhirVersionEnum fhirVersion;
 
     public MeasureOperationsProvider(IMeasureServiceFactory dstu3MeasureProcessorFactory) {
         this.dstu3MeasureProcessorFactory = dstu3MeasureProcessorFactory;
+        fhirVersion = FhirVersionEnum.DSTU3;
     }
 
     /**
@@ -45,6 +51,7 @@ public class MeasureOperationsProvider {
      * @param productLine    the productLine (e.g. Medicare, Medicaid, etc) to use
      *                          for the evaluation. This is a non-standard parameter.
      * @param additionalData the data bundle containing additional data
+     * @param terminologyEndpoint the FHIR {@link Endpoint} Endpoint resource or url to use to access terminology (i.e. valuesets, codesystems, naming systems, concept maps, and membership testing) referenced by the Resource. If no terminology endpoint is supplied, the evaluation will attempt to use the server on which the operation is being performed as the terminology server.
      * @param requestDetails The details (such as tenant) of this request. Usually
      *                          autopopulated HAPI.
      * @return the calculated MeasureReport
@@ -60,10 +67,11 @@ public class MeasureOperationsProvider {
             @OperationParam(name = "lastReceivedOn") String lastReceivedOn,
             @OperationParam(name = "productLine") String productLine,
             @OperationParam(name = "additionalData") Bundle additionalData,
-            @OperationParam(name = "terminologyEndpoint") Endpoint terminologyEndpoint,
+            @OperationParam(name = "terminologyEndpoint") ParametersParameterComponent terminologyEndpoint,
             @OperationParam(name = "parameters") Parameters parameters,
             RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
+        var terminologyEndpointParam = (Endpoint) getEndpoint(fhirVersion, terminologyEndpoint);
         return dstu3MeasureProcessorFactory
                 .create(requestDetails)
                 .evaluateMeasure(
@@ -77,6 +85,6 @@ public class MeasureOperationsProvider {
                         productLine,
                         additionalData,
                         parameters,
-                        terminologyEndpoint);
+                        terminologyEndpointParam);
     }
 }

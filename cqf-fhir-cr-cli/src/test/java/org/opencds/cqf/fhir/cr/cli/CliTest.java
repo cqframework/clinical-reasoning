@@ -1,14 +1,30 @@
 package org.opencds.cqf.fhir.cr.cli;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.IParser;
+import com.google.common.collect.ImmutableListMultimap;
+import com.google.common.collect.ListMultimap;
+import jakarta.annotation.Nonnull;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import org.apache.commons.lang3.tuple.Pair;
+import org.hl7.fhir.r4.model.MeasureReport;
+import org.hl7.fhir.r4.model.MeasureReport.MeasureReportStatus;
+import org.hl7.fhir.r4.model.MeasureReport.MeasureReportType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,10 +33,17 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.opencds.cqf.fhir.test.Resources;
 
+@SuppressWarnings("squid:S1135")
 @TestInstance(Lifecycle.PER_CLASS)
 class CliTest {
+
+    private static final IParser JSON_PARSER = FhirContext.forR4().newJsonParser();
+    private static final String MEASUREREPORTS_FOLDER = "measurereports";
+    private static final String TXTRESULTS_FOLDER = "txtresults";
 
     @TempDir
     private static Path tempDir;
@@ -31,12 +54,14 @@ class CliTest {
     private final PrintStream originalErr = System.err;
 
     private static String testResourcePath = null;
+    private static String testResultsPath = null;
 
     @BeforeAll
     void setup() throws URISyntaxException, IOException, ClassNotFoundException {
         Resources.copyFromJar("/", tempDir);
         testResourcePath = tempDir.toAbsolutePath().toString();
         System.out.printf("Test resource directory: %s%n", testResourcePath);
+        testResultsPath = testResourcePath + "/results";
     }
 
     @BeforeEach
@@ -73,7 +98,6 @@ class CliTest {
         Main.run(args);
         String output = outContent.toString();
         assertTrue(output.startsWith("Usage:"));
-        // assertTrue(output.endsWith("Patient=123\n"));
     }
 
     @Test
@@ -82,18 +106,12 @@ class CliTest {
         Main.run(args);
         String output = errContent.toString();
         assertTrue(output.startsWith("Missing required subcommand"));
-        // assertTrue(output.endsWith("Patient=123\n"));
     }
 
     @Test
     void testNull() {
-        assertThrows(NullPointerException.class, () -> {
-            Main.run(null);
-        });
+        assertThrows(NullPointerException.class, () -> Main.run(null));
     }
-
-    @Test
-    void dstu3() {}
 
     @Test
     void argFile() {
@@ -111,12 +129,9 @@ class CliTest {
     void r4() {
         String[] args = new String[] {
             "cql",
-            "-fv=R4",
-            "-lu=" + testResourcePath + "/r4",
-            "-ln=TestFHIR",
-            "-m=FHIR",
-            "-mu=" + testResourcePath + "/r4/example",
-            "-t=" + testResourcePath + "/r4/vocabulary/valueset",
+            "-source=" + testResourcePath + "/r4/input/cql",
+            "-name=TestFHIR",
+            "-data=" + testResourcePath + "/r4",
             "-c=Patient",
             "-cv=example"
         };
@@ -143,12 +158,9 @@ class CliTest {
     void r4WithHelpers() {
         String[] args = new String[] {
             "cql",
-            "-fv=R4",
-            "-lu=" + testResourcePath + "/r4",
-            "-ln=TestFHIRWithHelpers",
-            "-m=FHIR",
-            "-mu=" + testResourcePath + "/r4/example",
-            "-t=" + testResourcePath + "/r4/vocabulary/valueset",
+            "-source=" + testResourcePath + "/r4/input/cql",
+            "-name=TestFHIRWithHelpers",
+            "-data=" + testResourcePath + "/r4",
             "-c=Patient",
             "-cv=example"
         };
@@ -175,12 +187,9 @@ class CliTest {
     void uSCore() {
         String[] args = new String[] {
             "cql",
-            "-fv=R4",
-            "-lu=" + testResourcePath + "/uscore",
-            "-ln=TestUSCore",
-            "-m=FHIR",
-            "-mu=" + testResourcePath + "/uscore/example",
-            "-t=" + testResourcePath + "/uscore/vocabulary/valueset",
+            "-source=" + testResourcePath + "/uscore/input/cql",
+            "-name=TestUSCore",
+            "-data=" + testResourcePath + "/uscore",
             "-c=Patient",
             "-cv=example"
         };
@@ -204,12 +213,9 @@ class CliTest {
     void qICore() {
         String[] args = new String[] {
             "cql",
-            "-fv=R4",
-            "-lu=" + testResourcePath + "/qicore",
-            "-ln=TestQICore",
-            "-m=FHIR",
-            "-mu=" + testResourcePath + "/qicore/example",
-            "-t=" + testResourcePath + "/qicore/vocabulary/valueset",
+            "-source=" + testResourcePath + "/qicore/input/cql",
+            "-name=TestQICore",
+            "-data=" + testResourcePath + "/qicore",
             "-c=Patient",
             "-cv=example"
         };
@@ -226,12 +232,9 @@ class CliTest {
         assertTrue(output.contains("TestPatientDeceasedAsDateTime=null"));
         // TODO: This is because the engine is not validating on profile-based
         // retrieve...
-        // assertTrue(output.contains("TestSlices=[Observation(id=blood-pressure)]"));
         assertTrue(output.contains("TestSimpleExtensions=Patient(id=example)"));
         assertTrue(output.contains("TestComplexExtensions=Patient(id=example)"));
         assertTrue(output.contains("TestEncounterDiagnosisCardinality=true"));
-        // assertTrue(output.contains("TestProcedureNotDoneElements=[Procedure(id=negation-example),
-        // Procedure(id=negation-with-code-example)]"));
         // NOTE: Testing combinations here because ordering is not guaranteed
         assertTrue(
                 output.contains(
@@ -268,12 +271,9 @@ class CliTest {
     void qICoreCommon() {
         String[] args = new String[] {
             "cql",
-            "-fv=R4",
-            "-lu=" + testResourcePath + "/qicorecommon",
-            "-ln=QICoreCommonTests",
-            "-m=FHIR",
-            "-mu=" + testResourcePath + "/qicorecommon/example",
-            "-t=" + testResourcePath + "/qicorecommon/vocabulary/valueset",
+            "-source=" + testResourcePath + "/qicorecommon/input/cql",
+            "-name=QICoreCommonTests",
+            "-data=" + testResourcePath + "/qicorecommon",
             "-c=Patient",
             "-cv=example"
         };
@@ -297,13 +297,9 @@ class CliTest {
     void options() {
         String[] args = new String[] {
             "cql",
-            "-fv=R4",
-            "-op=" + testResourcePath + "/options/cql-options.json",
-            "-lu=" + testResourcePath + "/options",
-            "-ln=FluentFunctions",
-            "-m=FHIR",
-            "-mu=" + testResourcePath + "/options/example",
-            "-t=" + testResourcePath + "/options/vocabulary/valueset",
+            "-source=" + testResourcePath + "/options/input/cql",
+            "-name=FluentFunctions",
+            "-data=" + testResourcePath + "/options",
             "-c=Patient",
             "-cv=example"
         };
@@ -321,13 +317,9 @@ class CliTest {
     void optionsFailure() {
         String[] args = new String[] {
             "cql",
-            "-fv=R4",
-            "-op=" + testResourcePath + "/optionsFailure/cql-options.json",
-            "-lu=" + testResourcePath + "/optionsFailure",
-            "-ln=FluentFunctions",
-            "-m=FHIR",
-            "-mu=" + testResourcePath + "/optionsFailure",
-            "-t=" + testResourcePath + "/optionsFailure/vocabulary/valueset",
+            "-source=" + testResourcePath + "/optionsFailure/input/cql",
+            "-name=FluentFunctions",
+            "-data=" + testResourcePath + "/optionsFailure",
             "-c=Patient",
             "-cv=example"
         };
@@ -335,20 +327,16 @@ class CliTest {
         Main.run(args);
 
         String errOutput = errContent.toString();
-        assertTrue(errOutput.contains("library FluentFunctions loaded, but had errors"));
+        assertTrue(errOutput.contains("Library FluentFunctions loaded, but had errors"));
     }
 
     @Test
     void vSCastFunction14() {
         String[] args = new String[] {
             "cql",
-            "-fv=R4",
-            "-op=" + testResourcePath + "/vscast/cql-options.json",
-            "-lu=" + testResourcePath + "/vscast",
-            "-ln=TestVSCastFunction",
-            "-m=FHIR",
-            "-mu=" + testResourcePath + "/vscast/Patient-17",
-            "-t=" + testResourcePath + "/vscast/vocabulary/valueset",
+            "-source=" + testResourcePath + "/vscast/input/cql",
+            "-name=TestVSCastFunction",
+            "-data=" + testResourcePath + "/vscast",
             "-c=Patient",
             "-cv=Patient-17"
         };
@@ -365,13 +353,9 @@ class CliTest {
     void vSCastFunction15() {
         String[] args = new String[] {
             "cql",
-            "-fv=R4",
-            "-op=" + testResourcePath + "/vscast15/cql-options.json",
-            "-lu=" + testResourcePath + "/vscast15",
-            "-ln=TestVSCastFunction",
-            "-m=FHIR",
-            "-mu=" + testResourcePath + "/vscast15/Patient-17",
-            "-t=" + testResourcePath + "/vscast15/vocabulary/valueset",
+            "-source=" + testResourcePath + "/vscast15/input/cql",
+            "-name=TestVSCastFunction",
+            "-data=" + testResourcePath + "/vscast15",
             "-c=Patient",
             "-cv=Patient-17"
         };
@@ -388,13 +372,9 @@ class CliTest {
     void qICoreSupplementalDataElements() {
         String[] args = new String[] {
             "cql",
-            "-fv=R4",
-            "-lu=" + testResourcePath + "/qicore",
-            "-ln=SupplementalDataElements_QICore4",
-            "-lv=2.0.0",
-            "-m=FHIR",
-            "-mu=" + testResourcePath + "/qicore/example",
-            "-t=" + testResourcePath + "/qicore/vocabulary/valueset",
+            "-source=" + testResourcePath + "/qicore/input/cql",
+            "-name=SupplementalDataElements_QICore4",
+            "-data=" + testResourcePath + "/qicore",
             "-c=Patient",
             "-cv=example"
         };
@@ -421,13 +401,9 @@ class CliTest {
     void qICoreEXM124Example() {
         String[] args = new String[] {
             "cql",
-            "-fv=R4",
-            "-lu=" + testResourcePath + "/qicore",
-            "-ln=EXM124_QICore4",
-            "-lv=8.2.000",
-            "-m=FHIR",
-            "-mu=" + testResourcePath + "/qicore/example",
-            "-t=" + testResourcePath + "/qicore/vocabulary/valueset",
+            "-source=" + testResourcePath + "/qicore/input/cql",
+            "-name=EXM124_QICore4",
+            "-data=" + testResourcePath + "/qicore",
             "-c=Patient",
             "-cv=example"
         };
@@ -458,13 +434,9 @@ class CliTest {
     void qICoreEXM124Denom() {
         String[] args = new String[] {
             "cql",
-            "-fv=R4",
-            "-lu=" + testResourcePath + "/qicore",
-            "-ln=EXM124_QICore4",
-            "-lv=8.2.000",
-            "-m=FHIR",
-            "-mu=" + testResourcePath + "/qicore/denom-EXM124",
-            "-t=" + testResourcePath + "/qicore/vocabulary/valueset",
+            "-source=" + testResourcePath + "/qicore/input/cql",
+            "-name=EXM124_QICore4",
+            "-data=" + testResourcePath + "/qicore",
             "-c=Patient",
             "-cv=denom-EXM124"
         };
@@ -486,13 +458,9 @@ class CliTest {
     void qICoreEXM124Numer() {
         String[] args = new String[] {
             "cql",
-            "-fv=R4",
-            "-lu=" + testResourcePath + "/qicore",
-            "-ln=EXM124_QICore4",
-            "-lv=8.2.000",
-            "-m=FHIR",
-            "-mu=" + testResourcePath + "/qicore/numer-EXM124",
-            "-t=" + testResourcePath + "/qicore/vocabulary/valueset",
+            "-source=" + testResourcePath + "/qicore/input/cql",
+            "-name=EXM124_QICore4",
+            "-data=" + testResourcePath + "/qicore",
             "-c=Patient",
             "-cv=numer-EXM124"
         };
@@ -511,19 +479,164 @@ class CliTest {
     }
 
     @Test
+    void hedisCompatibilityModeTest() {
+        // TODO: this test exposes an issue, which is that we don't support
+        // evaluating arbitrary CQL libraries without context/data in the CLI.
+        String[] args = new String[] {
+            "cql",
+            "-source=" + testResourcePath + "/hedis/input/cql",
+            "-data=" + testResourcePath + "/hedis",
+            "-name=ReturnTest",
+            "-c=Patient",
+            "-cv=ABC",
+            "--enable-hedis-compatibility-mode",
+        };
+
+        Main.run(args);
+
+        String output = outContent.toString();
+        assertTrue(output.contains("Return=[1, 1, 1, 2, 2]"));
+    }
+
+    @Test
+    void expressionTest() {
+        String[] args = new String[] {
+            "cql",
+            "-source=" + testResourcePath + "/expression/input/cql",
+            "-data=" + testResourcePath + "/expression",
+            "-name=ExpressionTest",
+            "-c=Patient",
+            "-cv=ABC",
+            "--expression=One",
+        };
+
+        Main.run(args);
+
+        String output = outContent.toString();
+        assertTrue(output.contains("One=1"));
+        // We do not expect "Two" to be evaluated because we specified a single expression
+        assertFalse(output.contains("Two=2"));
+    }
+
+    @Test
+    void compartmentalizedTests() {
+        String[] args = new String[] {
+            "cql",
+            "-source=" + testResourcePath + "/compartment/input/cql",
+            "-name=Example",
+            "-data=" + testResourcePath + "/compartment",
+            "-c=Patient",
+            "-cv=123",
+            "-c=Patient",
+            "-cv=456"
+        };
+
+        Main.run(args);
+
+        String output = outContent.toString();
+        assertTrue(output.contains("Patient=Patient(id=123)"));
+        assertTrue(output.contains("Encounters=[Encounter(id=ABC)]"));
+        assertTrue(output.contains("Patient=Patient(id=456)"));
+        assertTrue(output.contains("Encounters=[Encounter(id=DEF)]"));
+    }
+
+    @ParameterizedTest
+    @CsvSource({"ABCLIB,ABC", "DEFLIB,DEF"})
+    void measureEvaluationTest(String libraryName, String measureId) throws IOException {
+        var expectedMeasureId = "http://example.com/Measure/%s".formatted(measureId);
+        var subjectId1 = "Patient/123";
+        var subjectId2 = "Patient/456";
+
+        var expectedTxtResult123 =
+                """
+                Encounters=[Encounter(id=ABC)]
+                Patient=Patient(id=123)
+                """;
+
+        var expectedTxtResult456 =
+                """
+                Encounters=[Encounter(id=DEF)]
+                Patient=Patient(id=456)
+                """;
+
+        String[] args = new String[] {
+            "measure",
+            "-source=" + testResourcePath + "/compartment/input/cql",
+            "-name=%s".formatted(libraryName),
+            "-data=" + testResourcePath + "/compartment",
+            "-c=Patient",
+            "-cv=123",
+            "-c=Patient",
+            "-cv=456",
+            "--measure-path=" + testResourcePath + "/compartment/input/resources/measure/",
+            "--measure=%s".formatted(measureId),
+            "--output-path=" + Path.of(testResultsPath, libraryName, TXTRESULTS_FOLDER),
+            "--report-path=" + Path.of(testResultsPath, libraryName, MEASUREREPORTS_FOLDER),
+        };
+
+        Main.run(args);
+
+        var resultsMap = getFilenameToTxtResultsMap(libraryName, MEASUREREPORTS_FOLDER, TXTRESULTS_FOLDER);
+
+        final List<Pair<Path, String>> measureReportJsons = resultsMap.get(MEASUREREPORTS_FOLDER);
+        assertEquals(2, measureReportJsons.size());
+
+        final Optional<MeasureReport> measureReport123 = getMeasureReportForSubject(measureReportJsons, "123.json");
+        assertTrue(measureReport123.isPresent());
+        assertMeasureReport(measureReport123.get(), expectedMeasureId, subjectId1);
+
+        final Optional<MeasureReport> measureReport456 = getMeasureReportForSubject(measureReportJsons, "456.json");
+        assertTrue(measureReport456.isPresent());
+        assertMeasureReport(measureReport456.get(), expectedMeasureId, subjectId2);
+
+        final List<Pair<Path, String>> txtResults = resultsMap.get(TXTRESULTS_FOLDER);
+        assertEquals(2, txtResults.size());
+
+        final Optional<String> txtResult123 = getTxtResultsForSubject(txtResults, "123.txt");
+        assertTrue(txtResult123.isPresent());
+        assertEquals(expectedTxtResult123.trim(), txtResult123.get().trim());
+
+        final Optional<String> txtResult456 = getTxtResultsForSubject(txtResults, "456.txt");
+        assertTrue(txtResult456.isPresent());
+        assertEquals(expectedTxtResult456.trim(), txtResult456.get().trim());
+    }
+
+    @ParameterizedTest
+    @CsvSource({"ABCLIB,ABC", "DEFLIB,DEF"})
+    void measureEvaluationTestSystemOut(String libraryName, String measureId) {
+        String[] args = new String[] {
+            "measure",
+            "-source=" + testResourcePath + "/compartment/input/cql",
+            "-name=%s".formatted(libraryName),
+            "-data=" + testResourcePath + "/compartment",
+            "-c=Patient",
+            "-cv=123",
+            "-c=Patient",
+            "-cv=456",
+            "--measure-path=" + testResourcePath + "/compartment/input/resources/measure/",
+            "--measure=%s".formatted(measureId),
+        };
+
+        Main.run(args);
+
+        // Should be two MeasureReports printed to the console
+        String output = outContent.toString();
+        assertTrue(output.contains("\"resourceType\":\"MeasureReport\""));
+        assertTrue(output.contains("\"subject\":{\"reference\":\"Patient/123\""));
+        assertTrue(output.contains("\"subject\":{\"reference\":\"Patient/456\""));
+    }
+
+    @Test
     @Disabled("This test is failing on the CI Server for reasons unknown. Need to debug that.")
     void sampleContentIG() {
         String[] args = new String[] {
             "cql",
-            "-fv=R4",
-            "-rd=" + testResourcePath + "/samplecontentig",
+            "-root=" + testResourcePath + "/samplecontentig",
             "-ig=" + "input/mycontentig.xml",
-            "-lu=" + testResourcePath + "/samplecontentig/input/cql",
-            "-ln=DependencyExample",
-            "-lv=0.1.0",
-            "-m=FHIR",
-            "-mu=" + testResourcePath + "/samplecontentig/input/tests/DependencyExample",
-            "-t=" + testResourcePath + "/samplecontentig/input/vocabulary/valueset",
+            "-source=" + testResourcePath + "/samplecontentig/input/cql",
+            "-name=DependencyExample",
+            "-data=" + testResourcePath + "/samplecontentig/input/tests/DependencyExample",
+            "-terminology=" + testResourcePath + "/samplecontentig/input/vocabulary/valueset",
             "-c=Patient",
             "-cv=example"
         };
@@ -539,5 +652,57 @@ class CliTest {
         assertTrue(output.contains("Observation(id=satO2-fiO2)"));
         assertFalse(output.contains("Observation(id=blood-glucose)"));
         assertFalse(output.contains("Observation(id=blood-pressure)"));
+    }
+
+    @Nonnull
+    private Optional<String> getTxtResultsForSubject(List<Pair<Path, String>> txtResults, String file) {
+        return txtResults.stream()
+                .filter(pair -> Path.of(file).equals(pair.getKey()))
+                .map(Pair::getValue)
+                .findFirst();
+    }
+
+    @Nonnull
+    private Optional<MeasureReport> getMeasureReportForSubject(
+            List<Pair<Path, String>> measureReportJsons, String first) {
+        return measureReportJsons.stream()
+                .filter(pair -> Path.of(first).equals(pair.getKey()))
+                .map(Pair::getValue)
+                .map(json -> JSON_PARSER.parseResource(MeasureReport.class, json))
+                .findFirst();
+    }
+
+    private void assertMeasureReport(MeasureReport measureReport, String expectedMeasureId, String expectedSubjectId) {
+        assertEquals(expectedMeasureId, measureReport.getMeasure());
+        assertEquals(MeasureReportStatus.COMPLETE, measureReport.getStatus());
+        assertEquals(expectedSubjectId, measureReport.getSubject().getReference());
+        assertEquals(MeasureReportType.INDIVIDUAL, measureReport.getType());
+    }
+
+    private ListMultimap<String, Pair<Path, String>> getFilenameToTxtResultsMap(
+            String libraryName, String... resultTypes) throws IOException {
+
+        final ImmutableListMultimap.Builder<String, Pair<Path, String>> multimapBuilder =
+                ImmutableListMultimap.builder();
+
+        for (String resultType : resultTypes) {
+            Path resultsPath = Path.of(testResultsPath, libraryName, resultType);
+            if (!Files.exists(resultsPath) || !Files.isDirectory(resultsPath)) {
+                throw new IOException("Missing or invalid directory: " + resultsPath);
+            }
+
+            try (Stream<Path> pathsStream = Files.walk(resultsPath)) {
+                for (Path filePath : pathsStream.filter(Files::isRegularFile).toList()) {
+                    try (Stream<String> lines = Files.lines(filePath, StandardCharsets.UTF_8)) {
+                        String fileContents = lines.collect(Collectors.joining("\n"));
+                        // Use relative path from resultsPath to avoid name collisions
+                        Path relativePath = filePath.getFileName();
+                        multimapBuilder.put(resultType, Pair.of(relativePath, fileContents));
+                    }
+                }
+            }
+        }
+
+        return multimapBuilder.build();
     }
 }

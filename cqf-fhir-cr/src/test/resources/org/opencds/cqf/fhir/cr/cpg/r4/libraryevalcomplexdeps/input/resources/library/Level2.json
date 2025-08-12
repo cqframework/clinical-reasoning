@@ -1,0 +1,17 @@
+{
+  "resourceType": "Library",
+  "id": "Level2",
+  "url": "http://example.com/Library/Level2",
+  "name": "Level2",
+  "status": "active",
+  "type": {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/library-type",
+      "code": "logic-library"
+    } ]
+  },
+  "content": [ {
+    "contentType": "text/cql",
+    "url": "../../cql/Level2.cql"
+  } ]
+}

@@ -1,5 +1,8 @@
 package org.opencds.cqf.fhir.cr.hapi.r4.measure;
 
+import static org.opencds.cqf.fhir.cr.hapi.common.EndpointHelper.getEndpoint;
+
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -24,11 +27,13 @@ public class MeasureOperationsProvider {
 
     private final R4MeasureEvaluatorSingleFactory r4MeasureServiceFactory;
     private final StringTimePeriodHandler stringTimePeriodHandler;
+    private final FhirVersionEnum fhirVersion;
 
     public MeasureOperationsProvider(
             R4MeasureEvaluatorSingleFactory r4MeasureServiceFactory, StringTimePeriodHandler stringTimePeriodHandler) {
         this.r4MeasureServiceFactory = r4MeasureServiceFactory;
         this.stringTimePeriodHandler = stringTimePeriodHandler;
+        fhirVersion = FhirVersionEnum.R4;
     }
 
     /**
@@ -50,6 +55,7 @@ public class MeasureOperationsProvider {
      * @param productLine    the productLine (e.g. Medicare, Medicaid, etc) to use
      *                          for the evaluation. This is a non-standard parameter.
      * @param additionalData the data bundle containing additional data
+     * @param terminologyEndpoint the FHIR {@link Endpoint} Endpoint resource or url to use to access terminology (i.e. valuesets, codesystems, naming systems, concept maps, and membership testing) referenced by the Resource. If no terminology endpoint is supplied, the evaluation will attempt to use the server on which the operation is being performed as the terminology server.
      * @param requestDetails The details (such as tenant) of this request. Usually
      *                          autopopulated HAPI.
      * @return the calculated MeasureReport
@@ -65,10 +71,11 @@ public class MeasureOperationsProvider {
             @OperationParam(name = "lastReceivedOn") String lastReceivedOn,
             @OperationParam(name = "productLine") String productLine,
             @OperationParam(name = "additionalData") Bundle additionalData,
-            @OperationParam(name = "terminologyEndpoint") Endpoint terminologyEndpoint,
+            @OperationParam(name = "terminologyEndpoint") Parameters.ParametersParameterComponent terminologyEndpoint,
             @OperationParam(name = "parameters") Parameters parameters,
             RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
+        var terminologyEndpointParam = (Endpoint) getEndpoint(fhirVersion, terminologyEndpoint);
         return r4MeasureServiceFactory
                 .create(requestDetails)
                 .evaluate(
@@ -79,7 +86,7 @@ public class MeasureOperationsProvider {
                         subject,
                         lastReceivedOn,
                         null,
-                        terminologyEndpoint,
+                        terminologyEndpointParam,
                         null,
                         additionalData,
                         parameters,

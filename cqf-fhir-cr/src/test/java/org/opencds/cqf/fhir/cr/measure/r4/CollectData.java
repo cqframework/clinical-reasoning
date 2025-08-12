@@ -101,7 +101,7 @@ public class CollectData {
         }
 
         private R4CollectDataService buildR4CollectDataService() {
-            return new R4CollectDataService(repository, evaluationOptions, measureServiceUtils, npmPackageLoader);
+            return new R4CollectDataService(repository, evaluationOptions, npmPackageLoader);
         }
 
         public When when() {

@@ -34,6 +34,7 @@ import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.DateType;
+import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IdType;
@@ -41,10 +42,14 @@ import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Period;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.RelatedArtifact;
 import org.hl7.fhir.r4.model.RelatedArtifact.RelatedArtifactType;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.TerminologyCapabilities;
+import org.hl7.fhir.r4.model.TerminologyCapabilities.TerminologyCapabilitiesCodeSystemComponent;
+import org.hl7.fhir.r4.model.TerminologyCapabilities.TerminologyCapabilitiesCodeSystemVersionComponent;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -225,11 +230,13 @@ class ReleaseVisitorTests {
         crmiEDRCervical.setId(crmiEDRId);
         cervicalCancerScreeningFHIR.addContained(crmiEDRCervical);
         cervicalCancerScreeningFHIR.addExtension(crmiEDRExtension);
+
         var crmiEDRBreastCancer =
                 breastCancerScreeningFHIR.getContained().get(0).copy();
         crmiEDRBreastCancer.setId(crmiEDRId);
         breastCancerScreeningFHIR.addContained(crmiEDRBreastCancer);
         breastCancerScreeningFHIR.addExtension(crmiEDRExtension);
+
         repo.update(cervicalCancerScreeningFHIR);
         repo.update(breastCancerScreeningFHIR);
 
@@ -261,10 +268,24 @@ class ReleaseVisitorTests {
         Library library = repo.read(Library.class, new IdType("Library/ecqm-update-2024-05-02"))
                 .copy();
         ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
-        Parameters params = new Parameters();
-        params.addParameter("version", "1.0.0");
-        params.addParameter("versionBehavior", new CodeType("default"));
-        ReleaseVisitor releaseVisitor = new ReleaseVisitor(repo);
+
+        final var authoritativeSource = "http://cts.nlm.nih.gov/fhir/";
+        var endpoint = createEndpoint(authoritativeSource);
+        Parameters params = parameters(
+                part("version", "1.0.0"),
+                part("versionBehavior", new CodeType("default")),
+                part("terminologyEndpoint", (Endpoint) endpoint.get()));
+
+        var clientMock = mock(TerminologyServerClient.class, new ReturnsDeepStubs());
+        var terminologyCapabilities = new TerminologyCapabilities();
+        var codeSystemComponent = new TerminologyCapabilitiesCodeSystemComponent();
+        codeSystemComponent.setUri("http://terminology.hl7.org/CodeSystem/observation-category");
+        codeSystemComponent.setVersion(
+                List.of(new TerminologyCapabilitiesCodeSystemVersionComponent().setCode("1.2.3")));
+        terminologyCapabilities.addCodeSystem(codeSystemComponent);
+        when(clientMock.getR4TerminologyCapabilities(any())).thenReturn(terminologyCapabilities);
+
+        ReleaseVisitor releaseVisitor = new ReleaseVisitor(repo, clientMock);
         // Approval date is required to release an artifact
         library.setApprovalDateElement(new DateType("2024-04-23"));
 
@@ -350,7 +371,7 @@ class ReleaseVisitorTests {
         var canonicalVersionParams = expansionParameters
                 .flatMap(p -> VisitorHelper.getStringListParameter(Constants.CANONICAL_VERSION, p))
                 .orElse(new ArrayList<>());
-        assertEquals(0, canonicalVersionParams.size());
+        assertEquals(1, canonicalVersionParams.size());
     }
 
     @Test
@@ -547,10 +568,6 @@ class ReleaseVisitorTests {
         var factory = IAdapterFactory.forFhirVersion(FhirVersionEnum.R4);
         var endpoint = factory.createEndpoint(new org.hl7.fhir.r4.model.Endpoint());
         endpoint.setAddress(authoritativeSource);
-        endpoint.addExtension(new org.hl7.fhir.r4.model.Extension(
-                Constants.VSAC_USERNAME, new org.hl7.fhir.r4.model.StringType("username")));
-        endpoint.addExtension(new org.hl7.fhir.r4.model.Extension(
-                Constants.APIKEY, new org.hl7.fhir.r4.model.StringType("password")));
         return endpoint;
     }
 
@@ -804,5 +821,34 @@ class ReleaseVisitorTests {
                 maybeRetiredLeafRA.get().getResource());
         assertSame(PublicationStatus.RETIRED, retiredLeaf.getStatus());
         assertEquals("3.2.0", Canonicals.getVersion(maybeRetiredLeafRA.get().getResource()));
+    }
+
+    @Test
+    void release_should_capture_input_and_runtime_expansion_params() {
+        var bundle = (Bundle) jsonParser.parseResource(
+                ReleaseVisitorTests.class.getResourceAsStream("Bundle-versioned-and-unversioned-dependency.json"));
+        repo.transaction(bundle);
+        var releaseVisitor = new ReleaseVisitor(repo);
+        var originalLibrary = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
+                .copy();
+        var testLibrary = originalLibrary.copy();
+        var libraryAdapter = new AdapterFactory().createLibrary(testLibrary);
+        var params =
+                parameters(part("version", new StringType("1.2.3")), part("versionBehavior", new CodeType("force")));
+        var returnResource = (Bundle) libraryAdapter.accept(releaseVisitor, params);
+        var maybeLib = returnResource.getEntry().stream()
+                .filter(entry -> entry.getResponse().getLocation().contains("Library/SpecificationLibrary"))
+                .findFirst();
+        assertTrue(maybeLib.isPresent());
+        var releasedLibrary =
+                repo.read(Library.class, new IdType(maybeLib.get().getResponse().getLocation()));
+        var authoredExpansionParamsExt = releasedLibrary.getExtensionByUrl(Constants.CQF_INPUT_EXPANSION_PARAMETERS);
+        var runtimeExpansionParamsExt = releasedLibrary.getExtensionByUrl(Constants.CQF_EXPANSION_PARAMETERS);
+        var authoredExpansionParams = (Parameters)
+                releasedLibrary.getContained(((Reference) authoredExpansionParamsExt.getValue()).getReference());
+        var runtimeExpansionParams = (Parameters)
+                releasedLibrary.getContained(((Reference) runtimeExpansionParamsExt.getValue()).getReference());
+        assertEquals(1, authoredExpansionParams.getParameter().size());
+        assertEquals(3, runtimeExpansionParams.getParameter().size());
     }
 }

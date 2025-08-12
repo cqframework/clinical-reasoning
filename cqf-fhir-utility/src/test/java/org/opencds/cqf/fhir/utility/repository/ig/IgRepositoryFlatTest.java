@@ -119,7 +119,7 @@ class IgRepositoryFlatTest {
         var created = repository.read(Library.class, o.getId());
         assertNotNull(created);
 
-        var loc = tempDir.resolve("Library-new-library.json");
+        var loc = tempDir.resolve("input/Library-new-library.json");
         assertTrue(Files.exists(loc));
 
         repository.delete(Library.class, created.getIdElement());
@@ -134,7 +134,7 @@ class IgRepositoryFlatTest {
         var created = repository.read(Patient.class, o.getId());
         assertNotNull(created);
 
-        var loc = tempDir.resolve("Patient-new-patient.json");
+        var loc = tempDir.resolve("input/Patient-new-patient.json");
         assertTrue(Files.exists(loc));
 
         repository.delete(Patient.class, created.getIdElement());
@@ -149,7 +149,7 @@ class IgRepositoryFlatTest {
         var created = repository.read(ValueSet.class, o.getId());
         assertNotNull(created);
 
-        var loc = tempDir.resolve("ValueSet-new-valueset.json");
+        var loc = tempDir.resolve("input/ValueSet-new-valueset.json");
         assertTrue(Files.exists(loc));
 
         repository.delete(ValueSet.class, created.getIdElement());

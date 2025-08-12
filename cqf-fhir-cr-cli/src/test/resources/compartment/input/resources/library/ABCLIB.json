@@ -1,0 +1,17 @@
+{
+    "resourceType": "Library",
+    "id": "ABCLIB",
+    "url": "http://example.com/Library/ABC-LIB",
+    "name": "ABCLIB",
+    "status": "active",
+    "type": {
+      "coding": [ {
+        "system": "http://terminology.hl7.org/CodeSystem/library-type",
+        "code": "logic-library"
+      } ]
+    },
+    "content": [ {
+      "contentType": "text/cql",
+      "url": "../../cql/ABCLIB.cql"
+    } ]
+}

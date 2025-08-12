@@ -20,6 +20,7 @@ import org.opencds.cqf.fhir.cr.hapi.config.test.TestCqlProperties;
 import org.opencds.cqf.fhir.cr.hapi.config.test.TestCrConfig;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.utility.ValidationProfile;
+import org.opencds.cqf.fhir.utility.client.TerminologyServerClientSettings;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -139,5 +140,10 @@ public class TestCrDstu3Config {
         evaluationSettings.setModelCache(theGlobalModelCache);
         evaluationSettings.setValueSetCache(theGlobalValueSetCache);
         return evaluationSettings;
+    }
+
+    @Bean
+    public TerminologyServerClientSettings terminologyServerClientSettings() {
+        return new TerminologyServerClientSettings();
     }
 }

@@ -14,6 +14,7 @@ import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Attachment;
 import org.hl7.fhir.r4.model.CanonicalType;
+import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DataRequirement;
@@ -24,10 +25,12 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.RelatedArtifact;
+import org.hl7.fhir.r4.model.StringType;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IDataRequirementAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
+import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
 
 public class LibraryAdapter extends KnowledgeArtifactAdapter implements ILibraryAdapter {
@@ -227,30 +230,47 @@ public class LibraryAdapter extends KnowledgeArtifactAdapter implements ILibrary
         }
     }
 
+    public void ensureExpansionParametersEntry(IKnowledgeArtifactAdapter artifactAdapter, String crmiVersion) {
+        var maybeExpansionParameters = getExpansionParameters();
+        if (maybeExpansionParameters.isEmpty()) {
+            return;
+        }
+
+        Parameters expansionParameters = (Parameters) maybeExpansionParameters.get();
+        String resourceType = artifactAdapter.get().fhirType();
+        String canonical = artifactAdapter.getUrl() + "|" + artifactAdapter.getVersion();
+        String parameterName = getExpansionParameterName(resourceType, crmiVersion);
+
+        if (parameterExists(expansionParameters, parameterName, canonical)) {
+            return;
+        }
+
+        CanonicalType canonicalToAdd = buildCanonicalToAdd(artifactAdapter, crmiVersion, resourceType, canonical);
+        expansionParameters.addParameter(parameterName, canonicalToAdd);
+    }
+
     @SuppressWarnings("unchecked")
-    public void ensureExpansionParametersEntry(String resourceType, String canonical) {
-        // extract expansion parameters
-        var expansionParameters = getExpansionParameters();
+    private boolean parameterExists(Parameters parameters, String parameterName, String canonical) {
+        var parametersWithName = parameters.getParameters(parameterName);
+        if (parametersWithName == null) {
+            return false;
+        }
+        return parametersWithName.stream()
+                .map(p -> (IPrimitiveType<String>) p.getValue())
+                .map(IPrimitiveType::getValueAsString)
+                .anyMatch(value -> value.equals(canonical));
+    }
 
-        String parameterName;
+    private CanonicalType buildCanonicalToAdd(
+            IKnowledgeArtifactAdapter artifactAdapter, String crmiVersion, String resourceType, String canonical) {
+        CanonicalType canonicalToAdd = new CanonicalType(canonical);
 
-        if (resourceType.equals("ValueSet")) {
-            parameterName = Constants.CANONICAL_VERSION;
-        } else if (resourceType.equals("CodeSystem")) {
-            parameterName = Constants.SYSTEM_VERSION;
-        } else {
-            parameterName = Constants.CANONICAL_VERSION;
+        if (shouldAddResourceTypeExtension(crmiVersion, resourceType)) {
+            canonicalToAdd.addExtension(Constants.CQF_RESOURCETYPE, new CodeType(resourceType));
         }
 
-        if (expansionParameters.isPresent()) {
-            var parametersWithName = ((Parameters) expansionParameters.get()).getParameters(parameterName);
-            if (parametersWithName != null
-                    && parametersWithName.stream().noneMatch(p -> ((IPrimitiveType<String>) p.getValue())
-                            .getValueAsString()
-                            .equals(canonical))) {
-                expansionParameters.ifPresent(
-                        ep -> ((Parameters) ep).addParameter(parameterName, new CanonicalType(canonical)));
-            }
-        }
+        canonicalToAdd.addExtension(Constants.DISPLAY_EXTENSION, new StringType(artifactAdapter.getDescriptor()));
+
+        return canonicalToAdd;
     }
 }

@@ -29,6 +29,7 @@ import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IDataRequirementAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
+import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
 
 public class LibraryAdapter extends KnowledgeArtifactAdapter implements ILibraryAdapter {
@@ -236,38 +237,34 @@ public class LibraryAdapter extends KnowledgeArtifactAdapter implements ILibrary
         }
     }
 
-    @SuppressWarnings("unchecked")
-    public void ensureExpansionParametersEntry(String resourceType, String canonical) {
-        // extract expansion parameters
-        var expansionParameters = getExpansionParameters();
-
-        String parameterName;
-
-        if (resourceType.equals("ValueSet")) {
-            parameterName = Constants.CANONICAL_VERSION;
-        } else if (resourceType.equals("CodeSystem")) {
-            parameterName = Constants.SYSTEM_VERSION;
-        } else {
-            parameterName = Constants.CANONICAL_VERSION;
+    public void ensureExpansionParametersEntry(IKnowledgeArtifactAdapter artifactAdapter, String crmiVersion) {
+        var expansionParametersOpt = getExpansionParameters();
+        if (expansionParametersOpt.isEmpty()) {
+            return;
         }
 
-        if (expansionParameters.isPresent()) {
-            List<ParametersParameterComponent> parametersWithName = new ArrayList<>();
+        Parameters expansionParameters = (Parameters) expansionParametersOpt.get();
 
-            for (ParametersParameterComponent param : ((Parameters) expansionParameters.get()).getParameter()) {
-                if (parameterName.equals(param.getName())) {
-                    parametersWithName.add(param);
-                }
-            }
+        String resourceType = artifactAdapter.get().fhirType();
+        String parameterName = getExpansionParameterName(resourceType, crmiVersion);
+        String canonical = artifactAdapter.getUrl() + "|" + artifactAdapter.getVersion();
 
-            if (parametersWithName.stream().noneMatch(p -> ((IPrimitiveType<String>) p.getValue())
-                    .getValueAsString()
-                    .equals(canonical))) {
-                var parameterToAdd = new ParametersParameterComponent();
-                parameterToAdd.setName(parameterName);
-                parameterToAdd.setValue(new UriType(canonical));
-                expansionParameters.ifPresent(ep -> ((Parameters) ep).addParameter(parameterToAdd));
-            }
+        if (parameterExists(expansionParameters, parameterName, canonical)) {
+            return;
         }
+
+        Parameters.ParametersParameterComponent parameterToAdd = new Parameters.ParametersParameterComponent()
+                .setName(parameterName)
+                .setValue(new UriType(canonical));
+
+        expansionParameters.addParameter(parameterToAdd);
+    }
+
+    private boolean parameterExists(Parameters parameters, String parameterName, String canonical) {
+        return parameters.getParameter().stream()
+                .filter(p -> parameterName.equals(p.getName()))
+                .map(p -> (IPrimitiveType<String>) p.getValue())
+                .map(IPrimitiveType::getValueAsString)
+                .anyMatch(canonical::equals);
     }
 }

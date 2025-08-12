@@ -1,0 +1,17 @@
+{
+  "resourceType": "Library",
+  "id": "libraryA",
+  "url": "http://example.com/Library/libraryA",
+  "name": "libraryA",
+  "status": "active",
+  "type": {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/library-type",
+      "code": "logic-library"
+    } ]
+  },
+  "content": [ {
+    "contentType": "text/cql",
+    "url": "../../cql/libraryA.cql"
+  } ]
+}

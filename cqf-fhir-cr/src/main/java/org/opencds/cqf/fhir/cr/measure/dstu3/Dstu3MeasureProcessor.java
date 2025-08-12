@@ -3,12 +3,13 @@ package org.opencds.cqf.fhir.cr.measure.dstu3;
 import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
+import java.util.Optional;
 import org.cqframework.cql.cql2elm.CqlIncludeException;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.hl7.elm.r1.VersionedIdentifier;
@@ -28,10 +29,12 @@ import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorUtils;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
+import org.opencds.cqf.fhir.cr.measure.common.MultiLibraryIdMeasureEngineDetails;
 import org.opencds.cqf.fhir.cr.measure.common.SubjectProvider;
 import org.opencds.cqf.fhir.utility.repository.FederatedRepository;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
+@SuppressWarnings("squid:S1135")
 public class Dstu3MeasureProcessor {
     private final IRepository repository;
     private final MeasureEvaluationOptions measureEvaluationOptions;
@@ -89,15 +92,20 @@ public class Dstu3MeasureProcessor {
             actualRepo = new FederatedRepository(
                     this.repository, new InMemoryFhirRepository(this.repository.fhirContext(), additionalData));
         }
-        var subjects = subjectProvider.getSubjects(actualRepo, subjectIds).collect(Collectors.toList());
+        var subjects = subjectProvider.getSubjects(actualRepo, subjectIds).toList();
         var evalType = getMeasureEvalType(reportType, subjects);
         var context = Engines.forRepository(
                 this.repository, this.measureEvaluationOptions.getEvaluationSettings(), additionalData);
 
-        var libraryVersionIdentifier = getLibraryVersionIdentifier(measure);
-        var libraryEngine = getLibraryEngine(parameters, libraryVersionIdentifier, context);
+        // Note that we must build the LibraryEngine BEFORE we call
+        // measureProcessorUtils.setMeasurementPeriod(), otherwise, we get an NPE.
+        var measureLibraryIdEngineDetails = buildLibraryIdEngineDetails(measure, parameters, context);
+
         // set measurement Period from CQL if operation parameters are empty
-        measureProcessorUtils.setMeasurementPeriod(measureDef, measurementPeriodParams, context);
+        measureProcessorUtils.setMeasurementPeriod(
+                measurementPeriodParams,
+                context,
+                Optional.ofNullable(measure.getUrl()).map(List::of).orElse(List.of("Unknown Measure URL")));
         // extract measurement Period from CQL to pass to report Builder
         Interval measurementPeriod =
                 measureProcessorUtils.getDefaultMeasurementPeriod(measurementPeriodParams, context);
@@ -106,11 +114,11 @@ public class Dstu3MeasureProcessor {
         // populate results from Library $evaluate
         if (!subjects.isEmpty()) {
             var results = measureProcessorUtils.getEvaluationResults(
-                    subjectIds, measureDef, zonedMeasurementPeriod, context, libraryEngine, libraryVersionIdentifier);
+                    subjectIds, zonedMeasurementPeriod, context, measureLibraryIdEngineDetails);
 
             // Process Criteria Expression Results
             measureProcessorUtils.processResults(
-                    results,
+                    results.processMeasureForSuccessOrFailure(measure.getIdElement(), measureDef),
                     measureDef,
                     evalType,
                     measureEvaluationOptions.getApplyScoringSetMembership(),
@@ -124,20 +132,26 @@ public class Dstu3MeasureProcessor {
                 .build(measure, measureDef, evalTypeToReportType(evalType), measurementPeriod, subjects);
     }
 
+    // Ideally this would be done in MeasureProcessorUtils, but it's too much work to change for now
+    private MultiLibraryIdMeasureEngineDetails buildLibraryIdEngineDetails(
+            Measure measure, Parameters parameters, CqlEngine context) {
+
+        var libraryVersionIdentifier = getLibraryVersionIdentifier(measure);
+
+        final LibraryEngine libraryEngine = getLibraryEngine(parameters, libraryVersionIdentifier, context);
+
+        return MultiLibraryIdMeasureEngineDetails.builder(libraryEngine)
+                .addLibraryIdToMeasureId(
+                        new VersionedIdentifier().withId(libraryVersionIdentifier.getId()), measure.getIdElement())
+                .build();
+    }
+
     protected MeasureReportType evalTypeToReportType(MeasureEvalType measureEvalType) {
-        switch (measureEvalType) {
-            case PATIENT:
-            case SUBJECT:
-                return MeasureReportType.INDIVIDUAL;
-            case PATIENTLIST:
-            case SUBJECTLIST:
-                return MeasureReportType.PATIENTLIST;
-            case POPULATION:
-                return MeasureReportType.SUMMARY;
-            default:
-                throw new InvalidRequestException(
-                        "Unsupported MeasureEvalType: %s".formatted(measureEvalType.toCode()));
-        }
+        return switch (measureEvalType) {
+            case PATIENT, SUBJECT -> MeasureReportType.INDIVIDUAL;
+            case PATIENTLIST, SUBJECTLIST -> MeasureReportType.PATIENTLIST;
+            case POPULATION -> MeasureReportType.SUMMARY;
+        };
     }
 
     protected LibraryEngine getLibraryEngine(Parameters parameters, VersionedIdentifier id, CqlEngine context) {
@@ -219,7 +233,10 @@ public class Dstu3MeasureProcessor {
                         list.add(value);
                     }
                 } else {
-                    parameterMap.put(param.getName(), Arrays.asList(parameterMap.get(param.getName()), value));
+                    // We need a mutable list here, otherwise, retrieving the list above will fail with
+                    // UnsupportedOperationException
+                    parameterMap.put(
+                            param.getName(), new ArrayList<>(Arrays.asList(parameterMap.get(param.getName()), value)));
                 }
             } else {
                 parameterMap.put(param.getName(), value);

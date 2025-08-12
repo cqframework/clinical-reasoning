@@ -1,0 +1,17 @@
+{
+  "resourceType": "Encounter",
+  "id": "enc_planned_cat2",
+  "meta": {
+    "profile": [
+      "http://example.com/category2"
+    ]
+  },
+  "status": "planned",
+  "subject": {
+    "reference": "Patient/patient1"
+  },
+  "period": {
+    "start": "2001-01-01T00:00:00-05:00",
+    "end": "2001-12-31T00:00:00-05:00"
+  }
+}

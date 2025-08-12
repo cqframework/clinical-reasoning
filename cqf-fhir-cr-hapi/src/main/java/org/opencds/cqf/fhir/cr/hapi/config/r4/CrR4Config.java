@@ -48,13 +48,8 @@ public class CrR4Config {
     R4MeasureEvaluatorSingleFactory r4MeasureServiceFactory(
             IRepositoryFactory repositoryFactory,
             MeasureEvaluationOptions evaluationOptions,
-            MeasurePeriodValidator measurePeriodValidator,
-            R4MeasureServiceUtilsFactory r4MeasureServiceUtilsFactory) {
-        return rd -> new R4MeasureService(
-                repositoryFactory.create(rd),
-                evaluationOptions,
-                measurePeriodValidator,
-                r4MeasureServiceUtilsFactory.create(rd));
+            MeasurePeriodValidator measurePeriodValidator) {
+        return rd -> new R4MeasureService(repositoryFactory.create(rd), evaluationOptions, measurePeriodValidator);
     }
 
     @Bean
@@ -90,8 +85,7 @@ public class CrR4Config {
             IRepositoryFactory repositoryFactory,
             MeasureEvaluationOptions measureEvaluationOptions,
             R4MeasureServiceUtilsFactory r4MeasureServiceUtilsFactory) {
-        return rd -> new R4CollectDataService(
-                repositoryFactory.create(rd), measureEvaluationOptions, r4MeasureServiceUtilsFactory.create(rd));
+        return rd -> new R4CollectDataService(repositoryFactory.create(rd), measureEvaluationOptions);
     }
 
     @Bean

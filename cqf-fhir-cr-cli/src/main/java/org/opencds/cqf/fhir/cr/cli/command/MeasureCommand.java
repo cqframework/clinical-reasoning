@@ -26,10 +26,8 @@ import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cr.cli.argument.MeasureCommandArgument;
 import org.opencds.cqf.fhir.cr.cli.command.CqlCommand.SubjectAndResult;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
-import org.opencds.cqf.fhir.cr.measure.SubjectProviderOptions;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorUtils;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureProcessor;
-import org.opencds.cqf.fhir.cr.measure.r4.R4RepositorySubjectProvider;
-import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Command;
 
@@ -139,11 +137,7 @@ public class MeasureCommand implements Callable<Integer> {
         evaluationOptions.setApplyScoringSetMembership(false);
         evaluationOptions.setEvaluationSettings(evaluationSettings);
 
-        return new R4MeasureProcessor(
-                repository,
-                evaluationOptions,
-                new R4RepositorySubjectProvider(new SubjectProviderOptions()),
-                new R4MeasureServiceUtils(repository));
+        return new R4MeasureProcessor(repository, evaluationOptions, new MeasureProcessorUtils());
     }
 
     private void writeJsonToFile(String json, String patientId, Path path) {

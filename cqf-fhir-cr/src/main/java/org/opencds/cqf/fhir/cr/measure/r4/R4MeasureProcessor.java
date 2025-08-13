@@ -14,14 +14,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import org.cqframework.cql.cql2elm.CqlCompilerException;
-import java.util.Optional;
 import java.util.function.Function;
-import java.util.stream.Collectors;
+import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.cqframework.cql.cql2elm.CqlIncludeException;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.hl7.elm.r1.VersionedIdentifier;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -50,31 +47,28 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 import org.opencds.cqf.fhir.cr.measure.common.MultiLibraryIdMeasureEngineDetails;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4DateHelper;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
-import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.adapter.IMeasureAdapter;
 import org.opencds.cqf.fhir.utility.monad.Either3;
 import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.npm.NpmResourceInfoForCql;
-import org.opencds.cqf.fhir.utility.repository.FederatedRepository;
-import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.search.Searches;
 
 public class R4MeasureProcessor {
     private final IRepository repository;
     private final MeasureEvaluationOptions measureEvaluationOptions;
     private final MeasureProcessorUtils measureProcessorUtils;
-    private final R4MeasureServiceUtils r4MeasureServiceUtils;
     private final NpmPackageLoader npmPackageLoader;
 
     public R4MeasureProcessor(
             IRepository repository,
             MeasureEvaluationOptions measureEvaluationOptions,
-            R4MeasureServiceUtils r4MeasureServiceUtils,
+            MeasureProcessorUtils measureProcessorUtils,
             NpmPackageLoader npmPackageLoader) {
+
         this.repository = Objects.requireNonNull(repository);
         this.measureEvaluationOptions =
                 measureEvaluationOptions != null ? measureEvaluationOptions : MeasureEvaluationOptions.defaultOptions();
-        this.r4MeasureServiceUtils = r4MeasureServiceUtils;
+        this.measureProcessorUtils = measureProcessorUtils;
         this.npmPackageLoader = npmPackageLoader;
     }
 
@@ -177,7 +171,6 @@ public class R4MeasureProcessor {
             List<String> subjectIds,
             MeasureEvalType evalType,
             CqlEngine context,
-            NpmResourceInfoForCql npmResourceInfoForCql,
             CompositeEvaluationResultsPerMeasure compositeEvaluationResultsPerMeasure) {
 
         MeasureEvalType evaluationType = measureProcessorUtils.getEvalType(evalType, reportType, subjectIds);
@@ -577,13 +570,14 @@ public class R4MeasureProcessor {
         return measurementPeriod;
     }
 
-    private Measure getMeasure(
-            Either3<CanonicalType, IdType, Measure> measure, NpmResourceInfoForCql npmResourceInfoForCql) {
-        final Optional<IMeasureAdapter> optMeasure = npmResourceInfoForCql.getMeasure();
-        if (optMeasure.isPresent() && optMeasure.get().get() instanceof Measure measureFromNpm) {
-            return measureFromNpm;
-        }
-
-        return measure.fold(this::resolveByUrl, this::resolveById, Function.identity());
-    }
+// LUKETODO:  get rid of this after mining for requirements
+//    private Measure getMeasure(
+//            Either3<CanonicalType, IdType, Measure> measure, NpmResourceInfoForCql npmResourceInfoForCql) {
+//        final Optional<IMeasureAdapter> optMeasure = npmResourceInfoForCql.getMeasure();
+//        if (optMeasure.isPresent() && optMeasure.get().get() instanceof Measure measureFromNpm) {
+//            return measureFromNpm;
+//        }
+//
+//        return measure.fold(this::resolveByUrl, this::resolveById, Function.identity());
+//    }
 }

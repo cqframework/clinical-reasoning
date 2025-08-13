@@ -252,7 +252,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
                 MeasureReport measureReport;
                 // evaluate each measure
                 measureReport = r4Processor.evaluateMeasure(
-                        Eithers.forRight3(measure),
+                        measure,
                         periodStart,
                         periodEnd,
                         reportType,

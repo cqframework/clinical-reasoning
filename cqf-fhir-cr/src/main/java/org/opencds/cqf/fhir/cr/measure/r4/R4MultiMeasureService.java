@@ -28,7 +28,6 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorUtils;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.builder.BundleBuilder;
-import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.repository.Repositories;
 
@@ -63,20 +62,16 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
         this.serverBase = serverBase;
         this.npmPackageLoader = npmPackageLoader;
         this.subjectProvider = new R4RepositorySubjectProvider(measureEvaluationOptions.getSubjectProviderOptions());
-        this.r4MeasureProcessorStandardRepository =
-                new R4MeasureProcessor(
-                    repository,
-                    this.measureEvaluationOptions,
-                    this.measureProcessorUtils,
-                    this.npmPackageLoader);
-        this.r4MeasureServiceUtilsStandardRepository = new R4MeasureServiceUtils(repository);
+        this.r4MeasureProcessorStandardRepository = new R4MeasureProcessor(
+                repository, this.measureEvaluationOptions, this.measureProcessorUtils, this.npmPackageLoader);
+        this.r4MeasureServiceUtilsStandardRepository = new R4MeasureServiceUtils(repository, npmPackageLoader);
     }
 
     @Override
     public Bundle evaluate(
-            List<IdType> measureId,
-            List<String> measureUrl,
-            List<String> measureIdentifier,
+            List<IdType> measureIds,
+            List<String> measureUrls,
+            List<String> measureIdentifiers,
             @Nullable ZonedDateTime periodStart,
             @Nullable ZonedDateTime periodEnd,
             String reportType,
@@ -98,18 +93,21 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
             var repositoryToUse =
                     Repositories.proxy(repository, true, dataEndpoint, contentEndpoint, terminologyEndpoint);
 
-            r4ProcessorToUse =
-                    new R4MeasureProcessor(repositoryToUse, this.measureEvaluationOptions, this.measureProcessorUtils, npmPackageLoader);
+            r4ProcessorToUse = new R4MeasureProcessor(
+                    repositoryToUse, this.measureEvaluationOptions, this.measureProcessorUtils, npmPackageLoader);
 
-            r4MeasureServiceUtilsToUse = new R4MeasureServiceUtils(repositoryToUse);
+            r4MeasureServiceUtilsToUse = new R4MeasureServiceUtils(repositoryToUse, npmPackageLoader);
         } else {
             r4ProcessorToUse = r4MeasureProcessorStandardRepository;
             r4MeasureServiceUtilsToUse = r4MeasureServiceUtilsStandardRepository;
         }
 
         r4MeasureServiceUtilsToUse.ensureSupplementalDataElementSearchParameter();
-        List<Measure> measures = r4MeasureServiceUtilsToUse.getMeasures(measureId, measureIdentifier, measureUrl);
-        log.info("multi-evaluate-measure, measures to evaluate: {}", measures.size());
+
+        var measurePlusNpmDetails =
+                r4MeasureServiceUtilsToUse.getMeasurePlusNpmDetails(measureIds, measureIdentifiers, measureUrls);
+
+        log.info("multi-evaluate-measure, measures to evaluate: {}", measurePlusNpmDetails.size());
 
         var evalType = r4MeasureServiceUtilsToUse.getMeasureEvalType(reportType, subject);
 
@@ -129,7 +127,9 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
 
         // This is basically a Map of measure -> subject -> EvaluationResult
         var compositeEvaluationResultsPerMeasure = r4ProcessorToUse.evaluateMultiMeasuresWithCqlEngine(
-                subjects, measures, periodStart, periodEnd, parameters, context);
+                subjects, measurePlusNpmDetails, periodStart, periodEnd, parameters, context);
+
+        var measures = measurePlusNpmDetails.getMeasures();
 
         // evaluate Measures
         if (evalType.equals(MeasureEvalType.POPULATION) || evalType.equals(MeasureEvalType.SUBJECTLIST)) {

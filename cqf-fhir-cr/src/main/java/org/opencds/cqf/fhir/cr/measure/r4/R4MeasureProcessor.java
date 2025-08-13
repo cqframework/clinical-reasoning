@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Function;
 import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.cqframework.cql.cql2elm.CqlIncludeException;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
@@ -28,7 +27,6 @@ import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Parameters;
-import org.hl7.fhir.r4.model.Resource;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.fhir.model.R4FhirModelResolver;
@@ -47,7 +45,6 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 import org.opencds.cqf.fhir.cr.measure.common.MultiLibraryIdMeasureEngineDetails;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4DateHelper;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
-import org.opencds.cqf.fhir.utility.adapter.IMeasureAdapter;
 import org.opencds.cqf.fhir.utility.monad.Either3;
 import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.npm.NpmResourceInfoForCql;
@@ -87,11 +84,8 @@ public class R4MeasureProcessor {
             MeasureEvalType evalType,
             CqlEngine context,
             CompositeEvaluationResultsPerMeasure compositeEvaluationResultsPerMeasure) {
-        var npmResourceHolder = measure.isLeft()
-            ? npmPackageLoader.loadNpmResources(measure.leftOrThrow())
-            : NpmResourceInfoForCql.EMPTY;
 
-        var retrievedMeasure = getMeasure(measure, npmResourceHolder);
+        var retrievedMeasure = R4MeasureServiceUtils.foldMeasure(measure, repository);
 
         return this.evaluateMeasure(
                 retrievedMeasure,
@@ -102,6 +96,167 @@ public class R4MeasureProcessor {
                 evalType,
                 context,
                 compositeEvaluationResultsPerMeasure);
+    }
+
+    // LUKETODO:  top level record
+    // LUKETODO:  docs:  the measure in question is either found in the DB or derived from NPM
+    public static final class MeasurePlusNpmResourceHolder {
+        @Nullable
+        private final Measure measure;
+
+        @Nullable
+        private final NpmResourceInfoForCql npmResourceHolder;
+
+        public static MeasurePlusNpmResourceHolder measureOnly(Measure measure) {
+            return new MeasurePlusNpmResourceHolder(measure, null);
+        }
+
+        public static MeasurePlusNpmResourceHolder npmOnly(NpmResourceInfoForCql npmResourceHolder) {
+            return new MeasurePlusNpmResourceHolder(null, npmResourceHolder);
+        }
+
+        private MeasurePlusNpmResourceHolder(
+                @Nullable Measure measure, @Nullable NpmResourceInfoForCql npmResourceHolder) {
+            this.measure = measure;
+            this.npmResourceHolder = npmResourceHolder;
+        }
+
+        // LUKETODO: static factory?
+
+        public boolean hasLibrary() {
+            return false;
+        }
+
+        public String getMeasureUrl() {
+            return getMeasure().getUrl();
+        }
+
+        public Measure getMeasure() {
+            var optMeasureFromNpm = Optional.ofNullable(npmResourceHolder).flatMap(NpmResourceInfoForCql::getMeasure);
+
+            if (optMeasureFromNpm.isPresent() && optMeasureFromNpm.get().get() instanceof Measure measureFromNpm) {
+                return measureFromNpm;
+            }
+
+            return measure;
+        }
+
+        public NpmResourceInfoForCql npmResourceHolders() {
+            return npmResourceHolder;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == this) {
+                return true;
+            }
+            if (obj == null || obj.getClass() != this.getClass()) {
+                return false;
+            }
+            var that = (MeasurePlusNpmResourceHolder) obj;
+            return Objects.equals(this.measure, that.measure)
+                    && Objects.equals(this.npmResourceHolder, that.npmResourceHolder);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(measure, npmResourceHolder);
+        }
+
+        @Override
+        public String toString() {
+            return "MeasurePlusNpmResourceHolder[" + "measure="
+                    + measure + ", " + "npmResourceHolders="
+                    + npmResourceHolder + ']';
+        }
+
+        public IIdType getMeasureIdElement() {
+            return getMeasure().getIdElement();
+        }
+    }
+
+    // LUKETODO:  top level record
+    public static final class MeasurePlusNpmResourceHolderList {
+
+        private final List<MeasurePlusNpmResourceHolder> measuresPlusNpmResourceHolders;
+
+        public static MeasurePlusNpmResourceHolderList of(MeasurePlusNpmResourceHolder measurePlusNpmResourceHolder) {
+            return new MeasurePlusNpmResourceHolderList(List.of(measurePlusNpmResourceHolder));
+        }
+
+        public static MeasurePlusNpmResourceHolderList of(
+                List<MeasurePlusNpmResourceHolder> measurePlusNpmResourceHolders) {
+            return new MeasurePlusNpmResourceHolderList(measurePlusNpmResourceHolders);
+        }
+
+        public static MeasurePlusNpmResourceHolderList of(Measure measure) {
+            return new MeasurePlusNpmResourceHolderList(List.of(MeasurePlusNpmResourceHolder.measureOnly(measure)));
+        }
+
+        private MeasurePlusNpmResourceHolderList(List<MeasurePlusNpmResourceHolder> measuresPlusNpmResourceHolders) {
+            this.measuresPlusNpmResourceHolders = measuresPlusNpmResourceHolders;
+        }
+
+        public List<MeasurePlusNpmResourceHolder> getMeasuresPlusNpmResourceHolders() {
+            return measuresPlusNpmResourceHolders;
+        }
+
+        List<Measure> measures() {
+            return this.measuresPlusNpmResourceHolders.stream()
+                    .map(MeasurePlusNpmResourceHolder::getMeasure)
+                    .toList();
+        }
+
+        List<NpmResourceInfoForCql> npmResourceHolders() {
+            return this.measuresPlusNpmResourceHolders.stream()
+                    .map(MeasurePlusNpmResourceHolder::npmResourceHolders)
+                    .toList();
+        }
+
+        public List<Measure> getMeasures() {
+            // LUKETODO:
+            return List.of();
+        }
+
+        private void checkMeasureLibraries() {
+            for (MeasurePlusNpmResourceHolder measurePlusNpmResourceHolder : measuresPlusNpmResourceHolders) {
+                if (!measurePlusNpmResourceHolder.hasLibrary()) {
+                    throw new InvalidRequestException("Measure %s does not have a primary library specified"
+                            .formatted(measurePlusNpmResourceHolder.getMeasureUrl()));
+                }
+            }
+        }
+
+        public int size() {
+            return measuresPlusNpmResourceHolders.size();
+        }
+
+        public List<MeasurePlusNpmResourceHolder> measuresPlusNpmResourceHolders() {
+            return measuresPlusNpmResourceHolders;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == this) {
+                return true;
+            }
+            if (obj == null || obj.getClass() != this.getClass()) {
+                return false;
+            }
+            var that = (MeasurePlusNpmResourceHolderList) obj;
+            return Objects.equals(this.measuresPlusNpmResourceHolders, that.measuresPlusNpmResourceHolders);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(measuresPlusNpmResourceHolders);
+        }
+
+        @Override
+        public String toString() {
+            return "MeasurePlusNpmResourceHolderList[" + "measuresPlusNpmResourceHolders="
+                    + measuresPlusNpmResourceHolders + ']';
+        }
     }
 
     /**
@@ -225,7 +380,8 @@ public class R4MeasureProcessor {
 
         return evaluateMultiMeasuresWithCqlEngine(
                 subjects,
-                List.of(R4MeasureServiceUtils.foldMeasure(measureEither, repository)),
+                MeasurePlusNpmResourceHolderList.of(
+                        R4MeasureServiceUtils.foldMeasure(measureEither, repository, npmPackageLoader)),
                 periodStart,
                 periodEnd,
                 parameters,
@@ -242,7 +398,7 @@ public class R4MeasureProcessor {
 
         return evaluateMultiMeasuresWithCqlEngine(
                 subjects,
-                List.of(R4MeasureServiceUtils.resolveById(measureId, repository)),
+                MeasurePlusNpmResourceHolderList.of(R4MeasureServiceUtils.resolveById(measureId, repository)),
                 periodStart,
                 periodEnd,
                 parameters,
@@ -258,41 +414,61 @@ public class R4MeasureProcessor {
             CqlEngine context) {
 
         return evaluateMultiMeasuresWithCqlEngine(
-                subjects, List.of(measure), periodStart, periodEnd, parameters, context);
+                subjects, MeasurePlusNpmResourceHolderList.of(measure), periodStart, periodEnd, parameters, context);
     }
 
-    public CompositeEvaluationResultsPerMeasure evaluateMultiMeasureIdsWithCqlEngine(
+    public CompositeEvaluationResultsPerMeasure evaluateMeasureWithCqlEngine(
             List<String> subjects,
-            List<IdType> measureIds,
+            MeasurePlusNpmResourceHolder measurePlusNpmResourceHolder,
             @Nullable ZonedDateTime periodStart,
             @Nullable ZonedDateTime periodEnd,
             Parameters parameters,
             CqlEngine context) {
+
         return evaluateMultiMeasuresWithCqlEngine(
                 subjects,
-                measureIds.stream()
-                        .map(IIdType::toUnqualifiedVersionless)
-                        .map(id -> R4MeasureServiceUtils.resolveById(id, repository))
-                        .toList(),
+                MeasurePlusNpmResourceHolderList.of(measurePlusNpmResourceHolder),
                 periodStart,
                 periodEnd,
                 parameters,
                 context);
     }
 
-    public CompositeEvaluationResultsPerMeasure evaluateMultiMeasuresWithCqlEngine(
+    // LUKETODO:  see if we still need this method from cdr-cr
+    //    public CompositeEvaluationResultsPerMeasure evaluateMultiMeasureIdsWithCqlEngine(
+    //            List<String> subjects,
+    //            List<IdType> measureIds,
+    //            @Nullable ZonedDateTime periodStart,
+    //            @Nullable ZonedDateTime periodEnd,
+    //            Parameters parameters,
+    //            CqlEngine context) {
+    //        return evaluateMultiMeasuresWithCqlEngine(
+    //                subjects,
+    //                measureIds.stream()
+    //                        .map(IIdType::toUnqualifiedVersionless)
+    //                        .map(id -> R4MeasureServiceUtils.resolveById(id, repository))
+    //                        .toList(),
+    //                periodStart,
+    //                periodEnd,
+    //                parameters,
+    //                context);
+    //    }
+
+    CompositeEvaluationResultsPerMeasure evaluateMultiMeasuresWithCqlEngine(
             List<String> subjects,
-            List<Measure> measures,
+            MeasurePlusNpmResourceHolderList measurePlusNpmResourceHolderList,
             @Nullable ZonedDateTime periodStart,
             @Nullable ZonedDateTime periodEnd,
             Parameters parameters,
             CqlEngine context) {
 
-        measures.forEach(this::checkMeasureLibrary);
+        measurePlusNpmResourceHolderList.checkMeasureLibraries();
 
         var measurementPeriodParams = buildMeasurementPeriod(periodStart, periodEnd);
         var zonedMeasurementPeriod = MeasureProcessorUtils.getZonedTimeZoneForEval(
                 measureProcessorUtils.getDefaultMeasurementPeriod(measurementPeriodParams, context));
+
+        var measures = measurePlusNpmResourceHolderList.getMeasures();
 
         // Do this to be backwards compatible with the previous single-library evaluation:
         // Trigger first-pass validation on measure scoring as well as other aspects of the Measures
@@ -300,7 +476,8 @@ public class R4MeasureProcessor {
 
         // Note that we must build the LibraryEngine BEFORE we call
         // measureProcessorUtils.setMeasurementPeriod(), otherwise, we get an NPE.
-        var multiLibraryIdMeasureEngineDetails = getMultiLibraryIdMeasureEngineDetails(measures, parameters, context);
+        var multiLibraryIdMeasureEngineDetails =
+                getMultiLibraryIdMeasureEngineDetails(measurePlusNpmResourceHolderList, parameters, context);
 
         // set measurement Period from CQL if operation parameters are empty
         measureProcessorUtils.setMeasurementPeriod(
@@ -317,13 +494,15 @@ public class R4MeasureProcessor {
     }
 
     private MultiLibraryIdMeasureEngineDetails getMultiLibraryIdMeasureEngineDetails(
-            List<Measure> measures, Parameters parameters, CqlEngine context) {
+            MeasurePlusNpmResourceHolderList measurePlusNpmResourceHolderList,
+            Parameters parameters,
+            CqlEngine context) {
 
-        var libraryIdentifiersToMeasureIds = measures.stream()
-                .collect(ImmutableListMultimap.toImmutableListMultimap(
-                        this::getLibraryVersionIdentifier, // Key function
-                        Resource::getIdElement // Value function
-                        ));
+        var libraryIdentifiersToMeasureIds =
+                measurePlusNpmResourceHolderList.getMeasuresPlusNpmResourceHolders().stream()
+                        .collect(ImmutableListMultimap.toImmutableListMultimap(
+                                this::getLibraryVersionIdentifier, // Key function
+                                MeasurePlusNpmResourceHolder::getMeasureIdElement));
 
         var libraryEngine = getLibraryEngine(parameters, List.copyOf(libraryIdentifiersToMeasureIds.keySet()), context);
 
@@ -373,13 +552,14 @@ public class R4MeasureProcessor {
         };
     }
 
+    // LUKETODO:  redo javadoc
     /**
      * method to extract Library version defined on the Measure resource
-     * @param measure resource that has desired Library
+     * @param measurePlusNpmResourceHolder resource that has desired Library
      * @return version identifier of Library
      */
     protected VersionedIdentifier getLibraryVersionIdentifier(
-            Measure measure, NpmResourceInfoForCql npmResourceInfoForCql) {
+            MeasurePlusNpmResourceHolder measurePlusNpmResourceHolder) {
         var url = measure.getLibrary().get(0).asStringValue();
 
         // Check to see if this Library exists in an NPM Package.  If not, search the Repository
@@ -478,10 +658,18 @@ public class R4MeasureProcessor {
         }
     }
 
+    // LUKETODO:  merge these two
     protected void checkMeasureLibrary(Measure measure) {
         if (!measure.hasLibrary()) {
             throw new InvalidRequestException(
                     "Measure %s does not have a primary library specified".formatted(measure.getUrl()));
+        }
+    }
+
+    private void checkMeasureLibrary(MeasurePlusNpmResourceHolder measurePlusNpmResourceHolder) {
+        if (!measurePlusNpmResourceHolder.hasLibrary()) {
+            throw new InvalidRequestException("Measure %s does not have a primary library specified"
+                    .formatted(measurePlusNpmResourceHolder.getMeasureUrl()));
         }
     }
 
@@ -570,14 +758,14 @@ public class R4MeasureProcessor {
         return measurementPeriod;
     }
 
-// LUKETODO:  get rid of this after mining for requirements
-//    private Measure getMeasure(
-//            Either3<CanonicalType, IdType, Measure> measure, NpmResourceInfoForCql npmResourceInfoForCql) {
-//        final Optional<IMeasureAdapter> optMeasure = npmResourceInfoForCql.getMeasure();
-//        if (optMeasure.isPresent() && optMeasure.get().get() instanceof Measure measureFromNpm) {
-//            return measureFromNpm;
-//        }
-//
-//        return measure.fold(this::resolveByUrl, this::resolveById, Function.identity());
-//    }
+    // LUKETODO:  get rid of this after mining for requirements
+    //    private Measure getMeasure(
+    //            Either3<CanonicalType, IdType, Measure> measure, NpmResourceInfoForCql npmResourceHolders) {
+    //        final Optional<IMeasureAdapter> optMeasure = npmResourceHolders.getMeasure();
+    //        if (optMeasure.isPresent() && optMeasure.get().get() instanceof Measure measureFromNpm) {
+    //            return measureFromNpm;
+    //        }
+    //
+    //        return measure.fold(this::resolveByUrl, this::resolveById, Function.identity());
+    //    }
 }

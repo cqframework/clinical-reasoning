@@ -30,6 +30,7 @@ import org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureEvalType;
 import org.opencds.cqf.fhir.utility.monad.Either;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 
 @ExtendWith(MockitoExtension.class)
 class R4MeasureServiceUtilsTest {
@@ -53,7 +54,8 @@ class R4MeasureServiceUtilsTest {
 
     @BeforeEach
     void beforeEach() {
-        testSubject = new R4MeasureServiceUtils(repository);
+        // LUKETODO:  do we want the default?
+        testSubject = new R4MeasureServiceUtils(repository, NpmPackageLoader.DEFAULT);
     }
 
     private static Stream<Arguments> getReporterParams() {

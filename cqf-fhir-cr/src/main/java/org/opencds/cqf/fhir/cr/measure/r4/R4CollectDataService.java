@@ -73,10 +73,7 @@ public class R4CollectDataService {
 
         Parameters parameters = new Parameters();
         var processor = new R4MeasureProcessor(
-                this.repository,
-                this.measureEvaluationOptions,
-                this.measureProcessorUtils,
-                this.npmPackageLoader);
+                this.repository, this.measureEvaluationOptions, this.measureProcessorUtils, this.npmPackageLoader);
 
         List<String> subjectList = getSubjects(subject, practitioner, subjectProvider);
 

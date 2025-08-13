@@ -89,7 +89,7 @@ public class R4CareGapsBundleBuilder {
         this.serverBase = serverBase;
         this.configuredResources = configuredResources;
 
-        r4MeasureServiceUtils = new R4MeasureServiceUtils(repository);
+        r4MeasureServiceUtils = new R4MeasureServiceUtils(repository, npmPackageLoader);
         r4MultiMeasureService = new R4MultiMeasureService(
                 repository, measureEvaluationOptions, serverBase, measurePeriodValidator, npmPackageLoader);
     }

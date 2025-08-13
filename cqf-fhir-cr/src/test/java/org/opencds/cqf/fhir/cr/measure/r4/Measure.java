@@ -150,9 +150,8 @@ public class Measure {
 
             this.measurePeriodValidator = new MeasurePeriodValidator();
 
-            this.measureServiceUtils = new R4MeasureServiceUtils(repository);
-
             this.npmPackageLoader = NpmPackageLoader.DEFAULT;
+            this.measureServiceUtils = new R4MeasureServiceUtils(repository, npmPackageLoader);
         }
 
         public Given repository(IRepository repository) {

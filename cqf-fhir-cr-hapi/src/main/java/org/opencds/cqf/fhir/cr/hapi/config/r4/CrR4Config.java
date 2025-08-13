@@ -53,10 +53,10 @@ public class CrR4Config {
             MeasurePeriodValidator measurePeriodValidator,
             Optional<NpmPackageLoader> optNpmPackageLoader) {
         return rd -> new R4MeasureService(
-            repositoryFactory.create(rd),
-            evaluationOptions,
-            measurePeriodValidator,
-            npmPackageLoader(optNpmPackageLoader));
+                repositoryFactory.create(rd),
+                evaluationOptions,
+                measurePeriodValidator,
+                npmPackageLoader(optNpmPackageLoader));
     }
 
     @Bean
@@ -83,20 +83,18 @@ public class CrR4Config {
     }
 
     @Bean
-    R4MeasureServiceUtilsFactory r4MeasureServiceUtilsFactory(IRepositoryFactory repositoryFactory) {
-        return requestDetails -> new R4MeasureServiceUtils(repositoryFactory.create(requestDetails));
+    R4MeasureServiceUtilsFactory r4MeasureServiceUtilsFactory(
+            IRepositoryFactory repositoryFactory, NpmPackageLoader npmPackageLoader) {
+        return requestDetails -> new R4MeasureServiceUtils(repositoryFactory.create(requestDetails), npmPackageLoader);
     }
 
     @Bean
     ICollectDataServiceFactory collectDataServiceFactory(
             IRepositoryFactory repositoryFactory,
             MeasureEvaluationOptions measureEvaluationOptions,
-            R4MeasureServiceUtilsFactory r4MeasureServiceUtilsFactory,
             Optional<NpmPackageLoader> optNpmPackageLoader) {
         return rd -> new R4CollectDataService(
-                repositoryFactory.create(rd),
-                measureEvaluationOptions,
-                npmPackageLoader(optNpmPackageLoader));
+                repositoryFactory.create(rd), measureEvaluationOptions, npmPackageLoader(optNpmPackageLoader));
     }
 
     @Bean

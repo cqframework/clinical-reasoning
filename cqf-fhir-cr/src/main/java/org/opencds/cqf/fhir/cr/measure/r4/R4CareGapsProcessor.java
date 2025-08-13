@@ -58,7 +58,7 @@ public class R4CareGapsProcessor implements R4CareGapsProcessorInterface {
         this.repository = repository;
         this.careGapsProperties = careGapsProperties;
 
-        r4MeasureServiceUtils = new R4MeasureServiceUtils(repository);
+        r4MeasureServiceUtils = new R4MeasureServiceUtils(repository, npmPackageLoader);
         r4CareGapsBundleBuilder = new R4CareGapsBundleBuilder(
                 careGapsProperties,
                 repository,

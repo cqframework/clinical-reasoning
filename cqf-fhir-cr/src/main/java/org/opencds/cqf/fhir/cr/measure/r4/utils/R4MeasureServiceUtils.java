@@ -33,7 +33,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -57,17 +56,23 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureEvalType;
+import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureProcessor.MeasurePlusNpmResourceHolder;
+import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureProcessor.MeasurePlusNpmResourceHolderList;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.monad.Either3;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
+import org.opencds.cqf.fhir.utility.npm.NpmResourceInfoForCql;
 import org.opencds.cqf.fhir.utility.search.Searches;
 
 public class R4MeasureServiceUtils {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(R4MeasureServiceUtils.class);
     private final IRepository repository;
+    private final NpmPackageLoader npmPackageLoader;
 
-    public R4MeasureServiceUtils(IRepository repository) {
+    public R4MeasureServiceUtils(IRepository repository, NpmPackageLoader npmPackageLoader) {
         this.repository = repository;
+        this.npmPackageLoader = npmPackageLoader;
     }
 
     public MeasureReport addProductLineExtension(MeasureReport measureReport, String productLine) {
@@ -233,31 +238,45 @@ public class R4MeasureServiceUtils {
         }
     }
 
-    public List<Measure> getMeasures(
+    public MeasurePlusNpmResourceHolder getMeasurePlusNpmDetails(
+            IdType measureId, String measureIdentifier, String measureCanonical) {
+        // LUKETODO:  implement
+        return null;
+    }
+
+    public MeasurePlusNpmResourceHolderList getMeasurePlusNpmDetails(
             List<IdType> measureIds, List<String> measureIdentifiers, List<String> measureCanonicals) {
-        List<Measure> measures = new ArrayList<>();
+
+        List<MeasurePlusNpmResourceHolder> measuresPlusResourceHolders = new ArrayList<>();
         if (measureIds != null && !measureIds.isEmpty()) {
             for (IdType measureId : measureIds) {
-                Measure measureById = resolveById(measureId);
-                measures.add(measureById);
+                var measureById = resolveById(measureId);
+                measuresPlusResourceHolders.add(MeasurePlusNpmResourceHolder.measureOnly(measureById));
             }
         }
 
         if (measureCanonicals != null && !measureCanonicals.isEmpty()) {
             for (String measureCanonical : measureCanonicals) {
                 Measure measureByUrl = resolveByUrl(measureCanonical);
-                measures.add(measureByUrl);
+                if (measureByUrl != null) {
+                    measuresPlusResourceHolders.add(MeasurePlusNpmResourceHolder.measureOnly(measureByUrl));
+                } else {
+                    // LUKETODO:  test this to make sure it works
+                    var npmResourceHolder = this.npmPackageLoader.loadNpmResources(new CanonicalType(measureCanonical));
+                    measuresPlusResourceHolders.add(MeasurePlusNpmResourceHolder.npmOnly(npmResourceHolder));
+                }
             }
         }
 
         if (measureIdentifiers != null && !measureIdentifiers.isEmpty()) {
             for (String measureIdentifier : measureIdentifiers) {
-                Measure measureByIdentifier = resolveByIdentifier(measureIdentifier);
-                measures.add(measureByIdentifier);
+                var measureByIdentifier = resolveByIdentifier(measureIdentifier);
+                measuresPlusResourceHolders.add(MeasurePlusNpmResourceHolder.measureOnly(measureByIdentifier));
             }
         }
 
-        return distinctByKey(measures, Measure::getUrl);
+        return MeasurePlusNpmResourceHolderList.of(
+                distinctByKey(measuresPlusResourceHolders, MeasurePlusNpmResourceHolder::getMeasureUrl));
     }
 
     public static <T, K> List<T> distinctByKey(List<T> list, Function<T, K> keyExtractor) {
@@ -272,7 +291,7 @@ public class R4MeasureServiceUtils {
         var groupScoringCodes = measure.getGroup().stream()
                 .map(t -> (CodeableConcept)
                         t.getExtensionByUrl(CQFM_SCORING_EXT_URL).getValue())
-                .collect(Collectors.toList());
+                .toList();
         // extract measureScoring Type from components
         return groupScoringCodes.stream()
                 .map(t -> MeasureScoring.fromCode(t.getCodingFirstRep().getCode()))
@@ -294,10 +313,7 @@ public class R4MeasureServiceUtils {
     */
     public boolean hasGroupScoringDef(Measure measure) {
 
-        return !measure.getGroup().stream()
-                .filter(t -> t.getExtensionByUrl(CQFM_SCORING_EXT_URL) != null)
-                .collect(Collectors.toList())
-                .isEmpty();
+        return measure.getGroup().stream().anyMatch(t -> t.getExtensionByUrl(CQFM_SCORING_EXT_URL) != null);
     }
 
     public List<MeasureScoring> getMeasureScoringDef(Measure measure) {
@@ -349,6 +365,7 @@ public class R4MeasureServiceUtils {
         return subjectIds == null || subjectIds.isEmpty() || subjectIds.get(0) == null;
     }
 
+    // LUKETODO:  is this used downstream?
     public static List<Measure> foldMeasures(
             List<Either3<CanonicalType, IdType, Measure>> measures, IRepository repository) {
         return measures.stream()
@@ -356,18 +373,60 @@ public class R4MeasureServiceUtils {
                 .toList();
     }
 
+    // LUKETODO:  think about all the different scenarios and callers and maybe just return MeasurePlusNpmResourceHolder
+    // no matter what?
     public static Measure foldMeasure(Either3<CanonicalType, IdType, Measure> measure, IRepository repository) {
-        return measure.fold(
-                measureCanonicalType -> resolveByUrl(measureCanonicalType, repository),
-                measureIdType -> resolveById(measureIdType, repository),
-                Function.identity());
+        return foldMeasure(measure, repository, null).getMeasure();
     }
 
-    private static Measure resolveByUrl(CanonicalType url, IRepository repository) {
-        var parts = Canonicals.getParts(url);
+    public static MeasurePlusNpmResourceHolder foldMeasure(
+            Either3<CanonicalType, IdType, Measure> measure,
+            IRepository repository,
+            @Nullable NpmPackageLoader npmPackageLoader) {
+        if (npmPackageLoader == null) {
+            var folded = measure.fold(
+                    // LUKETODO:  check before calling measure()?
+                    measureCanonicalType ->
+                            resolveByUrl(measureCanonicalType, repository, null).getMeasure(),
+                    measureIdType -> resolveById(measureIdType, repository),
+                    Function.identity());
+
+            return MeasurePlusNpmResourceHolder.measureOnly(folded);
+        }
+
+        return measure.fold(
+                // LUKETODO:  check before calling measure()?
+                measureCanonicalType -> resolveByUrl(measureCanonicalType, repository, npmPackageLoader),
+                measureIdType -> MeasurePlusNpmResourceHolder.measureOnly(resolveById(measureIdType, repository)),
+                MeasurePlusNpmResourceHolder::measureOnly);
+    }
+
+    // LUKETODO:  optimize
+    private static MeasurePlusNpmResourceHolder resolveByUrl(
+            CanonicalType measureUrl, IRepository repository, @Nullable NpmPackageLoader npmPackageLoader) {
+        if (npmPackageLoader == null) {
+            var parts = Canonicals.getParts(measureUrl);
+            var result = repository.search(
+                    Bundle.class, Measure.class, Searches.byNameAndVersion(parts.idPart(), parts.version()));
+            // LUKETODO:  blind cast?
+            return MeasurePlusNpmResourceHolder.measureOnly(
+                    (Measure) result.getEntryFirstRep().getResource());
+        }
+
+        var npmResourceHolder = npmPackageLoader.loadNpmResources(measureUrl);
+
+        if (NpmResourceInfoForCql.EMPTY != npmPackageLoader) {
+            if (npmResourceHolder.getMeasure().isPresent()) {
+                return MeasurePlusNpmResourceHolder.npmOnly(npmResourceHolder);
+            }
+        }
+
+        var parts = Canonicals.getParts(measureUrl);
         var result = repository.search(
                 Bundle.class, Measure.class, Searches.byNameAndVersion(parts.idPart(), parts.version()));
-        return (Measure) result.getEntryFirstRep().getResource();
+        // LUKETODO:  blind cast?
+        return MeasurePlusNpmResourceHolder.measureOnly(
+                (Measure) result.getEntryFirstRep().getResource());
     }
 
     public static List<Measure> resolveByIds(List<? extends IIdType> ids, IRepository repository) {

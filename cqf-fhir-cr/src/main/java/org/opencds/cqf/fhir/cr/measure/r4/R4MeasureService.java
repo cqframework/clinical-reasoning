@@ -20,9 +20,9 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorUtils;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.monad.Either3;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.repository.FederatedRepository;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
-import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.repository.Repositories;
 
 public class R4MeasureService implements R4MeasureEvaluatorSingle {
@@ -71,7 +71,7 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
                 this.measureProcessorUtils,
                 this.npmPackageLoader);
 
-        R4MeasureServiceUtils r4MeasureServiceUtils = new R4MeasureServiceUtils(repository);
+        R4MeasureServiceUtils r4MeasureServiceUtils = new R4MeasureServiceUtils(repository, npmPackageLoader);
         r4MeasureServiceUtils.ensureSupplementalDataElementSearchParameter();
 
         MeasureReport measureReport;
@@ -88,17 +88,27 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
 
         var subjects = getSubjects(subjectId, proxyRepoForMeasureProcessor, additionalData);
 
+        var measurePlusNpmResourceHolder =
+                R4MeasureServiceUtils.foldMeasure(measure, proxyRepoForMeasureProcessor, npmPackageLoader);
+
         // Replicate the old logic of using the repository used to initialize the measure processor
         // as the repository for the CQL engine context.
         // LUKETODO:  find and pass the the NPM resource load and loaded NPM resources here?
         var context = Engines.forRepository(
                 proxyRepoForMeasureProcessor, this.measureEvaluationOptions.getEvaluationSettings(), additionalData);
 
-        var evaluationResults =
-                processor.evaluateMeasureWithCqlEngine(subjects, measure, periodStart, periodEnd, parameters, context);
+        var evaluationResults = processor.evaluateMeasureWithCqlEngine(
+                subjects, measurePlusNpmResourceHolder, periodStart, periodEnd, parameters, context);
 
         measureReport = processor.evaluateMeasure(
-                measure, periodStart, periodEnd, reportType, subjects, evalType, context, evaluationResults);
+                measurePlusNpmResourceHolder.getMeasure(),
+                periodStart,
+                periodEnd,
+                reportType,
+                subjects,
+                evalType,
+                context,
+                evaluationResults);
 
         // add ProductLine after report is generated
         measureReport = r4MeasureServiceUtils.addProductLineExtension(measureReport, productLine);

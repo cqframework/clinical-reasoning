@@ -83,9 +83,8 @@ public class CollectData {
                     .getTerminologySettings()
                     .setValuesetExpansionMode(VALUESET_EXPANSION_MODE.PERFORM_NAIVE_EXPANSION);
 
-            this.measureServiceUtils = new R4MeasureServiceUtils(repository);
-
             this.npmPackageLoader = NpmPackageLoader.DEFAULT;
+            this.measureServiceUtils = new R4MeasureServiceUtils(repository, npmPackageLoader);
         }
 
         public Given repository(IRepository repository) {

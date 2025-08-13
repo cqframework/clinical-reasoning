@@ -7,6 +7,10 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.cql.model.ModelIdentifier;
+import org.hl7.cql.model.NamespaceInfo;
+import org.hl7.elm.r1.VersionedIdentifier;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Endpoint;
@@ -19,8 +23,10 @@ import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorUtils;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
+import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
 import org.opencds.cqf.fhir.utility.monad.Either3;
 import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
+import org.opencds.cqf.fhir.utility.npm.NpmResourceInfoForCql;
 import org.opencds.cqf.fhir.utility.repository.FederatedRepository;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.repository.Repositories;
@@ -95,7 +101,7 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
         // as the repository for the CQL engine context.
         // LUKETODO:  find and pass the the NPM resource load and loaded NPM resources here?
         var context = Engines.forRepository(
-                proxyRepoForMeasureProcessor, this.measureEvaluationOptions.getEvaluationSettings(), additionalData);
+                proxyRepoForMeasureProcessor, this.measureEvaluationOptions.getEvaluationSettings(), additionalData, new NpmPackageLoaderWithCache(measurePlusNpmResourceHolder.npmResourceHolder(), npmPackageLoader));
 
         var evaluationResults = processor.evaluateMeasureWithCqlEngine(
                 subjects, measurePlusNpmResourceHolder, periodStart, periodEnd, parameters, context);
@@ -115,6 +121,60 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
 
         // add subject reference for non-individual reportTypes
         return r4MeasureServiceUtils.addSubjectReference(measureReport, practitioner, subjectId);
+    }
+
+    // LUKETODO:  javadoc
+    // LUKETODO:  top level
+    private static class NpmPackageLoaderWithCache implements NpmPackageLoader {
+        private final NpmResourceInfoForCql npmResourceHolder;
+        private final NpmPackageLoader npmPackageLoader;
+
+        public NpmPackageLoaderWithCache(NpmResourceInfoForCql npmResourceHolder,
+            NpmPackageLoader npmPackageLoader) {
+            this.npmResourceHolder = npmResourceHolder;
+            this.npmPackageLoader = npmPackageLoader;
+        }
+
+        @Override
+        public NpmResourceInfoForCql loadNpmResources(IPrimitiveType<String> measureUrl) {
+
+            if (npmResourceHolder.getMeasure()
+                    .map(measure -> measure.getUrl().equals(measureUrl.getValue()))
+                    .orElse(false)) {
+                return npmResourceHolder;
+            }
+
+            return npmPackageLoader.loadNpmResources(measureUrl);
+        }
+
+        @Override
+        public Optional<ILibraryAdapter> findMatchingLibrary(VersionedIdentifier versionedIdentifier) {
+            return npmResourceHolder.findMatchingLibrary(versionedIdentifier)
+                .or(() -> findLibraryFromUnrelatedNpmPackage(versionedIdentifier));
+        }
+
+        @Override
+        public Optional<ILibraryAdapter> findMatchingLibrary(ModelIdentifier modelIdentifier) {
+            return npmResourceHolder.findMatchingLibrary(modelIdentifier)
+                .or(() -> findLibraryFromUnrelatedNpmPackage(modelIdentifier));
+        }
+
+        @Override
+        public List<NamespaceInfo> getAllNamespaceInfos() {
+            return npmPackageLoader.getAllNamespaceInfos();
+        }
+
+        @Override
+        public Optional<ILibraryAdapter> loadLibraryByUrl(String libraryUrl) {
+
+            if (npmResourceHolder.getOptMainLibrary()
+                    .map(library -> library.getUrl().equals(libraryUrl))
+                    .orElse(false)) {
+                return npmResourceHolder.getOptMainLibrary();
+            }
+
+            return npmPackageLoader.loadLibraryByUrl(libraryUrl);
+        }
     }
 
     @Nonnull

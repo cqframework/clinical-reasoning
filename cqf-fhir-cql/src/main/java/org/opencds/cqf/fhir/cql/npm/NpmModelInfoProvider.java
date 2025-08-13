@@ -22,11 +22,9 @@ public class NpmModelInfoProvider implements ModelInfoProvider {
 
     private static final String APPLICATION_XML = "application/xml";
 
-    private final NpmResourceInfoForCql npmResourceInfoForCql;
     private final NpmPackageLoader npmPackageLoader;
 
-    public NpmModelInfoProvider(NpmResourceInfoForCql npmResourceInfoForCql, NpmPackageLoader npmPackageLoader) {
-        this.npmResourceInfoForCql = npmResourceInfoForCql;
+    public NpmModelInfoProvider(NpmPackageLoader npmPackageLoader) {
         this.npmPackageLoader = npmPackageLoader;
     }
 
@@ -35,7 +33,7 @@ public class NpmModelInfoProvider implements ModelInfoProvider {
     public ModelInfo load(ModelIdentifier modelIdentifier) {
 
         return npmPackageLoader
-                .findMatchingLibrary(npmResourceInfoForCql, modelIdentifier)
+                .findMatchingLibrary(modelIdentifier)
                 .map(this::findElmXmlAttachment)
                 .flatMap(Function.identity())
                 .map(IAttachmentAdapter::getData)

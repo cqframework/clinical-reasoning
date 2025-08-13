@@ -113,18 +113,12 @@ public interface NpmPackageLoader {
      */
     List<NamespaceInfo> getAllNamespaceInfos();
 
-    default Optional<ILibraryAdapter> findMatchingLibrary(
-            NpmResourceInfoForCql npmResourceInfoForCql, VersionedIdentifier versionedIdentifier) {
-        return npmResourceInfoForCql
-                .findMatchingLibrary(versionedIdentifier)
-                .or(() -> findLibraryFromUnrelatedNpmPackage(versionedIdentifier));
+    default Optional<ILibraryAdapter> findMatchingLibrary(VersionedIdentifier versionedIdentifier) {
+        return findLibraryFromUnrelatedNpmPackage(versionedIdentifier);
     }
 
-    default Optional<ILibraryAdapter> findMatchingLibrary(
-            NpmResourceInfoForCql npmResourceInfoForCql, ModelIdentifier modelIdentifier) {
-        return npmResourceInfoForCql
-                .findMatchingLibrary(modelIdentifier)
-                .or(() -> findLibraryFromUnrelatedNpmPackage(modelIdentifier));
+    default Optional<ILibraryAdapter> findMatchingLibrary(ModelIdentifier modelIdentifier) {
+        return findLibraryFromUnrelatedNpmPackage(modelIdentifier);
     }
 
     default Optional<ILibraryAdapter> findLibraryFromUnrelatedNpmPackage(VersionedIdentifier versionedIdentifier) {

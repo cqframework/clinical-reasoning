@@ -21,7 +21,7 @@ import org.opencds.cqf.fhir.utility.npm.NpmPackageLoaderInMemory;
 // TODO: LD :  introduce an R5 version of this test once R5 services/etc become available
 class MeasureWithNpmForR4Test {
 
-    private static final String SIMPLE_ALPHA = "simple-alpha";
+    private static final String SIMPLE_ALPHA = "SimpleAlpha";
     private static final String SIMPLE_BRAVO = "simple-bravo";
     private static final String WITH_DERIVED_LIBRARY = "with-derived-library";
     private static final String WITH_DERIVED_LIBRARY_UPPER = "WithDerivedLibrary";

@@ -126,6 +126,12 @@ public class R4MeasureProcessor {
             this.npmResourceHolder = npmResourceHolder;
         }
 
+        public boolean hasNpmLibrary() {
+            return Optional.ofNullable(npmResourceHolder)
+                .flatMap( NpmResourceInfoForCql::getOptMainLibrary)
+                .isPresent();
+        }
+
         // LUKETODO: calls to hasLibrary are always inverted
         public boolean hasLibrary() {
             if (npmResourceHolder != null) {
@@ -176,7 +182,7 @@ public class R4MeasureProcessor {
             return measure;
         }
 
-        public NpmResourceInfoForCql npmResourceHolders() {
+        public NpmResourceInfoForCql npmResourceHolder() {
             return npmResourceHolder;
         }
 
@@ -244,7 +250,7 @@ public class R4MeasureProcessor {
 
         List<NpmResourceInfoForCql> npmResourceHolders() {
             return this.measuresPlusNpmResourceHolders.stream()
-                    .map(MeasurePlusNpmResourceHolder::npmResourceHolders)
+                    .map(MeasurePlusNpmResourceHolder::npmResourceHolder)
                     .toList();
         }
 
@@ -599,7 +605,7 @@ public class R4MeasureProcessor {
         var url = measurePlusNpmResourceHolder.getMainLibraryUrl();
 
         // Check to see if this Library exists in an NPM Package.  If not, search the Repository
-        if (!measurePlusNpmResourceHolder.hasLibrary()) {
+        if (!measurePlusNpmResourceHolder.hasNpmLibrary()) {
             Bundle b = this.repository.search(Bundle.class, Library.class, Searches.byCanonical(url), null);
             if (b.getEntry().isEmpty()) {
                 var errorMsg = "Unable to find Library with url: %s".formatted(url);

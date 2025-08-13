@@ -18,17 +18,16 @@ public class EnginesNpmLibraryHandler {
     public static void registerNpmPackageLoader(
             LibraryManager libraryManager,
             ModelManager modelManager,
-            NpmResourceInfoForCql r4NpmResourceInfoForCql,
             NpmPackageLoader npmPackageLoader) {
 
         npmPackageLoader.initNamespaceMappings(libraryManager);
 
         var loader = libraryManager.getLibrarySourceLoader();
 
-        loader.registerProvider(new NpmLibraryProvider(r4NpmResourceInfoForCql, npmPackageLoader));
+        loader.registerProvider(new NpmLibraryProvider(npmPackageLoader));
 
         modelManager
                 .getModelInfoLoader()
-                .registerModelInfoProvider(new NpmModelInfoProvider(r4NpmResourceInfoForCql, npmPackageLoader));
+                .registerModelInfoProvider(new NpmModelInfoProvider(npmPackageLoader));
     }
 }

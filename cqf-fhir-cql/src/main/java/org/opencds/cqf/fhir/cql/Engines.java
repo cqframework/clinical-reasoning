@@ -53,20 +53,19 @@ public class Engines {
     }
 
     public static CqlEngine forRepository(IRepository repository, EvaluationSettings settings) {
-        return forRepository(repository, settings, null, NpmResourceInfoForCql.EMPTY, NpmPackageLoader.DEFAULT);
+        return forRepository(repository, settings, null, NpmPackageLoader.DEFAULT);
     }
 
     public static CqlEngine forRepository(
             IRepository repository, EvaluationSettings settings, IBaseBundle additionalData) {
         return forRepository(
-                repository, settings, additionalData, NpmResourceInfoForCql.EMPTY, NpmPackageLoader.DEFAULT);
+                repository, settings, additionalData, NpmPackageLoader.DEFAULT);
     }
 
     public static CqlEngine forRepository(
             IRepository repository,
             EvaluationSettings settings,
             IBaseBundle additionalData,
-            NpmResourceInfoForCql npmResourceInfoForCql,
             NpmPackageLoader npmPackageLoader) {
         checkNotNull(settings);
         checkNotNull(repository);
@@ -76,7 +75,7 @@ public class Engines {
         var dataProviders =
                 buildDataProviders(repository, additionalData, terminologyProvider, settings.getRetrieveSettings());
         var environment = buildEnvironment(
-                repository, settings, terminologyProvider, dataProviders, npmResourceInfoForCql, npmPackageLoader);
+                repository, settings, terminologyProvider, dataProviders, npmPackageLoader);
         return createEngine(environment, settings);
     }
 
@@ -85,7 +84,6 @@ public class Engines {
             EvaluationSettings settings,
             TerminologyProvider terminologyProvider,
             Map<String, DataProvider> dataProviders,
-            NpmResourceInfoForCql npmResourceInfoForCql,
             NpmPackageLoader npmPackageLoader) {
 
         var modelManager =
@@ -97,7 +95,7 @@ public class Engines {
         registerLibrarySourceProviders(settings, libraryManager, repository);
         registerNpmSupport(settings, libraryManager, modelManager);
         EnginesNpmLibraryHandler.registerNpmPackageLoader(
-                libraryManager, modelManager, npmResourceInfoForCql, npmPackageLoader);
+                libraryManager, modelManager, npmPackageLoader);
 
         return new Environment(libraryManager, dataProviders, terminologyProvider);
     }

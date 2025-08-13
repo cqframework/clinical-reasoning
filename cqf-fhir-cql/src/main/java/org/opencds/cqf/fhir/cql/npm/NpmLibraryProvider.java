@@ -22,11 +22,9 @@ public class NpmLibraryProvider implements LibrarySourceProvider {
 
     private static final String TEXT_CQL = "text/cql";
 
-    private final NpmResourceInfoForCql npmResourceInfoForCql;
     private final NpmPackageLoader npmPackageLoader;
 
-    public NpmLibraryProvider(NpmResourceInfoForCql npmResourceInfoForCql, NpmPackageLoader npmPackageLoader) {
-        this.npmResourceInfoForCql = npmResourceInfoForCql;
+    public NpmLibraryProvider(NpmPackageLoader npmPackageLoader) {
         this.npmPackageLoader = npmPackageLoader;
     }
 
@@ -34,8 +32,7 @@ public class NpmLibraryProvider implements LibrarySourceProvider {
     @Nullable
     public InputStream getLibrarySource(VersionedIdentifier versionedIdentifier) {
 
-        return npmPackageLoader
-                .findMatchingLibrary(npmResourceInfoForCql, versionedIdentifier)
+        return npmPackageLoader.findMatchingLibrary(versionedIdentifier)
                 .map(this::findCqlAttachment)
                 .flatMap(Function.identity())
                 .map(IAttachmentAdapter::getData)

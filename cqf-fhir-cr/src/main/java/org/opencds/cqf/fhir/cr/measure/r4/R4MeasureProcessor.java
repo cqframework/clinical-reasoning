@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
 import ca.uhn.fhir.repository.IRepository;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.google.common.collect.ImmutableListMultimap;
@@ -45,6 +46,7 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 import org.opencds.cqf.fhir.cr.measure.common.MultiLibraryIdMeasureEngineDetails;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4DateHelper;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
+import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
 import org.opencds.cqf.fhir.utility.monad.Either3;
 import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.npm.NpmResourceInfoForCql;
@@ -117,14 +119,47 @@ public class R4MeasureProcessor {
 
         private MeasurePlusNpmResourceHolder(
                 @Nullable Measure measure, @Nullable NpmResourceInfoForCql npmResourceHolder) {
+            if (measure == null && npmResourceHolder == null) {
+                throw new IllegalStateException("Measure and NpmResourceHolder cannot both be null");
+            }
             this.measure = measure;
             this.npmResourceHolder = npmResourceHolder;
         }
 
-        // LUKETODO: static factory?
-
+        // LUKETODO: calls to hasLibrary are always inverted
         public boolean hasLibrary() {
-            return false;
+            if (npmResourceHolder != null) {
+                return npmResourceHolder.getOptMainLibrary().isPresent();
+            }
+
+            if (measure == null) {
+                // LUKETODO:  change all these to FHIR REST exceptions
+                throw new IllegalStateException("Measure and NpmResourceHolder cannot both be null");
+            }
+
+            return measure.hasLibrary();
+        }
+
+        public String getMainLibraryUrl() {
+            if (npmResourceHolder != null) {
+                return npmResourceHolder
+                        .getOptMainLibrary()
+                        .map(ILibraryAdapter::getUrl)
+                        .orElse(null); // LUKETODO:  is this wise?
+            }
+
+            if (measure == null) {
+                throw new InternalErrorException("Measure and NpmResourceHolder cannot both be null");
+            }
+
+            final List<CanonicalType> libraryUrls = measure.getLibrary();
+
+            if (libraryUrls.isEmpty()) {
+                throw new InvalidRequestException(
+                        "Measure does not have any library urls specified: %s".formatted(measure.getUrl()));
+            }
+
+            return libraryUrls.get(0).asStringValue();
         }
 
         public String getMeasureUrl() {
@@ -214,8 +249,9 @@ public class R4MeasureProcessor {
         }
 
         public List<Measure> getMeasures() {
-            // LUKETODO:
-            return List.of();
+            return measuresPlusNpmResourceHolders.stream()
+                    .map(MeasurePlusNpmResourceHolder::getMeasure)
+                    .toList();
         }
 
         private void checkMeasureLibraries() {
@@ -560,10 +596,10 @@ public class R4MeasureProcessor {
      */
     protected VersionedIdentifier getLibraryVersionIdentifier(
             MeasurePlusNpmResourceHolder measurePlusNpmResourceHolder) {
-        var url = measure.getLibrary().get(0).asStringValue();
+        var url = measurePlusNpmResourceHolder.getMainLibraryUrl();
 
         // Check to see if this Library exists in an NPM Package.  If not, search the Repository
-        if (npmResourceInfoForCql.getOptMainLibrary().isEmpty()) {
+        if (!measurePlusNpmResourceHolder.hasLibrary()) {
             Bundle b = this.repository.search(Bundle.class, Library.class, Searches.byCanonical(url), null);
             if (b.getEntry().isEmpty()) {
                 var errorMsg = "Unable to find Library with url: %s".formatted(url);

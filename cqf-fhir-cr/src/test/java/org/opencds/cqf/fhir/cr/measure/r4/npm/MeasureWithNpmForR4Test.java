@@ -92,6 +92,9 @@ class MeasureWithNpmForR4Test {
     private static final String DENOMINATOR = "denominator";
     private static final String NUMERATOR = "numerator";
 
+    // LUKETODO:  these tests seem to be totally breaking for some reason
+    // LUKETODO:  set up a multilib eval with NPM
+
     @Test
     void evaluateSucceedsWithMinimalMeasure() {
         final Given npmRepo = initNpmRepos(SIMPLE_ALPHA);

@@ -17,6 +17,7 @@ import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.repository.IRepository;
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import java.nio.file.Path;
 import java.time.LocalDate;
@@ -183,7 +184,7 @@ public class Measure {
         }
 
         private R4MeasureService buildMeasureService() {
-            return new R4MeasureService(repository, evaluationOptions, measureServiceUtils, npmPackageLoader);
+            return new R4MeasureService(repository, evaluationOptions, measurePeriodValidator, npmPackageLoader);
         }
 
         public When when() {

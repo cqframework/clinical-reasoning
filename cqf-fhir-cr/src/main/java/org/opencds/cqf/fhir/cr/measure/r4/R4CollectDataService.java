@@ -75,7 +75,7 @@ public class R4CollectDataService {
         var processor = new R4MeasureProcessor(
                 this.repository,
                 this.measureEvaluationOptions,
-                this.subjectProvider,
+                this.measureProcessorUtils,
                 this.npmPackageLoader);
 
         List<String> subjectList = getSubjects(subject, practitioner, subjectProvider);
@@ -83,7 +83,7 @@ public class R4CollectDataService {
         var context =
                 Engines.forRepository(this.repository, this.measureEvaluationOptions.getEvaluationSettings(), null);
 
-        var foldedMeasure = R4MeasureServiceUtils.foldMeasure(Eithers.forMiddle3(measureId), repository);
+        var foldedMeasure = R4MeasureServiceUtils.foldMeasure(Eithers.forMiddle3(measureId), npmPackageLoader, repository);
 
         if (!subjectList.isEmpty()) {
             for (String patient : subjectList) {

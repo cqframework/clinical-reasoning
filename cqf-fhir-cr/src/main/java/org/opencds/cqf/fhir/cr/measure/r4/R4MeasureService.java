@@ -68,6 +68,7 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
         var processor = new R4MeasureProcessor(
                 proxyRepoForMeasureProcessor,
                 this.measureEvaluationOptions,
+                this.measureProcessorUtils,
                 this.npmPackageLoader);
 
         R4MeasureServiceUtils r4MeasureServiceUtils = new R4MeasureServiceUtils(repository);

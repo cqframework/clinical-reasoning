@@ -64,7 +64,11 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
         this.npmPackageLoader = npmPackageLoader;
         this.subjectProvider = new R4RepositorySubjectProvider(measureEvaluationOptions.getSubjectProviderOptions());
         this.r4MeasureProcessorStandardRepository =
-                new R4MeasureProcessor(repository, this.measureEvaluationOptions, this.measureProcessorUtils);
+                new R4MeasureProcessor(
+                    repository,
+                    this.measureEvaluationOptions,
+                    this.measureProcessorUtils,
+                    this.npmPackageLoader);
         this.r4MeasureServiceUtilsStandardRepository = new R4MeasureServiceUtils(repository);
     }
 

@@ -934,6 +934,11 @@ public class Measure {
                 return this;
             }
 
+            public SelectedReference hasEvaluatedResourceReferenceCount(int count) {
+                assertEquals(count, this.value().getExtension().size());
+                return this;
+            }
+
             // Hmm.. may need to rethink this one a bit.
             public SelectedReference hasPopulations(String... population) {
                 var ex = this.value().getExtensionsByUrl(EXT_CRITERIA_REFERENCE_URL);

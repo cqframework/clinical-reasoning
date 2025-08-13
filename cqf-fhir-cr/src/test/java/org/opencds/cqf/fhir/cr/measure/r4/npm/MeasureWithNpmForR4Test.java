@@ -22,9 +22,8 @@ import org.opencds.cqf.fhir.utility.npm.NpmPackageLoaderInMemory;
 class MeasureWithNpmForR4Test {
 
     private static final String SIMPLE_ALPHA = "SimpleAlpha";
-    private static final String SIMPLE_BRAVO = "simple-bravo";
-    private static final String WITH_DERIVED_LIBRARY = "with-derived-library";
-    private static final String WITH_DERIVED_LIBRARY_UPPER = "WithDerivedLibrary";
+    private static final String SIMPLE_BRAVO = "SimpleBravo";
+    private static final String WITH_DERIVED_LIBRARY = "WithDerivedLibrary";
     private static final String WITH_TWO_LAYERS_DERIVED_LIBRARIES = "with-two-layers-derived-libraries";
     private static final String WITH_TWO_LAYERS_DERIVED_LIBRARIES_UPPER = "WithTwoLayersDerivedLibraries";
 
@@ -48,7 +47,7 @@ class MeasureWithNpmForR4Test {
     private static final String MEASURE_URL_BRAVO_WITH_VERSION = MEASURE_URL_BRAVO + PIPE + VERSION_0_5;
 
     private static final String MEASURE_URL_WITH_DERIVED_LIBRARY =
-            DERIVED_URL + SLASH_MEASURE_SLASH + WITH_DERIVED_LIBRARY_UPPER;
+            DERIVED_URL + SLASH_MEASURE_SLASH + WITH_DERIVED_LIBRARY;
     private static final String MEASURE_URL_WITH_DERIVED_LIBRARY_WITH_VERSION =
             MEASURE_URL_WITH_DERIVED_LIBRARY + PIPE + VERSION_0_2;
     private static final String MEASURE_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES =
@@ -251,6 +250,8 @@ class MeasureWithNpmForR4Test {
                 .hasCount(1);
     }
 
+    // LUKETODO:  we add a patient here but it doesn't seem to be enough to get us an evaluated resource count
+    // do we need to tweak all of the CQLs?
     private void setupPatient(Given npmRepo) {
         npmRepo.getRepository().update(new Patient().setId(new IdType(ResourceType.Patient.toString(), PATIENT_ID)));
     }

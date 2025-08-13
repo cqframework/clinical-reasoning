@@ -7,7 +7,7 @@ parameter "Measurement Period" Interval<DateTime>
 context Patient
 
 define "Initial Population":
-    AgeInYearsAt(start of "Measurement Period") > 0
+  exists (["Encounter"])
 
 define "Denominator":
     "Initial Population"

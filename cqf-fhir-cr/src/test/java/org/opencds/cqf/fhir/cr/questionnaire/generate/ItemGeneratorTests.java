@@ -37,6 +37,19 @@ class ItemGeneratorTests {
     }
 
     @Test
+    void testErrorItem() {
+        given().repositoryFor(fhirContextR4, "r4")
+                .when()
+                .profileUrl(new CanonicalType(
+                        "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/RouteOneOrganization-noLibrary"))
+                .then()
+                .hasItemCount(1)
+                .itemHasText("1", "An error occurred")
+                .itemHasType("1", "display")
+                .itemRepeats("1", false);
+    }
+
+    @Test
     void generateItemR4() {
         given().repositoryFor(fhirContextR4, "r4")
                 .when()

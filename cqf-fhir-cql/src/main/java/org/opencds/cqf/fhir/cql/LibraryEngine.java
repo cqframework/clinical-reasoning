@@ -159,6 +159,7 @@ public class LibraryEngine {
 
         var requestSettings = new EvaluationSettings(settings);
         requestSettings.getLibrarySourceProviders().add(new StringLibrarySourceProvider(Lists.newArrayList(cql)));
+        // LUKETODO:  NPM for multiple libraries?
         var engine = Engines.forRepository(repository, requestSettings, bundle);
 
         var evaluationParameters = cqlFhirParametersConverter.toCqlParameters(parameters);

@@ -49,6 +49,7 @@ public class ItemGenerator {
 
     public ItemGenerator(IRepository repository) {
         this.repository = repository;
+        // LUKETODO:  NPM for multiple libraries?
         engine = Engines.forRepository(this.repository);
         expressionProcessor = new ExpressionProcessor();
         extensionProcessor = new ExtensionProcessor();

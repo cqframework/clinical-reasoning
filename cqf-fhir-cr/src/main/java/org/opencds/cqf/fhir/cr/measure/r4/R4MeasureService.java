@@ -90,6 +90,7 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
 
         // Replicate the old logic of using the repository used to initialize the measure processor
         // as the repository for the CQL engine context.
+        // LUKETODO:  find and pass the the NPM resource load and loaded NPM resources here?
         var context = Engines.forRepository(
                 proxyRepoForMeasureProcessor, this.measureEvaluationOptions.getEvaluationSettings(), additionalData);
 

@@ -14,6 +14,7 @@ import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
 import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.npm.NpmResourceInfoForCql;
 
+// LUKETODO:  adapt this to work with multiple libraries?
 /**
  * {@link LibrarySourceProvider} to provide a CQL Library Stream from an NPM package.
  */

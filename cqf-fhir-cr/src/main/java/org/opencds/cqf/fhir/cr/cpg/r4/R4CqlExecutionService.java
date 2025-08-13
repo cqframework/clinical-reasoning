@@ -79,6 +79,7 @@ public class R4CqlExecutionService {
                         null);
             }
 
+            // LUKETODO:  NPM for multiple libraries?
             var engine = Engines.forRepository(repository, evaluationSettings, null);
             var libraryManager = engine.getEnvironment().getLibraryManager();
             var libraryIdentifier = baseCqlExecutionProcessor.resolveLibraryIdentifier(content, null, libraryManager);

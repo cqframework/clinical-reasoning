@@ -284,6 +284,7 @@ class MeasureWithNpmForR4Test {
                 .hasPeriodEnd(toJavaUtilDate(LOCAL_DATE_TIME_2023_01_01_MINUS_ONE_SECOND))
                 .hasSubjectReference(PATIENT_MALE_1988)
                 .hasStatus(MeasureReportStatus.COMPLETE)
+                // LUKETODO:  why am I getting 11 and not 1?
                 .hasEvaluatedResourceCount(1)
                 .firstGroup()
                 .population(INITIAL_POPULATION)

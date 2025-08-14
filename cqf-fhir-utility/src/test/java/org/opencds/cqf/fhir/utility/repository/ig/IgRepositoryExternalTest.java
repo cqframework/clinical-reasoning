@@ -54,7 +54,7 @@ class IgRepositoryExternalTest {
         var created = repository.read(ValueSet.class, o.getId());
         assertNotNull(created);
 
-        var loc = tempDir.resolve("vocabulary/valueset/new-valueset.json");
+        var loc = tempDir.resolve("input/vocabulary/valueset/new-valueset.json");
         assertTrue(Files.exists(loc));
 
         repository.delete(ValueSet.class, created.getIdElement());

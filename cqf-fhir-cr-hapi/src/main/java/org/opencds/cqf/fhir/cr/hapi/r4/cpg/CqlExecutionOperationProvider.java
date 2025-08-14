@@ -1,5 +1,8 @@
 package org.opencds.cqf.fhir.cr.hapi.r4.cpg;
 
+import static org.opencds.cqf.fhir.cr.hapi.common.EndpointHelper.getEndpoint;
+
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -16,9 +19,11 @@ import org.opencds.cqf.fhir.cr.hapi.r4.ICqlExecutionServiceFactory;
 public class CqlExecutionOperationProvider {
 
     private final ICqlExecutionServiceFactory cqlExecutionServiceFactory;
+    private final FhirVersionEnum fhirVersion;
 
     public CqlExecutionOperationProvider(ICqlExecutionServiceFactory cqlExecutionServiceFactory) {
         this.cqlExecutionServiceFactory = cqlExecutionServiceFactory;
+        fhirVersion = FhirVersionEnum.R4;
     }
 
     /**
@@ -68,18 +73,18 @@ public class CqlExecutionOperationProvider {
      *                            data as a single bundle, or provide data using
      *                            multiple bundles with prefetch descriptions).
      * @param prefetchData        ***Not Yet Implemented***
-     * @param dataEndpoint        An {@link Endpoint} endpoint to use to access data
+     * @param dataEndpoint        The FHIR {@link Endpoint} Endpoint resource or url to use to access data
      *                            referenced by retrieve operations in the library.
      *                            If provided, this endpoint is used after the data
      *                            or prefetchData bundles, and the server, if the
      *                            useServerData parameter is true.
-     * @param contentEndpoint     An {@link Endpoint} endpoint to use to access
+     * @param contentEndpoint     The FHIR {@link Endpoint} Endpoint resource or url to use to access
      *                            content (i.e. libraries) referenced by the
      *                            library. If no content endpoint is supplied, the
      *                            evaluation will attempt to retrieve content from
      *                            the server on which the operation is being
      *                            performed.
-     * @param terminologyEndpoint An {@link Endpoint} endpoint to use to access
+     * @param terminologyEndpoint The FHIR {@link Endpoint} Endpoint resource or url to use to access
      *                            terminology (i.e. valuesets, codesystems, and
      *                            membership testing) referenced by the library. If
      *                            no terminology endpoint is supplied, the
@@ -111,10 +116,14 @@ public class CqlExecutionOperationProvider {
             @OperationParam(name = "useServerData", max = 1) BooleanType useServerData,
             @OperationParam(name = "data", max = 1) Bundle data,
             @OperationParam(name = "prefetchData") List<Parameters> prefetchData,
-            @OperationParam(name = "dataEndpoint", max = 1) Endpoint dataEndpoint,
-            @OperationParam(name = "contentEndpoint", max = 1) Endpoint contentEndpoint,
-            @OperationParam(name = "terminologyEndpoint", max = 1) Endpoint terminologyEndpoint,
+            @OperationParam(name = "dataEndpoint", max = 1) Parameters.ParametersParameterComponent dataEndpoint,
+            @OperationParam(name = "contentEndpoint", max = 1) Parameters.ParametersParameterComponent contentEndpoint,
+            @OperationParam(name = "terminologyEndpoint", max = 1)
+                    Parameters.ParametersParameterComponent terminologyEndpoint,
             @OperationParam(name = "content", max = 1) String content) {
+        var dataEndpointParam = (Endpoint) getEndpoint(fhirVersion, dataEndpoint);
+        var contentEndpointParam = (Endpoint) getEndpoint(fhirVersion, contentEndpoint);
+        var terminologyEndpointParam = (Endpoint) getEndpoint(fhirVersion, terminologyEndpoint);
         return cqlExecutionServiceFactory
                 .create(requestDetails)
                 .evaluate(
@@ -125,9 +134,9 @@ public class CqlExecutionOperationProvider {
                         useServerData,
                         data,
                         prefetchData,
-                        dataEndpoint,
-                        contentEndpoint,
-                        terminologyEndpoint,
+                        dataEndpointParam,
+                        contentEndpointParam,
+                        terminologyEndpointParam,
                         content);
     }
 }

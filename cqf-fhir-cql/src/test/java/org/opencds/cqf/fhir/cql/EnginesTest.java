@@ -14,11 +14,11 @@ import static org.mockito.Mockito.when;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.util.BundleBuilder;
+import jakarta.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.StreamSupport;
-import javax.annotation.Nonnull;
 import org.cqframework.cql.cql2elm.StringLibrarySourceProvider;
 import org.cqframework.fhir.npm.NpmPackageManager;
 import org.cqframework.fhir.npm.NpmProcessor;

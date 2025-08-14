@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
@@ -25,6 +26,7 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
+import org.opencds.cqf.cql.engine.execution.EvaluationResultsForMultiLib;
 import org.opencds.cqf.fhir.cql.engine.parameters.CqlFhirParametersConverter;
 import org.opencds.cqf.fhir.cql.engine.parameters.CqlParameterDefinition;
 import org.opencds.cqf.fhir.utility.CqfExpression;
@@ -325,6 +327,42 @@ public class LibraryEngine {
         return result;
     }
 
+    public EvaluationResultsForMultiLib getEvaluationResult(
+            List<VersionedIdentifier> ids,
+            String patientId,
+            IBaseParameters parameters,
+            Map<String, Object> rawParameters,
+            IBaseBundle additionalData,
+            Set<String> expressions,
+            CqlFhirParametersConverter cqlFhirParametersConverter,
+            @Nullable ZonedDateTime zonedDateTime,
+            CqlEngine engine) {
+
+        var cqlFhirParametersConverterToUse = Objects.requireNonNullElseGet(
+                cqlFhirParametersConverter, () -> Engines.getCqlFhirParametersConverter(repository.fhirContext()));
+
+        // engine context built externally of LibraryEngine?
+        var engineToUse = Objects.requireNonNullElseGet(
+                engine, () -> Engines.forRepository(repository, settings, additionalData));
+
+        var evaluationParameters = cqlFhirParametersConverterToUse.toCqlParameters(parameters);
+        if (rawParameters != null && !rawParameters.isEmpty()) {
+            evaluationParameters.putAll(rawParameters);
+        }
+
+        var versionlessIdentifiers = ids.stream()
+                .map(id -> new VersionedIdentifier().withId(id.getId()))
+                .toList();
+
+        return engineToUse.evaluate(
+                versionlessIdentifiers,
+                expressions,
+                buildContextParameter(patientId),
+                evaluationParameters,
+                null,
+                zonedDateTime);
+    }
+
     public EvaluationResult getEvaluationResult(
             VersionedIdentifier id,
             String patientId,
@@ -336,25 +374,17 @@ public class LibraryEngine {
             @Nullable ZonedDateTime zonedDateTime,
             CqlEngine engine) {
 
-        if (cqlFhirParametersConverter == null) {
-            cqlFhirParametersConverter = Engines.getCqlFhirParametersConverter(repository.fhirContext());
-        }
-        // engine context built externally of LibraryEngine?
-        if (engine == null) {
-            engine = Engines.forRepository(repository, settings, additionalData);
-        }
-
-        var evaluationParameters = cqlFhirParametersConverter.toCqlParameters(parameters);
-        if (rawParameters != null && !rawParameters.isEmpty()) {
-            evaluationParameters.putAll(rawParameters);
-        }
-
-        return engine.evaluate(
-                new VersionedIdentifier().withId(id.getId()),
+        var evaluationResultsForMultiLib = getEvaluationResult(
+                List.of(id),
+                patientId,
+                parameters,
+                rawParameters,
+                additionalData,
                 expressions,
-                buildContextParameter(patientId),
-                evaluationParameters,
-                null,
-                zonedDateTime);
+                cqlFhirParametersConverter,
+                zonedDateTime,
+                engine);
+
+        return evaluationResultsForMultiLib.getOnlyResultOrThrow();
     }
 }

@@ -1,0 +1,8 @@
+{
+    "id": "DEF",
+    "url": "http://example.com/Measure/DEF",
+    "resourceType" : "Measure",
+    "library": [
+        "http://example.com/Library/DEFLIB"
+      ]
+}

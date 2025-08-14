@@ -25,9 +25,13 @@ import org.hl7.fhir.r5.model.DataRequirement;
 import org.hl7.fhir.r5.model.Enumerations.FHIRTypes;
 import org.hl7.fhir.r5.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r5.model.Library;
+import org.hl7.fhir.r5.model.Parameters;
+import org.hl7.fhir.r5.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r5.model.Period;
 import org.hl7.fhir.r5.model.PlanDefinition;
 import org.hl7.fhir.r5.model.RelatedArtifact;
+import org.hl7.fhir.r5.model.RelatedArtifact.RelatedArtifactType;
+import org.hl7.fhir.r5.model.StringType;
 import org.hl7.fhir.r5.model.UsageContext;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.utility.adapter.IAdapter;
@@ -171,12 +175,29 @@ class LibraryAdapterTest {
                 "profileRef", "relatedArtifactRef", "dataRequirementProfileRef", "dataRequirementCodeFilterRef");
         var library = new Library();
         library.getMeta().addProfile(dependencies.get(0));
-        library.getRelatedArtifactFirstRep().setResource(dependencies.get(1));
+        library.getRelatedArtifactFirstRep().setResource(dependencies.get(1)).setType(RelatedArtifactType.DEPENDSON);
         library.addDataRequirement().addProfile(dependencies.get(2));
         library.addDataRequirement().addCodeFilter().setValueSet(dependencies.get(3));
         var adapter = adapterFactory.createKnowledgeArtifactAdapter(library);
         var extractedDependencies = adapter.getDependencies();
         assertEquals(extractedDependencies.size(), dependencies.size());
+        extractedDependencies.forEach(dep -> {
+            assertTrue(dependencies.contains(dep.getReference()));
+        });
+    }
+
+    @Test
+    void adapter_get_all_dependencies_with_non_depends_on_related_artifacts() {
+        var dependencies = List.of(
+                "profileRef", "relatedArtifactRef", "dataRequirementProfileRef", "dataRequirementCodeFilterRef");
+        var library = new Library();
+        library.getMeta().addProfile(dependencies.get(0));
+        library.getRelatedArtifactFirstRep().setResource(dependencies.get(1));
+        library.addDataRequirement().addProfile(dependencies.get(2));
+        library.addDataRequirement().addCodeFilter().setValueSet(dependencies.get(3));
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(library);
+        var extractedDependencies = adapter.getDependencies();
+        assertEquals(extractedDependencies.size(), dependencies.size() - 1);
         extractedDependencies.forEach(dep -> {
             assertTrue(dependencies.contains(dep.getReference()));
         });
@@ -247,5 +268,29 @@ class LibraryAdapterTest {
         assertEquals(
                 library,
                 adapter.retrieveReferencedLibraries(null).get(libraryName).get());
+    }
+
+    @Test
+    void testSetExpansionParameters() {
+        var library = new Library();
+        var adapter = (LibraryAdapter) adapterFactory.createKnowledgeArtifactAdapter(library);
+        var params = new Parameters();
+        var paramComponent =
+                new ParametersParameterComponent().setName("paramName").setValue(new StringType("paramValue"));
+        params.addParameter(paramComponent);
+        adapter.setExpansionParameters(params);
+        assertTrue(adapter.getExpansionParameters().isPresent());
+        assertEquals(
+                ((Parameters) adapter.getExpansionParameters().get())
+                        .getParameter()
+                        .get(0)
+                        .getName(),
+                params.getParameter().get(0).getName());
+        assertEquals(
+                ((Parameters) adapter.getExpansionParameters().get())
+                        .getParameter()
+                        .get(0)
+                        .getValue(),
+                params.getParameter().get(0).getValue());
     }
 }

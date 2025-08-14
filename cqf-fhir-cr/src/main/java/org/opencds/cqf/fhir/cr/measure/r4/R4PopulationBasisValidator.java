@@ -10,6 +10,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Enumeration;
@@ -175,15 +176,24 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
             return Collections.emptyList();
         }
 
-        if (!(result instanceof List<?> list)) {
+        if (!(result instanceof Iterable<?> iterable)) {
             return Collections.singletonList(result.getClass());
         }
 
         // Need to this to return List<Class<?>> and get rid of Sonar warnings.
         final Stream<Class<?>> classStream =
-                list.stream().filter(Objects::nonNull).map(Object::getClass);
+                getStream(iterable).filter(Objects::nonNull).map(Object::getClass);
 
         return classStream.toList();
+    }
+
+    private Stream<?> getStream(Iterable<?> iterable) {
+        if (iterable instanceof List<?> list) {
+            return list.stream();
+        }
+
+        // It's entirely possible CQL returns an Iterable that is not a List, so we need to handle that case
+        return StreamSupport.stream(iterable.spliterator(), false);
     }
 
     private List<String> prettyClassNames(List<Class<?>> classes) {

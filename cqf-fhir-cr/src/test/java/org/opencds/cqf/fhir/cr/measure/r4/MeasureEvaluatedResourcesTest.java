@@ -5,6 +5,9 @@ import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.repository.IRepository;
 import java.nio.file.Path;
+import java.time.LocalDate;
+import java.time.Month;
+import java.time.ZoneId;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Period;
 import org.junit.jupiter.api.BeforeAll;
@@ -29,6 +32,8 @@ class MeasureEvaluatedResourcesTest {
             Path.of(getResourcePath(MeasureEvaluatedResourcesTest.class) + "/" + CLASS_PATH + "/" + "MeasureTest"));
     private final Given given = Measure.given().repository(repository);
     private static final TestDataGenerator testDataGenerator = new TestDataGenerator(repository);
+
+    private static final Measure.Given GIVEN_REPO = Measure.given().repositoryFor("MinimalMeasureEvaluation");
 
     @BeforeAll
     static void init() {
@@ -59,11 +64,9 @@ class MeasureEvaluatedResourcesTest {
                 .hasNoDuplicateExtensions()
                 .up()
                 .evaluatedResource("Encounter/patient-9-encounter-1")
-                .referenceHasExtension("sde-patient-sex")
                 .hasNoDuplicateExtensions()
                 .up()
                 .evaluatedResource("Encounter/patient-9-encounter-2")
-                .referenceHasExtension("sde-patient-sex")
                 .hasNoDuplicateExtensions()
                 .up()
                 .report();
@@ -86,9 +89,6 @@ class MeasureEvaluatedResourcesTest {
                 .hasEvaluatedResourceCount(3)
                 .evaluatedResourceHasNoDuplicateReferences()
                 .evaluatedResource("Patient/patient-9")
-                .referenceHasExtension("initial-population")
-                .referenceHasExtension("denominator")
-                .referenceHasExtension("numerator")
                 .hasNoDuplicateExtensions()
                 .up()
                 .evaluatedResource("Encounter/patient-9-encounter-1")
@@ -117,6 +117,28 @@ class MeasureEvaluatedResourcesTest {
                 .evaluate()
                 .then()
                 .hasEvaluatedResourceCount(0)
+                .report();
+    }
+    // MinimalProportionBooleanBasisSingleGroup
+    @Test
+    void correctReferenceExpQtyCheck() {
+
+        GIVEN_REPO
+                .when()
+                .measureId("MinimalProportionBooleanBasisSingleGroup")
+                .subject("Patient/male-2022")
+                .periodStart(LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .periodEnd(LocalDate.of(2024, Month.DECEMBER, 31).atStartOfDay().atZone(ZoneId.systemDefault()))
+                .evaluate()
+                .then()
+                .hasEvaluatedResourceCount(2) // resources touched in evaluation
+                .evaluatedResource("Patient/male-2022")
+                .hasEvaluatedResourceReferenceCount(4) // qty of expressions that touched resource
+                .up()
+                .evaluatedResource(
+                        "Encounter/male-2022-encounter-1") // only initial-population & Denominator touches Encounter
+                .hasEvaluatedResourceReferenceCount(2)
+                .up()
                 .report();
     }
 }

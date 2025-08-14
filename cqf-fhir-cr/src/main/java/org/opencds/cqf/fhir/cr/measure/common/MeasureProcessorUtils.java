@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.cr.measure.common;
 
 import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.MEASUREPOPULATION;
 
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -9,7 +10,6 @@ import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -22,12 +22,12 @@ import org.hl7.elm.r1.ParameterDef;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
+import org.opencds.cqf.cql.engine.execution.EvaluationResultsForMultiLib;
 import org.opencds.cqf.cql.engine.execution.Libraries;
 import org.opencds.cqf.cql.engine.execution.Variable;
 import org.opencds.cqf.cql.engine.runtime.Date;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.engine.runtime.Interval;
-import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.opencds.cqf.fhir.cr.measure.helper.DateHelper;
 import org.slf4j.Logger;
@@ -35,6 +35,8 @@ import org.slf4j.LoggerFactory;
 
 public class MeasureProcessorUtils {
     private static final Logger logger = LoggerFactory.getLogger(MeasureProcessorUtils.class);
+    private static final String EXCEPTION_FOR_SUBJECT_ID_MESSAGE_TEMPLATE = "Exception for subjectId: %s, Message: %s";
+
     /**
      * Method that processes CQL Results into Measure defined fields that reference associated CQL expressions
      * @param results criteria expression results
@@ -66,7 +68,7 @@ public class MeasureProcessorUtils {
             } catch (Exception e) {
                 // Catch Exceptions from evaluation per subject, but allow rest of subjects to be processed (if
                 // applicable)
-                var error = "Exception for subjectId: %s, Message: %s".formatted(subjectId, e.getMessage());
+                var error = EXCEPTION_FOR_SUBJECT_ID_MESSAGE_TEMPLATE.formatted(subjectId, e.getMessage());
                 // Capture error for MeasureReportBuilder
                 measureDef.addError(error);
                 logger.error(error, e);
@@ -147,12 +149,11 @@ public class MeasureProcessorUtils {
     /**
      * method to set measurement period on cql engine context.
      * Priority is operation parameter defined value, otherwise default CQL value is used
-     * @param measureDef Measure defined objects to populate with criteria results
      * @param measurementPeriod Interval defined by operation parameters to override default CQL value
      * @param context cql engine context used to set measurement period parameter
      */
     @SuppressWarnings({"deprecation", "removal"})
-    public void setMeasurementPeriod(MeasureDef measureDef, Interval measurementPeriod, CqlEngine context) {
+    public void setMeasurementPeriod(Interval measurementPeriod, CqlEngine context, List<String> measureUrls) {
         ParameterDef pd = this.getMeasurementPeriodParameterDef(context);
         if (pd == null) {
             logger.warn(
@@ -194,7 +195,7 @@ public class MeasureProcessorUtils {
 
         NamedTypeSpecifier pointType = (NamedTypeSpecifier) intervalTypeSpecifier.getPointType();
         String targetType = pointType.getName().getLocalPart();
-        Interval convertedPeriod = convertInterval(measureDef, measurementPeriod, targetType);
+        Interval convertedPeriod = convertInterval(measurementPeriod, targetType, measureUrls);
 
         context.getState().setParameter(null, MeasureConstants.MEASUREMENT_PERIOD_PARAMETER_NAME, convertedPeriod);
     }
@@ -247,7 +248,7 @@ public class MeasureProcessorUtils {
         return newDateTime;
     }
 
-    public Interval convertInterval(MeasureDef measureDef, Interval interval, String targetType) {
+    public Interval convertInterval(Interval interval, String targetType, List<String> measureUrls) {
         String sourceTypeQualified = interval.getPointType().getTypeName();
         String sourceType = sourceTypeQualified.substring(sourceTypeQualified.lastIndexOf(".") + 1);
         if (sourceType.equals(targetType)) {
@@ -265,8 +266,11 @@ public class MeasureProcessorUtils {
         }
 
         throw new InvalidRequestException(
-                "The interval type of %s did not match the expected type of %s and no conversion was possible for MeasureDef: %s."
-                        .formatted(sourceType, targetType, measureDef.url()));
+                "The interval type of %s did not match the expected type of %s and no conversion was possible for measure URLs (first 5 only shown): %s."
+                        .formatted(
+                                sourceType,
+                                targetType,
+                                measureUrls.stream().limit(5).toList()));
     }
 
     public Date truncateDateTime(DateTime dateTime) {
@@ -312,24 +316,22 @@ public class MeasureProcessorUtils {
         var ed = Libraries.resolveExpressionRef(
                 criteriaExpression, context.getState().getCurrentLibrary());
 
-        if (!(ed instanceof FunctionDef)) {
+        if (!(ed instanceof FunctionDef functionDef)) {
             throw new InvalidRequestException(
                     "Measure observation %s does not reference a function definition".formatted(criteriaExpression));
         }
 
         Object result;
-        context.getState().pushWindow();
+        context.getState().pushActivationFrame(functionDef, functionDef.getContext());
         try {
             if (!isBooleanBasis) {
                 // subject based observations don't have a parameter to pass in
                 context.getState()
-                        .push(new Variable(
-                                        ((FunctionDef) ed).getOperand().get(0).getName())
-                                .withValue(resource));
+                        .push(new Variable(functionDef.getOperand().get(0).getName()).withValue(resource));
             }
             result = context.getEvaluationVisitor().visitExpression(ed.getExpression(), context.getState());
         } finally {
-            context.getState().popWindow();
+            context.getState().popActivationFrame();
         }
 
         captureEvaluatedResources(outEvaluatedResources, context);
@@ -339,49 +341,95 @@ public class MeasureProcessorUtils {
 
     /**
      * method used to execute generate CQL results via Library $evaluate
+     *
      * @param subjectIds subjects to generate results for
-     * @param measureDef Measure definition object used to store results of criteria expressions
      * @param zonedMeasurementPeriod offset defined measurement period for evaluation
      * @param context cql engine context
-     * @param libraryEngine library engine to use for evaluation of cql
-     * @param id library Version identifier used by library engine
+     * @param multiLibraryIdMeasureEngineDetails container for engine, library and measure IDs
      * @return CQL results for Library defined in the Measure resource
      */
-    public Map<String, EvaluationResult> getEvaluationResults(
+    public CompositeEvaluationResultsPerMeasure getEvaluationResults(
             List<String> subjectIds,
-            MeasureDef measureDef,
             ZonedDateTime zonedMeasurementPeriod,
             CqlEngine context,
-            LibraryEngine libraryEngine,
-            VersionedIdentifier id) {
+            MultiLibraryIdMeasureEngineDetails multiLibraryIdMeasureEngineDetails) {
 
-        Map<String, EvaluationResult> result = new HashMap<>();
+        // measure -> subject -> results
+        var resultsBuilder = CompositeEvaluationResultsPerMeasure.builder();
 
         // Library $evaluate each subject
+        // The goal here is to do each measure/library evaluation within the context of a single subject.
+        // This means that we will not switch between subject contexts while evaluating measures.
+        // Once we've switched to a different subject context, the previous expression cache is dropped.
         for (String subjectId : subjectIds) {
             if (subjectId == null) {
-                throw new NullPointerException("SubjectId is required in order to calculate.");
+                throw new InternalErrorException("SubjectId is required in order to calculate.");
             }
             Pair<String, String> subjectInfo = this.getSubjectTypeAndId(subjectId);
             String subjectTypePart = subjectInfo.getLeft();
             String subjectIdPart = subjectInfo.getRight();
             context.getState().setContextValue(subjectTypePart, subjectIdPart);
             try {
-                result.put(
-                        subjectId,
-                        libraryEngine.getEvaluationResult(
-                                id, subjectId, null, null, null, null, null, zonedMeasurementPeriod, context));
+                var libraryIdentifiers = multiLibraryIdMeasureEngineDetails.getLibraryIdentifiers();
+
+                var evaluationResultsForMultiLib = multiLibraryIdMeasureEngineDetails
+                        .getLibraryEngine()
+                        .getEvaluationResult(
+                                libraryIdentifiers,
+                                subjectId,
+                                null,
+                                null,
+                                null,
+                                null,
+                                null,
+                                zonedMeasurementPeriod,
+                                context);
+
+                for (var libraryVersionedIdentifier : libraryIdentifiers) {
+                    validateEvaluationResultExistsForIdentifier(
+                            libraryVersionedIdentifier, evaluationResultsForMultiLib);
+
+                    var evaluationResult = evaluationResultsForMultiLib.getResultFor(libraryVersionedIdentifier);
+
+                    var measureIds =
+                            multiLibraryIdMeasureEngineDetails.getMeasureIdsForLibrary(libraryVersionedIdentifier);
+
+                    resultsBuilder.addResults(measureIds, subjectId, evaluationResult);
+
+                    Optional.ofNullable(evaluationResultsForMultiLib.getExceptionFor(libraryVersionedIdentifier))
+                            .ifPresent(exception -> {
+                                var error = EXCEPTION_FOR_SUBJECT_ID_MESSAGE_TEMPLATE.formatted(
+                                        subjectId, exception.getMessage());
+                                resultsBuilder.addErrors(measureIds, error);
+                                logger.error(error, exception);
+                            });
+                }
+
             } catch (Exception e) {
-                // Catch Exceptions from evaluation per subject, but allow rest of subjects to be processed (if
-                // applicable)
-                var error = "Exception for subjectId: %s, Message: %s".formatted(subjectId, e.getMessage());
-                // Capture error for MeasureReportBuilder
-                measureDef.addError(error);
+                // If there's any error we didn't anticipate, catch it here:
+                var error = EXCEPTION_FOR_SUBJECT_ID_MESSAGE_TEMPLATE.formatted(subjectId, e.getMessage());
+                var measureIds = multiLibraryIdMeasureEngineDetails.getAllMeasureIds();
+
+                resultsBuilder.addErrors(measureIds, error);
                 logger.error(error, e);
             }
         }
 
-        return result;
+        return resultsBuilder.build();
+    }
+
+    private void validateEvaluationResultExistsForIdentifier(
+            VersionedIdentifier versionedIdentifierFromQuery,
+            EvaluationResultsForMultiLib evaluationResultsForMultiLib) {
+
+        var containsResults = evaluationResultsForMultiLib.containsResultsFor(versionedIdentifierFromQuery);
+        var containsExceptions = evaluationResultsForMultiLib.containsExceptionsFor(versionedIdentifierFromQuery);
+
+        if (!containsResults && !containsExceptions) {
+            throw new InternalErrorException(
+                    "Evaluation result in versionless search not found for identifier with ID: %s"
+                            .formatted(versionedIdentifierFromQuery.getId()));
+        }
     }
 
     public Pair<String, String> getSubjectTypeAndId(String subjectId) {

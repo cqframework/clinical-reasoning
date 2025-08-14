@@ -134,7 +134,7 @@ public class TestPlanDefinition {
                         .getTerminologySettings()
                         .setValuesetExpansionMode(VALUESET_EXPANSION_MODE.PERFORM_NAIVE_EXPANSION);
             }
-            return new PlanDefinitionProcessor(repository, evaluationSettings);
+            return new PlanDefinitionProcessor(repository, evaluationSettings, null);
         }
 
         public When when() {

@@ -57,6 +57,25 @@ public class CompositeEvaluationResultsPerMeasure {
         return resultsPerMeasure.getOrDefault(unqualifiedMeasureId, Map.of());
     }
 
+    /**
+     * Expose method to allow retrieval of evaluated cql results per Measure.
+     * IIdType for Measure is key, Nested Map<String, EvaluationResult> has Key for subject evaluated,
+     * and associated EvaluationResult produced from CQL expression evaluation
+     * @return {@code Map<IIdType, Map<String, EvaluationResult>>}
+     */
+    public Map<IIdType, Map<String, EvaluationResult>> getResultsPerMeasure() {
+        return this.resultsPerMeasure;
+    }
+
+    /**
+     * Expose method to allow retrieval of captured errors produced from evaluated cql per Measure.
+     * When an error is produced while evaluating, we capture the errors generated in this object, which can be rendered per Measure evaluated.
+     * @return {@code Map<IIdType, List<String>>}
+     */
+    public Map<IIdType, List<String>> getErrorsPerMeasure() {
+        return this.errorsPerMeasure;
+    }
+
     public static Builder builder() {
         return new Builder();
     }

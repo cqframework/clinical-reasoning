@@ -243,7 +243,7 @@ public class LibraryAdapter extends KnowledgeArtifactAdapter implements ILibrary
             return;
         }
 
-        Parameters expansionParameters = (Parameters) expansionParametersOpt.get();
+        var expansionParameters = (Parameters) expansionParametersOpt.get();
 
         String resourceType = artifactAdapter.get().fhirType();
         String parameterName = getExpansionParameterName(resourceType, crmiVersion);

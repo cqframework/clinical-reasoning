@@ -11,6 +11,8 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 
+import static org.junit.jupiter.api.Assertions.fail;
+
 // TODO: LD :  introduce an R5 version of this test once R5 services/etc become available
 class MeasureWithNpmForR4Test {
 
@@ -84,6 +86,8 @@ class MeasureWithNpmForR4Test {
 
     private static final String PATIENT_FEMALE_1944 = "Patient/female-1944";
     private static final String PATIENT_MALE_1944 = "Patient/male-1944";
+    private static final String PATIENT_MALE_1988 = "Patient/male-1988";
+    private static final String ENCOUNTER_MALE_1988_FINISHED_ENCOUNTER_1 = "Encounter/male-1988-finished-encounter-1";
 
     // LUKETODO:  set up a multilib eval with NPM
 
@@ -106,8 +110,7 @@ class MeasureWithNpmForR4Test {
                 .hasEvaluatedResourceReferenceCount(1)
                 .up()
                 .firstGroup()
-                .firstPopulation()
-                .hasCode("initial-population")
+                .population(INITIAL_POPULATION)
                 // We match the patient and the single finished encounter, which matches Alpha's where
                 .hasCount(1);
 
@@ -127,8 +130,7 @@ class MeasureWithNpmForR4Test {
                 .hasEvaluatedResourceReferenceCount(1)
                 .up()
                 .firstGroup()
-                .firstPopulation()
-                .hasCode("initial-population")
+                .population(INITIAL_POPULATION)
                 // We match the patient and the single finished encounter, which matches Alpha's where
                 .hasCount(1);
     }
@@ -152,8 +154,7 @@ class MeasureWithNpmForR4Test {
                 .hasEvaluatedResourceReferenceCount(1)
                 .up()
                 .firstGroup()
-                .firstPopulation()
-                .hasCode("initial-population")
+                .population(INITIAL_POPULATION)
                 // there are 0 planned encounters corresponding to Bravo's where and the patient
                 .hasCount(0);
     }
@@ -198,14 +199,14 @@ class MeasureWithNpmForR4Test {
                 .evaluatedResource("Encounter/male-1944-finished-encounter-1")
                 .hasEvaluatedResourceReferenceCount(1)
                 .up()
-                .evaluatedResource("Encounter/male-1988-finished-encounter-1")
+                .evaluatedResource(ENCOUNTER_MALE_1988_FINISHED_ENCOUNTER_1)
                 .hasEvaluatedResourceReferenceCount(1)
                 .up()
                 .evaluatedResource("Encounter/male-2022-finished-encounter-1")
                 .hasEvaluatedResourceReferenceCount(1)
                 .up()
                 .firstGroup()
-                .firstPopulation()
+                .population(INITIAL_POPULATION)
                 .hasCode("initial-population")
                 .hasCount(3); // there are 3 planned encounters which corresponds to Bravo's where
     }
@@ -224,7 +225,13 @@ class MeasureWithNpmForR4Test {
                 .hasPeriodEnd(toJavaUtilDate(LOCAL_DATE_TIME_2022_01_01_MINUS_ONE_SECOND))
                 .hasSubjectReference(PATIENT_FEMALE_1944)
                 .hasStatus(MeasureReportStatus.COMPLETE)
-                .hasEvaluatedResourceCount(0);
+                .hasEvaluatedResourceCount(1)
+                .evaluatedResource("Encounter/female-1944-finished-encounter-1")
+                .hasEvaluatedResourceReferenceCount(1)
+                .up()
+                .firstGroup()
+                .population(INITIAL_POPULATION)
+                .hasCount(1);
 
         NPM_REPO.when()
                 .measureUrl(MEASURE_URL_WITH_DERIVED_LIBRARY)
@@ -240,40 +247,42 @@ class MeasureWithNpmForR4Test {
                 .hasEvaluatedResourceCount(1)
                 .firstGroup()
                 .population(INITIAL_POPULATION)
-                .hasCount(1)
-                .up()
-                .population(DENOMINATOR)
-                .hasCount(1)
-                .up()
-                .population(NUMERATOR)
                 .hasCount(1);
     }
 
     @Test
-    void evaluateWithSingleMeasureDerivedLibraryTwoLayers() {
+    void evaluateWithDerivedLibraryOneLayerAndAllSubjects() {
+        fail();
+    }
+
+    @Test
+    void evaluateWithSingleMeasureDerivedLibraryTwoLayersOneSubject() {
 
         NPM_REPO.when()
                 .measureUrl(MEASURE_URL_BRAVO)
                 .reportType(MeasureEvalType.SUBJECT.toCode())
-                .subject("Patient/male-1988")
+                .subject(PATIENT_MALE_1988)
                 .evaluate()
                 .then()
                 .hasMeasureUrl(MEASURE_URL_BRAVO_WITH_VERSION)
                 .hasPeriodStart(toJavaUtilDate(LOCAL_DATE_TIME_2024_01_01))
                 .hasPeriodEnd(toJavaUtilDate(LOCAL_DATE_TIME_2025_01_01_MINUS_ONE_SECOND))
-                .hasSubjectReference("Patient/male-1988")
+                .hasSubjectReference(PATIENT_MALE_1988)
                 .hasStatus(MeasureReportStatus.COMPLETE)
-                .hasEvaluatedResourceCount(0);
+                .hasEvaluatedResourceCount(1)
+                .evaluatedResource(ENCOUNTER_MALE_1988_FINISHED_ENCOUNTER_1)
+                .hasEvaluatedResourceReferenceCount(1);
 
         NPM_REPO.when()
                 .measureUrl(MEASURE_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES)
                 .reportType(MeasureEvalType.SUBJECT.toCode())
+                .subject(PATIENT_MALE_1988)
                 .evaluate()
                 .then()
                 .hasMeasureUrl(MEASURE_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES_WITH_VERSION)
                 .hasPeriodStart(toJavaUtilDate(LOCAL_DATE_TIME_2022_01_01))
                 .hasPeriodEnd(toJavaUtilDate(LOCAL_DATE_TIME_2023_01_01_MINUS_ONE_SECOND))
-                .hasSubjectReference(PATIENT_MALE_1944)
+                .hasSubjectReference(PATIENT_MALE_1988)
                 .hasStatus(MeasureReportStatus.COMPLETE)
                 .hasEvaluatedResourceCount(1)
                 .firstGroup()
@@ -285,6 +294,11 @@ class MeasureWithNpmForR4Test {
                 .up()
                 .population(NUMERATOR)
                 .hasCount(1);
+    }
+
+    @Test
+    void evaluateWithSingleMeasureDerivedLibraryTwoLayersAllSubjects() {
+
     }
 
     @Test

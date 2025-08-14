@@ -372,6 +372,9 @@ public class MeasureProcessorUtils {
             try {
                 var libraryIdentifiers = multiLibraryIdMeasureEngineDetails.getLibraryIdentifiers();
 
+                // LUKETODO:  are we somehow loading the libraries out of order:  we're looking for 1a, but found 1b
+                // NEW ERROR!!!!
+//                Library WithTwoLayersDerivedLibraries-0.1 loaded, but had errors: Library DerivedLayer1a was included with version 0.1, but id: DerivedLayer1b and version 0.1 of the library was found., Could not resolve identifier DerivedLayer1a in the current library.
                 var evaluationResultsForMultiLib = multiLibraryIdMeasureEngineDetails
                         .getLibraryEngine()
                         .getEvaluationResult(

@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.opencds.cqf.fhir.cr.measure.common.MeasureInfo.EXT_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_CRITERIA_REFERENCE_URL;
@@ -363,7 +364,7 @@ public class Measure {
                     .findFirst();
 
             if (optResourceReference.isEmpty()) {
-                throw new IllegalArgumentException("No evaluated resource with name: %s within: %s"
+                fail("No evaluated resource with name: %s within: %s"
                         .formatted(
                                 name,
                                 measureReport.getEvaluatedResource().stream()

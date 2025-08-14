@@ -58,10 +58,10 @@ public interface ILibraryAdapter extends IKnowledgeArtifactAdapter {
     // resourceType extension.
     default boolean shouldAddResourceTypeExtension(String crmiVersion, String resourceType) {
         var isV1AndQualifies = (crmiVersion == null || crmiVersion.equals(Constants.CRMI_VERSION_1))
-            && !resourceType.equals(Constants.RESOURCETYPE_CODESYSTEM);
+                && !resourceType.equals(Constants.RESOURCETYPE_CODESYSTEM);
 
         var isV2AndQualifies = (crmiVersion != null && !crmiVersion.equals(Constants.CRMI_VERSION_1))
-            && resourceType.equals(Constants.RESOURCETYPE_VALUESET);
+                && resourceType.equals(Constants.RESOURCETYPE_VALUESET);
 
         return isV1AndQualifies || isV2AndQualifies;
     }

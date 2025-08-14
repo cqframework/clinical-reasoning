@@ -27,7 +27,6 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DataRequirement;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
-import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
@@ -322,56 +321,56 @@ class LibraryAdapterTest {
         var manifestLibraryAdapter = (LibraryAdapter) adapterFactory.createKnowledgeArtifactAdapter(new Library());
 
         var valueSetUrl = "http://www.terminologytest.com/fhir/ValueSet/test-value-set";
-        var valueSetDependencyAdapter = (ValueSetAdapter) adapterFactory.createKnowledgeArtifactAdapter(new ValueSet().setUrl(valueSetUrl).setVersion(version));
+        var valueSetDependencyAdapter = (ValueSetAdapter) adapterFactory.createKnowledgeArtifactAdapter(
+                new ValueSet().setUrl(valueSetUrl).setVersion(version));
         manifestLibraryAdapter.ensureExpansionParametersEntry(valueSetDependencyAdapter, crmiVersion);
 
         var codeSystemUrl = "http://www.terminologytest.com/fhir/CodeSystem/test-code-system";
-        var codeSystemV1Adapter = (IKnowledgeArtifactAdapter) adapterFactory.createKnowledgeArtifactAdapter(new CodeSystem().setUrl(codeSystemUrl).setVersion(version));
+        var codeSystemV1Adapter = (IKnowledgeArtifactAdapter) adapterFactory.createKnowledgeArtifactAdapter(
+                new CodeSystem().setUrl(codeSystemUrl).setVersion(version));
         manifestLibraryAdapter.ensureExpansionParametersEntry(codeSystemV1Adapter, crmiVersion);
 
         var libraryUrl = "http://www.terminologytest.com/fhir/Library/test-library";
-        var libraryV1Adapter = (LibraryAdapter) adapterFactory.createKnowledgeArtifactAdapter(new Library().setUrl(libraryUrl).setVersion("1.2.3"));
+        var libraryV1Adapter = (LibraryAdapter) adapterFactory.createKnowledgeArtifactAdapter(
+                new Library().setUrl(libraryUrl).setVersion("1.2.3"));
         manifestLibraryAdapter.ensureExpansionParametersEntry(libraryV1Adapter, crmiVersion);
 
         var expansionParameters = manifestLibraryAdapter.getExpansionParameters();
 
         var valueSetCanonical = valueSetUrl + "|" + version;
         var valueSetParameter = expansionParameters
-            .filter(Parameters.class::isInstance)
-            .map(Parameters.class::cast)
-            .flatMap(p -> p.getParameter().stream()
-                .filter(param -> Constants.CANONICAL_VERSION.equals(param.getName())
-                    && param.getValue() instanceof CanonicalType
-                    && valueSetCanonical.equals(((CanonicalType) param.getValue()).getValue()))
-                .findFirst()
-            )
-            .orElse(null);
+                .filter(Parameters.class::isInstance)
+                .map(Parameters.class::cast)
+                .flatMap(p -> p.getParameter().stream()
+                        .filter(param -> Constants.CANONICAL_VERSION.equals(param.getName())
+                                && param.getValue() instanceof CanonicalType
+                                && valueSetCanonical.equals(((CanonicalType) param.getValue()).getValue()))
+                        .findFirst())
+                .orElse(null);
         assertNotNull(valueSetParameter);
 
         var codeSystemCanonical = codeSystemUrl + "|" + version;
         var codeSystemParameter = expansionParameters
-            .filter(Parameters.class::isInstance)
-            .map(Parameters.class::cast)
-            .flatMap(p -> p.getParameter().stream()
-                .filter(param -> Constants.SYSTEM_VERSION.equals(param.getName())
-                    && param.getValue() instanceof CanonicalType
-                    && codeSystemCanonical.equals(((CanonicalType) param.getValue()).getValue()))
-                .findFirst()
-            )
-            .orElse(null);
+                .filter(Parameters.class::isInstance)
+                .map(Parameters.class::cast)
+                .flatMap(p -> p.getParameter().stream()
+                        .filter(param -> Constants.SYSTEM_VERSION.equals(param.getName())
+                                && param.getValue() instanceof CanonicalType
+                                && codeSystemCanonical.equals(((CanonicalType) param.getValue()).getValue()))
+                        .findFirst())
+                .orElse(null);
         assertNotNull(codeSystemParameter);
 
         var libraryCanonical = libraryUrl + "|" + version;
         var libraryParameter = expansionParameters
-            .filter(Parameters.class::isInstance)
-            .map(Parameters.class::cast)
-            .flatMap(p -> p.getParameter().stream()
-                .filter(param -> Constants.CANONICAL_VERSION.equals(param.getName())
-                    && param.getValue() instanceof CanonicalType
-                    && libraryCanonical.equals(((CanonicalType) param.getValue()).getValue()))
-                .findFirst()
-            )
-            .orElse(null);
+                .filter(Parameters.class::isInstance)
+                .map(Parameters.class::cast)
+                .flatMap(p -> p.getParameter().stream()
+                        .filter(param -> Constants.CANONICAL_VERSION.equals(param.getName())
+                                && param.getValue() instanceof CanonicalType
+                                && libraryCanonical.equals(((CanonicalType) param.getValue()).getValue()))
+                        .findFirst())
+                .orElse(null);
         assertNotNull(libraryParameter);
     }
 
@@ -383,56 +382,56 @@ class LibraryAdapterTest {
         var manifestLibraryAdapter = (LibraryAdapter) adapterFactory.createKnowledgeArtifactAdapter(new Library());
 
         var valueSetUrl = "http://www.terminologytest.com/fhir/ValueSet/test-value-set";
-        var valueSetDependencyAdapter = (ValueSetAdapter) adapterFactory.createKnowledgeArtifactAdapter(new ValueSet().setUrl(valueSetUrl).setVersion(version));
+        var valueSetDependencyAdapter = (ValueSetAdapter) adapterFactory.createKnowledgeArtifactAdapter(
+                new ValueSet().setUrl(valueSetUrl).setVersion(version));
         manifestLibraryAdapter.ensureExpansionParametersEntry(valueSetDependencyAdapter, crmiVersion);
 
         var codeSystemUrl = "http://www.terminologytest.com/fhir/CodeSystem/test-code-system";
-        var codeSystemV1Adapter = (IKnowledgeArtifactAdapter) adapterFactory.createKnowledgeArtifactAdapter(new CodeSystem().setUrl(codeSystemUrl).setVersion(version));
+        var codeSystemV1Adapter = (IKnowledgeArtifactAdapter) adapterFactory.createKnowledgeArtifactAdapter(
+                new CodeSystem().setUrl(codeSystemUrl).setVersion(version));
         manifestLibraryAdapter.ensureExpansionParametersEntry(codeSystemV1Adapter, crmiVersion);
 
         var libraryUrl = "http://www.terminologytest.com/fhir/Library/test-library";
-        var libraryV1Adapter = (LibraryAdapter) adapterFactory.createKnowledgeArtifactAdapter(new Library().setUrl(libraryUrl).setVersion("1.2.3"));
+        var libraryV1Adapter = (LibraryAdapter) adapterFactory.createKnowledgeArtifactAdapter(
+                new Library().setUrl(libraryUrl).setVersion("1.2.3"));
         manifestLibraryAdapter.ensureExpansionParametersEntry(libraryV1Adapter, crmiVersion);
 
         var expansionParameters = manifestLibraryAdapter.getExpansionParameters();
 
         var valueSetCanonical = valueSetUrl + "|" + version;
         var valueSetParameter = expansionParameters
-            .filter(Parameters.class::isInstance)
-            .map(Parameters.class::cast)
-            .flatMap(p -> p.getParameter().stream()
-                .filter(param -> Constants.DEFAULT_VALUESET_VERSION.equals(param.getName())
-                    && param.getValue() instanceof CanonicalType
-                    && valueSetCanonical.equals(((CanonicalType) param.getValue()).getValue()))
-                .findFirst()
-            )
-            .orElse(null);
+                .filter(Parameters.class::isInstance)
+                .map(Parameters.class::cast)
+                .flatMap(p -> p.getParameter().stream()
+                        .filter(param -> Constants.DEFAULT_VALUESET_VERSION.equals(param.getName())
+                                && param.getValue() instanceof CanonicalType
+                                && valueSetCanonical.equals(((CanonicalType) param.getValue()).getValue()))
+                        .findFirst())
+                .orElse(null);
         assertNotNull(valueSetParameter);
 
         var codeSystemCanonical = codeSystemUrl + "|" + version;
         var codeSystemParameter = expansionParameters
-            .filter(Parameters.class::isInstance)
-            .map(Parameters.class::cast)
-            .flatMap(p -> p.getParameter().stream()
-                .filter(param -> Constants.DEFAULT_SYSTEM_VERSION.equals(param.getName())
-                    && param.getValue() instanceof CanonicalType
-                    && codeSystemCanonical.equals(((CanonicalType) param.getValue()).getValue()))
-                .findFirst()
-            )
-            .orElse(null);
+                .filter(Parameters.class::isInstance)
+                .map(Parameters.class::cast)
+                .flatMap(p -> p.getParameter().stream()
+                        .filter(param -> Constants.DEFAULT_SYSTEM_VERSION.equals(param.getName())
+                                && param.getValue() instanceof CanonicalType
+                                && codeSystemCanonical.equals(((CanonicalType) param.getValue()).getValue()))
+                        .findFirst())
+                .orElse(null);
         assertNotNull(codeSystemParameter);
 
         var libraryCanonical = libraryUrl + "|" + version;
         var libraryParameter = expansionParameters
-            .filter(Parameters.class::isInstance)
-            .map(Parameters.class::cast)
-            .flatMap(p -> p.getParameter().stream()
-                .filter(param -> Constants.DEFAULT_CANONICAL_VERSION.equals(param.getName())
-                    && param.getValue() instanceof CanonicalType
-                    && libraryCanonical.equals(((CanonicalType) param.getValue()).getValue()))
-                .findFirst()
-            )
-            .orElse(null);
+                .filter(Parameters.class::isInstance)
+                .map(Parameters.class::cast)
+                .flatMap(p -> p.getParameter().stream()
+                        .filter(param -> Constants.DEFAULT_CANONICAL_VERSION.equals(param.getName())
+                                && param.getValue() instanceof CanonicalType
+                                && libraryCanonical.equals(((CanonicalType) param.getValue()).getValue()))
+                        .findFirst())
+                .orElse(null);
         assertNotNull(libraryParameter);
     }
 

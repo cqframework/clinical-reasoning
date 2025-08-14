@@ -1,6 +1,6 @@
 {
   "resourceType": "StructureDefinition",
-  "id": "RouteOneOrganization-noLibrary",
+  "id": "RouteOneOrganization-missingLibrary",
   "meta": {
     "lastUpdated": "2022-05-28T12:47:40.239+10:00"
   },
@@ -29,11 +29,12 @@
       "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-featureExpression",
       "valueExpression": {
         "language": "text/cql.identifier",
-        "expression": "OrganizationFacility"
+        "expression": "OrganizationFacility",
+        "reference": "http://test.org/fhir/Library/Test"
       }
     }
   ],
-  "url": "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/RouteOneOrganization-noLibrary",
+  "url": "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/RouteOneOrganization-missingLibrary",
   "version": "5.0.0",
   "name": "RouteOneOrganization",
   "title": "Facility Information",

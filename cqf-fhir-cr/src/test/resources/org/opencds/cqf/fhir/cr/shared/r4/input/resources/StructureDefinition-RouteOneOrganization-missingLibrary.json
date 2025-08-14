@@ -1,6 +1,6 @@
 {
   "resourceType": "StructureDefinition",
-  "id": "RouteOneOrganization-noLibrary",
+  "id": "RouteOneOrganization-missingLibrary",
   "meta": {
     "lastUpdated": "2022-05-28T12:47:40.239+10:00"
   },
@@ -29,12 +29,13 @@
       "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-featureExpression",
       "valueExpression": {
         "language": "text/cql.identifier",
-        "expression": "OrganizationFacility"
+        "expression": "OrganizationFacility",
+        "reference": "http://test.org/fhir/Library/Test"
       }
     }
   ],
-  "url": "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/RouteOneOrganization-noLibrary",
-  "version": "5.0.0",
+  "url": "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/RouteOneOrganization-missingLibrary",
+  "version": "4.3.0",
   "name": "RouteOneOrganization",
   "title": "Facility Information",
   "status": "draft",
@@ -60,7 +61,7 @@
     }
   ],
   "description": "A formally or informally recognized grouping of people or organizations formed for the purpose of achieving some form of collective action.  Includes companies, institutions, corporations, departments, community groups, healthcare practice groups, payer/insurer, etc.",
-  "fhirVersion": "5.0.0",
+  "fhirVersion": "4.3.0",
   "mapping": [
     {
       "identity": "v2",

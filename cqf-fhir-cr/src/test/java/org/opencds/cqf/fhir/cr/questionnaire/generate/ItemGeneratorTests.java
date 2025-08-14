@@ -37,6 +37,52 @@ class ItemGeneratorTests {
     }
 
     @Test
+    void testErrorItemR4() {
+        given().repositoryFor(fhirContextR4, "r4")
+                .when()
+                .profileUrl(new CanonicalType(
+                        "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/RouteOneOrganization-noLibrary"))
+                .then()
+                .hasItemCount(1)
+                .itemHasText("1", "An error occurred")
+                .itemHasType("1", "display")
+                .itemRepeats("1", false);
+        given().repositoryFor(fhirContextR4, "r4")
+                .when()
+                .profileUrl(
+                        new CanonicalType(
+                                "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/RouteOneOrganization-missingLibrary"))
+                .then()
+                .hasItemCount(1)
+                .itemHasText("1", "An error occurred")
+                .itemHasType("1", "display")
+                .itemRepeats("1", false);
+    }
+
+    @Test
+    void testErrorItemR5() {
+        given().repositoryFor(fhirContextR5, "r5")
+                .when()
+                .profileUrl(new CanonicalType(
+                        "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/RouteOneOrganization-noLibrary"))
+                .then()
+                .hasItemCount(1)
+                .itemHasText("1", "An error occurred")
+                .itemHasType("1", "display")
+                .itemRepeats("1", false);
+        given().repositoryFor(fhirContextR5, "r5")
+                .when()
+                .profileUrl(
+                        new CanonicalType(
+                                "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/RouteOneOrganization-missingLibrary"))
+                .then()
+                .hasItemCount(1)
+                .itemHasText("1", "An error occurred")
+                .itemHasType("1", "display")
+                .itemRepeats("1", false);
+    }
+
+    @Test
     void generateItemR4() {
         given().repositoryFor(fhirContextR4, "r4")
                 .when()

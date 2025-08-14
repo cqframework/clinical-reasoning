@@ -78,9 +78,9 @@ public class MeasureOperationsProvider {
             @OperationParam(name = "lastReceivedOn") String lastReceivedOn,
             @OperationParam(name = "productLine") String productLine,
             @OperationParam(name = "additionalData") Bundle additionalData,
-            @OperationParam(name = "terminologyEndpoint") Parameters.ParametersParameterComponent contentEndpoint,
+            @OperationParam(name = "contentEndpoint") Parameters.ParametersParameterComponent contentEndpoint,
             @OperationParam(name = "terminologyEndpoint") Parameters.ParametersParameterComponent terminologyEndpoint,
-            @OperationParam(name = "terminologyEndpoint") Parameters.ParametersParameterComponent dataEndpoint,
+            @OperationParam(name = "dataEndpoint") Parameters.ParametersParameterComponent dataEndpoint,
             @OperationParam(name = "parameters") Parameters parameters,
             RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
@@ -146,9 +146,9 @@ public class MeasureOperationsProvider {
             @OperationParam(name = "lastReceivedOn") String lastReceivedOn,
             @OperationParam(name = "productLine") String productLine,
             @OperationParam(name = "additionalData") Bundle additionalData,
-            @OperationParam(name = "terminologyEndpoint") Parameters.ParametersParameterComponent contentEndpoint,
+            @OperationParam(name = "contentEndpoint") Parameters.ParametersParameterComponent contentEndpoint,
             @OperationParam(name = "terminologyEndpoint") Parameters.ParametersParameterComponent terminologyEndpoint,
-            @OperationParam(name = "terminologyEndpoint") Parameters.ParametersParameterComponent dataEndpoint,
+            @OperationParam(name = "dataEndpoint") Parameters.ParametersParameterComponent dataEndpoint,
             @OperationParam(name = "parameters") Parameters parameters,
             @OperationParam(name = "reporter") String reporter,
             RequestDetails requestDetails)

@@ -281,7 +281,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
             // we trust in this case that the Endpoint URL matches up with the Authoritative Source in the ValueSet
             // if this assumption is faulty the only consequence is that the VSet doesn't get resolved
             latest = terminologyServerClient
-                    .getLatestNonDraftResource(endpoint, preReleaseReference)
+                    .getLatestNonDraftValueSetResource(endpoint, preReleaseReference)
                     .map(r -> (IKnowledgeArtifactAdapter) createAdapterForResource(r));
         } else {
             // get the latest ACTIVE version, if not fallback to the latest non-DRAFT version
@@ -468,10 +468,16 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
         Optional<IKnowledgeArtifactAdapter> maybeAdapter;
         // we trust in this case that the Endpoint URL matches up with the Authoritative Source in the ValueSet
         // if this assumption is faulty the only consequence is that the VSet doesn't get resolved
-        if (resourceType != null && resourceType.equals(Constants.RESOURCETYPE_VALUESET) && latestFromTxServer) {
+        if (resourceType != null && resourceType.equals(Constants.RESOURCETYPE_VALUESET)
+            && latestFromTxServer) {
             maybeAdapter = terminologyServerClient
-                    .getLatestNonDraftResource(endpoint, reference)
-                    .map(r -> (IKnowledgeArtifactAdapter) createAdapterForResource(r));
+                .getLatestNonDraftValueSetResource(endpoint, reference)
+                .map(r -> (IKnowledgeArtifactAdapter) createAdapterForResource(r));
+        } else if (resourceType != null && resourceType.equals(Constants.RESOURCETYPE_CODESYSTEM)
+            && latestFromTxServer) {
+            maybeAdapter = terminologyServerClient
+                .getCodeSystemResource(endpoint, reference)
+                .map(r -> (IKnowledgeArtifactAdapter) createAdapterForResource(r));
         } else {
             // get the latest ACTIVE version, if not fallback to the latest non-DRAFT version
             maybeAdapter = VisitorHelper.tryGetLatestVersionWithStatus(reference, repository, Constants.STATUS_ACTIVE)

@@ -264,7 +264,7 @@ public class TerminologyServerClientTest {
 
         // test
         var client = new TerminologyServerClient(contextMock);
-        client.getLatestNonDraftResource(endpointMock, "www.test.com/fhir/ValueSet/123|1.2.3");
+        client.getLatestNonDraftValueSetResource(endpointMock, "www.test.com/fhir/ValueSet/123|1.2.3");
         var capturedUrlParams = urlParamsCaptor.getValue();
         var token = (TokenParam) capturedUrlParams.get("status").get(0);
 
@@ -324,7 +324,7 @@ public class TerminologyServerClientTest {
                 (org.hl7.fhir.r4.model.ValueSet) client.expand(valueSetAdapter, endpointAdapter, parametersAdapter);
 
         assertEquals(3, actual.getExpansion().getContains().size());
-        verify(client, never()).getResource(any(), any());
+        verify(client, never()).getValueSetResource(any(), any());
         verify(fhirClient, atLeast(3)).operation();
     }
 
@@ -368,7 +368,7 @@ public class TerminologyServerClientTest {
         assertThrows(
                 TerminologyServerExpansionException.class,
                 () -> client.expand(valueSetAdapter, endpointAdapter, parametersAdapter));
-        verify(client, never()).getResource(any(), any());
+        verify(client, never()).getValueSetResource(any(), any());
         verify(fhirClient, atLeast(3)).operation();
     }
 }

@@ -124,7 +124,7 @@ public class TerminologyServerClient {
         return fhirClient;
     }
 
-    public java.util.Optional<IDomainResource> getResource(IEndpointAdapter endpoint, String url) {
+    public java.util.Optional<IDomainResource> getValueSetResource(IEndpointAdapter endpoint, String url) {
         return IKnowledgeArtifactAdapter.findLatestVersion(initializeClientWithAuth(endpoint)
                 .search()
                 .forResource(getValueSetClass())
@@ -132,7 +132,15 @@ public class TerminologyServerClient {
                 .execute());
     }
 
-    public java.util.Optional<IDomainResource> getLatestNonDraftResource(IEndpointAdapter endpoint, String url) {
+    public java.util.Optional<IDomainResource> getCodeSystemResource(IEndpointAdapter endpoint, String url) {
+        return IKnowledgeArtifactAdapter.findLatestVersion(initializeClientWithAuth(endpoint)
+            .search()
+            .forResource(getCodeSystemClass())
+            .where(Searches.byCanonical(url))
+            .execute());
+    }
+
+    public java.util.Optional<IDomainResource> getLatestNonDraftValueSetResource(IEndpointAdapter endpoint, String url) {
         var urlParams = Searches.byCanonical(url);
         var statusParam = Searches.exceptStatus("draft");
         urlParams.putAll(statusParam);
@@ -146,6 +154,11 @@ public class TerminologyServerClient {
     private Class<? extends IBaseResource> getValueSetClass() {
         return Resources.getClassForTypeAndVersion(
                 "ValueSet", fhirContext.getVersion().getVersion());
+    }
+
+    private Class<? extends IBaseResource> getCodeSystemClass() {
+        return Resources.getClassForTypeAndVersion(
+            "CodeSystem", fhirContext.getVersion().getVersion());
     }
 
     private String getAddressBase(String address) {

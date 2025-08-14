@@ -225,24 +225,8 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
                                 .getValueAsString());
             }
         }
-
-        IBaseParameters paramsCopy = Parameters.newParameters(fhirContext());
-
-        switch (fhirVersion()) {
-            case DSTU3:
-                paramsCopy = ((org.hl7.fhir.dstu3.model.Parameters) expansionParams).copy();
-                break;
-            case R4:
-                paramsCopy = ((org.hl7.fhir.r4.model.Parameters) expansionParams).copy();
-                break;
-            case R5:
-                paramsCopy = ((org.hl7.fhir.r5.model.Parameters) expansionParams).copy();
-                break;
-            default:
-                break;
-        }
-
-        var params = (IParametersAdapter) createAdapterForResource(paramsCopy);
+        var params = (IParametersAdapter) createAdapterForResource(
+                createAdapterForResource(expansionParams).copy());
 
         var valueSets = BundleHelper.getEntryResources(packagedBundle).stream()
                 .filter(r -> r.fhirType().equals("ValueSet"))

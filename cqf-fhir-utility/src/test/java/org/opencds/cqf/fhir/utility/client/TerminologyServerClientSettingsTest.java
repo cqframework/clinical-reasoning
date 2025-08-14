@@ -16,7 +16,8 @@ class TerminologyServerClientSettingsTest {
                 .setMaxRetryCount(retryCount)
                 .setRetryIntervalMillis(interval)
                 .setTimeoutSeconds(timeout)
-                .setSocketTimeout(socketTimeout);
+                .setSocketTimeout(socketTimeout)
+                .setCrmiVersion("2.0.0");
         assertEquals(retryCount, settings.getMaxRetryCount());
         assertEquals(interval, settings.getRetryIntervalMillis());
         assertEquals(timeout, settings.getTimeoutSeconds());
@@ -26,5 +27,6 @@ class TerminologyServerClientSettingsTest {
         assertEquals(settings.getRetryIntervalMillis(), copy.getRetryIntervalMillis());
         assertEquals(settings.getTimeoutSeconds(), copy.getTimeoutSeconds());
         assertEquals(settings.getSocketTimeout(), copy.getSocketTimeout());
+        assertEquals(settings.getCrmiVersion(), copy.getCrmiVersion());
     }
 }

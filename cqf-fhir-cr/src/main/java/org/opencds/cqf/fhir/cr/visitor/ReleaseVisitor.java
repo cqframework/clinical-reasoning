@@ -468,8 +468,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
         Optional<IKnowledgeArtifactAdapter> maybeAdapter;
         // we trust in this case that the Endpoint URL matches up with the Authoritative Source in the ValueSet
         // if this assumption is faulty the only consequence is that the VSet doesn't get resolved
-        if (resourceType != null && resourceType.equals(Constants.RESOURCETYPE_VALUESET)
-            && latestFromTxServer) {
+        if (resourceType != null && resourceType.equals(Constants.RESOURCETYPE_VALUESET) && latestFromTxServer) {
             maybeAdapter = terminologyServerClient
                 .getLatestNonDraftValueSetResource(endpoint, reference)
                 .map(r -> (IKnowledgeArtifactAdapter) createAdapterForResource(r));

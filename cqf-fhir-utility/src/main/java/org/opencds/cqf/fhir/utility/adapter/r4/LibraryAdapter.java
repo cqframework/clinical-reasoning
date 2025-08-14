@@ -13,8 +13,6 @@ import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Attachment;
-import org.hl7.fhir.r4.model.CanonicalType;
-import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DataRequirement;
@@ -228,49 +226,5 @@ public class LibraryAdapter extends KnowledgeArtifactAdapter implements ILibrary
             var existingExpansionParameters = getExpansionParameters();
             existingExpansionParameters.ifPresent(parameters -> ((Parameters) parameters).setParameter(newParameters));
         }
-    }
-
-    public void ensureExpansionParametersEntry(IKnowledgeArtifactAdapter artifactAdapter, String crmiVersion) {
-        var maybeExpansionParameters = getExpansionParameters();
-        if (maybeExpansionParameters.isEmpty()) {
-            return;
-        }
-
-        Parameters expansionParameters = (Parameters) maybeExpansionParameters.get();
-        String resourceType = artifactAdapter.get().fhirType();
-        String canonical = artifactAdapter.getUrl() + "|" + artifactAdapter.getVersion();
-        String parameterName = getExpansionParameterName(resourceType, crmiVersion);
-
-        if (parameterExists(expansionParameters, parameterName, canonical)) {
-            return;
-        }
-
-        CanonicalType canonicalToAdd = buildCanonicalToAdd(artifactAdapter, crmiVersion, resourceType, canonical);
-        expansionParameters.addParameter(parameterName, canonicalToAdd);
-    }
-
-    @SuppressWarnings("unchecked")
-    private boolean parameterExists(Parameters parameters, String parameterName, String canonical) {
-        var parametersWithName = parameters.getParameters(parameterName);
-        if (parametersWithName == null) {
-            return false;
-        }
-        return parametersWithName.stream()
-                .map(p -> (IPrimitiveType<String>) p.getValue())
-                .map(IPrimitiveType::getValueAsString)
-                .anyMatch(value -> value.equals(canonical));
-    }
-
-    private CanonicalType buildCanonicalToAdd(
-            IKnowledgeArtifactAdapter artifactAdapter, String crmiVersion, String resourceType, String canonical) {
-        CanonicalType canonicalToAdd = new CanonicalType(canonical);
-
-        if (shouldAddResourceTypeExtension(crmiVersion, resourceType)) {
-            canonicalToAdd.addExtension(Constants.CQF_RESOURCETYPE, new CodeType(resourceType));
-        }
-
-        canonicalToAdd.addExtension(Constants.DISPLAY_EXTENSION, new StringType(artifactAdapter.getDescriptor()));
-
-        return canonicalToAdd;
     }
 }

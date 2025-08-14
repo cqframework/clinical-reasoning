@@ -57,10 +57,12 @@ public interface ILibraryAdapter extends IKnowledgeArtifactAdapter {
     // resourceType extension. For CRMI Version 2, only entries for ValueSets should have the
     // resourceType extension.
     default boolean shouldAddResourceTypeExtension(String crmiVersion, String resourceType) {
-        return ((crmiVersion == null || crmiVersion.equals(Constants.CRMI_VERSION_1))
-                        && !resourceType.equals(Constants.RESOURCETYPE_CODESYSTEM))
-                || ((crmiVersion != null && !crmiVersion.equals(Constants.CRMI_VERSION_1))
-                        && !resourceType.equals(Constants.RESOURCETYPE_VALUESET)
-                        && !resourceType.equals(Constants.RESOURCETYPE_CODESYSTEM));
+        var isV1AndQualifies = (crmiVersion == null || crmiVersion.equals(Constants.CRMI_VERSION_1))
+            && !resourceType.equals(Constants.RESOURCETYPE_CODESYSTEM);
+
+        var isV2AndQualifies = (crmiVersion != null && !crmiVersion.equals(Constants.CRMI_VERSION_1))
+            && resourceType.equals(Constants.RESOURCETYPE_VALUESET);
+
+        return isV1AndQualifies || isV2AndQualifies;
     }
 }

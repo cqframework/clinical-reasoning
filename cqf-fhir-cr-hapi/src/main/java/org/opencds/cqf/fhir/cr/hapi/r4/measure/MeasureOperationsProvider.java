@@ -59,7 +59,10 @@ public class MeasureOperationsProvider {
      * @param productLine    the productLine (e.g. Medicare, Medicaid, etc) to use
      *                          for the evaluation. This is a non-standard parameter.
      * @param additionalData the data bundle containing additional data
+     * @param contentEndpoint     the FHIR {@link Endpoint} Endpoint resource or url to use to access content (i.e. libraries) referenced by the Measure.
      * @param terminologyEndpoint the FHIR {@link Endpoint} Endpoint resource or url to use to access terminology (i.e. valuesets, codesystems, naming systems, concept maps, and membership testing) referenced by the Resource. If no terminology endpoint is supplied, the evaluation will attempt to use the server on which the operation is being performed as the terminology server.
+     * @param dataEndpoint        the FHIR {@link Endpoint} Endpoint resource or url to use to access data referenced by retrieve operations in libraries
+     *                               referenced by the Measure.
      * @param requestDetails The details (such as tenant) of this request. Usually
      *                          autopopulated HAPI.
      * @return the calculated MeasureReport
@@ -75,11 +78,15 @@ public class MeasureOperationsProvider {
             @OperationParam(name = "lastReceivedOn") String lastReceivedOn,
             @OperationParam(name = "productLine") String productLine,
             @OperationParam(name = "additionalData") Bundle additionalData,
+            @OperationParam(name = "terminologyEndpoint") Parameters.ParametersParameterComponent contentEndpoint,
             @OperationParam(name = "terminologyEndpoint") Parameters.ParametersParameterComponent terminologyEndpoint,
+            @OperationParam(name = "terminologyEndpoint") Parameters.ParametersParameterComponent dataEndpoint,
             @OperationParam(name = "parameters") Parameters parameters,
             RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
+        var contentEndpointParam = (Endpoint) getEndpoint(fhirVersion, contentEndpoint);
         var terminologyEndpointParam = (Endpoint) getEndpoint(fhirVersion, terminologyEndpoint);
+        var dataEndpointParam = (Endpoint) getEndpoint(fhirVersion, dataEndpoint);
         return r4MeasureServiceFactory
                 .create(requestDetails)
                 .evaluate(
@@ -89,9 +96,9 @@ public class MeasureOperationsProvider {
                         reportType,
                         subject,
                         lastReceivedOn,
-                        null,
+                        contentEndpointParam,
                         terminologyEndpointParam,
-                        null,
+                        dataEndpointParam,
                         additionalData,
                         parameters,
                         productLine,
@@ -116,8 +123,11 @@ public class MeasureOperationsProvider {
      * @param lastReceivedOn  the date the results of this measure were last received.
      * @param productLine     the productLine (e.g. Medicare, Medicaid, etc) to use for
      *                          the evaluation. This is a non-standard parameter.
-     * @param additionalData  the data bundle containing additional data
-     * @param terminologyEndpoint The endpoint for terminology services
+     * @param additionalData      the data bundle containing additional data
+     * @param contentEndpoint     the FHIR {@link Endpoint} Endpoint resource or url to use to access content (i.e. libraries) referenced by the Measure.
+     * @param terminologyEndpoint the FHIR {@link Endpoint} Endpoint resource or url to use to access terminology (i.e. valuesets, codesystems, naming systems, concept maps, and membership testing) referenced by the Resource. If no terminology endpoint is supplied, the evaluation will attempt to use the server on which the operation is being performed as the terminology server.
+     * @param dataEndpoint        the FHIR {@link Endpoint} Endpoint resource or url to use to access data referenced by retrieve operations in libraries
+     *                               referenced by the Measure.
      * @param parameters      additional parameters for evaluation
      * @param reporter        The reporter for this evaluation, if applicable.
      * @return a Bundle containing multiple MeasureReports, one for each Measure evaluated.
@@ -136,11 +146,16 @@ public class MeasureOperationsProvider {
             @OperationParam(name = "lastReceivedOn") String lastReceivedOn,
             @OperationParam(name = "productLine") String productLine,
             @OperationParam(name = "additionalData") Bundle additionalData,
-            @OperationParam(name = "terminologyEndpoint") Endpoint terminologyEndpoint,
+            @OperationParam(name = "terminologyEndpoint") Parameters.ParametersParameterComponent contentEndpoint,
+            @OperationParam(name = "terminologyEndpoint") Parameters.ParametersParameterComponent terminologyEndpoint,
+            @OperationParam(name = "terminologyEndpoint") Parameters.ParametersParameterComponent dataEndpoint,
             @OperationParam(name = "parameters") Parameters parameters,
             @OperationParam(name = "reporter") String reporter,
             RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
+        var contentEndpointParam = (Endpoint) getEndpoint(fhirVersion, contentEndpoint);
+        var terminologyEndpointParam = (Endpoint) getEndpoint(fhirVersion, terminologyEndpoint);
+        var dataEndpointParam = (Endpoint) getEndpoint(fhirVersion, dataEndpoint);
         return r4MultiMeasureServiceFactory
                 .create(requestDetails)
                 .evaluate(
@@ -151,9 +166,9 @@ public class MeasureOperationsProvider {
                         stringTimePeriodHandler.getEndZonedDateTime(periodEnd, requestDetails),
                         reportType,
                         subject,
-                        null,
-                        terminologyEndpoint,
-                        null,
+                        contentEndpointParam,
+                        terminologyEndpointParam,
+                        dataEndpointParam,
                         additionalData,
                         parameters,
                         productLine,

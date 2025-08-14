@@ -37,7 +37,6 @@ import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
-import org.opencds.cqf.fhir.utility.npm.NpmResourceInfoForCql;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,8 +57,7 @@ public class Engines {
 
     public static CqlEngine forRepository(
             IRepository repository, EvaluationSettings settings, IBaseBundle additionalData) {
-        return forRepository(
-                repository, settings, additionalData, NpmPackageLoader.DEFAULT);
+        return forRepository(repository, settings, additionalData, NpmPackageLoader.DEFAULT);
     }
 
     public static CqlEngine forRepository(
@@ -74,8 +72,7 @@ public class Engines {
                 repository, settings.getValueSetCache(), settings.getTerminologySettings());
         var dataProviders =
                 buildDataProviders(repository, additionalData, terminologyProvider, settings.getRetrieveSettings());
-        var environment = buildEnvironment(
-                repository, settings, terminologyProvider, dataProviders, npmPackageLoader);
+        var environment = buildEnvironment(repository, settings, terminologyProvider, dataProviders, npmPackageLoader);
         return createEngine(environment, settings);
     }
 
@@ -94,8 +91,7 @@ public class Engines {
 
         registerLibrarySourceProviders(settings, libraryManager, repository);
         registerNpmSupport(settings, libraryManager, modelManager);
-        EnginesNpmLibraryHandler.registerNpmPackageLoader(
-                libraryManager, modelManager, npmPackageLoader);
+        EnginesNpmLibraryHandler.registerNpmPackageLoader(libraryManager, modelManager, npmPackageLoader);
 
         return new Environment(libraryManager, dataProviders, terminologyProvider);
     }

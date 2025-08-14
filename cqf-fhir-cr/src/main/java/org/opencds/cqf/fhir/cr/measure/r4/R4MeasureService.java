@@ -101,7 +101,10 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
         // as the repository for the CQL engine context.
         // LUKETODO:  find and pass the the NPM resource load and loaded NPM resources here?
         var context = Engines.forRepository(
-                proxyRepoForMeasureProcessor, this.measureEvaluationOptions.getEvaluationSettings(), additionalData, new NpmPackageLoaderWithCache(measurePlusNpmResourceHolder.npmResourceHolder(), npmPackageLoader));
+                proxyRepoForMeasureProcessor,
+                this.measureEvaluationOptions.getEvaluationSettings(),
+                additionalData,
+                new NpmPackageLoaderWithCache(measurePlusNpmResourceHolder.npmResourceHolder(), npmPackageLoader));
 
         var evaluationResults = processor.evaluateMeasureWithCqlEngine(
                 subjects, measurePlusNpmResourceHolder, periodStart, periodEnd, parameters, context);
@@ -129,8 +132,7 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
         private final NpmResourceInfoForCql npmResourceHolder;
         private final NpmPackageLoader npmPackageLoader;
 
-        public NpmPackageLoaderWithCache(NpmResourceInfoForCql npmResourceHolder,
-            NpmPackageLoader npmPackageLoader) {
+        public NpmPackageLoaderWithCache(NpmResourceInfoForCql npmResourceHolder, NpmPackageLoader npmPackageLoader) {
             this.npmResourceHolder = npmResourceHolder;
             this.npmPackageLoader = npmPackageLoader;
         }
@@ -138,7 +140,8 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
         @Override
         public NpmResourceInfoForCql loadNpmResources(IPrimitiveType<String> measureUrl) {
 
-            if (npmResourceHolder.getMeasure()
+            if (npmResourceHolder
+                    .getMeasure()
                     .map(measure -> measure.getUrl().equals(measureUrl.getValue()))
                     .orElse(false)) {
                 return npmResourceHolder;
@@ -149,14 +152,16 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
 
         @Override
         public Optional<ILibraryAdapter> findMatchingLibrary(VersionedIdentifier versionedIdentifier) {
-            return npmResourceHolder.findMatchingLibrary(versionedIdentifier)
-                .or(() -> findLibraryFromUnrelatedNpmPackage(versionedIdentifier));
+            return npmResourceHolder
+                    .findMatchingLibrary(versionedIdentifier)
+                    .or(() -> findLibraryFromUnrelatedNpmPackage(versionedIdentifier));
         }
 
         @Override
         public Optional<ILibraryAdapter> findMatchingLibrary(ModelIdentifier modelIdentifier) {
-            return npmResourceHolder.findMatchingLibrary(modelIdentifier)
-                .or(() -> findLibraryFromUnrelatedNpmPackage(modelIdentifier));
+            return npmResourceHolder
+                    .findMatchingLibrary(modelIdentifier)
+                    .or(() -> findLibraryFromUnrelatedNpmPackage(modelIdentifier));
         }
 
         @Override
@@ -167,7 +172,8 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
         @Override
         public Optional<ILibraryAdapter> loadLibraryByUrl(String libraryUrl) {
 
-            if (npmResourceHolder.getOptMainLibrary()
+            if (npmResourceHolder
+                    .getOptMainLibrary()
                     .map(library -> library.getUrl().equals(libraryUrl))
                     .orElse(false)) {
                 return npmResourceHolder.getOptMainLibrary();

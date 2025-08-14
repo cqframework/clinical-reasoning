@@ -16,7 +16,6 @@ import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
-import org.opencds.cqf.fhir.utility.npm.NpmPackageLoaderInMemory;
 
 // TODO: LD :  introduce an R5 version of this test once R5 services/etc become available
 class MeasureWithNpmForR4Test {
@@ -24,8 +23,7 @@ class MeasureWithNpmForR4Test {
     private static final String SIMPLE_ALPHA = "SimpleAlpha";
     private static final String SIMPLE_BRAVO = "SimpleBravo";
     private static final String WITH_DERIVED_LIBRARY = "WithDerivedLibrary";
-    private static final String WITH_TWO_LAYERS_DERIVED_LIBRARIES = "with-two-layers-derived-libraries";
-    private static final String WITH_TWO_LAYERS_DERIVED_LIBRARIES_UPPER = "WithTwoLayersDerivedLibraries";
+    private static final String WITH_TWO_LAYERS_DERIVED_LIBRARIES = "WithTwoLayersDerivedLibraries";
 
     private static final String SIMPLE_URL = "http://example.com";
     private static final String DERIVED_URL = "http://with-derived-library.npm.opencds.org";
@@ -51,18 +49,17 @@ class MeasureWithNpmForR4Test {
     private static final String MEASURE_URL_WITH_DERIVED_LIBRARY_WITH_VERSION =
             MEASURE_URL_WITH_DERIVED_LIBRARY + PIPE + VERSION_0_2;
     private static final String MEASURE_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES =
-            DERIVED_TWO_LAYERS_URL + SLASH_MEASURE_SLASH + WITH_TWO_LAYERS_DERIVED_LIBRARIES_UPPER;
+            DERIVED_TWO_LAYERS_URL + SLASH_MEASURE_SLASH + WITH_TWO_LAYERS_DERIVED_LIBRARIES;
     private static final String MEASURE_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES_WITH_VERSION =
             MEASURE_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES + PIPE + VERSION_0_1;
 
-    private static final String CROSS_PACKAGE_SOURCE = "cross-package-source";
-    private static final String CROSS_PACKAGE_SOURCE_UPPER = "CrossPackageSource";
-    private static final String CROSS_PACKAGE_TARGET = "cross-package-target";
+    private static final String CROSS_PACKAGE_SOURCE = "CrossPackageSource";
+    private static final String CROSS_PACKAGE_TARGET = "CrossPackageTarget";
 
     private static final String CROSS_PACKAGE_SOURCE_URL = "http://cross.package.source.npm.opencds.org";
 
     private static final String MEASURE_URL_CROSS_PACKAGE_SOURCE =
-            CROSS_PACKAGE_SOURCE_URL + SLASH_MEASURE_SLASH + CROSS_PACKAGE_SOURCE_UPPER;
+            CROSS_PACKAGE_SOURCE_URL + SLASH_MEASURE_SLASH + CROSS_PACKAGE_SOURCE;
     private static final String MEASURE_URL_CROSS_PACKAGE_SOURCE_WITH_VERSION =
             MEASURE_URL_CROSS_PACKAGE_SOURCE + PIPE + VERSION_0_2;
 
@@ -96,7 +93,7 @@ class MeasureWithNpmForR4Test {
 
     @Test
     void evaluateSucceedsWithMinimalMeasure() {
-        final Given npmRepo = initNpmRepos(SIMPLE_ALPHA);
+        final Given npmRepo = Measure.given().repositoryFor("BasicNpmPackages");
 
         npmRepo.when()
                 .measureUrl(MEASURE_URL_ALPHA)
@@ -125,7 +122,7 @@ class MeasureWithNpmForR4Test {
 
     @Test
     void evaluateSucceedsWithMeasureAndBasicPatient() {
-        final Given npmRepo = initNpmRepos(SIMPLE_BRAVO);
+        final Given npmRepo = Measure.given().repositoryFor("BasicNpmPackages");
 
         setupPatient(npmRepo);
 
@@ -144,7 +141,7 @@ class MeasureWithNpmForR4Test {
 
     @Test
     void evaluateWithDerivedLibraryOneLayer() {
-        final Given npmRepo = initNpmRepos(SIMPLE_ALPHA, WITH_DERIVED_LIBRARY);
+        final Given npmRepo = Measure.given().repositoryFor("BasicNpmPackages");
 
         setupPatient(npmRepo);
 
@@ -184,7 +181,7 @@ class MeasureWithNpmForR4Test {
 
     @Test
     void evaluateWithDerivedLibraryTwoLayers() {
-        final Given npmRepo = initNpmRepos(SIMPLE_BRAVO, WITH_TWO_LAYERS_DERIVED_LIBRARIES);
+        final Given npmRepo = Measure.given().repositoryFor("BasicNpmPackages");
 
         setupPatient(npmRepo);
 
@@ -224,7 +221,7 @@ class MeasureWithNpmForR4Test {
 
     @Test
     void evaluateWithDerivedLibraryCrossPackage() {
-        final Given npmRepo = initNpmRepos(CROSS_PACKAGE_SOURCE, CROSS_PACKAGE_TARGET);
+        final Given npmRepo = Measure.given().repositoryFor("BasicNpmPackages");
 
         setupPatient(npmRepo);
 
@@ -250,15 +247,11 @@ class MeasureWithNpmForR4Test {
                 .hasCount(1);
     }
 
+    // LUKETODO:  get rid of this once we have an IgRepository
     // LUKETODO:  we add a patient here but it doesn't seem to be enough to get us an evaluated resource count
     // do we need to tweak all of the CQLs?
     private void setupPatient(Given npmRepo) {
         npmRepo.getRepository().update(new Patient().setId(new IdType(ResourceType.Patient.toString(), PATIENT_ID)));
-    }
-
-    private Given initNpmRepos(String... tgzFileNames) {
-        return Measure.given()
-                .npmPackageLoader(NpmPackageLoaderInMemory.fromNpmPackageTgzPath(getClass(), getPaths(tgzFileNames)));
     }
 
     private Path[] getPaths(String[] tgzFileNames) {

@@ -9,6 +9,7 @@ import jakarta.annotation.Nullable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -42,6 +43,10 @@ public class NpmPackageLoaderInMemory implements NpmPackageLoader {
     private final List<NamespaceInfo> namespaceInfos;
 
     public static NpmPackageLoaderInMemory fromNpmPackageTgzPath(Class<?> clazz, Path... tgzPaths) {
+        return fromNpmPackageTgzPath(clazz, Arrays.asList(tgzPaths));
+    }
+
+    public static NpmPackageLoaderInMemory fromNpmPackageTgzPath(Class<?> clazz, List<Path> tgzPaths) {
         final List<NpmPackage> npmPackages = buildNpmPackage(clazz, tgzPaths);
 
         return new NpmPackageLoaderInMemory(npmPackages);
@@ -69,6 +74,7 @@ public class NpmPackageLoaderInMemory implements NpmPackageLoader {
         }
 
         @Override
+        @Nonnull
         public String toString() {
             return url + "|" + version;
         }
@@ -108,18 +114,14 @@ public class NpmPackageLoaderInMemory implements NpmPackageLoader {
     }
 
     @Nonnull
-    private static List<NpmPackage> buildNpmPackage(Class<?> clazz, Path... tgzPaths) {
-        return Arrays.stream(tgzPaths).map(path -> getNpmPackage(clazz, path)).toList();
+    private static List<NpmPackage> buildNpmPackage(Class<?> clazz, List<Path> tgzPaths) {
+        return tgzPaths.stream().map(path -> getNpmPackage(clazz, path)).toList();
     }
 
     @Nonnull
     private static NpmPackage getNpmPackage(Class<?> clazz, Path tgzPath) {
-        try (final InputStream simpleAlphaStream = clazz.getResourceAsStream(tgzPath.toString())) {
-            if (simpleAlphaStream == null) {
-                throw new InvalidRequestException("Failed to load resource: %s".formatted(tgzPath));
-            }
-
-            return NpmPackage.fromPackage(simpleAlphaStream);
+        try (final InputStream npmStream = Files.newInputStream(tgzPath)) {
+            return NpmPackage.fromPackage(npmStream);
         } catch (IOException e) {
             throw new InvalidRequestException("Failed to load resource: %s".formatted(tgzPath), e);
         }

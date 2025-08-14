@@ -41,6 +41,8 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.matcher.ResourceMatcher;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoaderInMemory;
 import org.opencds.cqf.fhir.utility.repository.Repositories;
 import org.opencds.cqf.fhir.utility.repository.ig.EncodingBehavior.PreserveEncoding;
 import org.opencds.cqf.fhir.utility.repository.ig.IgConventions.CategoryLayout;
@@ -124,6 +126,8 @@ public class IgRepository implements IRepository {
     private final Path root;
     private final IgConventions conventions;
     private final ResourceMatcher resourceMatcher;
+    private final NpmPackageLoader npmPackageLoader;
+
     private IRepositoryOperationProvider operationProvider;
 
     private final Cache<Path, Optional<IBaseResource>> resourceCache =
@@ -225,8 +229,6 @@ public class IgRepository implements IRepository {
      * @param root              The root directory of the IG.
      * @param conventions       The conventions defining directory and filename
      *                          structures.
-     * @param encodingBehavior  The encoding behavior for parsing and encoding
-     *                          resources.
      * @param operationProvider The operation provider for invoking FHIR operations.
      */
     public IgRepository(
@@ -239,6 +241,34 @@ public class IgRepository implements IRepository {
         this.conventions = requireNonNull(conventions, "conventions cannot be null");
         this.resourceMatcher = Repositories.getResourceMatcher(this.fhirContext);
         this.operationProvider = operationProvider;
+        this.npmPackageLoader = buildNpmPackageLoader();
+    }
+
+    public NpmPackageLoader getNpmPackageLoader() {
+        return npmPackageLoader;
+    }
+
+    private NpmPackageLoader buildNpmPackageLoader() {
+        return NpmPackageLoaderInMemory.fromNpmPackageTgzPath(getClass(), getNpmTgzPaths());
+    }
+
+    private List<Path> getNpmTgzPaths() {
+        final Path npmDir = root.resolve("input/npm");
+
+        // More often than not, the npm directory will not exist in an IgRepository
+        if (!Files.exists(npmDir) || !Files.isDirectory(npmDir)) {
+            return List.of();
+        }
+
+        try (Stream<Path> npmSubPaths = Files.list(npmDir)) {
+            // LUKETODO: assume that all tgz files are NPM packages for now
+            return npmSubPaths
+                    .filter(Files::isRegularFile)
+                    .filter(file -> file.getFileName().toString().endsWith(".tgz"))
+                    .toList();
+        } catch (IOException exception) {
+            throw new IllegalStateException("Could not resolve NPM files", exception);
+        }
     }
 
     public void setOperationProvider(IRepositoryOperationProvider operationProvider) {
@@ -363,7 +393,7 @@ public class IgRepository implements IRepository {
             Class<T> resourceType, IgRepositoryCompartment igRepositoryCompartment) {
         var category = ResourceCategory.forType(resourceType.getSimpleName());
         var categoryPaths = TYPE_DIRECTORIES.rowMap().get(this.conventions.categoryLayout()).get(category).stream()
-                .map(path -> this.root.resolve(path));
+                .map(this.root::resolve);
         if (category == ResourceCategory.DATA
                 && this.conventions.compartmentLayout() == CompartmentLayout.DIRECTORY_PER_COMPARTMENT) {
             var compartmentPath = pathForCompartment(resourceType, this.fhirContext, igRepositoryCompartment);

@@ -4,7 +4,6 @@ import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.ModelManager;
 import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
-import org.opencds.cqf.fhir.utility.npm.NpmResourceInfoForCql;
 
 /**
  * Convenience class to extend {@link Engines} to handle NPM package specific logic.
@@ -16,9 +15,7 @@ public class EnginesNpmLibraryHandler {
     }
 
     public static void registerNpmPackageLoader(
-            LibraryManager libraryManager,
-            ModelManager modelManager,
-            NpmPackageLoader npmPackageLoader) {
+            LibraryManager libraryManager, ModelManager modelManager, NpmPackageLoader npmPackageLoader) {
 
         npmPackageLoader.initNamespaceMappings(libraryManager);
 
@@ -26,8 +23,6 @@ public class EnginesNpmLibraryHandler {
 
         loader.registerProvider(new NpmLibraryProvider(npmPackageLoader));
 
-        modelManager
-                .getModelInfoLoader()
-                .registerModelInfoProvider(new NpmModelInfoProvider(npmPackageLoader));
+        modelManager.getModelInfoLoader().registerModelInfoProvider(new NpmModelInfoProvider(npmPackageLoader));
     }
 }

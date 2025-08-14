@@ -9,6 +9,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.opencds.cqf.fhir.utility.npm.BaseNpmResourceInfoForCqlTest;
 
+// LUKETODO:  this is totally broken:   fix it
 @SuppressWarnings("squid:S2699")
 class NpmResourceInfoForCqlR4Test extends BaseNpmResourceInfoForCqlTest {
 

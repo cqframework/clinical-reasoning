@@ -12,7 +12,6 @@ import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IAttachmentAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
 import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
-import org.opencds.cqf.fhir.utility.npm.NpmResourceInfoForCql;
 
 // LUKETODO:  adapt this to work with multiple libraries?
 /**
@@ -32,7 +31,8 @@ public class NpmLibraryProvider implements LibrarySourceProvider {
     @Nullable
     public InputStream getLibrarySource(VersionedIdentifier versionedIdentifier) {
 
-        return npmPackageLoader.findMatchingLibrary(versionedIdentifier)
+        return npmPackageLoader
+                .findMatchingLibrary(versionedIdentifier)
                 .map(this::findCqlAttachment)
                 .flatMap(Function.identity())
                 .map(IAttachmentAdapter::getData)

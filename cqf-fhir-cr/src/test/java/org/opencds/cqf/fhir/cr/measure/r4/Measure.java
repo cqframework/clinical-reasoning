@@ -66,7 +66,6 @@ import org.opencds.cqf.fhir.utility.monad.Either3;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.r4.ContainedHelper;
-import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 @SuppressWarnings({"squid:S2699", "squid:S5960", "squid:S1135"})
@@ -160,17 +159,19 @@ public class Measure {
             return this;
         }
 
+        // LUKETODO:  get rid of this
         public Given npmPackageLoader(NpmPackageLoader npmPackageLoader) {
-            this.repository = new InMemoryFhirRepository(FhirContext.forR4Cached());
+            //            this.repository = new InMemoryFhirRepository(FhirContext.forR4Cached());
             this.npmPackageLoader = npmPackageLoader;
             return this;
         }
 
         public Given repositoryFor(String repositoryPath) {
-            this.repository = new IgRepository(
+            var igRepository = new IgRepository(
                     FhirContext.forR4Cached(),
                     Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
-
+            this.repository = igRepository;
+            this.npmPackageLoader = igRepository.getNpmPackageLoader();
             return this;
         }
 

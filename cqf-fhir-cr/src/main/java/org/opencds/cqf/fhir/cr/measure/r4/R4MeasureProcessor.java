@@ -106,21 +106,19 @@ public class R4MeasureProcessor {
         @Nullable
         private final Measure measure;
 
-        @Nullable
         private final NpmResourceInfoForCql npmResourceHolder;
 
         public static MeasurePlusNpmResourceHolder measureOnly(Measure measure) {
-            return new MeasurePlusNpmResourceHolder(measure, null);
+            return new MeasurePlusNpmResourceHolder(measure, NpmResourceInfoForCql.EMPTY);
         }
 
         public static MeasurePlusNpmResourceHolder npmOnly(NpmResourceInfoForCql npmResourceHolder) {
             return new MeasurePlusNpmResourceHolder(null, npmResourceHolder);
         }
 
-        private MeasurePlusNpmResourceHolder(
-                @Nullable Measure measure, @Nullable NpmResourceInfoForCql npmResourceHolder) {
-            if (measure == null && npmResourceHolder == null) {
-                throw new IllegalStateException("Measure and NpmResourceHolder cannot both be null");
+        private MeasurePlusNpmResourceHolder(@Nullable Measure measure, NpmResourceInfoForCql npmResourceHolder) {
+            if (measure == null && (NpmResourceInfoForCql.EMPTY == npmResourceHolder)) {
+                throw new InternalErrorException("Measure and NpmResourceHolder cannot both be null");
             }
             this.measure = measure;
             this.npmResourceHolder = npmResourceHolder;
@@ -128,44 +126,43 @@ public class R4MeasureProcessor {
 
         public boolean hasNpmLibrary() {
             return Optional.ofNullable(npmResourceHolder)
-                .flatMap( NpmResourceInfoForCql::getOptMainLibrary)
-                .isPresent();
+                    .flatMap(NpmResourceInfoForCql::getOptMainLibrary)
+                    .isPresent();
         }
 
         // LUKETODO: calls to hasLibrary are always inverted
         public boolean hasLibrary() {
-            if (npmResourceHolder != null) {
-                return npmResourceHolder.getOptMainLibrary().isPresent();
+            if (measure == null && (NpmResourceInfoForCql.EMPTY == npmResourceHolder)) {
+                throw new InvalidRequestException("Measure and NpmResourceHolder cannot both be null");
             }
 
-            if (measure == null) {
-                // LUKETODO:  change all these to FHIR REST exceptions
-                throw new IllegalStateException("Measure and NpmResourceHolder cannot both be null");
+            if (measure != null) {
+                return measure.hasLibrary();
             }
 
-            return measure.hasLibrary();
+            return npmResourceHolder.getOptMainLibrary().isPresent();
         }
 
         public String getMainLibraryUrl() {
-            if (npmResourceHolder != null) {
-                return npmResourceHolder
-                        .getOptMainLibrary()
-                        .map(ILibraryAdapter::getUrl)
-                        .orElse(null); // LUKETODO:  is this wise?
+            if (measure == null && (NpmResourceInfoForCql.EMPTY == npmResourceHolder)) {
+                throw new InvalidRequestException("Measure and NpmResourceHolder cannot both be null");
             }
 
-            if (measure == null) {
-                throw new InternalErrorException("Measure and NpmResourceHolder cannot both be null");
+            if (measure != null) {
+                final List<CanonicalType> libraryUrls = measure.getLibrary();
+
+                if (libraryUrls.isEmpty()) {
+                    throw new InvalidRequestException(
+                            "Measure does not have any library urls specified: %s".formatted(measure.getUrl()));
+                }
+
+                return libraryUrls.get(0).asStringValue();
             }
 
-            final List<CanonicalType> libraryUrls = measure.getLibrary();
-
-            if (libraryUrls.isEmpty()) {
-                throw new InvalidRequestException(
-                        "Measure does not have any library urls specified: %s".formatted(measure.getUrl()));
-            }
-
-            return libraryUrls.get(0).asStringValue();
+            return npmResourceHolder
+                    .getOptMainLibrary()
+                    .map(ILibraryAdapter::getUrl)
+                    .orElse(null); // LUKETODO:  is this wise?
         }
 
         public String getMeasureUrl() {

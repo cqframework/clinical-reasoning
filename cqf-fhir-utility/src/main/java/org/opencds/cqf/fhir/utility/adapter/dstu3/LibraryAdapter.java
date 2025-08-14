@@ -237,6 +237,7 @@ public class LibraryAdapter extends KnowledgeArtifactAdapter implements ILibrary
         }
     }
 
+    @Override
     public void ensureExpansionParametersEntry(IKnowledgeArtifactAdapter artifactAdapter, String crmiVersion) {
         var expansionParametersOpt = getExpansionParameters();
         if (expansionParametersOpt.isEmpty()) {

@@ -1,17 +1,11 @@
 package org.opencds.cqf.fhir.cr.measure.r4.npm;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.time.ZoneOffset;
-import java.util.Arrays;
 import java.util.Date;
-import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportStatus;
-import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.ResourceType;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure;
@@ -82,51 +76,92 @@ class MeasureWithNpmForR4Test {
             LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay();
     private static final LocalDateTime LOCAL_DATE_TIME_2025_01_01_MINUS_ONE_SECOND =
             LocalDate.of(2025, Month.JANUARY, 1).atStartOfDay().minusNanos(1);
-    private static final String PATIENT_ID = "pat1";
-    private static final String PATIENT_REFERENCE = ResourceType.Patient + "/pat1";
+
     private static final String INITIAL_POPULATION = "initial-population";
     private static final String DENOMINATOR = "denominator";
     private static final String NUMERATOR = "numerator";
+    private static final Given NPM_REPO = Measure.given().repositoryFor("BasicNpmPackages");
 
-    // LUKETODO:  these tests seem to be totally breaking for some reason
+    private static final String PATIENT_FEMALE_1944 = "Patient/female-1944";
+    private static final String PATIENT_MALE_1944 = "Patient/male-1944";
+
     // LUKETODO:  set up a multilib eval with NPM
 
     @Test
-    void evaluateSucceedsWithMinimalMeasure() {
-        final Given npmRepo = Measure.given().repositoryFor("BasicNpmPackages");
+    void evaluateSucceedsWithSingleMinimalMeasureAndSingleSubject() {
 
-        npmRepo.when()
+        NPM_REPO.when()
                 .measureUrl(MEASURE_URL_ALPHA)
                 .reportType(MeasureEvalType.SUBJECT.toCode())
+                .subject(PATIENT_FEMALE_1944)
                 .evaluate()
                 .then()
                 .hasMeasureUrl(MEASURE_URL_ALPHA_WITH_VERSION)
                 .hasPeriodStart(toJavaUtilDate(LOCAL_DATE_TIME_2021_01_01))
                 .hasPeriodEnd(toJavaUtilDate(LOCAL_DATE_TIME_2022_01_01_MINUS_ONE_SECOND))
-                .hasEmptySubject()
+                .hasSubjectReference(PATIENT_FEMALE_1944)
                 .hasStatus(MeasureReportStatus.COMPLETE)
-                .hasEvaluatedResourceCount(0);
+                .hasEvaluatedResourceCount(1)
+                .evaluatedResource("Encounter/female-1944-finished-encounter-1")
+                .hasEvaluatedResourceReferenceCount(1)
+                .up()
+                .firstGroup()
+                .firstPopulation()
+                .hasCode("initial-population")
+                // We match the patient and the single finished encounter, which matches Alpha's where
+                .hasCount(1);
 
-        npmRepo.when()
+        NPM_REPO.when()
                 .measureUrl(MEASURE_URL_ALPHA_WITH_VERSION)
                 .reportType(MeasureEvalType.SUBJECT.toCode())
+                .subject(PATIENT_MALE_1944)
                 .evaluate()
                 .then()
                 .hasMeasureUrl(MEASURE_URL_ALPHA_WITH_VERSION)
                 .hasPeriodStart(toJavaUtilDate(LOCAL_DATE_TIME_2021_01_01))
                 .hasPeriodEnd(toJavaUtilDate(LOCAL_DATE_TIME_2022_01_01_MINUS_ONE_SECOND))
-                .hasEmptySubject()
+                .hasSubjectReference(PATIENT_MALE_1944)
                 .hasStatus(MeasureReportStatus.COMPLETE)
-                .hasEvaluatedResourceCount(0);
+                .hasEvaluatedResourceCount(1)
+                .evaluatedResource("Encounter/male-1944-finished-encounter-1")
+                .hasEvaluatedResourceReferenceCount(1)
+                .up()
+                .firstGroup()
+                .firstPopulation()
+                .hasCode("initial-population")
+                // We match the patient and the single finished encounter, which matches Alpha's where
+                .hasCount(1);
     }
 
     @Test
-    void evaluateSucceedsWithMeasureAndBasicPatient() {
-        final Given npmRepo = Measure.given().repositoryFor("BasicNpmPackages");
+    void evaluateSucceedsWithSingleMeasureAndBasicPatientAndSingleSubject() {
 
-        setupPatient(npmRepo);
+        NPM_REPO.when()
+                .measureUrl(MEASURE_URL_BRAVO)
+                .reportType(MeasureEvalType.SUBJECT.toCode())
+                .subject(PATIENT_MALE_1944)
+                .evaluate()
+                .then()
+                .hasMeasureUrl(MEASURE_URL_BRAVO_WITH_VERSION)
+                .hasPeriodStart(toJavaUtilDate(LOCAL_DATE_TIME_2024_01_01))
+                .hasPeriodEnd(toJavaUtilDate(LOCAL_DATE_TIME_2025_01_01_MINUS_ONE_SECOND))
+                .hasSubjectReference(PATIENT_MALE_1944)
+                .hasStatus(MeasureReportStatus.COMPLETE)
+                .hasEvaluatedResourceCount(1)
+                .evaluatedResource("Encounter/male-1944-finished-encounter-1")
+                .hasEvaluatedResourceReferenceCount(1)
+                .up()
+                .firstGroup()
+                .firstPopulation()
+                .hasCode("initial-population")
+                // there are 0 planned encounters corresponding to Bravo's where and the patient
+                .hasCount(0);
+    }
 
-        npmRepo.when()
+    @Test
+    void evaluateSucceedsWithSingleMeasureAndBasicPatientAllSubjects() {
+
+        NPM_REPO.when()
                 .measureUrl(MEASURE_URL_BRAVO)
                 .reportType(MeasureEvalType.SUBJECT.toCode())
                 .evaluate()
@@ -134,38 +169,73 @@ class MeasureWithNpmForR4Test {
                 .hasMeasureUrl(MEASURE_URL_BRAVO_WITH_VERSION)
                 .hasPeriodStart(toJavaUtilDate(LOCAL_DATE_TIME_2024_01_01))
                 .hasPeriodEnd(toJavaUtilDate(LOCAL_DATE_TIME_2025_01_01_MINUS_ONE_SECOND))
-                .hasSubjectReference(PATIENT_REFERENCE)
                 .hasStatus(MeasureReportStatus.COMPLETE)
-                .hasEvaluatedResourceCount(0);
+                .hasEvaluatedResourceCount(11)
+                .evaluatedResource("Encounter/female-1914-planned-encounter-1")
+                .hasEvaluatedResourceReferenceCount(1)
+                .up()
+                .evaluatedResource("Encounter/female-1931-finished-encounter-1")
+                .hasEvaluatedResourceReferenceCount(1)
+                .up()
+                .evaluatedResource("Encounter/female-1944-finished-encounter-1")
+                .hasEvaluatedResourceReferenceCount(1)
+                .up()
+                .evaluatedResource("Encounter/female-1988-2-finished-encounter-invalid-period")
+                .hasEvaluatedResourceReferenceCount(1)
+                .up()
+                .evaluatedResource("Encounter/female-1988-planned-encounter-1")
+                .hasEvaluatedResourceReferenceCount(1)
+                .up()
+                .evaluatedResource("Encounter/female-1988-finished-encounter-2")
+                .hasEvaluatedResourceReferenceCount(1)
+                .up()
+                .evaluatedResource("Encounter/female-2021-finished-encounter-1")
+                .hasEvaluatedResourceReferenceCount(1)
+                .up()
+                .evaluatedResource("Encounter/male-1931-planned-encounter-1")
+                .hasEvaluatedResourceReferenceCount(1)
+                .up()
+                .evaluatedResource("Encounter/male-1944-finished-encounter-1")
+                .hasEvaluatedResourceReferenceCount(1)
+                .up()
+                .evaluatedResource("Encounter/male-1988-finished-encounter-1")
+                .hasEvaluatedResourceReferenceCount(1)
+                .up()
+                .evaluatedResource("Encounter/male-2022-finished-encounter-1")
+                .hasEvaluatedResourceReferenceCount(1)
+                .up()
+                .firstGroup()
+                .firstPopulation()
+                .hasCode("initial-population")
+                .hasCount(3); // there are 3 planned encounters which corresponds to Bravo's where
     }
 
     @Test
-    void evaluateWithDerivedLibraryOneLayer() {
-        final Given npmRepo = Measure.given().repositoryFor("BasicNpmPackages");
+    void evaluateWithDerivedLibraryOneLayerAndSingleSubject() {
 
-        setupPatient(npmRepo);
-
-        npmRepo.when()
+        NPM_REPO.when()
                 .measureUrl(MEASURE_URL_ALPHA)
                 .reportType(MeasureEvalType.SUBJECT.toCode())
+                .subject(PATIENT_FEMALE_1944)
                 .evaluate()
                 .then()
                 .hasMeasureUrl(MEASURE_URL_ALPHA_WITH_VERSION)
                 .hasPeriodStart(toJavaUtilDate(LOCAL_DATE_TIME_2021_01_01))
                 .hasPeriodEnd(toJavaUtilDate(LOCAL_DATE_TIME_2022_01_01_MINUS_ONE_SECOND))
-                .hasSubjectReference(PATIENT_REFERENCE)
+                .hasSubjectReference(PATIENT_FEMALE_1944)
                 .hasStatus(MeasureReportStatus.COMPLETE)
                 .hasEvaluatedResourceCount(0);
 
-        npmRepo.when()
+        NPM_REPO.when()
                 .measureUrl(MEASURE_URL_WITH_DERIVED_LIBRARY)
                 .reportType(MeasureEvalType.SUBJECT.toCode())
+                .subject(PATIENT_FEMALE_1944)
                 .evaluate()
                 .then()
                 .hasMeasureUrl(MEASURE_URL_WITH_DERIVED_LIBRARY_WITH_VERSION)
                 .hasPeriodStart(toJavaUtilDate(LOCAL_DATE_TIME_2021_01_01))
                 .hasPeriodEnd(toJavaUtilDate(LOCAL_DATE_TIME_2022_01_01_MINUS_ONE_SECOND))
-                .hasSubjectReference(PATIENT_REFERENCE)
+                .hasSubjectReference(PATIENT_FEMALE_1944)
                 .hasStatus(MeasureReportStatus.COMPLETE)
                 .hasEvaluatedResourceCount(1)
                 .firstGroup()
@@ -180,24 +250,22 @@ class MeasureWithNpmForR4Test {
     }
 
     @Test
-    void evaluateWithDerivedLibraryTwoLayers() {
-        final Given npmRepo = Measure.given().repositoryFor("BasicNpmPackages");
+    void evaluateWithSingleMeasureDerivedLibraryTwoLayers() {
 
-        setupPatient(npmRepo);
-
-        npmRepo.when()
+        NPM_REPO.when()
                 .measureUrl(MEASURE_URL_BRAVO)
                 .reportType(MeasureEvalType.SUBJECT.toCode())
+                .subject("Patient/male-1988")
                 .evaluate()
                 .then()
                 .hasMeasureUrl(MEASURE_URL_BRAVO_WITH_VERSION)
                 .hasPeriodStart(toJavaUtilDate(LOCAL_DATE_TIME_2024_01_01))
                 .hasPeriodEnd(toJavaUtilDate(LOCAL_DATE_TIME_2025_01_01_MINUS_ONE_SECOND))
-                .hasSubjectReference(PATIENT_REFERENCE)
+                .hasSubjectReference("Patient/male-1988")
                 .hasStatus(MeasureReportStatus.COMPLETE)
                 .hasEvaluatedResourceCount(0);
 
-        npmRepo.when()
+        NPM_REPO.when()
                 .measureUrl(MEASURE_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES)
                 .reportType(MeasureEvalType.SUBJECT.toCode())
                 .evaluate()
@@ -205,7 +273,7 @@ class MeasureWithNpmForR4Test {
                 .hasMeasureUrl(MEASURE_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES_WITH_VERSION)
                 .hasPeriodStart(toJavaUtilDate(LOCAL_DATE_TIME_2022_01_01))
                 .hasPeriodEnd(toJavaUtilDate(LOCAL_DATE_TIME_2023_01_01_MINUS_ONE_SECOND))
-                .hasSubjectReference(PATIENT_REFERENCE)
+                .hasSubjectReference(PATIENT_MALE_1944)
                 .hasStatus(MeasureReportStatus.COMPLETE)
                 .hasEvaluatedResourceCount(1)
                 .firstGroup()
@@ -220,20 +288,18 @@ class MeasureWithNpmForR4Test {
     }
 
     @Test
-    void evaluateWithDerivedLibraryCrossPackage() {
-        final Given npmRepo = Measure.given().repositoryFor("BasicNpmPackages");
+    void evaluateWithSingleMeasureDerivedLibraryCrossPackageSingleSubject() {
 
-        setupPatient(npmRepo);
-
-        npmRepo.when()
+        NPM_REPO.when()
                 .measureUrl(MEASURE_URL_CROSS_PACKAGE_SOURCE)
                 .reportType(MeasureEvalType.SUBJECT.toCode())
+                .subject(PATIENT_FEMALE_1944)
                 .evaluate()
                 .then()
                 .hasMeasureUrl(MEASURE_URL_CROSS_PACKAGE_SOURCE_WITH_VERSION)
                 .hasPeriodStart(toJavaUtilDate(LOCAL_DATE_TIME_2020_01_01))
                 .hasPeriodEnd(toJavaUtilDate(LOCAL_DATE_TIME_2021_01_01_MINUS_ONE_SECOND))
-                .hasSubjectReference(PATIENT_REFERENCE)
+                .hasSubjectReference(PATIENT_FEMALE_1944)
                 .hasStatus(MeasureReportStatus.COMPLETE)
                 .hasEvaluatedResourceCount(1)
                 .firstGroup()
@@ -245,19 +311,6 @@ class MeasureWithNpmForR4Test {
                 .up()
                 .population(NUMERATOR)
                 .hasCount(1);
-    }
-
-    // LUKETODO:  get rid of this once we have an IgRepository
-    // LUKETODO:  we add a patient here but it doesn't seem to be enough to get us an evaluated resource count
-    // do we need to tweak all of the CQLs?
-    private void setupPatient(Given npmRepo) {
-        npmRepo.getRepository().update(new Patient().setId(new IdType(ResourceType.Patient.toString(), PATIENT_ID)));
-    }
-
-    private Path[] getPaths(String[] tgzFileNames) {
-        return Arrays.stream(tgzFileNames)
-                .map(tgzFileName -> Paths.get("BasicNpmPackages/%s.tgz".formatted(tgzFileName)))
-                .toArray(Path[]::new);
     }
 
     private Date toJavaUtilDate(LocalDateTime localDateTime) {

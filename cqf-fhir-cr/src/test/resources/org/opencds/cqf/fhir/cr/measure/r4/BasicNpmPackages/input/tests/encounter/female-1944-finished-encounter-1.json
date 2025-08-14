@@ -1,6 +1,6 @@
 {
   "resourceType": "Encounter",
-  "id": "female-1988-encounter-2",
+  "id": "female-1944-finished-encounter-1",
   "status": "finished",
   "class": {
     "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
@@ -15,10 +15,10 @@
     } ]
   } ],
   "subject": {
-    "reference": "Patient/female-1988"
+    "reference": "Patient/female-1944"
   },
   "period": {
     "start": "2024-01-16T08:30:00-07:00",
-    "end": "2024-01-28T08:30:00-07:00"
+    "end": "2024-01-20T08:30:00-07:00"
   }
 }

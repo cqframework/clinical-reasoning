@@ -353,23 +353,22 @@ public class Measure {
         }
 
         public SelectedReference evaluatedResource(String name) {
-            return this.reference(measureReport -> reportSelectorByName(report(), name) );
+            return this.reference(measureReport -> reportSelectorByName(report(), name));
         }
 
         private Reference reportSelectorByName(MeasureReport measureReport, String name) {
-            var optResourceReference = measureReport.getEvaluatedResource()
-                .stream()
-                .filter(evaluatedResource -> evaluatedResource.getReference().equals(name))
-                .findFirst();
+            var optResourceReference = measureReport.getEvaluatedResource().stream()
+                    .filter(evaluatedResource ->
+                            evaluatedResource.getReference().equals(name))
+                    .findFirst();
 
             if (optResourceReference.isEmpty()) {
-                throw new IllegalArgumentException(
-                    "No evaluated resource with name: %s within: %s"
-                        .formatted(name,
-                            measureReport.getEvaluatedResource()
-                                .stream()
-                                .map(Reference::getReference)
-                                .toList()));
+                throw new IllegalArgumentException("No evaluated resource with name: %s within: %s"
+                        .formatted(
+                                name,
+                                measureReport.getEvaluatedResource().stream()
+                                        .map(Reference::getReference)
+                                        .toList()));
             }
 
             return optResourceReference.get();
@@ -1026,6 +1025,11 @@ public class Measure {
 
             public SelectedPopulation hasCount(int count) {
                 MeasureValidationUtils.validatePopulation(value(), count);
+                return this;
+            }
+
+            public SelectedPopulation hasCode(String code) {
+                assertEquals(code, value().getCode().getCodingFirstRep().getCode());
                 return this;
             }
 

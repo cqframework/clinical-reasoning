@@ -1,6 +1,6 @@
 {
   "resourceType": "Encounter",
-  "id": "male-2022-encounter-1",
+  "id": "male-2022-finished-encounter-1",
   "status": "finished",
   "class": {
     "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",

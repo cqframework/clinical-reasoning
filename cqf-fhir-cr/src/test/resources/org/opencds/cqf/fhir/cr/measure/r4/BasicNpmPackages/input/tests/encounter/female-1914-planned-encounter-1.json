@@ -1,7 +1,7 @@
 {
   "resourceType": "Encounter",
-  "id": "female-1988-encounter-1",
-  "status": "finished",
+  "id": "female-1914-planned-encounter-1",
+  "status": "planned",
   "class": {
     "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
     "code": "IMP",
@@ -15,10 +15,10 @@
     } ]
   } ],
   "subject": {
-    "reference": "Patient/female-1988"
+    "reference": "Patient/female-1914"
   },
   "period": {
-    "start": "2024-01-16T08:30:00-07:00",
-    "end": "2024-01-20T08:30:00-07:00"
+    "start": "2020-01-16T20:00:00Z",
+    "end": "2020-01-16T21:00:00Z"
   }
 }

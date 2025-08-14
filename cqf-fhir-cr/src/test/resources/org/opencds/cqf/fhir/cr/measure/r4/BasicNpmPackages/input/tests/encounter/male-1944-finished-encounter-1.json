@@ -1,6 +1,6 @@
 {
   "resourceType": "Encounter",
-  "id": "female-2021-encounter-1",
+  "id": "male-1944-finished-encounter-1",
   "status": "finished",
   "class": {
     "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
@@ -15,7 +15,7 @@
     } ]
   } ],
   "subject": {
-    "reference": "Patient/female-2021"
+    "reference": "Patient/male-1944"
   },
   "period": {
     "start": "2024-01-16T08:30:00-07:00",

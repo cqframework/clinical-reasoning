@@ -1,6 +1,6 @@
 {
   "resourceType": "Encounter",
-  "id": "female-1931-encounter-1",
+  "id": "female-1988-2-finished-encounter-invalid-period",
   "status": "finished",
   "class": {
     "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
@@ -15,10 +15,10 @@
     } ]
   } ],
   "subject": {
-    "reference": "Patient/female-1931"
+    "reference": "Patient/female-1988-2"
   },
   "period": {
-    "start": "2024-01-16T08:30:00-07:00",
-    "end": "2024-01-20T08:30:00-07:00"
+    "start": "2024-01-29T08:30:00-07:00",
+    "end": "2024-01-28T08:30:00-07:00"
   }
 }

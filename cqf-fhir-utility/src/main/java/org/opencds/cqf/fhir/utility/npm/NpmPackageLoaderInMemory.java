@@ -42,12 +42,18 @@ public class NpmPackageLoaderInMemory implements NpmPackageLoader {
     private final Map<UrlAndVersion, NpmPackage> libraryUrlToPackage = new HashMap<>();
     private final List<NamespaceInfo> namespaceInfos;
 
-    public static NpmPackageLoaderInMemory fromNpmPackageTgzPath(Class<?> clazz, Path... tgzPaths) {
-        return fromNpmPackageTgzPath(clazz, Arrays.asList(tgzPaths));
+    public static NpmPackageLoaderInMemory fromNpmPackageAbsolutePath(List<Path> tgzPaths) {
+        final List<NpmPackage> npmPackages = buildNpmPackageFromAbsolutePath(tgzPaths);
+
+        return new NpmPackageLoaderInMemory(npmPackages);
     }
 
-    public static NpmPackageLoaderInMemory fromNpmPackageTgzPath(Class<?> clazz, List<Path> tgzPaths) {
-        final List<NpmPackage> npmPackages = buildNpmPackage(clazz, tgzPaths);
+    public static NpmPackageLoaderInMemory fromNpmPackageClasspath(Class<?> clazz, Path... tgzPaths) {
+        return fromNpmPackageClasspath(clazz, Arrays.asList(tgzPaths));
+    }
+
+    public static NpmPackageLoaderInMemory fromNpmPackageClasspath(Class<?> clazz, List<Path> tgzPaths) {
+        final List<NpmPackage> npmPackages = buildNpmPackageFromClasspath(clazz, tgzPaths);
 
         return new NpmPackageLoaderInMemory(npmPackages);
     }
@@ -114,16 +120,38 @@ public class NpmPackageLoaderInMemory implements NpmPackageLoader {
     }
 
     @Nonnull
-    private static List<NpmPackage> buildNpmPackage(Class<?> clazz, List<Path> tgzPaths) {
-        return tgzPaths.stream().map(path -> getNpmPackage(clazz, path)).toList();
+    private static List<NpmPackage> buildNpmPackageFromAbsolutePath(List<Path> tgzPaths) {
+        return tgzPaths.stream()
+                .map(NpmPackageLoaderInMemory::getNpmPackageFromAbsolutePath)
+                .toList();
     }
 
     @Nonnull
-    private static NpmPackage getNpmPackage(Class<?> clazz, Path tgzPath) {
+    private static List<NpmPackage> buildNpmPackageFromClasspath(Class<?> clazz, List<Path> tgzPaths) {
+        return tgzPaths.stream()
+                .map(path -> getNpmPackageFromClasspath(clazz, path))
+                .toList();
+    }
+
+    @Nonnull
+    private static NpmPackage getNpmPackageFromAbsolutePath(Path tgzPath) {
         try (final InputStream npmStream = Files.newInputStream(tgzPath)) {
             return NpmPackage.fromPackage(npmStream);
-        } catch (IOException e) {
-            throw new InvalidRequestException("Failed to load resource: %s".formatted(tgzPath), e);
+        } catch (IOException exception) {
+            throw new InvalidRequestException("Failed to load resource: %s".formatted(tgzPath), exception);
+        }
+    }
+
+    @Nonnull
+    private static NpmPackage getNpmPackageFromClasspath(Class<?> clazz, Path tgzClasspathPath) {
+        try (final InputStream simpleAlphaStream = clazz.getResourceAsStream(tgzClasspathPath.toString())) {
+            if (simpleAlphaStream == null) {
+                throw new InvalidRequestException("Failed to load resource: %s".formatted(tgzClasspathPath));
+            }
+
+            return NpmPackage.fromPackage(simpleAlphaStream);
+        } catch (IOException exception) {
+            throw new InvalidRequestException("Failed to load resource: %s".formatted(tgzClasspathPath), exception);
         }
     }
 

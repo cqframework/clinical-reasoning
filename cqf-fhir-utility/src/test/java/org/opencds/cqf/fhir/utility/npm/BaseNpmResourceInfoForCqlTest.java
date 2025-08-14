@@ -26,10 +26,9 @@ public abstract class BaseNpmResourceInfoForCqlTest {
 
     protected static final String DOT_TGZ = ".tgz";
 
-    protected static final String SIMPLE_ALPHA = "simple-alpha";
-    protected static final String SIMPLE_BRAVO = "simple-bravo";
-    protected static final String WITH_DERIVED_LIBRARY = "with-derived-library";
-    protected static final String WITH_DERIVED_LIBRARY_UPPER = "WithDerivedLibrary";
+    protected static final String SIMPLE_ALPHA = "SimpleAlpha";
+    protected static final String SIMPLE_BRAVO = "SimpleBravo";
+    protected static final String WITH_DERIVED_LIBRARY = "WithDerivedLibrary";
     protected static final String DERIVED_LIBRARY_ID = "DerivedLibrary";
     protected static final String DERIVED_LIBRARY = DERIVED_LIBRARY_ID;
     protected static final String DERIVED_LAYER_1_A = "DerivedLayer1a";
@@ -72,7 +71,7 @@ public abstract class BaseNpmResourceInfoForCqlTest {
     protected static final String MEASURE_URL_ALPHA = SIMPLE_URL + SLASH_MEASURE_SLASH + SIMPLE_ALPHA;
     protected static final String MEASURE_URL_BRAVO = SIMPLE_URL + SLASH_MEASURE_SLASH + SIMPLE_BRAVO;
     protected static final String MEASURE_URL_WITH_DERIVED_LIBRARY =
-            DERIVED_URL + SLASH_MEASURE_SLASH + WITH_DERIVED_LIBRARY_UPPER;
+            DERIVED_URL + SLASH_MEASURE_SLASH + WITH_DERIVED_LIBRARY;
     protected static final String MEASURE_URL_WITH_DERIVED_LIBRARY_WITH_VERSION =
             MEASURE_URL_WITH_DERIVED_LIBRARY + PIPE + VERSION_0_2;
     protected static final String MEASURE_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES =
@@ -88,7 +87,7 @@ public abstract class BaseNpmResourceInfoForCqlTest {
     protected static final String LIBRARY_URL_ALPHA = SIMPLE_URL + SLASH_LIBRARY_SLASH + SIMPLE_ALPHA;
     protected static final String LIBRARY_URL_BRAVO = SIMPLE_URL + SLASH_LIBRARY_SLASH + SIMPLE_BRAVO;
     protected static final String LIBRARY_URL_WITH_DERIVED_LIBRARY =
-            DERIVED_URL + SLASH_LIBRARY_SLASH + WITH_DERIVED_LIBRARY_UPPER;
+            DERIVED_URL + SLASH_LIBRARY_SLASH + WITH_DERIVED_LIBRARY;
     protected static final String LIBRARY_URL_WITH_DERIVED_LIBRARY_AND_VERSION =
             LIBRARY_URL_WITH_DERIVED_LIBRARY + PIPE + VERSION_0_1;
     protected static final String LIBRARY_URL_DERIVED_LIBRARY = DERIVED_URL + SLASH_LIBRARY_SLASH + DERIVED_LIBRARY;
@@ -324,6 +323,6 @@ public abstract class BaseNpmResourceInfoForCqlTest {
 
     @Nonnull
     private NpmPackageLoaderInMemory setup(Path... tgzPaths) {
-        return NpmPackageLoaderInMemory.fromNpmPackageTgzPath(getClass(), tgzPaths);
+        return NpmPackageLoaderInMemory.fromNpmPackageClasspath(getClass(), tgzPaths);
     }
 }

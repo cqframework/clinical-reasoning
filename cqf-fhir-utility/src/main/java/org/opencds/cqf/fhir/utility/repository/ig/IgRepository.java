@@ -249,7 +249,7 @@ public class IgRepository implements IRepository {
     }
 
     private NpmPackageLoader buildNpmPackageLoader() {
-        return NpmPackageLoaderInMemory.fromNpmPackageClasspath(getClass(), getNpmTgzPaths());
+        return NpmPackageLoaderInMemory.fromNpmPackageAbsolutePath(getNpmTgzPaths());
     }
 
     private List<Path> getNpmTgzPaths() {

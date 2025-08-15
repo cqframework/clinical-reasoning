@@ -24,18 +24,24 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorUtils;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 
 @SuppressWarnings("squid:S107")
 public class R4CollectDataService {
     private final IRepository repository;
     private final MeasureEvaluationOptions measureEvaluationOptions;
     private final R4RepositorySubjectProvider subjectProvider;
+    private final NpmPackageLoader npmPackageLoader;
     private final MeasureProcessorUtils measureProcessorUtils = new MeasureProcessorUtils();
 
-    public R4CollectDataService(IRepository repository, MeasureEvaluationOptions measureEvaluationOptions) {
+    public R4CollectDataService(
+            IRepository repository,
+            MeasureEvaluationOptions measureEvaluationOptions,
+            NpmPackageLoader npmPackageLoader) {
         this.repository = repository;
         this.measureEvaluationOptions = measureEvaluationOptions;
         this.subjectProvider = new R4RepositorySubjectProvider(measureEvaluationOptions.getSubjectProviderOptions());
+        this.npmPackageLoader = npmPackageLoader;
     }
 
     /**
@@ -66,15 +72,16 @@ public class R4CollectDataService {
             String practitioner) {
 
         Parameters parameters = new Parameters();
-        var processor =
-                new R4MeasureProcessor(this.repository, this.measureEvaluationOptions, this.measureProcessorUtils);
+        var processor = new R4MeasureProcessor(
+                this.repository, this.measureEvaluationOptions, this.measureProcessorUtils, this.npmPackageLoader);
 
         List<String> subjectList = getSubjects(subject, practitioner, subjectProvider);
 
         var context =
                 Engines.forRepository(this.repository, this.measureEvaluationOptions.getEvaluationSettings(), null);
 
-        var foldedMeasure = R4MeasureServiceUtils.foldMeasure(Eithers.forMiddle3(measureId), repository);
+        var foldedMeasure =
+                R4MeasureServiceUtils.foldMeasure(Eithers.forMiddle3(measureId), repository, npmPackageLoader);
 
         if (!subjectList.isEmpty()) {
             for (String patient : subjectList) {

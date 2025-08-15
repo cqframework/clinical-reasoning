@@ -21,6 +21,7 @@ import org.opencds.cqf.fhir.cr.cli.argument.CqlCommandArgument;
 import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Command;
 
+// LUKETODO:  how do I plug in NPM here?
 @Command(name = "cql", mixinStandardHelpOptions = true, description = "Evaluate CQL libraries against FHIR resources.")
 public class CqlCommand implements Callable<Integer> {
     @ArgGroup(multiplicity = "1", exclusive = false)

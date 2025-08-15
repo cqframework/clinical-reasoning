@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.opencds.cqf.fhir.cr.measure.common.MeasureInfo.EXT_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_CRITERIA_REFERENCE_URL;
@@ -17,6 +18,7 @@ import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.repository.IRepository;
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import java.nio.file.Path;
 import java.time.LocalDate;
@@ -27,12 +29,14 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IdType;
@@ -60,7 +64,9 @@ import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.SelectedGroup.SelectedReference;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
+import org.opencds.cqf.fhir.utility.monad.Either3;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.r4.ContainedHelper;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
@@ -71,7 +77,7 @@ public class Measure {
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     @FunctionalInterface
-    interface Validator<T> {
+    public interface Validator<T> {
         void validate(T value);
     }
 
@@ -120,7 +126,7 @@ public class Measure {
         private IRepository repository;
         private MeasureEvaluationOptions evaluationOptions;
         private final MeasurePeriodValidator measurePeriodValidator;
-        private final R4MeasureServiceUtils measureServiceUtils;
+        private NpmPackageLoader npmPackageLoader;
 
         public Given(@Nullable Boolean applyScoringSetMembership) {
             this.evaluationOptions = MeasureEvaluationOptions.defaultOptions();
@@ -144,8 +150,6 @@ public class Measure {
                     .setValuesetExpansionMode(VALUESET_EXPANSION_MODE.PERFORM_NAIVE_EXPANSION);
 
             this.measurePeriodValidator = new MeasurePeriodValidator();
-
-            this.measureServiceUtils = new R4MeasureServiceUtils(repository);
         }
 
         public Given repository(IRepository repository) {
@@ -154,10 +158,11 @@ public class Measure {
         }
 
         public Given repositoryFor(String repositoryPath) {
-            this.repository = new IgRepository(
+            var igRepository = new IgRepository(
                     FhirContext.forR4Cached(),
                     Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
-
+            this.repository = igRepository;
+            this.npmPackageLoader = igRepository.getNpmPackageLoader();
             return this;
         }
 
@@ -166,8 +171,22 @@ public class Measure {
             return this;
         }
 
+        public IRepository getRepository() {
+            return repository;
+        }
+
         private R4MeasureService buildMeasureService() {
-            return new R4MeasureService(repository, evaluationOptions, measurePeriodValidator);
+            var npmPackageLoaderInner = npmPackageLoaderOrEmpty();
+            return new R4MeasureService(
+                    repository,
+                    evaluationOptions,
+                    measurePeriodValidator,
+                    new R4MeasureServiceUtils(repository, npmPackageLoaderInner),
+                    npmPackageLoaderInner);
+        }
+
+        private NpmPackageLoader npmPackageLoaderOrEmpty() {
+            return Optional.ofNullable(npmPackageLoader).orElse(NpmPackageLoader.DEFAULT);
         }
 
         public When when() {
@@ -183,6 +202,7 @@ public class Measure {
         }
 
         private String measureId;
+        private CanonicalType measureUrl;
         private ZonedDateTime periodStart;
         private ZonedDateTime periodEnd;
         private String subject;
@@ -196,6 +216,11 @@ public class Measure {
 
         public When measureId(String measureId) {
             this.measureId = measureId;
+            return this;
+        }
+
+        public When measureUrl(String measureUrl) {
+            this.measureUrl = new CanonicalType(measureUrl);
             return this;
         }
 
@@ -253,7 +278,7 @@ public class Measure {
 
         public When evaluate() {
             this.operation = () -> service.evaluate(
-                    Eithers.forMiddle3(new IdType("Measure", measureId)),
+                    deriveMeasureEither(measureId, measureUrl),
                     periodStart,
                     periodEnd,
                     reportType,
@@ -276,6 +301,20 @@ public class Measure {
             }
 
             return new SelectedReport(this.operation.get());
+        }
+
+        @Nonnull
+        private Either3<CanonicalType, IdType, org.hl7.fhir.r4.model.Measure> deriveMeasureEither(
+                @Nullable String measureId, @Nullable CanonicalType measureUrl) {
+            if (measureId != null) {
+                return Eithers.forMiddle3(new IdType("Measure", measureId));
+            }
+
+            if (measureUrl != null) {
+                return Eithers.forLeft3(measureUrl);
+            }
+
+            throw new IllegalStateException("Expected either a measure ID or a measure URL but there is neither");
         }
     }
 
@@ -315,10 +354,25 @@ public class Measure {
         }
 
         public SelectedReference evaluatedResource(String name) {
-            return this.reference(x -> x.getEvaluatedResource().stream()
-                    .filter(y -> y.getReference().equals(name))
-                    .findFirst()
-                    .get());
+            return this.reference(measureReport -> reportSelectorByName(report(), name));
+        }
+
+        private Reference reportSelectorByName(MeasureReport measureReport, String name) {
+            var optResourceReference = measureReport.getEvaluatedResource().stream()
+                    .filter(evaluatedResource ->
+                            evaluatedResource.getReference().equals(name))
+                    .findFirst();
+
+            if (optResourceReference.isEmpty()) {
+                fail("No evaluated resource with name: %s within: %s"
+                        .formatted(
+                                name,
+                                measureReport.getEvaluatedResource().stream()
+                                        .map(Reference::getReference)
+                                        .toList()));
+            }
+
+            return optResourceReference.get();
         }
 
         public SelectedReport hasEvaluatedResourceCount(int count) {
@@ -898,7 +952,7 @@ public class Measure {
             return new SelectedStratifier(s, this);
         }
 
-        static class SelectedReference extends Selected<Reference, SelectedReport> {
+        public static class SelectedReference extends Selected<Reference, SelectedReport> {
 
             public SelectedReference(Reference value, SelectedReport parent) {
                 super(value, parent);
@@ -963,7 +1017,7 @@ public class Measure {
             }
         }
 
-        static class SelectedPopulation
+        public static class SelectedPopulation
                 extends Selected<MeasureReport.MeasureReportGroupPopulationComponent, SelectedGroup> {
 
             public SelectedPopulation(MeasureReportGroupPopulationComponent value, SelectedGroup parent) {
@@ -972,6 +1026,11 @@ public class Measure {
 
             public SelectedPopulation hasCount(int count) {
                 MeasureValidationUtils.validatePopulation(value(), count);
+                return this;
+            }
+
+            public SelectedPopulation hasCode(String code) {
+                assertEquals(code, value().getCode().getCodingFirstRep().getCode());
                 return this;
             }
 

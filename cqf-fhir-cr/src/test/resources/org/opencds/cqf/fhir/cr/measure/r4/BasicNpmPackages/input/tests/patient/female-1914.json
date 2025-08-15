@@ -1,0 +1,9 @@
+{
+  "resourceType": "Patient",
+  "id": "female-1914",
+  "gender": "female",
+  "birthDate": "1914-01-01",
+  "managingOrganization" : {
+    "reference": "Organization/organization-linked-by-managingOrganization"
+  }
+}

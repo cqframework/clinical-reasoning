@@ -21,6 +21,7 @@ import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FIL
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 public class CollectData {
@@ -67,6 +68,7 @@ public class CollectData {
         private IRepository repository;
         private final MeasureEvaluationOptions evaluationOptions;
         private final R4MeasureServiceUtils measureServiceUtils;
+        private final NpmPackageLoader npmPackageLoader;
 
         public Given() {
             this.evaluationOptions = MeasureEvaluationOptions.defaultOptions();
@@ -81,7 +83,8 @@ public class CollectData {
                     .getTerminologySettings()
                     .setValuesetExpansionMode(VALUESET_EXPANSION_MODE.PERFORM_NAIVE_EXPANSION);
 
-            this.measureServiceUtils = new R4MeasureServiceUtils(repository);
+            this.npmPackageLoader = NpmPackageLoader.DEFAULT;
+            this.measureServiceUtils = new R4MeasureServiceUtils(repository, npmPackageLoader);
         }
 
         public Given repository(IRepository repository) {
@@ -97,7 +100,7 @@ public class CollectData {
         }
 
         private R4CollectDataService buildR4CollectDataService() {
-            return new R4CollectDataService(repository, evaluationOptions);
+            return new R4CollectDataService(repository, evaluationOptions, npmPackageLoader);
         }
 
         public When when() {

@@ -26,9 +26,9 @@ import org.opencds.cqf.fhir.utility.adapter.IMeasureAdapter;
  * Encapsulate the NpmPackages by only exposing the {@link NamespaceInfo}s and derived
  *Libraries not directly associated with a given Measure.
  */
-public class NpmResourceInfoForCql {
+public class NpmResourceHolder {
 
-    public static final NpmResourceInfoForCql EMPTY = new NpmResourceInfoForCql(null, null, List.of());
+    public static final NpmResourceHolder EMPTY = new NpmResourceHolder(null, null, List.of());
 
     private static final String TEXT_CQL = "text/cql";
 
@@ -44,7 +44,7 @@ public class NpmResourceInfoForCql {
     @Nullable
     private final IAdapterFactory adapterFactory;
 
-    public NpmResourceInfoForCql(
+    public NpmResourceHolder(
             @Nullable IMeasureAdapter measure, @Nullable ILibraryAdapter mainLibrary, List<NpmPackage> npmPackages) {
         this.measure = measure;
         this.mainLibrary = mainLibrary;
@@ -96,7 +96,7 @@ public class NpmResourceInfoForCql {
         if (object == null || getClass() != object.getClass()) {
             return false;
         }
-        final NpmResourceInfoForCql that = (NpmResourceInfoForCql) object;
+        final NpmResourceHolder that = (NpmResourceHolder) object;
         return Objects.equals(measure, that.measure)
                 && Objects.equals(mainLibrary, that.mainLibrary)
                 && Objects.equals(npmPackages, that.npmPackages);
@@ -109,7 +109,7 @@ public class NpmResourceInfoForCql {
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", NpmResourceInfoForCql.class.getSimpleName() + "[", "]")
+        return new StringJoiner(", ", NpmResourceHolder.class.getSimpleName() + "[", "]")
                 .add("measure=" + measure)
                 .add("mainLibrary=" + mainLibrary)
                 .add("npmPackages=" + npmPackages)

@@ -10,7 +10,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.opencds.cqf.fhir.utility.npm.BaseNpmResourceInfoForCqlTest;
 
 @SuppressWarnings("squid:S2699")
-class NpmResourceInfoForCqlR4Test extends BaseNpmResourceInfoForCqlTest {
+class NpmResourceHolderR4Test extends BaseNpmResourceInfoForCqlTest {
 
     protected FhirVersionEnum fhirVersion = FhirVersionEnum.R4;
 

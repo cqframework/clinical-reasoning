@@ -115,23 +115,23 @@ public abstract class BaseNpmResourceInfoForCqlTest {
     protected void simpleCommon(Path tgzPath, String measureUrl, String expectedLibraryUrl, String expectedCql) {
         final NpmPackageLoaderInMemory loader = setup(tgzPath);
 
-        final NpmResourceInfoForCql npmResourceInfoForCql =
+        final NpmResourceHolder npmResourceHolder =
                 loader.loadNpmResources(new org.hl7.fhir.r5.model.CanonicalType(measureUrl));
 
-        verifyMeasure(measureUrl, expectedLibraryUrl, npmResourceInfoForCql);
+        verifyMeasure(measureUrl, expectedLibraryUrl, npmResourceHolder);
         verifyLibrary(
                 expectedLibraryUrl,
                 expectedCql,
-                npmResourceInfoForCql.getOptMainLibrary().orElse(null));
+                npmResourceHolder.getOptMainLibrary().orElse(null));
     }
 
     protected void multiplePackages(String expectedCqlAlpha, String expectedCqlBravo) {
         final NpmPackageLoaderInMemory loader = setup(
                 Stream.of(SIMPLE_ALPHA_TGZ, SIMPLE_BRAVO_TGZ).map(Paths::get).toArray(Path[]::new));
 
-        final NpmResourceInfoForCql resourceInfoAlpha =
+        final NpmResourceHolder resourceInfoAlpha =
                 loader.loadNpmResources(new org.hl7.fhir.r5.model.CanonicalType(MEASURE_URL_ALPHA));
-        final NpmResourceInfoForCql resourceInfoBravo =
+        final NpmResourceHolder resourceInfoBravo =
                 loader.loadNpmResources(new org.hl7.fhir.r5.model.CanonicalType(MEASURE_URL_BRAVO));
 
         verifyMeasure(MEASURE_URL_ALPHA, LIBRARY_URL_ALPHA, resourceInfoAlpha);
@@ -151,10 +151,10 @@ public abstract class BaseNpmResourceInfoForCqlTest {
 
         final NpmPackageLoaderInMemory loader = setup(WITH_DERIVED_LIBRARY_TGZ);
 
-        final NpmResourceInfoForCql resourceInfoWithNoVersion =
+        final NpmResourceHolder resourceInfoWithNoVersion =
                 loader.loadNpmResources(new CanonicalType(MEASURE_URL_WITH_DERIVED_LIBRARY));
         verifyMeasure(MEASURE_URL_WITH_DERIVED_LIBRARY, LIBRARY_URL_WITH_DERIVED_LIBRARY, resourceInfoWithNoVersion);
-        final NpmResourceInfoForCql resourceInfoWithVersion =
+        final NpmResourceHolder resourceInfoWithVersion =
                 loader.loadNpmResources(new CanonicalType(MEASURE_URL_WITH_DERIVED_LIBRARY_WITH_VERSION));
         verifyMeasure(MEASURE_URL_WITH_DERIVED_LIBRARY, LIBRARY_URL_WITH_DERIVED_LIBRARY, resourceInfoWithVersion);
         verifyLibrary(
@@ -192,7 +192,7 @@ public abstract class BaseNpmResourceInfoForCqlTest {
 
         final NpmPackageLoaderInMemory loader = setup(WITH_TWO_LAYERS_DERIVED_LIBRARIES_TGZ);
 
-        final NpmResourceInfoForCql resourceInfoNoVersion =
+        final NpmResourceHolder resourceInfoNoVersion =
                 loader.loadNpmResources(new CanonicalType(MEASURE_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES));
         verifyMeasure(
                 MEASURE_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES,
@@ -203,7 +203,7 @@ public abstract class BaseNpmResourceInfoForCqlTest {
                 expectedCql,
                 resourceInfoNoVersion.getOptMainLibrary().orElse(null));
 
-        final NpmResourceInfoForCql resourceInfoWithVersion =
+        final NpmResourceHolder resourceInfoWithVersion =
                 loader.loadNpmResources(new CanonicalType(MEASURE_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES_WITH_VERSION));
         verifyMeasure(
                 MEASURE_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES,
@@ -247,13 +247,13 @@ public abstract class BaseNpmResourceInfoForCqlTest {
 
         final NpmPackageLoaderInMemory loader = setup(CROSS_PACKAGE_SOURCE_TGZ, CROSS_PACKAGE_TARGET_TGZ);
 
-        final NpmResourceInfoForCql resourceInfoWithNoVersion =
+        final NpmResourceHolder resourceInfoWithNoVersion =
                 loader.loadNpmResources(new CanonicalType(MEASURE_URL_CROSS_PACKAGE_SOURCE));
         verifyMeasure(
                 MEASURE_URL_CROSS_PACKAGE_SOURCE,
                 LIBRARY_URL_CROSS_PACKAGE_SOURCE_WITH_VERSION,
                 resourceInfoWithNoVersion);
-        final NpmResourceInfoForCql resourceInfoWithVersion =
+        final NpmResourceHolder resourceInfoWithVersion =
                 loader.loadNpmResources(new CanonicalType(MEASURE_URL_CROSS_PACKAGE_SOURCE_WITH_VERSION));
         verifyMeasure(
                 MEASURE_URL_CROSS_PACKAGE_SOURCE,
@@ -304,10 +304,9 @@ public abstract class BaseNpmResourceInfoForCqlTest {
         assertEquals(expectedCql, cql);
     }
 
-    private void verifyMeasure(
-            String measureUrl, String expectedLibraryUrl, NpmResourceInfoForCql npmResourceInfoForCql) {
+    private void verifyMeasure(String measureUrl, String expectedLibraryUrl, NpmResourceHolder npmResourceHolder) {
 
-        final Optional<IMeasureAdapter> optMeasure = npmResourceInfoForCql.getMeasure();
+        final Optional<IMeasureAdapter> optMeasure = npmResourceHolder.getMeasure();
         assertTrue(optMeasure.isPresent());
 
         final IMeasureAdapter measure = optMeasure.get();

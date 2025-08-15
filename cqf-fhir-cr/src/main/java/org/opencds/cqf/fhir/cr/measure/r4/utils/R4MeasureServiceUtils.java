@@ -56,13 +56,13 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureEvalType;
-import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureProcessor.MeasurePlusNpmResourceHolder;
-import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureProcessor.MeasurePlusNpmResourceHolderList;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.monad.Either3;
+import org.opencds.cqf.fhir.utility.npm.MeasurePlusNpmResourceHolder;
+import org.opencds.cqf.fhir.utility.npm.MeasurePlusNpmResourceHolderList;
 import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
-import org.opencds.cqf.fhir.utility.npm.NpmResourceInfoForCql;
+import org.opencds.cqf.fhir.utility.npm.NpmResourceHolder;
 import org.opencds.cqf.fhir.utility.search.Searches;
 
 public class R4MeasureServiceUtils {
@@ -422,7 +422,7 @@ public class R4MeasureServiceUtils {
 
         var npmResourceHolder = npmPackageLoader.loadNpmResources(measureUrl);
 
-        if (NpmResourceInfoForCql.EMPTY != npmPackageLoader) {
+        if (NpmResourceHolder.EMPTY != npmPackageLoader) {
             if (npmResourceHolder.getMeasure().isPresent()) {
                 return MeasurePlusNpmResourceHolder.npmOnly(npmResourceHolder);
             }

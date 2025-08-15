@@ -14,7 +14,7 @@ import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
 
 /**
  * FHIR version agnostic Interface for loading NPM resources including Measures, Libraries and
- * NpmPackages as captured within {@link NpmResourceInfoForCql}.
+ * NpmPackages as captured within {@link NpmResourceHolder}.
  * <p/>
  * This javadoc documents the entire NPM package feature in the clinical-reasoning project.  Please
  * read below:
@@ -30,7 +30,7 @@ import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
  * {@link #initNamespaceMappings(LibraryManager)}, as due to how CQL libraries are loaded, it
  * won't work automatically.
  * <p/>
- * The {@link NpmResourceInfoForCql} class is used to capture the results of query the NPM
+ * The {@link NpmResourceHolder} class is used to capture the results of query the NPM
  * package with a given measure URL.  It's effectively a container for the Measure, its directly
  * associated Library, and its NPM package information.  In theory, there could be more than one
  * NPM package for a given Measure.  When CQL runs and calls a custom {@link LibrarySourceProvider},
@@ -66,8 +66,8 @@ public interface NpmPackageLoader {
 
     NpmPackageLoader DEFAULT = new NpmPackageLoader() {
         @Override
-        public NpmResourceInfoForCql loadNpmResources(IPrimitiveType<String> measureUrl) {
-            return NpmResourceInfoForCql.EMPTY;
+        public NpmResourceHolder loadNpmResources(IPrimitiveType<String> measureUrl) {
+            return NpmResourceHolder.EMPTY;
         }
 
         @Override
@@ -86,7 +86,7 @@ public interface NpmPackageLoader {
      *                   withing one of the stored NPM packages.
      * @return The Measure corresponding to the URL.
      */
-    NpmResourceInfoForCql loadNpmResources(IPrimitiveType<String> measureUrl);
+    NpmResourceHolder loadNpmResources(IPrimitiveType<String> measureUrl);
 
     /**
      * Hackish:  Either the downstream app injected this or we default to a NO-OP implementation.

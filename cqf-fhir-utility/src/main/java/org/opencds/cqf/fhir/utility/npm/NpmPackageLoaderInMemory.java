@@ -28,7 +28,7 @@ import org.opencds.cqf.fhir.utility.adapter.IResourceAdapter;
 
 /**
  * Simplistic implementation of {@link NpmPackageLoader} that loads NpmPackages from the classpath
- * and stores {@link NpmResourceInfoForCql}s in a Map. This class is recommended for testing
+ * and stores {@link NpmResourceHolder}s in a Map. This class is recommended for testing
  * and NOT for production.
  * <p/
  * Does not use an {@link NpmNamespaceManager} and instead resolves all NamespaceInfos by extracting
@@ -38,7 +38,7 @@ public class NpmPackageLoaderInMemory implements NpmPackageLoader {
 
     private static final Pattern PATTERN_PIPE = Pattern.compile("\\|");
 
-    private final Map<UrlAndVersion, NpmResourceInfoForCql> measureUrlToResourceInfo = new HashMap<>();
+    private final Map<UrlAndVersion, NpmResourceHolder> measureUrlToResourceInfo = new HashMap<>();
     private final Map<UrlAndVersion, NpmPackage> libraryUrlToPackage = new HashMap<>();
     private final List<NamespaceInfo> namespaceInfos;
 
@@ -87,12 +87,12 @@ public class NpmPackageLoaderInMemory implements NpmPackageLoader {
     }
 
     @Override
-    public NpmResourceInfoForCql loadNpmResources(IPrimitiveType<String> measureUrl) {
+    public NpmResourceHolder loadNpmResources(IPrimitiveType<String> measureUrl) {
         return measureUrlToResourceInfo.entrySet().stream()
                 .filter(entry -> doUrlAndVersionMatch(measureUrl, entry))
                 .map(Map.Entry::getValue)
                 .findFirst()
-                .orElse(NpmResourceInfoForCql.EMPTY);
+                .orElse(NpmResourceHolder.EMPTY);
     }
 
     @Override
@@ -238,7 +238,7 @@ public class NpmPackageLoaderInMemory implements NpmPackageLoader {
         if (measure != null) {
             measureUrlToResourceInfo.put(
                     UrlAndVersion.fromCanonicalAndVersion(measure.getUrl(), measure.getVersion()),
-                    new NpmResourceInfoForCql(measure, findMatchingLibrary(measure, libraries), List.of(npmPackage)));
+                    new NpmResourceHolder(measure, findMatchingLibrary(measure, libraries), List.of(npmPackage)));
         }
 
         for (ILibraryAdapter library : libraries) {
@@ -256,7 +256,7 @@ public class NpmPackageLoaderInMemory implements NpmPackageLoader {
     }
 
     private static boolean doUrlAndVersionMatch(
-            IPrimitiveType<String> measureUrl, Map.Entry<UrlAndVersion, NpmResourceInfoForCql> entry) {
+            IPrimitiveType<String> measureUrl, Map.Entry<UrlAndVersion, NpmResourceHolder> entry) {
 
         if (entry.getKey().equals(UrlAndVersion.fromCanonical(measureUrl.getValueAsString()))) {
             return true;

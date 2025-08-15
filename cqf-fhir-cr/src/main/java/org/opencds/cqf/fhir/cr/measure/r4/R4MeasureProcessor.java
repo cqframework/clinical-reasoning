@@ -1,7 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
 import ca.uhn.fhir.repository.IRepository;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.google.common.collect.ImmutableListMultimap;
@@ -46,10 +45,10 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 import org.opencds.cqf.fhir.cr.measure.common.MultiLibraryIdMeasureEngineDetails;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4DateHelper;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
-import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
 import org.opencds.cqf.fhir.utility.monad.Either3;
+import org.opencds.cqf.fhir.utility.npm.MeasurePlusNpmResourceHolder;
+import org.opencds.cqf.fhir.utility.npm.MeasurePlusNpmResourceHolderList;
 import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
-import org.opencds.cqf.fhir.utility.npm.NpmResourceInfoForCql;
 import org.opencds.cqf.fhir.utility.search.Searches;
 
 public class R4MeasureProcessor {
@@ -98,210 +97,6 @@ public class R4MeasureProcessor {
                 evalType,
                 context,
                 compositeEvaluationResultsPerMeasure);
-    }
-
-    // LUKETODO:  top level record
-    // LUKETODO:  docs:  the measure in question is either found in the DB or derived from NPM
-    public static final class MeasurePlusNpmResourceHolder {
-        @Nullable
-        private final Measure measure;
-
-        private final NpmResourceInfoForCql npmResourceHolder;
-
-        public static MeasurePlusNpmResourceHolder measureOnly(Measure measure) {
-            return new MeasurePlusNpmResourceHolder(measure, NpmResourceInfoForCql.EMPTY);
-        }
-
-        public static MeasurePlusNpmResourceHolder npmOnly(NpmResourceInfoForCql npmResourceHolder) {
-            return new MeasurePlusNpmResourceHolder(null, npmResourceHolder);
-        }
-
-        private MeasurePlusNpmResourceHolder(@Nullable Measure measure, NpmResourceInfoForCql npmResourceHolder) {
-            if (measure == null && (NpmResourceInfoForCql.EMPTY == npmResourceHolder)) {
-                throw new InternalErrorException("Measure and NpmResourceHolder cannot both be null");
-            }
-            this.measure = measure;
-            this.npmResourceHolder = npmResourceHolder;
-        }
-
-        public boolean hasNpmLibrary() {
-            return Optional.ofNullable(npmResourceHolder)
-                    .flatMap(NpmResourceInfoForCql::getOptMainLibrary)
-                    .isPresent();
-        }
-
-        // LUKETODO: calls to hasLibrary are always inverted
-        public boolean hasLibrary() {
-            if (measure == null && (NpmResourceInfoForCql.EMPTY == npmResourceHolder)) {
-                throw new InvalidRequestException("Measure and NpmResourceHolder cannot both be null");
-            }
-
-            if (measure != null) {
-                return measure.hasLibrary();
-            }
-
-            return npmResourceHolder.getOptMainLibrary().isPresent();
-        }
-
-        public String getMainLibraryUrl() {
-            if (measure == null && (NpmResourceInfoForCql.EMPTY == npmResourceHolder)) {
-                throw new InvalidRequestException("Measure and NpmResourceHolder cannot both be null");
-            }
-
-            if (measure != null) {
-                final List<CanonicalType> libraryUrls = measure.getLibrary();
-
-                if (libraryUrls.isEmpty()) {
-                    throw new InvalidRequestException(
-                            "Measure does not have any library urls specified: %s".formatted(measure.getUrl()));
-                }
-
-                return libraryUrls.get(0).asStringValue();
-            }
-
-            return npmResourceHolder
-                    .getOptMainLibrary()
-                    .map(ILibraryAdapter::getUrl)
-                    .orElse(null); // LUKETODO:  is this wise?
-        }
-
-        public String getMeasureUrl() {
-            return getMeasure().getUrl();
-        }
-
-        public Measure getMeasure() {
-            var optMeasureFromNpm = Optional.ofNullable(npmResourceHolder).flatMap(NpmResourceInfoForCql::getMeasure);
-
-            if (optMeasureFromNpm.isPresent() && optMeasureFromNpm.get().get() instanceof Measure measureFromNpm) {
-                return measureFromNpm;
-            }
-
-            return measure;
-        }
-
-        public NpmResourceInfoForCql npmResourceHolder() {
-            return npmResourceHolder;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (obj == this) {
-                return true;
-            }
-            if (obj == null || obj.getClass() != this.getClass()) {
-                return false;
-            }
-            var that = (MeasurePlusNpmResourceHolder) obj;
-            return Objects.equals(this.measure, that.measure)
-                    && Objects.equals(this.npmResourceHolder, that.npmResourceHolder);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(measure, npmResourceHolder);
-        }
-
-        @Override
-        public String toString() {
-            return "MeasurePlusNpmResourceHolder[" + "measure="
-                    + measure + ", " + "npmResourceHolders="
-                    + npmResourceHolder + ']';
-        }
-
-        public IIdType getMeasureIdElement() {
-            return getMeasure().getIdElement();
-        }
-    }
-
-    // LUKETODO:  top level record
-    public static final class MeasurePlusNpmResourceHolderList {
-
-        private final List<MeasurePlusNpmResourceHolder> measuresPlusNpmResourceHolders;
-
-        public static MeasurePlusNpmResourceHolderList of(MeasurePlusNpmResourceHolder measurePlusNpmResourceHolder) {
-            return new MeasurePlusNpmResourceHolderList(List.of(measurePlusNpmResourceHolder));
-        }
-
-        public static MeasurePlusNpmResourceHolderList of(
-                List<MeasurePlusNpmResourceHolder> measurePlusNpmResourceHolders) {
-            return new MeasurePlusNpmResourceHolderList(measurePlusNpmResourceHolders);
-        }
-
-        public static MeasurePlusNpmResourceHolderList of(Measure measure) {
-            return new MeasurePlusNpmResourceHolderList(List.of(MeasurePlusNpmResourceHolder.measureOnly(measure)));
-        }
-
-        public static MeasurePlusNpmResourceHolderList ofMeasures(List<Measure> measures) {
-            return new MeasurePlusNpmResourceHolderList(measures.stream()
-                    .map(MeasurePlusNpmResourceHolder::measureOnly)
-                    .toList());
-        }
-
-        private MeasurePlusNpmResourceHolderList(List<MeasurePlusNpmResourceHolder> measuresPlusNpmResourceHolders) {
-            this.measuresPlusNpmResourceHolders = measuresPlusNpmResourceHolders;
-        }
-
-        public List<MeasurePlusNpmResourceHolder> getMeasuresPlusNpmResourceHolders() {
-            return measuresPlusNpmResourceHolders;
-        }
-
-        List<Measure> measures() {
-            return this.measuresPlusNpmResourceHolders.stream()
-                    .map(MeasurePlusNpmResourceHolder::getMeasure)
-                    .toList();
-        }
-
-        List<NpmResourceInfoForCql> npmResourceHolders() {
-            return this.measuresPlusNpmResourceHolders.stream()
-                    .map(MeasurePlusNpmResourceHolder::npmResourceHolder)
-                    .toList();
-        }
-
-        public List<Measure> getMeasures() {
-            return measuresPlusNpmResourceHolders.stream()
-                    .map(MeasurePlusNpmResourceHolder::getMeasure)
-                    .toList();
-        }
-
-        private void checkMeasureLibraries() {
-            for (MeasurePlusNpmResourceHolder measurePlusNpmResourceHolder : measuresPlusNpmResourceHolders) {
-                if (!measurePlusNpmResourceHolder.hasLibrary()) {
-                    throw new InvalidRequestException("Measure %s does not have a primary library specified"
-                            .formatted(measurePlusNpmResourceHolder.getMeasureUrl()));
-                }
-            }
-        }
-
-        public int size() {
-            return measuresPlusNpmResourceHolders.size();
-        }
-
-        public List<MeasurePlusNpmResourceHolder> measuresPlusNpmResourceHolders() {
-            return measuresPlusNpmResourceHolders;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (obj == this) {
-                return true;
-            }
-            if (obj == null || obj.getClass() != this.getClass()) {
-                return false;
-            }
-            var that = (MeasurePlusNpmResourceHolderList) obj;
-            return Objects.equals(this.measuresPlusNpmResourceHolders, that.measuresPlusNpmResourceHolders);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(measuresPlusNpmResourceHolders);
-        }
-
-        @Override
-        public String toString() {
-            return "MeasurePlusNpmResourceHolderList[" + "measuresPlusNpmResourceHolders="
-                    + measuresPlusNpmResourceHolders + ']';
-        }
     }
 
     /**

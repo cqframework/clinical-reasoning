@@ -77,6 +77,14 @@ public final class MeasurePlusNpmResourceHolder {
                 .orElse(null); // LUKETODO:  is this wise?
     }
 
+    public IIdType getMeasureIdElement() {
+        return getMeasure().getIdElement();
+    }
+
+    public boolean hasMeasureUrl() {
+        return getMeasure().hasUrl();
+    }
+
     public String getMeasureUrl() {
         return getMeasure().getUrl();
     }
@@ -118,9 +126,5 @@ public final class MeasurePlusNpmResourceHolder {
         return "MeasurePlusNpmResourceHolder[" + "measure="
                 + measure + ", " + "npmResourceHolders="
                 + npmResourceHolder + ']';
-    }
-
-    public IIdType getMeasureIdElement() {
-        return getMeasure().getIdElement();
     }
 }

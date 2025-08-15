@@ -107,7 +107,7 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
                 subjects, measurePlusNpmResourceHolder, periodStart, periodEnd, parameters, context);
 
         measureReport = processor.evaluateMeasure(
-                measurePlusNpmResourceHolder.getMeasure(),
+                measurePlusNpmResourceHolder,
                 periodStart,
                 periodEnd,
                 reportType,

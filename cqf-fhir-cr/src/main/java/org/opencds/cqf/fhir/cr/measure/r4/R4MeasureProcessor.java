@@ -89,7 +89,7 @@ public class R4MeasureProcessor {
         var measurePlusNpmResourceHolder = R4MeasureServiceUtils.foldMeasure(measure, repository, npmPackageLoader);
 
         return this.evaluateMeasure(
-                measurePlusNpmResourceHolder.getMeasure(),
+                measurePlusNpmResourceHolder,
                 periodStart,
                 periodEnd,
                 reportType,
@@ -159,7 +159,7 @@ public class R4MeasureProcessor {
      * @return Measure Report resource
      */
     public MeasureReport evaluateMeasure(
-            Measure measure,
+            MeasurePlusNpmResourceHolder measurePlusNpmResourceHolder,
             @Nullable ZonedDateTime periodStart,
             @Nullable ZonedDateTime periodEnd,
             String reportType,
@@ -169,6 +169,8 @@ public class R4MeasureProcessor {
             CompositeEvaluationResultsPerMeasure compositeEvaluationResultsPerMeasure) {
 
         MeasureEvalType evaluationType = measureProcessorUtils.getEvalType(evalType, reportType, subjectIds);
+
+        var measure = measurePlusNpmResourceHolder.getMeasure();
 
         // setup MeasureDef
         var measureDef = new R4MeasureDefBuilder().build(measure);
@@ -187,7 +189,7 @@ public class R4MeasureProcessor {
                 new R4PopulationBasisValidator());
 
         var measurementPeriod = postLibraryEvaluationPeriodProcessingAndContinuousVariableObservation(
-                measure, measureDef, periodStart, periodEnd, context);
+                measurePlusNpmResourceHolder, measureDef, periodStart, periodEnd, context);
 
         // Build Measure Report with Results
         return new R4MeasureReportBuilder()
@@ -209,14 +211,15 @@ public class R4MeasureProcessor {
      * through good fortune before we didn't accidentally evaluate twice.
      */
     private Interval postLibraryEvaluationPeriodProcessingAndContinuousVariableObservation(
-            Measure measure,
+            MeasurePlusNpmResourceHolder measurePlusNpmResourceHolder,
             MeasureDef measureDef,
             @Nullable ZonedDateTime periodStart,
             @Nullable ZonedDateTime periodEnd,
             CqlEngine context) {
 
-        var libraryVersionedIdentifiers =
-                getMultiLibraryIdMeasureEngineDetails(List.of(measure)).getLibraryIdentifiers();
+        var libraryVersionedIdentifiers = getMultiLibraryIdMeasureEngineDetails(
+                        MeasurePlusNpmResourceHolderList.of(measurePlusNpmResourceHolder))
+                .getLibraryIdentifiers();
 
         var compiledLibraries = getCompiledLibraries(libraryVersionedIdentifiers, context);
 
@@ -232,7 +235,9 @@ public class R4MeasureProcessor {
         measureProcessorUtils.setMeasurementPeriod(
                 measurementPeriodParams,
                 context,
-                Optional.ofNullable(measure.getUrl()).map(List::of).orElse(List.of("Unknown Measure URL")));
+                Optional.ofNullable(measurePlusNpmResourceHolder.getMeasureUrl())
+                        .map(List::of)
+                        .orElse(List.of("Unknown Measure URL")));
 
         // DON'T pop the library off the stack yet, because we need it for continuousVariableObservation()
 
@@ -372,7 +377,8 @@ public class R4MeasureProcessor {
 
         // Note that we must build the LibraryEngine BEFORE we call
         // measureProcessorUtils.setMeasurementPeriod(), otherwise, we get an NPE.
-        var multiLibraryIdMeasureEngineDetails = getMultiLibraryIdMeasureEngineDetails(measurePlusNpmResourceHolderList);
+        var multiLibraryIdMeasureEngineDetails =
+                getMultiLibraryIdMeasureEngineDetails(measurePlusNpmResourceHolderList);
 
         preLibraryEvaluationPeriodProcessing(
                 multiLibraryIdMeasureEngineDetails.getLibraryIdentifiers(),

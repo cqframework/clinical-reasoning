@@ -86,7 +86,7 @@ class IgRepositoryKalmTest {
     @Test
     void readPatient() {
         var id = Ids.newId(Patient.class, "123");
-        var p = repository.read(Patient.class, id, Map.of(IgRepository.FHIR_COMPARTMENT_HEADER, "Patient/123"));
+        var p = repository.read(Patient.class, id);
 
         assertNotNull(p);
         assertEquals(id.getIdPart(), p.getIdElement().getIdPart());
@@ -101,11 +101,7 @@ class IgRepositoryKalmTest {
 
     @Test
     void searchEncounter() {
-        var encounters = repository.search(
-                Bundle.class,
-                Encounter.class,
-                Searches.ALL,
-                Map.of(IgRepository.FHIR_COMPARTMENT_HEADER, "Patient/123"));
+        var encounters = repository.search(Bundle.class, Encounter.class, Searches.ALL);
         assertNotNull(encounters);
         assertEquals(1, encounters.getEntry().size());
     }
@@ -123,7 +119,7 @@ class IgRepositoryKalmTest {
     @Test
     void readValueSet() {
         var id = Ids.newId(ValueSet.class, "456");
-        var vs = repository.read(ValueSet.class, id, Map.of(IgRepository.FHIR_COMPARTMENT_HEADER, "Patient/123"));
+        var vs = repository.read(ValueSet.class, id);
 
         assertNotNull(vs);
         assertEquals(vs.getIdPart(), vs.getIdElement().getIdPart());
@@ -174,15 +170,14 @@ class IgRepositoryKalmTest {
     void createAndDeleteOrganizationWithCompartment() {
         var org = new Organization();
         org.setId("new-organization");
-        var header = Map.of(IgRepository.FHIR_COMPARTMENT_HEADER, "Patient/new-patient");
-        var o = repository.create(org, header);
-        var created = repository.read(Organization.class, o.getId(), header);
+        var o = repository.create(org);
+        var created = repository.read(Organization.class, o.getId());
         assertNotNull(created);
 
         var loc = tempDir.resolve("tests/data/fhir/shared/organization/new-organization.json");
         assertTrue(Files.exists(loc));
 
-        repository.delete(Organization.class, created.getIdElement(), header);
+        repository.delete(Organization.class, created.getIdElement());
         assertFalse(Files.exists(loc));
     }
 
@@ -190,15 +185,14 @@ class IgRepositoryKalmTest {
     void createAndDeletePatient() {
         var p = new Patient();
         p.setId("new-patient");
-        var header = Map.of(IgRepository.FHIR_COMPARTMENT_HEADER, "Patient/new-patient");
-        var o = repository.create(p, header);
-        var created = repository.read(Patient.class, o.getId(), header);
+        var o = repository.create(p);
+        var created = repository.read(Patient.class, o.getId());
         assertNotNull(created);
 
         var loc = tempDir.resolve("tests/data/fhir/patient/new-patient/patient/new-patient.json");
         assertTrue(Files.exists(loc));
 
-        repository.delete(Patient.class, created.getIdElement(), header);
+        repository.delete(Patient.class, created.getIdElement());
         assertFalse(Files.exists(loc));
     }
 
@@ -220,13 +214,13 @@ class IgRepositoryKalmTest {
     @Test
     void updatePatient() {
         var id = Ids.newId(Patient.class, "123");
-        var p = repository.read(Patient.class, id, Map.of(IgRepository.FHIR_COMPARTMENT_HEADER, "Patient/123"));
+        var p = repository.read(Patient.class, id);
         assertFalse(p.hasActive());
 
         p.setActive(true);
         repository.update(p);
 
-        var updated = repository.read(Patient.class, id, Map.of(IgRepository.FHIR_COMPARTMENT_HEADER, "Patient/123"));
+        var updated = repository.read(Patient.class, id);
         assertTrue(updated.hasActive());
         assertTrue(updated.getActive());
     }
@@ -241,7 +235,7 @@ class IgRepositoryKalmTest {
     @Test
     void readMedicationWithCompartment() {
         var id = Ids.newId(Medication.class, "456");
-        var m = repository.read(Medication.class, id, Map.of(IgRepository.FHIR_COMPARTMENT_HEADER, "Patient/123"));
+        var m = repository.read(Medication.class, id);
 
         assertNotNull(m);
         assertEquals(m.getIdPart(), m.getIdElement().getIdPart());
@@ -258,8 +252,7 @@ class IgRepositoryKalmTest {
 
     @Test
     void searchMedicationWithCompartment() {
-        var sets = repository.search(
-                Bundle.class, Medication.class, Map.of(), Map.of(IgRepository.FHIR_COMPARTMENT_HEADER, "Patient/123"));
+        var sets = repository.search(Bundle.class, Medication.class, Map.of());
         assertNotNull(sets);
         assertEquals(1, sets.getEntry().size());
     }

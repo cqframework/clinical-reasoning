@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Map;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.IdType;
@@ -84,7 +83,7 @@ class IgRepositoryCompartmentTest {
     @Test
     void readPatient() {
         var id = Ids.newId(Patient.class, "123");
-        var p = repository.read(Patient.class, id, Map.of(IgRepository.FHIR_COMPARTMENT_HEADER, "Patient/123"));
+        var p = repository.read(Patient.class, id);
 
         assertNotNull(p);
         assertEquals(id.getIdPart(), p.getIdElement().getIdPart());
@@ -99,11 +98,7 @@ class IgRepositoryCompartmentTest {
 
     @Test
     void searchEncounter() {
-        var encounters = repository.search(
-                Bundle.class,
-                Encounter.class,
-                Searches.ALL,
-                Map.of(IgRepository.FHIR_COMPARTMENT_HEADER, "Patient/123"));
+        var encounters = repository.search(Bundle.class, Encounter.class, Searches.ALL);
         assertNotNull(encounters);
         assertEquals(1, encounters.getEntry().size());
     }
@@ -121,7 +116,7 @@ class IgRepositoryCompartmentTest {
     @Test
     void readValueSet() {
         var id = Ids.newId(ValueSet.class, "456");
-        var vs = repository.read(ValueSet.class, id, Map.of(IgRepository.FHIR_COMPARTMENT_HEADER, "Patient/123"));
+        var vs = repository.read(ValueSet.class, id);
 
         assertNotNull(vs);
         assertEquals(vs.getIdPart(), vs.getIdElement().getIdPart());
@@ -153,15 +148,14 @@ class IgRepositoryCompartmentTest {
     void createAndDeletePatient() {
         var p = new Patient();
         p.setId("new-patient");
-        var header = Map.of(IgRepository.FHIR_COMPARTMENT_HEADER, "Patient/new-patient");
-        var o = repository.create(p, header);
-        var created = repository.read(Patient.class, o.getId(), header);
+        var o = repository.create(p);
+        var created = repository.read(Patient.class, o.getId());
         assertNotNull(created);
 
         var loc = tempDir.resolve("input/tests/patient/new-patient/patient/new-patient.json");
         assertTrue(Files.exists(loc));
 
-        repository.delete(Patient.class, created.getIdElement(), header);
+        repository.delete(Patient.class, created.getIdElement());
         assertFalse(Files.exists(loc));
     }
 
@@ -183,13 +177,13 @@ class IgRepositoryCompartmentTest {
     @Test
     void updatePatient() {
         var id = Ids.newId(Patient.class, "123");
-        var p = repository.read(Patient.class, id, Map.of(IgRepository.FHIR_COMPARTMENT_HEADER, "Patient/123"));
+        var p = repository.read(Patient.class, id);
         assertFalse(p.hasActive());
 
         p.setActive(true);
         repository.update(p);
 
-        var updated = repository.read(Patient.class, id, Map.of(IgRepository.FHIR_COMPARTMENT_HEADER, "Patient/123"));
+        var updated = repository.read(Patient.class, id);
         assertTrue(updated.hasActive());
         assertTrue(updated.getActive());
     }

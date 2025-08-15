@@ -6,6 +6,8 @@ public class TerminologyServerClientSettings {
     private long retryIntervalMillis = 1000;
     private int timeoutSeconds = 30;
     private int socketTimeout = 60;
+    private String crmiVersion = "1.0.0";
+
     /*
      * Default constructor for TerminologySettings
      */
@@ -22,6 +24,7 @@ public class TerminologyServerClientSettings {
         this.retryIntervalMillis = terminologyServerClientSettings.retryIntervalMillis;
         this.timeoutSeconds = terminologyServerClientSettings.timeoutSeconds;
         this.socketTimeout = terminologyServerClientSettings.socketTimeout;
+        this.crmiVersion = terminologyServerClientSettings.crmiVersion;
     }
 
     public int getMaxRetryCount() {
@@ -57,6 +60,15 @@ public class TerminologyServerClientSettings {
 
     public TerminologyServerClientSettings setSocketTimeout(int socketTimeout) {
         this.socketTimeout = socketTimeout;
+        return this;
+    }
+
+    public String getCrmiVersion() {
+        return crmiVersion;
+    }
+
+    public TerminologyServerClientSettings setCrmiVersion(String crmiVersion) {
+        this.crmiVersion = crmiVersion;
         return this;
     }
 }

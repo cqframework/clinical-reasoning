@@ -29,6 +29,7 @@ public class Constants {
 
     public static final String FHIR_TYPE_EXTENSION =
             "http://hl7.org/fhir/StructureDefinition/structuredefinition-fhir-type";
+    public static final String DISPLAY_EXTENSION = "http://hl7.org/fhir/StructureDefinition/display";
     public static final String PERTAINS_TO_GOAL = "http://hl7.org/fhir/StructureDefinition/resource-pertainsToGoal";
     public static final String REQUEST_DO_NOT_PERFORM = "http://hl7.org/fhir/StructureDefinition/request-doNotPerform";
     public static final String QUESTIONNAIRE_RESPONSE_AUTHOR =
@@ -108,6 +109,8 @@ public class Constants {
             "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-directReferenceCode";
     public static final String CRMI_EFFECTIVE_DATA_REQUIREMENTS =
             "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-effectiveDataRequirements";
+    public static final String CRMI_VERSION_1 = "1.0.0";
+    public static final String CRMI_VERSION_2 = "2.0.0";
 
     public static final String DTR_QUESTIONNAIRE_RESPONSE_QUESTIONNAIRE =
             "http://hl7.org/fhir/us/davinci-dtr/StructureDefinition/dtr-questionnaireresponse-questionnaire";
@@ -184,16 +187,22 @@ public class Constants {
     public static final String US_PH_CONTEXT_URL = "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context";
     public static final String LIBRARY_TYPE = "http://terminology.hl7.org/CodeSystem/library-type";
     public static final String ASSET_COLLECTION = "asset-collection";
+    /* CRMI V1 Manifest Parameter Names */
     public static final String SYSTEM_VERSION = "system-version"; // For CodeSystems
-    public static final String CANONICAL_VERSION = "canonical-version";
-    public static final String DEFAULT_CANONICAL_VERSION =
-            "default-canonical-version"; // For resources other than ValueSet and CodeSystem; Replaces
-    // 'canonical-version' in R6
-    public static final String DEFAULT_VALUESET_VERSION = "default-valueset-version"; // for ValueSets
+    public static final String CANONICAL_VERSION = "canonicalVersion";
+    /* CRMI V2 Manifest Parameter Names */
+    public static final String DEFAULT_SYSTEM_VERSION = "default-system-version";
+    public static final String DEFAULT_CANONICAL_VERSION = "default-canonical-version";
+    public static final String DEFAULT_VALUESET_VERSION = "default-valueset-version";
 
     public static final String AUTHORITATIVE_SOURCE_URL =
             "http://hl7.org/fhir/StructureDefinition/valueset-authoritativeSource";
 
     public static final String VSAC_USERNAME = "vsacUsername";
     public static final String APIKEY = "apiKey";
+    public static final String STATUS_ACTIVE = "active";
+    public static final String STATUS_DRAFT = "draft";
+    public static final String RELATEDARTIFACT_TYPE_DEPENDSON = "depends-on";
+    public static final String RESOURCETYPE_VALUESET = "ValueSet";
+    public static final String RESOURCETYPE_CODESYSTEM = "CodeSystem";
 }

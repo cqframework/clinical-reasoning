@@ -169,20 +169,9 @@ public class R4MeasureProcessor {
             CompositeEvaluationResultsPerMeasure compositeEvaluationResultsPerMeasure) {
 
         MeasureEvalType evaluationType = measureProcessorUtils.getEvalType(evalType, reportType, subjectIds);
-        // Measurement Period: operation parameter defined measurement period
-        Interval measurementPeriodParams = buildMeasurementPeriod(periodStart, periodEnd);
 
         // setup MeasureDef
         var measureDef = new R4MeasureDefBuilder().build(measure);
-
-        measureProcessorUtils.setMeasurementPeriod(
-                measurementPeriodParams,
-                context,
-                Optional.ofNullable(measure.getUrl()).map(List::of).orElse(List.of("Unknown Measure URL")));
-
-        // extract measurement Period from CQL to pass to report Builder
-        Interval measurementPeriod =
-                measureProcessorUtils.getDefaultMeasurementPeriod(measurementPeriodParams, context);
 
         // Process Criteria Expression Results
         final IIdType measureId = measure.getIdElement().toUnqualifiedVersionless();
@@ -197,8 +186,8 @@ public class R4MeasureProcessor {
                 this.measureEvaluationOptions.getApplyScoringSetMembership(),
                 new R4PopulationBasisValidator());
 
-        // Populate populationDefs that require MeasureDef results
-        measureProcessorUtils.continuousVariableObservation(measureDef, context);
+        var measurementPeriod = postLibraryEvaluationPeriodProcessingAndContinuousVariableObservation(
+                measure, measureDef, periodStart, periodEnd, context);
 
         // Build Measure Report with Results
         return new R4MeasureReportBuilder()
@@ -208,6 +197,54 @@ public class R4MeasureProcessor {
                         r4EvalTypeToReportType(evaluationType, measure),
                         measurementPeriod,
                         subjectIds);
+    }
+
+    /**
+     * Do post-processing after the libraries have been evaluated, such as: setting the measurement period,
+     * once again, with the view to running continuousVariableObservation() and computing the
+     * interval used in the MeasureReportBuilder.
+     * <p/>
+     * Now that we've pushed and popped the current library stack, we're doing it again a 3rd time,
+     * since this is easier to reason about than leaving duplicate libraries on the stack that
+     * through good fortune before we didn't accidentally evaluate twice.
+     */
+    private Interval postLibraryEvaluationPeriodProcessingAndContinuousVariableObservation(
+            Measure measure,
+            MeasureDef measureDef,
+            @Nullable ZonedDateTime periodStart,
+            @Nullable ZonedDateTime periodEnd,
+            CqlEngine context) {
+
+        var libraryVersionedIdentifiers =
+                getMultiLibraryIdMeasureEngineDetails(List.of(measure)).getLibraryIdentifiers();
+
+        var compiledLibraries = getCompiledLibraries(libraryVersionedIdentifiers, context);
+
+        var libraries =
+                compiledLibraries.stream().map(CompiledLibrary::getLibrary).toList();
+
+        // Add back the libraries to the stack, since we popped them off during CQL
+        context.getState().init(libraries);
+
+        // Measurement Period: operation parameter defined measurement period
+        Interval measurementPeriodParams = buildMeasurementPeriod(periodStart, periodEnd);
+
+        measureProcessorUtils.setMeasurementPeriod(
+                measurementPeriodParams,
+                context,
+                Optional.ofNullable(measure.getUrl()).map(List::of).orElse(List.of("Unknown Measure URL")));
+
+        // DON'T pop the library off the stack yet, because we need it for continuousVariableObservation()
+
+        // Populate populationDefs that require MeasureDef results
+        measureProcessorUtils.continuousVariableObservation(measureDef, context);
+
+        // Now that we've done continuousVariableObservation(), we're safe to pop the libraries off
+        // the stack
+        popAllLibrariesFromCqlEngine(context, libraries);
+
+        // extract measurement Period from CQL to pass to report Builder
+        return measureProcessorUtils.getDefaultMeasurementPeriod(measurementPeriodParams, context);
     }
 
     public CompositeEvaluationResultsPerMeasure evaluateMeasureWithCqlEngine(
@@ -335,8 +372,50 @@ public class R4MeasureProcessor {
 
         // Note that we must build the LibraryEngine BEFORE we call
         // measureProcessorUtils.setMeasurementPeriod(), otherwise, we get an NPE.
-        var multiLibraryIdMeasureEngineDetails =
-                getMultiLibraryIdMeasureEngineDetails(measurePlusNpmResourceHolderList, parameters, context);
+        var multiLibraryIdMeasureEngineDetails = getMultiLibraryIdMeasureEngineDetails(measurePlusNpmResourceHolderList);
+
+        preLibraryEvaluationPeriodProcessing(
+                multiLibraryIdMeasureEngineDetails.getLibraryIdentifiers(),
+                measures,
+                parameters,
+                context,
+                measurementPeriodParams);
+
+        // populate results from Library $evaluate
+        return measureProcessorUtils.getEvaluationResults(
+                subjects, zonedMeasurementPeriod, context, multiLibraryIdMeasureEngineDetails);
+    }
+
+    /**
+     * Do pre-processing before CQL evaluating the libraries largely centred on setting the correct
+     * measurement period and setting the arg parameters for the libraries.
+     * <p/>
+     * Annoyingly, this involves pushing and popping the libraries off the stack before we do it
+     * all over again in the CQL evaluation.
+     * It's possible to just push the libraries onto the stack and then let the CQL evaluation
+     * evaluate with twice as much libraries in its current stack since only the first set
+     * will be popped during evaluation, but this is more difficult to reason about having
+     * duplicate libraries on the stack that through good fortune before we didn't accidentally
+     * evaluate twice.
+     */
+    private void preLibraryEvaluationPeriodProcessing(
+            List<VersionedIdentifier> libraryVersionedIdentifiers,
+            List<Measure> measures,
+            Parameters parameters,
+            CqlEngine context,
+            Interval measurementPeriodParams) {
+
+        var compiledLibraries = getCompiledLibraries(libraryVersionedIdentifiers, context);
+
+        var libraries =
+                compiledLibraries.stream().map(CompiledLibrary::getLibrary).toList();
+
+        // We need the libraries on the stack for setMeasurementPeriod(),
+        // specifically for .getMeasurementPeriodParameterDef()
+        context.getState().init(libraries);
+
+        // if we comment this out MeasureScorerTest and other tests will fail with NPEs
+        setArgParameters(parameters, context, compiledLibraries);
 
         // set measurement Period from CQL if operation parameters are empty
         measureProcessorUtils.setMeasurementPeriod(
@@ -347,15 +426,13 @@ public class R4MeasureProcessor {
                         .map(url -> Optional.ofNullable(url).orElse("Unknown Measure URL"))
                         .toList());
 
-        // populate results from Library $evaluate
-        return measureProcessorUtils.getEvaluationResults(
-                subjects, zonedMeasurementPeriod, context, multiLibraryIdMeasureEngineDetails);
+        // Now pop the libraries off the stack, because we'll be adding them back during
+        // CQL library evaluation
+        popAllLibrariesFromCqlEngine(context, libraries);
     }
 
     private MultiLibraryIdMeasureEngineDetails getMultiLibraryIdMeasureEngineDetails(
-            MeasurePlusNpmResourceHolderList measurePlusNpmResourceHolderList,
-            Parameters parameters,
-            CqlEngine context) {
+            MeasurePlusNpmResourceHolderList measurePlusNpmResourceHolderList) {
 
         var libraryIdentifiersToMeasureIds =
                 measurePlusNpmResourceHolderList.getMeasuresPlusNpmResourceHolders().stream()
@@ -363,14 +440,14 @@ public class R4MeasureProcessor {
                                 this::getLibraryVersionIdentifier, // Key function
                                 MeasurePlusNpmResourceHolder::getMeasureIdElement));
 
-        var libraryEngine = getLibraryEngine(parameters, List.copyOf(libraryIdentifiersToMeasureIds.keySet()), context);
+        var libraryEngine = new LibraryEngine(repository, this.measureEvaluationOptions.getEvaluationSettings());
 
         var builder = MultiLibraryIdMeasureEngineDetails.builder(libraryEngine);
 
-        libraryIdentifiersToMeasureIds.entries().forEach(entry -> {
-            builder.addLibraryIdToMeasureId(
-                    new VersionedIdentifier().withId(entry.getKey().getId()), entry.getValue());
-        });
+        libraryIdentifiersToMeasureIds
+                .entries()
+                .forEach(entry -> builder.addLibraryIdToMeasureId(
+                        new VersionedIdentifier().withId(entry.getKey().getId()), entry.getValue()));
 
         return builder.build();
     }
@@ -454,21 +531,6 @@ public class R4MeasureProcessor {
         context.getState().init(lib.getLibrary());
 
         setArgParameters(parameters, context, lib);
-
-        return new LibraryEngine(repository, this.measureEvaluationOptions.getEvaluationSettings());
-    }
-
-    protected LibraryEngine getLibraryEngine(Parameters parameters, List<VersionedIdentifier> ids, CqlEngine context) {
-
-        var compiledLibraries = getCompiledLibraries(ids, context);
-
-        var libraries =
-                compiledLibraries.stream().map(CompiledLibrary::getLibrary).toList();
-
-        context.getState().init(libraries);
-
-        // if we comment this out MeasureScorerTest and other tests will fail with NPEs
-        setArgParameters(parameters, context, compiledLibraries);
 
         return new LibraryEngine(repository, this.measureEvaluationOptions.getEvaluationSettings());
     }
@@ -615,6 +677,10 @@ public class R4MeasureProcessor {
             measurementPeriod = helper.buildMeasurementPeriodInterval(periodStart, periodEnd);
         }
         return measurementPeriod;
+    }
+
+    private void popAllLibrariesFromCqlEngine(CqlEngine context, List<org.hl7.elm.r1.Library> libraries) {
+        libraries.forEach(lib -> context.getState().exitLibrary(true));
     }
 
     // LUKETODO:  get rid of this after mining for requirements

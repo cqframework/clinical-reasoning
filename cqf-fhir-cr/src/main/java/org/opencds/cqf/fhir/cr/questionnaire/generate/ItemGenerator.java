@@ -30,6 +30,7 @@ import org.opencds.cqf.fhir.utility.CqfExpression;
 import org.opencds.cqf.fhir.utility.SearchHelper;
 import org.opencds.cqf.fhir.utility.VersionUtilities;
 import org.opencds.cqf.fhir.utility.adapter.IElementDefinitionAdapter;
+import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IStructureDefinitionAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -307,7 +308,7 @@ public class ItemGenerator {
     }
 
     protected IBaseBackboneElement createErrorItem(GenerateRequest request, String linkId, String errorMessage) {
-        return createQuestionnaireItemComponent(request, errorMessage, linkId, null, true);
+        return createQuestionnaireItemComponent(request, errorMessage, linkId, null, true, false);
     }
 
     protected String getElementType(GenerateRequest request, IElementDefinitionAdapter element) {
@@ -333,7 +334,7 @@ public class ItemGenerator {
                 ? request.getProfileAdapter().getTitle()
                 : request.getProfileAdapter().getName();
         var item = createQuestionnaireItemComponent(
-                request, text, linkId, request.getProfileAdapter().getUrl(), false);
+                request, text, linkId, request.getProfileAdapter().getUrl(), false, isRepeats(request));
         var definitionExtract = item.addExtension();
         definitionExtract.setUrl(Constants.SDC_QUESTIONNAIRE_DEFINITION_EXTRACT);
         definitionExtract.setValue(canonicalTypeForVersion(
@@ -341,8 +342,45 @@ public class ItemGenerator {
         return item;
     }
 
+    protected Boolean isRepeats(GenerateRequest request) {
+        // Determine whether the group should repeat based on the expected cardinality of
+        // the Case Feature Expression result.
+        var caseFeatureExtension = request.getProfileAdapter().getExtensionByUrl(Constants.CPG_FEATURE_EXPRESSION);
+        if (caseFeatureExtension != null) {
+            var expressionType = caseFeatureExtension.getValue();
+            var expression = request.resolvePathString(expressionType, "expression");
+            var reference = request.resolvePathString(expressionType, "reference");
+            if (StringUtils.isNotBlank(expression) && StringUtils.isNotBlank(reference)) {
+                var libraryCanonical = canonicalTypeForVersion(request.getFhirVersion(), reference);
+                ILibraryAdapter library = null;
+                try {
+                    library = request.getAdapterFactory()
+                            .createLibrary(SearchHelper.searchRepositoryByCanonical(repository, libraryCanonical));
+                } catch (Exception e) {
+                    logger.warn("Unable to find Library {} for Case Feature Expression {}", reference, expression);
+                }
+                if (library != null) {
+                    var resultParam = library.getParameter().stream()
+                            .filter(p -> expression.equals(request.resolvePathString(p, "name")))
+                            .findFirst()
+                            .orElse(null);
+                    if (resultParam != null) {
+                        var max = request.resolvePathString(resultParam, "max");
+                        return StringUtils.isNotBlank(max) && !max.equals("1");
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
     protected IBaseBackboneElement createQuestionnaireItemComponent(
-            GenerateRequest request, String text, String linkId, String definition, Boolean isDisplay) {
+            GenerateRequest request,
+            String text,
+            String linkId,
+            String definition,
+            Boolean isDisplay,
+            Boolean isRepeats) {
         Object itemType =
                 switch (request.getFhirVersion()) {
                     case R4 -> Boolean.TRUE.equals(isDisplay)
@@ -353,7 +391,7 @@ public class ItemGenerator {
                             : org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemType.GROUP;
                     default -> null;
                 };
-        return initializeQuestionnaireItem(request, itemType, definition, linkId, text, false, true);
+        return initializeQuestionnaireItem(request, itemType, definition, linkId, text, false, isRepeats);
     }
 
     protected IBaseBackboneElement initializeQuestionnaireItem(

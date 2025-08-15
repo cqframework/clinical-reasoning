@@ -224,7 +224,8 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
                                 .getValueAsString());
             }
         }
-        var params = (IParametersAdapter) createAdapterForResource(expansionParams);
+        var params = (IParametersAdapter) createAdapterForResource(
+                createAdapterForResource(expansionParams).copy());
 
         var valueSets = BundleHelper.getEntryResources(packagedBundle).stream()
                 .filter(r -> r.fhirType().equals("ValueSet"))

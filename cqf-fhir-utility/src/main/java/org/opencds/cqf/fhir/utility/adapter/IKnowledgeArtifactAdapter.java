@@ -231,6 +231,18 @@ public interface IKnowledgeArtifactAdapter extends IResourceAdapter {
         }
     }
 
+    static <T extends ICompositeType & IBaseHasExtensions> String getRelatedArtifactDisplay(T relatedArtifact) {
+        if (relatedArtifact instanceof org.hl7.fhir.dstu3.model.RelatedArtifact artifact2) {
+            return artifact2.getDisplay();
+        } else if (relatedArtifact instanceof org.hl7.fhir.r4.model.RelatedArtifact artifact1) {
+            return artifact1.getDisplay();
+        } else if (relatedArtifact instanceof org.hl7.fhir.r5.model.RelatedArtifact artifact) {
+            return artifact.getDisplay();
+        } else {
+            throw new UnprocessableEntityException(VALID_RELATED_ARTIFACT);
+        }
+    }
+
     static <T extends ICompositeType & IBaseHasExtensions> String getRelatedArtifactType(T relatedArtifact) {
         if (relatedArtifact instanceof org.hl7.fhir.dstu3.model.RelatedArtifact artifact2) {
             return artifact2.getType().toCode();

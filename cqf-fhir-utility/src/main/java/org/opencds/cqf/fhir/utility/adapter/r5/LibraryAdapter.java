@@ -13,7 +13,6 @@ import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r5.model.Attachment;
-import org.hl7.fhir.r5.model.CanonicalType;
 import org.hl7.fhir.r5.model.CodeableConcept;
 import org.hl7.fhir.r5.model.Coding;
 import org.hl7.fhir.r5.model.DataRequirement;
@@ -230,33 +229,6 @@ public class LibraryAdapter extends KnowledgeArtifactAdapter implements ILibrary
 
             var existingExpansionParameters = getExpansionParameters();
             existingExpansionParameters.ifPresent(parameters -> ((Parameters) parameters).setParameter(newParameters));
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    public void ensureExpansionParametersEntry(String resourceType, String canonical) {
-        // extract expansion parameters
-        var expansionParameters = getExpansionParameters();
-
-        String parameterName;
-
-        if (resourceType.equals("ValueSet")) {
-            parameterName = Constants.CANONICAL_VERSION;
-        } else if (resourceType.equals("CodeSystem")) {
-            parameterName = Constants.SYSTEM_VERSION;
-        } else {
-            parameterName = Constants.CANONICAL_VERSION;
-        }
-
-        if (expansionParameters.isPresent()) {
-            var parametersWithName = ((Parameters) expansionParameters.get()).getParameters(parameterName);
-            if (parametersWithName != null
-                    && parametersWithName.stream().noneMatch(p -> ((IPrimitiveType<String>) p.getValue())
-                            .getValueAsString()
-                            .equals(canonical))) {
-                expansionParameters.ifPresent(
-                        ep -> ((Parameters) ep).addParameter(parameterName, new CanonicalType(canonical)));
-            }
         }
     }
 }

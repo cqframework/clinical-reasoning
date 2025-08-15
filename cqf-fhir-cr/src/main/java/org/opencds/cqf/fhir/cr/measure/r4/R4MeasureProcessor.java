@@ -231,6 +231,12 @@ public class R4MeasureProcessor {
             return new MeasurePlusNpmResourceHolderList(List.of(MeasurePlusNpmResourceHolder.measureOnly(measure)));
         }
 
+        public static MeasurePlusNpmResourceHolderList ofMeasures(List<Measure> measures) {
+            return new MeasurePlusNpmResourceHolderList(measures.stream()
+                    .map(MeasurePlusNpmResourceHolder::measureOnly)
+                    .toList());
+        }
+
         private MeasurePlusNpmResourceHolderList(List<MeasurePlusNpmResourceHolder> measuresPlusNpmResourceHolders) {
             this.measuresPlusNpmResourceHolders = measuresPlusNpmResourceHolders;
         }
@@ -417,7 +423,7 @@ public class R4MeasureProcessor {
             Parameters parameters,
             CqlEngine context) {
 
-        return evaluateMultiMeasuresWithCqlEngine(
+        return evaluateMultiMeasuresPlusNpmHoldersWithCqlEngine(
                 subjects,
                 MeasurePlusNpmResourceHolderList.of(
                         R4MeasureServiceUtils.foldMeasure(measureEither, repository, npmPackageLoader)),
@@ -436,7 +442,7 @@ public class R4MeasureProcessor {
             Parameters parameters,
             CqlEngine context) {
 
-        return evaluateMultiMeasuresWithCqlEngine(
+        return evaluateMultiMeasuresPlusNpmHoldersWithCqlEngine(
                 subjects,
                 MeasurePlusNpmResourceHolderList.of(
                         R4MeasureServiceUtils.foldMeasure(measureId, repository, npmPackageLoader)),
@@ -454,7 +460,7 @@ public class R4MeasureProcessor {
             Parameters parameters,
             CqlEngine context) {
 
-        return evaluateMultiMeasuresWithCqlEngine(
+        return evaluateMultiMeasuresPlusNpmHoldersWithCqlEngine(
                 subjects, MeasurePlusNpmResourceHolderList.of(measure), periodStart, periodEnd, parameters, context);
     }
 
@@ -466,7 +472,7 @@ public class R4MeasureProcessor {
             Parameters parameters,
             CqlEngine context) {
 
-        return evaluateMultiMeasuresWithCqlEngine(
+        return evaluateMultiMeasuresPlusNpmHoldersWithCqlEngine(
                 subjects,
                 MeasurePlusNpmResourceHolderList.of(measurePlusNpmResourceHolder),
                 periodStart,
@@ -495,7 +501,24 @@ public class R4MeasureProcessor {
     //                context);
     //    }
 
-    CompositeEvaluationResultsPerMeasure evaluateMultiMeasuresWithCqlEngine(
+    public CompositeEvaluationResultsPerMeasure evaluateMultiMeasuresWithCqlEngine(
+            List<String> subjects,
+            List<Measure> measures,
+            @Nullable ZonedDateTime periodStart,
+            @Nullable ZonedDateTime periodEnd,
+            Parameters parameters,
+            CqlEngine context) {
+        return evaluateMultiMeasuresPlusNpmHoldersWithCqlEngine(
+                subjects,
+                MeasurePlusNpmResourceHolderList.ofMeasures(measures),
+                periodStart,
+                periodEnd,
+                parameters,
+                context);
+    }
+
+    // LUKETODO:  who actually calls this besides evaluateMultiMeasuresWithCqlEngine
+    CompositeEvaluationResultsPerMeasure evaluateMultiMeasuresPlusNpmHoldersWithCqlEngine(
             List<String> subjects,
             MeasurePlusNpmResourceHolderList measurePlusNpmResourceHolderList,
             @Nullable ZonedDateTime periodStart,

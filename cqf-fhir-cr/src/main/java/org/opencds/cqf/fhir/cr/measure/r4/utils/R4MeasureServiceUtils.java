@@ -379,26 +379,33 @@ public class R4MeasureServiceUtils {
     //        return foldMeasure(measure, repository, null).getMeasure();
     //    }
 
+    public MeasurePlusNpmResourceHolder foldMeasure(Either3<CanonicalType, IdType, Measure> measure) {
+        return foldMeasure(measure, repository, npmPackageLoader);
+    }
+
     public static MeasurePlusNpmResourceHolder foldMeasure(
             Either3<CanonicalType, IdType, Measure> measure,
             IRepository repository,
-            @Nullable NpmPackageLoader npmPackageLoader) {
-        if (npmPackageLoader == null) {
-            var folded = measure.fold(
-                    // LUKETODO:  check before calling measure()?
-                    measureCanonicalType ->
-                            resolveByUrl(measureCanonicalType, repository, null).getMeasure(),
-                    measureIdType -> resolveById(measureIdType, repository),
-                    Function.identity());
+            NpmPackageLoader npmPackageLoader) {
 
-            return MeasurePlusNpmResourceHolder.measureOnly(folded);
-        }
-
-        return measure.fold(
+        var measureFromRepository = measure.fold(
                 // LUKETODO:  check before calling measure()?
                 measureCanonicalType -> resolveByUrl(measureCanonicalType, repository, npmPackageLoader),
                 measureIdType -> MeasurePlusNpmResourceHolder.measureOnly(resolveById(measureIdType, repository)),
                 MeasurePlusNpmResourceHolder::measureOnly);
+
+        if (measureFromRepository.getMeasure() != null) {
+            return measureFromRepository;
+        }
+
+        var folded = measure.fold(
+                // LUKETODO:  check before calling measure()?
+                measureCanonicalType ->
+                        resolveByUrl(measureCanonicalType, repository, null).getMeasure(),
+                measureIdType -> resolveById(measureIdType, repository),
+                Function.identity());
+
+        return MeasurePlusNpmResourceHolder.measureOnly(folded);
     }
 
     // LUKETODO:  optimize
@@ -429,7 +436,12 @@ public class R4MeasureServiceUtils {
                 (Measure) result.getEntryFirstRep().getResource());
     }
 
-    public static List<Measure> resolveByIds(List<? extends IIdType> ids, IRepository repository) {
+    // Can't use NPM to resolve measures by IDs, so this is explicitly a query against the repository.
+    public List<Measure> resolveByIds(List<? extends IIdType> ids) {
+        return resolveMeasuresFromRepository(ids, repository);
+    }
+
+    private static List<Measure> resolveMeasuresFromRepository(List<? extends IIdType> ids, IRepository repository) {
         var idStringArray = ids.stream().map(IPrimitiveType::getValueAsString).toArray(String[]::new);
         var searchParameters = Searches.byId(idStringArray);
 

@@ -126,7 +126,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
                 additionalData);
 
         // This is basically a Map of measure -> subject -> EvaluationResult
-        var compositeEvaluationResultsPerMeasure = r4ProcessorToUse.evaluateMultiMeasuresWithCqlEngine(
+        var compositeEvaluationResultsPerMeasure = r4ProcessorToUse.evaluateMultiMeasuresPlusNpmHoldersWithCqlEngine(
                 subjects, measurePlusNpmDetails, periodStart, periodEnd, parameters, context);
 
         var measures = measurePlusNpmDetails.getMeasures();

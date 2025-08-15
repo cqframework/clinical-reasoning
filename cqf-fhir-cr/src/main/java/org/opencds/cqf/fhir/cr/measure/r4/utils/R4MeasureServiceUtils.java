@@ -364,20 +364,20 @@ public class R4MeasureServiceUtils {
     public boolean isSubjectListEffectivelyEmpty(List<String> subjectIds) {
         return subjectIds == null || subjectIds.isEmpty() || subjectIds.get(0) == null;
     }
-
-    // LUKETODO:  is this used downstream?
-    public static List<Measure> foldMeasures(
-            List<Either3<CanonicalType, IdType, Measure>> measures, IRepository repository) {
-        return measures.stream()
-                .map(measure -> foldMeasure(measure, repository))
-                .toList();
-    }
+    //
+    //    // LUKETODO:  is this used downstream?
+    //    public static List<Measure> foldMeasures(
+    //            List<Either3<CanonicalType, IdType, Measure>> measures, IRepository repository) {
+    //        return measures.stream()
+    //                .map(measure -> foldMeasure(measure, repository))
+    //                .toList();
+    //    }
 
     // LUKETODO:  think about all the different scenarios and callers and maybe just return MeasurePlusNpmResourceHolder
-    // no matter what?
-    public static Measure foldMeasure(Either3<CanonicalType, IdType, Measure> measure, IRepository repository) {
-        return foldMeasure(measure, repository, null).getMeasure();
-    }
+    //    // no matter what?
+    //    public static Measure foldMeasure(Either3<CanonicalType, IdType, Measure> measure, IRepository repository) {
+    //        return foldMeasure(measure, repository, null).getMeasure();
+    //    }
 
     public static MeasurePlusNpmResourceHolder foldMeasure(
             Either3<CanonicalType, IdType, Measure> measure,

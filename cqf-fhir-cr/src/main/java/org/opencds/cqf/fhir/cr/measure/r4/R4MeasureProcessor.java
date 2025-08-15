@@ -87,10 +87,10 @@ public class R4MeasureProcessor {
             CqlEngine context,
             CompositeEvaluationResultsPerMeasure compositeEvaluationResultsPerMeasure) {
 
-        var retrievedMeasure = R4MeasureServiceUtils.foldMeasure(measure, repository);
+        var measurePlusNpmResourceHolder = R4MeasureServiceUtils.foldMeasure(measure, repository, npmPackageLoader);
 
         return this.evaluateMeasure(
-                retrievedMeasure,
+                measurePlusNpmResourceHolder.getMeasure(),
                 periodStart,
                 periodEnd,
                 reportType,
@@ -427,9 +427,10 @@ public class R4MeasureProcessor {
                 context);
     }
 
+    // LUEKTODO:  test for coverage
     public CompositeEvaluationResultsPerMeasure evaluateMeasureIdWithCqlEngine(
             List<String> subjects,
-            IIdType measureId,
+            Either3<CanonicalType, IdType, Measure> measureId,
             @Nullable ZonedDateTime periodStart,
             @Nullable ZonedDateTime periodEnd,
             Parameters parameters,
@@ -437,7 +438,8 @@ public class R4MeasureProcessor {
 
         return evaluateMultiMeasuresWithCqlEngine(
                 subjects,
-                MeasurePlusNpmResourceHolderList.of(R4MeasureServiceUtils.resolveById(measureId, repository)),
+                MeasurePlusNpmResourceHolderList.of(
+                        R4MeasureServiceUtils.foldMeasure(measureId, repository, npmPackageLoader)),
                 periodStart,
                 periodEnd,
                 parameters,

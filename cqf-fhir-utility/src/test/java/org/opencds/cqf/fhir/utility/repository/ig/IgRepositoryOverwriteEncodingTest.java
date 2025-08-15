@@ -19,7 +19,6 @@ import org.opencds.cqf.fhir.test.Resources;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.repository.ig.EncodingBehavior.PreserveEncoding;
 import org.opencds.cqf.fhir.utility.repository.ig.IgConventions.CategoryLayout;
-import org.opencds.cqf.fhir.utility.repository.ig.IgConventions.CompartmentLayout;
 import org.opencds.cqf.fhir.utility.repository.ig.IgConventions.FhirTypeLayout;
 import org.opencds.cqf.fhir.utility.repository.ig.IgConventions.FilenameMode;
 
@@ -38,7 +37,7 @@ class IgRepositoryOverwriteEncodingTest {
         var conventions = new IgConventions(
                 FhirTypeLayout.DIRECTORY_PER_TYPE,
                 CategoryLayout.DIRECTORY_PER_CATEGORY,
-                CompartmentLayout.FLAT,
+                CompartmentMode.NONE,
                 FilenameMode.ID_ONLY,
                 new EncodingBehavior(EncodingEnum.XML, PreserveEncoding.OVERWRITE_WITH_PREFERRED_ENCODING));
         repository = new IgRepository(FhirContext.forR4Cached(), tempDir, conventions, null);

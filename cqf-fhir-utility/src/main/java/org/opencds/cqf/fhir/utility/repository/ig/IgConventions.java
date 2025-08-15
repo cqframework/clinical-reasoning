@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 public record IgConventions(
         org.opencds.cqf.fhir.utility.repository.ig.IgConventions.FhirTypeLayout typeLayout,
         org.opencds.cqf.fhir.utility.repository.ig.IgConventions.CategoryLayout categoryLayout,
-        org.opencds.cqf.fhir.utility.repository.ig.IgConventions.CompartmentLayout compartmentLayout,
+        org.opencds.cqf.fhir.utility.repository.ig.CompartmentMode compartmentMode,
         org.opencds.cqf.fhir.utility.repository.ig.IgConventions.FilenameMode filenameMode,
         org.opencds.cqf.fhir.utility.repository.ig.EncodingBehavior encodingBehavior) {
 
@@ -45,15 +45,6 @@ public record IgConventions(
     }
 
     /**
-     * Whether or not the files are organized by compartment. This is primarily used for tests to
-     * provide isolation between test cases.
-     */
-    public enum CompartmentLayout {
-        DIRECTORY_PER_COMPARTMENT,
-        FLAT
-    }
-
-    /**
      * Whether or not the files are prefixed with the resource type.
      */
     public enum FilenameMode {
@@ -64,20 +55,20 @@ public record IgConventions(
     public static final IgConventions FLAT = new IgConventions(
             FhirTypeLayout.FLAT,
             CategoryLayout.FLAT,
-            CompartmentLayout.FLAT,
+            CompartmentMode.NONE,
             FilenameMode.TYPE_AND_ID,
             EncodingBehavior.DEFAULT);
     public static final IgConventions STANDARD = new IgConventions(
             FhirTypeLayout.DIRECTORY_PER_TYPE,
             CategoryLayout.DIRECTORY_PER_CATEGORY,
-            CompartmentLayout.FLAT,
+            CompartmentMode.NONE,
             FilenameMode.ID_ONLY,
             EncodingBehavior.DEFAULT);
 
     public static final IgConventions KALM = new IgConventions(
             FhirTypeLayout.DIRECTORY_PER_TYPE,
             CategoryLayout.DEFINITIONAL_AND_DATA,
-            CompartmentLayout.DIRECTORY_PER_COMPARTMENT,
+            CompartmentMode.PATIENT,
             FilenameMode.ID_ONLY,
             EncodingBehavior.KALM);
 
@@ -93,6 +84,7 @@ public record IgConventions(
      *
      * @param path The path to the IG.
      * @return The IG conventions.
+     * @throws IllegalArgumentException if the path is invalid or does not conform to IG conventions.
      */
     public static IgConventions autoDetect(Path path) {
         if (path == null || !Files.exists(path)) {
@@ -139,7 +131,7 @@ public record IgConventions(
 
         var hasCategoryDirectory = !path.equals(categoryPath);
 
-        var hasCompartmentDirectory = false;
+        var compartmentMode = CompartmentMode.NONE;
 
         // Compartments can only exist for test data
         if (hasCategoryDirectory) {
@@ -170,8 +162,17 @@ public record IgConventions(
                         .findFirst()
                         .orElse(categoryPath);
 
-                hasCompartmentDirectory = !compartment.equals(categoryPath);
-                if (hasCompartmentDirectory) {
+                // If we found a compartment directory, we need to determine its type.
+                if (!compartment.equals(categoryPath)) {
+                    compartmentMode =
+                            CompartmentMode.fromType(compartment.getFileName().toString());
+                    if (compartmentMode == CompartmentMode.NONE) {
+                        throw new IllegalArgumentException(
+                                "The compartment directory does not match any known compartment type: " + compartment);
+                    }
+                }
+
+                if (compartmentMode != CompartmentMode.NONE) {
                     categoryPath = compartment;
                 }
             }
@@ -204,7 +205,7 @@ public record IgConventions(
         var config = new IgConventions(
                 hasTypeDirectory ? FhirTypeLayout.DIRECTORY_PER_TYPE : FhirTypeLayout.FLAT,
                 hasCategoryDirectory ? CategoryLayout.DIRECTORY_PER_CATEGORY : CategoryLayout.FLAT,
-                hasCompartmentDirectory ? CompartmentLayout.DIRECTORY_PER_COMPARTMENT : CompartmentLayout.FLAT,
+                compartmentMode,
                 hasTypeFilename ? FilenameMode.TYPE_AND_ID : FilenameMode.ID_ONLY,
                 EncodingBehavior.DEFAULT);
 
@@ -294,7 +295,7 @@ public record IgConventions(
         return typeLayout == that.typeLayout
                 && filenameMode == that.filenameMode
                 && categoryLayout == that.categoryLayout
-                && compartmentLayout == that.compartmentLayout
+                && compartmentMode == that.compartmentMode
                 && (this.encodingBehavior != null
                         ? encodingBehavior.equals(that.encodingBehavior)
                         : that.encodingBehavior == null);
@@ -302,13 +303,13 @@ public record IgConventions(
 
     @Override
     public int hashCode() {
-        return Objects.hash(typeLayout, categoryLayout, compartmentLayout, filenameMode, encodingBehavior);
+        return Objects.hash(typeLayout, categoryLayout, compartmentMode, filenameMode, encodingBehavior);
     }
 
     @Override
     @Nonnull
     public String toString() {
-        return "IGConventions [typeLayout=%s, categoryLayout=%s compartmentLayout=%s, filenameMode=%s]"
-                .formatted(typeLayout, categoryLayout, compartmentLayout, filenameMode);
+        return "IGConventions [typeLayout=%s, categoryLayout=%s compartmentMode=%s, filenameMode=%s]"
+                .formatted(typeLayout, categoryLayout, compartmentMode, filenameMode);
     }
 }

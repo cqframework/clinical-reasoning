@@ -1,5 +1,7 @@
 package org.opencds.cqf.fhir.cr.measure.r4.npm;
 
+import static org.junit.jupiter.api.Assertions.fail;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
@@ -10,8 +12,6 @@ import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
-
-import static org.junit.jupiter.api.Assertions.fail;
 
 // TODO: LD :  introduce an R5 version of this test once R5 services/etc become available
 class MeasureWithNpmForR4Test {
@@ -290,7 +290,7 @@ class MeasureWithNpmForR4Test {
                 .hasCount(1)
                 .up()
                 .population(DENOMINATOR)
-            // LUKETODO:  investigate to see if this is correct for male 1988
+                // LUKETODO:  investigate to see if this is correct for male 1988
                 .hasCount(1)
                 .up()
                 .population(NUMERATOR)
@@ -298,9 +298,7 @@ class MeasureWithNpmForR4Test {
     }
 
     @Test
-    void evaluateWithSingleMeasureDerivedLibraryTwoLayersAllSubjects() {
-
-    }
+    void evaluateWithSingleMeasureDerivedLibraryTwoLayersAllSubjects() {}
 
     @Test
     void evaluateWithSingleMeasureDerivedLibraryCrossPackageSingleSubject() {

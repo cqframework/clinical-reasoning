@@ -76,7 +76,7 @@ public class Measure {
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     @FunctionalInterface
-    interface Validator<T> {
+    public interface Validator<T> {
         void validate(T value);
     }
 
@@ -150,20 +150,11 @@ public class Measure {
                     .setValuesetExpansionMode(VALUESET_EXPANSION_MODE.PERFORM_NAIVE_EXPANSION);
 
             this.measurePeriodValidator = new MeasurePeriodValidator();
-
-            this.npmPackageLoader = NpmPackageLoader.DEFAULT;
             this.measureServiceUtils = new R4MeasureServiceUtils(repository, npmPackageLoader);
         }
 
         public Given repository(IRepository repository) {
             this.repository = repository;
-            return this;
-        }
-
-        // LUKETODO:  get rid of this
-        public Given npmPackageLoader(NpmPackageLoader npmPackageLoader) {
-            //            this.repository = new InMemoryFhirRepository(FhirContext.forR4Cached());
-            this.npmPackageLoader = npmPackageLoader;
             return this;
         }
 

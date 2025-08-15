@@ -44,11 +44,13 @@ import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
+import org.opencds.cqf.fhir.cr.measure.r4.Measure.SelectedGroup;
+import org.opencds.cqf.fhir.cr.measure.r4.Measure.SelectedGroup.SelectedReference;
 import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 @SuppressWarnings("squid:S1135")
-class MultiMeasure {
+public class MultiMeasure {
     public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/measure/r4";
 
     @FunctionalInterface
@@ -126,9 +128,11 @@ class MultiMeasure {
         }
 
         public MultiMeasure.Given repositoryFor(String repositoryPath) {
-            this.repository = new IgRepository(
-                    FhirContext.forR4Cached(),
-                    Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
+            var igRepository = new IgRepository(
+                FhirContext.forR4Cached(),
+                Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
+            this.repository = igRepository;
+            this.npmPackageLoader = igRepository.getNpmPackageLoader();
             return this;
         }
 
@@ -589,6 +593,11 @@ class MultiMeasure {
                                 .formatted(p));
             }
 
+            return this;
+        }
+
+        public SelectedReference<P> hasEvaluatedResourceReferenceCount(int count) {
+            assertEquals(count, this.value().getExtension().size());
             return this;
         }
     }

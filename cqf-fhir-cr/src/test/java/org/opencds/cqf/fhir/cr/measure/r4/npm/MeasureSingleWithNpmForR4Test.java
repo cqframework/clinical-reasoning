@@ -14,31 +14,14 @@ import org.opencds.cqf.fhir.cr.measure.r4.Measure;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 
 // TODO: LD :  introduce an R5 version of this test once R5 services/etc become available
-class MeasureWithNpmForR4Test {
+class MeasureSingleWithNpmForR4Test extends BaseMeasureWithNpmForR4Test {
 
-    private static final String SIMPLE_ALPHA = "SimpleAlpha";
-    private static final String SIMPLE_BRAVO = "SimpleBravo";
     private static final String WITH_DERIVED_LIBRARY = "WithDerivedLibrary";
     private static final String WITH_TWO_LAYERS_DERIVED_LIBRARIES = "WithTwoLayersDerivedLibraries";
 
-    private static final String SIMPLE_URL = "http://example.com";
     private static final String DERIVED_URL = "http://with-derived-library.npm.opencds.org";
     private static final String DERIVED_TWO_LAYERS_URL = "http://with-two-layers-derived-libraries.npm.opencds.org";
 
-    private static final String SLASH_MEASURE_SLASH = "/Measure/";
-
-    private static final String PIPE = "|";
-    private static final String VERSION_0_1 = "0.1";
-    private static final String VERSION_0_2 = "0.2";
-    private static final String VERSION_0_3 = "0.3";
-    private static final String VERSION_0_4 = "0.4";
-    private static final String VERSION_0_5 = "0.5";
-    private static final String VERSION_0_6 = "0.6";
-
-    private static final String MEASURE_URL_ALPHA = SIMPLE_URL + SLASH_MEASURE_SLASH + SIMPLE_ALPHA;
-    private static final String MEASURE_URL_ALPHA_WITH_VERSION = MEASURE_URL_ALPHA + PIPE + VERSION_0_2;
-    private static final String MEASURE_URL_BRAVO = SIMPLE_URL + SLASH_MEASURE_SLASH + SIMPLE_BRAVO;
-    private static final String MEASURE_URL_BRAVO_WITH_VERSION = MEASURE_URL_BRAVO + PIPE + VERSION_0_5;
 
     private static final String MEASURE_URL_WITH_DERIVED_LIBRARY =
             DERIVED_URL + SLASH_MEASURE_SLASH + WITH_DERIVED_LIBRARY;
@@ -59,42 +42,16 @@ class MeasureWithNpmForR4Test {
     private static final String MEASURE_URL_CROSS_PACKAGE_SOURCE_WITH_VERSION =
             MEASURE_URL_CROSS_PACKAGE_SOURCE + PIPE + VERSION_0_2;
 
-    private static final LocalDateTime LOCAL_DATE_TIME_2020_01_01 =
-            LocalDate.of(2020, Month.JANUARY, 1).atStartOfDay();
-    private static final LocalDateTime LOCAL_DATE_TIME_2021_01_01_MINUS_ONE_SECOND =
-            LocalDate.of(2021, Month.JANUARY, 1).atStartOfDay().minusNanos(1);
+    private static final Given NPM_REPO_SINGLE_MEASURE = Measure.given().repositoryFor("BasicNpmPackages");
 
-    private static final LocalDateTime LOCAL_DATE_TIME_2021_01_01 =
-            LocalDate.of(2021, Month.JANUARY, 1).atStartOfDay();
-    private static final LocalDateTime LOCAL_DATE_TIME_2022_01_01_MINUS_ONE_SECOND =
-            LocalDate.of(2022, Month.JANUARY, 1).atStartOfDay().minusNanos(1);
-
-    private static final LocalDateTime LOCAL_DATE_TIME_2022_01_01 =
-            LocalDate.of(2022, Month.JANUARY, 1).atStartOfDay();
-    private static final LocalDateTime LOCAL_DATE_TIME_2023_01_01_MINUS_ONE_SECOND =
-            LocalDate.of(2023, Month.JANUARY, 1).atStartOfDay().minusNanos(1);
-
-    private static final LocalDateTime LOCAL_DATE_TIME_2024_01_01 =
-            LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay();
-    private static final LocalDateTime LOCAL_DATE_TIME_2025_01_01_MINUS_ONE_SECOND =
-            LocalDate.of(2025, Month.JANUARY, 1).atStartOfDay().minusNanos(1);
-
-    private static final String INITIAL_POPULATION = "initial-population";
-    private static final String DENOMINATOR = "denominator";
-    private static final String NUMERATOR = "numerator";
-    private static final Given NPM_REPO = Measure.given().repositoryFor("BasicNpmPackages");
-
-    private static final String PATIENT_FEMALE_1944 = "Patient/female-1944";
-    private static final String PATIENT_MALE_1944 = "Patient/male-1944";
     private static final String PATIENT_MALE_1988 = "Patient/male-1988";
-    private static final String ENCOUNTER_MALE_1988_FINISHED_ENCOUNTER_1 = "Encounter/male-1988-finished-encounter-1";
 
     // LUKETODO:  set up a multilib eval with NPM
 
     @Test
-    void evaluateSucceedsWithSingleMinimalMeasureAndSingleSubject() {
+    void evaluateSucceedsWithMinimalMeasureAndSingleSubject() {
 
-        NPM_REPO.when()
+        NPM_REPO_SINGLE_MEASURE.when()
                 .measureUrl(MEASURE_URL_ALPHA)
                 .reportType(MeasureEvalType.SUBJECT.toCode())
                 .subject(PATIENT_FEMALE_1944)
@@ -114,7 +71,7 @@ class MeasureWithNpmForR4Test {
                 // We match the patient and the single finished encounter, which matches Alpha's where
                 .hasCount(1);
 
-        NPM_REPO.when()
+        NPM_REPO_SINGLE_MEASURE.when()
                 .measureUrl(MEASURE_URL_ALPHA_WITH_VERSION)
                 .reportType(MeasureEvalType.SUBJECT.toCode())
                 .subject(PATIENT_MALE_1944)
@@ -136,9 +93,9 @@ class MeasureWithNpmForR4Test {
     }
 
     @Test
-    void evaluateSucceedsWithSingleMeasureAndBasicPatientAndSingleSubject() {
+    void evaluateSucceedsWithBasicPatientAndSingleSubject() {
 
-        NPM_REPO.when()
+        NPM_REPO_SINGLE_MEASURE.when()
                 .measureUrl(MEASURE_URL_BRAVO)
                 .reportType(MeasureEvalType.SUBJECT.toCode())
                 .subject(PATIENT_MALE_1944)
@@ -160,9 +117,9 @@ class MeasureWithNpmForR4Test {
     }
 
     @Test
-    void evaluateSucceedsWithSingleMeasureAndBasicPatientAllSubjects() {
+    void evaluateSucceedsWithBasicPatientAllSubjects() {
 
-        NPM_REPO.when()
+        NPM_REPO_SINGLE_MEASURE.when()
                 .measureUrl(MEASURE_URL_BRAVO)
                 .reportType(MeasureEvalType.SUBJECT.toCode())
                 .evaluate()
@@ -214,7 +171,7 @@ class MeasureWithNpmForR4Test {
     @Test
     void evaluateWithDerivedLibraryOneLayerAndSingleSubject() {
 
-        NPM_REPO.when()
+        NPM_REPO_SINGLE_MEASURE.when()
                 .measureUrl(MEASURE_URL_ALPHA)
                 .reportType(MeasureEvalType.SUBJECT.toCode())
                 .subject(PATIENT_FEMALE_1944)
@@ -233,7 +190,7 @@ class MeasureWithNpmForR4Test {
                 .population(INITIAL_POPULATION)
                 .hasCount(1);
 
-        NPM_REPO.when()
+        NPM_REPO_SINGLE_MEASURE.when()
                 .measureUrl(MEASURE_URL_WITH_DERIVED_LIBRARY)
                 .reportType(MeasureEvalType.SUBJECT.toCode())
                 .subject(PATIENT_FEMALE_1944)
@@ -258,7 +215,7 @@ class MeasureWithNpmForR4Test {
     @Test
     void evaluateWithSingleMeasureDerivedLibraryTwoLayersOneSubject() {
 
-        NPM_REPO.when()
+        NPM_REPO_SINGLE_MEASURE.when()
                 .measureUrl(MEASURE_URL_BRAVO)
                 .reportType(MeasureEvalType.SUBJECT.toCode())
                 .subject(PATIENT_MALE_1988)
@@ -273,7 +230,7 @@ class MeasureWithNpmForR4Test {
                 .evaluatedResource(ENCOUNTER_MALE_1988_FINISHED_ENCOUNTER_1)
                 .hasEvaluatedResourceReferenceCount(1);
 
-        NPM_REPO.when()
+        NPM_REPO_SINGLE_MEASURE.when()
                 .measureUrl(MEASURE_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES)
                 .reportType(MeasureEvalType.SUBJECT.toCode())
                 .subject(PATIENT_MALE_1988)
@@ -298,12 +255,14 @@ class MeasureWithNpmForR4Test {
     }
 
     @Test
-    void evaluateWithSingleMeasureDerivedLibraryTwoLayersAllSubjects() {}
+    void evaluateWithDerivedLibraryTwoLayersAllSubjects() {
+        fail();
+    }
 
     @Test
-    void evaluateWithSingleMeasureDerivedLibraryCrossPackageSingleSubject() {
+    void evaluateWithDerivedLibraryCrossPackageSingleSubject() {
 
-        NPM_REPO.when()
+        NPM_REPO_SINGLE_MEASURE.when()
                 .measureUrl(MEASURE_URL_CROSS_PACKAGE_SOURCE)
                 .reportType(MeasureEvalType.SUBJECT.toCode())
                 .subject(PATIENT_FEMALE_1944)
@@ -324,9 +283,5 @@ class MeasureWithNpmForR4Test {
                 .up()
                 .population(NUMERATOR)
                 .hasCount(1);
-    }
-
-    private Date toJavaUtilDate(LocalDateTime localDateTime) {
-        return Date.from(localDateTime.atZone(ZoneOffset.UTC).toInstant());
     }
 }

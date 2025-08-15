@@ -25,6 +25,7 @@ import org.opencds.cqf.fhir.cr.measure.common.CompositeEvaluationResultsPerMeasu
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorUtils;
+import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureService.NpmPackageLoaderWithCache;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.builder.BundleBuilder;
@@ -104,10 +105,10 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
 
         r4MeasureServiceUtilsToUse.ensureSupplementalDataElementSearchParameter();
 
-        var measurePlusNpmDetails =
+        var measurePlusNpmResourceHolderList =
                 r4MeasureServiceUtilsToUse.getMeasurePlusNpmDetails(measureIds, measureIdentifiers, measureUrls);
 
-        log.info("multi-evaluate-measure, measures to evaluate: {}", measurePlusNpmDetails.size());
+        log.info("multi-evaluate-measure, measures to evaluate: {}", measurePlusNpmResourceHolderList.size());
 
         var evalType = r4MeasureServiceUtilsToUse.getMeasureEvalType(reportType, subject);
 
@@ -119,17 +120,18 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
                 .withType(BundleType.SEARCHSET.toString())
                 .build();
 
-        // LUKETODO:  NPM for multiple libraries?
+        // LUKETODO:  add the same code as for single measures
         var context = Engines.forRepository(
                 r4ProcessorToUse.getRepository(),
                 this.measureEvaluationOptions.getEvaluationSettings(),
-                additionalData);
+                additionalData,
+            NpmPackageLoaderWithCache.of(measurePlusNpmResourceHolderList.npmResourceHolders(), npmPackageLoader));
 
         // This is basically a Map of measure -> subject -> EvaluationResult
         var compositeEvaluationResultsPerMeasure = r4ProcessorToUse.evaluateMultiMeasuresPlusNpmHoldersWithCqlEngine(
-                subjects, measurePlusNpmDetails, periodStart, periodEnd, parameters, context);
+                subjects, measurePlusNpmResourceHolderList, periodStart, periodEnd, parameters, context);
 
-        var measures = measurePlusNpmDetails.getMeasures();
+        var measures = measurePlusNpmResourceHolderList.getMeasures();
 
         // evaluate Measures
         if (evalType.equals(MeasureEvalType.POPULATION) || evalType.equals(MeasureEvalType.SUBJECTLIST)) {

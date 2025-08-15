@@ -2,11 +2,6 @@ package org.opencds.cqf.fhir.cr.measure.r4.npm;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.Month;
-import java.time.ZoneOffset;
-import java.util.Date;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportStatus;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
@@ -21,7 +16,6 @@ class MeasureSingleWithNpmForR4Test extends BaseMeasureWithNpmForR4Test {
 
     private static final String DERIVED_URL = "http://with-derived-library.npm.opencds.org";
     private static final String DERIVED_TWO_LAYERS_URL = "http://with-two-layers-derived-libraries.npm.opencds.org";
-
 
     private static final String MEASURE_URL_WITH_DERIVED_LIBRARY =
             DERIVED_URL + SLASH_MEASURE_SLASH + WITH_DERIVED_LIBRARY;
@@ -51,7 +45,8 @@ class MeasureSingleWithNpmForR4Test extends BaseMeasureWithNpmForR4Test {
     @Test
     void evaluateSucceedsWithMinimalMeasureAndSingleSubject() {
 
-        NPM_REPO_SINGLE_MEASURE.when()
+        NPM_REPO_SINGLE_MEASURE
+                .when()
                 .measureUrl(MEASURE_URL_ALPHA)
                 .reportType(MeasureEvalType.SUBJECT.toCode())
                 .subject(PATIENT_FEMALE_1944)
@@ -71,7 +66,8 @@ class MeasureSingleWithNpmForR4Test extends BaseMeasureWithNpmForR4Test {
                 // We match the patient and the single finished encounter, which matches Alpha's where
                 .hasCount(1);
 
-        NPM_REPO_SINGLE_MEASURE.when()
+        NPM_REPO_SINGLE_MEASURE
+                .when()
                 .measureUrl(MEASURE_URL_ALPHA_WITH_VERSION)
                 .reportType(MeasureEvalType.SUBJECT.toCode())
                 .subject(PATIENT_MALE_1944)
@@ -95,7 +91,8 @@ class MeasureSingleWithNpmForR4Test extends BaseMeasureWithNpmForR4Test {
     @Test
     void evaluateSucceedsWithBasicPatientAndSingleSubject() {
 
-        NPM_REPO_SINGLE_MEASURE.when()
+        NPM_REPO_SINGLE_MEASURE
+                .when()
                 .measureUrl(MEASURE_URL_BRAVO)
                 .reportType(MeasureEvalType.SUBJECT.toCode())
                 .subject(PATIENT_MALE_1944)
@@ -119,7 +116,8 @@ class MeasureSingleWithNpmForR4Test extends BaseMeasureWithNpmForR4Test {
     @Test
     void evaluateSucceedsWithBasicPatientAllSubjects() {
 
-        NPM_REPO_SINGLE_MEASURE.when()
+        NPM_REPO_SINGLE_MEASURE
+                .when()
                 .measureUrl(MEASURE_URL_BRAVO)
                 .reportType(MeasureEvalType.SUBJECT.toCode())
                 .evaluate()
@@ -171,7 +169,8 @@ class MeasureSingleWithNpmForR4Test extends BaseMeasureWithNpmForR4Test {
     @Test
     void evaluateWithDerivedLibraryOneLayerAndSingleSubject() {
 
-        NPM_REPO_SINGLE_MEASURE.when()
+        NPM_REPO_SINGLE_MEASURE
+                .when()
                 .measureUrl(MEASURE_URL_ALPHA)
                 .reportType(MeasureEvalType.SUBJECT.toCode())
                 .subject(PATIENT_FEMALE_1944)
@@ -190,7 +189,8 @@ class MeasureSingleWithNpmForR4Test extends BaseMeasureWithNpmForR4Test {
                 .population(INITIAL_POPULATION)
                 .hasCount(1);
 
-        NPM_REPO_SINGLE_MEASURE.when()
+        NPM_REPO_SINGLE_MEASURE
+                .when()
                 .measureUrl(MEASURE_URL_WITH_DERIVED_LIBRARY)
                 .reportType(MeasureEvalType.SUBJECT.toCode())
                 .subject(PATIENT_FEMALE_1944)
@@ -215,7 +215,8 @@ class MeasureSingleWithNpmForR4Test extends BaseMeasureWithNpmForR4Test {
     @Test
     void evaluateWithSingleMeasureDerivedLibraryTwoLayersOneSubject() {
 
-        NPM_REPO_SINGLE_MEASURE.when()
+        NPM_REPO_SINGLE_MEASURE
+                .when()
                 .measureUrl(MEASURE_URL_BRAVO)
                 .reportType(MeasureEvalType.SUBJECT.toCode())
                 .subject(PATIENT_MALE_1988)
@@ -230,7 +231,8 @@ class MeasureSingleWithNpmForR4Test extends BaseMeasureWithNpmForR4Test {
                 .evaluatedResource(ENCOUNTER_MALE_1988_FINISHED_ENCOUNTER_1)
                 .hasEvaluatedResourceReferenceCount(1);
 
-        NPM_REPO_SINGLE_MEASURE.when()
+        NPM_REPO_SINGLE_MEASURE
+                .when()
                 .measureUrl(MEASURE_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES)
                 .reportType(MeasureEvalType.SUBJECT.toCode())
                 .subject(PATIENT_MALE_1988)
@@ -262,7 +264,8 @@ class MeasureSingleWithNpmForR4Test extends BaseMeasureWithNpmForR4Test {
     @Test
     void evaluateWithDerivedLibraryCrossPackageSingleSubject() {
 
-        NPM_REPO_SINGLE_MEASURE.when()
+        NPM_REPO_SINGLE_MEASURE
+                .when()
                 .measureUrl(MEASURE_URL_CROSS_PACKAGE_SOURCE)
                 .reportType(MeasureEvalType.SUBJECT.toCode())
                 .subject(PATIENT_FEMALE_1944)

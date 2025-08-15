@@ -125,7 +125,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
                 r4ProcessorToUse.getRepository(),
                 this.measureEvaluationOptions.getEvaluationSettings(),
                 additionalData,
-            NpmPackageLoaderWithCache.of(measurePlusNpmResourceHolderList.npmResourceHolders(), npmPackageLoader));
+                NpmPackageLoaderWithCache.of(measurePlusNpmResourceHolderList.npmResourceHolders(), npmPackageLoader));
 
         // This is basically a Map of measure -> subject -> EvaluationResult
         var compositeEvaluationResultsPerMeasure = r4ProcessorToUse.evaluateMultiMeasuresPlusNpmHoldersWithCqlEngine(

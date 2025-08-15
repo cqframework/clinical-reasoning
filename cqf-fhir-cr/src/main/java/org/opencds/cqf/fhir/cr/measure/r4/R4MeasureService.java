@@ -134,15 +134,18 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
         private final List<NpmResourceInfoForCql> npmResourceHolders;
         private final NpmPackageLoader npmPackageLoader;
 
-        public static NpmPackageLoaderWithCache of(NpmResourceInfoForCql npmResourceHolder, NpmPackageLoader npmPackageLoader) {
+        public static NpmPackageLoaderWithCache of(
+                NpmResourceInfoForCql npmResourceHolder, NpmPackageLoader npmPackageLoader) {
             return new NpmPackageLoaderWithCache(List.of(npmResourceHolder), npmPackageLoader);
         }
 
-        public static NpmPackageLoaderWithCache of(List<NpmResourceInfoForCql> npmResourceHolders, NpmPackageLoader npmPackageLoader) {
+        public static NpmPackageLoaderWithCache of(
+                List<NpmResourceInfoForCql> npmResourceHolders, NpmPackageLoader npmPackageLoader) {
             return new NpmPackageLoaderWithCache(npmResourceHolders, npmPackageLoader);
         }
 
-        private NpmPackageLoaderWithCache(List<NpmResourceInfoForCql> npmResourceHolders, NpmPackageLoader npmPackageLoader) {
+        private NpmPackageLoaderWithCache(
+                List<NpmResourceInfoForCql> npmResourceHolders, NpmPackageLoader npmPackageLoader) {
             this.npmResourceHolders = npmResourceHolders;
             this.npmPackageLoader = npmPackageLoader;
         }
@@ -150,33 +153,31 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
         @Override
         public NpmResourceInfoForCql loadNpmResources(IPrimitiveType<String> measureUrl) {
             return npmResourceHolders.stream()
-                .filter(npmResourceHolder -> isMeasureUrlMatch(npmResourceHolder, measureUrl))
-                .findFirst()
-                .orElseGet( () -> npmPackageLoader.loadNpmResources(measureUrl));
+                    .filter(npmResourceHolder -> isMeasureUrlMatch(npmResourceHolder, measureUrl))
+                    .findFirst()
+                    .orElseGet(() -> npmPackageLoader.loadNpmResources(measureUrl));
         }
 
         @Override
         public Optional<ILibraryAdapter> findMatchingLibrary(VersionedIdentifier versionedIdentifier) {
             var optLibrary = npmResourceHolders.stream()
-                .map(
-                    npmResourceHolder -> npmResourceHolder.findMatchingLibrary(versionedIdentifier))
-                .flatMap(Optional::stream)
-                .findFirst();
+                    .map(npmResourceHolder -> npmResourceHolder.findMatchingLibrary(versionedIdentifier))
+                    .flatMap(Optional::stream)
+                    .findFirst();
 
             if (optLibrary.isPresent()) {
                 return optLibrary;
             }
 
-           return findLibraryFromUnrelatedNpmPackage(versionedIdentifier);
+            return findLibraryFromUnrelatedNpmPackage(versionedIdentifier);
         }
 
         @Override
         public Optional<ILibraryAdapter> findMatchingLibrary(ModelIdentifier modelIdentifier) {
             var optLibrary = npmResourceHolders.stream()
-                .map(
-                    npmResourceHolder -> npmResourceHolder.findMatchingLibrary(modelIdentifier))
-                .flatMap(Optional::stream)
-                .findFirst();
+                    .map(npmResourceHolder -> npmResourceHolder.findMatchingLibrary(modelIdentifier))
+                    .flatMap(Optional::stream)
+                    .findFirst();
 
             if (optLibrary.isPresent()) {
                 return optLibrary;
@@ -194,10 +195,10 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
         public Optional<ILibraryAdapter> loadLibraryByUrl(String libraryUrl) {
 
             var optLibrary = npmResourceHolders.stream()
-                .filter(npmResourceHolder -> isLibraryUrlMatch(npmResourceHolder, libraryUrl))
-                .map(NpmResourceInfoForCql::getOptMainLibrary)
-                .flatMap(Optional::stream)
-                .findFirst();
+                    .filter(npmResourceHolder -> isLibraryUrlMatch(npmResourceHolder, libraryUrl))
+                    .map(NpmResourceInfoForCql::getOptMainLibrary)
+                    .flatMap(Optional::stream)
+                    .findFirst();
 
             if (optLibrary.isPresent()) {
                 return optLibrary;
@@ -206,16 +207,19 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
             return npmPackageLoader.loadLibraryByUrl(libraryUrl);
         }
 
-        private static boolean isMeasureUrlMatch(NpmResourceInfoForCql npmResourceHolder, IPrimitiveType<String> measureUrl) {
-            return npmResourceHolder.getMeasure()
-                .map(measure -> measure.getUrl().equals(measureUrl.getValue()))
-                .orElse(false);
+        private static boolean isMeasureUrlMatch(
+                NpmResourceInfoForCql npmResourceHolder, IPrimitiveType<String> measureUrl) {
+            return npmResourceHolder
+                    .getMeasure()
+                    .map(measure -> measure.getUrl().equals(measureUrl.getValue()))
+                    .orElse(false);
         }
 
         private static boolean isLibraryUrlMatch(NpmResourceInfoForCql npmResourceHolder, String libraryUrl) {
-            return npmResourceHolder.getMeasure()
-                .map(library -> library.getUrl().equals(libraryUrl))
-                .orElse(false);
+            return npmResourceHolder
+                    .getMeasure()
+                    .map(library -> library.getUrl().equals(libraryUrl))
+                    .orElse(false);
         }
     }
 

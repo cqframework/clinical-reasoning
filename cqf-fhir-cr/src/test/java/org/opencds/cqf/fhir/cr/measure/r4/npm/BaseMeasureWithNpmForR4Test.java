@@ -7,27 +7,27 @@ import java.time.ZoneOffset;
 import java.util.Date;
 
 // TODO: LD :  introduce an R5 version of this test once R5 services/etc become available
-abstract public class BaseMeasureWithNpmForR4Test {
+public abstract class BaseMeasureWithNpmForR4Test {
 
     static final LocalDateTime LOCAL_DATE_TIME_2020_01_01 =
-        LocalDate.of(2020, Month.JANUARY, 1).atStartOfDay();
+            LocalDate.of(2020, Month.JANUARY, 1).atStartOfDay();
     static final LocalDateTime LOCAL_DATE_TIME_2021_01_01_MINUS_ONE_SECOND =
-        LocalDate.of(2021, Month.JANUARY, 1).atStartOfDay().minusNanos(1);
+            LocalDate.of(2021, Month.JANUARY, 1).atStartOfDay().minusNanos(1);
 
     static final LocalDateTime LOCAL_DATE_TIME_2021_01_01 =
-        LocalDate.of(2021, Month.JANUARY, 1).atStartOfDay();
+            LocalDate.of(2021, Month.JANUARY, 1).atStartOfDay();
     static final LocalDateTime LOCAL_DATE_TIME_2022_01_01_MINUS_ONE_SECOND =
-        LocalDate.of(2022, Month.JANUARY, 1).atStartOfDay().minusNanos(1);
+            LocalDate.of(2022, Month.JANUARY, 1).atStartOfDay().minusNanos(1);
 
     static final LocalDateTime LOCAL_DATE_TIME_2022_01_01 =
-        LocalDate.of(2022, Month.JANUARY, 1).atStartOfDay();
+            LocalDate.of(2022, Month.JANUARY, 1).atStartOfDay();
     static final LocalDateTime LOCAL_DATE_TIME_2023_01_01_MINUS_ONE_SECOND =
-        LocalDate.of(2023, Month.JANUARY, 1).atStartOfDay().minusNanos(1);
+            LocalDate.of(2023, Month.JANUARY, 1).atStartOfDay().minusNanos(1);
 
     static final LocalDateTime LOCAL_DATE_TIME_2024_01_01 =
-        LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay();
+            LocalDate.of(2024, Month.JANUARY, 1).atStartOfDay();
     static final LocalDateTime LOCAL_DATE_TIME_2025_01_01_MINUS_ONE_SECOND =
-        LocalDate.of(2025, Month.JANUARY, 1).atStartOfDay().minusNanos(1);
+            LocalDate.of(2025, Month.JANUARY, 1).atStartOfDay().minusNanos(1);
 
     static final String PIPE = "|";
     static final String VERSION_0_1 = "0.1";
@@ -57,7 +57,6 @@ abstract public class BaseMeasureWithNpmForR4Test {
     static final String INITIAL_POPULATION = "initial-population";
     static final String DENOMINATOR = "denominator";
     static final String NUMERATOR = "numerator";
-
 
     static Date toJavaUtilDate(LocalDateTime localDateTime) {
         return Date.from(localDateTime.atZone(ZoneOffset.UTC).toInstant());

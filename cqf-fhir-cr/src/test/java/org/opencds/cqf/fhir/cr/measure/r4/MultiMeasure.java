@@ -129,8 +129,8 @@ public class MultiMeasure {
 
         public MultiMeasure.Given repositoryFor(String repositoryPath) {
             var igRepository = new IgRepository(
-                FhirContext.forR4Cached(),
-                Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
+                    FhirContext.forR4Cached(),
+                    Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
             this.repository = igRepository;
             this.npmPackageLoader = igRepository.getNpmPackageLoader();
             return this;

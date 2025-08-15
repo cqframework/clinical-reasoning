@@ -177,13 +177,16 @@ public class Measure {
 
         private R4MeasureService buildMeasureService() {
             var npmPackageLoaderInner = npmPackageLoaderOrEmpty();
-            return new R4MeasureService(repository, evaluationOptions, measurePeriodValidator,
-                new R4MeasureServiceUtils(repository, npmPackageLoaderInner), npmPackageLoaderInner);
+            return new R4MeasureService(
+                    repository,
+                    evaluationOptions,
+                    measurePeriodValidator,
+                    new R4MeasureServiceUtils(repository, npmPackageLoaderInner),
+                    npmPackageLoaderInner);
         }
 
         private NpmPackageLoader npmPackageLoaderOrEmpty() {
-            return Optional.ofNullable(npmPackageLoader)
-                .orElse(NpmPackageLoader.DEFAULT);
+            return Optional.ofNullable(npmPackageLoader).orElse(NpmPackageLoader.DEFAULT);
         }
 
         public When when() {

@@ -37,17 +37,20 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
     private final MeasurePeriodValidator measurePeriodValidator;
     private final R4RepositorySubjectProvider subjectProvider;
     private final MeasureProcessorUtils measureProcessorUtils = new MeasureProcessorUtils();
+    private final R4MeasureServiceUtils r4MeasureServiceUtils;
     private final NpmPackageLoader npmPackageLoader;
 
     public R4MeasureService(
             IRepository repository,
             MeasureEvaluationOptions measureEvaluationOptions,
             MeasurePeriodValidator measurePeriodValidator,
+            R4MeasureServiceUtils r4MeasureServiceUtils,
             NpmPackageLoader npmPackageLoader) {
         this.repository = repository;
         this.measureEvaluationOptions = measureEvaluationOptions;
         this.measurePeriodValidator = measurePeriodValidator;
         this.subjectProvider = new R4RepositorySubjectProvider(measureEvaluationOptions.getSubjectProviderOptions());
+        this.r4MeasureServiceUtils = r4MeasureServiceUtils;
         this.npmPackageLoader = npmPackageLoader;
     }
 
@@ -77,7 +80,6 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
                 this.measureProcessorUtils,
                 this.npmPackageLoader);
 
-        R4MeasureServiceUtils r4MeasureServiceUtils = new R4MeasureServiceUtils(repository, npmPackageLoader);
         r4MeasureServiceUtils.ensureSupplementalDataElementSearchParameter();
 
         MeasureReport measureReport;

@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -125,7 +126,6 @@ public class Measure {
         private IRepository repository;
         private MeasureEvaluationOptions evaluationOptions;
         private final MeasurePeriodValidator measurePeriodValidator;
-        private final R4MeasureServiceUtils measureServiceUtils;
         private NpmPackageLoader npmPackageLoader;
 
         public Given(@Nullable Boolean applyScoringSetMembership) {
@@ -150,7 +150,6 @@ public class Measure {
                     .setValuesetExpansionMode(VALUESET_EXPANSION_MODE.PERFORM_NAIVE_EXPANSION);
 
             this.measurePeriodValidator = new MeasurePeriodValidator();
-            this.measureServiceUtils = new R4MeasureServiceUtils(repository, npmPackageLoader);
         }
 
         public Given repository(IRepository repository) {
@@ -177,7 +176,14 @@ public class Measure {
         }
 
         private R4MeasureService buildMeasureService() {
-            return new R4MeasureService(repository, evaluationOptions, measurePeriodValidator, npmPackageLoader);
+            var npmPackageLoaderInner = npmPackageLoaderOrEmpty();
+            return new R4MeasureService(repository, evaluationOptions, measurePeriodValidator,
+                new R4MeasureServiceUtils(repository, npmPackageLoaderInner), npmPackageLoaderInner);
+        }
+
+        private NpmPackageLoader npmPackageLoaderOrEmpty() {
+            return Optional.ofNullable(npmPackageLoader)
+                .orElse(NpmPackageLoader.DEFAULT);
         }
 
         public When when() {

@@ -51,7 +51,7 @@ public enum CompartmentMode {
     }
 
     public boolean resourceBelongsToCompartment(FhirContext fhirContext, String resourceName) {
-        if (this.type.equals(resourceName.toLowerCase())) {
+        if (this.type.equals(resourceName)) {
             return true;
         }
 

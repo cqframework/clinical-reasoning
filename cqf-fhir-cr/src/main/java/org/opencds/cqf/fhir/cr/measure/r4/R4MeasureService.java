@@ -73,6 +73,7 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
                 proxyRepoForMeasureProcessor,
                 this.measureEvaluationOptions,
                 this.measureProcessorUtils,
+                this.r4MeasureServiceUtils,
                 this.npmPackageLoader);
 
         r4MeasureServiceUtils.ensureSupplementalDataElementSearchParameter();
@@ -91,8 +92,7 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
 
         var subjects = getSubjects(subjectId, proxyRepoForMeasureProcessor, additionalData);
 
-        var measurePlusNpmResourceHolder =
-                R4MeasureServiceUtils.foldMeasure(measure, proxyRepoForMeasureProcessor, npmPackageLoader);
+        var measurePlusNpmResourceHolder = r4MeasureServiceUtils.foldMeasure(measure, proxyRepoForMeasureProcessor);
 
         // Replicate the old logic of using the repository used to initialize the measure processor
         // as the repository for the CQL engine context.

@@ -8,57 +8,56 @@ import org.hl7.fhir.r4.model.Measure;
 // LUKETODO:  top level record
 public final class MeasurePlusNpmResourceHolderList {
 
-    private final List<MeasurePlusNpmResourceHolder> measuresPlusNpmResourceHolders;
+    private final List<MeasureOrNpmResourceHolder> measuresPlusNpmResourceHolders;
 
-    public static MeasurePlusNpmResourceHolderList of(MeasurePlusNpmResourceHolder measurePlusNpmResourceHolder) {
-        return new MeasurePlusNpmResourceHolderList(List.of(measurePlusNpmResourceHolder));
+    public static MeasurePlusNpmResourceHolderList of(MeasureOrNpmResourceHolder measureOrNpmResourceHolder) {
+        return new MeasurePlusNpmResourceHolderList(List.of(measureOrNpmResourceHolder));
     }
 
-    public static MeasurePlusNpmResourceHolderList of(
-            List<MeasurePlusNpmResourceHolder> measurePlusNpmResourceHolders) {
-        return new MeasurePlusNpmResourceHolderList(measurePlusNpmResourceHolders);
+    public static MeasurePlusNpmResourceHolderList of(List<MeasureOrNpmResourceHolder> measureOrNpmResourceHolders) {
+        return new MeasurePlusNpmResourceHolderList(measureOrNpmResourceHolders);
     }
 
     public static MeasurePlusNpmResourceHolderList of(Measure measure) {
-        return new MeasurePlusNpmResourceHolderList(List.of(MeasurePlusNpmResourceHolder.measureOnly(measure)));
+        return new MeasurePlusNpmResourceHolderList(List.of(MeasureOrNpmResourceHolder.measureOnly(measure)));
     }
 
     public static MeasurePlusNpmResourceHolderList ofMeasures(List<Measure> measures) {
         return new MeasurePlusNpmResourceHolderList(
-                measures.stream().map(MeasurePlusNpmResourceHolder::measureOnly).toList());
+                measures.stream().map(MeasureOrNpmResourceHolder::measureOnly).toList());
     }
 
-    private MeasurePlusNpmResourceHolderList(List<MeasurePlusNpmResourceHolder> measuresPlusNpmResourceHolders) {
+    private MeasurePlusNpmResourceHolderList(List<MeasureOrNpmResourceHolder> measuresPlusNpmResourceHolders) {
         this.measuresPlusNpmResourceHolders = measuresPlusNpmResourceHolders;
     }
 
-    public List<MeasurePlusNpmResourceHolder> getMeasuresPlusNpmResourceHolders() {
+    public List<MeasureOrNpmResourceHolder> getMeasuresPlusNpmResourceHolders() {
         return measuresPlusNpmResourceHolders;
     }
 
     List<Measure> measures() {
         return this.measuresPlusNpmResourceHolders.stream()
-                .map(MeasurePlusNpmResourceHolder::getMeasure)
+                .map(MeasureOrNpmResourceHolder::getMeasure)
                 .toList();
     }
 
     public List<NpmResourceHolder> npmResourceHolders() {
         return this.measuresPlusNpmResourceHolders.stream()
-                .map(MeasurePlusNpmResourceHolder::npmResourceHolder)
+                .map(MeasureOrNpmResourceHolder::npmResourceHolder)
                 .toList();
     }
 
     public List<Measure> getMeasures() {
         return measuresPlusNpmResourceHolders.stream()
-                .map(MeasurePlusNpmResourceHolder::getMeasure)
+                .map(MeasureOrNpmResourceHolder::getMeasure)
                 .toList();
     }
 
     public void checkMeasureLibraries() {
-        for (MeasurePlusNpmResourceHolder measurePlusNpmResourceHolder : measuresPlusNpmResourceHolders) {
-            if (!measurePlusNpmResourceHolder.hasLibrary()) {
+        for (MeasureOrNpmResourceHolder measureOrNpmResourceHolder : measuresPlusNpmResourceHolders) {
+            if (!measureOrNpmResourceHolder.hasLibrary()) {
                 throw new InvalidRequestException("Measure %s does not have a primary library specified"
-                        .formatted(measurePlusNpmResourceHolder.getMeasureUrl()));
+                        .formatted(measureOrNpmResourceHolder.getMeasureUrl()));
             }
         }
     }
@@ -67,7 +66,7 @@ public final class MeasurePlusNpmResourceHolderList {
         return measuresPlusNpmResourceHolders.size();
     }
 
-    public List<MeasurePlusNpmResourceHolder> measuresPlusNpmResourceHolders() {
+    public List<MeasureOrNpmResourceHolder> measuresPlusNpmResourceHolders() {
         return measuresPlusNpmResourceHolders;
     }
 

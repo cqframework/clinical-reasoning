@@ -181,7 +181,7 @@ public class Measure {
                     repository,
                     evaluationOptions,
                     measurePeriodValidator,
-                    new R4MeasureServiceUtils(repository, npmPackageLoaderInner),
+                    new R4MeasureServiceUtils(repository, npmPackageLoaderInner, evaluationOptions),
                     npmPackageLoaderInner);
         }
 

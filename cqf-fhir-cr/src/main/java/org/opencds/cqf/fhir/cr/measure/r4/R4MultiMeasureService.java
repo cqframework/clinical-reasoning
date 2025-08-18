@@ -27,7 +27,7 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorUtils;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.builder.BundleBuilder;
-import org.opencds.cqf.fhir.utility.npm.MeasurePlusNpmResourceHolder;
+import org.opencds.cqf.fhir.utility.npm.MeasureOrNpmResourceHolder;
 import org.opencds.cqf.fhir.utility.npm.MeasurePlusNpmResourceHolderList;
 import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.npm.NpmPackageLoaderWithCache;
@@ -57,16 +57,21 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
             MeasureEvaluationOptions measureEvaluationOptions,
             String serverBase,
             MeasurePeriodValidator measurePeriodValidator,
+            R4MeasureServiceUtils r4MeasureServiceUtilsStandardRepository,
             NpmPackageLoader npmPackageLoader) {
         this.repository = repository;
         this.measureEvaluationOptions = measureEvaluationOptions;
         this.measurePeriodValidator = measurePeriodValidator;
         this.serverBase = serverBase;
+        this.r4MeasureServiceUtilsStandardRepository = r4MeasureServiceUtilsStandardRepository;
         this.npmPackageLoader = npmPackageLoader;
         this.subjectProvider = new R4RepositorySubjectProvider(measureEvaluationOptions.getSubjectProviderOptions());
         this.r4MeasureProcessorStandardRepository = new R4MeasureProcessor(
-                repository, this.measureEvaluationOptions, this.measureProcessorUtils, this.npmPackageLoader);
-        this.r4MeasureServiceUtilsStandardRepository = new R4MeasureServiceUtils(repository, npmPackageLoader);
+                repository,
+                this.measureEvaluationOptions,
+                this.measureProcessorUtils,
+                this.r4MeasureServiceUtilsStandardRepository,
+                this.npmPackageLoader);
     }
 
     @Override
@@ -95,10 +100,16 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
             var repositoryToUse =
                     Repositories.proxy(repository, true, dataEndpoint, contentEndpoint, terminologyEndpoint);
 
-            r4ProcessorToUse = new R4MeasureProcessor(
-                    repositoryToUse, this.measureEvaluationOptions, this.measureProcessorUtils, npmPackageLoader);
+            r4MeasureServiceUtilsToUse =
+                    new R4MeasureServiceUtils(repositoryToUse, this.npmPackageLoader, this.measureEvaluationOptions);
 
-            r4MeasureServiceUtilsToUse = new R4MeasureServiceUtils(repositoryToUse, npmPackageLoader);
+            r4ProcessorToUse = new R4MeasureProcessor(
+                    repositoryToUse,
+                    this.measureEvaluationOptions,
+                    this.measureProcessorUtils,
+                    r4MeasureServiceUtilsToUse,
+                    npmPackageLoader);
+
         } else {
             r4ProcessorToUse = r4MeasureProcessorStandardRepository;
             r4MeasureServiceUtilsToUse = r4MeasureServiceUtilsStandardRepository;
@@ -186,12 +197,12 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
             String reporter) {
 
         var totalMeasures = measurePlusNpmResourceHolderList.size();
-        for (MeasurePlusNpmResourceHolder measurePlusNpmResourceHolder :
+        for (MeasureOrNpmResourceHolder measureOrNpmResourceHolder :
                 measurePlusNpmResourceHolderList.measuresPlusNpmResourceHolders()) {
             MeasureReport measureReport;
             // evaluate each measure
             measureReport = r4Processor.evaluateMeasure(
-                    measurePlusNpmResourceHolder,
+                    measureOrNpmResourceHolder,
                     periodStart,
                     periodEnd,
                     reportType,
@@ -250,13 +261,13 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
                 "Evaluating individual MeasureReports for {} patients, and {} measures",
                 subjects.size(),
                 measurePlusNpmResourceHolderList.size());
-        for (MeasurePlusNpmResourceHolder measurePlusNpmResourceHolder :
+        for (MeasureOrNpmResourceHolder measureOrNpmResourceHolder :
                 measurePlusNpmResourceHolderList.getMeasuresPlusNpmResourceHolders()) {
             for (String subject : subjects) {
                 MeasureReport measureReport;
                 // evaluate each measure
                 measureReport = r4Processor.evaluateMeasure(
-                        measurePlusNpmResourceHolder,
+                        measureOrNpmResourceHolder,
                         periodStart,
                         periodEnd,
                         reportType,
@@ -285,10 +296,10 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
                     log.debug("MeasureReports remaining to evaluate {}", totalReports--);
                 }
             }
-            if (measurePlusNpmResourceHolder.hasMeasureUrl()) {
+            if (measureOrNpmResourceHolder.hasMeasureUrl()) {
                 log.info(
                         "Completed evaluation for Measure: {}, Measures remaining to evaluate: {}",
-                        measurePlusNpmResourceHolder.getMeasureUrl(),
+                        measureOrNpmResourceHolder.getMeasureUrl(),
                         totalMeasures--);
             }
         }

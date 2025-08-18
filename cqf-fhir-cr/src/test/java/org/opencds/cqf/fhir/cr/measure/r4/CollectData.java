@@ -84,7 +84,7 @@ public class CollectData {
                     .setValuesetExpansionMode(VALUESET_EXPANSION_MODE.PERFORM_NAIVE_EXPANSION);
 
             this.npmPackageLoader = NpmPackageLoader.DEFAULT;
-            this.measureServiceUtils = new R4MeasureServiceUtils(repository, npmPackageLoader);
+            this.measureServiceUtils = new R4MeasureServiceUtils(repository, npmPackageLoader, evaluationOptions);
         }
 
         public Given repository(IRepository repository) {
@@ -100,7 +100,7 @@ public class CollectData {
         }
 
         private R4CollectDataService buildR4CollectDataService() {
-            return new R4CollectDataService(repository, evaluationOptions, npmPackageLoader);
+            return new R4CollectDataService(repository, evaluationOptions, npmPackageLoader, measureServiceUtils);
         }
 
         public When when() {

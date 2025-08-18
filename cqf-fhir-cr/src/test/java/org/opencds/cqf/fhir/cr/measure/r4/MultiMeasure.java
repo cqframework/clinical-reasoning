@@ -44,8 +44,7 @@ import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
-import org.opencds.cqf.fhir.cr.measure.r4.Measure.SelectedGroup;
-import org.opencds.cqf.fhir.cr.measure.r4.Measure.SelectedGroup.SelectedReference;
+import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
@@ -99,7 +98,8 @@ public class MultiMeasure {
         private IRepository repository;
         private MeasureEvaluationOptions evaluationOptions;
         private String serverBase;
-        private MeasurePeriodValidator measurePeriodValidator;
+        private final MeasurePeriodValidator measurePeriodValidator;
+        private final R4MeasureServiceUtils r4MeasureServiceUtils;
         private NpmPackageLoader npmPackageLoader;
 
         public Given() {
@@ -118,8 +118,9 @@ public class MultiMeasure {
             this.serverBase = "http://localhost";
 
             this.measurePeriodValidator = new MeasurePeriodValidator();
-
+            // LUKETODO:  change this:
             this.npmPackageLoader = NpmPackageLoader.DEFAULT;
+            this.r4MeasureServiceUtils = new R4MeasureServiceUtils(repository, npmPackageLoader, evaluationOptions);
         }
 
         public MultiMeasure.Given repository(IRepository repository) {
@@ -158,7 +159,12 @@ public class MultiMeasure {
 
         private R4MultiMeasureService buildMeasureService() {
             return new R4MultiMeasureService(
-                    repository, evaluationOptions, serverBase, measurePeriodValidator, npmPackageLoader);
+                    repository,
+                    evaluationOptions,
+                    serverBase,
+                    measurePeriodValidator,
+                    r4MeasureServiceUtils,
+                    npmPackageLoader);
         }
 
         public MultiMeasure.When when() {

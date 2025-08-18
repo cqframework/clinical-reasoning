@@ -32,15 +32,18 @@ public class R4CollectDataService {
     private final MeasureEvaluationOptions measureEvaluationOptions;
     private final R4RepositorySubjectProvider subjectProvider;
     private final NpmPackageLoader npmPackageLoader;
+    private final R4MeasureServiceUtils r4MeasureServiceUtils;
     private final MeasureProcessorUtils measureProcessorUtils = new MeasureProcessorUtils();
 
     public R4CollectDataService(
             IRepository repository,
             MeasureEvaluationOptions measureEvaluationOptions,
-            NpmPackageLoader npmPackageLoader) {
+            NpmPackageLoader npmPackageLoader,
+            R4MeasureServiceUtils r4MeasureServiceUtils) {
         this.repository = repository;
         this.measureEvaluationOptions = measureEvaluationOptions;
         this.subjectProvider = new R4RepositorySubjectProvider(measureEvaluationOptions.getSubjectProviderOptions());
+        this.r4MeasureServiceUtils = r4MeasureServiceUtils;
         this.npmPackageLoader = npmPackageLoader;
     }
 
@@ -73,15 +76,18 @@ public class R4CollectDataService {
 
         Parameters parameters = new Parameters();
         var processor = new R4MeasureProcessor(
-                this.repository, this.measureEvaluationOptions, this.measureProcessorUtils, this.npmPackageLoader);
+                this.repository,
+                this.measureEvaluationOptions,
+                this.measureProcessorUtils,
+                this.r4MeasureServiceUtils,
+                this.npmPackageLoader);
 
         List<String> subjectList = getSubjects(subject, practitioner, subjectProvider);
 
         var context =
                 Engines.forRepository(this.repository, this.measureEvaluationOptions.getEvaluationSettings(), null);
 
-        var foldedMeasure =
-                R4MeasureServiceUtils.foldMeasure(Eithers.forMiddle3(measureId), repository, npmPackageLoader);
+        var foldedMeasure = r4MeasureServiceUtils.foldMeasure(Eithers.forMiddle3(measureId));
 
         if (!subjectList.isEmpty()) {
             for (String patient : subjectList) {

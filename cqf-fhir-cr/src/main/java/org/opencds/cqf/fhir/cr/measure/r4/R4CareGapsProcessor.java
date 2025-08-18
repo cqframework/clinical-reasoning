@@ -51,20 +51,22 @@ public class R4CareGapsProcessor implements R4CareGapsProcessorInterface {
     public R4CareGapsProcessor(
             CareGapsProperties careGapsProperties,
             IRepository repository,
+            R4MeasureServiceUtils r4MeasureServiceUtils,
             MeasureEvaluationOptions measureEvaluationOptions,
             String serverBase,
             MeasurePeriodValidator measurePeriodValidator,
             NpmPackageLoader npmPackageLoader) {
         this.repository = repository;
         this.careGapsProperties = careGapsProperties;
+        this.r4MeasureServiceUtils = r4MeasureServiceUtils;
 
-        r4MeasureServiceUtils = new R4MeasureServiceUtils(repository, npmPackageLoader);
         r4CareGapsBundleBuilder = new R4CareGapsBundleBuilder(
                 careGapsProperties,
                 repository,
                 measureEvaluationOptions,
                 serverBase,
                 configuredResources,
+                this.r4MeasureServiceUtils,
                 measurePeriodValidator,
                 npmPackageLoader);
         subjectProvider = new R4RepositorySubjectProvider(measureEvaluationOptions.getSubjectProviderOptions());

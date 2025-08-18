@@ -13,22 +13,22 @@ import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
 
 // LUKETODO:  top level record
 // LUKETODO:  docs:  the measure in question is either found in the DB or derived from NPM
-public final class MeasurePlusNpmResourceHolder {
+public final class MeasureOrNpmResourceHolder {
 
     @Nullable
     private final Measure measure;
 
     private final NpmResourceHolder npmResourceHolder;
 
-    public static MeasurePlusNpmResourceHolder measureOnly(Measure measure) {
-        return new MeasurePlusNpmResourceHolder(measure, NpmResourceHolder.EMPTY);
+    public static MeasureOrNpmResourceHolder measureOnly(Measure measure) {
+        return new MeasureOrNpmResourceHolder(measure, NpmResourceHolder.EMPTY);
     }
 
-    public static MeasurePlusNpmResourceHolder npmOnly(NpmResourceHolder npmResourceHolder) {
-        return new MeasurePlusNpmResourceHolder(null, npmResourceHolder);
+    public static MeasureOrNpmResourceHolder npmOnly(NpmResourceHolder npmResourceHolder) {
+        return new MeasureOrNpmResourceHolder(null, npmResourceHolder);
     }
 
-    private MeasurePlusNpmResourceHolder(@Nullable Measure measure, NpmResourceHolder npmResourceHolder) {
+    private MeasureOrNpmResourceHolder(@Nullable Measure measure, NpmResourceHolder npmResourceHolder) {
         if (measure == null && (NpmResourceHolder.EMPTY == npmResourceHolder)) {
             throw new InternalErrorException("Measure and NpmResourceHolder cannot both be null");
         }
@@ -111,7 +111,7 @@ public final class MeasurePlusNpmResourceHolder {
         if (obj == null || obj.getClass() != this.getClass()) {
             return false;
         }
-        var that = (MeasurePlusNpmResourceHolder) obj;
+        var that = (MeasureOrNpmResourceHolder) obj;
         return Objects.equals(this.measure, that.measure)
                 && Objects.equals(this.npmResourceHolder, that.npmResourceHolder);
     }

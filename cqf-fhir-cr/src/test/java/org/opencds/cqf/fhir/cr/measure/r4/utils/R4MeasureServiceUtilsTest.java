@@ -25,6 +25,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureEvalType;
@@ -50,12 +51,15 @@ class R4MeasureServiceUtilsTest {
     @Mock
     private IRepository repository;
 
+    // LUKETODO: enhance this?
+    private final MeasureEvaluationOptions measureEvaluationOptions = MeasureEvaluationOptions.defaultOptions();
+
     private R4MeasureServiceUtils testSubject;
 
     @BeforeEach
     void beforeEach() {
         // LUKETODO:  do we want the default?
-        testSubject = new R4MeasureServiceUtils(repository, NpmPackageLoader.DEFAULT);
+        testSubject = new R4MeasureServiceUtils(repository, NpmPackageLoader.DEFAULT, measureEvaluationOptions);
     }
 
     private static Stream<Arguments> getReporterParams() {

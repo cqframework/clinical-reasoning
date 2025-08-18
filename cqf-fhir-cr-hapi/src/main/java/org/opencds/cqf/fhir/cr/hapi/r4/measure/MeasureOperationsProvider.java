@@ -168,6 +168,20 @@ public class MeasureOperationsProvider {
             @OperationParam(name = "reporter") String reporter,
             RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
+
+        if (measureEvaluationOptions.isUseNpmForLibrariesAndMeasures()) {
+            if (measureId != null && !measureId.isEmpty()) {
+                throw new InvalidRequestException(
+                        "Measure evaluation by IDs is not supported if NPM libraries and measures are enabled.  Pass measureUrls instead.");
+            }
+
+            // LUKETODO:  figure out how to add a test for this
+            if (measureIdentifier != null && !measureIdentifier.isEmpty()) {
+                throw new InvalidRequestException(
+                        "Measure evaluation by identifiers is not supported if NPM libraries and measures are enabled.  Pass measureUrls instead.");
+            }
+        }
+
         var contentEndpointParam = (Endpoint) getEndpoint(fhirVersion, contentEndpoint);
         var terminologyEndpointParam = (Endpoint) getEndpoint(fhirVersion, terminologyEndpoint);
         var dataEndpointParam = (Endpoint) getEndpoint(fhirVersion, dataEndpoint);

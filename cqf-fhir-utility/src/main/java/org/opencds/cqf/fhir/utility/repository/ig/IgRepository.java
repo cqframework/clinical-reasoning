@@ -352,7 +352,7 @@ public class IgRepository implements IRepository {
         var category = ResourceCategory.forType(resourceType.getSimpleName());
         var categoryPaths = TYPE_DIRECTORIES.rowMap().get(this.conventions.categoryLayout()).get(category).stream()
                 .map(path -> this.root.resolve(path));
-        if (category == ResourceCategory.DATA && this.conventions.compartmentMode() != CompartmentMode.PATIENT) {
+        if (category == ResourceCategory.DATA) {
             var compartmentPath = pathForCompartment(resourceType, this.fhirContext);
             return categoryPaths.map(path -> path.resolve(compartmentPath));
         }
@@ -393,6 +393,7 @@ public class IgRepository implements IRepository {
      */
     protected <T extends IBaseResource> Stream<Path> directoryForResource(Class<T> resourceType) {
         var directories = directoriesForCategory(resourceType);
+
         if (this.conventions.typeLayout() == FhirTypeLayout.FLAT) {
             return directories;
         }
@@ -960,14 +961,19 @@ public class IgRepository implements IRepository {
     }
 
     protected String pathForCompartment(Class<? extends IBaseResource> resourceType, FhirContext fhirContext) {
-        if (this.conventions.compartmentMode() == CompartmentMode.NONE
-                && this.conventions.categoryLayout() != CategoryLayout.DEFINITIONAL_AND_DATA) {
-            return "";
-        } else if (this.conventions.compartmentMode() == CompartmentMode.NONE) {
-            return "shared";
-        } else {
-            // TODO: work out how to handle ids for compartment paths..
-            return this.conventions.compartmentMode().name();
+        if (this.conventions.categoryLayout() == CategoryLayout.DEFINITIONAL_AND_DATA) {
+            if (!this.conventions.compartmentMode().resourceBelongsToCompartment(fhirContext, resourceType.getSimpleName())) {
+                return "shared";
+            }
+
+            return this.conventions.compartmentMode().name().toLowerCase();
+        }
+        else {
+            if (!this.conventions.compartmentMode().resourceBelongsToCompartment(fhirContext, resourceType.getSimpleName())) {
+                return "";
+            }
+
+            return this.conventions.compartmentMode().name().toLowerCase();
         }
     }
 }

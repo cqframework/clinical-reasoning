@@ -69,14 +69,14 @@ public class CrR4Config {
             MeasureEvaluationOptions evaluationOptions,
             MeasurePeriodValidator measurePeriodValidator,
             R4MeasureServiceUtilsFactory r4MeasureServiceUtilsFactory,
-            NpmPackageLoader npmPackageLoader) {
+            Optional<NpmPackageLoader> optNpmPackageLoader) {
         return requestDetails -> new R4MultiMeasureService(
                 repositoryFactory.create(requestDetails),
                 evaluationOptions,
                 requestDetails.getFhirServerBase(),
                 measurePeriodValidator,
                 r4MeasureServiceUtilsFactory.create(requestDetails),
-                npmPackageLoader);
+                npmPackageLoader(optNpmPackageLoader));
     }
 
     @Bean
@@ -106,9 +106,11 @@ public class CrR4Config {
     R4MeasureServiceUtilsFactory r4MeasureServiceUtilsFactory(
             IRepositoryFactory repositoryFactory,
             MeasureEvaluationOptions measureEvaluationOptions,
-            NpmPackageLoader npmPackageLoader) {
+            Optional<NpmPackageLoader> optNpmPackageLoader) {
         return requestDetails -> new R4MeasureServiceUtils(
-                repositoryFactory.create(requestDetails), npmPackageLoader, measureEvaluationOptions);
+                repositoryFactory.create(requestDetails),
+                npmPackageLoader(optNpmPackageLoader),
+                measureEvaluationOptions);
     }
 
     @Bean

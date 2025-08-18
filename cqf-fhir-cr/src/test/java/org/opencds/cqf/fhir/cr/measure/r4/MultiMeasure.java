@@ -178,7 +178,7 @@ public class MultiMeasure {
                     evaluationOptions,
                     serverBase,
                     measurePeriodValidator,
-                    r4MeasureServiceUtils,
+                    new R4MeasureServiceUtils(repository, npmPackageLoader, evaluationOptions),
                     npmPackageLoader);
         }
 

@@ -157,22 +157,35 @@ public class Measure {
             return this;
         }
 
+        // Use this if you wish to have nothing to do with NPM
         public Given repositoryFor(String repositoryPath) {
             var igRepository = new IgRepository(
                     FhirContext.forR4Cached(),
                     Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
             this.repository = igRepository;
-            this.npmPackageLoader = igRepository.getNpmPackageLoader();
+            // We're explicitly NOT using NPM here
+            this.npmPackageLoader = NpmPackageLoader.DEFAULT;
             return this;
+        }
+
+        // Use this if you wish to do anything with NPM
+        public Given repositoryPlusNpmFor(String repositoryPath) {
+            var igRepository = new IgRepository(
+                    FhirContext.forR4Cached(),
+                    Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
+            this.repository = igRepository;
+            this.npmPackageLoader = igRepository.getNpmPackageLoader();
+            mutateEvaluationOptionsToEnableNpm();
+            return this;
+        }
+
+        private void mutateEvaluationOptionsToEnableNpm() {
+            this.evaluationOptions.setUseNpmForLibrariesAndMeasures(true);
         }
 
         public Given evaluationOptions(MeasureEvaluationOptions evaluationOptions) {
             this.evaluationOptions = evaluationOptions;
             return this;
-        }
-
-        public IRepository getRepository() {
-            return repository;
         }
 
         private R4MeasureService buildMeasureService() {

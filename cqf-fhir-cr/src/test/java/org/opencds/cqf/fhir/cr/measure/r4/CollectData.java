@@ -65,10 +65,11 @@ public class CollectData {
     }
 
     public static class Given {
-        private IRepository repository;
         private final MeasureEvaluationOptions evaluationOptions;
-        private final R4MeasureServiceUtils measureServiceUtils;
         private final NpmPackageLoader npmPackageLoader;
+
+        private IRepository repository;
+        private R4MeasureServiceUtils measureServiceUtils;
 
         public Given() {
             this.evaluationOptions = MeasureEvaluationOptions.defaultOptions();
@@ -84,7 +85,6 @@ public class CollectData {
                     .setValuesetExpansionMode(VALUESET_EXPANSION_MODE.PERFORM_NAIVE_EXPANSION);
 
             this.npmPackageLoader = NpmPackageLoader.DEFAULT;
-            this.measureServiceUtils = new R4MeasureServiceUtils(repository, npmPackageLoader, evaluationOptions);
         }
 
         public Given repository(IRepository repository) {
@@ -96,6 +96,7 @@ public class CollectData {
             this.repository = new IgRepository(
                     FhirContext.forR4Cached(),
                     Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
+            this.measureServiceUtils = new R4MeasureServiceUtils(repository, npmPackageLoader, evaluationOptions);
             return this;
         }
 

@@ -61,7 +61,7 @@ import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.monad.Either3;
 import org.opencds.cqf.fhir.utility.npm.MeasureOrNpmResourceHolder;
-import org.opencds.cqf.fhir.utility.npm.MeasurePlusNpmResourceHolderList;
+import org.opencds.cqf.fhir.utility.npm.MeasureOrNpmResourceHolderList;
 import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.search.Searches;
 
@@ -250,7 +250,7 @@ public class R4MeasureServiceUtils {
         return null;
     }
 
-    public MeasurePlusNpmResourceHolderList getMeasurePlusNpmDetails(
+    public MeasureOrNpmResourceHolderList getMeasurePlusNpmDetails(
             List<IdType> measureIds, List<String> measureIdentifiers, List<String> measureCanonicals) {
 
         List<MeasureOrNpmResourceHolder> measuresPlusResourceHolders = new ArrayList<>();
@@ -269,14 +269,14 @@ public class R4MeasureServiceUtils {
         if (measureCanonicals != null && !measureCanonicals.isEmpty()) {
             for (String measureCanonical : measureCanonicals) {
                 if (measureEvaluationOptions.isUseNpmForLibrariesAndMeasures()) {
+                    // LUKETODO:  test this to make sure it works
+                    var npmResourceHolder = this.npmPackageLoader.loadNpmResources(new CanonicalType(measureCanonical));
+                    measuresPlusResourceHolders.add(MeasureOrNpmResourceHolder.npmOnly(npmResourceHolder));
+                } else {
                     Measure measureByUrl = resolveByUrl(measureCanonical);
                     if (measureByUrl != null) {
                         measuresPlusResourceHolders.add(MeasureOrNpmResourceHolder.measureOnly(measureByUrl));
                     }
-                } else {
-                    // LUKETODO:  test this to make sure it works
-                    var npmResourceHolder = this.npmPackageLoader.loadNpmResources(new CanonicalType(measureCanonical));
-                    measuresPlusResourceHolders.add(MeasureOrNpmResourceHolder.npmOnly(npmResourceHolder));
                 }
             }
         }
@@ -293,7 +293,7 @@ public class R4MeasureServiceUtils {
             }
         }
 
-        return MeasurePlusNpmResourceHolderList.of(
+        return MeasureOrNpmResourceHolderList.of(
                 distinctByKey(measuresPlusResourceHolders, MeasureOrNpmResourceHolder::getMeasureUrl));
     }
 
@@ -453,7 +453,11 @@ public class R4MeasureServiceUtils {
         return measure;
     }
 
-    // Can't use NPM to resolve measures by IDs, so this is explicitly a query against the repository.
+    // Wrap in MeasureOrNpmResourceHolderList for convenience
+    public MeasureOrNpmResourceHolderList resolveByIdsToMeasuresOrNpms(List<? extends IIdType> ids) {
+        return MeasureOrNpmResourceHolderList.ofMeasures(resolveByIds(ids));
+    }
+
     public List<Measure> resolveByIds(List<? extends IIdType> ids) {
         return resolveMeasuresFromRepository(ids, repository);
     }

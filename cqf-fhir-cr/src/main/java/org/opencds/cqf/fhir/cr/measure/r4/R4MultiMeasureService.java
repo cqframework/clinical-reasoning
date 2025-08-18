@@ -28,7 +28,7 @@ import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.builder.BundleBuilder;
 import org.opencds.cqf.fhir.utility.npm.MeasureOrNpmResourceHolder;
-import org.opencds.cqf.fhir.utility.npm.MeasurePlusNpmResourceHolderList;
+import org.opencds.cqf.fhir.utility.npm.MeasureOrNpmResourceHolderList;
 import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.npm.NpmPackageLoaderWithCache;
 import org.opencds.cqf.fhir.utility.repository.Repositories;
@@ -186,7 +186,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
             CompositeEvaluationResultsPerMeasure compositeEvaluationResultsPerMeasure,
             CqlEngine context,
             Bundle bundle,
-            MeasurePlusNpmResourceHolderList measurePlusNpmResourceHolderList,
+            MeasureOrNpmResourceHolderList measureOrNpmResourceHolderList,
             @Nullable ZonedDateTime periodStart,
             @Nullable ZonedDateTime periodEnd,
             String reportType,
@@ -196,9 +196,9 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
             String productLine,
             String reporter) {
 
-        var totalMeasures = measurePlusNpmResourceHolderList.size();
+        var totalMeasures = measureOrNpmResourceHolderList.size();
         for (MeasureOrNpmResourceHolder measureOrNpmResourceHolder :
-                measurePlusNpmResourceHolderList.measuresPlusNpmResourceHolders()) {
+                measureOrNpmResourceHolderList.measuresPlusNpmResourceHolders()) {
             MeasureReport measureReport;
             // evaluate each measure
             measureReport = r4Processor.evaluateMeasure(
@@ -245,7 +245,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
             CompositeEvaluationResultsPerMeasure compositeEvaluationResultsPerMeasure,
             CqlEngine context,
             Bundle bundle,
-            MeasurePlusNpmResourceHolderList measurePlusNpmResourceHolderList,
+            MeasureOrNpmResourceHolderList measureOrNpmResourceHolderList,
             @Nullable ZonedDateTime periodStart,
             @Nullable ZonedDateTime periodEnd,
             String reportType,
@@ -255,14 +255,14 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
             String reporter) {
 
         // create individual reports for each subject, and each measure
-        var totalReports = subjects.size() * measurePlusNpmResourceHolderList.size();
-        var totalMeasures = measurePlusNpmResourceHolderList.size();
+        var totalReports = subjects.size() * measureOrNpmResourceHolderList.size();
+        var totalMeasures = measureOrNpmResourceHolderList.size();
         log.debug(
                 "Evaluating individual MeasureReports for {} patients, and {} measures",
                 subjects.size(),
-                measurePlusNpmResourceHolderList.size());
+                measureOrNpmResourceHolderList.size());
         for (MeasureOrNpmResourceHolder measureOrNpmResourceHolder :
-                measurePlusNpmResourceHolderList.getMeasuresPlusNpmResourceHolders()) {
+                measureOrNpmResourceHolderList.getMeasuresOrNpmResourceHolders()) {
             for (String subject : subjects) {
                 MeasureReport measureReport;
                 // evaluate each measure

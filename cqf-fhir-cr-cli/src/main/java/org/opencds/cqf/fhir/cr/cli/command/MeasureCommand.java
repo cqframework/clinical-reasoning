@@ -28,6 +28,7 @@ import org.opencds.cqf.fhir.cr.cli.command.CqlCommand.SubjectAndResult;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorUtils;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureProcessor;
+import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Command;
@@ -140,8 +141,16 @@ public class MeasureCommand implements Callable<Integer> {
 
         // LUKETODO:  figure out how to inject the NpmPackageLoader here since this is the bare minimum implementation
         // to fix the compile error:
+        var npmPackageLoader = NpmPackageLoader.DEFAULT;
+
+        var r4MeasureServiceUtils = new R4MeasureServiceUtils(
+                repository,
+                npmPackageLoader,
+                // LUKETODO:  how do we figure out if we're doing NPM or not?
+                MeasureEvaluationOptions.defaultOptions());
+
         return new R4MeasureProcessor(
-                repository, evaluationOptions, new MeasureProcessorUtils(), NpmPackageLoader.DEFAULT);
+                repository, evaluationOptions, new MeasureProcessorUtils(), r4MeasureServiceUtils, npmPackageLoader);
     }
 
     private void writeJsonToFile(String json, String patientId, Path path) {

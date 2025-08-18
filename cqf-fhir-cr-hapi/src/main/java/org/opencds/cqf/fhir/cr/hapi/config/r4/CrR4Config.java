@@ -53,11 +53,13 @@ public class CrR4Config {
             IRepositoryFactory repositoryFactory,
             MeasureEvaluationOptions evaluationOptions,
             MeasurePeriodValidator measurePeriodValidator,
+            R4MeasureServiceUtilsFactory r4MeasureServiceUtilsFactory,
             Optional<NpmPackageLoader> optNpmPackageLoader) {
-        return rd -> new R4MeasureService(
-                repositoryFactory.create(rd),
+        return requestDetails -> new R4MeasureService(
+                repositoryFactory.create(requestDetails),
                 evaluationOptions,
                 measurePeriodValidator,
+                r4MeasureServiceUtilsFactory.create(requestDetails),
                 npmPackageLoader(optNpmPackageLoader));
     }
 
@@ -65,9 +67,16 @@ public class CrR4Config {
     R4MeasureEvaluatorMultipleFactory r4MeasureEvaluatorMultipleFactory(
             IRepositoryFactory repositoryFactory,
             MeasureEvaluationOptions evaluationOptions,
-            MeasurePeriodValidator measurePeriodValidator) {
-        return rd -> new R4MultiMeasureService(
-                repositoryFactory.create(rd), evaluationOptions, rd.getFhirServerBase(), measurePeriodValidator);
+            MeasurePeriodValidator measurePeriodValidator,
+            R4MeasureServiceUtilsFactory r4MeasureServiceUtilsFactory,
+            NpmPackageLoader npmPackageLoader) {
+        return requestDetails -> new R4MultiMeasureService(
+                repositoryFactory.create(requestDetails),
+                evaluationOptions,
+                requestDetails.getFhirServerBase(),
+                measurePeriodValidator,
+                r4MeasureServiceUtilsFactory.create(requestDetails),
+                npmPackageLoader);
     }
 
     @Bean
@@ -95,17 +104,24 @@ public class CrR4Config {
 
     @Bean
     R4MeasureServiceUtilsFactory r4MeasureServiceUtilsFactory(
-            IRepositoryFactory repositoryFactory, NpmPackageLoader npmPackageLoader) {
-        return requestDetails -> new R4MeasureServiceUtils(repositoryFactory.create(requestDetails), npmPackageLoader);
+            IRepositoryFactory repositoryFactory,
+            MeasureEvaluationOptions measureEvaluationOptions,
+            NpmPackageLoader npmPackageLoader) {
+        return requestDetails -> new R4MeasureServiceUtils(
+                repositoryFactory.create(requestDetails), npmPackageLoader, measureEvaluationOptions);
     }
 
     @Bean
     ICollectDataServiceFactory collectDataServiceFactory(
             IRepositoryFactory repositoryFactory,
             MeasureEvaluationOptions measureEvaluationOptions,
+            R4MeasureServiceUtilsFactory r4MeasureServiceUtilsFactory,
             Optional<NpmPackageLoader> optNpmPackageLoader) {
-        return rd -> new R4CollectDataService(
-                repositoryFactory.create(rd), measureEvaluationOptions, npmPackageLoader(optNpmPackageLoader));
+        return requestDetails -> new R4CollectDataService(
+                repositoryFactory.create(requestDetails),
+                measureEvaluationOptions,
+                npmPackageLoader(optNpmPackageLoader),
+                r4MeasureServiceUtilsFactory.create(requestDetails));
     }
 
     @Bean

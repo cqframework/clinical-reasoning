@@ -49,7 +49,7 @@ public class Measure {
         private IRepository repository;
         private MeasureEvaluationOptions evaluationOptions;
         private final MeasurePeriodValidator measurePeriodValidator;
-        private final R4MeasureServiceUtils measureServiceUtils;
+        private final R4MeasureServiceUtils r4MeasureServiceUtils;
         private final NpmPackageLoader npmPackageLoader;
 
         public Given() {
@@ -68,7 +68,7 @@ public class Measure {
             this.measurePeriodValidator = new MeasurePeriodValidator();
 
             this.npmPackageLoader = NpmPackageLoader.DEFAULT;
-            this.measureServiceUtils = new R4MeasureServiceUtils(repository, npmPackageLoader);
+            this.r4MeasureServiceUtils = new R4MeasureServiceUtils(repository, npmPackageLoader, evaluationOptions);
         }
 
         public Given repositoryFor(String repositoryPath) {
@@ -85,7 +85,8 @@ public class Measure {
         }
 
         private R4MeasureService buildMeasureService() {
-            return new R4MeasureService(repository, evaluationOptions, measurePeriodValidator, npmPackageLoader);
+            return new R4MeasureService(
+                    repository, evaluationOptions, measurePeriodValidator, r4MeasureServiceUtils, npmPackageLoader);
         }
 
         public When when() {

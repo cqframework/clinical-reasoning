@@ -9,7 +9,7 @@ import org.opencds.cqf.fhir.cr.measure.r4.Measure;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 
 // TODO: LD :  introduce an R5 version of this test once R5 services/etc become available
-class MeasureSingleWithNpmForR4Test extends BaseMeasureWithNpmForR4Test {
+class SingleMeasureWithNpmForR4Test extends BaseMeasureWithNpmForR4Test {
 
     private static final String WITH_DERIVED_LIBRARY = "WithDerivedLibrary";
     private static final String WITH_TWO_LAYERS_DERIVED_LIBRARIES = "WithTwoLayersDerivedLibraries";
@@ -36,7 +36,7 @@ class MeasureSingleWithNpmForR4Test extends BaseMeasureWithNpmForR4Test {
     private static final String MEASURE_URL_CROSS_PACKAGE_SOURCE_WITH_VERSION =
             MEASURE_URL_CROSS_PACKAGE_SOURCE + PIPE + VERSION_0_2;
 
-    private static final Given NPM_REPO_SINGLE_MEASURE = Measure.given().repositoryFor("BasicNpmPackages");
+    private static final Given NPM_REPO_SINGLE_MEASURE = Measure.given().repositoryPlusNpmFor("BasicNpmPackages");
 
     private static final String PATIENT_MALE_1988 = "Patient/male-1988";
 

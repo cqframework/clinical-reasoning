@@ -6,32 +6,32 @@ import java.util.Objects;
 import org.hl7.fhir.r4.model.Measure;
 
 // LUKETODO:  top level record
-public final class MeasurePlusNpmResourceHolderList {
+public final class MeasureOrNpmResourceHolderList {
 
     private final List<MeasureOrNpmResourceHolder> measuresPlusNpmResourceHolders;
 
-    public static MeasurePlusNpmResourceHolderList of(MeasureOrNpmResourceHolder measureOrNpmResourceHolder) {
-        return new MeasurePlusNpmResourceHolderList(List.of(measureOrNpmResourceHolder));
+    public static MeasureOrNpmResourceHolderList of(MeasureOrNpmResourceHolder measureOrNpmResourceHolder) {
+        return new MeasureOrNpmResourceHolderList(List.of(measureOrNpmResourceHolder));
     }
 
-    public static MeasurePlusNpmResourceHolderList of(List<MeasureOrNpmResourceHolder> measureOrNpmResourceHolders) {
-        return new MeasurePlusNpmResourceHolderList(measureOrNpmResourceHolders);
+    public static MeasureOrNpmResourceHolderList of(List<MeasureOrNpmResourceHolder> measureOrNpmResourceHolders) {
+        return new MeasureOrNpmResourceHolderList(measureOrNpmResourceHolders);
     }
 
-    public static MeasurePlusNpmResourceHolderList of(Measure measure) {
-        return new MeasurePlusNpmResourceHolderList(List.of(MeasureOrNpmResourceHolder.measureOnly(measure)));
+    public static MeasureOrNpmResourceHolderList of(Measure measure) {
+        return new MeasureOrNpmResourceHolderList(List.of(MeasureOrNpmResourceHolder.measureOnly(measure)));
     }
 
-    public static MeasurePlusNpmResourceHolderList ofMeasures(List<Measure> measures) {
-        return new MeasurePlusNpmResourceHolderList(
+    public static MeasureOrNpmResourceHolderList ofMeasures(List<Measure> measures) {
+        return new MeasureOrNpmResourceHolderList(
                 measures.stream().map(MeasureOrNpmResourceHolder::measureOnly).toList());
     }
 
-    private MeasurePlusNpmResourceHolderList(List<MeasureOrNpmResourceHolder> measuresPlusNpmResourceHolders) {
+    private MeasureOrNpmResourceHolderList(List<MeasureOrNpmResourceHolder> measuresPlusNpmResourceHolders) {
         this.measuresPlusNpmResourceHolders = measuresPlusNpmResourceHolders;
     }
 
-    public List<MeasureOrNpmResourceHolder> getMeasuresPlusNpmResourceHolders() {
+    public List<MeasureOrNpmResourceHolder> getMeasuresOrNpmResourceHolders() {
         return measuresPlusNpmResourceHolders;
     }
 
@@ -78,7 +78,7 @@ public final class MeasurePlusNpmResourceHolderList {
         if (obj == null || obj.getClass() != this.getClass()) {
             return false;
         }
-        var that = (MeasurePlusNpmResourceHolderList) obj;
+        var that = (MeasureOrNpmResourceHolderList) obj;
         return Objects.equals(this.measuresPlusNpmResourceHolders, that.measuresPlusNpmResourceHolders);
     }
 

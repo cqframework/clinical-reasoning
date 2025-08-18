@@ -9,7 +9,7 @@ import org.opencds.cqf.fhir.cr.measure.r4.MultiMeasure.SelectedReport;
 
 // TODO: LD :  introduce an R5 version of this test once R5 services/etc become available
 class MultiMeasureWithNpmForR4Test extends BaseMeasureWithNpmForR4Test {
-    private static final Given NPM_REPO_MULTI_MEASURE = MultiMeasure.given().repositoryFor("BasicNpmPackages");
+    private static final Given NPM_REPO_MULTI_MEASURE = MultiMeasure.given().repositoryPlusNpmFor("BasicNpmPackages");
 
     @Test
     void evaluateSucceedsWithMinimalMeasureAndSingleSubject() {

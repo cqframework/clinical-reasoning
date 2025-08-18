@@ -44,6 +44,7 @@ import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
+import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
@@ -99,7 +100,7 @@ public class MultiMeasure {
         private MeasureEvaluationOptions evaluationOptions;
         private String serverBase;
         private final MeasurePeriodValidator measurePeriodValidator;
-        private final R4MeasureServiceUtils r4MeasureServiceUtils;
+        private R4MeasureServiceUtils r4MeasureServiceUtils;
         private NpmPackageLoader npmPackageLoader;
 
         public Given() {
@@ -118,9 +119,6 @@ public class MultiMeasure {
             this.serverBase = "http://localhost";
 
             this.measurePeriodValidator = new MeasurePeriodValidator();
-            // LUKETODO:  change this:
-            this.npmPackageLoader = NpmPackageLoader.DEFAULT;
-            this.r4MeasureServiceUtils = new R4MeasureServiceUtils(repository, npmPackageLoader, evaluationOptions);
         }
 
         public MultiMeasure.Given repository(IRepository repository) {
@@ -128,13 +126,30 @@ public class MultiMeasure {
             return this;
         }
 
-        public MultiMeasure.Given repositoryFor(String repositoryPath) {
+        // Use this if you wish to have nothing to do with NPM
+        public Given repositoryFor(String repositoryPath) {
+            var igRepository = new IgRepository(
+                    FhirContext.forR4Cached(),
+                    Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
+            this.repository = igRepository;
+            // We're explicitly NOT using NPM here
+            this.npmPackageLoader = NpmPackageLoader.DEFAULT;
+            return this;
+        }
+
+        // Use this if you wish to do anything with NPM
+        public Given repositoryPlusNpmFor(String repositoryPath) {
             var igRepository = new IgRepository(
                     FhirContext.forR4Cached(),
                     Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
             this.repository = igRepository;
             this.npmPackageLoader = igRepository.getNpmPackageLoader();
+            mutateEvaluationOptionsToEnableNpm();
             return this;
+        }
+
+        private void mutateEvaluationOptionsToEnableNpm() {
+            this.evaluationOptions.setUseNpmForLibrariesAndMeasures(true);
         }
 
         public MultiMeasure.Given evaluationOptions(MeasureEvaluationOptions evaluationOptions) {

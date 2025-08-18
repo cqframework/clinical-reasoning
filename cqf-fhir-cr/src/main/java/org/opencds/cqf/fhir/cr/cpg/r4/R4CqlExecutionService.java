@@ -18,6 +18,7 @@ import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.cpg.CqlExecutionProcessor;
 import org.opencds.cqf.fhir.utility.repository.Repositories;
 
+@SuppressWarnings("squid:S107")
 public class R4CqlExecutionService {
 
     protected IRepository repository;
@@ -30,7 +31,6 @@ public class R4CqlExecutionService {
 
     // should use adapters to make this version agnostic
     public Parameters evaluate(
-            // RequestDetails requestDetails,
             String subject,
             String expression,
             Parameters parameters,
@@ -79,6 +79,7 @@ public class R4CqlExecutionService {
                         null);
             }
 
+            // LUKETODO:  NPM for multiple libraries?
             var engine = Engines.forRepository(repository, evaluationSettings, null);
             var libraryManager = engine.getEnvironment().getLibraryManager();
             var libraryIdentifier = baseCqlExecutionProcessor.resolveLibraryIdentifier(content, null, libraryManager);

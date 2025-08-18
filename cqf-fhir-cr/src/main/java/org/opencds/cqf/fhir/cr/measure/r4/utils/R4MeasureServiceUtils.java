@@ -33,7 +33,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -53,6 +52,7 @@ import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.StringType;
+import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
@@ -60,14 +60,24 @@ import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureEvalType;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.monad.Either3;
+import org.opencds.cqf.fhir.utility.npm.MeasureOrNpmResourceHolder;
+import org.opencds.cqf.fhir.utility.npm.MeasurePlusNpmResourceHolderList;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.search.Searches;
 
 public class R4MeasureServiceUtils {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(R4MeasureServiceUtils.class);
     private final IRepository repository;
+    private final NpmPackageLoader npmPackageLoader;
+    private final MeasureEvaluationOptions measureEvaluationOptions;
 
-    public R4MeasureServiceUtils(IRepository repository) {
+    public R4MeasureServiceUtils(
+            IRepository repository,
+            NpmPackageLoader npmPackageLoader,
+            MeasureEvaluationOptions measureEvaluationOptions) {
         this.repository = repository;
+        this.npmPackageLoader = npmPackageLoader;
+        this.measureEvaluationOptions = measureEvaluationOptions;
     }
 
     public MeasureReport addProductLineExtension(MeasureReport measureReport, String productLine) {
@@ -233,31 +243,58 @@ public class R4MeasureServiceUtils {
         }
     }
 
-    public List<Measure> getMeasures(
+    // LUKETODO: is this used anywhere?
+    public MeasureOrNpmResourceHolder getMeasurePlusNpmDetails(
+            IdType measureId, String measureIdentifier, String measureCanonical) {
+        // LUKETODO:  implement
+        return null;
+    }
+
+    public MeasurePlusNpmResourceHolderList getMeasurePlusNpmDetails(
             List<IdType> measureIds, List<String> measureIdentifiers, List<String> measureCanonicals) {
-        List<Measure> measures = new ArrayList<>();
+
+        List<MeasureOrNpmResourceHolder> measuresPlusResourceHolders = new ArrayList<>();
         if (measureIds != null && !measureIds.isEmpty()) {
+            if (measureEvaluationOptions.isUseNpmForLibrariesAndMeasures()) {
+                throw new InvalidRequestException(
+                        "Queries by measure IDs: %s are not supported by NPM resources".formatted(measureIds));
+            }
+
             for (IdType measureId : measureIds) {
-                Measure measureById = resolveById(measureId);
-                measures.add(measureById);
+                var measureById = resolveById(measureId);
+                measuresPlusResourceHolders.add(MeasureOrNpmResourceHolder.measureOnly(measureById));
             }
         }
 
         if (measureCanonicals != null && !measureCanonicals.isEmpty()) {
             for (String measureCanonical : measureCanonicals) {
-                Measure measureByUrl = resolveByUrl(measureCanonical);
-                measures.add(measureByUrl);
+                if (measureEvaluationOptions.isUseNpmForLibrariesAndMeasures()) {
+                    Measure measureByUrl = resolveByUrl(measureCanonical);
+                    if (measureByUrl != null) {
+                        measuresPlusResourceHolders.add(MeasureOrNpmResourceHolder.measureOnly(measureByUrl));
+                    }
+                } else {
+                    // LUKETODO:  test this to make sure it works
+                    var npmResourceHolder = this.npmPackageLoader.loadNpmResources(new CanonicalType(measureCanonical));
+                    measuresPlusResourceHolders.add(MeasureOrNpmResourceHolder.npmOnly(npmResourceHolder));
+                }
             }
         }
 
         if (measureIdentifiers != null && !measureIdentifiers.isEmpty()) {
+            if (measureEvaluationOptions.isUseNpmForLibrariesAndMeasures()) {
+                throw new InvalidRequestException(
+                        "Queries by measure identifiers: %s are not supported by NPM resources"
+                                .formatted(measureIdentifiers));
+            }
             for (String measureIdentifier : measureIdentifiers) {
-                Measure measureByIdentifier = resolveByIdentifier(measureIdentifier);
-                measures.add(measureByIdentifier);
+                var measureByIdentifier = resolveByIdentifier(measureIdentifier);
+                measuresPlusResourceHolders.add(MeasureOrNpmResourceHolder.measureOnly(measureByIdentifier));
             }
         }
 
-        return distinctByKey(measures, Measure::getUrl);
+        return MeasurePlusNpmResourceHolderList.of(
+                distinctByKey(measuresPlusResourceHolders, MeasureOrNpmResourceHolder::getMeasureUrl));
     }
 
     public static <T, K> List<T> distinctByKey(List<T> list, Function<T, K> keyExtractor) {
@@ -272,7 +309,7 @@ public class R4MeasureServiceUtils {
         var groupScoringCodes = measure.getGroup().stream()
                 .map(t -> (CodeableConcept)
                         t.getExtensionByUrl(CQFM_SCORING_EXT_URL).getValue())
-                .collect(Collectors.toList());
+                .toList();
         // extract measureScoring Type from components
         return groupScoringCodes.stream()
                 .map(t -> MeasureScoring.fromCode(t.getCodingFirstRep().getCode()))
@@ -294,10 +331,7 @@ public class R4MeasureServiceUtils {
     */
     public boolean hasGroupScoringDef(Measure measure) {
 
-        return !measure.getGroup().stream()
-                .filter(t -> t.getExtensionByUrl(CQFM_SCORING_EXT_URL) != null)
-                .collect(Collectors.toList())
-                .isEmpty();
+        return measure.getGroup().stream().anyMatch(t -> t.getExtensionByUrl(CQFM_SCORING_EXT_URL) != null);
     }
 
     public List<MeasureScoring> getMeasureScoringDef(Measure measure) {
@@ -349,28 +383,82 @@ public class R4MeasureServiceUtils {
         return subjectIds == null || subjectIds.isEmpty() || subjectIds.get(0) == null;
     }
 
-    public static List<Measure> foldMeasures(
-            List<Either3<CanonicalType, IdType, Measure>> measures, IRepository repository) {
-        return measures.stream()
-                .map(measure -> foldMeasure(measure, repository))
-                .toList();
+    // If the caller chooses to provide their own IRepository (ex:  federated)
+    public MeasureOrNpmResourceHolder foldMeasure(
+            Either3<CanonicalType, IdType, Measure> measureEither, IRepository repository) {
+
+        if (measureEvaluationOptions.isUseNpmForLibrariesAndMeasures()) {
+            return measureEither.fold(
+                    measureUrl -> MeasureOrNpmResourceHolder.npmOnly(npmPackageLoader.loadNpmResources(measureUrl)),
+                    measureId -> {
+                        throw new InvalidRequestException(
+                                "Queries by measure ID: %s are not supported by NPM resources".formatted(measureId));
+                    },
+                    measure -> {
+                        throw new InvalidRequestException(
+                                "Not sure how we got here, but we have a Measure: %s".formatted(measure));
+                    });
+        }
+
+        return MeasureOrNpmResourceHolder.measureOnly(foldMeasureFromRepository(measureEither, repository));
     }
 
-    public static Measure foldMeasure(Either3<CanonicalType, IdType, Measure> measure, IRepository repository) {
-        return measure.fold(
-                measureCanonicalType -> resolveByUrl(measureCanonicalType, repository),
+    public MeasureOrNpmResourceHolder foldMeasure(Either3<CanonicalType, IdType, Measure> measureEither) {
+        if (measureEvaluationOptions.isUseNpmForLibrariesAndMeasures()) {
+            return measureEither.fold(
+                    measureUrl -> MeasureOrNpmResourceHolder.npmOnly(npmPackageLoader.loadNpmResources(measureUrl)),
+                    measureId -> {
+                        throw new InvalidRequestException(
+                                "Queries by measure ID: %s are not supported by NPM resources".formatted(measureId));
+                    },
+                    measure -> {
+                        throw new InvalidRequestException(
+                                "Not sure how we got here, but we have a Measure: %s".formatted(measure));
+                    });
+        }
+
+        var folded = measureEither.fold(
+                this::resolveByUrlFromRepository,
+                measureIdType -> resolveById(measureIdType, repository),
+                Function.identity());
+
+        return MeasureOrNpmResourceHolder.measureOnly(folded);
+    }
+
+    private static Measure foldMeasureFromRepository(
+            Either3<CanonicalType, IdType, Measure> measureEither, IRepository repository) {
+
+        return measureEither.fold(
+                measureUrl -> resolveByUrlFromRepository(measureUrl, repository),
                 measureIdType -> resolveById(measureIdType, repository),
                 Function.identity());
     }
 
-    private static Measure resolveByUrl(CanonicalType url, IRepository repository) {
-        var parts = Canonicals.getParts(url);
-        var result = repository.search(
-                Bundle.class, Measure.class, Searches.byNameAndVersion(parts.idPart(), parts.version()));
-        return (Measure) result.getEntryFirstRep().getResource();
+    private Measure resolveByUrlFromRepository(CanonicalType measureUrl) {
+        return resolveByUrlFromRepository(measureUrl, repository);
     }
 
-    public static List<Measure> resolveByIds(List<? extends IIdType> ids, IRepository repository) {
+    private static Measure resolveByUrlFromRepository(CanonicalType measureUrl, IRepository repository) {
+
+        var parts = Canonicals.getParts(measureUrl);
+        var result = repository.search(
+                Bundle.class, Measure.class, Searches.byNameAndVersion(parts.idPart(), parts.version()));
+        var bundleResource = result.getEntryFirstRep().getResource();
+
+        if (!(bundleResource instanceof Measure measure)) {
+            throw new InvalidRequestException(
+                    "Measure URL: %s, did not resolve to a Measure resource.".formatted(measureUrl.getValue()));
+        }
+
+        return measure;
+    }
+
+    // Can't use NPM to resolve measures by IDs, so this is explicitly a query against the repository.
+    public List<Measure> resolveByIds(List<? extends IIdType> ids) {
+        return resolveMeasuresFromRepository(ids, repository);
+    }
+
+    private static List<Measure> resolveMeasuresFromRepository(List<? extends IIdType> ids, IRepository repository) {
         var idStringArray = ids.stream().map(IPrimitiveType::getValueAsString).toArray(String[]::new);
         var searchParameters = Searches.byId(idStringArray);
 

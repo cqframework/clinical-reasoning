@@ -31,6 +31,7 @@ import org.opencds.cqf.fhir.cr.measure.constant.CareGapsConstants;
 import org.opencds.cqf.fhir.cr.measure.enumeration.CareGapsStatusCode;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.monad.Either3;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,20 +51,24 @@ public class R4CareGapsProcessor implements R4CareGapsProcessorInterface {
     public R4CareGapsProcessor(
             CareGapsProperties careGapsProperties,
             IRepository repository,
+            R4MeasureServiceUtils r4MeasureServiceUtils,
             MeasureEvaluationOptions measureEvaluationOptions,
             String serverBase,
-            MeasurePeriodValidator measurePeriodValidator) {
+            MeasurePeriodValidator measurePeriodValidator,
+            NpmPackageLoader npmPackageLoader) {
         this.repository = repository;
         this.careGapsProperties = careGapsProperties;
+        this.r4MeasureServiceUtils = r4MeasureServiceUtils;
 
-        r4MeasureServiceUtils = new R4MeasureServiceUtils(repository);
         r4CareGapsBundleBuilder = new R4CareGapsBundleBuilder(
                 careGapsProperties,
                 repository,
                 measureEvaluationOptions,
                 serverBase,
                 configuredResources,
-                measurePeriodValidator);
+                this.r4MeasureServiceUtils,
+                measurePeriodValidator,
+                npmPackageLoader);
         subjectProvider = new R4RepositorySubjectProvider(measureEvaluationOptions.getSubjectProviderOptions());
     }
 

@@ -20,6 +20,8 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorUtils;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.monad.Either3;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoaderWithCache;
 import org.opencds.cqf.fhir.utility.repository.FederatedRepository;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.repository.Repositories;
@@ -30,15 +32,21 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
     private final MeasurePeriodValidator measurePeriodValidator;
     private final R4RepositorySubjectProvider subjectProvider;
     private final MeasureProcessorUtils measureProcessorUtils = new MeasureProcessorUtils();
+    private final R4MeasureServiceUtils r4MeasureServiceUtils;
+    private final NpmPackageLoader npmPackageLoader;
 
     public R4MeasureService(
             IRepository repository,
             MeasureEvaluationOptions measureEvaluationOptions,
-            MeasurePeriodValidator measurePeriodValidator) {
+            MeasurePeriodValidator measurePeriodValidator,
+            R4MeasureServiceUtils r4MeasureServiceUtils,
+            NpmPackageLoader npmPackageLoader) {
         this.repository = repository;
         this.measureEvaluationOptions = measureEvaluationOptions;
         this.measurePeriodValidator = measurePeriodValidator;
         this.subjectProvider = new R4RepositorySubjectProvider(measureEvaluationOptions.getSubjectProviderOptions());
+        this.r4MeasureServiceUtils = r4MeasureServiceUtils;
+        this.npmPackageLoader = npmPackageLoader;
     }
 
     @Override
@@ -62,9 +70,12 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
         var proxyRepoForMeasureProcessor =
                 Repositories.proxy(repository, true, dataEndpoint, contentEndpoint, terminologyEndpoint);
         var processor = new R4MeasureProcessor(
-                proxyRepoForMeasureProcessor, this.measureEvaluationOptions, measureProcessorUtils);
+                proxyRepoForMeasureProcessor,
+                this.measureEvaluationOptions,
+                this.measureProcessorUtils,
+                this.r4MeasureServiceUtils,
+                this.npmPackageLoader);
 
-        R4MeasureServiceUtils r4MeasureServiceUtils = new R4MeasureServiceUtils(repository);
         r4MeasureServiceUtils.ensureSupplementalDataElementSearchParameter();
 
         MeasureReport measureReport;
@@ -81,16 +92,29 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
 
         var subjects = getSubjects(subjectId, proxyRepoForMeasureProcessor, additionalData);
 
+        var measurePlusNpmResourceHolder = r4MeasureServiceUtils.foldMeasure(measure, proxyRepoForMeasureProcessor);
+
         // Replicate the old logic of using the repository used to initialize the measure processor
         // as the repository for the CQL engine context.
+        // LUKETODO:  find and pass the the NPM resource load and loaded NPM resources here?
         var context = Engines.forRepository(
-                proxyRepoForMeasureProcessor, this.measureEvaluationOptions.getEvaluationSettings(), additionalData);
+                proxyRepoForMeasureProcessor,
+                this.measureEvaluationOptions.getEvaluationSettings(),
+                additionalData,
+                NpmPackageLoaderWithCache.of(measurePlusNpmResourceHolder.npmResourceHolder(), npmPackageLoader));
 
-        var evaluationResults =
-                processor.evaluateMeasureWithCqlEngine(subjects, measure, periodStart, periodEnd, parameters, context);
+        var evaluationResults = processor.evaluateMeasureWithCqlEngine(
+                subjects, measurePlusNpmResourceHolder, periodStart, periodEnd, parameters, context);
 
         measureReport = processor.evaluateMeasure(
-                measure, periodStart, periodEnd, reportType, subjects, evalType, context, evaluationResults);
+                measurePlusNpmResourceHolder,
+                periodStart,
+                periodEnd,
+                reportType,
+                subjects,
+                evalType,
+                context,
+                evaluationResults);
 
         // add ProductLine after report is generated
         measureReport = r4MeasureServiceUtils.addProductLineExtension(measureReport, productLine);

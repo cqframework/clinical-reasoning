@@ -12,11 +12,13 @@ import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import java.util.List;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Parameters;
+import org.opencds.cqf.fhir.cr.hapi.common.CrProviderConstants;
 import org.opencds.cqf.fhir.cr.hapi.common.StringTimePeriodHandler;
 import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureEvaluatorMultipleFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureEvaluatorSingleFactory;
@@ -173,5 +175,39 @@ public class MeasureOperationsProvider {
                         parameters,
                         productLine,
                         reporter);
+    }
+
+    // TODO: LD:  we may have to permanently keep this API separate from $evaluate_mesasure
+    @Operation(name = CrProviderConstants.CR_OPERATION_EVALUATE_MEASURE_URL, idempotent = true, type = Measure.class)
+    public MeasureReport evaluateMeasureWithUrl(
+            @OperationParam(name = "measureUrl") String measureUrl,
+            @OperationParam(name = "periodStart") String periodStart,
+            @OperationParam(name = "periodEnd") String periodEnd,
+            @OperationParam(name = "reportType") String reportType,
+            @OperationParam(name = "subject") String subject,
+            @OperationParam(name = "practitioner") String practitioner,
+            @OperationParam(name = "lastReceivedOn") String lastReceivedOn,
+            @OperationParam(name = "productLine") String productLine,
+            @OperationParam(name = "additionalData") Bundle additionalData,
+            @OperationParam(name = "terminologyEndpoint") Endpoint terminologyEndpoint,
+            @OperationParam(name = "parameters") Parameters parameters,
+            RequestDetails requestDetails)
+            throws InternalErrorException, FHIRException {
+        return r4MeasureServiceFactory
+                .create(requestDetails)
+                .evaluate(
+                        Eithers.forLeft3(new CanonicalType(measureUrl)),
+                        stringTimePeriodHandler.getStartZonedDateTime(periodStart, requestDetails),
+                        stringTimePeriodHandler.getEndZonedDateTime(periodEnd, requestDetails),
+                        reportType,
+                        subject,
+                        lastReceivedOn,
+                        null,
+                        terminologyEndpoint,
+                        null,
+                        additionalData,
+                        parameters,
+                        productLine,
+                        practitioner);
     }
 }

@@ -6,6 +6,7 @@ import ca.uhn.fhir.rest.api.server.IRepositoryFactory;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Optional;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cr.cpg.r4.R4CqlExecutionService;
 import org.opencds.cqf.fhir.cr.hapi.common.StringTimePeriodHandler;
@@ -37,6 +38,7 @@ import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureService;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MultiMeasureService;
 import org.opencds.cqf.fhir.cr.measure.r4.R4SubmitDataService;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -50,8 +52,13 @@ public class CrR4Config {
     R4MeasureEvaluatorSingleFactory r4MeasureServiceFactory(
             IRepositoryFactory repositoryFactory,
             MeasureEvaluationOptions evaluationOptions,
-            MeasurePeriodValidator measurePeriodValidator) {
-        return rd -> new R4MeasureService(repositoryFactory.create(rd), evaluationOptions, measurePeriodValidator);
+            MeasurePeriodValidator measurePeriodValidator,
+            Optional<NpmPackageLoader> optNpmPackageLoader) {
+        return rd -> new R4MeasureService(
+                repositoryFactory.create(rd),
+                evaluationOptions,
+                measurePeriodValidator,
+                npmPackageLoader(optNpmPackageLoader));
     }
 
     @Bean
@@ -87,16 +94,18 @@ public class CrR4Config {
     }
 
     @Bean
-    R4MeasureServiceUtilsFactory r4MeasureServiceUtilsFactory(IRepositoryFactory repositoryFactory) {
-        return requestDetails -> new R4MeasureServiceUtils(repositoryFactory.create(requestDetails));
+    R4MeasureServiceUtilsFactory r4MeasureServiceUtilsFactory(
+            IRepositoryFactory repositoryFactory, NpmPackageLoader npmPackageLoader) {
+        return requestDetails -> new R4MeasureServiceUtils(repositoryFactory.create(requestDetails), npmPackageLoader);
     }
 
     @Bean
     ICollectDataServiceFactory collectDataServiceFactory(
             IRepositoryFactory repositoryFactory,
             MeasureEvaluationOptions measureEvaluationOptions,
-            R4MeasureServiceUtilsFactory r4MeasureServiceUtilsFactory) {
-        return rd -> new R4CollectDataService(repositoryFactory.create(rd), measureEvaluationOptions);
+            Optional<NpmPackageLoader> optNpmPackageLoader) {
+        return rd -> new R4CollectDataService(
+                repositoryFactory.create(rd), measureEvaluationOptions, npmPackageLoader(optNpmPackageLoader));
     }
 
     @Bean
@@ -116,13 +125,15 @@ public class CrR4Config {
             IRepositoryFactory repositoryFactory,
             CareGapsProperties careGapsProperties,
             MeasureEvaluationOptions measureEvaluationOptions,
-            MeasurePeriodValidator measurePeriodValidator) {
+            MeasurePeriodValidator measurePeriodValidator,
+            Optional<NpmPackageLoader> optNpmPackageLoader) {
         return rd -> new R4CareGapsService(
                 careGapsProperties,
                 repositoryFactory.create(rd),
                 measureEvaluationOptions,
                 rd.getFhirServerBase(),
-                measurePeriodValidator);
+                measurePeriodValidator,
+                npmPackageLoader(optNpmPackageLoader));
     }
 
     @Bean
@@ -162,5 +173,9 @@ public class CrR4Config {
                                 DataRequirementsOperationProvider.class)));
 
         return new ProviderLoader(restfulServer, applicationContext, selector);
+    }
+
+    private NpmPackageLoader npmPackageLoader(Optional<NpmPackageLoader> optNpmPackageLoader) {
+        return NpmPackageLoader.getDefaultIfEmpty(optNpmPackageLoader.orElse(null));
     }
 }

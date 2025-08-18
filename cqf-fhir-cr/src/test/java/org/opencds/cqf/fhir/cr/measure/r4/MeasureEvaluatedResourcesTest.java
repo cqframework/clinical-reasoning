@@ -119,6 +119,8 @@ class MeasureEvaluatedResourcesTest {
                 .hasEvaluatedResourceCount(0)
                 .report();
     }
+
+    // LUKETODO:  emulate this test for NPM
     // MinimalProportionBooleanBasisSingleGroup
     @Test
     void correctReferenceExpQtyCheck() {

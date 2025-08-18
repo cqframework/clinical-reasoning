@@ -32,16 +32,18 @@ import org.opencds.cqf.fhir.cql.engine.retrieve.FederatedDataProvider;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RepositoryRetrieveProvider;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings;
 import org.opencds.cqf.fhir.cql.engine.terminology.RepositoryTerminologyProvider;
+import org.opencds.cqf.fhir.cql.npm.EnginesNpmLibraryHandler;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Engines {
 
-    private static Logger logger = LoggerFactory.getLogger(Engines.class);
+    private static final Logger logger = LoggerFactory.getLogger(Engines.class);
 
     private Engines() {}
 
@@ -50,11 +52,19 @@ public class Engines {
     }
 
     public static CqlEngine forRepository(IRepository repository, EvaluationSettings settings) {
-        return forRepository(repository, settings, null);
+        return forRepository(repository, settings, null, NpmPackageLoader.DEFAULT);
     }
 
     public static CqlEngine forRepository(
             IRepository repository, EvaluationSettings settings, IBaseBundle additionalData) {
+        return forRepository(repository, settings, additionalData, NpmPackageLoader.DEFAULT);
+    }
+
+    public static CqlEngine forRepository(
+            IRepository repository,
+            EvaluationSettings settings,
+            IBaseBundle additionalData,
+            NpmPackageLoader npmPackageLoader) {
         checkNotNull(settings);
         checkNotNull(repository);
 
@@ -62,7 +72,7 @@ public class Engines {
                 repository, settings.getValueSetCache(), settings.getTerminologySettings());
         var dataProviders =
                 buildDataProviders(repository, additionalData, terminologyProvider, settings.getRetrieveSettings());
-        var environment = buildEnvironment(repository, settings, terminologyProvider, dataProviders);
+        var environment = buildEnvironment(repository, settings, terminologyProvider, dataProviders, npmPackageLoader);
         return createEngine(environment, settings);
     }
 
@@ -70,7 +80,8 @@ public class Engines {
             IRepository repository,
             EvaluationSettings settings,
             TerminologyProvider terminologyProvider,
-            Map<String, DataProvider> dataProviders) {
+            Map<String, DataProvider> dataProviders,
+            NpmPackageLoader npmPackageLoader) {
 
         var modelManager =
                 settings.getModelCache() != null ? new ModelManager(settings.getModelCache()) : new ModelManager();
@@ -80,6 +91,7 @@ public class Engines {
 
         registerLibrarySourceProviders(settings, libraryManager, repository);
         registerNpmSupport(settings, libraryManager, modelManager);
+        EnginesNpmLibraryHandler.registerNpmPackageLoader(libraryManager, modelManager, npmPackageLoader);
 
         return new Environment(libraryManager, dataProviders, terminologyProvider);
     }
@@ -123,8 +135,8 @@ public class Engines {
         // list, and b) there are packages with different package ids but the same base canonical (e.g.
         // fhir.r4.examples has the same base canonical as fhir.r4)
         // NOTE: Using ensureNamespaceRegistered works around a but not b
-        Set<String> keys = new HashSet<String>();
-        Set<String> uris = new HashSet<String>();
+        Set<String> keys = new HashSet<>();
+        Set<String> uris = new HashSet<>();
         for (var n : npmProcessor.getNamespaces()) {
             if (!keys.contains(n.getName()) && !uris.contains(n.getUri())) {
                 libraryManager.getNamespaceManager().addNamespace(n);

@@ -403,6 +403,7 @@ public class R4MeasureServiceUtils {
         return MeasureOrNpmResourceHolder.measureOnly(foldMeasureFromRepository(measureEither, repository));
     }
 
+    // LUKETODO:  return the List class instead?
     public MeasureOrNpmResourceHolder foldMeasure(Either3<CanonicalType, IdType, Measure> measureEither) {
         if (measureEvaluationOptions.isUseNpmForLibrariesAndMeasures()) {
             return measureEither.fold(

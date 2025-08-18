@@ -292,18 +292,6 @@ public class R4MeasureProcessor {
 
     public CompositeEvaluationResultsPerMeasure evaluateMeasureWithCqlEngine(
             List<String> subjects,
-            Measure measure,
-            @Nullable ZonedDateTime periodStart,
-            @Nullable ZonedDateTime periodEnd,
-            Parameters parameters,
-            CqlEngine context) {
-
-        return evaluateMultiMeasuresPlusNpmHoldersWithCqlEngine(
-                subjects, MeasureOrNpmResourceHolderList.of(measure), periodStart, periodEnd, parameters, context);
-    }
-
-    public CompositeEvaluationResultsPerMeasure evaluateMeasureWithCqlEngine(
-            List<String> subjects,
             MeasureOrNpmResourceHolder measureOrNpmResourceHolder,
             @Nullable ZonedDateTime periodStart,
             @Nullable ZonedDateTime periodEnd,
@@ -377,7 +365,7 @@ public class R4MeasureProcessor {
 
         preLibraryEvaluationPeriodProcessing(
                 multiLibraryIdMeasureEngineDetails.getLibraryIdentifiers(),
-                measures,
+                measureOrNpmResourceHolderList,
                 parameters,
                 context,
                 measurementPeriodParams);
@@ -399,9 +387,10 @@ public class R4MeasureProcessor {
      * duplicate libraries on the stack that through good fortune before we didn't accidentally
      * evaluate twice.
      */
+    // LUKETODO:  test with NPM
     private void preLibraryEvaluationPeriodProcessing(
             List<VersionedIdentifier> libraryVersionedIdentifiers,
-            List<Measure> measures,
+            MeasureOrNpmResourceHolderList measureOrNpmResourceHolderList,
             Parameters parameters,
             CqlEngine context,
             Interval measurementPeriodParams) {
@@ -422,7 +411,7 @@ public class R4MeasureProcessor {
         measureProcessorUtils.setMeasurementPeriod(
                 measurementPeriodParams,
                 context,
-                measures.stream()
+                measureOrNpmResourceHolderList.getMeasures().stream()
                         .map(Measure::getUrl)
                         .map(url -> Optional.ofNullable(url).orElse("Unknown Measure URL"))
                         .toList());

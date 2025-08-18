@@ -169,9 +169,13 @@ public class CrR4Config {
     MeasureOperationsProvider r4MeasureOperationsProvider(
             R4MeasureEvaluatorSingleFactory r4MeasureServiceFactory,
             R4MeasureEvaluatorMultipleFactory r4MultiMeasureServiceFactory,
+            MeasureEvaluationOptions measureEvaluationOptions,
             StringTimePeriodHandler stringTimePeriodHandler) {
         return new MeasureOperationsProvider(
-                r4MeasureServiceFactory, r4MultiMeasureServiceFactory, stringTimePeriodHandler);
+                r4MeasureServiceFactory,
+                r4MultiMeasureServiceFactory,
+                measureEvaluationOptions,
+                stringTimePeriodHandler);
     }
 
     @Bean

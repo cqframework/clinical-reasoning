@@ -8,6 +8,7 @@ import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import java.util.List;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -22,6 +23,7 @@ import org.opencds.cqf.fhir.cr.hapi.common.CrProviderConstants;
 import org.opencds.cqf.fhir.cr.hapi.common.StringTimePeriodHandler;
 import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureEvaluatorMultipleFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureEvaluatorSingleFactory;
+import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 
 @SuppressWarnings("java:S107")
@@ -30,15 +32,18 @@ public class MeasureOperationsProvider {
     private final R4MeasureEvaluatorSingleFactory r4MeasureServiceFactory;
     private final R4MeasureEvaluatorMultipleFactory r4MultiMeasureServiceFactory;
     private final StringTimePeriodHandler stringTimePeriodHandler;
+    private final MeasureEvaluationOptions measureEvaluationOptions;
     private final FhirVersionEnum fhirVersion;
 
     public MeasureOperationsProvider(
             R4MeasureEvaluatorSingleFactory r4MeasureServiceFactory,
             R4MeasureEvaluatorMultipleFactory r4MultiMeasureServiceFactory,
+            MeasureEvaluationOptions measureEvaluationOptions,
             StringTimePeriodHandler stringTimePeriodHandler) {
         this.r4MeasureServiceFactory = r4MeasureServiceFactory;
         this.r4MultiMeasureServiceFactory = r4MultiMeasureServiceFactory;
         this.stringTimePeriodHandler = stringTimePeriodHandler;
+        this.measureEvaluationOptions = measureEvaluationOptions;
         fhirVersion = FhirVersionEnum.R4;
     }
 
@@ -86,6 +91,14 @@ public class MeasureOperationsProvider {
             @OperationParam(name = "parameters") Parameters parameters,
             RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
+
+        // LUKETODO:  consider adding this validation to all services where this could happen
+        if (measureEvaluationOptions.isUseNpmForLibrariesAndMeasures()) {
+            throw new InvalidRequestException(
+                    "Measure evaluation by ID is not supported if NPM libraries and measures are enabled.  Use %s instead."
+                            .formatted(CrProviderConstants.CR_OPERATION_EVALUATE_MEASURE_URL));
+        }
+
         var contentEndpointParam = (Endpoint) getEndpoint(fhirVersion, contentEndpoint);
         var terminologyEndpointParam = (Endpoint) getEndpoint(fhirVersion, terminologyEndpoint);
         var dataEndpointParam = (Endpoint) getEndpoint(fhirVersion, dataEndpoint);

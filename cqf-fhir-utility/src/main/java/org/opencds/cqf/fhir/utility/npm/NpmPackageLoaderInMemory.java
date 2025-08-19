@@ -88,7 +88,8 @@ public class NpmPackageLoaderInMemory implements NpmPackageLoader {
 
     @Override
     public NpmResourceHolder loadNpmResources(IPrimitiveType<String> measureUrl) {
-        return measureUrlToResourceInfo.entrySet().stream()
+        return measureUrlToResourceInfo.entrySet()
+                .stream()
                 .filter(entry -> doUrlAndVersionMatch(measureUrl, entry))
                 .map(Map.Entry::getValue)
                 .findFirst()

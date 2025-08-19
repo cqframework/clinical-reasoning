@@ -367,7 +367,27 @@ class SingleMeasureWithNpmForR4Test extends BaseMeasureWithNpmForR4Test {
 
     @Test
     void evaluateWithDerivedLibraryTwoLayersAllSubjects() {
-        fail();
+        NPM_REPO_SINGLE_MEASURE
+            .when()
+            .measureUrl(MEASURE_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES)
+            .reportType(MeasureEvalType.SUBJECT.toCode())
+            .evaluate()
+            .then()
+            .hasMeasureUrl(MEASURE_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES_WITH_VERSION)
+            .hasPeriodStart(toJavaUtilDate(LOCAL_DATE_TIME_2022_01_01))
+            .hasPeriodEnd(toJavaUtilDate(LOCAL_DATE_TIME_2023_01_01_MINUS_ONE_SECOND))
+            .hasStatus(MeasureReportStatus.COMPLETE)
+            .hasEvaluatedResourceCount(11)
+            .firstGroup()
+            .population(INITIAL_POPULATION)
+            .hasCount(8)
+            .up()
+            .population(DENOMINATOR)
+            // LUKETODO:  investigate to see if this is correct for male 1988
+            .hasCount(1)
+            .up()
+            .population(NUMERATOR)
+            .hasCount(1);
     }
 
     @Test

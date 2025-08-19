@@ -45,7 +45,11 @@ public abstract class BaseMeasureWithNpmForR4Test {
     static final String SIMPLE_ALPHA = "SimpleAlpha";
     static final String SIMPLE_BRAVO = "SimpleBravo";
 
+    static final String MULTILIB_CROSSPACKAGE_SOURCE_1 = "MultiLibCrossPackageSource1";
+    static final String MULTILIB_CROSSPACKAGE_SOURCE_2 = "MultiLibCrossPackageSource2";
+
     static final String SIMPLE_URL = "http://example.com";
+    static final String MULTILIB_CROSSPACKAGE_SOURCE_URL = "http://multilib.cross.package.source.npm.opencds.org";
 
     static final String SLASH_MEASURE_SLASH = "/Measure/";
 
@@ -53,6 +57,11 @@ public abstract class BaseMeasureWithNpmForR4Test {
     static final String MEASURE_URL_ALPHA_WITH_VERSION = MEASURE_URL_ALPHA + PIPE + VERSION_0_2;
     static final String MEASURE_URL_BRAVO = SIMPLE_URL + SLASH_MEASURE_SLASH + SIMPLE_BRAVO;
     static final String MEASURE_URL_BRAVO_WITH_VERSION = MEASURE_URL_BRAVO + PIPE + VERSION_0_5;
+
+    static final String MEASURE_URL_CROSSPACKAGE_SOURCE_1 = MULTILIB_CROSSPACKAGE_SOURCE_URL + SLASH_MEASURE_SLASH + MULTILIB_CROSSPACKAGE_SOURCE_1;
+    static final String MEASURE_URL_CROSSPACKAGE_SOURCE_1_VERSION = MEASURE_URL_CROSSPACKAGE_SOURCE_1 + PIPE + VERSION_0_1;
+    static final String MEASURE_URL_CROSSPACKAGE_SOURCE_2 = MULTILIB_CROSSPACKAGE_SOURCE_URL + SLASH_MEASURE_SLASH + MULTILIB_CROSSPACKAGE_SOURCE_2;
+    static final String MEASURE_URL_CROSSPACKAGE_SOURCE_2_VERSION = MEASURE_URL_CROSSPACKAGE_SOURCE_2 + PIPE + VERSION_0_1;
 
     static final String INITIAL_POPULATION = "initial-population";
     static final String DENOMINATOR = "denominator";

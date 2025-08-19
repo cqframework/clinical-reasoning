@@ -7,9 +7,13 @@ import org.opencds.cqf.fhir.cr.measure.r4.MultiMeasure;
 import org.opencds.cqf.fhir.cr.measure.r4.MultiMeasure.Given;
 import org.opencds.cqf.fhir.cr.measure.r4.MultiMeasure.SelectedReport;
 
+import static org.junit.jupiter.api.Assertions.fail;
+
 // TODO: LD :  introduce an R5 version of this test once R5 services/etc become available
 class MultiMeasureWithNpmForR4Test extends BaseMeasureWithNpmForR4Test {
     private static final Given NPM_REPO_MULTI_MEASURE = MultiMeasure.given().repositoryPlusNpmFor("BasicNpmPackages");
+
+    // LUKETODO:  multi-lib cross-package, common targets, similar to complex deps test
 
     @Test
     void evaluateSucceedsWithMinimalMeasureAndSingleSubject() {
@@ -173,5 +177,25 @@ class MultiMeasureWithNpmForR4Test extends BaseMeasureWithNpmForR4Test {
         //            .population(INITIAL_POPULATION)
         //            // We match the patient and the single finished encounter, which matches Alpha's where
         //            .hasCount(1);
+    }
+
+    @Test
+    void evaluateSucceedsWithMultiLibCrossPackageSingleSubject() {
+        fail();
+    }
+
+
+    @Test
+    void evaluateSucceedsWithMultiLibCrossPackageAllSubject() {
+        NPM_REPO_MULTI_MEASURE
+            .when()
+            .measureUrl(MEASURE_URL_CROSSPACKAGE_SOURCE_1)
+            .measureUrl(MEASURE_URL_CROSSPACKAGE_SOURCE_2)
+            .reportType(MeasureEvalType.SUBJECT.toCode())
+            .evaluate()
+            .then()
+            .hasMeasureReportCount(20)
+            .hasMeasureReportCountPerUrl(10, MEASURE_URL_CROSSPACKAGE_SOURCE_1_VERSION)
+            .hasMeasureReportCountPerUrl(10, MEASURE_URL_CROSSPACKAGE_SOURCE_2_VERSION);
     }
 }

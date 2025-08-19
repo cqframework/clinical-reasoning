@@ -270,6 +270,7 @@ public class R4MeasureServiceUtils {
             for (String measureCanonical : measureCanonicals) {
                 if (measureEvaluationOptions.isUseNpmForLibrariesAndMeasures()) {
                     // LUKETODO:  test this to make sure it works
+                    // LUKETODO:  if this returns EMPTY, error handle and log accordingly
                     var npmResourceHolder = this.npmPackageLoader.loadNpmResources(new CanonicalType(measureCanonical));
                     measuresPlusResourceHolders.add(MeasureOrNpmResourceHolder.npmOnly(npmResourceHolder));
                 } else {

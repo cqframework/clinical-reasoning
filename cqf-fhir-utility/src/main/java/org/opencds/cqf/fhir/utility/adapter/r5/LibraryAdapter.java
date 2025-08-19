@@ -23,13 +23,11 @@ import org.hl7.fhir.r5.model.Parameters;
 import org.hl7.fhir.r5.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r5.model.Reference;
 import org.hl7.fhir.r5.model.RelatedArtifact;
-import org.hl7.fhir.r5.model.StringType;
 import org.hl7.fhir.r5.model.UsageContext;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IDataRequirementAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
-import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
 
 public class LibraryAdapter extends KnowledgeArtifactAdapter implements ILibraryAdapter {

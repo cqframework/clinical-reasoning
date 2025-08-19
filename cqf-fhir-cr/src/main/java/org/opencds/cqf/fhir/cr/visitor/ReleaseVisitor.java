@@ -470,13 +470,14 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
         // if this assumption is faulty the only consequence is that the VSet doesn't get resolved
         if (resourceType != null && resourceType.equals(Constants.RESOURCETYPE_VALUESET) && latestFromTxServer) {
             maybeAdapter = terminologyServerClient
-                .getLatestNonDraftValueSetResource(endpoint, reference)
-                .map(r -> (IKnowledgeArtifactAdapter) createAdapterForResource(r));
-        } else if (resourceType != null && resourceType.equals(Constants.RESOURCETYPE_CODESYSTEM)
-            && latestFromTxServer) {
+                    .getLatestNonDraftValueSetResource(endpoint, reference)
+                    .map(r -> (IKnowledgeArtifactAdapter) createAdapterForResource(r));
+        } else if (resourceType != null
+                && resourceType.equals(Constants.RESOURCETYPE_CODESYSTEM)
+                && latestFromTxServer) {
             maybeAdapter = terminologyServerClient
-                .getCodeSystemResource(endpoint, reference)
-                .map(r -> (IKnowledgeArtifactAdapter) createAdapterForResource(r));
+                    .getCodeSystemResource(endpoint, reference)
+                    .map(r -> (IKnowledgeArtifactAdapter) createAdapterForResource(r));
         } else {
             // get the latest ACTIVE version, if not fallback to the latest non-DRAFT version
             maybeAdapter = VisitorHelper.tryGetLatestVersionWithStatus(reference, repository, Constants.STATUS_ACTIVE)

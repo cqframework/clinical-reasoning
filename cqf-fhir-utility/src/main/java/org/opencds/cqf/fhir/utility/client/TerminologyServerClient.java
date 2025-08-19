@@ -134,13 +134,14 @@ public class TerminologyServerClient {
 
     public java.util.Optional<IDomainResource> getCodeSystemResource(IEndpointAdapter endpoint, String url) {
         return IKnowledgeArtifactAdapter.findLatestVersion(initializeClientWithAuth(endpoint)
-            .search()
-            .forResource(getCodeSystemClass())
-            .where(Searches.byCanonical(url))
-            .execute());
+                .search()
+                .forResource(getCodeSystemClass())
+                .where(Searches.byCanonical(url))
+                .execute());
     }
 
-    public java.util.Optional<IDomainResource> getLatestNonDraftValueSetResource(IEndpointAdapter endpoint, String url) {
+    public java.util.Optional<IDomainResource> getLatestNonDraftValueSetResource(
+            IEndpointAdapter endpoint, String url) {
         var urlParams = Searches.byCanonical(url);
         var statusParam = Searches.exceptStatus("draft");
         urlParams.putAll(statusParam);
@@ -158,7 +159,7 @@ public class TerminologyServerClient {
 
     private Class<? extends IBaseResource> getCodeSystemClass() {
         return Resources.getClassForTypeAndVersion(
-            "CodeSystem", fhirContext.getVersion().getVersion());
+                "CodeSystem", fhirContext.getVersion().getVersion());
     }
 
     private String getAddressBase(String address) {

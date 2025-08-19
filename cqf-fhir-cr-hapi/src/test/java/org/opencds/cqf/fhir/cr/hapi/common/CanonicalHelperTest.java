@@ -1,12 +1,14 @@
 package org.opencds.cqf.fhir.cr.hapi.common;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.CanonicalType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -73,7 +75,7 @@ class CanonicalHelperTest {
             IPrimitiveType<String> result = CanonicalHelper.getCanonicalType(FhirVersionEnum.R4, null, null, null);
 
             // Assert
-            assertNull(result, "Should be null when there is no string to build from.");
+            assertNull(result);
         }
     }
 
@@ -90,9 +92,7 @@ class CanonicalHelperTest {
 
             // Assert
             assertNotNull(result);
-            assertTrue(
-                    result instanceof org.hl7.fhir.dstu3.model.StringType,
-                    "Result should be an instance of Dstu3StringType.");
+            assertInstanceOf(StringType.class, result);
             assertEquals("test", result.getValue());
         }
 
@@ -104,9 +104,7 @@ class CanonicalHelperTest {
 
             // Assert
             assertNotNull(result);
-            assertTrue(
-                    result instanceof org.hl7.fhir.r4.model.CanonicalType,
-                    "Result should be an instance of R4CanonicalType.");
+            assertInstanceOf(CanonicalType.class, result);
             assertEquals("test", result.getValue());
         }
 
@@ -118,9 +116,7 @@ class CanonicalHelperTest {
 
             // Assert
             assertNotNull(result);
-            assertTrue(
-                    result instanceof org.hl7.fhir.r5.model.CanonicalType,
-                    "Result should be an instance of R5CanonicalType.");
+            assertInstanceOf(org.hl7.fhir.r5.model.CanonicalType.class, result);
             assertEquals("test", result.getValue());
         }
 
@@ -135,7 +131,7 @@ class CanonicalHelperTest {
                     CanonicalHelper.getCanonicalType(version, "some-canonical", "some-url", "1.0");
 
             // Assert
-            assertNull(result, "Should return null for unsupported version: " + version);
+            assertNull(result);
         }
     }
 }

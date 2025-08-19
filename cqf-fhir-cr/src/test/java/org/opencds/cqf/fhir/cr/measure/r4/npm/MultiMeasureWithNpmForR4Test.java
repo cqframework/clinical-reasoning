@@ -1,13 +1,13 @@
 package org.opencds.cqf.fhir.cr.measure.r4.npm;
 
+import static org.junit.jupiter.api.Assertions.fail;
+
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportStatus;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.r4.MultiMeasure;
 import org.opencds.cqf.fhir.cr.measure.r4.MultiMeasure.Given;
 import org.opencds.cqf.fhir.cr.measure.r4.MultiMeasure.SelectedReport;
-
-import static org.junit.jupiter.api.Assertions.fail;
 
 // TODO: LD :  introduce an R5 version of this test once R5 services/etc become available
 class MultiMeasureWithNpmForR4Test extends BaseMeasureWithNpmForR4Test {
@@ -184,18 +184,71 @@ class MultiMeasureWithNpmForR4Test extends BaseMeasureWithNpmForR4Test {
         fail();
     }
 
-
     @Test
     void evaluateSucceedsWithMultiLibCrossPackageAllSubject() {
         NPM_REPO_MULTI_MEASURE
-            .when()
-            .measureUrl(MEASURE_URL_CROSSPACKAGE_SOURCE_1)
-            .measureUrl(MEASURE_URL_CROSSPACKAGE_SOURCE_2)
-            .reportType(MeasureEvalType.SUBJECT.toCode())
-            .evaluate()
-            .then()
-            .hasMeasureReportCount(20)
-            .hasMeasureReportCountPerUrl(10, MEASURE_URL_CROSSPACKAGE_SOURCE_1_VERSION)
-            .hasMeasureReportCountPerUrl(10, MEASURE_URL_CROSSPACKAGE_SOURCE_2_VERSION);
+                .when()
+                .measureUrl(MEASURE_URL_CROSSPACKAGE_SOURCE_1)
+                .measureUrl(MEASURE_URL_CROSSPACKAGE_SOURCE_2)
+                .reportType(MeasureEvalType.SUBJECT.toCode())
+                .evaluate()
+                .then()
+                .hasMeasureReportCount(20)
+                .hasMeasureReportCountPerUrl(10, MEASURE_URL_CROSSPACKAGE_SOURCE_1_WITH_VERSION)
+                .hasMeasureReportCountPerUrl(10, MEASURE_URL_CROSSPACKAGE_SOURCE_2_WITH_VERSION)
+                .measureReport(MEASURE_URL_CROSSPACKAGE_SOURCE_1_WITH_VERSION, PATIENT_FEMALE_1944)
+                .hasSubjectReference(PATIENT_FEMALE_1944)
+                .hasMeasureReportStatus(MeasureReportStatus.COMPLETE)
+                .hasEvaluatedResourceCount(11)
+                .evaluatedResource("Encounter/female-1914-planned-encounter-1")
+                .hasEvaluatedResourceReferenceCount(1)
+                .up()
+                .evaluatedResource("Encounter/female-1931-finished-encounter-1")
+                .hasEvaluatedResourceReferenceCount(1)
+                .up()
+                .evaluatedResource("Encounter/female-1944-finished-encounter-1")
+                .hasEvaluatedResourceReferenceCount(1)
+                .up()
+                .evaluatedResource("Encounter/female-1988-2-finished-encounter-invalid-period")
+                .hasEvaluatedResourceReferenceCount(1)
+                .up()
+                .evaluatedResource("Encounter/female-1988-planned-encounter-1")
+                .hasEvaluatedResourceReferenceCount(1)
+                .up()
+                .evaluatedResource("Encounter/female-1988-finished-encounter-2")
+                .hasEvaluatedResourceReferenceCount(1)
+                .up()
+                .evaluatedResource("Encounter/female-2021-finished-encounter-1")
+                .hasEvaluatedResourceReferenceCount(1)
+                .up()
+                .evaluatedResource("Encounter/male-1931-planned-encounter-1")
+                .hasEvaluatedResourceReferenceCount(1)
+                .up()
+                .evaluatedResource("Encounter/male-1944-finished-encounter-1")
+                .hasEvaluatedResourceReferenceCount(1)
+                .up()
+                .evaluatedResource(ENCOUNTER_MALE_1988_FINISHED_ENCOUNTER_1)
+                .hasEvaluatedResourceReferenceCount(1)
+                .up()
+                .evaluatedResource("Encounter/male-2022-finished-encounter-1")
+                .hasEvaluatedResourceReferenceCount(1)
+                .up()
+                .firstGroup()
+                .population(INITIAL_POPULATION)
+                .hasCount(8)
+                .up()
+                .up()
+                .up()
+                .measureReport(MEASURE_URL_CROSSPACKAGE_SOURCE_2_WITH_VERSION, PATIENT_FEMALE_1944)
+                .hasSubjectReference(PATIENT_FEMALE_1944)
+                .hasMeasureReportStatus(MeasureReportStatus.COMPLETE)
+                .hasEvaluatedResourceCount(11)
+                .evaluatedResource("Encounter/female-1944-finished-encounter-1")
+                .hasEvaluatedResourceReferenceCount(1)
+                .up()
+                .firstGroup()
+                .population(INITIAL_POPULATION)
+                // No match for the second library, so zero
+                .hasCount(3);
     }
 }

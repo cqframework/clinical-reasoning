@@ -43,7 +43,7 @@ public class NpmPackageLoaderInMemory implements NpmPackageLoader {
     private final List<NamespaceInfo> namespaceInfos;
 
     public static NpmPackageLoaderInMemory fromNpmPackageAbsolutePath(List<Path> tgzPaths) {
-        final List<NpmPackage> npmPackages = buildNpmPackageFromAbsolutePath(tgzPaths);
+        final List<NpmPackage> npmPackages = buildNpmPackagesFromAbsolutePath(tgzPaths);
 
         return new NpmPackageLoaderInMemory(npmPackages);
     }
@@ -88,8 +88,7 @@ public class NpmPackageLoaderInMemory implements NpmPackageLoader {
 
     @Override
     public NpmResourceHolder loadNpmResources(IPrimitiveType<String> measureUrl) {
-        return measureUrlToResourceInfo.entrySet()
-                .stream()
+        return measureUrlToResourceInfo.entrySet().stream()
                 .filter(entry -> doUrlAndVersionMatch(measureUrl, entry))
                 .map(Map.Entry::getValue)
                 .findFirst()
@@ -121,9 +120,9 @@ public class NpmPackageLoaderInMemory implements NpmPackageLoader {
     }
 
     @Nonnull
-    private static List<NpmPackage> buildNpmPackageFromAbsolutePath(List<Path> tgzPaths) {
+    private static List<NpmPackage> buildNpmPackagesFromAbsolutePath(List<Path> tgzPaths) {
         return tgzPaths.stream()
-                .map(NpmPackageLoaderInMemory::getNpmPackageFromAbsolutePath)
+                .map(NpmPackageLoaderInMemory::getNpmPackageFromAbsolutePaths)
                 .toList();
     }
 
@@ -135,7 +134,7 @@ public class NpmPackageLoaderInMemory implements NpmPackageLoader {
     }
 
     @Nonnull
-    private static NpmPackage getNpmPackageFromAbsolutePath(Path tgzPath) {
+    private static NpmPackage getNpmPackageFromAbsolutePaths(Path tgzPath) {
         try (final InputStream npmStream = Files.newInputStream(tgzPath)) {
             return NpmPackage.fromPackage(npmStream);
         } catch (IOException exception) {

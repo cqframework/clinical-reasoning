@@ -127,6 +127,7 @@ public class IgRepository implements IRepository {
     private final IgConventions conventions;
     private final ResourceMatcher resourceMatcher;
     private final NpmPackageLoader npmPackageLoader;
+    private final List<Path> npmTgzPaths;
 
     private IRepositoryOperationProvider operationProvider;
 
@@ -241,18 +242,27 @@ public class IgRepository implements IRepository {
         this.conventions = requireNonNull(conventions, "conventions cannot be null");
         this.resourceMatcher = Repositories.getResourceMatcher(this.fhirContext);
         this.operationProvider = operationProvider;
-        this.npmPackageLoader = buildNpmPackageLoader();
+        this.npmTgzPaths = buildNpmTgzPaths();
+        this.npmPackageLoader = buildNpmPackageLoader(this.npmTgzPaths);
     }
 
     public NpmPackageLoader getNpmPackageLoader() {
         return npmPackageLoader;
     }
 
-    private NpmPackageLoader buildNpmPackageLoader() {
-        return NpmPackageLoaderInMemory.fromNpmPackageAbsolutePath(getNpmTgzPaths());
+    public List<Path> getNpmTgzPaths() {
+        return npmTgzPaths;
     }
 
-    private List<Path> getNpmTgzPaths() {
+    public Path getRootPath() {
+        return this.root;
+    }
+
+    private NpmPackageLoader buildNpmPackageLoader(List<Path> npmTgzPaths) {
+        return NpmPackageLoaderInMemory.fromNpmPackageAbsolutePath(npmTgzPaths);
+    }
+
+    private List<Path> buildNpmTgzPaths() {
         final Path npmDir = root.resolve("input/npm");
 
         // More often than not, the npm directory will not exist in an IgRepository

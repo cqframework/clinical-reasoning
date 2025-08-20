@@ -6,7 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
-public class VersionComparatorTest {
+class VersionComparatorTest {
 
     private final VersionComparator comparator = new VersionComparator();
 

@@ -158,6 +158,12 @@
             <artifactId>mockito-junit-jupiter</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>ca.uhn.hapi.fhir</groupId>
+            <artifactId>hapi-fhir-structures-dstu2.1</artifactId>
+            <version>${hapi.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <profiles>

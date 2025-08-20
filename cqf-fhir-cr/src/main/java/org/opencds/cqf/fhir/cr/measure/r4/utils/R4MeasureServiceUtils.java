@@ -50,6 +50,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.StringType;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
@@ -486,6 +487,11 @@ public class R4MeasureServiceUtils {
     }
 
     public static Measure resolveById(IIdType id, IRepository repository) {
-        return repository.read(Measure.class, id);
+        if (id.getValueAsString().startsWith("Measure/")) {
+            // If the id is a Measure resource, we can use the read method directly
+            return repository.read(Measure.class, id);
+        }
+        // If not, add it to ensure it plays nicely with the InMemoryFhirRepository
+        return repository.read(Measure.class, new IdType(ResourceType.Measure.name(), id.getIdPart()));
     }
 }

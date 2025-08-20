@@ -269,6 +269,7 @@ public class R4MeasureServiceUtils {
                     var npmResourceHolder = resolveByUrlFromNpm(measureCanonical);
                     measuresPlusResourceHolders.add(MeasureOrNpmResourceHolder.npmOnly(npmResourceHolder));
                 } else {
+                    // LUKETODO:  do we want to support URL queries for non-NPM?
                     Measure measureByUrl = resolveByUrl(measureCanonical);
                     if (measureByUrl != null) {
                         measuresPlusResourceHolders.add(MeasureOrNpmResourceHolder.measureOnly(measureByUrl));

@@ -41,6 +41,7 @@ public abstract class BaseMeasureWithNpmForR4Test {
     static final String PATIENT_MALE_1944 = "Patient/male-1944";
 
     static final String ENCOUNTER_MALE_1988_FINISHED_ENCOUNTER_1 = "Encounter/male-1988-finished-encounter-1";
+    static final String ENCOUNTER_FEMALE_1944_FINISHED_ENCOUNTER_1 = "Encounter/female-1944-finished-encounter-1";
 
     static final String SIMPLE_ALPHA = "SimpleAlpha";
     static final String SIMPLE_BRAVO = "SimpleBravo";

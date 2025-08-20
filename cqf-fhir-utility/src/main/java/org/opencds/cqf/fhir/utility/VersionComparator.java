@@ -43,9 +43,7 @@ public class VersionComparator implements Comparator<String> {
         String core = preSplit[0];
         String pre = (preSplit.length > 1) ? preSplit[1] : null;
 
-        return (isValidCore(core))
-            && (pre == null || isValidPreRelease(pre))
-            && (build == null || isValidBuild(build));
+        return (isValidCore(core)) && (pre == null || isValidPreRelease(pre)) && (build == null || isValidBuild(build));
     }
 
     private boolean isValidCore(String core) {

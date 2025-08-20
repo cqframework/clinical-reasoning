@@ -428,6 +428,7 @@ public class MeasureProcessorUtils {
             EvaluationResultsForMultiLib evaluationResultsForMultiLib) {
 
         var containsResults = evaluationResultsForMultiLib.containsResultsFor(versionedIdentifierFromQuery);
+        // LUKETODO:  this is not doing versionless searches correctly, and needs to be fixed in CQL
         var containsExceptions = evaluationResultsForMultiLib.containsExceptionsFor(versionedIdentifierFromQuery);
 
         if (!containsResults && !containsExceptions) {

@@ -33,8 +33,8 @@ import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.SearchHelper;
+import org.opencds.cqf.fhir.utility.VersionComparator;
 import org.opencds.cqf.fhir.utility.VersionUtilities;
-import org.opencds.cqf.fhir.utility.Versions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -338,11 +338,12 @@ public interface IKnowledgeArtifactAdapter extends IResourceAdapter {
     }
 
     static Optional<IDomainResource> findLatestVersion(IBaseBundle bundle) {
+        var versionComparator = new VersionComparator();
         var sorted = BundleHelper.getEntryResources(bundle).stream()
                 .filter(IKnowledgeArtifactAdapter::isSupportedMetadataResource)
                 .map(r -> (IKnowledgeArtifactAdapter) IAdapterFactory.forFhirVersion(r.getStructureFhirVersionEnum())
                         .createResource(r))
-                .sorted((a, b) -> Versions.compareVersions(a.getVersion(), b.getVersion()))
+                .sorted((a, b) -> versionComparator.compare(a.getVersion(), b.getVersion()))
                 .toList();
         if (!sorted.isEmpty()) {
             return Optional.of(sorted.get(sorted.size() - 1).get());

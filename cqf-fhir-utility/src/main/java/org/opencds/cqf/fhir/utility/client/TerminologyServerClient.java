@@ -152,12 +152,12 @@ public class TerminologyServerClient {
                 .execute());
     }
 
-    private Class<? extends IBaseResource> getValueSetClass() {
+    public Class<? extends IBaseResource> getValueSetClass() {
         return Resources.getClassForTypeAndVersion(
                 "ValueSet", fhirContext.getVersion().getVersion());
     }
 
-    private Class<? extends IBaseResource> getCodeSystemClass() {
+    public Class<? extends IBaseResource> getCodeSystemClass() {
         return Resources.getClassForTypeAndVersion(
                 "CodeSystem", fhirContext.getVersion().getVersion());
     }

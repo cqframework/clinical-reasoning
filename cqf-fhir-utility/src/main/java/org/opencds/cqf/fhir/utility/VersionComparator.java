@@ -43,10 +43,9 @@ public class VersionComparator implements Comparator<String> {
         String core = preSplit[0];
         String pre = (preSplit.length > 1) ? preSplit[1] : null;
 
-        if (!isValidCore(core)) return false;
-        if (pre != null && !isValidPreRelease(pre)) return false;
-        if (build != null && !isValidBuild(build)) return false;
-        return true;
+        return (isValidCore(core))
+            && (pre == null || isValidPreRelease(pre))
+            && (build == null || isValidBuild(build));
     }
 
     private boolean isValidCore(String core) {
@@ -201,6 +200,7 @@ public class VersionComparator implements Comparator<String> {
             try {
                 return LocalDate.parse(input, DateTimeFormatter.ofPattern(fmt));
             } catch (DateTimeParseException ignored) {
+                return null;
             }
         }
         return null;

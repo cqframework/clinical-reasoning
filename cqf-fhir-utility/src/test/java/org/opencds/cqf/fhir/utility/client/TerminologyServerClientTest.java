@@ -21,7 +21,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.gclient.ICriterion;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.IUntypedQuery;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -412,13 +411,14 @@ public class TerminologyServerClientTest {
         when(query.execute()).thenReturn(bundle);
 
         try (MockedStatic<IKnowledgeArtifactAdapter> mockedStatic =
-            Mockito.mockStatic(IKnowledgeArtifactAdapter.class)) {
+                Mockito.mockStatic(IKnowledgeArtifactAdapter.class)) {
 
-            mockedStatic.when(() -> IKnowledgeArtifactAdapter.findLatestVersion(bundle))
-                .thenReturn(Optional.of((IDomainResource) vs));
+            mockedStatic
+                    .when(() -> IKnowledgeArtifactAdapter.findLatestVersion(bundle))
+                    .thenReturn(Optional.of((IDomainResource) vs));
 
             Optional<IDomainResource> result =
-                txServerClient.getValueSetResource(endpoint, "http://example.org/vs/123");
+                    txServerClient.getValueSetResource(endpoint, "http://example.org/vs/123");
 
             assertTrue(result.isPresent());
             assertEquals("123", result.get().getIdElement().getIdPart());
@@ -488,13 +488,14 @@ public class TerminologyServerClientTest {
         when(query.execute()).thenReturn(bundle);
 
         try (MockedStatic<IKnowledgeArtifactAdapter> mockedStatic =
-            Mockito.mockStatic(IKnowledgeArtifactAdapter.class)) {
+                Mockito.mockStatic(IKnowledgeArtifactAdapter.class)) {
 
-            mockedStatic.when(() -> IKnowledgeArtifactAdapter.findLatestVersion(bundle))
-                .thenReturn(Optional.of((IDomainResource) cs));
+            mockedStatic
+                    .when(() -> IKnowledgeArtifactAdapter.findLatestVersion(bundle))
+                    .thenReturn(Optional.of((IDomainResource) cs));
 
             Optional<IDomainResource> result =
-                txServerClient.getCodeSystemResource(endpoint, "http://example.org/cs/123");
+                    txServerClient.getCodeSystemResource(endpoint, "http://example.org/cs/123");
 
             assertTrue(result.isPresent());
             assertEquals("123", result.get().getIdElement().getIdPart());

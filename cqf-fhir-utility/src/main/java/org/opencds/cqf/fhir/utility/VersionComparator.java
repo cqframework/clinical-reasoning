@@ -8,14 +8,7 @@ import java.util.regex.Pattern;
 
 public class VersionComparator implements Comparator<String> {
 
-    // Stepwise SemVer regex pieces (Sonar-friendly)
-    private static final Pattern CORE_PATTERN = Pattern.compile("^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)$");
-
-    private static final Pattern PRERELEASE_PATTERN = Pattern.compile(
-            "^(?:0|[1-9]\\d*|[0-9A-Za-z-][0-9A-Za-z-]*)" + "(?:\\.(?:0|[1-9]\\d*|[0-9A-Za-z-][0-9A-Za-z-]*))*$");
-
-    private static final Pattern BUILD_PATTERN = Pattern.compile("^[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*$");
-
+    // Keep the simple date detector
     private static final Pattern DATE_PATTERN = Pattern.compile("^\\d{4}([-/]?\\d{2}){0,2}$");
 
     @Override
@@ -36,34 +29,98 @@ public class VersionComparator implements Comparator<String> {
         return v1.compareTo(v2);
     }
 
-    /**
-     * Strict SemVer validation (per semver.org spec).
-     */
+    /** -------- Strict SemVer validation without complex regexes -------- */
     public boolean isStrictSemVer(String version) {
-        if (version == null || version.isEmpty()) {
-            return false;
-        }
+        if (version == null || version.isEmpty()) return false;
 
+        // Split build metadata
         String[] buildSplit = version.split("\\+", 2);
         String mainAndPre = buildSplit[0];
-        String build = buildSplit.length > 1 ? buildSplit[1] : null;
+        String build = (buildSplit.length > 1) ? buildSplit[1] : null;
 
+        // Split pre-release
         String[] preSplit = mainAndPre.split("-", 2);
         String core = preSplit[0];
-        String pre = preSplit.length > 1 ? preSplit[1] : null;
+        String pre = (preSplit.length > 1) ? preSplit[1] : null;
 
-        if (!CORE_PATTERN.matcher(core).matches()) {
-            return false;
-        }
-        if (pre != null && !PRERELEASE_PATTERN.matcher(pre).matches()) {
-            return false;
-        }
-        if (build != null && !BUILD_PATTERN.matcher(build).matches()) {
-            return false;
+        if (!isValidCore(core)) return false;
+        if (pre != null && !isValidPreRelease(pre)) return false;
+        if (build != null && !isValidBuild(build)) return false;
+        return true;
+    }
+
+    private boolean isValidCore(String core) {
+        String[] p = core.split("\\.", -1);
+        if (p.length != 3) return false;
+        return isValidNumericCorePart(p[0]) && isValidNumericCorePart(p[1]) && isValidNumericCorePart(p[2]);
+    }
+
+    // major/minor/patch: digits only, no leading zeros unless exactly "0"
+    private boolean isValidNumericCorePart(String s) {
+        if (s == null || s.isEmpty()) return false;
+        if (s.equals("0")) return true;
+        if (s.charAt(0) == '0') return false;
+        return allDigits(s);
+    }
+
+    private boolean isValidPreRelease(String pre) {
+        String[] ids = pre.split("\\.", -1);
+        if (ids.length == 0) return false;
+        for (String id : ids) {
+            if (!isValidPreId(id)) return false;
         }
         return true;
     }
 
+    // pre-release id: either numeric (no leading zeros unless "0") OR
+    // alphanum with at least one letter or hyphen; only [0-9A-Za-z-]
+    private boolean isValidPreId(String s) {
+        if (s == null || s.isEmpty()) return false;
+        if (!allAlphaNumHyphen(s)) return false;
+
+        if (allDigits(s)) {
+            // numeric identifier
+            return s.equals("0") || s.charAt(0) != '0';
+        }
+        // must contain at least one non-digit (letter or hyphen)
+        return containsLetterOrHyphen(s);
+    }
+
+    private boolean isValidBuild(String build) {
+        String[] ids = build.split("\\.", -1);
+        if (ids.length == 0) return false;
+        for (String id : ids) {
+            if (id.isEmpty() || !allAlphaNumHyphen(id)) return false;
+        }
+        return true;
+    }
+
+    private boolean allDigits(String s) {
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            if (c < '0' || c > '9') return false;
+        }
+        return true;
+    }
+
+    private boolean containsLetterOrHyphen(String s) {
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || c == '-') return true;
+        }
+        return false;
+    }
+
+    private boolean allAlphaNumHyphen(String s) {
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            boolean ok = (c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || c == '-';
+            if (!ok) return false;
+        }
+        return true;
+    }
+
+    /** --------------------- Comparison logic --------------------- */
     private boolean isDate(String version) {
         return DATE_PATTERN.matcher(version).matches();
     }
@@ -84,7 +141,7 @@ public class VersionComparator implements Comparator<String> {
         String pre1 = preSplit1.length > 1 ? preSplit1[1] : null;
         String pre2 = preSplit2.length > 1 ? preSplit2[1] : null;
 
-        // Compare core parts (major.minor.patch)
+        // Compare core (major.minor.patch)
         String[] parts1 = core1.split("\\.");
         String[] parts2 = core2.split("\\.");
         for (int i = 0; i < 3; i++) {
@@ -93,7 +150,7 @@ public class VersionComparator implements Comparator<String> {
             if (n1 != n2) return Integer.compare(n1, n2);
         }
 
-        // Compare pre-release (if any)
+        // Pre-release comparison
         if (pre1 == null && pre2 == null) return 0;
         if (pre1 == null) return 1; // release > pre-release
         if (pre2 == null) return -1;
@@ -101,6 +158,7 @@ public class VersionComparator implements Comparator<String> {
         return comparePreRelease(pre1, pre2);
     }
 
+    // SemVer §11: compare identifiers left-to-right; numeric < non-numeric; if all equal, shorter is lower.
     private int comparePreRelease(String p1, String p2) {
         String[] parts1 = p1.split("\\.");
         String[] parts2 = p2.split("\\.");
@@ -110,27 +168,22 @@ public class VersionComparator implements Comparator<String> {
             String s1 = parts1[i];
             String s2 = parts2[i];
 
-            boolean isNum1 = s1.matches("\\d+");
-            boolean isNum2 = s2.matches("\\d+");
+            boolean isNum1 = allDigits(s1);
+            boolean isNum2 = allDigits(s2);
 
             if (isNum1 && isNum2) {
-                long n1 = Long.parseLong(s1); // numeric identifiers compare numerically
+                long n1 = Long.parseLong(s1);
                 long n2 = Long.parseLong(s2);
                 if (n1 != n2) return Long.compare(n1, n2);
             } else if (isNum1 != isNum2) {
-                // numeric identifiers have lower precedence than non-numeric
-                return isNum1 ? -1 : 1;
+                return isNum1 ? -1 : 1; // numeric < non-numeric
             } else {
-                int cmp = s1.compareTo(s2); // ASCII sort for non-numeric identifiers
+                int cmp = s1.compareTo(s2); // ASCII
                 if (cmp != 0) return cmp;
             }
         }
-
-        // All compared identifiers equal so far; shorter list has lower precedence
-        if (parts1.length != parts2.length) {
-            return parts1.length < parts2.length ? -1 : 1;
-        }
-        return 0;
+        // All equal so far; shorter list has lower precedence
+        return Integer.compare(parts1.length, parts2.length);
     }
 
     private int compareDate(String d1, String d2) {
@@ -147,14 +200,13 @@ public class VersionComparator implements Comparator<String> {
         for (String fmt : formats) {
             try {
                 return LocalDate.parse(input, DateTimeFormatter.ofPattern(fmt));
-            } catch (DateTimeParseException e) {
-                // ignore and try next
+            } catch (DateTimeParseException ignored) {
             }
         }
         return null;
     }
 
-    // Optional public wrapper to directly test date logic
+    // Optional: public wrapper for tests
     public int compareDatesDirect(String d1, String d2) {
         return compareDate(d1, d2);
     }

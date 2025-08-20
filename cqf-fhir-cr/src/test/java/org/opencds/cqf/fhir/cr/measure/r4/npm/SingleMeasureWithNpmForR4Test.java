@@ -342,13 +342,13 @@ class SingleMeasureWithNpmForR4Test extends BaseMeasureWithNpmForR4Test {
                 .when()
                 .measureUrl(MEASURE_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES)
                 .reportType(MeasureEvalType.SUBJECT.toCode())
-                .subject(PATIENT_MALE_1988)
+                .subject(PATIENT_FEMALE_1944)
                 .evaluate()
                 .then()
                 .hasMeasureUrl(MEASURE_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES_WITH_VERSION)
                 .hasPeriodStart(toJavaUtilDate(LOCAL_DATE_TIME_2022_01_01))
                 .hasPeriodEnd(toJavaUtilDate(LOCAL_DATE_TIME_2023_01_01_MINUS_ONE_SECOND))
-                .hasSubjectReference(PATIENT_MALE_1988)
+                .hasSubjectReference(PATIENT_FEMALE_1944)
                 .hasStatus(MeasureReportStatus.COMPLETE)
                 .hasEvaluatedResourceCount(1)
                 .firstGroup()
@@ -356,11 +356,10 @@ class SingleMeasureWithNpmForR4Test extends BaseMeasureWithNpmForR4Test {
                 .hasCount(1)
                 .up()
                 .population(DENOMINATOR)
-                // LUKETODO:  investigate to see if this is correct for male 1988
-                .hasCount(1)
+                .hasCount(0)
                 .up()
                 .population(NUMERATOR)
-                .hasCount(1);
+                .hasCount(0);
     }
 
     @Test
@@ -381,11 +380,10 @@ class SingleMeasureWithNpmForR4Test extends BaseMeasureWithNpmForR4Test {
                 .hasCount(8)
                 .up()
                 .population(DENOMINATOR)
-                // LUKETODO:  investigate to see if this is correct for male 1988
                 .hasCount(1)
                 .up()
                 .population(NUMERATOR)
-                .hasCount(1);
+                .hasCount(0);
     }
 
     @Test

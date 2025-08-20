@@ -962,14 +962,17 @@ public class IgRepository implements IRepository {
 
     protected String pathForCompartment(Class<? extends IBaseResource> resourceType, FhirContext fhirContext) {
         if (this.conventions.categoryLayout() == CategoryLayout.DEFINITIONAL_AND_DATA) {
-            if (!this.conventions.compartmentMode().resourceBelongsToCompartment(fhirContext, resourceType.getSimpleName())) {
+            if (!this.conventions
+                    .compartmentMode()
+                    .resourceBelongsToCompartment(fhirContext, resourceType.getSimpleName())) {
                 return "shared";
             }
 
             return this.conventions.compartmentMode().name().toLowerCase();
-        }
-        else {
-            if (!this.conventions.compartmentMode().resourceBelongsToCompartment(fhirContext, resourceType.getSimpleName())) {
+        } else {
+            if (!this.conventions
+                    .compartmentMode()
+                    .resourceBelongsToCompartment(fhirContext, resourceType.getSimpleName())) {
                 return "";
             }
 

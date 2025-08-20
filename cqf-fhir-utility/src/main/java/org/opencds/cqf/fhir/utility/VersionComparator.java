@@ -8,8 +8,8 @@ import java.util.regex.Pattern;
 
 public class VersionComparator implements Comparator<String> {
 
-    private static final Pattern SEMVER_PATTERN =
-        Pattern.compile("^([1-9]\\d*)\\.(\\d+)\\.(\\d+)(?:-([\\dA-Za-z-]+(?:\\.[\\dA-Za-z-]+)*))?(?:\\+([\\dA-Za-z-]+(?:\\.[\\dA-Za-z-]+)*))?$");
+    private static final Pattern SEMVER_PATTERN = Pattern.compile(
+            "^([1-9]\\d*)\\.(\\d+)\\.(\\d+)(?:-([\\dA-Za-z-]+(?:\\.[\\dA-Za-z-]+)*))?(?:\\+([\\dA-Za-z-]+(?:\\.[\\dA-Za-z-]+)*))?$");
     private static final Pattern DATE_PATTERN = Pattern.compile("^\\d{4}([-/]?\\d{2}){0,2}$");
 
     @Override

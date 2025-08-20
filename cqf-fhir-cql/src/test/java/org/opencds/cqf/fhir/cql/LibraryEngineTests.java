@@ -148,7 +148,7 @@ class LibraryEngineTests {
             public InputStream getLibraryContent(VersionedIdentifier libraryIdentifier, LibraryContentType type) {
                 if ("MyLibrary".equals(libraryIdentifier.getId()))
                     return new ByteArrayInputStream(libraryCql.getBytes(StandardCharsets.UTF_8));
-                else return LibrarySourceProvider.super.getLibraryContent(libraryIdentifier, type);
+                else return LibrarySourceProvider.DefaultImpls.getLibraryContent(this, libraryIdentifier, type);
             }
         });
         var evaluationSettings = EvaluationSettings.getDefault().withLibrarySourceProviders(libraryResourceProvider);

@@ -70,6 +70,12 @@ public final class MeasureOrNpmResourceHolderList {
         return measuresPlusNpmResourceHolders;
     }
 
+    public List<String> getMeasureUrls() {
+        return this.measuresPlusNpmResourceHolders.stream()
+                .map(MeasureOrNpmResourceHolder::getMeasureUrl)
+                .toList();
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (obj == this) {

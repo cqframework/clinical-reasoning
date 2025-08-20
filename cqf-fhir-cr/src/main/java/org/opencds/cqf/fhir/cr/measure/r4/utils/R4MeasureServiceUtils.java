@@ -63,6 +63,7 @@ import org.opencds.cqf.fhir.utility.monad.Either3;
 import org.opencds.cqf.fhir.utility.npm.MeasureOrNpmResourceHolder;
 import org.opencds.cqf.fhir.utility.npm.MeasureOrNpmResourceHolderList;
 import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
+import org.opencds.cqf.fhir.utility.npm.NpmResourceHolder;
 import org.opencds.cqf.fhir.utility.search.Searches;
 
 public class R4MeasureServiceUtils {
@@ -243,13 +244,6 @@ public class R4MeasureServiceUtils {
         }
     }
 
-    // LUKETODO: is this used anywhere?
-    public MeasureOrNpmResourceHolder getMeasurePlusNpmDetails(
-            IdType measureId, String measureIdentifier, String measureCanonical) {
-        // LUKETODO:  implement
-        return null;
-    }
-
     public MeasureOrNpmResourceHolderList getMeasurePlusNpmDetails(
             List<IdType> measureIds, List<String> measureIdentifiers, List<String> measureCanonicals) {
 
@@ -271,7 +265,7 @@ public class R4MeasureServiceUtils {
                 if (measureEvaluationOptions.isUseNpmForLibrariesAndMeasures()) {
                     // LUKETODO:  test this to make sure it works
                     // LUKETODO:  if this returns EMPTY, error handle and log accordingly
-                    var npmResourceHolder = this.npmPackageLoader.loadNpmResources(new CanonicalType(measureCanonical));
+                    var npmResourceHolder = resolveByUrlFromNpm(measureCanonical);
                     measuresPlusResourceHolders.add(MeasureOrNpmResourceHolder.npmOnly(npmResourceHolder));
                 } else {
                     Measure measureByUrl = resolveByUrl(measureCanonical);
@@ -296,6 +290,10 @@ public class R4MeasureServiceUtils {
 
         return MeasureOrNpmResourceHolderList.of(
                 distinctByKey(measuresPlusResourceHolders, MeasureOrNpmResourceHolder::getMeasureUrl));
+    }
+
+    public NpmResourceHolder resolveByUrlFromNpm(String measureCanonical) {
+        return this.npmPackageLoader.loadNpmResources(new CanonicalType(measureCanonical));
     }
 
     public static <T, K> List<T> distinctByKey(List<T> list, Function<T, K> keyExtractor) {
@@ -395,6 +393,15 @@ public class R4MeasureServiceUtils {
         return MeasureOrNpmResourceHolder.measureOnly(foldMeasureFromRepository(measureEither, repository));
     }
 
+    public MeasureOrNpmResourceHolderList foldMeasures(List<Either3<CanonicalType, IdType, Measure>> measureEithers) {
+        if (measureEithers == null || measureEithers.isEmpty()) {
+            throw new InvalidRequestException("measure IDs or URLs parameter cannot be null or empty.");
+        }
+
+        return MeasureOrNpmResourceHolderList.of(
+                measureEithers.stream().map(this::foldMeasure).toList());
+    }
+
     // LUKETODO:  return the List class instead?
     public MeasureOrNpmResourceHolder foldMeasure(Either3<CanonicalType, IdType, Measure> measureEither) {
         if (measureEvaluationOptions.isUseNpmForLibrariesAndMeasures()) {
@@ -421,6 +428,7 @@ public class R4MeasureServiceUtils {
     @Nonnull
     private MeasureOrNpmResourceHolder foldMeasureForRepository(Either3<CanonicalType, IdType, Measure> measureEither) {
 
+        // LUKETODO:  do we want to permit this for non-NPM?
         var folded = measureEither.fold(
                 this::resolveByUrlFromRepository,
                 measureIdType -> resolveById(measureIdType, repository),

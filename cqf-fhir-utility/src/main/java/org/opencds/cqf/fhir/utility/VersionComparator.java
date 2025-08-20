@@ -7,8 +7,6 @@ import java.util.Comparator;
 import java.util.regex.Pattern;
 
 public class VersionComparator implements Comparator<String> {
-
-    // Keep the simple date detector
     private static final Pattern DATE_PATTERN = Pattern.compile("^\\d{4}([-/]?\\d{2}){0,2}$");
 
     @Override
@@ -25,7 +23,7 @@ public class VersionComparator implements Comparator<String> {
             return compareDate(v1, v2);
         }
 
-        // Fallback: lexicographic
+        // Fallback to lexicographic
         return v1.compareTo(v2);
     }
 
@@ -155,7 +153,7 @@ public class VersionComparator implements Comparator<String> {
         return comparePreRelease(pre1, pre2);
     }
 
-    // SemVer §11: compare identifiers left-to-right; numeric < non-numeric; if all equal, shorter is lower.
+    // compare identifiers left-to-right; numeric < non-numeric; if all equal, shorter is lower.
     private int comparePreRelease(String p1, String p2) {
         String[] parts1 = p1.split("\\.");
         String[] parts2 = p2.split("\\.");
@@ -204,7 +202,7 @@ public class VersionComparator implements Comparator<String> {
         return null;
     }
 
-    // Optional: public wrapper for tests
+    // Public wrapper for tests
     public int compareDatesDirect(String d1, String d2) {
         return compareDate(d1, d2);
     }

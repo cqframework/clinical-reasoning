@@ -5,7 +5,7 @@
 
   <groupId>org.opencds.cqf.fhir</groupId>
   <artifactId>cqf-fhir-jackson</artifactId>
-  <version>3.25.0-SNAPSHOT</version>
+  <version>3.26.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>FHIR Clinical Reasoning (Jackson)</name>
   <description>Aggregator module for Jackson dependencies</description>
@@ -13,7 +13,7 @@
   <parent>
     <groupId>org.opencds.cqf.fhir</groupId>
     <artifactId>cqf-fhir</artifactId>
-    <version>3.25.0-SNAPSHOT</version>
+    <version>3.26.0-SNAPSHOT</version>
   </parent>
 
   <dependencies>

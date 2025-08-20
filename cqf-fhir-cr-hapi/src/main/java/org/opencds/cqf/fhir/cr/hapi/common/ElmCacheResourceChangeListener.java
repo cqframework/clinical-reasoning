@@ -7,15 +7,14 @@ import ca.uhn.fhir.jpa.cache.IResourceChangeListener;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.util.FhirTerser;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.opencds.cqf.fhir.utility.Reflections;
 
 /**
  * This class listens for changes to Library resources and invalidates the CodeCache. The CodeCache is used in CQL evaluatuon to speed up the measure operations. If underlying values change in the library then cache requires updating.
@@ -27,15 +26,14 @@ public class ElmCacheResourceChangeListener implements IResourceChangeListener {
 
     private final IFhirResourceDao<?> libraryDao;
     private final Map<VersionedIdentifier, CompiledLibrary> globalLibraryCache;
-    private final Function<IBaseResource, String> nameFunction;
-    private final Function<IBaseResource, String> versionFunction;
+    private final FhirTerser fhirTerser;
 
     public ElmCacheResourceChangeListener(
             DaoRegistry daoRegistry, Map<VersionedIdentifier, CompiledLibrary> globalLibraryCache) {
+
         this.libraryDao = daoRegistry.getResourceDao("Library");
         this.globalLibraryCache = globalLibraryCache;
-        this.nameFunction = Reflections.getNameFunction(libraryDao.getResourceType());
-        this.versionFunction = Reflections.getVersionFunction(libraryDao.getResourceType());
+        this.fhirTerser = daoRegistry.getFhirContext().newTerser();
     }
 
     @Override
@@ -86,8 +84,8 @@ public class ElmCacheResourceChangeListener implements IResourceChangeListener {
             return;
         }
 
-        String name = this.nameFunction.apply(library);
-        String version = this.versionFunction.apply(library);
+        String name = this.fhirTerser.getSinglePrimitiveValueOrNull(library, "name");
+        String version = this.fhirTerser.getSinglePrimitiveValueOrNull(library, "version");
 
         this.globalLibraryCache.remove(new VersionedIdentifier().withId(name).withVersion(version));
     }

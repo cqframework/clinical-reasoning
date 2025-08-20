@@ -7,14 +7,13 @@ import ca.uhn.fhir.jpa.cache.IResourceChangeListener;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.util.FhirTerser;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.cql.engine.runtime.Code;
-import org.opencds.cqf.fhir.utility.Reflections;
 
 /**
  * This class listens for changes to ValueSet resources and invalidates the CodeCache. The CodeCache is used in CQL evaluation to speed up terminology operations. If ValueSet changes, it's possible that the constituent codes change and therefore the cache needs to be updated.
@@ -26,12 +25,12 @@ public class CodeCacheResourceChangeListener implements IResourceChangeListener 
 
     private final IFhirResourceDao<?> valueSetDao;
     private final Map<String, List<Code>> globalValueSetCache;
-    private final Function<IBaseResource, String> urlFunction;
+    private final FhirTerser fhirTerser;
 
     public CodeCacheResourceChangeListener(DaoRegistry daoRegistry, Map<String, List<Code>> globalValueSetCache) {
         this.valueSetDao = daoRegistry.getResourceDao("ValueSet");
         this.globalValueSetCache = globalValueSetCache;
-        this.urlFunction = Reflections.getUrlFunction(valueSetDao.getResourceType());
+        this.fhirTerser = daoRegistry.getFhirContext().newTerser();
     }
 
     @Override
@@ -78,7 +77,7 @@ public class CodeCacheResourceChangeListener implements IResourceChangeListener 
             return;
         }
 
-        String url = this.urlFunction.apply(valueSet);
+        String url = this.fhirTerser.getSinglePrimitiveValueOrNull(valueSet, "url");
 
         var valuesets = globalValueSetCache.keySet();
 

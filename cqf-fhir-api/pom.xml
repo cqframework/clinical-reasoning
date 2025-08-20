@@ -5,14 +5,14 @@
 
   <groupId>org.opencds.cqf.fhir</groupId>
   <artifactId>cqf-fhir-api</artifactId>
-  <version>3.25.0-SNAPSHOT</version>
+  <version>3.26.0-SNAPSHOT</version>
   <name>FHIR Clinical Reasoning (APIs)</name>
   <description>FHIR Repository APIs used by this project. Implement these to incorporate clinical reasoning on your platform</description>
 
   <parent>
     <groupId>org.opencds.cqf.fhir</groupId>
     <artifactId>cqf-fhir</artifactId>
-    <version>3.25.0-SNAPSHOT</version>
+    <version>3.26.0-SNAPSHOT</version>
   </parent>
 
   <dependencies>

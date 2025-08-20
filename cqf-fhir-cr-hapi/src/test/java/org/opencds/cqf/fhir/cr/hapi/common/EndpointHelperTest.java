@@ -5,6 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.opencds.cqf.fhir.cr.hapi.common.EndpointHelper.getEndpoint;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import java.util.Date;
+import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
+import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
 
 class EndpointHelperTest {
@@ -22,5 +25,10 @@ class EndpointHelperTest {
         assertInstanceOf(
                 org.hl7.fhir.r5.model.Endpoint.class,
                 getEndpoint(FhirVersionEnum.R5, new org.hl7.fhir.r5.model.Parameters.ParametersParameterComponent()));
+
+        ParametersParameterComponent parametersParameterComponent = new ParametersParameterComponent();
+        parametersParameterComponent.setResource(new Patient().setBirthDate(new Date()));
+        assertInstanceOf(
+                org.hl7.fhir.r4.model.Resource.class, getEndpoint(FhirVersionEnum.R4, parametersParameterComponent));
     }
 }

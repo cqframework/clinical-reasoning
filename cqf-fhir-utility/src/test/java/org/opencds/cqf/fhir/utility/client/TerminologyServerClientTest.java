@@ -433,6 +433,32 @@ public class TerminologyServerClientTest {
     }
 
     @Test
+    void getCodeSystemClass_returnsR4ValueSet() {
+        // Arrange
+        var txServerClient = new TerminologyServerClient(fhirContextR4);
+
+        // Act
+        var returnedClass = txServerClient.getValueSetClass();
+
+        // Assert
+        assertNotNull(returnedClass);
+        assertEquals(org.hl7.fhir.r4.model.ValueSet.class, returnedClass);
+    }
+
+    @Test
+    void getCodeSystemClass_returnsR4CodeSystem() {
+        // Arrange
+        var txServerClient = new TerminologyServerClient(fhirContextR4);
+
+        // Act
+        var returnedClass = txServerClient.getCodeSystemClass();
+
+        // Assert
+        assertNotNull(returnedClass);
+        assertEquals(org.hl7.fhir.r4.model.CodeSystem.class, returnedClass);
+    }
+
+    @Test
     void getCodeSystemResource_found() {
         var txServerClient = spy(new TerminologyServerClient(fhirContextR4));
 

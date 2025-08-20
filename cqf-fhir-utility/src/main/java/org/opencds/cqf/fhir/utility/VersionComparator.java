@@ -196,7 +196,7 @@ public class VersionComparator implements Comparator<String> {
             try {
                 return LocalDate.parse(input, DateTimeFormatter.ofPattern(fmt));
             } catch (DateTimeParseException ignored) {
-                return null;
+                // Expected: try next format
             }
         }
         return null;

@@ -338,13 +338,6 @@ public interface IKnowledgeArtifactAdapter extends IResourceAdapter {
     }
 
     static Optional<IDomainResource> findLatestVersion(IBaseBundle bundle) {
-        //        var sorted = BundleHelper.getEntryResources(bundle).stream()
-        //                .filter(IKnowledgeArtifactAdapter::isSupportedMetadataResource)
-        //                .map(r -> (IKnowledgeArtifactAdapter)
-        // IAdapterFactory.forFhirVersion(r.getStructureFhirVersionEnum())
-        //                        .createResource(r))
-        //                .sorted((a, b) -> Versions.compareVersions(a.getVersion(), b.getVersion()))
-        //                .toList();
         var versionComparator = new VersionComparator();
         var sorted = BundleHelper.getEntryResources(bundle).stream()
                 .filter(IKnowledgeArtifactAdapter::isSupportedMetadataResource)

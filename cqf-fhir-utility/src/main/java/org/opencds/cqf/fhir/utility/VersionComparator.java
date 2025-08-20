@@ -8,16 +8,20 @@ import java.util.regex.Pattern;
 
 public class VersionComparator implements Comparator<String> {
 
-    @SuppressWarnings("squid:S5843") // Suppress Sonar regex complexity warning
-    private static final Pattern SEMVER_PATTERN = Pattern.compile(
-            "^([1-9]\\d*)\\.(\\d+)\\.(\\d+)(?:-([\\dA-Za-z-]+(?:\\.[\\dA-Za-z-]+)*))?(?:\\+([\\dA-Za-z-]+(?:\\.[\\dA-Za-z-]+)*))?$");
+    // Stepwise SemVer regex pieces (Sonar-friendly)
+    private static final Pattern CORE_PATTERN = Pattern.compile("^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)$");
+
+    private static final Pattern PRERELEASE_PATTERN = Pattern.compile(
+            "^(?:0|[1-9]\\d*|[0-9A-Za-z-][0-9A-Za-z-]*)" + "(?:\\.(?:0|[1-9]\\d*|[0-9A-Za-z-][0-9A-Za-z-]*))*$");
+
+    private static final Pattern BUILD_PATTERN = Pattern.compile("^[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*$");
 
     private static final Pattern DATE_PATTERN = Pattern.compile("^\\d{4}([-/]?\\d{2}){0,2}$");
 
     @Override
     public int compare(String v1, String v2) {
-        boolean isV1SemVer = isSemVer(v1);
-        boolean isV2SemVer = isSemVer(v2);
+        boolean isV1SemVer = isStrictSemVer(v1);
+        boolean isV2SemVer = isStrictSemVer(v2);
         if (isV1SemVer && isV2SemVer) {
             return compareSemVer(v1, v2);
         }
@@ -28,12 +32,36 @@ public class VersionComparator implements Comparator<String> {
             return compareDate(v1, v2);
         }
 
-        // Fallback to lexicographic
+        // Fallback: lexicographic
         return v1.compareTo(v2);
     }
 
-    private boolean isSemVer(String version) {
-        return SEMVER_PATTERN.matcher(version).matches();
+    /**
+     * Strict SemVer validation (per semver.org spec).
+     */
+    public boolean isStrictSemVer(String version) {
+        if (version == null || version.isEmpty()) {
+            return false;
+        }
+
+        String[] buildSplit = version.split("\\+", 2);
+        String mainAndPre = buildSplit[0];
+        String build = buildSplit.length > 1 ? buildSplit[1] : null;
+
+        String[] preSplit = mainAndPre.split("-", 2);
+        String core = preSplit[0];
+        String pre = preSplit.length > 1 ? preSplit[1] : null;
+
+        if (!CORE_PATTERN.matcher(core).matches()) {
+            return false;
+        }
+        if (pre != null && !PRERELEASE_PATTERN.matcher(pre).matches()) {
+            return false;
+        }
+        if (build != null && !BUILD_PATTERN.matcher(build).matches()) {
+            return false;
+        }
+        return true;
     }
 
     private boolean isDate(String version) {
@@ -41,55 +69,67 @@ public class VersionComparator implements Comparator<String> {
     }
 
     private int compareSemVer(String v1, String v2) {
-        String[] main1 = v1.split("-", 2);
-        String[] main2 = v2.split("-", 2);
+        String[] buildSplit1 = v1.split("\\+", 2);
+        String[] buildSplit2 = v2.split("\\+", 2);
 
-        String[] core1 = main1[0].split("\\.");
-        String[] core2 = main2[0].split("\\.");
+        String mainAndPre1 = buildSplit1[0];
+        String mainAndPre2 = buildSplit2[0];
 
+        String[] preSplit1 = mainAndPre1.split("-", 2);
+        String[] preSplit2 = mainAndPre2.split("-", 2);
+
+        String core1 = preSplit1[0];
+        String core2 = preSplit2[0];
+
+        String pre1 = preSplit1.length > 1 ? preSplit1[1] : null;
+        String pre2 = preSplit2.length > 1 ? preSplit2[1] : null;
+
+        // Compare core parts (major.minor.patch)
+        String[] parts1 = core1.split("\\.");
+        String[] parts2 = core2.split("\\.");
         for (int i = 0; i < 3; i++) {
-            int n1 = i < core1.length ? Integer.parseInt(core1[i]) : 0;
-            int n2 = i < core2.length ? Integer.parseInt(core2[i]) : 0;
+            int n1 = Integer.parseInt(parts1[i]);
+            int n2 = Integer.parseInt(parts2[i]);
             if (n1 != n2) return Integer.compare(n1, n2);
         }
 
-        // Handle pre-release label comparison
-        boolean hasPre1 = main1.length > 1;
-        boolean hasPre2 = main2.length > 1;
+        // Compare pre-release (if any)
+        if (pre1 == null && pre2 == null) return 0;
+        if (pre1 == null) return 1; // release > pre-release
+        if (pre2 == null) return -1;
 
-        if (!hasPre1 && !hasPre2) return 0; // both are normal versions
-        if (!hasPre1) return 1; // v1 is release, v2 is pre-release
-        if (!hasPre2) return -1; // v1 is pre-release, v2 is release
-
-        return comparePreRelease(main1[1], main2[1]);
+        return comparePreRelease(pre1, pre2);
     }
 
     private int comparePreRelease(String p1, String p2) {
         String[] parts1 = p1.split("\\.");
         String[] parts2 = p2.split("\\.");
 
-        int len = Math.max(parts1.length, parts2.length);
-        for (int i = 0; i < len; i++) {
-            String s1 = i < parts1.length ? parts1[i] : "";
-            String s2 = i < parts2.length ? parts2[i] : "";
+        int common = Math.min(parts1.length, parts2.length);
+        for (int i = 0; i < common; i++) {
+            String s1 = parts1[i];
+            String s2 = parts2[i];
 
             boolean isNum1 = s1.matches("\\d+");
             boolean isNum2 = s2.matches("\\d+");
 
             if (isNum1 && isNum2) {
-                int n1 = Integer.parseInt(s1);
-                int n2 = Integer.parseInt(s2);
-                if (n1 != n2) return Integer.compare(n1, n2);
-            } else if (isNum1) {
-                return -1; // numeric < alphanumeric
-            } else if (isNum2) {
-                return 1; // alphanumeric > numeric
+                long n1 = Long.parseLong(s1); // numeric identifiers compare numerically
+                long n2 = Long.parseLong(s2);
+                if (n1 != n2) return Long.compare(n1, n2);
+            } else if (isNum1 != isNum2) {
+                // numeric identifiers have lower precedence than non-numeric
+                return isNum1 ? -1 : 1;
             } else {
-                int cmp = s1.compareTo(s2);
+                int cmp = s1.compareTo(s2); // ASCII sort for non-numeric identifiers
                 if (cmp != 0) return cmp;
             }
         }
 
+        // All compared identifiers equal so far; shorter list has lower precedence
+        if (parts1.length != parts2.length) {
+            return parts1.length < parts2.length ? -1 : 1;
+        }
         return 0;
     }
 
@@ -97,7 +137,7 @@ public class VersionComparator implements Comparator<String> {
         LocalDate date1 = parseDate(d1);
         LocalDate date2 = parseDate(d2);
         if (date1 == null || date2 == null) {
-            return d1.compareTo(d2); // fallback if parse fails
+            return d1.compareTo(d2);
         }
         return date1.compareTo(date2);
     }
@@ -108,9 +148,14 @@ public class VersionComparator implements Comparator<String> {
             try {
                 return LocalDate.parse(input, DateTimeFormatter.ofPattern(fmt));
             } catch (DateTimeParseException e) {
-                // try next
+                // ignore and try next
             }
         }
         return null;
+    }
+
+    // Optional public wrapper to directly test date logic
+    public int compareDatesDirect(String d1, String d2) {
+        return compareDate(d1, d2);
     }
 }

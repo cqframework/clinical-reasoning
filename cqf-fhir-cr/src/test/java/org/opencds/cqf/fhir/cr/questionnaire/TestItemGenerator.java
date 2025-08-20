@@ -236,5 +236,32 @@ public class TestItemGenerator {
             assertEquals(count, launchContextExts.size());
             return this;
         }
+
+        @SuppressWarnings("unchecked")
+        public GeneratedItem itemHasText(String linkId, String text) {
+            var item = items.get(linkId);
+            assertNotNull(item);
+            var itemText = (IPrimitiveType<String>) modelResolver.resolvePath(item, "text");
+            assertTrue(itemText.getValueAsString().contains(text));
+            return this;
+        }
+
+        @SuppressWarnings("unchecked")
+        public GeneratedItem itemHasType(String linkId, String type) {
+            var item = items.get(linkId);
+            assertNotNull(item);
+            var itemType = (IPrimitiveType<String>) modelResolver.resolvePath(item, "type");
+            assertEquals(type, itemType.getValueAsString());
+            return this;
+        }
+
+        @SuppressWarnings("unchecked")
+        public GeneratedItem itemRepeats(String linkId, Boolean repeats) {
+            var item = items.get(linkId);
+            assertNotNull(item);
+            var itemRepeats = (IPrimitiveType<Boolean>) modelResolver.resolvePath(item, "repeats");
+            assertEquals(repeats, itemRepeats.getValue());
+            return this;
+        }
     }
 }

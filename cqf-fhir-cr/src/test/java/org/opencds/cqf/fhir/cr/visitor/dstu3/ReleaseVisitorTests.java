@@ -345,7 +345,7 @@ class ReleaseVisitorTests {
                 .map(p -> VisitorHelper.getStringListParameter(Constants.CANONICAL_VERSION, p)
                         .orElse(null))
                 .orElse(new ArrayList<String>());
-        assertEquals(1, canonicalVersionParams.size());
+        assertEquals(0, canonicalVersionParams.size());
     }
 
     @Test

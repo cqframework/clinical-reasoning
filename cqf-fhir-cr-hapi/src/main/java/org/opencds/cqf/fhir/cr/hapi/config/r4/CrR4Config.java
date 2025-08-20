@@ -18,6 +18,7 @@ import org.opencds.cqf.fhir.cr.hapi.r4.ICollectDataServiceFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.ICqlExecutionServiceFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.IDataRequirementsServiceFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.ISubmitDataProcessorFactory;
+import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureEvaluatorMultipleFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureEvaluatorSingleFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureServiceUtilsFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.cpg.CqlExecutionOperationProvider;
@@ -33,6 +34,7 @@ import org.opencds.cqf.fhir.cr.measure.r4.R4CareGapsService;
 import org.opencds.cqf.fhir.cr.measure.r4.R4CollectDataService;
 import org.opencds.cqf.fhir.cr.measure.r4.R4DataRequirementsService;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureService;
+import org.opencds.cqf.fhir.cr.measure.r4.R4MultiMeasureService;
 import org.opencds.cqf.fhir.cr.measure.r4.R4SubmitDataService;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.springframework.context.ApplicationContext;
@@ -50,6 +52,15 @@ public class CrR4Config {
             MeasureEvaluationOptions evaluationOptions,
             MeasurePeriodValidator measurePeriodValidator) {
         return rd -> new R4MeasureService(repositoryFactory.create(rd), evaluationOptions, measurePeriodValidator);
+    }
+
+    @Bean
+    R4MeasureEvaluatorMultipleFactory r4MeasureEvaluatorMultipleFactory(
+            IRepositoryFactory repositoryFactory,
+            MeasureEvaluationOptions evaluationOptions,
+            MeasurePeriodValidator measurePeriodValidator) {
+        return rd -> new R4MultiMeasureService(
+                repositoryFactory.create(rd), evaluationOptions, rd.getFhirServerBase(), measurePeriodValidator);
     }
 
     @Bean
@@ -127,8 +138,11 @@ public class CrR4Config {
 
     @Bean
     MeasureOperationsProvider r4MeasureOperationsProvider(
-            R4MeasureEvaluatorSingleFactory r4MeasureServiceFactory, StringTimePeriodHandler stringTimePeriodHandler) {
-        return new MeasureOperationsProvider(r4MeasureServiceFactory, stringTimePeriodHandler);
+            R4MeasureEvaluatorSingleFactory r4MeasureServiceFactory,
+            R4MeasureEvaluatorMultipleFactory r4MultiMeasureServiceFactory,
+            StringTimePeriodHandler stringTimePeriodHandler) {
+        return new MeasureOperationsProvider(
+                r4MeasureServiceFactory, r4MultiMeasureServiceFactory, stringTimePeriodHandler);
     }
 
     @Bean

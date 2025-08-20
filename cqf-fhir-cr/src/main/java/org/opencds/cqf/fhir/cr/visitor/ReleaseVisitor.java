@@ -45,12 +45,7 @@ import org.slf4j.LoggerFactory;
 
 public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
     private static final String NOT_SUPPORTED = " not supported";
-    private static final String ACTIVE = "active";
-    private static final String DRAFT = "draft";
     private Logger logger = LoggerFactory.getLogger(ReleaseVisitor.class);
-    private static final String DEPENDSON = "depends-on";
-    private static final String VALUESET = "ValueSet";
-    private static final String CODESYSTEM = "CodeSystem";
     protected final TerminologyServerClient terminologyServerClient;
     private IKnowledgeArtifactAdapter artifactBeingReleasedAdapter;
 
@@ -73,6 +68,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
     @Override
     public IBase visit(IKnowledgeArtifactAdapter rootAdapter, IBaseParameters operationParameters) {
         artifactBeingReleasedAdapter = rootAdapter;
+
         // Setup and parameter validation
         final var rootLibrary = rootAdapter.get();
         final var current = new Date();
@@ -136,8 +132,8 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
                 .collect(Collectors.toList());
         // Delete all depends-on RAs in the root artifact
         var noDeps = rootAdapter.getRelatedArtifact();
-        noDeps.removeIf(
-                ra -> IKnowledgeArtifactAdapter.getRelatedArtifactType(ra).equalsIgnoreCase(DEPENDSON));
+        noDeps.removeIf(ra -> IKnowledgeArtifactAdapter.getRelatedArtifactType(ra)
+                .equalsIgnoreCase(Constants.RELATEDARTIFACT_TYPE_DEPENDSON));
         rootAdapter.setRelatedArtifact(noDeps);
 
         // extract expansion parameters
@@ -179,7 +175,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
                         .filter(originalDep -> Canonicals.getUrl(originalDep.getReference())
                                         .equals(Canonicals.getUrl(relatedArtifactReference))
                                 && IKnowledgeArtifactAdapter.getRelatedArtifactType(resolvedRelatedArtifact)
-                                        .equalsIgnoreCase(DEPENDSON))
+                                        .equalsIgnoreCase(Constants.RELATEDARTIFACT_TYPE_DEPENDSON))
                         .findFirst()
                         .ifPresent(dep -> {
                             ((List<IBaseExtension<?, ?>>) resolvedRelatedArtifact.getExtension())
@@ -230,7 +226,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
             ICompositeType rootEffectivePeriod,
             Date current) {
         artifactAdapter.setDate(current == null ? new Date() : current);
-        artifactAdapter.setStatus(ACTIVE);
+        artifactAdapter.setStatus(Constants.STATUS_ACTIVE);
         artifactAdapter.setVersion(version);
         propagateEffectivePeriod(rootEffectivePeriod, artifactAdapter);
     }
@@ -278,7 +274,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
             // updated as part of $release)
             latest = VisitorHelper.tryGetLatestVersion(preReleaseReference, repository);
         } else if (resourceType != null
-                && resourceType.equals(VALUESET)
+                && resourceType.equals(Constants.RESOURCETYPE_VALUESET)
                 && prereleaseReferenceVersion == null
                 && latestFromTxServer) {
             // ValueSets we don't own go to the Tx Server if latestFromTxServer is true
@@ -289,8 +285,10 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
                     .map(r -> (IKnowledgeArtifactAdapter) createAdapterForResource(r));
         } else {
             // get the latest ACTIVE version, if not fallback to the latest non-DRAFT version
-            latest = VisitorHelper.tryGetLatestVersionWithStatus(preReleaseReference, repository, ACTIVE)
-                    .or(() -> VisitorHelper.tryGetLatestVersionExceptStatus(preReleaseReference, repository, DRAFT));
+            latest = VisitorHelper.tryGetLatestVersionWithStatus(
+                            preReleaseReference, repository, Constants.STATUS_ACTIVE)
+                    .or(() -> VisitorHelper.tryGetLatestVersionExceptStatus(
+                            preReleaseReference, repository, Constants.STATUS_DRAFT));
         }
         return latest;
     }
@@ -320,13 +318,13 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
                 // convert to dependency
                 var componentToDependency = IKnowledgeArtifactAdapter.newRelatedArtifact(
                         fhirVersion(),
-                        DEPENDSON,
+                        Constants.RELATEDARTIFACT_TYPE_DEPENDSON,
                         maybeLatest
                                 .map(IKnowledgeArtifactAdapter::getCanonical)
                                 .orElse(IKnowledgeArtifactAdapter.getRelatedArtifactReference(component)),
                         maybeLatest
                                 .map(IKnowledgeArtifactAdapter::getDescriptor)
-                                .orElse(null));
+                                .orElse(IKnowledgeArtifactAdapter.getRelatedArtifactDisplay(component)));
 
                 var resourceType = maybeLatest
                         .map(r -> Canonicals.getResourceType(r.getCanonical()))
@@ -387,7 +385,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
                 if (!artifactAdapter.getUrl().equals(rootAdapter.getUrl())) {
                     var newDep = IKnowledgeArtifactAdapter.newRelatedArtifact(
                             fhirVersion(),
-                            DEPENDSON,
+                            Constants.RELATEDARTIFACT_TYPE_DEPENDSON,
                             dependency.getReference(),
                             dependencyAdapter != null ? dependencyAdapter.getDescriptor() : null);
 
@@ -404,7 +402,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
     }
 
     private void ensureResourceTypeExtension(String resourceType, ICompositeType newDep) {
-        if (resourceType != null && (resourceType.equals(VALUESET) || resourceType.equals(CODESYSTEM))) {
+        if (resourceType != null) {
             if (this.fhirVersion().equals(FhirVersionEnum.R4)) {
                 ((org.hl7.fhir.r4.model.RelatedArtifact) newDep)
                         .getResourceElement()
@@ -452,14 +450,14 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
         } else {
             maybeAdapter =
                     tryFindLatestDependency(dependency.getReference(), resourceType, latestFromTxServer, endpoint);
-        }
 
-        if (maybeAdapter.isPresent()) {
-            ((ILibraryAdapter) artifactBeingReleasedAdapter)
+            // Only add the expansion parameters entry for versionless references
+            maybeAdapter.ifPresent(iKnowledgeArtifactAdapter -> ((ILibraryAdapter) artifactBeingReleasedAdapter)
                     .ensureExpansionParametersEntry(
-                            resourceType,
-                            maybeAdapter.get().getUrl() + "|"
-                                    + maybeAdapter.get().getVersion());
+                            iKnowledgeArtifactAdapter,
+                            terminologyServerClient
+                                    .getTerminologyServerClientSettings()
+                                    .getCrmiVersion()));
         }
 
         return maybeAdapter;
@@ -470,14 +468,15 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
         Optional<IKnowledgeArtifactAdapter> maybeAdapter;
         // we trust in this case that the Endpoint URL matches up with the Authoritative Source in the ValueSet
         // if this assumption is faulty the only consequence is that the VSet doesn't get resolved
-        if (resourceType != null && resourceType.equals(VALUESET) && latestFromTxServer) {
+        if (resourceType != null && resourceType.equals(Constants.RESOURCETYPE_VALUESET) && latestFromTxServer) {
             maybeAdapter = terminologyServerClient
                     .getLatestNonDraftResource(endpoint, reference)
                     .map(r -> (IKnowledgeArtifactAdapter) createAdapterForResource(r));
         } else {
             // get the latest ACTIVE version, if not fallback to the latest non-DRAFT version
-            maybeAdapter = VisitorHelper.tryGetLatestVersionWithStatus(reference, repository, ACTIVE)
-                    .or(() -> VisitorHelper.tryGetLatestVersionExceptStatus(reference, repository, DRAFT));
+            maybeAdapter = VisitorHelper.tryGetLatestVersionWithStatus(reference, repository, Constants.STATUS_ACTIVE)
+                    .or(() -> VisitorHelper.tryGetLatestVersionExceptStatus(
+                            reference, repository, Constants.STATUS_DRAFT));
         }
         return maybeAdapter;
     }
@@ -523,7 +522,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
         Optional<String> expansionParametersVersion = Optional.empty();
         if (expansionParameters != null && !expansionParameters.isEmpty()) {
             // assume if we can't figure out the resource type it's a CodeSystem. This may be a
-            if (resourceType == null || resourceType.equals(CODESYSTEM)) {
+            if (resourceType == null || resourceType.equals(Constants.RESOURCETYPE_CODESYSTEM)) {
                 var systemVersionExpansionParameters =
                         VisitorHelper.getStringListParameter(Constants.SYSTEM_VERSION, expansionParameters);
 
@@ -533,7 +532,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
                                     && Objects.equals(Canonicals.getUrl(svp), dependency.getReference()))
                             .findAny();
                 }
-            } else if (resourceType.equals(VALUESET)) {
+            } else if (resourceType.equals(Constants.RESOURCETYPE_VALUESET)) {
                 var valueSetVersionExpansionParameters =
                         VisitorHelper.getStringListParameter(Constants.DEFAULT_VALUESET_VERSION, expansionParameters);
 
@@ -671,7 +670,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
             throw new ResourceNotFoundException("Resource not found.");
         }
 
-        if (!artifact.getStatus().equals(DRAFT)) {
+        if (!artifact.getStatus().equals(Constants.STATUS_DRAFT)) {
             throw new PreconditionFailedException("Resource with ID: '%s' does not have a status of 'draft'."
                     .formatted(artifact.get().getIdElement().getIdPart()));
         }
@@ -703,7 +702,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
         if (version == null || version.isEmpty()) {
             throw new UnprocessableEntityException("The version argument is required");
         }
-        if (version.contains(DRAFT)) {
+        if (version.contains(Constants.STATUS_DRAFT)) {
             throw new UnprocessableEntityException("The version cannot contain 'draft'");
         }
         if (version.contains("/") || version.contains("\\") || version.contains("|")) {

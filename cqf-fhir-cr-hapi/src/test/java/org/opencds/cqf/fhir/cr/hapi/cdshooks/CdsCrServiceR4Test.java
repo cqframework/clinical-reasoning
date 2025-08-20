@@ -74,8 +74,8 @@ class CdsCrServiceR4Test extends BaseCdsCrServiceTest {
         final IdType planDefinitionId = new IdType(PLAN_DEFINITION_RESOURCE_NAME, "ASLPCrd");
         requestDetails.setId(planDefinitionId);
 
-        IBaseParameters iBaseParameters = new CdsCrService(requestDetails, repository).encodeParams(
-            cdsServiceRequestJson);
+        IBaseParameters iBaseParameters =
+                new CdsCrService(requestDetails, repository).encodeParams(cdsServiceRequestJson);
 
         final var params = adapterFactory.createParameters(iBaseParameters);
 
@@ -96,13 +96,14 @@ class CdsCrServiceR4Test extends BaseCdsCrServiceTest {
         cdsServiceRequestJson.addContext(CDS_PARAMETER_ENCOUNTER_ID, expectedEncounterId);
         cdsServiceRequestJson.addPrefetch("patientKey", new Patient().setId(expectedPatientId));
 
-        IBaseParameters iBaseParameters = new CdsCrService(requestDetails, repository).encodeParams(
-            cdsServiceRequestJson);
+        IBaseParameters iBaseParameters =
+                new CdsCrService(requestDetails, repository).encodeParams(cdsServiceRequestJson);
 
         final var params = adapterFactory.createParameters(iBaseParameters);
 
         assertEquals(3, params.getParameter().size());
-        assertEquals((params.getParameter(APPLY_PARAMETER_PRACTITIONER)).getValue().toString(), expectedUserId);
+        assertEquals(
+                (params.getParameter(APPLY_PARAMETER_PRACTITIONER)).getValue().toString(), expectedUserId);
         assertEquals((params.getParameter(APPLY_PARAMETER_ENCOUNTER)).getValue().toString(), expectedEncounterId);
 
         assertTrue(params.getParameter(APPLY_PARAMETER_DATA).hasResource());
@@ -111,23 +112,27 @@ class CdsCrServiceR4Test extends BaseCdsCrServiceTest {
 
         Bundle bundle = (Bundle) resource;
         assertEquals(1, bundle.getEntry().size());
-        assertEquals(expectedPatientId, bundle.getEntryFirstRep().getResource().getIdElement().getIdPart());
+        assertEquals(
+                expectedPatientId,
+                bundle.getEntryFirstRep().getResource().getIdElement().getIdPart());
     }
 
     @Test
-    public void testEncodeCqlParameters(){
+    public void testEncodeCqlParameters() {
         final RequestDetails requestDetails = new SystemRequestDetails();
 
         CdsServiceRequestJson cdsServiceRequestJson = new CdsServiceRequestJson();
         cdsServiceRequestJson.addContext(CDS_PARAMETER_DRAFT_ORDERS, new Patient().setId("patient-id"));
 
-        IBaseParameters iBaseParameters = new CdsCrService(requestDetails, repository).encodeParams(
-            cdsServiceRequestJson);
+        IBaseParameters iBaseParameters =
+                new CdsCrService(requestDetails, repository).encodeParams(cdsServiceRequestJson);
 
         final var params = adapterFactory.createParameters(iBaseParameters);
 
-        ParametersParameterComponent parametersParameterComponent = ((Parameters) params.getParameter(
-            APPLY_PARAMETER_PARAMETERS).getResource()).getParameter().get(0);
+        ParametersParameterComponent parametersParameterComponent = ((Parameters)
+                        params.getParameter(APPLY_PARAMETER_PARAMETERS).getResource())
+                .getParameter()
+                .get(0);
 
         assertEquals(CDS_PARAMETER_DRAFT_ORDERS, parametersParameterComponent.getName());
         assertTrue(parametersParameterComponent.hasResource());
@@ -139,7 +144,6 @@ class CdsCrServiceR4Test extends BaseCdsCrServiceTest {
         ParameterDefinition parameterDefinition = (ParameterDefinition) extension.getValue();
         assertEquals(CDS_PARAMETER_DRAFT_ORDERS, parameterDefinition.getName());
         assertEquals("*", parameterDefinition.getMax());
-
     }
 
     @Test

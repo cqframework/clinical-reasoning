@@ -65,26 +65,24 @@ class CdsCrServiceMethodTest {
     }
 
     @Test
-    void testExceptionCauseIsThrown_whenExceptionCause_isInstanceOfBaseServerResponseException(){
+    void testExceptionCauseIsThrown_whenExceptionCause_isInstanceOfBaseServerResponseException() {
         when(cdsCrServiceFactory.create(serviceId)).thenReturn(cdsCrService);
         RuntimeException exception = Mockito.mock(RuntimeException.class);
         when(exception.getCause()).thenReturn(Mockito.mock(BaseServerResponseException.class));
         when(cdsCrService.invoke(new CdsServiceRequestJson())).thenThrow(exception);
 
-        assertThatThrownBy( () ->
-            testSubject.invoke(new ObjectMapper(), new CdsServiceRequestJson(), serviceId))
-        .isInstanceOf(BaseServerResponseException.class);
+        assertThatThrownBy(() -> testSubject.invoke(new ObjectMapper(), new CdsServiceRequestJson(), serviceId))
+                .isInstanceOf(BaseServerResponseException.class);
     }
 
     @Test
-    void testInternalErrorExceptionWrappingOriginalException_isThrown_whenInvokeThrowsException(){
+    void testInternalErrorExceptionWrappingOriginalException_isThrown_whenInvokeThrowsException() {
         when(cdsCrServiceFactory.create(serviceId)).thenReturn(cdsCrService);
         RuntimeException exception = Mockito.mock(RuntimeException.class);
         when(exception.getCause()).thenReturn(Mockito.mock(Exception.class));
         when(cdsCrService.invoke(new CdsServiceRequestJson())).thenThrow(exception);
 
-        assertThatThrownBy( () ->
-            testSubject.invoke(new ObjectMapper(), new CdsServiceRequestJson(), serviceId))
-            .isInstanceOf(InternalErrorException.class);
+        assertThatThrownBy(() -> testSubject.invoke(new ObjectMapper(), new CdsServiceRequestJson(), serviceId))
+                .isInstanceOf(InternalErrorException.class);
     }
 }

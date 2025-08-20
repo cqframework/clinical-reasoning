@@ -16,7 +16,6 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.Mockito;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
-
 class CdsCrUtilsTest {
 
     @Test
@@ -31,7 +30,6 @@ class CdsCrUtilsTest {
 
         // Assert
         assertInstanceOf(PlanDefinition.class, result);
-
     }
 
     @Test
@@ -64,10 +62,9 @@ class CdsCrUtilsTest {
 
     @ParameterizedTest
     @EnumSource(
-       value = FhirVersionEnum.class,
-        names = {"DSTU3", "R4", "R5"},
-        mode = EnumSource.Mode.EXCLUDE
-    )
+            value = FhirVersionEnum.class,
+            names = {"DSTU3", "R4", "R5"},
+            mode = EnumSource.Mode.EXCLUDE)
     @DisplayName("Should return null for unsupported FHIR versions")
     void readPlanDefinition_forUnsupportedVersions_shouldReturnNull(FhirVersionEnum theUnsupportedVersion) {
         IIdType dontCare = null;
@@ -82,6 +79,4 @@ class CdsCrUtilsTest {
         // Assert
         assertNull(result, "The result should be null for unsupported version: " + theUnsupportedVersion);
     }
-
-
 }

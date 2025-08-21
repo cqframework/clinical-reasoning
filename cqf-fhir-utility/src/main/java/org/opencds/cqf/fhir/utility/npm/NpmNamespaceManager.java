@@ -9,5 +9,8 @@ import org.hl7.cql.model.NamespaceInfo;
  * Library/CQL dependencies.  See {@link NpmPackageLoader}.
  */
 public interface NpmNamespaceManager {
+
+    NpmNamespaceManager DEFAULT = List::of;
+
     List<NamespaceInfo> getAllNamespaceInfos();
 }

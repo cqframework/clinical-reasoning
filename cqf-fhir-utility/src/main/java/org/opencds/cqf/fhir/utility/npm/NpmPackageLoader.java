@@ -8,6 +8,7 @@ import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.hl7.cql.model.ModelIdentifier;
 import org.hl7.cql.model.NamespaceInfo;
+import org.hl7.cql.model.NamespaceManager;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
@@ -100,8 +101,13 @@ public interface NpmPackageLoader {
     }
 
     default void initNamespaceMappings(LibraryManager libraryManager) {
-        getAllNamespaceInfos()
-                .forEach(info -> libraryManager.getNamespaceManager().addNamespace(info));
+        final List<NamespaceInfo> allNamespaceInfos = getAllNamespaceInfos();
+        final NamespaceManager namespaceManager = libraryManager.getNamespaceManager();
+
+        for (NamespaceInfo namespaceInfo : allNamespaceInfos) {
+            // if we do this more than one time it won't error out subsequent times
+            namespaceManager.ensureNamespaceRegistered(namespaceInfo);
+        }
     }
 
     /**

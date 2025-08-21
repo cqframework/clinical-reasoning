@@ -21,6 +21,7 @@ import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Table;
+import jakarta.annotation.Nonnull;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -127,7 +128,8 @@ public class IgRepository implements IRepository {
     private final IgConventions conventions;
     private final ResourceMatcher resourceMatcher;
     private final NpmPackageLoader npmPackageLoader;
-    private final List<Path> npmTgzPaths;
+    // LUKETODO:  separate fields for JSON and TGZs
+    private final List<Path> npmJsonAndTgzPaths;
 
     private IRepositoryOperationProvider operationProvider;
 
@@ -242,16 +244,29 @@ public class IgRepository implements IRepository {
         this.conventions = requireNonNull(conventions, "conventions cannot be null");
         this.resourceMatcher = Repositories.getResourceMatcher(this.fhirContext);
         this.operationProvider = operationProvider;
-        this.npmTgzPaths = buildNpmTgzPaths();
-        this.npmPackageLoader = buildNpmPackageLoader(this.npmTgzPaths);
+        this.npmJsonAndTgzPaths = buildNpmJsonAndTgzPaths();
+        this.npmPackageLoader = buildNpmPackageLoader(getTgzPaths());
     }
 
     public NpmPackageLoader getNpmPackageLoader() {
         return npmPackageLoader;
     }
 
-    public List<Path> getNpmTgzPaths() {
-        return npmTgzPaths;
+    public List<Path> getNpmJsonAndTgzPaths() {
+        return npmJsonAndTgzPaths;
+    }
+
+    // LUKETODO:  here or upstream?
+    public Path getJson() {
+        final List<Path> jsonPaths = npmJsonAndTgzPaths.stream()
+                .filter(file -> file.getFileName().toString().endsWith(".json"))
+                .toList();
+
+        if (jsonPaths.size() != 1) {
+            throw new IllegalArgumentException("expected only one path");
+        }
+
+        return jsonPaths.get(0);
     }
 
     public Path getRootPath() {
@@ -262,7 +277,14 @@ public class IgRepository implements IRepository {
         return NpmPackageLoaderInMemory.fromNpmPackageAbsolutePath(npmTgzPaths);
     }
 
-    private List<Path> buildNpmTgzPaths() {
+    @Nonnull
+    private List<Path> getTgzPaths() {
+        return this.npmJsonAndTgzPaths.stream()
+                .filter(file -> file.getFileName().toString().endsWith(".tgz"))
+                .toList();
+    }
+
+    private List<Path> buildNpmJsonAndTgzPaths() {
         final Path npmDir = root.resolve("input/npm");
 
         // More often than not, the npm directory will not exist in an IgRepository
@@ -271,10 +293,10 @@ public class IgRepository implements IRepository {
         }
 
         try (Stream<Path> npmSubPaths = Files.list(npmDir)) {
-            // LUKETODO: assume that all tgz files are NPM packages for now
             return npmSubPaths
                     .filter(Files::isRegularFile)
-                    .filter(file -> file.getFileName().toString().endsWith(".tgz"))
+                    .filter(file -> file.getFileName().toString().endsWith(".tgz")
+                            || file.getFileName().toString().endsWith(".json"))
                     .toList();
         } catch (IOException exception) {
             throw new IllegalStateException("Could not resolve NPM files", exception);

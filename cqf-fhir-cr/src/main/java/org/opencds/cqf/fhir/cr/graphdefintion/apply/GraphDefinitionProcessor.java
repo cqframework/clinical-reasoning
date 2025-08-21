@@ -15,8 +15,8 @@ public class GraphDefinitionProcessor {
 
     protected IRepository repository;
 
-    public GraphDefinitionProcessor(IRepository theRepository) {
-        repository = theRepository;
+    public GraphDefinitionProcessor(IRepository repository) {
+        this.repository = repository;
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseParameters apply(

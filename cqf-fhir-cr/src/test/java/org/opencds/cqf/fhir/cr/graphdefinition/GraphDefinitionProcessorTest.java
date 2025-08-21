@@ -12,9 +12,10 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.junit.jupiter.api.Test;
-import org.opencds.cqf.fhir.cr.graphdefintion.apply.GraphDefinitionProcessor;
+import org.opencds.cqf.fhir.cr.graphdefintion.GraphDefinitionProcessor;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 
+@SuppressWarnings("UnstableApiUsage")
 public class GraphDefinitionProcessorTest {
 
     @Test

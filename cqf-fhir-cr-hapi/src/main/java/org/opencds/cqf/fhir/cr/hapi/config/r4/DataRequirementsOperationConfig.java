@@ -10,11 +10,9 @@ import org.opencds.cqf.fhir.cr.hapi.common.ILibraryProcessorFactory;
 import org.opencds.cqf.fhir.cr.hapi.common.IPlanDefinitionProcessorFactory;
 import org.opencds.cqf.fhir.cr.hapi.common.IQuestionnaireProcessorFactory;
 import org.opencds.cqf.fhir.cr.hapi.common.IValueSetProcessorFactory;
-import org.opencds.cqf.fhir.cr.hapi.common.StringTimePeriodHandler;
 import org.opencds.cqf.fhir.cr.hapi.config.CrProcessorConfig;
 import org.opencds.cqf.fhir.cr.hapi.config.ProviderLoader;
 import org.opencds.cqf.fhir.cr.hapi.config.ProviderSelector;
-import org.opencds.cqf.fhir.cr.hapi.r4.graphdefinition.GraphDefinitionApplyProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.graphdefinition.GraphDefinitionDataRequirementsProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.library.LibraryDataRequirementsProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.plandefinition.PlanDefinitionDataRequirementsProvider;
@@ -53,7 +51,7 @@ public class DataRequirementsOperationConfig {
 
     @Bean
     GraphDefinitionDataRequirementsProvider r4GraphDefinitionDataRequirementsProvider(
-        IGraphDefinitionProcessorFactory graphDefinitionProcessorFactory) {
+            IGraphDefinitionProcessorFactory graphDefinitionProcessorFactory) {
         return new GraphDefinitionDataRequirementsProvider(graphDefinitionProcessorFactory);
     }
 

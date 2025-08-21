@@ -13,7 +13,6 @@ import org.opencds.cqf.fhir.cr.hapi.common.IValueSetProcessorFactory;
 import org.opencds.cqf.fhir.cr.hapi.config.CrProcessorConfig;
 import org.opencds.cqf.fhir.cr.hapi.config.ProviderLoader;
 import org.opencds.cqf.fhir.cr.hapi.config.ProviderSelector;
-import org.opencds.cqf.fhir.cr.hapi.r4.graphdefinition.GraphDefinitionDataRequirementsProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.graphdefinition.GraphDefinitionPackageProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.library.LibraryPackageProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.plandefinition.PlanDefinitionPackageProvider;
@@ -51,7 +50,7 @@ public class PackageOperationConfig {
 
     @Bean
     GraphDefinitionPackageProvider r4GraphDefinitionPackageProvider(
-        IGraphDefinitionProcessorFactory graphDefinitionProcessorFactory) {
+            IGraphDefinitionProcessorFactory graphDefinitionProcessorFactory) {
         return new GraphDefinitionPackageProvider(graphDefinitionProcessorFactory);
     }
 

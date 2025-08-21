@@ -37,5 +37,12 @@ public class GraphDefinitionProcessorTest {
 
         assertNotNull(result);
         assertTrue(result instanceof Parameters);
+
+        Parameters parameters = (Parameters) result;
+        assertTrue(parameters.getParameter().size() > 0);
+
+        Object firstParameter = parameters.getParameter().get(0);
+        assertTrue(firstParameter instanceof Object);
+
     }
 }

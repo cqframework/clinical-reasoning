@@ -352,6 +352,16 @@ public class TestQuestionnaire {
                 if (!childItems.isEmpty()) {
                     populateItems(childItems);
                 }
+                var answers = request.resolvePathList(item, "answer");
+                if (!answers.isEmpty()) {
+                    var answerItems = answers.stream()
+                            .flatMap(a -> request.resolvePathList(a, "item").stream())
+                            .map(i -> (IBaseBackboneElement) i)
+                            .toList();
+                    if (!answerItems.isEmpty()) {
+                        populateItems(answerItems);
+                    }
+                }
             }
         }
 

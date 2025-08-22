@@ -30,10 +30,32 @@ public class ProcessItem {
 
     public IBaseBackboneElement processItem(PopulateRequest request, IBaseBackboneElement item) {
         final var responseItem = createResponseItem(request.getFhirVersion(), item);
-        request.setContextVariable(responseItem);
-        var rawParams = request.getRawParameters();
-        rawParams.put("%qitem", item);
-        populateAnswer(request, responseItem, getInitialValue(request, item, responseItem, rawParams));
+        var childItems = request.getItems(item);
+        if ("group".equals(request.resolvePathString(item, "type"))) {
+            final List<IBaseBackboneElement> groupChildItems = new ArrayList<>();
+            childItems.forEach(childItem -> {
+                groupChildItems.add(processItem(request, childItem));
+            });
+            request.getModelResolver().setValue(responseItem, "item", groupChildItems);
+        } else {
+            request.setContextVariable(responseItem);
+            var rawParams = request.getRawParameters();
+            rawParams.put("%qitem", item);
+            populateAnswer(request, responseItem, getInitialValue(request, item, responseItem, rawParams));
+            if (!childItems.isEmpty()) {
+                //  child items go under each answer
+                var childResponseItems =
+                        childItems.stream().map(c -> processItem(request, c)).toList();
+                if (!childResponseItems.isEmpty()) {
+                    var answers = request.resolvePathList(responseItem, "answer");
+                    if (answers.isEmpty()) {
+                        answers.add(createAnswer(request.getFhirVersion(), null));
+                        request.getModelResolver().setValue(responseItem, "answer", answers);
+                    }
+                    answers.forEach(a -> request.getModelResolver().setValue(a, "item", childResponseItems));
+                }
+            }
+        }
         return responseItem;
     }
 

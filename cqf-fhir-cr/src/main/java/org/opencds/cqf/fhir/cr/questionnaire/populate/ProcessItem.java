@@ -46,14 +46,12 @@ public class ProcessItem {
                 //  child items go under each answer
                 var childResponseItems =
                         childItems.stream().map(c -> processItem(request, c)).toList();
-                if (!childResponseItems.isEmpty()) {
-                    var answers = request.resolvePathList(responseItem, "answer");
-                    if (answers.isEmpty()) {
-                        answers.add(createAnswer(request.getFhirVersion(), null));
-                        request.getModelResolver().setValue(responseItem, "answer", answers);
-                    }
-                    answers.forEach(a -> request.getModelResolver().setValue(a, "item", childResponseItems));
+                var answers = request.resolvePathList(responseItem, "answer");
+                if (answers.isEmpty()) {
+                    answers.add(createAnswer(request.getFhirVersion(), null));
+                    request.getModelResolver().setValue(responseItem, "answer", answers);
                 }
+                answers.forEach(a -> request.getModelResolver().setValue(a, "item", childResponseItems));
             }
         }
         return responseItem;

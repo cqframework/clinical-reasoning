@@ -135,7 +135,7 @@ public class CrR4Config {
     }
 
     @Bean
-    IApproveServiceFactory r4ApproveProvider(IRepositoryFactory repositoryFactory) {
+    IApproveServiceFactory approveServiceFactory(IRepositoryFactory repositoryFactory) {
         return rd -> new R4ApproveService(repositoryFactory.create(rd));
     }
 

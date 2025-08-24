@@ -8,11 +8,13 @@ import java.util.Arrays;
 import java.util.Map;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cr.cpg.r4.R4CqlExecutionService;
+import org.opencds.cqf.fhir.cr.crmi.R4ApproveService;
 import org.opencds.cqf.fhir.cr.hapi.common.StringTimePeriodHandler;
 import org.opencds.cqf.fhir.cr.hapi.config.CrBaseConfig;
 import org.opencds.cqf.fhir.cr.hapi.config.ProviderLoader;
 import org.opencds.cqf.fhir.cr.hapi.config.ProviderSelector;
 import org.opencds.cqf.fhir.cr.hapi.config.RepositoryConfig;
+import org.opencds.cqf.fhir.cr.hapi.r4.IApproveServiceFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.ICareGapsServiceFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.ICollectDataServiceFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.ICqlExecutionServiceFactory;
@@ -22,6 +24,7 @@ import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureEvaluatorMultipleFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureEvaluatorSingleFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureServiceUtilsFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.cpg.CqlExecutionOperationProvider;
+import org.opencds.cqf.fhir.cr.hapi.r4.crmi.ApproveProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.measure.CareGapsOperationProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.measure.CollectDataOperationProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.measure.DataRequirementsOperationProvider;
@@ -129,6 +132,16 @@ public class CrR4Config {
     CareGapsOperationProvider r4CareGapsOperationProvider(
             ICareGapsServiceFactory r4CareGapsProcessorFactory, StringTimePeriodHandler stringTimePeriodHandler) {
         return new CareGapsOperationProvider(r4CareGapsProcessorFactory, stringTimePeriodHandler);
+    }
+
+    @Bean
+    IApproveServiceFactory r4ApproveProvider(IRepositoryFactory repositoryFactory) {
+        return rd -> new R4ApproveService(repositoryFactory.create(rd));
+    }
+
+    @Bean
+    ApproveProvider r4ApproveProvider(IApproveServiceFactory r4ApproveServiceFactory) {
+        return new ApproveProvider(r4ApproveServiceFactory);
     }
 
     @Bean

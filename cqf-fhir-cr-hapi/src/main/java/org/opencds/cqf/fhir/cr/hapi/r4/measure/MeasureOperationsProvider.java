@@ -220,6 +220,14 @@ public class MeasureOperationsProvider {
             @OperationParam(name = "parameters") Parameters parameters,
             RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
+
+        if (!measureEvaluationOptions.isUseNpmForLibrariesAndMeasures()) {
+            // LUKETODO: do we really want to do this?
+            throw new InvalidRequestException(
+                    "The %s operation is only supported when NPM libraries and measures are enabled.  Use $evaluate-measure instead."
+                            .formatted(CrProviderConstants.CR_OPERATION_EVALUATE_MEASURE_URL));
+        }
+
         return r4MeasureServiceFactory
                 .create(requestDetails)
                 .evaluate(

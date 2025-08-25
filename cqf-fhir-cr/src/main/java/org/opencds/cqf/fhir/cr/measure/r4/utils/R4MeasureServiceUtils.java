@@ -405,6 +405,7 @@ public class R4MeasureServiceUtils {
     }
 
     // LUKETODO:  return the List class instead?
+    // LUKETODO:  dedicated class to search either FHIR or NPM?
     public MeasureOrNpmResourceHolder foldMeasure(Either3<CanonicalType, IdType, Measure> measureEither) {
         if (measureEvaluationOptions.isUseNpmForLibrariesAndMeasures()) {
             return foldMeasureForNpm(measureEither);

@@ -243,7 +243,6 @@ public class R4FhirOrNpmResourceProvider {
         if (measureCanonicals != null && !measureCanonicals.isEmpty()) {
             for (String measureCanonical : measureCanonicals) {
                 if (measureEvaluationOptions.isUseNpmForQualifyingResources()) {
-                    // LUKETODO:  test this to make sure it works
                     // LUKETODO:  if this returns EMPTY, error handle and log accordingly
                     var npmResourceHolder = resolveByUrlFromNpm(measureCanonical);
                     measuresPlusResourceHolders.add(MeasureOrNpmResourceHolder.npmOnly(npmResourceHolder));

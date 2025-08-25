@@ -111,6 +111,25 @@ public class R4FhirOrNpmResourceProvider {
         return foldMeasureForRepository(measureEither);
     }
 
+    public MeasureOrNpmResourceHolder foldWithCustomIdTypeHandler(
+            Either3<CanonicalType, IdType, Measure> measureEither, Function<? super IdType, Measure> foldMiddle) {
+
+        if (measureEvaluationOptions.isUseNpmForQualifyingResources()) {
+            return foldMeasureForNpm(measureEither);
+        }
+
+        return measureEither.fold(
+                measureUrl -> {
+                    throw new InvalidRequestException(
+                            "Queries by measure URL: %s are not supported by NPM resources".formatted(measureUrl));
+                },
+                foldMiddle.andThen(MeasureOrNpmResourceHolder::measureOnly),
+                measureInput -> {
+                    throw new InvalidRequestException(
+                            "Not sure how we got here, but we have a Measure: %s".formatted(measureInput));
+                });
+    }
+
     @Nonnull
     private MeasureOrNpmResourceHolder foldMeasureForRepository(Either3<CanonicalType, IdType, Measure> measureEither) {
 

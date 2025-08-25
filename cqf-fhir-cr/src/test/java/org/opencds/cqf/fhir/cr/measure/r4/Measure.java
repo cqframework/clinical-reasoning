@@ -180,7 +180,7 @@ public class Measure {
         }
 
         private void mutateEvaluationOptionsToEnableNpm() {
-            this.evaluationOptions.setUseNpmForLibrariesAndMeasures(true);
+            this.evaluationOptions.setUseNpmForQualifyingResources(true);
         }
 
         public Given evaluationOptions(MeasureEvaluationOptions evaluationOptions) {

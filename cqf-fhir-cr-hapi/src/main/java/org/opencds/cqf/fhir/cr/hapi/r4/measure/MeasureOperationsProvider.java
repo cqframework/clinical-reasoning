@@ -93,7 +93,7 @@ public class MeasureOperationsProvider {
             throws InternalErrorException, FHIRException {
 
         // LUKETODO:  consider adding this validation to all services where this could happen
-        if (measureEvaluationOptions.isUseNpmForLibrariesAndMeasures()) {
+        if (measureEvaluationOptions.isUseNpmForQualifyingResources()) {
             throw new InvalidRequestException(
                     "Measure evaluation by ID is not supported if NPM libraries and measures are enabled.  Use %s instead."
                             .formatted(CrProviderConstants.CR_OPERATION_EVALUATE_MEASURE_URL));
@@ -169,7 +169,7 @@ public class MeasureOperationsProvider {
             RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
 
-        if (measureEvaluationOptions.isUseNpmForLibrariesAndMeasures()) {
+        if (measureEvaluationOptions.isUseNpmForQualifyingResources()) {
             if (measureId != null && !measureId.isEmpty()) {
                 throw new InvalidRequestException(
                         "Measure evaluation by IDs is not supported if NPM libraries and measures are enabled.  Pass measureUrls instead.");
@@ -221,7 +221,7 @@ public class MeasureOperationsProvider {
             RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
 
-        if (!measureEvaluationOptions.isUseNpmForLibrariesAndMeasures()) {
+        if (!measureEvaluationOptions.isUseNpmForQualifyingResources()) {
             // LUKETODO: do we really want to do this?
             throw new InvalidRequestException(
                     "The %s operation is only supported when NPM libraries and measures are enabled.  Use $evaluate-measure instead."

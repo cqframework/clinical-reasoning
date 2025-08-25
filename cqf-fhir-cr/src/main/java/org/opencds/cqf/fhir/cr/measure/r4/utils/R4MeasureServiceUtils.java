@@ -250,7 +250,7 @@ public class R4MeasureServiceUtils {
 
         List<MeasureOrNpmResourceHolder> measuresPlusResourceHolders = new ArrayList<>();
         if (measureIds != null && !measureIds.isEmpty()) {
-            if (measureEvaluationOptions.isUseNpmForLibrariesAndMeasures()) {
+            if (measureEvaluationOptions.isUseNpmForQualifyingResources()) {
                 throw new InvalidRequestException(
                         "Queries by measure IDs: %s are not supported by NPM resources".formatted(measureIds));
             }
@@ -263,7 +263,7 @@ public class R4MeasureServiceUtils {
 
         if (measureCanonicals != null && !measureCanonicals.isEmpty()) {
             for (String measureCanonical : measureCanonicals) {
-                if (measureEvaluationOptions.isUseNpmForLibrariesAndMeasures()) {
+                if (measureEvaluationOptions.isUseNpmForQualifyingResources()) {
                     // LUKETODO:  test this to make sure it works
                     // LUKETODO:  if this returns EMPTY, error handle and log accordingly
                     var npmResourceHolder = resolveByUrlFromNpm(measureCanonical);
@@ -279,7 +279,7 @@ public class R4MeasureServiceUtils {
         }
 
         if (measureIdentifiers != null && !measureIdentifiers.isEmpty()) {
-            if (measureEvaluationOptions.isUseNpmForLibrariesAndMeasures()) {
+            if (measureEvaluationOptions.isUseNpmForQualifyingResources()) {
                 throw new InvalidRequestException(
                         "Queries by measure identifiers: %s are not supported by NPM resources"
                                 .formatted(measureIdentifiers));
@@ -388,7 +388,7 @@ public class R4MeasureServiceUtils {
     public MeasureOrNpmResourceHolder foldMeasure(
             Either3<CanonicalType, IdType, Measure> measureEither, IRepository repository) {
 
-        if (measureEvaluationOptions.isUseNpmForLibrariesAndMeasures()) {
+        if (measureEvaluationOptions.isUseNpmForQualifyingResources()) {
             return foldMeasureForNpm(measureEither);
         }
 
@@ -407,7 +407,7 @@ public class R4MeasureServiceUtils {
     // LUKETODO:  return the List class instead?
     // LUKETODO:  dedicated class to search either FHIR or NPM?
     public MeasureOrNpmResourceHolder foldMeasure(Either3<CanonicalType, IdType, Measure> measureEither) {
-        if (measureEvaluationOptions.isUseNpmForLibrariesAndMeasures()) {
+        if (measureEvaluationOptions.isUseNpmForQualifyingResources()) {
             return foldMeasureForNpm(measureEither);
         }
 

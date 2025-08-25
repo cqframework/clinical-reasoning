@@ -5,7 +5,9 @@ import java.util.List;
 import java.util.Objects;
 import org.hl7.fhir.r4.model.Measure;
 
-// LUKETODO:  javadoc
+/**
+ * Effectively a list of {@link MeasureOrNpmResourceHolder} with some convenience methods
+ */
 public final class MeasureOrNpmResourceHolderList {
 
     private final List<MeasureOrNpmResourceHolder> measuresPlusNpmResourceHolders;

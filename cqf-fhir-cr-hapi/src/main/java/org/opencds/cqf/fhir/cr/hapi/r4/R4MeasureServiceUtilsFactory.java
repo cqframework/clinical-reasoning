@@ -6,7 +6,6 @@ import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 /**
  * Factory to create an {@link R4MeasureServiceUtils} from a {@link RequestDetails}
  */
-// LUKETODO:  move to utils
 @FunctionalInterface
 public interface R4MeasureServiceUtilsFactory {
     R4MeasureServiceUtils create(RequestDetails requestDetails);

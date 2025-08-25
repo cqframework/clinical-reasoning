@@ -18,8 +18,7 @@ public class MeasureEvaluationOptions {
     private SubjectProviderOptions subjectProviderOptions;
 
     private EvaluationSettings evaluationSettings = null;
-    // LUKETODO:  better name:
-    private boolean isUseNpmForLibrariesAndMeasures = false;
+    private boolean isUseNpmForQualifyingResources = false;
 
     public boolean isValidationEnabled() {
         return this.isValidationEnabled;
@@ -64,12 +63,12 @@ public class MeasureEvaluationOptions {
         return this.applyScoringSetMembership;
     }
 
-    public boolean isUseNpmForLibrariesAndMeasures() {
-        return isUseNpmForLibrariesAndMeasures;
+    public boolean isUseNpmForQualifyingResources() {
+        return isUseNpmForQualifyingResources;
     }
 
-    public MeasureEvaluationOptions setUseNpmForLibrariesAndMeasures(boolean useNpmForLibrariesAndMeasures) {
-        isUseNpmForLibrariesAndMeasures = useNpmForLibrariesAndMeasures;
+    public MeasureEvaluationOptions setUseNpmForQualifyingResources(boolean useNpmForQualifyingResources) {
+        isUseNpmForQualifyingResources = useNpmForQualifyingResources;
         return this;
     }
 }

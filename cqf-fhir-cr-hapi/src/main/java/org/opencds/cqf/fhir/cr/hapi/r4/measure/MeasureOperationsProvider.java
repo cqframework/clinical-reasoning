@@ -92,7 +92,6 @@ public class MeasureOperationsProvider {
             RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
 
-        // LUKETODO:  consider adding this validation to all services where this could happen
         if (measureEvaluationOptions.isUseNpmForQualifyingResources()) {
             throw new InvalidRequestException(
                     "Measure evaluation by ID is not supported if NPM libraries and measures are enabled.  Use %s instead."
@@ -204,7 +203,6 @@ public class MeasureOperationsProvider {
                         reporter);
     }
 
-    // TODO: LD:  we may have to permanently keep this API separate from $evaluate_mesasure
     @Operation(name = CrProviderConstants.CR_OPERATION_EVALUATE_MEASURE_URL, idempotent = true, type = Measure.class)
     public MeasureReport evaluateMeasureWithUrl(
             @OperationParam(name = "measureUrl") String measureUrl,
@@ -222,7 +220,6 @@ public class MeasureOperationsProvider {
             throws InternalErrorException, FHIRException {
 
         if (!measureEvaluationOptions.isUseNpmForQualifyingResources()) {
-            // LUKETODO: do we really want to do this?
             throw new InvalidRequestException(
                     "The %s operation is only supported when NPM libraries and measures are enabled.  Use $evaluate-measure instead."
                             .formatted(CrProviderConstants.CR_OPERATION_EVALUATE_MEASURE_URL));

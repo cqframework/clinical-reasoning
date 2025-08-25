@@ -44,7 +44,6 @@ public final class MeasureOrNpmResourceHolder {
                 .isPresent();
     }
 
-    // LUKETODO: calls to hasLibrary are always inverted
     public boolean hasLibrary() {
         if (measure == null && (NpmResourceHolder.EMPTY == npmResourceHolder)) {
             throw new InvalidRequestException("Measure and NpmResourceHolder cannot both be null");

@@ -9,6 +9,7 @@ import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.repository.IRepository;
+import jakarta.annotation.Nonnull;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -179,8 +180,12 @@ public class MultiMeasure {
                     serverBase,
                     measurePeriodValidator,
                     new R4MeasureServiceUtils(repository),
-                    // LUKETODO: field?
-                    new R4FhirOrNpmResourceProvider(repository, npmPackageLoader, evaluationOptions));
+                    getR4FhirOrNpmResourceProvider());
+        }
+
+        @Nonnull
+        private R4FhirOrNpmResourceProvider getR4FhirOrNpmResourceProvider() {
+            return new R4FhirOrNpmResourceProvider(repository, npmPackageLoader, evaluationOptions);
         }
 
         public MultiMeasure.When when() {

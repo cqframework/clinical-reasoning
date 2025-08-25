@@ -40,7 +40,10 @@ import org.opencds.cqf.fhir.utility.npm.NpmResourceHolder;
 import org.opencds.cqf.fhir.utility.search.Searches;
 import org.slf4j.Logger;
 
-// LUKETODO:   javadoc
+/**
+ * Combined readonly operations on Repository and NPM resources for R4 Measures and Libraries, and possibly
+ * other resources such as PlanDefinition, ValueSet, etc in the future.
+ */
 public class R4FhirOrNpmResourceProvider {
 
     private static final Logger log = getLogger(R4FhirOrNpmResourceProvider.class);
@@ -100,7 +103,6 @@ public class R4FhirOrNpmResourceProvider {
     }
 
     // LUKETODO:  return the List class instead?
-    // LUKETODO:  dedicated class to search either FHIR or NPM?
     public MeasureOrNpmResourceHolder foldMeasure(Either3<CanonicalType, IdType, Measure> measureEither) {
         if (measureEvaluationOptions.isUseNpmForQualifyingResources()) {
             return foldMeasureForNpm(measureEither);

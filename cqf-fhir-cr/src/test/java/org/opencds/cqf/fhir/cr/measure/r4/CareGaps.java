@@ -12,6 +12,7 @@ import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.repository.IRepository;
+import jakarta.annotation.Nonnull;
 import java.nio.file.Path;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -116,6 +117,7 @@ public class CareGaps {
             this.careGapsProperties.setCareGapsCompositionSectionAuthor("alphora-author");
             this.serverBase = "http://localhost";
             this.measurePeriodEvaluator = new MeasurePeriodValidator();
+            // LUKETODO: allow custom npm loader?
             this.npmPackageLoader = NpmPackageLoader.DEFAULT;
         }
 
@@ -148,8 +150,12 @@ public class CareGaps {
                     evaluationOptions,
                     serverBase,
                     measurePeriodEvaluator,
-                    // LUKETODO:  field?
-                    new R4FhirOrNpmResourceProvider(repository, npmPackageLoader, evaluationOptions));
+                    getR4FhirOrNpmResourceProvider());
+        }
+
+        @Nonnull
+        private R4FhirOrNpmResourceProvider getR4FhirOrNpmResourceProvider() {
+            return new R4FhirOrNpmResourceProvider(repository, npmPackageLoader, evaluationOptions);
         }
 
         public When when() {

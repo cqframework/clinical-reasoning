@@ -6,6 +6,7 @@ import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.repository.IRepository;
+import jakarta.annotation.Nonnull;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -102,11 +103,12 @@ public class CollectData {
         }
 
         private R4CollectDataService buildR4CollectDataService() {
-            return new R4CollectDataService(
-                    repository,
-                    evaluationOptions,
-                    new R4FhirOrNpmResourceProvider(repository, npmPackageLoader, evaluationOptions));
-            // LUKETODO: field?
+            return new R4CollectDataService(repository, evaluationOptions, getR4FhirOrNpmResourceProvider());
+        }
+
+        @Nonnull
+        private R4FhirOrNpmResourceProvider getR4FhirOrNpmResourceProvider() {
+            return new R4FhirOrNpmResourceProvider(repository, npmPackageLoader, evaluationOptions);
         }
 
         public When when() {

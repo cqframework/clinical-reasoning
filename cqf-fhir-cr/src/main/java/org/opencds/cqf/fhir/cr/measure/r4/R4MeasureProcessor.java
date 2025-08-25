@@ -248,41 +248,6 @@ public class R4MeasureProcessor {
 
     public CompositeEvaluationResultsPerMeasure evaluateMeasureWithCqlEngine(
             List<String> subjects,
-            Either3<CanonicalType, IdType, Measure> measureEither,
-            @Nullable ZonedDateTime periodStart,
-            @Nullable ZonedDateTime periodEnd,
-            Parameters parameters,
-            CqlEngine context) {
-
-        return evaluateMultiMeasuresPlusNpmHoldersWithCqlEngine(
-                subjects,
-                MeasureOrNpmResourceHolderList.of(r4FhirOrNpmResourceProvider.foldMeasure(measureEither)),
-                periodStart,
-                periodEnd,
-                parameters,
-                context);
-    }
-
-    // LUEKTODO:  test for coverage
-    public CompositeEvaluationResultsPerMeasure evaluateMeasureIdWithCqlEngine(
-            List<String> subjects,
-            Either3<CanonicalType, IdType, Measure> measureId,
-            @Nullable ZonedDateTime periodStart,
-            @Nullable ZonedDateTime periodEnd,
-            Parameters parameters,
-            CqlEngine context) {
-
-        return evaluateMultiMeasuresPlusNpmHoldersWithCqlEngine(
-                subjects,
-                MeasureOrNpmResourceHolderList.of(r4FhirOrNpmResourceProvider.foldMeasure(measureId)),
-                periodStart,
-                periodEnd,
-                parameters,
-                context);
-    }
-
-    public CompositeEvaluationResultsPerMeasure evaluateMeasureWithCqlEngine(
-            List<String> subjects,
             MeasureOrNpmResourceHolder measureOrNpmResourceHolder,
             @Nullable ZonedDateTime periodStart,
             @Nullable ZonedDateTime periodEnd,
@@ -298,26 +263,6 @@ public class R4MeasureProcessor {
                 context);
     }
 
-    // LUKETODO:  see if we still need this method from cdr-cr
-    //    public CompositeEvaluationResultsPerMeasure evaluateMultiMeasureIdsWithCqlEngine(
-    //            List<String> subjects,
-    //            List<IdType> measureIds,
-    //            @Nullable ZonedDateTime periodStart,
-    //            @Nullable ZonedDateTime periodEnd,
-    //            Parameters parameters,
-    //            CqlEngine context) {
-    //        return evaluateMultiMeasuresWithCqlEngine(
-    //                subjects,
-    //                measureIds.stream()
-    //                        .map(IIdType::toUnqualifiedVersionless)
-    //                        .map(id -> R4MeasureServiceUtils.resolveById(id, repository))
-    //                        .toList(),
-    //                periodStart,
-    //                periodEnd,
-    //                parameters,
-    //                context);
-    //    }
-
     public CompositeEvaluationResultsPerMeasure evaluateMultiMeasuresWithCqlEngine(
             List<String> subjects,
             MeasureOrNpmResourceHolderList measureResourcesOrHolderList,
@@ -329,7 +274,6 @@ public class R4MeasureProcessor {
                 subjects, measureResourcesOrHolderList, periodStart, periodEnd, parameters, context);
     }
 
-    // LUKETODO:  who actually calls this besides evaluateMultiMeasuresWithCqlEngine
     CompositeEvaluationResultsPerMeasure evaluateMultiMeasuresPlusNpmHoldersWithCqlEngine(
             List<String> subjects,
             MeasureOrNpmResourceHolderList measureOrNpmResourceHolderList,
@@ -641,15 +585,4 @@ public class R4MeasureProcessor {
     private void popAllLibrariesFromCqlEngine(CqlEngine context, List<org.hl7.elm.r1.Library> libraries) {
         libraries.forEach(lib -> context.getState().exitLibrary(true));
     }
-
-    // LUKETODO:  get rid of this after mining for requirements
-    //    private Measure getMeasure(
-    //            Either3<CanonicalType, IdType, Measure> measure, NpmResourceInfoForCql npmResourceHolders) {
-    //        final Optional<IMeasureAdapter> optMeasure = npmResourceHolders.getMeasure();
-    //        if (optMeasure.isPresent() && optMeasure.get().get() instanceof Measure measureFromNpm) {
-    //            return measureFromNpm;
-    //        }
-    //
-    //        return measure.fold(this::resolveByUrl, this::resolveById, Function.identity());
-    //    }
 }

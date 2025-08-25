@@ -82,7 +82,7 @@ public class MeasureCommand implements Callable<Integer> {
         return 0; // Return an appropriate exit code
     }
 
-    record SubjectAndReport(String subjectId, EvaluationResult result, MeasureReport measureReport) {}
+    public record SubjectAndReport(String subjectId, EvaluationResult result, MeasureReport measureReport) {}
 
     public static Stream<SubjectAndReport> evaluate(MeasureCommandArgument args) {
         var cqlArgs = args.cql;

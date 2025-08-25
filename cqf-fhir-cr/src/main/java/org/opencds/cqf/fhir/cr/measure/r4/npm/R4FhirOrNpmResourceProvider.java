@@ -286,7 +286,34 @@ public class R4FhirOrNpmResourceProvider {
     }
 
     public Measure resolveById(IdType id) {
+        if (measureEvaluationOptions.isUseNpmForQualifyingResources()) {
+            throw new InvalidRequestException(
+                    "Queries by measure ID: %s are not supported by NPM resources".formatted(id));
+        }
+
         return this.repository.read(Measure.class, id);
+    }
+
+    public Measure resolveByUrl(CanonicalType measureUrl) {
+        if (measureEvaluationOptions.isUseNpmForQualifyingResources()) {
+            final NpmResourceHolder npmResourceHolder = npmPackageLoader.loadNpmResources(measureUrl);
+
+            var optMeasureAdapter = npmResourceHolder.getMeasure();
+
+            if (optMeasureAdapter.isEmpty()) {
+                throw new IllegalArgumentException("No measure found for URL: %s".formatted(measureUrl.getValue()));
+            }
+
+            var measureAdapter = optMeasureAdapter.get();
+
+            if (!(measureAdapter.get() instanceof Measure measure)) {
+                throw new IllegalArgumentException("MeasureAdapter is not a Measure for URL: %s".formatted(measureUrl));
+            }
+
+            return measure;
+        }
+
+        return resolveByUrl(measureUrl.getValue());
     }
 
     public Measure resolveByUrl(String url) {

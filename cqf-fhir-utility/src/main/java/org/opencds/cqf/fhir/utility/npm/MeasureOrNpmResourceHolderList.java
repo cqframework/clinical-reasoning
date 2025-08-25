@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Objects;
 import org.hl7.fhir.r4.model.Measure;
 
-// LUKETODO:  top level record
+// LUKETODO:  javadoc
 public final class MeasureOrNpmResourceHolderList {
 
     private final List<MeasureOrNpmResourceHolder> measuresPlusNpmResourceHolders;

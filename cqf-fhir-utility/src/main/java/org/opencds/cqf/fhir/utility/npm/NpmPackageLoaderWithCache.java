@@ -8,8 +8,11 @@ import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
 
-// LUKETODO:  javadoc
-// LUKETODO:  top level
+/**
+ * Support operations against a set of NPM resources that will either operate on the already
+ * retrieved resources, or delegate to another {@link NpmPackageLoader} if the retrieved data
+ * does not return results for a given query.
+ */
 public class NpmPackageLoaderWithCache implements NpmPackageLoader {
 
     private final List<NpmResourceHolder> npmResourceHolders;

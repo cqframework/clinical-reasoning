@@ -11,8 +11,10 @@ import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Measure;
 import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
 
-// LUKETODO:  top level record
-// LUKETODO:  docs:  the measure in question is either found in the DB or derived from NPM
+/**
+ * This class supports polymorphic handling of a Measure that was either retrieved from the FHIR
+ * DB or an NPM package.
+ */
 public final class MeasureOrNpmResourceHolder {
 
     @Nullable
@@ -55,7 +57,7 @@ public final class MeasureOrNpmResourceHolder {
         return npmResourceHolder.getOptMainLibrary().isPresent();
     }
 
-    public String getMainLibraryUrl() {
+    public Optional<String> getMainLibraryUrl() {
         if (measure == null && (NpmResourceHolder.EMPTY == npmResourceHolder)) {
             throw new InvalidRequestException("Measure and NpmResourceHolder cannot both be null");
         }
@@ -64,17 +66,13 @@ public final class MeasureOrNpmResourceHolder {
             final List<CanonicalType> libraryUrls = measure.getLibrary();
 
             if (libraryUrls.isEmpty()) {
-                throw new InvalidRequestException(
-                        "Measure does not have any library urls specified: %s".formatted(measure.getUrl()));
+                return Optional.empty();
             }
 
-            return libraryUrls.get(0).asStringValue();
+            return Optional.ofNullable(libraryUrls.get(0).asStringValue());
         }
 
-        return npmResourceHolder
-                .getOptMainLibrary()
-                .map(ILibraryAdapter::getUrl)
-                .orElse(null); // LUKETODO:  is this wise?
+        return npmResourceHolder.getOptMainLibrary().map(ILibraryAdapter::getUrl);
     }
 
     public IIdType getMeasureIdElement() {

@@ -128,8 +128,8 @@ public class IgRepository implements IRepository {
     private final IgConventions conventions;
     private final ResourceMatcher resourceMatcher;
     private final NpmPackageLoader npmPackageLoader;
-    // LUKETODO:  separate fields for JSON and TGZs
-    private final List<Path> npmJsonAndTgzPaths;
+    private final Path npmJsonPath;
+    private final List<Path> npmTgzPaths;
 
     private IRepositoryOperationProvider operationProvider;
 
@@ -244,29 +244,22 @@ public class IgRepository implements IRepository {
         this.conventions = requireNonNull(conventions, "conventions cannot be null");
         this.resourceMatcher = Repositories.getResourceMatcher(this.fhirContext);
         this.operationProvider = operationProvider;
-        this.npmJsonAndTgzPaths = buildNpmJsonAndTgzPaths();
-        this.npmPackageLoader = buildNpmPackageLoader(getTgzPaths());
+        this.npmJsonPath = buildNpmJsonPath().orElse(null);
+        this.npmTgzPaths = buildTgzPaths();
+        this.npmPackageLoader = buildNpmPackageLoader(npmTgzPaths);
     }
 
     public NpmPackageLoader getNpmPackageLoader() {
         return npmPackageLoader;
     }
 
-    public List<Path> getNpmJsonAndTgzPaths() {
-        return npmJsonAndTgzPaths;
+    public Path getJson() {
+        return this.npmJsonPath;
     }
 
-    // LUKETODO:  here or upstream?
-    public Path getJson() {
-        final List<Path> jsonPaths = npmJsonAndTgzPaths.stream()
-                .filter(file -> file.getFileName().toString().endsWith(".json"))
-                .toList();
-
-        if (jsonPaths.size() != 1) {
-            throw new IllegalArgumentException("expected only one path");
-        }
-
-        return jsonPaths.get(0);
+    @Nonnull
+    public List<Path> getNpmTgzPaths() {
+        return npmTgzPaths;
     }
 
     public Path getRootPath() {
@@ -277,15 +270,26 @@ public class IgRepository implements IRepository {
         return NpmPackageLoaderInMemory.fromNpmPackageAbsolutePath(npmTgzPaths);
     }
 
-    @Nonnull
-    private List<Path> getTgzPaths() {
-        return this.npmJsonAndTgzPaths.stream()
-                .filter(file -> file.getFileName().toString().endsWith(".tgz"))
-                .toList();
+    private Optional<Path> buildNpmJsonPath() {
+        final Path npmDir = resolveNpmPath();
+
+        // More often than not, the npm directory will not exist in an IgRepository
+        if (!Files.exists(npmDir) || !Files.isDirectory(npmDir)) {
+            return Optional.empty();
+        }
+
+        try (Stream<Path> npmSubPaths = Files.list(npmDir)) {
+            return npmSubPaths
+                    .filter(Files::isRegularFile)
+                    .filter(file -> file.getFileName().toString().endsWith(".json"))
+                    .findFirst();
+        } catch (IOException exception) {
+            throw new IllegalStateException("Could not resolve NPM JSON file", exception);
+        }
     }
 
-    private List<Path> buildNpmJsonAndTgzPaths() {
-        final Path npmDir = root.resolve("input/npm");
+    private List<Path> buildTgzPaths() {
+        final Path npmDir = resolveNpmPath();
 
         // More often than not, the npm directory will not exist in an IgRepository
         if (!Files.exists(npmDir) || !Files.isDirectory(npmDir)) {
@@ -295,11 +299,10 @@ public class IgRepository implements IRepository {
         try (Stream<Path> npmSubPaths = Files.list(npmDir)) {
             return npmSubPaths
                     .filter(Files::isRegularFile)
-                    .filter(file -> file.getFileName().toString().endsWith(".tgz")
-                            || file.getFileName().toString().endsWith(".json"))
+                    .filter(file -> file.getFileName().toString().endsWith(".tgz"))
                     .toList();
         } catch (IOException exception) {
-            throw new IllegalStateException("Could not resolve NPM files", exception);
+            throw new IllegalStateException("Could not resolve NPM namespace tgz files", exception);
         }
     }
 
@@ -313,6 +316,11 @@ public class IgRepository implements IRepository {
 
     public void clearCache(Iterable<Path> paths) {
         this.resourceCache.invalidate(paths);
+    }
+
+    @Nonnull
+    private Path resolveNpmPath() {
+        return root.resolve("input/npm");
     }
 
     private boolean isExternalPath(Path path) {

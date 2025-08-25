@@ -477,14 +477,17 @@ public class R4MeasureProcessor {
         };
     }
 
-    // LUKETODO:  redo javadoc
     /**
-     * method to extract Library version defined on the Measure resource
-     * @param measureOrNpmResourceHolder resource that has desired Library
+     * method to extract Library version defined on the Measure in question
+     * <p/>
+     * @param measureOrNpmResourceHolder FHIR or NPM Measure that has desired Library
      * @return version identifier of Library
      */
     protected VersionedIdentifier getLibraryVersionIdentifier(MeasureOrNpmResourceHolder measureOrNpmResourceHolder) {
-        var url = measureOrNpmResourceHolder.getMainLibraryUrl();
+        var url = measureOrNpmResourceHolder
+                .getMainLibraryUrl()
+                .orElseThrow(() -> new InvalidRequestException("Measure %s does not have a primary library specified"
+                        .formatted(measureOrNpmResourceHolder.getMeasureUrl())));
 
         // Check to see if this Library exists in an NPM Package.  If not, search the Repository
         if (!measureOrNpmResourceHolder.hasNpmLibrary()) {

@@ -24,13 +24,12 @@ import org.opencds.cqf.fhir.cr.measure.common.CompositeEvaluationResultsPerMeasu
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorUtils;
+import org.opencds.cqf.fhir.cr.measure.r4.npm.R4FhirOrNpmResourceProvider;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.builder.BundleBuilder;
 import org.opencds.cqf.fhir.utility.npm.MeasureOrNpmResourceHolder;
 import org.opencds.cqf.fhir.utility.npm.MeasureOrNpmResourceHolderList;
-import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
-import org.opencds.cqf.fhir.utility.npm.NpmPackageLoaderWithCache;
 import org.opencds.cqf.fhir.utility.repository.Repositories;
 
 /**
@@ -50,7 +49,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
     private final R4RepositorySubjectProvider subjectProvider;
     private final R4MeasureProcessor r4MeasureProcessorStandardRepository;
     private final R4MeasureServiceUtils r4MeasureServiceUtilsStandardRepository;
-    private final NpmPackageLoader npmPackageLoader;
+    private final R4FhirOrNpmResourceProvider r4FhirOrNpmResourceProvider;
 
     public R4MultiMeasureService(
             IRepository repository,
@@ -58,20 +57,16 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
             String serverBase,
             MeasurePeriodValidator measurePeriodValidator,
             R4MeasureServiceUtils r4MeasureServiceUtilsStandardRepository,
-            NpmPackageLoader npmPackageLoader) {
+            R4FhirOrNpmResourceProvider r4FhirOrNpmResourceProvider) {
         this.repository = repository;
         this.measureEvaluationOptions = measureEvaluationOptions;
         this.measurePeriodValidator = measurePeriodValidator;
         this.serverBase = serverBase;
         this.r4MeasureServiceUtilsStandardRepository = r4MeasureServiceUtilsStandardRepository;
-        this.npmPackageLoader = npmPackageLoader;
         this.subjectProvider = new R4RepositorySubjectProvider(measureEvaluationOptions.getSubjectProviderOptions());
         this.r4MeasureProcessorStandardRepository = new R4MeasureProcessor(
-                repository,
-                this.measureEvaluationOptions,
-                this.measureProcessorUtils,
-                this.r4MeasureServiceUtilsStandardRepository,
-                this.npmPackageLoader);
+                repository, this.measureEvaluationOptions, this.measureProcessorUtils, r4FhirOrNpmResourceProvider);
+        this.r4FhirOrNpmResourceProvider = r4FhirOrNpmResourceProvider;
     }
 
     @Override
@@ -100,15 +95,13 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
             var repositoryToUse =
                     Repositories.proxy(repository, true, dataEndpoint, contentEndpoint, terminologyEndpoint);
 
-            r4MeasureServiceUtilsToUse =
-                    new R4MeasureServiceUtils(repositoryToUse, this.npmPackageLoader, this.measureEvaluationOptions);
+            r4MeasureServiceUtilsToUse = new R4MeasureServiceUtils(repositoryToUse);
 
             r4ProcessorToUse = new R4MeasureProcessor(
                     repositoryToUse,
                     this.measureEvaluationOptions,
                     this.measureProcessorUtils,
-                    r4MeasureServiceUtilsToUse,
-                    npmPackageLoader);
+                    this.r4FhirOrNpmResourceProvider);
 
         } else {
             r4ProcessorToUse = r4MeasureProcessorStandardRepository;
@@ -118,7 +111,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
         r4MeasureServiceUtilsToUse.ensureSupplementalDataElementSearchParameter();
 
         var measurePlusNpmResourceHolderList =
-                r4MeasureServiceUtilsToUse.getMeasurePlusNpmDetails(measureIds, measureIdentifiers, measureUrls);
+                r4FhirOrNpmResourceProvider.getMeasurePlusNpmDetails(measureIds, measureIdentifiers, measureUrls);
 
         log.info("multi-evaluate-measure, measures to evaluate: {}", measurePlusNpmResourceHolderList.size());
 
@@ -138,7 +131,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
                 r4ProcessorToUse.getRepository(),
                 this.measureEvaluationOptions.getEvaluationSettings(),
                 additionalData,
-                NpmPackageLoaderWithCache.of(measurePlusNpmResourceHolderList.npmResourceHolders(), npmPackageLoader));
+                r4FhirOrNpmResourceProvider.npmPackageLoaderWithCache(measurePlusNpmResourceHolderList));
 
         // This is basically a Map of measure -> subject -> EvaluationResult
         var compositeEvaluationResultsPerMeasure = r4ProcessorToUse.evaluateMultiMeasuresPlusNpmHoldersWithCqlEngine(

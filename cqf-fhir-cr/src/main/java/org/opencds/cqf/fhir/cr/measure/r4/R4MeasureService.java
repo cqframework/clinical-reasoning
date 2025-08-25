@@ -18,10 +18,9 @@ import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorUtils;
+import org.opencds.cqf.fhir.cr.measure.r4.npm.R4FhirOrNpmResourceProvider;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.monad.Either3;
-import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
-import org.opencds.cqf.fhir.utility.npm.NpmPackageLoaderWithCache;
 import org.opencds.cqf.fhir.utility.repository.FederatedRepository;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.repository.Repositories;
@@ -33,20 +32,20 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
     private final R4RepositorySubjectProvider subjectProvider;
     private final MeasureProcessorUtils measureProcessorUtils = new MeasureProcessorUtils();
     private final R4MeasureServiceUtils r4MeasureServiceUtils;
-    private final NpmPackageLoader npmPackageLoader;
+    private final R4FhirOrNpmResourceProvider r4FhirOrNpmResourceProvider;
 
     public R4MeasureService(
             IRepository repository,
             MeasureEvaluationOptions measureEvaluationOptions,
             MeasurePeriodValidator measurePeriodValidator,
             R4MeasureServiceUtils r4MeasureServiceUtils,
-            NpmPackageLoader npmPackageLoader) {
+            R4FhirOrNpmResourceProvider r4FhirOrNpmResourceProvider) {
         this.repository = repository;
         this.measureEvaluationOptions = measureEvaluationOptions;
         this.measurePeriodValidator = measurePeriodValidator;
         this.subjectProvider = new R4RepositorySubjectProvider(measureEvaluationOptions.getSubjectProviderOptions());
         this.r4MeasureServiceUtils = r4MeasureServiceUtils;
-        this.npmPackageLoader = npmPackageLoader;
+        this.r4FhirOrNpmResourceProvider = r4FhirOrNpmResourceProvider;
     }
 
     @Override
@@ -73,8 +72,7 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
                 proxyRepoForMeasureProcessor,
                 this.measureEvaluationOptions,
                 this.measureProcessorUtils,
-                this.r4MeasureServiceUtils,
-                this.npmPackageLoader);
+                this.r4FhirOrNpmResourceProvider);
 
         r4MeasureServiceUtils.ensureSupplementalDataElementSearchParameter();
 
@@ -92,16 +90,16 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
 
         var subjects = getSubjects(subjectId, proxyRepoForMeasureProcessor, additionalData);
 
-        var measurePlusNpmResourceHolder = r4MeasureServiceUtils.foldMeasure(measure, proxyRepoForMeasureProcessor);
+        var measurePlusNpmResourceHolder =
+                r4FhirOrNpmResourceProvider.foldMeasure(measure, proxyRepoForMeasureProcessor);
 
         // Replicate the old logic of using the repository used to initialize the measure processor
         // as the repository for the CQL engine context.
-        // LUKETODO:  find and pass the the NPM resource load and loaded NPM resources here?
         var context = Engines.forRepository(
                 proxyRepoForMeasureProcessor,
                 this.measureEvaluationOptions.getEvaluationSettings(),
                 additionalData,
-                NpmPackageLoaderWithCache.of(measurePlusNpmResourceHolder.npmResourceHolder(), npmPackageLoader));
+                r4FhirOrNpmResourceProvider.npmPackageLoaderWithCache(measurePlusNpmResourceHolder));
 
         var evaluationResults = processor.evaluateMeasureWithCqlEngine(
                 subjects, measurePlusNpmResourceHolder, periodStart, periodEnd, parameters, context);

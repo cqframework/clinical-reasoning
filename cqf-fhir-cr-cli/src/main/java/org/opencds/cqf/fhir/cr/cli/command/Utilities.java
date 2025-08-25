@@ -32,6 +32,7 @@ import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.CODE_LOOK
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_MEMBERSHIP_MODE;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_PRE_EXPANSION_MODE;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.repository.ProxyRepository;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
@@ -171,5 +172,10 @@ public class Utilities {
         } catch (IOException e) {
             throw new RuntimeException("Failed to write evaluation result", e);
         }
+    }
+
+    // LUKETODO: think carefully about what to do here????
+    public static NpmPackageLoader createNpmPackageLoader() {
+        return NpmPackageLoader.DEFAULT;
     }
 }

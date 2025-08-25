@@ -63,6 +63,7 @@ import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.SelectedGroup.SelectedReference;
+import org.opencds.cqf.fhir.cr.measure.r4.npm.R4FhirOrNpmResourceProvider;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.monad.Either3;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
@@ -194,8 +195,8 @@ public class Measure {
                     repository,
                     evaluationOptions,
                     measurePeriodValidator,
-                    new R4MeasureServiceUtils(repository, npmPackageLoaderInner, evaluationOptions),
-                    npmPackageLoaderInner);
+                    new R4MeasureServiceUtils(repository),
+                    new R4FhirOrNpmResourceProvider(repository, npmPackageLoaderInner, evaluationOptions));
         }
 
         private NpmPackageLoader npmPackageLoaderOrEmpty() {

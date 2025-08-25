@@ -28,7 +28,7 @@ import org.opencds.cqf.fhir.cr.cli.command.CqlCommand.SubjectAndResult;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorUtils;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureProcessor;
-import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
+import org.opencds.cqf.fhir.cr.measure.r4.npm.R4FhirOrNpmResourceProvider;
 import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Command;
@@ -92,7 +92,8 @@ public class MeasureCommand implements Callable<Integer> {
         var resource = getMeasure(parser, args.measurePath, args.measureName);
         var processor = getR4MeasureProcessor(
                 Utilities.createEvaluationSettings(cqlArgs.content.cqlPath, cqlArgs.hedisCompatibilityMode),
-                Utilities.createRepository(fhirContext, cqlArgs.fhir.terminologyUrl, cqlArgs.fhir.dataUrl));
+                Utilities.createRepository(fhirContext, cqlArgs.fhir.terminologyUrl, cqlArgs.fhir.dataUrl),
+                Utilities.createNpmPackageLoader());
 
         var start = args.periodStart != null
                 ? LocalDate.parse(args.periodStart, DateTimeFormatter.ISO_LOCAL_DATE)
@@ -133,24 +134,22 @@ public class MeasureCommand implements Callable<Integer> {
 
     @Nonnull
     private static R4MeasureProcessor getR4MeasureProcessor(
-            EvaluationSettings evaluationSettings, IRepository repository) {
+            EvaluationSettings evaluationSettings, IRepository repository, NpmPackageLoader npmPackageLoader) {
 
         MeasureEvaluationOptions evaluationOptions = new MeasureEvaluationOptions();
         evaluationOptions.setApplyScoringSetMembership(false);
         evaluationOptions.setEvaluationSettings(evaluationSettings);
 
-        // LUKETODO:  figure out how to inject the NpmPackageLoader here since this is the bare minimum implementation
-        // to fix the compile error:
-        var npmPackageLoader = NpmPackageLoader.DEFAULT;
-
-        var r4MeasureServiceUtils = new R4MeasureServiceUtils(
-                repository,
-                npmPackageLoader,
-                // LUKETODO:  how do we figure out if we're doing NPM or not?
-                MeasureEvaluationOptions.defaultOptions());
-
         return new R4MeasureProcessor(
-                repository, evaluationOptions, new MeasureProcessorUtils(), r4MeasureServiceUtils, npmPackageLoader);
+                repository,
+                evaluationOptions,
+                new MeasureProcessorUtils(),
+                getR4FhirOrNpmResourceLoader(repository, npmPackageLoader, evaluationOptions));
+    }
+
+    private static R4FhirOrNpmResourceProvider getR4FhirOrNpmResourceLoader(
+            IRepository repository, NpmPackageLoader npmPackageLoader, MeasureEvaluationOptions evaluationOptions) {
+        return new R4FhirOrNpmResourceProvider(repository, npmPackageLoader, evaluationOptions);
     }
 
     private void writeJsonToFile(String json, String patientId, Path path) {

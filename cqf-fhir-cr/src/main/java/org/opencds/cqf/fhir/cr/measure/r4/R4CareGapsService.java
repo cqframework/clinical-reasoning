@@ -16,10 +16,10 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.opencds.cqf.fhir.cr.measure.CareGapsProperties;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
+import org.opencds.cqf.fhir.cr.measure.r4.npm.R4FhirOrNpmResourceProvider;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.monad.Either3;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
-import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 
 /**
  * Care Gap service that processes and produces care-gaps report as a result
@@ -33,16 +33,16 @@ public class R4CareGapsService implements R4CareGapsServiceInterface {
             MeasureEvaluationOptions measureEvaluationOptions,
             String serverBase,
             MeasurePeriodValidator measurePeriodEvaluator,
-            NpmPackageLoader npmPackageLoader) {
+            R4FhirOrNpmResourceProvider r4FhirOrNpmResourceProvider) {
 
         r4CareGapsProcessor = new R4CareGapsProcessor(
                 careGapsProperties,
                 repository,
-                new R4MeasureServiceUtils(repository, npmPackageLoader, measureEvaluationOptions),
+                new R4MeasureServiceUtils(repository),
                 measureEvaluationOptions,
                 serverBase,
                 measurePeriodEvaluator,
-                npmPackageLoader);
+                r4FhirOrNpmResourceProvider);
     }
 
     /**

@@ -20,6 +20,7 @@ import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_M
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
+import org.opencds.cqf.fhir.cr.measure.r4.npm.R4FhirOrNpmResourceProvider;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
@@ -96,12 +97,16 @@ public class CollectData {
             this.repository = new IgRepository(
                     FhirContext.forR4Cached(),
                     Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
-            this.measureServiceUtils = new R4MeasureServiceUtils(repository, npmPackageLoader, evaluationOptions);
+            this.measureServiceUtils = new R4MeasureServiceUtils(repository);
             return this;
         }
 
         private R4CollectDataService buildR4CollectDataService() {
-            return new R4CollectDataService(repository, evaluationOptions, npmPackageLoader, measureServiceUtils);
+            return new R4CollectDataService(
+                    repository,
+                    evaluationOptions,
+                    new R4FhirOrNpmResourceProvider(repository, npmPackageLoader, evaluationOptions));
+            // LUKETODO: field?
         }
 
         public When when() {

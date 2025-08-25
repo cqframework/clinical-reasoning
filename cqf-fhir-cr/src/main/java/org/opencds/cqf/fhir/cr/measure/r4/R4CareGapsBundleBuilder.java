@@ -47,6 +47,7 @@ import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.enumeration.CareGapsStatusCode;
+import org.opencds.cqf.fhir.cr.measure.r4.npm.R4FhirOrNpmResourceProvider;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.Resources;
@@ -56,7 +57,6 @@ import org.opencds.cqf.fhir.utility.builder.CompositionBuilder;
 import org.opencds.cqf.fhir.utility.builder.CompositionSectionComponentBuilder;
 import org.opencds.cqf.fhir.utility.builder.DetectedIssueBuilder;
 import org.opencds.cqf.fhir.utility.builder.NarrativeSettings;
-import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 
 /**
  * Care Gaps Bundle Builder houses the logic for constructing a Care-Gaps Document Bundle for a Patient per Measures requested
@@ -73,8 +73,8 @@ public class R4CareGapsBundleBuilder {
     private static final FhirContext fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
     private final CareGapsProperties careGapsProperties;
     private final String serverBase;
-    private final R4MeasureServiceUtils r4MeasureServiceUtils;
     private final R4MultiMeasureService r4MultiMeasureService;
+    private final R4FhirOrNpmResourceProvider r4FhirOrNpmResourceProvider;
 
     public R4CareGapsBundleBuilder(
             CareGapsProperties careGapsProperties,
@@ -84,20 +84,20 @@ public class R4CareGapsBundleBuilder {
             Map<String, Resource> configuredResources,
             R4MeasureServiceUtils r4MeasureServiceUtils,
             MeasurePeriodValidator measurePeriodValidator,
-            NpmPackageLoader npmPackageLoader) {
+            R4FhirOrNpmResourceProvider r4FhirOrNpmResourceProvider) {
         this.repository = repository;
         this.careGapsProperties = careGapsProperties;
         this.serverBase = serverBase;
         this.configuredResources = configuredResources;
-        this.r4MeasureServiceUtils = r4MeasureServiceUtils;
+        this.r4FhirOrNpmResourceProvider = r4FhirOrNpmResourceProvider;
 
         r4MultiMeasureService = new R4MultiMeasureService(
                 repository,
                 measureEvaluationOptions,
                 serverBase,
                 measurePeriodValidator,
-                this.r4MeasureServiceUtils,
-                npmPackageLoader);
+                r4MeasureServiceUtils,
+                this.r4FhirOrNpmResourceProvider);
     }
 
     public List<Parameters.ParametersParameterComponent> makePatientBundles(
@@ -158,7 +158,7 @@ public class R4CareGapsBundleBuilder {
             MeasureReport mr = (MeasureReport) entry.getResource();
             addProfile(mr);
             addResourceId(mr);
-            Measure measure = r4MeasureServiceUtils.resolveByUrl(mr.getMeasure());
+            Measure measure = r4FhirOrNpmResourceProvider.resolveByUrl(mr.getMeasure());
             // Applicable Reports per Gap-Status
             var gapStatus = gapEvaluator.getGroupGapStatus(measure, mr);
             var filteredGapStatus = filteredGapStatus(gapStatus, statuses);

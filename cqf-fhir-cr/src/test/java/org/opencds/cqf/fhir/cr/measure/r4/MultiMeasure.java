@@ -44,7 +44,7 @@ import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
-import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
+import org.opencds.cqf.fhir.cr.measure.r4.npm.R4FhirOrNpmResourceProvider;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
@@ -178,8 +178,9 @@ public class MultiMeasure {
                     evaluationOptions,
                     serverBase,
                     measurePeriodValidator,
-                    new R4MeasureServiceUtils(repository, npmPackageLoader, evaluationOptions),
-                    npmPackageLoader);
+                    new R4MeasureServiceUtils(repository),
+                    // LUKETODO: field?
+                    new R4FhirOrNpmResourceProvider(repository, npmPackageLoader, evaluationOptions));
         }
 
         public MultiMeasure.When when() {

@@ -21,30 +21,26 @@ import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.CompositeEvaluationResultsPerMeasure;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorUtils;
-import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
+import org.opencds.cqf.fhir.cr.measure.r4.npm.R4FhirOrNpmResourceProvider;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
-import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 
 @SuppressWarnings("squid:S107")
 public class R4CollectDataService {
     private final IRepository repository;
     private final MeasureEvaluationOptions measureEvaluationOptions;
     private final R4RepositorySubjectProvider subjectProvider;
-    private final NpmPackageLoader npmPackageLoader;
-    private final R4MeasureServiceUtils r4MeasureServiceUtils;
     private final MeasureProcessorUtils measureProcessorUtils = new MeasureProcessorUtils();
+    private final R4FhirOrNpmResourceProvider r4FhirOrNpmResourceProvider;
 
     public R4CollectDataService(
             IRepository repository,
             MeasureEvaluationOptions measureEvaluationOptions,
-            NpmPackageLoader npmPackageLoader,
-            R4MeasureServiceUtils r4MeasureServiceUtils) {
+            R4FhirOrNpmResourceProvider r4FhirOrNpmResourceProvider) {
         this.repository = repository;
         this.measureEvaluationOptions = measureEvaluationOptions;
         this.subjectProvider = new R4RepositorySubjectProvider(measureEvaluationOptions.getSubjectProviderOptions());
-        this.r4MeasureServiceUtils = r4MeasureServiceUtils;
-        this.npmPackageLoader = npmPackageLoader;
+        this.r4FhirOrNpmResourceProvider = r4FhirOrNpmResourceProvider;
     }
 
     /**
@@ -79,15 +75,14 @@ public class R4CollectDataService {
                 this.repository,
                 this.measureEvaluationOptions,
                 this.measureProcessorUtils,
-                this.r4MeasureServiceUtils,
-                this.npmPackageLoader);
+                this.r4FhirOrNpmResourceProvider);
 
         List<String> subjectList = getSubjects(subject, practitioner, subjectProvider);
 
         var context =
                 Engines.forRepository(this.repository, this.measureEvaluationOptions.getEvaluationSettings(), null);
 
-        var foldedMeasure = r4MeasureServiceUtils.foldMeasure(Eithers.forMiddle3(measureId));
+        var foldedMeasure = r4FhirOrNpmResourceProvider.foldMeasure(Eithers.forMiddle3(measureId));
 
         if (!subjectList.isEmpty()) {
             for (String patient : subjectList) {

@@ -2,7 +2,6 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 
 import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.google.common.collect.ImmutableListMultimap;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -20,10 +19,8 @@ import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Parameters;
@@ -32,7 +29,6 @@ import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.fhir.model.R4FhirModelResolver;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
-import org.opencds.cqf.fhir.cql.VersionedIdentifiers;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.CompositeEvaluationResultsPerMeasure;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
@@ -43,34 +39,29 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorUtils;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 import org.opencds.cqf.fhir.cr.measure.common.MultiLibraryIdMeasureEngineDetails;
+import org.opencds.cqf.fhir.cr.measure.r4.npm.R4FhirOrNpmResourceProvider;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4DateHelper;
-import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.monad.Either3;
 import org.opencds.cqf.fhir.utility.npm.MeasureOrNpmResourceHolder;
 import org.opencds.cqf.fhir.utility.npm.MeasureOrNpmResourceHolderList;
-import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
-import org.opencds.cqf.fhir.utility.search.Searches;
 
 public class R4MeasureProcessor {
     private final IRepository repository;
     private final MeasureEvaluationOptions measureEvaluationOptions;
     private final MeasureProcessorUtils measureProcessorUtils;
-    private final R4MeasureServiceUtils r4MeasureServiceUtils;
-    private final NpmPackageLoader npmPackageLoader;
+    private final R4FhirOrNpmResourceProvider r4FhirOrNpmResourceProvider;
 
     public R4MeasureProcessor(
             IRepository repository,
             MeasureEvaluationOptions measureEvaluationOptions,
             MeasureProcessorUtils measureProcessorUtils,
-            R4MeasureServiceUtils r4MeasureServiceUtils,
-            NpmPackageLoader npmPackageLoader) {
+            R4FhirOrNpmResourceProvider r4FhirOrNpmResourceProvider) {
 
         this.repository = Objects.requireNonNull(repository);
         this.measureEvaluationOptions =
                 measureEvaluationOptions != null ? measureEvaluationOptions : MeasureEvaluationOptions.defaultOptions();
         this.measureProcessorUtils = measureProcessorUtils;
-        this.r4MeasureServiceUtils = r4MeasureServiceUtils;
-        this.npmPackageLoader = npmPackageLoader;
+        this.r4FhirOrNpmResourceProvider = r4FhirOrNpmResourceProvider;
     }
 
     // Expose this so CQL measure evaluation can use the same Repository as the one passed to the
@@ -89,7 +80,7 @@ public class R4MeasureProcessor {
             CqlEngine context,
             CompositeEvaluationResultsPerMeasure compositeEvaluationResultsPerMeasure) {
 
-        var measurePlusNpmResourceHolder = r4MeasureServiceUtils.foldMeasure(measure);
+        var measurePlusNpmResourceHolder = r4FhirOrNpmResourceProvider.foldMeasure(measure);
 
         return this.evaluateMeasure(
                 measurePlusNpmResourceHolder,
@@ -265,7 +256,7 @@ public class R4MeasureProcessor {
 
         return evaluateMultiMeasuresPlusNpmHoldersWithCqlEngine(
                 subjects,
-                MeasureOrNpmResourceHolderList.of(r4MeasureServiceUtils.foldMeasure(measureEither)),
+                MeasureOrNpmResourceHolderList.of(r4FhirOrNpmResourceProvider.foldMeasure(measureEither)),
                 periodStart,
                 periodEnd,
                 parameters,
@@ -283,7 +274,7 @@ public class R4MeasureProcessor {
 
         return evaluateMultiMeasuresPlusNpmHoldersWithCqlEngine(
                 subjects,
-                MeasureOrNpmResourceHolderList.of(r4MeasureServiceUtils.foldMeasure(measureId)),
+                MeasureOrNpmResourceHolderList.of(r4FhirOrNpmResourceProvider.foldMeasure(measureId)),
                 periodStart,
                 periodEnd,
                 parameters,
@@ -426,7 +417,7 @@ public class R4MeasureProcessor {
 
         var libraryIdentifiersToMeasureIds = measureOrNpmResourceHolderList.getMeasuresOrNpmResourceHolders().stream()
                 .collect(ImmutableListMultimap.toImmutableListMultimap(
-                        this::getLibraryVersionIdentifier, // Key function
+                        r4FhirOrNpmResourceProvider::getLibraryVersionIdentifier, // Key function
                         MeasureOrNpmResourceHolder::getMeasureIdElement));
 
         var libraryEngine = new LibraryEngine(repository, this.measureEvaluationOptions.getEvaluationSettings());
@@ -475,29 +466,6 @@ public class R4MeasureProcessor {
             default -> throw new InvalidRequestException("Unsupported MeasureEvalType: %s for Measure: %s"
                     .formatted(measureEvalType.toCode(), measure.getUrl()));
         };
-    }
-
-    /**
-     * method to extract Library version defined on the Measure in question
-     * <p/>
-     * @param measureOrNpmResourceHolder FHIR or NPM Measure that has desired Library
-     * @return version identifier of Library
-     */
-    protected VersionedIdentifier getLibraryVersionIdentifier(MeasureOrNpmResourceHolder measureOrNpmResourceHolder) {
-        var url = measureOrNpmResourceHolder
-                .getMainLibraryUrl()
-                .orElseThrow(() -> new InvalidRequestException("Measure %s does not have a primary library specified"
-                        .formatted(measureOrNpmResourceHolder.getMeasureUrl())));
-
-        // Check to see if this Library exists in an NPM Package.  If not, search the Repository
-        if (!measureOrNpmResourceHolder.hasNpmLibrary()) {
-            Bundle b = this.repository.search(Bundle.class, Library.class, Searches.byCanonical(url), null);
-            if (b.getEntry().isEmpty()) {
-                var errorMsg = "Unable to find Library with url: %s".formatted(url);
-                throw new ResourceNotFoundException(errorMsg);
-            }
-        }
-        return VersionedIdentifiers.forUrl(url);
     }
 
     /**

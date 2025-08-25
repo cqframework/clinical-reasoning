@@ -29,9 +29,9 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 import org.opencds.cqf.fhir.cr.measure.constant.CareGapsConstants;
 import org.opencds.cqf.fhir.cr.measure.enumeration.CareGapsStatusCode;
+import org.opencds.cqf.fhir.cr.measure.r4.npm.R4FhirOrNpmResourceProvider;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.monad.Either3;
-import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,6 +47,7 @@ public class R4CareGapsProcessor implements R4CareGapsProcessorInterface {
     private final R4MeasureServiceUtils r4MeasureServiceUtils;
     private final R4CareGapsBundleBuilder r4CareGapsBundleBuilder;
     private final R4RepositorySubjectProvider subjectProvider;
+    private final R4FhirOrNpmResourceProvider r4FhirOrNpmResourceProvider;
 
     public R4CareGapsProcessor(
             CareGapsProperties careGapsProperties,
@@ -55,10 +56,11 @@ public class R4CareGapsProcessor implements R4CareGapsProcessorInterface {
             MeasureEvaluationOptions measureEvaluationOptions,
             String serverBase,
             MeasurePeriodValidator measurePeriodValidator,
-            NpmPackageLoader npmPackageLoader) {
+            R4FhirOrNpmResourceProvider r4FhirOrNpmResourceProvider) {
         this.repository = repository;
         this.careGapsProperties = careGapsProperties;
         this.r4MeasureServiceUtils = r4MeasureServiceUtils;
+        this.r4FhirOrNpmResourceProvider = r4FhirOrNpmResourceProvider;
 
         r4CareGapsBundleBuilder = new R4CareGapsBundleBuilder(
                 careGapsProperties,
@@ -68,7 +70,7 @@ public class R4CareGapsProcessor implements R4CareGapsProcessorInterface {
                 configuredResources,
                 this.r4MeasureServiceUtils,
                 measurePeriodValidator,
-                npmPackageLoader);
+                r4FhirOrNpmResourceProvider);
         subjectProvider = new R4RepositorySubjectProvider(measureEvaluationOptions.getSubjectProviderOptions());
     }
 
@@ -133,8 +135,8 @@ public class R4CareGapsProcessor implements R4CareGapsProcessorInterface {
         return measure.stream()
                 .map(x -> x.fold(
                         id -> repository.read(Measure.class, id),
-                        r4MeasureServiceUtils::resolveByIdentifier,
-                        canonical -> r4MeasureServiceUtils.resolveByUrl(canonical.asStringValue())))
+                        r4FhirOrNpmResourceProvider::resolveByIdentifier,
+                        canonical -> r4FhirOrNpmResourceProvider.resolveByUrl(canonical.asStringValue())))
                 .collect(Collectors.toList());
     }
 

@@ -1,0 +1,37 @@
+package org.opencds.cqf.fhir.cr.crmi;
+
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.repository.IRepository;
+import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.OperationParam;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.MetadataResource;
+import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.StringType;
+import org.opencds.cqf.fhir.cr.visitor.DraftVisitor;
+import org.opencds.cqf.fhir.utility.SearchHelper;
+import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
+
+public class R4DraftService {
+
+    private final IAdapterFactory adapterFactory = IAdapterFactory.forFhirVersion(FhirVersionEnum.R4);
+    private final IRepository repository;
+
+    public R4DraftService(IRepository repository) {
+        this.repository = repository;
+    }
+
+    public Bundle draft(@IdParam IdType id, @OperationParam(name = "version") String version) throws FHIRException {
+        var resource = (MetadataResource) SearchHelper.readRepository(repository, id);
+        if (resource == null) {
+            throw new ResourceNotFoundException(id);
+        }
+        var params = new Parameters().addParameter("version", new StringType(version));
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(resource);
+        var visitor = new DraftVisitor(repository);
+        return ((Bundle) adapter.accept(visitor, params));
+    }
+}

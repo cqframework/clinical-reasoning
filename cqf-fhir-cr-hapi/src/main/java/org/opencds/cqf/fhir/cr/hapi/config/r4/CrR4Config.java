@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.Map;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cr.cpg.r4.R4CqlExecutionService;
+import org.opencds.cqf.fhir.cr.crmi.R4DraftService;
 import org.opencds.cqf.fhir.cr.hapi.common.StringTimePeriodHandler;
 import org.opencds.cqf.fhir.cr.hapi.config.CrBaseConfig;
 import org.opencds.cqf.fhir.cr.hapi.config.ProviderLoader;
@@ -17,11 +18,13 @@ import org.opencds.cqf.fhir.cr.hapi.r4.ICareGapsServiceFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.ICollectDataServiceFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.ICqlExecutionServiceFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.IDataRequirementsServiceFactory;
+import org.opencds.cqf.fhir.cr.hapi.r4.IDraftServiceFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.ISubmitDataProcessorFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureEvaluatorMultipleFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureEvaluatorSingleFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureServiceUtilsFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.cpg.CqlExecutionOperationProvider;
+import org.opencds.cqf.fhir.cr.hapi.r4.crmi.DraftProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.measure.CareGapsOperationProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.measure.CollectDataOperationProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.measure.DataRequirementsOperationProvider;
@@ -129,6 +132,16 @@ public class CrR4Config {
     CareGapsOperationProvider r4CareGapsOperationProvider(
             ICareGapsServiceFactory r4CareGapsProcessorFactory, StringTimePeriodHandler stringTimePeriodHandler) {
         return new CareGapsOperationProvider(r4CareGapsProcessorFactory, stringTimePeriodHandler);
+    }
+
+    @Bean
+    IDraftServiceFactory draftServiceFactory(IRepositoryFactory repositoryFactory) {
+        return rd -> new R4DraftService(repositoryFactory.create(rd));
+    }
+
+    @Bean
+    DraftProvider r4DraftProvider(IDraftServiceFactory r4DraftServiceFactory) {
+        return new DraftProvider(r4DraftServiceFactory);
     }
 
     @Bean

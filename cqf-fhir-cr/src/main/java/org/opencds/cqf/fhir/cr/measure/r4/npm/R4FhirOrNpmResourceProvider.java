@@ -32,6 +32,7 @@ import org.opencds.cqf.fhir.cql.VersionedIdentifiers;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.monad.Either3;
+import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.npm.MeasureOrNpmResourceHolder;
 import org.opencds.cqf.fhir.utility.npm.MeasureOrNpmResourceHolderList;
 import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
@@ -70,6 +71,25 @@ public class R4FhirOrNpmResourceProvider {
         return NpmPackageLoaderWithCache.of(measureOrNpmResourceHolderList.npmResourceHolders(), npmPackageLoader);
     }
 
+    public List<Either3<CanonicalType, IdType, Measure>> getMeasureEithers(
+            List<String> measureIds, List<String> measureUrls) {
+        if (measureIds != null && !measureIds.isEmpty()) {
+            return measureIds.stream()
+                    // LUKETODO:  do I need to add ResourceType.Measure here?
+                    .map(measureId -> Eithers.<CanonicalType, IdType, Measure>forMiddle3(new IdType(measureId)))
+                    .toList();
+        }
+
+        if (measureUrls != null && !measureUrls.isEmpty()) {
+            return measureUrls.stream()
+                    .map(measureUrl -> Eithers.<CanonicalType, IdType, Measure>forLeft3(new CanonicalType(measureUrl)))
+                    .toList();
+        }
+
+        // LUKETODO:  not sure if this is right, but this is what the step2 test expects
+        return List.of();
+    }
+
     /**
      * method to extract Library version defined on the Measure in question
      * <p/>
@@ -102,7 +122,6 @@ public class R4FhirOrNpmResourceProvider {
                 Function.identity());
     }
 
-    // LUKETODO:  return the List class instead?
     public MeasureOrNpmResourceHolder foldMeasure(Either3<CanonicalType, IdType, Measure> measureEither) {
         if (measureEvaluationOptions.isUseNpmForQualifyingResources()) {
             return foldMeasureForNpm(measureEither);
@@ -133,7 +152,6 @@ public class R4FhirOrNpmResourceProvider {
     @Nonnull
     private MeasureOrNpmResourceHolder foldMeasureForRepository(Either3<CanonicalType, IdType, Measure> measureEither) {
 
-        // LUKETODO:  do we want to permit this for non-NPM?
         var folded = measureEither.fold(
                 this::resolveByUrlFromRepository,
                 measureIdType -> resolveById(measureIdType, repository),
@@ -213,7 +231,14 @@ public class R4FhirOrNpmResourceProvider {
     public MeasureOrNpmResourceHolder foldMeasureForNpm(Either3<CanonicalType, IdType, Measure> measureEither) {
 
         return measureEither.fold(
-                measureUrl -> MeasureOrNpmResourceHolder.npmOnly(npmPackageLoader.loadNpmResources(measureUrl)),
+                measureUrl -> {
+                    var npmResourceHolder = npmPackageLoader.loadNpmResources(measureUrl);
+                    if (npmResourceHolder == null || npmResourceHolder == NpmResourceHolder.EMPTY) {
+                        throw new InvalidRequestException(
+                                "No NPM resources found for Measure URL: %s".formatted(measureUrl.getValue()));
+                    }
+                    return MeasureOrNpmResourceHolder.npmOnly(npmResourceHolder);
+                },
                 measureId -> {
                     throw new InvalidRequestException(
                             "Queries by measure ID: %s are not supported by NPM resources".formatted(measureId));
@@ -224,7 +249,7 @@ public class R4FhirOrNpmResourceProvider {
                 });
     }
 
-    public MeasureOrNpmResourceHolderList getMeasurePlusNpmDetails(
+    public MeasureOrNpmResourceHolderList getMeasureOrNpmDetails(
             List<IdType> measureIds, List<String> measureIdentifiers, List<String> measureCanonicals) {
 
         List<MeasureOrNpmResourceHolder> measuresPlusResourceHolders = new ArrayList<>();
@@ -243,12 +268,10 @@ public class R4FhirOrNpmResourceProvider {
         if (measureCanonicals != null && !measureCanonicals.isEmpty()) {
             for (String measureCanonical : measureCanonicals) {
                 if (measureEvaluationOptions.isUseNpmForQualifyingResources()) {
-                    // LUKETODO:  if this returns EMPTY, error handle and log accordingly
                     var npmResourceHolder = resolveByUrlFromNpm(measureCanonical);
                     measuresPlusResourceHolders.add(MeasureOrNpmResourceHolder.npmOnly(npmResourceHolder));
                 } else {
-                    // LUKETODO:  do we want to support URL queries for non-NPM?
-                    Measure measureByUrl = resolveByUrl(measureCanonical);
+                    var measureByUrl = resolveByUrl(measureCanonical);
                     if (measureByUrl != null) {
                         measuresPlusResourceHolders.add(MeasureOrNpmResourceHolder.measureOnly(measureByUrl));
                     }

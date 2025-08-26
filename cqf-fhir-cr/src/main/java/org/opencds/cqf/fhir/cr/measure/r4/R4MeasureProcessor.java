@@ -80,10 +80,10 @@ public class R4MeasureProcessor {
             CqlEngine context,
             CompositeEvaluationResultsPerMeasure compositeEvaluationResultsPerMeasure) {
 
-        var measurePlusNpmResourceHolder = r4FhirOrNpmResourceProvider.foldMeasure(measure);
+        var measureOrNpmResourceHolder = r4FhirOrNpmResourceProvider.foldMeasure(measure);
 
         return this.evaluateMeasure(
-                measurePlusNpmResourceHolder,
+                measureOrNpmResourceHolder,
                 periodStart,
                 periodEnd,
                 reportType,

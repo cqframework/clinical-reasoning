@@ -174,7 +174,6 @@ public class MeasureOperationsProvider {
                         "Measure evaluation by IDs is not supported if NPM libraries and measures are enabled.  Pass measureUrls instead.");
             }
 
-            // LUKETODO:  figure out how to add a test for this
             if (measureIdentifier != null && !measureIdentifier.isEmpty()) {
                 throw new InvalidRequestException(
                         "Measure evaluation by identifiers is not supported if NPM libraries and measures are enabled.  Pass measureUrls instead.");

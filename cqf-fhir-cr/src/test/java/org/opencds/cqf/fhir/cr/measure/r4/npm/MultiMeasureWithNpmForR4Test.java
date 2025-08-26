@@ -10,8 +10,6 @@ import org.opencds.cqf.fhir.cr.measure.r4.MultiMeasure.Given;
 class MultiMeasureWithNpmForR4Test extends BaseMeasureWithNpmForR4Test {
     private static final Given NPM_REPO_MULTI_MEASURE = MultiMeasure.given().repositoryPlusNpmFor("BasicNpmPackages");
 
-    // LUKETODO:  multi-lib cross-package, common targets, similar to complex deps test
-
     @Test
     void evaluateSucceedsWithMinimalMeasureAndSingleSubject() {
 

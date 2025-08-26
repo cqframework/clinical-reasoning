@@ -53,8 +53,6 @@ class SingleMeasureWithNpmForR4Test extends BaseMeasureWithNpmForR4Test {
     private static final String ENCOUNTER_MALE_1944_FINISHED_ENCOUNTER_1 = "Encounter/male-1944-finished-encounter-1";
     private static final String ENCOUNTER_MALE_2022_FINISHED_ENCOUNTER_1 = "Encounter/male-2022-finished-encounter-1";
 
-    // LUKETODO:  set up a multilib eval with NPM
-
     @Test
     void evaluateSucceedsWithMinimalMeasureAndSingleSubject() {
 

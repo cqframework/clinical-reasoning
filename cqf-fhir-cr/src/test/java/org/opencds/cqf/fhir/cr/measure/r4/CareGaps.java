@@ -96,7 +96,7 @@ public class CareGaps {
         private CareGapsProperties careGapsProperties;
         private final String serverBase;
         private final MeasurePeriodValidator measurePeriodEvaluator;
-        private final NpmPackageLoader npmPackageLoader;
+        private NpmPackageLoader npmPackageLoader;
 
         public Given() {
             this.evaluationOptions = MeasureEvaluationOptions.defaultOptions();
@@ -117,8 +117,6 @@ public class CareGaps {
             this.careGapsProperties.setCareGapsCompositionSectionAuthor("alphora-author");
             this.serverBase = "http://localhost";
             this.measurePeriodEvaluator = new MeasurePeriodValidator();
-            // LUKETODO: allow custom npm loader?
-            this.npmPackageLoader = NpmPackageLoader.DEFAULT;
         }
 
         public CareGaps.Given repository(IRepository repository) {
@@ -130,7 +128,25 @@ public class CareGaps {
             this.repository = new IgRepository(
                     FhirContext.forR4Cached(),
                     Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
+            // We're explicitly NOT using NPM here
+            this.npmPackageLoader = NpmPackageLoader.DEFAULT;
             return this;
+        }
+
+        // LUKETODO:  we may need to test this for test coverage numbers
+        // Use this if you wish to do anything with NPM
+        public Given repositoryPlusNpmFor(String repositoryPath) {
+            var igRepository = new IgRepository(
+                    FhirContext.forR4Cached(),
+                    Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
+            this.repository = igRepository;
+            this.npmPackageLoader = igRepository.getNpmPackageLoader();
+            mutateEvaluationOptionsToEnableNpm();
+            return this;
+        }
+
+        private void mutateEvaluationOptionsToEnableNpm() {
+            this.evaluationOptions.setUseNpmForQualifyingResources(true);
         }
 
         public CareGaps.Given evaluationOptions(MeasureEvaluationOptions evaluationOptions) {

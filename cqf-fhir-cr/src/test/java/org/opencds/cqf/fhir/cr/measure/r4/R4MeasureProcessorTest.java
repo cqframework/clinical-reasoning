@@ -5,13 +5,13 @@ import org.hl7.fhir.r4.model.ResourceType;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.MultiMeasure.Given;
 
+// LUKETODO:  see if we need to keep this for the test coverage numbers
 class R4MeasureProcessorTest {
     private static final Given GIVEN_REPO = MultiMeasure.given().repositoryFor("MinimalMeasureEvaluation");
     private static final IdType MINIMAL_COHORT_BOOLEAN_BASIS_SINGLE_GROUP =
             new IdType(ResourceType.Measure.name(), "MinimalCohortBooleanBasisSingleGroup");
     private static final String SUBJECT_ID = "Patient/female-1914";
 
-    // LUKETODO:  see if we still need this method from cdr-cr
     // This test could probably be improved with better data and more assertions, but it's to
     // confirm that a method exposed for downstream works with reasonable sanity.
     @Test

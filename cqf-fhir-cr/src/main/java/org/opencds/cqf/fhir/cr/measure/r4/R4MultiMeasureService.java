@@ -111,7 +111,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
         r4MeasureServiceUtilsToUse.ensureSupplementalDataElementSearchParameter();
 
         var measurePlusNpmResourceHolderList =
-                r4FhirOrNpmResourceProvider.getMeasurePlusNpmDetails(measureIds, measureIdentifiers, measureUrls);
+                r4FhirOrNpmResourceProvider.getMeasureOrNpmDetails(measureIds, measureIdentifiers, measureUrls);
 
         log.info("multi-evaluate-measure, measures to evaluate: {}", measurePlusNpmResourceHolderList.size());
 

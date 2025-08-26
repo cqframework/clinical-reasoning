@@ -423,12 +423,15 @@ public class MeasureProcessorUtils {
             EvaluationResultsForMultiLib evaluationResultsForMultiLib) {
 
         var containsResults = evaluationResultsForMultiLib.containsResultsFor(versionedIdentifierFromQuery);
+        // TODO: LD: there is a bug here where we're not matching up the versionless identifiers for Exceptions
         var containsExceptions = evaluationResultsForMultiLib.containsExceptionsFor(versionedIdentifierFromQuery);
 
         if (!containsResults && !containsExceptions) {
             throw new InternalErrorException(
-                    "Evaluation result in versionless search not found for identifier with ID: %s"
-                            .formatted(versionedIdentifierFromQuery.getId()));
+                    "Evaluation result in versionless search not found for identifier with ID: %s due to presence of Exception (true/false): %s"
+                            .formatted(
+                                    versionedIdentifierFromQuery.getId(),
+                                    evaluationResultsForMultiLib.hasExceptions()));
         }
     }
 

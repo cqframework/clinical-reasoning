@@ -12,11 +12,15 @@ import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IAttachmentAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
 import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * {@link LibrarySourceProvider} to provide a CQL Library Stream from an NPM package.
  */
 public class NpmLibraryProvider implements LibrarySourceProvider {
+
+    private static final Logger logger = LoggerFactory.getLogger(NpmLibraryProvider.class);
 
     private static final String TEXT_CQL = "text/cql";
 
@@ -30,13 +34,21 @@ public class NpmLibraryProvider implements LibrarySourceProvider {
     @Nullable
     public InputStream getLibrarySource(VersionedIdentifier versionedIdentifier) {
 
-        return npmPackageLoader
+        var libraryInputStream = npmPackageLoader
                 .findMatchingLibrary(versionedIdentifier)
                 .map(this::findCqlAttachment)
                 .flatMap(Function.identity())
                 .map(IAttachmentAdapter::getData)
                 .map(ByteArrayInputStream::new)
                 .orElse(null);
+
+        if (NpmPackageLoader.DEFAULT != npmPackageLoader) {
+            logger.warn(
+                    "ATTENTION!  Non-NOOP NPM loader: Could not find CQL Library for identifier: {}",
+                    versionedIdentifier);
+        }
+
+        return libraryInputStream;
     }
 
     @Nonnull

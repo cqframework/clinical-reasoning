@@ -150,7 +150,7 @@ public class MultiMeasure {
         }
 
         private void mutateEvaluationOptionsToEnableNpm() {
-            this.evaluationOptions.setUseNpmForQualifyingResources(true);
+            this.evaluationOptions.getEvaluationSettings().setUseNpmForQualifyingResources(true);
         }
 
         public MultiMeasure.Given evaluationOptions(MeasureEvaluationOptions evaluationOptions) {

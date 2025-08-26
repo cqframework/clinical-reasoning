@@ -65,10 +65,4 @@ public class MeasureEvaluationOptions {
     public boolean isUseNpmForQualifyingResources() {
         return evaluationSettings.isUseNpmForQualifyingResources();
     }
-
-    // LUKETODO:  get rid of this once refactoring is complete
-    public MeasureEvaluationOptions setUseNpmForQualifyingResources(boolean useNpmForQualifyingResources) {
-        evaluationSettings.setUseNpmForQualifyingResources(useNpmForQualifyingResources);
-        return this;
-    }
 }

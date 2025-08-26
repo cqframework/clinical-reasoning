@@ -181,7 +181,7 @@ public class Measure {
         }
 
         private void mutateEvaluationOptionsToEnableNpm() {
-            this.evaluationOptions.setUseNpmForQualifyingResources(true);
+            this.evaluationOptions.getEvaluationSettings().setUseNpmForQualifyingResources(true);
         }
 
         public Given evaluationOptions(MeasureEvaluationOptions evaluationOptions) {

@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cql;
 
+import com.google.common.annotations.VisibleForTesting;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -167,6 +168,7 @@ public class EvaluationSettings {
         return isUseNpmForQualifyingResources;
     }
 
+    @VisibleForTesting
     public EvaluationSettings setUseNpmForQualifyingResources(boolean useNpmForQualifyingResources) {
         isUseNpmForQualifyingResources = useNpmForQualifyingResources;
         return this;

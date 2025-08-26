@@ -1,6 +1,8 @@
 package org.opencds.cqf.fhir.cr.questionnaire.populate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -13,11 +15,13 @@ import static org.opencds.cqf.fhir.cr.helpers.RequestHelpers.newPopulateRequestF
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.repository.IRepository;
+import java.util.Collections;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent;
+import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType;
 import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseItemComponent;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,6 +33,7 @@ import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.common.ExpressionProcessor;
 import org.opencds.cqf.fhir.utility.CqfExpression;
 
+@SuppressWarnings("UnstableApiUsage")
 @ExtendWith(MockitoExtension.class)
 class ProcessItemTests {
     @Mock
@@ -110,21 +115,17 @@ class ProcessItemTests {
     }
 
     private List<IBase> withExpressionResults(FhirVersionEnum fhirVersion) {
-        switch (fhirVersion) {
-            case R4:
-                return List.of(
-                        new org.hl7.fhir.r4.model.StringType("string type value"),
-                        new org.hl7.fhir.r4.model.BooleanType(true),
-                        new org.hl7.fhir.r4.model.IntegerType(3));
-            case R5:
-                return List.of(
-                        new org.hl7.fhir.r5.model.StringType("string type value"),
-                        new org.hl7.fhir.r5.model.BooleanType(true),
-                        new org.hl7.fhir.r5.model.IntegerType(3));
-
-            default:
-                return null;
-        }
+        return switch (fhirVersion) {
+            case R4 -> List.of(
+                    new org.hl7.fhir.r4.model.StringType("string type value"),
+                    new org.hl7.fhir.r4.model.BooleanType(true),
+                    new org.hl7.fhir.r4.model.IntegerType(3));
+            case R5 -> List.of(
+                    new org.hl7.fhir.r5.model.StringType("string type value"),
+                    new org.hl7.fhir.r5.model.BooleanType(true),
+                    new org.hl7.fhir.r5.model.IntegerType(3));
+            default -> Collections.emptyList();
+        };
     }
 
     @Test
@@ -179,5 +180,23 @@ class ProcessItemTests {
 
     private CqfExpression withExpression() {
         return new CqfExpression().setLanguage("text/cql").setExpression("%subject.name.given[0]");
+    }
+
+    @Test
+    void processItemShouldCorrectlyProcessNonGroupItemsWithChildren() {
+        final Questionnaire questionnaire = new Questionnaire();
+        doReturn(FhirContext.forR4Cached()).when(repository).fhirContext();
+        final var populateRequest = newPopulateRequestForVersion(FhirVersionEnum.R4, libraryEngine, questionnaire);
+        var parentItem = questionnaire.addItem().setLinkId("1").setType(QuestionnaireItemType.BOOLEAN);
+        parentItem.addItem().setLinkId("1.1");
+        parentItem.addItem().setLinkId("1.2");
+        doReturn(null).when(expressionProcessor).getItemInitialExpression(eq(populateRequest), any());
+        var actual = (QuestionnaireResponseItemComponent)
+                processItem.processItem(populateRequest, questionnaire.getItem().get(0));
+        assertNotNull(actual);
+        assertFalse(actual.hasItem());
+        assertTrue(actual.hasAnswer());
+        assertFalse(actual.getAnswerFirstRep().hasValue());
+        assertTrue(actual.getAnswerFirstRep().hasItem());
     }
 }

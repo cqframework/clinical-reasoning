@@ -75,7 +75,6 @@ public class R4FhirOrNpmResourceProvider {
             List<String> measureIds, List<String> measureUrls) {
         if (measureIds != null && !measureIds.isEmpty()) {
             return measureIds.stream()
-                    // LUKETODO:  do I need to add ResourceType.Measure here?
                     .map(measureId -> Eithers.<CanonicalType, IdType, Measure>forMiddle3(new IdType(measureId)))
                     .toList();
         }

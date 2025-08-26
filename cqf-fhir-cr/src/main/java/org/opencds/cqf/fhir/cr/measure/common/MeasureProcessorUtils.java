@@ -426,6 +426,14 @@ public class MeasureProcessorUtils {
         // TODO: LD: there is a bug here where we're not matching up the versionless identifiers for Exceptions
         var containsExceptions = evaluationResultsForMultiLib.containsExceptionsFor(versionedIdentifierFromQuery);
 
+        // LUKETODO: get rid of the hot mess of:  Exception for subjectId: Patient/numer-EXM130, Message: Library
+        // MultiLibCrossPackageSource1-0.1 loaded, but had errors: An operand identifier reference is hiding another
+        // identifier of the same name., An operand identifier reference is hiding another identifier of the same name.,
+        // An operand identifier reference is hiding another identifier of the same name., Could not load source for
+        // library MultiLibCrossPackageTarget1A, version 0.1, namespace uri
+        // http://multilib.cross.package.target1a.npm.opencds.org., Could not resolve identifier
+        // MultiLibCrossPackageTarget1A in the current library.
+
         if (!containsResults && !containsExceptions) {
             throw new InternalErrorException(
                     "Evaluation result in versionless search not found for identifier with ID: %s due to presence of Exception (true/false): %s"

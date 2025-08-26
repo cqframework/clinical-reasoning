@@ -82,7 +82,7 @@ public class R4ApproveService {
                         "ArtifactAssessmentTarget version does not match version of resource being approved.");
             }
         } else {
-            String target = null;
+            String target = "";
             String url = resource.getUrl();
             String version = resource.getVersion();
             if (url != null) {
@@ -94,7 +94,7 @@ public class R4ApproveService {
                 }
                 target += version;
             }
-            if (target != null) {
+            if (!target.isEmpty()) {
                 artifactAssessmentTarget = new CanonicalType(target);
             }
         }

@@ -5,7 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doReturn;
@@ -20,24 +22,31 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IQuery;
+import ca.uhn.fhir.rest.gclient.IUntypedQuery;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
 import org.opencds.cqf.fhir.utility.client.ExpandRunner.TerminologyServerExpansionException;
@@ -264,7 +273,7 @@ public class TerminologyServerClientTest {
 
         // test
         var client = new TerminologyServerClient(contextMock);
-        client.getLatestNonDraftResource(endpointMock, "www.test.com/fhir/ValueSet/123|1.2.3");
+        client.getLatestNonDraftValueSetResource(endpointMock, "www.test.com/fhir/ValueSet/123|1.2.3");
         var capturedUrlParams = urlParamsCaptor.getValue();
         var token = (TokenParam) capturedUrlParams.get("status").get(0);
 
@@ -324,7 +333,7 @@ public class TerminologyServerClientTest {
                 (org.hl7.fhir.r4.model.ValueSet) client.expand(valueSetAdapter, endpointAdapter, parametersAdapter);
 
         assertEquals(3, actual.getExpansion().getContains().size());
-        verify(client, never()).getResource(any(), any());
+        verify(client, never()).getValueSetResource(any(), any());
         verify(fhirClient, atLeast(3)).operation();
     }
 
@@ -368,7 +377,135 @@ public class TerminologyServerClientTest {
         assertThrows(
                 TerminologyServerExpansionException.class,
                 () -> client.expand(valueSetAdapter, endpointAdapter, parametersAdapter));
-        verify(client, never()).getResource(any(), any());
+        verify(client, never()).getValueSetResource(any(), any());
         verify(fhirClient, atLeast(3)).operation();
+    }
+
+    @Test
+    void getValueSetResource_found() {
+        var txServerClient = spy(new TerminologyServerClient(fhirContextR4));
+
+        IEndpointAdapter endpoint = mock(IEndpointAdapter.class);
+        IGenericClient client = mock(IGenericClient.class);
+        IUntypedQuery<IBaseBundle> untyped = mock(IUntypedQuery.class);
+        IQuery<IBaseBundle> query = mock(IQuery.class);
+
+        // Fake ValueSet in a bundle
+        var vs = new org.hl7.fhir.r4.model.ValueSet();
+        vs.setId("123");
+        vs.setUrl("http://example.org/vs/123");
+
+        var bundle = new org.hl7.fhir.r4.model.Bundle();
+        bundle.addEntry().setResource(vs);
+
+        // Stub helpers
+        doReturn(client).when(txServerClient).initializeClientWithAuth(endpoint);
+        doReturn(org.hl7.fhir.r4.model.ValueSet.class).when(txServerClient).getValueSetClass();
+
+        // Stub fluent chain
+        when(client.search()).thenReturn(untyped);
+        when(untyped.forResource(org.hl7.fhir.r4.model.ValueSet.class)).thenReturn(query);
+
+        when(query.where(anyMap())).thenReturn(query);
+
+        when(query.execute()).thenReturn(bundle);
+
+        try (MockedStatic<IKnowledgeArtifactAdapter> mockedStatic =
+                Mockito.mockStatic(IKnowledgeArtifactAdapter.class)) {
+
+            mockedStatic
+                    .when(() -> IKnowledgeArtifactAdapter.findLatestVersion(bundle))
+                    .thenReturn(Optional.of((IDomainResource) vs));
+
+            Optional<IDomainResource> result =
+                    txServerClient.getValueSetResource(endpoint, "http://example.org/vs/123");
+
+            assertTrue(result.isPresent());
+            assertEquals("123", result.get().getIdElement().getIdPart());
+
+            // Verify calls
+            verify(client).search();
+            verify(untyped).forResource(org.hl7.fhir.r4.model.ValueSet.class);
+            verify(query).where(anyMap());
+            verify(query).execute();
+            mockedStatic.verify(() -> IKnowledgeArtifactAdapter.findLatestVersion(bundle));
+        }
+    }
+
+    @Test
+    void getCodeSystemClass_returnsR4ValueSet() {
+        // Arrange
+        var txServerClient = new TerminologyServerClient(fhirContextR4);
+
+        // Act
+        var returnedClass = txServerClient.getValueSetClass();
+
+        // Assert
+        assertNotNull(returnedClass);
+        assertEquals(org.hl7.fhir.r4.model.ValueSet.class, returnedClass);
+    }
+
+    @Test
+    void getCodeSystemClass_returnsR4CodeSystem() {
+        // Arrange
+        var txServerClient = new TerminologyServerClient(fhirContextR4);
+
+        // Act
+        var returnedClass = txServerClient.getCodeSystemClass();
+
+        // Assert
+        assertNotNull(returnedClass);
+        assertEquals(org.hl7.fhir.r4.model.CodeSystem.class, returnedClass);
+    }
+
+    @Test
+    void getCodeSystemResource_found() {
+        var txServerClient = spy(new TerminologyServerClient(fhirContextR4));
+
+        IEndpointAdapter endpoint = mock(IEndpointAdapter.class);
+        IGenericClient client = mock(IGenericClient.class);
+        IUntypedQuery<IBaseBundle> untyped = mock(IUntypedQuery.class);
+        IQuery<IBaseBundle> query = mock(IQuery.class);
+
+        // Fake CodeSystem in a bundle
+        var cs = new org.hl7.fhir.r4.model.CodeSystem();
+        cs.setId("123");
+        cs.setUrl("http://example.org/vs/123");
+
+        var bundle = new org.hl7.fhir.r4.model.Bundle();
+        bundle.addEntry().setResource(cs);
+
+        // Stub helpers
+        doReturn(client).when(txServerClient).initializeClientWithAuth(endpoint);
+        doReturn(org.hl7.fhir.r4.model.CodeSystem.class).when(txServerClient).getCodeSystemClass();
+
+        // Stub fluent chain
+        when(client.search()).thenReturn(untyped);
+        when(untyped.forResource(org.hl7.fhir.r4.model.CodeSystem.class)).thenReturn(query);
+
+        when(query.where(anyMap())).thenReturn(query);
+
+        when(query.execute()).thenReturn(bundle);
+
+        try (MockedStatic<IKnowledgeArtifactAdapter> mockedStatic =
+                Mockito.mockStatic(IKnowledgeArtifactAdapter.class)) {
+
+            mockedStatic
+                    .when(() -> IKnowledgeArtifactAdapter.findLatestVersion(bundle))
+                    .thenReturn(Optional.of((IDomainResource) cs));
+
+            Optional<IDomainResource> result =
+                    txServerClient.getCodeSystemResource(endpoint, "http://example.org/cs/123");
+
+            assertTrue(result.isPresent());
+            assertEquals("123", result.get().getIdElement().getIdPart());
+
+            // Verify calls
+            verify(client).search();
+            verify(untyped).forResource(org.hl7.fhir.r4.model.CodeSystem.class);
+            verify(query).where(anyMap());
+            verify(query).execute();
+            mockedStatic.verify(() -> IKnowledgeArtifactAdapter.findLatestVersion(bundle));
+        }
     }
 }

@@ -18,7 +18,6 @@ public class MeasureEvaluationOptions {
     private SubjectProviderOptions subjectProviderOptions;
 
     private EvaluationSettings evaluationSettings = null;
-    private boolean isUseNpmForQualifyingResources = false;
 
     public boolean isValidationEnabled() {
         return this.isValidationEnabled;
@@ -64,11 +63,12 @@ public class MeasureEvaluationOptions {
     }
 
     public boolean isUseNpmForQualifyingResources() {
-        return isUseNpmForQualifyingResources;
+        return evaluationSettings.isUseNpmForQualifyingResources();
     }
 
+    // LUKETODO:  get rid of this once refactoring is complete
     public MeasureEvaluationOptions setUseNpmForQualifyingResources(boolean useNpmForQualifyingResources) {
-        isUseNpmForQualifyingResources = useNpmForQualifyingResources;
+        evaluationSettings.setUseNpmForQualifyingResources(useNpmForQualifyingResources);
         return this;
     }
 }

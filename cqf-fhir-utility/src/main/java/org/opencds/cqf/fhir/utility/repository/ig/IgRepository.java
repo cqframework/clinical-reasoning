@@ -85,21 +85,21 @@ import org.opencds.cqf.fhir.utility.repository.operations.IRepositoryOperationPr
  * /path/to/kalm/root/        (CategoryLayout.DEFINITIONAL_AND_DATA)
  * ├── src/
  * │   └── fhir/              (Definitional Resources)
- * │       ├── [patient/]     (CompartmentLayout.DIRECTORY_PER_COMPARTMENT)
- * │       │   └── Patient/123/
- * │       │       └── Observation-456.json
  * │       └── ...
  * └── tests/
  *     └── data/
  *         └── fhir/          (Test Data Resources)
- *             └── ...
+ *           ├── [patient/]     (CompartmentLayout.DIRECTORY_PER_COMPARTMENT)
+ *           │   └── Patient/123/
+ *           │       └── Observation-456.json
+ *           └── ...
  * </pre>
  *
  * <p>
  * <strong>Compartment Support:</strong>
  * </p>
  * <p>
- * The repository supports FHIR compartment contexts through the {@code X-FHIR-Compartment} header.
+ * The repository supports FHIR compartment contexts using directory conventions.
  * When using {@code CompartmentLayout.DIRECTORY_PER_COMPARTMENT}, resources are organized by
  * compartment type and ID (e.g., {@code Patient/123/}).
  * </p>
@@ -345,7 +345,6 @@ public class IgRepository implements IRepository {
      *
      * @param <T>                     The type of the FHIR resource.
      * @param resourceType            The class representing the FHIR resource type.
-     * @param igRepositoryCompartment The compartment context for path resolution.
      * @return A stream of directory paths for the resource category.
      */
     protected <T extends IBaseResource> Stream<Path> directoriesForCategory(Class<T> resourceType) {
@@ -388,7 +387,6 @@ public class IgRepository implements IRepository {
      *
      * @param <T>                     The type of the FHIR resource.
      * @param resourceType            The class representing the FHIR resource type.
-     * @param igRepositoryCompartment The compartment context for path resolution.
      * @return A stream of directory paths for the resource type.
      */
     protected <T extends IBaseResource> Stream<Path> directoryForResource(Class<T> resourceType) {
@@ -603,8 +601,7 @@ public class IgRepository implements IRepository {
      * <li>TYPE_AND_ID: "Patient-123.json"</li>
      * </ul>
      *
-     * <p>Compartment context can be passed via the {@code X-FHIR-Compartment} header
-     * in the format "ResourceType/Id" (e.g., "Patient/123").</p>
+    * <p>Compartment context is determined by repository conventions and resource references.</p>
      *
      * Utilizes cache to improve performance.
      *
@@ -623,7 +620,7 @@ public class IgRepository implements IRepository {
      * @param <I>          The type of the resource identifier.
      * @param resourceType The class representing the FHIR resource type.
      * @param id           The identifier of the resource.
-     * @param headers      Request headers, may include compartment context via {@code X-FHIR-Compartment}.
+    * @param headers      Request headers
      * @return The resource if found.
      * @throws ResourceNotFoundException if the resource is not found.
      */
@@ -660,9 +657,7 @@ public class IgRepository implements IRepository {
      * Observation newObservation = new Observation();
      * newObservation.setId("obs-789");
      * newObservation.setSubject(new Reference("Patient/patient-123"));
-     * Map<String, String> headers = new HashMap<>();
-     * headers.put(FHIR_COMPARTMENT_HEADER, "Patient/patient-123");
-     * MethodOutcome outcome = repository.create(newObservation, headers);
+     * MethodOutcome outcome = repository.create(newObservation, null);
      * }</pre>
      *
      * @param <T>      The type of the FHIR resource.

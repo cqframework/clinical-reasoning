@@ -158,7 +158,7 @@ public class DraftProviderIT extends BaseCrR4TestServer {
         loadResourceFromPath("minimal-draft-to-test-version-conflict.json");
         String maybeException = null;
         try {
-            callDraft(SPEC_LIB_REF, "1.2.1");
+            callDraft("Library/SpecificationLibraryDraftVersion-1-0-0", "1.2.1");
         } catch (Exception e) {
             maybeException = e.getMessage();
         }
@@ -184,7 +184,7 @@ public class DraftProviderIT extends BaseCrR4TestServer {
         for (String version : badVersionList) {
             UnprocessableEntityException maybeException = null;
             try {
-                callDraft(SPEC_LIB_REF, version);
+                callDraft("Library/SpecificationLibraryDraftVersion-1-0-0", version);
             } catch (UnprocessableEntityException e) {
                 maybeException = e;
             }

@@ -88,8 +88,11 @@ public class CrR4Config {
 
     @Bean
     ICqlExecutionServiceFactory r4CqlExecutionServiceFactory(
-            IRepositoryFactory repositoryFactory, EvaluationSettings evaluationSettings) {
-        return rd -> new R4CqlExecutionService(repositoryFactory.create(rd), evaluationSettings);
+            IRepositoryFactory repositoryFactory,
+            Optional<NpmPackageLoader> optPackageLoader,
+            EvaluationSettings evaluationSettings) {
+        return rd -> new R4CqlExecutionService(
+                repositoryFactory.create(rd), npmPackageLoader(optPackageLoader), evaluationSettings);
     }
 
     @Bean
@@ -113,9 +116,11 @@ public class CrR4Config {
     ICollectDataServiceFactory collectDataServiceFactory(
             IRepositoryFactory repositoryFactory,
             MeasureEvaluationOptions measureEvaluationOptions,
+            Optional<NpmPackageLoader> optPackageLoader,
             R4FhirOrNpmResourceProviderFactory r4FhirOrNpmResourceProviderFactory) {
         return requestDetails -> new R4CollectDataService(
                 repositoryFactory.create(requestDetails),
+                npmPackageLoader(optPackageLoader),
                 measureEvaluationOptions,
                 r4FhirOrNpmResourceProviderFactory.create(requestDetails));
     }
@@ -195,9 +200,9 @@ public class CrR4Config {
     public R4FhirOrNpmResourceProviderFactory r4FhirOrNpmResourceProviderFactory(
             IRepositoryFactory repositoryFactory,
             Optional<NpmPackageLoader> optPackageLoader,
-            MeasureEvaluationOptions measureEvaluationOptions) {
+            EvaluationSettings evaluationSettings) {
         return requestDetails -> new R4FhirOrNpmResourceProvider(
-                repositoryFactory.create(requestDetails), npmPackageLoader(optPackageLoader), measureEvaluationOptions);
+                repositoryFactory.create(requestDetails), npmPackageLoader(optPackageLoader), evaluationSettings);
     }
 
     private NpmPackageLoader npmPackageLoader(Optional<NpmPackageLoader> optNpmPackageLoader) {

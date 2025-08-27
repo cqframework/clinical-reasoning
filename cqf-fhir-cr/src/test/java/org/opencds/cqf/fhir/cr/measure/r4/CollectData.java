@@ -103,12 +103,14 @@ public class CollectData {
         }
 
         private R4CollectDataService buildR4CollectDataService() {
-            return new R4CollectDataService(repository, evaluationOptions, getR4FhirOrNpmResourceProvider());
+            return new R4CollectDataService(
+                    repository, npmPackageLoader, evaluationOptions, getR4FhirOrNpmResourceProvider());
         }
 
         @Nonnull
         private R4FhirOrNpmResourceProvider getR4FhirOrNpmResourceProvider() {
-            return new R4FhirOrNpmResourceProvider(repository, npmPackageLoader, evaluationOptions);
+            return new R4FhirOrNpmResourceProvider(
+                    repository, npmPackageLoader, evaluationOptions.getEvaluationSettings());
         }
 
         public When when() {

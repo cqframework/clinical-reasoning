@@ -29,6 +29,7 @@ import org.opencds.cqf.fhir.cr.questionnaireresponse.QuestionnaireResponseProces
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,13 +56,14 @@ public class ApplyProcessor implements IApplyProcessor {
 
     public ApplyProcessor(
             IRepository repository,
+            NpmPackageLoader npmPackageLoader,
             ModelResolver modelResolver,
             org.opencds.cqf.fhir.cr.activitydefinition.apply.IApplyProcessor activityProcessor) {
         this.repository = repository;
         this.modelResolver = modelResolver;
         this.activityProcessor = activityProcessor;
         extensionProcessor = new ExtensionProcessor();
-        generateProcessor = new GenerateProcessor(this.repository);
+        generateProcessor = new GenerateProcessor(this.repository, npmPackageLoader);
         populateProcessor = new PopulateProcessor();
         extractProcessor = new QuestionnaireResponseProcessor(this.repository);
         processRequest = new ResponseBuilder(populateProcessor);

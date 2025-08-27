@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.spring.measure;
 
 import ca.uhn.fhir.repository.IRepository;
+import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorUtils;
 import org.opencds.cqf.fhir.cr.measure.common.SubjectProvider;
@@ -27,6 +28,7 @@ public class MeasureConfiguration {
     @Bean
     R4MeasureProcessor r4MeasureProcessor(
             IRepository repository,
+            EvaluationSettings evaluationSettings,
             MeasureEvaluationOptions measureEvaluationOptions,
             MeasureProcessorUtils measureProcessorUtils,
             NpmPackageLoader npmPackageLoader) {
@@ -34,13 +36,11 @@ public class MeasureConfiguration {
                 repository,
                 measureEvaluationOptions,
                 measureProcessorUtils,
-                r4FhirOrNpmResourceProvider(repository, npmPackageLoader, measureEvaluationOptions));
+                r4FhirOrNpmResourceProvider(repository, npmPackageLoader, evaluationSettings));
     }
 
     R4FhirOrNpmResourceProvider r4FhirOrNpmResourceProvider(
-            IRepository repository,
-            NpmPackageLoader npmPackageLoader,
-            MeasureEvaluationOptions measureEvaluationOptions) {
-        return new R4FhirOrNpmResourceProvider(repository, npmPackageLoader, measureEvaluationOptions);
+            IRepository repository, NpmPackageLoader npmPackageLoader, EvaluationSettings evaluationSettings) {
+        return new R4FhirOrNpmResourceProvider(repository, npmPackageLoader, evaluationSettings);
     }
 }

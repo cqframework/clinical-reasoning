@@ -16,16 +16,20 @@ import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.cpg.CqlExecutionProcessor;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.repository.Repositories;
 
 @SuppressWarnings("squid:S107")
 public class R4CqlExecutionService {
 
     protected IRepository repository;
+    protected NpmPackageLoader npmPackageLoader;
     protected EvaluationSettings evaluationSettings;
 
-    public R4CqlExecutionService(IRepository repository, EvaluationSettings evaluationSettings) {
+    public R4CqlExecutionService(
+            IRepository repository, NpmPackageLoader npmPackageLoader, EvaluationSettings evaluationSettings) {
         this.repository = repository;
+        this.npmPackageLoader = npmPackageLoader;
         this.evaluationSettings = evaluationSettings;
     }
 
@@ -41,7 +45,7 @@ public class R4CqlExecutionService {
             Endpoint dataEndpoint,
             Endpoint contentEndpoint,
             Endpoint terminologyEndpoint,
-            String content) {
+            String cqlContent) {
 
         var baseCqlExecutionProcessor = new CqlExecutionProcessor();
 
@@ -50,10 +54,10 @@ public class R4CqlExecutionService {
                     baseCqlExecutionProcessor.createIssue("warning", "prefetchData is not yet supported", repository)));
         }
 
-        if (expression == null && content == null) {
+        if (expression == null && cqlContent == null) {
             return parameters(part("invalid parameters", (OperationOutcome) baseCqlExecutionProcessor.createIssue(
                     "error",
-                    "The $cql operation requires the expression parameter and/or content parameter to exist",
+                    "The $cql operation requires the expression parameter and/or cqlContent parameter to exist",
                     repository)));
         }
 
@@ -64,9 +68,12 @@ public class R4CqlExecutionService {
             }
             var libraryEngine = new LibraryEngine(repository, this.evaluationSettings);
 
+            // LUKETODO:  NPM part goes in here:  "also include these libraries" which is what the Map is
+            // inject the NpmPackageLoader here
             var libraries = baseCqlExecutionProcessor.resolveIncludedLibraries(library);
 
-            if (StringUtils.isBlank(content)) {
+            // LUKETODO:  how would we get blank CQL content?
+            if (StringUtils.isBlank(cqlContent)) {
 
                 return (Parameters) libraryEngine.evaluateExpression(
                         expression,
@@ -79,10 +86,10 @@ public class R4CqlExecutionService {
                         null);
             }
 
-            // LUKETODO:  NPM for multiple libraries?
-            var engine = Engines.forRepository(repository, evaluationSettings, null);
+            var engine = Engines.forRepository(repository, evaluationSettings, null, npmPackageLoader);
             var libraryManager = engine.getEnvironment().getLibraryManager();
-            var libraryIdentifier = baseCqlExecutionProcessor.resolveLibraryIdentifier(content, null, libraryManager);
+            var libraryIdentifier =
+                    baseCqlExecutionProcessor.resolveLibraryIdentifier(cqlContent, null, libraryManager);
 
             return (Parameters) libraryEngine.evaluate(
                     libraryIdentifier,

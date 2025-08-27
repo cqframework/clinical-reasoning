@@ -28,8 +28,9 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.ResourceType;
+import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.VersionedIdentifiers;
-import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
+import org.opencds.cqf.fhir.cql.npm.FhirOrNpmThingee;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.monad.Either3;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
@@ -45,21 +46,27 @@ import org.slf4j.Logger;
  * Combined readonly operations on Repository and NPM resources for R4 Measures and Libraries, and possibly
  * other resources such as PlanDefinition, ValueSet, etc in the future.
  */
-public class R4FhirOrNpmResourceProvider {
+public class R4FhirOrNpmResourceProvider implements FhirOrNpmThingee {
 
     private static final Logger log = getLogger(R4FhirOrNpmResourceProvider.class);
 
     private final IRepository repository;
     private final NpmPackageLoader npmPackageLoader;
-    private final MeasureEvaluationOptions measureEvaluationOptions;
+    private final EvaluationSettings evaluationSettings;
+
+    public R4FhirOrNpmResourceProvider withRepositoryIfNonNpm(IRepository repository) {
+        if (this.evaluationSettings.isUseNpmForQualifyingResources() || repository == this.repository) {
+            return this;
+        }
+
+        return new R4FhirOrNpmResourceProvider(repository, this.npmPackageLoader, this.evaluationSettings);
+    }
 
     public R4FhirOrNpmResourceProvider(
-            IRepository repository,
-            NpmPackageLoader npmPackageLoader,
-            MeasureEvaluationOptions measureEvaluationOptions) {
+            IRepository repository, NpmPackageLoader npmPackageLoader, EvaluationSettings evaluationSettings) {
         this.repository = repository;
         this.npmPackageLoader = npmPackageLoader;
-        this.measureEvaluationOptions = measureEvaluationOptions;
+        this.evaluationSettings = evaluationSettings;
     }
 
     public NpmPackageLoaderWithCache npmPackageLoaderWithCache(MeasureOrNpmResourceHolder measureOrNpmResourceHolder) {
@@ -69,6 +76,21 @@ public class R4FhirOrNpmResourceProvider {
     public NpmPackageLoaderWithCache npmPackageLoaderWithCache(
             MeasureOrNpmResourceHolderList measureOrNpmResourceHolderList) {
         return NpmPackageLoaderWithCache.of(measureOrNpmResourceHolderList.npmResourceHolders(), npmPackageLoader);
+    }
+
+    @Override
+    public IRepository getRepository() {
+        return repository;
+    }
+
+    @Override
+    public NpmPackageLoader getNpmPackageLoader() {
+        return npmPackageLoader;
+    }
+
+    @Override
+    public EvaluationSettings getEvaluationSettings() {
+        return evaluationSettings;
     }
 
     public List<Either3<CanonicalType, IdType, Measure>> getMeasureEithers(
@@ -117,12 +139,12 @@ public class R4FhirOrNpmResourceProvider {
 
         return measureEither.fold(
                 measureUrl -> resolveByUrlFromRepository(measureUrl, repository),
-                measureIdType -> resolveById(measureIdType, repository),
+                measureIdType -> resolveMeasureById(measureIdType, repository),
                 Function.identity());
     }
 
     public MeasureOrNpmResourceHolder foldMeasure(Either3<CanonicalType, IdType, Measure> measureEither) {
-        if (measureEvaluationOptions.isUseNpmForQualifyingResources()) {
+        if (evaluationSettings.isUseNpmForQualifyingResources()) {
             return foldMeasureForNpm(measureEither);
         }
 
@@ -132,7 +154,7 @@ public class R4FhirOrNpmResourceProvider {
     public MeasureOrNpmResourceHolder foldWithCustomIdTypeHandler(
             Either3<CanonicalType, IdType, Measure> measureEither, Function<? super IdType, Measure> foldMiddle) {
 
-        if (measureEvaluationOptions.isUseNpmForQualifyingResources()) {
+        if (evaluationSettings.isUseNpmForQualifyingResources()) {
             return foldMeasureForNpm(measureEither);
         }
 
@@ -153,13 +175,13 @@ public class R4FhirOrNpmResourceProvider {
 
         var folded = measureEither.fold(
                 this::resolveByUrlFromRepository,
-                measureIdType -> resolveById(measureIdType, repository),
+                measureIdType -> resolveMeasureById(measureIdType, repository),
                 Function.identity());
 
         return MeasureOrNpmResourceHolder.measureOnly(folded);
     }
 
-    public static Measure resolveById(IIdType id, IRepository repository) {
+    public static Measure resolveMeasureById(IIdType id, IRepository repository) {
         if (id.getValueAsString().startsWith("Measure/")) {
             // If the id is a Measure resource, we can use the read method directly
             return repository.read(Measure.class, id);
@@ -187,6 +209,7 @@ public class R4FhirOrNpmResourceProvider {
         return measure;
     }
 
+    // LUKETODO:  do we still need this???
     // Wrap in MeasureOrNpmResourceHolderList for convenience
     public MeasureOrNpmResourceHolderList resolveByIdsToMeasuresOrNpms(List<? extends IIdType> ids) {
         return MeasureOrNpmResourceHolderList.ofMeasures(resolveByIds(ids));
@@ -211,7 +234,7 @@ public class R4FhirOrNpmResourceProvider {
     public MeasureOrNpmResourceHolder foldMeasure(
             Either3<CanonicalType, IdType, Measure> measureEither, IRepository repository) {
 
-        if (measureEvaluationOptions.isUseNpmForQualifyingResources()) {
+        if (evaluationSettings.isUseNpmForQualifyingResources()) {
             return foldMeasureForNpm(measureEither);
         }
 
@@ -253,20 +276,20 @@ public class R4FhirOrNpmResourceProvider {
 
         List<MeasureOrNpmResourceHolder> measuresPlusResourceHolders = new ArrayList<>();
         if (measureIds != null && !measureIds.isEmpty()) {
-            if (measureEvaluationOptions.isUseNpmForQualifyingResources()) {
+            if (evaluationSettings.isUseNpmForQualifyingResources()) {
                 throw new InvalidRequestException(
                         "Queries by measure IDs: %s are not supported by NPM resources".formatted(measureIds));
             }
 
             for (IdType measureId : measureIds) {
-                var measureById = resolveById(measureId);
+                var measureById = resolveMeasureById(measureId);
                 measuresPlusResourceHolders.add(MeasureOrNpmResourceHolder.measureOnly(measureById));
             }
         }
 
         if (measureCanonicals != null && !measureCanonicals.isEmpty()) {
             for (String measureCanonical : measureCanonicals) {
-                if (measureEvaluationOptions.isUseNpmForQualifyingResources()) {
+                if (evaluationSettings.isUseNpmForQualifyingResources()) {
                     var npmResourceHolder = resolveByUrlFromNpm(measureCanonical);
                     measuresPlusResourceHolders.add(MeasureOrNpmResourceHolder.npmOnly(npmResourceHolder));
                 } else {
@@ -279,7 +302,7 @@ public class R4FhirOrNpmResourceProvider {
         }
 
         if (measureIdentifiers != null && !measureIdentifiers.isEmpty()) {
-            if (measureEvaluationOptions.isUseNpmForQualifyingResources()) {
+            if (evaluationSettings.isUseNpmForQualifyingResources()) {
                 throw new InvalidRequestException(
                         "Queries by measure identifiers: %s are not supported by NPM resources"
                                 .formatted(measureIdentifiers));
@@ -306,8 +329,18 @@ public class R4FhirOrNpmResourceProvider {
                 .toList();
     }
 
-    public Measure resolveById(IdType id) {
-        if (measureEvaluationOptions.isUseNpmForQualifyingResources()) {
+    public Library resolveLibraryById(IdType id) {
+        // LUKETODO: what to do here????
+        if (evaluationSettings.isUseNpmForQualifyingResources()) {
+            throw new InvalidRequestException(
+                    "Queries by measure ID: %s are not supported by NPM resources".formatted(id));
+        }
+
+        return this.repository.read(Library.class, id);
+    }
+
+    public Measure resolveMeasureById(IdType id) {
+        if (evaluationSettings.isUseNpmForQualifyingResources()) {
             throw new InvalidRequestException(
                     "Queries by measure ID: %s are not supported by NPM resources".formatted(id));
         }
@@ -316,7 +349,7 @@ public class R4FhirOrNpmResourceProvider {
     }
 
     public Measure resolveByUrl(CanonicalType measureUrl) {
-        if (measureEvaluationOptions.isUseNpmForQualifyingResources()) {
+        if (evaluationSettings.isUseNpmForQualifyingResources()) {
             final NpmResourceHolder npmResourceHolder = npmPackageLoader.loadNpmResources(measureUrl);
 
             var optMeasureAdapter = npmResourceHolder.getMeasure();

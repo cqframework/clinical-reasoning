@@ -50,6 +50,7 @@ import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -100,10 +101,12 @@ public class TestPlanDefinition {
 
     public static class Given {
         private IRepository repository;
+        private NpmPackageLoader npmPackageLoader;
         private EvaluationSettings evaluationSettings;
 
         public Given repository(IRepository repository) {
             this.repository = repository;
+            this.npmPackageLoader = NpmPackageLoader.DEFAULT;
             return this;
         }
 
@@ -111,6 +114,7 @@ public class TestPlanDefinition {
             this.repository = new IgRepository(
                     fhirContext,
                     Path.of("%s/%s/%s".formatted(getResourcePath(this.getClass()), CLASS_PATH, repositoryPath)));
+            this.npmPackageLoader = NpmPackageLoader.DEFAULT;
             return this;
         }
 
@@ -134,7 +138,7 @@ public class TestPlanDefinition {
                         .getTerminologySettings()
                         .setValuesetExpansionMode(VALUESET_EXPANSION_MODE.PERFORM_NAIVE_EXPANSION);
             }
-            return new PlanDefinitionProcessor(repository, evaluationSettings, null);
+            return new PlanDefinitionProcessor(repository, npmPackageLoader, evaluationSettings, null);
         }
 
         public When when() {

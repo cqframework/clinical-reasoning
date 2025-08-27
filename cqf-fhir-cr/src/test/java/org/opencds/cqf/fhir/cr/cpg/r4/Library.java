@@ -15,6 +15,8 @@ import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
+import org.opencds.cqf.fhir.cr.measure.r4.npm.R4FhirOrNpmResourceProvider;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 public class Library {
@@ -64,6 +66,8 @@ public class Library {
 
     public static class Given {
         private IRepository repository;
+        private NpmPackageLoader npmPackageLoader;
+        private R4FhirOrNpmResourceProvider r4FhirOrNpmResourceProvider;
         private EvaluationSettings evaluationSettings;
 
         public Given() {
@@ -87,7 +91,28 @@ public class Library {
             this.repository = new IgRepository(
                     FhirContext.forR4Cached(),
                     Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
+            // We're explicitly NOT using NPM here
+            this.npmPackageLoader = NpmPackageLoader.DEFAULT;
+            this.r4FhirOrNpmResourceProvider =
+                    new R4FhirOrNpmResourceProvider(this.repository, this.npmPackageLoader, this.evaluationSettings);
             return this;
+        }
+
+        // Use this if you wish to do anything with NPM
+        public Given repositoryPlusNpmFor(String repositoryPath) {
+            var igRepository = new IgRepository(
+                    FhirContext.forR4Cached(),
+                    Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
+            this.repository = igRepository;
+            this.npmPackageLoader = igRepository.getNpmPackageLoader();
+            this.r4FhirOrNpmResourceProvider =
+                    new R4FhirOrNpmResourceProvider(this.repository, this.npmPackageLoader, this.evaluationSettings);
+            mutateEvaluationSettingsToEnableNpm();
+            return this;
+        }
+
+        private void mutateEvaluationSettingsToEnableNpm() {
+            this.evaluationSettings.setUseNpmForQualifyingResources(true);
         }
 
         public Library.Given evaluationSettings(EvaluationSettings evaluationSettings) {
@@ -96,11 +121,12 @@ public class Library {
         }
 
         private R4CqlExecutionService buildCqlService() {
-            return new R4CqlExecutionService(repository, evaluationSettings);
+            return new R4CqlExecutionService(repository, npmPackageLoader, evaluationSettings);
         }
 
         private R4LibraryEvaluationService buildLibraryEvaluationService() {
-            return new R4LibraryEvaluationService(repository, evaluationSettings);
+            return new R4LibraryEvaluationService(
+                    repository, npmPackageLoader, r4FhirOrNpmResourceProvider, evaluationSettings);
         }
 
         public Library.When when() {

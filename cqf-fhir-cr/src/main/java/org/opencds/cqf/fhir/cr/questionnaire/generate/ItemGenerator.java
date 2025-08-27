@@ -21,6 +21,7 @@ import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.fhir.cql.Engines;
+import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cr.common.ExpressionProcessor;
 import org.opencds.cqf.fhir.cr.common.ExtensionProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.Helpers;
@@ -32,6 +33,7 @@ import org.opencds.cqf.fhir.utility.VersionUtilities;
 import org.opencds.cqf.fhir.utility.adapter.IElementDefinitionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IStructureDefinitionAdapter;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,10 +50,9 @@ public class ItemGenerator {
     protected final ElementHasCaseFeature elementHasCaseFeature;
     protected final ItemTypeIsChoice itemTypeIsChoice;
 
-    public ItemGenerator(IRepository repository) {
+    public ItemGenerator(IRepository repository, NpmPackageLoader npmPackageLoader) {
         this.repository = repository;
-        // LUKETODO:  NPM for multiple libraries?
-        engine = Engines.forRepository(this.repository);
+        engine = Engines.forRepository(this.repository, EvaluationSettings.getDefault(), null, npmPackageLoader);
         expressionProcessor = new ExpressionProcessor();
         extensionProcessor = new ExtensionProcessor();
         elementHasCaseFeature = new ElementHasCaseFeature();

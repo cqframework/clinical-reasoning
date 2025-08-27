@@ -42,11 +42,14 @@ import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.VersionUtilities;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 public class TestQuestionnaire {
     public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/shared";
+
+    // LUKETODO: add a code path to explicitly enable NPM
 
     public static Given given() {
         return new Given();
@@ -54,6 +57,7 @@ public class TestQuestionnaire {
 
     public static class Given {
         private IRepository repository;
+        private NpmPackageLoader npmPackageLoader;
         private EvaluationSettings evaluationSettings;
         private IGenerateProcessor generateProcessor;
         private IPackageProcessor packageProcessor;
@@ -62,12 +66,16 @@ public class TestQuestionnaire {
 
         public Given repository(IRepository repository) {
             this.repository = repository;
+            // We're explicitly NOT using NPM here
+            this.npmPackageLoader = NpmPackageLoader.DEFAULT;
             return this;
         }
 
         public Given repositoryFor(FhirContext fhirContext, String repositoryPath) {
             this.repository = new IgRepository(
                     fhirContext, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
+            // We're explicitly NOT using NPM here
+            this.npmPackageLoader = NpmPackageLoader.DEFAULT;
             return this;
         }
 
@@ -110,6 +118,7 @@ public class TestQuestionnaire {
             }
             return new QuestionnaireProcessor(
                     repository,
+                    npmPackageLoader,
                     evaluationSettings,
                     generateProcessor,
                     packageProcessor,

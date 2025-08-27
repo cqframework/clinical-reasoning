@@ -19,6 +19,7 @@ import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FIL
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
 import org.opencds.cqf.fhir.cr.questionnaire.QuestionnaireProcessor;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 public class TestQuestionnaire {
@@ -30,11 +31,13 @@ public class TestQuestionnaire {
 
     public static class Given {
         private IRepository repository;
+        private NpmPackageLoader npmPackageLoader;
         private EvaluationSettings evaluationSettings;
 
         public Given repositoryFor(FhirContext fhirContext, String repositoryPath) {
             this.repository = new IgRepository(
                     fhirContext, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
+            this.npmPackageLoader = NpmPackageLoader.DEFAULT;
             return this;
         }
 
@@ -50,7 +53,7 @@ public class TestQuestionnaire {
                         .getTerminologySettings()
                         .setValuesetExpansionMode(VALUESET_EXPANSION_MODE.PERFORM_NAIVE_EXPANSION);
             }
-            return new QuestionnaireProcessor(repository, evaluationSettings, null, null, null, null);
+            return new QuestionnaireProcessor(repository, npmPackageLoader, evaluationSettings, null, null, null, null);
         }
 
         public When when() {

@@ -18,6 +18,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IElementDefinitionAdapter;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,10 +30,10 @@ public class GenerateProcessor implements IGenerateProcessor {
     protected final FhirVersionEnum fhirVersion;
     protected final ItemGenerator itemGenerator;
 
-    public GenerateProcessor(IRepository repository) {
+    public GenerateProcessor(IRepository repository, NpmPackageLoader npmPackageLoader) {
         this.repository = repository;
         this.fhirVersion = repository.fhirContext().getVersion().getVersion();
-        itemGenerator = new ItemGenerator(repository);
+        itemGenerator = new ItemGenerator(repository, npmPackageLoader);
     }
 
     @Override

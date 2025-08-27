@@ -70,8 +70,8 @@ public class Measure {
 
             var npmPackageLoader = NpmPackageLoader.DEFAULT;
             this.r4MeasureServiceUtils = new R4MeasureServiceUtils(repository);
-            this.r4FhirOrNpmResourceProvider =
-                    new R4FhirOrNpmResourceProvider(repository, npmPackageLoader, evaluationOptions);
+            this.r4FhirOrNpmResourceProvider = new R4FhirOrNpmResourceProvider(
+                    repository, npmPackageLoader, evaluationOptions.getEvaluationSettings());
         }
 
         public Given repositoryFor(String repositoryPath) {

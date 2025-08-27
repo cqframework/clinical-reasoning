@@ -28,6 +28,7 @@ import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.client.TerminologyServerClientSettings;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 @SuppressWarnings("squid:S2699")
@@ -36,11 +37,14 @@ class PlanDefinitionProcessorTests {
     private final FhirContext fhirContextR4 = FhirContext.forR4Cached();
     private final FhirContext fhirContextR5 = FhirContext.forR5Cached();
 
+    // LUKETODO: consider NPM tests
+
     @Test
     void defaultSettings() {
         var repository =
                 new IgRepository(fhirContextR4, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r4"));
-        var processor = new PlanDefinitionProcessor(repository);
+        var npmPackageLoader = NpmPackageLoader.DEFAULT;
+        var processor = new PlanDefinitionProcessor(repository, npmPackageLoader);
         assertNotNull(processor.evaluationSettings());
     }
 
@@ -48,6 +52,7 @@ class PlanDefinitionProcessorTests {
     void processor() {
         var repository =
                 new IgRepository(fhirContextR5, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r5"));
+        var npmPackageLoader = NpmPackageLoader.DEFAULT;
         var modelResolver = FhirModelResolverCache.resolverForVersion(FhirVersionEnum.R5);
         var activityProcessor = new org.opencds.cqf.fhir.cr.activitydefinition.apply.ApplyProcessor(
                 repository, IRequestResolverFactory.getDefault(FhirVersionEnum.R5));
@@ -56,9 +61,10 @@ class PlanDefinitionProcessorTests {
         var requestResolverFactory = IRequestResolverFactory.getDefault(FhirVersionEnum.R5);
         var processor = new PlanDefinitionProcessor(
                 repository,
+                npmPackageLoader,
                 EvaluationSettings.getDefault(),
                 new TerminologyServerClientSettings(),
-                new ApplyProcessor(repository, modelResolver, activityProcessor),
+                new ApplyProcessor(repository, npmPackageLoader, modelResolver, activityProcessor),
                 packageProcessor,
                 dataRequirementsProcessor,
                 activityProcessor,

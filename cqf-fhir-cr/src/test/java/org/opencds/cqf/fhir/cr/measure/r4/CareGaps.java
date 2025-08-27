@@ -171,7 +171,8 @@ public class CareGaps {
 
         @Nonnull
         private R4FhirOrNpmResourceProvider getR4FhirOrNpmResourceProvider() {
-            return new R4FhirOrNpmResourceProvider(repository, npmPackageLoader, evaluationOptions);
+            return new R4FhirOrNpmResourceProvider(
+                    repository, npmPackageLoader, evaluationOptions.getEvaluationSettings());
         }
 
         public When when() {

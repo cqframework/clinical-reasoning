@@ -29,6 +29,7 @@ import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 import org.skyscreamer.jsonassert.JSONAssert;
 
@@ -53,6 +54,7 @@ public class TestItemGenerator {
 
     public static class Given {
         private IRepository repository;
+        private NpmPackageLoader npmPackageLoader;
 
         public Given repository(IRepository repository) {
             this.repository = repository;
@@ -62,15 +64,27 @@ public class TestItemGenerator {
         public Given repositoryFor(FhirContext fhirContext, String repositoryPath) {
             this.repository = new IgRepository(
                     fhirContext, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
+            // We're explicitly NOT using NPM here
+            this.npmPackageLoader = NpmPackageLoader.DEFAULT;
             return this;
         }
 
-        public static QuestionnaireProcessor buildProcessor(IRepository repository) {
-            return new QuestionnaireProcessor(repository);
+        // Use this if you wish to do anything with NPM
+        public Given repositoryPlusNpmFor(String repositoryPath) {
+            var igRepository = new IgRepository(
+                    FhirContext.forR4Cached(),
+                    Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
+            this.repository = igRepository;
+            this.npmPackageLoader = igRepository.getNpmPackageLoader();
+            return this;
+        }
+
+        public static QuestionnaireProcessor buildProcessor(IRepository repository, NpmPackageLoader npmPackageLoader) {
+            return new QuestionnaireProcessor(repository, npmPackageLoader);
         }
 
         public When when() {
-            return new When(repository, buildProcessor(repository));
+            return new When(repository, buildProcessor(repository, npmPackageLoader));
         }
     }
 

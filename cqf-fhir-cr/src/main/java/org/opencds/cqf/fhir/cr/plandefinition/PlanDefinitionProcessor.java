@@ -35,6 +35,7 @@ import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.client.TerminologyServerClientSettings;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.monad.Either3;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 
 @SuppressWarnings({"squid:S107", "squid:S1172"})
 public class PlanDefinitionProcessor {
@@ -46,22 +47,34 @@ public class PlanDefinitionProcessor {
     protected org.opencds.cqf.fhir.cr.activitydefinition.apply.IApplyProcessor activityProcessor;
     protected IRequestResolverFactory requestResolverFactory;
     protected IRepository repository;
+    protected NpmPackageLoader npmPackageLoader;
     protected EvaluationSettings evaluationSettings;
     protected TerminologyServerClientSettings terminologyServerClientSettings;
 
-    public PlanDefinitionProcessor(IRepository repository) {
-        this(repository, EvaluationSettings.getDefault(), new TerminologyServerClientSettings());
+    public PlanDefinitionProcessor(IRepository repository, NpmPackageLoader npmPackageLoader) {
+        this(repository, npmPackageLoader, EvaluationSettings.getDefault(), new TerminologyServerClientSettings());
     }
 
     public PlanDefinitionProcessor(
             IRepository repository,
+            NpmPackageLoader npmPackageLoader,
             EvaluationSettings evaluationSettings,
             TerminologyServerClientSettings terminologyServerClientSettings) {
-        this(repository, evaluationSettings, terminologyServerClientSettings, null, null, null, null, null);
+        this(
+                repository,
+                npmPackageLoader,
+                evaluationSettings,
+                terminologyServerClientSettings,
+                null,
+                null,
+                null,
+                null,
+                null);
     }
 
     public PlanDefinitionProcessor(
             IRepository repository,
+            NpmPackageLoader npmPackageLoader,
             EvaluationSettings evaluationSettings,
             TerminologyServerClientSettings terminologyServerClientSettings,
             IApplyProcessor applyProcessor,
@@ -70,6 +83,7 @@ public class PlanDefinitionProcessor {
             org.opencds.cqf.fhir.cr.activitydefinition.apply.IApplyProcessor activityProcessor,
             IRequestResolverFactory requestResolverFactory) {
         this.repository = requireNonNull(repository, "repository can not be null");
+        this.npmPackageLoader = requireNonNull(npmPackageLoader, "npmPackageLoader can not be null");
         this.evaluationSettings = requireNonNull(evaluationSettings, "evaluationSettings can not be null");
         if (packageProcessor == null) {
             this.terminologyServerClientSettings =
@@ -98,7 +112,7 @@ public class PlanDefinitionProcessor {
         }
         applyProcessor = applyProcessor != null
                 ? applyProcessor
-                : new ApplyProcessor(repository, modelResolver, activityProcessor);
+                : new ApplyProcessor(repository, npmPackageLoader, modelResolver, activityProcessor);
     }
 
     protected <C extends IPrimitiveType<String>, R extends IBaseResource> R resolvePlanDefinition(

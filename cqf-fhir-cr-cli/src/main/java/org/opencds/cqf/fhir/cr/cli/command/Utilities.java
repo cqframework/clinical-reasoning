@@ -174,7 +174,8 @@ public class Utilities {
         }
     }
 
-    // LUKETODO: think carefully about what to do here????
+    // Currently a NOOP implementation, since we can only load the NpmProcessor from implementation
+    // guides, for now
     public static NpmPackageLoader createNpmPackageLoader() {
         return NpmPackageLoader.DEFAULT;
     }

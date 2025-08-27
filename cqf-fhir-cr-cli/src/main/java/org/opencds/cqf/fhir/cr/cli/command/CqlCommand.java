@@ -21,7 +21,6 @@ import org.opencds.cqf.fhir.cr.cli.argument.CqlCommandArgument;
 import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Command;
 
-// LUKETODO:  how do I plug in NPM here?
 @Command(name = "cql", mixinStandardHelpOptions = true, description = "Evaluate CQL libraries against FHIR resources.")
 public class CqlCommand implements Callable<Integer> {
     @ArgGroup(multiplicity = "1", exclusive = false)
@@ -63,6 +62,7 @@ public class CqlCommand implements Callable<Integer> {
         NpmProcessor npmProcessor = null;
         if (arguments.fhir.implementationGuidePath != null && arguments.fhir.rootDirectory != null) {
             try {
+                // LUKETODO:  status quo except stub the NOOP NpmPackageLoader for now
                 var context = new IGContext();
                 context.initializeFromIg(
                         arguments.fhir.rootDirectory,

@@ -176,11 +176,11 @@ public class Measure {
                     Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
             this.repository = igRepository;
             this.npmPackageLoader = igRepository.getNpmPackageLoader();
-            mutateEvaluationOptionsToEnableNpm();
+            mutateEvaluationSettingsToEnableNpm();
             return this;
         }
 
-        private void mutateEvaluationOptionsToEnableNpm() {
+        private void mutateEvaluationSettingsToEnableNpm() {
             this.evaluationOptions.getEvaluationSettings().setUseNpmForQualifyingResources(true);
         }
 
@@ -196,7 +196,8 @@ public class Measure {
                     evaluationOptions,
                     measurePeriodValidator,
                     new R4MeasureServiceUtils(repository),
-                    new R4FhirOrNpmResourceProvider(repository, npmPackageLoaderInner, evaluationOptions));
+                    new R4FhirOrNpmResourceProvider(
+                            repository, npmPackageLoaderInner, evaluationOptions.getEvaluationSettings()));
         }
 
         private NpmPackageLoader npmPackageLoaderOrEmpty() {

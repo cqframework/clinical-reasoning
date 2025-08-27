@@ -50,6 +50,7 @@ import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
 import org.opencds.cqf.fhir.utility.client.TerminologyServerClientSettings;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -81,17 +82,38 @@ public class TestPlanDefinition {
 
     public static class Given {
         private IRepository repository;
+        private NpmPackageLoader npmPackageLoader;
         private EvaluationSettings evaluationSettings;
 
         public Given repository(IRepository repository) {
             this.repository = repository;
+            // We're explicitly NOT using NPM here
+            this.npmPackageLoader = NpmPackageLoader.DEFAULT;
             return this;
         }
 
         public Given repositoryFor(FhirContext fhirContext, String repositoryPath) {
             this.repository = new IgRepository(
                     fhirContext, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
+            // We're explicitly NOT using NPM here
+            this.npmPackageLoader = NpmPackageLoader.DEFAULT;
             return this;
+        }
+
+        // LUKETODO: actually use this in tests
+        // Use this if you wish to do anything with NPM
+        public Given repositoryPlusNpmFor(String repositoryPath) {
+            var igRepository = new IgRepository(
+                    FhirContext.forR4Cached(),
+                    Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
+            this.repository = igRepository;
+            this.npmPackageLoader = igRepository.getNpmPackageLoader();
+            mutateEvaluationSettingsToEnableNpm();
+            return this;
+        }
+
+        private void mutateEvaluationSettingsToEnableNpm() {
+            this.evaluationSettings.setUseNpmForQualifyingResources(true);
         }
 
         public Given evaluationSettings(EvaluationSettings evaluationSettings) {
@@ -114,7 +136,8 @@ public class TestPlanDefinition {
                         .getTerminologySettings()
                         .setValuesetExpansionMode(VALUESET_EXPANSION_MODE.PERFORM_NAIVE_EXPANSION);
             }
-            return new PlanDefinitionProcessor(repository, evaluationSettings, new TerminologyServerClientSettings());
+            return new PlanDefinitionProcessor(
+                    repository, npmPackageLoader, evaluationSettings, new TerminologyServerClientSettings());
         }
 
         public When when() {

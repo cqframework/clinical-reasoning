@@ -86,6 +86,7 @@ class CqlEvaluationServiceTest {
         assertTrue(((BooleanType) results.getParameter("Numerator").getValue()).booleanValue());
     }
 
+    // LUKETODO:  this is a test with blank CQL content - is this relevant and correct?
     @Test
     void libraryEvaluationService_arithmetic() {
         var when = Library.given()
@@ -113,6 +114,7 @@ class CqlEvaluationServiceTest {
         assertTrue(((BooleanType) results.getParameter("return").getValue()).booleanValue());
     }
 
+    // LUKETODO:  also testing blank CQL content here - is this relevant and correct?
     @Test
     void libraryEvaluationService_IntegerInterval() {
         var expression = "Interval[1,5]";
@@ -130,6 +132,7 @@ class CqlEvaluationServiceTest {
         assertEquals("Interval[1, 5]", value.toString());
     }
 
+    // LUKETODO: also testing blank CQL content here - is this relevant and correct?
     @Test
     void libraryEvaluationService_Error() {
         var expression =

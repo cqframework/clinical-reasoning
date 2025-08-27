@@ -24,10 +24,12 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorUtils;
 import org.opencds.cqf.fhir.cr.measure.r4.npm.R4FhirOrNpmResourceProvider;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 
 @SuppressWarnings("squid:S107")
 public class R4CollectDataService {
     private final IRepository repository;
+    private final NpmPackageLoader npmPackageLoader;
     private final MeasureEvaluationOptions measureEvaluationOptions;
     private final R4RepositorySubjectProvider subjectProvider;
     private final MeasureProcessorUtils measureProcessorUtils = new MeasureProcessorUtils();
@@ -35,9 +37,11 @@ public class R4CollectDataService {
 
     public R4CollectDataService(
             IRepository repository,
+            NpmPackageLoader npmPackageLoader,
             MeasureEvaluationOptions measureEvaluationOptions,
             R4FhirOrNpmResourceProvider r4FhirOrNpmResourceProvider) {
         this.repository = repository;
+        this.npmPackageLoader = npmPackageLoader;
         this.measureEvaluationOptions = measureEvaluationOptions;
         this.subjectProvider = new R4RepositorySubjectProvider(measureEvaluationOptions.getSubjectProviderOptions());
         this.r4FhirOrNpmResourceProvider = r4FhirOrNpmResourceProvider;
@@ -79,8 +83,9 @@ public class R4CollectDataService {
 
         List<String> subjectList = getSubjects(subject, practitioner, subjectProvider);
 
-        var context =
-                Engines.forRepository(this.repository, this.measureEvaluationOptions.getEvaluationSettings(), null);
+        // LUKETODO: get the NpmPackageLoader from the R4FhirOrNpmResourceProvider instead?
+        var context = Engines.forRepository(
+                this.repository, this.measureEvaluationOptions.getEvaluationSettings(), null, npmPackageLoader);
 
         var foldedMeasure = r4FhirOrNpmResourceProvider.foldMeasure(Eithers.forMiddle3(measureId));
 

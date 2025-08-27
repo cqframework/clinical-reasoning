@@ -30,6 +30,7 @@ import org.opencds.cqf.fhir.cr.questionnaire.populate.PopulateProcessor;
 import org.opencds.cqf.fhir.cr.questionnaireresponse.TestQuestionnaireResponse;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Ids;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 @SuppressWarnings("squid:S2699")
@@ -40,11 +41,14 @@ class QuestionnaireProcessorTests {
             new IgRepository(fhirContextR4, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r4"));
     private final IRepository repositoryR5 =
             new IgRepository(fhirContextR5, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r5"));
+    // LUKETODO:  look at everywhere that we stub the default NpmPackageLoader and add conditional logic
+    // to enable the in-memory loader
+    private final NpmPackageLoader npmPackageLoader = NpmPackageLoader.DEFAULT;
 
     @Test
     void processors() {
         var bundle = given().repository(repositoryR4)
-                .generateProcessor(new GenerateProcessor(repositoryR4))
+                .generateProcessor(new GenerateProcessor(repositoryR4, npmPackageLoader))
                 .packageProcessor(new PackageProcessor(repositoryR4))
                 .populateProcessor(new PopulateProcessor())
                 .when()

@@ -32,6 +32,7 @@ import org.opencds.cqf.fhir.cr.questionnaire.populate.PopulateRequest;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.monad.Either3;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 
 public class QuestionnaireProcessor {
     protected static final String SUBJECT_TYPE = "Patient";
@@ -42,27 +43,31 @@ public class QuestionnaireProcessor {
     protected final EvaluationSettings evaluationSettings;
     protected final FhirVersionEnum fhirVersion;
     protected IRepository repository;
+    protected NpmPackageLoader npmPackageLoader;
     protected IGenerateProcessor generateProcessor;
     protected IPackageProcessor packageProcessor;
     protected IDataRequirementsProcessor dataRequirementsProcessor;
     protected IPopulateProcessor populateProcessor;
 
-    public QuestionnaireProcessor(IRepository repository) {
-        this(repository, EvaluationSettings.getDefault());
+    public QuestionnaireProcessor(IRepository repository, NpmPackageLoader npmPackageLoader) {
+        this(repository, npmPackageLoader, EvaluationSettings.getDefault());
     }
 
-    public QuestionnaireProcessor(IRepository repository, EvaluationSettings evaluationSettings) {
-        this(repository, evaluationSettings, null, null, null, null);
+    public QuestionnaireProcessor(
+            IRepository repository, NpmPackageLoader npmPackageLoader, EvaluationSettings evaluationSettings) {
+        this(repository, npmPackageLoader, evaluationSettings, null, null, null, null);
     }
 
     public QuestionnaireProcessor(
             IRepository repository,
+            NpmPackageLoader npmPackageLoader,
             EvaluationSettings evaluationSettings,
             IGenerateProcessor generateProcessor,
             IPackageProcessor packageProcessor,
             IDataRequirementsProcessor dataRequirementsProcessor,
             IPopulateProcessor populateProcessor) {
         this.repository = requireNonNull(repository, "repository can not be null");
+        this.npmPackageLoader = npmPackageLoader;
         this.evaluationSettings = requireNonNull(evaluationSettings, "evaluationSettings can not be null");
         this.questionnaireResolver = new ResourceResolver("Questionnaire", this.repository);
         this.structureDefResolver = new ResourceResolver("StructureDefinition", this.repository);
@@ -154,7 +159,9 @@ public class QuestionnaireProcessor {
     }
 
     public IBaseResource generateQuestionnaire(GenerateRequest request, String id) {
-        var processor = generateProcessor != null ? generateProcessor : new GenerateProcessor(this.repository);
+        var processor = generateProcessor != null
+                ? generateProcessor
+                : new GenerateProcessor(this.repository, this.npmPackageLoader);
         return request == null ? processor.generate(id) : processor.generate(request, id);
     }
 

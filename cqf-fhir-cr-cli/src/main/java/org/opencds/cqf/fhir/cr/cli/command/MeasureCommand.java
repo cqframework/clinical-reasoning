@@ -136,7 +136,7 @@ public class MeasureCommand implements Callable<Integer> {
     private static R4MeasureProcessor getR4MeasureProcessor(
             EvaluationSettings evaluationSettings, IRepository repository, NpmPackageLoader npmPackageLoader) {
 
-        MeasureEvaluationOptions evaluationOptions = new MeasureEvaluationOptions();
+        final MeasureEvaluationOptions evaluationOptions = new MeasureEvaluationOptions();
         evaluationOptions.setApplyScoringSetMembership(false);
         evaluationOptions.setEvaluationSettings(evaluationSettings);
 
@@ -144,12 +144,12 @@ public class MeasureCommand implements Callable<Integer> {
                 repository,
                 evaluationOptions,
                 new MeasureProcessorUtils(),
-                getR4FhirOrNpmResourceLoader(repository, npmPackageLoader, evaluationOptions));
+                getR4FhirOrNpmResourceLoader(repository, npmPackageLoader, evaluationSettings));
     }
 
     private static R4FhirOrNpmResourceProvider getR4FhirOrNpmResourceLoader(
-            IRepository repository, NpmPackageLoader npmPackageLoader, MeasureEvaluationOptions evaluationOptions) {
-        return new R4FhirOrNpmResourceProvider(repository, npmPackageLoader, evaluationOptions);
+            IRepository repository, NpmPackageLoader npmPackageLoader, EvaluationSettings evaluationSettings) {
+        return new R4FhirOrNpmResourceProvider(repository, npmPackageLoader, evaluationSettings);
     }
 
     private void writeJsonToFile(String json, String patientId, Path path) {

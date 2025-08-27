@@ -197,6 +197,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             }
         }
 
+        // LUKETODO:  should we add warnings and infos as well, separately?
         public void addOperationOutcomes() {
             var errorMsgs = this.measureDef.errors();
             for (var error : errorMsgs) {

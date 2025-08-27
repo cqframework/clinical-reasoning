@@ -24,6 +24,18 @@ public class R4DraftService {
         this.repository = repository;
     }
 
+    /**
+     * Creates a draft version of a knowledge artifact and all its children.
+     * This operation is used to set the status and version. It also removes effectivePeriod,
+     * approvalDate and any extensions which are only valid for active artifacts.
+     *
+     * @param id                The logical id of the artifact to draft. The server must know the
+     *                          artifact (e.g. it is defined explicitly in the server's resources)
+     * @param version           A semantic version in the form MAJOR.MINOR.PATCH.REVISION
+     * @return  The {@link Bundle Bundle} result containing the new resource(s). If inputParameters
+     *          are present in the manifest being drafted, those parameters are moved to the
+     *          expansionParameters extension in the new draft.
+     */
     public Bundle draft(@IdParam IdType id, @OperationParam(name = "version") String version) throws FHIRException {
         var resource = (MetadataResource) SearchHelper.readRepository(repository, id);
         if (resource == null) {

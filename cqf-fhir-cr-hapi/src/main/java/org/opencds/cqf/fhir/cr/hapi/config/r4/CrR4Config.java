@@ -172,7 +172,8 @@ public class CrR4Config {
                                 CareGapsOperationProvider.class,
                                 CqlExecutionOperationProvider.class,
                                 CollectDataOperationProvider.class,
-                                DataRequirementsOperationProvider.class)));
+                                DataRequirementsOperationProvider.class,
+                                DraftProvider.class)));
 
         return new ProviderLoader(restfulServer, applicationContext, selector);
     }

@@ -225,8 +225,6 @@ public class IgRepository implements IRepository {
      * @param root              The root directory of the IG.
      * @param conventions       The conventions defining directory and filename
      *                          structures.
-     * @param encodingBehavior  The encoding behavior for parsing and encoding
-     *                          resources.
      * @param operationProvider The operation provider for invoking FHIR operations.
      */
     public IgRepository(

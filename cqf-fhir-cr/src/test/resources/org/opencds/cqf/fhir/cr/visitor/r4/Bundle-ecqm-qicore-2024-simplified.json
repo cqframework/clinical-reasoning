@@ -2145,7 +2145,7 @@
             "id": "effective-data-requirements",
             "extension": [
               {
-                "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-directReferenceCode",
+                "url": "http://hl7.org/fhir/StructureDefinition/cqf-directReferenceCode",
                 "valueCoding": {
                   "system": "http://snomed.info/sct",
                   "code": "428361000124107",

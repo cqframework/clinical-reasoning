@@ -189,7 +189,7 @@
                   "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
                   "valueExpression": {
                     "language": "text/fhirpath",
-                    "expression": "%patient.telecom.where(system='phone').select(($this.where(use='mobile') | $this.where(use='home')).first().value)"
+                    "expression": "%patient.telecom.where(system='phone').select(($this.where(use='mobile')).value)"
                   }
                 }
               ],

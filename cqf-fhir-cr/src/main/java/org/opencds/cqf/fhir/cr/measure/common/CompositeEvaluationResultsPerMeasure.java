@@ -59,7 +59,7 @@ public class CompositeEvaluationResultsPerMeasure {
 
     /**
      * Expose method to allow retrieval of evaluated cql results per Measure.
-     * IIdType for Measure is key, Nested Map<String, EvaluationResult> has Key for subject evaluated,
+     * IIdType for Measure is key, Nested {@code Map<String, EvaluationResult>} has Key for subject evaluated,
      * and associated EvaluationResult produced from CQL expression evaluation
      * @return {@code Map<IIdType, Map<String, EvaluationResult>>}
      */

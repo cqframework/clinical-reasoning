@@ -69,7 +69,11 @@ public class Engines {
 
     // LUKETODO: consider having absolutely every caller use one of these
     public static CqlEngine forFhirOrNpmThingee(FhirOrNpmThingee fhirOrNpmThingee, IBaseBundle additionalData) {
-        return forRepository(fhirOrNpmThingee.getRepository(), fhirOrNpmThingee.getEvaluationSettings(), additionalData, fhirOrNpmThingee.getNpmPackageLoader());
+        return forRepository(
+                fhirOrNpmThingee.getRepository(),
+                fhirOrNpmThingee.getEvaluationSettings(),
+                additionalData,
+                fhirOrNpmThingee.getNpmPackageLoader());
     }
 
     public static CqlEngine forRepository(

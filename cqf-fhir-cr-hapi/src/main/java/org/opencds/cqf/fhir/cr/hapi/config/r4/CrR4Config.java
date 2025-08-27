@@ -9,11 +9,13 @@ import java.util.Map;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cr.cpg.r4.R4CqlExecutionService;
 import org.opencds.cqf.fhir.cr.crmi.R4DraftService;
+import org.opencds.cqf.fhir.cr.crmi.R4ApproveService;
 import org.opencds.cqf.fhir.cr.hapi.common.StringTimePeriodHandler;
 import org.opencds.cqf.fhir.cr.hapi.config.CrBaseConfig;
 import org.opencds.cqf.fhir.cr.hapi.config.ProviderLoader;
 import org.opencds.cqf.fhir.cr.hapi.config.ProviderSelector;
 import org.opencds.cqf.fhir.cr.hapi.config.RepositoryConfig;
+import org.opencds.cqf.fhir.cr.hapi.r4.IApproveServiceFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.ICareGapsServiceFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.ICollectDataServiceFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.ICqlExecutionServiceFactory;
@@ -25,6 +27,7 @@ import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureEvaluatorSingleFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureServiceUtilsFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.cpg.CqlExecutionOperationProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.crmi.DraftProvider;
+import org.opencds.cqf.fhir.cr.hapi.r4.crmi.ApproveProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.measure.CareGapsOperationProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.measure.CollectDataOperationProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.measure.DataRequirementsOperationProvider;
@@ -143,6 +146,15 @@ public class CrR4Config {
     DraftProvider r4DraftProvider(IDraftServiceFactory r4DraftServiceFactory) {
         return new DraftProvider(r4DraftServiceFactory);
     }
+      
+    IApproveServiceFactory approveServiceFactory(IRepositoryFactory repositoryFactory) {
+        return rd -> new R4ApproveService(repositoryFactory.create(rd));
+    }
+
+    @Bean
+    ApproveProvider r4ApproveProvider(IApproveServiceFactory r4ApproveServiceFactory) {
+        return new ApproveProvider(r4ApproveServiceFactory);
+    }
 
     @Bean
     SubmitDataProvider r4SubmitDataProvider(ISubmitDataProcessorFactory r4SubmitDataProcessorFactory) {
@@ -174,6 +186,7 @@ public class CrR4Config {
                                 CollectDataOperationProvider.class,
                                 DataRequirementsOperationProvider.class,
                                 DraftProvider.class)));
+                                ApproveProvider.class)));
 
         return new ProviderLoader(restfulServer, applicationContext, selector);
     }

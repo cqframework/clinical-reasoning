@@ -1,5 +1,7 @@
 package org.opencds.cqf.fhir.cr.hapi.config.r4;
 
+import static org.opencds.cqf.fhir.utility.npm.NpmConfigDependencySubstitutor.substituteNpmPackageLoaderIfEmpty;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.api.server.IRepositoryFactory;
@@ -92,7 +94,7 @@ public class CrR4Config {
             Optional<NpmPackageLoader> optPackageLoader,
             EvaluationSettings evaluationSettings) {
         return rd -> new R4CqlExecutionService(
-                repositoryFactory.create(rd), npmPackageLoader(optPackageLoader), evaluationSettings);
+                repositoryFactory.create(rd), substituteNpmPackageLoaderIfEmpty(optPackageLoader), evaluationSettings);
     }
 
     @Bean
@@ -120,7 +122,7 @@ public class CrR4Config {
             R4FhirOrNpmResourceProviderFactory r4FhirOrNpmResourceProviderFactory) {
         return requestDetails -> new R4CollectDataService(
                 repositoryFactory.create(requestDetails),
-                npmPackageLoader(optPackageLoader),
+                substituteNpmPackageLoaderIfEmpty(optPackageLoader),
                 measureEvaluationOptions,
                 r4FhirOrNpmResourceProviderFactory.create(requestDetails));
     }
@@ -202,10 +204,8 @@ public class CrR4Config {
             Optional<NpmPackageLoader> optPackageLoader,
             EvaluationSettings evaluationSettings) {
         return requestDetails -> new R4FhirOrNpmResourceProvider(
-                repositoryFactory.create(requestDetails), npmPackageLoader(optPackageLoader), evaluationSettings);
-    }
-
-    private NpmPackageLoader npmPackageLoader(Optional<NpmPackageLoader> optNpmPackageLoader) {
-        return NpmPackageLoader.getDefaultIfEmpty(optNpmPackageLoader.orElse(null));
+                repositoryFactory.create(requestDetails),
+                substituteNpmPackageLoaderIfEmpty(optPackageLoader),
+                evaluationSettings);
     }
 }

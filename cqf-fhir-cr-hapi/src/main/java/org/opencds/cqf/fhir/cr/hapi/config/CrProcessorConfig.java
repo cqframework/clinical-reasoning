@@ -1,5 +1,7 @@
 package org.opencds.cqf.fhir.cr.hapi.config;
 
+import static org.opencds.cqf.fhir.utility.npm.NpmConfigDependencySubstitutor.substituteNpmPackageLoaderIfEmpty;
+
 import ca.uhn.fhir.rest.api.server.IRepositoryFactory;
 import java.util.Optional;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
@@ -36,7 +38,7 @@ public class CrProcessorConfig {
             TerminologyServerClientSettings terminologyServerClientSettings) {
         return rd -> new PlanDefinitionProcessor(
                 repositoryFactory.create(rd),
-                npmPackageLoader(optNpmPackageLoader),
+                substituteNpmPackageLoaderIfEmpty(optNpmPackageLoader),
                 evaluationSettings,
                 terminologyServerClientSettings);
     }
@@ -47,7 +49,9 @@ public class CrProcessorConfig {
             Optional<NpmPackageLoader> optNpmPackageLoader,
             EvaluationSettings evaluationSettings) {
         return rd -> new QuestionnaireProcessor(
-                repositoryFactory.create(rd), npmPackageLoader(optNpmPackageLoader), evaluationSettings);
+                repositoryFactory.create(rd),
+                substituteNpmPackageLoaderIfEmpty(optNpmPackageLoader),
+                evaluationSettings);
     }
 
     @Bean
@@ -72,11 +76,5 @@ public class CrProcessorConfig {
             TerminologyServerClientSettings terminologyServerClientSettings) {
         return rd -> new ValueSetProcessor(
                 repositoryFactory.create(rd), evaluationSettings, terminologyServerClientSettings);
-    }
-
-    // LUKETODO: reuse this everywhere
-    // LUKETODO: javadoc
-    private NpmPackageLoader npmPackageLoader(Optional<NpmPackageLoader> optNpmPackageLoader) {
-        return NpmPackageLoader.getDefaultIfEmpty(optNpmPackageLoader.orElse(null));
     }
 }

@@ -61,23 +61,21 @@ import org.opencds.cqf.fhir.utility.repository.operations.IRepositoryOperationPr
  * <pre>
  * Standard IG Layout:
  * /path/to/ig/root/          (CategoryLayout.FLAT)
- * ├── Patient-001.json
- * ├── Observation-002.json
- * ├── or
  * ├── input/
- * │   ├── [resources/]       (CategoryLayout.DIRECTORY_PER_CATEGORY)
- * │   │   ├── Patient-789.json   (FhirTypeLayout.FLAT)
+ * │   ├── [resources/]               (CategoryLayout.DIRECTORY_PER_CATEGORY)
+ * │   │   ├── Patient-789.json       (FhirTypeLayout.FLAT)
  * │   │   ├── or
- * │   │   ├── [patient/]     (FhirTypeLayout.DIRECTORY_PER_TYPE)
+ * │   │   ├── [patient/]             (FhirTypeLayout.DIRECTORY_PER_TYPE)
  * │   │   │   ├── Patient-123.json   (FilenameMode.TYPE_AND_ID)
  * │   │   │   ├── or
- * │   │   │   ├── 456.json       (FilenameMode.ID_ONLY)
+ * │   │   │   ├── 456.json           (FilenameMode.ID_ONLY)
  * │   │   │   └── ...
  * │   │   └── ...
- * │   └── vocabulary/        (CategoryLayout.DIRECTORY_PER_CATEGORY)
- * │       ├── ValueSet-abc.json
- * │       ├── def.json
- * │       └── external/      (External Resources - Read-only, Terminology-only)
+ * │   └── vocabulary/                (CategoryLayout.DIRECTORY_PER_CATEGORY)
+ * │       ├── ValueSet-ABC.json      (FilenameMode.TYPE_AND_ID)
+ * |       ├── or
+ * │       ├── DEF.json               (FilenameMode.ID_ONLY)
+ * │       └── external/              (External Resources - Read-only, Terminology-only)
  * │           └── CodeSystem-external.json
  * └── ...
  *
@@ -89,7 +87,7 @@ import org.opencds.cqf.fhir.utility.repository.operations.IRepositoryOperationPr
  * └── tests/
  *     └── data/
  *         └── fhir/          (Test Data Resources)
- *           ├── [patient/]     (CompartmentLayout.DIRECTORY_PER_COMPARTMENT)
+ *           ├── [patient/]     (CompartmentMode.PATIENT)
  *           │   └── Patient/123/
  *           │       └── Observation-456.json
  *           └── ...
@@ -100,7 +98,7 @@ import org.opencds.cqf.fhir.utility.repository.operations.IRepositoryOperationPr
  * </p>
  * <p>
  * The repository supports FHIR compartment contexts using directory conventions.
- * When using {@code CompartmentLayout.DIRECTORY_PER_COMPARTMENT}, resources are organized by
+ * When using a {@code CompartmentMode} other than {@code CompartmentMode.NONE}, resources are organized by
  * compartment type and ID (e.g., {@code Patient/123/}).
  * </p>
  *
@@ -267,10 +265,10 @@ public class IgRepository implements IRepository {
      * </pre>
      *
      * Path components depend on configuration:
-     * - Category directory (e.g., `input/resources/`, `src/fhir/`) depends on `CategoryLayout`
-     * - Type directory (e.g., `patient/`) depends on `FhirTypeLayout.DIRECTORY_PER_TYPE`
-     * - Compartment directory (e.g., `Patient/123/`) depends on `CompartmentLayout.DIRECTORY_PER_COMPARTMENT`
-     * - Filename format depends on `FilenameMode`:
+     * - Category directory (e.g., `input/resources/`, `src/fhir/`) depends on {@code CategoryLayout}
+     * - Type directory (e.g., `patient/`) depends on {@code FhirTypeLayout.DIRECTORY_PER_TYPE}
+     * - Compartment directory (e.g., `Patient/123/`) depends on {@code CompartmentMode}
+     * - Filename format depends on {@code FilenameMode}:
      *   - `TYPE_AND_ID`: `Patient-123.json`
      *   - `ID_ONLY`: `123.json`
      *
@@ -340,7 +338,7 @@ public class IgRepository implements IRepository {
      *     (e.g., `src/fhir/`, `tests/data/fhir/`)</li>
      * </ul>
      *
-     * <p>When {@code CompartmentLayout.DIRECTORY_PER_COMPARTMENT} is used with DATA resources,
+     * <p>When a {@code CompartmentMode} other than {@code CompartmentMode.NONE} is used with DATA resources,
      * compartment path is appended (e.g., `tests/data/fhir/Patient/123/`).</p>
      *
      * @param <T>                     The type of the FHIR resource.

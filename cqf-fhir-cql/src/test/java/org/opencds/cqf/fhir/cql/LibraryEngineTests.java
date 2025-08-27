@@ -155,8 +155,7 @@ class LibraryEngineTests {
 
         libraryEngine = new LibraryEngine(repository, evaluationSettings);
         repository.create(
-                new Patient().addName(new HumanName().addGiven("me")).setId("Patient/Patient1"),
-                Map.of(IgRepository.FHIR_COMPARTMENT_HEADER, "Patient/Patient1"));
+                new Patient().addName(new HumanName().addGiven("me")).setId("Patient/Patient1"));
         var patientId = "Patient/Patient1";
         var expression = new CqfExpression(
                 "text/cql", "MyLibrary.MyNameReturner", Map.of("MyLibrary", "http://fhir.test/Library/MyLibrary"));

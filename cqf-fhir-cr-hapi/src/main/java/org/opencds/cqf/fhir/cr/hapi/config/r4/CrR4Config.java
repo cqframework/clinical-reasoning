@@ -8,8 +8,8 @@ import java.util.Arrays;
 import java.util.Map;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cr.cpg.r4.R4CqlExecutionService;
-import org.opencds.cqf.fhir.cr.crmi.R4DraftService;
 import org.opencds.cqf.fhir.cr.crmi.R4ApproveService;
+import org.opencds.cqf.fhir.cr.crmi.R4DraftService;
 import org.opencds.cqf.fhir.cr.hapi.common.StringTimePeriodHandler;
 import org.opencds.cqf.fhir.cr.hapi.config.CrBaseConfig;
 import org.opencds.cqf.fhir.cr.hapi.config.ProviderLoader;
@@ -26,8 +26,8 @@ import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureEvaluatorMultipleFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureEvaluatorSingleFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureServiceUtilsFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.cpg.CqlExecutionOperationProvider;
-import org.opencds.cqf.fhir.cr.hapi.r4.crmi.DraftProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.crmi.ApproveProvider;
+import org.opencds.cqf.fhir.cr.hapi.r4.crmi.DraftProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.measure.CareGapsOperationProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.measure.CollectDataOperationProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.measure.DataRequirementsOperationProvider;
@@ -146,7 +146,8 @@ public class CrR4Config {
     DraftProvider r4DraftProvider(IDraftServiceFactory r4DraftServiceFactory) {
         return new DraftProvider(r4DraftServiceFactory);
     }
-      
+
+    @Bean
     IApproveServiceFactory approveServiceFactory(IRepositoryFactory repositoryFactory) {
         return rd -> new R4ApproveService(repositoryFactory.create(rd));
     }
@@ -185,7 +186,7 @@ public class CrR4Config {
                                 CqlExecutionOperationProvider.class,
                                 CollectDataOperationProvider.class,
                                 DataRequirementsOperationProvider.class,
-                                DraftProvider.class)));
+                                DraftProvider.class,
                                 ApproveProvider.class)));
 
         return new ProviderLoader(restfulServer, applicationContext, selector);

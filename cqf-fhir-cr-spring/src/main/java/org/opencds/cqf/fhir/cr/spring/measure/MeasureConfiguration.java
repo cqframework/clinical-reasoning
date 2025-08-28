@@ -20,23 +20,26 @@ public class MeasureConfiguration {
     @Bean
     Dstu3MeasureProcessor dstu3MeasureProcessor(
             IRepository repository,
+            NpmPackageLoader npmPackageLoader,
             MeasureEvaluationOptions measureEvaluationOptions,
             SubjectProvider subjectProvider) {
-        return new Dstu3MeasureProcessor(repository, measureEvaluationOptions, subjectProvider);
+        return new Dstu3MeasureProcessor(repository, npmPackageLoader, measureEvaluationOptions, subjectProvider);
     }
 
     @Bean
     R4MeasureProcessor r4MeasureProcessor(
             IRepository repository,
+            NpmPackageLoader npmPackageLoader,
             EvaluationSettings evaluationSettings,
             MeasureEvaluationOptions measureEvaluationOptions,
             MeasureProcessorUtils measureProcessorUtils,
-            NpmPackageLoader npmPackageLoader) {
+            R4FhirOrNpmResourceProvider r4FhirOrNpmResourceProvider) {
         return new R4MeasureProcessor(
                 repository,
+                npmPackageLoader,
                 measureEvaluationOptions,
                 measureProcessorUtils,
-                r4FhirOrNpmResourceProvider(repository, npmPackageLoader, evaluationSettings));
+                r4FhirOrNpmResourceProvider);
     }
 
     R4FhirOrNpmResourceProvider r4FhirOrNpmResourceProvider(

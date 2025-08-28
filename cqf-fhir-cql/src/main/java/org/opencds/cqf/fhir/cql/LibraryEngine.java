@@ -30,6 +30,7 @@ import org.opencds.cqf.cql.engine.execution.EvaluationResultsForMultiLib;
 import org.opencds.cqf.fhir.cql.engine.parameters.CqlFhirParametersConverter;
 import org.opencds.cqf.fhir.cql.engine.parameters.CqlParameterDefinition;
 import org.opencds.cqf.fhir.utility.CqfExpression;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,10 +41,13 @@ public class LibraryEngine {
 
     protected final IRepository repository;
     protected final FhirContext fhirContext;
+    protected final NpmPackageLoader npmPackageLoader;
     protected final EvaluationSettings settings;
 
-    public LibraryEngine(IRepository repository, EvaluationSettings evaluationSettings) {
+    public LibraryEngine(
+            IRepository repository, NpmPackageLoader npmPackageLoader, EvaluationSettings evaluationSettings) {
         this.repository = requireNonNull(repository, "repository can not be null");
+        this.npmPackageLoader = npmPackageLoader;
         this.settings = requireNonNull(evaluationSettings, "evaluationSettings can not be null");
         fhirContext = repository.fhirContext();
     }
@@ -159,8 +163,7 @@ public class LibraryEngine {
 
         var requestSettings = new EvaluationSettings(settings);
         requestSettings.getLibrarySourceProviders().add(new StringLibrarySourceProvider(Lists.newArrayList(cql)));
-        // LUKETODO:  NPM for multiple libraries?
-        var engine = Engines.forRepository(repository, requestSettings, bundle);
+        var engine = Engines.forRepository(repository, requestSettings, bundle, npmPackageLoader);
 
         var evaluationParameters = cqlFhirParametersConverter.toCqlParameters(parameters);
         if (contextParameter != null) {
@@ -339,7 +342,7 @@ public class LibraryEngine {
 
         // engine context built externally of LibraryEngine?
         var engineToUse = Objects.requireNonNullElseGet(
-                engine, () -> Engines.forRepository(repository, settings, additionalData));
+                engine, () -> Engines.forRepository(repository, settings, additionalData, npmPackageLoader));
 
         var evaluationParameters = cqlFhirParametersConverterToUse.toCqlParameters(parameters);
         if (rawParameters != null && !rawParameters.isEmpty()) {

@@ -68,7 +68,7 @@ public class R4LibraryEvaluationService {
             r4FhirOrNpmResourceProviderToUse = r4FhirOrNpmResourceProvider;
         }
 
-        var libraryEngine = new LibraryEngine(repositoryToUse, this.evaluationSettings);
+        var libraryEngine = new LibraryEngine(repositoryToUse, this.npmPackageLoader, this.evaluationSettings);
         var library = r4FhirOrNpmResourceProviderToUse.resolveLibraryById(id);
         var engine = Engines.forRepository(repository, evaluationSettings, null, npmPackageLoader);
         var libraryManager = engine.getEnvironment().getLibraryManager();

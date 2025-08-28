@@ -25,6 +25,7 @@ import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.opencds.cqf.fhir.cr.measure.dstu3.Measure.SelectedGroup.SelectedReference;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 public class Measure {
@@ -88,7 +89,8 @@ public class Measure {
         }
 
         private Dstu3MeasureProcessor buildProcessor() {
-            return new Dstu3MeasureProcessor(repository, evaluationOptions, new Dstu3RepositorySubjectProvider());
+            return new Dstu3MeasureProcessor(
+                    repository, NpmPackageLoader.DEFAULT, evaluationOptions, new Dstu3RepositorySubjectProvider());
         }
 
         public When when() {

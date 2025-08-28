@@ -216,7 +216,7 @@ public class PlanDefinitionProcessor {
                 null,
                 null,
                 null,
-                new LibraryEngine(repository, evaluationSettings));
+                new LibraryEngine(repository, npmPackageLoader, evaluationSettings));
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource apply(
@@ -290,7 +290,7 @@ public class PlanDefinitionProcessor {
                 parameters,
                 data,
                 prefetchData,
-                new LibraryEngine(repository, this.evaluationSettings));
+                new LibraryEngine(repository, this.npmPackageLoader, this.evaluationSettings));
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource apply(
@@ -418,7 +418,7 @@ public class PlanDefinitionProcessor {
                 parameters,
                 data,
                 prefetchData,
-                new LibraryEngine(repository, this.evaluationSettings));
+                new LibraryEngine(repository, this.npmPackageLoader, this.evaluationSettings));
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseParameters applyR5(

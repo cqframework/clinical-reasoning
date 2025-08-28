@@ -14,6 +14,7 @@ import org.opencds.cqf.fhir.cr.activitydefinition.apply.BaseRequestResourceResol
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.IRequestResolverFactory;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 public class RequestResourceResolver {
@@ -22,6 +23,8 @@ public class RequestResourceResolver {
     public static class Given {
         private IRequestResolverFactory resolverFactory;
         private IRepository repository;
+        private NpmPackageLoader npmPackageLoader;
+        private final EvaluationSettings evaluationSettings = EvaluationSettings.getDefault();
         private String activityDefinitionId;
 
         public Given repository(IRepository repository) {
@@ -36,7 +39,25 @@ public class RequestResourceResolver {
                     fhirContext, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
             this.resolverFactory =
                     IRequestResolverFactory.getDefault(fhirContext.getVersion().getVersion());
+            this.npmPackageLoader = NpmPackageLoader.DEFAULT;
             return this;
+        }
+
+        // LUKETODO:  we may need to test this for test coverage numbers
+        // Use this if you wish to do anything with NPM
+        public Given repositoryPlusNpmFor(String repositoryPath) {
+            var igRepository = new IgRepository(
+                    FhirContext.forR4Cached(),
+                    Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
+            this.repository = igRepository;
+            this.npmPackageLoader = igRepository.getNpmPackageLoader();
+            this.npmPackageLoader = NpmPackageLoader.DEFAULT;
+            mutateEvaluationSettingsToEnableNpm();
+            return this;
+        }
+
+        private void mutateEvaluationSettingsToEnableNpm() {
+            this.evaluationSettings.setUseNpmForQualifyingResources(true);
         }
 
         public Given activityDefinition(String activityDefinitionId) {
@@ -55,12 +76,13 @@ public class RequestResourceResolver {
                     .getImplementingClass();
             var activityDefinition =
                     repository.read(activityDefinitionClass, Ids.newId(activityDefinitionClass, activityDefinitionId));
-            return new When(repository, activityDefinition, buildResolver(activityDefinition));
+            return new When(repository, npmPackageLoader, activityDefinition, buildResolver(activityDefinition));
         }
     }
 
     public static class When {
         private final IRepository repository;
+        private final NpmPackageLoader npmPackageLoader;
         private final IBaseResource activityDefinition;
         private final BaseRequestResourceResolver resolver;
         private IIdType subjectId;
@@ -68,8 +90,13 @@ public class RequestResourceResolver {
         private IIdType practitionerId;
         private IIdType organizationId;
 
-        When(IRepository repository, IBaseResource activityDefinition, BaseRequestResourceResolver resolver) {
+        When(
+                IRepository repository,
+                NpmPackageLoader npmPackageLoader,
+                IBaseResource activityDefinition,
+                BaseRequestResourceResolver resolver) {
             this.repository = repository;
+            this.npmPackageLoader = npmPackageLoader;
             this.activityDefinition = activityDefinition;
             this.resolver = resolver;
         }
@@ -108,7 +135,7 @@ public class RequestResourceResolver {
                     null,
                     null,
                     null,
-                    new LibraryEngine(repository, EvaluationSettings.getDefault()),
+                    new LibraryEngine(repository, npmPackageLoader, EvaluationSettings.getDefault()),
                     FhirModelResolverCache.resolverForVersion(
                             repository.fhirContext().getVersion().getVersion())));
         }

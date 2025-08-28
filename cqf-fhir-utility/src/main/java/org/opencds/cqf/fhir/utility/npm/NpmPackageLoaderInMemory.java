@@ -25,7 +25,10 @@ import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IMeasureAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IResourceAdapter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+// LUKETODO:  should this class implicitly allow for a custom NamespaceManager?
 /**
  * Simplistic implementation of {@link NpmPackageLoader} that loads NpmPackages from the classpath
  * and stores {@link NpmResourceHolder}s in a Map. This class is recommended for testing
@@ -35,6 +38,8 @@ import org.opencds.cqf.fhir.utility.adapter.IResourceAdapter;
  * them from all loaded packages at construction time.
  */
 public class NpmPackageLoaderInMemory implements NpmPackageLoader {
+
+    private static final Logger logger = LoggerFactory.getLogger(NpmPackageLoaderInMemory.class);
 
     private static final Pattern PATTERN_PIPE = Pattern.compile("\\|");
 

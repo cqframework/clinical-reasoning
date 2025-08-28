@@ -49,17 +49,13 @@ public class Engines {
     private Engines() {}
 
     // LUKETODO: think about each of these constructors
-    public static CqlEngine forRepository(IRepository repository) {
-        return forRepository(repository, EvaluationSettings.getDefault());
-    }
-
-    public static CqlEngine forRepository(IRepository repository, EvaluationSettings settings) {
-        return forRepository(repository, settings, null, NpmPackageLoader.DEFAULT);
+    public static CqlEngine forRepository(IRepository repository, NpmPackageLoader npmPackageLoader) {
+        return forRepository(repository, EvaluationSettings.getDefault(), null, npmPackageLoader);
     }
 
     public static CqlEngine forRepository(
-            IRepository repository, EvaluationSettings settings, IBaseBundle additionalData) {
-        return forRepository(repository, settings, additionalData, NpmPackageLoader.DEFAULT);
+            IRepository repository, EvaluationSettings settings, NpmPackageLoader npmPackageLoader) {
+        return forRepository(repository, settings, null, npmPackageLoader);
     }
 
     // LUKETODO: consider having absolutely every caller use one of these
@@ -81,6 +77,7 @@ public class Engines {
             EvaluationSettings settings,
             IBaseBundle additionalData,
             NpmPackageLoader npmPackageLoader) {
+        logger.info("1234: initializing CQL engine");
         checkNotNull(settings);
         checkNotNull(repository);
 

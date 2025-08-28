@@ -66,7 +66,7 @@ public class R4CqlExecutionService {
                 repository = Repositories.proxy(
                         repository, useServerData.booleanValue(), dataEndpoint, contentEndpoint, terminologyEndpoint);
             }
-            var libraryEngine = new LibraryEngine(repository, this.evaluationSettings);
+            var libraryEngine = new LibraryEngine(this.repository, this.npmPackageLoader, this.evaluationSettings);
 
             // LUKETODO:  NPM part goes in here:  "also include these libraries" which is what the Map is
             // inject the NpmPackageLoader here

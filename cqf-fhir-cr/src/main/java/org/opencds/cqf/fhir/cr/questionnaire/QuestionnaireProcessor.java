@@ -153,7 +153,9 @@ public class QuestionnaireProcessor {
                 resolveStructureDefinition(profile),
                 supportedOnly,
                 requiredOnly,
-                libraryEngine != null ? libraryEngine : new LibraryEngine(repository, evaluationSettings),
+                libraryEngine != null
+                        ? libraryEngine
+                        : new LibraryEngine(repository, npmPackageLoader, evaluationSettings),
                 modelResolver);
         return generateQuestionnaire(request, id);
     }
@@ -212,7 +214,9 @@ public class QuestionnaireProcessor {
                 launchContext,
                 parameters,
                 data,
-                libraryEngine != null ? libraryEngine : new LibraryEngine(repository, evaluationSettings),
+                libraryEngine != null
+                        ? libraryEngine
+                        : new LibraryEngine(repository, npmPackageLoader, evaluationSettings),
                 modelResolver);
     }
 
@@ -259,7 +263,7 @@ public class QuestionnaireProcessor {
                 launchContext,
                 parameters,
                 data,
-                new LibraryEngine(repository, this.evaluationSettings));
+                new LibraryEngine(repository, this.npmPackageLoader, this.evaluationSettings));
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource populate(

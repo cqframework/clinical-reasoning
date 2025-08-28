@@ -49,6 +49,7 @@ class EnginesTest {
     private static final Logger log = LoggerFactory.getLogger(EnginesTest.class);
 
     private InMemoryFhirRepository repository;
+    private final NpmPackageLoader npmPackageLoader = NpmPackageLoader.DEFAULT;
 
     @BeforeEach
     void beforeEach() {
@@ -58,7 +59,7 @@ class EnginesTest {
 
     @Test
     void defaultSettings() {
-        var engine = Engines.forRepository(repository);
+        var engine = Engines.forRepository(repository, npmPackageLoader);
 
         assertDataProviders(engine);
     }
@@ -309,7 +310,7 @@ class EnginesTest {
         bundleBuilder.addTransactionCreateEntry(new Encounter().setId("en1"));
         var additionalData = bundleBuilder.getBundle();
 
-        var engine = Engines.forRepository(repository, settings, additionalData);
+        var engine = Engines.forRepository(repository, settings, additionalData, npmPackageLoader);
 
         assertNotNull(engine.getState());
 
@@ -390,7 +391,7 @@ class EnginesTest {
 
     @Nonnull
     private CqlEngine getEngine(EvaluationSettings settings) {
-        return Engines.forRepository(repository, settings);
+        return Engines.forRepository(repository, settings, npmPackageLoader);
     }
 
     @Nonnull

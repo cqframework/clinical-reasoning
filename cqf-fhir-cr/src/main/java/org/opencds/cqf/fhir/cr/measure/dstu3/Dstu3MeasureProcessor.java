@@ -31,25 +31,29 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorUtils;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
 import org.opencds.cqf.fhir.cr.measure.common.MultiLibraryIdMeasureEngineDetails;
 import org.opencds.cqf.fhir.cr.measure.common.SubjectProvider;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.repository.FederatedRepository;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
 @SuppressWarnings({"squid:S1135", "squid:S107"})
 public class Dstu3MeasureProcessor {
     private final IRepository repository;
+    private final NpmPackageLoader npmPackageLoader;
     private final MeasureEvaluationOptions measureEvaluationOptions;
     private final SubjectProvider subjectProvider;
     private final MeasureProcessorUtils measureProcessorUtils = new MeasureProcessorUtils();
 
     public Dstu3MeasureProcessor(IRepository repository, MeasureEvaluationOptions measureEvaluationOptions) {
-        this(repository, measureEvaluationOptions, new Dstu3RepositorySubjectProvider());
+        this(repository, NpmPackageLoader.DEFAULT, measureEvaluationOptions, new Dstu3RepositorySubjectProvider());
     }
 
     public Dstu3MeasureProcessor(
             IRepository repository,
+            NpmPackageLoader npmPackageLoader,
             MeasureEvaluationOptions measureEvaluationOptions,
             SubjectProvider subjectProvider) {
         this.repository = Objects.requireNonNull(repository);
+        this.npmPackageLoader = Objects.requireNonNull(npmPackageLoader);
         this.measureEvaluationOptions =
                 measureEvaluationOptions != null ? measureEvaluationOptions : MeasureEvaluationOptions.defaultOptions();
         this.subjectProvider = subjectProvider;
@@ -95,7 +99,10 @@ public class Dstu3MeasureProcessor {
         var subjects = subjectProvider.getSubjects(actualRepo, subjectIds).toList();
         var evalType = getMeasureEvalType(reportType, subjects);
         var context = Engines.forRepository(
-                this.repository, this.measureEvaluationOptions.getEvaluationSettings(), additionalData);
+                this.repository,
+                this.measureEvaluationOptions.getEvaluationSettings(),
+                additionalData,
+                npmPackageLoader);
 
         // Note that we must build the LibraryEngine BEFORE we call
         // measureProcessorUtils.setMeasurementPeriod(), otherwise, we get an NPE.
@@ -184,7 +191,8 @@ public class Dstu3MeasureProcessor {
             }
         }
 
-        return new LibraryEngine(repository, this.measureEvaluationOptions.getEvaluationSettings());
+        return new LibraryEngine(
+                repository, this.npmPackageLoader, this.measureEvaluationOptions.getEvaluationSettings());
     }
 
     private VersionedIdentifier getLibraryVersionIdentifier(Measure measure) {

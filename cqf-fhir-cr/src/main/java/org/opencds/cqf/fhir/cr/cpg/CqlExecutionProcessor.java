@@ -52,11 +52,11 @@ public class CqlExecutionProcessor {
     }
 
     public VersionedIdentifier resolveLibraryIdentifier(
-            String content, IBaseResource library, LibraryManager libraryManager) {
+            String cqlContent, IBaseResource library, LibraryManager libraryManager) {
 
-        if (!StringUtils.isBlank(content)) {
+        if (!StringUtils.isBlank(cqlContent)) {
             var translatedLibrary =
-                    CqlTranslator.fromText(content, libraryManager).getTranslatedLibrary();
+                    CqlTranslator.fromText(cqlContent, libraryManager).getTranslatedLibrary();
             return new VersionedIdentifier()
                     .withId(translatedLibrary.getIdentifier().getId())
                     .withVersion(translatedLibrary.getIdentifier().getVersion());

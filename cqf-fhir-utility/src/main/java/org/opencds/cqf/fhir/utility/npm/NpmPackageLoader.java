@@ -12,6 +12,8 @@ import org.hl7.cql.model.NamespaceManager;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * FHIR version agnostic Interface for loading NPM resources including Measures, Libraries and
@@ -64,6 +66,8 @@ import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
  * by new APIs in IHapiPackageCacheManager.
  */
 public interface NpmPackageLoader {
+    Logger logger = LoggerFactory.getLogger(NpmPackageLoader.class);
+    String LIBRARY_URL_TEMPLATE = "%s/Library/%s";
 
     NpmPackageLoader DEFAULT = new NpmPackageLoader() {
         @Override
@@ -135,12 +139,33 @@ public interface NpmPackageLoader {
         return loadLibraryByUrl(getUrl(modelIdentifier));
     }
 
+    // LUKETODO:  unit test this from all angles
     private String getUrl(VersionedIdentifier versionedIdentifier) {
-        return "%s/Library/%s".formatted(versionedIdentifier.getSystem(), versionedIdentifier.getId());
+        if (versionedIdentifier.getSystem() == null) {
+            // LUKETODO: stub proof of concept
+            // LUKETODO: always favour the namespace info here:  only use the system if we're absolutely out of options,
+            // and WARN if this is the case
+            logger.info(
+                    "1234: resolving NPM package URL for versioned identifier with null system: {}",
+                    versionedIdentifier);
+            var matchingNamespaceUri =
+                    getAllNamespaceInfos().stream().map(NamespaceInfo::getUri).findFirst();
+
+            // LUKETODO:
+            if (matchingNamespaceUri.isEmpty()) {
+                logger.warn("No namespace URI found for versioned identifier with null system");
+                return LIBRARY_URL_TEMPLATE.formatted(versionedIdentifier.getSystem(), versionedIdentifier.getId());
+            }
+
+            return LIBRARY_URL_TEMPLATE.formatted(matchingNamespaceUri.get(), versionedIdentifier.getId());
+        }
+        // We need this case because the CQL engine will do the right thing and populate the system
+        // in the cross-package target case
+        return LIBRARY_URL_TEMPLATE.formatted(versionedIdentifier.getSystem(), versionedIdentifier.getId());
     }
 
     static String getUrl(ModelIdentifier modelIdentifier) {
-        return "%s/Library/%s".formatted(modelIdentifier.getSystem(), modelIdentifier.getId());
+        return LIBRARY_URL_TEMPLATE.formatted(modelIdentifier.getSystem(), modelIdentifier.getId());
     }
 
     /**

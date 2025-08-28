@@ -32,10 +32,12 @@ import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.client.TerminologyServerClientSettings;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.monad.Either3;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 
 public class LibraryProcessor {
     protected final ModelResolver modelResolver;
     protected final FhirVersionEnum fhirVersion;
+    protected final NpmPackageLoader npmPackageLoader;
     protected IPackageProcessor packageProcessor;
     protected IReleaseProcessor releaseProcessor;
     protected IDataRequirementsProcessor dataRequirementsProcessor;
@@ -52,11 +54,20 @@ public class LibraryProcessor {
             IRepository repository,
             EvaluationSettings evaluationSettings,
             TerminologyServerClientSettings terminologyServerClientSettings) {
-        this(repository, evaluationSettings, terminologyServerClientSettings, null, null, null, null);
+        this(
+                repository,
+                NpmPackageLoader.DEFAULT,
+                evaluationSettings,
+                terminologyServerClientSettings,
+                null,
+                null,
+                null,
+                null);
     }
 
     public LibraryProcessor(
             IRepository repository,
+            NpmPackageLoader npmPackageLoader,
             EvaluationSettings evaluationSettings,
             TerminologyServerClientSettings terminologyServerClientSettings,
             IPackageProcessor packageProcessor,
@@ -64,6 +75,7 @@ public class LibraryProcessor {
             IDataRequirementsProcessor dataRequirementsProcessor,
             IEvaluateProcessor evaluateProcessor) {
         this.repository = requireNonNull(repository, "repository can not be null");
+        this.npmPackageLoader = requireNonNull(npmPackageLoader, "npmPackageLoader can not be null");
         this.evaluationSettings = requireNonNull(evaluationSettings, "evaluationSettings can not be null");
         this.terminologyServerClientSettings =
                 requireNonNull(terminologyServerClientSettings, "terminologyServerClientSettings can not be null");
@@ -192,7 +204,7 @@ public class LibraryProcessor {
                 parameters,
                 data,
                 prefetchData,
-                new LibraryEngine(repository, this.evaluationSettings));
+                new LibraryEngine(repository, this.npmPackageLoader, this.evaluationSettings));
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseParameters evaluate(

@@ -42,7 +42,7 @@ public class NpmLibraryProvider implements LibrarySourceProvider {
                 .map(ByteArrayInputStream::new)
                 .orElse(null);
 
-        if (NpmPackageLoader.DEFAULT != npmPackageLoader) {
+        if (libraryInputStream == null && NpmPackageLoader.DEFAULT != npmPackageLoader) {
             logger.warn(
                     "ATTENTION!  Non-NOOP NPM loader: Could not find CQL Library for identifier: {}",
                     versionedIdentifier);

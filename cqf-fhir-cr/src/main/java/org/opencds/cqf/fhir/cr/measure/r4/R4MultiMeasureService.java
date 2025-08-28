@@ -65,7 +65,11 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
         this.r4MeasureServiceUtilsStandardRepository = r4MeasureServiceUtilsStandardRepository;
         this.subjectProvider = new R4RepositorySubjectProvider(measureEvaluationOptions.getSubjectProviderOptions());
         this.r4MeasureProcessorStandardRepository = new R4MeasureProcessor(
-                repository, this.measureEvaluationOptions, this.measureProcessorUtils, r4FhirOrNpmResourceProvider);
+                repository,
+                r4FhirOrNpmResourceProvider.getNpmPackageLoader(),
+                this.measureEvaluationOptions,
+                this.measureProcessorUtils,
+                r4FhirOrNpmResourceProvider);
         this.r4FhirOrNpmResourceProvider = r4FhirOrNpmResourceProvider;
     }
 
@@ -99,6 +103,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
 
             r4ProcessorToUse = new R4MeasureProcessor(
                     repositoryToUse,
+                    r4FhirOrNpmResourceProvider.getNpmPackageLoader(),
                     this.measureEvaluationOptions,
                     this.measureProcessorUtils,
                     this.r4FhirOrNpmResourceProvider);

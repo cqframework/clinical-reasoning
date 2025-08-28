@@ -19,10 +19,12 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
+import org.opencds.cqf.fhir.cr.measure.r4.CareGaps.Given;
 import org.opencds.cqf.fhir.cr.questionnaireresponse.extract.IExtractProcessor;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 import org.skyscreamer.jsonassert.JSONAssert;
 
@@ -53,16 +55,30 @@ public class TestQuestionnaireResponse {
 
     public static class Given {
         private IRepository repository;
+        private NpmPackageLoader npmPackageLoader;
         private IExtractProcessor extractProcessor;
 
         public Given repository(IRepository repository) {
             this.repository = repository;
+            this.npmPackageLoader = NpmPackageLoader.DEFAULT;
             return this;
         }
 
         public Given repositoryFor(FhirContext fhirContext, String repositoryPath) {
             this.repository = new IgRepository(
                     fhirContext, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
+            this.npmPackageLoader = NpmPackageLoader.DEFAULT;
+            return this;
+        }
+
+        // LUKETODO:  we may need to test this for test coverage numbers
+        // Use this if you wish to do anything with NPM
+        public Given repositoryPlusNpmFor(String repositoryPath) {
+            var igRepository = new IgRepository(
+                    FhirContext.forR4Cached(),
+                    Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
+            this.repository = igRepository;
+            this.npmPackageLoader = igRepository.getNpmPackageLoader();
             return this;
         }
 
@@ -72,7 +88,8 @@ public class TestQuestionnaireResponse {
         }
 
         private QuestionnaireResponseProcessor buildProcessor() {
-            return new QuestionnaireResponseProcessor(repository, EvaluationSettings.getDefault(), extractProcessor);
+            return new QuestionnaireResponseProcessor(
+                    repository, npmPackageLoader, EvaluationSettings.getDefault(), extractProcessor);
         }
 
         public When when() {

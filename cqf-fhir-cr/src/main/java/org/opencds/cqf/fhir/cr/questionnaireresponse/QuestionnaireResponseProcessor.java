@@ -23,6 +23,7 @@ import org.opencds.cqf.fhir.cr.questionnaireresponse.extract.IExtractProcessor;
 import org.opencds.cqf.fhir.utility.SearchHelper;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.monad.Either;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,6 +36,7 @@ public class QuestionnaireResponseProcessor {
     protected final EvaluationSettings evaluationSettings;
     protected final FhirVersionEnum fhirVersion;
     protected IRepository repository;
+    protected NpmPackageLoader npmPackageLoader;
     protected IExtractProcessor extractProcessor;
 
     public QuestionnaireResponseProcessor(IRepository repository) {
@@ -42,12 +44,16 @@ public class QuestionnaireResponseProcessor {
     }
 
     public QuestionnaireResponseProcessor(IRepository repository, EvaluationSettings evaluationSettings) {
-        this(repository, evaluationSettings, null);
+        this(repository, NpmPackageLoader.DEFAULT, evaluationSettings, null);
     }
 
     public QuestionnaireResponseProcessor(
-            IRepository repository, EvaluationSettings evaluationSettings, IExtractProcessor extractProcessor) {
+            IRepository repository,
+            NpmPackageLoader npmPackageLoader,
+            EvaluationSettings evaluationSettings,
+            IExtractProcessor extractProcessor) {
         this.repository = requireNonNull(repository, "repository can not be null");
+        this.npmPackageLoader = requireNonNull(npmPackageLoader, "npmPackageLoader can not be null");
         this.evaluationSettings = requireNonNull(evaluationSettings, "evaluationSettings can not be null");
         this.questionnaireResponseResolver = new ResourceResolver("QuestionnaireResponse", this.repository);
         this.questionnaireResolver = new ResourceResolver(QUESTIONNAIRE, this.repository);
@@ -137,7 +143,7 @@ public class QuestionnaireResponseProcessor {
                 questionnaireId,
                 parameters,
                 data,
-                new LibraryEngine(repository, evaluationSettings));
+                new LibraryEngine(repository, npmPackageLoader, evaluationSettings));
     }
 
     public <R extends IBaseResource> IBaseBundle extract(

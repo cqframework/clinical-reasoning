@@ -77,6 +77,7 @@ public class R4CollectDataService {
         Parameters parameters = new Parameters();
         var processor = new R4MeasureProcessor(
                 this.repository,
+                this.npmPackageLoader,
                 this.measureEvaluationOptions,
                 this.measureProcessorUtils,
                 this.r4FhirOrNpmResourceProvider);

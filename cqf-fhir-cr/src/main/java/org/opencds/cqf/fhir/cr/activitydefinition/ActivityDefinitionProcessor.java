@@ -26,6 +26,7 @@ import org.opencds.cqf.fhir.cr.common.ResourceResolver;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.monad.Either3;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.repository.operations.IActivityDefinitionProcessor;
 
 public class ActivityDefinitionProcessor implements IActivityDefinitionProcessor {
@@ -36,6 +37,7 @@ public class ActivityDefinitionProcessor implements IActivityDefinitionProcessor
     protected IApplyProcessor applyProcessor;
     protected IRequestResolverFactory requestResolverFactory;
     protected IRepository repository;
+    protected NpmPackageLoader npmPackageLoader;
     protected ExtensionResolver extensionResolver;
 
     public ActivityDefinitionProcessor(IRepository repository) {
@@ -43,15 +45,17 @@ public class ActivityDefinitionProcessor implements IActivityDefinitionProcessor
     }
 
     public ActivityDefinitionProcessor(IRepository repository, EvaluationSettings evaluationSettings) {
-        this(repository, evaluationSettings, null, null);
+        this(repository, NpmPackageLoader.DEFAULT, evaluationSettings, null, null);
     }
 
     public ActivityDefinitionProcessor(
             IRepository repository,
+            NpmPackageLoader npmPackageLoader,
             EvaluationSettings evaluationSettings,
             IApplyProcessor applyProcessor,
             IRequestResolverFactory requestResolverFactory) {
         this.repository = requireNonNull(repository, "repository can not be null");
+        this.npmPackageLoader = requireNonNull(npmPackageLoader, "npmPackageLoader can not be null");
         this.evaluationSettings = requireNonNull(evaluationSettings, "evaluationSettings can not be null");
         this.resourceResolver = new ResourceResolver("ActivityDefinition", this.repository);
         fhirVersion = repository.fhirContext().getVersion().getVersion();
@@ -159,7 +163,7 @@ public class ActivityDefinitionProcessor implements IActivityDefinitionProcessor
                 settingContext,
                 parameters,
                 data,
-                new LibraryEngine(repository, evaluationSettings));
+                new LibraryEngine(repository, npmPackageLoader, evaluationSettings));
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource apply(

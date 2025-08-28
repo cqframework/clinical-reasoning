@@ -127,12 +127,13 @@ public class TestQuestionnaire {
         }
 
         public When when() {
-            return new When(repository, buildProcessor(repository));
+            return new When(repository, npmPackageLoader, buildProcessor(repository));
         }
     }
 
     public static class When {
         private final IRepository repository;
+        private final NpmPackageLoader npmPackageLoader;
         private final QuestionnaireProcessor processor;
         private IPrimitiveType<String> questionnaireUrl;
         private IIdType questionnaireId;
@@ -146,8 +147,9 @@ public class TestQuestionnaire {
         private Boolean isPut;
         private IIdType profileId;
 
-        When(IRepository repository, QuestionnaireProcessor processor) {
+        When(IRepository repository, NpmPackageLoader npmPackageLoader, QuestionnaireProcessor processor) {
             this.repository = repository;
+            this.npmPackageLoader = npmPackageLoader;
             this.processor = processor;
             useServerData = true;
         }
@@ -164,7 +166,7 @@ public class TestQuestionnaire {
                     launchContext,
                     parameters,
                     data,
-                    new LibraryEngine(repository, processor.evaluationSettings),
+                    new LibraryEngine(repository, npmPackageLoader, processor.evaluationSettings),
                     processor.modelResolver);
         }
 
@@ -261,7 +263,7 @@ public class TestQuestionnaire {
                     processor.resolveStructureDefinition(Eithers.for3(null, profileId, null)),
                     false,
                     true,
-                    new LibraryEngine(repository, processor.evaluationSettings),
+                    new LibraryEngine(repository, npmPackageLoader, processor.evaluationSettings),
                     processor.modelResolver);
             return new GeneratedQuestionnaire(repository, request, processor.generateQuestionnaire(request, null));
         }

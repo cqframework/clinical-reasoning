@@ -58,12 +58,14 @@ class LibraryProcessorTests {
     void processor() {
         var repository =
                 new IgRepository(fhirContextR5, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r5"));
+        var npmPackageLoader = repository.getNpmPackageLoader();
         var packageProcessor = new PackageProcessor(repository);
         var releaseProcessor = new ReleaseProcessor(repository);
         var dataRequirementsProcessor = new DataRequirementsProcessor(repository);
         var evaluateProcessor = new EvaluateProcessor(repository, EvaluationSettings.getDefault());
         var processor = new LibraryProcessor(
                 repository,
+                npmPackageLoader,
                 EvaluationSettings.getDefault(),
                 new TerminologyServerClientSettings(),
                 packageProcessor,

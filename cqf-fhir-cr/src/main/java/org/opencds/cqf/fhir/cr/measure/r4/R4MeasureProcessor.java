@@ -44,20 +44,25 @@ import org.opencds.cqf.fhir.cr.measure.r4.utils.R4DateHelper;
 import org.opencds.cqf.fhir.utility.monad.Either3;
 import org.opencds.cqf.fhir.utility.npm.MeasureOrNpmResourceHolder;
 import org.opencds.cqf.fhir.utility.npm.MeasureOrNpmResourceHolderList;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 
 public class R4MeasureProcessor {
     private final IRepository repository;
+    private final NpmPackageLoader npmPackageLoader;
     private final MeasureEvaluationOptions measureEvaluationOptions;
     private final MeasureProcessorUtils measureProcessorUtils;
     private final R4FhirOrNpmResourceProvider r4FhirOrNpmResourceProvider;
 
     public R4MeasureProcessor(
             IRepository repository,
+            // LUKETODO:  source off the R4FhirOrNpmResourceProvider instead?
+            NpmPackageLoader npmPackageLoader,
             MeasureEvaluationOptions measureEvaluationOptions,
             MeasureProcessorUtils measureProcessorUtils,
             R4FhirOrNpmResourceProvider r4FhirOrNpmResourceProvider) {
 
         this.repository = Objects.requireNonNull(repository);
+        this.npmPackageLoader = Objects.requireNonNull(npmPackageLoader);
         this.measureEvaluationOptions =
                 measureEvaluationOptions != null ? measureEvaluationOptions : MeasureEvaluationOptions.defaultOptions();
         this.measureProcessorUtils = measureProcessorUtils;
@@ -364,7 +369,8 @@ public class R4MeasureProcessor {
                         r4FhirOrNpmResourceProvider::getLibraryVersionIdentifier, // Key function
                         MeasureOrNpmResourceHolder::getMeasureIdElement));
 
-        var libraryEngine = new LibraryEngine(repository, this.measureEvaluationOptions.getEvaluationSettings());
+        var libraryEngine = new LibraryEngine(
+                repository, this.npmPackageLoader, this.measureEvaluationOptions.getEvaluationSettings());
 
         var builder = MultiLibraryIdMeasureEngineDetails.builder(libraryEngine);
 
@@ -435,7 +441,8 @@ public class R4MeasureProcessor {
 
         setArgParameters(parameters, context, lib);
 
-        return new LibraryEngine(repository, this.measureEvaluationOptions.getEvaluationSettings());
+        return new LibraryEngine(
+                repository, this.npmPackageLoader, this.measureEvaluationOptions.getEvaluationSettings());
     }
 
     private List<CompiledLibrary> getCompiledLibraries(List<VersionedIdentifier> ids, CqlEngine context) {

@@ -142,6 +142,7 @@ public class MeasureCommand implements Callable<Integer> {
 
         return new R4MeasureProcessor(
                 repository,
+                npmPackageLoader,
                 evaluationOptions,
                 new MeasureProcessorUtils(),
                 getR4FhirOrNpmResourceLoader(repository, npmPackageLoader, evaluationSettings));

@@ -70,6 +70,7 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
                 Repositories.proxy(repository, true, dataEndpoint, contentEndpoint, terminologyEndpoint);
         var processor = new R4MeasureProcessor(
                 proxyRepoForMeasureProcessor,
+                this.r4FhirOrNpmResourceProvider.getNpmPackageLoader(),
                 this.measureEvaluationOptions,
                 this.measureProcessorUtils,
                 this.r4FhirOrNpmResourceProvider);

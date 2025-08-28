@@ -33,18 +33,22 @@ import org.hl7.fhir.r4.model.Task;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.utility.CqfExpression;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 class LibraryEngineTests {
 
     IRepository repository;
+    NpmPackageLoader npmPackageLoader;
     LibraryEngine libraryEngine;
 
     @BeforeEach
     public void beforeEach() {
         var path = Path.of(getResourcePath(LibraryEngineTests.class) + "/org/opencds/cqf/fhir/cql");
         repository = new IgRepository(FhirContext.forR4Cached(), path);
-        libraryEngine = new LibraryEngine(repository, EvaluationSettings.getDefault());
+        // LUKETODO:
+        npmPackageLoader = NpmPackageLoader.DEFAULT;
+        libraryEngine = new LibraryEngine(repository, npmPackageLoader, EvaluationSettings.getDefault());
     }
 
     @Test
@@ -153,7 +157,7 @@ class LibraryEngineTests {
         });
         var evaluationSettings = EvaluationSettings.getDefault().withLibrarySourceProviders(libraryResourceProvider);
 
-        libraryEngine = new LibraryEngine(repository, evaluationSettings);
+        libraryEngine = new LibraryEngine(repository, npmPackageLoader, evaluationSettings);
         repository.create(
                 new Patient().addName(new HumanName().addGiven("me")).setId("Patient/Patient1"),
                 Map.of(IgRepository.FHIR_COMPARTMENT_HEADER, "Patient/Patient1"));

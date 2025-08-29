@@ -28,39 +28,54 @@ import org.opencds.cqf.fhir.utility.adapter.IResourceAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-// LUKETODO:  should this class implicitly allow for a custom NamespaceManager?
 /**
  * Simplistic implementation of {@link NpmPackageLoader} that loads NpmPackages from the classpath
  * and stores {@link NpmResourceHolder}s in a Map. This class is recommended for testing
  * and NOT for production.
  * <p/
- * Does not use an {@link NpmNamespaceManager} and instead resolves all NamespaceInfos by extracting
- * them from all loaded packages at construction time.
+ * Optionally uses a custom {@link NpmNamespaceManager} but can also resolve all NamespaceInfos
+ * by extracting them from all loaded packages at construction time.
  */
 public class NpmPackageLoaderInMemory implements NpmPackageLoader {
 
     private static final Logger logger = LoggerFactory.getLogger(NpmPackageLoaderInMemory.class);
 
     private static final Pattern PATTERN_PIPE = Pattern.compile("\\|");
+    public static final String FAILED_TO_LOAD_RESOURCE_TEMPLATE = "Failed to load resource: %s";
 
     private final Map<UrlAndVersion, NpmResourceHolder> measureUrlToResourceInfo = new HashMap<>();
     private final Map<UrlAndVersion, NpmPackage> libraryUrlToPackage = new HashMap<>();
-    private final List<NamespaceInfo> namespaceInfos;
+    private final NpmNamespaceManager npmNamespaceManager;
 
     public static NpmPackageLoaderInMemory fromNpmPackageAbsolutePath(List<Path> tgzPaths) {
+        return fromNpmPackageAbsolutePath(null, tgzPaths);
+    }
+
+    public static NpmPackageLoaderInMemory fromNpmPackageAbsolutePath(
+            NpmNamespaceManager npmNamespaceManager, List<Path> tgzPaths) {
         final List<NpmPackage> npmPackages = buildNpmPackagesFromAbsolutePath(tgzPaths);
 
-        return new NpmPackageLoaderInMemory(npmPackages);
+        return new NpmPackageLoaderInMemory(npmPackages, npmNamespaceManager);
     }
 
     public static NpmPackageLoaderInMemory fromNpmPackageClasspath(Class<?> clazz, Path... tgzPaths) {
-        return fromNpmPackageClasspath(clazz, Arrays.asList(tgzPaths));
+        return fromNpmPackageClasspath(null, clazz, tgzPaths);
+    }
+
+    public static NpmPackageLoaderInMemory fromNpmPackageClasspath(
+            @Nullable NpmNamespaceManager npmNamespaceManager, Class<?> clazz, Path... tgzPaths) {
+        return fromNpmPackageClasspath(npmNamespaceManager, clazz, Arrays.asList(tgzPaths));
     }
 
     public static NpmPackageLoaderInMemory fromNpmPackageClasspath(Class<?> clazz, List<Path> tgzPaths) {
+        return fromNpmPackageClasspath(null, clazz, tgzPaths);
+    }
+
+    public static NpmPackageLoaderInMemory fromNpmPackageClasspath(
+            @Nullable NpmNamespaceManager npmNamespaceManager, Class<?> clazz, List<Path> tgzPaths) {
         final List<NpmPackage> npmPackages = buildNpmPackageFromClasspath(clazz, tgzPaths);
 
-        return new NpmPackageLoaderInMemory(npmPackages);
+        return new NpmPackageLoaderInMemory(npmPackages, npmNamespaceManager);
     }
 
     record UrlAndVersion(String url, @Nullable String version) {
@@ -120,8 +135,8 @@ public class NpmPackageLoaderInMemory implements NpmPackageLoader {
     }
 
     @Override
-    public List<NamespaceInfo> getAllNamespaceInfos() {
-        return namespaceInfos;
+    public NpmNamespaceManager getNamespaceManager() {
+        return npmNamespaceManager;
     }
 
     @Nonnull
@@ -143,7 +158,7 @@ public class NpmPackageLoaderInMemory implements NpmPackageLoader {
         try (final InputStream npmStream = Files.newInputStream(tgzPath)) {
             return NpmPackage.fromPackage(npmStream);
         } catch (IOException exception) {
-            throw new InvalidRequestException("Failed to load resource: %s".formatted(tgzPath), exception);
+            throw new InvalidRequestException(FAILED_TO_LOAD_RESOURCE_TEMPLATE.formatted(tgzPath), exception);
         }
     }
 
@@ -151,20 +166,26 @@ public class NpmPackageLoaderInMemory implements NpmPackageLoader {
     private static NpmPackage getNpmPackageFromClasspath(Class<?> clazz, Path tgzClasspathPath) {
         try (final InputStream simpleAlphaStream = clazz.getResourceAsStream(tgzClasspathPath.toString())) {
             if (simpleAlphaStream == null) {
-                throw new InvalidRequestException("Failed to load resource: %s".formatted(tgzClasspathPath));
+                throw new InvalidRequestException(FAILED_TO_LOAD_RESOURCE_TEMPLATE.formatted(tgzClasspathPath));
             }
 
             return NpmPackage.fromPackage(simpleAlphaStream);
         } catch (IOException exception) {
-            throw new InvalidRequestException("Failed to load resource: %s".formatted(tgzClasspathPath), exception);
+            throw new InvalidRequestException(FAILED_TO_LOAD_RESOURCE_TEMPLATE.formatted(tgzClasspathPath), exception);
         }
     }
 
-    private NpmPackageLoaderInMemory(List<NpmPackage> npmPackages) {
+    private NpmPackageLoaderInMemory(List<NpmPackage> npmPackages, @Nullable NpmNamespaceManager npmNamespaceManager) {
 
-        namespaceInfos = npmPackages.stream()
-                .map(npmPackage -> new NamespaceInfo(npmPackage.name(), npmPackage.canonical()))
-                .toList();
+        if (npmNamespaceManager == null) {
+            var namespaceInfos = npmPackages.stream()
+                    .map(npmPackage -> new NamespaceInfo(npmPackage.name(), npmPackage.canonical()))
+                    .toList();
+
+            this.npmNamespaceManager = new NpmNamespaceManagerFromList(namespaceInfos);
+        } else {
+            this.npmNamespaceManager = npmNamespaceManager;
+        }
 
         npmPackages.forEach(this::setup);
     }

@@ -70,14 +70,15 @@ public interface NpmPackageLoader {
     String LIBRARY_URL_TEMPLATE = "%s/Library/%s";
 
     NpmPackageLoader DEFAULT = new NpmPackageLoader() {
+
         @Override
-        public NpmResourceHolder loadNpmResources(IPrimitiveType<String> measureUrl) {
-            return NpmResourceHolder.EMPTY;
+        public NpmNamespaceManager getNamespaceManager() {
+            return NpmNamespaceManager.DEFAULT;
         }
 
         @Override
-        public List<NamespaceInfo> getAllNamespaceInfos() {
-            return List.of();
+        public NpmResourceHolder loadNpmResources(IPrimitiveType<String> measureUrl) {
+            return NpmResourceHolder.EMPTY;
         }
 
         @Override
@@ -115,13 +116,18 @@ public interface NpmPackageLoader {
     }
 
     /**
-     * It's up to implementors to maintain the implementation that returns these NamespaceInfos.
-     *
      * @return All NamespaceInfos to map package IDs to package URLs for all NPM Packages maintained
      * for clinical-reasoning NPM package to be used to resolve cross-package Library/CQL
      * dependencies.
      */
-    List<NamespaceInfo> getAllNamespaceInfos();
+    default List<NamespaceInfo> getAllNamespaceInfos() {
+        return getNamespaceManager().getAllNamespaceInfos();
+    }
+
+    /**
+     * It's up to implementors to maintain the NamespaceManager that maintains the NamespaceInfos.
+     */
+    NpmNamespaceManager getNamespaceManager();
 
     default Optional<ILibraryAdapter> findMatchingLibrary(VersionedIdentifier versionedIdentifier) {
         return findLibraryFromUnrelatedNpmPackage(versionedIdentifier);
@@ -141,24 +147,6 @@ public interface NpmPackageLoader {
 
     // LUKETODO:  unit test this from all angles
     private String getUrl(VersionedIdentifier versionedIdentifier) {
-        if (versionedIdentifier.getSystem() == null) {
-            // LUKETODO: stub proof of concept
-            // LUKETODO: always favour the namespace info here:  only use the system if we're absolutely out of options,
-            // and WARN if this is the case
-            logger.info(
-                    "1234: resolving NPM package URL for versioned identifier with null system: {}",
-                    versionedIdentifier);
-            var matchingNamespaceUri =
-                    getAllNamespaceInfos().stream().map(NamespaceInfo::getUri).findFirst();
-
-            // LUKETODO:
-            if (matchingNamespaceUri.isEmpty()) {
-                logger.warn("No namespace URI found for versioned identifier with null system");
-                return LIBRARY_URL_TEMPLATE.formatted(versionedIdentifier.getSystem(), versionedIdentifier.getId());
-            }
-
-            return LIBRARY_URL_TEMPLATE.formatted(matchingNamespaceUri.get(), versionedIdentifier.getId());
-        }
         // We need this case because the CQL engine will do the right thing and populate the system
         // in the cross-package target case
         return LIBRARY_URL_TEMPLATE.formatted(versionedIdentifier.getSystem(), versionedIdentifier.getId());

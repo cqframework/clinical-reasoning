@@ -33,6 +33,11 @@ public class NpmPackageLoaderWithCache implements NpmPackageLoader {
     }
 
     @Override
+    public NpmNamespaceManager getNamespaceManager() {
+        return npmPackageLoader.getNamespaceManager();
+    }
+
+    @Override
     public NpmResourceHolder loadNpmResources(IPrimitiveType<String> measureUrl) {
         return npmResourceHolders.stream()
                 .filter(npmResourceHolder -> isMeasureUrlMatch(npmResourceHolder, measureUrl))

@@ -14,6 +14,10 @@ import java.util.Optional;
  */
 public class NpmConfigDependencySubstitutor {
 
+    private NpmConfigDependencySubstitutor() {
+        // static utility class
+    }
+
     public static NpmPackageLoader substituteNpmPackageLoaderIfEmpty(Optional<NpmPackageLoader> optNpmPackageLoader) {
         return NpmPackageLoader.getDefaultIfEmpty(optNpmPackageLoader.orElse(null));
     }

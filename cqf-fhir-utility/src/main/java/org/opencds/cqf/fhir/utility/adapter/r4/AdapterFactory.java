@@ -1,6 +1,8 @@
 package org.opencds.cqf.fhir.utility.adapter.r4;
 
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+
+import org.hl7.fhir.dstu2.model.ImplementationGuide;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -24,6 +26,7 @@ import org.opencds.cqf.fhir.utility.adapter.ICodingAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IDataRequirementAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IElementDefinitionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IImplementationGuideAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
@@ -58,6 +61,8 @@ public class AdapterFactory implements IAdapterFactory {
             adapter = new MeasureAdapter(measure);
         } else if (resource instanceof ActivityDefinition activityDefinition) {
             adapter = new ActivityDefinitionAdapter(activityDefinition);
+        } else if (resource instanceof ImplementationGuide implementationGuide) {
+            adapter = new ImplementationGuideAdapter(implementationGuide);
         } else if (resource instanceof PlanDefinition planDefinition) {
             adapter = new PlanDefinitionAdapter(planDefinition);
         } else if (resource instanceof Questionnaire questionnaire) {
@@ -146,5 +151,10 @@ public class AdapterFactory implements IAdapterFactory {
     @Override
     public IValueSetAdapter createValueSet(IBaseResource valueSet) {
         return new ValueSetAdapter((IDomainResource) valueSet);
+    }
+
+    @Override
+    public IImplementationGuideAdapter createImplementationGuide(IBaseResource implementationGuide) {
+        return new ImplementationGuideAdapter((IDomainResource) implementationGuide);
     }
 }

@@ -53,24 +53,140 @@ class NpmResourceHolderR4Test extends BaseNpmResourceInfoForCqlTest {
         """;
 
     private static final String EXPECTED_CQL_WITH_DERIVED =
-            "library WithDerivedLibrary version '0.3'  using FHIR version '4.0.1'  include DerivedLibrary version '0.4'  parameter \"Measurement Period\" Interval<DateTime>     default Interval[@2021-01-01T00:00:00.0-06:00, @2022-01-01T00:00:00.0-06:00)  context Patient  define \"Initial Population\":     DerivedLibrary.\"Has Initial Population\"  define \"Denominator\":     \"Initial Population\"  define \"Numerator\":     \"Initial Population\" ";
+            """
+        library opencds.withderivedlibrary WithDerivedLibrary version '0.4'
+
+        using FHIR version '4.0.1'
+
+        include FHIRHelpers version '4.0.1' called FHIRHelpers
+        include DerivedLibrary version '0.4'
+
+        parameter "Measurement Period" Interval<DateTime>
+            default Interval[@2021-01-01T00:00:00.0-06:00, @2022-01-01T00:00:00.0-06:00)
+
+        context Patient
+
+        define "Initial Population":
+            exists (DerivedLibrary."Encounter Finished")
+        """;
+
     private static final String EXPECTED_CQL_DERIVED =
-            "library DerivedLibrary version '0.4'  using FHIR version '4.0.1'  context Patient  define \"Has Initial Population\": true ";
+            """
+        library opencds.withderivedlibrary.DerivedLibrary version '0.4'
+
+        using FHIR version '4.0.1'
+
+        include FHIRHelpers version '4.0.1' called FHIRHelpers
+
+        context Patient
+
+        define "Encounter Finished":
+          [Encounter] E
+            where E.status = 'finished'
+        """;
 
     private static final String EXPECTED_CQL_DERIVED_TWO_LAYERS =
-            "library WithTwoLayersDerivedLibraries version '0.1'  using FHIR version '4.0.1'  include DerivedLayer1a version '0.1' include DerivedLayer1b version '0.1'  parameter \"Measurement Period\" Interval<DateTime>      default Interval[@2022-01-01T00:00:00.0-06:00, @2023-01-01T00:00:00.0-06:00)  context Patient  define \"Initial Population\":     DerivedLayer1a.\"Has Initial Population\"  define \"Denominator\":     DerivedLayer1b.\"Has Denominator\"  define \"Numerator\":     DerivedLayer1b.\"Has Numerator\" ";
+            """
+        library opencds.withtwolayersderivedlibraries.WithTwoLayersDerivedLibraries version '0.5'
+
+        using FHIR version '4.0.1'
+
+        include DerivedLayer1a version '0.5'
+        include DerivedLayer1b version '0.5'
+
+        parameter "Measurement Period" Interval<DateTime>
+            default Interval[@2022-01-01T00:00:00.0-06:00, @2023-01-01T00:00:00.0-06:00)
+
+        context Patient
+
+        define "Initial Population":
+            DerivedLayer1a."Initial Population"
+
+        define "Denominator":
+            DerivedLayer1b."Denominator"
+
+        define "Numerator":
+            DerivedLayer1b."Numerator"
+        """;
 
     private static final String EXPECTED_CQL_DERIVED_1_A =
-            "library DerivedLayer1a version '0.1'  using FHIR version '4.0.1'  include DerivedLayer2a version '0.1' include DerivedLayer2b version '0.1'  define \"Has Initial Population\":     DerivedLayer2a.\"Has Initial Population\" ";
+            """
+        library opencds.withtwolayersderivedlibraries.DerivedLayer1a version '0.5'
+
+        using FHIR version '4.0.1'
+
+        include DerivedLayer2a version '0.5'
+        include DerivedLayer2b version '0.5'
+
+        context Patient
+
+        define "Initial Population":
+            DerivedLayer2a."Initial Population"
+        """;
 
     private static final String EXPECTED_CQL_DERIVED_1_B =
-            "library DerivedLayer1b version '0.1'  using FHIR version '4.0.1'  include DerivedLayer2a version '0.1' include DerivedLayer2b version '0.1'  define \"Has Denominator\":     DerivedLayer2a.\"Has Denominator\"  define \"Has Numerator\":     DerivedLayer2b.\"Has Numerator\" ";
+            """
+        library opencds.withtwolayersderivedlibraries.DerivedLayer1b version '0.5'
+
+        using FHIR version '4.0.1'
+
+        include DerivedLayer2a version '0.5'
+        include DerivedLayer2b version '0.5'
+
+        context Patient
+
+        define "Denominator":
+            DerivedLayer2a."Denominator"
+
+        define "Numerator":
+            DerivedLayer2b."Numerator"
+        """;
 
     private static final String EXPECTED_CQL_DERIVED_2_A =
-            "library DerivedLayer2a version '0.1'  using FHIR version '4.0.1'  define \"Has Initial Population\": true define \"Has Denominator\": true ";
+            """
+        library opencds.withtwolayersderivedlibraries.DerivedLayer2a version '0.5'
+
+        using FHIR version '4.0.1'
+
+        include FHIRHelpers version '4.0.1' called FHIRHelpers
+
+        context Patient
+
+        define "Initial Population":
+            exists ("Encounter Finished")
+
+        define "Denominator":
+            exists ("Encounter Planned")
+
+        define "Encounter Finished":
+          [Encounter] E
+            where E.status = 'finished'
+
+        define "Encounter Planned":
+          [Encounter] E
+            where E.status = 'planned'
+        """;
 
     private static final String EXPECTED_CQL_DERIVED_2_B =
-            "library DerivedLayer2b version '0.1'  using FHIR version '4.0.1'  define \"Has Numerator\": true ";
+            """
+        library opencds.withtwolayersderivedlibraries.DerivedLayer2b version '0.5'
+
+        using FHIR version '4.0.1'
+
+        include FHIRHelpers version '4.0.1' called FHIRHelpers
+
+        parameter "Measurement Period" Interval<DateTime>
+          default Interval[@2021-01-01T00:00:00.0-06:00, @2022-01-01T00:00:00.0-06:00)
+
+        context Patient
+
+        define "Numerator":
+            exists ("Encounter Triaged")
+
+        define "Encounter Triaged":
+          [Encounter] E
+            where E.status = 'triaged'
+        """;
 
     private static final String EXPECTED_CQL_CROSS_SOURCE =
             """

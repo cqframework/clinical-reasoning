@@ -2,11 +2,7 @@ package org.opencds.cqf.fhir.utility.npm.r5;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.nio.file.Path;
-import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.opencds.cqf.fhir.utility.npm.BaseNpmResourceInfoForCqlTest;
 
 @SuppressWarnings("squid:S2699")
@@ -14,51 +10,137 @@ class NpmResourceHolderR5Test extends BaseNpmResourceInfoForCqlTest {
 
     protected FhirVersionEnum fhirVersion = FhirVersionEnum.R5;
 
-    private static final String EXPECTED_CQL_ALPHA =
-            "library SimpleAlpha  using FHIR version '5.0.1'  parameter \"Measurement Period\" Interval<DateTime> default Interval[@2021-01-01T00:00:00.0-06:00, @2022-01-01T00:00:00.0-06:00)  context Patient  define \"Initial Population\": true ";
-    private static final String EXPECTED_CQL_BRAVO =
-            "library SimpleBravo  using FHIR version '5.0.1'  parameter \"Measurement Period\" Interval<DateTime>   default Interval[@2024-01-01T00:00:00.0-06:00, @2025-01-01T00:00:00.0-06:00)  context Patient  define \"Initial Population\": true ";
-    private static final String EXPECTED_CQL_WITH_DERIVED =
-            "library WithDerivedLibrary version '0.1'  using FHIR version '5.0.1'  include DerivedLibrary version '0.1'  parameter \"Measurement Period\" Interval<DateTime>     default Interval[@2021-01-01T00:00:00.0-06:00, @2022-01-01T00:00:00.0-06:00)  context Patient  define \"Initial Population\":     DerivedLibrary.\"Has Initial Population\"  define \"Denominator\":     \"Initial Population\"  define \"Numerator\":     \"Initial Population\" ";
-    private static final String EXPECTED_CQL_DERIVED =
-            "library DerivedLibrary version '0.1'  using FHIR version '5.0.1'  context Patient  define \"Has Initial Population\": true ";
+    private static final String EXPECTED_CQL_ALPHA = """
+        """;
+    private static final String EXPECTED_CQL_BRAVO = """
+        """;
+    private static final String EXPECTED_CQL_WITH_DERIVED = """
+        """;
+    private static final String EXPECTED_CQL_DERIVED = """
+        """;
 
     private static final String EXPECTED_CQL_DERIVED_TWO_LAYERS =
-            "library WithTwoLayersDerivedLibraries version '0.1'  using FHIR version '5.0.1'  include DerivedLayer1a version '0.1' include DerivedLayer1b version '0.1'  parameter \"Measurement Period\" Interval<DateTime>      default Interval[@2022-01-01T00:00:00.0-06:00, @2023-01-01T00:00:00.0-06:00)  context Patient  define \"Initial Population\":     DerivedLayer1a.\"Has Initial Population\"  define \"Denominator\":     DerivedLayer1b.\"Has Denominator\"  define \"Numerator\":     DerivedLayer1b.\"Has Numerator\" ";
+            """
+        library opencds.withtwolayersderivedlibraries.WithTwoLayersDerivedLibraries version '0.5'
+
+        using FHIR version '5.0.1'
+
+        include DerivedLayer1a version '0.5'
+        include DerivedLayer1b version '0.5'
+
+        parameter "Measurement Period" Interval<DateTime>
+            default Interval[@2022-01-01T00:00:00.0-06:00, @2023-01-01T00:00:00.0-06:00)
+
+        context Patient
+
+        define "Initial Population":
+            DerivedLayer1a."Initial Population"
+
+        define "Denominator":
+            DerivedLayer1b."Denominator"
+
+        define "Numerator":
+            DerivedLayer1b."Numerator"
+        """;
 
     private static final String EXPECTED_CQL_DERIVED_1_A =
-            "library DerivedLayer1a version '0.1'  using FHIR version '5.0.1'  include DerivedLayer2a version '0.1' include DerivedLayer2b version '0.1'  define \"Has Initial Population\":     DerivedLayer2a.\"Has Initial Population\" ";
+            """
+        library opencds.withtwolayersderivedlibraries.DerivedLayer1a version '0.5'
+
+        using FHIR version '5.0.1'
+
+        include DerivedLayer2a version '0.5'
+        include DerivedLayer2b version '0.5'
+
+        context Patient
+
+        define "Initial Population":
+            DerivedLayer2a."Initial Population"
+        """;
 
     private static final String EXPECTED_CQL_DERIVED_1_B =
-            "library DerivedLayer1b version '0.1'  using FHIR version '5.0.1'  include DerivedLayer2a version '0.1' include DerivedLayer2b version '0.1'  define \"Has Denominator\":     DerivedLayer2a.\"Has Denominator\"  define \"Has Numerator\":     DerivedLayer2b.\"Has Numerator\" ";
+            """
+        library opencds.withtwolayersderivedlibraries.DerivedLayer1b version '0.5'
+
+        using FHIR version '5.0.1'
+
+        include DerivedLayer2a version '0.5'
+        include DerivedLayer2b version '0.5'
+
+        context Patient
+
+        define "Denominator":
+            DerivedLayer2a."Denominator"
+
+        define "Numerator":
+            DerivedLayer2b."Numerator"
+        """;
 
     private static final String EXPECTED_CQL_DERIVED_2_A =
-            "library DerivedLayer2a version '0.1'  using FHIR version '5.0.1'  define \"Has Initial Population\": true define \"Has Denominator\": true ";
+            """
+        library opencds.withtwolayersderivedlibraries.DerivedLayer2a version '0.5'
+
+        using FHIR version '5.0.1'
+
+        include FHIRHelpers version '5.0.1' called FHIRHelpers
+
+        context Patient
+
+        define "Initial Population":
+            exists ("Encounter Finished")
+
+        define "Denominator":
+            exists ("Encounter Planned")
+
+        define "Encounter Finished":
+          [Encounter] E
+            where E.status = 'finished'
+
+        define "Encounter Planned":
+          [Encounter] E
+            where E.status = 'planned'
+        """;
 
     private static final String EXPECTED_CQL_DERIVED_2_B =
-            "library DerivedLayer2b version '0.1'  using FHIR version '5.0.1'  define \"Has Numerator\": true ";
+            """
+        library opencds.withtwolayersderivedlibraries.DerivedLayer2b version '0.5'
 
-    private static final String EXPECTED_CQL_CROSS_SOURCE =
-            "library CrossPackageSource version '0.3'  using FHIR version '5.0.1'  include opencds.crosspackagetarget.CrossPackageTarget version '0.5' called CrossPackageTarget  parameter \"Measurement Period\" Interval<DateTime>     default Interval[@2020-01-01T00:00:00.0-06:00, @2021-01-01T00:00:00.0-06:00)  context Patient  define \"Initial Population\":     CrossPackageTarget.\"Has Initial Population\"  define \"Denominator\":     CrossPackageTarget.\"Has Denominator\"  define \"Numerator\":     CrossPackageTarget.\"Has Numerator\" ";
+        using FHIR version '5.0.1'
 
-    private static final String EXPECTED_CQL_CROSS_TARGET =
-            "library CrossPackageTarget version '0.5'  using FHIR version '5.0.1'  define \"Has Initial Population\": true  define \"Has Denominator\": true  define \"Has Numerator\": true ";
+        include FHIRHelpers version '5.0.1' called FHIRHelpers
+
+        parameter "Measurement Period" Interval<DateTime>
+          default Interval[@2021-01-01T00:00:00.0-06:00, @2022-01-01T00:00:00.0-06:00)
+
+        context Patient
+
+        define "Numerator":
+            exists ("Encounter Triaged")
+
+        define "Encounter Triaged":
+          [Encounter] E
+            where E.status = 'triaged'
+        """;
+
+    private static final String EXPECTED_CQL_CROSS_SOURCE = """
+        """;
+
+    private static final String EXPECTED_CQL_CROSS_TARGET = """
+        """;
 
     @Override
     protected FhirVersionEnum getExpectedFhirVersion() {
         return FhirVersionEnum.R5;
     }
 
-    private static Stream<Arguments> simplePackagesParams() {
-        return Stream.of(
-                Arguments.of(SIMPLE_ALPHA_TGZ, MEASURE_URL_ALPHA, LIBRARY_URL_ALPHA, EXPECTED_CQL_ALPHA),
-                Arguments.of(SIMPLE_BRAVO_TGZ, MEASURE_URL_BRAVO, LIBRARY_URL_BRAVO, EXPECTED_CQL_BRAVO));
+    @Test
+    void simpleAlpha() {
+        simpleCommon(Path.of(SIMPLE_ALPHA_TGZ), MEASURE_URL_ALPHA, LIBRARY_URL_ALPHA, EXPECTED_CQL_ALPHA);
     }
 
-    @ParameterizedTest
-    @MethodSource("simplePackagesParams")
-    void simple(Path tgzPath, String measureUrl, String expectedLibraryUrl, String expectedCql) {
-        simpleCommon(tgzPath, measureUrl, expectedLibraryUrl, expectedCql);
+    @Test
+    void simpleBravo() {
+        simpleCommon(Path.of(SIMPLE_BRAVO_TGZ), MEASURE_URL_BRAVO, LIBRARY_URL_BRAVO, EXPECTED_CQL_BRAVO);
     }
 
     @Test

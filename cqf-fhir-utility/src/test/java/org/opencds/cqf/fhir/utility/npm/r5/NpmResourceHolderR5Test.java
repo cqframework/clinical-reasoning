@@ -14,9 +14,36 @@ class NpmResourceHolderR5Test extends BaseNpmResourceInfoForCqlTest {
         """;
     private static final String EXPECTED_CQL_BRAVO = """
         """;
-    private static final String EXPECTED_CQL_WITH_DERIVED = """
+    private static final String EXPECTED_CQL_WITH_DERIVED =
+        """
+        library opencds.withderivedlibrary WithDerivedLibrary version '0.4'
+        
+        using FHIR version '5.0.1'
+        
+        include FHIRHelpers version '5.0.1' called FHIRHelpers
+        include DerivedLibrary version '0.4'
+        
+        parameter "Measurement Period" Interval<DateTime>
+            default Interval[@2021-01-01T00:00:00.0-06:00, @2022-01-01T00:00:00.0-06:00)
+        
+        context Patient
+        
+        define "Initial Population":
+            exists (DerivedLibrary."Encounter Finished")
         """;
-    private static final String EXPECTED_CQL_DERIVED = """
+    private static final String EXPECTED_CQL_DERIVED =
+        """
+        library opencds.withderivedlibrary.DerivedLibrary version '0.4'
+        
+        using FHIR version '5.0.1'
+        
+        include FHIRHelpers version '5.0.1' called FHIRHelpers
+        
+        context Patient
+        
+        define "Encounter Finished":
+          [Encounter] E
+            where E.status = 'finished'
         """;
 
     private static final String EXPECTED_CQL_DERIVED_TWO_LAYERS =
@@ -122,10 +149,37 @@ class NpmResourceHolderR5Test extends BaseNpmResourceInfoForCqlTest {
             where E.status = 'triaged'
         """;
 
-    private static final String EXPECTED_CQL_CROSS_SOURCE = """
+    private static final String EXPECTED_CQL_CROSS_SOURCE =
+        """
+        library opencds.crosspackagesource.CrossPackageSource version '0.2'
+        
+        using FHIR version '5.0.1'
+        
+        include FHIRHelpers version '4.0.1' called FHIRHelpers
+        include opencds.crosspackagetarget.CrossPackageTarget version '0.3' called CrossPackageTarget
+        
+        parameter "Measurement Period" Interval<DateTime>
+            default Interval[@2020-01-01T00:00:00.0-06:00, @2021-01-01T00:00:00.0-06:00)
+        
+        context Patient
+        
+        define "Initial Population":
+            exists (CrossPackageTarget."Encounter Finished")
         """;
 
-    private static final String EXPECTED_CQL_CROSS_TARGET = """
+    private static final String EXPECTED_CQL_CROSS_TARGET =
+        """
+        library opencds.crosspackagetarget.CrossPackageTarget version '0.3'
+        
+        using FHIR version '5.0.1'
+        
+        include FHIRHelpers version '5.0.1' called FHIRHelpers
+        
+        context Patient
+        
+        define "Encounter Finished":
+          [Encounter] E
+            where E.status = 'finished'
         """;
 
     @Override

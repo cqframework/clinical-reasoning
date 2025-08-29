@@ -3,7 +3,9 @@ package org.opencds.cqf.fhir.cr.hapi.config;
 import ca.uhn.fhir.rest.api.server.IRepositoryFactory;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cr.activitydefinition.ActivityDefinitionProcessor;
+import org.opencds.cqf.fhir.cr.graphdefintion.GraphDefinitionProcessor;
 import org.opencds.cqf.fhir.cr.hapi.common.IActivityDefinitionProcessorFactory;
+import org.opencds.cqf.fhir.cr.hapi.common.IGraphDefinitionProcessorFactory;
 import org.opencds.cqf.fhir.cr.hapi.common.ILibraryProcessorFactory;
 import org.opencds.cqf.fhir.cr.hapi.common.IPlanDefinitionProcessorFactory;
 import org.opencds.cqf.fhir.cr.hapi.common.IQuestionnaireProcessorFactory;
@@ -18,6 +20,7 @@ import org.opencds.cqf.fhir.utility.client.TerminologyServerClientSettings;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+@SuppressWarnings("UnstableApiUsage")
 @Configuration
 public class CrProcessorConfig {
     @Bean
@@ -62,6 +65,15 @@ public class CrProcessorConfig {
             EvaluationSettings evaluationSettings,
             TerminologyServerClientSettings terminologyServerClientSettings) {
         return rd -> new ValueSetProcessor(
+                repositoryFactory.create(rd), evaluationSettings, terminologyServerClientSettings);
+    }
+
+    @Bean
+    IGraphDefinitionProcessorFactory graphDefinitionProcessorFactory(
+            IRepositoryFactory repositoryFactory,
+            EvaluationSettings evaluationSettings,
+            TerminologyServerClientSettings terminologyServerClientSettings) {
+        return rd -> new GraphDefinitionProcessor(
                 repositoryFactory.create(rd), evaluationSettings, terminologyServerClientSettings);
     }
 }

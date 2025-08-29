@@ -9,6 +9,7 @@ import java.util.Map;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cr.cpg.r4.R4CqlExecutionService;
 import org.opencds.cqf.fhir.cr.crmi.R4ApproveService;
+import org.opencds.cqf.fhir.cr.crmi.R4WithdrawService;
 import org.opencds.cqf.fhir.cr.hapi.common.StringTimePeriodHandler;
 import org.opencds.cqf.fhir.cr.hapi.config.CrBaseConfig;
 import org.opencds.cqf.fhir.cr.hapi.config.ProviderLoader;
@@ -20,11 +21,13 @@ import org.opencds.cqf.fhir.cr.hapi.r4.ICollectDataServiceFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.ICqlExecutionServiceFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.IDataRequirementsServiceFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.ISubmitDataProcessorFactory;
+import org.opencds.cqf.fhir.cr.hapi.r4.IWithdrawServiceFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureEvaluatorMultipleFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureEvaluatorSingleFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureServiceUtilsFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.cpg.CqlExecutionOperationProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.crmi.ApproveProvider;
+import org.opencds.cqf.fhir.cr.hapi.r4.crmi.WithdrawProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.measure.CareGapsOperationProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.measure.CollectDataOperationProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.measure.DataRequirementsOperationProvider;
@@ -145,6 +148,16 @@ public class CrR4Config {
     }
 
     @Bean
+    IWithdrawServiceFactory withdrawServiceFactory(IRepositoryFactory repositoryFactory) {
+        return rd -> new R4WithdrawService(repositoryFactory.create(rd));
+    }
+
+    @Bean
+    WithdrawProvider r4WithdrawProvider(IWithdrawServiceFactory r4WithdrawServiceFactory) {
+        return new WithdrawProvider(r4WithdrawServiceFactory);
+    }
+
+    @Bean
     SubmitDataProvider r4SubmitDataProvider(ISubmitDataProcessorFactory r4SubmitDataProcessorFactory) {
         return new SubmitDataProvider(r4SubmitDataProcessorFactory);
     }
@@ -173,7 +186,8 @@ public class CrR4Config {
                                 CqlExecutionOperationProvider.class,
                                 CollectDataOperationProvider.class,
                                 DataRequirementsOperationProvider.class,
-                                ApproveProvider.class)));
+                                ApproveProvider.class,
+                                WithdrawProvider.class)));
 
         return new ProviderLoader(restfulServer, applicationContext, selector);
     }

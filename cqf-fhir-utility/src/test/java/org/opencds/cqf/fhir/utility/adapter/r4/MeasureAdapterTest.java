@@ -15,6 +15,7 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -28,6 +29,9 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.RelatedArtifact;
 import org.hl7.fhir.r4.model.RelatedArtifact.RelatedArtifactType;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.TestVisitor;
 
@@ -276,5 +280,22 @@ class MeasureAdapterTest {
         extractedDependencies.forEach(dep -> {
             assertTrue(dependencies.indexOf(dep.getReference()) >= 0);
         });
+    }
+
+    private static Stream<Arguments> getLibraryParams() {
+        return Stream.of(
+                Arguments.of(List.of(), List.of()),
+                Arguments.of(
+                        List.of(new CanonicalType("library1"), new CanonicalType("library2")),
+                        List.of("library1", "library2")));
+    }
+
+    @ParameterizedTest
+    @MethodSource("getLibraryParams")
+    void getLibrary(List<CanonicalType> measureLibraries, List<String> expectedAdapterLibraries) {
+        var measure = new Measure().setLibrary(measureLibraries);
+        var measureAdapter = adapterFactory.createMeasure(measure);
+
+        assertEquals(expectedAdapterLibraries, measureAdapter.getLibrary());
     }
 }

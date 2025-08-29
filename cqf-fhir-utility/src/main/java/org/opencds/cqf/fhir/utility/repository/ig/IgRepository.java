@@ -21,6 +21,7 @@ import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Table;
+import jakarta.annotation.Nonnull;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -41,6 +42,8 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.matcher.ResourceMatcher;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoaderInMemory;
 import org.opencds.cqf.fhir.utility.repository.Repositories;
 import org.opencds.cqf.fhir.utility.repository.ig.EncodingBehavior.PreserveEncoding;
 import org.opencds.cqf.fhir.utility.repository.ig.IgConventions.CategoryLayout;
@@ -124,6 +127,10 @@ public class IgRepository implements IRepository {
     private final Path root;
     private final IgConventions conventions;
     private final ResourceMatcher resourceMatcher;
+    private final NpmPackageLoader npmPackageLoader;
+    private final Path npmJsonPath;
+    private final List<Path> npmTgzPaths;
+
     private IRepositoryOperationProvider operationProvider;
 
     private final Cache<Path, Optional<IBaseResource>> resourceCache =
@@ -237,6 +244,66 @@ public class IgRepository implements IRepository {
         this.conventions = requireNonNull(conventions, "conventions cannot be null");
         this.resourceMatcher = Repositories.getResourceMatcher(this.fhirContext);
         this.operationProvider = operationProvider;
+        this.npmJsonPath = buildNpmJsonPath().orElse(null);
+        this.npmTgzPaths = buildTgzPaths();
+        this.npmPackageLoader = buildNpmPackageLoader(npmTgzPaths);
+    }
+
+    public NpmPackageLoader getNpmPackageLoader() {
+        return npmPackageLoader;
+    }
+
+    public Path getJson() {
+        return this.npmJsonPath;
+    }
+
+    @Nonnull
+    public List<Path> getNpmTgzPaths() {
+        return npmTgzPaths;
+    }
+
+    public Path getRootPath() {
+        return this.root;
+    }
+
+    private NpmPackageLoader buildNpmPackageLoader(List<Path> npmTgzPaths) {
+        return NpmPackageLoaderInMemory.fromNpmPackageAbsolutePath(npmTgzPaths);
+    }
+
+    private Optional<Path> buildNpmJsonPath() {
+        final Path npmDir = resolveNpmPath();
+
+        // More often than not, the npm directory will not exist in an IgRepository
+        if (!Files.exists(npmDir) || !Files.isDirectory(npmDir)) {
+            return Optional.empty();
+        }
+
+        try (Stream<Path> npmSubPaths = Files.list(npmDir)) {
+            return npmSubPaths
+                    .filter(Files::isRegularFile)
+                    .filter(file -> file.getFileName().toString().endsWith(".json"))
+                    .findFirst();
+        } catch (IOException exception) {
+            throw new IllegalStateException("Could not resolve NPM JSON file", exception);
+        }
+    }
+
+    private List<Path> buildTgzPaths() {
+        final Path npmDir = resolveNpmPath();
+
+        // More often than not, the npm directory will not exist in an IgRepository
+        if (!Files.exists(npmDir) || !Files.isDirectory(npmDir)) {
+            return List.of();
+        }
+
+        try (Stream<Path> npmSubPaths = Files.list(npmDir)) {
+            return npmSubPaths
+                    .filter(Files::isRegularFile)
+                    .filter(file -> file.getFileName().toString().endsWith(".tgz"))
+                    .toList();
+        } catch (IOException exception) {
+            throw new IllegalStateException("Could not resolve NPM namespace tgz files", exception);
+        }
     }
 
     public void setOperationProvider(IRepositoryOperationProvider operationProvider) {
@@ -249,6 +316,11 @@ public class IgRepository implements IRepository {
 
     public void clearCache(Iterable<Path> paths) {
         this.resourceCache.invalidate(paths);
+    }
+
+    @Nonnull
+    private Path resolveNpmPath() {
+        return root.resolve("input/npm");
     }
 
     private boolean isExternalPath(Path path) {
@@ -361,7 +433,7 @@ public class IgRepository implements IRepository {
             Class<T> resourceType, IgRepositoryCompartment igRepositoryCompartment) {
         var category = ResourceCategory.forType(resourceType.getSimpleName());
         var categoryPaths = TYPE_DIRECTORIES.rowMap().get(this.conventions.categoryLayout()).get(category).stream()
-                .map(path -> this.root.resolve(path));
+                .map(this.root::resolve);
         if (category == ResourceCategory.DATA
                 && this.conventions.compartmentLayout() == CompartmentLayout.DIRECTORY_PER_COMPARTMENT) {
             var compartmentPath = pathForCompartment(resourceType, this.fhirContext, igRepositoryCompartment);

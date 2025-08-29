@@ -10,37 +10,73 @@ class NpmResourceHolderR5Test extends BaseNpmResourceInfoForCqlTest {
 
     protected FhirVersionEnum fhirVersion = FhirVersionEnum.R5;
 
-    private static final String EXPECTED_CQL_ALPHA = """
+    private static final String EXPECTED_CQL_ALPHA =
+            """
+        library opencds.simplealpha.SimpleAlpha
+
+        using FHIR version '5.0.1'
+
+        include FHIRHelpers version '5.0.1' called FHIRHelpers
+
+        parameter "Measurement Period" Interval<DateTime>
+          default Interval[@2021-01-01T00:00:00.0-06:00, @2022-01-01T00:00:00.0-06:00)
+
+        context Patient
+
+        define "Initial Population":
+            exists ("Encounter Finished")
+
+        define "Encounter Finished":
+          [Encounter] E
+            where E.status = 'finished'
         """;
-    private static final String EXPECTED_CQL_BRAVO = """
+    private static final String EXPECTED_CQL_BRAVO =
+            """
+        library opencds.simplealpha.SimpleBravo
+
+        using FHIR version '5.0.1'
+
+        include FHIRHelpers version '4.0.1' called FHIRHelpers
+
+        parameter "Measurement Period" Interval<DateTime>
+          default Interval[@2024-01-01T00:00:00.0-06:00, @2025-01-01T00:00:00.0-06:00)
+
+        context Patient
+
+        define "Initial Population":
+            exists ("Encounter Planned")
+
+        define "Encounter Planned":
+          [Encounter] E
+            where E.status = 'planned'
         """;
     private static final String EXPECTED_CQL_WITH_DERIVED =
-        """
+            """
         library opencds.withderivedlibrary WithDerivedLibrary version '0.4'
-        
+
         using FHIR version '5.0.1'
-        
+
         include FHIRHelpers version '5.0.1' called FHIRHelpers
         include DerivedLibrary version '0.4'
-        
+
         parameter "Measurement Period" Interval<DateTime>
             default Interval[@2021-01-01T00:00:00.0-06:00, @2022-01-01T00:00:00.0-06:00)
-        
+
         context Patient
-        
+
         define "Initial Population":
             exists (DerivedLibrary."Encounter Finished")
         """;
     private static final String EXPECTED_CQL_DERIVED =
-        """
+            """
         library opencds.withderivedlibrary.DerivedLibrary version '0.4'
-        
+
         using FHIR version '5.0.1'
-        
+
         include FHIRHelpers version '5.0.1' called FHIRHelpers
-        
+
         context Patient
-        
+
         define "Encounter Finished":
           [Encounter] E
             where E.status = 'finished'
@@ -150,33 +186,33 @@ class NpmResourceHolderR5Test extends BaseNpmResourceInfoForCqlTest {
         """;
 
     private static final String EXPECTED_CQL_CROSS_SOURCE =
-        """
+            """
         library opencds.crosspackagesource.CrossPackageSource version '0.2'
-        
+
         using FHIR version '5.0.1'
-        
+
         include FHIRHelpers version '4.0.1' called FHIRHelpers
         include opencds.crosspackagetarget.CrossPackageTarget version '0.3' called CrossPackageTarget
-        
+
         parameter "Measurement Period" Interval<DateTime>
             default Interval[@2020-01-01T00:00:00.0-06:00, @2021-01-01T00:00:00.0-06:00)
-        
+
         context Patient
-        
+
         define "Initial Population":
             exists (CrossPackageTarget."Encounter Finished")
         """;
 
     private static final String EXPECTED_CQL_CROSS_TARGET =
-        """
+            """
         library opencds.crosspackagetarget.CrossPackageTarget version '0.3'
-        
+
         using FHIR version '5.0.1'
-        
+
         include FHIRHelpers version '5.0.1' called FHIRHelpers
-        
+
         context Patient
-        
+
         define "Encounter Finished":
           [Encounter] E
             where E.status = 'finished'
@@ -189,12 +225,22 @@ class NpmResourceHolderR5Test extends BaseNpmResourceInfoForCqlTest {
 
     @Test
     void simpleAlpha() {
-        simpleCommon(Path.of(SIMPLE_ALPHA_TGZ), MEASURE_URL_ALPHA, LIBRARY_URL_ALPHA, EXPECTED_CQL_ALPHA);
+        simpleCommon(
+                Path.of(SIMPLE_ALPHA_TGZ),
+                MEASURE_URL_ALPHA,
+                LIBRARY_URL_ALPHA_WITH_VERSION,
+                LIBRARY_URL_ALPHA_NO_VERSION,
+                EXPECTED_CQL_ALPHA);
     }
 
     @Test
     void simpleBravo() {
-        simpleCommon(Path.of(SIMPLE_BRAVO_TGZ), MEASURE_URL_BRAVO, LIBRARY_URL_BRAVO, EXPECTED_CQL_BRAVO);
+        simpleCommon(
+                Path.of(SIMPLE_BRAVO_TGZ),
+                MEASURE_URL_BRAVO,
+                LIBRARY_URL_BRAVO_WITH_VERSION,
+                LIBRARY_URL_BRAVO_NO_VERSION,
+                EXPECTED_CQL_BRAVO);
     }
 
     @Test

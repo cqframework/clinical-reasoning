@@ -95,10 +95,12 @@ public abstract class BaseNpmResourceInfoForCqlTest {
     protected static final String MEASURE_URL_CROSS_PACKAGE_SOURCE_WITH_VERSION =
             MEASURE_URL_CROSS_PACKAGE_SOURCE + PIPE + VERSION_0_2;
 
-    protected static final String LIBRARY_URL_ALPHA =
+    protected static final String LIBRARY_URL_ALPHA_NO_VERSION =
             SIMPLE_ALPHA_NAMESPACE_URL + SLASH_LIBRARY_SLASH + SIMPLE_ALPHA_MIXED;
-    protected static final String LIBRARY_URL_BRAVO =
+    protected static final String LIBRARY_URL_ALPHA_WITH_VERSION = LIBRARY_URL_ALPHA_NO_VERSION + PIPE + VERSION_0_1;
+    protected static final String LIBRARY_URL_BRAVO_NO_VERSION =
             SIMPLE_BRAVO_NAMESPACE_URL + SLASH_LIBRARY_SLASH + SIMPLE_BRAVO_MIXED;
+    protected static final String LIBRARY_URL_BRAVO_WITH_VERSION = LIBRARY_URL_BRAVO_NO_VERSION + PIPE + VERSION_0_1;
 
     protected static final String LIBRARY_URL_WITH_DERIVED_LIBRARY_NO_VERSION =
             DERIVED_URL + SLASH_LIBRARY_SLASH + WITH_DERIVED_LIBRARY_MIXED;
@@ -129,15 +131,20 @@ public abstract class BaseNpmResourceInfoForCqlTest {
 
     protected abstract FhirVersionEnum getExpectedFhirVersion();
 
-    protected void simpleCommon(Path tgzPath, String measureUrl, String expectedLibraryUrl, String expectedCql) {
+    protected void simpleCommon(
+            Path tgzPath,
+            String measureUrl,
+            String expectedLibraryUrlFromMeasure,
+            String expectedLibraryUrlWithinLibrary,
+            String expectedCql) {
         final NpmPackageLoaderInMemory loader = setup(tgzPath);
 
         final NpmResourceHolder npmResourceHolder =
                 loader.loadNpmResources(new org.hl7.fhir.r5.model.CanonicalType(measureUrl));
 
-        verifyMeasure(measureUrl, expectedLibraryUrl, npmResourceHolder);
+        verifyMeasure(measureUrl, expectedLibraryUrlFromMeasure, npmResourceHolder);
         verifyLibrary(
-                expectedLibraryUrl,
+                expectedLibraryUrlWithinLibrary,
                 expectedCql,
                 npmResourceHolder.getOptMainLibrary().orElse(null));
     }
@@ -151,15 +158,15 @@ public abstract class BaseNpmResourceInfoForCqlTest {
         final NpmResourceHolder resourceInfoBravo =
                 loader.loadNpmResources(new org.hl7.fhir.r5.model.CanonicalType(MEASURE_URL_BRAVO));
 
-        verifyMeasure(MEASURE_URL_ALPHA, LIBRARY_URL_ALPHA, resourceInfoAlpha);
+        verifyMeasure(MEASURE_URL_ALPHA, LIBRARY_URL_ALPHA_WITH_VERSION, resourceInfoAlpha);
         verifyLibrary(
-                LIBRARY_URL_ALPHA,
+                LIBRARY_URL_ALPHA_NO_VERSION,
                 expectedCqlAlpha,
                 resourceInfoAlpha.getOptMainLibrary().orElse(null));
 
-        verifyMeasure(MEASURE_URL_BRAVO, LIBRARY_URL_BRAVO, resourceInfoBravo);
+        verifyMeasure(MEASURE_URL_BRAVO, LIBRARY_URL_BRAVO_WITH_VERSION, resourceInfoBravo);
         verifyLibrary(
-                LIBRARY_URL_BRAVO,
+                LIBRARY_URL_BRAVO_NO_VERSION,
                 expectedCqlBravo,
                 resourceInfoBravo.getOptMainLibrary().orElse(null));
     }

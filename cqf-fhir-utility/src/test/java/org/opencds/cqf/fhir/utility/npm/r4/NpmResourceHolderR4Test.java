@@ -228,12 +228,22 @@ class NpmResourceHolderR4Test extends BaseNpmResourceInfoForCqlTest {
 
     @Test
     void simpleAlpha() {
-        simpleCommon(Path.of(SIMPLE_ALPHA_TGZ), MEASURE_URL_ALPHA, LIBRARY_URL_ALPHA, EXPECTED_CQL_ALPHA);
+        simpleCommon(
+                Path.of(SIMPLE_ALPHA_TGZ),
+                MEASURE_URL_ALPHA,
+                LIBRARY_URL_ALPHA_WITH_VERSION,
+                LIBRARY_URL_ALPHA_NO_VERSION,
+                EXPECTED_CQL_ALPHA);
     }
 
     @Test
     void simpleBravo() {
-        simpleCommon(Path.of(SIMPLE_BRAVO_TGZ), MEASURE_URL_BRAVO, LIBRARY_URL_BRAVO, EXPECTED_CQL_BRAVO);
+        simpleCommon(
+                Path.of(SIMPLE_BRAVO_TGZ),
+                MEASURE_URL_BRAVO,
+                LIBRARY_URL_BRAVO_WITH_VERSION,
+                LIBRARY_URL_BRAVO_NO_VERSION,
+                EXPECTED_CQL_BRAVO);
     }
 
     @Test

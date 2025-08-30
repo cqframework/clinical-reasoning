@@ -2,7 +2,10 @@ package org.opencds.cqf.fhir.utility.adapter.r4;
 
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.r4.model.ImplementationGuide;
+import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IImplementationGuideAdapter;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ImplementationGuideAdapter extends KnowledgeArtifactAdapter implements IImplementationGuideAdapter {
 
@@ -32,4 +35,17 @@ public class ImplementationGuideAdapter extends KnowledgeArtifactAdapter impleme
         return get().copy();
     }
 
+    @Override
+    public List<IDependencyInfo> getDependencies() {
+        List<IDependencyInfo> references = new ArrayList<>();
+        final String referenceSource = getReferenceSource();
+        addProfileReferences(references, referenceSource);
+
+        // TODO: is the dependsOn element needed?
+
+        getImplementationGuide().getDefinition().getResource().forEach(dr -> {
+            addProfileReferences(references, dr.getReference().getReference());
+        });
+        return references;
+    }
 }

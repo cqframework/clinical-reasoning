@@ -12,6 +12,7 @@ import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cr.cpg.r4.R4CqlExecutionService;
 import org.opencds.cqf.fhir.cr.crmi.R4ApproveService;
 import org.opencds.cqf.fhir.cr.crmi.R4DraftService;
+import org.opencds.cqf.fhir.cr.crmi.R4ReleaseService;
 import org.opencds.cqf.fhir.cr.hapi.common.StringTimePeriodHandler;
 import org.opencds.cqf.fhir.cr.hapi.config.CrBaseConfig;
 import org.opencds.cqf.fhir.cr.hapi.config.ProviderLoader;
@@ -23,6 +24,7 @@ import org.opencds.cqf.fhir.cr.hapi.r4.ICollectDataServiceFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.ICqlExecutionServiceFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.IDataRequirementsServiceFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.IDraftServiceFactory;
+import org.opencds.cqf.fhir.cr.hapi.r4.IReleaseServiceFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.ISubmitDataProcessorFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureEvaluatorMultipleFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureEvaluatorSingleFactory;
@@ -30,6 +32,7 @@ import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureServiceUtilsFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.cpg.CqlExecutionOperationProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.crmi.ApproveProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.crmi.DraftProvider;
+import org.opencds.cqf.fhir.cr.hapi.r4.crmi.ReleaseProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.measure.CareGapsOperationProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.measure.CollectDataOperationProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.measure.DataRequirementsOperationProvider;
@@ -214,6 +217,16 @@ public class CrR4Config {
     }
 
     @Bean
+    IReleaseServiceFactory releaseServiceFactory(IRepositoryFactory repositoryFactory) {
+        return rd -> new R4ReleaseService(repositoryFactory.create(rd));
+    }
+
+    @Bean
+    ReleaseProvider r4ReleaseProvider(IReleaseServiceFactory r4ReleaseServiceFactory) {
+        return new ReleaseProvider(r4ReleaseServiceFactory);
+    }
+
+    @Bean
     SubmitDataProvider r4SubmitDataProvider(ISubmitDataProcessorFactory r4SubmitDataProcessorFactory) {
         return new SubmitDataProvider(r4SubmitDataProcessorFactory);
     }
@@ -243,7 +256,8 @@ public class CrR4Config {
                                 CollectDataOperationProvider.class,
                                 DataRequirementsOperationProvider.class,
                                 DraftProvider.class,
-                                ApproveProvider.class)));
+                                ApproveProvider.class,
+                                ReleaseProvider.class)));
 
         return new ProviderLoader(restfulServer, applicationContext, selector);
     }

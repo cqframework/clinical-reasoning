@@ -308,7 +308,6 @@ class EnginesTest {
 
     @Test
     void additionalDataEntry() {
-        var settings = EvaluationSettings.getDefault();
 
         var bundleBuilder = new BundleBuilder(FhirContext.forR4Cached());
         bundleBuilder.addTransactionCreateEntry(new Encounter().setId("en1"));

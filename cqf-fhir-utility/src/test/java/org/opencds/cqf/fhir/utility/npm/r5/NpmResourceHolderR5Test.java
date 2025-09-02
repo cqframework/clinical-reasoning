@@ -225,7 +225,7 @@ class NpmResourceHolderR5Test extends BaseNpmResourceInfoForCqlTest {
 
     @Test
     void simpleAlpha() {
-        simpleCommon(
+        simpleAlpha(
                 Path.of(SIMPLE_ALPHA_TGZ),
                 MEASURE_URL_ALPHA,
                 LIBRARY_URL_ALPHA_WITH_VERSION,
@@ -235,7 +235,7 @@ class NpmResourceHolderR5Test extends BaseNpmResourceInfoForCqlTest {
 
     @Test
     void simpleBravo() {
-        simpleCommon(
+        simpleBravo(
                 Path.of(SIMPLE_BRAVO_TGZ),
                 MEASURE_URL_BRAVO,
                 LIBRARY_URL_BRAVO_WITH_VERSION,

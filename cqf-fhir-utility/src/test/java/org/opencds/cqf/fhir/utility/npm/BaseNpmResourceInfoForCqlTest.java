@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.utility.npm;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -14,6 +15,7 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
+import org.hl7.cql.model.NamespaceInfo;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.r4.model.CanonicalType;
@@ -40,6 +42,9 @@ public abstract class BaseNpmResourceInfoForCqlTest {
     protected static final String WITH_TWO_LAYERS_DERIVED_LIBRARIES = "withtwolayersderivedlibraries";
     protected static final String WITH_TWO_LAYERS_DERIVED_LIBRARIES_UPPER = "WithTwoLayersDerivedLibraries";
 
+    protected static final String SIMPLE_ALPHA_NAMESPACE = NAMESPACE_PREFIX + SIMPLE_ALPHA_LOWER;
+    protected static final String SIMPLE_BRAVO_NAMESPACE = NAMESPACE_PREFIX + SIMPLE_BRAVO_LOWER;
+    protected static final String WITH_DERIVED_NAMESPACE = NAMESPACE_PREFIX + WITH_DERIVED_LIBRARY_LOWER;
     protected static final String WITH_TWO_LAYERS_NAMESPACE = NAMESPACE_PREFIX + WITH_TWO_LAYERS_DERIVED_LIBRARIES;
 
     protected static final String DERIVED_LAYER_1_A = "DerivedLayer1a";
@@ -65,15 +70,13 @@ public abstract class BaseNpmResourceInfoForCqlTest {
     private static final String PIPE = "|";
     private static final String VERSION_0_1 = "0.1";
     private static final String VERSION_0_2 = "0.2";
-    private static final String VERSION_0_3 = "0.3";
     private static final String VERSION_0_4 = "0.4";
     private static final String VERSION_0_5 = "0.5";
-    private static final String VERSION_0_6 = "0.6";
 
     protected static final String SIMPLE_ALPHA_NAMESPACE_URL = "http://simplealpha.npm.opencds.org";
     protected static final String SIMPLE_BRAVO_NAMESPACE_URL = "http://simplebravo.npm.opencds.org";
-    protected static final String DERIVED_URL = "http://withderivedlibrary.npm.opencds.org";
-    protected static final String DERIVED_TWO_LAYERS_URL = "http://withtwolayersderivedlibraries.npm.opencds.org";
+    protected static final String WITH_DERIVED_URL = "http://withderivedlibrary.npm.opencds.org";
+    protected static final String WITH_DERIVED_TWO_LAYERS_URL = "http://withtwolayersderivedlibraries.npm.opencds.org";
     protected static final String CROSS_PACKAGE_SOURCE_URL = "http://crosspackagesource.npm.opencds.org";
     protected static final String CROSS_PACKAGE_TARGET_URL = "http://crosspackagetarget.npm.opencds.org";
 
@@ -82,11 +85,11 @@ public abstract class BaseNpmResourceInfoForCqlTest {
     protected static final String MEASURE_URL_BRAVO =
             SIMPLE_BRAVO_NAMESPACE_URL + SLASH_MEASURE_SLASH + SIMPLE_BRAVO_MIXED;
     protected static final String MEASURE_URL_WITH_DERIVED_LIBRARY =
-            DERIVED_URL + SLASH_MEASURE_SLASH + WITH_DERIVED_LIBRARY_MIXED;
+            WITH_DERIVED_URL + SLASH_MEASURE_SLASH + WITH_DERIVED_LIBRARY_MIXED;
     protected static final String MEASURE_URL_WITH_DERIVED_LIBRARY_WITH_VERSION =
             MEASURE_URL_WITH_DERIVED_LIBRARY + PIPE + VERSION_0_4;
     protected static final String MEASURE_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES =
-            DERIVED_TWO_LAYERS_URL + SLASH_MEASURE_SLASH + WITH_TWO_LAYERS_DERIVED_LIBRARIES_UPPER;
+            WITH_DERIVED_TWO_LAYERS_URL + SLASH_MEASURE_SLASH + WITH_TWO_LAYERS_DERIVED_LIBRARIES_UPPER;
     protected static final String MEASURE_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES_WITH_VERSION =
             MEASURE_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES + PIPE + VERSION_0_5;
 
@@ -103,10 +106,11 @@ public abstract class BaseNpmResourceInfoForCqlTest {
     protected static final String LIBRARY_URL_BRAVO_WITH_VERSION = LIBRARY_URL_BRAVO_NO_VERSION + PIPE + VERSION_0_1;
 
     protected static final String LIBRARY_URL_WITH_DERIVED_LIBRARY_NO_VERSION =
-            DERIVED_URL + SLASH_LIBRARY_SLASH + WITH_DERIVED_LIBRARY_MIXED;
+            WITH_DERIVED_URL + SLASH_LIBRARY_SLASH + WITH_DERIVED_LIBRARY_MIXED;
     protected static final String LIBRARY_URL_WITH_DERIVED_LIBRARY_WITH_VERSION =
-            DERIVED_URL + SLASH_LIBRARY_SLASH + WITH_DERIVED_LIBRARY_MIXED + PIPE + VERSION_0_4;
-    protected static final String LIBRARY_URL_DERIVED_LIBRARY = DERIVED_URL + SLASH_LIBRARY_SLASH + DERIVED_LIBRARY;
+            WITH_DERIVED_URL + SLASH_LIBRARY_SLASH + WITH_DERIVED_LIBRARY_MIXED + PIPE + VERSION_0_4;
+    protected static final String LIBRARY_URL_DERIVED_LIBRARY =
+            WITH_DERIVED_URL + SLASH_LIBRARY_SLASH + DERIVED_LIBRARY;
 
     protected static final String LIBRARY_URL_CROSS_PACKAGE_SOURCE =
             CROSS_PACKAGE_SOURCE_URL + SLASH_LIBRARY_SLASH + CROSS_PACKAGE_SOURCE_ID;
@@ -116,23 +120,56 @@ public abstract class BaseNpmResourceInfoForCqlTest {
             CROSS_PACKAGE_TARGET_URL + SLASH_LIBRARY_SLASH + CROSS_PACKAGE_TARGET_ID;
 
     protected static final String LIBRARY_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES_NO_VERSION =
-            DERIVED_TWO_LAYERS_URL + SLASH_LIBRARY_SLASH + WITH_TWO_LAYERS_DERIVED_LIBRARIES_UPPER;
+            WITH_DERIVED_TWO_LAYERS_URL + SLASH_LIBRARY_SLASH + WITH_TWO_LAYERS_DERIVED_LIBRARIES_UPPER;
     protected static final String LIBRARY_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES_WITH_VERSION =
             LIBRARY_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES_NO_VERSION + PIPE + VERSION_0_5;
 
     protected static final String LIBRARY_URL_WITH_TWO_LAYERS_DERIVED_LIBRARY_1A =
-            DERIVED_TWO_LAYERS_URL + SLASH_LIBRARY_SLASH + DERIVED_LAYER_1_A;
+            WITH_DERIVED_TWO_LAYERS_URL + SLASH_LIBRARY_SLASH + DERIVED_LAYER_1_A;
     protected static final String LIBRARY_URL_WITH_TWO_LAYERS_DERIVED_LIBRARY_1B =
-            DERIVED_TWO_LAYERS_URL + SLASH_LIBRARY_SLASH + DERIVED_LAYER_1_B;
+            WITH_DERIVED_TWO_LAYERS_URL + SLASH_LIBRARY_SLASH + DERIVED_LAYER_1_B;
     protected static final String LIBRARY_URL_WITH_TWO_LAYERS_DERIVED_LIBRARY_2A =
-            DERIVED_TWO_LAYERS_URL + SLASH_LIBRARY_SLASH + DERIVED_LAYER_2_A;
+            WITH_DERIVED_TWO_LAYERS_URL + SLASH_LIBRARY_SLASH + DERIVED_LAYER_2_A;
     protected static final String LIBRARY_URL_WITH_TWO_LAYERS_DERIVED_LIBRARY_2B =
-            DERIVED_TWO_LAYERS_URL + SLASH_LIBRARY_SLASH + DERIVED_LAYER_2_B;
+            WITH_DERIVED_TWO_LAYERS_URL + SLASH_LIBRARY_SLASH + DERIVED_LAYER_2_B;
 
     protected abstract FhirVersionEnum getExpectedFhirVersion();
 
+    protected void simpleAlpha(
+            Path tgzPath,
+            String measureUrl,
+            String expectedLibraryUrlFromMeasure,
+            String expectedLibraryUrlWithinLibrary,
+            String expectedCql) {
+
+        simpleCommon(
+                tgzPath,
+                List.of(new NamespaceInfo(SIMPLE_ALPHA_NAMESPACE, SIMPLE_ALPHA_NAMESPACE_URL)),
+                measureUrl,
+                expectedLibraryUrlFromMeasure,
+                expectedLibraryUrlWithinLibrary,
+                expectedCql);
+    }
+
+    protected void simpleBravo(
+            Path tgzPath,
+            String measureUrl,
+            String expectedLibraryUrlFromMeasure,
+            String expectedLibraryUrlWithinLibrary,
+            String expectedCql) {
+
+        simpleCommon(
+                tgzPath,
+                List.of(new NamespaceInfo(SIMPLE_BRAVO_NAMESPACE, SIMPLE_BRAVO_NAMESPACE_URL)),
+                measureUrl,
+                expectedLibraryUrlFromMeasure,
+                expectedLibraryUrlWithinLibrary,
+                expectedCql);
+    }
+
     protected void simpleCommon(
             Path tgzPath,
+            List<NamespaceInfo> expectedNamespaceInfos,
             String measureUrl,
             String expectedLibraryUrlFromMeasure,
             String expectedLibraryUrlWithinLibrary,
@@ -141,6 +178,10 @@ public abstract class BaseNpmResourceInfoForCqlTest {
 
         final NpmResourceHolder npmResourceHolder =
                 loader.loadNpmResources(new org.hl7.fhir.r5.model.CanonicalType(measureUrl));
+
+        sanityCheckNpmResourceHolder(npmResourceHolder);
+
+        assertEquals(expectedNamespaceInfos, npmResourceHolder.getNamespaceInfos());
 
         verifyMeasure(measureUrl, expectedLibraryUrlFromMeasure, npmResourceHolder);
         verifyLibrary(
@@ -157,6 +198,13 @@ public abstract class BaseNpmResourceInfoForCqlTest {
                 loader.loadNpmResources(new org.hl7.fhir.r5.model.CanonicalType(MEASURE_URL_ALPHA));
         final NpmResourceHolder resourceInfoBravo =
                 loader.loadNpmResources(new org.hl7.fhir.r5.model.CanonicalType(MEASURE_URL_BRAVO));
+
+        assertEquals(
+                List.of(new NamespaceInfo(SIMPLE_ALPHA_NAMESPACE, SIMPLE_ALPHA_NAMESPACE_URL)),
+                resourceInfoAlpha.getNamespaceInfos());
+        assertEquals(
+                List.of(new NamespaceInfo(SIMPLE_BRAVO_NAMESPACE, SIMPLE_BRAVO_NAMESPACE_URL)),
+                resourceInfoBravo.getNamespaceInfos());
 
         verifyMeasure(MEASURE_URL_ALPHA, LIBRARY_URL_ALPHA_WITH_VERSION, resourceInfoAlpha);
         verifyLibrary(
@@ -177,12 +225,23 @@ public abstract class BaseNpmResourceInfoForCqlTest {
 
         final NpmResourceHolder resourceInfoWithNoVersion =
                 loader.loadNpmResources(new CanonicalType(MEASURE_URL_WITH_DERIVED_LIBRARY));
+
+        sanityCheckNpmResourceHolder(resourceInfoWithNoVersion);
+
+        var expectedNamespaceInfos = List.of(new NamespaceInfo(WITH_DERIVED_NAMESPACE, WITH_DERIVED_URL));
+
+        assertEquals(expectedNamespaceInfos, resourceInfoWithNoVersion.getNamespaceInfos());
+
         verifyMeasure(
                 MEASURE_URL_WITH_DERIVED_LIBRARY,
                 LIBRARY_URL_WITH_DERIVED_LIBRARY_WITH_VERSION,
                 resourceInfoWithNoVersion);
+
         final NpmResourceHolder resourceInfoWithVersion =
                 loader.loadNpmResources(new CanonicalType(MEASURE_URL_WITH_DERIVED_LIBRARY_WITH_VERSION));
+        sanityCheckNpmResourceHolder(resourceInfoWithVersion);
+        assertEquals(expectedNamespaceInfos, resourceInfoWithVersion.getNamespaceInfos());
+
         verifyMeasure(
                 MEASURE_URL_WITH_DERIVED_LIBRARY,
                 LIBRARY_URL_WITH_DERIVED_LIBRARY_WITH_VERSION,
@@ -222,8 +281,12 @@ public abstract class BaseNpmResourceInfoForCqlTest {
 
         final NpmPackageLoaderInMemory loader = setup(WITH_TWO_LAYERS_DERIVED_LIBRARIES_TGZ);
 
+        var expectedNamespaceInfos = List.of(new NamespaceInfo(WITH_TWO_LAYERS_NAMESPACE, WITH_DERIVED_TWO_LAYERS_URL));
+
         final NpmResourceHolder resourceInfoNoVersion =
                 loader.loadNpmResources(new CanonicalType(MEASURE_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES));
+        sanityCheckNpmResourceHolder(resourceInfoNoVersion);
+        assertEquals(expectedNamespaceInfos, resourceInfoNoVersion.getNamespaceInfos());
         verifyMeasure(
                 MEASURE_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES,
                 LIBRARY_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES_WITH_VERSION,
@@ -235,6 +298,8 @@ public abstract class BaseNpmResourceInfoForCqlTest {
 
         final NpmResourceHolder resourceInfoWithVersion =
                 loader.loadNpmResources(new CanonicalType(MEASURE_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES_WITH_VERSION));
+        sanityCheckNpmResourceHolder(resourceInfoWithVersion);
+        assertEquals(expectedNamespaceInfos, resourceInfoWithVersion.getNamespaceInfos());
         verifyMeasure(
                 MEASURE_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES,
                 LIBRARY_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES_WITH_VERSION,
@@ -248,7 +313,7 @@ public abstract class BaseNpmResourceInfoForCqlTest {
                 .findMatchingLibrary(new VersionedIdentifier()
                         .withId(DERIVED_LAYER_1_A)
                         .withVersion(VERSION_0_5)
-                        .withSystem(DERIVED_TWO_LAYERS_URL))
+                        .withSystem(WITH_DERIVED_TWO_LAYERS_URL))
                 .orElse(null);
 
         verifyLibrary(LIBRARY_URL_WITH_TWO_LAYERS_DERIVED_LIBRARY_1A, expectedCqlDerived1a, derivedLibrary1a);
@@ -281,12 +346,14 @@ public abstract class BaseNpmResourceInfoForCqlTest {
 
         final NpmResourceHolder resourceInfoWithNoVersion =
                 loader.loadNpmResources(new CanonicalType(MEASURE_URL_CROSS_PACKAGE_SOURCE));
+        sanityCheckNpmResourceHolder(resourceInfoWithNoVersion);
         verifyMeasure(
                 MEASURE_URL_CROSS_PACKAGE_SOURCE,
                 LIBRARY_URL_CROSS_PACKAGE_SOURCE_WITH_VERSION,
                 resourceInfoWithNoVersion);
         final NpmResourceHolder resourceInfoWithVersion =
                 loader.loadNpmResources(new CanonicalType(MEASURE_URL_CROSS_PACKAGE_SOURCE_WITH_VERSION));
+        sanityCheckNpmResourceHolder(resourceInfoWithVersion);
         verifyMeasure(
                 MEASURE_URL_CROSS_PACKAGE_SOURCE,
                 LIBRARY_URL_CROSS_PACKAGE_SOURCE_WITH_VERSION,
@@ -355,5 +422,11 @@ public abstract class BaseNpmResourceInfoForCqlTest {
     @Nonnull
     private NpmPackageLoaderInMemory setup(Path... tgzPaths) {
         return NpmPackageLoaderInMemory.fromNpmPackageClasspath(getClass(), tgzPaths);
+    }
+
+    private static void sanityCheckNpmResourceHolder(NpmResourceHolder npmResourceHolder) {
+        assertNotNull(npmResourceHolder);
+        assertFalse(npmResourceHolder.getNpmPackages().isEmpty());
+        assertFalse(npmResourceHolder.getNamespaceInfos().isEmpty());
     }
 }

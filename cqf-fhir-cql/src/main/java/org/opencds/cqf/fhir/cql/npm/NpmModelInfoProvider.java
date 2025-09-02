@@ -46,7 +46,8 @@ public class NpmModelInfoProvider implements ModelInfoProvider {
         final IAdapterFactory adapterFactory = IAdapterFactory.forFhirVersion(
                 library.fhirContext().getVersion().getVersion());
 
-        return library.getContent().stream()
+        return library.getContent()
+                .stream()
                 .map(adapterFactory::createAttachment)
                 .filter(attachment -> APPLICATION_XML.equals(attachment.getContentType()))
                 .findFirst();

@@ -29,33 +29,33 @@ class NpmLibraryProviderTest {
     private static final Path CROSS_PACKAGE_TARGET_TGZ = Paths.get(CROSS_PACKAGE_TARGET + DOT_TGZ);
 
     private static final String EXPECTED_CQL_CROSS_SOURCE =
-        """
+            """
             library opencds.crosspackagesource.CrossPackageSource version '0.2'
-            
+
             using FHIR version '4.0.1'
-            
+
             include FHIRHelpers version '4.0.1' called FHIRHelpers
             include opencds.crosspackagetarget.CrossPackageTarget version '0.3' called CrossPackageTarget
-            
+
             parameter "Measurement Period" Interval<DateTime>
                 default Interval[@2020-01-01T00:00:00.0-06:00, @2021-01-01T00:00:00.0-06:00)
-            
+
             context Patient
-            
+
             define "Initial Population":
                 exists (CrossPackageTarget."Encounter Finished")
             """;
 
     private static final String EXPECTED_CQL_CROSS_TARGET =
-        """
+            """
             library opencds.crosspackagetarget.CrossPackageTarget version '0.3'
-            
+
             using FHIR version '4.0.1'
-            
+
             include FHIRHelpers version '4.0.1' called FHIRHelpers
-            
+
             context Patient
-            
+
             define "Encounter Finished":
               [Encounter] E
                 where E.status = 'finished'
@@ -69,8 +69,7 @@ class NpmLibraryProviderTest {
         var libraryProvider = new NpmLibraryProvider(loader);
 
         var versionedIdentifierSource =
-            new VersionedIdentifier().withSystem(CROSS_PACKAGE_SOURCE_URL)
-                .withId(CROSS_PACKAGE_SOURCE_ID);
+                new VersionedIdentifier().withSystem(CROSS_PACKAGE_SOURCE_URL).withId(CROSS_PACKAGE_SOURCE_ID);
 
         var librarySourceInputStream = libraryProvider.getLibrarySource(versionedIdentifierSource);
         assertNotNull(librarySourceInputStream);
@@ -80,8 +79,7 @@ class NpmLibraryProviderTest {
         assertEquals(EXPECTED_CQL_CROSS_SOURCE, actualSourceCql);
 
         var versionedIdentifierTarget =
-            new VersionedIdentifier().withSystem(CROSS_PACKAGE_TARGET_URL)
-                .withId(CROSS_PACKAGE_TARGET_ID);
+                new VersionedIdentifier().withSystem(CROSS_PACKAGE_TARGET_URL).withId(CROSS_PACKAGE_TARGET_ID);
 
         var libraryTargetInputStream = libraryProvider.getLibrarySource(versionedIdentifierTarget);
 
@@ -98,8 +96,7 @@ class NpmLibraryProviderTest {
     }
 
     @Nonnull
-    private String getStringFromInputStream(InputStream librarySourceInputStream)
-        throws IOException {
+    private String getStringFromInputStream(InputStream librarySourceInputStream) throws IOException {
         return new String(librarySourceInputStream.readAllBytes(), StandardCharsets.UTF_8);
     }
 }

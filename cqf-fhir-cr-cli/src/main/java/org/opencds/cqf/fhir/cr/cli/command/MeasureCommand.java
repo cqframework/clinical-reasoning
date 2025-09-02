@@ -22,12 +22,14 @@ import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
+import org.opencds.cqf.fhir.cql.Engines.EngineInitializationContext;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cr.cli.argument.MeasureCommandArgument;
 import org.opencds.cqf.fhir.cr.cli.command.CqlCommand.SubjectAndResult;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorUtils;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureProcessor;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Command;
 
@@ -137,7 +139,11 @@ public class MeasureCommand implements Callable<Integer> {
         evaluationOptions.setApplyScoringSetMembership(false);
         evaluationOptions.setEvaluationSettings(evaluationSettings);
 
-        return new R4MeasureProcessor(repository, evaluationOptions, new MeasureProcessorUtils());
+        return new R4MeasureProcessor(
+                repository,
+                new EngineInitializationContext(repository, NpmPackageLoader.DEFAULT, evaluationSettings),
+                evaluationOptions,
+                new MeasureProcessorUtils());
     }
 
     private void writeJsonToFile(String json, String patientId, Path path) {

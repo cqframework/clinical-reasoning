@@ -26,9 +26,12 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.json.JSONException;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
+import org.opencds.cqf.fhir.cql.Engines.EngineInitializationContext;
+import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 import org.skyscreamer.jsonassert.JSONAssert;
 
@@ -66,7 +69,10 @@ public class TestItemGenerator {
         }
 
         public static QuestionnaireProcessor buildProcessor(IRepository repository) {
-            return new QuestionnaireProcessor(repository);
+            var engineInitializationContext = new EngineInitializationContext(
+                    repository, NpmPackageLoader.DEFAULT, EvaluationSettings.getDefault());
+
+            return new QuestionnaireProcessor(repository, engineInitializationContext);
         }
 
         public When when() {

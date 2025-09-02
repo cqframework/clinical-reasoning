@@ -8,6 +8,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.repository.IRepository;
 import java.nio.file.Path;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import org.hl7.fhir.dstu3.model.Bundle;
@@ -19,12 +20,15 @@ import org.hl7.fhir.dstu3.model.MeasureReport.MeasureReportGroupStratifierCompon
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.opencds.cqf.fhir.cql.Engines.EngineInitializationContext;
+import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.opencds.cqf.fhir.cr.measure.dstu3.Measure.SelectedGroup.SelectedReference;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 public class Measure {
@@ -54,6 +58,7 @@ public class Measure {
 
     public static class Given {
         private IRepository repository;
+        private EngineInitializationContext engineInitializationContext;
         private MeasureEvaluationOptions evaluationOptions;
 
         public Given() {
@@ -79,6 +84,12 @@ public class Measure {
             this.repository = new IgRepository(
                     FhirContext.forDstu3Cached(),
                     Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
+            this.engineInitializationContext = new EngineInitializationContext(
+                    this.repository,
+                    NpmPackageLoader.DEFAULT,
+                    Optional.ofNullable(this.evaluationOptions)
+                            .map(MeasureEvaluationOptions::getEvaluationSettings)
+                            .orElse(EvaluationSettings.getDefault()));
             return this;
         }
 
@@ -88,7 +99,8 @@ public class Measure {
         }
 
         private Dstu3MeasureProcessor buildProcessor() {
-            return new Dstu3MeasureProcessor(repository, evaluationOptions, new Dstu3RepositorySubjectProvider());
+            return new Dstu3MeasureProcessor(
+                    repository, engineInitializationContext, evaluationOptions, new Dstu3RepositorySubjectProvider());
         }
 
         public When when() {

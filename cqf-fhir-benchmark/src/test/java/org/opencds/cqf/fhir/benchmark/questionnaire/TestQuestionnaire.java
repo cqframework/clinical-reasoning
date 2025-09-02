@@ -6,6 +6,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.repository.IRepository;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
@@ -13,12 +14,14 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.opencds.cqf.fhir.cql.Engines.EngineInitializationContext;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
 import org.opencds.cqf.fhir.cr.questionnaire.QuestionnaireProcessor;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 public class TestQuestionnaire {
@@ -50,7 +53,13 @@ public class TestQuestionnaire {
                         .getTerminologySettings()
                         .setValuesetExpansionMode(VALUESET_EXPANSION_MODE.PERFORM_NAIVE_EXPANSION);
             }
-            return new QuestionnaireProcessor(repository, evaluationSettings, null, null, null, null);
+            var engineInitializationContext = new EngineInitializationContext(
+                    this.repository,
+                    NpmPackageLoader.DEFAULT,
+                    Optional.ofNullable(this.evaluationSettings).orElse(EvaluationSettings.getDefault()));
+
+            return new QuestionnaireProcessor(
+                    repository, evaluationSettings, engineInitializationContext, null, null, null, null);
         }
 
         public When when() {

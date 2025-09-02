@@ -12,12 +12,14 @@ import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.nio.file.Path;
+import javax.annotation.Nonnull;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.cql.Engines.EngineInitializationContext;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.IRequestResolverFactory;
 import org.opencds.cqf.fhir.cr.common.DataRequirementsProcessor;
@@ -28,6 +30,7 @@ import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.client.TerminologyServerClientSettings;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 @SuppressWarnings("squid:S2699")
@@ -40,7 +43,8 @@ class PlanDefinitionProcessorTests {
     void defaultSettings() {
         var repository =
                 new IgRepository(fhirContextR4, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r4"));
-        var processor = new PlanDefinitionProcessor(repository);
+        var engineInitializationContext = getEngineInitializationContext(repository);
+        var processor = new PlanDefinitionProcessor(repository, engineInitializationContext);
         assertNotNull(processor.evaluationSettings());
     }
 
@@ -48,6 +52,7 @@ class PlanDefinitionProcessorTests {
     void processor() {
         var repository =
                 new IgRepository(fhirContextR5, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r5"));
+        var engineInitializationContext = getEngineInitializationContext(repository);
         var modelResolver = FhirModelResolverCache.resolverForVersion(FhirVersionEnum.R5);
         var activityProcessor = new org.opencds.cqf.fhir.cr.activitydefinition.apply.ApplyProcessor(
                 repository, IRequestResolverFactory.getDefault(FhirVersionEnum.R5));
@@ -57,8 +62,9 @@ class PlanDefinitionProcessorTests {
         var processor = new PlanDefinitionProcessor(
                 repository,
                 EvaluationSettings.getDefault(),
+                engineInitializationContext,
                 new TerminologyServerClientSettings(),
-                new ApplyProcessor(repository, modelResolver, activityProcessor),
+                new ApplyProcessor(repository, engineInitializationContext, modelResolver, activityProcessor),
                 packageProcessor,
                 dataRequirementsProcessor,
                 activityProcessor,
@@ -565,5 +571,10 @@ class PlanDefinitionProcessorTests {
                 .planDefinitionId("route-one")
                 .thenDataRequirements()
                 .hasDataRequirements(30);
+    }
+
+    @Nonnull
+    private EngineInitializationContext getEngineInitializationContext(IgRepository repository) {
+        return new EngineInitializationContext(repository, NpmPackageLoader.DEFAULT, EvaluationSettings.getDefault());
     }
 }

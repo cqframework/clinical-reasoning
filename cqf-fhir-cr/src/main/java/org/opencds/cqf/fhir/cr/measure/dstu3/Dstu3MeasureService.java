@@ -25,14 +25,20 @@ import org.hl7.fhir.dstu3.model.MeasureReport;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.SearchParameter;
 import org.hl7.fhir.dstu3.model.StringType;
+import org.opencds.cqf.fhir.cql.Engines.EngineInitializationContext;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 
 public class Dstu3MeasureService implements Dstu3MeasureEvaluatorSingle {
     private final IRepository repository;
+    private final EngineInitializationContext engineInitializationContext;
     private final MeasureEvaluationOptions measureEvaluationOptions;
 
-    public Dstu3MeasureService(IRepository repository, MeasureEvaluationOptions measureEvaluationOptions) {
+    public Dstu3MeasureService(
+            IRepository repository,
+            EngineInitializationContext engineInitializationContext,
+            MeasureEvaluationOptions measureEvaluationOptions) {
         this.repository = repository;
+        this.engineInitializationContext = engineInitializationContext;
         this.measureEvaluationOptions = measureEvaluationOptions;
     }
 
@@ -109,7 +115,8 @@ public class Dstu3MeasureService implements Dstu3MeasureEvaluatorSingle {
 
         ensureSupplementalDataElementSearchParameter();
 
-        var dstu3MeasureProcessor = new Dstu3MeasureProcessor(repository, measureEvaluationOptions);
+        var dstu3MeasureProcessor =
+                new Dstu3MeasureProcessor(repository, engineInitializationContext, measureEvaluationOptions);
 
         MeasureReport report = dstu3MeasureProcessor.evaluateMeasure(
                 id, periodStart, periodEnd, reportType, Collections.singletonList(subject), additionalData, parameters);

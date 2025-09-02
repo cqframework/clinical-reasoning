@@ -42,6 +42,7 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
+import org.opencds.cqf.fhir.cql.Engines.EngineInitializationContext;
 import org.opencds.cqf.fhir.cr.measure.CareGapsProperties;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
@@ -78,6 +79,7 @@ public class R4CareGapsBundleBuilder {
     public R4CareGapsBundleBuilder(
             CareGapsProperties careGapsProperties,
             IRepository repository,
+            EngineInitializationContext engineInitializationContext,
             MeasureEvaluationOptions measureEvaluationOptions,
             String serverBase,
             Map<String, Resource> configuredResources,
@@ -88,8 +90,8 @@ public class R4CareGapsBundleBuilder {
         this.configuredResources = configuredResources;
 
         r4MeasureServiceUtils = new R4MeasureServiceUtils(repository);
-        r4MultiMeasureService =
-                new R4MultiMeasureService(repository, measureEvaluationOptions, serverBase, measurePeriodValidator);
+        r4MultiMeasureService = new R4MultiMeasureService(
+                repository, engineInitializationContext, measureEvaluationOptions, serverBase, measurePeriodValidator);
     }
 
     public List<Parameters.ParametersParameterComponent> makePatientBundles(

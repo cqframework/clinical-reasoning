@@ -15,6 +15,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
+import org.opencds.cqf.fhir.cql.Engines.EngineInitializationContext;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.ExtensionResolver;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
@@ -36,23 +37,30 @@ public class ActivityDefinitionProcessor implements IActivityDefinitionProcessor
     protected IApplyProcessor applyProcessor;
     protected IRequestResolverFactory requestResolverFactory;
     protected IRepository repository;
+    private EngineInitializationContext engineInitializationContext;
     protected ExtensionResolver extensionResolver;
 
-    public ActivityDefinitionProcessor(IRepository repository) {
-        this(repository, EvaluationSettings.getDefault());
-    }
-
-    public ActivityDefinitionProcessor(IRepository repository, EvaluationSettings evaluationSettings) {
-        this(repository, evaluationSettings, null, null);
+    public ActivityDefinitionProcessor(
+            IRepository repository, EngineInitializationContext engineInitializationContext) {
+        this(repository, EvaluationSettings.getDefault(), engineInitializationContext);
     }
 
     public ActivityDefinitionProcessor(
             IRepository repository,
             EvaluationSettings evaluationSettings,
+            EngineInitializationContext engineInitializationContext) {
+        this(repository, evaluationSettings, engineInitializationContext, null, null);
+    }
+
+    public ActivityDefinitionProcessor(
+            IRepository repository,
+            EvaluationSettings evaluationSettings,
+            EngineInitializationContext engineInitializationContext,
             IApplyProcessor applyProcessor,
             IRequestResolverFactory requestResolverFactory) {
         this.repository = requireNonNull(repository, "repository can not be null");
         this.evaluationSettings = requireNonNull(evaluationSettings, "evaluationSettings can not be null");
+        this.engineInitializationContext = engineInitializationContext;
         this.resourceResolver = new ResourceResolver("ActivityDefinition", this.repository);
         fhirVersion = repository.fhirContext().getVersion().getVersion();
         modelResolver = FhirModelResolverCache.resolverForVersion(fhirVersion);
@@ -159,7 +167,7 @@ public class ActivityDefinitionProcessor implements IActivityDefinitionProcessor
                 settingContext,
                 parameters,
                 data,
-                new LibraryEngine(repository, evaluationSettings));
+                new LibraryEngine(repository, evaluationSettings, engineInitializationContext));
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource apply(

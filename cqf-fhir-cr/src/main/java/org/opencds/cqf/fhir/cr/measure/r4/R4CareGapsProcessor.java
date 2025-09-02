@@ -22,6 +22,7 @@ import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.PrimitiveType;
 import org.hl7.fhir.r4.model.Resource;
+import org.opencds.cqf.fhir.cql.Engines.EngineInitializationContext;
 import org.opencds.cqf.fhir.cr.measure.CareGapsProperties;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
@@ -50,6 +51,7 @@ public class R4CareGapsProcessor implements R4CareGapsProcessorInterface {
     public R4CareGapsProcessor(
             CareGapsProperties careGapsProperties,
             IRepository repository,
+            EngineInitializationContext engineInitializationContext,
             MeasureEvaluationOptions measureEvaluationOptions,
             String serverBase,
             MeasurePeriodValidator measurePeriodValidator) {
@@ -60,6 +62,7 @@ public class R4CareGapsProcessor implements R4CareGapsProcessorInterface {
         r4CareGapsBundleBuilder = new R4CareGapsBundleBuilder(
                 careGapsProperties,
                 repository,
+                engineInitializationContext,
                 measureEvaluationOptions,
                 serverBase,
                 configuredResources,

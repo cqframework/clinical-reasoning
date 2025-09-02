@@ -13,6 +13,7 @@ import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
 import org.opencds.cqf.fhir.cql.Engines;
+import org.opencds.cqf.fhir.cql.Engines.EngineInitializationContext;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.cpg.CqlExecutionProcessor;
@@ -22,10 +23,15 @@ public class R4CqlExecutionService {
 
     protected IRepository repository;
     protected EvaluationSettings evaluationSettings;
+    protected EngineInitializationContext engineInitializationContext;
 
-    public R4CqlExecutionService(IRepository repository, EvaluationSettings evaluationSettings) {
+    public R4CqlExecutionService(
+            IRepository repository,
+            EvaluationSettings evaluationSettings,
+            EngineInitializationContext engineInitializationContext) {
         this.repository = repository;
         this.evaluationSettings = evaluationSettings;
+        this.engineInitializationContext = engineInitializationContext;
     }
 
     // should use adapters to make this version agnostic
@@ -62,7 +68,7 @@ public class R4CqlExecutionService {
                 repository = Repositories.proxy(
                         repository, useServerData.booleanValue(), dataEndpoint, contentEndpoint, terminologyEndpoint);
             }
-            var libraryEngine = new LibraryEngine(repository, this.evaluationSettings);
+            var libraryEngine = new LibraryEngine(repository, this.evaluationSettings, engineInitializationContext);
 
             var libraries = baseCqlExecutionProcessor.resolveIncludedLibraries(library);
 
@@ -79,7 +85,8 @@ public class R4CqlExecutionService {
                         null);
             }
 
-            var engine = Engines.forRepository(repository, evaluationSettings, null);
+            //            var engine = Engines.forContext(engineInitializationContext, null);
+            var engine = Engines.forContext(engineInitializationContext.modifiedCopyWith(repository), null);
             var libraryManager = engine.getEnvironment().getLibraryManager();
             var libraryIdentifier = baseCqlExecutionProcessor.resolveLibraryIdentifier(content, null, libraryManager);
 

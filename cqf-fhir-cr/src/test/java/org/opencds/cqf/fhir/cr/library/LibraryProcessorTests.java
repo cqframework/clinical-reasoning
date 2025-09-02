@@ -10,11 +10,13 @@ import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.nio.file.Path;
+import javax.annotation.Nonnull;
 import org.hl7.fhir.r4.model.Library;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.opencds.cqf.fhir.cql.Engines.EngineInitializationContext;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.common.DataRequirementsProcessor;
@@ -25,6 +27,7 @@ import org.opencds.cqf.fhir.cr.library.evaluate.EvaluateProcessor;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.client.TerminologyServerClientSettings;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -41,7 +44,8 @@ class LibraryProcessorTests {
     void defaultSettings() {
         var repository =
                 new IgRepository(fhirContextR4, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r4"));
-        var processor = new LibraryProcessor(repository);
+        var engineInitializationContext = getEngineInitializationContext(repository);
+        var processor = new LibraryProcessor(repository, engineInitializationContext);
         assertNotNull(processor.evaluationSettings());
     }
 
@@ -58,6 +62,7 @@ class LibraryProcessorTests {
     void processor() {
         var repository =
                 new IgRepository(fhirContextR5, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r5"));
+        var engineInitializationContext = getEngineInitializationContext(repository);
         var packageProcessor = new PackageProcessor(repository);
         var releaseProcessor = new ReleaseProcessor(repository);
         var dataRequirementsProcessor = new DataRequirementsProcessor(repository);
@@ -65,6 +70,7 @@ class LibraryProcessorTests {
         var processor = new LibraryProcessor(
                 repository,
                 EvaluationSettings.getDefault(),
+                engineInitializationContext,
                 new TerminologyServerClientSettings(),
                 packageProcessor,
                 releaseProcessor,
@@ -192,5 +198,10 @@ class LibraryProcessorTests {
                 .terminology(content)
                 .thenEvaluate()
                 .hasResults(6);
+    }
+
+    @Nonnull
+    private EngineInitializationContext getEngineInitializationContext(IgRepository repository) {
+        return new EngineInitializationContext(repository, NpmPackageLoader.DEFAULT, EvaluationSettings.getDefault());
     }
 }

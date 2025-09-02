@@ -6,6 +6,8 @@ import ca.uhn.fhir.rest.api.server.IRepositoryFactory;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Optional;
+import org.opencds.cqf.fhir.cql.Engines.EngineInitializationContext;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cr.cpg.r4.R4CqlExecutionService;
 import org.opencds.cqf.fhir.cr.crmi.R4ApproveService;
@@ -43,6 +45,8 @@ import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureService;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MultiMeasureService;
 import org.opencds.cqf.fhir.cr.measure.r4.R4SubmitDataService;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
+import org.opencds.cqf.fhir.utility.npm.NpmConfigDependencySubstitutor;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -55,29 +59,63 @@ public class CrR4Config {
     @Bean
     R4MeasureEvaluatorSingleFactory r4MeasureServiceFactory(
             IRepositoryFactory repositoryFactory,
+            Optional<NpmPackageLoader> optNpmPackageLoader,
             MeasureEvaluationOptions evaluationOptions,
             MeasurePeriodValidator measurePeriodValidator) {
-        return rd -> new R4MeasureService(repositoryFactory.create(rd), evaluationOptions, measurePeriodValidator);
+        return requestDetails -> {
+            var repository = repositoryFactory.create(requestDetails);
+            return new R4MeasureService(
+                    repository,
+                    new EngineInitializationContext(
+                            repository,
+                            NpmConfigDependencySubstitutor.substituteNpmPackageLoaderIfEmpty(optNpmPackageLoader),
+                            evaluationOptions.getEvaluationSettings()),
+                    evaluationOptions,
+                    measurePeriodValidator);
+        };
     }
 
     @Bean
     R4MeasureEvaluatorMultipleFactory r4MeasureEvaluatorMultipleFactory(
             IRepositoryFactory repositoryFactory,
+            Optional<NpmPackageLoader> optNpmPackageLoader,
             MeasureEvaluationOptions evaluationOptions,
             MeasurePeriodValidator measurePeriodValidator) {
-        return rd -> new R4MultiMeasureService(
-                repositoryFactory.create(rd), evaluationOptions, rd.getFhirServerBase(), measurePeriodValidator);
+        return requestDetails -> {
+            var repository = repositoryFactory.create(requestDetails);
+            return new R4MultiMeasureService(
+                    repository,
+                    new EngineInitializationContext(
+                            repository,
+                            NpmConfigDependencySubstitutor.substituteNpmPackageLoaderIfEmpty(optNpmPackageLoader),
+                            evaluationOptions.getEvaluationSettings()),
+                    evaluationOptions,
+                    requestDetails.getFhirServerBase(),
+                    measurePeriodValidator);
+        };
     }
 
     @Bean
     ISubmitDataProcessorFactory r4SubmitDataProcessorFactory(IRepositoryFactory repositoryFactory) {
-        return rd -> new R4SubmitDataService(repositoryFactory.create(rd));
+        return requestDetails -> new R4SubmitDataService(repositoryFactory.create(requestDetails));
     }
 
     @Bean
     ICqlExecutionServiceFactory r4CqlExecutionServiceFactory(
-            IRepositoryFactory repositoryFactory, EvaluationSettings evaluationSettings) {
-        return rd -> new R4CqlExecutionService(repositoryFactory.create(rd), evaluationSettings);
+            IRepositoryFactory repositoryFactory,
+            Optional<NpmPackageLoader> optNpmPackageLoader,
+            EvaluationSettings evaluationSettings) {
+
+        return requestDetails -> {
+            var repository = repositoryFactory.create(requestDetails);
+            return new R4CqlExecutionService(
+                    repository,
+                    evaluationSettings,
+                    new EngineInitializationContext(
+                            repository,
+                            NpmConfigDependencySubstitutor.substituteNpmPackageLoaderIfEmpty(optNpmPackageLoader),
+                            evaluationSettings));
+        };
     }
 
     @Bean
@@ -100,9 +138,19 @@ public class CrR4Config {
     @Bean
     ICollectDataServiceFactory collectDataServiceFactory(
             IRepositoryFactory repositoryFactory,
+            Optional<NpmPackageLoader> optNpmPackageLoader,
             MeasureEvaluationOptions measureEvaluationOptions,
             R4MeasureServiceUtilsFactory r4MeasureServiceUtilsFactory) {
-        return rd -> new R4CollectDataService(repositoryFactory.create(rd), measureEvaluationOptions);
+        return requestDetails -> {
+            var repository = repositoryFactory.create(requestDetails);
+            return new R4CollectDataService(
+                    repository,
+                    new EngineInitializationContext(
+                            repository,
+                            NpmConfigDependencySubstitutor.substituteNpmPackageLoaderIfEmpty(optNpmPackageLoader),
+                            measureEvaluationOptions.getEvaluationSettings()),
+                    measureEvaluationOptions);
+        };
     }
 
     @Bean
@@ -120,15 +168,23 @@ public class CrR4Config {
     @Bean
     ICareGapsServiceFactory careGapsServiceFactory(
             IRepositoryFactory repositoryFactory,
+            Optional<NpmPackageLoader> optNpmPackageLoader,
             CareGapsProperties careGapsProperties,
             MeasureEvaluationOptions measureEvaluationOptions,
             MeasurePeriodValidator measurePeriodValidator) {
-        return rd -> new R4CareGapsService(
-                careGapsProperties,
-                repositoryFactory.create(rd),
-                measureEvaluationOptions,
-                rd.getFhirServerBase(),
-                measurePeriodValidator);
+        return requestDetails -> {
+            var repository = repositoryFactory.create(requestDetails);
+            return new R4CareGapsService(
+                    careGapsProperties,
+                    repository,
+                    new EngineInitializationContext(
+                            repository,
+                            NpmConfigDependencySubstitutor.substituteNpmPackageLoaderIfEmpty(optNpmPackageLoader),
+                            measureEvaluationOptions.getEvaluationSettings()),
+                    measureEvaluationOptions,
+                    requestDetails.getFhirServerBase(),
+                    measurePeriodValidator);
+        };
     }
 
     @Bean

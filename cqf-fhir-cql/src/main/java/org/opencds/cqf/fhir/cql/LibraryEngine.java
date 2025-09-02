@@ -27,6 +27,7 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.EvaluationResultsForMultiLib;
+import org.opencds.cqf.fhir.cql.Engines.EngineInitializationContext;
 import org.opencds.cqf.fhir.cql.engine.parameters.CqlFhirParametersConverter;
 import org.opencds.cqf.fhir.cql.engine.parameters.CqlParameterDefinition;
 import org.opencds.cqf.fhir.utility.CqfExpression;
@@ -40,11 +41,16 @@ public class LibraryEngine {
     protected final IRepository repository;
     protected final FhirContext fhirContext;
     protected final EvaluationSettings settings;
+    protected final EngineInitializationContext engineInitializationContext;
 
-    public LibraryEngine(IRepository repository, EvaluationSettings evaluationSettings) {
+    public LibraryEngine(
+            IRepository repository,
+            EvaluationSettings evaluationSettings,
+            EngineInitializationContext engineInitializationContext) {
         this.repository = requireNonNull(repository, "repository can not be null");
         this.settings = requireNonNull(evaluationSettings, "evaluationSettings can not be null");
         fhirContext = repository.fhirContext();
+        this.engineInitializationContext = engineInitializationContext;
     }
 
     public IRepository getRepository() {
@@ -158,7 +164,11 @@ public class LibraryEngine {
 
         var requestSettings = new EvaluationSettings(settings);
         requestSettings.getLibrarySourceProviders().add(new StringLibrarySourceProvider(Lists.newArrayList(cql)));
-        var engine = Engines.forRepository(repository, requestSettings, bundle);
+
+        var modifiedEngineInitializationContext =
+                engineInitializationContext.modifiedCopyWith(repository).modifiedCopyWith(requestSettings);
+
+        var engine = Engines.forContext(modifiedEngineInitializationContext, bundle);
 
         var evaluationParameters = cqlFhirParametersConverter.toCqlParameters(parameters);
         if (contextParameter != null) {
@@ -343,7 +353,10 @@ public class LibraryEngine {
 
         // engine context built externally of LibraryEngine?
         var engineToUse = Objects.requireNonNullElseGet(
-                engine, () -> Engines.forRepository(repository, settings, additionalData));
+                engine,
+                () -> Engines.forContext(
+                        engineInitializationContext.modifiedCopyWith(repository).modifiedCopyWith(settings),
+                        additionalData));
 
         var evaluationParameters = cqlFhirParametersConverterToUse.toCqlParameters(parameters);
         if (rawParameters != null && !rawParameters.isEmpty()) {

@@ -35,31 +35,29 @@ import org.opencds.cqf.fhir.cql.engine.terminology.RepositoryTerminologyProvider
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Engines {
 
-    private static Logger logger = LoggerFactory.getLogger(Engines.class);
+    private static final Logger logger = LoggerFactory.getLogger(Engines.class);
 
     private Engines() {}
 
-    public static CqlEngine forRepository(IRepository repository) {
-        return forRepository(repository, EvaluationSettings.getDefault());
+    public static CqlEngine forContext(EngineInitializationContext initializationContext) {
+        return forContext(initializationContext, null);
     }
 
-    public static CqlEngine forRepository(IRepository repository, EvaluationSettings settings) {
-        return forRepository(repository, settings, null);
-    }
-
-    public static CqlEngine forRepository(
-            IRepository repository, EvaluationSettings settings, IBaseBundle additionalData) {
-        checkNotNull(settings);
-        checkNotNull(repository);
-
+    public static CqlEngine forContext(EngineInitializationContext initializationContext, IBaseBundle additionalData) {
+        var repository = initializationContext.repository;
+        var settings = initializationContext.evaluationSettings;
         var terminologyProvider = new RepositoryTerminologyProvider(
-                repository, settings.getValueSetCache(), settings.getTerminologySettings());
+                repository,
+                settings.getValueSetCache(),
+                initializationContext.evaluationSettings.getTerminologySettings());
+
         var dataProviders =
                 buildDataProviders(repository, additionalData, terminologyProvider, settings.getRetrieveSettings());
         var environment = buildEnvironment(repository, settings, terminologyProvider, dataProviders);
@@ -181,5 +179,40 @@ public class Engines {
                 new FhirTypeConverterFactory().create(fhirContext.getVersion().getVersion());
         return new CqlFhirParametersConverter(
                 fhirContext, IAdapterFactory.forFhirContext(fhirContext), fhirTypeConverter);
+    }
+
+    /**
+     * Maintain context needed to initialize a CqlEngine.  This will initially contain both the
+     * Repository and NpmPackageLoader, but will eventually drop the Repository as qualifying
+     * clinical intelligence resources (starting with Library and Measure but later including
+     * ValueSets, PlanDefinitions, etc) are stored in the NpmPackageLoader, the Repository will
+     * eventually be dropped from this context and from initialization of the CqlEngine.
+     * <p>
+     * This context also has convenience methods to create modified copies of itself when
+     * either the Repository or EvaluationSettings need to be changed for a specific evaluation.
+     */
+    public static class EngineInitializationContext {
+
+        private final IRepository repository;
+        private final NpmPackageLoader npmPackageLoader;
+        private final EvaluationSettings evaluationSettings;
+
+        public EngineInitializationContext(
+                IRepository repository, NpmPackageLoader npmPackageLoader, EvaluationSettings evaluationSettings) {
+            this.repository = checkNotNull(repository);
+            this.npmPackageLoader = checkNotNull(npmPackageLoader);
+            this.evaluationSettings = checkNotNull(evaluationSettings);
+        }
+
+        // For when a request builds a proxy or federated repository and needs to pass that to the
+        // Engine
+        public EngineInitializationContext modifiedCopyWith(IRepository repository) {
+            return new EngineInitializationContext(repository, npmPackageLoader, evaluationSettings);
+        }
+
+        // For when a request evaluates evaluation settings
+        EngineInitializationContext modifiedCopyWith(EvaluationSettings evaluationSettings) {
+            return new EngineInitializationContext(repository, npmPackageLoader, evaluationSettings);
+        }
     }
 }

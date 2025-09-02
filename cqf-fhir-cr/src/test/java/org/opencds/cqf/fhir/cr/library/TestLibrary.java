@@ -21,6 +21,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -29,6 +30,7 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
+import org.opencds.cqf.fhir.cql.Engines.EngineInitializationContext;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
@@ -40,6 +42,7 @@ import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.client.TerminologyServerClientSettings;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
@@ -70,6 +73,8 @@ public class TestLibrary {
 
     public static class Given {
         private IRepository repository;
+        private NpmPackageLoader npmPackageLoader;
+        private EngineInitializationContext engineInitializationContext;
         private EvaluationSettings evaluationSettings;
 
         public Given repository(IRepository repository) {
@@ -80,6 +85,11 @@ public class TestLibrary {
         public Given repositoryFor(FhirContext fhirContext, String repositoryPath) {
             this.repository = new IgRepository(
                     fhirContext, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
+            this.npmPackageLoader = NpmPackageLoader.DEFAULT;
+            this.engineInitializationContext = new EngineInitializationContext(
+                    this.repository,
+                    npmPackageLoader,
+                    Optional.ofNullable(this.evaluationSettings).orElse(EvaluationSettings.getDefault()));
             return this;
         }
 
@@ -90,7 +100,8 @@ public class TestLibrary {
 
         public LibraryProcessor buildProcessor(IRepository repository) {
             if (repository instanceof IgRepository igRepository) {
-                igRepository.setOperationProvider(TestOperationProvider.newProvider(repository.fhirContext()));
+                igRepository.setOperationProvider(TestOperationProvider.newProvider(
+                        repository.fhirContext(), npmPackageLoader, evaluationSettings));
             }
             if (evaluationSettings == null) {
                 evaluationSettings = EvaluationSettings.getDefault();
@@ -103,7 +114,11 @@ public class TestLibrary {
                         .getTerminologySettings()
                         .setValuesetExpansionMode(VALUESET_EXPANSION_MODE.PERFORM_NAIVE_EXPANSION);
             }
-            return new LibraryProcessor(repository, evaluationSettings, new TerminologyServerClientSettings());
+            return new LibraryProcessor(
+                    repository,
+                    evaluationSettings,
+                    engineInitializationContext.modifiedCopyWith(repository),
+                    new TerminologyServerClientSettings());
         }
 
         public When when() {

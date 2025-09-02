@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -25,6 +26,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.json.JSONException;
+import org.opencds.cqf.fhir.cql.Engines.EngineInitializationContext;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
@@ -42,6 +44,7 @@ import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.VersionUtilities;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 import org.skyscreamer.jsonassert.JSONAssert;
 
@@ -54,6 +57,7 @@ public class TestQuestionnaire {
 
     public static class Given {
         private IRepository repository;
+        private EngineInitializationContext engineInitializationContext;
         private EvaluationSettings evaluationSettings;
         private IGenerateProcessor generateProcessor;
         private IPackageProcessor packageProcessor;
@@ -62,12 +66,20 @@ public class TestQuestionnaire {
 
         public Given repository(IRepository repository) {
             this.repository = repository;
+            this.engineInitializationContext = new EngineInitializationContext(
+                    this.repository,
+                    NpmPackageLoader.DEFAULT,
+                    Optional.ofNullable(this.evaluationSettings).orElse(EvaluationSettings.getDefault()));
             return this;
         }
 
         public Given repositoryFor(FhirContext fhirContext, String repositoryPath) {
             this.repository = new IgRepository(
                     fhirContext, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
+            this.engineInitializationContext = new EngineInitializationContext(
+                    this.repository,
+                    NpmPackageLoader.DEFAULT,
+                    Optional.ofNullable(this.evaluationSettings).orElse(EvaluationSettings.getDefault()));
             return this;
         }
 
@@ -111,6 +123,7 @@ public class TestQuestionnaire {
             return new QuestionnaireProcessor(
                     repository,
                     evaluationSettings,
+                    engineInitializationContext,
                     generateProcessor,
                     packageProcessor,
                     dataRequirementsProcessor,
@@ -118,12 +131,13 @@ public class TestQuestionnaire {
         }
 
         public When when() {
-            return new When(repository, buildProcessor(repository));
+            return new When(repository, engineInitializationContext, buildProcessor(repository));
         }
     }
 
     public static class When {
         private final IRepository repository;
+        private final EngineInitializationContext engineInitializationContext;
         private final QuestionnaireProcessor processor;
         private IPrimitiveType<String> questionnaireUrl;
         private IIdType questionnaireId;
@@ -137,8 +151,12 @@ public class TestQuestionnaire {
         private Boolean isPut;
         private IIdType profileId;
 
-        When(IRepository repository, QuestionnaireProcessor processor) {
+        When(
+                IRepository repository,
+                EngineInitializationContext engineInitializationContext,
+                QuestionnaireProcessor processor) {
             this.repository = repository;
+            this.engineInitializationContext = engineInitializationContext;
             this.processor = processor;
             useServerData = true;
         }
@@ -155,7 +173,7 @@ public class TestQuestionnaire {
                     launchContext,
                     parameters,
                     data,
-                    new LibraryEngine(repository, processor.evaluationSettings),
+                    new LibraryEngine(repository, processor.evaluationSettings, engineInitializationContext),
                     processor.modelResolver);
         }
 
@@ -252,7 +270,7 @@ public class TestQuestionnaire {
                     processor.resolveStructureDefinition(Eithers.for3(null, profileId, null)),
                     false,
                     true,
-                    new LibraryEngine(repository, processor.evaluationSettings),
+                    new LibraryEngine(repository, processor.evaluationSettings, engineInitializationContext),
                     processor.modelResolver);
             return new GeneratedQuestionnaire(repository, request, processor.generateQuestionnaire(request, null));
         }

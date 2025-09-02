@@ -27,10 +27,12 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -53,14 +55,16 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
+import org.opencds.cqf.fhir.cql.Engines.EngineInitializationContext;
+import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.SelectedGroup.SelectedReference;
-import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.r4.ContainedHelper;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
@@ -118,9 +122,9 @@ public class Measure {
 
     public static class Given {
         private IRepository repository;
+        private EngineInitializationContext engineInitializationContext;
         private MeasureEvaluationOptions evaluationOptions;
         private final MeasurePeriodValidator measurePeriodValidator;
-        private final R4MeasureServiceUtils measureServiceUtils;
 
         public Given(@Nullable Boolean applyScoringSetMembership) {
             this.evaluationOptions = MeasureEvaluationOptions.defaultOptions();
@@ -144,12 +148,11 @@ public class Measure {
                     .setValuesetExpansionMode(VALUESET_EXPANSION_MODE.PERFORM_NAIVE_EXPANSION);
 
             this.measurePeriodValidator = new MeasurePeriodValidator();
-
-            this.measureServiceUtils = new R4MeasureServiceUtils(repository);
         }
 
         public Given repository(IRepository repository) {
             this.repository = repository;
+            this.engineInitializationContext = getEngineInitializationContext();
             return this;
         }
 
@@ -157,6 +160,7 @@ public class Measure {
             this.repository = new IgRepository(
                     FhirContext.forR4Cached(),
                     Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
+            this.engineInitializationContext = getEngineInitializationContext();
 
             return this;
         }
@@ -167,11 +171,22 @@ public class Measure {
         }
 
         private R4MeasureService buildMeasureService() {
-            return new R4MeasureService(repository, evaluationOptions, measurePeriodValidator);
+            return new R4MeasureService(
+                    repository, engineInitializationContext, evaluationOptions, measurePeriodValidator);
         }
 
         public When when() {
             return new When(buildMeasureService());
+        }
+
+        @Nonnull
+        private EngineInitializationContext getEngineInitializationContext() {
+            return new EngineInitializationContext(
+                    this.repository,
+                    NpmPackageLoader.DEFAULT,
+                    Optional.ofNullable(evaluationOptions)
+                            .map(MeasureEvaluationOptions::getEvaluationSettings)
+                            .orElse(EvaluationSettings.getDefault()));
         }
     }
 

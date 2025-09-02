@@ -1,6 +1,8 @@
 package org.opencds.cqf.fhir.cr.hapi.config;
 
 import ca.uhn.fhir.rest.api.server.IRepositoryFactory;
+import java.util.Optional;
+import org.opencds.cqf.fhir.cql.Engines.EngineInitializationContext;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cr.activitydefinition.ActivityDefinitionProcessor;
 import org.opencds.cqf.fhir.cr.hapi.common.IActivityDefinitionProcessorFactory;
@@ -15,6 +17,8 @@ import org.opencds.cqf.fhir.cr.questionnaire.QuestionnaireProcessor;
 import org.opencds.cqf.fhir.cr.questionnaireresponse.QuestionnaireResponseProcessor;
 import org.opencds.cqf.fhir.cr.valueset.ValueSetProcessor;
 import org.opencds.cqf.fhir.utility.client.TerminologyServerClientSettings;
+import org.opencds.cqf.fhir.utility.npm.NpmConfigDependencySubstitutor;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -22,38 +26,99 @@ import org.springframework.context.annotation.Configuration;
 public class CrProcessorConfig {
     @Bean
     IActivityDefinitionProcessorFactory activityDefinitionProcessorFactory(
-            IRepositoryFactory repositoryFactory, EvaluationSettings evaluationSettings) {
-        return rd -> new ActivityDefinitionProcessor(repositoryFactory.create(rd), evaluationSettings);
+            IRepositoryFactory repositoryFactory,
+            Optional<NpmPackageLoader> optNpmPackageLoader,
+            EvaluationSettings evaluationSettings) {
+
+        return requestDetails -> {
+            var repository = repositoryFactory.create(requestDetails);
+
+            return new ActivityDefinitionProcessor(
+                    repository,
+                    evaluationSettings,
+                    new EngineInitializationContext(
+                            repository,
+                            NpmConfigDependencySubstitutor.substituteNpmPackageLoaderIfEmpty(optNpmPackageLoader),
+                            evaluationSettings));
+        };
     }
 
     @Bean
     IPlanDefinitionProcessorFactory planDefinitionProcessorFactory(
             IRepositoryFactory repositoryFactory,
+            Optional<NpmPackageLoader> optNpmPackageLoader,
             EvaluationSettings evaluationSettings,
             TerminologyServerClientSettings terminologyServerClientSettings) {
-        return rd -> new PlanDefinitionProcessor(
-                repositoryFactory.create(rd), evaluationSettings, terminologyServerClientSettings);
+
+        return requestDetails -> {
+            var repository = repositoryFactory.create(requestDetails);
+
+            return new PlanDefinitionProcessor(
+                    repository,
+                    evaluationSettings,
+                    new EngineInitializationContext(
+                            repository,
+                            NpmConfigDependencySubstitutor.substituteNpmPackageLoaderIfEmpty(optNpmPackageLoader),
+                            evaluationSettings),
+                    terminologyServerClientSettings);
+        };
     }
 
     @Bean
     IQuestionnaireProcessorFactory questionnaireProcessorFactory(
-            IRepositoryFactory repositoryFactory, EvaluationSettings evaluationSettings) {
-        return rd -> new QuestionnaireProcessor(repositoryFactory.create(rd), evaluationSettings);
+            IRepositoryFactory repositoryFactory,
+            Optional<NpmPackageLoader> optNpmPackageLoader,
+            EvaluationSettings evaluationSettings) {
+
+        return requestDetails -> {
+            var repository = repositoryFactory.create(requestDetails);
+
+            return new QuestionnaireProcessor(
+                    repository,
+                    evaluationSettings,
+                    new EngineInitializationContext(
+                            repository,
+                            NpmConfigDependencySubstitutor.substituteNpmPackageLoaderIfEmpty(optNpmPackageLoader),
+                            evaluationSettings));
+        };
     }
 
     @Bean
     IQuestionnaireResponseProcessorFactory questionnaireResponseProcessorFactory(
-            IRepositoryFactory repositoryFactory, EvaluationSettings evaluationSettings) {
-        return rd -> new QuestionnaireResponseProcessor(repositoryFactory.create(rd), evaluationSettings);
+            IRepositoryFactory repositoryFactory,
+            Optional<NpmPackageLoader> optNpmPackageLoader,
+            EvaluationSettings evaluationSettings) {
+
+        return requestDetails -> {
+            var repository = repositoryFactory.create(requestDetails);
+            return new QuestionnaireResponseProcessor(
+                    repository,
+                    evaluationSettings,
+                    new EngineInitializationContext(
+                            repository,
+                            NpmConfigDependencySubstitutor.substituteNpmPackageLoaderIfEmpty(optNpmPackageLoader),
+                            evaluationSettings));
+        };
     }
 
     @Bean
     ILibraryProcessorFactory libraryProcessorFactory(
             IRepositoryFactory repositoryFactory,
+            Optional<NpmPackageLoader> optNpmPackageLoader,
             EvaluationSettings evaluationSettings,
             TerminologyServerClientSettings terminologyServerClientSettings) {
-        return rd ->
-                new LibraryProcessor(repositoryFactory.create(rd), evaluationSettings, terminologyServerClientSettings);
+
+        return requestDetails -> {
+            var repository = repositoryFactory.create(requestDetails);
+            return new LibraryProcessor(
+                    repository,
+                    evaluationSettings,
+                    new EngineInitializationContext(
+                            repository,
+                            NpmConfigDependencySubstitutor.substituteNpmPackageLoaderIfEmpty(optNpmPackageLoader),
+                            evaluationSettings),
+                    terminologyServerClientSettings);
+        };
     }
 
     @Bean

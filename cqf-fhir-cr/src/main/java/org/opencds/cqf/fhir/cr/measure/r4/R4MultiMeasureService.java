@@ -20,6 +20,7 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Resource;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.fhir.cql.Engines;
+import org.opencds.cqf.fhir.cql.Engines.EngineInitializationContext;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.CompositeEvaluationResultsPerMeasure;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
@@ -40,6 +41,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(R4MultiMeasureService.class);
 
     private final IRepository repository;
+    private final EngineInitializationContext engineInitializationContext;
     private final MeasureEvaluationOptions measureEvaluationOptions;
     private final MeasurePeriodValidator measurePeriodValidator;
     private final MeasureProcessorUtils measureProcessorUtils = new MeasureProcessorUtils();
@@ -50,16 +52,18 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
 
     public R4MultiMeasureService(
             IRepository repository,
+            EngineInitializationContext engineInitializationContext,
             MeasureEvaluationOptions measureEvaluationOptions,
             String serverBase,
             MeasurePeriodValidator measurePeriodValidator) {
         this.repository = repository;
+        this.engineInitializationContext = engineInitializationContext;
         this.measureEvaluationOptions = measureEvaluationOptions;
         this.measurePeriodValidator = measurePeriodValidator;
         this.serverBase = serverBase;
         this.subjectProvider = new R4RepositorySubjectProvider(measureEvaluationOptions.getSubjectProviderOptions());
-        this.r4MeasureProcessorStandardRepository =
-                new R4MeasureProcessor(repository, this.measureEvaluationOptions, this.measureProcessorUtils);
+        this.r4MeasureProcessorStandardRepository = new R4MeasureProcessor(
+                repository, engineInitializationContext, this.measureEvaluationOptions, this.measureProcessorUtils);
         this.r4MeasureServiceUtilsStandardRepository = new R4MeasureServiceUtils(repository);
     }
 
@@ -89,8 +93,11 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
             var repositoryToUse =
                     Repositories.proxy(repository, true, dataEndpoint, contentEndpoint, terminologyEndpoint);
 
-            r4ProcessorToUse =
-                    new R4MeasureProcessor(repositoryToUse, this.measureEvaluationOptions, this.measureProcessorUtils);
+            r4ProcessorToUse = new R4MeasureProcessor(
+                    repositoryToUse,
+                    this.engineInitializationContext,
+                    this.measureEvaluationOptions,
+                    this.measureProcessorUtils);
 
             r4MeasureServiceUtilsToUse = new R4MeasureServiceUtils(repositoryToUse);
         } else {
@@ -112,10 +119,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
                 .withType(BundleType.SEARCHSET.toString())
                 .build();
 
-        var context = Engines.forRepository(
-                r4ProcessorToUse.getRepository(),
-                this.measureEvaluationOptions.getEvaluationSettings(),
-                additionalData);
+        var context = Engines.forContext(engineInitializationContext, additionalData);
 
         // This is basically a Map of measure -> subject -> EvaluationResult
         var compositeEvaluationResultsPerMeasure = r4ProcessorToUse.evaluateMultiMeasuresWithCqlEngine(

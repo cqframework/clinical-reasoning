@@ -16,6 +16,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
+import org.opencds.cqf.fhir.cql.Engines.EngineInitializationContext;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.common.DataRequirementsProcessor;
@@ -43,21 +44,36 @@ public class LibraryProcessor {
     protected IRepository repository;
     protected EvaluationSettings evaluationSettings;
     protected TerminologyServerClientSettings terminologyServerClientSettings;
+    protected EngineInitializationContext engineInitializationContext;
 
-    public LibraryProcessor(IRepository repository) {
-        this(repository, EvaluationSettings.getDefault(), new TerminologyServerClientSettings());
+    public LibraryProcessor(IRepository repository, EngineInitializationContext engineInitializationContext) {
+        this(
+                repository,
+                EvaluationSettings.getDefault(),
+                engineInitializationContext,
+                new TerminologyServerClientSettings());
     }
 
     public LibraryProcessor(
             IRepository repository,
             EvaluationSettings evaluationSettings,
+            EngineInitializationContext engineInitializationContext,
             TerminologyServerClientSettings terminologyServerClientSettings) {
-        this(repository, evaluationSettings, terminologyServerClientSettings, null, null, null, null);
+        this(
+                repository,
+                evaluationSettings,
+                engineInitializationContext,
+                terminologyServerClientSettings,
+                null,
+                null,
+                null,
+                null);
     }
 
     public LibraryProcessor(
             IRepository repository,
             EvaluationSettings evaluationSettings,
+            EngineInitializationContext engineInitializationContext,
             TerminologyServerClientSettings terminologyServerClientSettings,
             IPackageProcessor packageProcessor,
             IReleaseProcessor releaseProcessor,
@@ -65,6 +81,7 @@ public class LibraryProcessor {
             IEvaluateProcessor evaluateProcessor) {
         this.repository = requireNonNull(repository, "repository can not be null");
         this.evaluationSettings = requireNonNull(evaluationSettings, "evaluationSettings can not be null");
+        this.engineInitializationContext = engineInitializationContext;
         this.terminologyServerClientSettings =
                 requireNonNull(terminologyServerClientSettings, "terminologyServerClientSettings can not be null");
         fhirVersion = this.repository.fhirContext().getVersion().getVersion();
@@ -192,7 +209,7 @@ public class LibraryProcessor {
                 parameters,
                 data,
                 prefetchData,
-                new LibraryEngine(repository, this.evaluationSettings));
+                new LibraryEngine(repository, evaluationSettings, engineInitializationContext));
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseParameters evaluate(

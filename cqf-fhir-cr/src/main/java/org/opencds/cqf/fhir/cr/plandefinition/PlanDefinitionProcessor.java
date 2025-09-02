@@ -8,6 +8,7 @@ import static org.opencds.cqf.fhir.utility.repository.Repositories.proxy;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.repository.IRepository;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
@@ -18,6 +19,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
+import org.opencds.cqf.fhir.cql.Engines.EngineInitializationContext;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.IRequestResolverFactory;
@@ -46,23 +48,41 @@ public class PlanDefinitionProcessor {
     protected org.opencds.cqf.fhir.cr.activitydefinition.apply.IApplyProcessor activityProcessor;
     protected IRequestResolverFactory requestResolverFactory;
     protected IRepository repository;
-    protected EvaluationSettings evaluationSettings;
-    protected TerminologyServerClientSettings terminologyServerClientSettings;
+    protected final EvaluationSettings evaluationSettings;
+    protected final EngineInitializationContext engineInitializationContext;
 
-    public PlanDefinitionProcessor(IRepository repository) {
-        this(repository, EvaluationSettings.getDefault(), new TerminologyServerClientSettings());
+    @Nullable
+    protected final TerminologyServerClientSettings terminologyServerClientSettings;
+
+    public PlanDefinitionProcessor(IRepository repository, EngineInitializationContext engineInitializationContext) {
+        this(
+                repository,
+                EvaluationSettings.getDefault(),
+                engineInitializationContext,
+                new TerminologyServerClientSettings());
     }
 
     public PlanDefinitionProcessor(
             IRepository repository,
             EvaluationSettings evaluationSettings,
+            EngineInitializationContext engineInitializationContext,
             TerminologyServerClientSettings terminologyServerClientSettings) {
-        this(repository, evaluationSettings, terminologyServerClientSettings, null, null, null, null, null);
+        this(
+                repository,
+                evaluationSettings,
+                engineInitializationContext,
+                terminologyServerClientSettings,
+                null,
+                null,
+                null,
+                null,
+                null);
     }
 
     public PlanDefinitionProcessor(
             IRepository repository,
             EvaluationSettings evaluationSettings,
+            EngineInitializationContext engineInitializationContext,
             TerminologyServerClientSettings terminologyServerClientSettings,
             IApplyProcessor applyProcessor,
             IPackageProcessor packageProcessor,
@@ -71,9 +91,12 @@ public class PlanDefinitionProcessor {
             IRequestResolverFactory requestResolverFactory) {
         this.repository = requireNonNull(repository, "repository can not be null");
         this.evaluationSettings = requireNonNull(evaluationSettings, "evaluationSettings can not be null");
+        this.engineInitializationContext = engineInitializationContext;
         if (packageProcessor == null) {
             this.terminologyServerClientSettings =
                     requireNonNull(terminologyServerClientSettings, "terminologyServerClientSettings can not be null");
+        } else {
+            this.terminologyServerClientSettings = null;
         }
         fhirVersion = this.repository.fhirContext().getVersion().getVersion();
         modelResolver = FhirModelResolverCache.resolverForVersion(fhirVersion);
@@ -98,7 +121,7 @@ public class PlanDefinitionProcessor {
         }
         applyProcessor = applyProcessor != null
                 ? applyProcessor
-                : new ApplyProcessor(repository, modelResolver, activityProcessor);
+                : new ApplyProcessor(repository, engineInitializationContext, modelResolver, activityProcessor);
     }
 
     protected <C extends IPrimitiveType<String>, R extends IBaseResource> R resolvePlanDefinition(
@@ -202,7 +225,7 @@ public class PlanDefinitionProcessor {
                 null,
                 null,
                 null,
-                new LibraryEngine(repository, evaluationSettings));
+                new LibraryEngine(repository, evaluationSettings, engineInitializationContext));
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource apply(
@@ -276,7 +299,8 @@ public class PlanDefinitionProcessor {
                 parameters,
                 data,
                 prefetchData,
-                new LibraryEngine(repository, this.evaluationSettings));
+                new LibraryEngine(
+                        repository, this.evaluationSettings, engineInitializationContext.modifiedCopyWith(repository)));
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource apply(
@@ -404,7 +428,8 @@ public class PlanDefinitionProcessor {
                 parameters,
                 data,
                 prefetchData,
-                new LibraryEngine(repository, this.evaluationSettings));
+                new LibraryEngine(
+                        repository, this.evaluationSettings, engineInitializationContext.modifiedCopyWith(repository)));
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseParameters applyR5(

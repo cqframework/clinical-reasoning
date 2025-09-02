@@ -32,11 +32,14 @@ import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.opencds.cqf.fhir.cql.Engines.EngineInitializationContext;
+import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.IRequestResolverFactory;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.monad.Either3;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 @TestInstance(Lifecycle.PER_CLASS)
@@ -58,7 +61,10 @@ class ActivityDefinitionProcessorTests {
     }
 
     private ActivityDefinitionProcessor createProcessor(IRepository repository) {
-        return new ActivityDefinitionProcessor(repository);
+        var engineInitializationContext =
+                new EngineInitializationContext(repository, NpmPackageLoader.DEFAULT, EvaluationSettings.getDefault());
+
+        return new ActivityDefinitionProcessor(repository, engineInitializationContext);
     }
 
     @BeforeAll

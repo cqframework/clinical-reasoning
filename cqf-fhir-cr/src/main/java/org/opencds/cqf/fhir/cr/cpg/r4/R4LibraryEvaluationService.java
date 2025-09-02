@@ -14,6 +14,7 @@ import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
 import org.opencds.cqf.fhir.cql.Engines;
+import org.opencds.cqf.fhir.cql.Engines.EngineInitializationContext;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.cpg.CqlExecutionProcessor;
@@ -21,12 +22,17 @@ import org.opencds.cqf.fhir.utility.repository.Repositories;
 
 public class R4LibraryEvaluationService {
 
-    protected IRepository repository;
-    protected EvaluationSettings evaluationSettings;
+    protected final IRepository repository;
+    protected final EvaluationSettings evaluationSettings;
+    protected final EngineInitializationContext engineInitializationContext;
 
-    public R4LibraryEvaluationService(IRepository repository, EvaluationSettings evaluationSettings) {
+    public R4LibraryEvaluationService(
+            IRepository repository,
+            EvaluationSettings evaluationSettings,
+            EngineInitializationContext engineInitializationContext) {
         this.repository = repository;
         this.evaluationSettings = evaluationSettings;
+        this.engineInitializationContext = engineInitializationContext;
     }
 
     public Parameters evaluate(
@@ -47,12 +53,19 @@ public class R4LibraryEvaluationService {
                     baseCqlExecutionProcessor.createIssue("warning", "prefetchData is not yet supported", repository)));
         }
 
+        final IRepository repositoryToUse;
+        final EngineInitializationContext engineInitializationContextToUse;
         if (contentEndpoint != null) {
-            repository = Repositories.proxy(repository, true, dataEndpoint, contentEndpoint, terminologyEndpoint);
+            repositoryToUse = Repositories.proxy(repository, true, dataEndpoint, contentEndpoint, terminologyEndpoint);
+            engineInitializationContextToUse = engineInitializationContext.modifiedCopyWith(repositoryToUse);
+        } else {
+            repositoryToUse = repository;
+            engineInitializationContextToUse = engineInitializationContext;
         }
-        var libraryEngine = new LibraryEngine(repository, this.evaluationSettings);
+        var libraryEngine =
+                new LibraryEngine(repositoryToUse, this.evaluationSettings, engineInitializationContextToUse);
         var library = repository.read(Library.class, id);
-        var engine = Engines.forRepository(repository, evaluationSettings, data);
+        var engine = Engines.forContext(engineInitializationContextToUse, data);
         var libraryManager = engine.getEnvironment().getLibraryManager();
         var libraryIdentifier = baseCqlExecutionProcessor.resolveLibraryIdentifier(null, library, libraryManager);
 

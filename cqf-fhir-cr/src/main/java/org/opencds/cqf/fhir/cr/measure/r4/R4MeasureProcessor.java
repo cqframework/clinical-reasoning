@@ -32,6 +32,7 @@ import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.fhir.model.R4FhirModelResolver;
 import org.opencds.cqf.cql.engine.runtime.Interval;
+import org.opencds.cqf.fhir.cql.Engines.EngineInitializationContext;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cql.VersionedIdentifiers;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
@@ -51,15 +52,18 @@ import org.opencds.cqf.fhir.utility.search.Searches;
 
 public class R4MeasureProcessor {
     private final IRepository repository;
+    private final EngineInitializationContext engineInitializationContext;
     private final MeasureEvaluationOptions measureEvaluationOptions;
     private final MeasureProcessorUtils measureProcessorUtils;
 
     public R4MeasureProcessor(
             IRepository repository,
+            EngineInitializationContext engineInitializationContext,
             MeasureEvaluationOptions measureEvaluationOptions,
             MeasureProcessorUtils measureProcessorUtils) {
 
         this.repository = Objects.requireNonNull(repository);
+        this.engineInitializationContext = engineInitializationContext;
         this.measureEvaluationOptions =
                 measureEvaluationOptions != null ? measureEvaluationOptions : MeasureEvaluationOptions.defaultOptions();
         this.measureProcessorUtils = measureProcessorUtils;
@@ -391,7 +395,8 @@ public class R4MeasureProcessor {
                         Resource::getIdElement // Value function
                         ));
 
-        var libraryEngine = new LibraryEngine(repository, this.measureEvaluationOptions.getEvaluationSettings());
+        var libraryEngine = new LibraryEngine(
+                repository, this.measureEvaluationOptions.getEvaluationSettings(), engineInitializationContext);
 
         var builder = MultiLibraryIdMeasureEngineDetails.builder(libraryEngine);
 
@@ -478,7 +483,8 @@ public class R4MeasureProcessor {
 
         setArgParameters(parameters, context, lib);
 
-        return new LibraryEngine(repository, this.measureEvaluationOptions.getEvaluationSettings());
+        return new LibraryEngine(
+                repository, this.measureEvaluationOptions.getEvaluationSettings(), engineInitializationContext);
     }
 
     private List<CompiledLibrary> getCompiledLibraries(List<VersionedIdentifier> ids, CqlEngine context) {

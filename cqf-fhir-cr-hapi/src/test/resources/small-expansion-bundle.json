@@ -155,7 +155,7 @@
 					},
 					{
 						"type": "depends-on",
-						"resource": "http://ersd.aimsplatform.org/fhir/ValueSet/dxtc|4.0.0.0"
+						"resource": "http://ersd.aimsplatform.org/fhir/ValueSet/dxtc|4.0.0"
 					}
 				]
 			},

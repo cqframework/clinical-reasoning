@@ -188,6 +188,14 @@ public class MultiMeasure {
                             .orElse(EvaluationSettings.getDefault()));
         }
 
+        @Nonnull
+        public NpmPackageLoader getNpmPackageLoader() {
+            if (this.npmPackageLoader == null) {
+                throw new IllegalStateException("NpmPackageLoader has not been set");
+            }
+            return this.npmPackageLoader;
+        }
+
         public EngineInitializationContext getEngineInitializationContext() {
             if (this.engineInitializationContext == null) {
                 throw new IllegalStateException(

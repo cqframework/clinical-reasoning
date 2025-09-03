@@ -45,8 +45,11 @@ import org.opencds.cqf.fhir.utility.search.Searches;
  */
 public class R4RepositoryOrNpmResourceProvider {
 
-    public static final String QUERIES_BY_MEASURE_ID_S_ARE_NOT_SUPPORTED_BY_NPM_RESOURCES =
+    public static final String QUERIES_BY_MEASURE_IDS_ARE_NOT_SUPPORTED_BY_NPM_RESOURCES =
             "Queries by measure ID: %s are not supported by NPM resources";
+
+    public static final String QUERIES_BY_MEASURE_IDENTIFIERS_ARE_NOT_SUPPORTED_BY_NPM_RESOURCES =
+        "Queries by measure identifiers: %s are not supported by NPM resources";
 
     private final IRepository repository;
     private final NpmPackageLoader npmPackageLoader;
@@ -136,29 +139,22 @@ public class R4RepositoryOrNpmResourceProvider {
 
     public MeasureOrNpmResourceHolder foldMeasure(Either3<CanonicalType, IdType, Measure> measureEither) {
         if (evaluationSettings.isUseNpmForQualifyingResources()) {
-            return foldMeasureForNpm(measureEither);
+            return foldMeasureEitherForNpm(measureEither);
         }
 
         return foldMeasureForRepository(measureEither);
     }
 
-    public MeasureOrNpmResourceHolder foldWithCustomIdTypeHandler(
-            Either3<CanonicalType, IdType, Measure> measureEither, Function<? super IdType, Measure> foldMiddle) {
+    @Nonnull
+    private MeasureOrNpmResourceHolder foldMeasureEitherForRepository(
+            Either3<IdType, String, CanonicalType> measureEither) {
 
-        if (evaluationSettings.isUseNpmForQualifyingResources()) {
-            return foldMeasureForNpm(measureEither);
-        }
+        var folded = measureEither.fold(
+            measureIdType -> resolveMeasureById(measureIdType, repository),
+            this::resolveByIdentifier,
+            measureUrl -> resolveByUrlFromRepository(measureUrl, repository));
 
-        return measureEither.fold(
-                measureUrl -> {
-                    throw new InvalidRequestException(
-                            "Queries by measure URL: %s are not supported by NPM resources".formatted(measureUrl));
-                },
-                foldMiddle.andThen(MeasureOrNpmResourceHolder::measureOnly),
-                measureInput -> {
-                    throw new InvalidRequestException(
-                            "Not sure how we got here, but we have a Measure: %s".formatted(measureInput));
-                });
+        return MeasureOrNpmResourceHolder.measureOnly(folded);
     }
 
     @Nonnull
@@ -200,16 +196,6 @@ public class R4RepositoryOrNpmResourceProvider {
         return measure;
     }
 
-    // LUKETODO:  do we still need this???
-    // Wrap in MeasureOrNpmResourceHolderList for convenience
-    public MeasureOrNpmResourceHolderList resolveByIdsToMeasuresOrNpms(List<? extends IIdType> ids) {
-        return MeasureOrNpmResourceHolderList.ofMeasures(resolveByIds(ids));
-    }
-
-    public List<Measure> resolveByIds(List<? extends IIdType> ids) {
-        return resolveMeasuresFromRepository(ids, repository);
-    }
-
     private static List<Measure> resolveMeasuresFromRepository(List<? extends IIdType> ids, IRepository repository) {
         var idStringArray = ids.stream().map(IPrimitiveType::getValueAsString).toArray(String[]::new);
         var searchParameters = Searches.byId(idStringArray);
@@ -226,22 +212,32 @@ public class R4RepositoryOrNpmResourceProvider {
             Either3<CanonicalType, IdType, Measure> measureEither, IRepository repository) {
 
         if (evaluationSettings.isUseNpmForQualifyingResources()) {
-            return foldMeasureForNpm(measureEither);
+            return foldMeasureEitherForNpm(measureEither);
         }
 
         return MeasureOrNpmResourceHolder.measureOnly(foldMeasureFromRepository(measureEither, repository));
     }
 
-    public MeasureOrNpmResourceHolderList foldMeasures(List<Either3<CanonicalType, IdType, Measure>> measureEithers) {
+    public MeasureOrNpmResourceHolderList foldMeasureEithers(List<Either3<IdType, String, CanonicalType>> measureEithers) {
         if (measureEithers == null || measureEithers.isEmpty()) {
             throw new InvalidRequestException("measure IDs or URLs parameter cannot be null or empty.");
         }
 
         return MeasureOrNpmResourceHolderList.of(
-                measureEithers.stream().map(this::foldMeasure).toList());
+                measureEithers.stream()
+                    .map(this::foldMeasureEither)
+                    .toList());
     }
 
-    public MeasureOrNpmResourceHolder foldMeasureForNpm(Either3<CanonicalType, IdType, Measure> measureEither) {
+    private MeasureOrNpmResourceHolder foldMeasureEither(Either3<IdType, String, CanonicalType> measureEither) {
+        if (evaluationSettings.isUseNpmForQualifyingResources()) {
+            return foldMeasureForNpm(measureEither);
+        }
+
+        return foldMeasureEitherForRepository(measureEither);
+    }
+
+    public MeasureOrNpmResourceHolder foldMeasureEitherForNpm(Either3<CanonicalType, IdType, Measure> measureEither) {
 
         return measureEither.fold(
                 measureUrl -> {
@@ -254,12 +250,33 @@ public class R4RepositoryOrNpmResourceProvider {
                 },
                 measureId -> {
                     throw new InvalidRequestException(
-                            QUERIES_BY_MEASURE_ID_S_ARE_NOT_SUPPORTED_BY_NPM_RESOURCES.formatted(measureId));
+                            QUERIES_BY_MEASURE_IDS_ARE_NOT_SUPPORTED_BY_NPM_RESOURCES.formatted(measureId));
                 },
                 measure -> {
                     throw new InvalidRequestException(
                             "Not sure how we got here, but we have a Measure: %s".formatted(measure));
                 });
+    }
+
+    private MeasureOrNpmResourceHolder foldMeasureForNpm(Either3<IdType, String, CanonicalType> measureEither) {
+
+        return measureEither.fold(
+            measureId -> {
+                throw new InvalidRequestException(
+                    QUERIES_BY_MEASURE_IDS_ARE_NOT_SUPPORTED_BY_NPM_RESOURCES.formatted(measureId));
+            },
+            measureIdentifier -> {
+                throw new InvalidRequestException(
+                    QUERIES_BY_MEASURE_IDENTIFIERS_ARE_NOT_SUPPORTED_BY_NPM_RESOURCES.formatted(measureIdentifier));
+            },
+            measureUrl -> {
+                var npmResourceHolder = npmPackageLoader.loadNpmResources(measureUrl);
+                if (npmResourceHolder == null || npmResourceHolder == NpmResourceHolder.EMPTY) {
+                    throw new InvalidRequestException(
+                        "No NPM resources found for Measure URL: %s".formatted(measureUrl.getValue()));
+                }
+                return MeasureOrNpmResourceHolder.npmOnly(npmResourceHolder);
+            });
     }
 
     public MeasureOrNpmResourceHolderList getMeasureOrNpmDetails(
@@ -341,7 +358,7 @@ public class R4RepositoryOrNpmResourceProvider {
 
     public Measure resolveMeasureById(IdType id) {
         if (evaluationSettings.isUseNpmForQualifyingResources()) {
-            throw new InvalidRequestException(QUERIES_BY_MEASURE_ID_S_ARE_NOT_SUPPORTED_BY_NPM_RESOURCES.formatted(id));
+            throw new InvalidRequestException(QUERIES_BY_MEASURE_IDS_ARE_NOT_SUPPORTED_BY_NPM_RESOURCES.formatted(id));
         }
 
         return this.repository.read(Measure.class, id);

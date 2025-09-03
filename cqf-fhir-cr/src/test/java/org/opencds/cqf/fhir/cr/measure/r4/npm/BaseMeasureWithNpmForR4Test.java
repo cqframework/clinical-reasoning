@@ -6,7 +6,6 @@ import java.time.Month;
 import java.time.ZoneOffset;
 import java.util.Date;
 
-// TODO: LD :  introduce an R5 version of this test once R5 services/etc become available
 public abstract class BaseMeasureWithNpmForR4Test {
 
     static final LocalDateTime LOCAL_DATE_TIME_2020_01_01 =

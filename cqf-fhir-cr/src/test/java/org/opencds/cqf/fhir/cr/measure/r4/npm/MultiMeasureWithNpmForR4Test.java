@@ -6,7 +6,7 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.r4.MultiMeasure;
 import org.opencds.cqf.fhir.cr.measure.r4.MultiMeasure.Given;
 
-// TODO: LD :  introduce an R5 version of this test once R5 services/etc become available
+@SuppressWarnings({"java:S2699"})
 class MultiMeasureWithNpmForR4Test extends BaseMeasureWithNpmForR4Test {
     private static final Given NPM_REPO_MULTI_MEASURE = MultiMeasure.given().repositoryPlusNpmFor("BasicNpmPackages");
 

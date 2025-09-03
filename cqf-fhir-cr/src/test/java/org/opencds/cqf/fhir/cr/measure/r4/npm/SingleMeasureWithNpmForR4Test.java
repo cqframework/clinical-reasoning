@@ -6,7 +6,6 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 
-// TODO: LD :  introduce an R5 version of this test once R5 services/etc become available
 @SuppressWarnings({"java:S2699"})
 class SingleMeasureWithNpmForR4Test extends BaseMeasureWithNpmForR4Test {
 

@@ -331,7 +331,6 @@ public class R4MeasureProcessor {
      * duplicate libraries on the stack that through good fortune before we didn't accidentally
      * evaluate twice.
      */
-    // LUKETODO:  test with NPM
     private void preLibraryEvaluationPeriodProcessing(
             List<VersionedIdentifier> libraryVersionedIdentifiers,
             MeasureOrNpmResourceHolderList measureOrNpmResourceHolderList,

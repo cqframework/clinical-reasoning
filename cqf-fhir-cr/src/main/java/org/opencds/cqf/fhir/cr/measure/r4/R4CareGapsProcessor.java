@@ -133,13 +133,9 @@ public class R4CareGapsProcessor implements R4CareGapsProcessorInterface {
     }
 
     @Override
-    public List<Measure> resolveMeasure(List<Either3<IdType, String, CanonicalType>> measure) {
-        return measure.stream()
-                .map(x -> x.fold(
-                        id -> repository.read(Measure.class, id),
-                        r4RepositoryOrNpmResourceProvider::resolveByIdentifier,
-                        canonical -> r4RepositoryOrNpmResourceProvider.resolveByUrl(canonical.asStringValue())))
-                .collect(Collectors.toList());
+    public List<Measure> resolveMeasure(List<Either3<IdType, String, CanonicalType>> measureEithers) {
+        return this.r4RepositoryOrNpmResourceProvider.foldMeasureEithers(measureEithers)
+            .getMeasures();
     }
 
     @Override

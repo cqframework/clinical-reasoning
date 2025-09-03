@@ -2,7 +2,7 @@ package org.opencds.cqf.fhir.cr.hapi.common;
 
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.opencds.cqf.fhir.cr.hapi.common.EndpointHelper.getEndpoint;
+import static org.opencds.cqf.fhir.utility.EndpointHelper.getEndpoint;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.Date;

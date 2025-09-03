@@ -1,7 +1,7 @@
 package org.opencds.cqf.fhir.cr.hapi.r4.library;
 
 import static org.opencds.cqf.fhir.cr.hapi.common.CanonicalHelper.getCanonicalType;
-import static org.opencds.cqf.fhir.cr.hapi.common.EndpointHelper.getEndpoint;
+import static org.opencds.cqf.fhir.utility.EndpointHelper.getEndpoint;
 import static org.opencds.cqf.fhir.cr.hapi.common.IdHelper.getIdType;
 import static org.opencds.cqf.fhir.utility.PackageHelper.packageParameters;
 

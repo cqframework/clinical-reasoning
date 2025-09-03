@@ -14,5 +14,5 @@ import org.opencds.cqf.fhir.cr.measure.r4.R4MultiMeasureService;
 
 @FunctionalInterface
 public interface R4MultiMeasureServiceFactory {
-    R4MultiMeasureService create(RequestDetails theRequestDetails);
+    R4MultiMeasureService create(RequestDetails requestDetails);
 }

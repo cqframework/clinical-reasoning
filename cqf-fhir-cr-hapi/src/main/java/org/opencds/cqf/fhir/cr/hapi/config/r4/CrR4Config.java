@@ -281,4 +281,26 @@ public class CrR4Config {
                 NpmConfigDependencySubstitutor.substituteNpmPackageLoaderIfEmpty(optPackageLoader),
                 evaluationSettings);
     }
+
+    @Bean
+    R4MultiMeasureServiceFactory r4MultiMeasureServiceFactory(
+            IRepositoryFactory repositoryFactory,
+            Optional<NpmPackageLoader> optNpmPackageLoader,
+            MeasureEvaluationOptions evaluationOptions,
+            MeasurePeriodValidator measurePeriodValidator,
+            R4RepositoryOrNpmResourceProviderFactory r4RepositoryOrNpmResourceProviderFactory) {
+        return requestDetails -> {
+            var repository = repositoryFactory.create(requestDetails);
+            return new R4MultiMeasureService(
+                    repository,
+                    new EngineInitializationContext(
+                            repository,
+                            NpmConfigDependencySubstitutor.substituteNpmPackageLoaderIfEmpty(optNpmPackageLoader),
+                            evaluationOptions.getEvaluationSettings()),
+                    evaluationOptions,
+                    requestDetails.getFhirServerBase(),
+                    measurePeriodValidator,
+                    r4RepositoryOrNpmResourceProviderFactory.create(requestDetails));
+        };
+    }
 }

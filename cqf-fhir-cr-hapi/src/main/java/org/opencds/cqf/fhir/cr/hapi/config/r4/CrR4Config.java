@@ -29,6 +29,7 @@ import org.opencds.cqf.fhir.cr.hapi.r4.ISubmitDataProcessorFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureEvaluatorMultipleFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureEvaluatorSingleFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureServiceUtilsFactory;
+import org.opencds.cqf.fhir.cr.hapi.r4.R4RepositoryOrNpmResourceProviderFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.cpg.CqlExecutionOperationProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.crmi.ApproveProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.crmi.DraftProvider;
@@ -47,6 +48,7 @@ import org.opencds.cqf.fhir.cr.measure.r4.R4DataRequirementsService;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureService;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MultiMeasureService;
 import org.opencds.cqf.fhir.cr.measure.r4.R4SubmitDataService;
+import org.opencds.cqf.fhir.cr.measure.r4.npm.R4RepositoryOrNpmResourceProvider;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.npm.NpmConfigDependencySubstitutor;
 import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
@@ -64,7 +66,8 @@ public class CrR4Config {
             IRepositoryFactory repositoryFactory,
             Optional<NpmPackageLoader> optNpmPackageLoader,
             MeasureEvaluationOptions evaluationOptions,
-            MeasurePeriodValidator measurePeriodValidator) {
+            MeasurePeriodValidator measurePeriodValidator,
+            R4RepositoryOrNpmResourceProviderFactory r4RepositoryOrNpmResourceProviderFactory) {
         return requestDetails -> {
             var repository = repositoryFactory.create(requestDetails);
             return new R4MeasureService(
@@ -74,7 +77,8 @@ public class CrR4Config {
                             NpmConfigDependencySubstitutor.substituteNpmPackageLoaderIfEmpty(optNpmPackageLoader),
                             evaluationOptions.getEvaluationSettings()),
                     evaluationOptions,
-                    measurePeriodValidator);
+                    measurePeriodValidator,
+                    r4RepositoryOrNpmResourceProviderFactory.create(requestDetails));
         };
     }
 
@@ -83,7 +87,8 @@ public class CrR4Config {
             IRepositoryFactory repositoryFactory,
             Optional<NpmPackageLoader> optNpmPackageLoader,
             MeasureEvaluationOptions evaluationOptions,
-            MeasurePeriodValidator measurePeriodValidator) {
+            MeasurePeriodValidator measurePeriodValidator,
+            R4RepositoryOrNpmResourceProviderFactory r4RepositoryOrNpmResourceProviderFactory) {
         return requestDetails -> {
             var repository = repositoryFactory.create(requestDetails);
             return new R4MultiMeasureService(
@@ -94,7 +99,8 @@ public class CrR4Config {
                             evaluationOptions.getEvaluationSettings()),
                     evaluationOptions,
                     requestDetails.getFhirServerBase(),
-                    measurePeriodValidator);
+                    measurePeriodValidator,
+                    r4RepositoryOrNpmResourceProviderFactory.create(requestDetails));
         };
     }
 
@@ -143,7 +149,7 @@ public class CrR4Config {
             IRepositoryFactory repositoryFactory,
             Optional<NpmPackageLoader> optNpmPackageLoader,
             MeasureEvaluationOptions measureEvaluationOptions,
-            R4MeasureServiceUtilsFactory r4MeasureServiceUtilsFactory) {
+            R4RepositoryOrNpmResourceProviderFactory r4RepositoryOrNpmResourceProviderFactory) {
         return requestDetails -> {
             var repository = repositoryFactory.create(requestDetails);
             return new R4CollectDataService(
@@ -152,7 +158,8 @@ public class CrR4Config {
                             repository,
                             NpmConfigDependencySubstitutor.substituteNpmPackageLoaderIfEmpty(optNpmPackageLoader),
                             measureEvaluationOptions.getEvaluationSettings()),
-                    measureEvaluationOptions);
+                    measureEvaluationOptions,
+                    r4RepositoryOrNpmResourceProviderFactory.create(requestDetails));
         };
     }
 
@@ -173,8 +180,10 @@ public class CrR4Config {
             IRepositoryFactory repositoryFactory,
             Optional<NpmPackageLoader> optNpmPackageLoader,
             CareGapsProperties careGapsProperties,
+            R4MeasureServiceUtilsFactory r4MeasureServiceUtilsFactory,
             MeasureEvaluationOptions measureEvaluationOptions,
-            MeasurePeriodValidator measurePeriodValidator) {
+            MeasurePeriodValidator measurePeriodValidator,
+            R4RepositoryOrNpmResourceProviderFactory r4repositoryOrNpmResourceProviderFactory) {
         return requestDetails -> {
             var repository = repositoryFactory.create(requestDetails);
             return new R4CareGapsService(
@@ -184,9 +193,11 @@ public class CrR4Config {
                             repository,
                             NpmConfigDependencySubstitutor.substituteNpmPackageLoaderIfEmpty(optNpmPackageLoader),
                             measureEvaluationOptions.getEvaluationSettings()),
+                    r4MeasureServiceUtilsFactory.create(requestDetails),
                     measureEvaluationOptions,
                     requestDetails.getFhirServerBase(),
-                    measurePeriodValidator);
+                    measurePeriodValidator,
+                    r4repositoryOrNpmResourceProviderFactory.create(requestDetails));
         };
     }
 
@@ -260,5 +271,16 @@ public class CrR4Config {
                                 ReleaseProvider.class)));
 
         return new ProviderLoader(restfulServer, applicationContext, selector);
+    }
+
+    @Bean
+    public R4RepositoryOrNpmResourceProviderFactory r4FhirOrNpmResourceProviderFactory(
+            IRepositoryFactory repositoryFactory,
+            Optional<NpmPackageLoader> optPackageLoader,
+            EvaluationSettings evaluationSettings) {
+        return requestDetails -> new R4RepositoryOrNpmResourceProvider(
+                repositoryFactory.create(requestDetails),
+                NpmConfigDependencySubstitutor.substituteNpmPackageLoaderIfEmpty(optPackageLoader),
+                evaluationSettings);
     }
 }

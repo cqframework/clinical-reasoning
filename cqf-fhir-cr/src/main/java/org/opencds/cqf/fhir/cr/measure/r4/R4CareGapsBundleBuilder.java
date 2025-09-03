@@ -48,6 +48,7 @@ import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.enumeration.CareGapsStatusCode;
+import org.opencds.cqf.fhir.cr.measure.r4.npm.R4RepositoryOrNpmResourceProvider;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.Resources;
@@ -75,6 +76,7 @@ public class R4CareGapsBundleBuilder {
     private final String serverBase;
     private final R4MeasureServiceUtils r4MeasureServiceUtils;
     private final R4MultiMeasureService r4MultiMeasureService;
+    private final R4RepositoryOrNpmResourceProvider r4RepositoryOrNpmResourceProvider;
 
     public R4CareGapsBundleBuilder(
             CareGapsProperties careGapsProperties,
@@ -83,15 +85,22 @@ public class R4CareGapsBundleBuilder {
             MeasureEvaluationOptions measureEvaluationOptions,
             String serverBase,
             Map<String, Resource> configuredResources,
-            MeasurePeriodValidator measurePeriodValidator) {
+            MeasurePeriodValidator measurePeriodValidator,
+            R4RepositoryOrNpmResourceProvider r4RepositoryOrNpmResourceProvider) {
         this.repository = repository;
         this.careGapsProperties = careGapsProperties;
         this.serverBase = serverBase;
         this.configuredResources = configuredResources;
+        this.r4RepositoryOrNpmResourceProvider = r4RepositoryOrNpmResourceProvider;
 
         r4MeasureServiceUtils = new R4MeasureServiceUtils(repository);
         r4MultiMeasureService = new R4MultiMeasureService(
-                repository, engineInitializationContext, measureEvaluationOptions, serverBase, measurePeriodValidator);
+                repository,
+                engineInitializationContext,
+                measureEvaluationOptions,
+                serverBase,
+                measurePeriodValidator,
+                this.r4RepositoryOrNpmResourceProvider);
     }
 
     public List<Parameters.ParametersParameterComponent> makePatientBundles(
@@ -152,7 +161,7 @@ public class R4CareGapsBundleBuilder {
             MeasureReport mr = (MeasureReport) entry.getResource();
             addProfile(mr);
             addResourceId(mr);
-            Measure measure = r4MeasureServiceUtils.resolveByUrl(mr.getMeasure());
+            Measure measure = r4RepositoryOrNpmResourceProvider.resolveByUrl(mr.getMeasure());
             // Applicable Reports per Gap-Status
             var gapStatus = gapEvaluator.getGroupGapStatus(measure, mr);
             var filteredGapStatus = filteredGapStatus(gapStatus, statuses);

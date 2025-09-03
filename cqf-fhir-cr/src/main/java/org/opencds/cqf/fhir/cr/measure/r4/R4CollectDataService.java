@@ -22,7 +22,7 @@ import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.CompositeEvaluationResultsPerMeasure;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorUtils;
-import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
+import org.opencds.cqf.fhir.cr.measure.r4.npm.R4RepositoryOrNpmResourceProvider;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 
@@ -33,15 +33,18 @@ public class R4CollectDataService {
     private final MeasureEvaluationOptions measureEvaluationOptions;
     private final R4RepositorySubjectProvider subjectProvider;
     private final MeasureProcessorUtils measureProcessorUtils = new MeasureProcessorUtils();
+    private final R4RepositoryOrNpmResourceProvider r4RepositoryOrNpmResourceProvider;
 
     public R4CollectDataService(
             IRepository repository,
             EngineInitializationContext engineInitializationContext,
-            MeasureEvaluationOptions measureEvaluationOptions) {
+            MeasureEvaluationOptions measureEvaluationOptions,
+            R4RepositoryOrNpmResourceProvider r4RepositoryOrNpmResourceProvider) {
         this.repository = repository;
         this.engineInitializationContext = engineInitializationContext;
         this.measureEvaluationOptions = measureEvaluationOptions;
         this.subjectProvider = new R4RepositorySubjectProvider(measureEvaluationOptions.getSubjectProviderOptions());
+        this.r4RepositoryOrNpmResourceProvider = r4RepositoryOrNpmResourceProvider;
     }
 
     /**
@@ -76,13 +79,14 @@ public class R4CollectDataService {
                 this.repository,
                 this.engineInitializationContext,
                 this.measureEvaluationOptions,
-                this.measureProcessorUtils);
+                this.measureProcessorUtils,
+                this.r4RepositoryOrNpmResourceProvider);
 
         List<String> subjectList = getSubjects(subject, practitioner, subjectProvider);
 
         var context = Engines.forContext(engineInitializationContext);
 
-        var foldedMeasure = R4MeasureServiceUtils.foldMeasure(Eithers.forMiddle3(measureId), repository);
+        var foldedMeasure = r4RepositoryOrNpmResourceProvider.foldMeasure(Eithers.forMiddle3(measureId));
 
         if (!subjectList.isEmpty()) {
             for (String patient : subjectList) {

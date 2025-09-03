@@ -12,6 +12,7 @@ import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.repository.IRepository;
+import jakarta.annotation.Nonnull;
 import java.nio.file.Path;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -42,6 +43,8 @@ import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_
 import org.opencds.cqf.fhir.cr.measure.CareGapsProperties;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
+import org.opencds.cqf.fhir.cr.measure.r4.npm.R4RepositoryOrNpmResourceProvider;
+import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
@@ -93,6 +96,7 @@ public class CareGaps {
 
     public static class Given {
         private IRepository repository;
+        private NpmPackageLoader npmPackageLoader = NpmPackageLoader.DEFAULT;
         private EngineInitializationContext engineInitializationContext;
         private MeasureEvaluationOptions evaluationOptions;
         private CareGapsProperties careGapsProperties;
@@ -129,6 +133,8 @@ public class CareGaps {
             this.repository = new IgRepository(
                     FhirContext.forR4Cached(),
                     Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
+            // We're explicitly NOT using NPM here
+            this.npmPackageLoader = NpmPackageLoader.DEFAULT;
             this.engineInitializationContext = new EngineInitializationContext(
                     this.repository,
                     NpmPackageLoader.DEFAULT,
@@ -136,6 +142,22 @@ public class CareGaps {
                             .map(MeasureEvaluationOptions::getEvaluationSettings)
                             .orElse(EvaluationSettings.getDefault()));
             return this;
+        }
+
+        // LUKETODO:  we may need to test this for test coverage numbers
+        // Use this if you wish to do anything with NPM
+        public Given repositoryPlusNpmFor(String repositoryPath) {
+            var igRepository = new IgRepository(
+                    FhirContext.forR4Cached(),
+                    Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
+            this.repository = igRepository;
+            this.npmPackageLoader = igRepository.getNpmPackageLoader();
+            mutateEvaluationOptionsToEnableNpm();
+            return this;
+        }
+
+        private void mutateEvaluationOptionsToEnableNpm() {
+            this.evaluationOptions.getEvaluationSettings().setUseNpmForQualifyingResources(true);
         }
 
         public CareGaps.Given evaluationOptions(MeasureEvaluationOptions evaluationOptions) {
@@ -153,9 +175,17 @@ public class CareGaps {
                     careGapsProperties,
                     repository,
                     engineInitializationContext,
+                    new R4MeasureServiceUtils(repository),
                     evaluationOptions,
                     serverBase,
-                    measurePeriodEvaluator);
+                    measurePeriodEvaluator,
+                    getR4RepositoryOrNpmResourceProvider());
+        }
+
+        @Nonnull
+        private R4RepositoryOrNpmResourceProvider getR4RepositoryOrNpmResourceProvider() {
+            return new R4RepositoryOrNpmResourceProvider(
+                    repository, npmPackageLoader, evaluationOptions.getEvaluationSettings());
         }
 
         public When when() {

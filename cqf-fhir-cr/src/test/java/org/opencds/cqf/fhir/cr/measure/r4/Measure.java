@@ -17,6 +17,7 @@ import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.repository.IRepository;
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import java.nio.file.Path;
 import java.time.LocalDate;
@@ -32,7 +33,6 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -63,6 +63,7 @@ import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.SelectedGroup.SelectedReference;
+import org.opencds.cqf.fhir.cr.measure.r4.npm.R4RepositoryOrNpmResourceProvider;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.r4.ContainedHelper;
@@ -75,7 +76,7 @@ public class Measure {
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     @FunctionalInterface
-    interface Validator<T> {
+    public interface Validator<T> {
         void validate(T value);
     }
 
@@ -125,6 +126,7 @@ public class Measure {
         private EngineInitializationContext engineInitializationContext;
         private MeasureEvaluationOptions evaluationOptions;
         private final MeasurePeriodValidator measurePeriodValidator;
+        private NpmPackageLoader npmPackageLoader;
 
         public Given(@Nullable Boolean applyScoringSetMembership) {
             this.evaluationOptions = MeasureEvaluationOptions.defaultOptions();
@@ -156,13 +158,31 @@ public class Measure {
             return this;
         }
 
+        // Use this if you wish to have nothing to do with NPM
         public Given repositoryFor(String repositoryPath) {
             this.repository = new IgRepository(
                     FhirContext.forR4Cached(),
                     Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
+            // We're explicitly NOT using NPM here
+            this.npmPackageLoader = NpmPackageLoader.DEFAULT;
             this.engineInitializationContext = getEngineInitializationContext();
 
             return this;
+        }
+
+        // Use this if you wish to do anything with NPM
+        public Given repositoryPlusNpmFor(String repositoryPath) {
+            var igRepository = new IgRepository(
+                    FhirContext.forR4Cached(),
+                    Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
+            this.repository = igRepository;
+            this.npmPackageLoader = igRepository.getNpmPackageLoader();
+            mutateEvaluationSettingsToEnableNpm();
+            return this;
+        }
+
+        private void mutateEvaluationSettingsToEnableNpm() {
+            this.evaluationOptions.getEvaluationSettings().setUseNpmForQualifyingResources(true);
         }
 
         public Given evaluationOptions(MeasureEvaluationOptions evaluationOptions) {
@@ -172,7 +192,11 @@ public class Measure {
 
         private R4MeasureService buildMeasureService() {
             return new R4MeasureService(
-                    repository, engineInitializationContext, evaluationOptions, measurePeriodValidator);
+                    repository,
+                    engineInitializationContext,
+                    evaluationOptions,
+                    measurePeriodValidator,
+                    getR4RepositoryOrNpmResourceProvider());
         }
 
         public When when() {
@@ -187,6 +211,12 @@ public class Measure {
                     Optional.ofNullable(evaluationOptions)
                             .map(MeasureEvaluationOptions::getEvaluationSettings)
                             .orElse(EvaluationSettings.getDefault()));
+        }
+
+        @Nonnull
+        private R4RepositoryOrNpmResourceProvider getR4RepositoryOrNpmResourceProvider() {
+            return new R4RepositoryOrNpmResourceProvider(
+                    repository, npmPackageLoader, evaluationOptions.getEvaluationSettings());
         }
     }
 

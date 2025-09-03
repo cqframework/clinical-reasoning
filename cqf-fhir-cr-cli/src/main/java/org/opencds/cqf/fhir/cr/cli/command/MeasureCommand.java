@@ -29,6 +29,7 @@ import org.opencds.cqf.fhir.cr.cli.command.CqlCommand.SubjectAndResult;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorUtils;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureProcessor;
+import org.opencds.cqf.fhir.cr.measure.r4.npm.R4RepositoryOrNpmResourceProvider;
 import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Command;
@@ -90,9 +91,11 @@ public class MeasureCommand implements Callable<Integer> {
         var fhirContext = FhirContext.forCached(FhirVersionEnum.valueOf(cqlArgs.fhir.fhirVersion));
         var parser = fhirContext.newJsonParser();
         var resource = getMeasure(parser, args.measurePath, args.measureName);
+        var npmPackageLoader = NpmPackageLoader.DEFAULT;
         var processor = getR4MeasureProcessor(
                 Utilities.createEvaluationSettings(cqlArgs.content.cqlPath, cqlArgs.hedisCompatibilityMode),
-                Utilities.createRepository(fhirContext, cqlArgs.fhir.terminologyUrl, cqlArgs.fhir.dataUrl));
+                Utilities.createRepository(fhirContext, cqlArgs.fhir.terminologyUrl, cqlArgs.fhir.dataUrl),
+                npmPackageLoader);
 
         var start = args.periodStart != null
                 ? LocalDate.parse(args.periodStart, DateTimeFormatter.ISO_LOCAL_DATE)
@@ -133,7 +136,7 @@ public class MeasureCommand implements Callable<Integer> {
 
     @Nonnull
     private static R4MeasureProcessor getR4MeasureProcessor(
-            EvaluationSettings evaluationSettings, IRepository repository) {
+            EvaluationSettings evaluationSettings, IRepository repository, NpmPackageLoader npmPackageLoader) {
 
         MeasureEvaluationOptions evaluationOptions = new MeasureEvaluationOptions();
         evaluationOptions.setApplyScoringSetMembership(false);
@@ -143,7 +146,13 @@ public class MeasureCommand implements Callable<Integer> {
                 repository,
                 new EngineInitializationContext(repository, NpmPackageLoader.DEFAULT, evaluationSettings),
                 evaluationOptions,
-                new MeasureProcessorUtils());
+                new MeasureProcessorUtils(),
+                getR4RepositoryOrNpmResourceProvider(repository, npmPackageLoader, evaluationSettings));
+    }
+
+    private static R4RepositoryOrNpmResourceProvider getR4RepositoryOrNpmResourceProvider(
+            IRepository repository, NpmPackageLoader npmPackageLoader, EvaluationSettings evaluationSettings) {
+        return new R4RepositoryOrNpmResourceProvider(repository, npmPackageLoader, evaluationSettings);
     }
 
     private void writeJsonToFile(String json, String patientId, Path path) {

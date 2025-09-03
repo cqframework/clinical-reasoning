@@ -17,6 +17,8 @@ import org.opencds.cqf.fhir.cql.Engines.EngineInitializationContext;
 import org.opencds.cqf.fhir.cr.measure.CareGapsProperties;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
+import org.opencds.cqf.fhir.cr.measure.r4.npm.R4RepositoryOrNpmResourceProvider;
+import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.monad.Either3;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 
@@ -30,17 +32,21 @@ public class R4CareGapsService implements R4CareGapsServiceInterface {
             CareGapsProperties careGapsProperties,
             IRepository repository,
             EngineInitializationContext engineInitializationContext,
+            R4MeasureServiceUtils r4MeasureServiceUtils,
             MeasureEvaluationOptions measureEvaluationOptions,
             String serverBase,
-            MeasurePeriodValidator measurePeriodEvalutator) {
+            MeasurePeriodValidator measurePeriodEvaluator,
+            R4RepositoryOrNpmResourceProvider r4RepositoryOrNpmResourceProvider) {
 
         r4CareGapsProcessor = new R4CareGapsProcessor(
                 careGapsProperties,
                 repository,
                 engineInitializationContext,
+                r4MeasureServiceUtils,
                 measureEvaluationOptions,
                 serverBase,
-                measurePeriodEvalutator);
+                measurePeriodEvaluator,
+                r4RepositoryOrNpmResourceProvider);
     }
 
     /**

@@ -9,6 +9,7 @@ import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.repository.IRepository;
+import jakarta.annotation.Nonnull;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -47,6 +48,8 @@ import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
+import org.opencds.cqf.fhir.cr.measure.r4.npm.R4RepositoryOrNpmResourceProvider;
+import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
@@ -101,7 +104,9 @@ class MultiMeasure {
         private EngineInitializationContext engineInitializationContext;
         private MeasureEvaluationOptions evaluationOptions;
         private String serverBase;
-        private MeasurePeriodValidator measurePeriodValidator;
+        private final MeasurePeriodValidator measurePeriodValidator;
+        private R4MeasureServiceUtils r4MeasureServiceUtils;
+        private NpmPackageLoader npmPackageLoader;
 
         public Given() {
             this.evaluationOptions = MeasureEvaluationOptions.defaultOptions();
@@ -126,17 +131,35 @@ class MultiMeasure {
             return this;
         }
 
-        public MultiMeasure.Given repositoryFor(String repositoryPath) {
+        // Use this if you wish to have nothing to do with NPM
+        public Given repositoryFor(String repositoryPath) {
             this.repository = new IgRepository(
                     FhirContext.forR4Cached(),
                     Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
+            // We're explicitly NOT using NPM here
+            this.npmPackageLoader = NpmPackageLoader.DEFAULT;
             this.engineInitializationContext = new EngineInitializationContext(
                     this.repository,
-                    NpmPackageLoader.DEFAULT,
+                    npmPackageLoader,
                     Optional.ofNullable(this.evaluationOptions)
                             .map(MeasureEvaluationOptions::getEvaluationSettings)
                             .orElse(EvaluationSettings.getDefault()));
             return this;
+        }
+
+        // Use this if you wish to do anything with NPM
+        public Given repositoryPlusNpmFor(String repositoryPath) {
+            var igRepository = new IgRepository(
+                    FhirContext.forR4Cached(),
+                    Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
+            this.repository = igRepository;
+            this.npmPackageLoader = igRepository.getNpmPackageLoader();
+            mutateEvaluationOptionsToEnableNpm();
+            return this;
+        }
+
+        private void mutateEvaluationOptionsToEnableNpm() {
+            this.evaluationOptions.getEvaluationSettings().setUseNpmForQualifyingResources(true);
         }
 
         public MultiMeasure.Given evaluationOptions(MeasureEvaluationOptions evaluationOptions) {
@@ -169,7 +192,18 @@ class MultiMeasure {
 
         private R4MultiMeasureService buildMeasureService() {
             return new R4MultiMeasureService(
-                    repository, engineInitializationContext, evaluationOptions, serverBase, measurePeriodValidator);
+                    repository,
+                    engineInitializationContext,
+                    evaluationOptions,
+                    serverBase,
+                    measurePeriodValidator,
+                    getR4RepositoryOrNpmResourceProvider());
+        }
+
+        @Nonnull
+        private R4RepositoryOrNpmResourceProvider getR4RepositoryOrNpmResourceProvider() {
+            return new R4RepositoryOrNpmResourceProvider(
+                    repository, npmPackageLoader, evaluationOptions.getEvaluationSettings());
         }
 
         public MultiMeasure.When when() {
@@ -604,6 +638,11 @@ class MultiMeasure {
                                 .formatted(p));
             }
 
+            return this;
+        }
+
+        public SelectedReference<P> hasEvaluatedResourceReferenceCount(int count) {
+            assertEquals(count, this.value().getExtension().size());
             return this;
         }
     }

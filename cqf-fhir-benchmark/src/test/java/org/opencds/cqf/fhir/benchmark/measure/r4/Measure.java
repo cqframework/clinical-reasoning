@@ -20,7 +20,7 @@ import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureService;
-import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
+import org.opencds.cqf.fhir.cr.measure.r4.npm.R4RepositoryOrNpmResourceProvider;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
@@ -54,7 +54,7 @@ public class Measure {
         private EngineInitializationContext engineInitializationContext;
         private MeasureEvaluationOptions evaluationOptions;
         private final MeasurePeriodValidator measurePeriodValidator;
-        private final R4MeasureServiceUtils measureServiceUtils;
+        private final R4RepositoryOrNpmResourceProvider r4RepositoryOrNpmResourceProvider;
 
         public Given() {
             this.evaluationOptions = MeasureEvaluationOptions.defaultOptions();
@@ -71,7 +71,9 @@ public class Measure {
 
             this.measurePeriodValidator = new MeasurePeriodValidator();
 
-            this.measureServiceUtils = new R4MeasureServiceUtils(repository);
+            var npmPackageLoader = NpmPackageLoader.DEFAULT;
+            this.r4RepositoryOrNpmResourceProvider = new R4RepositoryOrNpmResourceProvider(
+                    repository, npmPackageLoader, evaluationOptions.getEvaluationSettings());
         }
 
         public Given repositoryFor(String repositoryPath) {
@@ -89,7 +91,11 @@ public class Measure {
 
         private R4MeasureService buildMeasureService() {
             return new R4MeasureService(
-                    repository, engineInitializationContext, evaluationOptions, measurePeriodValidator);
+                    repository,
+                    engineInitializationContext,
+                    evaluationOptions,
+                    measurePeriodValidator,
+                    r4RepositoryOrNpmResourceProvider);
         }
 
         public When when() {

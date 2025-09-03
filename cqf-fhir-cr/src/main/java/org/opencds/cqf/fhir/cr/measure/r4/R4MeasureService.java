@@ -19,6 +19,7 @@ import org.opencds.cqf.fhir.cql.Engines.EngineInitializationContext;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorUtils;
+import org.opencds.cqf.fhir.cr.measure.r4.npm.R4RepositoryOrNpmResourceProvider;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.monad.Either3;
 import org.opencds.cqf.fhir.utility.repository.FederatedRepository;
@@ -32,17 +33,20 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
     private final MeasurePeriodValidator measurePeriodValidator;
     private final R4RepositorySubjectProvider subjectProvider;
     private final MeasureProcessorUtils measureProcessorUtils = new MeasureProcessorUtils();
+    private final R4RepositoryOrNpmResourceProvider r4RepositoryOrNpmResourceProvider;
 
     public R4MeasureService(
             IRepository repository,
             EngineInitializationContext engineInitializationContext,
             MeasureEvaluationOptions measureEvaluationOptions,
-            MeasurePeriodValidator measurePeriodValidator) {
+            MeasurePeriodValidator measurePeriodValidator,
+            R4RepositoryOrNpmResourceProvider r4RepositoryOrNpmResourceProvider) {
         this.repository = repository;
         this.engineInitializationContext = engineInitializationContext;
         this.measureEvaluationOptions = measureEvaluationOptions;
         this.measurePeriodValidator = measurePeriodValidator;
         this.subjectProvider = new R4RepositorySubjectProvider(measureEvaluationOptions.getSubjectProviderOptions());
+        this.r4RepositoryOrNpmResourceProvider = r4RepositoryOrNpmResourceProvider;
     }
 
     @Override
@@ -69,7 +73,8 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
                 proxyRepoForMeasureProcessor,
                 this.engineInitializationContext,
                 this.measureEvaluationOptions,
-                measureProcessorUtils);
+                this.measureProcessorUtils,
+                this.r4RepositoryOrNpmResourceProvider);
 
         R4MeasureServiceUtils r4MeasureServiceUtils = new R4MeasureServiceUtils(repository);
         r4MeasureServiceUtils.ensureSupplementalDataElementSearchParameter();
@@ -88,16 +93,26 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
 
         var subjects = getSubjects(subjectId, proxyRepoForMeasureProcessor, additionalData);
 
+        var measurePlusNpmResourceHolder =
+                r4RepositoryOrNpmResourceProvider.foldMeasure(measure, proxyRepoForMeasureProcessor);
+
         // Replicate the old logic of using the repository used to initialize the measure processor
         // as the repository for the CQL engine context.
         var context = Engines.forContext(
                 engineInitializationContext.modifiedCopyWith(proxyRepoForMeasureProcessor), additionalData);
 
-        var evaluationResults =
-                processor.evaluateMeasureWithCqlEngine(subjects, measure, periodStart, periodEnd, parameters, context);
+        var evaluationResults = processor.evaluateMeasureWithCqlEngine(
+                subjects, measurePlusNpmResourceHolder, periodStart, periodEnd, parameters, context);
 
         measureReport = processor.evaluateMeasure(
-                measure, periodStart, periodEnd, reportType, subjects, evalType, context, evaluationResults);
+                measurePlusNpmResourceHolder,
+                periodStart,
+                periodEnd,
+                reportType,
+                subjects,
+                evalType,
+                context,
+                evaluationResults);
 
         // add ProductLine after report is generated
         measureReport = r4MeasureServiceUtils.addProductLineExtension(measureReport, productLine);

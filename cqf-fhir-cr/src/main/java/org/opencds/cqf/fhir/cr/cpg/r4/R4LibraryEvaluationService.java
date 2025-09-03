@@ -57,7 +57,7 @@ public class R4LibraryEvaluationService {
         final EngineInitializationContext engineInitializationContextToUse;
         if (contentEndpoint != null) {
             repositoryToUse = Repositories.proxy(repository, true, dataEndpoint, contentEndpoint, terminologyEndpoint);
-            engineInitializationContextToUse = engineInitializationContext.modifiedCopyWith(repositoryToUse);
+            engineInitializationContextToUse = engineInitializationContext.withRepository(repositoryToUse);
         } else {
             repositoryToUse = repository;
             engineInitializationContextToUse = engineInitializationContext;

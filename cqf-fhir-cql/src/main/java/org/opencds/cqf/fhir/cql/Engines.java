@@ -125,8 +125,8 @@ public class Engines {
         // list, and b) there are packages with different package ids but the same base canonical (e.g.
         // fhir.r4.examples has the same base canonical as fhir.r4)
         // NOTE: Using ensureNamespaceRegistered works around a but not b
-        Set<String> keys = new HashSet<String>();
-        Set<String> uris = new HashSet<String>();
+        Set<String> keys = new HashSet<>();
+        Set<String> uris = new HashSet<>();
         for (var n : npmProcessor.getNamespaces()) {
             if (!keys.contains(n.getName()) && !uris.contains(n.getUri())) {
                 libraryManager.getNamespaceManager().addNamespace(n);
@@ -210,12 +210,16 @@ public class Engines {
 
         // For when a request builds a proxy or federated repository and needs to pass that to the
         // Engine
-        public EngineInitializationContext modifiedCopyWith(IRepository repository) {
+        public EngineInitializationContext withRepository(IRepository repository) {
+            return new EngineInitializationContext(repository, npmPackageLoader, evaluationSettings);
+        }
+
+        public EngineInitializationContext withNpmPackageLoader(NpmPackageLoader npmPackageLoader) {
             return new EngineInitializationContext(repository, npmPackageLoader, evaluationSettings);
         }
 
         // For when a request evaluates evaluation settings
-        EngineInitializationContext modifiedCopyWith(EvaluationSettings evaluationSettings) {
+        EngineInitializationContext withEvaluationSettings(EvaluationSettings evaluationSettings) {
             return new EngineInitializationContext(repository, npmPackageLoader, evaluationSettings);
         }
     }

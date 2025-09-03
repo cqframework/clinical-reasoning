@@ -54,7 +54,7 @@ import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 @SuppressWarnings("squid:S1135")
-class MultiMeasure {
+public class MultiMeasure {
     public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/measure/r4";
 
     @FunctionalInterface
@@ -138,12 +138,7 @@ class MultiMeasure {
                     Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
             // We're explicitly NOT using NPM here
             this.npmPackageLoader = NpmPackageLoader.DEFAULT;
-            this.engineInitializationContext = new EngineInitializationContext(
-                    this.repository,
-                    npmPackageLoader,
-                    Optional.ofNullable(this.evaluationOptions)
-                            .map(MeasureEvaluationOptions::getEvaluationSettings)
-                            .orElse(EvaluationSettings.getDefault()));
+            this.engineInitializationContext = buildEngineInitializationContext();
             return this;
         }
 
@@ -154,6 +149,7 @@ class MultiMeasure {
                     Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
             this.repository = igRepository;
             this.npmPackageLoader = igRepository.getNpmPackageLoader();
+            this.engineInitializationContext = buildEngineInitializationContext();
             mutateEvaluationOptionsToEnableNpm();
             return this;
         }
@@ -180,6 +176,16 @@ class MultiMeasure {
                         "Repository has not been set. Use 'repository' or 'repositoryFor' to set it.");
             }
             return this.repository;
+        }
+
+        @Nonnull
+        private EngineInitializationContext buildEngineInitializationContext() {
+            return new EngineInitializationContext(
+                    this.repository,
+                    npmPackageLoader,
+                    Optional.ofNullable(this.evaluationOptions)
+                            .map(MeasureEvaluationOptions::getEvaluationSettings)
+                            .orElse(EvaluationSettings.getDefault()));
         }
 
         public EngineInitializationContext getEngineInitializationContext() {

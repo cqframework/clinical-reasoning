@@ -4,6 +4,7 @@ import static org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils.get
 
 import ca.uhn.fhir.repository.IRepository;
 import com.google.common.base.Strings;
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import java.time.ZonedDateTime;
 import java.util.Collections;
@@ -132,7 +133,11 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
                 .withType(BundleType.SEARCHSET.toString())
                 .build();
 
-        var context = Engines.forContext(engineInitializationContext, additionalData);
+        // Replicate the old logic of using the repository used to initialize the measure processor
+        // as the repository for the CQL engine context.
+        var context = Engines.forContext(
+                buildEvaluationContext(r4ProcessorToUse.getRepository(), measurePlusNpmResourceHolderList),
+                additionalData);
 
         // This is basically a Map of measure -> subject -> EvaluationResult
         var compositeEvaluationResultsPerMeasure = r4ProcessorToUse.evaluateMultiMeasuresPlusNpmHoldersWithCqlEngine(
@@ -298,6 +303,16 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
                         totalMeasures--);
             }
         }
+    }
+
+    @Nonnull
+    private EngineInitializationContext buildEvaluationContext(
+            IRepository proxyRepoForMeasureProcessor, MeasureOrNpmResourceHolderList measurePlusNpmResourceHolderList) {
+
+        return engineInitializationContext
+                .withRepository(proxyRepoForMeasureProcessor)
+                .withNpmPackageLoader(
+                        r4RepositoryOrNpmResourceProvider.npmPackageLoaderWithCache(measurePlusNpmResourceHolderList));
     }
 
     protected List<String> getSubjects(R4RepositorySubjectProvider subjectProvider, String subjectId) {

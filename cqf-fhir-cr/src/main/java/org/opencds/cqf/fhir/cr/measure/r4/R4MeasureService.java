@@ -22,6 +22,7 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorUtils;
 import org.opencds.cqf.fhir.cr.measure.r4.npm.R4RepositoryOrNpmResourceProvider;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.monad.Either3;
+import org.opencds.cqf.fhir.utility.npm.MeasureOrNpmResourceHolder;
 import org.opencds.cqf.fhir.utility.repository.FederatedRepository;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.repository.Repositories;
@@ -99,7 +100,7 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
         // Replicate the old logic of using the repository used to initialize the measure processor
         // as the repository for the CQL engine context.
         var context = Engines.forContext(
-                engineInitializationContext.modifiedCopyWith(proxyRepoForMeasureProcessor), additionalData);
+                buildEvaluationContext(proxyRepoForMeasureProcessor, measurePlusNpmResourceHolder), additionalData);
 
         var evaluationResults = processor.evaluateMeasureWithCqlEngine(
                 subjects, measurePlusNpmResourceHolder, periodStart, periodEnd, parameters, context);
@@ -119,6 +120,16 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
 
         // add subject reference for non-individual reportTypes
         return r4MeasureServiceUtils.addSubjectReference(measureReport, practitioner, subjectId);
+    }
+
+    @Nonnull
+    private EngineInitializationContext buildEvaluationContext(
+            IRepository proxyRepoForMeasureProcessor, MeasureOrNpmResourceHolder measurePlusNpmResourceHolder) {
+
+        return engineInitializationContext
+                .withRepository(proxyRepoForMeasureProcessor)
+                .withNpmPackageLoader(
+                        r4RepositoryOrNpmResourceProvider.npmPackageLoaderWithCache(measurePlusNpmResourceHolder));
     }
 
     @Nonnull

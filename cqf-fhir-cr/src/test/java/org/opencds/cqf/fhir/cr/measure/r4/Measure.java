@@ -2,9 +2,11 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.opencds.cqf.fhir.cr.measure.common.MeasureInfo.EXT_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_CRITERIA_REFERENCE_URL;
@@ -35,6 +37,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IdType;
@@ -64,6 +67,7 @@ import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.SelectedGroup.SelectedReference;
 import org.opencds.cqf.fhir.cr.measure.r4.npm.R4RepositoryOrNpmResourceProvider;
+import org.opencds.cqf.fhir.utility.monad.Either3;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.r4.ContainedHelper;
@@ -154,6 +158,8 @@ public class Measure {
 
         public Given repository(IRepository repository) {
             this.repository = repository;
+            // We're explicitly NOT using NPM here
+            this.npmPackageLoader = NpmPackageLoader.DEFAULT;
             this.engineInitializationContext = getEngineInitializationContext();
             return this;
         }
@@ -177,6 +183,7 @@ public class Measure {
                     Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
             this.repository = igRepository;
             this.npmPackageLoader = igRepository.getNpmPackageLoader();
+            this.engineInitializationContext = getEngineInitializationContext();
             mutateEvaluationSettingsToEnableNpm();
             return this;
         }
@@ -228,6 +235,7 @@ public class Measure {
         }
 
         private String measureId;
+        private CanonicalType measureUrl;
         private ZonedDateTime periodStart;
         private ZonedDateTime periodEnd;
         private String subject;
@@ -241,6 +249,11 @@ public class Measure {
 
         public When measureId(String measureId) {
             this.measureId = measureId;
+            return this;
+        }
+
+        public When measureUrl(String measureUrl) {
+            this.measureUrl = new CanonicalType(measureUrl);
             return this;
         }
 
@@ -298,7 +311,7 @@ public class Measure {
 
         public When evaluate() {
             this.operation = () -> service.evaluate(
-                    Eithers.forMiddle3(new IdType("Measure", measureId)),
+                    deriveMeasureEither(measureId, measureUrl),
                     periodStart,
                     periodEnd,
                     reportType,
@@ -321,6 +334,20 @@ public class Measure {
             }
 
             return new SelectedReport(this.operation.get());
+        }
+
+        @Nonnull
+        private Either3<CanonicalType, IdType, org.hl7.fhir.r4.model.Measure> deriveMeasureEither(
+                @Nullable String measureId, @Nullable CanonicalType measureUrl) {
+            if (measureId != null) {
+                return Eithers.forMiddle3(new IdType("Measure", measureId));
+            }
+
+            if (measureUrl != null) {
+                return Eithers.forLeft3(measureUrl);
+            }
+
+            throw new IllegalStateException("Expected either a measure ID or a measure URL but there is neither");
         }
     }
 
@@ -360,10 +387,25 @@ public class Measure {
         }
 
         public SelectedReference evaluatedResource(String name) {
-            return this.reference(x -> x.getEvaluatedResource().stream()
-                    .filter(y -> y.getReference().equals(name))
-                    .findFirst()
-                    .get());
+            return this.reference(measureReport -> reportSelectorByName(report(), name));
+        }
+
+        private Reference reportSelectorByName(MeasureReport measureReport, String name) {
+            var optResourceReference = measureReport.getEvaluatedResource().stream()
+                    .filter(evaluatedResource ->
+                            evaluatedResource.getReference().equals(name))
+                    .findFirst();
+
+            if (optResourceReference.isEmpty()) {
+                fail("No evaluated resource with name: %s within: %s"
+                        .formatted(
+                                name,
+                                measureReport.getEvaluatedResource().stream()
+                                        .map(Reference::getReference)
+                                        .toList()));
+            }
+
+            return optResourceReference.get();
         }
 
         public SelectedReport hasEvaluatedResourceCount(int count) {
@@ -791,7 +833,7 @@ public class Measure {
         }
     }
 
-    static class SelectedExtension extends Selected<Extension, SelectedReport> {
+    public static class SelectedExtension extends Selected<Extension, SelectedReport> {
 
         public SelectedExtension(Extension value, SelectedReport parent) {
             super(value, parent);
@@ -813,7 +855,7 @@ public class Measure {
         }
     }
 
-    static class SelectedContained extends Selected<Resource, SelectedReport> {
+    public static class SelectedContained extends Selected<Resource, SelectedReport> {
 
         public SelectedContained(Resource value, SelectedReport parent) {
             super(value, parent);
@@ -893,12 +935,12 @@ public class Measure {
                     .get(0)
                     .getValue()
                     .isEmpty());
-            assertTrue(
+            assertInstanceOf(
+                    Period.class,
                     this.value()
-                                    .getExtensionsByUrl(CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL)
-                                    .get(0)
-                                    .getValue()
-                            instanceof Period);
+                            .getExtensionsByUrl(CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL)
+                            .get(0)
+                            .getValue());
             return this;
         }
 
@@ -943,7 +985,7 @@ public class Measure {
             return new SelectedStratifier(s, this);
         }
 
-        static class SelectedReference extends Selected<Reference, SelectedReport> {
+        public static class SelectedReference extends Selected<Reference, SelectedReport> {
 
             public SelectedReference(Reference value, SelectedReport parent) {
                 super(value, parent);
@@ -1008,7 +1050,7 @@ public class Measure {
             }
         }
 
-        static class SelectedPopulation
+        public static class SelectedPopulation
                 extends Selected<MeasureReport.MeasureReportGroupPopulationComponent, SelectedGroup> {
 
             public SelectedPopulation(MeasureReportGroupPopulationComponent value, SelectedGroup parent) {
@@ -1017,6 +1059,11 @@ public class Measure {
 
             public SelectedPopulation hasCount(int count) {
                 MeasureValidationUtils.validatePopulation(value(), count);
+                return this;
+            }
+
+            public SelectedPopulation hasCode(String code) {
+                assertEquals(code, value().getCode().getCodingFirstRep().getCode());
                 return this;
             }
 
@@ -1033,7 +1080,7 @@ public class Measure {
         }
     }
 
-    static class SelectedStratifier
+    public static class SelectedStratifier
             extends Selected<MeasureReport.MeasureReportGroupStratifierComponent, SelectedGroup> {
 
         public SelectedStratifier(MeasureReportGroupStratifierComponent value, SelectedGroup parent) {
@@ -1088,7 +1135,7 @@ public class Measure {
         }
     }
 
-    static class SelectedStratum extends Selected<MeasureReport.StratifierGroupComponent, SelectedStratifier> {
+    public static class SelectedStratum extends Selected<MeasureReport.StratifierGroupComponent, SelectedStratifier> {
 
         public SelectedStratum(MeasureReport.StratifierGroupComponent value, SelectedStratifier parent) {
             super(value, parent);
@@ -1125,7 +1172,7 @@ public class Measure {
         }
     }
 
-    static class SelectedStratumPopulation
+    public static class SelectedStratumPopulation
             extends Selected<MeasureReport.StratifierGroupPopulationComponent, SelectedStratum> {
 
         public SelectedStratumPopulation(

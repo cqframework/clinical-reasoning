@@ -394,11 +394,11 @@ class EnginesTest {
 
     @Nonnull
     private CqlEngine getEngine(EvaluationSettings settings) {
-        return Engines.forContext(engineInitializationContext.modifiedCopyWith(settings));
+        return Engines.forContext(engineInitializationContext.withEvaluationSettings(settings));
     }
 
     @Nonnull
     private CqlEngine getEngine(EvaluationSettings settings, IBaseBundle bundle) {
-        return Engines.forContext(engineInitializationContext.modifiedCopyWith(settings), bundle);
+        return Engines.forContext(engineInitializationContext.withEvaluationSettings(settings), bundle);
     }
 }

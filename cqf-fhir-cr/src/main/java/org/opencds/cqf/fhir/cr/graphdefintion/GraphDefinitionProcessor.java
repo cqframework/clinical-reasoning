@@ -1,13 +1,11 @@
 package org.opencds.cqf.fhir.cr.graphdefintion;
 
+import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
 import static org.opencds.cqf.fhir.utility.PackageHelper.packageParameters;
-import static org.opencds.cqf.fhir.utility.Parameters.newParameters;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.repository.IRepository;
-import jakarta.annotation.Nullable;
-import java.time.ZonedDateTime;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -67,14 +65,19 @@ public class GraphDefinitionProcessor {
         this.packageProcessor = packageProcessor;
         this.dataRequirementsProcessor = dataRequirementsProcessor;
         this.applyProcessor = applyProcessor;
+
     }
 
     public EvaluationSettings evaluationSettings() {
         return evaluationSettings;
     }
 
-    protected void initApplyProcessor() {
-        applyProcessor = applyProcessor != null ? applyProcessor : new ApplyProcessor(repository, modelResolver);
+    public IApplyProcessor getApplyProcessor() {
+        if (isNull(this.applyProcessor)) {
+            applyProcessor = new ApplyProcessor(repository, modelResolver);
+
+        }
+        return applyProcessor;
     }
 
     protected <C extends IPrimitiveType<String>, R extends IBaseResource> R resolveGraphDefinition(
@@ -116,17 +119,7 @@ public class GraphDefinitionProcessor {
         return processor.getDataRequirements(graphDefinition, parameters);
     }
 
-    protected <C extends IPrimitiveType<String>, R extends IBaseResource> ApplyRequest buildApplyRequest() {
-        return new ApplyRequest();
-    }
-
-    public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseParameters apply(
-            Either3<C, IIdType, R> graphDefinition,
-            @Nullable String subject,
-            @Nullable ZonedDateTime periodStart,
-            @Nullable ZonedDateTime periodEnd,
-            IBaseParameters parameters) {
-
-        return newParameters(repository.fhirContext(), applyProcessor.apply(buildApplyRequest()));
+    public IBaseResource apply(ApplyRequest applyRequest) {
+        return getApplyProcessor().apply(applyRequest);
     }
 }

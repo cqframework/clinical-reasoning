@@ -18,9 +18,7 @@ import java.util.Set;
 import java.util.function.Function;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Library;
@@ -49,7 +47,7 @@ public class R4RepositoryOrNpmResourceProvider {
             "Queries by measure ID: %s are not supported by NPM resources";
 
     public static final String QUERIES_BY_MEASURE_IDENTIFIERS_ARE_NOT_SUPPORTED_BY_NPM_RESOURCES =
-        "Queries by measure identifiers: %s are not supported by NPM resources";
+            "Queries by measure identifiers: %s are not supported by NPM resources";
 
     private final IRepository repository;
     private final NpmPackageLoader npmPackageLoader;
@@ -150,9 +148,9 @@ public class R4RepositoryOrNpmResourceProvider {
             Either3<IdType, String, CanonicalType> measureEither) {
 
         var folded = measureEither.fold(
-            measureIdType -> resolveMeasureById(measureIdType, repository),
-            this::resolveByIdentifier,
-            measureUrl -> resolveByUrlFromRepository(measureUrl, repository));
+                measureIdType -> resolveMeasureById(measureIdType, repository),
+                this::resolveByIdentifier,
+                measureUrl -> resolveByUrlFromRepository(measureUrl, repository));
 
         return MeasureOrNpmResourceHolder.measureOnly(folded);
     }
@@ -196,17 +194,6 @@ public class R4RepositoryOrNpmResourceProvider {
         return measure;
     }
 
-    private static List<Measure> resolveMeasuresFromRepository(List<? extends IIdType> ids, IRepository repository) {
-        var idStringArray = ids.stream().map(IPrimitiveType::getValueAsString).toArray(String[]::new);
-        var searchParameters = Searches.byId(idStringArray);
-
-        return repository.search(Bundle.class, Measure.class, searchParameters).getEntry().stream()
-                .map(BundleEntryComponent::getResource)
-                .filter(Measure.class::isInstance)
-                .map(Measure.class::cast)
-                .toList();
-    }
-
     // If the caller chooses to provide their own IRepository (ex:  federated)
     public MeasureOrNpmResourceHolder foldMeasure(
             Either3<CanonicalType, IdType, Measure> measureEither, IRepository repository) {
@@ -218,15 +205,14 @@ public class R4RepositoryOrNpmResourceProvider {
         return MeasureOrNpmResourceHolder.measureOnly(foldMeasureFromRepository(measureEither, repository));
     }
 
-    public MeasureOrNpmResourceHolderList foldMeasureEithers(List<Either3<IdType, String, CanonicalType>> measureEithers) {
+    public MeasureOrNpmResourceHolderList foldMeasureEithers(
+            List<Either3<IdType, String, CanonicalType>> measureEithers) {
         if (measureEithers == null || measureEithers.isEmpty()) {
             throw new InvalidRequestException("measure IDs or URLs parameter cannot be null or empty.");
         }
 
         return MeasureOrNpmResourceHolderList.of(
-                measureEithers.stream()
-                    .map(this::foldMeasureEither)
-                    .toList());
+                measureEithers.stream().map(this::foldMeasureEither).toList());
     }
 
     private MeasureOrNpmResourceHolder foldMeasureEither(Either3<IdType, String, CanonicalType> measureEither) {
@@ -261,22 +247,23 @@ public class R4RepositoryOrNpmResourceProvider {
     private MeasureOrNpmResourceHolder foldMeasureForNpm(Either3<IdType, String, CanonicalType> measureEither) {
 
         return measureEither.fold(
-            measureId -> {
-                throw new InvalidRequestException(
-                    QUERIES_BY_MEASURE_IDS_ARE_NOT_SUPPORTED_BY_NPM_RESOURCES.formatted(measureId));
-            },
-            measureIdentifier -> {
-                throw new InvalidRequestException(
-                    QUERIES_BY_MEASURE_IDENTIFIERS_ARE_NOT_SUPPORTED_BY_NPM_RESOURCES.formatted(measureIdentifier));
-            },
-            measureUrl -> {
-                var npmResourceHolder = npmPackageLoader.loadNpmResources(measureUrl);
-                if (npmResourceHolder == null || npmResourceHolder == NpmResourceHolder.EMPTY) {
+                measureId -> {
                     throw new InvalidRequestException(
-                        "No NPM resources found for Measure URL: %s".formatted(measureUrl.getValue()));
-                }
-                return MeasureOrNpmResourceHolder.npmOnly(npmResourceHolder);
-            });
+                            QUERIES_BY_MEASURE_IDS_ARE_NOT_SUPPORTED_BY_NPM_RESOURCES.formatted(measureId));
+                },
+                measureIdentifier -> {
+                    throw new InvalidRequestException(
+                            QUERIES_BY_MEASURE_IDENTIFIERS_ARE_NOT_SUPPORTED_BY_NPM_RESOURCES.formatted(
+                                    measureIdentifier));
+                },
+                measureUrl -> {
+                    var npmResourceHolder = npmPackageLoader.loadNpmResources(measureUrl);
+                    if (npmResourceHolder == null || npmResourceHolder == NpmResourceHolder.EMPTY) {
+                        throw new InvalidRequestException(
+                                "No NPM resources found for Measure URL: %s".formatted(measureUrl.getValue()));
+                    }
+                    return MeasureOrNpmResourceHolder.npmOnly(npmResourceHolder);
+                });
     }
 
     public MeasureOrNpmResourceHolderList getMeasureOrNpmDetails(
@@ -334,8 +321,8 @@ public class R4RepositoryOrNpmResourceProvider {
 
     private List<MeasureOrNpmResourceHolder> getMeasureOrNpmDetailsForMeasureIdents(List<String> measureIdentifiers) {
         if (evaluationSettings.isUseNpmForQualifyingResources()) {
-            throw new InvalidRequestException("Queries by measure identifiers: %s are not supported by NPM resources"
-                    .formatted(measureIdentifiers));
+            throw new InvalidRequestException(
+                    QUERIES_BY_MEASURE_IDENTIFIERS_ARE_NOT_SUPPORTED_BY_NPM_RESOURCES.formatted(measureIdentifiers));
         }
 
         return measureIdentifiers.stream()

@@ -42,14 +42,10 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
-import org.opencds.cqf.fhir.cql.Engines.EngineInitializationContext;
 import org.opencds.cqf.fhir.cr.measure.CareGapsProperties;
-import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
-import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.enumeration.CareGapsStatusCode;
 import org.opencds.cqf.fhir.cr.measure.r4.npm.R4RepositoryOrNpmResourceProvider;
-import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.Resources;
 import org.opencds.cqf.fhir.utility.builder.BundleBuilder;
@@ -62,6 +58,7 @@ import org.opencds.cqf.fhir.utility.builder.NarrativeSettings;
 /**
  * Care Gaps Bundle Builder houses the logic for constructing a Care-Gaps Document Bundle for a Patient per Measures requested
  */
+@SuppressWarnings("squid:S125")
 public class R4CareGapsBundleBuilder {
     private static final Map<String, CodeableConceptSettings> CARE_GAPS_CODES = ImmutableMap.of(
             "http://loinc.org/96315-7",
@@ -74,33 +71,22 @@ public class R4CareGapsBundleBuilder {
     private static final FhirContext fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
     private final CareGapsProperties careGapsProperties;
     private final String serverBase;
-    private final R4MeasureServiceUtils r4MeasureServiceUtils;
     private final R4MultiMeasureService r4MultiMeasureService;
     private final R4RepositoryOrNpmResourceProvider r4RepositoryOrNpmResourceProvider;
 
     public R4CareGapsBundleBuilder(
             CareGapsProperties careGapsProperties,
             IRepository repository,
-            EngineInitializationContext engineInitializationContext,
-            MeasureEvaluationOptions measureEvaluationOptions,
             String serverBase,
             Map<String, Resource> configuredResources,
-            MeasurePeriodValidator measurePeriodValidator,
+            R4MultiMeasureService r4MultiMeasureService,
             R4RepositoryOrNpmResourceProvider r4RepositoryOrNpmResourceProvider) {
         this.repository = repository;
         this.careGapsProperties = careGapsProperties;
         this.serverBase = serverBase;
         this.configuredResources = configuredResources;
         this.r4RepositoryOrNpmResourceProvider = r4RepositoryOrNpmResourceProvider;
-
-        r4MeasureServiceUtils = new R4MeasureServiceUtils(repository);
-        r4MultiMeasureService = new R4MultiMeasureService(
-                repository,
-                engineInitializationContext,
-                measureEvaluationOptions,
-                serverBase,
-                measurePeriodValidator,
-                this.r4RepositoryOrNpmResourceProvider);
+        this.r4MultiMeasureService = r4MultiMeasureService;
     }
 
     public List<Parameters.ParametersParameterComponent> makePatientBundles(
@@ -320,26 +306,32 @@ public class R4CareGapsBundleBuilder {
         if (measureReport.hasExtension()) {
             for (Extension extension : measureReport.getExtension()) {
                 if (extension.hasUrl() && extension.getUrl().equals(EXT_SDE_REFERENCE_URL)) {
-                    Reference sdeRef = extension.hasValue() && extension.getValue() instanceof Reference
-                            ? (Reference) extension.getValue()
-                            : null;
-                    if (sdeRef != null
-                            && sdeRef.hasReference()
-                            && !sdeRef.getReference().startsWith("#")) {
-                        // sde reference comes in format [ResourceType]/{id}
-                        IdType sdeId = new IdType(sdeRef.getReference());
-                        if (!resources.containsKey(Ids.simple(sdeId))) {
-                            Class<? extends IBaseResource> resourceType = fhirContext
-                                    .getResourceDefinition(sdeId.getResourceType())
-                                    .newInstance()
-                                    .getClass();
-                            IBaseResource resource = repository.read(resourceType, sdeId);
-                            if (resource instanceof Resource resourceBase) {
-                                resources.put(Ids.simple(sdeId), resourceBase);
-                            }
-                        }
-                    }
+                    handleSdeExtensions(resources, extension);
                 }
+            }
+        }
+    }
+
+    private void handleSdeExtensions(Map<String, Resource> resources, Extension extension) {
+        Reference sdeRef = extension.hasValue() && extension.getValue() instanceof Reference extensionReference
+                ? extensionReference
+                : null;
+        if (sdeRef != null && sdeRef.hasReference() && !sdeRef.getReference().startsWith("#")) {
+            handleSdeReferences(resources, sdeRef);
+        }
+    }
+
+    private void handleSdeReferences(Map<String, Resource> resources, Reference sdeRef) {
+        // sde reference comes in format [ResourceType]/{id}
+        IdType sdeId = new IdType(sdeRef.getReference());
+        if (!resources.containsKey(Ids.simple(sdeId))) {
+            Class<? extends IBaseResource> resourceType = fhirContext
+                    .getResourceDefinition(sdeId.getResourceType())
+                    .newInstance()
+                    .getClass();
+            IBaseResource resource = repository.read(resourceType, sdeId);
+            if (resource instanceof Resource resourceBase) {
+                resources.put(Ids.simple(sdeId), resourceBase);
             }
         }
     }

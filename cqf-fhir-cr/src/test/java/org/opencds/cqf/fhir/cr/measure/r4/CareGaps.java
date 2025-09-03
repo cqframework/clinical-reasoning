@@ -171,15 +171,21 @@ public class CareGaps {
         }
 
         private R4CareGapsService buildCareGapsService() {
+            var r4RepositoryOrNpmResourceProvider = getR4RepositoryOrNpmResourceProvider();
             return new R4CareGapsService(
                     careGapsProperties,
                     repository,
-                    engineInitializationContext,
                     new R4MeasureServiceUtils(repository),
                     evaluationOptions,
                     serverBase,
-                    measurePeriodEvaluator,
-                    getR4RepositoryOrNpmResourceProvider());
+                    new R4MultiMeasureService(
+                            repository,
+                            engineInitializationContext,
+                            evaluationOptions,
+                            serverBase,
+                            measurePeriodEvaluator,
+                            r4RepositoryOrNpmResourceProvider),
+                    r4RepositoryOrNpmResourceProvider);
         }
 
         @Nonnull

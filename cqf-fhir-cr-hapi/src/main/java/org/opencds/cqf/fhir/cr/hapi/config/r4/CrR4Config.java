@@ -29,6 +29,7 @@ import org.opencds.cqf.fhir.cr.hapi.r4.ISubmitDataProcessorFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureEvaluatorMultipleFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureEvaluatorSingleFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureServiceUtilsFactory;
+import org.opencds.cqf.fhir.cr.hapi.r4.R4MultiMeasureServiceFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.R4RepositoryOrNpmResourceProviderFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.cpg.CqlExecutionOperationProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.crmi.ApproveProvider;
@@ -183,20 +184,17 @@ public class CrR4Config {
             R4MeasureServiceUtilsFactory r4MeasureServiceUtilsFactory,
             MeasureEvaluationOptions measureEvaluationOptions,
             MeasurePeriodValidator measurePeriodValidator,
+            R4MultiMeasureServiceFactory r4MultiMeasureServiceFactory,
             R4RepositoryOrNpmResourceProviderFactory r4repositoryOrNpmResourceProviderFactory) {
         return requestDetails -> {
             var repository = repositoryFactory.create(requestDetails);
             return new R4CareGapsService(
                     careGapsProperties,
                     repository,
-                    new EngineInitializationContext(
-                            repository,
-                            NpmConfigDependencySubstitutor.substituteNpmPackageLoaderIfEmpty(optNpmPackageLoader),
-                            measureEvaluationOptions.getEvaluationSettings()),
                     r4MeasureServiceUtilsFactory.create(requestDetails),
                     measureEvaluationOptions,
                     requestDetails.getFhirServerBase(),
-                    measurePeriodValidator,
+                    r4MultiMeasureServiceFactory.create(requestDetails),
                     r4repositoryOrNpmResourceProviderFactory.create(requestDetails));
         };
     }

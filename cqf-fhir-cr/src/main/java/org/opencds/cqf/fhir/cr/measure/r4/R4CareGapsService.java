@@ -9,14 +9,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
-import org.opencds.cqf.fhir.cql.Engines.EngineInitializationContext;
 import org.opencds.cqf.fhir.cr.measure.CareGapsProperties;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
-import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.r4.npm.R4RepositoryOrNpmResourceProvider;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.monad.Either3;
@@ -31,21 +28,19 @@ public class R4CareGapsService implements R4CareGapsServiceInterface {
     public R4CareGapsService(
             CareGapsProperties careGapsProperties,
             IRepository repository,
-            EngineInitializationContext engineInitializationContext,
             R4MeasureServiceUtils r4MeasureServiceUtils,
             MeasureEvaluationOptions measureEvaluationOptions,
             String serverBase,
-            MeasurePeriodValidator measurePeriodEvaluator,
+            R4MultiMeasureService r4MultiMeasureService,
             R4RepositoryOrNpmResourceProvider r4RepositoryOrNpmResourceProvider) {
 
         r4CareGapsProcessor = new R4CareGapsProcessor(
                 careGapsProperties,
                 repository,
-                engineInitializationContext,
                 r4MeasureServiceUtils,
                 measureEvaluationOptions,
                 serverBase,
-                measurePeriodEvaluator,
+                r4MultiMeasureService,
                 r4RepositoryOrNpmResourceProvider);
     }
 
@@ -106,7 +101,7 @@ public class R4CareGapsService implements R4CareGapsServiceInterface {
         if (eitherList.isEmpty()) {
             final List<String> measureIdsAsStrings = Optional.ofNullable(measureId)
                     .map(nonNullMeasureId ->
-                            nonNullMeasureId.stream().map(IdType::getIdPart).collect(Collectors.toList()))
+                            nonNullMeasureId.stream().map(IdType::getIdPart).toList())
                     .orElse(Collections.emptyList());
 
             throw new InvalidRequestException(

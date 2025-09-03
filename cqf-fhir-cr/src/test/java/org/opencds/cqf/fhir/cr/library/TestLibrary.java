@@ -117,7 +117,7 @@ public class TestLibrary {
             return new LibraryProcessor(
                     repository,
                     evaluationSettings,
-                    engineInitializationContext.modifiedCopyWith(repository),
+                    engineInitializationContext.withRepository(repository),
                     new TerminologyServerClientSettings());
         }
 

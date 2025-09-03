@@ -300,7 +300,7 @@ public class PlanDefinitionProcessor {
                 data,
                 prefetchData,
                 new LibraryEngine(
-                        repository, this.evaluationSettings, engineInitializationContext.modifiedCopyWith(repository)));
+                        repository, this.evaluationSettings, engineInitializationContext.withRepository(repository)));
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource apply(
@@ -429,7 +429,7 @@ public class PlanDefinitionProcessor {
                 data,
                 prefetchData,
                 new LibraryEngine(
-                        repository, this.evaluationSettings, engineInitializationContext.modifiedCopyWith(repository)));
+                        repository, this.evaluationSettings, engineInitializationContext.withRepository(repository)));
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseParameters applyR5(

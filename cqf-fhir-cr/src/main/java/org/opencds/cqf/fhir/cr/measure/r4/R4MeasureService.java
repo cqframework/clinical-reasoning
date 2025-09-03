@@ -91,7 +91,7 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
         // Replicate the old logic of using the repository used to initialize the measure processor
         // as the repository for the CQL engine context.
         var context = Engines.forContext(
-                engineInitializationContext.modifiedCopyWith(proxyRepoForMeasureProcessor), additionalData);
+                engineInitializationContext.withRepository(proxyRepoForMeasureProcessor), additionalData);
 
         var evaluationResults =
                 processor.evaluateMeasureWithCqlEngine(subjects, measure, periodStart, periodEnd, parameters, context);

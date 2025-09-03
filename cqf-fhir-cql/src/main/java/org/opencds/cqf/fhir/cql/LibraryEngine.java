@@ -166,7 +166,7 @@ public class LibraryEngine {
         requestSettings.getLibrarySourceProviders().add(new StringLibrarySourceProvider(Lists.newArrayList(cql)));
 
         var modifiedEngineInitializationContext =
-                engineInitializationContext.modifiedCopyWith(repository).modifiedCopyWith(requestSettings);
+                engineInitializationContext.withRepository(repository).withEvaluationSettings(requestSettings);
 
         var engine = Engines.forContext(modifiedEngineInitializationContext, bundle);
 
@@ -355,7 +355,7 @@ public class LibraryEngine {
         var engineToUse = Objects.requireNonNullElseGet(
                 engine,
                 () -> Engines.forContext(
-                        engineInitializationContext.modifiedCopyWith(repository).modifiedCopyWith(settings),
+                        engineInitializationContext.withRepository(repository).withEvaluationSettings(settings),
                         additionalData));
 
         var evaluationParameters = cqlFhirParametersConverterToUse.toCqlParameters(parameters);

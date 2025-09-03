@@ -210,12 +210,17 @@ public class Engines {
 
         // For when a request builds a proxy or federated repository and needs to pass that to the
         // Engine
-        public EngineInitializationContext modifiedCopyWith(IRepository repository) {
+        public EngineInitializationContext withRepository(IRepository repository) {
+            return new EngineInitializationContext(repository, npmPackageLoader, evaluationSettings);
+        }
+
+        // For when a request builds or selects a different NpmPackageLoader
+        public EngineInitializationContext withNpmPackageLoader(NpmPackageLoader npmPackageLoader) {
             return new EngineInitializationContext(repository, npmPackageLoader, evaluationSettings);
         }
 
         // For when a request evaluates evaluation settings
-        EngineInitializationContext modifiedCopyWith(EvaluationSettings evaluationSettings) {
+        EngineInitializationContext withEvaluationSettings(EvaluationSettings evaluationSettings) {
             return new EngineInitializationContext(repository, npmPackageLoader, evaluationSettings);
         }
     }

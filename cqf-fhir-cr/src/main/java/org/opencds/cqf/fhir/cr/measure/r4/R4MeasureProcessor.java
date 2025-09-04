@@ -27,11 +27,11 @@ import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Parameters;
-import org.hl7.fhir.r4.model.Resource;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.fhir.model.R4FhirModelResolver;
 import org.opencds.cqf.cql.engine.runtime.Interval;
+import org.opencds.cqf.fhir.cql.Engines.EngineInitializationContext;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cql.VersionedIdentifiers;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
@@ -44,25 +44,33 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorUtils;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 import org.opencds.cqf.fhir.cr.measure.common.MultiLibraryIdMeasureEngineDetails;
+import org.opencds.cqf.fhir.cr.measure.r4.npm.R4RepositoryOrNpmResourceProvider;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4DateHelper;
-import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.monad.Either3;
+import org.opencds.cqf.fhir.utility.npm.MeasureOrNpmResourceHolder;
+import org.opencds.cqf.fhir.utility.npm.MeasureOrNpmResourceHolderList;
 import org.opencds.cqf.fhir.utility.search.Searches;
 
 public class R4MeasureProcessor {
     private final IRepository repository;
+    private final EngineInitializationContext engineInitializationContext;
     private final MeasureEvaluationOptions measureEvaluationOptions;
     private final MeasureProcessorUtils measureProcessorUtils;
+    private final R4RepositoryOrNpmResourceProvider r4RepositoryOrNpmResourceProvider;
 
     public R4MeasureProcessor(
             IRepository repository,
+            EngineInitializationContext engineInitializationContext,
             MeasureEvaluationOptions measureEvaluationOptions,
-            MeasureProcessorUtils measureProcessorUtils) {
+            MeasureProcessorUtils measureProcessorUtils,
+            R4RepositoryOrNpmResourceProvider r4RepositoryOrNpmResourceProvider) {
 
         this.repository = Objects.requireNonNull(repository);
+        this.engineInitializationContext = engineInitializationContext;
         this.measureEvaluationOptions =
                 measureEvaluationOptions != null ? measureEvaluationOptions : MeasureEvaluationOptions.defaultOptions();
         this.measureProcessorUtils = measureProcessorUtils;
+        this.r4RepositoryOrNpmResourceProvider = r4RepositoryOrNpmResourceProvider;
     }
 
     // Expose this so CQL measure evaluation can use the same Repository as the one passed to the
@@ -80,8 +88,11 @@ public class R4MeasureProcessor {
             MeasureEvalType evalType,
             CqlEngine context,
             CompositeEvaluationResultsPerMeasure compositeEvaluationResultsPerMeasure) {
+
+        var measureOrNpmResourceHolder = r4RepositoryOrNpmResourceProvider.foldMeasure(measure);
+
         return this.evaluateMeasure(
-                R4MeasureServiceUtils.foldMeasure(measure, this.repository),
+                measureOrNpmResourceHolder,
                 periodStart,
                 periodEnd,
                 reportType,
@@ -142,7 +153,7 @@ public class R4MeasureProcessor {
 
     /**
      * Evaluation method that generates CQL results, Processes results, builds Measure Report
-     * @param measure Measure resource
+     * @param measureOrNpmResourceHolder Measure resource or NPM resource holder
      * @param periodStart start date of Measurement Period
      * @param periodEnd end date of Measurement Period
      * @param reportType type of report that defines MeasureReport Type
@@ -151,7 +162,7 @@ public class R4MeasureProcessor {
      * @return Measure Report resource
      */
     public MeasureReport evaluateMeasure(
-            Measure measure,
+            MeasureOrNpmResourceHolder measureOrNpmResourceHolder,
             @Nullable ZonedDateTime periodStart,
             @Nullable ZonedDateTime periodEnd,
             String reportType,
@@ -161,6 +172,8 @@ public class R4MeasureProcessor {
             CompositeEvaluationResultsPerMeasure compositeEvaluationResultsPerMeasure) {
 
         MeasureEvalType evaluationType = measureProcessorUtils.getEvalType(evalType, reportType, subjectIds);
+
+        var measure = measureOrNpmResourceHolder.getMeasure();
 
         // setup MeasureDef
         var measureDef = new R4MeasureDefBuilder().build(measure);
@@ -179,7 +192,7 @@ public class R4MeasureProcessor {
                 new R4PopulationBasisValidator());
 
         var measurementPeriod = postLibraryEvaluationPeriodProcessingAndContinuousVariableObservation(
-                measure, measureDef, periodStart, periodEnd, context);
+                measureOrNpmResourceHolder, measureDef, periodStart, periodEnd, context);
 
         // Build Measure Report with Results
         return new R4MeasureReportBuilder()
@@ -201,14 +214,15 @@ public class R4MeasureProcessor {
      * through good fortune before we didn't accidentally evaluate twice.
      */
     private Interval postLibraryEvaluationPeriodProcessingAndContinuousVariableObservation(
-            Measure measure,
+            MeasureOrNpmResourceHolder measureOrNpmResourceHolder,
             MeasureDef measureDef,
             @Nullable ZonedDateTime periodStart,
             @Nullable ZonedDateTime periodEnd,
             CqlEngine context) {
 
-        var libraryVersionedIdentifiers =
-                getMultiLibraryIdMeasureEngineDetails(List.of(measure)).getLibraryIdentifiers();
+        var libraryVersionedIdentifiers = getMultiLibraryIdMeasureEngineDetails(
+                        MeasureOrNpmResourceHolderList.of(measureOrNpmResourceHolder))
+                .getLibraryIdentifiers();
 
         var compiledLibraries = getCompiledLibraries(libraryVersionedIdentifiers, context);
 
@@ -224,7 +238,9 @@ public class R4MeasureProcessor {
         measureProcessorUtils.setMeasurementPeriod(
                 measurementPeriodParams,
                 context,
-                Optional.ofNullable(measure.getUrl()).map(List::of).orElse(List.of("Unknown Measure URL")));
+                Optional.ofNullable(measureOrNpmResourceHolder.getMeasureUrl())
+                        .map(List::of)
+                        .orElse(List.of("Unknown Measure URL")));
 
         // DON'T pop the library off the stack yet, because we need it for continuousVariableObservation()
 
@@ -241,63 +257,15 @@ public class R4MeasureProcessor {
 
     public CompositeEvaluationResultsPerMeasure evaluateMeasureWithCqlEngine(
             List<String> subjects,
-            Either3<CanonicalType, IdType, Measure> measureEither,
+            MeasureOrNpmResourceHolder measureOrNpmResourceHolder,
             @Nullable ZonedDateTime periodStart,
             @Nullable ZonedDateTime periodEnd,
             Parameters parameters,
             CqlEngine context) {
 
-        return evaluateMultiMeasuresWithCqlEngine(
+        return evaluateMultiMeasuresPlusNpmHoldersWithCqlEngine(
                 subjects,
-                List.of(R4MeasureServiceUtils.foldMeasure(measureEither, repository)),
-                periodStart,
-                periodEnd,
-                parameters,
-                context);
-    }
-
-    public CompositeEvaluationResultsPerMeasure evaluateMeasureIdWithCqlEngine(
-            List<String> subjects,
-            IIdType measureId,
-            @Nullable ZonedDateTime periodStart,
-            @Nullable ZonedDateTime periodEnd,
-            Parameters parameters,
-            CqlEngine context) {
-
-        return evaluateMultiMeasuresWithCqlEngine(
-                subjects,
-                List.of(R4MeasureServiceUtils.resolveById(measureId, repository)),
-                periodStart,
-                periodEnd,
-                parameters,
-                context);
-    }
-
-    public CompositeEvaluationResultsPerMeasure evaluateMeasureWithCqlEngine(
-            List<String> subjects,
-            Measure measure,
-            @Nullable ZonedDateTime periodStart,
-            @Nullable ZonedDateTime periodEnd,
-            Parameters parameters,
-            CqlEngine context) {
-
-        return evaluateMultiMeasuresWithCqlEngine(
-                subjects, List.of(measure), periodStart, periodEnd, parameters, context);
-    }
-
-    public CompositeEvaluationResultsPerMeasure evaluateMultiMeasureIdsWithCqlEngine(
-            List<String> subjects,
-            List<IdType> measureIds,
-            @Nullable ZonedDateTime periodStart,
-            @Nullable ZonedDateTime periodEnd,
-            Parameters parameters,
-            CqlEngine context) {
-        return evaluateMultiMeasuresWithCqlEngine(
-                subjects,
-                measureIds.stream()
-                        .map(IIdType::toUnqualifiedVersionless)
-                        .map(id -> R4MeasureServiceUtils.resolveById(id, repository))
-                        .toList(),
+                MeasureOrNpmResourceHolderList.of(measureOrNpmResourceHolder),
                 periodStart,
                 periodEnd,
                 parameters,
@@ -306,17 +274,30 @@ public class R4MeasureProcessor {
 
     public CompositeEvaluationResultsPerMeasure evaluateMultiMeasuresWithCqlEngine(
             List<String> subjects,
-            List<Measure> measures,
+            MeasureOrNpmResourceHolderList measureResourcesOrHolderList,
+            @Nullable ZonedDateTime periodStart,
+            @Nullable ZonedDateTime periodEnd,
+            Parameters parameters,
+            CqlEngine context) {
+        return evaluateMultiMeasuresPlusNpmHoldersWithCqlEngine(
+                subjects, measureResourcesOrHolderList, periodStart, periodEnd, parameters, context);
+    }
+
+    CompositeEvaluationResultsPerMeasure evaluateMultiMeasuresPlusNpmHoldersWithCqlEngine(
+            List<String> subjects,
+            MeasureOrNpmResourceHolderList measureOrNpmResourceHolderList,
             @Nullable ZonedDateTime periodStart,
             @Nullable ZonedDateTime periodEnd,
             Parameters parameters,
             CqlEngine context) {
 
-        measures.forEach(this::checkMeasureLibrary);
+        measureOrNpmResourceHolderList.checkMeasureLibraries();
 
         var measurementPeriodParams = buildMeasurementPeriod(periodStart, periodEnd);
         var zonedMeasurementPeriod = MeasureProcessorUtils.getZonedTimeZoneForEval(
                 measureProcessorUtils.getDefaultMeasurementPeriod(measurementPeriodParams, context));
+
+        var measures = measureOrNpmResourceHolderList.getMeasures();
 
         // Do this to be backwards compatible with the previous single-library evaluation:
         // Trigger first-pass validation on measure scoring as well as other aspects of the Measures
@@ -324,11 +305,11 @@ public class R4MeasureProcessor {
 
         // Note that we must build the LibraryEngine BEFORE we call
         // measureProcessorUtils.setMeasurementPeriod(), otherwise, we get an NPE.
-        var multiLibraryIdMeasureEngineDetails = getMultiLibraryIdMeasureEngineDetails(measures);
+        var multiLibraryIdMeasureEngineDetails = getMultiLibraryIdMeasureEngineDetails(measureOrNpmResourceHolderList);
 
         preLibraryEvaluationPeriodProcessing(
                 multiLibraryIdMeasureEngineDetails.getLibraryIdentifiers(),
-                measures,
+                measureOrNpmResourceHolderList,
                 parameters,
                 context,
                 measurementPeriodParams);
@@ -352,7 +333,7 @@ public class R4MeasureProcessor {
      */
     private void preLibraryEvaluationPeriodProcessing(
             List<VersionedIdentifier> libraryVersionedIdentifiers,
-            List<Measure> measures,
+            MeasureOrNpmResourceHolderList measureOrNpmResourceHolderList,
             Parameters parameters,
             CqlEngine context,
             Interval measurementPeriodParams) {
@@ -373,7 +354,7 @@ public class R4MeasureProcessor {
         measureProcessorUtils.setMeasurementPeriod(
                 measurementPeriodParams,
                 context,
-                measures.stream()
+                measureOrNpmResourceHolderList.getMeasures().stream()
                         .map(Measure::getUrl)
                         .map(url -> Optional.ofNullable(url).orElse("Unknown Measure URL"))
                         .toList());
@@ -383,15 +364,16 @@ public class R4MeasureProcessor {
         popAllLibrariesFromCqlEngine(context, libraries);
     }
 
-    private MultiLibraryIdMeasureEngineDetails getMultiLibraryIdMeasureEngineDetails(List<Measure> measures) {
+    private MultiLibraryIdMeasureEngineDetails getMultiLibraryIdMeasureEngineDetails(
+            MeasureOrNpmResourceHolderList measureOrNpmResourceHolderList) {
 
-        var libraryIdentifiersToMeasureIds = measures.stream()
+        var libraryIdentifiersToMeasureIds = measureOrNpmResourceHolderList.getMeasuresOrNpmResourceHolders().stream()
                 .collect(ImmutableListMultimap.toImmutableListMultimap(
-                        this::getLibraryVersionIdentifier, // Key function
-                        Resource::getIdElement // Value function
-                        ));
+                        r4RepositoryOrNpmResourceProvider::getLibraryVersionIdentifier, // Key function
+                        MeasureOrNpmResourceHolder::getMeasureIdElement));
 
-        var libraryEngine = new LibraryEngine(repository, this.measureEvaluationOptions.getEvaluationSettings());
+        var libraryEngine = new LibraryEngine(
+                repository, this.measureEvaluationOptions.getEvaluationSettings(), this.engineInitializationContext);
 
         var builder = MultiLibraryIdMeasureEngineDetails.builder(libraryEngine);
 
@@ -478,7 +460,8 @@ public class R4MeasureProcessor {
 
         setArgParameters(parameters, context, lib);
 
-        return new LibraryEngine(repository, this.measureEvaluationOptions.getEvaluationSettings());
+        return new LibraryEngine(
+                repository, this.measureEvaluationOptions.getEvaluationSettings(), engineInitializationContext);
     }
 
     private List<CompiledLibrary> getCompiledLibraries(List<VersionedIdentifier> ids, CqlEngine context) {

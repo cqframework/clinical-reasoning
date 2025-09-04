@@ -6,15 +6,18 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.repository.IRepository;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Supplier;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
+import org.opencds.cqf.fhir.cql.Engines.EngineInitializationContext;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 public class Library {
@@ -64,6 +67,7 @@ public class Library {
 
     public static class Given {
         private IRepository repository;
+        private EngineInitializationContext engineInitializationContext;
         private EvaluationSettings evaluationSettings;
 
         public Given() {
@@ -87,6 +91,10 @@ public class Library {
             this.repository = new IgRepository(
                     FhirContext.forR4Cached(),
                     Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
+            this.engineInitializationContext = new EngineInitializationContext(
+                    this.repository,
+                    NpmPackageLoader.DEFAULT,
+                    Optional.ofNullable(this.evaluationSettings).orElse(EvaluationSettings.getDefault()));
             return this;
         }
 
@@ -96,11 +104,11 @@ public class Library {
         }
 
         private R4CqlExecutionService buildCqlService() {
-            return new R4CqlExecutionService(repository, evaluationSettings);
+            return new R4CqlExecutionService(repository, evaluationSettings, engineInitializationContext);
         }
 
         private R4LibraryEvaluationService buildLibraryEvaluationService() {
-            return new R4LibraryEvaluationService(repository, evaluationSettings);
+            return new R4LibraryEvaluationService(repository, evaluationSettings, engineInitializationContext);
         }
 
         public Library.When when() {

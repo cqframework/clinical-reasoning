@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cql;
 
+import com.google.common.annotations.VisibleForTesting;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +27,7 @@ public class EvaluationSettings {
     private RetrieveSettings retrieveSettings;
     private TerminologySettings terminologySettings;
     private NpmProcessor npmProcessor;
+    private boolean isUseNpmForQualifyingResources = false;
 
     public static EvaluationSettings getDefault() {
         return new EvaluationSettings();
@@ -159,6 +161,16 @@ public class EvaluationSettings {
 
     public EvaluationSettings withNpmProcessor(NpmProcessor npmProcessor) {
         setNpmProcessor(npmProcessor);
+        return this;
+    }
+
+    public boolean isUseNpmForQualifyingResources() {
+        return isUseNpmForQualifyingResources;
+    }
+
+    @VisibleForTesting
+    public EvaluationSettings setUseNpmForQualifyingResources(boolean useNpmForQualifyingResources) {
+        isUseNpmForQualifyingResources = useNpmForQualifyingResources;
         return this;
     }
 }

@@ -18,11 +18,13 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
+import org.opencds.cqf.fhir.cql.Engines.EngineInitializationContext;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cr.questionnaireresponse.extract.IExtractProcessor;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 import org.skyscreamer.jsonassert.JSONAssert;
 
@@ -53,10 +55,13 @@ public class TestQuestionnaireResponse {
 
     public static class Given {
         private IRepository repository;
+        private EngineInitializationContext engineInitializationContext;
         private IExtractProcessor extractProcessor;
 
         public Given repository(IRepository repository) {
             this.repository = repository;
+            this.engineInitializationContext = new EngineInitializationContext(
+                    repository, NpmPackageLoader.DEFAULT, EvaluationSettings.getDefault());
             return this;
         }
 
@@ -72,7 +77,8 @@ public class TestQuestionnaireResponse {
         }
 
         private QuestionnaireResponseProcessor buildProcessor() {
-            return new QuestionnaireResponseProcessor(repository, EvaluationSettings.getDefault(), extractProcessor);
+            return new QuestionnaireResponseProcessor(
+                    repository, EvaluationSettings.getDefault(), engineInitializationContext, extractProcessor);
         }
 
         public When when() {

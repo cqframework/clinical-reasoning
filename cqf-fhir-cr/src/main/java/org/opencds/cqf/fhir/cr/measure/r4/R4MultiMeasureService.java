@@ -4,6 +4,7 @@ import static org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils.get
 
 import ca.uhn.fhir.repository.IRepository;
 import com.google.common.base.Strings;
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import java.time.ZonedDateTime;
 import java.util.Collections;
@@ -14,20 +15,23 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Resource;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.fhir.cql.Engines;
+import org.opencds.cqf.fhir.cql.Engines.EngineInitializationContext;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.CompositeEvaluationResultsPerMeasure;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorUtils;
+import org.opencds.cqf.fhir.cr.measure.r4.npm.R4RepositoryOrNpmResourceProvider;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.builder.BundleBuilder;
+import org.opencds.cqf.fhir.utility.npm.MeasureOrNpmResourceHolder;
+import org.opencds.cqf.fhir.utility.npm.MeasureOrNpmResourceHolderList;
 import org.opencds.cqf.fhir.utility.repository.Repositories;
 
 /**
@@ -40,6 +44,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(R4MultiMeasureService.class);
 
     private final IRepository repository;
+    private final EngineInitializationContext engineInitializationContext;
     private final MeasureEvaluationOptions measureEvaluationOptions;
     private final MeasurePeriodValidator measurePeriodValidator;
     private final MeasureProcessorUtils measureProcessorUtils = new MeasureProcessorUtils();
@@ -47,19 +52,28 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
     private final R4RepositorySubjectProvider subjectProvider;
     private final R4MeasureProcessor r4MeasureProcessorStandardRepository;
     private final R4MeasureServiceUtils r4MeasureServiceUtilsStandardRepository;
+    private final R4RepositoryOrNpmResourceProvider r4RepositoryOrNpmResourceProvider;
 
     public R4MultiMeasureService(
             IRepository repository,
+            EngineInitializationContext engineInitializationContext,
             MeasureEvaluationOptions measureEvaluationOptions,
             String serverBase,
-            MeasurePeriodValidator measurePeriodValidator) {
+            MeasurePeriodValidator measurePeriodValidator,
+            R4RepositoryOrNpmResourceProvider r4RepositoryOrNpmResourceProvider) {
         this.repository = repository;
+        this.engineInitializationContext = engineInitializationContext;
         this.measureEvaluationOptions = measureEvaluationOptions;
         this.measurePeriodValidator = measurePeriodValidator;
         this.serverBase = serverBase;
         this.subjectProvider = new R4RepositorySubjectProvider(measureEvaluationOptions.getSubjectProviderOptions());
-        this.r4MeasureProcessorStandardRepository =
-                new R4MeasureProcessor(repository, this.measureEvaluationOptions, this.measureProcessorUtils);
+        this.r4RepositoryOrNpmResourceProvider = r4RepositoryOrNpmResourceProvider;
+        this.r4MeasureProcessorStandardRepository = new R4MeasureProcessor(
+                repository,
+                engineInitializationContext,
+                this.measureEvaluationOptions,
+                this.measureProcessorUtils,
+                this.r4RepositoryOrNpmResourceProvider);
         this.r4MeasureServiceUtilsStandardRepository = new R4MeasureServiceUtils(repository);
     }
 
@@ -89,8 +103,12 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
             var repositoryToUse =
                     Repositories.proxy(repository, true, dataEndpoint, contentEndpoint, terminologyEndpoint);
 
-            r4ProcessorToUse =
-                    new R4MeasureProcessor(repositoryToUse, this.measureEvaluationOptions, this.measureProcessorUtils);
+            r4ProcessorToUse = new R4MeasureProcessor(
+                    repositoryToUse,
+                    this.engineInitializationContext,
+                    this.measureEvaluationOptions,
+                    this.measureProcessorUtils,
+                    this.r4RepositoryOrNpmResourceProvider);
 
             r4MeasureServiceUtilsToUse = new R4MeasureServiceUtils(repositoryToUse);
         } else {
@@ -99,8 +117,11 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
         }
 
         r4MeasureServiceUtilsToUse.ensureSupplementalDataElementSearchParameter();
-        List<Measure> measures = r4MeasureServiceUtilsToUse.getMeasures(measureId, measureIdentifier, measureUrl);
-        log.info("multi-evaluate-measure, measures to evaluate: {}", measures.size());
+
+        var measurePlusNpmResourceHolderList =
+                r4RepositoryOrNpmResourceProvider.getMeasureOrNpmDetails(measureId, measureIdentifier, measureUrl);
+
+        log.info("multi-evaluate-measure, measures to evaluate: {}", measurePlusNpmResourceHolderList.size());
 
         var evalType = r4MeasureServiceUtilsToUse.getMeasureEvalType(reportType, subject);
 
@@ -112,14 +133,15 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
                 .withType(BundleType.SEARCHSET.toString())
                 .build();
 
-        var context = Engines.forRepository(
-                r4ProcessorToUse.getRepository(),
-                this.measureEvaluationOptions.getEvaluationSettings(),
+        // Replicate the old logic of using the repository used to initialize the measure processor
+        // as the repository for the CQL engine context.
+        var context = Engines.forContext(
+                buildEvaluationContext(r4ProcessorToUse.getRepository(), measurePlusNpmResourceHolderList),
                 additionalData);
 
         // This is basically a Map of measure -> subject -> EvaluationResult
-        var compositeEvaluationResultsPerMeasure = r4ProcessorToUse.evaluateMultiMeasuresWithCqlEngine(
-                subjects, measures, periodStart, periodEnd, parameters, context);
+        var compositeEvaluationResultsPerMeasure = r4ProcessorToUse.evaluateMultiMeasuresPlusNpmHoldersWithCqlEngine(
+                subjects, measurePlusNpmResourceHolderList, periodStart, periodEnd, parameters, context);
 
         // evaluate Measures
         if (evalType.equals(MeasureEvalType.POPULATION) || evalType.equals(MeasureEvalType.SUBJECTLIST)) {
@@ -129,7 +151,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
                     compositeEvaluationResultsPerMeasure,
                     context,
                     bundle,
-                    measures,
+                    measurePlusNpmResourceHolderList,
                     periodStart,
                     periodEnd,
                     reportType,
@@ -145,7 +167,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
                     compositeEvaluationResultsPerMeasure,
                     context,
                     bundle,
-                    measures,
+                    measurePlusNpmResourceHolderList,
                     periodStart,
                     periodEnd,
                     reportType,
@@ -164,7 +186,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
             CompositeEvaluationResultsPerMeasure compositeEvaluationResultsPerMeasure,
             CqlEngine context,
             Bundle bundle,
-            List<Measure> measures,
+            MeasureOrNpmResourceHolderList measureOrNpmResourceHolderList,
             @Nullable ZonedDateTime periodStart,
             @Nullable ZonedDateTime periodEnd,
             String reportType,
@@ -174,12 +196,13 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
             String productLine,
             String reporter) {
 
-        var totalMeasures = measures.size();
-        for (Measure measure : measures) {
+        var totalMeasures = measureOrNpmResourceHolderList.size();
+        for (MeasureOrNpmResourceHolder measureOrNpmResourceHolder :
+                measureOrNpmResourceHolderList.measuresPlusNpmResourceHolders()) {
             MeasureReport measureReport;
             // evaluate each measure
             measureReport = r4Processor.evaluateMeasure(
-                    measure,
+                    measureOrNpmResourceHolder,
                     periodStart,
                     periodEnd,
                     reportType,
@@ -222,7 +245,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
             CompositeEvaluationResultsPerMeasure compositeEvaluationResultsPerMeasure,
             CqlEngine context,
             Bundle bundle,
-            List<Measure> measures,
+            MeasureOrNpmResourceHolderList measureOrNpmResourceHolderList,
             @Nullable ZonedDateTime periodStart,
             @Nullable ZonedDateTime periodEnd,
             String reportType,
@@ -232,18 +255,19 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
             String reporter) {
 
         // create individual reports for each subject, and each measure
-        var totalReports = subjects.size() * measures.size();
-        var totalMeasures = measures.size();
+        var totalReports = subjects.size() * measureOrNpmResourceHolderList.size();
+        var totalMeasures = measureOrNpmResourceHolderList.size();
         log.debug(
                 "Evaluating individual MeasureReports for {} patients, and {} measures",
                 subjects.size(),
-                measures.size());
-        for (Measure measure : measures) {
+                measureOrNpmResourceHolderList.size());
+        for (MeasureOrNpmResourceHolder measureOrNpmResourceHolder :
+                measureOrNpmResourceHolderList.getMeasuresOrNpmResourceHolders()) {
             for (String subject : subjects) {
                 MeasureReport measureReport;
                 // evaluate each measure
                 measureReport = r4Processor.evaluateMeasure(
-                        measure,
+                        measureOrNpmResourceHolder,
                         periodStart,
                         periodEnd,
                         reportType,
@@ -272,13 +296,23 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
                     log.debug("MeasureReports remaining to evaluate {}", totalReports--);
                 }
             }
-            if (measure.hasUrl()) {
+            if (measureOrNpmResourceHolder.hasMeasureUrl()) {
                 log.info(
                         "Completed evaluation for Measure: {}, Measures remaining to evaluate: {}",
-                        measure.getUrl(),
+                        measureOrNpmResourceHolder.getMeasureUrl(),
                         totalMeasures--);
             }
         }
+    }
+
+    @Nonnull
+    private EngineInitializationContext buildEvaluationContext(
+            IRepository proxyRepoForMeasureProcessor, MeasureOrNpmResourceHolderList measurePlusNpmResourceHolderList) {
+
+        return engineInitializationContext
+                .withRepository(proxyRepoForMeasureProcessor)
+                .withNpmPackageLoader(
+                        r4RepositoryOrNpmResourceProvider.npmPackageLoaderWithCache(measurePlusNpmResourceHolderList));
     }
 
     protected List<String> getSubjects(R4RepositorySubjectProvider subjectProvider, String subjectId) {

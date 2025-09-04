@@ -51,15 +51,11 @@ public class ApplyRequestBuilder {
     private ZonedDateTime periodEnd;
     private IPrimitiveType<String> canonicalType;
 
-    public ApplyRequestBuilder(
-        IRepository repository,
-        EvaluationSettings evaluationSettings) {
+    public ApplyRequestBuilder(IRepository repository, EvaluationSettings evaluationSettings) {
         this.repository = repository;
         this.fhirVersion = repository.fhirContext().getVersion().getVersion();
         this.evaluationSettings = evaluationSettings;
     }
-
-
 
     public ApplyRequestBuilder withGrapDefinitionId(IdType id) {
         this.id = id;
@@ -71,7 +67,7 @@ public class ApplyRequestBuilder {
         return this;
     }
 
-    public  ApplyRequestBuilder withGraphDefinition(GraphDefinition graphDefinition) {
+    public ApplyRequestBuilder withGraphDefinition(GraphDefinition graphDefinition) {
         this.graphDefinition = graphDefinition;
         return this;
     }
@@ -174,36 +170,38 @@ public class ApplyRequestBuilder {
             throw new IllegalArgumentException("Missing required parameter: 'subject'");
         }
 
-        this.repository = proxy(this.repository, this.useServerData, this.dataRepository, this.contentRepository, this.terminologyRepository);
+        this.repository = proxy(
+                this.repository,
+                this.useServerData,
+                this.dataRepository,
+                this.contentRepository,
+                this.terminologyRepository);
 
-        Either3<IPrimitiveType<String>, IIdType, IBaseResource> eitherGraphDefinition = Eithers.for3(canonicalType, this.id, this.graphDefinition);
+        Either3<IPrimitiveType<String>, IIdType, IBaseResource> eitherGraphDefinition =
+                Eithers.for3(canonicalType, this.id, this.graphDefinition);
 
-        IBaseResource resolvedGraphDefinition = new ResourceResolver("GraphDefinition", this.repository).resolve(eitherGraphDefinition);
+        IBaseResource resolvedGraphDefinition =
+                new ResourceResolver("GraphDefinition", this.repository).resolve(eitherGraphDefinition);
 
         LibraryEngine libraryEngine = new LibraryEngine(this.repository, this.evaluationSettings);
 
         ModelResolver modelResolver = FhirModelResolverCache.resolverForVersion(this.fhirVersion);
 
         return new ApplyRequest(
-            resolvedGraphDefinition,
-            Ids.newId(this.fhirVersion, Ids.ensureIdType(subject, "Patient")),
-            this.userType,
-            this.userLanguage,
-            this.userTaskContext,
-            this.setting,
-            this.settingContext,
-            this.parameters,
-            this.data,
-            this.prefetchData,
-            libraryEngine,
-            modelResolver,
-            this.periodStart,
-            this.periodEnd,
-            null);
+                resolvedGraphDefinition,
+                Ids.newId(this.fhirVersion, Ids.ensureIdType(subject, "Patient")),
+                this.userType,
+                this.userLanguage,
+                this.userTaskContext,
+                this.setting,
+                this.settingContext,
+                this.parameters,
+                this.data,
+                this.prefetchData,
+                libraryEngine,
+                modelResolver,
+                this.periodStart,
+                this.periodEnd,
+                null);
     }
-
-
-
-
-
 }

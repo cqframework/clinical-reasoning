@@ -65,7 +65,6 @@ public class GraphDefinitionProcessor {
         this.packageProcessor = packageProcessor;
         this.dataRequirementsProcessor = dataRequirementsProcessor;
         this.applyProcessor = applyProcessor;
-
     }
 
     public EvaluationSettings evaluationSettings() {
@@ -75,7 +74,6 @@ public class GraphDefinitionProcessor {
     public IApplyProcessor getApplyProcessor() {
         if (isNull(this.applyProcessor)) {
             applyProcessor = new ApplyProcessor(repository, modelResolver);
-
         }
         return applyProcessor;
     }

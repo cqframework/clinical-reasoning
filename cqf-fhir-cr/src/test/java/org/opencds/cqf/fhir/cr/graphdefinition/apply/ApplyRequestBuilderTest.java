@@ -20,12 +20,12 @@ import org.opencds.cqf.fhir.cr.graphdefintion.apply.ApplyRequest;
 import org.opencds.cqf.fhir.cr.graphdefintion.apply.ApplyRequestBuilder;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
-
 @ExtendWith(MockitoExtension.class)
 class ApplyRequestBuilderTest {
 
     @Mock
     private IRepository repository;
+
     private EvaluationSettings evaluationSettings;
     private GraphDefinition graphDefinition;
     private FhirContext fhirContext = FhirContext.forR4Cached();
@@ -40,8 +40,8 @@ class ApplyRequestBuilderTest {
     void build_withoutSubject_throwsIllegalArgumentException() {
         when(repository.fhirContext()).thenReturn(fhirContext);
 
-        ApplyRequestBuilder builder = new ApplyRequestBuilder(repository, evaluationSettings)
-            .withGraphDefinition(graphDefinition);
+        ApplyRequestBuilder builder =
+                new ApplyRequestBuilder(repository, evaluationSettings).withGraphDefinition(graphDefinition);
 
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, builder::buildApplyRequest);
         assertEquals("Missing required parameter: 'subject'", ex.getMessage());
@@ -54,9 +54,9 @@ class ApplyRequestBuilderTest {
 
         String subject = "Patient/123";
         ApplyRequestBuilder builder = new ApplyRequestBuilder(localRepository, evaluationSettings)
-            .withGrapDefinitionId(id)
-            .withSubject(subject)
-            .withUseLocalData(true);
+                .withGrapDefinitionId(id)
+                .withSubject(subject)
+                .withUseLocalData(true);
 
         ApplyRequest request = builder.buildApplyRequest();
 
@@ -68,7 +68,7 @@ class ApplyRequestBuilderTest {
         assertThat(libraryEngine.getSettings()).isEqualTo(evaluationSettings);
 
         assertThat(request.getModelResolver()).isNotNull();
-        assertThat(request.getGraphDefinition().getStructureFhirVersionEnum()).isEqualTo(fhirContext.getVersion().getVersion());
-
+        assertThat(request.getGraphDefinition().getStructureFhirVersionEnum())
+                .isEqualTo(fhirContext.getVersion().getVersion());
     }
 }

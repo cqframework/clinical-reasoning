@@ -81,10 +81,8 @@ public class CrProcessorConfig {
 
     @Bean
     IGraphDefinitionApplyRequestBuilderFactory graphDefinitionApplyRequestBuilderFactory(
-        IRepositoryFactory repositoryFactory,
-        EvaluationSettings evaluationSettings){
+            IRepositoryFactory repositoryFactory, EvaluationSettings evaluationSettings) {
 
-        return rd -> new ApplyRequestBuilder(
-            repositoryFactory.create(rd), evaluationSettings);
+        return rd -> new ApplyRequestBuilder(repositoryFactory.create(rd), evaluationSettings);
     }
 }

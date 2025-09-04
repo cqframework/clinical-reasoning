@@ -44,21 +44,21 @@ public class ApplyRequest implements ICpgRequest {
     private IBaseResource graphDefinition;
 
     public ApplyRequest(
-        IBaseResource graphDefinition,
-        IIdType subjectId,
-        IBaseDatatype userType,
-        IBaseDatatype userLanguage,
-        IBaseDatatype userTaskContext,
-        IBaseDatatype setting,
-        IBaseDatatype settingContext,
-        IBaseParameters parameters,
-        IBaseBundle data,
-        List<? extends IBaseBackboneElement> prefetchData,
-        LibraryEngine libraryEngine,
-        ModelResolver modelResolver,
-        ZonedDateTime startDateTime,
-        ZonedDateTime endDateTime,
-        IInputParameterResolver inputParameterResolver) {
+            IBaseResource graphDefinition,
+            IIdType subjectId,
+            IBaseDatatype userType,
+            IBaseDatatype userLanguage,
+            IBaseDatatype userTaskContext,
+            IBaseDatatype setting,
+            IBaseDatatype settingContext,
+            IBaseParameters parameters,
+            IBaseBundle data,
+            List<? extends IBaseBackboneElement> prefetchData,
+            LibraryEngine libraryEngine,
+            ModelResolver modelResolver,
+            ZonedDateTime startDateTime,
+            ZonedDateTime endDateTime,
+            IInputParameterResolver inputParameterResolver) {
 
         checkNotNull(graphDefinition, "expected non-null value for graphDefinition");
         checkNotNull(libraryEngine, "expected non-null value for libraryEngine");
@@ -84,14 +84,8 @@ public class ApplyRequest implements ICpgRequest {
         this.libraryEngine = libraryEngine;
         this.modelResolver = modelResolver;
         this.inputParameterResolver = inputParameterResolver != null
-            ? inputParameterResolver
-            : createResolver(
-                libraryEngine.getRepository(),
-                this.subjectId,
-                null,
-                null,
-                this.parameters,
-                this.data);
+                ? inputParameterResolver
+                : createResolver(libraryEngine.getRepository(), this.subjectId, null, null, this.parameters, this.data);
 
         this.startDateTime = startDateTime;
         this.endDateTime = endDateTime;
@@ -223,8 +217,8 @@ public class ApplyRequest implements ICpgRequest {
     @Override
     public String toString() {
         return String.format(
-            "ApplyRequest[subjectId=%s, userType=%s, userLanguage=%s, userTaskContext=%s, setting=%s, settingContext=%s, parameters=%s, data=%s]",
-            subjectId, userType, userLanguage, userTaskContext, setting, settingContext, parameters, data);
+                "ApplyRequest[subjectId=%s, userType=%s, userLanguage=%s, userTaskContext=%s, setting=%s, settingContext=%s, parameters=%s, data=%s]",
+                subjectId, userType, userLanguage, userTaskContext, setting, settingContext, parameters, data);
     }
 
     @Override

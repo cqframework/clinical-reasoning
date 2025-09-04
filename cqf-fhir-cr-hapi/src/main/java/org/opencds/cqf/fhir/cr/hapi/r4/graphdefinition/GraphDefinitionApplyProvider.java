@@ -34,10 +34,10 @@ public class GraphDefinitionApplyProvider {
     private final StringTimePeriodHandler stringTimePeriodHandler;
 
     public GraphDefinitionApplyProvider(
-        IGraphDefinitionProcessorFactory graphDefinitionProcessorFactory,
-        IGraphDefinitionApplyRequestBuilderFactory graphDefinitionApplyRequestBuilderFactory,
-        FhirVersionEnum fhirVersion,
-        StringTimePeriodHandler stringTimePeriodHandler) {
+            IGraphDefinitionProcessorFactory graphDefinitionProcessorFactory,
+            IGraphDefinitionApplyRequestBuilderFactory graphDefinitionApplyRequestBuilderFactory,
+            FhirVersionEnum fhirVersion,
+            StringTimePeriodHandler stringTimePeriodHandler) {
 
         this.graphDefinitionProcessorFactory = graphDefinitionProcessorFactory;
         this.graphDefinitionApplyRequestBuilderFactory = graphDefinitionApplyRequestBuilderFactory;
@@ -93,123 +93,119 @@ public class GraphDefinitionApplyProvider {
      */
     @Operation(name = ProviderConstants.CR_OPERATION_APPLY, idempotent = true, type = GraphDefinition.class)
     public IBaseResource apply(
-        @IdParam IdType id,
-        @OperationParam(name = "graphDefinition") GraphDefinition graphDefinition,
-        @OperationParam(name = "canonical") String canonical,
-        @OperationParam(name = "url") String url,
-        @OperationParam(name = "version") String version,
-        @OperationParam(name = "subject") String subject,
-        @OperationParam(name = "encounter") String encounter,
-        @OperationParam(name = "practitioner") String practitioner,
-        @OperationParam(name = "organization") String organization,
-        @OperationParam(name = "userType") CodeableConcept userType,
-        @OperationParam(name = "userLanguage") CodeableConcept userLanguage,
-        @OperationParam(name = "userTaskContext") CodeableConcept userTaskContext,
-        @OperationParam(name = "setting") CodeableConcept setting,
-        @OperationParam(name = "settingContext") CodeableConcept settingContext,
-        @OperationParam(name = "parameters") Parameters parameters,
-        @OperationParam(name = "useServerData") BooleanType useServerData,
-        @OperationParam(name = "data") Bundle data,
-        @OperationParam(name = "prefetchData") List<ParametersParameterComponent> prefetchData,
-        @OperationParam(name = "dataEndpoint") Parameters.ParametersParameterComponent dataEndpoint,
-        @OperationParam(name = "contentEndpoint") Parameters.ParametersParameterComponent contentEndpoint,
-        @OperationParam(name = "terminologyEndpoint") Parameters.ParametersParameterComponent terminologyEndpoint,
-        @OperationParam(name = "periodStart") String periodStart,
-        @OperationParam(name = "periodEnd") String periodEnd,
-        RequestDetails requestDetails)
-        throws InternalErrorException, FHIRException {
+            @IdParam IdType id,
+            @OperationParam(name = "graphDefinition") GraphDefinition graphDefinition,
+            @OperationParam(name = "canonical") String canonical,
+            @OperationParam(name = "url") String url,
+            @OperationParam(name = "version") String version,
+            @OperationParam(name = "subject") String subject,
+            @OperationParam(name = "encounter") String encounter,
+            @OperationParam(name = "practitioner") String practitioner,
+            @OperationParam(name = "organization") String organization,
+            @OperationParam(name = "userType") CodeableConcept userType,
+            @OperationParam(name = "userLanguage") CodeableConcept userLanguage,
+            @OperationParam(name = "userTaskContext") CodeableConcept userTaskContext,
+            @OperationParam(name = "setting") CodeableConcept setting,
+            @OperationParam(name = "settingContext") CodeableConcept settingContext,
+            @OperationParam(name = "parameters") Parameters parameters,
+            @OperationParam(name = "useServerData") BooleanType useServerData,
+            @OperationParam(name = "data") Bundle data,
+            @OperationParam(name = "prefetchData") List<ParametersParameterComponent> prefetchData,
+            @OperationParam(name = "dataEndpoint") Parameters.ParametersParameterComponent dataEndpoint,
+            @OperationParam(name = "contentEndpoint") Parameters.ParametersParameterComponent contentEndpoint,
+            @OperationParam(name = "terminologyEndpoint") Parameters.ParametersParameterComponent terminologyEndpoint,
+            @OperationParam(name = "periodStart") String periodStart,
+            @OperationParam(name = "periodEnd") String periodEnd,
+            RequestDetails requestDetails)
+            throws InternalErrorException, FHIRException {
 
         var canonicalType = CanonicalHelper.getCanonicalType(fhirVersion, canonical, url, version);
 
         ApplyRequestBuilder applyRequestBuilder = graphDefinitionApplyRequestBuilderFactory
-            .createApplyRequestBuilder(requestDetails)
-            .withGrapDefinitionId(id)
-            .withCanonicalType(canonicalType)
-            .withGraphDefinition(graphDefinition)
-            .withSubject(subject)
-            .withUserType(userType)
-            .withUserLanguage(userLanguage)
-            .withUserTaskContext(userTaskContext)
-            .withSetting(setting)
-            .withSettingContext(settingContext)
-            .withParameters(parameters)
-            .withUseLocalData(useServerData == null ? true : useServerData.booleanValue())
-            .withData(data)
-            .withPrefetchData(prefetchData)
-            .withDataEndpoint(dataEndpoint)
-            .withContentEndpoint(contentEndpoint)
-            .withTerminologyEndpoint(terminologyEndpoint)
-            .withPeriodStart(getZonedStartDateTime(periodStart, requestDetails))
-            .withPeriodEnd(getZonedEndDateTime(periodEnd, requestDetails));
+                .createApplyRequestBuilder(requestDetails)
+                .withGrapDefinitionId(id)
+                .withCanonicalType(canonicalType)
+                .withGraphDefinition(graphDefinition)
+                .withSubject(subject)
+                .withUserType(userType)
+                .withUserLanguage(userLanguage)
+                .withUserTaskContext(userTaskContext)
+                .withSetting(setting)
+                .withSettingContext(settingContext)
+                .withParameters(parameters)
+                .withUseLocalData(useServerData == null ? true : useServerData.booleanValue())
+                .withData(data)
+                .withPrefetchData(prefetchData)
+                .withDataEndpoint(dataEndpoint)
+                .withContentEndpoint(contentEndpoint)
+                .withTerminologyEndpoint(terminologyEndpoint)
+                .withPeriodStart(getZonedStartDateTime(periodStart, requestDetails))
+                .withPeriodEnd(getZonedEndDateTime(periodEnd, requestDetails));
 
         ApplyRequest applyRequest = applyRequestBuilder.buildApplyRequest();
 
-        return graphDefinitionProcessorFactory
-            .create(requestDetails)
-            .apply(applyRequest);
+        return graphDefinitionProcessorFactory.create(requestDetails).apply(applyRequest);
     }
 
     @Operation(name = ProviderConstants.CR_OPERATION_APPLY, idempotent = true, type = GraphDefinition.class)
     public IBaseResource apply(
-        @OperationParam(name = "graphDefinition") GraphDefinition graphDefinition,
-        @OperationParam(name = "canonical") String canonical,
-        @OperationParam(name = "url") String url,
-        @OperationParam(name = "version") String version,
-        @OperationParam(name = "subject") String subject,
-        @OperationParam(name = "encounter") String encounter,
-        @OperationParam(name = "practitioner") String practitioner,
-        @OperationParam(name = "organization") String organization,
-        @OperationParam(name = "userType") CodeableConcept userType,
-        @OperationParam(name = "userLanguage") CodeableConcept userLanguage,
-        @OperationParam(name = "userTaskContext") CodeableConcept userTaskContext,
-        @OperationParam(name = "setting") CodeableConcept setting,
-        @OperationParam(name = "settingContext") CodeableConcept settingContext,
-        @OperationParam(name = "parameters") Parameters parameters,
-        @OperationParam(name = "useServerData") BooleanType useServerData,
-        @OperationParam(name = "data") Bundle data,
-        @OperationParam(name = "prefetchData") List<Parameters.ParametersParameterComponent> prefetchData,
-        @OperationParam(name = "dataEndpoint") Parameters.ParametersParameterComponent dataEndpoint,
-        @OperationParam(name = "contentEndpoint") Parameters.ParametersParameterComponent contentEndpoint,
-        @OperationParam(name = "terminologyEndpoint") Parameters.ParametersParameterComponent terminologyEndpoint,
-        @OperationParam(name = "periodStart") String periodStart,
-        @OperationParam(name = "periodEnd") String periodEnd,
-        RequestDetails requestDetails)
-        throws InternalErrorException, FHIRException {
+            @OperationParam(name = "graphDefinition") GraphDefinition graphDefinition,
+            @OperationParam(name = "canonical") String canonical,
+            @OperationParam(name = "url") String url,
+            @OperationParam(name = "version") String version,
+            @OperationParam(name = "subject") String subject,
+            @OperationParam(name = "encounter") String encounter,
+            @OperationParam(name = "practitioner") String practitioner,
+            @OperationParam(name = "organization") String organization,
+            @OperationParam(name = "userType") CodeableConcept userType,
+            @OperationParam(name = "userLanguage") CodeableConcept userLanguage,
+            @OperationParam(name = "userTaskContext") CodeableConcept userTaskContext,
+            @OperationParam(name = "setting") CodeableConcept setting,
+            @OperationParam(name = "settingContext") CodeableConcept settingContext,
+            @OperationParam(name = "parameters") Parameters parameters,
+            @OperationParam(name = "useServerData") BooleanType useServerData,
+            @OperationParam(name = "data") Bundle data,
+            @OperationParam(name = "prefetchData") List<Parameters.ParametersParameterComponent> prefetchData,
+            @OperationParam(name = "dataEndpoint") Parameters.ParametersParameterComponent dataEndpoint,
+            @OperationParam(name = "contentEndpoint") Parameters.ParametersParameterComponent contentEndpoint,
+            @OperationParam(name = "terminologyEndpoint") Parameters.ParametersParameterComponent terminologyEndpoint,
+            @OperationParam(name = "periodStart") String periodStart,
+            @OperationParam(name = "periodEnd") String periodEnd,
+            RequestDetails requestDetails)
+            throws InternalErrorException, FHIRException {
 
         var canonicalType = CanonicalHelper.getCanonicalType(fhirVersion, canonical, url, version);
 
         ApplyRequestBuilder applyRequestBuilder = graphDefinitionApplyRequestBuilderFactory
-            .createApplyRequestBuilder(requestDetails)
-            .withCanonicalType(canonicalType)
-            .withGraphDefinition(graphDefinition)
-            .withSubject(subject)
-            .withUserType(userType)
-            .withUserLanguage(userLanguage)
-            .withUserTaskContext(userTaskContext)
-            .withSetting(setting)
-            .withSettingContext(settingContext)
-            .withParameters(parameters)
-            .withUseLocalData(useServerData == null ? true : useServerData.booleanValue())
-            .withData(data)
-            .withPrefetchData(prefetchData)
-            .withDataEndpoint(dataEndpoint)
-            .withContentEndpoint(contentEndpoint)
-            .withTerminologyEndpoint(terminologyEndpoint)
-            .withPeriodStart(getZonedStartDateTime(periodStart, requestDetails))
-            .withPeriodEnd(getZonedEndDateTime(periodEnd, requestDetails));
+                .createApplyRequestBuilder(requestDetails)
+                .withCanonicalType(canonicalType)
+                .withGraphDefinition(graphDefinition)
+                .withSubject(subject)
+                .withUserType(userType)
+                .withUserLanguage(userLanguage)
+                .withUserTaskContext(userTaskContext)
+                .withSetting(setting)
+                .withSettingContext(settingContext)
+                .withParameters(parameters)
+                .withUseLocalData(useServerData == null ? true : useServerData.booleanValue())
+                .withData(data)
+                .withPrefetchData(prefetchData)
+                .withDataEndpoint(dataEndpoint)
+                .withContentEndpoint(contentEndpoint)
+                .withTerminologyEndpoint(terminologyEndpoint)
+                .withPeriodStart(getZonedStartDateTime(periodStart, requestDetails))
+                .withPeriodEnd(getZonedEndDateTime(periodEnd, requestDetails));
 
         ApplyRequest applyRequest = applyRequestBuilder.buildApplyRequest();
 
-        return graphDefinitionProcessorFactory
-            .create(requestDetails)
-            .apply(applyRequest);
+        return graphDefinitionProcessorFactory.create(requestDetails).apply(applyRequest);
     }
 
-    protected ZonedDateTime getZonedStartDateTime(String start, RequestDetails requestDetails){
+    protected ZonedDateTime getZonedStartDateTime(String start, RequestDetails requestDetails) {
         return stringTimePeriodHandler.getStartZonedDateTime(start, requestDetails);
     }
 
-    protected ZonedDateTime getZonedEndDateTime(String end, RequestDetails requestDetails){
+    protected ZonedDateTime getZonedEndDateTime(String end, RequestDetails requestDetails) {
         return stringTimePeriodHandler.getEndZonedDateTime(end, requestDetails);
     }
 }

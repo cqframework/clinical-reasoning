@@ -16,19 +16,18 @@ class GraphDefinitionProcessorTest {
     @Test
     void testApply_returnsBundleResource2() {
 
-        IgRepository repository =
-            new IgRepository(fhirContextR4, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r4/eras"));
+        IgRepository repository = new IgRepository(
+                fhirContextR4, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r4/eras"));
 
         var patientID = "Patient/time-zero";
         var graphDefinitionID = "eras-postop";
 
         given().repositoryFor(fhirContextR4, "r4")
-            .when()
-            .graphDefinitionId(graphDefinitionID)
-            .subjectId(patientID)
-            .dataRepository(repository)
-            .thenApply()
-            .responseIsBundle();
+                .when()
+                .graphDefinitionId(graphDefinitionID)
+                .subjectId(patientID)
+                .dataRepository(repository)
+                .thenApply()
+                .responseIsBundle();
     }
-
 }

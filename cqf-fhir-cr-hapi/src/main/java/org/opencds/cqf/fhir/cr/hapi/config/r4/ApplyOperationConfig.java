@@ -25,37 +25,40 @@ import org.springframework.context.annotation.Import;
 public class ApplyOperationConfig {
     @Bean
     ActivityDefinitionApplyProvider r4ActivityDefinitionApplyProvider(
-        IActivityDefinitionProcessorFactory activityDefinitionProcessorFactory) {
+            IActivityDefinitionProcessorFactory activityDefinitionProcessorFactory) {
         return new ActivityDefinitionApplyProvider(activityDefinitionProcessorFactory);
     }
 
     @Bean
     PlanDefinitionApplyProvider r4PlanDefinitionApplyProvider(
-        IPlanDefinitionProcessorFactory planDefinitionProcessorFactory) {
+            IPlanDefinitionProcessorFactory planDefinitionProcessorFactory) {
         return new PlanDefinitionApplyProvider(planDefinitionProcessorFactory);
     }
 
     @Bean
     GraphDefinitionApplyProvider r4GraphDefinitionApplyProvider(
-        IGraphDefinitionProcessorFactory graphDefinitionProcessorFactory, IGraphDefinitionApplyRequestBuilderFactory graphDefinitionApplyRequestBuilderFactory, FhirContext fhirContext, StringTimePeriodHandler stringTimePeriodHandler) {
+            IGraphDefinitionProcessorFactory graphDefinitionProcessorFactory,
+            IGraphDefinitionApplyRequestBuilderFactory graphDefinitionApplyRequestBuilderFactory,
+            FhirContext fhirContext,
+            StringTimePeriodHandler stringTimePeriodHandler) {
         return new GraphDefinitionApplyProvider(
-            graphDefinitionProcessorFactory,
-            graphDefinitionApplyRequestBuilderFactory,
-            fhirContext.getVersion().getVersion(),
-            stringTimePeriodHandler);
+                graphDefinitionProcessorFactory,
+                graphDefinitionApplyRequestBuilderFactory,
+                fhirContext.getVersion().getVersion(),
+                stringTimePeriodHandler);
     }
 
     @Bean(name = "applyOperationLoader")
     public ProviderLoader applyOperationLoader(
-        ApplicationContext applicationContext, FhirContext fhirContext, RestfulServer restfulServer) {
+            ApplicationContext applicationContext, FhirContext fhirContext, RestfulServer restfulServer) {
         var selector = new ProviderSelector(
-            fhirContext,
-            Map.of(
-                fhirContext.getVersion().getVersion(),
-                Arrays.asList(
-                    ActivityDefinitionApplyProvider.class,
-                    PlanDefinitionApplyProvider.class,
-                    GraphDefinitionApplyProvider.class)));
+                fhirContext,
+                Map.of(
+                        fhirContext.getVersion().getVersion(),
+                        Arrays.asList(
+                                ActivityDefinitionApplyProvider.class,
+                                PlanDefinitionApplyProvider.class,
+                                GraphDefinitionApplyProvider.class)));
 
         return new ProviderLoader(restfulServer, applicationContext, selector);
     }

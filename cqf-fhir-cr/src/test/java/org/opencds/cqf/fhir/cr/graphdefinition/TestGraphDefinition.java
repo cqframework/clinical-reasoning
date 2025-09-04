@@ -1,6 +1,5 @@
 package org.opencds.cqf.fhir.cr.graphdefinition;
 
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 import static org.opencds.cqf.fhir.utility.BundleHelper.addEntry;
@@ -74,7 +73,7 @@ public class TestGraphDefinition {
 
         public Given repositoryFor(FhirContext fhirContext, String repositoryPath) {
             this.repository = new IgRepository(
-                fhirContext, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
+                    fhirContext, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
             return this;
         }
 
@@ -85,13 +84,13 @@ public class TestGraphDefinition {
             if (evaluationSettings == null) {
                 evaluationSettings = EvaluationSettings.getDefault();
                 evaluationSettings
-                    .getRetrieveSettings()
-                    .setSearchParameterMode(SEARCH_FILTER_MODE.FILTER_IN_MEMORY)
-                    .setTerminologyParameterMode(TERMINOLOGY_FILTER_MODE.FILTER_IN_MEMORY);
+                        .getRetrieveSettings()
+                        .setSearchParameterMode(SEARCH_FILTER_MODE.FILTER_IN_MEMORY)
+                        .setTerminologyParameterMode(TERMINOLOGY_FILTER_MODE.FILTER_IN_MEMORY);
 
                 evaluationSettings
-                    .getTerminologySettings()
-                    .setValuesetExpansionMode(VALUESET_EXPANSION_MODE.PERFORM_NAIVE_EXPANSION);
+                        .getTerminologySettings()
+                        .setValuesetExpansionMode(VALUESET_EXPANSION_MODE.PERFORM_NAIVE_EXPANSION);
             }
 
             return new GraphDefinitionProcessor(repository);
@@ -108,12 +107,13 @@ public class TestGraphDefinition {
         private ApplyRequestBuilder applyRequestBuilder;
         private IParser jsonParser;
 
-        public When(IRepository repository,
-            GraphDefinitionProcessor graphDefinitionProcessor,
-            EvaluationSettings evaluationSettings) {
+        public When(
+                IRepository repository,
+                GraphDefinitionProcessor graphDefinitionProcessor,
+                EvaluationSettings evaluationSettings) {
             this.repository = repository;
             this.processor = graphDefinitionProcessor;
-            this.applyRequestBuilder = new ApplyRequestBuilder(this.repository,evaluationSettings );
+            this.applyRequestBuilder = new ApplyRequestBuilder(this.repository, evaluationSettings);
             this.jsonParser = repository.fhirContext().newJsonParser();
         }
 
@@ -144,9 +144,10 @@ public class TestGraphDefinition {
 
         public When additionalData(IBaseResource resource) {
             var fhirVersion = repository.fhirContext().getVersion().getVersion();
-            IBaseBundle additionalData = resource.getIdElement().getResourceType().equals("Bundle")
-                ? (IBaseBundle) resource
-                : addEntry(newBundle(fhirVersion), newEntryWithResource(resource));
+            IBaseBundle additionalData =
+                    resource.getIdElement().getResourceType().equals("Bundle")
+                            ? (IBaseBundle) resource
+                            : addEntry(newBundle(fhirVersion), newEntryWithResource(resource));
 
             applyRequestBuilder.withData(additionalData);
             return this;
@@ -171,7 +172,7 @@ public class TestGraphDefinition {
 
         private IRepository createRepository(String dataAssetName) {
             return new InMemoryFhirRepository(
-                repository.fhirContext(), (IBaseBundle) jsonParser.parseResource(open(dataAssetName)));
+                    repository.fhirContext(), (IBaseBundle) jsonParser.parseResource(open(dataAssetName)));
         }
 
         public static class GeneratedCarePlan {
@@ -181,8 +182,7 @@ public class TestGraphDefinition {
             final IParser jsonParser;
             final ModelResolver modelResolver;
 
-            public GeneratedCarePlan(IRepository theRepository,
-                IBaseResource generatedResource) {
+            public GeneratedCarePlan(IRepository theRepository, IBaseResource generatedResource) {
                 this.repository = theRepository;
                 this.generatedResource = generatedResource;
 
@@ -190,7 +190,6 @@ public class TestGraphDefinition {
                 jsonParser = fhirContext.newJsonParser().setPrettyPrint(true);
                 modelResolver = resolverForVersion(fhirContext.getVersion().getVersion());
             }
-
 
             public void responseIsBundle() {
                 assertThat(this.generatedResource).isInstanceOf(IBaseBundle.class);

@@ -123,7 +123,7 @@ public class GraphDefinitionApplyProvider {
 
         ApplyRequestBuilder applyRequestBuilder = graphDefinitionApplyRequestBuilderFactory
             .createApplyRequestBuilder(requestDetails)
-            .withId(id)
+            .withGrapDefinitionId(id)
             .withCanonicalType(canonicalType)
             .withGraphDefinition(graphDefinition)
             .withSubject(subject)

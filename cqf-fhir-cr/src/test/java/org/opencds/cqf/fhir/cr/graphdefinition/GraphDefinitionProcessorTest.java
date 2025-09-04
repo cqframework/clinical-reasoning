@@ -1,52 +1,34 @@
 package org.opencds.cqf.fhir.cr.graphdefinition;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.opencds.cqf.fhir.cr.graphdefinition.TestGraphDefinition.CLASS_PATH;
+import static org.opencds.cqf.fhir.cr.graphdefinition.TestGraphDefinition.given;
+import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.repository.IRepository;
-import java.time.ZonedDateTime;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.Parameters;
+import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
-import org.opencds.cqf.fhir.cr.graphdefintion.GraphDefinitionProcessor;
-import org.opencds.cqf.fhir.utility.monad.Eithers;
+import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 @SuppressWarnings("UnstableApiUsage")
-public class GraphDefinitionProcessorTest {
+class GraphDefinitionProcessorTest {
+    private final FhirContext fhirContextR4 = FhirContext.forR4Cached();
 
     @Test
-    void testApply_returnsParametersResource() {
-        IRepository repository = mock(IRepository.class);
-        when(repository.fhirContext()).thenReturn(FhirContext.forR4Cached());
+    void testApply_returnsBundleResource2() {
 
-        GraphDefinitionProcessor processor = new GraphDefinitionProcessor(repository);
+        IgRepository repository =
+            new IgRepository(fhirContextR4, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r4/eras"));
 
-        IIdType graphId = mock(IIdType.class);
-        Parameters inputParams = new Parameters();
+        var patientID = "Patient/time-zero";
+        var graphDefinitionID = "eras-postop";
 
-//        new ApplyRequestBuilder(repository);
-//
-//        IBaseParameters result = processor.apply(
-//                Eithers.forMiddle3(graphId),
-//                "Patient/123",
-//                ZonedDateTime.now().minusDays(1),
-//                ZonedDateTime.now(),
-//                inputParams);
-
-
-//
-//        assertNotNull(result);
-//        assertTrue(result instanceof Parameters);
-//
-//        Parameters parameters = (Parameters) result;
-//        assertTrue(parameters.getParameter().size() > 0);
-//
-//        Object firstParameter = parameters.getParameter().get(0);
-//        assertTrue(firstParameter instanceof Object);
-
+        given().repositoryFor(fhirContextR4, "r4")
+            .when()
+            .graphDefinitionId(graphDefinitionID)
+            .subjectId(patientID)
+            .dataRepository(repository)
+            .thenApply()
+            .responseIsBundle();
     }
+
 }

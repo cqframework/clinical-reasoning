@@ -8,10 +8,10 @@ import ca.uhn.fhir.repository.IRepository;
 import java.time.ZonedDateTime;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.GraphDefinition;
 import org.hl7.fhir.r4.model.IdType;
@@ -40,7 +40,7 @@ public class ApplyRequestBuilder {
     private CodeableConcept setting;
     private CodeableConcept settingContext;
     private boolean useServerData;
-    private Bundle data;
+    private IBaseBundle data;
     private List<ParametersParameterComponent> prefetchData;
     private IRepository dataRepository;
     private IRepository contentRepository;
@@ -61,7 +61,7 @@ public class ApplyRequestBuilder {
 
 
 
-    public ApplyRequestBuilder withId(IdType id) {
+    public ApplyRequestBuilder withGrapDefinitionId(IdType id) {
         this.id = id;
         return this;
     }
@@ -108,17 +108,15 @@ public class ApplyRequestBuilder {
 
     public ApplyRequestBuilder withParameters(Parameters parameters) {
         this.parameters = parameters;
-
         return this;
     }
 
     public ApplyRequestBuilder withUseLocalData(boolean useServerData) {
         this.useServerData = useServerData;
-
         return this;
     }
 
-    public ApplyRequestBuilder withData(Bundle data) {
+    public ApplyRequestBuilder withData(IBaseBundle data) {
         this.data = data;
         return this;
     }
@@ -131,7 +129,11 @@ public class ApplyRequestBuilder {
     public ApplyRequestBuilder withDataEndpoint(ParametersParameterComponent dataEndpointParam) {
         IBaseResource endpoint = EndpointHelper.getEndpoint(fhirVersion, dataEndpointParam);
         this.dataRepository = createRestRepository(repository.fhirContext(), endpoint);
+        return this;
+    }
 
+    public ApplyRequestBuilder withDataRepository(IRepository dataRepository) {
+        this.dataRepository = dataRepository;
         return this;
     }
 
@@ -141,15 +143,24 @@ public class ApplyRequestBuilder {
         return this;
     }
 
+    public ApplyRequestBuilder withContentRepository(IRepository contentRepository) {
+        this.contentRepository = contentRepository;
+        return this;
+    }
+
     public ApplyRequestBuilder withTerminologyEndpoint(ParametersParameterComponent terminologyEndpointParam) {
         IBaseResource endpoint = EndpointHelper.getEndpoint(fhirVersion, terminologyEndpointParam);
         this.terminologyRepository = createRestRepository(repository.fhirContext(), endpoint);
         return this;
     }
 
+    public ApplyRequestBuilder withTerminologyRepository(IRepository terminologyRepositoary) {
+        this.terminologyRepository = terminologyRepositoary;
+        return this;
+    }
+
     public ApplyRequestBuilder withPeriodStart(ZonedDateTime periodStartString) {
         this.periodStart = periodStartString;
-
         return this;
     }
 

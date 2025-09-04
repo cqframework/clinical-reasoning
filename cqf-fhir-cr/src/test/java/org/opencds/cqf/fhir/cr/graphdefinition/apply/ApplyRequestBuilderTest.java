@@ -1,4 +1,4 @@
-package org.opencds.cqf.fhir.cr.graphdefinition;
+package org.opencds.cqf.fhir.cr.graphdefinition.apply;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -22,7 +22,7 @@ import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
 
 @ExtendWith(MockitoExtension.class)
-public class ApplyRequestBuilderTest {
+class ApplyRequestBuilderTest {
 
     @Mock
     private IRepository repository;
@@ -54,7 +54,7 @@ public class ApplyRequestBuilderTest {
 
         String subject = "Patient/123";
         ApplyRequestBuilder builder = new ApplyRequestBuilder(localRepository, evaluationSettings)
-            .withId(id)
+            .withGrapDefinitionId(id)
             .withSubject(subject)
             .withUseLocalData(true);
 

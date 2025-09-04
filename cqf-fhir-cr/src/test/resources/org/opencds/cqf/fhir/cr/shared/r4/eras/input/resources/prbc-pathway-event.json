@@ -1,0 +1,29 @@
+{
+  "resourceType": "GraphDefinition",
+  "id": "prbc-pathway-event",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-computablegraphdefinition",
+      "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-caseplansummarydefinition"
+    ]
+  },
+  "url": "http://example.org/cdosdh/demo/GraphDefinition/prbc-pathway-event",
+  "name": "pRBCPathwayEventGraph",
+  "status": "active",
+  "date": "2025-12-02T09:05:00Z",
+  "publisher": "Smile Digital Health",
+  "description": "pRBC",
+  "start": "Observation",
+  "profile": "http://example.org/cdosdh/demo/StructureDefinition/cpg-casefeature-prbc-pathway-event",
+  "link": [
+    {
+      "description": "Case Features",
+      "target": [
+        {
+          "type": "Observation",
+          "profile": "http://example.org/cdosdh/demo/StructureDefinition/cpg-casefeature-po-prbc"
+        }
+      ]
+    }
+  ]
+}

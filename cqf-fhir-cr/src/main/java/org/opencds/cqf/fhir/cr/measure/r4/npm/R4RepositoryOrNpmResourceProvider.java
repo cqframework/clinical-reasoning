@@ -29,7 +29,6 @@ import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.VersionedIdentifiers;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.monad.Either3;
-import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.npm.MeasureOrNpmResourceHolder;
 import org.opencds.cqf.fhir.utility.npm.MeasureOrNpmResourceHolderList;
 import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
@@ -83,24 +82,6 @@ public class R4RepositoryOrNpmResourceProvider {
 
     public EvaluationSettings getEvaluationSettings() {
         return evaluationSettings;
-    }
-
-    public List<Either3<CanonicalType, IdType, Measure>> getMeasureEithers(
-            List<String> measureIds, List<String> measureUrls) {
-        if (measureIds != null && !measureIds.isEmpty()) {
-            return measureIds.stream()
-                    .map(measureId -> Eithers.<CanonicalType, IdType, Measure>forMiddle3(new IdType(measureId)))
-                    .toList();
-        }
-
-        if (measureUrls != null && !measureUrls.isEmpty()) {
-            return measureUrls.stream()
-                    .map(measureUrl -> Eithers.<CanonicalType, IdType, Measure>forLeft3(new CanonicalType(measureUrl)))
-                    .toList();
-        }
-
-        // LUKETODO:  not sure if this is right, but this is what the step2 test expects
-        return List.of();
     }
 
     /**

@@ -144,7 +144,6 @@ public class CareGaps {
             return this;
         }
 
-        // LUKETODO:  we may need to test this for test coverage numbers
         // Use this if you wish to do anything with NPM
         public Given repositoryPlusNpmFor(String repositoryPath) {
             var igRepository = new IgRepository(

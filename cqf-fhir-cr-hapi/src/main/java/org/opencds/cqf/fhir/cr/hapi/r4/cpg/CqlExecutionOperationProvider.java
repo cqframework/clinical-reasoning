@@ -1,6 +1,6 @@
 package org.opencds.cqf.fhir.cr.hapi.r4.cpg;
 
-import static org.opencds.cqf.fhir.cr.hapi.common.EndpointHelper.getEndpoint;
+import static org.opencds.cqf.fhir.utility.EndpointHelper.getEndpoint;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.annotation.Description;

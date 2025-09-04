@@ -337,6 +337,6 @@ class QuestionnaireProcessorTests {
                 .itemHasAnswerValue(
                         "test-requested|diagnosis-description",
                         "Type 2 diabetes mellitus with other diabetic arthropathy")
-                .itemHasAnswer("history|other-findings");
+                .itemHasNoAnswer("history|other-findings");
     }
 }

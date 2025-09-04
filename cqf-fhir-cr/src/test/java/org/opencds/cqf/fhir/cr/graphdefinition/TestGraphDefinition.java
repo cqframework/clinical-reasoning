@@ -118,7 +118,7 @@ public class TestGraphDefinition {
         }
 
         public When graphDefinitionId(String graphDefinitionId) {
-            applyRequestBuilder.withGrapDefinitionId(new IdType("GraphDefinition", graphDefinitionId));
+            applyRequestBuilder.withGraphDefinitionId(new IdType("GraphDefinition", graphDefinitionId));
             return this;
         }
 

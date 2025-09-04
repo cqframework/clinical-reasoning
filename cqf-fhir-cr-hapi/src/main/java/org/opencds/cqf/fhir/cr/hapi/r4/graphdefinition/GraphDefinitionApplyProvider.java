@@ -19,8 +19,6 @@ import org.hl7.fhir.r4.model.GraphDefinition;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
-import org.opencds.cqf.fhir.cr.graphdefintion.apply.ApplyRequest;
-import org.opencds.cqf.fhir.cr.graphdefintion.apply.ApplyRequestBuilder;
 import org.opencds.cqf.fhir.cr.hapi.common.CanonicalHelper;
 import org.opencds.cqf.fhir.cr.hapi.common.IGraphDefinitionApplyRequestBuilderFactory;
 import org.opencds.cqf.fhir.cr.hapi.common.IGraphDefinitionProcessorFactory;
@@ -121,19 +119,22 @@ public class GraphDefinitionApplyProvider {
 
         var canonicalType = CanonicalHelper.getCanonicalType(fhirVersion, canonical, url, version);
 
-        ApplyRequestBuilder applyRequestBuilder = graphDefinitionApplyRequestBuilderFactory
+        var applyRequestBuilder = graphDefinitionApplyRequestBuilderFactory
                 .createApplyRequestBuilder(requestDetails)
-                .withGrapDefinitionId(id)
+                .withGraphDefinitionId(id)
                 .withCanonicalType(canonicalType)
                 .withGraphDefinition(graphDefinition)
                 .withSubject(subject)
+                .withEncounter(encounter)
+                .withPractitioner(practitioner)
+                .withOrganization(organization)
                 .withUserType(userType)
                 .withUserLanguage(userLanguage)
                 .withUserTaskContext(userTaskContext)
                 .withSetting(setting)
                 .withSettingContext(settingContext)
                 .withParameters(parameters)
-                .withUseLocalData(useServerData == null ? true : useServerData.booleanValue())
+                .withUseLocalData(useServerData == null || useServerData.booleanValue())
                 .withData(data)
                 .withPrefetchData(prefetchData)
                 .withDataEndpoint(dataEndpoint)
@@ -142,7 +143,7 @@ public class GraphDefinitionApplyProvider {
                 .withPeriodStart(getZonedStartDateTime(periodStart, requestDetails))
                 .withPeriodEnd(getZonedEndDateTime(periodEnd, requestDetails));
 
-        ApplyRequest applyRequest = applyRequestBuilder.buildApplyRequest();
+        var applyRequest = applyRequestBuilder.buildApplyRequest();
 
         return graphDefinitionProcessorFactory.create(requestDetails).apply(applyRequest);
     }
@@ -176,18 +177,21 @@ public class GraphDefinitionApplyProvider {
 
         var canonicalType = CanonicalHelper.getCanonicalType(fhirVersion, canonical, url, version);
 
-        ApplyRequestBuilder applyRequestBuilder = graphDefinitionApplyRequestBuilderFactory
+        var applyRequestBuilder = graphDefinitionApplyRequestBuilderFactory
                 .createApplyRequestBuilder(requestDetails)
                 .withCanonicalType(canonicalType)
                 .withGraphDefinition(graphDefinition)
                 .withSubject(subject)
+                .withEncounter(encounter)
+                .withPractitioner(practitioner)
+                .withOrganization(organization)
                 .withUserType(userType)
                 .withUserLanguage(userLanguage)
                 .withUserTaskContext(userTaskContext)
                 .withSetting(setting)
                 .withSettingContext(settingContext)
                 .withParameters(parameters)
-                .withUseLocalData(useServerData == null ? true : useServerData.booleanValue())
+                .withUseLocalData(useServerData == null || useServerData.booleanValue())
                 .withData(data)
                 .withPrefetchData(prefetchData)
                 .withDataEndpoint(dataEndpoint)
@@ -196,7 +200,7 @@ public class GraphDefinitionApplyProvider {
                 .withPeriodStart(getZonedStartDateTime(periodStart, requestDetails))
                 .withPeriodEnd(getZonedEndDateTime(periodEnd, requestDetails));
 
-        ApplyRequest applyRequest = applyRequestBuilder.buildApplyRequest();
+        var applyRequest = applyRequestBuilder.buildApplyRequest();
 
         return graphDefinitionProcessorFactory.create(requestDetails).apply(applyRequest);
     }

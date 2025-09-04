@@ -27,6 +27,7 @@ import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.monad.Either3;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 
+@SuppressWarnings("UnstableApiUsage")
 public class ApplyRequestBuilder {
 
     private IRepository repository;
@@ -34,6 +35,9 @@ public class ApplyRequestBuilder {
     private final FhirVersionEnum fhirVersion;
     private GraphDefinition graphDefinition;
     private String subject;
+    private String encounter;
+    private String practitioner;
+    private String organization;
     private CodeableConcept userType;
     private CodeableConcept userLanguage;
     private CodeableConcept userTaskContext;
@@ -57,7 +61,7 @@ public class ApplyRequestBuilder {
         this.evaluationSettings = evaluationSettings;
     }
 
-    public ApplyRequestBuilder withGrapDefinitionId(IdType id) {
+    public ApplyRequestBuilder withGraphDefinitionId(IdType id) {
         this.id = id;
         return this;
     }
@@ -74,6 +78,21 @@ public class ApplyRequestBuilder {
 
     public ApplyRequestBuilder withSubject(String subject) {
         this.subject = subject;
+        return this;
+    }
+
+    public ApplyRequestBuilder withEncounter(String encounter) {
+        this.encounter = encounter;
+        return this;
+    }
+
+    public ApplyRequestBuilder withPractitioner(String practitioner) {
+        this.practitioner = practitioner;
+        return this;
+    }
+
+    public ApplyRequestBuilder withOrganization(String organization) {
+        this.organization = organization;
         return this;
     }
 
@@ -190,6 +209,9 @@ public class ApplyRequestBuilder {
         return new ApplyRequest(
                 resolvedGraphDefinition,
                 Ids.newId(this.fhirVersion, Ids.ensureIdType(subject, "Patient")),
+                encounter == null ? null : Ids.newId(fhirVersion, Ids.ensureIdType(encounter, "Encounter")),
+                practitioner == null ? null : Ids.newId(fhirVersion, Ids.ensureIdType(practitioner, "Practitioner")),
+                organization == null ? null : Ids.newId(fhirVersion, Ids.ensureIdType(organization, "Organization")),
                 this.userType,
                 this.userLanguage,
                 this.userTaskContext,

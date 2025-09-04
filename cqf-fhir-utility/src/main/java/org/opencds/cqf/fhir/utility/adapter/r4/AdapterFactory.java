@@ -24,6 +24,7 @@ import org.opencds.cqf.fhir.utility.adapter.ICodingAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IDataRequirementAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IElementDefinitionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IGraphDefinitionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
@@ -146,5 +147,10 @@ public class AdapterFactory implements IAdapterFactory {
     @Override
     public IValueSetAdapter createValueSet(IBaseResource valueSet) {
         return new ValueSetAdapter((IDomainResource) valueSet);
+    }
+
+    @Override
+    public IGraphDefinitionAdapter createGraphDefinition(IBaseResource graphDefinition) {
+        return new GraphDefinitionAdapter((IDomainResource) graphDefinition);
     }
 }

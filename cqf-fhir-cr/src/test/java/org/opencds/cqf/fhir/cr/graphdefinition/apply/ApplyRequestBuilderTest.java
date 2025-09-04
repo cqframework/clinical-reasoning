@@ -54,7 +54,7 @@ class ApplyRequestBuilderTest {
 
         String subject = "Patient/123";
         ApplyRequestBuilder builder = new ApplyRequestBuilder(localRepository, evaluationSettings)
-                .withGrapDefinitionId(id)
+                .withGraphDefinitionId(id)
                 .withSubject(subject)
                 .withUseLocalData(true);
 

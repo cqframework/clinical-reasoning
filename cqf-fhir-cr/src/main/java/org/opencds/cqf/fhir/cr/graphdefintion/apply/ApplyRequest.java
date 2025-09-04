@@ -7,7 +7,6 @@ import static org.opencds.cqf.fhir.utility.BundleHelper.newBundle;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.repository.IRepository;
 import java.time.ZonedDateTime;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -22,30 +21,37 @@ import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.common.ICpgRequest;
 import org.opencds.cqf.fhir.cr.common.IInputParameterResolver;
+import org.opencds.cqf.fhir.utility.adapter.IGraphDefinitionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireAdapter;
 
+@SuppressWarnings("UnstableApiUsage")
 public class ApplyRequest implements ICpgRequest {
-
+    private final IGraphDefinitionAdapter graphDefinitionAdapter;
     private final IIdType subjectId;
+    private final IIdType encounterId;
+    private final IIdType practitionerId;
+    private final IIdType organizationId;
     private final IBaseDatatype userType;
     private final IBaseDatatype userLanguage;
     private final IBaseDatatype userTaskContext;
     private final IBaseDatatype setting;
     private final IBaseDatatype settingContext;
-    private final IBaseParameters parameters;
     private final ZonedDateTime startDateTime;
     private final ZonedDateTime endDateTime;
     private IBaseBundle data;
     private final LibraryEngine libraryEngine;
     private final ModelResolver modelResolver;
     private final FhirVersionEnum fhirVersion;
+    private final Map<String, String> referencedLibraries;
     private final IInputParameterResolver inputParameterResolver;
     private IBaseOperationOutcome operationOutcome;
-    private IBaseResource graphDefinition;
 
     public ApplyRequest(
             IBaseResource graphDefinition,
             IIdType subjectId,
+            IIdType encounterId,
+            IIdType practitionerId,
+            IIdType organizationId,
             IBaseDatatype userType,
             IBaseDatatype userLanguage,
             IBaseDatatype userTaskContext,
@@ -64,15 +70,17 @@ public class ApplyRequest implements ICpgRequest {
         checkNotNull(libraryEngine, "expected non-null value for libraryEngine");
         checkNotNull(modelResolver, "expected non-null value for modelResolver");
 
-        this.fhirVersion = graphDefinition.getStructureFhirVersionEnum();
-        this.graphDefinition = graphDefinition;
+        fhirVersion = graphDefinition.getStructureFhirVersionEnum();
+        graphDefinitionAdapter = getAdapterFactory().createGraphDefinition(graphDefinition);
         this.subjectId = subjectId;
+        this.encounterId = encounterId;
+        this.practitionerId = practitionerId;
+        this.organizationId = organizationId;
         this.userType = userType;
         this.userLanguage = userLanguage;
         this.userTaskContext = userTaskContext;
         this.setting = setting;
         this.settingContext = settingContext;
-        this.parameters = parameters;
 
         if (prefetchData != null && !prefetchData.isEmpty()) {
             if (data == null) {
@@ -85,7 +93,14 @@ public class ApplyRequest implements ICpgRequest {
         this.modelResolver = modelResolver;
         this.inputParameterResolver = inputParameterResolver != null
                 ? inputParameterResolver
-                : createResolver(libraryEngine.getRepository(), this.subjectId, null, null, this.parameters, this.data);
+                : createResolver(
+                        libraryEngine.getRepository(),
+                        this.subjectId,
+                        this.encounterId,
+                        this.practitionerId,
+                        parameters,
+                        this.data);
+        referencedLibraries = graphDefinitionAdapter.getReferencedLibraries();
 
         this.startDateTime = startDateTime;
         this.endDateTime = endDateTime;
@@ -99,6 +114,10 @@ public class ApplyRequest implements ICpgRequest {
         return endDateTime;
     }
 
+    public IBaseResource getGraphDefinition() {
+        return graphDefinitionAdapter.get();
+    }
+
     @Override
     public IIdType getSubjectId() {
         return subjectId;
@@ -106,17 +125,17 @@ public class ApplyRequest implements ICpgRequest {
 
     @Override
     public IIdType getPractitionerId() {
-        return null;
+        return practitionerId;
     }
 
     @Override
     public IIdType getEncounterId() {
-        return null;
+        return encounterId;
     }
 
     @Override
     public IIdType getOrganizationId() {
-        return null;
+        return organizationId;
     }
 
     @Override
@@ -171,7 +190,7 @@ public class ApplyRequest implements ICpgRequest {
 
     @Override
     public Map<String, String> getReferencedLibraries() {
-        return Collections.emptyMap();
+        return referencedLibraries;
     }
 
     @Override
@@ -191,22 +210,18 @@ public class ApplyRequest implements ICpgRequest {
 
     @Override
     public IBase getContextVariable() {
-        return null;
+        return getGraphDefinition();
     }
 
     @Override
     public IBaseResource getQuestionnaire() {
+        // Will generated Questionnaires be expected to be part of the graph?
         return null;
     }
 
     @Override
     public IQuestionnaireAdapter getQuestionnaireAdapter() {
-
         return null;
-    }
-
-    public IBaseResource getGraphDefinition() {
-        return graphDefinition;
     }
 
     public ApplyRequest setData(IBaseBundle bundle) {
@@ -218,7 +233,7 @@ public class ApplyRequest implements ICpgRequest {
     public String toString() {
         return String.format(
                 "ApplyRequest[subjectId=%s, userType=%s, userLanguage=%s, userTaskContext=%s, setting=%s, settingContext=%s, parameters=%s, data=%s]",
-                subjectId, userType, userLanguage, userTaskContext, setting, settingContext, parameters, data);
+                subjectId, userType, userLanguage, userTaskContext, setting, settingContext, getParameters(), data);
     }
 
     @Override

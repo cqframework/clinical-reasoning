@@ -18,7 +18,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ReleaseOperationConfig {
     @Bean
-    ImplementationGuideReleaseProvider r4LibraryReleaseProvider(
+    ImplementationGuideReleaseProvider r4ImplementationGuideReleaseProvider(
         IImplementationGuideProcessorFactory implementationGuideProcessorFactory) {
         return new ImplementationGuideReleaseProvider(implementationGuideProcessorFactory);
     }

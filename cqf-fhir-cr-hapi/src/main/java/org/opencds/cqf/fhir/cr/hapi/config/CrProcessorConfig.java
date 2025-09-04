@@ -4,11 +4,13 @@ import ca.uhn.fhir.rest.api.server.IRepositoryFactory;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cr.activitydefinition.ActivityDefinitionProcessor;
 import org.opencds.cqf.fhir.cr.hapi.common.IActivityDefinitionProcessorFactory;
+import org.opencds.cqf.fhir.cr.hapi.common.IImplementationGuideProcessorFactory;
 import org.opencds.cqf.fhir.cr.hapi.common.ILibraryProcessorFactory;
 import org.opencds.cqf.fhir.cr.hapi.common.IPlanDefinitionProcessorFactory;
 import org.opencds.cqf.fhir.cr.hapi.common.IQuestionnaireProcessorFactory;
 import org.opencds.cqf.fhir.cr.hapi.common.IQuestionnaireResponseProcessorFactory;
 import org.opencds.cqf.fhir.cr.hapi.common.IValueSetProcessorFactory;
+import org.opencds.cqf.fhir.cr.implementationguide.ImplementationGuideProcessor;
 import org.opencds.cqf.fhir.cr.library.LibraryProcessor;
 import org.opencds.cqf.fhir.cr.plandefinition.PlanDefinitionProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.QuestionnaireProcessor;
@@ -24,6 +26,11 @@ public class CrProcessorConfig {
     IActivityDefinitionProcessorFactory activityDefinitionProcessorFactory(
             IRepositoryFactory repositoryFactory, EvaluationSettings evaluationSettings) {
         return rd -> new ActivityDefinitionProcessor(repositoryFactory.create(rd), evaluationSettings);
+    }
+
+    @Bean
+    IImplementationGuideProcessorFactory implementationGuideProcessorFactory(IRepositoryFactory repositoryFactory) {
+        return rd -> new ImplementationGuideProcessor(repositoryFactory.create(rd));
     }
 
     @Bean

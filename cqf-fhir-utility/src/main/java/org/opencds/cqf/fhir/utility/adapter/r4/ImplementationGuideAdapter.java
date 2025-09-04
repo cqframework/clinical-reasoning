@@ -1,10 +1,12 @@
 package org.opencds.cqf.fhir.utility.adapter.r4;
 
 import org.hl7.fhir.instance.model.api.IDomainResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.ImplementationGuide;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IImplementationGuideAdapter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class ImplementationGuideAdapter extends KnowledgeArtifactAdapter implements IImplementationGuideAdapter {

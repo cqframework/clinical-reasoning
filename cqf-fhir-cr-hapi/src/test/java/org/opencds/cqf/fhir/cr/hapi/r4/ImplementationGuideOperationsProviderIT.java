@@ -15,10 +15,10 @@ public class ImplementationGuideOperationsProviderIT extends BaseCrR4TestServer 
 
     @Test
     void testRelease() {
-        loadBundle("org/opencds/cqf/fhir/cr/hapi/r4/igs/ImplementationGuide-hl7.fhir.us.core-6-1-0.json");
+        loadResourceFromPath("org/opencds/cqf/fhir/cr/hapi/r4/igs/ImplementationGuide-hl7.fhir.us.core-6-1-0.json");
         var requestDetails = setupRequestDetails();
         var result = implementationGuideReleaseProvider.releaseImplementationGuide(
-            "ImplementationGuide/UsCore",
+            "ImplementationGuide/hl7.fhir.us.core",
             "1.0.0",
             new CodeType("default"),
             null,

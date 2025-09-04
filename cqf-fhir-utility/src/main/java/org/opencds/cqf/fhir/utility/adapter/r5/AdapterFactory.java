@@ -8,6 +8,7 @@ import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.r5.model.ActivityDefinition;
 import org.hl7.fhir.r5.model.Endpoint;
+import org.hl7.fhir.r5.model.ImplementationGuide;
 import org.hl7.fhir.r5.model.Library;
 import org.hl7.fhir.r5.model.Measure;
 import org.hl7.fhir.r5.model.MetadataResource;
@@ -59,6 +60,8 @@ public class AdapterFactory implements IAdapterFactory {
             adapter = new MeasureAdapter(measure);
         } else if (resource instanceof ActivityDefinition activityDefinition) {
             adapter = new ActivityDefinitionAdapter(activityDefinition);
+        } else if (resource instanceof ImplementationGuide implementationGuide) {
+            adapter = new ImplementationGuideAdapter(implementationGuide);
         } else if (resource instanceof PlanDefinition planDefinition) {
             adapter = new PlanDefinitionAdapter(planDefinition);
         } else if (resource instanceof Questionnaire questionnaire) {

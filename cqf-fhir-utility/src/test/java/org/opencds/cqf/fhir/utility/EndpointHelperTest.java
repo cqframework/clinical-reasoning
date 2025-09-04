@@ -1,4 +1,4 @@
-package org.opencds.cqf.fhir.cr.hapi.common;
+package org.opencds.cqf.fhir.utility;
 
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNull;

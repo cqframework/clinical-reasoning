@@ -1,0 +1,43 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "eras-post-op-demo",
+  "url": "http://example.org/cdosdh/demo/CodeSystem/eras-post-op-demo",
+  "name": "ERASPostOpDemoCodes",
+  "title": "ERAS Post Op Demo Codes",
+  "status": "draft",
+  "experimental": true,
+  "publisher": "Smile Digital Health",
+  "description": "Set of codes in the local domain",
+  "caseSensitive": true,
+  "content": "complete",
+  "concept": [
+    {
+      "code": "pre-op-hgb",
+      "display": "Pre-Op Hgb",
+      "definition": "Pre-Op Hgb"
+    },
+    {
+      "code": "post-op-hgb",
+      "display": "Post-Op Hgb",
+      "definition": "Post-Op Hgb"
+    }
+    ,
+    {
+      "code": "post-op-hgb-order",
+      "display": "Post-Op Hgb Order",
+      "definition": "Post-Op Hgb Order"
+    },
+    {
+      "code": "post-op-hgb-discharge-goal",
+      "display": "Post-Op Hgb Discharge Goal",
+      "definition": "Post-Op Hgb Discharge Goal"
+    },
+    { "code": "pre-op-hgb-process-metric", "display": "Pre-Op Hgb Process Metric", "definition": "Pre-Op Hgb Process Metric" },
+    { "code": "pre-op-hgb-goal-metric", "display": "Pre-Op Hgb Goal Metric", "definition": "Pre-Op Hgb Goal Metric" },
+    { "code": "post-op-hgb-process-metric", "display": "Post-Op Hgb Process Metric", "definition": "Post-Op Hgb Process Metric" },
+    { "code": "post-op-hgb-goal-metric", "display": "Post-Op Hgb Goal Metric", "definition": "Post-Op Hgb Goal Metric" },
+    { "code": "post-op-hgb-order-metric", "display": "Post-Op Hgb Order Metric", "definition": "Post-Op Hgb Order Metric" }
+    ,
+    { "code": "hgb-pathway-event", "display": "Hgb Pathway Event", "definition": "Hgb Pathway Event" }
+  ]
+}

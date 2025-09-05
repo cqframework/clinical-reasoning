@@ -1,0 +1,80 @@
+{
+  "resourceType": "GraphDefinition",
+  "id": "urineoutput-pathway-event",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-computablegraphdefinition",
+      "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-caseplansummarydefinition"
+    ]
+  },
+  "url": "http://example.org/cdosdh/demo/GraphDefinition/urineoutput-pathway-event",
+  "name": "UrineOutputPathwayEventGraph",
+  "status": "active",
+  "date": "2025-12-02T09:05:00Z",
+  "publisher": "Smile Digital Health",
+  "description": "Urine Output",
+  "start": "Observation",
+  "profile": "http://example.org/cdosdh/demo/StructureDefinition/cpg-casefeature-urineoutput-pathway-event",
+  "link": [
+    {
+      "description": "Case Features",
+      "target": [
+        {
+          "type": "Observation",
+          "profile": "http://example.org/cdosdh/demo/StructureDefinition/cgp-casefeature-urineoutput-8hr-shift-total"
+        },
+        {
+          "type": "Observation",
+          "profile": "http://example.org/cdosdh/demo/StructureDefinition/cgp-casefeature-urineoutput-collection"
+        }
+      ]
+    },
+    {
+      "description": "Orders",
+      "target": [
+        {
+          "type": "ServiceRequest",
+          "profile": "http://example.org/cdosdh/demo/StructureDefinition/cpg-casefeature-io-order"
+        }
+      ]
+    },
+    {
+      "description": "Goal",
+      "target": [
+        {
+          "type": "Goal",
+          "profile": "http://example.org/cdosdh/demo/StructureDefinition/cpg-casefeature-urineoutput-8hr-goal"
+        },
+        {
+          "type": "Goal",
+          "profile": "http://example.org/cdosdh/demo/StructureDefinition/cpg-casefeature-urineoutput-minimum-hourly-goal"
+        }
+      ]
+    },
+    {
+      "description": "Metrics",
+      "target": [
+        {
+          "type": "Observation",
+          "profile": "http://example.org/cdosdh/demo/StructureDefinition/cpg-casefeature-metric-io-order"
+        },
+        {
+          "type": "Observation",
+          "profile": "http://example.org/cdosdh/demo/StructureDefinition/cpg-casefeature-metric-urineoutput-8hr-shift-total-goal"
+        },
+        {
+          "type": "Observation",
+          "profile": "http://example.org/cdosdh/demo/StructureDefinition/cpg-casefeature-metric-urineoutput-8hr-shift-total-process"
+        },
+        {
+          "type": "Observation",
+          "profile": "http://example.org/cdosdh/demo/StructureDefinition/cpg-casefeature-metric-urineoutput-collection-goal"
+        },
+        {
+          "type": "Observation",
+          "profile": "http://example.org/cdosdh/demo/StructureDefinition/cpg-casefeature-metric-urineoutput-collection-process"
+        }
+      ]
+    }
+  ]
+}

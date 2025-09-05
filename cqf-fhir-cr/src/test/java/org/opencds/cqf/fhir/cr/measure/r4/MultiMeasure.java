@@ -174,7 +174,7 @@ class MultiMeasure {
         private Bundle additionalData;
         private Parameters parameters;
 
-        private Supplier<Bundle> operation;
+        private Supplier<Parameters> operation;
         private String productLine;
         private String reporter;
 
@@ -264,24 +264,25 @@ class MultiMeasure {
         }
     }
 
-    public static class SelectedReport extends MultiMeasure.Selected<Bundle, Void> {
+    public static class SelectedReport extends MultiMeasure.Selected<Parameters, Void> {
 
-        public SelectedReport(Bundle report) {
+        public SelectedReport(Parameters report) {
             super(report, null);
         }
 
-        public Bundle report() {
+        public Parameters report() {
             return this.value();
         }
 
         public MultiMeasure.SelectedReport hasMeasureReportCount(int count) {
-            assertEquals(count, report().getEntry().size());
+            assertEquals(count, report().getParameter().size());
             return this;
         }
 
         public MultiMeasure.SelectedReport hasMeasureReportCountPerUrl(int count, String measureUrl) {
-            var reports = report().getEntry().stream()
-                    .map(t -> (MeasureReport) t.getResource())
+            var reports = report().getParameter().stream()
+                    .map(p -> ((Bundle) p.getResource()))
+                    .map(t -> (MeasureReport) t.getEntryFirstRep().getResource())
                     .filter(x -> x.getMeasure().equals(measureUrl))
                     .toList();
             var msg =
@@ -291,14 +292,15 @@ class MultiMeasure {
             return this;
         }
 
-        public SelectedMeasureReport measureReport(MultiMeasure.Selector<MeasureReport, Bundle> bundleSelector) {
+        public SelectedMeasureReport measureReport(MultiMeasure.Selector<MeasureReport, Parameters> bundleSelector) {
             var p = bundleSelector.select(value());
             return new SelectedMeasureReport(p, this);
         }
 
         public SelectedMeasureReport measureReport(String measureUrl) {
             return this.measureReport(g -> resourceToMeasureReport(
-                    g.getEntry().stream()
+                    g.getParameter().stream()
+                            .flatMap(p -> ((Bundle) p.getResource()).getEntry().stream())
                             .filter(x ->
                                     x.getResource().getResourceType().toString().equals("MeasureReport"))
                             .toList(),
@@ -307,7 +309,8 @@ class MultiMeasure {
 
         public SelectedMeasureReport measureReport(String measureUrl, String subject) {
             return this.measureReport(g -> resourceToMeasureReport(
-                    g.getEntry().stream()
+                    g.getParameter().stream()
+                            .flatMap(p -> ((Bundle) p.getResource()).getEntry().stream())
                             .filter(x ->
                                     x.getResource().getResourceType().toString().equals("MeasureReport"))
                             .toList(),
@@ -316,12 +319,16 @@ class MultiMeasure {
         }
 
         public SelectedMeasureReport getFirstMeasureReport() {
-            var mr = (MeasureReport) report().getEntryFirstRep().getResource();
+            var mr = (MeasureReport) ((Bundle) report().getParameterFirstRep().getResource())
+                    .getEntryFirstRep()
+                    .getResource();
             return this.measureReport(g -> mr);
         }
 
         public SelectedMeasureReport getSecondMeasureReport() {
-            var entries = report().getEntry();
+            var entries = report().getParameter().stream()
+                    .flatMap(p -> ((Bundle) p.getResource()).getEntry().stream())
+                    .toList();
             if (entries.size() < 2) {
                 fail("There are not enough entries in the report to get the second one.");
             }

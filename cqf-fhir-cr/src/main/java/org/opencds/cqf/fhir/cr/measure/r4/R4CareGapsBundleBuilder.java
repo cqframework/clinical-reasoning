@@ -60,6 +60,7 @@ import org.opencds.cqf.fhir.utility.builder.NarrativeSettings;
 /**
  * Care Gaps Bundle Builder houses the logic for constructing a Care-Gaps Document Bundle for a Patient per Measures requested
  */
+@SuppressWarnings("UnstableApiUsage")
 public class R4CareGapsBundleBuilder {
     private static final Map<String, CodeableConceptSettings> CARE_GAPS_CODES = ImmutableMap.of(
             "http://loinc.org/96315-7",
@@ -102,7 +103,7 @@ public class R4CareGapsBundleBuilder {
 
         for (String subject : subjects) {
             // Measure Reports
-            Bundle result = r4MultiMeasureService.evaluate(
+            var result = r4MultiMeasureService.evaluate(
                     measureId,
                     null,
                     null,
@@ -118,13 +119,17 @@ public class R4CareGapsBundleBuilder {
                     null,
                     reporter);
 
+            var entries = result.getParameter().stream()
+                    .map(p -> ((Bundle) p.getResource()))
+                    .flatMap(b -> b.getEntry().stream())
+                    .toList();
+
             // Patient, subject comes in as format "ResourceType/[id]", no resourceType required to be specified.
             var patient = repository.read(Patient.class, new IdType(subject));
 
-            Bundle bundle;
             // finalize patient Bundle results
-            bundle = makePatientBundle(
-                    result, r4CareGapsParameters.getStatus(), patient, r4CareGapsParameters.isNotDocument());
+            var bundle = makePatientBundle(
+                    entries, r4CareGapsParameters.getStatus(), patient, r4CareGapsParameters.isNotDocument());
 
             // add parameter with results
             if (bundle != null && bundle.hasEntry()) {
@@ -138,7 +143,8 @@ public class R4CareGapsBundleBuilder {
      * resources are added or excluded from the final bundle
      */
     @Nullable
-    public Bundle makePatientBundle(Bundle bundle, List<String> statuses, Patient patient, boolean notDocument) {
+    public Bundle makePatientBundle(
+            List<BundleEntryComponent> entries, List<String> statuses, Patient patient, boolean notDocument) {
         Map<String, Resource> evalPlusSDE = new HashMap<>();
         List<DetectedIssue> detectedIssues = new ArrayList<>();
         List<MeasureReport> measureReports = new ArrayList<>();
@@ -146,7 +152,7 @@ public class R4CareGapsBundleBuilder {
         var composition = getComposition(patient, notDocument);
 
         // get Evaluation Bundle Results
-        for (BundleEntryComponent entry : bundle.getEntry()) {
+        for (BundleEntryComponent entry : entries) {
             MeasureReport mr = (MeasureReport) entry.getResource();
             addProfile(mr);
             addResourceId(mr);
@@ -171,7 +177,7 @@ public class R4CareGapsBundleBuilder {
                     // add DetectedIssue list to set on Bundle
                     detectedIssues.add(issue);
                     // add sections for DetectedIssues created
-                    if (!notDocument) {
+                    if (!notDocument && composition != null) {
                         composition.addSection(getSection(measure, mr, issue, careGapsStatusCode));
                     }
                 }

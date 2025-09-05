@@ -14,7 +14,7 @@ import org.hl7.fhir.r4.model.Parameters;
  */
 public interface R4MeasureEvaluatorMultiple {
 
-    Bundle evaluate(
+    Parameters evaluate(
             List<IdType> measureId,
             List<String> measureUrl,
             List<String> measureIdentifier,

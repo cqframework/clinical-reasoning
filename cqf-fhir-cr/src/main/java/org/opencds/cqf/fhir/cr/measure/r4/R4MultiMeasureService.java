@@ -109,10 +109,6 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
 
         // create parameters
         var result = new Parameters();
-        //        // create bundle
-        //        Bundle bundle = new BundleBuilder<>(Bundle.class)
-        //                .withType(BundleType.SEARCHSET.toString())
-        //                .build();
 
         var context = Engines.forRepository(
                 r4ProcessorToUse.getRepository(),

@@ -9,7 +9,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.repository.IRepository;
 import org.hl7.fhir.r4.model.GraphDefinition;
 import org.hl7.fhir.r4.model.IdType;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -26,25 +25,29 @@ class ApplyRequestBuilderTest {
     @Mock
     private IRepository repository;
 
-    private EvaluationSettings evaluationSettings;
-    private GraphDefinition graphDefinition;
-    private FhirContext fhirContext = FhirContext.forR4Cached();
+    private EvaluationSettings evaluationSettings = EvaluationSettings.getDefault();
 
-    @BeforeEach
-    void beforeEach() {
-        this.evaluationSettings = EvaluationSettings.getDefault();
-        this.graphDefinition = new GraphDefinition();
-    }
+    private FhirContext fhirContext = FhirContext.forR4Cached();
 
     @Test
     void build_withoutSubject_throwsIllegalArgumentException() {
         when(repository.fhirContext()).thenReturn(fhirContext);
 
-        ApplyRequestBuilder builder =
-                new ApplyRequestBuilder(repository, evaluationSettings).withGraphDefinition(graphDefinition);
+        ApplyRequestBuilder builder = new ApplyRequestBuilder(repository, evaluationSettings);
 
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, builder::buildApplyRequest);
         assertEquals("Missing required parameter: 'subject'", ex.getMessage());
+    }
+
+    @Test
+    void build_withoutPractitioner_throwsIllegalArgumentException() {
+        when(repository.fhirContext()).thenReturn(fhirContext);
+
+        ApplyRequestBuilder builder =
+                new ApplyRequestBuilder(repository, evaluationSettings).withSubject("Patient/123");
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, builder::buildApplyRequest);
+        assertEquals("Missing required parameter: 'practitioner'", ex.getMessage());
     }
 
     @Test
@@ -52,10 +55,10 @@ class ApplyRequestBuilderTest {
         IRepository localRepository = new InMemoryFhirRepository(fhirContext);
         IdType id = (IdType) localRepository.create(new GraphDefinition()).getId();
 
-        String subject = "Patient/123";
         ApplyRequestBuilder builder = new ApplyRequestBuilder(localRepository, evaluationSettings)
                 .withGraphDefinitionId(id)
-                .withSubject(subject)
+                .withSubject("Patient/123")
+                .withPractitioner("Practitioner/456")
                 .withUseLocalData(true);
 
         ApplyRequest request = builder.buildApplyRequest();

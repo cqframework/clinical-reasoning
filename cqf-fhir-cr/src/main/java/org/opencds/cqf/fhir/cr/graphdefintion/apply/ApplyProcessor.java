@@ -23,6 +23,7 @@ public class ApplyProcessor implements IApplyProcessor {
 
     @Override
     public IBaseResource apply(ApplyRequest request) {
+
         return BundleHelper.newBundle(repository.fhirContext().getVersion().getVersion());
     }
 }

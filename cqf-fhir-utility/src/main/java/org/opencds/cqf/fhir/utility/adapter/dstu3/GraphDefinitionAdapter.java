@@ -5,6 +5,7 @@ import java.util.List;
 import org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.dstu3.model.GraphDefinition;
 import org.hl7.fhir.dstu3.model.UsageContext;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
@@ -69,6 +70,16 @@ public class GraphDefinitionAdapter extends ResourceAdapter implements IGraphDef
 
     @Override
     public <T extends ICompositeType & IBaseHasExtensions> List<T> getRelatedArtifactsOfType(String codeString) {
+        return List.of();
+    }
+
+    @Override
+    public List<IBaseBackboneElement> getBackBoneElements() {
+        return List.of();
+    }
+
+    @Override
+    public List<IBaseBackboneElement> getNode() {
         return List.of();
     }
 }

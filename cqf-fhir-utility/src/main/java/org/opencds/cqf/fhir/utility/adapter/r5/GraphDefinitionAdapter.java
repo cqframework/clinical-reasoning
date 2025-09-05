@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.utility.adapter.r5;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
@@ -92,6 +93,16 @@ public class GraphDefinitionAdapter extends ResourceAdapter implements IGraphDef
 
     @Override
     public <T extends ICompositeType & IBaseHasExtensions> List<T> getRelatedArtifactsOfType(String codeString) {
+        return List.of();
+    }
+
+    @Override
+    public List<IBaseBackboneElement> getBackBoneElements() {
+        return List.of();
+    }
+
+    @Override
+    public List<IBaseBackboneElement> getNode() {
         return List.of();
     }
 }

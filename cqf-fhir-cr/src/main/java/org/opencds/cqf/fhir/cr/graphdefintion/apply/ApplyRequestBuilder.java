@@ -51,8 +51,8 @@ public class ApplyRequestBuilder {
     private IRepository terminologyRepository;
     private Parameters parameters;
     private IIdType id;
-    private ZonedDateTime periodStart;
-    private ZonedDateTime periodEnd;
+    private ZonedDateTime periodStartString;
+    private ZonedDateTime periodEndString;
     private IPrimitiveType<String> canonicalType;
 
     public ApplyRequestBuilder(IRepository repository, EvaluationSettings evaluationSettings) {
@@ -175,18 +175,22 @@ public class ApplyRequestBuilder {
     }
 
     public ApplyRequestBuilder withPeriodStart(ZonedDateTime periodStartString) {
-        this.periodStart = periodStartString;
+        this.periodStartString = periodStartString;
         return this;
     }
 
     public ApplyRequestBuilder withPeriodEnd(ZonedDateTime periodEndString) {
-        this.periodEnd = periodEndString;
+        this.periodEndString = periodEndString;
         return this;
     }
 
     public ApplyRequest buildApplyRequest() {
         if (StringUtils.isBlank(this.subject)) {
             throw new IllegalArgumentException("Missing required parameter: 'subject'");
+        }
+
+        if (StringUtils.isBlank(this.practitioner)) {
+            throw new IllegalArgumentException("Missing required parameter: 'practitioner'");
         }
 
         this.repository = proxy(
@@ -209,8 +213,8 @@ public class ApplyRequestBuilder {
         return new ApplyRequest(
                 resolvedGraphDefinition,
                 Ids.newId(this.fhirVersion, Ids.ensureIdType(subject, "Patient")),
+                Ids.newId(this.fhirVersion, Ids.ensureIdType(practitioner, "Practitioner")),
                 encounter == null ? null : Ids.newId(fhirVersion, Ids.ensureIdType(encounter, "Encounter")),
-                practitioner == null ? null : Ids.newId(fhirVersion, Ids.ensureIdType(practitioner, "Practitioner")),
                 organization == null ? null : Ids.newId(fhirVersion, Ids.ensureIdType(organization, "Organization")),
                 this.userType,
                 this.userLanguage,
@@ -222,8 +226,8 @@ public class ApplyRequestBuilder {
                 this.prefetchData,
                 libraryEngine,
                 modelResolver,
-                this.periodStart,
-                this.periodEnd,
+                this.periodStartString,
+                this.periodEndString,
                 null);
     }
 }

@@ -70,8 +70,8 @@ public class ApplyRequest implements ICpgRequest {
         checkNotNull(libraryEngine, "expected non-null value for libraryEngine");
         checkNotNull(modelResolver, "expected non-null value for modelResolver");
 
-        fhirVersion = graphDefinition.getStructureFhirVersionEnum();
-        graphDefinitionAdapter = getAdapterFactory().createGraphDefinition(graphDefinition);
+        this.fhirVersion = graphDefinition.getStructureFhirVersionEnum();
+        this.graphDefinitionAdapter = getAdapterFactory().createGraphDefinition(graphDefinition);
         this.subjectId = subjectId;
         this.encounterId = encounterId;
         this.practitionerId = practitionerId;
@@ -84,7 +84,7 @@ public class ApplyRequest implements ICpgRequest {
 
         if (prefetchData != null && !prefetchData.isEmpty()) {
             if (data == null) {
-                data = newBundle(fhirVersion);
+                data = newBundle(this.fhirVersion);
             }
             resolvePrefetchData(data, prefetchData);
         }

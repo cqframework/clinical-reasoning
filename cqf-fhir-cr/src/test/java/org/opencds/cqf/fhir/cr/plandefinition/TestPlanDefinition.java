@@ -37,6 +37,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.json.JSONException;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
+import org.opencds.cqf.fhir.cql.Engines.EngineInitializationContext;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
@@ -50,6 +51,7 @@ import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
 import org.opencds.cqf.fhir.utility.client.TerminologyServerClientSettings;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -81,16 +83,19 @@ public class TestPlanDefinition {
 
     public static class Given {
         private IRepository repository;
+        private NpmPackageLoader npmPackageLoader;
         private EvaluationSettings evaluationSettings;
 
         public Given repository(IRepository repository) {
             this.repository = repository;
+            this.npmPackageLoader = NpmPackageLoader.DEFAULT;
             return this;
         }
 
         public Given repositoryFor(FhirContext fhirContext, String repositoryPath) {
             this.repository = new IgRepository(
                     fhirContext, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
+            this.npmPackageLoader = NpmPackageLoader.DEFAULT;
             return this;
         }
 
@@ -101,7 +106,8 @@ public class TestPlanDefinition {
 
         public PlanDefinitionProcessor buildProcessor(IRepository repository) {
             if (repository instanceof IgRepository igRepository) {
-                igRepository.setOperationProvider(TestOperationProvider.newProvider(repository.fhirContext()));
+                igRepository.setOperationProvider(TestOperationProvider.newProvider(
+                        repository.fhirContext(), npmPackageLoader, evaluationSettings));
             }
             if (evaluationSettings == null) {
                 evaluationSettings = EvaluationSettings.getDefault();
@@ -114,7 +120,10 @@ public class TestPlanDefinition {
                         .getTerminologySettings()
                         .setValuesetExpansionMode(VALUESET_EXPANSION_MODE.PERFORM_NAIVE_EXPANSION);
             }
-            return new PlanDefinitionProcessor(repository, evaluationSettings, new TerminologyServerClientSettings());
+            var engineInitializationContext =
+                    new EngineInitializationContext(repository, NpmPackageLoader.DEFAULT, evaluationSettings);
+            return new PlanDefinitionProcessor(
+                    repository, evaluationSettings, engineInitializationContext, new TerminologyServerClientSettings());
         }
 
         public When when() {

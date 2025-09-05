@@ -13,8 +13,10 @@ import org.hl7.fhir.r4.model.MarkdownType;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.cql.Engines.EngineInitializationContext;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.Ids;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
 class ExtensionResolverTests {
@@ -26,7 +28,9 @@ class ExtensionResolverTests {
     @Test
     void extensionResolution() {
         var repository = new InMemoryFhirRepository(FhirContext.forR4Cached());
-        var libraryEngine = new LibraryEngine(repository, EvaluationSettings.getDefault());
+        var engineInitializationContext =
+                new EngineInitializationContext(repository, NpmPackageLoader.DEFAULT, EvaluationSettings.getDefault());
+        var libraryEngine = new LibraryEngine(repository, EvaluationSettings.getDefault(), engineInitializationContext);
         var subjectId = Ids.newId(repository.fhirContext().getVersion().getVersion(), "Patient/Patient1");
 
         var params = parameters();

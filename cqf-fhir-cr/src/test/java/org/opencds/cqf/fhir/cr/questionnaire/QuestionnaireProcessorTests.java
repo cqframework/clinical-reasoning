@@ -24,12 +24,15 @@ import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.cql.Engines.EngineInitializationContext;
+import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cr.common.PackageProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.GenerateProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.populate.PopulateProcessor;
 import org.opencds.cqf.fhir.cr.questionnaireresponse.TestQuestionnaireResponse;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Ids;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 @SuppressWarnings("squid:S2699")
@@ -40,11 +43,15 @@ class QuestionnaireProcessorTests {
             new IgRepository(fhirContextR4, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r4"));
     private final IRepository repositoryR5 =
             new IgRepository(fhirContextR5, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r5"));
+    private final EngineInitializationContext engineInitializationContextR4 =
+            new EngineInitializationContext(repositoryR4, NpmPackageLoader.DEFAULT, EvaluationSettings.getDefault());
+    private final EngineInitializationContext engineInitializationContextR5 =
+            new EngineInitializationContext(repositoryR5, NpmPackageLoader.DEFAULT, EvaluationSettings.getDefault());
 
     @Test
     void processors() {
         var bundle = given().repository(repositoryR4)
-                .generateProcessor(new GenerateProcessor(repositoryR4))
+                .generateProcessor(new GenerateProcessor(repositoryR4, engineInitializationContextR4))
                 .packageProcessor(new PackageProcessor(repositoryR4))
                 .populateProcessor(new PopulateProcessor())
                 .when()

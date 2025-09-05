@@ -17,7 +17,9 @@ import org.cqframework.fhir.utilities.IGContext;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.fhir.cql.Engines;
+import org.opencds.cqf.fhir.cql.Engines.EngineInitializationContext;
 import org.opencds.cqf.fhir.cr.cli.argument.CqlCommandArgument;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Command;
 
@@ -80,7 +82,8 @@ public class CqlCommand implements Callable<Integer> {
         Set<String> expressions = arguments.content.expression != null ? Set.of(arguments.content.expression) : null;
 
         return arguments.parameters.context.stream().map(c -> {
-            var engine = Engines.forRepository(repository, evaluationSettings);
+            var engine = Engines.forContext(
+                    new EngineInitializationContext(repository, NpmPackageLoader.DEFAULT, evaluationSettings));
             if (arguments.content.cqlPath != null) {
                 var provider = new DefaultLibrarySourceProvider(Path.of(arguments.content.cqlPath));
                 engine.getEnvironment()

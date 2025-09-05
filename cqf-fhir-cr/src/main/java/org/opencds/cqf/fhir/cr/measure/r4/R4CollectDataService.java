@@ -17,6 +17,7 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Resource;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.fhir.cql.Engines;
+import org.opencds.cqf.fhir.cql.Engines.EngineInitializationContext;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.CompositeEvaluationResultsPerMeasure;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
@@ -28,12 +29,17 @@ import org.opencds.cqf.fhir.utility.monad.Eithers;
 @SuppressWarnings("squid:S107")
 public class R4CollectDataService {
     private final IRepository repository;
+    private final EngineInitializationContext engineInitializationContext;
     private final MeasureEvaluationOptions measureEvaluationOptions;
     private final R4RepositorySubjectProvider subjectProvider;
     private final MeasureProcessorUtils measureProcessorUtils = new MeasureProcessorUtils();
 
-    public R4CollectDataService(IRepository repository, MeasureEvaluationOptions measureEvaluationOptions) {
+    public R4CollectDataService(
+            IRepository repository,
+            EngineInitializationContext engineInitializationContext,
+            MeasureEvaluationOptions measureEvaluationOptions) {
         this.repository = repository;
+        this.engineInitializationContext = engineInitializationContext;
         this.measureEvaluationOptions = measureEvaluationOptions;
         this.subjectProvider = new R4RepositorySubjectProvider(measureEvaluationOptions.getSubjectProviderOptions());
     }
@@ -66,13 +72,15 @@ public class R4CollectDataService {
             String practitioner) {
 
         Parameters parameters = new Parameters();
-        var processor =
-                new R4MeasureProcessor(this.repository, this.measureEvaluationOptions, this.measureProcessorUtils);
+        var processor = new R4MeasureProcessor(
+                this.repository,
+                this.engineInitializationContext,
+                this.measureEvaluationOptions,
+                this.measureProcessorUtils);
 
         List<String> subjectList = getSubjects(subject, practitioner, subjectProvider);
 
-        var context =
-                Engines.forRepository(this.repository, this.measureEvaluationOptions.getEvaluationSettings(), null);
+        var context = Engines.forContext(engineInitializationContext);
 
         var foldedMeasure = R4MeasureServiceUtils.foldMeasure(Eithers.forMiddle3(measureId), repository);
 

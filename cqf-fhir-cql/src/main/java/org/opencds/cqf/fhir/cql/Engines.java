@@ -36,7 +36,9 @@ import org.opencds.cqf.fhir.cql.npm.EnginesNpmLibraryHandler;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
+import org.opencds.cqf.fhir.utility.npm.MeasureOrNpmResourceHolder;
 import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoaderWithCache;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -221,6 +223,15 @@ public class Engines {
         // For when a request evaluates evaluation settings
         EngineInitializationContext withEvaluationSettings(EvaluationSettings evaluationSettings) {
             return new EngineInitializationContext(repository, npmPackageLoader, evaluationSettings);
+        }
+
+        public EngineInitializationContext withRepositoryAndCachedPackageLoader(
+                IRepository proxyRepoForMeasureProcessor, MeasureOrNpmResourceHolder measureOrNpmResourceHolder) {
+
+            return new EngineInitializationContext(
+                    proxyRepoForMeasureProcessor,
+                    NpmPackageLoaderWithCache.of(measureOrNpmResourceHolder.npmResourceHolder(), npmPackageLoader),
+                    evaluationSettings);
         }
     }
 }

@@ -29,6 +29,7 @@ import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.VersionedIdentifiers;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.monad.Either3;
+import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.npm.MeasureOrNpmResourceHolder;
 import org.opencds.cqf.fhir.utility.npm.MeasureOrNpmResourceHolderList;
 import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
@@ -72,6 +73,18 @@ public class R4RepositoryOrNpmResourceProvider {
         return new EngineInitializationContext(repository, npmPackageLoader, evaluationSettings);
     }
 
+    public EngineInitializationContext getEngineInitializationContextWithNpmCached(
+            MeasureOrNpmResourceHolderList measureOrNpmResourceHolderList) {
+        return new EngineInitializationContext(
+                repository, npmPackageLoaderWithCache(measureOrNpmResourceHolderList), evaluationSettings);
+    }
+
+    public EngineInitializationContext getEngineInitializationContextWithNpmCached(
+            MeasureOrNpmResourceHolder measureOrNpmResourceHolder) {
+        return new EngineInitializationContext(
+                repository, npmPackageLoaderWithCache(measureOrNpmResourceHolder), evaluationSettings);
+    }
+
     public IRepository getRepository() {
         return repository;
     }
@@ -82,6 +95,26 @@ public class R4RepositoryOrNpmResourceProvider {
 
     public EvaluationSettings getEvaluationSettings() {
         return evaluationSettings;
+    }
+
+    // LUKETODO: test this:
+    // LUKETODO: is this called from anywhere else?
+    public List<Either3<CanonicalType, IdType, Measure>> getMeasureEithers(
+            List<String> measureIds, List<String> measureUrls) {
+        if (measureIds != null && !measureIds.isEmpty()) {
+            return measureIds.stream()
+                    .map(measureId -> Eithers.<CanonicalType, IdType, Measure>forMiddle3(new IdType(measureId)))
+                    .toList();
+        }
+
+        if (measureUrls != null && !measureUrls.isEmpty()) {
+            return measureUrls.stream()
+                    .map(measureUrl -> Eithers.<CanonicalType, IdType, Measure>forLeft3(new CanonicalType(measureUrl)))
+                    .toList();
+        }
+
+        // LUKETODO:  not sure if this is right, but this is what the step2 test expects
+        return List.of();
     }
 
     /**
@@ -116,12 +149,42 @@ public class R4RepositoryOrNpmResourceProvider {
                 Function.identity());
     }
 
+    // LUKETODO:  test this
+    public MeasureOrNpmResourceHolderList foldMeasures(List<Either3<CanonicalType, IdType, Measure>> measureEithers) {
+        if (measureEithers == null || measureEithers.isEmpty()) {
+            throw new InvalidRequestException("measure IDs or URLs parameter cannot be null or empty.");
+        }
+
+        return MeasureOrNpmResourceHolderList.of(
+                measureEithers.stream().map(this::foldMeasure).toList());
+    }
+
     public MeasureOrNpmResourceHolder foldMeasure(Either3<CanonicalType, IdType, Measure> measureEither) {
         if (evaluationSettings.isUseNpmForQualifyingResources()) {
             return foldMeasureEitherForNpm(measureEither);
         }
 
         return foldMeasureForRepository(measureEither);
+    }
+
+    // LUKETODO:  test this
+    public MeasureOrNpmResourceHolder foldWithCustomIdTypeHandler(
+            Either3<CanonicalType, IdType, Measure> measureEither, Function<? super IdType, Measure> foldMiddle) {
+
+        if (evaluationSettings.isUseNpmForQualifyingResources()) {
+            return foldMeasureEitherForNpm(measureEither);
+        }
+
+        return measureEither.fold(
+                measureUrl -> {
+                    throw new InvalidRequestException(
+                            "Queries by measure URL: %s are not supported by NPM resources".formatted(measureUrl));
+                },
+                foldMiddle.andThen(MeasureOrNpmResourceHolder::measureOnly),
+                measureInput -> {
+                    throw new InvalidRequestException(
+                            "Not sure how we got here, but we have a Measure: %s".formatted(measureInput));
+                });
     }
 
     @Nonnull
@@ -330,6 +393,29 @@ public class R4RepositoryOrNpmResourceProvider {
         }
 
         return this.repository.read(Measure.class, id);
+    }
+
+    // LUKETODO:  test for this:
+    public Measure resolveByUrl(CanonicalType measureUrl) {
+        if (evaluationSettings.isUseNpmForQualifyingResources()) {
+            final NpmResourceHolder npmResourceHolder = npmPackageLoader.loadNpmResources(measureUrl);
+
+            var optMeasureAdapter = npmResourceHolder.getMeasure();
+
+            if (optMeasureAdapter.isEmpty()) {
+                throw new IllegalArgumentException("No measure found for URL: %s".formatted(measureUrl.getValue()));
+            }
+
+            var measureAdapter = optMeasureAdapter.get();
+
+            if (!(measureAdapter.get() instanceof Measure measure)) {
+                throw new IllegalArgumentException("MeasureAdapter is not a Measure for URL: %s".formatted(measureUrl));
+            }
+
+            return measure;
+        }
+
+        return resolveByUrl(measureUrl.getValue());
     }
 
     public Measure resolveByUrl(String url) {

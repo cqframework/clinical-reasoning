@@ -14,6 +14,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Parameters;
+import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cql.Engines.EngineInitializationContext;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
@@ -99,8 +100,7 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
 
         // Replicate the old logic of using the repository used to initialize the measure processor
         // as the repository for the CQL engine context.
-        var context = Engines.forContext(
-                buildEvaluationContext(proxyRepoForMeasureProcessor, measurePlusNpmResourceHolder), additionalData);
+        var context = buildCqlEngineContext(additionalData, proxyRepoForMeasureProcessor, measurePlusNpmResourceHolder);
 
         var evaluationResults = processor.evaluateMeasureWithCqlEngine(
                 subjects, measurePlusNpmResourceHolder, periodStart, periodEnd, parameters, context);
@@ -123,13 +123,14 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
     }
 
     @Nonnull
-    private EngineInitializationContext buildEvaluationContext(
-            IRepository proxyRepoForMeasureProcessor, MeasureOrNpmResourceHolder measurePlusNpmResourceHolder) {
-
-        return engineInitializationContext
-                .withRepository(proxyRepoForMeasureProcessor)
-                .withNpmPackageLoader(
-                        r4RepositoryOrNpmResourceProvider.npmPackageLoaderWithCache(measurePlusNpmResourceHolder));
+    private CqlEngine buildCqlEngineContext(
+            Bundle additionalData,
+            IRepository proxyRepoForMeasureProcessor,
+            MeasureOrNpmResourceHolder measurePlusNpmResourceHolder) {
+        return Engines.forContext(
+                engineInitializationContext.withRepositoryAndCachedPackageLoader(
+                        proxyRepoForMeasureProcessor, measurePlusNpmResourceHolder),
+                additionalData);
     }
 
     @Nonnull

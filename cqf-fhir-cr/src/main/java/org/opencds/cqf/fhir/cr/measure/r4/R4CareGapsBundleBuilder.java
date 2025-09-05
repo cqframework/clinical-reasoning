@@ -19,6 +19,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import jakarta.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -120,8 +121,11 @@ public class R4CareGapsBundleBuilder {
                     reporter);
 
             var entries = result.getParameter().stream()
-                    .map(p -> ((Bundle) p.getResource()))
-                    .flatMap(b -> b.getEntry().stream())
+                    .map(ParametersParameterComponent::getResource)
+                    .filter(Bundle.class::isInstance)
+                    .map(Bundle.class::cast)
+                    .map(Bundle::getEntry)
+                    .flatMap(Collection::stream)
                     .toList();
 
             // Patient, subject comes in as format "ResourceType/[id]", no resourceType required to be specified.

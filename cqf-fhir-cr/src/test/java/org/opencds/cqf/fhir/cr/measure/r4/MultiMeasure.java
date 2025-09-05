@@ -35,6 +35,7 @@ import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupComponent;
 import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupPopulationComponent;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ResourceType;
@@ -281,7 +282,9 @@ class MultiMeasure {
 
         public MultiMeasure.SelectedReport hasMeasureReportCountPerUrl(int count, String measureUrl) {
             var reports = report().getParameter().stream()
-                    .map(p -> ((Bundle) p.getResource()))
+                    .map(ParametersParameterComponent::getResource)
+                    .filter(Bundle.class::isInstance)
+                    .map(Bundle.class::cast)
                     .map(t -> (MeasureReport) t.getEntryFirstRep().getResource())
                     .filter(x -> x.getMeasure().equals(measureUrl))
                     .toList();

@@ -31,6 +31,7 @@ import org.opencds.cqf.fhir.cr.graphdefintion.apply.ApplyRequestBuilder;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
+@SuppressWarnings("UnstableApiUsage")
 public class TestGraphDefinition {
     public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/shared";
 
@@ -127,6 +128,11 @@ public class TestGraphDefinition {
             return this;
         }
 
+        public When practitionerId(String practitionerId) {
+            applyRequestBuilder.withPractitioner("Practitioner/" + practitionerId);
+            return this;
+        }
+
         public When data(String dataAssetName) {
             applyRequestBuilder.withDataRepository(createRepository(dataAssetName));
             return this;
@@ -163,11 +169,11 @@ public class TestGraphDefinition {
             return additionalData(data);
         }
 
-        public GeneratedCarePlan thenApply() {
+        public GeneratedBundle thenApply() {
             ApplyRequest applyRequest = applyRequestBuilder.buildApplyRequest();
             IBaseResource generatedBundle = this.processor.apply(applyRequest);
 
-            return new GeneratedCarePlan(repository, generatedBundle);
+            return new GeneratedBundle(repository, generatedBundle);
         }
 
         private IRepository createRepository(String dataAssetName) {
@@ -175,14 +181,14 @@ public class TestGraphDefinition {
                     repository.fhirContext(), (IBaseBundle) jsonParser.parseResource(open(dataAssetName)));
         }
 
-        public static class GeneratedCarePlan {
+        public static class GeneratedBundle {
 
             final IRepository repository;
             final IBaseResource generatedResource;
             final IParser jsonParser;
             final ModelResolver modelResolver;
 
-            public GeneratedCarePlan(IRepository theRepository, IBaseResource generatedResource) {
+            public GeneratedBundle(IRepository theRepository, IBaseResource generatedResource) {
                 this.repository = theRepository;
                 this.generatedResource = generatedResource;
 

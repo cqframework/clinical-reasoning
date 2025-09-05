@@ -20,12 +20,14 @@ class GraphDefinitionProcessorTest {
                 fhirContextR4, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r4/eras"));
 
         var patientID = "Patient/time-zero";
+        var practitionerID = "Practitioner/doctor-1";
         var graphDefinitionID = "eras-postop";
 
         given().repositoryFor(fhirContextR4, "r4")
                 .when()
                 .graphDefinitionId(graphDefinitionID)
                 .subjectId(patientID)
+                .practitionerId(practitionerID)
                 .dataRepository(repository)
                 .thenApply()
                 .responseIsBundle();

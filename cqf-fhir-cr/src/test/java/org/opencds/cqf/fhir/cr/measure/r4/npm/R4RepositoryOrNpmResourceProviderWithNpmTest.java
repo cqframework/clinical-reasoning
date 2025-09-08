@@ -1,5 +1,7 @@
 package org.opencds.cqf.fhir.cr.measure.r4.npm;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.IdType;
@@ -8,8 +10,6 @@ import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.MultiMeasure;
 import org.opencds.cqf.fhir.cr.measure.r4.MultiMeasure.Given;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
-
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class R4RepositoryOrNpmResourceProviderWithNpmTest extends BaseR4RepositoryOrNpmResourceProviderTest {
 
@@ -44,6 +44,6 @@ class R4RepositoryOrNpmResourceProviderWithNpmTest extends BaseR4RepositoryOrNpm
         var customIdTypeHandler = getCustomIdTypeHandler();
         assertThrows(
                 InvalidRequestException.class,
-                () -> testSubject.foldWithCustomIdTypeHandler( measureEither, customIdTypeHandler));
+                () -> testSubject.foldWithCustomIdTypeHandler(measureEither, customIdTypeHandler));
     }
 }

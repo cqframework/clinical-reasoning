@@ -237,9 +237,7 @@ class R4MeasureServiceUtilsTest {
     @Test
     void getMeasureEitherBothNotNull() {
         var id = new IdType("yyy");
-        assertThrows(
-                IllegalArgumentException.class,
-            () -> R4MeasureServiceUtils.getMeasureEither("xxx", id));
+        assertThrows(IllegalArgumentException.class, () -> R4MeasureServiceUtils.getMeasureEither("xxx", id));
     }
 
     @Test

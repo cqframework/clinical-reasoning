@@ -18,6 +18,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
+import org.opencds.cqf.fhir.cql.Engines.EngineInitializationContext;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.common.ResourceResolver;
@@ -32,6 +33,7 @@ public class ApplyRequestBuilder {
 
     private IRepository repository;
     private final EvaluationSettings evaluationSettings;
+    private final EngineInitializationContext engineInitializationContext;
     private final FhirVersionEnum fhirVersion;
     private GraphDefinition graphDefinition;
     private String subject;
@@ -55,10 +57,14 @@ public class ApplyRequestBuilder {
     private ZonedDateTime periodEndString;
     private IPrimitiveType<String> canonicalType;
 
-    public ApplyRequestBuilder(IRepository repository, EvaluationSettings evaluationSettings) {
+    public ApplyRequestBuilder(
+            IRepository repository,
+            EvaluationSettings evaluationSettings,
+            EngineInitializationContext engineInitializationContext) {
         this.repository = repository;
         this.fhirVersion = repository.fhirContext().getVersion().getVersion();
         this.evaluationSettings = evaluationSettings;
+        this.engineInitializationContext = engineInitializationContext;
     }
 
     public ApplyRequestBuilder withGraphDefinitionId(IdType id) {
@@ -206,7 +212,7 @@ public class ApplyRequestBuilder {
         IBaseResource resolvedGraphDefinition =
                 new ResourceResolver("GraphDefinition", this.repository).resolve(eitherGraphDefinition);
 
-        LibraryEngine libraryEngine = new LibraryEngine(this.repository, this.evaluationSettings);
+        LibraryEngine libraryEngine = new LibraryEngine(repository, evaluationSettings, engineInitializationContext);
 
         ModelResolver modelResolver = FhirModelResolverCache.resolverForVersion(this.fhirVersion);
 

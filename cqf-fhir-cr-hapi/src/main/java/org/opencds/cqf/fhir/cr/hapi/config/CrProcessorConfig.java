@@ -146,8 +146,19 @@ public class CrProcessorConfig {
 
     @Bean
     IGraphDefinitionApplyRequestBuilderFactory graphDefinitionApplyRequestBuilderFactory(
-            IRepositoryFactory repositoryFactory, EvaluationSettings evaluationSettings) {
+            IRepositoryFactory repositoryFactory,
+            Optional<NpmPackageLoader> optNpmPackageLoader,
+            EvaluationSettings evaluationSettings) {
 
-        return rd -> new ApplyRequestBuilder(repositoryFactory.create(rd), evaluationSettings);
+        return requestDetails -> {
+            var repository = repositoryFactory.create(requestDetails);
+            return new ApplyRequestBuilder(
+                    repository,
+                    evaluationSettings,
+                    new EngineInitializationContext(
+                            repository,
+                            NpmConfigDependencySubstitutor.substituteNpmPackageLoaderIfEmpty(optNpmPackageLoader),
+                            evaluationSettings));
+        };
     }
 }

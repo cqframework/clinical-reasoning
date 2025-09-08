@@ -375,7 +375,6 @@ public class R4RepositoryOrNpmResourceProvider {
         return resolveByUrl(new CanonicalType(measureUrl));
     }
 
-
     public Measure resolveByUrl(CanonicalType measureUrl) {
         if (evaluationSettings.isUseNpmForQualifyingResources()) {
             final NpmResourceHolder npmResourceHolder = npmPackageLoader.loadNpmResources(measureUrl);

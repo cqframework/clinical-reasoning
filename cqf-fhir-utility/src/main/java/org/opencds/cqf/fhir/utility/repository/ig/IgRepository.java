@@ -257,6 +257,10 @@ public class IgRepository implements IRepository {
         return this.npmJsonPath;
     }
 
+    public boolean hasNpm() {
+        return NpmPackageLoader.DEFAULT != this.npmPackageLoader;
+    }
+
     @Nonnull
     public List<Path> getNpmTgzPaths() {
         return npmTgzPaths;
@@ -267,6 +271,9 @@ public class IgRepository implements IRepository {
     }
 
     private NpmPackageLoader buildNpmPackageLoader(List<Path> npmTgzPaths) {
+        if (npmTgzPaths.isEmpty()) {
+            return NpmPackageLoader.DEFAULT;
+        }
         return NpmPackageLoaderInMemory.fromNpmPackageAbsolutePath(npmTgzPaths);
     }
 

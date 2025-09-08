@@ -49,7 +49,6 @@ import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.opencds.cqf.fhir.cr.measure.r4.npm.R4RepositoryOrNpmResourceProvider;
-import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
@@ -105,7 +104,6 @@ public class MultiMeasure {
         private MeasureEvaluationOptions evaluationOptions;
         private String serverBase;
         private final MeasurePeriodValidator measurePeriodValidator;
-        private R4MeasureServiceUtils r4MeasureServiceUtils;
         private NpmPackageLoader npmPackageLoader;
 
         public Given() {
@@ -128,6 +126,8 @@ public class MultiMeasure {
 
         public MultiMeasure.Given repository(IRepository repository) {
             this.repository = repository;
+            mutateEvaluationOptionsToDisableNpm();
+            this.evaluationOptions.getEvaluationSettings().setUseNpmForQualifyingResources(false);
             return this;
         }
 
@@ -138,6 +138,8 @@ public class MultiMeasure {
                     Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
             // We're explicitly NOT using NPM here
             this.npmPackageLoader = NpmPackageLoader.DEFAULT;
+            this.evaluationOptions.getEvaluationSettings().setUseNpmForQualifyingResources(false);
+            mutateEvaluationOptionsToDisableNpm();
             this.engineInitializationContext = buildEngineInitializationContext();
             return this;
         }
@@ -149,9 +151,13 @@ public class MultiMeasure {
                     Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
             this.repository = igRepository;
             this.npmPackageLoader = igRepository.getNpmPackageLoader();
-            this.engineInitializationContext = buildEngineInitializationContext();
             mutateEvaluationOptionsToEnableNpm();
+            this.engineInitializationContext = buildEngineInitializationContext();
             return this;
+        }
+
+        private void mutateEvaluationOptionsToDisableNpm() {
+            this.evaluationOptions.getEvaluationSettings().setUseNpmForQualifyingResources(false);
         }
 
         private void mutateEvaluationOptionsToEnableNpm() {
@@ -176,6 +182,19 @@ public class MultiMeasure {
                         "Repository has not been set. Use 'repository' or 'repositoryFor' to set it.");
             }
             return this.repository;
+        }
+
+        public IgRepository getIgRepository() {
+            if (this.repository == null) {
+                throw new IllegalStateException(
+                        "Repository has not been set. Use 'repository' or 'repositoryFor' to set it.");
+            }
+
+            if (this.repository instanceof IgRepository igRepository) {
+                return igRepository;
+            }
+
+            return null;
         }
 
         @Nonnull

@@ -27,7 +27,6 @@ import org.hl7.fhir.r4.model.ResourceType;
 import org.opencds.cqf.fhir.cql.Engines.EngineInitializationContext;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.VersionedIdentifiers;
-import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.monad.Either3;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.npm.MeasureOrNpmResourceHolder;
@@ -167,7 +166,6 @@ public class R4RepositoryOrNpmResourceProvider {
         return foldMeasureForRepository(measureEither);
     }
 
-    // LUKETODO:  test this
     public MeasureOrNpmResourceHolder foldWithCustomIdTypeHandler(
             Either3<CanonicalType, IdType, Measure> measureEither, Function<? super IdType, Measure> foldMiddle) {
 
@@ -176,15 +174,10 @@ public class R4RepositoryOrNpmResourceProvider {
         }
 
         return measureEither.fold(
-                measureUrl -> {
-                    throw new InvalidRequestException(
-                            "Queries by measure URL: %s are not supported by NPM resources".formatted(measureUrl));
-                },
+                ((Function<CanonicalType, Measure>) this::resolveByUrl)
+                        .andThen(MeasureOrNpmResourceHolder::measureOnly),
                 foldMiddle.andThen(MeasureOrNpmResourceHolder::measureOnly),
-                measureInput -> {
-                    throw new InvalidRequestException(
-                            "Not sure how we got here, but we have a Measure: %s".formatted(measureInput));
-                });
+                MeasureOrNpmResourceHolder::measureOnly);
     }
 
     @Nonnull
@@ -221,21 +214,6 @@ public class R4RepositoryOrNpmResourceProvider {
 
     private Measure resolveByUrlFromRepository(CanonicalType measureUrl) {
         return resolveByUrlFromRepository(measureUrl, repository);
-    }
-
-    private static Measure resolveByUrlFromRepository(CanonicalType measureUrl, IRepository repository) {
-
-        var parts = Canonicals.getParts(measureUrl);
-        var result = repository.search(
-                Bundle.class, Measure.class, Searches.byNameAndVersion(parts.idPart(), parts.version()));
-        var bundleResource = result.getEntryFirstRep().getResource();
-
-        if (!(bundleResource instanceof Measure measure)) {
-            throw new InvalidRequestException(
-                    "Measure URL: %s, did not resolve to a Measure resource.".formatted(measureUrl.getValue()));
-        }
-
-        return measure;
     }
 
     // If the caller chooses to provide their own IRepository (ex:  federated)
@@ -282,10 +260,7 @@ public class R4RepositoryOrNpmResourceProvider {
                     throw new InvalidRequestException(
                             QUERIES_BY_MEASURE_IDS_ARE_NOT_SUPPORTED_BY_NPM_RESOURCES.formatted(measureId));
                 },
-                measure -> {
-                    throw new InvalidRequestException(
-                            "Not sure how we got here, but we have a Measure: %s".formatted(measure));
-                });
+                MeasureOrNpmResourceHolder::measureOnly);
     }
 
     private MeasureOrNpmResourceHolder foldMeasureForNpm(Either3<IdType, String, CanonicalType> measureEither) {
@@ -358,6 +333,7 @@ public class R4RepositoryOrNpmResourceProvider {
         }
 
         return measureCanonicals.stream()
+                .map(CanonicalType::new)
                 .map(this::resolveByUrl)
                 .map(MeasureOrNpmResourceHolder::measureOnly)
                 .toList();
@@ -395,7 +371,11 @@ public class R4RepositoryOrNpmResourceProvider {
         return this.repository.read(Measure.class, id);
     }
 
-    // LUKETODO:  test for this:
+    public Measure resolveByUrl(String measureUrl) {
+        return resolveByUrl(new CanonicalType(measureUrl));
+    }
+
+
     public Measure resolveByUrl(CanonicalType measureUrl) {
         if (evaluationSettings.isUseNpmForQualifyingResources()) {
             final NpmResourceHolder npmResourceHolder = npmPackageLoader.loadNpmResources(measureUrl);
@@ -415,25 +395,36 @@ public class R4RepositoryOrNpmResourceProvider {
             return measure;
         }
 
-        return resolveByUrl(measureUrl.getValue());
+        return resolveByUrlFromRepository(measureUrl);
     }
 
-    public Measure resolveByUrl(String url) {
+    private static Measure resolveByUrlFromRepository(CanonicalType url, IRepository repository) {
         Map<String, List<IQueryParameterType>> searchParameters = new HashMap<>();
-        if (url.contains("|")) {
+        var urlAsString = url.getValueAsString();
+        if (urlAsString.contains("|")) {
             // uri & version
-            var splitId = url.split("\\|");
+            var splitId = urlAsString.split("\\|");
             var uri = splitId[0];
             var version = splitId[1];
             searchParameters.put("url", Collections.singletonList(new UriParam(uri)));
             searchParameters.put("version", Collections.singletonList(new TokenParam(version)));
         } else {
             // uri only
-            searchParameters.put("url", Collections.singletonList(new UriParam(url)));
+            searchParameters.put("url", Collections.singletonList(new UriParam(urlAsString)));
         }
 
-        Bundle result = this.repository.search(Bundle.class, Measure.class, searchParameters);
-        return (Measure) result.getEntryFirstRep().getResource();
+        Bundle result = repository.search(Bundle.class, Measure.class, searchParameters);
+        if (result == null || result.getEntry().isEmpty()) {
+            throw new ResourceNotFoundException("No Measure found for URL: %s".formatted(url));
+        }
+        if (result.getEntryFirstRep().getResource() instanceof Measure measure) {
+            return measure;
+        }
+        throw new IllegalStateException("expected Measure resource but found: %s"
+                .formatted(result.getEntryFirstRep()
+                        .getResource()
+                        .getResourceType()
+                        .name()));
     }
 
     public Measure resolveByIdentifier(String identifier) {

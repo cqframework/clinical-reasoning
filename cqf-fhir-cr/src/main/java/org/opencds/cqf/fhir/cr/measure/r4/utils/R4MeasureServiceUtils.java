@@ -54,8 +54,17 @@ public class R4MeasureServiceUtils {
         this.repository = repository;
     }
 
-    // LUKETODO:  add a test for this:
-    public static Either3<CanonicalType, IdType, Measure> getMeasureEither(String measureUrl, IdType measureId) {
+    public static Either3<CanonicalType, IdType, Measure> getMeasureEither(
+            @Nullable String measureUrl, @Nullable IdType measureId) {
+        if (measureUrl == null && measureId == null) {
+            throw new IllegalArgumentException("Must have one of measureUrl or measureId populated but both are null");
+        }
+
+        if (measureUrl != null && measureId != null) {
+            throw new IllegalArgumentException(
+                    "Must have only one of measureUrl or measureId populated but both are non-null");
+        }
+
         return Eithers.for3(
                 Optional.ofNullable(measureUrl).map(CanonicalType::new).orElse(null), measureId, null);
     }

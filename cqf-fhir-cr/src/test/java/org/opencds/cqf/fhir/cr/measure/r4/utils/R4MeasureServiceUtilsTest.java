@@ -14,11 +14,15 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
+import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -29,6 +33,7 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureEvalType;
 import org.opencds.cqf.fhir.utility.monad.Either;
+import org.opencds.cqf.fhir.utility.monad.Either3;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 
 @ExtendWith(MockitoExtension.class)
@@ -222,6 +227,36 @@ class R4MeasureServiceUtilsTest {
         assertThat(
                 actualExtension.getValue().primitiveValue(),
                 equalTo(expectedExtension.getValue().primitiveValue()));
+    }
+
+    @Test
+    void getMeasureEitherBothNull() {
+        assertThrows(IllegalArgumentException.class, () -> R4MeasureServiceUtils.getMeasureEither(null, null));
+    }
+
+    @Test
+    void getMeasureEitherBothNotNull() {
+        assertThrows(
+                IllegalArgumentException.class, () -> R4MeasureServiceUtils.getMeasureEither("xxx", new IdType("yyy")));
+    }
+
+    @Test
+    void getMeasureEitherUrl() {
+        final String url = "http://example.com";
+
+        final Either3<CanonicalType, IdType, Measure> measureEither = R4MeasureServiceUtils.getMeasureEither(url, null);
+
+        assertEquals(url, measureEither.leftOrThrow().primitiveValue());
+    }
+
+    @Test
+    void getMeasureEitherId() {
+        final IdType idType = new IdType("Measure/123");
+
+        final Either3<CanonicalType, IdType, Measure> measureEither =
+                R4MeasureServiceUtils.getMeasureEither(null, idType);
+
+        assertEquals(Eithers.forMiddle3(idType), measureEither);
     }
 
     private static Extension buildExtensionForProductLine(String productLine) {

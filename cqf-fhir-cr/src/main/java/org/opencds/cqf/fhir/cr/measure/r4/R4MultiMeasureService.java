@@ -196,7 +196,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
 
         var totalMeasures = measureOrNpmResourceHolderList.size();
         for (MeasureOrNpmResourceHolder measureOrNpmResourceHolder :
-                measureOrNpmResourceHolderList.measuresPlusNpmResourceHolders()) {
+                measureOrNpmResourceHolderList.measuresOrNpmResourceHolders()) {
             MeasureReport measureReport;
             // evaluate each measure
             measureReport = r4Processor.evaluateMeasure(

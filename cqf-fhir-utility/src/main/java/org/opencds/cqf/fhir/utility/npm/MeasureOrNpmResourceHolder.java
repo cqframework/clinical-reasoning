@@ -22,6 +22,10 @@ public final class MeasureOrNpmResourceHolder {
 
     private final NpmResourceHolder npmResourceHolder;
 
+    public boolean isNpm() {
+        return !NpmResourceHolder.EMPTY.equals(npmResourceHolder);
+    }
+
     public static MeasureOrNpmResourceHolder measureOnly(Measure measure) {
         return new MeasureOrNpmResourceHolder(measure, NpmResourceHolder.EMPTY);
     }

@@ -68,7 +68,7 @@ public final class MeasureOrNpmResourceHolderList {
         return measuresPlusNpmResourceHolders.size();
     }
 
-    public List<MeasureOrNpmResourceHolder> measuresPlusNpmResourceHolders() {
+    public List<MeasureOrNpmResourceHolder> measuresOrNpmResourceHolders() {
         return measuresPlusNpmResourceHolders;
     }
 

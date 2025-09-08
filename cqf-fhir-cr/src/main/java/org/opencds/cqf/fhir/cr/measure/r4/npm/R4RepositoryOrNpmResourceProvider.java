@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
+import org.apache.commons.collections4.CollectionUtils;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -96,24 +97,24 @@ public class R4RepositoryOrNpmResourceProvider {
         return evaluationSettings;
     }
 
-    // LUKETODO: test this:
-    // LUKETODO: is this called from anywhere else?
     public List<Either3<CanonicalType, IdType, Measure>> getMeasureEithers(
             List<String> measureIds, List<String> measureUrls) {
+
+        if (CollectionUtils.isNotEmpty(measureIds) && CollectionUtils.isNotEmpty(measureUrls)) {
+            throw new InvalidRequestException("measure IDs and URLs cannot both be provided.");
+        }
+
         if (measureIds != null && !measureIds.isEmpty()) {
             return measureIds.stream()
                     .map(measureId -> Eithers.<CanonicalType, IdType, Measure>forMiddle3(new IdType(measureId)))
                     .toList();
-        }
-
-        if (measureUrls != null && !measureUrls.isEmpty()) {
+        } else if (measureUrls != null && !measureUrls.isEmpty()) {
             return measureUrls.stream()
                     .map(measureUrl -> Eithers.<CanonicalType, IdType, Measure>forLeft3(new CanonicalType(measureUrl)))
                     .toList();
         }
 
-        // LUKETODO:  not sure if this is right, but this is what the step2 test expects
-        return List.of();
+        throw new InvalidRequestException("measure IDs and URLs cannot both be empty.");
     }
 
     /**
@@ -148,7 +149,6 @@ public class R4RepositoryOrNpmResourceProvider {
                 Function.identity());
     }
 
-    // LUKETODO:  test this
     public MeasureOrNpmResourceHolderList foldMeasures(List<Either3<CanonicalType, IdType, Measure>> measureEithers) {
         if (measureEithers == null || measureEithers.isEmpty()) {
             throw new InvalidRequestException("measure IDs or URLs parameter cannot be null or empty.");

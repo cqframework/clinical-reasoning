@@ -1,0 +1,96 @@
+{
+  "resourceType": "GraphDefinition",
+  "id": "eras-postop",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-computablegraphdefinition",
+      "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-caseplansummarydefinition"
+    ]
+  },
+  "url": "http://example.org/cdosdh/demo/GraphDefinition/eras-postop",
+  "name": "ErasPostOpGraph",
+  "status": "active",
+  "experimental": true,
+  "date": "2025-12-02T09:05:00Z",
+  "publisher": "Smile Digital Health",
+  "description": "ERAS Post Op",
+  "start": "Patient",
+  "profile": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-patient",
+  "link": [
+    {
+      "description": "Pathway Event",
+      "link": [
+        {
+          "description": "Hgb",
+          "target": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-relatedsummarydefinition",
+                  "definitionCanonical": "http://example.org/cdosdh/demo/GraphDefinition/hgb-pathway-event"
+                }
+              ],
+              "type": "GraphDefinition"
+            }
+          ]
+        },
+        {
+          "description": "PO Hgb Drop",
+          "target": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-relatedsummarydefinition",
+                  "definitionCanonical": "http://example.org/cdosdh/demo/GraphDefinition/po-hgb-drop-pathway-event"
+                }
+              ],
+              "type": "GraphDefinition"
+            }
+          ]
+        },
+        {
+          "description": "Urine Output",
+          "target": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-relatedsummarydefinition",
+                  "definitionCanonical": "http://example.org/cdosdh/demo/GraphDefinition/urineoutput-pathway-event"
+                }
+              ],
+              "type": "GraphDefinition"
+            }
+          ]
+        },
+        {
+          "description": "HR",
+          "target": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-relatedsummarydefinition",
+                  "definitionCanonical": "http://example.org/cdosdh/demo/GraphDefinition/hr-pathway-event"
+                }
+              ],
+              "type": "GraphDefinition"
+            }
+          ]
+        },
+        {
+          "description": "NSAID",
+          "target": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-relatedsummarydefinition",
+                  "definitionCanonical": "http://example.org/cdosdh/demo/GraphDefinition/nsaid-pathway-event"
+                }
+              ],
+              "type": "GraphDefinition"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

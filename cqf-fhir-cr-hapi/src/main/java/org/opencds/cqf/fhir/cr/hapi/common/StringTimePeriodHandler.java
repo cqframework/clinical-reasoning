@@ -13,7 +13,7 @@ import java.time.temporal.TemporalAccessor;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
-import org.apache.logging.log4j.util.Strings;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -187,7 +187,7 @@ public class StringTimePeriodHandler {
     private ZoneId getClientTimezoneOrInvalidRequest(RequestDetails requestDetails) {
         final String clientTimezoneString = requestDetails.getHeader(Constants.HEADER_CLIENT_TIMEZONE);
 
-        if (Strings.isNotBlank(clientTimezoneString)) {
+        if (StringUtils.isNotBlank(clientTimezoneString)) {
             try {
                 return ZoneId.of(clientTimezoneString);
             } catch (Exception exception) {

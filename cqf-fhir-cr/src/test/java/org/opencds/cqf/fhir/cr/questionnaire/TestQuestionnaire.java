@@ -410,7 +410,12 @@ public class TestQuestionnaire {
         }
 
         public GeneratedQuestionnaireResponse itemHasAnswer(String linkId) {
-            assertTrue(!request.resolvePathList(items.get(linkId), "answer").isEmpty());
+            assertFalse(request.resolvePathList(items.get(linkId), "answer").isEmpty());
+            return this;
+        }
+
+        public GeneratedQuestionnaireResponse itemHasNoAnswer(String linkId) {
+            assertTrue(request.resolvePathList(items.get(linkId), "answer").isEmpty());
             return this;
         }
 

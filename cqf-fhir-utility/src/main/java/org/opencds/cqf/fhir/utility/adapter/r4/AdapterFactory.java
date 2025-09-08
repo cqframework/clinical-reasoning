@@ -8,6 +8,7 @@ import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.Endpoint;
+import org.hl7.fhir.r4.model.GraphDefinition;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MetadataResource;
@@ -24,6 +25,7 @@ import org.opencds.cqf.fhir.utility.adapter.ICodingAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IDataRequirementAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IElementDefinitionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IGraphDefinitionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IMeasureAdapter;
@@ -67,6 +69,8 @@ public class AdapterFactory implements IAdapterFactory {
             adapter = new StructureDefinitionAdapter(structureDefinition);
         } else if (resource instanceof ValueSet valueSet) {
             adapter = new ValueSetAdapter(valueSet);
+        } else if (resource instanceof GraphDefinition graphDefinition) {
+            adapter = new GraphDefinitionAdapter(graphDefinition);
         } else {
             if (resource instanceof MetadataResource metadataResource) {
                 adapter = new KnowledgeArtifactAdapter(metadataResource);
@@ -152,5 +156,10 @@ public class AdapterFactory implements IAdapterFactory {
     @Override
     public IValueSetAdapter createValueSet(IBaseResource valueSet) {
         return new ValueSetAdapter((IDomainResource) valueSet);
+    }
+
+    @Override
+    public IGraphDefinitionAdapter createGraphDefinition(IBaseResource graphDefinition) {
+        return new GraphDefinitionAdapter((IDomainResource) graphDefinition);
     }
 }

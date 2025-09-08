@@ -214,7 +214,7 @@ public class Measure {
         private EngineInitializationContext getEngineInitializationContext() {
             return new EngineInitializationContext(
                     this.repository,
-                    NpmPackageLoader.DEFAULT,
+                    npmPackageLoader,
                     Optional.ofNullable(evaluationOptions)
                             .map(MeasureEvaluationOptions::getEvaluationSettings)
                             .orElse(EvaluationSettings.getDefault()));

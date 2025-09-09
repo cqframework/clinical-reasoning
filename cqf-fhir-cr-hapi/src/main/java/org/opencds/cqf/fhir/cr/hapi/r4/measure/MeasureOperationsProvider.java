@@ -1,6 +1,6 @@
 package org.opencds.cqf.fhir.cr.hapi.r4.measure;
 
-import static org.opencds.cqf.fhir.cr.hapi.common.EndpointHelper.getEndpoint;
+import static org.opencds.cqf.fhir.utility.EndpointHelper.getEndpoint;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -130,10 +130,10 @@ public class MeasureOperationsProvider {
      *                               referenced by the Measure.
      * @param parameters      additional parameters for evaluation
      * @param reporter        The reporter for this evaluation, if applicable.
-     * @return a Bundle containing multiple MeasureReports, one for each Measure evaluated.
+     * @return a Parameters resource containing a Bundle for each Measure evaluated.
      */
     @Operation(name = ProviderConstants.CR_OPERATION_EVALUATE, idempotent = true, type = Measure.class)
-    public Bundle evaluate(
+    public Parameters evaluate(
             @OperationParam(name = "measureId") List<IdType> measureId,
             @OperationParam(name = "measureUrl") List<String> measureUrl,
             @OperationParam(name = "measureIdentifier") List<String> measureIdentifier,

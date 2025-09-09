@@ -10,6 +10,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.Resources;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,11 +81,12 @@ public class ExpandRunner implements Runnable {
             expansionAttempt++;
             if (expansionAttempt <= terminologyServerClientSettings.getMaxRetryCount()) {
                 logger.info("Expansion attempt: {} for ValueSet: {}", expansionAttempt, valueSetUrl);
+                var id = Canonicals.getResourceType(valueSetUrl) + "/" + Canonicals.getIdPart(valueSetUrl);
                 expandedValueSet = fhirClient
                         .operation()
-                        .onType("ValueSet")
+                        .onInstance(id)
                         .named("$expand")
-                        .withParameters(parameters)
+                        .withNoParameters(parameters.getClass())
                         .returnResourceType(getValueSetClass())
                         .execute();
                 scheduler.shutdown();

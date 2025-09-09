@@ -1,18 +1,5 @@
 package org.opencds.cqf.fhir.utility.adapter.r5;
 
-import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import org.hl7.fhir.r5.model.Enumerations.PublicationStatus;
-import org.hl7.fhir.r5.model.ImplementationGuide;
-import org.hl7.fhir.r5.model.ImplementationGuide.ImplementationGuideDefinitionComponent;
-import org.hl7.fhir.r5.model.ImplementationGuide.ImplementationGuideDefinitionResourceComponent;
-import org.hl7.fhir.r5.model.PlanDefinition;
-import org.hl7.fhir.r5.model.Reference;
-import org.junit.jupiter.api.Test;
-import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
-import org.opencds.cqf.fhir.utility.adapter.TestVisitor;
-import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -23,6 +10,19 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import java.util.List;
+import org.hl7.fhir.r5.model.Enumerations.PublicationStatus;
+import org.hl7.fhir.r5.model.ImplementationGuide;
+import org.hl7.fhir.r5.model.ImplementationGuide.ImplementationGuideDefinitionComponent;
+import org.hl7.fhir.r5.model.ImplementationGuide.ImplementationGuideDefinitionResourceComponent;
+import org.hl7.fhir.r5.model.PlanDefinition;
+import org.hl7.fhir.r5.model.Reference;
+import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
+import org.opencds.cqf.fhir.utility.adapter.TestVisitor;
+
 public class ImplementationGuideAdapterTest {
 
     private final IAdapterFactory adapterFactory = new AdapterFactory();
@@ -30,7 +30,9 @@ public class ImplementationGuideAdapterTest {
     @Test
     void invalid_object_fails() {
         var planDefinition = new PlanDefinition();
-        assertThrows(IllegalArgumentException.class, () -> new org.opencds.cqf.fhir.utility.adapter.r5.ImplementationGuideAdapter(planDefinition));
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> new org.opencds.cqf.fhir.utility.adapter.r5.ImplementationGuideAdapter(planDefinition));
     }
 
     @Test
@@ -38,11 +40,12 @@ public class ImplementationGuideAdapterTest {
         var spyVisitor = spy(new TestVisitor());
         var implementationGuide = new ImplementationGuide();
         var adapter = adapterFactory.createKnowledgeArtifactAdapter(implementationGuide);
-        doReturn(implementationGuide).when(spyVisitor).visit(any(
-            org.opencds.cqf.fhir.utility.adapter.r5.ImplementationGuideAdapter.class), any());
+        doReturn(implementationGuide)
+                .when(spyVisitor)
+                .visit(any(org.opencds.cqf.fhir.utility.adapter.r5.ImplementationGuideAdapter.class), any());
         adapter.accept(spyVisitor, null);
-        verify(spyVisitor, times(1)).visit(any(
-            org.opencds.cqf.fhir.utility.adapter.r5.ImplementationGuideAdapter.class), any());
+        verify(spyVisitor, times(1))
+                .visit(any(org.opencds.cqf.fhir.utility.adapter.r5.ImplementationGuideAdapter.class), any());
     }
 
     @Test
@@ -119,13 +122,12 @@ public class ImplementationGuideAdapterTest {
 
     @Test
     void adapter_get_all_dependencies() {
-        var dependencies = List.of(
-            "profileRef", "definitionResourceRef");
+        var dependencies = List.of("profileRef", "definitionResourceRef");
         var ig = new ImplementationGuide();
         ig.getMeta().addProfile(dependencies.get(0));
 
-        var igDefinitionResourceComponent = new ImplementationGuideDefinitionResourceComponent(
-            new Reference(dependencies.get(1)));
+        var igDefinitionResourceComponent =
+                new ImplementationGuideDefinitionResourceComponent(new Reference(dependencies.get(1)));
         var igDefinitionComponent = new ImplementationGuideDefinitionComponent();
         igDefinitionComponent.setResource(List.of(igDefinitionResourceComponent));
         ig.setDefinition(igDefinitionComponent);
@@ -139,5 +141,4 @@ public class ImplementationGuideAdapterTest {
             assertTrue(dependencies.contains(dep.getReference()));
         });
     }
-
 }

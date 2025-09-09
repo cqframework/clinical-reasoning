@@ -1,18 +1,5 @@
 package org.opencds.cqf.fhir.utility.adapter.r4;
 
-import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
-import org.hl7.fhir.r4.model.ImplementationGuide;
-import org.hl7.fhir.r4.model.ImplementationGuide.ImplementationGuideDefinitionComponent;
-import org.hl7.fhir.r4.model.ImplementationGuide.ImplementationGuideDefinitionResourceComponent;
-import org.hl7.fhir.r4.model.PlanDefinition;
-import org.hl7.fhir.r4.model.Reference;
-import org.junit.jupiter.api.Test;
-import org.opencds.cqf.fhir.utility.adapter.TestVisitor;
-
-import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -22,6 +9,18 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import java.util.List;
+import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
+import org.hl7.fhir.r4.model.ImplementationGuide;
+import org.hl7.fhir.r4.model.ImplementationGuide.ImplementationGuideDefinitionComponent;
+import org.hl7.fhir.r4.model.ImplementationGuide.ImplementationGuideDefinitionResourceComponent;
+import org.hl7.fhir.r4.model.PlanDefinition;
+import org.hl7.fhir.r4.model.Reference;
+import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.utility.adapter.TestVisitor;
 
 public class ImplementationGuideAdapterTest {
     private final org.opencds.cqf.fhir.utility.adapter.IAdapterFactory adapterFactory = new AdapterFactory();
@@ -116,13 +115,12 @@ public class ImplementationGuideAdapterTest {
 
     @Test
     void adapter_get_all_dependencies() {
-        var dependencies = List.of(
-            "profileRef", "definitionResourceRef");
+        var dependencies = List.of("profileRef", "definitionResourceRef");
         var ig = new ImplementationGuide();
         ig.getMeta().addProfile(dependencies.get(0));
 
-        var igDefinitionResourceComponent = new ImplementationGuideDefinitionResourceComponent(
-            new Reference(dependencies.get(1)));
+        var igDefinitionResourceComponent =
+                new ImplementationGuideDefinitionResourceComponent(new Reference(dependencies.get(1)));
         var igDefinitionComponent = new ImplementationGuideDefinitionComponent();
         igDefinitionComponent.setResource(List.of(igDefinitionResourceComponent));
         ig.setDefinition(igDefinitionComponent);

@@ -1,14 +1,14 @@
 package org.opencds.cqf.fhir.utility.adapter.dstu3;
 
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import java.util.ArrayList;
+import java.util.List;
 import org.hl7.fhir.dstu3.model.ImplementationGuide;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IImplementationGuideAdapter;
-import java.util.ArrayList;
-import java.util.List;
 
 public class ImplementationGuideAdapter extends KnowledgeArtifactAdapter implements IImplementationGuideAdapter {
 
@@ -55,7 +55,7 @@ public class ImplementationGuideAdapter extends KnowledgeArtifactAdapter impleme
                     addProfileReferences(references, ((Reference) source).getReference());
                 } else {
                     throw new UnprocessableEntityException(
-                        "Package Resource Source must be instance of UriType or Reference");
+                            "Package Resource Source must be instance of UriType or Reference");
                 }
             });
         });

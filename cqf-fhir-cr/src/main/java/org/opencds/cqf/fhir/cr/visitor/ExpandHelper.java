@@ -15,6 +15,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.Constants;
@@ -26,8 +27,12 @@ import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IParametersParameterComponentAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
 import org.opencds.cqf.fhir.utility.client.TerminologyServerClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ExpandHelper {
+
+    private static final Logger log = LoggerFactory.getLogger(ExpandHelper.class);
     private final IRepository repository;
     private final IAdapterFactory adapterFactory;
     private final TerminologyServerClient terminologyServerClient;
@@ -82,10 +87,18 @@ public class ExpandHelper {
                 && (authoritativeSourceUrl == null
                         || authoritativeSourceUrl.equals(
                                 terminologyEndpoint.get().getAddress()))) {
-            terminologyServerExpand(valueSet, expansionParameters, terminologyEndpoint.get());
+            try {
+                terminologyServerExpand(valueSet, expansionParameters, terminologyEndpoint.get());
+                return;
+            } catch (Exception e) {
+                log.warn(
+                        "Failed to expand value set {}. Reason: {}. Will attempt to expand locally.",
+                        valueSet.getUrl(),
+                        e.getMessage());
+            }
         }
         // Else if the ValueSet has a simple compose then we will perform naive expansion.
-        else if (valueSet.hasSimpleCompose()) {
+        if (valueSet.hasSimpleCompose()) {
             valueSet.naiveExpand();
         }
         // Else if the ValueSet has a grouping compose then we will attempt to group.
@@ -99,8 +112,16 @@ public class ExpandHelper {
                     repository,
                     expansionTimestamp);
         } else if (valueSet.hasCompose()) {
-            throw new UnprocessableEntityException(
-                    "Cannot expand ValueSet without a terminology server: " + valueSet.getId());
+            try {
+                var vs = repository.invoke(
+                        "$expand",
+                        (IBaseParameters) expansionParameters.get(),
+                        valueSet.get().getClass());
+                valueSet = (IValueSetAdapter) IAdapterFactory.createAdapterForResource(vs);
+            } catch (Exception e) {
+                throw new UnprocessableEntityException(
+                        "Cannot expand ValueSet without a terminology server: " + valueSet.getId());
+            }
         }
         expandedList.add(valueSet.getUrl());
     }
@@ -219,15 +240,20 @@ public class ExpandHelper {
                 .findFirst()
                 .orElseGet(() -> {
                     if (terminologyEndpoint.isPresent()) {
-                        return terminologyServerClient
-                                .getValueSetResource(terminologyEndpoint.get(), reference)
-                                .map(r -> (IValueSetAdapter) adapterFactory.createResource(r))
-                                .orElse(null);
-                    } else {
-                        return VisitorHelper.tryGetLatestVersion(reference, repository)
-                                .map(a -> (IValueSetAdapter) a)
-                                .orElse(null);
+                        try {
+                            return terminologyServerClient
+                                    .getValueSetResource(terminologyEndpoint.get(), reference)
+                                    .map(r -> (IValueSetAdapter) adapterFactory.createResource(r))
+                                    .orElse(null);
+                        } catch (Exception ex) {
+                            log.warn(
+                                    "Failed to retrieve ValueSet resource for ValueSet '{}', will attempt to retrieve locally",
+                                    reference,
+                                    ex);
+                        }
                     }
+                    return (IValueSetAdapter) VisitorHelper.tryGetLatestVersion(reference, repository)
+                            .orElse(null);
                 });
     }
 

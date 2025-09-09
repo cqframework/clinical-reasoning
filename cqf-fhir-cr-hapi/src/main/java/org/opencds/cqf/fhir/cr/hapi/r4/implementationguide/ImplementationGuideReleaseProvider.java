@@ -1,5 +1,7 @@
 package org.opencds.cqf.fhir.cr.hapi.r4.implementationguide;
 
+import static org.opencds.cqf.fhir.cr.hapi.common.IdHelper.getIdType;
+
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -17,13 +19,12 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.opencds.cqf.fhir.cr.hapi.common.IImplementationGuideProcessorFactory;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 
-import static org.opencds.cqf.fhir.cr.hapi.common.IdHelper.getIdType;
-
 public class ImplementationGuideReleaseProvider {
     private final IImplementationGuideProcessorFactory implementationGuideProcessorFactory;
     private final FhirVersionEnum fhirVersion;
 
-    public ImplementationGuideReleaseProvider(IImplementationGuideProcessorFactory implementationGuideProcessorFactory) {
+    public ImplementationGuideReleaseProvider(
+            IImplementationGuideProcessorFactory implementationGuideProcessorFactory) {
         this.implementationGuideProcessorFactory = implementationGuideProcessorFactory;
         fhirVersion = FhirVersionEnum.R4;
     }
@@ -41,56 +42,59 @@ public class ImplementationGuideReleaseProvider {
     @Operation(name = "$release", idempotent = true, global = true, type = Library.class)
     @Description(shortDefinition = "$release", value = "Release an existing draft artifact")
     public IBaseBundle releaseLibrary(
-        @IdParam IdType id,
-        @OperationParam(name = "version") String version,
-        @OperationParam(name = "versionBehavior") CodeType versionBehavior,
-        @OperationParam(name = "latestFromTxServer") BooleanType latestFromTxServer,
-        @OperationParam(name = "requireNonExperimental") CodeType requireNonExperimental,
-        @OperationParam(name = "terminologyEndpoint") Endpoint terminologyEndpoint,
-        @OperationParam(name = "releaseLabel") String releaseLabel,
-        RequestDetails requestDetails)
-        throws FHIRException {
+            @IdParam IdType id,
+            @OperationParam(name = "version") String version,
+            @OperationParam(name = "versionBehavior") CodeType versionBehavior,
+            @OperationParam(name = "latestFromTxServer") BooleanType latestFromTxServer,
+            @OperationParam(name = "requireNonExperimental") CodeType requireNonExperimental,
+            @OperationParam(name = "terminologyEndpoint") Endpoint terminologyEndpoint,
+            @OperationParam(name = "releaseLabel") String releaseLabel,
+            RequestDetails requestDetails)
+            throws FHIRException {
         var params = getReleaseParameters(
-            version,
-            versionBehavior,
-            latestFromTxServer,
-            requireNonExperimental,
-            terminologyEndpoint,
-            releaseLabel);
-        return implementationGuideProcessorFactory.create(requestDetails).releaseImplementationGuide(
-            Eithers.for3(null, id, null), params);
+                version,
+                versionBehavior,
+                latestFromTxServer,
+                requireNonExperimental,
+                terminologyEndpoint,
+                releaseLabel);
+        return implementationGuideProcessorFactory
+                .create(requestDetails)
+                .releaseImplementationGuide(Eithers.for3(null, id, null), params);
     }
 
     @Operation(name = "$release", idempotent = true, global = true, type = Library.class)
     @Description(shortDefinition = "$release", value = "Release an existing draft artifact")
     public IBaseBundle releaseImplementationGuide(
-        @OperationParam(name = "id") String id,
-        @OperationParam(name = "version") String version,
-        @OperationParam(name = "versionBehavior") CodeType versionBehavior,
-        @OperationParam(name = "latestFromTxServer") BooleanType latestFromTxServer,
-        @OperationParam(name = "requireNonExperimental") CodeType requireNonExperimental,
-        @OperationParam(name = "terminologyEndpoint") Endpoint terminologyEndpoint,
-        @OperationParam(name = "releaseLabel") String releaseLabel,
-        RequestDetails requestDetails)
-        throws FHIRException {
+            @OperationParam(name = "id") String id,
+            @OperationParam(name = "version") String version,
+            @OperationParam(name = "versionBehavior") CodeType versionBehavior,
+            @OperationParam(name = "latestFromTxServer") BooleanType latestFromTxServer,
+            @OperationParam(name = "requireNonExperimental") CodeType requireNonExperimental,
+            @OperationParam(name = "terminologyEndpoint") Endpoint terminologyEndpoint,
+            @OperationParam(name = "releaseLabel") String releaseLabel,
+            RequestDetails requestDetails)
+            throws FHIRException {
         var idToUse = (IdType) getIdType(fhirVersion, "ImplementationGuide", id);
         var params = getReleaseParameters(
-            version,
-            versionBehavior,
-            latestFromTxServer,
-            requireNonExperimental,
-            terminologyEndpoint,
-            releaseLabel);
-        return implementationGuideProcessorFactory.create(requestDetails).releaseImplementationGuide(Eithers.for3(null, idToUse, null), params);
+                version,
+                versionBehavior,
+                latestFromTxServer,
+                requireNonExperimental,
+                terminologyEndpoint,
+                releaseLabel);
+        return implementationGuideProcessorFactory
+                .create(requestDetails)
+                .releaseImplementationGuide(Eithers.for3(null, idToUse, null), params);
     }
 
     private static Parameters getReleaseParameters(
-        String version,
-        CodeType versionBehavior,
-        BooleanType latestFromTxServer,
-        CodeType requireNonExperimental,
-        Endpoint terminologyEndpoint,
-        String releaseLabel) {
+            String version,
+            CodeType versionBehavior,
+            BooleanType latestFromTxServer,
+            CodeType requireNonExperimental,
+            Endpoint terminologyEndpoint,
+            String releaseLabel) {
         var params = new Parameters();
         if (version != null) {
             params.addParameter("version", version);

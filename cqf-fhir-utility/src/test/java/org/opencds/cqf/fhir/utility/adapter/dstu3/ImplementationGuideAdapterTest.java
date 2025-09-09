@@ -12,6 +12,7 @@ import static org.mockito.Mockito.verify;
 
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import java.util.List;
 import org.hl7.fhir.dstu3.model.BooleanType;
 import org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.dstu3.model.ImplementationGuide;
@@ -22,7 +23,6 @@ import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.utility.adapter.TestVisitor;
-import java.util.List;
 
 public class ImplementationGuideAdapterTest {
     private final org.opencds.cqf.fhir.utility.adapter.IAdapterFactory adapterFactory = new AdapterFactory();
@@ -117,14 +117,12 @@ public class ImplementationGuideAdapterTest {
 
     @Test
     void adapter_get_all_dependencies() {
-        var dependencies = List.of(
-            "profileRef", "packageResourceRef");
+        var dependencies = List.of("profileRef", "packageResourceRef");
         var ig = new ImplementationGuide();
         ig.getMeta().addProfile(dependencies.get(0));
 
         var igPackageResourceSource = new ImplementationGuidePackageResourceComponent(
-            new BooleanType(false),
-            new Reference(dependencies.get(1)));
+                new BooleanType(false), new Reference(dependencies.get(1)));
         var igPackage = new ImplementationGuidePackageComponent(new StringType("exampleDependency"));
         igPackage.setResource(List.of(igPackageResourceSource));
         ig.setPackage(List.of(igPackage));

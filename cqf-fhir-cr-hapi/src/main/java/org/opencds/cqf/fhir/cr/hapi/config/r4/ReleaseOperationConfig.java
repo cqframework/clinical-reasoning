@@ -19,7 +19,7 @@ import org.springframework.context.annotation.Configuration;
 public class ReleaseOperationConfig {
     @Bean
     ImplementationGuideReleaseProvider r4ImplementationGuideReleaseProvider(
-        IImplementationGuideProcessorFactory implementationGuideProcessorFactory) {
+            IImplementationGuideProcessorFactory implementationGuideProcessorFactory) {
         return new ImplementationGuideReleaseProvider(implementationGuideProcessorFactory);
     }
 
@@ -31,15 +31,11 @@ public class ReleaseOperationConfig {
     @Bean(name = "releaseOperationLoader")
     public ProviderLoader releaseOperationLoader(
             ApplicationContext applicationContext, FhirContext fhirContext, RestfulServer restfulServer) {
-        var selector =
-                new ProviderSelector(
-                    fhirContext,
-                    Map.of(
+        var selector = new ProviderSelector(
+                fhirContext,
+                Map.of(
                         FhirVersionEnum.R4,
-                        List.of(
-                            ImplementationGuideReleaseProvider.class,
-                            LibraryReleaseProvider.class
-                        )));
+                        List.of(ImplementationGuideReleaseProvider.class, LibraryReleaseProvider.class)));
 
         return new ProviderLoader(restfulServer, applicationContext, selector);
     }

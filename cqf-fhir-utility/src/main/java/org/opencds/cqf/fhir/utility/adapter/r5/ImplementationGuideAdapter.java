@@ -1,12 +1,11 @@
 package org.opencds.cqf.fhir.utility.adapter.r5;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.r5.model.ImplementationGuide;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IImplementationGuideAdapter;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class ImplementationGuideAdapter extends KnowledgeArtifactAdapter implements IImplementationGuideAdapter {
 
@@ -14,7 +13,7 @@ public class ImplementationGuideAdapter extends KnowledgeArtifactAdapter impleme
         super(implementationGuide);
         if (!(implementationGuide instanceof ImplementationGuide)) {
             throw new IllegalArgumentException(
-                "resource passed as implementationGuide argument is not a ImplementationGuide resource");
+                    "resource passed as implementationGuide argument is not a ImplementationGuide resource");
         }
     }
 
@@ -49,5 +48,4 @@ public class ImplementationGuideAdapter extends KnowledgeArtifactAdapter impleme
         });
         return references;
     }
-
 }

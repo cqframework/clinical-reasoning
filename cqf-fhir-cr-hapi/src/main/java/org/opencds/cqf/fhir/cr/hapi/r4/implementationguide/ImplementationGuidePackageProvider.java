@@ -1,5 +1,10 @@
 package org.opencds.cqf.fhir.cr.hapi.r4.implementationguide;
 
+import static org.opencds.cqf.fhir.cr.hapi.common.CanonicalHelper.getCanonicalType;
+import static org.opencds.cqf.fhir.cr.hapi.common.EndpointHelper.getEndpoint;
+import static org.opencds.cqf.fhir.cr.hapi.common.IdHelper.getIdType;
+import static org.opencds.cqf.fhir.utility.PackageHelper.packageParameters;
+
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -17,16 +22,12 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.opencds.cqf.fhir.cr.hapi.common.IImplementationGuideProcessorFactory;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 
-import static org.opencds.cqf.fhir.cr.hapi.common.CanonicalHelper.getCanonicalType;
-import static org.opencds.cqf.fhir.cr.hapi.common.EndpointHelper.getEndpoint;
-import static org.opencds.cqf.fhir.cr.hapi.common.IdHelper.getIdType;
-import static org.opencds.cqf.fhir.utility.PackageHelper.packageParameters;
-
 public class ImplementationGuidePackageProvider {
     private final IImplementationGuideProcessorFactory implementationGuideProcessorFactory;
     private final FhirVersionEnum fhirVersion;
 
-    public ImplementationGuidePackageProvider(IImplementationGuideProcessorFactory implementationGuideProcessorFactory) {
+    public ImplementationGuidePackageProvider(
+            IImplementationGuideProcessorFactory implementationGuideProcessorFactory) {
         this.implementationGuideProcessorFactory = implementationGuideProcessorFactory;
         fhirVersion = FhirVersionEnum.R4;
     }
@@ -45,40 +46,40 @@ public class ImplementationGuidePackageProvider {
      */
     @Operation(name = ProviderConstants.CR_OPERATION_PACKAGE, idempotent = true, type = Library.class)
     public IBaseBundle packageLibrary(
-        @IdParam IdType id,
-        @OperationParam(name = "canonical") String canonical,
-        @OperationParam(name = "url") String url,
-        @OperationParam(name = "version") String version,
-        @OperationParam(name = "terminologyEndpoint") Parameters.ParametersParameterComponent terminologyEndpoint,
-        @OperationParam(name = "usePut") BooleanType usePut,
-        RequestDetails requestDetails)
-        throws InternalErrorException, FHIRException {
+            @IdParam IdType id,
+            @OperationParam(name = "canonical") String canonical,
+            @OperationParam(name = "url") String url,
+            @OperationParam(name = "version") String version,
+            @OperationParam(name = "terminologyEndpoint") Parameters.ParametersParameterComponent terminologyEndpoint,
+            @OperationParam(name = "usePut") BooleanType usePut,
+            RequestDetails requestDetails)
+            throws InternalErrorException, FHIRException {
         var canonicalType = getCanonicalType(fhirVersion, canonical, url, version);
         var terminologyEndpointParam = getEndpoint(fhirVersion, terminologyEndpoint);
         var params = packageParameters(
-            fhirVersion, terminologyEndpointParam, usePut == null ? Boolean.FALSE : usePut.booleanValue());
+                fhirVersion, terminologyEndpointParam, usePut == null ? Boolean.FALSE : usePut.booleanValue());
         return implementationGuideProcessorFactory
-            .create(requestDetails)
-            .packageImplementationGuide(Eithers.for3(canonicalType, id, null), params);
+                .create(requestDetails)
+                .packageImplementationGuide(Eithers.for3(canonicalType, id, null), params);
     }
 
     @Operation(name = ProviderConstants.CR_OPERATION_PACKAGE, idempotent = true, type = Library.class)
     public IBaseBundle packageLibrary(
-        @OperationParam(name = "id") String id,
-        @OperationParam(name = "canonical") String canonical,
-        @OperationParam(name = "url") String url,
-        @OperationParam(name = "version") String version,
-        @OperationParam(name = "terminologyEndpoint") Parameters.ParametersParameterComponent terminologyEndpoint,
-        @OperationParam(name = "usePut") BooleanType usePut,
-        RequestDetails requestDetails)
-        throws InternalErrorException, FHIRException {
+            @OperationParam(name = "id") String id,
+            @OperationParam(name = "canonical") String canonical,
+            @OperationParam(name = "url") String url,
+            @OperationParam(name = "version") String version,
+            @OperationParam(name = "terminologyEndpoint") Parameters.ParametersParameterComponent terminologyEndpoint,
+            @OperationParam(name = "usePut") BooleanType usePut,
+            RequestDetails requestDetails)
+            throws InternalErrorException, FHIRException {
         var idToUse = getIdType(fhirVersion, "Library", id);
         var canonicalType = getCanonicalType(fhirVersion, canonical, url, version);
         var terminologyEndpointParam = getEndpoint(fhirVersion, terminologyEndpoint);
         var params = packageParameters(
-            fhirVersion, terminologyEndpointParam, usePut == null ? Boolean.FALSE : usePut.booleanValue());
+                fhirVersion, terminologyEndpointParam, usePut == null ? Boolean.FALSE : usePut.booleanValue());
         return implementationGuideProcessorFactory
-            .create(requestDetails)
-            .packageImplementationGuide(Eithers.for3(canonicalType, idToUse, null), params);
+                .create(requestDetails)
+                .packageImplementationGuide(Eithers.for3(canonicalType, idToUse, null), params);
     }
 }

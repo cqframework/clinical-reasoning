@@ -7,6 +7,8 @@ import static org.opencds.cqf.fhir.utility.BundleHelper.newBundle;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.repository.IRepository;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -44,6 +46,7 @@ public class ApplyRequest implements ICpgRequest {
     private final FhirVersionEnum fhirVersion;
     private final Map<String, String> referencedLibraries;
     private final IInputParameterResolver inputParameterResolver;
+    private final Collection<IBaseResource> referencedResources;
     private IBaseOperationOutcome operationOutcome;
 
     public ApplyRequest(
@@ -101,6 +104,7 @@ public class ApplyRequest implements ICpgRequest {
                         parameters,
                         this.data);
         referencedLibraries = graphDefinitionAdapter.getReferencedLibraries();
+        referencedResources = new ArrayList<>();
 
         this.startDateTime = startDateTime;
         this.endDateTime = endDateTime;
@@ -243,5 +247,9 @@ public class ApplyRequest implements ICpgRequest {
     @Override
     public IRepository getRepository() {
         return libraryEngine.getRepository();
+    }
+
+    public Collection<IBaseResource> getReferencedResources() {
+        return referencedResources;
     }
 }

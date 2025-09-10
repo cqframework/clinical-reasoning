@@ -123,12 +123,12 @@ public class TestGraphDefinition {
         }
 
         public When subjectId(String patientId) {
-            applyRequestBuilder.withSubject("Patient/" + patientId);
+            applyRequestBuilder.withSubject(patientId);
             return this;
         }
 
         public When practitionerId(String practitionerId) {
-            applyRequestBuilder.withPractitioner("Practitioner/" + practitionerId);
+            applyRequestBuilder.withPractitioner(practitionerId);
             return this;
         }
 

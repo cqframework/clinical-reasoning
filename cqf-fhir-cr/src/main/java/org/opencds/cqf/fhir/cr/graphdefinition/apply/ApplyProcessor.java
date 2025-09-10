@@ -1,18 +1,22 @@
 package org.opencds.cqf.fhir.cr.graphdefinition.apply;
 
 import static ca.uhn.fhir.context.FhirVersionEnum.R4;
+import static org.opencds.cqf.fhir.utility.Constants.CPG_RELATED_SUMMARY_DEFINITION;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -35,6 +39,8 @@ import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cr.common.ExtensionProcessor;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Constants;
+import org.opencds.cqf.fhir.utility.SearchHelper;
+import org.opencds.cqf.fhir.utility.search.Searches;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +48,8 @@ import org.slf4j.LoggerFactory;
 public class ApplyProcessor implements IApplyProcessor {
     public static final String DEFAULT_IDENTIFIER_VALUE_PREFIX = "urn:uuid:";
     private static final String BUNDLE_TYPE = "document";
-    public static final Coding DEFAULT_CODING = new Coding().setSystem("http://loinc.org").setCode("18776-5").setDisplay("Plan of care note");
+    public static final Coding DEFAULT_CODING =
+            new Coding().setSystem("http://loinc.org").setCode("18776-5").setDisplay("Plan of care note");
 
     private static final Logger logger = LoggerFactory.getLogger(ApplyProcessor.class);
     protected final IRepository repository;
@@ -50,7 +57,7 @@ public class ApplyProcessor implements IApplyProcessor {
     protected final ExtensionProcessor extensionProcessor;
     protected final FhirVersionEnum fhirVersionEnum;
 
-    public ApplyProcessor(IRepository repository, ModelResolver modelResolver,FhirVersionEnum fhirVersionEnum) {
+    public ApplyProcessor(IRepository repository, ModelResolver modelResolver, FhirVersionEnum fhirVersionEnum) {
         this.repository = repository;
         this.modelResolver = modelResolver;
         this.fhirVersionEnum = fhirVersionEnum;
@@ -61,55 +68,97 @@ public class ApplyProcessor implements IApplyProcessor {
     public IBaseResource apply(ApplyRequest request) {
         validateVersion(request);
 
-        GraphDefinition graphDefinition = (GraphDefinition) request.getGraphDefinition();
-        Bundle bundle = createResponseBundle();
-        Composition responseComposite = createAndInitializeCompositeEntry(request);
+        var graphDefinition = (GraphDefinition) request.getGraphDefinition();
+        var bundle = createResponseBundle();
+        var responseComposite = createAndInitializeCompositeEntry(request);
 
-        List<SectionComponent> sections = transformBackBoneElementsToSections(graphDefinition.getLink());
+        var sections = transformBackBoneElementsToSections(request, graphDefinition.getLink());
         sections.forEach(responseComposite::addSection);
 
-        addResourceToResponseBundleEntries(bundle, responseComposite, createEntryUrl(graphDefinition.getIdElement()));
+        addResourceToResponseBundleEntries(
+                bundle,
+                responseComposite,
+                createEntryUrl(request.getGraphDefinition().getIdElement()));
         addRelatedResourcesToResponseBundle(bundle, request);
 
         return bundle;
     }
 
-    protected List<SectionComponent> transformBackBoneElementsToSections(List<GraphDefinitionLinkComponent> linkComponents) {
+    protected List<SectionComponent> transformBackBoneElementsToSections(
+            ApplyRequest request, List<GraphDefinitionLinkComponent> linkComponents) {
         return linkComponents.stream()
-            .map(this::transformLinkToSection)
-            .filter(Objects::nonNull)
-            .toList();
+                .map(l -> transformLinkToSection(request, l))
+                .filter(Objects::nonNull)
+                .toList();
     }
 
-    protected SectionComponent transformLinkToSection(GraphDefinitionLinkComponent linkComponent){
-        if(!linkComponent.hasTarget()){
+    protected SectionComponent transformLinkToSection(
+            ApplyRequest request, GraphDefinitionLinkComponent linkComponent) {
+        if (!linkComponent.hasTarget()) {
             return null;
         }
 
         String description = linkComponent.getDescription();
         SectionComponent sectionComponent = new SectionComponent().setTitle(description);
 
-        linkComponent.getTarget()
-            .stream()
-            .filter(this::isGraphDefinitionType)
-            .filter(GraphDefinitionLinkTargetComponent::hasExtension)
-            .map(this::transformTargetToSection)
-            .forEach(sectionComponent::addSection);
+        linkComponent.getTarget().stream()
+                .map(t -> transformTargetToSection(request, t))
+                .forEach(sectionComponent::addSection);
 
         return sectionComponent;
     }
 
-    protected SectionComponent transformTargetToSection(GraphDefinitionLinkTargetComponent target){
-        SectionComponent retVal = new SectionComponent();
+    protected SectionComponent transformTargetToSection(
+            ApplyRequest request, GraphDefinitionLinkTargetComponent target) {
+        var sectionComponent = new SectionComponent();
 
-        target.getExtension().stream()
-            .map(this::transformExtensionToReference)
-            .forEach(retVal::addEntry);
+        var profile = target.getProfile();
+        // Only concerned with related summary definition extensions for now
+        var relatedDefinitions = target.getExtensionsByUrl(CPG_RELATED_SUMMARY_DEFINITION);
+        if (profile != null && !relatedDefinitions.isEmpty()) {
+            throw new UnprocessableEntityException(
+                    "Encountered a target with both a profile and CPG Related Summary Definition extension.");
+        }
 
-        return retVal;
+        if (profile != null) {
+            var type = target.getType();
+            if (StringUtils.isEmpty(type)) {
+                throw new UnprocessableEntityException(
+                        String.format("Target with profile %s is missing type.", profile));
+            }
+            var resourceType = SearchHelper.getResourceClass(repository, type);
+            var searchParams = getSearchParams(request, type, profile);
+            var searchBundle = SearchHelper.searchRepositoryWithPaging(repository, resourceType, searchParams, null);
+            var referencedResources = searchBundle == null
+                    ? new ArrayList<IBaseResource>()
+                    : BundleHelper.getEntryResources(searchBundle);
+            referencedResources.forEach(r -> {
+                var reference = new Reference().setReference(r.getIdElement().getValue());
+                sectionComponent.addEntry(reference);
+                request.getReferencedResources().add(r);
+            });
+        }
+
+        if (!relatedDefinitions.isEmpty()) {
+            target.getExtension().stream()
+                    .map(this::transformExtensionToReference)
+                    .forEach(sectionComponent::addEntry);
+        }
+
+        return sectionComponent;
     }
 
-    protected Reference transformExtensionToReference(Extension extension){
+    protected Map<String, List<IQueryParameterType>> getSearchParams(
+            ApplyRequest request, String type, String profile) {
+        var searchParams = Searches.byProfile(profile);
+        searchParams.put(
+                Searches.getPatientSearchParam(fhirVersionEnum, type),
+                List.of(new ReferenceParam(request.getSubjectId().getIdPart())));
+        // Need to add date params
+        return searchParams;
+    }
+
+    protected Reference transformExtensionToReference(Extension extension) {
         Reference retVal = new Reference();
         retVal.addExtension(extension.copy());
         return retVal;
@@ -124,9 +173,11 @@ public class ApplyProcessor implements IApplyProcessor {
 
         List<IBaseResource> practitionerRoles = findPractitionerRoles(practitioner.getIdElement());
 
-        practitionerRoles.forEach(theIBaseResource ->
-            addResourceToResponseBundleEntries(responseBundle, theIBaseResource, createEntryUrl(theIBaseResource.getIdElement())));
+        practitionerRoles.forEach(theIBaseResource -> addResourceToResponseBundleEntries(
+                responseBundle, theIBaseResource, createEntryUrl(theIBaseResource.getIdElement())));
 
+        request.getReferencedResources()
+                .forEach(r -> addResourceToResponseBundleEntries(responseBundle, r, createEntryUrl(r.getIdElement())));
     }
 
     protected List<IBaseResource> findPractitionerRoles(IdType practitionerId) {
@@ -151,7 +202,7 @@ public class ApplyProcessor implements IApplyProcessor {
     }
 
     private void validateVersion(ApplyRequest request) {
-        if(!R4.isEquivalentTo(request.getFhirVersion())){
+        if (!R4.isEquivalentTo(request.getFhirVersion())) {
             throw new InvalidRequestException("Apply is not supported for FHIR version " + request.getFhirVersion());
         }
     }
@@ -169,12 +220,13 @@ public class ApplyProcessor implements IApplyProcessor {
 
         retVal.getMeta().addProfile(Constants.CPG_CASE_PLAN_SUMMARY);
 
-        retVal.addExtension(Constants.CPG_SUMMARY_FOR, new StringType(
-            request.getSubjectId().toUnqualifiedVersionless().getValue()));
+        retVal.addExtension(
+                Constants.CPG_SUMMARY_FOR,
+                new StringType(request.getSubjectId().toUnqualifiedVersionless().getValue()));
 
         GraphDefinition graphDefinition = (GraphDefinition) request.getGraphDefinition();
 
-        if(graphDefinition.hasUrl()) {
+        if (graphDefinition.hasUrl()) {
             retVal.addExtension(Constants.CPG_GENERATED_FOR, new StringType(graphDefinition.getUrl()));
         }
 
@@ -187,5 +239,4 @@ public class ApplyProcessor implements IApplyProcessor {
 
         return retVal;
     }
-
 }

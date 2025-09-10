@@ -76,8 +76,10 @@ public class Constants {
     public static final String CPG_SUMMARY_FOR = "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-summaryFor";
     public static final String CPG_GENERATED_FOR = "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-generatedFor";
 
-
-    public static final String CPG_CASE_PLAN_SUMMARY = "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-caseplansummary";
+    public static final String CPG_CASE_PLAN_SUMMARY =
+            "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-caseplansummary";
+    public static final String CPG_RELATED_SUMMARY_DEFINITION =
+            "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-relatedsummarydefinition";
 
     public static final String CQF_RESOURCETYPE = "http://hl7.org/fhir/StructureDefinition/cqf-resourceType";
 

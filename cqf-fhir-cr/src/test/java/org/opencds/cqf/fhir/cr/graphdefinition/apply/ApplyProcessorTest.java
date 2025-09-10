@@ -2,14 +2,15 @@ package org.opencds.cqf.fhir.cr.graphdefinition.apply;
 
 import static org.hl7.fhir.r4.model.GraphDefinition.GraphDefinitionLinkComponent;
 import static org.hl7.fhir.r4.model.GraphDefinition.GraphDefinitionLinkTargetComponent;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
+import static org.opencds.cqf.fhir.utility.Constants.CPG_RELATED_SUMMARY_DEFINITION;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -23,6 +24,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
+import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Composition;
 import org.hl7.fhir.r4.model.Composition.SectionComponent;
 import org.hl7.fhir.r4.model.Extension;
@@ -42,6 +44,7 @@ import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@SuppressWarnings("UnstableApiUsage")
 @ExtendWith(MockitoExtension.class)
 public class ApplyProcessorTest {
     private final Logger ourLog = LoggerFactory.getLogger(ApplyProcessorTest.class);
@@ -117,7 +120,7 @@ public class ApplyProcessorTest {
     }
 
     @Test
-    void testFindPractitionerRolesFromPractitioner(){
+    void testFindPractitionerRolesFromPractitioner() {
         IdType practitionerId = new IdType("Practitioner", "ordering-md-1");
         List<IBaseResource> practitionerRoles = fixture.findPractitionerRoles(practitionerId);
 
@@ -125,7 +128,7 @@ public class ApplyProcessorTest {
     }
 
     @Test
-    void testTransformExtensionToReference(){
+    void testTransformExtensionToReference() {
         final String url = "someUrl";
         final String value = "someValue";
         final Extension originalExtension = new Extension(url, new StringType(value));
@@ -142,15 +145,16 @@ public class ApplyProcessorTest {
     @Test
     void testTransformBackBoneElementsToSections_transformsValidLinks() {
         GraphDefinitionLinkTargetComponent target = new GraphDefinitionLinkTargetComponent();
-        target.setType("GraphDefinition").addExtension(new Extension("http://example.org/ext1", new StringType("value1")));
+        target.setType("GraphDefinition")
+                .addExtension(new Extension(CPG_RELATED_SUMMARY_DEFINITION, new CanonicalType("value1")));
 
-        GraphDefinitionLinkComponent link = new GraphDefinitionLinkComponent()
-            .setDescription("Valid Link")
-            .addTarget(target);
+        GraphDefinitionLinkComponent link =
+                new GraphDefinitionLinkComponent().setDescription("Valid Link").addTarget(target);
 
         printElement(link);
 
-        List<SectionComponent> sections = fixture.transformBackBoneElementsToSections(List.of(link));
+        var applyRequest = Mockito.mock(ApplyRequest.class);
+        List<SectionComponent> sections = fixture.transformBackBoneElementsToSections(applyRequest, List.of(link));
 
         assertNotNull(sections);
         assertEquals(1, sections.size());
@@ -163,16 +167,20 @@ public class ApplyProcessorTest {
 
         SectionComponent childSection = parentSection.getSection().get(0);
 
-        assertEquals("http://example.org/ext1", childSection.getEntryFirstRep().getExtensionFirstRep().getUrl());
+        assertEquals(
+                CPG_RELATED_SUMMARY_DEFINITION,
+                childSection.getEntryFirstRep().getExtensionFirstRep().getUrl());
     }
 
     @Test
     void testTransformLinkToSection_transformsWithValidTargets() {
         GraphDefinitionLinkTargetComponent target1 = new GraphDefinitionLinkTargetComponent();
-        target1.setType("GraphDefinition").addExtension(new Extension("http://example.org/ext1", new StringType("value1")));
+        target1.setType("GraphDefinition")
+                .addExtension(new Extension("http://example.org/ext1", new StringType("value1")));
 
         GraphDefinitionLinkTargetComponent target2 = new GraphDefinitionLinkTargetComponent();
-        target2.setType("GraphDefinition").addExtension(new Extension("http://example.org/ext2", new StringType("value2")));
+        target2.setType("GraphDefinition")
+                .addExtension(new Extension("http://example.org/ext2", new StringType("value2")));
 
         var linkComponent = new GraphDefinitionLinkComponent()
                 .setDescription("Test Link")
@@ -181,7 +189,8 @@ public class ApplyProcessorTest {
 
         printElement(linkComponent);
 
-        SectionComponent section = fixture.transformLinkToSection(linkComponent);
+        var applyRequest = Mockito.mock(ApplyRequest.class);
+        SectionComponent section = fixture.transformLinkToSection(applyRequest, linkComponent);
 
         assertNotNull(section);
         assertEquals("Test Link", section.getTitle());
@@ -191,7 +200,9 @@ public class ApplyProcessorTest {
     @Test
     void testTransformLinkToSection_skipsInvalidTargets() {
         GraphDefinitionLinkTargetComponent invalidTarget1 = new GraphDefinitionLinkTargetComponent();
-        invalidTarget1.setType("Patient").addExtension(new Extension("http://example.org/ext1", new StringType("value1")));
+        invalidTarget1
+                .setType("Patient")
+                .addExtension(new Extension("http://example.org/ext1", new StringType("value1")));
 
         GraphDefinitionLinkTargetComponent invalidTarget2 = new GraphDefinitionLinkTargetComponent();
         invalidTarget2.addExtension(new Extension("http://example.org/ext1", new StringType("value1")));
@@ -199,11 +210,12 @@ public class ApplyProcessorTest {
         GraphDefinitionLinkTargetComponent invalidTarget3 = new GraphDefinitionLinkTargetComponent(); // No extensions
 
         var linkComponent = new GraphDefinitionLinkComponent()
-            .addTarget(invalidTarget1)
-            .addTarget(invalidTarget2)
-            .addTarget(invalidTarget3);
+                .addTarget(invalidTarget1)
+                .addTarget(invalidTarget2)
+                .addTarget(invalidTarget3);
 
-        SectionComponent section = fixture.transformLinkToSection(linkComponent);
+        var applyRequest = Mockito.mock(ApplyRequest.class);
+        SectionComponent section = fixture.transformLinkToSection(applyRequest, linkComponent);
 
         assertNotNull(section);
         assertFalse(section.hasSection());
@@ -211,14 +223,15 @@ public class ApplyProcessorTest {
 
     @Test
     void testTransformTargetToSection_transformsExtensionsToReferences() {
-        var extension1 = new Extension("http://example.org/ext1", new StringType("value1"));
-        var extension2 = new Extension("http://example.org/ext2", new StringType("value2"));
+        var extension1 = new Extension(CPG_RELATED_SUMMARY_DEFINITION, new CanonicalType("value1"));
+        var extension2 = new Extension(CPG_RELATED_SUMMARY_DEFINITION, new CanonicalType("value2"));
 
         var target = new GraphDefinitionLinkTargetComponent();
         target.addExtension(extension1);
         target.addExtension(extension2);
 
-        SectionComponent section = fixture.transformTargetToSection(target);
+        var applyRequest = Mockito.mock(ApplyRequest.class);
+        SectionComponent section = fixture.transformTargetToSection(applyRequest, target);
 
         assertNotNull(section);
         assertEquals(2, section.getEntry().size());
@@ -226,11 +239,11 @@ public class ApplyProcessorTest {
         Reference ref1 = section.getEntry().get(0);
         Reference ref2 = section.getEntry().get(1);
 
-        assertEquals("http://example.org/ext1", ref1.getExtensionFirstRep().getUrl());
-        assertEquals("value1", ((StringType) ref1.getExtensionFirstRep().getValue()).getValue());
+        assertEquals(CPG_RELATED_SUMMARY_DEFINITION, ref1.getExtensionFirstRep().getUrl());
+        assertEquals("value1", ((CanonicalType) ref1.getExtensionFirstRep().getValue()).getValue());
 
-        assertEquals("http://example.org/ext2", ref2.getExtensionFirstRep().getUrl());
-        assertEquals("value2", ((StringType) ref2.getExtensionFirstRep().getValue()).getValue());
+        assertEquals(CPG_RELATED_SUMMARY_DEFINITION, ref2.getExtensionFirstRep().getUrl());
+        assertEquals("value2", ((CanonicalType) ref2.getExtensionFirstRep().getValue()).getValue());
     }
 
     private FhirContext getFhirContext() {
@@ -242,21 +255,22 @@ public class ApplyProcessorTest {
     }
 
     private Path getClassPath() {
-        String pathString = String.format("%s/%s/%s/eras",getResourcePath(this.getClass()), CLASS_PATH, getVersionPath());
+        String pathString =
+                String.format("%s/%s/%s/eras", getResourcePath(this.getClass()), CLASS_PATH, getVersionPath());
         return Path.of(pathString);
     }
 
-    private String getVersionPath(){
+    private String getVersionPath() {
         switch (getFhirVersion()) {
             case R4:
                 return "r4";
             default:
                 throw new IllegalArgumentException(
-                    "Unsupported FHIR version: " + getFhirVersion().getFhirVersionString());
+                        "Unsupported FHIR version: " + getFhirVersion().getFhirVersionString());
         }
     }
 
-    private void printElement(IBase element){
+    private void printElement(IBase element) {
         String elementAsString = jsonParser.encodeToString(element);
         ourLog.info(elementAsString);
     }

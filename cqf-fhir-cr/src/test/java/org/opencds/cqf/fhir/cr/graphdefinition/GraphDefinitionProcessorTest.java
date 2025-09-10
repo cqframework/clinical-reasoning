@@ -16,14 +16,14 @@ class GraphDefinitionProcessorTest {
     @Test
     void testApply_returnsBundleResource2() {
 
-        IgRepository repository = new IgRepository(
+        var repository = new IgRepository(
                 fhirContextR4, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r4/eras"));
 
         var patientID = "Patient/time-zero";
-        var practitionerID = "Practitioner/doctor-1";
+        var practitionerID = "Practitioner/ordering-md-1";
         var graphDefinitionID = "eras-postop";
 
-        given().repositoryFor(fhirContextR4, "r4")
+        given().repository(repository)
                 .when()
                 .graphDefinitionId(graphDefinitionID)
                 .subjectId(patientID)

@@ -169,8 +169,8 @@ public class ApplyRequestBuilder {
         return this;
     }
 
-    public ApplyRequestBuilder withTerminologyRepository(IRepository terminologyRepositoary) {
-        this.terminologyRepository = terminologyRepositoary;
+    public ApplyRequestBuilder withTerminologyRepository(IRepository terminologyRepository) {
+        this.terminologyRepository = terminologyRepository;
         return this;
     }
 

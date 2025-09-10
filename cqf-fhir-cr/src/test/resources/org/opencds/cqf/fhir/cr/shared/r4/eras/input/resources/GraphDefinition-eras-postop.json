@@ -19,74 +19,94 @@
   "link": [
     {
       "description": "Pathway Event",
-      "link": [
+      "target": [
         {
-          "description": "Hgb",
-          "target": [
+          "type": "GraphDefinition",
+          "extension": [
             {
-              "extension": [
-                {
-                  "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-relatedsummarydefinition",
-                  "definitionCanonical": "http://example.org/cdosdh/demo/GraphDefinition/hgb-pathway-event"
-                }
-              ],
-              "type": "GraphDefinition"
+              "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-relatedsummarydefinition",
+              "valueCanonical": "http://example.org/cdosdh/demo/GraphDefinition/hgb-pathway-event"
             }
           ]
         },
         {
-          "description": "PO Hgb Drop",
-          "target": [
+          "type": "GraphDefinition",
+          "extension": [
             {
-              "extension": [
-                {
-                  "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-relatedsummarydefinition",
-                  "definitionCanonical": "http://example.org/cdosdh/demo/GraphDefinition/po-hgb-drop-pathway-event"
-                }
-              ],
-              "type": "GraphDefinition"
+              "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-relatedsummarydefinition",
+              "valueCanonical": "http://example.org/cdosdh/demo/GraphDefinition/po-hgb-drop-pathway-event"
             }
           ]
         },
         {
-          "description": "Urine Output",
-          "target": [
+          "type": "GraphDefinition",
+          "extension": [
             {
-              "extension": [
-                {
-                  "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-relatedsummarydefinition",
-                  "definitionCanonical": "http://example.org/cdosdh/demo/GraphDefinition/urineoutput-pathway-event"
-                }
-              ],
-              "type": "GraphDefinition"
+              "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-relatedsummarydefinition",
+              "valueCanonical": "http://example.org/cdosdh/demo/GraphDefinition/hr-pathway-event"
             }
           ]
         },
         {
-          "description": "HR",
-          "target": [
+          "type": "GraphDefinition",
+          "extension": [
             {
-              "extension": [
-                {
-                  "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-relatedsummarydefinition",
-                  "definitionCanonical": "http://example.org/cdosdh/demo/GraphDefinition/hr-pathway-event"
-                }
-              ],
-              "type": "GraphDefinition"
+              "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-relatedsummarydefinition",
+              "valueCanonical": "http://example.org/cdosdh/demo/GraphDefinition/pain-pathway-event"
             }
           ]
         },
         {
-          "description": "NSAID",
-          "target": [
+          "type": "GraphDefinition",
+          "extension": [
             {
-              "extension": [
-                {
-                  "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-relatedsummarydefinition",
-                  "definitionCanonical": "http://example.org/cdosdh/demo/GraphDefinition/nsaid-pathway-event"
-                }
-              ],
-              "type": "GraphDefinition"
+              "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-relatedsummarydefinition",
+              "valueCanonical": "http://example.org/cdosdh/demo/GraphDefinition/urineoutput-pathway-event"
+            }
+          ]
+        },
+        {
+          "type": "GraphDefinition",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-relatedsummarydefinition",
+              "valueCanonical": "http://example.org/cdosdh/demo/GraphDefinition/postop-bleed-pathway-event"
+            }
+          ]
+        },
+        {
+          "type": "GraphDefinition",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-relatedsummarydefinition",
+              "valueCanonical": "http://example.org/cdosdh/demo/GraphDefinition/teg-pathway-event"
+            }
+          ]
+        },
+        {
+          "type": "GraphDefinition",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-relatedsummarydefinition",
+              "valueCanonical": "http://example.org/cdosdh/demo/GraphDefinition/prbc-pathway-event"
+            }
+          ]
+        },
+        {
+          "type": "GraphDefinition",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-relatedsummarydefinition",
+              "valueCanonical": "http://example.org/cdosdh/demo/GraphDefinition/sq-heparin-pathway-event"
+            }
+          ]
+        },
+        {
+          "type": "GraphDefinition",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-relatedsummarydefinition",
+              "valueCanonical": "http://example.org/cdosdh/demo/GraphDefinition/nsaid-pathway-event"
             }
           ]
         }

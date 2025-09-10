@@ -1,4 +1,4 @@
-package org.opencds.cqf.fhir.cr.graphdefintion.apply;
+package org.opencds.cqf.fhir.cr.graphdefinition.apply;
 
 import static org.opencds.cqf.fhir.utility.repository.Repositories.createRestRepository;
 import static org.opencds.cqf.fhir.utility.repository.Repositories.proxy;
@@ -43,7 +43,7 @@ public class ApplyRequestBuilder {
     private CodeableConcept userTaskContext;
     private CodeableConcept setting;
     private CodeableConcept settingContext;
-    private boolean useServerData;
+    private boolean useServerData = true;
     private IBaseBundle data;
     private List<ParametersParameterComponent> prefetchData;
     private IRepository dataRepository;

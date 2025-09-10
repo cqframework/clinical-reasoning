@@ -1,4 +1,4 @@
-package org.opencds.cqf.fhir.cr.graphdefintion.apply;
+package org.opencds.cqf.fhir.cr.graphdefinition.apply;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.opencds.cqf.fhir.cr.common.IInputParameterResolver.createResolver;
@@ -49,8 +49,8 @@ public class ApplyRequest implements ICpgRequest {
     public ApplyRequest(
             IBaseResource graphDefinition,
             IIdType subjectId,
-            IIdType encounterId,
             IIdType practitionerId,
+            IIdType encounterId,
             IIdType organizationId,
             IBaseDatatype userType,
             IBaseDatatype userLanguage,
@@ -116,6 +116,10 @@ public class ApplyRequest implements ICpgRequest {
 
     public IBaseResource getGraphDefinition() {
         return graphDefinitionAdapter.get();
+    }
+
+    public IGraphDefinitionAdapter getGraphDefinitionAdapter() {
+        return graphDefinitionAdapter;
     }
 
     @Override

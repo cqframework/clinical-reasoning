@@ -25,9 +25,8 @@ import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_M
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
 import org.opencds.cqf.fhir.cr.TestOperationProvider;
-import org.opencds.cqf.fhir.cr.graphdefintion.GraphDefinitionProcessor;
-import org.opencds.cqf.fhir.cr.graphdefintion.apply.ApplyRequest;
-import org.opencds.cqf.fhir.cr.graphdefintion.apply.ApplyRequestBuilder;
+import org.opencds.cqf.fhir.cr.graphdefinition.apply.ApplyRequest;
+import org.opencds.cqf.fhir.cr.graphdefinition.apply.ApplyRequestBuilder;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 

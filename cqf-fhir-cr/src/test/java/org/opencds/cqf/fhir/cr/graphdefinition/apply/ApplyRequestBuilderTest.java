@@ -15,8 +15,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
-import org.opencds.cqf.fhir.cr.graphdefintion.apply.ApplyRequest;
-import org.opencds.cqf.fhir.cr.graphdefintion.apply.ApplyRequestBuilder;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
 @ExtendWith(MockitoExtension.class)

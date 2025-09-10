@@ -17,7 +17,7 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Library;
+import org.hl7.fhir.r4.model.ImplementationGuide;
 import org.hl7.fhir.r4.model.Parameters;
 import org.opencds.cqf.fhir.cr.hapi.common.IImplementationGuideProcessorFactory;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
@@ -44,8 +44,8 @@ public class ImplementationGuidePackageProvider {
      * @param requestDetails the details (such as tenant) of this request. Usually autopopulated by HAPI.
      * @return a Bundle containing the ValueSet and all related CodeSystem and ValueSet resources
      */
-    @Operation(name = ProviderConstants.CR_OPERATION_PACKAGE, idempotent = true, type = Library.class)
-    public IBaseBundle packageLibrary(
+    @Operation(name = ProviderConstants.CR_OPERATION_PACKAGE, idempotent = true, type = ImplementationGuide.class)
+    public IBaseBundle packageImplementationGuide(
             @IdParam IdType id,
             @OperationParam(name = "canonical") String canonical,
             @OperationParam(name = "url") String url,
@@ -63,8 +63,8 @@ public class ImplementationGuidePackageProvider {
                 .packageImplementationGuide(Eithers.for3(canonicalType, id, null), params);
     }
 
-    @Operation(name = ProviderConstants.CR_OPERATION_PACKAGE, idempotent = true, type = Library.class)
-    public IBaseBundle packageLibrary(
+    @Operation(name = ProviderConstants.CR_OPERATION_PACKAGE, idempotent = true, type = ImplementationGuide.class)
+    public IBaseBundle packageImplementationGuide(
             @OperationParam(name = "id") String id,
             @OperationParam(name = "canonical") String canonical,
             @OperationParam(name = "url") String url,

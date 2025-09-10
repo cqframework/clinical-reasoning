@@ -14,7 +14,7 @@ import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Library;
+import org.hl7.fhir.r4.model.ImplementationGuide;
 import org.hl7.fhir.r4.model.Parameters;
 import org.opencds.cqf.fhir.cr.hapi.common.IImplementationGuideProcessorFactory;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
@@ -39,9 +39,9 @@ public class ImplementationGuideReleaseProvider {
      * @param requestDetails     the {@link RequestDetails RequestDetails}
      * @return A transaction bundle result of the updated resources
      */
-    @Operation(name = "$release", idempotent = true, global = true, type = Library.class)
+    @Operation(name = "$release", idempotent = true, global = true, type = ImplementationGuide.class)
     @Description(shortDefinition = "$release", value = "Release an existing draft artifact")
-    public IBaseBundle releaseLibrary(
+    public IBaseBundle releaseImplementationGuide(
             @IdParam IdType id,
             @OperationParam(name = "version") String version,
             @OperationParam(name = "versionBehavior") CodeType versionBehavior,
@@ -63,7 +63,7 @@ public class ImplementationGuideReleaseProvider {
                 .releaseImplementationGuide(Eithers.for3(null, id, null), params);
     }
 
-    @Operation(name = "$release", idempotent = true, global = true, type = Library.class)
+    @Operation(name = "$release", idempotent = true, global = true, type = ImplementationGuide.class)
     @Description(shortDefinition = "$release", value = "Release an existing draft artifact")
     public IBaseBundle releaseImplementationGuide(
             @OperationParam(name = "id") String id,

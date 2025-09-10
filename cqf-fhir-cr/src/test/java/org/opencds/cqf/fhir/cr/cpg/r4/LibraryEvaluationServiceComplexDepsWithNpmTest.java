@@ -13,7 +13,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Encounter;
-import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.junit.jupiter.api.Test;
 
@@ -28,7 +27,6 @@ class LibraryEvaluationServiceComplexDepsWithNpmTest {
 
         // LUKETODO:  talk to JP about this:  shouyld we support an evaluate library by URL REST API?
         var params = parameters(stringPart("subject", "Patient/patient1"));
-        var libId = new IdType("Library", "Level1A");
         var when = GIVEN_REPO
                 .when()
                 .url(new CanonicalType("http://multilib.complexdeps.npm.opencds.org/Library/Level1A"))
@@ -125,8 +123,11 @@ class LibraryEvaluationServiceComplexDepsWithNpmTest {
     @Test
     void singleLibraryTest_1B() {
         var params = parameters(stringPart("subject", "Patient/patient1"));
-        var libId = new IdType("Library", "Level1B");
-        var when = GIVEN_REPO.when().id(libId).parameters(params).evaluateLibrary();
+        var when = GIVEN_REPO
+                .when()
+                .url(new CanonicalType("http://multilib.complexdeps.npm.opencds.org/Library/Level1B"))
+                .parameters(params)
+                .evaluateLibrary();
         var report = when.then().parameters();
 
         assertNotNull(report);

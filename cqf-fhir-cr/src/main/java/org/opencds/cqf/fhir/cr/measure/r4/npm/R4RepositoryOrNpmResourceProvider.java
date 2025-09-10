@@ -114,7 +114,8 @@ public class R4RepositoryOrNpmResourceProvider {
                     .toList();
         }
 
-        throw new InvalidRequestException("measure IDs and URLs cannot both be empty.");
+        // Maybe should be an IllegalArgumentException instead, but preserve backwards compatibility
+        return List.of();
     }
 
     /**

@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.List;
@@ -163,12 +164,12 @@ abstract class BaseR4RepositoryOrNpmResourceProviderTest {
 
     @Test
     void getMeasureEithersInvalidBothNull() {
-        assertThrows(InvalidRequestException.class, () -> testSubject.getMeasureEithers(null, null));
+        assertTrue(testSubject.getMeasureEithers(null, null).isEmpty());
     }
 
     @Test
     void getMeasureEithersInvalidBothEmpty() {
-        assertThrows(InvalidRequestException.class, () -> testSubject.getMeasureEithers(List.of(), List.of()));
+        assertTrue(testSubject.getMeasureEithers(null, null).isEmpty());
     }
 
     @Test

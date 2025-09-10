@@ -388,6 +388,26 @@ public class R4FhirOrNpmResourceProvider implements FhirOrNpmThingee {
         return (Measure) result.getEntryFirstRep().getResource();
     }
 
+    public Library resolveLibraryByUrl(CanonicalType measureUrl) {
+        if (evaluationSettings.isUseNpmForQualifyingResources()) {
+            var optLibraryAdapter = npmPackageLoader.loadLibraryByUrl(measureUrl);
+
+            if (optLibraryAdapter.isEmpty()) {
+                throw new IllegalArgumentException("No measure found for URL: %s".formatted(measureUrl.getValue()));
+            }
+
+            var libraryAdapter = optLibraryAdapter.get();
+
+            if (!(libraryAdapter.get() instanceof Library library)) {
+                throw new IllegalArgumentException("MeasureAdapter is not a Measure for URL: %s".formatted(measureUrl));
+            }
+
+            return library;
+        }
+
+        return resolveLibraryByUrl(measureUrl);
+    }
+
     public Measure resolveByIdentifier(String identifier) {
         List<IQueryParameterType> params = new ArrayList<>();
         Map<String, List<IQueryParameterType>> searchParams = new HashMap<>();

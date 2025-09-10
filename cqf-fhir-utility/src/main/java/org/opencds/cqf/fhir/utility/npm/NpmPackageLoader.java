@@ -11,10 +11,12 @@ import org.hl7.cql.model.NamespaceInfo;
 import org.hl7.cql.model.NamespaceManager;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.CanonicalType;
 import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+// LUKETODO:  be clear about canonical URLs and versions
 /**
  * FHIR version agnostic Interface for loading NPM resources including Measures, Libraries and
  * NpmPackages as captured within {@link NpmResourceHolder}.
@@ -154,6 +156,10 @@ public interface NpmPackageLoader {
 
     static String getUrl(ModelIdentifier modelIdentifier) {
         return LIBRARY_URL_TEMPLATE.formatted(modelIdentifier.getSystem(), modelIdentifier.getId());
+    }
+
+    default Optional<ILibraryAdapter> loadLibraryByUrl(CanonicalType libraryUrl) {
+        return loadLibraryByUrl(libraryUrl.getValueAsString());
     }
 
     /**

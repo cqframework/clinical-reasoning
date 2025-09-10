@@ -7,30 +7,20 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.datePart;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.parameters;
 
-import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r4.model.StringType;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
-import org.opencds.cqf.fhir.cr.cpg.r4.Library.Given;
+import org.junit.jupiter.api.Test;
 
-class CqlEvaluationServiceTest {
+class CqlEvaluationServiceNonNpmTest extends BaseCqlEvaluationServiceTest {
 
-    private static final String LIBRARYEVAL_IG = "libraryeval";
-    private static final String LIBRARYEVAL_NPM_IG = "libraryevalnpm";
+    private static final Library.Given GIVEN_REPO = Library.given().repositoryFor("libraryeval");
 
-    private enum QualifyingResourcesSource {
-        REPOSITORY,
-        NPM
-    }
-
-    @ParameterizedTest
-    @EnumSource(QualifyingResourcesSource.class)
-    void libraryEvaluationService_inlineAsthma(QualifyingResourcesSource qualifyingResourcesSource) {
+    @Test
+    void libraryEvaluationService_inlineAsthma_repository() {
         var content =
                 """
         library asthmatest version '1.0.0'
@@ -51,7 +41,7 @@ class CqlEvaluationServiceTest {
         define "Has Asthma Diagnosis":
           exists("Asthma Diagnosis")
         """;
-        var when = buildGivenWithIg(qualifyingResourcesSource)
+        var when = GIVEN_REPO
                 .when()
                 .subject("Patient/SimplePatient")
                 .content(content)
@@ -70,9 +60,8 @@ class CqlEvaluationServiceTest {
         assertEquals(3, parameters.size());
     }
 
-    @ParameterizedTest
-    @EnumSource(QualifyingResourcesSource.class)
-    void libraryEvaluationService_contentAndExpression(QualifyingResourcesSource qualifyingResourcesSource) {
+    @Test
+    void libraryEvaluationService_contentAndExpression() {
         var content =
                 """
         library SimpleR4Library
@@ -95,7 +84,7 @@ class CqlEvaluationServiceTest {
 
         define "Numerator": "Denominator"";
         """;
-        var when = buildGivenWithIg(qualifyingResourcesSource)
+        var when = GIVEN_REPO
                 .when()
                 .subject("Patient/SimplePatient")
                 .expression("Numerator")
@@ -109,23 +98,18 @@ class CqlEvaluationServiceTest {
     }
 
     // LUKETODO:  this is a test with blank CQL content - is this relevant and correct?
-    @ParameterizedTest
-    @EnumSource(QualifyingResourcesSource.class)
-    void libraryEvaluationService_arithmetic(QualifyingResourcesSource qualifyingResourcesSource) {
-        var when = buildGivenWithIg(qualifyingResourcesSource)
-                .when()
-                .expression("5*5")
-                .evaluateCql();
+    @Test
+    void libraryEvaluationService_arithmetic() {
+        var when = GIVEN_REPO.when().expression("5*5").evaluateCql();
         var results = when.then().parameters();
         assertInstanceOf(IntegerType.class, results.getParameter("return").getValue());
         assertEquals("25", ((IntegerType) results.getParameter("return").getValue()).asStringValue());
     }
 
-    @ParameterizedTest
-    @EnumSource(QualifyingResourcesSource.class)
-    void libraryEvaluationService_paramsAndExpression(QualifyingResourcesSource qualifyingResourcesSource) {
+    @Test
+    void libraryEvaluationService_paramsAndExpression() {
         Parameters evaluationParams = parameters(datePart("%inputDate", "2019-11-01"));
-        var when = buildGivenWithIg(qualifyingResourcesSource)
+        var when = GIVEN_REPO
                 .when()
                 .subject("Patient/SimplePatient")
                 .parameters(evaluationParams)
@@ -137,14 +121,10 @@ class CqlEvaluationServiceTest {
     }
 
     // LUKETODO:  also testing blank CQL content here - is this relevant and correct?
-    @ParameterizedTest
-    @EnumSource(QualifyingResourcesSource.class)
-    void libraryEvaluationService_IntegerInterval(QualifyingResourcesSource qualifyingResourcesSource) {
+    @Test
+    void libraryEvaluationService_IntegerInterval() {
         var expression = "Interval[1,5]";
-        var when = buildGivenWithIg(qualifyingResourcesSource)
-                .when()
-                .expression(expression)
-                .evaluateCql();
+        var when = GIVEN_REPO.when().expression(expression).evaluateCql();
         var report = when.then().parameters();
         assertTrue(report.hasParameter());
         assertTrue(report.getParameterFirstRep().hasName());
@@ -155,16 +135,12 @@ class CqlEvaluationServiceTest {
     }
 
     // LUKETODO: also testing blank CQL content here - is this relevant and correct?
-    @ParameterizedTest
-    @EnumSource(QualifyingResourcesSource.class)
-    void libraryEvaluationService_Error(QualifyingResourcesSource qualifyingResourcesSource) {
+    @Test
+    void libraryEvaluationService_Error() {
         var expression =
                 "Message('Return Value If Not Error', true, 'Example Failure Code', 'Error', 'This is an error message')";
 
-        var when = buildGivenWithIg(qualifyingResourcesSource)
-                .when()
-                .expression(expression)
-                .evaluateCql();
+        var when = GIVEN_REPO.when().expression(expression).evaluateCql();
         var report = when.then().parameters();
         assertTrue(report.hasParameter());
         assertTrue(report.getParameterFirstRep().hasName());
@@ -177,13 +153,5 @@ class CqlEvaluationServiceTest {
         assertEquals(
                 "Example Failure Code: This is an error message",
                 issue.getDetails().getText().replaceAll("[\\r\\n]", ""));
-    }
-
-    @Nonnull
-    private static Given buildGivenWithIg(QualifyingResourcesSource qualifyingResourcesSource) {
-        return switch (qualifyingResourcesSource) {
-            case REPOSITORY -> Library.given().repositoryFor(LIBRARYEVAL_IG);
-            case NPM -> Library.given().repositoryPlusNpmFor(LIBRARYEVAL_NPM_IG);
-        };
     }
 }

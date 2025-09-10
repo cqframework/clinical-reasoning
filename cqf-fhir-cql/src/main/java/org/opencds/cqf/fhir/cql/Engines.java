@@ -33,7 +33,6 @@ import org.opencds.cqf.fhir.cql.engine.retrieve.RepositoryRetrieveProvider;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings;
 import org.opencds.cqf.fhir.cql.engine.terminology.RepositoryTerminologyProvider;
 import org.opencds.cqf.fhir.cql.npm.EnginesNpmLibraryHandler;
-import org.opencds.cqf.fhir.cql.npm.FhirOrNpmThingee;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
@@ -56,20 +55,6 @@ public class Engines {
     public static CqlEngine forRepository(
             IRepository repository, EvaluationSettings settings, NpmPackageLoader npmPackageLoader) {
         return forRepository(repository, settings, null, npmPackageLoader);
-    }
-
-    // LUKETODO: consider having absolutely every caller use one of these
-    public static CqlEngine forFhirOrNpmThingee(FhirOrNpmThingee fhirOrNpmThingee) {
-        return forFhirOrNpmThingee(fhirOrNpmThingee, null);
-    }
-
-    // LUKETODO: consider having absolutely every caller use one of these
-    public static CqlEngine forFhirOrNpmThingee(FhirOrNpmThingee fhirOrNpmThingee, IBaseBundle additionalData) {
-        return forRepository(
-                fhirOrNpmThingee.getRepository(),
-                fhirOrNpmThingee.getEvaluationSettings(),
-                additionalData,
-                fhirOrNpmThingee.getNpmPackageLoader());
     }
 
     public static CqlEngine forRepository(

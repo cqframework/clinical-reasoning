@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.function.Supplier;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
@@ -144,6 +145,7 @@ public class Library {
         }
         // Library Eval Service params
         private IdType theId;
+        private CanonicalType url;
         private String subject;
         private List<String> expressionList;
         private Parameters parameters;
@@ -162,6 +164,11 @@ public class Library {
 
         public Library.When id(IdType theId) {
             this.theId = theId;
+            return this;
+        }
+
+        public Library.When url(CanonicalType url) {
+            this.url = url;
             return this;
         }
 
@@ -237,16 +244,34 @@ public class Library {
         }
 
         public Library.When evaluateLibrary() {
-            this.operation = () -> libraryEvalService.evaluate(
-                    theId,
-                    subject,
-                    expressionList,
-                    parameters,
-                    data,
-                    prefetchData,
-                    dataEndpoint,
-                    contentEndpoint,
-                    terminologyEndpoint);
+            if (theId == null && url == null) {
+                throw new IllegalStateException(
+                        "Either 'id' or 'url' must be provided to identify the Library to evaluate.");
+            }
+            if (theId != null) {
+                this.operation = () -> libraryEvalService.evaluate(
+                        theId,
+                        subject,
+                        expressionList,
+                        parameters,
+                        data,
+                        prefetchData,
+                        dataEndpoint,
+                        contentEndpoint,
+                        terminologyEndpoint);
+            } else {
+                this.operation = () -> libraryEvalService.evaluate(
+                        url,
+                        subject,
+                        expressionList,
+                        parameters,
+                        data,
+                        prefetchData,
+                        dataEndpoint,
+                        contentEndpoint,
+                        terminologyEndpoint);
+            }
+
             return this;
         }
 

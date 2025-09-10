@@ -8,6 +8,7 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.LibraryManager;
+import org.hl7.cql.model.NamespaceInfo;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -52,13 +53,14 @@ public class CqlExecutionProcessor {
     }
 
     public VersionedIdentifier resolveLibraryIdentifier(
-            String cqlContent, IBaseResource library, LibraryManager libraryManager) {
+            NamespaceInfo namespaceInfo, String cqlContent, IBaseResource library, LibraryManager libraryManager) {
 
         if (!StringUtils.isBlank(cqlContent)) {
-            var translatedLibrary =
-                    CqlTranslator.fromText(cqlContent, libraryManager).getTranslatedLibrary();
+            var translatedLibrary = CqlTranslator.fromText(namespaceInfo, cqlContent, libraryManager)
+                    .getTranslatedLibrary();
             return new VersionedIdentifier()
                     .withId(translatedLibrary.getIdentifier().getId())
+                    .withSystem(translatedLibrary.getIdentifier().getSystem())
                     .withVersion(translatedLibrary.getIdentifier().getVersion());
         } else if (library == null) {
             return null;
@@ -69,11 +71,26 @@ public class CqlExecutionProcessor {
                             r4Library.hasUrl()
                                     ? Canonicals.getIdPart(r4Library.getUrl())
                                     : r4Library.hasName() ? r4Library.getName() : null)
+                    .withSystem(getSystemFromLibrary(r4Library))
                     .withVersion(
                             r4Library.hasVersion()
                                     ? r4Library.getVersion()
                                     : r4Library.hasUrl() ? Canonicals.getVersion(r4Library.getUrl()) : null);
         }
+    }
+
+    private String getSystemFromLibrary(Library r4Library) {
+        if (r4Library.hasUrl()) {
+            final String libraryUrl = r4Library.getUrl();
+
+            final String[] splitByLibrary = libraryUrl.split("/Library/");
+
+            if (splitByLibrary.length == 2) {
+                return splitByLibrary[0];
+            }
+        }
+
+        return null;
     }
 
     public IBaseOperationOutcome createIssue(String severity, String details, IRepository repository) {

@@ -17,19 +17,16 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("squid:S1135")
-class LibraryEvaluationServiceComplexDepsTest {
+class LibraryEvaluationServiceComplexDepsNonNpmTest {
+
+    private static final Library.Given GIVEN_REPO = Library.given().repositoryFor("libraryevalcomplexdeps");
 
     @Test
     void singleLibraryTest_1A() {
 
         var params = parameters(stringPart("subject", "Patient/patient1"));
         var libId = new IdType("Library", "Level1A");
-        var when = Library.given()
-                .repositoryFor("libraryevalcomplexdeps")
-                .when()
-                .id(libId)
-                .parameters(params)
-                .evaluateLibrary();
+        var when = GIVEN_REPO.when().id(libId).parameters(params).evaluateLibrary();
         var report = when.then().parameters();
 
         assertNotNull(report);
@@ -122,12 +119,7 @@ class LibraryEvaluationServiceComplexDepsTest {
     void singleLibraryTest_1B() {
         var params = parameters(stringPart("subject", "Patient/patient1"));
         var libId = new IdType("Library", "Level1B");
-        var when = Library.given()
-                .repositoryFor("libraryevalcomplexdeps")
-                .when()
-                .id(libId)
-                .parameters(params)
-                .evaluateLibrary();
+        var when = GIVEN_REPO.when().id(libId).parameters(params).evaluateLibrary();
         var report = when.then().parameters();
 
         assertNotNull(report);

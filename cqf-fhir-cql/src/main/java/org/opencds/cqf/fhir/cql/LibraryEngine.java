@@ -350,7 +350,7 @@ public class LibraryEngine {
         }
 
         var versionlessIdentifiers = ids.stream()
-                .map(id -> new VersionedIdentifier().withId(id.getId()))
+                .map(LibraryEngine::removeVersionPreserveIdAndSystem)
                 .toList();
 
         return engineToUse.evaluate(
@@ -385,5 +385,11 @@ public class LibraryEngine {
                 engine);
 
         return evaluationResultsForMultiLib.getOnlyResultOrThrow();
+    }
+
+    private static VersionedIdentifier removeVersionPreserveIdAndSystem(VersionedIdentifier versionedIdentifier) {
+        return new VersionedIdentifier()
+                .withId(versionedIdentifier.getId())
+                .withSystem(versionedIdentifier.getSystem());
     }
 }

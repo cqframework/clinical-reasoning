@@ -4,9 +4,11 @@ import static org.opencds.cqf.fhir.utility.r4.Parameters.parameters;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.part;
 
 import ca.uhn.fhir.repository.IRepository;
+import jakarta.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.cql.model.NamespaceInfo;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Endpoint;
@@ -88,8 +90,10 @@ public class R4CqlExecutionService {
 
             var engine = Engines.forRepository(repository, evaluationSettings, null, npmPackageLoader);
             var libraryManager = engine.getEnvironment().getLibraryManager();
+
+            var namespaceInfo = getNamespaceInfoForCqlContent(cqlContent);
             var libraryIdentifier =
-                    baseCqlExecutionProcessor.resolveLibraryIdentifier(cqlContent, null, libraryManager);
+                    baseCqlExecutionProcessor.resolveLibraryIdentifier(namespaceInfo, cqlContent, null, libraryManager);
 
             return (Parameters) libraryEngine.evaluate(
                     libraryIdentifier,
@@ -103,6 +107,52 @@ public class R4CqlExecutionService {
         } catch (Exception e) {
             return parameters(part("evaluation error", (OperationOutcome)
                     baseCqlExecutionProcessor.createIssue("error", e.getMessage(), repository)));
+        }
+    }
+
+    // LUKETODO:  share with R4LibraryEvaluationService, etc
+    private NamespaceInfo getNamespaceInfoForCqlContent(String cqlContent) {
+        final String namespaceName = getNamespaceNameFromCqlString(cqlContent);
+        if (namespaceName == null) {
+            return null;
+        }
+
+        return npmPackageLoader.getAllNamespaceInfos().stream()
+                .filter(namespaceInfo -> namespaceName.equals(namespaceInfo.getName()))
+                .findFirst()
+                .orElse(null);
+    }
+
+    // LUKETODO:  run this by Brenin because this is gross
+    // Really really gross:  Get the namespace name from the library declaration in the CQL string:
+    @Nullable
+    private String getNamespaceNameFromCqlString(String cqlContent) {
+        if (StringUtils.isBlank(cqlContent)) {
+            return null;
+        }
+        final String[] splitByLibrary = cqlContent.split("library ");
+
+        if (splitByLibrary.length < 2) {
+            return null;
+        }
+
+        final String pastLibrary = splitByLibrary[1];
+
+        // We don't know what kind of whitespace might be after the library name
+        final String[] pastLibrarySplitByWhitespace = pastLibrary.split("\\s+");
+
+        if (pastLibrarySplitByWhitespace.length < 1) {
+            return null;
+        }
+
+        final String libraryIncludingNamespace = pastLibrarySplitByWhitespace[0];
+
+        int lastDotIndex = libraryIncludingNamespace.lastIndexOf('.');
+
+        if (lastDotIndex != -1) {
+            return libraryIncludingNamespace.substring(0, lastDotIndex);
+        } else {
+            return null;
         }
     }
 }

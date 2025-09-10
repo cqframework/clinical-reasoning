@@ -2,14 +2,11 @@ package org.opencds.cqf.fhir.cql.cql2elm.content;
 
 import static java.util.Objects.requireNonNull;
 
+import jakarta.xml.bind.JAXB;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import jakarta.xml.bind.JAXB;
-import org.cqframework.cql.cql2elm.LibraryContentType;
-import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.hl7.cql.model.ModelIdentifier;
 import org.hl7.cql.model.ModelInfoProvider;
-import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.elm_modelinfo.r1.ModelInfo;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
@@ -35,7 +32,8 @@ public abstract class BaseFhirModelInfoProvider implements ModelInfoProvider {
         return JAXB.unmarshal(is, ModelInfo.class);
     }
 
-    protected InputStream getModelInfoContent(ModelIdentifier modelIdentifier, ModelInfoContentType modelInfoContentType) {
+    protected InputStream getModelInfoContent(
+            ModelIdentifier modelIdentifier, ModelInfoContentType modelInfoContentType) {
         requireNonNull(modelIdentifier, "versionedIdentifier can not be null.");
         requireNonNull(modelInfoContentType, "modelInfoContentType can not be null.");
 

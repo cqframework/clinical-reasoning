@@ -41,6 +41,7 @@ import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@SuppressWarnings("UnstableApiUsage")
 public class Engines {
 
     private static Logger logger = LoggerFactory.getLogger(Engines.class);
@@ -88,7 +89,7 @@ public class Engines {
     }
 
     private static void registerModelInfoProviders(
-        EvaluationSettings settings, ModelManager manager, IRepository repository) {
+            EvaluationSettings settings, ModelManager manager, IRepository repository) {
         var loader = manager.getModelInfoLoader();
 
         // TODO: Add a 'useEmbeddedModelInfo' setting?
@@ -150,7 +151,7 @@ public class Engines {
     private static ModelInfoProvider buildModelInfo(IRepository repository) {
         var adapterFactory = IAdapterFactory.forFhirContext(repository.fhirContext());
         return new RepositoryFhirModelInfoProvider(
-            repository, adapterFactory, new LibraryVersionSelector(adapterFactory));
+                repository, adapterFactory, new LibraryVersionSelector(adapterFactory));
     }
 
     private static LibrarySourceProvider buildLibrarySource(IRepository repository) {

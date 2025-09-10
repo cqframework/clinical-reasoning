@@ -25,10 +25,10 @@ import org.hl7.fhir.r4.model.Resource;
 import org.opencds.cqf.fhir.cr.measure.CareGapsProperties;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
-import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 import org.opencds.cqf.fhir.cr.measure.constant.CareGapsConstants;
 import org.opencds.cqf.fhir.cr.measure.enumeration.CareGapsStatusCode;
+import org.opencds.cqf.fhir.cr.measure.r4.npm.R4RepositoryOrNpmResourceProvider;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.monad.Either3;
 import org.slf4j.Logger;
@@ -46,24 +46,28 @@ public class R4CareGapsProcessor implements R4CareGapsProcessorInterface {
     private final R4MeasureServiceUtils r4MeasureServiceUtils;
     private final R4CareGapsBundleBuilder r4CareGapsBundleBuilder;
     private final R4RepositorySubjectProvider subjectProvider;
+    private final R4RepositoryOrNpmResourceProvider r4RepositoryOrNpmResourceProvider;
 
     public R4CareGapsProcessor(
             CareGapsProperties careGapsProperties,
             IRepository repository,
+            R4MeasureServiceUtils r4MeasureServiceUtils,
             MeasureEvaluationOptions measureEvaluationOptions,
             String serverBase,
-            MeasurePeriodValidator measurePeriodValidator) {
+            R4MultiMeasureService r4MultiMeasureService,
+            R4RepositoryOrNpmResourceProvider r4RepositoryOrNpmResourceProvider) {
         this.repository = repository;
         this.careGapsProperties = careGapsProperties;
+        this.r4MeasureServiceUtils = r4MeasureServiceUtils;
+        this.r4RepositoryOrNpmResourceProvider = r4RepositoryOrNpmResourceProvider;
 
-        r4MeasureServiceUtils = new R4MeasureServiceUtils(repository);
         r4CareGapsBundleBuilder = new R4CareGapsBundleBuilder(
                 careGapsProperties,
                 repository,
-                measureEvaluationOptions,
                 serverBase,
                 configuredResources,
-                measurePeriodValidator);
+                r4MultiMeasureService,
+                this.r4RepositoryOrNpmResourceProvider);
         subjectProvider = new R4RepositorySubjectProvider(measureEvaluationOptions.getSubjectProviderOptions());
     }
 
@@ -124,13 +128,10 @@ public class R4CareGapsProcessor implements R4CareGapsProcessorInterface {
     }
 
     @Override
-    public List<Measure> resolveMeasure(List<Either3<IdType, String, CanonicalType>> measure) {
-        return measure.stream()
-                .map(x -> x.fold(
-                        id -> repository.read(Measure.class, id),
-                        r4MeasureServiceUtils::resolveByIdentifier,
-                        canonical -> r4MeasureServiceUtils.resolveByUrl(canonical.asStringValue())))
-                .collect(Collectors.toList());
+    public List<Measure> resolveMeasure(List<Either3<IdType, String, CanonicalType>> measureEithers) {
+        return this.r4RepositoryOrNpmResourceProvider
+                .foldMeasureEithers(measureEithers)
+                .getMeasures();
     }
 
     @Override

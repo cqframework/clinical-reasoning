@@ -10,16 +10,19 @@ import static org.opencds.cqf.fhir.utility.model.FhirModelResolverCache.resolver
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.repository.IRepository;
+import jakarta.annotation.Nonnull;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.util.Optional;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
+import org.opencds.cqf.fhir.cql.Engines.EngineInitializationContext;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
@@ -28,6 +31,7 @@ import org.opencds.cqf.fhir.cr.TestOperationProvider;
 import org.opencds.cqf.fhir.cr.graphdefintion.GraphDefinitionProcessor;
 import org.opencds.cqf.fhir.cr.graphdefintion.apply.ApplyRequest;
 import org.opencds.cqf.fhir.cr.graphdefintion.apply.ApplyRequestBuilder;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
@@ -60,10 +64,14 @@ public class TestGraphDefinition {
     public static class Given {
         private IRepository repository;
         private EvaluationSettings evaluationSettings;
+        private NpmPackageLoader npmPackageLoader;
+        private EngineInitializationContext engineInitializationContext;
 
         public Given repository(IRepository repository) {
             this.repository = repository;
             this.evaluationSettings = EvaluationSettings.getDefault();
+            this.npmPackageLoader = NpmPackageLoader.DEFAULT;
+            this.engineInitializationContext = buildEngineInitializationContext();
             return this;
         }
 
@@ -75,12 +83,15 @@ public class TestGraphDefinition {
         public Given repositoryFor(FhirContext fhirContext, String repositoryPath) {
             this.repository = new IgRepository(
                     fhirContext, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
+            this.npmPackageLoader = NpmPackageLoader.DEFAULT;
+            this.engineInitializationContext = buildEngineInitializationContext();
             return this;
         }
 
         public GraphDefinitionProcessor buildProcessor(IRepository repository) {
             if (repository instanceof IgRepository igRepository) {
-                igRepository.setOperationProvider(TestOperationProvider.newProvider(repository.fhirContext()));
+                igRepository.setOperationProvider(TestOperationProvider.newProvider(
+                        repository.fhirContext(), npmPackageLoader, evaluationSettings));
             }
             if (evaluationSettings == null) {
                 evaluationSettings = EvaluationSettings.getDefault();
@@ -97,8 +108,16 @@ public class TestGraphDefinition {
             return new GraphDefinitionProcessor(repository);
         }
 
+        @Nonnull
+        private EngineInitializationContext buildEngineInitializationContext() {
+            return new EngineInitializationContext(
+                    this.repository,
+                    npmPackageLoader,
+                    Optional.ofNullable(this.evaluationSettings).orElse(EvaluationSettings.getDefault()));
+        }
+
         public When when() {
-            return new When(repository, buildProcessor(repository), evaluationSettings);
+            return new When(repository, engineInitializationContext, buildProcessor(repository), evaluationSettings);
         }
     }
 
@@ -110,11 +129,13 @@ public class TestGraphDefinition {
 
         public When(
                 IRepository repository,
+                EngineInitializationContext engineInitializationContext,
                 GraphDefinitionProcessor graphDefinitionProcessor,
                 EvaluationSettings evaluationSettings) {
             this.repository = repository;
             this.processor = graphDefinitionProcessor;
-            this.applyRequestBuilder = new ApplyRequestBuilder(this.repository, evaluationSettings);
+            this.applyRequestBuilder =
+                    new ApplyRequestBuilder(this.repository, evaluationSettings, engineInitializationContext);
             this.jsonParser = repository.fhirContext().newJsonParser();
         }
 

@@ -6,18 +6,23 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.repository.IRepository;
 import java.nio.file.Path;
 import java.time.ZonedDateTime;
+import java.util.Optional;
 import java.util.function.Supplier;
+import javax.annotation.Nonnull;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MeasureReport;
+import org.opencds.cqf.fhir.cql.Engines.EngineInitializationContext;
+import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureService;
-import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
+import org.opencds.cqf.fhir.cr.measure.r4.npm.R4RepositoryOrNpmResourceProvider;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 public class Measure {
@@ -46,9 +51,10 @@ public class Measure {
 
     public static class Given {
         private IRepository repository;
+        private EngineInitializationContext engineInitializationContext;
         private MeasureEvaluationOptions evaluationOptions;
         private final MeasurePeriodValidator measurePeriodValidator;
-        private final R4MeasureServiceUtils measureServiceUtils;
+        private final R4RepositoryOrNpmResourceProvider r4RepositoryOrNpmResourceProvider;
 
         public Given() {
             this.evaluationOptions = MeasureEvaluationOptions.defaultOptions();
@@ -65,14 +71,16 @@ public class Measure {
 
             this.measurePeriodValidator = new MeasurePeriodValidator();
 
-            this.measureServiceUtils = new R4MeasureServiceUtils(repository);
+            var npmPackageLoader = NpmPackageLoader.DEFAULT;
+            this.r4RepositoryOrNpmResourceProvider = new R4RepositoryOrNpmResourceProvider(
+                    repository, npmPackageLoader, evaluationOptions.getEvaluationSettings());
         }
 
         public Given repositoryFor(String repositoryPath) {
             this.repository = new IgRepository(
                     FhirContext.forR4Cached(),
                     Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
-
+            this.engineInitializationContext = getEngineInitializationContext();
             return this;
         }
 
@@ -82,11 +90,26 @@ public class Measure {
         }
 
         private R4MeasureService buildMeasureService() {
-            return new R4MeasureService(repository, evaluationOptions, measurePeriodValidator);
+            return new R4MeasureService(
+                    repository,
+                    engineInitializationContext,
+                    evaluationOptions,
+                    measurePeriodValidator,
+                    r4RepositoryOrNpmResourceProvider);
         }
 
         public When when() {
             return new When(buildMeasureService());
+        }
+
+        @Nonnull
+        private EngineInitializationContext getEngineInitializationContext() {
+            return new EngineInitializationContext(
+                    this.repository,
+                    NpmPackageLoader.DEFAULT,
+                    Optional.ofNullable(evaluationOptions)
+                            .map(MeasureEvaluationOptions::getEvaluationSettings)
+                            .orElse(EvaluationSettings.getDefault()));
         }
     }
 

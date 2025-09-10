@@ -21,6 +21,7 @@ import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
+import org.opencds.cqf.fhir.cql.Engines.EngineInitializationContext;
 import org.opencds.cqf.fhir.cr.common.ExtensionProcessor;
 import org.opencds.cqf.fhir.cr.common.ICpgRequest;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.GenerateProcessor;
@@ -55,15 +56,16 @@ public class ApplyProcessor implements IApplyProcessor {
 
     public ApplyProcessor(
             IRepository repository,
+            EngineInitializationContext engineInitializationContext,
             ModelResolver modelResolver,
             org.opencds.cqf.fhir.cr.activitydefinition.apply.IApplyProcessor activityProcessor) {
         this.repository = repository;
         this.modelResolver = modelResolver;
         this.activityProcessor = activityProcessor;
         extensionProcessor = new ExtensionProcessor();
-        generateProcessor = new GenerateProcessor(this.repository);
+        generateProcessor = new GenerateProcessor(this.repository, engineInitializationContext);
         populateProcessor = new PopulateProcessor();
-        extractProcessor = new QuestionnaireResponseProcessor(this.repository);
+        extractProcessor = new QuestionnaireResponseProcessor(this.repository, engineInitializationContext);
         processRequest = new ResponseBuilder(populateProcessor);
         processGoal = new ProcessGoal();
         processAction = new ProcessAction(this.repository, this, generateProcessor);

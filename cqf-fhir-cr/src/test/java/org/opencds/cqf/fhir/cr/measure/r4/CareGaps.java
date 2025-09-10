@@ -12,10 +12,12 @@ import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.repository.IRepository;
+import jakarta.annotation.Nonnull;
 import java.nio.file.Path;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Supplier;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
@@ -33,12 +35,17 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ResourceType;
+import org.opencds.cqf.fhir.cql.Engines.EngineInitializationContext;
+import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
 import org.opencds.cqf.fhir.cr.measure.CareGapsProperties;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
+import org.opencds.cqf.fhir.cr.measure.r4.npm.R4RepositoryOrNpmResourceProvider;
+import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 public class CareGaps {
@@ -89,6 +96,8 @@ public class CareGaps {
 
     public static class Given {
         private IRepository repository;
+        private NpmPackageLoader npmPackageLoader = NpmPackageLoader.DEFAULT;
+        private EngineInitializationContext engineInitializationContext;
         private MeasureEvaluationOptions evaluationOptions;
         private CareGapsProperties careGapsProperties;
         private final String serverBase;
@@ -124,7 +133,30 @@ public class CareGaps {
             this.repository = new IgRepository(
                     FhirContext.forR4Cached(),
                     Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
+            // We're explicitly NOT using NPM here
+            this.npmPackageLoader = NpmPackageLoader.DEFAULT;
+            this.engineInitializationContext = new EngineInitializationContext(
+                    this.repository,
+                    NpmPackageLoader.DEFAULT,
+                    Optional.ofNullable(this.evaluationOptions)
+                            .map(MeasureEvaluationOptions::getEvaluationSettings)
+                            .orElse(EvaluationSettings.getDefault()));
             return this;
+        }
+
+        // Use this if you wish to do anything with NPM
+        public Given repositoryPlusNpmFor(String repositoryPath) {
+            var igRepository = new IgRepository(
+                    FhirContext.forR4Cached(),
+                    Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
+            this.repository = igRepository;
+            this.npmPackageLoader = igRepository.getNpmPackageLoader();
+            mutateEvaluationOptionsToEnableNpm();
+            return this;
+        }
+
+        private void mutateEvaluationOptionsToEnableNpm() {
+            this.evaluationOptions.getEvaluationSettings().setUseNpmForQualifyingResources(true);
         }
 
         public CareGaps.Given evaluationOptions(MeasureEvaluationOptions evaluationOptions) {
@@ -138,8 +170,27 @@ public class CareGaps {
         }
 
         private R4CareGapsService buildCareGapsService() {
+            var r4RepositoryOrNpmResourceProvider = getR4RepositoryOrNpmResourceProvider();
             return new R4CareGapsService(
-                    careGapsProperties, repository, evaluationOptions, serverBase, measurePeriodEvaluator);
+                    careGapsProperties,
+                    repository,
+                    new R4MeasureServiceUtils(repository),
+                    evaluationOptions,
+                    serverBase,
+                    new R4MultiMeasureService(
+                            repository,
+                            engineInitializationContext,
+                            evaluationOptions,
+                            serverBase,
+                            measurePeriodEvaluator,
+                            r4RepositoryOrNpmResourceProvider),
+                    r4RepositoryOrNpmResourceProvider);
+        }
+
+        @Nonnull
+        private R4RepositoryOrNpmResourceProvider getR4RepositoryOrNpmResourceProvider() {
+            return new R4RepositoryOrNpmResourceProvider(
+                    repository, npmPackageLoader, evaluationOptions.getEvaluationSettings());
         }
 
         public When when() {

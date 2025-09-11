@@ -45,6 +45,7 @@ import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
+import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 @SuppressWarnings("squid:S1135")
@@ -276,7 +277,16 @@ class MultiMeasure {
         }
 
         public MultiMeasure.SelectedReport hasMeasureReportCount(int count) {
-            assertEquals(count, report().getParameter().size());
+            assertEquals(
+                    count,
+                    report().getParameter().stream()
+                            .map(ParametersParameterComponent::getResource)
+                            .filter(Bundle.class::isInstance)
+                            .map(Bundle.class::cast)
+                            .flatMap(b -> BundleHelper.getEntryResources(b).stream())
+                            .filter(MeasureReport.class::isInstance)
+                            .toList()
+                            .size());
             return this;
         }
 
@@ -285,7 +295,9 @@ class MultiMeasure {
                     .map(ParametersParameterComponent::getResource)
                     .filter(Bundle.class::isInstance)
                     .map(Bundle.class::cast)
-                    .map(t -> (MeasureReport) t.getEntryFirstRep().getResource())
+                    .flatMap(b -> BundleHelper.getEntryResources(b).stream())
+                    .filter(MeasureReport.class::isInstance)
+                    .map(MeasureReport.class::cast)
                     .filter(x -> x.getMeasure().equals(measureUrl))
                     .toList();
             var msg =

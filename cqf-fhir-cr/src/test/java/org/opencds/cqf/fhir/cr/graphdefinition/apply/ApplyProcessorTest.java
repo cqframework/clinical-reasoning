@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
@@ -18,6 +19,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.nio.file.Path;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -174,6 +176,16 @@ public class ApplyProcessorTest {
     }
 
     @Test
+    void testTransformLinkToSection_returnsNullWithNoTarget() {
+        var linkComponent = new GraphDefinitionLinkComponent().setDescription("Test Link");
+
+        var applyRequest = Mockito.mock(ApplyRequest.class);
+        SectionComponent section = fixture.transformLinkToSection(applyRequest, linkComponent);
+
+        assertNull(section);
+    }
+
+    @Test
     void testTransformLinkToSection_transformsWithValidTargets() {
         GraphDefinitionLinkTargetComponent target1 = new GraphDefinitionLinkTargetComponent();
         target1.setType("GraphDefinition")
@@ -220,6 +232,18 @@ public class ApplyProcessorTest {
 
         assertNotNull(section);
         assertFalse(section.hasSection());
+    }
+
+    @Test
+    void testTransformTargetToSection_throwsWithProfileAndExtension() {
+        var extension = new Extension(CPG_RELATED_SUMMARY_DEFINITION, new CanonicalType("value"));
+        var target = new GraphDefinitionLinkTargetComponent();
+        target.setType("GraphDefinition");
+        target.addExtension(extension);
+        target.setProfile("test");
+
+        var applyRequest = Mockito.mock(ApplyRequest.class);
+        assertThrows(UnprocessableEntityException.class, () -> fixture.transformTargetToSection(applyRequest, target));
     }
 
     @Test

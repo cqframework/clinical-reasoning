@@ -9,7 +9,6 @@ import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -124,9 +123,7 @@ public class ApplyProcessor implements IApplyProcessor {
             var resourceType = SearchHelper.getResourceClass(repository, type);
             var searchParams = getSearchParams(request, type, profile);
             var searchBundle = SearchHelper.searchRepositoryWithPaging(repository, resourceType, searchParams, null);
-            var referencedResources = searchBundle == null
-                    ? new ArrayList<IBaseResource>()
-                    : BundleHelper.getEntryResources(searchBundle);
+            var referencedResources = BundleHelper.getEntryResources(searchBundle);
             referencedResources.forEach(r -> {
                 var reference = new Reference().setReference(r.getIdElement().getValue());
                 sectionComponent.addEntry(reference);

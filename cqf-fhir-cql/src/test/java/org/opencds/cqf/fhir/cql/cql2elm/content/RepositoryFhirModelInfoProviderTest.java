@@ -23,7 +23,7 @@ class RepositoryFhirModelInfoProviderTest {
             new ModelIdentifier().withId("USCore").withVersion("7.0.0");
 
     @BeforeEach
-    public void beforeEach() {
+    void beforeEach() {
         var path = Path.of(getResourcePath(RepositoryFhirModelInfoProviderTest.class) + "/org/opencds/cqf/fhir/cql");
         repository = new IgRepository(FhirContext.forR4Cached(), path);
         adapterFactory = IAdapterFactory.forFhirContext(repository.fhirContext());

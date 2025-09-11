@@ -174,6 +174,11 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
             String productLine,
             String reporter) {
 
+        // create bundle
+        Bundle bundle = new BundleBuilder<>(Bundle.class)
+                .withType(BundleType.SEARCHSET.toString())
+                .build();
+
         var totalMeasures = measures.size();
         for (Measure measure : measures) {
             MeasureReport measureReport;
@@ -202,14 +207,8 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
             // add id to measureReport
             initializeReport(measureReport);
 
-            // create bundle
-            Bundle bundle = new BundleBuilder<>(Bundle.class)
-                    .withType(BundleType.SEARCHSET.toString())
-                    .build();
             // add report to bundle
             bundle.addEntry(getBundleEntry(serverBase, measureReport));
-            // add bundle to result
-            result.addParameter().setName("return").setResource(bundle);
 
             // progress feedback
             var measureUrl = measureReport.getMeasure();
@@ -220,6 +219,9 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
                         totalMeasures--);
             }
         }
+
+        // add bundle to result
+        result.addParameter().setName("return").setResource(bundle);
     }
 
     protected void subjectMeasureReport(

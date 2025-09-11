@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
@@ -137,7 +138,7 @@ public class ApplyProcessorTest {
 
         Extension wrappedExtension = reference.getExtensionFirstRep();
 
-        assertTrue(wrappedExtension != originalExtension);
+        assertNotSame(wrappedExtension, originalExtension);
         assertEquals(url, wrappedExtension.getUrl());
         assertEquals(value, wrappedExtension.getValue().toString());
     }
@@ -261,13 +262,11 @@ public class ApplyProcessorTest {
     }
 
     private String getVersionPath() {
-        switch (getFhirVersion()) {
-            case R4:
-                return "r4";
-            default:
-                throw new IllegalArgumentException(
-                        "Unsupported FHIR version: " + getFhirVersion().getFhirVersionString());
-        }
+        return switch (getFhirVersion()) {
+            case R4 -> "r4";
+            default -> throw new IllegalArgumentException(
+                    "Unsupported FHIR version: " + getFhirVersion().getFhirVersionString());
+        };
     }
 
     private void printElement(IBase element) {

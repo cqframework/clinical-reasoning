@@ -16,7 +16,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -112,6 +111,7 @@ public class ApplyProcessor implements IApplyProcessor {
             ApplyRequest request, GraphDefinitionLinkTargetComponent target) {
         var sectionComponent = new SectionComponent();
 
+        var type = target.getType();
         var profile = target.getProfile();
         // Only concerned with related summary definition extensions for now
         var relatedDefinitions = target.getExtensionsByUrl(CPG_RELATED_SUMMARY_DEFINITION);
@@ -121,11 +121,6 @@ public class ApplyProcessor implements IApplyProcessor {
         }
 
         if (profile != null) {
-            var type = target.getType();
-            if (StringUtils.isEmpty(type)) {
-                throw new UnprocessableEntityException(
-                        String.format("Target with profile %s is missing type.", profile));
-            }
             var resourceType = SearchHelper.getResourceClass(repository, type);
             var searchParams = getSearchParams(request, type, profile);
             var searchBundle = SearchHelper.searchRepositoryWithPaging(repository, resourceType, searchParams, null);
@@ -140,9 +135,12 @@ public class ApplyProcessor implements IApplyProcessor {
         }
 
         if (!relatedDefinitions.isEmpty()) {
-            target.getExtension().stream()
-                    .map(this::transformExtensionToReference)
-                    .forEach(sectionComponent::addEntry);
+            if (!isGraphDefinitionType(target)) {
+                throw new UnprocessableEntityException(String.format(
+                        "Encountered the CPG Related Summary Definition extension on a target with a type other than GraphDefinition: %s",
+                        type));
+            }
+            relatedDefinitions.stream().map(this::transformExtensionToReference).forEach(sectionComponent::addEntry);
         }
 
         return sectionComponent;

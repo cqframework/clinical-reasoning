@@ -38,6 +38,9 @@ import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
 
+import static kotlinx.io.CoreKt.buffered;
+import static kotlinx.io.JvmCoreKt.asSource;
+
 public class DataRequirementsVisitor extends BaseKnowledgeArtifactVisitor {
     protected DataRequirementsProcessor dataRequirementsProcessor;
     protected EvaluationSettings evaluationSettings;
@@ -141,7 +144,7 @@ public class DataRequirementsVisitor extends BaseKnowledgeArtifactVisitor {
     protected CqlTranslator getTranslator(InputStream cqlStream, LibraryManager libraryManager) {
         CqlTranslator translator;
         try {
-            translator = CqlTranslator.fromStream(cqlStream, libraryManager);
+            translator = CqlTranslator.fromSource(buffered(asSource(cqlStream)), libraryManager);
         } catch (IOException e) {
             throw new IllegalArgumentException("Errors occurred translating library: %s".formatted(e.getMessage()));
         }

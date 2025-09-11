@@ -60,6 +60,9 @@ import org.opencds.cqf.fhir.utility.search.Searches;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static kotlinx.io.CoreKt.buffered;
+import static kotlinx.io.JvmCoreKt.asSource;
+
 public class R4DataRequirementsService {
     private static final Logger ourLog = LoggerFactory.getLogger(R4DataRequirementsService.class);
     private final IRepository repository;
@@ -157,7 +160,7 @@ public class R4DataRequirementsService {
     public static CqlTranslator getTranslator(InputStream cqlStream, LibraryManager libraryManager) {
         CqlTranslator translator;
         try {
-            translator = CqlTranslator.fromStream(cqlStream, libraryManager);
+            translator = CqlTranslator.fromSource(buffered(asSource(cqlStream)), libraryManager);
         } catch (IOException e) {
             throw new IllegalArgumentException("Errors occurred translating library: %s".formatted(e.getMessage()));
         }

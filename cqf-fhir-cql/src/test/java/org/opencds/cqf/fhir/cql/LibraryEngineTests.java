@@ -1,5 +1,7 @@
 package org.opencds.cqf.fhir.cql;
 
+import static kotlinx.io.CoreKt.buffered;
+import static kotlinx.io.JvmCoreKt.asSource;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -15,6 +17,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Map;
+import kotlinx.io.Source;
 import org.cqframework.cql.cql2elm.LibraryContentType;
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.hl7.elm.r1.VersionedIdentifier;
@@ -140,14 +143,14 @@ class LibraryEngineTests {
         var libraryResourceProvider = new ArrayList<LibrarySourceProvider>();
         libraryResourceProvider.add(new LibrarySourceProvider() {
             @Override
-            public InputStream getLibrarySource(VersionedIdentifier libraryIdentifier) {
+            public Source getLibrarySource(VersionedIdentifier libraryIdentifier) {
                 return null;
             }
 
             @Override
-            public InputStream getLibraryContent(VersionedIdentifier libraryIdentifier, LibraryContentType type) {
+            public Source getLibraryContent(VersionedIdentifier libraryIdentifier, LibraryContentType type) {
                 if ("MyLibrary".equals(libraryIdentifier.getId()))
-                    return new ByteArrayInputStream(libraryCql.getBytes(StandardCharsets.UTF_8));
+                    return buffered(asSource(new ByteArrayInputStream(libraryCql.getBytes(StandardCharsets.UTF_8))));
                 else return LibrarySourceProvider.DefaultImpls.getLibraryContent(this, libraryIdentifier, type);
             }
         });

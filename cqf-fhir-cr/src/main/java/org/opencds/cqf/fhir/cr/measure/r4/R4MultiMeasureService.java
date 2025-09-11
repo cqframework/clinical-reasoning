@@ -34,7 +34,7 @@ import org.opencds.cqf.fhir.utility.repository.Repositories;
  * Alternate MeasureService call to Process MeasureEvaluation for the selected population of subjects against n-number
  * of measure resources. The output of this operation would be a bundle of MeasureReports instead of MeasureReport.
  */
-@SuppressWarnings("squid:S107")
+@SuppressWarnings({"squid:S107", "UnstableApiUsage"})
 public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(R4MultiMeasureService.class);
@@ -64,7 +64,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
     }
 
     @Override
-    public Bundle evaluate(
+    public Parameters evaluate(
             List<IdType> measureId,
             List<String> measureUrl,
             List<String> measureIdentifier,
@@ -107,10 +107,8 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
         // get subjects
         var subjects = getSubjects(subjectProvider, subject);
 
-        // create bundle
-        Bundle bundle = new BundleBuilder<>(Bundle.class)
-                .withType(BundleType.SEARCHSET.toString())
-                .build();
+        // create parameters
+        var result = new Parameters();
 
         var context = Engines.forRepository(
                 r4ProcessorToUse.getRepository(),
@@ -128,7 +126,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
                     r4MeasureServiceUtilsToUse,
                     compositeEvaluationResultsPerMeasure,
                     context,
-                    bundle,
+                    result,
                     measures,
                     periodStart,
                     periodEnd,
@@ -144,7 +142,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
                     r4MeasureServiceUtilsToUse,
                     compositeEvaluationResultsPerMeasure,
                     context,
-                    bundle,
+                    result,
                     measures,
                     periodStart,
                     periodEnd,
@@ -155,7 +153,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
                     reporter);
         }
 
-        return bundle;
+        return result;
     }
 
     protected void populationMeasureReport(
@@ -163,7 +161,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
             R4MeasureServiceUtils r4MeasureServiceUtils,
             CompositeEvaluationResultsPerMeasure compositeEvaluationResultsPerMeasure,
             CqlEngine context,
-            Bundle bundle,
+            Parameters result,
             List<Measure> measures,
             @Nullable ZonedDateTime periodStart,
             @Nullable ZonedDateTime periodEnd,
@@ -202,8 +200,14 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
             // add id to measureReport
             initializeReport(measureReport);
 
+            // create bundle
+            Bundle bundle = new BundleBuilder<>(Bundle.class)
+                    .withType(BundleType.SEARCHSET.toString())
+                    .build();
             // add report to bundle
             bundle.addEntry(getBundleEntry(serverBase, measureReport));
+            // add bundle to result
+            result.addParameter().setName("return").setResource(bundle);
 
             // progress feedback
             var measureUrl = measureReport.getMeasure();
@@ -221,7 +225,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
             R4MeasureServiceUtils r4MeasureServiceUtils,
             CompositeEvaluationResultsPerMeasure compositeEvaluationResultsPerMeasure,
             CqlEngine context,
-            Bundle bundle,
+            Parameters result,
             List<Measure> measures,
             @Nullable ZonedDateTime periodStart,
             @Nullable ZonedDateTime periodEnd,
@@ -263,8 +267,14 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
                 // add id to measureReport
                 initializeReport(measureReport);
 
+                // create bundle
+                Bundle bundle = new BundleBuilder<>(Bundle.class)
+                        .withType(BundleType.SEARCHSET.toString())
+                        .build();
                 // add report to bundle
                 bundle.addEntry(getBundleEntry(serverBase, measureReport));
+                // add bundle to result
+                result.addParameter().setName("return").setResource(bundle);
 
                 // progress feedback
                 var measureUrl = measureReport.getMeasure();

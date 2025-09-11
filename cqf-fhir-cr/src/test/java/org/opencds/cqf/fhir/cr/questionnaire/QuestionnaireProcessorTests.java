@@ -324,6 +324,7 @@ class QuestionnaireProcessorTests {
                 .subjectId("USCorePatient-GMTP-1")
                 .thenPopulate(true)
                 .hasNoErrors()
+                .itemHasAnswerValue("billing-provider-question", "No")
                 .itemHasAnswerValue("billing-provider-info|name", "Oak Street Billing Provider")
                 .itemHasAnswerValue("billing-provider-info|phone-number", "+1 (123) 4567890")
                 .itemHasAnswerValue("billing-provider-info|npi", "1144221849")
@@ -336,6 +337,6 @@ class QuestionnaireProcessorTests {
                 .itemHasAnswerValue(
                         "test-requested|diagnosis-description",
                         "Type 2 diabetes mellitus with other diabetic arthropathy")
-                .itemHasAnswer("history|other-findings");
+                .itemHasNoAnswer("history|other-findings");
     }
 }

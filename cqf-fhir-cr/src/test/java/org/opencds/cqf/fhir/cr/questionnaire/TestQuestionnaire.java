@@ -352,6 +352,16 @@ public class TestQuestionnaire {
                 if (!childItems.isEmpty()) {
                     populateItems(childItems);
                 }
+                var answers = request.resolvePathList(item, "answer");
+                if (!answers.isEmpty()) {
+                    var answerItems = answers.stream()
+                            .flatMap(a -> request.resolvePathList(a, "item").stream())
+                            .map(i -> (IBaseBackboneElement) i)
+                            .toList();
+                    if (!answerItems.isEmpty()) {
+                        populateItems(answerItems);
+                    }
+                }
             }
         }
 
@@ -382,7 +392,12 @@ public class TestQuestionnaire {
         }
 
         public GeneratedQuestionnaireResponse itemHasAnswer(String linkId) {
-            assertTrue(!request.resolvePathList(items.get(linkId), "answer").isEmpty());
+            assertFalse(request.resolvePathList(items.get(linkId), "answer").isEmpty());
+            return this;
+        }
+
+        public GeneratedQuestionnaireResponse itemHasNoAnswer(String linkId) {
+            assertTrue(request.resolvePathList(items.get(linkId), "answer").isEmpty());
             return this;
         }
 

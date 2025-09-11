@@ -11,6 +11,7 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.CqfExpression;
 import org.slf4j.Logger;
@@ -84,7 +85,15 @@ public class ExpressionProcessor {
                                 request.getResourceVariable());
         return result == null
                 ? new ArrayList<>()
-                : result.stream().filter(Objects::nonNull).collect(Collectors.toList());
+                : result.stream()
+                        // Missing values are returned as a BooleanType with a null value which can cause
+                        // problems when the consumer of the result is expecting a specific result type,
+                        // so we are filtering out primitive types with no value.
+                        .map(r -> r instanceof IPrimitiveType<?> primitiveType && primitiveType.getValue() == null
+                                ? null
+                                : r)
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList());
     }
 
     /**

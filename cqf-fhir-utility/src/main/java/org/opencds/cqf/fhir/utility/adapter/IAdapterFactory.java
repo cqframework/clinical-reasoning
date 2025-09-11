@@ -162,4 +162,12 @@ public interface IAdapterFactory {
      * @return an adapter exposing common api calls
      */
     IValueSetAdapter createValueSet(IBaseResource valueSet);
+
+    /**
+     * Creates an adapter that exposes common GraphDefinition operations across multiple versions of FHIR
+     *
+     * @param graphDefinition a FHIR GraphDefinition Resource
+     * @return an adapter exposing common api calls
+     */
+    IGraphDefinitionAdapter createGraphDefinition(IBaseResource graphDefinition);
 }

@@ -56,6 +56,10 @@ public class Constants {
     public static final String CPG_QUESTIONNAIRE_GENERATE =
             "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-questionnaire-generate";
     public static final String CPG_RATIONALE = "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-rationale";
+    public static final String CPG_RELATED_ARTIFACT =
+            "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-relatedArtifact";
+    public static final String ARTIFACT_RELATED_ARTIFACT =
+            "http://hl7.org/fhir/StructureDefinition/artifact-relatedArtifact";
     public static final String CPG_SERVICE_REQUEST =
             "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-servicerequest";
     public static final String CPG_STRATEGY = "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-strategy";

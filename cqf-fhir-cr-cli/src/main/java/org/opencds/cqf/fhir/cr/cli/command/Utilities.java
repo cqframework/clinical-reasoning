@@ -14,7 +14,6 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.cqframework.cql.cql2elm.CqlCompilerOptions.Options;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
-import org.cqframework.cql.cql2elm.CqlTranslatorOptionsMapper;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -57,7 +56,7 @@ public class Utilities {
 
         var optionPath = Path.of(cqlPath).resolve("cql-options.json");
         if (Files.exists(optionPath)) {
-            CqlTranslatorOptions options = CqlTranslatorOptionsMapper.fromFile(optionPath.toString());
+            CqlTranslatorOptions options = CqlTranslatorOptions.fromFile(new kotlinx.io.files.Path(optionPath.toFile()));
             cqlOptions.setCqlCompilerOptions(options.getCqlCompilerOptions());
         }
 

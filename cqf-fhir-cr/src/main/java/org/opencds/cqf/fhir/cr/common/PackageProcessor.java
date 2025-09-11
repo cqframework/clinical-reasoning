@@ -10,6 +10,7 @@ import org.opencds.cqf.fhir.cr.visitor.PackageVisitor;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.client.TerminologyServerClientSettings;
 
+@SuppressWarnings("UnstableApiUsage")
 public class PackageProcessor implements IPackageProcessor {
     protected final IRepository repository;
     protected final FhirVersionEnum fhirVersion;

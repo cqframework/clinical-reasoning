@@ -1,6 +1,5 @@
 package org.opencds.cqf.fhir.cr.questionnaire.populate;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -77,27 +76,9 @@ public class PopulateProcessor implements IPopulateProcessor {
                 .filter(e -> e.getUrl().equals(Constants.SDC_QUESTIONNAIRE_ITEM_POPULATION_CONTEXT))
                 .findFirst()
                 .orElse(null);
-        if (populationContextExt != null) {
-            return processItemWithContext(request, item);
-        } else {
-            var childItems = request.getItems(item);
-            if (!childItems.isEmpty()) {
-                final var responseItem = processItem.createResponseItem(request.getFhirVersion(), item);
-                final var responseChildItems = populateItems(request, childItems);
-                request.getModelResolver().setValue(responseItem, "item", responseChildItems);
-                return List.of(responseItem);
-            } else {
-                return List.of(processItem(request, item));
-            }
-        }
-    }
-
-    protected List<IBaseBackboneElement> populateItems(PopulateRequest request, List<IBaseBackboneElement> items) {
-        final List<IBaseBackboneElement> responseItems = new ArrayList<>();
-        items.forEach(item -> {
-            responseItems.addAll(populateItem(request, item));
-        });
-        return responseItems;
+        return populationContextExt != null
+                ? processItemWithContext(request, item)
+                : List.of(processItem(request, item));
     }
 
     protected List<IBaseBackboneElement> processItemWithContext(PopulateRequest request, IBaseBackboneElement item) {

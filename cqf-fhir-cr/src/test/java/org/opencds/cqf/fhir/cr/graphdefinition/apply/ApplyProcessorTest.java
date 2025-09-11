@@ -65,7 +65,7 @@ public class ApplyProcessorTest {
     @BeforeEach
     void beforeEach() {
         repository = new IgRepository(getFhirContext(), getClassPath());
-        fixture = new ApplyProcessor(repository, modelResolver, getFhirVersion());
+        fixture = new ApplyProcessor(repository, modelResolver);
     }
 
     @Test

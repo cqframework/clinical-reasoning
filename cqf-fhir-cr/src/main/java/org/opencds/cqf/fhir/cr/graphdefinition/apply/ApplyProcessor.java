@@ -55,10 +55,10 @@ public class ApplyProcessor implements IApplyProcessor {
     protected final ExtensionProcessor extensionProcessor;
     protected final FhirVersionEnum fhirVersionEnum;
 
-    public ApplyProcessor(IRepository repository, ModelResolver modelResolver, FhirVersionEnum fhirVersionEnum) {
+    public ApplyProcessor(IRepository repository, ModelResolver modelResolver) {
         this.repository = repository;
         this.modelResolver = modelResolver;
-        this.fhirVersionEnum = fhirVersionEnum;
+        this.fhirVersionEnum = this.repository.fhirContext().getVersion().getVersion();
         extensionProcessor = new ExtensionProcessor();
     }
 

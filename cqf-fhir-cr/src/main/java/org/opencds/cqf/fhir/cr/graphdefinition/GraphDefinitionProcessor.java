@@ -73,7 +73,7 @@ public class GraphDefinitionProcessor {
 
     public IApplyProcessor getApplyProcessor() {
         if (isNull(this.applyProcessor)) {
-            applyProcessor = new ApplyProcessor(repository, modelResolver, fhirVersion);
+            applyProcessor = new ApplyProcessor(repository, modelResolver);
         }
         return applyProcessor;
     }

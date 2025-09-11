@@ -16,6 +16,7 @@ import java.nio.file.Path;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Supplier;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
@@ -33,12 +34,15 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ResourceType;
+import org.opencds.cqf.fhir.cql.Engines.EngineInitializationContext;
+import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
 import org.opencds.cqf.fhir.cr.measure.CareGapsProperties;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 public class CareGaps {
@@ -89,6 +93,7 @@ public class CareGaps {
 
     public static class Given {
         private IRepository repository;
+        private EngineInitializationContext engineInitializationContext;
         private MeasureEvaluationOptions evaluationOptions;
         private CareGapsProperties careGapsProperties;
         private final String serverBase;
@@ -124,6 +129,12 @@ public class CareGaps {
             this.repository = new IgRepository(
                     FhirContext.forR4Cached(),
                     Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
+            this.engineInitializationContext = new EngineInitializationContext(
+                    this.repository,
+                    NpmPackageLoader.DEFAULT,
+                    Optional.ofNullable(this.evaluationOptions)
+                            .map(MeasureEvaluationOptions::getEvaluationSettings)
+                            .orElse(EvaluationSettings.getDefault()));
             return this;
         }
 
@@ -139,7 +150,12 @@ public class CareGaps {
 
         private R4CareGapsService buildCareGapsService() {
             return new R4CareGapsService(
-                    careGapsProperties, repository, evaluationOptions, serverBase, measurePeriodEvaluator);
+                    careGapsProperties,
+                    repository,
+                    engineInitializationContext,
+                    evaluationOptions,
+                    serverBase,
+                    measurePeriodEvaluator);
         }
 
         public When when() {

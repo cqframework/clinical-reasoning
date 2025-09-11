@@ -28,6 +28,7 @@ import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IGraphDefinitionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IMeasureAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IParametersParameterComponentAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IPlanDefinitionAdapter;
@@ -84,6 +85,11 @@ public class AdapterFactory implements IAdapterFactory {
     @Override
     public ILibraryAdapter createLibrary(IBaseResource library) {
         return new LibraryAdapter((IDomainResource) library);
+    }
+
+    @Override
+    public IMeasureAdapter createMeasure(IBaseResource measure) {
+        return new MeasureAdapter((IDomainResource) measure);
     }
 
     @Override

@@ -25,10 +25,14 @@ class R4MeasureProcessorTest {
     @Test
     void evaluateMultiMeasureIdsWithCqlEngine() {
         var repository = GIVEN_REPO.getRepository();
+        var engineInitializationContext = GIVEN_REPO.getEngineInitializationContext();
         var r4MeasureProcessor = new R4MeasureProcessor(
-                repository, MeasureEvaluationOptions.defaultOptions(), new MeasureProcessorUtils());
+                repository,
+                engineInitializationContext,
+                MeasureEvaluationOptions.defaultOptions(),
+                new MeasureProcessorUtils());
 
-        var cqlEngine = Engines.forRepository(repository);
+        var cqlEngine = Engines.forContext(engineInitializationContext);
 
         var results = r4MeasureProcessor.evaluateMultiMeasureIdsWithCqlEngine(
                 List.of(SUBJECT_ID),

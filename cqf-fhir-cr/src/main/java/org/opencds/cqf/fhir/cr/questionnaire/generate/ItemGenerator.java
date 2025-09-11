@@ -21,6 +21,7 @@ import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.fhir.cql.Engines;
+import org.opencds.cqf.fhir.cql.Engines.EngineInitializationContext;
 import org.opencds.cqf.fhir.cr.common.ExpressionProcessor;
 import org.opencds.cqf.fhir.cr.common.ExtensionProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.Helpers;
@@ -48,9 +49,9 @@ public class ItemGenerator {
     protected final ElementHasCaseFeature elementHasCaseFeature;
     protected final ItemTypeIsChoice itemTypeIsChoice;
 
-    public ItemGenerator(IRepository repository) {
+    public ItemGenerator(IRepository repository, EngineInitializationContext engineInitializationContext) {
         this.repository = repository;
-        engine = Engines.forRepository(this.repository);
+        engine = Engines.forContext(engineInitializationContext);
         expressionProcessor = new ExpressionProcessor();
         extensionProcessor = new ExtensionProcessor();
         elementHasCaseFeature = new ElementHasCaseFeature();

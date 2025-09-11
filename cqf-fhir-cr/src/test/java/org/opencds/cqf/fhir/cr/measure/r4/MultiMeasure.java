@@ -17,6 +17,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -39,12 +40,15 @@ import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ResourceType;
+import org.opencds.cqf.fhir.cql.Engines.EngineInitializationContext;
+import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
+import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 @SuppressWarnings("squid:S1135")
@@ -95,6 +99,7 @@ class MultiMeasure {
 
     public static class Given {
         private IRepository repository;
+        private EngineInitializationContext engineInitializationContext;
         private MeasureEvaluationOptions evaluationOptions;
         private String serverBase;
         private MeasurePeriodValidator measurePeriodValidator;
@@ -126,6 +131,12 @@ class MultiMeasure {
             this.repository = new IgRepository(
                     FhirContext.forR4Cached(),
                     Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
+            this.engineInitializationContext = new EngineInitializationContext(
+                    this.repository,
+                    NpmPackageLoader.DEFAULT,
+                    Optional.ofNullable(this.evaluationOptions)
+                            .map(MeasureEvaluationOptions::getEvaluationSettings)
+                            .orElse(EvaluationSettings.getDefault()));
             return this;
         }
 
@@ -149,8 +160,17 @@ class MultiMeasure {
             return this.repository;
         }
 
+        public EngineInitializationContext getEngineInitializationContext() {
+            if (this.engineInitializationContext == null) {
+                throw new IllegalStateException(
+                        "EngineInitializationContext has not been set. Use 'repository' or 'repositoryFor' to set it.");
+            }
+            return this.engineInitializationContext;
+        }
+
         private R4MultiMeasureService buildMeasureService() {
-            return new R4MultiMeasureService(repository, evaluationOptions, serverBase, measurePeriodValidator);
+            return new R4MultiMeasureService(
+                    repository, engineInitializationContext, evaluationOptions, serverBase, measurePeriodValidator);
         }
 
         public MultiMeasure.When when() {

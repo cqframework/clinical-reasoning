@@ -393,7 +393,7 @@ public class R4FhirOrNpmResourceProvider implements FhirOrNpmThingee {
             var optLibraryAdapter = npmPackageLoader.loadLibraryByUrl(measureUrl);
 
             if (optLibraryAdapter.isEmpty()) {
-                throw new IllegalArgumentException("No measure found for URL: %s".formatted(measureUrl.getValue()));
+                throw new IllegalArgumentException("No Library found for URL: %s".formatted(measureUrl.getValue()));
             }
 
             var libraryAdapter = optLibraryAdapter.get();

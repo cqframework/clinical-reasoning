@@ -45,25 +45,7 @@ class CqlEvaluationServiceWithNpmComplexDepsTest {
         assertTrue(results.hasParameter());
         var parameters = results.getParameter();
 
-        var operationOutcomes = parameters.stream()
-                .map(ParametersParameterComponent::getResource)
-                .filter(OperationOutcome.class::isInstance)
-                .map(OperationOutcome.class::cast)
-                .toList();
-
-        var hasErrors = operationOutcomes.stream()
-                .anyMatch(oo -> oo.getIssueFirstRep().getSeverity() == OperationOutcome.IssueSeverity.ERROR);
-
-        assertFalse(
-                hasErrors,
-                () -> "OperationOutcome issues: "
-                        + operationOutcomes.stream()
-                                .map(OperationOutcome::getIssue)
-                                .flatMap(Collection::stream)
-                                .map(issue -> issue.getSeverity() + ": "
-                                        + issue.getDetails().getText())
-                                .reduce((first, second) -> first + "; " + second)
-                                .orElse("No issues found"));
+        LibraryEvalTestUtils.verifyNoErrors(results);
 
         assertEquals(3, parameters.size());
     }
@@ -101,6 +83,7 @@ class CqlEvaluationServiceWithNpmComplexDepsTest {
         var results = when.then().parameters();
         assertFalse(results.isEmpty());
         assertEquals(1, results.getParameter().size());
+        LibraryEvalTestUtils.verifyNoErrors(results);
         assertInstanceOf(BooleanType.class, results.getParameter("Numerator").getValue());
         assertTrue(((BooleanType) results.getParameter("Numerator").getValue()).booleanValue());
     }

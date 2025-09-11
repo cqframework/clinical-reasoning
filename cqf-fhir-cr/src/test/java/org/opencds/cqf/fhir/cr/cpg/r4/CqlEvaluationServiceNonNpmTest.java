@@ -20,11 +20,11 @@ class CqlEvaluationServiceNonNpmTest extends BaseCqlEvaluationServiceTest {
     private static final Library.Given GIVEN_REPO = Library.given().repositoryFor("libraryeval");
 
     @Test
-    void libraryEvaluationService_inlineAsthma_repository() {
+    void libraryEvaluationService_inlineAsthma() {
         var content =
                 """
-        library asthmatest version '1.0.0'
-
+        library opencds.crosspackagesource.asthmatest version '1.0.0'
+        
         using FHIR version '4.0.1'
 
         include FHIRHelpers version '4.0.1'
@@ -50,12 +50,7 @@ class CqlEvaluationServiceNonNpmTest extends BaseCqlEvaluationServiceTest {
         assertTrue(results.hasParameter());
         var parameters = results.getParameter();
 
-        var hasErrors = parameters.stream()
-                .map(ParametersParameterComponent::getResource)
-                .filter(OperationOutcome.class::isInstance)
-                .map(OperationOutcome.class::cast)
-                .anyMatch(oo -> oo.getIssueFirstRep().getSeverity() == OperationOutcome.IssueSeverity.ERROR);
-        assertFalse(hasErrors);
+        LibraryEvalTestUtils.verifyNoErrors(results);
 
         assertEquals(3, parameters.size());
     }

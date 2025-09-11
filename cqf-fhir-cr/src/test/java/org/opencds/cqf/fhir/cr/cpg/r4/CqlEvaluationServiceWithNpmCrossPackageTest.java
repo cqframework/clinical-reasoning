@@ -5,8 +5,14 @@ import static org.opencds.cqf.fhir.utility.r4.Parameters.datePart;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.parameters;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.stringPart;
 
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.CanonicalType;
+import org.hl7.fhir.r4.model.Encounter;
+import org.hl7.fhir.r4.model.IntegerType;
+import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
+import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -26,6 +32,7 @@ class CqlEvaluationServiceWithNpmCrossPackageTest {
             .url(new CanonicalType("http://multilib.cross.package.source.npm.opencds.org/Library/MultiLibCrossPackageSource1"))
             .parameters(params)
             .evaluateLibrary();
+        // LUKETODO:  Caused by: java.lang.IllegalArgumentException: No Library found for URL: http://multilib.cross.package.source.npm.opencds.org/Library/MultiLibCrossPackageSource1
         var report = when.then().parameters();
 
         assertNotNull(report);
@@ -115,11 +122,12 @@ class CqlEvaluationServiceWithNpmCrossPackageTest {
     }
 
 
+    // LUKETODO:  make sure you have an npm tgz in the "IG"
     @Test
-    void libraryEvaluationService_inlineAsthma_npm() {
+    void libraryEvaluationService_inlineAsthma() {
         var content =
                 """
-            library opencds.libraryevalnpm.asthmatest version '1.0.0'
+            library opencds.multilibcrosspackagesource1.asthmatest version '1.0.0'
 
             using FHIR version '4.0.1'
 
@@ -146,12 +154,7 @@ class CqlEvaluationServiceWithNpmCrossPackageTest {
         assertTrue(results.hasParameter());
         var parameters = results.getParameter();
 
-        var hasErrors = parameters.stream()
-                .map(ParametersParameterComponent::getResource)
-                .filter(OperationOutcome.class::isInstance)
-                .map(OperationOutcome.class::cast)
-                .anyMatch(oo -> oo.getIssueFirstRep().getSeverity() == OperationOutcome.IssueSeverity.ERROR);
-        assertFalse(hasErrors);
+        LibraryEvalTestUtils.verifyNoErrors(results);
 
         assertEquals(3, parameters.size());
     }
@@ -189,6 +192,8 @@ class CqlEvaluationServiceWithNpmCrossPackageTest {
         var results = when.then().parameters();
         assertFalse(results.isEmpty());
         assertEquals(1, results.getParameter().size());
+        LibraryEvalTestUtils.verifyNoErrors(results);
+        // LUKETODO:  capture the error:  "at least one libraryIdentifier Id is null"
         assertInstanceOf(BooleanType.class, results.getParameter("Numerator").getValue());
         assertTrue(((BooleanType) results.getParameter("Numerator").getValue()).booleanValue());
     }

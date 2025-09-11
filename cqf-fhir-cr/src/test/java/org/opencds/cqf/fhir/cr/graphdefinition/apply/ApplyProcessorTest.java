@@ -228,6 +228,7 @@ public class ApplyProcessorTest {
         var extension2 = new Extension(CPG_RELATED_SUMMARY_DEFINITION, new CanonicalType("value2"));
 
         var target = new GraphDefinitionLinkTargetComponent();
+        target.setType("GraphDefinition");
         target.addExtension(extension1);
         target.addExtension(extension2);
 

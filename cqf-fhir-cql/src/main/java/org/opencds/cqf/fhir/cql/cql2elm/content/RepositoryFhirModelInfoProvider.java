@@ -4,15 +4,12 @@ import static java.util.Objects.requireNonNull;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.repository.IRepository;
-import com.fasterxml.jackson.databind.AnnotationIntrospector;
-import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
-import com.fasterxml.jackson.databind.type.TypeFactory;
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
+import java.io.IOException;
 import java.util.ArrayList;
 import org.hl7.cql.model.ModelIdentifier;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.elm_modelinfo.r1.ModelInfo;
+import org.hl7.elm_modelinfo.r1.serializing.ModelInfoReaderFactory;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.fhir.cql.cql2elm.util.LibraryVersionSelector;
@@ -51,20 +48,16 @@ public class RepositoryFhirModelInfoProvider extends BaseFhirModelInfoProvider {
     public ModelInfo load(ModelIdentifier modelIdentifier) {
         var is = getModelInfoContent(modelIdentifier, ModelInfoContentType.XML);
         if (is == null) {
+            logger.error("Unable to locate model info content for {}", modelIdentifier.getId());
             return null;
         }
 
-        //var objectMapper = new ObjectMapper();
-        var objectMapper = new XmlMapper();
-        var typeFactory = TypeFactory.defaultInstance();
-        var jaxbIntrospector = new JaxbAnnotationIntrospector(typeFactory);
-        var jacksonIntrospector = new JacksonAnnotationIntrospector();
-        objectMapper.setAnnotationIntrospector(AnnotationIntrospector.pair(jaxbIntrospector, jacksonIntrospector));
-        // objectMapper.registerModule(new JaxbAnnotationModule());
+        var xmlReader = ModelInfoReaderFactory.getReader(ModelInfoContentType.XML.mimeType());
         try {
-            return objectMapper.readValue(is, ModelInfo.class);
-        } catch (Exception | Error e) {
-            logger.error("Error encountered while loading model info for {}: {}", modelIdentifier.getId(), e.getMessage());
+            return xmlReader.read(is);
+        } catch (IOException e) {
+            logger.error(
+                    "Error encountered while loading model info for {}: {}", modelIdentifier.getId(), e.getMessage());
             return null;
         }
     }

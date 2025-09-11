@@ -153,7 +153,7 @@ public class ApplyProcessor implements IApplyProcessor {
         var searchParams = Searches.byProfile(profile);
         searchParams.put(
                 Searches.getPatientSearchParam(fhirVersionEnum, type),
-                List.of(new ReferenceParam(request.getSubjectId().getIdPart())));
+                List.of(new ReferenceParam(request.getSubjectId().getValue())));
         // Need to add date params
         return searchParams;
     }

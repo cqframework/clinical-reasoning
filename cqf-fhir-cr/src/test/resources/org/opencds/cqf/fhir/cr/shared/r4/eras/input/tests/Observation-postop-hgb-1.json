@@ -1,0 +1,47 @@
+{
+  "resourceType": "Observation",
+  "meta": {
+    "profile": [
+      "http://example.org/cdosdh/demo/StructureDefinition/cpg-casefeature-postop-hgb"
+    ]
+  },
+  "id": "postop-hgb-1",
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-instantiatesCaseFeature",
+      "valueCanonical": "http://example.org/cdosdh/demo/StructureDefinition/cpg-casefeature-postop-hgb"
+    }
+  ],
+  "status": "final",
+  "category": [
+    {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code": "laboratory",
+          "display": "Laboratory"
+        }
+      ],
+      "text": "Laboratory"
+    }
+  ],
+  "code": {
+    "coding": [
+      {
+        "system": "http://example.org/cdosdh/demo/CodeSystem/eras-post-op-demo",
+        "code": "post-op-hgb",
+        "display": "Post-Op Hgb"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/time-zero"
+  },
+  "effectiveDateTime": "2025-12-01T19:37:00Z",
+  "valueQuantity": {
+    "value": 8.6,
+    "unit": "mg/dL",
+    "system": "http://unitsofmeasure.org",
+    "code": "mg/dL"
+  }
+}

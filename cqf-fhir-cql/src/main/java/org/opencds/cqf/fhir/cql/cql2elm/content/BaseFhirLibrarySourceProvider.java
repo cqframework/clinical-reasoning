@@ -1,9 +1,12 @@
 package org.opencds.cqf.fhir.cql.cql2elm.content;
 
 import static java.util.Objects.requireNonNull;
+import static kotlinx.io.CoreKt.buffered;
+import static kotlinx.io.JvmCoreKt.asSource;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import kotlinx.io.Source;
 import org.cqframework.cql.cql2elm.LibraryContentType;
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.hl7.elm.r1.VersionedIdentifier;
@@ -26,7 +29,7 @@ public abstract class BaseFhirLibrarySourceProvider implements LibrarySourceProv
     }
 
     @Override
-    public InputStream getLibraryContent(VersionedIdentifier libraryIdentifier, LibraryContentType libraryContentType) {
+    public Source getLibraryContent(VersionedIdentifier libraryIdentifier, LibraryContentType libraryContentType) {
         requireNonNull(libraryIdentifier, "versionedIdentifier can not be null.");
         requireNonNull(libraryContentType, "libraryContentType can not be null.");
 
@@ -35,7 +38,8 @@ public abstract class BaseFhirLibrarySourceProvider implements LibrarySourceProv
             return null;
         }
 
-        return this.getContentStream(library, libraryContentType.mimeType());
+        var inputStream = this.getContentStream(library, libraryContentType.mimeType());
+        return inputStream == null ? null : buffered(asSource(inputStream));
     }
 
     protected InputStream getContentStream(IBaseResource library, String contentType) {
@@ -56,7 +60,7 @@ public abstract class BaseFhirLibrarySourceProvider implements LibrarySourceProv
     }
 
     @Override
-    public InputStream getLibrarySource(VersionedIdentifier libraryIdentifier) {
+    public Source getLibrarySource(VersionedIdentifier libraryIdentifier) {
         return getLibraryContent(libraryIdentifier, LibraryContentType.CQL);
     }
 

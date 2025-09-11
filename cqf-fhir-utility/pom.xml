@@ -35,6 +35,10 @@
     </dependency>
     <dependency>
       <groupId>info.cqframework</groupId>
+      <artifactId>ucum</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>info.cqframework</groupId>
       <artifactId>elm-fhir</artifactId>
     </dependency>
     <dependency>

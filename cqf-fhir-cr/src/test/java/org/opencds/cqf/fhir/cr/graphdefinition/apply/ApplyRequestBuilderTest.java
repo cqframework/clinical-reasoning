@@ -1,7 +1,7 @@
 package org.opencds.cqf.fhir.cr.graphdefinition.apply;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
@@ -15,8 +15,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
-import org.opencds.cqf.fhir.cr.graphdefintion.apply.ApplyRequest;
-import org.opencds.cqf.fhir.cr.graphdefintion.apply.ApplyRequestBuilder;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -63,15 +61,16 @@ class ApplyRequestBuilderTest {
 
         ApplyRequest request = builder.buildApplyRequest();
 
-        assertThat(request).isNotNull();
+        assertNotNull(request);
         LibraryEngine libraryEngine = request.getLibraryEngine();
 
-        assertThat(libraryEngine).isNotNull();
-        assertThat(libraryEngine.getRepository()).isEqualTo(localRepository);
-        assertThat(libraryEngine.getSettings()).isEqualTo(evaluationSettings);
+        assertNotNull(libraryEngine);
+        assertEquals(localRepository, libraryEngine.getRepository());
+        assertEquals(evaluationSettings, libraryEngine.getSettings());
 
-        assertThat(request.getModelResolver()).isNotNull();
-        assertThat(request.getGraphDefinition().getStructureFhirVersionEnum())
-                .isEqualTo(fhirContext.getVersion().getVersion());
+        assertNotNull(request.getModelResolver());
+        assertEquals(
+                fhirContext.getVersion().getVersion(),
+                request.getGraphDefinition().getStructureFhirVersionEnum());
     }
 }

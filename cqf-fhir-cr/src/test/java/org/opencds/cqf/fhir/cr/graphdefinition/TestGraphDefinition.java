@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.graphdefinition;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 import static org.opencds.cqf.fhir.utility.BundleHelper.addEntry;
 import static org.opencds.cqf.fhir.utility.BundleHelper.newBundle;
@@ -25,9 +26,9 @@ import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_M
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
 import org.opencds.cqf.fhir.cr.TestOperationProvider;
-import org.opencds.cqf.fhir.cr.graphdefintion.GraphDefinitionProcessor;
-import org.opencds.cqf.fhir.cr.graphdefintion.apply.ApplyRequest;
-import org.opencds.cqf.fhir.cr.graphdefintion.apply.ApplyRequestBuilder;
+import org.opencds.cqf.fhir.cr.graphdefinition.apply.ApplyRequest;
+import org.opencds.cqf.fhir.cr.graphdefinition.apply.ApplyRequestBuilder;
+import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
@@ -124,12 +125,12 @@ public class TestGraphDefinition {
         }
 
         public When subjectId(String patientId) {
-            applyRequestBuilder.withSubject("Patient/" + patientId);
+            applyRequestBuilder.withSubject(patientId);
             return this;
         }
 
         public When practitionerId(String practitionerId) {
-            applyRequestBuilder.withPractitioner("Practitioner/" + practitionerId);
+            applyRequestBuilder.withPractitioner(practitionerId);
             return this;
         }
 
@@ -197,8 +198,17 @@ public class TestGraphDefinition {
                 modelResolver = resolverForVersion(fhirContext.getVersion().getVersion());
             }
 
-            public void responseIsBundle() {
-                assertThat(this.generatedResource).isInstanceOf(IBaseBundle.class);
+            public GeneratedBundle responseIsBundle() {
+                assertInstanceOf(IBaseBundle.class, this.generatedResource);
+                return this;
+            }
+
+            public GeneratedBundle responseBundleResourceCount(int count) {
+                assertEquals(
+                        count,
+                        BundleHelper.getEntryResources((IBaseBundle) generatedResource)
+                                .size());
+                return this;
             }
         }
     }

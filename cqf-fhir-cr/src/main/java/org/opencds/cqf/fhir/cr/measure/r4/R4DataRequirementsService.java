@@ -1,5 +1,8 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
+import static kotlinx.io.CoreKt.buffered;
+import static kotlinx.io.JvmCoreKt.asSource;
+
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -59,9 +62,6 @@ import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.search.Searches;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static kotlinx.io.CoreKt.buffered;
-import static kotlinx.io.JvmCoreKt.asSource;
 
 public class R4DataRequirementsService {
     private static final Logger ourLog = LoggerFactory.getLogger(R4DataRequirementsService.class);

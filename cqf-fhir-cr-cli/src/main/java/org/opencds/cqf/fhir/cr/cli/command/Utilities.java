@@ -56,7 +56,8 @@ public class Utilities {
 
         var optionPath = Path.of(cqlPath).resolve("cql-options.json");
         if (Files.exists(optionPath)) {
-            CqlTranslatorOptions options = CqlTranslatorOptions.fromFile(new kotlinx.io.files.Path(optionPath.toFile()));
+            CqlTranslatorOptions options =
+                    CqlTranslatorOptions.fromFile(new kotlinx.io.files.Path(optionPath.toFile()));
             cqlOptions.setCqlCompilerOptions(options.getCqlCompilerOptions());
         }
 

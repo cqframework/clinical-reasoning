@@ -1,5 +1,8 @@
 package org.opencds.cqf.fhir.cr.visitor;
 
+import static kotlinx.io.CoreKt.buffered;
+import static kotlinx.io.JvmCoreKt.asSource;
+
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -37,9 +40,6 @@ import org.opencds.cqf.fhir.utility.Libraries;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
-
-import static kotlinx.io.CoreKt.buffered;
-import static kotlinx.io.JvmCoreKt.asSource;
 
 public class DataRequirementsVisitor extends BaseKnowledgeArtifactVisitor {
     protected DataRequirementsProcessor dataRequirementsProcessor;

@@ -1,12 +1,17 @@
 package org.opencds.cqf.fhir.cr.cpg.r4;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.datePart;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.parameters;
 
-import java.util.Collection;
-import org.hl7.fhir.r4.model.*;
-import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
+import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.IntegerType;
+import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
 
 class CqlEvaluationServiceWithNpmComplexDepsTest {
@@ -15,10 +20,10 @@ class CqlEvaluationServiceWithNpmComplexDepsTest {
 
     // LUKETODO:  reference another CQL here
     @Test
-    void libraryEvaluationService_inlineAsthma_npm() {
+    void libraryEvaluationService_inlineAsthma() {
         var content =
                 """
-            library opencds.libraryevalnpm.asthmatest version '1.0.0'
+            library opencds.multilibcomplexdeps.asthmatest version '1.0.0'
 
             using FHIR version '4.0.1'
 
@@ -54,7 +59,7 @@ class CqlEvaluationServiceWithNpmComplexDepsTest {
     void libraryEvaluationService_contentAndExpression() {
         var content =
                 """
-        library opencds.libraryevalnpm.SimpleR4Library
+        library opencds.multilibcomplexdeps.SimpleR4Library
 
         using FHIR version '4.0.1'
 

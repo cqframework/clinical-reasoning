@@ -11,7 +11,6 @@ import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
-import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
 
@@ -23,7 +22,7 @@ class CqlEvaluationServiceNonNpmTest extends BaseCqlEvaluationServiceTest {
     void libraryEvaluationService_inlineAsthma() {
         var content =
                 """
-        library opencds.crosspackagesource.asthmatest version '1.0.0'
+        library asthmatest version '1.0.0'
         
         using FHIR version '4.0.1'
 

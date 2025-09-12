@@ -1,0 +1,33 @@
+{
+  "resourceType": "Library",
+  "id": "Invalid-ModelInfo",
+  "url": "http://hl7.org/fhir/us/cql/Library/Invalid-ModelInfo",
+  "version": "1.0.0",
+  "name": "Invalid",
+  "title": "Invalid Model Information",
+  "status": "active",
+  "experimental": false,
+  "type": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/library-type",
+        "code": "model-definition"
+      }
+    ]
+  },
+  "description": "Invalid CQL model information for testing",
+  "topic": [
+    {
+      "text": "FHIR"
+    },
+    {
+      "text": "CQL"
+    }
+  ],
+  "content": [
+    {
+      "contentType": "application/xml",
+      "data": "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiIHN0YW5kYWxvbmU9InllcyI"
+    }
+  ]
+}

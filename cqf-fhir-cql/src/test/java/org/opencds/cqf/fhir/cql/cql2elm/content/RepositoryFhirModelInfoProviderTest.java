@@ -1,6 +1,8 @@
 package org.opencds.cqf.fhir.cql.cql2elm.content;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -16,6 +18,7 @@ import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 @SuppressWarnings("UnstableApiUsage")
 class RepositoryFhirModelInfoProviderTest {
 
+    private final FhirContext fhirContextR4 = FhirContext.forR4Cached();
     private IRepository repository;
     private IAdapterFactory adapterFactory;
     private RepositoryFhirModelInfoProvider fixture;
@@ -25,10 +28,15 @@ class RepositoryFhirModelInfoProviderTest {
     @BeforeEach
     void beforeEach() {
         var path = Path.of(getResourcePath(RepositoryFhirModelInfoProviderTest.class) + "/org/opencds/cqf/fhir/cql");
-        repository = new IgRepository(FhirContext.forR4Cached(), path);
+        repository = new IgRepository(fhirContextR4, path);
         adapterFactory = IAdapterFactory.forFhirContext(repository.fhirContext());
         fixture = new RepositoryFhirModelInfoProvider(
                 repository, adapterFactory, new LibraryVersionSelector(adapterFactory));
+    }
+
+    @Test
+    void testFhirContext() {
+        assertEquals(fhirContextR4, fixture.getFhirContext());
     }
 
     @Test
@@ -41,5 +49,11 @@ class RepositoryFhirModelInfoProviderTest {
     void testLoadModelInfo() {
         var actual = fixture.load(usCoreModelId);
         assertNotNull(actual);
+    }
+
+    @Test
+    void testLoadModelInfo_Exception() {
+        var actual = fixture.load(new ModelIdentifier().withId("Invalid").withVersion("1.0.0"));
+        assertNull(actual);
     }
 }

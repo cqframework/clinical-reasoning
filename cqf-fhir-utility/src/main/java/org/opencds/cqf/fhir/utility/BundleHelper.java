@@ -373,6 +373,17 @@ public class BundleHelper {
     }
 
     /**
+     * Returns a new Bundle for the given version of FHIR and type
+     *
+     * @param fhirVersion FhirVersionEnum
+     * @param type The type of Bundle to return, defaults to COLLECTION
+     * @return
+     */
+    public static IBaseBundle newBundle(FhirVersionEnum fhirVersion, String type) {
+        return newBundle(fhirVersion, null, type);
+    }
+
+    /**
      * Returns a new Bundle for the given version of FHIR
      *
      * @param fhirVersion FhirVersionEnum

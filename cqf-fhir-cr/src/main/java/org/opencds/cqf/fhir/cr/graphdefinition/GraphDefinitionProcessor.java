@@ -1,4 +1,4 @@
-package org.opencds.cqf.fhir.cr.graphdefintion;
+package org.opencds.cqf.fhir.cr.graphdefinition;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
@@ -18,9 +18,9 @@ import org.opencds.cqf.fhir.cr.common.IDataRequirementsProcessor;
 import org.opencds.cqf.fhir.cr.common.IPackageProcessor;
 import org.opencds.cqf.fhir.cr.common.PackageProcessor;
 import org.opencds.cqf.fhir.cr.common.ResourceResolver;
-import org.opencds.cqf.fhir.cr.graphdefintion.apply.ApplyProcessor;
-import org.opencds.cqf.fhir.cr.graphdefintion.apply.ApplyRequest;
-import org.opencds.cqf.fhir.cr.graphdefintion.apply.IApplyProcessor;
+import org.opencds.cqf.fhir.cr.graphdefinition.apply.ApplyProcessor;
+import org.opencds.cqf.fhir.cr.graphdefinition.apply.ApplyRequest;
+import org.opencds.cqf.fhir.cr.graphdefinition.apply.IApplyProcessor;
 import org.opencds.cqf.fhir.utility.client.TerminologyServerClientSettings;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.monad.Either3;

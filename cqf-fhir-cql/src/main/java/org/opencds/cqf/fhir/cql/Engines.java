@@ -18,6 +18,7 @@ import org.cqframework.fhir.npm.NpmLibrarySourceProvider;
 import org.cqframework.fhir.npm.NpmModelInfoProvider;
 import org.cqframework.fhir.utilities.LoggerAdapter;
 import org.hl7.cql.model.ModelInfoProvider;
+import org.hl7.cql.model.NamespaceInfo;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.opencds.cqf.cql.engine.data.DataProvider;
 import org.opencds.cqf.cql.engine.debug.DebugMap;
@@ -84,6 +85,11 @@ public class Engines {
         registerLibrarySourceProviders(settings, libraryManager, repository);
         registerModelInfoProviders(settings, modelManager, repository);
         registerNpmSupport(settings, libraryManager, modelManager);
+
+        // Manually registering Using CQL 2.0 namespace for now
+        libraryManager
+                .getNamespaceManager()
+                .ensureNamespaceRegistered(new NamespaceInfo("hl7.fhir.uv.cql", "http://hl7.org/fhir/uv/cql"));
 
         return new Environment(libraryManager, dataProviders, terminologyProvider);
     }

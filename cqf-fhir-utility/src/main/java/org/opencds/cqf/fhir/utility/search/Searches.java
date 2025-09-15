@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.utility.search;
 
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -20,6 +21,14 @@ import org.opencds.cqf.fhir.utility.Canonicals;
 public class Searches {
 
     public static final Map<String, List<IQueryParameterType>> ALL = Collections.emptyMap();
+    private static final String PATIENT = "patient";
+    private static final String ACTOR = "actor";
+    private static final String SUBJECT = "subject";
+    private static final String MEDICATION_STATEMENT = "MedicationStatement";
+    private static final String MEDICATION_REQUEST = "MedicationRequest";
+    private static final String MEDICATION_DISPENSE = "MedicationDispense";
+    private static final String MEDICATION_ADMINISTRATION = "MedicationAdministration";
+    private static final String PROCEDURE_REQUEST = "ProcedureRequest";
 
     private Searches() {}
 
@@ -33,6 +42,10 @@ public class Searches {
 
     public static Map<String, List<IQueryParameterType>> byId(String id) {
         return builder().withTokenParam("_id", id).build();
+    }
+
+    public static Map<String, List<IQueryParameterType>> byProfile(String profile) {
+        return builder().withUriParam("_profile", profile).build();
     }
 
     public static Map<String, List<IQueryParameterType>> byCanonical(String canonical) {
@@ -153,5 +166,140 @@ public class Searches {
 
             return this;
         }
+    }
+
+    public static String getPatientSearchParam(FhirVersionEnum fhirVersion, String dataType) {
+        if (fhirVersion.equals(FhirVersionEnum.DSTU3)) {
+            return switch (dataType) {
+                case "Group" -> "member";
+                case "Patient" -> "_id";
+                case "ResearchSubject" -> "individual";
+                case "Appointment", "AppointmentResponse", "Schedule" -> ACTOR;
+                case "Account",
+                        "AdverseEvent",
+                        "ChargeItem",
+                        "ClinicalImpression",
+                        "Communication",
+                        "CommunicationRequest",
+                        "Composition",
+                        "DeviceUseStatement",
+                        "DiagnosticReport",
+                        "DocumentManifest",
+                        "DocumentReference",
+                        "DeviceRequest",
+                        "EnrollmentRequest",
+                        "SupplyRequest",
+                        "Specimen",
+                        "RiskAssessment",
+                        "RequestGroup",
+                        "QuestionnaireResponse",
+                        "Observation",
+                        MEDICATION_STATEMENT,
+                        MEDICATION_REQUEST,
+                        "Media",
+                        "List" -> SUBJECT;
+                case "AllergyIntolerance",
+                        "AuditEvent",
+                        "Basic",
+                        "BodySite",
+                        "CarePlan",
+                        "CareTeam",
+                        "Claim",
+                        "ClaimResponse",
+                        "Condition",
+                        "Consent",
+                        "Coverage",
+                        "DetectedIssue",
+                        "EligibilityRequest",
+                        "Encounter",
+                        "EpisodeOfCare",
+                        "ExplanationOfBenefit",
+                        "FamilyMemberHistory",
+                        "Flag",
+                        "Goal",
+                        "ImagingManifest",
+                        "ImagingStudy",
+                        "Immunization",
+                        "ImmunizationRecommendation",
+                        "VisionPrescription",
+                        "SupplyDelivery",
+                        "RelatedPerson",
+                        "ReferralRequest",
+                        "Provenance",
+                        PROCEDURE_REQUEST,
+                        "Procedure",
+                        "Person",
+                        "NutritionOrder",
+                        MEDICATION_DISPENSE,
+                        MEDICATION_ADMINISTRATION,
+                        "MeasureReport" -> PATIENT;
+                default -> null;
+            };
+        }
+        return switch (dataType) {
+            case "Coverage" -> "policy-holder";
+            case "Group" -> "member";
+            case "Patient" -> "_id";
+            case "ResearchSubject" -> "individual";
+            case "Appointment", "AppointmentResponse", "Schedule" -> ACTOR;
+            case "Account",
+                    "AdverseEvent",
+                    "ChargeItem",
+                    "ClinicalImpression",
+                    "Communication",
+                    "CommunicationRequest",
+                    "Composition",
+                    "DeviceRequest",
+                    "DeviceUseStatement",
+                    "DiagnosticReport",
+                    "DocumentManifest",
+                    "DocumentReference",
+                    "EnrollmentRequest",
+                    "Invoice",
+                    "List",
+                    "Media",
+                    MEDICATION_REQUEST,
+                    MEDICATION_STATEMENT,
+                    "QuestionnaireResponse",
+                    "Observation",
+                    "RequestGroup",
+                    "RiskAssessment",
+                    "SupplyRequest",
+                    "Specimen",
+                    "RequestOrchestration" -> SUBJECT;
+            case "AllergyIntolerance",
+                    "AuditEvent",
+                    "Basic",
+                    "BodyStructure",
+                    "CarePlan",
+                    "CareTeam",
+                    "Claim",
+                    "ClaimResponse",
+                    "Condition",
+                    "Consent",
+                    "DetectedIssue",
+                    "Encounter",
+                    "EpisodeOfCare",
+                    "ExplanationOfBenefit",
+                    "FamilyMemberHistory",
+                    "Flag",
+                    "Goal",
+                    "ImagingStudy",
+                    "Immunization",
+                    "ImmunizationRecommendation",
+                    "MeasureReport",
+                    MEDICATION_ADMINISTRATION,
+                    MEDICATION_DISPENSE,
+                    "MolecularSequence",
+                    "NutritionOrder",
+                    "Person",
+                    "Procedure",
+                    "Provenance",
+                    "RelatedPerson",
+                    "ServiceRequest",
+                    "SupplyDelivery",
+                    "VisionPrescription" -> PATIENT;
+            default -> null;
+        };
     }
 }

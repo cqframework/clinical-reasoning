@@ -6,7 +6,9 @@ import ca.uhn.fhir.repository.IRepository;
 import com.google.common.base.Strings;
 import jakarta.annotation.Nullable;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -172,6 +174,11 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
             String productLine,
             String reporter) {
 
+        // create bundle
+        Bundle bundle = new BundleBuilder<>(Bundle.class)
+                .withType(BundleType.SEARCHSET.toString())
+                .build();
+
         var totalMeasures = measures.size();
         for (Measure measure : measures) {
             MeasureReport measureReport;
@@ -200,14 +207,8 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
             // add id to measureReport
             initializeReport(measureReport);
 
-            // create bundle
-            Bundle bundle = new BundleBuilder<>(Bundle.class)
-                    .withType(BundleType.SEARCHSET.toString())
-                    .build();
             // add report to bundle
             bundle.addEntry(getBundleEntry(serverBase, measureReport));
-            // add bundle to result
-            result.addParameter().setName("return").setResource(bundle);
 
             // progress feedback
             var measureUrl = measureReport.getMeasure();
@@ -218,6 +219,9 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
                         totalMeasures--);
             }
         }
+
+        // add bundle to result
+        result.addParameter().setName("return").setResource(bundle);
     }
 
     protected void subjectMeasureReport(
@@ -238,6 +242,8 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
         // create individual reports for each subject, and each measure
         var totalReports = subjects.size() * measures.size();
         var totalMeasures = measures.size();
+        var subjectMeasures = new HashMap<String, List<Resource>>();
+        subjects.forEach(s -> subjectMeasures.put(s, new ArrayList<>()));
         log.debug(
                 "Evaluating individual MeasureReports for {} patients, and {} measures",
                 subjects.size(),
@@ -267,14 +273,8 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
                 // add id to measureReport
                 initializeReport(measureReport);
 
-                // create bundle
-                Bundle bundle = new BundleBuilder<>(Bundle.class)
-                        .withType(BundleType.SEARCHSET.toString())
-                        .build();
-                // add report to bundle
-                bundle.addEntry(getBundleEntry(serverBase, measureReport));
-                // add bundle to result
-                result.addParameter().setName("return").setResource(bundle);
+                // add report to subject list
+                subjectMeasures.get(subject).add(measureReport);
 
                 // progress feedback
                 var measureUrl = measureReport.getMeasure();
@@ -289,6 +289,17 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
                         totalMeasures--);
             }
         }
+
+        // create subject bundles
+        subjects.forEach(s -> {
+            Bundle bundle = new BundleBuilder<>(Bundle.class)
+                    .withType(BundleType.SEARCHSET.toString())
+                    .build();
+            // add subject reports to bundle
+            subjectMeasures.get(s).forEach(r -> bundle.addEntry(getBundleEntry(serverBase, r)));
+            // add bundle to result
+            result.addParameter().setName("return").setResource(bundle);
+        });
     }
 
     protected List<String> getSubjects(R4RepositorySubjectProvider subjectProvider, String subjectId) {

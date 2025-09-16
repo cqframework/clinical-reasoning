@@ -119,17 +119,11 @@ public class ProcessItemWithContext extends ProcessItem {
                     if (!childItems.isEmpty()) {
                         var childGroupItem = processPopulationContext(request, item, contextName, context, profile);
                         contextItem.addItem(childGroupItem);
-                        //                        request.getModelResolver()
-                        //                                .setValue(contextItem, "item",
-                        // Collections.singletonList(childGroupItem));
                     } else {
                         try {
                             var processedSubItem =
                                     createResponseContextItem(request, item, contextName, context, profile);
                             contextItem.addItem(processedSubItem);
-                            //                            request.getModelResolver()
-                            //                                    .setValue(contextItem, "item",
-                            // Collections.singletonList(processedSubItem));
                         } catch (Exception e) {
                             logger.error(e.getMessage());
                             request.logException(e.getMessage());

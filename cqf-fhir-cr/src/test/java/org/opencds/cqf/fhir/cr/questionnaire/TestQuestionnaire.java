@@ -331,7 +331,6 @@ public class TestQuestionnaire {
                     .toList();
             for (var item : matchingItems) {
                 assertTrue(item.hasInitial());
-                // assertFalse(request.resolvePathList(item, "initial").isEmpty());
             }
 
             return this;

@@ -109,8 +109,8 @@ public class ApplyProcessor implements IApplyProcessor {
         for (var resource : request.getRequestResources()) {
             addEntry(resultBundle, newEntryWithResource(resource));
         }
-        // if (!request.getItems(request.getQuestionnaire()).isEmpty()) {
-        if (!request.getQuestionnaireAdapter().getItem().isEmpty()) {
+        if (request.getQuestionnaireAdapter() != null
+                && !request.getQuestionnaireAdapter().getItem().isEmpty()) {
             addEntry(resultBundle, newEntryWithResource(request.getQuestionnaire()));
             addEntry(resultBundle, newEntryWithResource(populateProcessor.populate(request.toPopulateRequest())));
         }

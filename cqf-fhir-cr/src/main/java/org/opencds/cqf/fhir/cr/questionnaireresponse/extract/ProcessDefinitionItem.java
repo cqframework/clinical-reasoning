@@ -120,7 +120,6 @@ public class ProcessDefinitionItem {
         // Second, check the QuestionnaireResponse.item
         // Third, check the Questionnaire
         IBase element;
-        // if (request.hasExtension(item.getItem(), url)) {
         if (item.getItem() != null && item.getItem().hasExtension(url)) {
             element = item.getItem().get();
         } else if (item.getResponseItem() != null && item.getResponseItem().hasExtension(url)) {

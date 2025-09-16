@@ -59,7 +59,7 @@ public class AdapterFactory implements IAdapterFactory {
     }
 
     @Override
-    public IAdapter<? extends IBase> createBase(IBase element) {
+    public IAdapter<IBase> createBase(IBase element) {
         if (element instanceof QuestionnaireItemComponent) {
             return createQuestionnaireItem(element);
         } else if (element instanceof QuestionnaireResponseItemComponent) {

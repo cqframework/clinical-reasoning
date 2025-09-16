@@ -128,7 +128,6 @@ public class Constants {
 
     public static final String DTR_QUESTIONNAIRE_RESPONSE_QUESTIONNAIRE =
             "http://hl7.org/fhir/us/davinci-dtr/StructureDefinition/dtr-questionnaireresponse-questionnaire";
-    public static final String EXT_CRMI_MESSAGES = "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-messages";
     public static final String SDC_QUESTIONNAIRE_HIDDEN =
             "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden";
     public static final String SDC_QUESTIONNAIRE_ITEM_EXTRACTION_CONTEXT =

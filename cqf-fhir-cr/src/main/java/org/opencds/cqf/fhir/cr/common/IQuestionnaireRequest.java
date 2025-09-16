@@ -66,12 +66,4 @@ public interface IQuestionnaireRequest extends ICqlOperationRequest {
             }
         });
     }
-
-    //    default List<IBaseBackboneElement> getItems(IBase base) {
-    //        return resolvePathList(base, "item", IBaseBackboneElement.class);
-    //    }
-    //
-    //    default boolean hasItems(IBase base) {
-    //        return !getItems(base).isEmpty();
-    //    }
 }

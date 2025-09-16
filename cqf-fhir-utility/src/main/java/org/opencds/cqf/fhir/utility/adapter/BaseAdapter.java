@@ -9,7 +9,7 @@ import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 
 public abstract class BaseAdapter implements IAdapter<IBase> {
     protected final FhirContext fhirContext;
-    protected final BaseRuntimeElementDefinition<?> elementDefinition;
+    protected final BaseRuntimeElementDefinition<?> baseElementDefinition;
     protected final IBase element;
     protected final ModelResolver modelResolver;
     protected final IAdapterFactory adapterFactory;
@@ -21,7 +21,7 @@ public abstract class BaseAdapter implements IAdapter<IBase> {
         this.element = element;
         fhirContext = FhirContext.forCached(fhirVersion);
         adapterFactory = IAdapterFactory.forFhirContext(fhirContext);
-        elementDefinition = fhirContext.getElementDefinition(this.element.getClass());
+        baseElementDefinition = fhirContext.getElementDefinition(this.element.getClass());
         modelResolver = FhirModelResolverCache.resolverForVersion(
                 fhirContext.getVersion().getVersion());
     }

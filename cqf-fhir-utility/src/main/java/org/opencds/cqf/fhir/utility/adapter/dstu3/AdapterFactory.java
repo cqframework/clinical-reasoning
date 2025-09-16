@@ -10,14 +10,17 @@ import org.hl7.fhir.dstu3.model.MetadataResource;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.PlanDefinition;
 import org.hl7.fhir.dstu3.model.Questionnaire;
+import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemComponent;
+import org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseItemComponent;
+import org.hl7.fhir.dstu3.model.RequestGroup.RequestGroupActionComponent;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.dstu3.model.ValueSet;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.opencds.cqf.fhir.utility.adapter.IActivityDefinitionAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IAttachmentAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ICodeableConceptAdapter;
@@ -32,6 +35,10 @@ import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IParametersParameterComponentAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IPlanDefinitionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireItemComponentAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireResponseAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireResponseItemAnswerComponentAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireResponseItemComponentAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IRequestActionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IResourceAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
@@ -48,6 +55,20 @@ public class AdapterFactory implements IAdapterFactory {
             return createParameters(parameters);
         } else {
             return new ResourceAdapter(resource);
+        }
+    }
+
+    @Override
+    public IAdapter<? extends IBase> createBase(IBase element) {
+        if (element instanceof QuestionnaireItemComponent) {
+            return createQuestionnaireItem(element);
+        } else if (element instanceof QuestionnaireResponseItemComponent) {
+            return createQuestionnaireResponseItem(element);
+        } else if (element instanceof RequestGroupActionComponent) {
+            return createRequestAction(element);
+        } else {
+            throw new UnprocessableEntityException(
+                    String.format("Unable to create an adapter for type: %s", element.fhirType()));
         }
     }
 
@@ -87,7 +108,7 @@ public class AdapterFactory implements IAdapterFactory {
     }
 
     @Override
-    public IAttachmentAdapter createAttachment(ICompositeType attachment) {
+    public IAttachmentAdapter createAttachment(IBase attachment) {
         return new AttachmentAdapter(attachment);
     }
 
@@ -97,8 +118,7 @@ public class AdapterFactory implements IAdapterFactory {
     }
 
     @Override
-    public IParametersParameterComponentAdapter createParametersParameter(
-            IBaseBackboneElement parametersParametersComponent) {
+    public IParametersParameterComponentAdapter createParametersParameter(IBase parametersParametersComponent) {
         return new ParametersParameterComponentAdapter(parametersParametersComponent);
     }
 
@@ -108,17 +128,17 @@ public class AdapterFactory implements IAdapterFactory {
     }
 
     @Override
-    public ICodeableConceptAdapter createCodeableConcept(ICompositeType codeableConcept) {
+    public ICodeableConceptAdapter createCodeableConcept(IBase codeableConcept) {
         return new CodeableConceptAdapter(codeableConcept);
     }
 
     @Override
-    public ICodingAdapter createCoding(ICompositeType coding) {
+    public ICodingAdapter createCoding(IBase coding) {
         return new CodingAdapter(coding);
     }
 
     @Override
-    public IElementDefinitionAdapter createElementDefinition(ICompositeType element) {
+    public IElementDefinitionAdapter createElementDefinition(IBase element) {
         return new ElementDefinitionAdapter(element);
     }
 
@@ -133,18 +153,38 @@ public class AdapterFactory implements IAdapterFactory {
     }
 
     @Override
-    public IRequestActionAdapter createRequestAction(IBaseBackboneElement action) {
+    public IRequestActionAdapter createRequestAction(IBase action) {
         return new RequestActionAdapter(action);
     }
 
     @Override
-    public IDataRequirementAdapter createDataRequirement(ICompositeType dataRequirement) {
+    public IDataRequirementAdapter createDataRequirement(IBase dataRequirement) {
         return new DataRequirementAdapter(dataRequirement);
     }
 
     @Override
     public IQuestionnaireAdapter createQuestionnaire(IBaseResource questionnaire) {
         return new QuestionnaireAdapter((IDomainResource) questionnaire);
+    }
+
+    @Override
+    public IQuestionnaireItemComponentAdapter createQuestionnaireItem(IBase item) {
+        return new QuestionnaireItemComponentAdapter(item);
+    }
+
+    @Override
+    public IQuestionnaireResponseAdapter createQuestionnaireResponse(IBaseResource questionnaireResponse) {
+        return new QuestionnaireResponseAdapter((IDomainResource) questionnaireResponse);
+    }
+
+    @Override
+    public IQuestionnaireResponseItemComponentAdapter createQuestionnaireResponseItem(IBase item) {
+        return new QuestionnaireResponseItemComponentAdapter(item);
+    }
+
+    @Override
+    public IQuestionnaireResponseItemAnswerComponentAdapter createQuestionnaireResponseItemAnswer(IBase answer) {
+        return new QuestionnaireResponseItemAnswerComponentAdapter(answer);
     }
 
     @Override

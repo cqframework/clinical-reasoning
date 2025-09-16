@@ -14,8 +14,8 @@ public interface IGenerateProcessor {
     /**
      * Generates a Questionnaire item from a StructureDefinition Profile and returns
      * a Pair containing the Questionnaire item and the url of the supporting CQL Library if present
-     * @param request
-     * @return
+     * @param request GenerateRequest
+     * @return Pair
      */
     <T extends IBaseExtension<?, ?>> Pair<IBaseBackboneElement, List<T>> generateItem(GenerateRequest request);
 }

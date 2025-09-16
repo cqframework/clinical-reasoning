@@ -5,7 +5,6 @@ import static org.opencds.cqf.fhir.utility.VersionUtilities.canonicalTypeForVers
 import java.util.Collections;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -68,15 +67,11 @@ public interface IQuestionnaireRequest extends ICqlOperationRequest {
         });
     }
 
-    default List<IBaseBackboneElement> getItems(IBase base) {
-        return resolvePathList(base, "item", IBaseBackboneElement.class);
-    }
-
-    default boolean hasItems(IBase base) {
-        return !getItems(base).isEmpty();
-    }
-
-    default String getItemLinkId(IBaseBackboneElement item) {
-        return resolvePathString(item, "linkId");
-    }
+    //    default List<IBaseBackboneElement> getItems(IBase base) {
+    //        return resolvePathList(base, "item", IBaseBackboneElement.class);
+    //    }
+    //
+    //    default boolean hasItems(IBase base) {
+    //        return !getItems(base).isEmpty();
+    //    }
 }

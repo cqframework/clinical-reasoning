@@ -19,7 +19,6 @@ import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType;
-import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseItemComponent;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,7 +30,10 @@ import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.common.ExpressionProcessor;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.CqfExpression;
+import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
+import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireItemComponentAdapter;
 
+@SuppressWarnings("UnstableApiUsage")
 @ExtendWith(MockitoExtension.class)
 class ProcessItemWithContextTests {
     @Mock
@@ -76,7 +78,9 @@ class ProcessItemWithContextTests {
         doReturn(expressionResults)
                 .when(expressionProcessor)
                 .getExpressionResultForItem(eq(populateRequest), eq(expression), eq("1"), any(), any());
-        processItemWithContext.processContextItem(populateRequest, questionnaireItem);
+        var adapter = (IQuestionnaireItemComponentAdapter)
+                IAdapterFactory.createAdapterForBase(populateRequest.getFhirVersion(), questionnaireItem);
+        processItemWithContext.processContextItem(populateRequest, adapter);
         var operationOutcome = (OperationOutcome) populateRequest.getOperationOutcome();
         assertTrue(operationOutcome.hasIssue());
         assertEquals(2, operationOutcome.getIssue().size());
@@ -101,9 +105,10 @@ class ProcessItemWithContextTests {
         doReturn(expressionResults)
                 .when(expressionProcessor)
                 .getExpressionResultForItem(eq(populateRequest), eq(expression), eq("1"), any(), any());
-        var actual = processItemWithContext.processContextItem(populateRequest, questionnaireItem);
+        var adapter = (IQuestionnaireItemComponentAdapter)
+                IAdapterFactory.createAdapterForBase(populateRequest.getFhirVersion(), questionnaireItem);
+        var actual = processItemWithContext.processContextItem(populateRequest, adapter);
         assertEquals(1, actual.size());
-        assertTrue(
-                ((QuestionnaireResponseItemComponent) actual.get(0)).getAnswer().isEmpty());
+        assertTrue(actual.get(0).getAnswer().isEmpty());
     }
 }

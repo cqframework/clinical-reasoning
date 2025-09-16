@@ -16,6 +16,7 @@ import org.opencds.cqf.fhir.utility.adapter.IValueSetExpansionContainsAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@SuppressWarnings("UnstableApiUsage")
 public class ItemTypeIsChoice {
     protected static final Logger logger = LoggerFactory.getLogger(ItemTypeIsChoice.class);
     protected final IRepository repository;

@@ -8,25 +8,25 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public interface IParametersAdapter extends IResourceAdapter {
 
-    public boolean hasParameter();
+    boolean hasParameter();
 
-    public List<IParametersParameterComponentAdapter> getParameter();
+    List<IParametersParameterComponentAdapter> getParameter();
 
-    public boolean hasParameter(String name);
+    boolean hasParameter(String name);
 
-    public IParametersParameterComponentAdapter getParameter(String name);
+    IParametersParameterComponentAdapter getParameter(String name);
 
-    public <T extends IBaseDatatype> List<T> getParameterValues(String name);
+    <T extends IBaseDatatype> List<T> getParameterValues(String name);
 
-    public void setParameter(List<IBaseBackboneElement> parametersParameterComponents);
+    void setParameter(List<IBaseBackboneElement> parametersParameterComponents);
 
-    public void addParameter(IBase parameter);
+    void addParameter(IBase parameter);
 
-    public void addParameter(String name, String value);
+    void addParameter(String name, String value);
 
-    public void addParameter(String name, IBase value);
+    void addParameter(String name, IBase value);
 
-    public void addParameter(String name, IBaseResource resource);
+    void addParameter(String name, IBaseResource resource);
 
-    public IBaseBackboneElement addParameter();
+    IBaseBackboneElement addParameter();
 }

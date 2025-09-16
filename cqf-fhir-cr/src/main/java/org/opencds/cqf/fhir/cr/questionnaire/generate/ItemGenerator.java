@@ -35,6 +35,7 @@ import org.opencds.cqf.fhir.utility.adapter.IStructureDefinitionAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@SuppressWarnings("UnstableApiUsage")
 public class ItemGenerator {
     protected static final Logger logger = LoggerFactory.getLogger(ItemGenerator.class);
     protected static final String NO_PROFILE_ERROR = "No profile defined for input. Unable to generate item.";
@@ -60,7 +61,7 @@ public class ItemGenerator {
     @Nullable
     public <T extends IBaseExtension<?, ?>> Pair<IBaseBackboneElement, List<T>> generate(GenerateRequest request) {
         final String linkId =
-                String.valueOf(request.getItems(request.getQuestionnaire()).size() + 1);
+                String.valueOf(request.getQuestionnaireAdapter().getItem().size() + 1);
         try {
             int childCount = 0;
             var caseFeature = getFeatureExpression(request);

@@ -9,8 +9,10 @@ import org.hl7.fhir.r5.model.Questionnaire;
 import org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemComponent;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
+import org.opencds.cqf.fhir.utility.adapter.IAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireItemComponentAdapter;
 
 public class QuestionnaireAdapter extends KnowledgeArtifactAdapter implements IQuestionnaireAdapter {
 
@@ -125,5 +127,39 @@ public class QuestionnaireAdapter extends KnowledgeArtifactAdapter implements IQ
                         expression.getExtension(),
                         expression::setReference)));
         item.getItem().forEach(childItem -> getDependenciesOfItem(childItem, references, referenceSource));
+    }
+
+    @Override
+    public boolean hasItem() {
+        return getQuestionnaire().hasItem();
+    }
+
+    @Override
+    public List<IQuestionnaireItemComponentAdapter> getItem() {
+        return getQuestionnaire().getItem().stream()
+                .map(adapterFactory::createQuestionnaireItem)
+                .toList();
+    }
+
+    @Override
+    public void setItem(List<IQuestionnaireItemComponentAdapter> items) {
+        getQuestionnaire()
+                .setItem(items.stream()
+                        .map(IAdapter::get)
+                        .map(QuestionnaireItemComponent.class::cast)
+                        .toList());
+    }
+
+    @Override
+    public void addItem(IQuestionnaireItemComponentAdapter item) {
+        getQuestionnaire().addItem((QuestionnaireItemComponent) item.get());
+    }
+
+    @Override
+    public void addItems(List<IQuestionnaireItemComponentAdapter> items) {
+        items.stream()
+                .map(IAdapter::get)
+                .map(QuestionnaireItemComponent.class::cast)
+                .forEach(item -> getQuestionnaire().addItem(item));
     }
 }

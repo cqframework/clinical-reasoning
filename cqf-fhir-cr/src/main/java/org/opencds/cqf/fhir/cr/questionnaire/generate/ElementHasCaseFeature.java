@@ -61,22 +61,16 @@ public class ElementHasCaseFeature {
     }
 
     private ICompositeType createExpression(FhirVersionEnum fhirVersion, String expression, String name) {
-        switch (fhirVersion) {
-            case R4:
-                var r4Expression = new org.hl7.fhir.r4.model.Expression()
-                        .setLanguage("text/cql-expression")
-                        .setExpression(expression)
-                        .setName(name);
-                return r4Expression;
-            case R5:
-                var r5Expression = new org.hl7.fhir.r5.model.Expression()
-                        .setLanguage("text/cql-expression")
-                        .setExpression(expression)
-                        .setName(name);
-                return r5Expression;
-
-            default:
-                return null;
-        }
+        return switch (fhirVersion) {
+            case R4 -> new org.hl7.fhir.r4.model.Expression()
+                    .setLanguage("text/cql-expression")
+                    .setExpression(expression)
+                    .setName(name);
+            case R5 -> new org.hl7.fhir.r5.model.Expression()
+                    .setLanguage("text/cql-expression")
+                    .setExpression(expression)
+                    .setName(name);
+            default -> null;
+        };
     }
 }

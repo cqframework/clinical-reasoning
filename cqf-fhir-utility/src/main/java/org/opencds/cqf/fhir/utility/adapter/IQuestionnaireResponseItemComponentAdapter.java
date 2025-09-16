@@ -5,6 +5,12 @@ import org.hl7.fhir.instance.model.api.IBaseDatatype;
 
 public interface IQuestionnaireResponseItemComponentAdapter extends IItemComponentAdapter {
 
+    IQuestionnaireResponseItemComponentAdapter setLinkId(String linkId);
+
+    IQuestionnaireResponseItemComponentAdapter setDefinition(String definition);
+
+    void addItems(List<IQuestionnaireResponseItemComponentAdapter> items);
+
     boolean hasAnswer();
 
     List<IQuestionnaireResponseItemAnswerComponentAdapter> getAnswer();

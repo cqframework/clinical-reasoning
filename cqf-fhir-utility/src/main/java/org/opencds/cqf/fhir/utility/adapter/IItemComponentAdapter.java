@@ -18,6 +18,4 @@ public interface IItemComponentAdapter extends IAdapter<IBase> {
     void setItem(List<? extends IItemComponentAdapter> item);
 
     void addItem(IItemComponentAdapter item);
-
-    void addItems(List<IItemComponentAdapter> items);
 }

@@ -205,10 +205,23 @@ class StructureDefinitionAdapterTest {
 
     @Test
     void adapter_get_elements() {
-        var structureDef = new StructureDefinition();
-        structureDef.getDifferential().addElement().addType().setCode("String");
-        structureDef.getDifferential().addElement().addType().setCode("Quantity");
+        var baseDefinition = "http://hl7.org/fhir/Observation";
+        var structureDef = new StructureDefinition().setBaseDefinition(baseDefinition);
+        structureDef
+                .getDifferential()
+                .addElement()
+                .setPath("Observation.code")
+                .addType()
+                .setCode("String");
+        structureDef
+                .getDifferential()
+                .addElement()
+                .setPath("Observation.value")
+                .addType()
+                .setCode("Quantity");
         var adapter = (IStructureDefinitionAdapter) adapterFactory.createKnowledgeArtifactAdapter(structureDef);
+        assertFalse(adapter.hasSnapshot());
+        assertEquals(baseDefinition, adapter.getBaseDefinition().getValue());
         var snapshotElements = adapter.getSnapshotElements();
         assertEquals(0, snapshotElements.size());
         var differentialElements = adapter.getDifferentialElements();

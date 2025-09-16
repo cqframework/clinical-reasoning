@@ -2,9 +2,9 @@ package org.opencds.cqf.fhir.cr.questionnaire.generate;
 
 import java.util.List;
 import org.apache.commons.lang3.tuple.Pair;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireItemComponentAdapter;
 
 public interface IGenerateProcessor {
     IBaseResource generate(String id);
@@ -17,5 +17,6 @@ public interface IGenerateProcessor {
      * @param request GenerateRequest
      * @return Pair
      */
-    <T extends IBaseExtension<?, ?>> Pair<IBaseBackboneElement, List<T>> generateItem(GenerateRequest request);
+    <T extends IBaseExtension<?, ?>> Pair<IQuestionnaireItemComponentAdapter, List<T>> generateItem(
+            GenerateRequest request);
 }

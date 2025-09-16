@@ -33,4 +33,9 @@ public class ValueSetConceptReferenceAdapter extends BaseAdapter implements IVal
     public String getCode() {
         return get().getCode();
     }
+
+    @Override
+    public String getDisplay() {
+        return get().getDisplay();
+    }
 }

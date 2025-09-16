@@ -41,6 +41,7 @@ import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireResponseItemAnswerComp
 import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireResponseItemComponentAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IRequestActionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IResourceAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IStructureDefinitionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
 
 public class AdapterFactory implements IAdapterFactory {
@@ -168,6 +169,11 @@ public class AdapterFactory implements IAdapterFactory {
     }
 
     @Override
+    public IQuestionnaireItemComponentAdapter createQuestionnaireItem() {
+        return new QuestionnaireItemComponentAdapter(new QuestionnaireItemComponent());
+    }
+
+    @Override
     public IQuestionnaireItemComponentAdapter createQuestionnaireItem(IBase item) {
         return new QuestionnaireItemComponentAdapter(item);
     }
@@ -195,5 +201,10 @@ public class AdapterFactory implements IAdapterFactory {
     @Override
     public IGraphDefinitionAdapter createGraphDefinition(IBaseResource graphDefinition) {
         return new GraphDefinitionAdapter((IDomainResource) graphDefinition);
+    }
+
+    @Override
+    public IStructureDefinitionAdapter createStructureDefinition(IBaseResource structureDefinition) {
+        return new StructureDefinitionAdapter((IDomainResource) structureDefinition);
     }
 }

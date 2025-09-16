@@ -194,28 +194,15 @@ public class PopulateRequest implements IQuestionnaireRequest {
     }
 
     protected IQuestionnaireResponseAdapter createQuestionnaireResponse() {
-        var response =
-                switch (fhirVersion) {
-                    case R4 -> new org.hl7.fhir.r4.model.QuestionnaireResponse()
-                            .setStatus(
-                                    org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseStatus.INPROGRESS)
-                            .setQuestionnaire(questionnaireAdapter.getCanonical())
-                            .setSubject(new org.hl7.fhir.r4.model.Reference(subjectId))
-                            .setAuthored(new Date());
-                    case R5 -> new org.hl7.fhir.r5.model.QuestionnaireResponse()
-                            .setStatus(
-                                    org.hl7.fhir.r5.model.QuestionnaireResponse.QuestionnaireResponseStatus.INPROGRESS)
-                            .setQuestionnaire(questionnaireAdapter.getCanonical())
-                            .setSubject(new org.hl7.fhir.r5.model.Reference(subjectId))
-                            .setAuthored(new Date());
-                    default -> null;
-                };
-        if (response == null) {
-            throw new IllegalArgumentException(
-                    "Unsupported FHIR version: %s".formatted(fhirVersion.getFhirVersionString()));
-        }
-        response.setId("%s-%s".formatted(questionnaireAdapter.getId().getIdPart(), subjectId.getIdPart()));
-        return getAdapterFactory().createQuestionnaireResponse(response);
+        return getAdapterFactory()
+                .createQuestionnaireResponse(getFhirContext()
+                        .getResourceDefinition("QuestionnaireResponse")
+                        .newInstance())
+                .setId("%s-%s".formatted(questionnaireAdapter.getId().getIdPart(), subjectId.getIdPart()))
+                .setQuestionnaire(questionnaireAdapter.getCanonical())
+                .setSubject(subjectId)
+                .setAuthored(new Date())
+                .setStatus("in-progress");
     }
 
     public IQuestionnaireResponseAdapter getQuestionnaireResponseAdapter() {

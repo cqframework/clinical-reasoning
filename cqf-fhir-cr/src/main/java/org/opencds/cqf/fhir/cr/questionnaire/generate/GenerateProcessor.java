@@ -7,17 +7,13 @@ import ca.uhn.fhir.repository.IRepository;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.apache.commons.lang3.tuple.Pair;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.ICompositeType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.utility.Ids;
-import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IElementDefinitionAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireItemComponentAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IStructureDefinitionAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,6 +51,7 @@ public class GenerateProcessor implements IGenerateProcessor {
                 .setVersion("%s-%s".formatted(request.getProfileAdapter().getVersion(), formatter.format(new Date())));
         var item = generateItem(request);
         if (item != null) {
+            item.getLeft();
             request.addQuestionnaireItem(item.getLeft());
             if (!item.getRight().isEmpty()) {
                 request.addCqlLibraryExtension();
@@ -65,48 +62,35 @@ public class GenerateProcessor implements IGenerateProcessor {
     }
 
     @Override
-    public <T extends IBaseExtension<?, ?>> Pair<IBaseBackboneElement, List<T>> generateItem(GenerateRequest request) {
+    public <T extends IBaseExtension<?, ?>> Pair<IQuestionnaireItemComponentAdapter, List<T>> generateItem(
+            GenerateRequest request) {
         logger.info(
                 "Generating Questionnaire Item for StructureDefinition/{}",
                 request.getProfile().getIdElement().getIdPart());
-        request.setDifferentialElements(request.getProfileAdapter().getDifferentialElements().stream()
-                .filter(e -> e.getId().split("\\.").length > 1)
-                .collect(Collectors.toList()));
-        request.setSnapshotElements(getElements(request, getProfileSnapshot(request)));
+        request.setDifferentialElements(request.getProfileAdapter().getDifferentialElements());
+        request.setSnapshotElements(getSnapshotElements(request));
         return itemGenerator.generate(request);
     }
 
-    protected List<IElementDefinitionAdapter> getElements(GenerateRequest request, IBase baseElement) {
-        var adapterFactory = IAdapterFactory.forFhirVersion(fhirVersion);
-        return baseElement == null
-                ? null
-                : request.resolvePathList(baseElement, "element").stream()
-                        .filter(e -> request.resolvePathString(e, "path").split("\\.").length > 1)
-                        .filter(ICompositeType.class::isInstance)
-                        .map(ICompositeType.class::cast)
-                        .map(adapterFactory::createElementDefinition)
-                        .collect(Collectors.toList());
-    }
-
-    @SuppressWarnings("unchecked")
-    protected IBase getProfileSnapshot(GenerateRequest request) {
-        var snapshot = request.resolvePath(request.getProfile(), "snapshot");
-        if (snapshot == null) {
-            // Grab the snapshot from the baseDefinition
-            var baseUrl = request.resolvePath(request.getProfile(), "baseDefinition", IPrimitiveType.class);
+    protected List<IElementDefinitionAdapter> getSnapshotElements(GenerateRequest request) {
+        if (!request.getProfileAdapter().hasSnapshot()) {
+            var baseUrl = request.getProfileAdapter().getBaseDefinition();
             if (baseUrl != null) {
-                IBaseResource baseProfile = null;
+                IStructureDefinitionAdapter baseProfile = null;
                 try {
-                    baseProfile = searchRepositoryByCanonical(repository, baseUrl);
+                    baseProfile = request.getAdapterFactory()
+                            .createStructureDefinition(searchRepositoryByCanonical(repository, baseUrl));
                 } catch (Exception e) {
                     logger.debug(NO_BASE_DEFINITION_ERROR, baseUrl.getValueAsString(), e.getMessage());
                 }
-                if (baseProfile != null) {
-                    snapshot = request.resolvePath(baseProfile, "snapshot");
+                if (baseProfile != null && baseProfile.hasSnapshot()) {
+                    return baseProfile.getSnapshotElements();
                 }
             }
+            return null;
+        } else {
+            return request.getProfileAdapter().getSnapshotElements();
         }
-        return snapshot;
     }
 
     protected IBaseResource createQuestionnaire() {

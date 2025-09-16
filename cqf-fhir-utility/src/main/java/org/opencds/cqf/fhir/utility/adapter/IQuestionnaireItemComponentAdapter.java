@@ -6,13 +6,35 @@ import org.hl7.fhir.instance.model.api.IBaseDatatype;
 
 public interface IQuestionnaireItemComponentAdapter extends IItemComponentAdapter {
 
+    IQuestionnaireItemComponentAdapter setLinkId(String linkId);
+
+    IQuestionnaireItemComponentAdapter setDefinition(String definition);
+
+    void addItems(List<IQuestionnaireItemComponentAdapter> items);
+
     List<IBaseCoding> getCode();
+
+    String getText();
+
+    IQuestionnaireItemComponentAdapter setText(String text);
 
     String getType();
 
+    IQuestionnaireItemComponentAdapter setType(String type);
+
     boolean isGroupItem();
 
+    boolean isChoiceItem();
+
+    boolean getRequired();
+
+    IQuestionnaireItemComponentAdapter setRequired(boolean required);
+
     boolean getRepeats();
+
+    IQuestionnaireItemComponentAdapter setRepeats(boolean repeats);
+
+    void addAnswerOption(ICodingAdapter option);
 
     boolean hasInitial();
 

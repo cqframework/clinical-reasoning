@@ -174,6 +174,14 @@ public interface IAdapterFactory {
 
     /**
      * Creates an adapter that exposes common Questionnaire item operations across multiple versions of FHIR
+     * Includes a newly created QuestionnaireItemComponent of the appropriate version
+     *
+     * @return an adapter exposing common api calls
+     */
+    IQuestionnaireItemComponentAdapter createQuestionnaireItem();
+
+    /**
+     * Creates an adapter that exposes common Questionnaire item operations across multiple versions of FHIR
      *
      * @param questionnaireItem a FHIR QuestionnaireItemComponent object
      * @return an adapter exposing common api calls
@@ -220,4 +228,12 @@ public interface IAdapterFactory {
      * @return an adapter exposing common api calls
      */
     IGraphDefinitionAdapter createGraphDefinition(IBaseResource graphDefinition);
+
+    /**
+     * Creates an adapter that exposes common StructureDefinition operations across multiple versions of FHIR
+     *
+     * @param structureDefinition a FHIR StructureDefinition Resource
+     * @return an adapter exposing common api calls
+     */
+    IStructureDefinitionAdapter createStructureDefinition(IBaseResource structureDefinition);
 }

@@ -4,6 +4,8 @@ import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
+import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 
@@ -40,5 +42,14 @@ public abstract class BaseAdapter implements IAdapter<IBase> {
 
     public IAdapterFactory getAdapterFactory() {
         return adapterFactory;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <E extends IBaseExtension<?, ?>> E addExtension() {
+        if (get() instanceof IBaseHasExtensions baseHasExtensions) {
+            return (E) baseHasExtensions.addExtension();
+        }
+        return null;
     }
 }

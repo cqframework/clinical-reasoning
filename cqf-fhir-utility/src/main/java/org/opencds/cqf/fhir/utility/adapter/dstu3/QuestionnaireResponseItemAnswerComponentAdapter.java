@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.utility.adapter.dstu3;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseItemComponent;
 import org.hl7.fhir.dstu3.model.Type;
@@ -63,6 +64,6 @@ public class QuestionnaireResponseItemAnswerComponentAdapter extends BaseAdapter
         answer.setItem(items.stream()
                 .map(IAdapter::get)
                 .map(QuestionnaireResponseItemComponent.class::cast)
-                .toList());
+                .collect(Collectors.toList()));
     }
 }

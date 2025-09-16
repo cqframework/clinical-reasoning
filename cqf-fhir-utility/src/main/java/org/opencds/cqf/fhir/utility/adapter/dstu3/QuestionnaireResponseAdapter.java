@@ -1,9 +1,14 @@
 package org.opencds.cqf.fhir.utility.adapter.dstu3;
 
+import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseItemComponent;
+import org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseStatus;
+import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.instance.model.api.IDomainResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.fhir.utility.adapter.IAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireResponseAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireResponseItemComponentAdapter;
@@ -37,6 +42,36 @@ public class QuestionnaireResponseAdapter extends ResourceAdapter implements IQu
     }
 
     @Override
+    public IQuestionnaireResponseAdapter setId(String id) {
+        get().setId(id);
+        return this;
+    }
+
+    @Override
+    public IQuestionnaireResponseAdapter setQuestionnaire(String canonical) {
+        get().setQuestionnaire(new Reference(canonical));
+        return this;
+    }
+
+    @Override
+    public IQuestionnaireResponseAdapter setSubject(IIdType subject) {
+        get().setSubject(new Reference(subject));
+        return this;
+    }
+
+    @Override
+    public IQuestionnaireResponseAdapter setAuthored(Date date) {
+        get().setAuthored(date);
+        return this;
+    }
+
+    @Override
+    public IQuestionnaireResponseAdapter setStatus(String status) {
+        get().setStatus(QuestionnaireResponseStatus.fromCode(status));
+        return this;
+    }
+
+    @Override
     public boolean hasItem() {
         return getQuestionnaireResponse().hasItem();
     }
@@ -54,7 +89,7 @@ public class QuestionnaireResponseAdapter extends ResourceAdapter implements IQu
                 .setItem(items.stream()
                         .map(IAdapter::get)
                         .map(QuestionnaireResponseItemComponent.class::cast)
-                        .toList());
+                        .collect(Collectors.toList()));
     }
 
     @Override

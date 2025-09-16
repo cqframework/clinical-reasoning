@@ -2,10 +2,12 @@ package org.opencds.cqf.fhir.utility.adapter.dstu3;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.hl7.fhir.dstu3.model.Questionnaire;
 import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.UriType;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
@@ -130,7 +132,14 @@ public class QuestionnaireAdapter extends KnowledgeArtifactAdapter implements IQ
                 .setItem(items.stream()
                         .map(IAdapter::get)
                         .map(QuestionnaireItemComponent.class::cast)
-                        .toList());
+                        .collect(Collectors.toList()));
+    }
+
+    @Override
+    public void addItem(IBaseBackboneElement item) {
+        if (item instanceof QuestionnaireItemComponent itemComponent) {
+            getQuestionnaire().addItem(itemComponent);
+        }
     }
 
     @Override

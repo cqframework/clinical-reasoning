@@ -1,0 +1,59 @@
+package org.opencds.cqf.fhir.utility.adapter.r5;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import ca.uhn.fhir.context.FhirVersionEnum;
+import java.util.List;
+import org.hl7.fhir.r5.model.Library;
+import org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemComponent;
+import org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemType;
+import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
+
+class QuestionnaireItemComponentAdapterTest {
+    private final IAdapterFactory adapterFactory = new AdapterFactory();
+
+    @Test
+    void invalid_object_fails() {
+        var library = new Library();
+        assertThrows(IllegalArgumentException.class, () -> adapterFactory.createQuestionnaireItem(library));
+    }
+
+    @Test
+    void test() {
+        var item = new QuestionnaireItemComponent();
+        var adapter = new QuestionnaireItemComponentAdapter(item);
+        assertNotNull(adapter);
+        assertEquals(item, adapter.get());
+        assertEquals(FhirVersionEnum.R5, adapter.fhirVersion());
+        assertNotNull(adapter.getModelResolver());
+        assertNotNull(adapter.getAdapterFactory());
+    }
+
+    @Test
+    void testItem() {
+        var item = new QuestionnaireItemComponent();
+        var item1 = adapterFactory.createQuestionnaireItem(
+                new QuestionnaireItemComponent("1", QuestionnaireItemType.BOOLEAN));
+        var item2 = adapterFactory.createQuestionnaireItem(
+                new QuestionnaireItemComponent("2", QuestionnaireItemType.BOOLEAN));
+        var item3 = adapterFactory.createQuestionnaireItem(
+                new QuestionnaireItemComponent("3", QuestionnaireItemType.BOOLEAN));
+        var item4 = adapterFactory.createQuestionnaireItem(
+                new QuestionnaireItemComponent("4", QuestionnaireItemType.BOOLEAN));
+        item.addItem((QuestionnaireItemComponent) item1.get());
+        item.addItem((QuestionnaireItemComponent) item2.get());
+        var adapter = adapterFactory.createQuestionnaireItem(item);
+        assertTrue(adapter.hasItem());
+        assertEquals(2, adapter.getItem().size());
+        adapter.addItem(item3);
+        assertEquals(3, adapter.getItem().size());
+        adapter.setItem(List.of(item1));
+        assertEquals(1, adapter.getItem().size());
+        adapter.addItems(List.of(item2, item3, item4));
+        assertEquals(4, adapter.getItem().size());
+    }
+}

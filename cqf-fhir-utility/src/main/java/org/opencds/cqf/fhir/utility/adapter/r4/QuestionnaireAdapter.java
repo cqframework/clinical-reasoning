@@ -2,6 +2,8 @@ package org.opencds.cqf.fhir.utility.adapter.r4;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Expression;
@@ -147,7 +149,14 @@ public class QuestionnaireAdapter extends KnowledgeArtifactAdapter implements IQ
                 .setItem(items.stream()
                         .map(IAdapter::get)
                         .map(QuestionnaireItemComponent.class::cast)
-                        .toList());
+                        .collect(Collectors.toList()));
+    }
+
+    @Override
+    public void addItem(IBaseBackboneElement item) {
+        if (item instanceof QuestionnaireItemComponent itemComponent) {
+            getQuestionnaire().addItem(itemComponent);
+        }
     }
 
     @Override

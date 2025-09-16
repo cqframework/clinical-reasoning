@@ -7,4 +7,6 @@ public interface IValueSetConceptReferenceAdapter extends IAdapter<IBase> {
     boolean hasCode();
 
     String getCode();
+
+    String getDisplay();
 }

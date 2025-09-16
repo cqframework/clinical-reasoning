@@ -39,8 +39,9 @@ class AdapterTest {
         var factory = IAdapterFactory.forFhirVersion(fhirVersion);
         assertThrows(IllegalArgumentException.class, () -> factory.createCoding(null));
         var adapter = factory.createCoding(coding);
-        assertEquals(fhirVersion, adapter.fhirVersion());
         assertEquals(coding, adapter.get());
+        assertEquals(fhirVersion, adapter.fhirVersion());
         assertNotNull(adapter.getAdapterFactory());
+        assertNotNull(adapter.getModelResolver());
     }
 }

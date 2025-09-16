@@ -39,6 +39,18 @@ public class QuestionnaireResponseItemComponentAdapter extends BaseAdapter
     }
 
     @Override
+    public IQuestionnaireResponseItemComponentAdapter setLinkId(String linkId) {
+        get().setLinkId(linkId);
+        return this;
+    }
+
+    @Override
+    public IQuestionnaireResponseItemComponentAdapter setDefinition(String definition) {
+        get().setDefinition(definition);
+        return this;
+    }
+
+    @Override
     public boolean hasDefinition() {
         return item.hasDefinition();
     }
@@ -65,7 +77,7 @@ public class QuestionnaireResponseItemComponentAdapter extends BaseAdapter
         item.setItem(items.stream()
                 .map(IAdapter::get)
                 .map(QuestionnaireResponseItemComponent.class::cast)
-                .toList());
+                .collect(Collectors.toList()));
     }
 
     @Override
@@ -74,7 +86,7 @@ public class QuestionnaireResponseItemComponentAdapter extends BaseAdapter
     }
 
     @Override
-    public void addItems(List<IItemComponentAdapter> items) {
+    public void addItems(List<IQuestionnaireResponseItemComponentAdapter> items) {
         items.stream()
                 .map(IAdapter::get)
                 .map(QuestionnaireResponseItemComponent.class::cast)

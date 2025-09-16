@@ -53,6 +53,8 @@ public interface IAdapter<T extends IBase> {
         }
     }
 
+    <E extends IBaseExtension<?, ?>> E addExtension();
+
     default <E extends IBaseExtension<?, ?>> void addExtension(E extension) {
         try {
             getModelResolver().setValue(get(), "extension", Collections.singletonList(extension));

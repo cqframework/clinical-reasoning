@@ -3,16 +3,19 @@ package org.opencds.cqf.fhir.utility.adapter.r4;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemInitialComponent;
-import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType;
 import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseItemComponent;
 import org.hl7.fhir.r4.model.Type;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.utility.adapter.BaseAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IAdapter;
+import org.opencds.cqf.fhir.utility.adapter.ICodingAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IItemComponentAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireItemComponentAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireResponseItemComponentAdapter;
@@ -51,23 +54,9 @@ public class QuestionnaireItemComponentAdapter extends BaseAdapter implements IQ
     }
 
     @Override
-    public List<IBaseCoding> getCode() {
-        return item.getCode().stream().map(IBaseCoding.class::cast).toList();
-    }
-
-    @Override
-    public String getType() {
-        return item.getType().toCode();
-    }
-
-    @Override
-    public boolean isGroupItem() {
-        return item.getType().equals(QuestionnaireItemType.GROUP);
-    }
-
-    @Override
-    public boolean getRepeats() {
-        return item.getRepeats();
+    public IQuestionnaireItemComponentAdapter setLinkId(String linkId) {
+        get().setLinkId(linkId);
+        return this;
     }
 
     @Override
@@ -78,6 +67,12 @@ public class QuestionnaireItemComponentAdapter extends BaseAdapter implements IQ
     @Override
     public String getDefinition() {
         return item.getDefinition();
+    }
+
+    @Override
+    public IQuestionnaireItemComponentAdapter setDefinition(String definition) {
+        item.setDefinition(definition);
+        return this;
     }
 
     @Override
@@ -97,7 +92,7 @@ public class QuestionnaireItemComponentAdapter extends BaseAdapter implements IQ
         item.setItem(items.stream()
                 .map(IAdapter::get)
                 .map(QuestionnaireItemComponent.class::cast)
-                .toList());
+                .collect(Collectors.toList()));
     }
 
     @Override
@@ -106,11 +101,75 @@ public class QuestionnaireItemComponentAdapter extends BaseAdapter implements IQ
     }
 
     @Override
-    public void addItems(List<IItemComponentAdapter> items) {
+    public void addItems(List<IQuestionnaireItemComponentAdapter> items) {
         items.stream()
                 .map(IAdapter::get)
                 .map(QuestionnaireItemComponent.class::cast)
                 .forEach(this.item::addItem);
+    }
+
+    @Override
+    public List<IBaseCoding> getCode() {
+        return item.getCode().stream().map(IBaseCoding.class::cast).toList();
+    }
+
+    @Override
+    public String getText() {
+        return item.getText();
+    }
+
+    @Override
+    public IQuestionnaireItemComponentAdapter setText(String text) {
+        item.setText(text);
+        return this;
+    }
+
+    @Override
+    public String getType() {
+        return item.getType().toCode();
+    }
+
+    @Override
+    public IQuestionnaireItemComponentAdapter setType(String type) {
+        item.setType(Questionnaire.QuestionnaireItemType.fromCode(type));
+        return this;
+    }
+
+    @Override
+    public boolean isGroupItem() {
+        return item.getType().equals(Questionnaire.QuestionnaireItemType.GROUP);
+    }
+
+    @Override
+    public boolean isChoiceItem() {
+        return item.getType().equals(Questionnaire.QuestionnaireItemType.QUESTION);
+    }
+
+    @Override
+    public boolean getRequired() {
+        return item.getRequired();
+    }
+
+    @Override
+    public IQuestionnaireItemComponentAdapter setRequired(boolean required) {
+        get().setRequired(required);
+        return this;
+    }
+
+    @Override
+    public boolean getRepeats() {
+        return item.getRepeats();
+    }
+
+    @Override
+    public IQuestionnaireItemComponentAdapter setRepeats(boolean repeats) {
+        get().setRepeats(repeats);
+        return this;
+    }
+
+    @Override
+    public void addAnswerOption(ICodingAdapter option) {
+        get().addAnswerOption().setValue((Coding) option.get());
     }
 
     @Override

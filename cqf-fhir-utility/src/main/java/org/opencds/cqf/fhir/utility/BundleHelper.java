@@ -555,9 +555,6 @@ public class BundleHelper {
      */
     public static IBaseBackboneElement setRequestUrl(
             FhirVersionEnum fhirVersion, IBaseBackboneElement request, String url) {
-        if (request == null) {
-            request = newRequest(fhirVersion, null);
-        }
         return switch (fhirVersion) {
             case DSTU3 -> ((Bundle.BundleEntryRequestComponent) request).setUrl(url);
             case R4 -> ((BundleEntryRequestComponent) request).setUrl(url);
@@ -576,9 +573,6 @@ public class BundleHelper {
      */
     public static IBaseBackboneElement setRequestIfNoneExist(
             FhirVersionEnum fhirVersion, IBaseBackboneElement request, String ifNoneExist) {
-        if (request == null) {
-            request = newRequest(fhirVersion, null);
-        }
         return switch (fhirVersion) {
             case DSTU3 -> ((Bundle.BundleEntryRequestComponent) request).setIfNoneExist(ifNoneExist);
             case R4 -> ((BundleEntryRequestComponent) request).setIfNoneExist(ifNoneExist);
@@ -597,9 +591,6 @@ public class BundleHelper {
      */
     public static IBaseBackboneElement setEntryFullUrl(
             FhirVersionEnum fhirVersion, IBaseBackboneElement entry, String fullUrl) {
-        if (entry == null) {
-            entry = newEntry(fhirVersion);
-        }
         return switch (fhirVersion) {
             case DSTU3 -> ((Bundle.BundleEntryComponent) entry).setFullUrl(fullUrl);
             case R4 -> ((BundleEntryComponent) entry).setFullUrl(fullUrl);
@@ -618,12 +609,6 @@ public class BundleHelper {
      */
     public static IBaseBackboneElement setEntryRequest(
             FhirVersionEnum fhirVersion, IBaseBackboneElement entry, IBaseBackboneElement request) {
-        if (entry == null) {
-            entry = newEntry(fhirVersion);
-        }
-        if (request == null) {
-            request = newRequest(fhirVersion, null);
-        }
         String requestTypeError = "Request should be of type: %s";
         return switch (fhirVersion) {
             case DSTU3 -> {

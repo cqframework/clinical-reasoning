@@ -43,17 +43,47 @@ public class RepositoryFhirLibrarySourceProvider extends BaseFhirLibrarySourcePr
                 this.fhirContext.getResourceDefinition("Bundle").getImplementingClass();
         var lt = this.fhirContext.getResourceDefinition("Library").getImplementingClass();
 
-        var libs = repository.search(
-                bt, lt, Searches.byNameAndVersion(libraryIdentifier.getId(), libraryIdentifier.getVersion()));
+        // HACK: Retry to handle transient failures
+        // This should be baked into the IRepository implementation
 
-        var iter = new BundleIterable<>(repository, libs).iterator();
+        var retries = 5;
 
-        if (!iter.hasNext()) {
+        BundleIterable<IBaseBundle> iter = null;
+
+        for (int i = 0; i < retries; i++) {
+            try {
+                var libs = repository.search(
+                        bt, lt, Searches.byNameAndVersion(libraryIdentifier.getId(), libraryIdentifier.getVersion()));
+                iter = new BundleIterable<>(repository, libs);
+                if (iter != null && iter.iterator().hasNext()) {
+                    break;
+                }
+
+                if (i == retries - 1) {
+                    break;
+                }
+
+                Thread.sleep(20 * (i + 1));
+            } catch (Exception e) {
+                if (i == retries - 1) {
+                    break;
+                }
+
+                try {
+                    Thread.sleep(20 * (i + 1));
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    throw new RuntimeException(ie);
+                }
+            }
+        }
+
+        if (iter == null || !iter.iterator().hasNext()) {
             return null;
         }
 
         var libraries = new ArrayList<IBaseResource>();
-        iter.forEachRemaining(x -> libraries.add(x.getResource()));
+        iter.iterator().forEachRemaining(x -> libraries.add(x.getResource()));
 
         return this.libraryVersionSelector.select(libraryIdentifier, libraries);
     }

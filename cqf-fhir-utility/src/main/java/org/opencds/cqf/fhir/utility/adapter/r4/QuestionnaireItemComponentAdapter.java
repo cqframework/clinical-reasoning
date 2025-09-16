@@ -9,9 +9,9 @@ import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Expression;
-import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemInitialComponent;
+import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType;
 import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseItemComponent;
 import org.hl7.fhir.r4.model.Type;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
@@ -133,18 +133,18 @@ public class QuestionnaireItemComponentAdapter extends BaseAdapter implements IQ
 
     @Override
     public IQuestionnaireItemComponentAdapter setType(String type) {
-        item.setType(Questionnaire.QuestionnaireItemType.fromCode(type));
+        item.setType(QuestionnaireItemType.fromCode(type));
         return this;
     }
 
     @Override
     public boolean isGroupItem() {
-        return item.getType().equals(Questionnaire.QuestionnaireItemType.GROUP);
+        return item.getType().equals(QuestionnaireItemType.GROUP);
     }
 
     @Override
     public boolean isChoiceItem() {
-        return item.getType().equals(Questionnaire.QuestionnaireItemType.QUESTION);
+        return item.getType().equals(QuestionnaireItemType.CHOICE);
     }
 
     @Override

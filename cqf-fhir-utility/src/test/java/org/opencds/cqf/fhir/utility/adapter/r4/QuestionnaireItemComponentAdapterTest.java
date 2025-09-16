@@ -1,12 +1,14 @@
 package org.opencds.cqf.fhir.utility.adapter.r4;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.List;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType;
@@ -24,13 +26,45 @@ class QuestionnaireItemComponentAdapterTest {
 
     @Test
     void test() {
-        var item = new QuestionnaireItemComponent();
-        var adapter = new QuestionnaireItemComponentAdapter(item);
+        var text = "test";
+        var item = new QuestionnaireItemComponent().addCode(new Coding().setCode(text));
+        var adapter = adapterFactory.createQuestionnaireItem(item);
+        assertNotNull(adapterFactory.createBase(item));
         assertNotNull(adapter);
         assertEquals(item, adapter.get());
         assertEquals(FhirVersionEnum.R4, adapter.fhirVersion());
         assertNotNull(adapter.getModelResolver());
         assertNotNull(adapter.getAdapterFactory());
+        var linkId = "1";
+        adapter.setLinkId(linkId);
+        assertEquals(linkId, adapter.getLinkId());
+        assertEquals(text, adapter.getCode().get(0).getCode());
+        adapter.setText(text);
+        assertEquals(text, adapter.getText());
+        assertFalse(adapter.hasDefinition());
+        var definition = "Observation.valueBoolean";
+        adapter.setDefinition(definition);
+        assertEquals(definition, adapter.getDefinition());
+        adapter.setType("choice");
+        assertFalse(adapter.isGroupItem());
+        assertTrue(adapter.isChoiceItem());
+        adapter.setRequired(true);
+        assertTrue(adapter.getRequired());
+        adapter.setRepeats(false);
+        assertFalse(adapter.getRepeats());
+        var optionValue = "option";
+        adapter.addAnswerOption(new CodingAdapter(new Coding().setCode(optionValue)));
+        assertEquals(
+                optionValue,
+                ((Coding) ((QuestionnaireItemComponent) adapter.get())
+                                .getAnswerOption()
+                                .get(0)
+                                .getValue())
+                        .getCode());
+        assertFalse(adapter.hasInitial());
+        assertEquals(0, adapter.getInitial().size());
+        assertNotNull(adapter.newResponseItem());
+        assertNotNull(adapter.newExpression("expression"));
     }
 
     @Test

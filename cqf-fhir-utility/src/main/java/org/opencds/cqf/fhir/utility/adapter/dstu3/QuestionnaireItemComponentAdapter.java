@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.utility.adapter.dstu3;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.hl7.fhir.dstu3.model.Coding;
@@ -126,12 +127,12 @@ public class QuestionnaireItemComponentAdapter extends BaseAdapter implements IQ
 
     @Override
     public boolean isGroupItem() {
-        return item.getType().equals(Questionnaire.QuestionnaireItemType.GROUP);
+        return item.getType().equals(QuestionnaireItemType.GROUP);
     }
 
     @Override
     public boolean isChoiceItem() {
-        return item.getType().equals(QuestionnaireItemType.QUESTION);
+        return item.getType().equals(QuestionnaireItemType.CHOICE);
     }
 
     @Override
@@ -168,7 +169,7 @@ public class QuestionnaireItemComponentAdapter extends BaseAdapter implements IQ
 
     @Override
     public List<Type> getInitial() {
-        return List.of(item.getInitial());
+        return item.hasInitial() ? List.of(item.getInitial()) : new ArrayList<>();
     }
 
     @Override

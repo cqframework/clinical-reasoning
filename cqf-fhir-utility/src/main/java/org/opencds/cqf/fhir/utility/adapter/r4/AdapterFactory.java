@@ -15,6 +15,7 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.PlanDefinition;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent;
+import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent;
 import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseItemComponent;
 import org.hl7.fhir.r4.model.RequestGroup.RequestGroupActionComponent;
 import org.hl7.fhir.r4.model.StructureDefinition;
@@ -61,12 +62,14 @@ public class AdapterFactory implements IAdapterFactory {
 
     @Override
     public IAdapter<IBase> createBase(IBase element) {
-        if (element instanceof QuestionnaireItemComponent) {
-            return createQuestionnaireItem(element);
-        } else if (element instanceof QuestionnaireResponseItemComponent) {
-            return createQuestionnaireResponseItem(element);
-        } else if (element instanceof RequestGroupActionComponent) {
-            return createRequestAction(element);
+        if (element instanceof QuestionnaireItemComponent item) {
+            return createQuestionnaireItem(item);
+        } else if (element instanceof QuestionnaireResponseItemComponent responseItem) {
+            return createQuestionnaireResponseItem(responseItem);
+        } else if (element instanceof QuestionnaireResponseItemAnswerComponent answer) {
+            return createQuestionnaireResponseItemAnswer(answer);
+        } else if (element instanceof RequestGroupActionComponent requestAction) {
+            return createRequestAction(requestAction);
         } else {
             throw new UnprocessableEntityException(
                     String.format("Unable to create an adapter for type: %s", element.fhirType()));

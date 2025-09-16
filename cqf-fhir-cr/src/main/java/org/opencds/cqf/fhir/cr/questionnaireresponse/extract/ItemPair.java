@@ -11,11 +11,6 @@ import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireResponseItemComponentA
 public class ItemPair
         extends ImmutablePair<IQuestionnaireItemComponentAdapter, IQuestionnaireResponseItemComponentAdapter> {
 
-    public ItemPair(FhirVersionEnum fhirVersion, IItemComponentAdapter item, IBaseBackboneElement responseItem) {
-        this(item, (IQuestionnaireResponseItemComponentAdapter)
-                IAdapterFactory.createAdapterForBase(fhirVersion, responseItem));
-    }
-
     public ItemPair(FhirVersionEnum fhirVersion, IBaseBackboneElement item, IBaseBackboneElement responseItem) {
         this(
                 (IQuestionnaireItemComponentAdapter) IAdapterFactory.createAdapterForBase(fhirVersion, item),

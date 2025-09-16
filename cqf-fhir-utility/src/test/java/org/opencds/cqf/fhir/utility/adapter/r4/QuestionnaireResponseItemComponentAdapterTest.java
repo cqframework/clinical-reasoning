@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.utility.adapter.r4;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -26,12 +27,20 @@ class QuestionnaireResponseItemComponentAdapterTest {
     @Test
     void test() {
         var item = new QuestionnaireResponseItemComponent();
-        var adapter = new QuestionnaireResponseItemComponentAdapter(item);
+        var adapter = adapterFactory.createQuestionnaireResponseItem(item);
+        assertNotNull(adapterFactory.createBase(item));
         assertNotNull(adapter);
         assertEquals(item, adapter.get());
         assertEquals(FhirVersionEnum.R4, adapter.fhirVersion());
         assertNotNull(adapter.getModelResolver());
         assertNotNull(adapter.getAdapterFactory());
+        var linkId = "1";
+        adapter.setLinkId(linkId);
+        assertEquals(linkId, adapter.getLinkId());
+        assertFalse(adapter.hasDefinition());
+        var definition = "Observation.valueBoolean";
+        adapter.setDefinition(definition);
+        assertEquals(definition, adapter.getDefinition());
     }
 
     @Test

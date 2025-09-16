@@ -13,8 +13,7 @@ public class CodingAdapter extends BaseAdapter implements ICodingAdapter {
     public CodingAdapter(IBase coding) {
         super(FhirVersionEnum.R4, coding);
         if (!(coding instanceof Coding)) {
-            throw new IllegalArgumentException(
-                    "object passed as codeableConcept argument is not a CodeableConcept data type");
+            throw new IllegalArgumentException("object passed as coding argument is not a Coding data type");
         }
         this.coding = (Coding) coding;
     }

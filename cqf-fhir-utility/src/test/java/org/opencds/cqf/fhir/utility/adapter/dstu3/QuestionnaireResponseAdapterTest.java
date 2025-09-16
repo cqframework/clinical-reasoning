@@ -6,7 +6,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import java.util.Date;
 import java.util.List;
+import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Library;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseItemComponent;
@@ -25,12 +27,18 @@ class QuestionnaireResponseAdapterTest {
     @Test
     void test() {
         var response = new QuestionnaireResponse();
-        var adapter = new QuestionnaireResponseAdapter(response);
+        var adapter = adapterFactory.createQuestionnaireResponse(response);
+        assertNotNull(adapterFactory.createResource(response));
         assertNotNull(adapter);
         assertEquals(response, adapter.get());
         assertEquals(FhirVersionEnum.DSTU3, adapter.fhirVersion());
         assertNotNull(adapter.getModelResolver());
         assertNotNull(adapter.getAdapterFactory());
+        adapter.setId("test");
+        adapter.setQuestionnaire("test.com/Questionnaire/test");
+        adapter.setSubject(new IdType("test1"));
+        adapter.setAuthored(new Date());
+        adapter.setStatus("in-progress");
     }
 
     @Test

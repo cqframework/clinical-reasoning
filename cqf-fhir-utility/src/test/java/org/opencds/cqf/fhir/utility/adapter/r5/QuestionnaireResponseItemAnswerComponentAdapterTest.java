@@ -28,7 +28,8 @@ class QuestionnaireResponseItemAnswerComponentAdapterTest {
     @Test
     void test() {
         var answer = new QuestionnaireResponseItemAnswerComponent();
-        var adapter = new QuestionnaireResponseItemAnswerComponentAdapter(answer);
+        var adapter = adapterFactory.createQuestionnaireResponseItemAnswer(answer);
+        assertNotNull(adapterFactory.createBase(answer));
         assertNotNull(adapter);
         assertEquals(answer, adapter.get());
         assertEquals(FhirVersionEnum.R5, adapter.fhirVersion());

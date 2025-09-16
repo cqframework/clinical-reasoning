@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cr.common;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.opencds.cqf.fhir.cr.common.ItemValueTransformer.transformValueToItem;
 import static org.opencds.cqf.fhir.cr.common.ItemValueTransformer.transformValueToResource;
 
@@ -12,10 +13,20 @@ import org.junit.jupiter.api.Test;
 class ItemValueTransformerTests {
 
     @Test
+    void testUnsupportedVersion() {
+        var fhirVersion = FhirVersionEnum.DSTU2;
+        var stringType = new org.hl7.fhir.dstu2.model.StringType("test");
+        var transformStringTypeItem = transformValueToItem(fhirVersion, stringType);
+        assertNull(transformStringTypeItem);
+        var transformStringTypeResource = transformValueToResource(fhirVersion, stringType);
+        assertNull(transformStringTypeResource);
+    }
+
+    @Test
     void transformValueToItemDstu3() {
         var fhirVersion = FhirVersionEnum.DSTU3;
         var stringType = new org.hl7.fhir.dstu3.model.StringType("test");
-        var transformStringType = transformValueToItem(stringType);
+        var transformStringType = transformValueToItem(fhirVersion, stringType);
         assertEquals(stringType, transformStringType);
 
         var coding = new org.hl7.fhir.dstu3.model.Coding("test", "test", "test");

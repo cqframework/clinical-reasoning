@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.utility.adapter;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
+import org.hl7.fhir.instance.model.api.ICompositeType;
 
 public interface IQuestionnaireItemComponentAdapter extends IItemComponentAdapter {
 
@@ -41,4 +42,10 @@ public interface IQuestionnaireItemComponentAdapter extends IItemComponentAdapte
     List<? extends IBaseDatatype> getInitial();
 
     IQuestionnaireResponseItemComponentAdapter newResponseItem();
+
+    ICompositeType newExpression(String language, String expression);
+
+    default ICompositeType newExpression(String expression) {
+        return newExpression("text/cql-expression", expression);
+    }
 }

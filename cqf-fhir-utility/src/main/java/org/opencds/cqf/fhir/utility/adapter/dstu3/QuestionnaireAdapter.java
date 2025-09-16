@@ -41,11 +41,6 @@ public class QuestionnaireAdapter extends KnowledgeArtifactAdapter implements IQ
     }
 
     @Override
-    public Questionnaire copy() {
-        return get().copy();
-    }
-
-    @Override
     public List<IDependencyInfo> getDependencies() {
         List<IDependencyInfo> references = new ArrayList<>();
         final String referenceSource = getReferenceSource();

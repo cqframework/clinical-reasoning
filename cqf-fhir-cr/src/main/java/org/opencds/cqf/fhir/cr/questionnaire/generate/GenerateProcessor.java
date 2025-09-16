@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.questionnaire.generate;
 
+import static org.opencds.cqf.fhir.utility.Resources.newBaseForVersion;
 import static org.opencds.cqf.fhir.utility.SearchHelper.searchRepositoryByCanonical;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -12,7 +13,9 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.fhir.utility.Ids;
+import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IElementDefinitionAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireItemComponentAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IStructureDefinitionAdapter;
 import org.slf4j.Logger;
@@ -25,11 +28,13 @@ public class GenerateProcessor implements IGenerateProcessor {
             "An error occurred searching for base definition with url ({}): {}";
     protected final IRepository repository;
     protected final FhirVersionEnum fhirVersion;
+    protected final IAdapterFactory adapterFactory;
     protected final ItemGenerator itemGenerator;
 
     public GenerateProcessor(IRepository repository) {
         this.repository = repository;
-        this.fhirVersion = repository.fhirContext().getVersion().getVersion();
+        fhirVersion = repository.fhirContext().getVersion().getVersion();
+        adapterFactory = IAdapterFactory.forFhirVersion(fhirVersion);
         itemGenerator = new ItemGenerator(repository);
     }
 
@@ -40,7 +45,7 @@ public class GenerateProcessor implements IGenerateProcessor {
             var newId = Ids.newId(fhirVersion, Ids.ensureIdType(id, "Questionnaire"));
             questionnaire.setId(newId);
         }
-        return questionnaire;
+        return questionnaire.get();
     }
 
     @Override
@@ -94,13 +99,10 @@ public class GenerateProcessor implements IGenerateProcessor {
         }
     }
 
-    protected IBaseResource createQuestionnaire() {
-        return switch (fhirVersion) {
-            case R4 -> new org.hl7.fhir.r4.model.Questionnaire()
-                    .setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
-            case R5 -> new org.hl7.fhir.r5.model.Questionnaire()
-                    .setStatus(org.hl7.fhir.r5.model.Enumerations.PublicationStatus.ACTIVE);
-            default -> null;
-        };
+    protected IQuestionnaireAdapter createQuestionnaire() {
+        var questionnaire =
+                adapterFactory.createQuestionnaire((IBaseResource) newBaseForVersion("Questionnaire", fhirVersion));
+        questionnaire.setStatus("active");
+        return questionnaire;
     }
 }

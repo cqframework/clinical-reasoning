@@ -51,7 +51,7 @@ public class ProcessItem {
                         childItems.stream().map(c -> processItem(request, c)).toList();
                 var answers = responseItem.getAnswer();
                 if (answers.isEmpty()) {
-                    answers.add(responseItem.createAnswer(null));
+                    answers.add(responseItem.newAnswer(null));
                     responseItem.setAnswer(answers);
                 }
                 answers.forEach(a -> a.setItem(childResponseItems));
@@ -67,7 +67,7 @@ public class ProcessItem {
         }
         var answers = new ArrayList<IQuestionnaireResponseItemAnswerComponentAdapter>();
         for (var value : answerValue) {
-            answers.add(responseItem.createAnswer(transformValueToItem(request.getFhirVersion(), value)));
+            answers.add(responseItem.newAnswer(transformValueToItem(request.getFhirVersion(), value)));
         }
         responseItem.setAnswer(answers);
     }

@@ -6,7 +6,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
+import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Expression;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemInitialComponent;
@@ -190,5 +192,10 @@ public class QuestionnaireItemComponentAdapter extends BaseAdapter implements IQ
                 .setLinkId(item.getLinkId())
                 .setDefinitionElement(item.getDefinitionElement())
                 .setTextElement(item.getTextElement()));
+    }
+
+    @Override
+    public ICompositeType newExpression(String language, String expression) {
+        return new Expression().setLanguage(language).setExpression(expression);
     }
 }

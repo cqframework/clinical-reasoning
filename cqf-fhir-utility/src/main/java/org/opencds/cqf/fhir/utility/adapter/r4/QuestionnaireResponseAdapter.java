@@ -37,11 +37,6 @@ public class QuestionnaireResponseAdapter extends ResourceAdapter implements IQu
     }
 
     @Override
-    public QuestionnaireResponse copy() {
-        return get().copy();
-    }
-
-    @Override
     public IQuestionnaireResponseAdapter setId(String id) {
         get().setId(id);
         return this;

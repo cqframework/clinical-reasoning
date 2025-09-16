@@ -1,7 +1,6 @@
 package org.opencds.cqf.fhir.utility.adapter.r4;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -16,7 +15,6 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
-import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.r4.model.ElementDefinition.ElementDefinitionBindingComponent;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r4.model.Expression;
@@ -36,7 +34,7 @@ class StructureDefinitionAdapterTest {
     void invalid_object_fails() {
         var library = new Library();
         assertThrows(IllegalArgumentException.class, () -> new StructureDefinitionAdapter(library));
-        assertNotNull(new StructureDefinitionAdapter((IDomainResource) new StructureDefinition()));
+        assertNotNull(adapterFactory.createStructureDefinition(new StructureDefinition()));
     }
 
     @Test
@@ -196,6 +194,9 @@ class StructureDefinitionAdapterTest {
     void adapter_get_elements() {
         var baseDefinition = "http://hl7.org/fhir/Observation";
         var structureDef = new StructureDefinition().setBaseDefinition(baseDefinition);
+        structureDef.getSnapshot().addElement().setPath("Observation");
+        structureDef.getSnapshot().addElement().setPath("Observation.id");
+        structureDef.getDifferential().addElement().setPath("Observation");
         structureDef
                 .getDifferential()
                 .addElement()
@@ -209,10 +210,10 @@ class StructureDefinitionAdapterTest {
                 .addType()
                 .setCode("Quantity");
         var adapter = (IStructureDefinitionAdapter) adapterFactory.createKnowledgeArtifactAdapter(structureDef);
-        assertFalse(adapter.hasSnapshot());
+        assertTrue(adapter.hasSnapshot());
         assertEquals(baseDefinition, adapter.getBaseDefinition().getValue());
         var snapshotElements = adapter.getSnapshotElements();
-        assertEquals(0, snapshotElements.size());
+        assertEquals(1, snapshotElements.size());
         var differentialElements = adapter.getDifferentialElements();
         assertEquals(2, differentialElements.size());
     }

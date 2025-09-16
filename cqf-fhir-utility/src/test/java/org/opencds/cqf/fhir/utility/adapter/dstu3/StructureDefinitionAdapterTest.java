@@ -1,8 +1,8 @@
 package org.opencds.cqf.fhir.utility.adapter.dstu3;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -34,6 +34,7 @@ class StructureDefinitionAdapterTest {
     void invalid_object_fails() {
         var library = new Library();
         assertThrows(IllegalArgumentException.class, () -> new StructureDefinitionAdapter(library));
+        assertNotNull(adapterFactory.createStructureDefinition(new StructureDefinition()));
     }
 
     @Test
@@ -185,6 +186,9 @@ class StructureDefinitionAdapterTest {
     void adapter_get_elements() {
         var baseDefinition = "http://hl7.org/fhir/Observation";
         var structureDef = new StructureDefinition().setBaseDefinition(baseDefinition);
+        structureDef.getSnapshot().addElement().setPath("Observation");
+        structureDef.getSnapshot().addElement().setPath("Observation.id");
+        structureDef.getDifferential().addElement().setPath("Observation");
         structureDef
                 .getDifferential()
                 .addElement()
@@ -198,10 +202,10 @@ class StructureDefinitionAdapterTest {
                 .addType()
                 .setCode("Quantity");
         var adapter = (IStructureDefinitionAdapter) adapterFactory.createKnowledgeArtifactAdapter(structureDef);
-        assertFalse(adapter.hasSnapshot());
+        assertTrue(adapter.hasSnapshot());
         assertEquals(baseDefinition, adapter.getBaseDefinition().getValue());
         var snapshotElements = adapter.getSnapshotElements();
-        assertEquals(0, snapshotElements.size());
+        assertEquals(1, snapshotElements.size());
         var differentialElements = adapter.getDifferentialElements();
         assertEquals(2, differentialElements.size());
     }

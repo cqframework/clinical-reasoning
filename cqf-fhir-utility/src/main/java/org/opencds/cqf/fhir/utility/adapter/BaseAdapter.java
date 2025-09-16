@@ -36,10 +36,6 @@ public abstract class BaseAdapter implements IAdapter<IBase> {
         return modelResolver;
     }
 
-    public IBase get() {
-        return element;
-    }
-
     public IAdapterFactory getAdapterFactory() {
         return adapterFactory;
     }

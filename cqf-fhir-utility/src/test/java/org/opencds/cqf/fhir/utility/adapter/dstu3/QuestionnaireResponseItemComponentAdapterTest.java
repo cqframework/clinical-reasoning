@@ -1,4 +1,4 @@
-package org.opencds.cqf.fhir.utility.adapter.r5;
+package org.opencds.cqf.fhir.utility.adapter.dstu3;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -7,10 +7,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.List;
-import org.hl7.fhir.r5.model.IntegerType;
-import org.hl7.fhir.r5.model.Library;
-import org.hl7.fhir.r5.model.QuestionnaireResponse.QuestionnaireResponseItemComponent;
-import org.hl7.fhir.r5.model.StringType;
+import org.hl7.fhir.dstu3.model.IntegerType;
+import org.hl7.fhir.dstu3.model.Library;
+import org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseItemComponent;
+import org.hl7.fhir.dstu3.model.StringType;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 
@@ -29,7 +29,7 @@ class QuestionnaireResponseItemComponentAdapterTest {
         var adapter = new QuestionnaireResponseItemComponentAdapter(item);
         assertNotNull(adapter);
         assertEquals(item, adapter.get());
-        assertEquals(FhirVersionEnum.R5, adapter.fhirVersion());
+        assertEquals(FhirVersionEnum.DSTU3, adapter.fhirVersion());
         assertNotNull(adapter.getModelResolver());
         assertNotNull(adapter.getAdapterFactory());
     }
@@ -53,10 +53,14 @@ class QuestionnaireResponseItemComponentAdapterTest {
     @Test
     void testItem() {
         var item = new QuestionnaireResponseItemComponent();
-        var item1 = adapterFactory.createQuestionnaireResponseItem(new QuestionnaireResponseItemComponent("1"));
-        var item2 = adapterFactory.createQuestionnaireResponseItem(new QuestionnaireResponseItemComponent("2"));
-        var item3 = adapterFactory.createQuestionnaireResponseItem(new QuestionnaireResponseItemComponent("3"));
-        var item4 = adapterFactory.createQuestionnaireResponseItem(new QuestionnaireResponseItemComponent("4"));
+        var item1 =
+                adapterFactory.createQuestionnaireResponseItem(new QuestionnaireResponseItemComponent().setLinkId("1"));
+        var item2 =
+                adapterFactory.createQuestionnaireResponseItem(new QuestionnaireResponseItemComponent().setLinkId("2"));
+        var item3 =
+                adapterFactory.createQuestionnaireResponseItem(new QuestionnaireResponseItemComponent().setLinkId("3"));
+        var item4 =
+                adapterFactory.createQuestionnaireResponseItem(new QuestionnaireResponseItemComponent().setLinkId("4"));
         item.addItem((QuestionnaireResponseItemComponent) item1.get());
         item.addItem((QuestionnaireResponseItemComponent) item2.get());
         var adapter = adapterFactory.createQuestionnaireResponseItem(item);

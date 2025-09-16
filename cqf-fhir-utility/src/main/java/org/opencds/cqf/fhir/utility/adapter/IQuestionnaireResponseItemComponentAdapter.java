@@ -17,5 +17,5 @@ public interface IQuestionnaireResponseItemComponentAdapter extends IItemCompone
 
     void setAnswer(List<IQuestionnaireResponseItemAnswerComponentAdapter> answers);
 
-    IQuestionnaireResponseItemAnswerComponentAdapter createAnswer(IBaseDatatype value);
+    IQuestionnaireResponseItemAnswerComponentAdapter newAnswer(IBaseDatatype value);
 }

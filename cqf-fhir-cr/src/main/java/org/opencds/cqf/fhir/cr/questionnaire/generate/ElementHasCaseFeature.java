@@ -1,9 +1,7 @@
 package org.opencds.cqf.fhir.cr.questionnaire.generate;
 
-import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.ArrayList;
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.opencds.cqf.fhir.cr.questionnaire.Helpers;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.CqfExpression;
@@ -51,23 +49,9 @@ public class ElementHasCaseFeature {
             }
         }
         var expression = "%" + "%s%s".formatted(caseFeature.getName(), path);
-        var expressionType = createExpression(request.getFhirVersion(), expression);
-        if (expressionType != null) {
-            var initialExpressionExt = questionnaireItem.addExtension();
-            initialExpressionExt.setUrl(Constants.SDC_QUESTIONNAIRE_INITIAL_EXPRESSION);
-            initialExpressionExt.setValue(expressionType);
-        }
-    }
-
-    private ICompositeType createExpression(FhirVersionEnum fhirVersion, String expression) {
-        return switch (fhirVersion) {
-            case R4 -> new org.hl7.fhir.r4.model.Expression()
-                    .setLanguage("text/cql-expression")
-                    .setExpression(expression);
-            case R5 -> new org.hl7.fhir.r5.model.Expression()
-                    .setLanguage("text/cql-expression")
-                    .setExpression(expression);
-            default -> null;
-        };
+        var expressionType = questionnaireItem.newExpression(expression);
+        var initialExpressionExt = questionnaireItem.addExtension();
+        initialExpressionExt.setUrl(Constants.SDC_QUESTIONNAIRE_INITIAL_EXPRESSION);
+        initialExpressionExt.setValue(expressionType);
     }
 }

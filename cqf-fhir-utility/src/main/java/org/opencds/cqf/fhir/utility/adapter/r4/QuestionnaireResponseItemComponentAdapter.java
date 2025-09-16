@@ -115,7 +115,7 @@ public class QuestionnaireResponseItemComponentAdapter extends BaseAdapter
     }
 
     @Override
-    public IQuestionnaireResponseItemAnswerComponentAdapter createAnswer(IBaseDatatype value) {
+    public IQuestionnaireResponseItemAnswerComponentAdapter newAnswer(IBaseDatatype value) {
         return adapterFactory.createQuestionnaireResponseItemAnswer(
                 new QuestionnaireResponseItemAnswerComponent().setValue((Type) value));
     }

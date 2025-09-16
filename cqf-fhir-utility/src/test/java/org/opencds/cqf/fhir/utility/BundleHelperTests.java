@@ -16,6 +16,8 @@ import static org.opencds.cqf.fhir.utility.BundleHelper.newEntryWithResource;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.Collections;
+import java.util.List;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryRequestComponent;
@@ -210,5 +212,14 @@ class BundleHelperTests {
         } catch (IllegalArgumentException e) {
             assertTrue(e.getMessage().contains("Unsupported version of FHIR"));
         }
+    }
+
+    @Test
+    void testgetBundleEntryResourceIds_whenBundleHasNoEntries_shouldReturnEmptyList(){
+        Bundle bundle = new Bundle();
+        List<IIdType> bundleEntryResourceIds = BundleHelper.getBundleEntryResourceIds(
+            FhirVersionEnum.R4, bundle);
+
+        assertTrue(bundleEntryResourceIds.isEmpty());
     }
 }

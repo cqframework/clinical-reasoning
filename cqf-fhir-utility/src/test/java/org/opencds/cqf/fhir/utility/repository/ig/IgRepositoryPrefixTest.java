@@ -45,6 +45,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.MethodOrderer;
@@ -313,8 +314,33 @@ class IgRepositoryPrefixTest {
         assertIterableEquals(List.of(org1Id, org3Id), bundledResourceIds);
     }
 
+    @Test
+    void searchByReference() {
+        String patientReference = "Patient/123";
+        IIdType org1Id = createOrganization(withId("1"), withSubjetReference(patientReference));
+        IIdType org2Id = createOrganization(withId("2"), withEffectiveDate("2023-01-01"));
+
+        SearchBuilder searchBuilder = new SearchBuilder();
+        Multimap<String, List<IQueryParameterType>> multimap = searchBuilder.withReferenceParam(
+            "subject", patientReference).build();
+
+        // we are searching for Observation where effectiveDate is outside a range
+        var bundle = repository.search(Bundle.class, Observation.class, multimap);
+
+        assertNotNull(bundle);
+        assertEquals(1, bundle.getEntry().size());
+
+        List<IIdType> bundledResourceIds = BundleHelper.getBundleEntryResourceIds(getFhirContext(), bundle);
+
+        assertIterableEquals(List.of(org1Id), bundledResourceIds);
+    }
+
     IIdType createOrganization(ICreationArgument... theModifiers) {
         return createResource("Observation", theModifiers);
+    }
+
+    ICreationArgument withSubjetReference(String subjectRefrence) {
+        return t -> ((Observation) t).setSubject(new Reference(subjectRefrence));
     }
 
     ICreationArgument withEffectiveDate(String dateTime) {

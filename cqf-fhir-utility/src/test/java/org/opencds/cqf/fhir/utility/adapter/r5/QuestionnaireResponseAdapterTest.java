@@ -34,18 +34,22 @@ class QuestionnaireResponseAdapterTest {
     }
 
     @Test
-    void testInfo() {}
+    void testInfo() {
+        var questionnaireResponse = new QuestionnaireResponse();
+        var adapter = adapterFactory.createQuestionnaireResponse(questionnaireResponse);
+        assertNotNull(adapter);
+    }
 
     @Test
     void testItem() {
-        var questionnaire = new QuestionnaireResponse();
+        var questionnaireResponse = new QuestionnaireResponse();
         var item1 = adapterFactory.createQuestionnaireResponseItem(new QuestionnaireResponseItemComponent("1"));
         var item2 = adapterFactory.createQuestionnaireResponseItem(new QuestionnaireResponseItemComponent("2"));
         var item3 = adapterFactory.createQuestionnaireResponseItem(new QuestionnaireResponseItemComponent("3"));
         var item4 = adapterFactory.createQuestionnaireResponseItem(new QuestionnaireResponseItemComponent("4"));
-        questionnaire.addItem((QuestionnaireResponseItemComponent) item1.get());
-        questionnaire.addItem((QuestionnaireResponseItemComponent) item2.get());
-        var adapter = adapterFactory.createQuestionnaireResponse(questionnaire);
+        questionnaireResponse.addItem((QuestionnaireResponseItemComponent) item1.get());
+        questionnaireResponse.addItem((QuestionnaireResponseItemComponent) item2.get());
+        var adapter = adapterFactory.createQuestionnaireResponse(questionnaireResponse);
         assertTrue(adapter.hasItem());
         assertEquals(2, adapter.getItem().size());
         adapter.addItem(item3);

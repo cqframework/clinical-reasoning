@@ -5,6 +5,7 @@ import static org.opencds.cqf.fhir.utility.SearchHelper.searchRepositoryByCanoni
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.repository.IRepository;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import org.apache.commons.lang3.tuple.Pair;
@@ -87,7 +88,7 @@ public class GenerateProcessor implements IGenerateProcessor {
                     return baseProfile.getSnapshotElements();
                 }
             }
-            return null;
+            return Collections.emptyList();
         } else {
             return request.getProfileAdapter().getSnapshotElements();
         }

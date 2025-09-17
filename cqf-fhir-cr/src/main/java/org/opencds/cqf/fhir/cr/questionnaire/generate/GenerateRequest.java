@@ -145,7 +145,7 @@ public class GenerateRequest implements IQuestionnaireRequest {
 
     @Override
     public IBaseResource getQuestionnaire() {
-        return questionnaireAdapter.get();
+        return questionnaireAdapter == null ? null : questionnaireAdapter.get();
     }
 
     @Override

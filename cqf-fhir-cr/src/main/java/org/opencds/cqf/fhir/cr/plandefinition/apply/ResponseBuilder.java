@@ -153,7 +153,7 @@ public class ResponseBuilder {
                 .toList();
         for (var operationOutcome : operationOutcomes) {
             carePlan.addExtension(
-                    Constants.EXT_CRMI_MESSAGES,
+                    Constants.CQF_MESSAGES,
                     new org.hl7.fhir.dstu3.model.Reference(
                             "#" + operationOutcome.getIdElement().getIdPart()));
         }
@@ -204,7 +204,7 @@ public class ResponseBuilder {
                 .toList();
         for (var operationOutcome : operationOutcomes) {
             carePlan.addExtension(
-                    Constants.EXT_CRMI_MESSAGES,
+                    Constants.CQF_MESSAGES,
                     new org.hl7.fhir.r4.model.Reference(
                             "#" + operationOutcome.getIdElement().getIdPart()));
         }
@@ -259,7 +259,7 @@ public class ResponseBuilder {
                 .toList();
         for (var operationOutcome : operationOutcomes) {
             carePlan.addExtension(
-                    Constants.EXT_CRMI_MESSAGES,
+                    Constants.CQF_MESSAGES,
                     new org.hl7.fhir.r5.model.Reference(
                             "#" + operationOutcome.getIdElement().getIdPart()));
         }

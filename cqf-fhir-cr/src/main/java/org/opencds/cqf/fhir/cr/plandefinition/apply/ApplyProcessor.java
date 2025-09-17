@@ -32,6 +32,7 @@ import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@SuppressWarnings("UnstableApiUsage")
 public class ApplyProcessor implements IApplyProcessor {
     private static final Logger logger = LoggerFactory.getLogger(ApplyProcessor.class);
     protected static final List<String> EXCLUDED_EXTENSION_LIST = Arrays.asList(
@@ -108,7 +109,8 @@ public class ApplyProcessor implements IApplyProcessor {
         for (var resource : request.getRequestResources()) {
             addEntry(resultBundle, newEntryWithResource(resource));
         }
-        if (!request.getItems(request.getQuestionnaire()).isEmpty()) {
+        if (request.getQuestionnaireAdapter() != null
+                && !request.getQuestionnaireAdapter().getItem().isEmpty()) {
             addEntry(resultBundle, newEntryWithResource(request.getQuestionnaire()));
             addEntry(resultBundle, newEntryWithResource(populateProcessor.populate(request.toPopulateRequest())));
         }

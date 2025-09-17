@@ -1,103 +1,44 @@
 package org.opencds.cqf.fhir.cr.questionnaire;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import org.apache.commons.lang3.StringUtils;
 
 public class Helpers {
+    private static final String CHOICE = "choice";
+    private static final String QUESTION = "question";
+    private static final String GROUP = "group";
+    private static final String URL = "url";
+    private static final String QUANTITY = "quantity";
+    private static final String REFERENCE = "reference";
+    private static final String STRING = "string";
+    private static final String INTEGER = "integer";
+    private static final String DATETIME = "dateTime";
+
     private Helpers() {}
 
-    public static Object parseItemTypeForVersion(
+    public static String parseItemTypeForVersion(
             FhirVersionEnum fhirVersion, String typeCode, Boolean hasBinding, Boolean isGroup) {
-        switch (fhirVersion) {
-            case R4:
-                return parseR4ItemType(typeCode, hasBinding, isGroup);
-            case R5:
-                return parseR5ItemType(typeCode, hasBinding, isGroup);
-
-            default:
-                throw new IllegalArgumentException("unsupported FHIR version: %s".formatted(fhirVersion));
-        }
-    }
-
-    public static org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType parseR4ItemType(
-            String elementType, Boolean hasBinding, Boolean isGroup) {
         if (Boolean.TRUE.equals(hasBinding)) {
-            return org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType.CHOICE;
+            return fhirVersion.isEqualOrNewerThan(FhirVersionEnum.R5) ? QUESTION : CHOICE;
         }
         if (Boolean.TRUE.equals(isGroup)) {
-            return org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType.GROUP;
+            return GROUP;
         }
-        if (elementType == null) {
+        if (StringUtils.isBlank(typeCode)) {
             return null;
         }
-        switch (elementType) {
-            case "code", "coding", "CodeableConcept":
-                return org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType.CHOICE;
-            case "uri", "url", "canonical":
-                return org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType.URL;
-            case "Quantity":
-                return org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType.QUANTITY;
-            case "Reference":
-                return org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType.REFERENCE;
-            case "id", "oid", "uuid", "base64Binary", "Identifier", "Extension":
-                return org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType.STRING;
-            case "positiveInt", "unsignedInt":
-                return org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType.INTEGER;
-            case "instant":
-                return org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType.DATETIME;
-            default:
-                return org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType.fromCode(elementType);
-        }
-    }
-
-    public static org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemType parseR5ItemType(
-            String elementType, Boolean hasBinding, Boolean isGroup) {
-        if (Boolean.TRUE.equals(hasBinding)) {
-            return org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemType.QUESTION;
-        }
-        if (Boolean.TRUE.equals(isGroup)) {
-            return org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemType.GROUP;
-        }
-        if (elementType == null) {
-            return null;
-        }
-        switch (elementType) {
-            case "code", "coding", "CodeableConcept":
-                return org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemType.QUESTION;
-            case "uri", "url", "canonical":
-                return org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemType.URL;
-            case "Quantity":
-                return org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemType.QUANTITY;
-            case "Reference":
-                return org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemType.REFERENCE;
-            case "id", "oid", "uuid", "base64Binary", "Identifier", "Extension":
-                return org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemType.STRING;
-            case "positiveInt", "unsignedInt":
-                return org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemType.INTEGER;
-            case "instant":
-                return org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemType.DATETIME;
-            default:
-                return org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemType.fromCode(elementType);
-        }
-    }
-
-    public static boolean isGroupItemType(Object itemType) {
-        if (itemType instanceof org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType r4ItemType) {
-            return r4ItemType == org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType.GROUP;
-        }
-        if (itemType instanceof org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemType r5ItemType) {
-            return r5ItemType == org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemType.GROUP;
-        }
-        return false;
-    }
-
-    public static boolean isChoiceItemType(Object itemType) {
-        if (itemType instanceof org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType r4ItemType) {
-            return r4ItemType == org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType.CHOICE;
-        }
-        if (itemType instanceof org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemType r5ItemType) {
-            return r5ItemType == org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemType.QUESTION;
-        }
-        return false;
+        return switch (typeCode) {
+            case "code", "coding", "CodeableConcept" -> fhirVersion.isEqualOrNewerThan(FhirVersionEnum.R5)
+                    ? QUESTION
+                    : CHOICE;
+            case "uri", "url", "canonical" -> URL;
+            case "Quantity" -> QUANTITY;
+            case "Reference" -> REFERENCE;
+            case "id", "oid", "uuid", "base64Binary", "Identifier", "Extension" -> STRING;
+            case "positiveInt", "unsignedInt" -> INTEGER;
+            case "instant" -> DATETIME;
+            default -> typeCode;
+        };
     }
 
     public static String getSliceName(String elementId) {

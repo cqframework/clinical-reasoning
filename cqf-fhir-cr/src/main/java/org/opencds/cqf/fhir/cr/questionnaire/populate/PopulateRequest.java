@@ -27,10 +27,12 @@ import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.Resources;
 import org.opencds.cqf.fhir.utility.adapter.IParametersParameterComponentAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireResponseAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireResponseItemComponentAdapter;
 
 public class PopulateRequest implements IQuestionnaireRequest {
     private final IQuestionnaireAdapter questionnaireAdapter;
-    private final IBaseResource questionnaireResponse;
+    private final IQuestionnaireResponseAdapter questionnaireResponseAdapter;
     private final IIdType subjectId;
     private final List<IParametersParameterComponentAdapter> context;
     private final IBaseBundle data;
@@ -74,8 +76,8 @@ public class PopulateRequest implements IQuestionnaireRequest {
             parameters = (IBaseParameters) Resources.newBaseForVersion("Parameters", fhirVersion);
         }
         getAdapterFactory().createParameters(parameters).addParameter("%questionnaire", questionnaireAdapter.get());
-        questionnaireResponse = createQuestionnaireResponse();
-        contextVariable = questionnaireResponse;
+        questionnaireResponseAdapter = createQuestionnaireResponse();
+        contextVariable = questionnaireResponseAdapter.get();
         referencedLibraries = questionnaireAdapter.getReferencedLibraries();
         inputParameterResolver = IInputParameterResolver.createResolver(
                 libraryEngine.getRepository(),
@@ -131,7 +133,7 @@ public class PopulateRequest implements IQuestionnaireRequest {
 
     @Override
     public IBase getResourceVariable() {
-        return getQuestionnaireResponse();
+        return questionnaireResponseAdapter.get();
     }
 
     @Override
@@ -191,36 +193,23 @@ public class PopulateRequest implements IQuestionnaireRequest {
         this.operationOutcome = operationOutcome;
     }
 
-    protected IBaseResource createQuestionnaireResponse() {
-        var response =
-                switch (fhirVersion) {
-                    case R4 -> new org.hl7.fhir.r4.model.QuestionnaireResponse()
-                            .setStatus(
-                                    org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseStatus.INPROGRESS)
-                            .setQuestionnaire(questionnaireAdapter.getCanonical())
-                            .setSubject(new org.hl7.fhir.r4.model.Reference(subjectId))
-                            .setAuthored(new Date());
-                    case R5 -> new org.hl7.fhir.r5.model.QuestionnaireResponse()
-                            .setStatus(
-                                    org.hl7.fhir.r5.model.QuestionnaireResponse.QuestionnaireResponseStatus.INPROGRESS)
-                            .setQuestionnaire(questionnaireAdapter.getCanonical())
-                            .setSubject(new org.hl7.fhir.r5.model.Reference(subjectId))
-                            .setAuthored(new Date());
-                    default -> null;
-                };
-        if (response == null) {
-            throw new IllegalArgumentException(
-                    "Unsupported FHIR version: %s".formatted(fhirVersion.getFhirVersionString()));
-        }
-        response.setId("%s-%s".formatted(questionnaireAdapter.getId().getIdPart(), subjectId.getIdPart()));
-        return response;
+    protected IQuestionnaireResponseAdapter createQuestionnaireResponse() {
+        return getAdapterFactory()
+                .createQuestionnaireResponse(getFhirContext()
+                        .getResourceDefinition("QuestionnaireResponse")
+                        .newInstance())
+                .setId("%s-%s".formatted(questionnaireAdapter.getId().getIdPart(), subjectId.getIdPart()))
+                .setQuestionnaire(questionnaireAdapter.getCanonical())
+                .setSubject(subjectId)
+                .setAuthored(new Date())
+                .setStatus("in-progress");
     }
 
-    public IBaseResource getQuestionnaireResponse() {
-        return questionnaireResponse;
+    public IQuestionnaireResponseAdapter getQuestionnaireResponseAdapter() {
+        return questionnaireResponseAdapter;
     }
 
-    public void addQuestionnaireResponseItems(List<IBaseBackboneElement> items) {
-        getModelResolver().setValue(getQuestionnaireResponse(), "item", items);
+    public void addQuestionnaireResponseItems(List<IQuestionnaireResponseItemComponentAdapter> items) {
+        questionnaireResponseAdapter.addItems(items);
     }
 }

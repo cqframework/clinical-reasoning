@@ -14,8 +14,6 @@ public class ProcessItem {
     public void processItem(
             ExtractRequest request,
             ItemPair itemPair,
-            //            IBaseBackboneElement answerItem,
-            //            IBaseBackboneElement questionnaireItem,
             Map<String, List<IBaseCoding>> questionnaireCodeMap,
             List<IBaseResource> resources,
             IBaseReference subject) {

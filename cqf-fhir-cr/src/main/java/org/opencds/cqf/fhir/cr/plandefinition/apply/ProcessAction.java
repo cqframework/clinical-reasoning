@@ -26,6 +26,7 @@ import org.opencds.cqf.fhir.utility.Constants.CqfApplicabilityBehavior;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@SuppressWarnings("UnstableApiUsage")
 public class ProcessAction {
     private static final Logger logger = LoggerFactory.getLogger(ProcessAction.class);
 
@@ -124,10 +125,11 @@ public class ProcessAction {
                 if (item != null) {
                     // If input has text extension use it to override
                     if (request.hasExtension(input, Constants.CPG_INPUT_TEXT)) {
-                        var itemText =
-                                ((IPrimitiveType<String>) request.getExtensionByUrl(input, Constants.CPG_INPUT_TEXT)
-                                        .getValue());
-                        request.getModelResolver().setValue(item.getLeft(), "text", itemText);
+                        item.getLeft()
+                                .setText(((IPrimitiveType<String>)
+                                                request.getExtensionByUrl(input, Constants.CPG_INPUT_TEXT)
+                                                        .getValue())
+                                        .getValueAsString());
                         // item Constants.CPG_INPUT_DESCRIPTION
                     }
                     request.addQuestionnaireItem(item.getLeft());

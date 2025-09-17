@@ -1,8 +1,8 @@
 package org.opencds.cqf.fhir.utility.adapter;
 
-import org.hl7.fhir.instance.model.api.ICompositeType;
+import org.hl7.fhir.instance.model.api.IBase;
 
-public interface ICodingAdapter extends IAdapter<ICompositeType> {
+public interface ICodingAdapter extends IAdapter<IBase> {
     String getCode();
 
     boolean hasCode();

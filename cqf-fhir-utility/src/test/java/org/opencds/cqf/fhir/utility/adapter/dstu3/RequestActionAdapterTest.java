@@ -19,10 +19,10 @@ import org.hl7.fhir.dstu3.model.RequestGroup.RequestGroupActionComponent;
 import org.junit.jupiter.api.Test;
 
 class RequestActionAdapterTest {
+    private final org.opencds.cqf.fhir.utility.adapter.IAdapterFactory adapterFactory = new AdapterFactory();
 
     @Test
     void invalid_object_fails() {
-        var adapterFactory = new AdapterFactory();
         var action = new PlanDefinitionActionComponent();
         assertThrows(IllegalArgumentException.class, () -> adapterFactory.createRequestAction(action));
     }
@@ -30,7 +30,8 @@ class RequestActionAdapterTest {
     @Test
     void test() {
         var action = new RequestGroupActionComponent();
-        var adapter = new RequestActionAdapter(action);
+        var adapter = adapterFactory.createRequestAction(action);
+        assertNotNull(adapterFactory.createBase(action));
         assertNotNull(adapter);
         assertEquals(action, adapter.get());
         assertEquals(FhirVersionEnum.DSTU3, adapter.fhirContext().getVersion().getVersion());

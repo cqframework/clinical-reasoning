@@ -35,4 +35,12 @@ class ValueSetConceptReferenceAdapterTest {
         assertTrue(adapter.hasCode());
         assertEquals(code, adapter.getCode());
     }
+
+    @Test
+    void testDisplay() {
+        var display = "test";
+        var conceptRef = new ValueSet.ConceptReferenceComponent().setDisplay(display);
+        var adapter = new ValueSetConceptReferenceAdapter(conceptRef);
+        assertEquals(display, adapter.getDisplay());
+    }
 }

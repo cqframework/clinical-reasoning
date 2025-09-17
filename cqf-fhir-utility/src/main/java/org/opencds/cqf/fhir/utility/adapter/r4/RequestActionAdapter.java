@@ -1,46 +1,32 @@
 package org.opencds.cqf.fhir.utility.adapter.r4;
 
-import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.RelatedArtifact;
 import org.hl7.fhir.r4.model.RequestGroup.RequestGroupActionComponent;
-import org.opencds.cqf.cql.engine.model.ModelResolver;
+import org.opencds.cqf.fhir.utility.adapter.BaseAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ICodeableConceptAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IRequestActionAdapter;
-import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 
-public class RequestActionAdapter implements IRequestActionAdapter {
+public class RequestActionAdapter extends BaseAdapter implements IRequestActionAdapter {
 
     private final RequestGroupActionComponent action;
-    private final FhirContext fhirContext = FhirContext.forR4Cached();
-    private final ModelResolver modelResolver;
 
-    public RequestActionAdapter(IBaseBackboneElement action) {
+    public RequestActionAdapter(IBase action) {
+        super(FhirVersionEnum.R4, action);
         if (!(action instanceof RequestGroupActionComponent)) {
             throw new IllegalArgumentException(
                     "element passed as action argument is not a RequestGroupActionComponent Element");
         }
         this.action = (RequestGroupActionComponent) action;
-        modelResolver = FhirModelResolverCache.resolverForVersion(
-                fhirContext.getVersion().getVersion());
     }
 
     @Override
     public RequestGroupActionComponent get() {
         return action;
-    }
-
-    @Override
-    public FhirContext fhirContext() {
-        return fhirContext;
-    }
-
-    @Override
-    public ModelResolver getModelResolver() {
-        return modelResolver;
     }
 
     @Override

@@ -274,10 +274,9 @@ class BundleHelperTests {
     }
 
     @Test
-    void testgetBundleEntryResourceIds_whenBundleHasNoEntries_shouldReturnEmptyList(){
+    void testgetBundleEntryResourceIds_whenBundleHasNoEntries_shouldReturnEmptyList() {
         Bundle bundle = new Bundle();
-        List<IIdType> bundleEntryResourceIds = BundleHelper.getBundleEntryResourceIds(
-            FhirVersionEnum.R4, bundle);
+        List<IIdType> bundleEntryResourceIds = BundleHelper.getBundleEntryResourceIds(FhirVersionEnum.R4, bundle);
 
         assertTrue(bundleEntryResourceIds.isEmpty());
     }

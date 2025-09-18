@@ -31,6 +31,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.function.Consumer;
@@ -263,9 +264,11 @@ class IgRepositoryPrefixTest {
 
     @Test
     void searchBySearchParameterIntersection() {
-        IIdType org1Id = createOrganization(withId("1"), withEffectiveDate("2021-01-01"));
-        IIdType org2Id = createOrganization(withId("2"), withEffectiveDate("2023-01-01"));
-        IIdType org3Id = createOrganization(withId("3"), withEffectiveDate("2025-01-01"));
+        IIdType org2Id = new IdType("Organization", "2");
+
+        createOrganization(withId("1"), withEffectiveDate("2021-01-01"));
+        createOrganization(withId(org2Id), withEffectiveDate("2023-01-01"));
+        createOrganization(withId("3"), withEffectiveDate("2025-01-01"));
 
         SearchBuilder searchBuilder = new SearchBuilder();
 
@@ -290,9 +293,12 @@ class IgRepositoryPrefixTest {
 
     @Test
     void searchBySearchParameterUnion() {
-        IIdType org1Id = createOrganization(withId("1"), withEffectiveDate("2021-01-01"));
-        IIdType org2Id = createOrganization(withId("2"), withEffectiveDate("2023-01-01"));
-        IIdType org3Id = createOrganization(withId("3"), withEffectiveDate("2025-01-01"));
+        IIdType org1Id = new IdType("Organization", "1");
+        IIdType org3Id = new IdType("Organization", "3");
+
+        createOrganization(withId(org1Id), withEffectiveDate("2021-01-01"));
+        createOrganization(withId("2"), withEffectiveDate("2023-01-01"));
+        createOrganization(withId(org3Id), withEffectiveDate("2025-01-01"));
 
         SearchBuilder searchBuilder = new SearchBuilder();
 
@@ -311,18 +317,22 @@ class IgRepositoryPrefixTest {
 
         List<IIdType> bundledResourceIds = BundleHelper.getBundleEntryResourceIds(getFhirContext(), bundle);
 
-        assertIterableEquals(List.of(org1Id, org3Id), bundledResourceIds);
+        var actualSorted = sortBundleEntryResourceIds(bundledResourceIds);
+
+        assertIterableEquals(List.of(org1Id, org3Id), actualSorted);
     }
 
     @Test
     void searchByReference() {
         String patientReference = "Patient/123";
-        IIdType org1Id = createOrganization(withId("1"), withSubjetReference(patientReference));
-        IIdType org2Id = createOrganization(withId("2"), withEffectiveDate("2023-01-01"));
+        IIdType org1Id = new IdType("Organization", "1");
+
+        createOrganization(withId(org1Id), withSubjectReference(patientReference));
+        createOrganization(withId("2"), withEffectiveDate("2023-01-01"));
 
         SearchBuilder searchBuilder = new SearchBuilder();
-        Multimap<String, List<IQueryParameterType>> multimap = searchBuilder.withReferenceParam(
-            "subject", patientReference).build();
+        Multimap<String, List<IQueryParameterType>> multimap =
+                searchBuilder.withReferenceParam("subject", patientReference).build();
 
         // we are searching for Observation where effectiveDate is outside a range
         var bundle = repository.search(Bundle.class, Observation.class, multimap);
@@ -335,12 +345,12 @@ class IgRepositoryPrefixTest {
         assertIterableEquals(List.of(org1Id), bundledResourceIds);
     }
 
-    IIdType createOrganization(ICreationArgument... theModifiers) {
-        return createResource("Observation", theModifiers);
+    IIdType createOrganization(ICreationArgument... modifiers) {
+        return createResource("Observation", modifiers);
     }
 
-    ICreationArgument withSubjetReference(String subjectRefrence) {
-        return t -> ((Observation) t).setSubject(new Reference(subjectRefrence));
+    ICreationArgument withSubjectReference(String subjectReference) {
+        return t -> ((Observation) t).setSubject(new Reference(subjectReference));
     }
 
     ICreationArgument withEffectiveDate(String dateTime) {
@@ -348,17 +358,21 @@ class IgRepositoryPrefixTest {
         return t -> ((Observation) t).setEffective(new DateTimeType(date));
     }
 
-    ICreationArgument withId(@Nonnull String theId) {
+    ICreationArgument withId(@Nonnull String id) {
         return t -> {
-            assertTrue(theId.matches("[a-zA-Z0-9-]+"));
-            ((IBaseResource) t).setId(theId);
+            assertTrue(id.matches("[a-zA-Z0-9-]+"));
+            ((IBaseResource) t).setId(id);
         };
+    }
+
+    private ICreationArgument withId(IIdType iid) {
+        return t -> ((IBaseResource) t).setId(iid);
     }
 
     interface ICreationArgument extends Consumer<IBase> {}
 
-    IIdType createResource(String theResourceType, ICreationArgument... modifiers) {
-        IBaseResource resource = buildResource(theResourceType, modifiers);
+    IIdType createResource(String resourceType, ICreationArgument... modifiers) {
+        IBaseResource resource = buildResource(resourceType, modifiers);
 
         if (isNotBlank(resource.getIdElement().getValue())) {
             return repository.update(resource).getId().toUnqualifiedVersionless();
@@ -367,15 +381,15 @@ class IgRepositoryPrefixTest {
         }
     }
 
-    <T extends IBaseResource> T buildResource(String theResourceType, ICreationArgument... theModifiers) {
+    <T extends IBaseResource> T buildResource(String resourceType, ICreationArgument... modifiers) {
         IBaseResource resource =
-                getFhirContext().getResourceDefinition(theResourceType).newInstance();
-        applyElementModifiers(resource, theModifiers);
+                getFhirContext().getResourceDefinition(resourceType).newInstance();
+        applyElementModifiers(resource, modifiers);
         return (T) resource;
     }
 
-    <E extends IBase> void applyElementModifiers(E element, Consumer<E>[] theModifiers) {
-        for (Consumer<E> nextModifier : theModifiers) {
+    <E extends IBase> void applyElementModifiers(E element, Consumer<E>[] modifiers) {
+        for (Consumer<E> nextModifier : modifiers) {
             nextModifier.accept(element);
         }
     }
@@ -391,5 +405,11 @@ class IgRepositoryPrefixTest {
 
     FhirContext getFhirContext() {
         return fhirContext;
+    }
+
+    List<IIdType> sortBundleEntryResourceIds(List<IIdType> ids) {
+        var actualSorted = new ArrayList<>(ids);
+        actualSorted.sort((o1, o2) -> o1.getIdPart().compareTo(o2.getIdPart()));
+        return actualSorted;
     }
 }

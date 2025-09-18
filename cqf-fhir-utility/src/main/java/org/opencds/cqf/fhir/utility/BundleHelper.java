@@ -1,11 +1,13 @@
 package org.opencds.cqf.fhir.utility;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.RuntimeSearchParam.RuntimeSearchParamStatusEnum;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import jakarta.annotation.Nonnull;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -244,6 +246,26 @@ public class BundleHelper {
             default -> throw new IllegalArgumentException(
                     UNSUPPORTED_VERSION_OF_FHIR.formatted(fhirVersion.getFhirVersionString()));
         };
+    }
+
+    public static List<IIdType> getBundleEntryResourceIds(FhirContext fhirContext, IBaseBundle bundle) {
+        return getBundleEntryResourceIds(fhirContext.getVersion().getVersion(), bundle);
+    }
+
+    public static List<IIdType> getBundleEntryResourceIds(FhirVersionEnum fhirVersion, IBaseBundle bundle) {
+
+        List<IBaseBackboneElement> entry = getEntry(bundle);
+        if (entry.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        List<IIdType> retVal = new ArrayList<>(entry.size());
+
+        entry.forEach(e -> {
+            retVal.add(getEntryResource(fhirVersion, e).getIdElement());
+        });
+
+        return retVal;
     }
 
     /**

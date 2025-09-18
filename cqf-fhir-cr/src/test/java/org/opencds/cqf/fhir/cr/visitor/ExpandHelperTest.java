@@ -18,7 +18,6 @@ import ca.uhn.fhir.repository.IRepository;
 import com.google.common.collect.Multimap;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Map;
 import java.util.Optional;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CanonicalType;
@@ -64,7 +63,7 @@ class ExpandHelperTest {
         assertEquals(3, grouper.getExpansion().getContains().size());
         assertEquals(
                 expansionDate.getTime(), grouper.getExpansion().getTimestamp().getTime());
-        verify(rep, times(1)).search(any(), any(), any(Map.class), any());
+        verify(rep, times(1)).search(any(), any(), any(Multimap.class), any());
         verify(client, never()).getValueSetResource(any(), any());
         verify(client, never()).expand(any(IValueSetAdapter.class), any(), any());
     }
@@ -365,7 +364,7 @@ class ExpandHelperTest {
         when(mockRepository.fhirContext()).thenReturn(FhirContext.forR4Cached());
         org.hl7.fhir.r4.model.Bundle bundle = new org.hl7.fhir.r4.model.Bundle();
         bundle.addEntry().setFullUrl(valueSet.getUrl()).setResource(valueSet);
-        when(mockRepository.search(any(), any(), any(Map.class), any())).thenReturn(bundle);
+        when(mockRepository.search(any(), any(), any(Multimap.class), any())).thenReturn(bundle);
         return mockRepository;
     }
 

@@ -10,6 +10,7 @@ import static org.opencds.cqf.fhir.utility.Parameters.newStringPart;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.repository.IRepository;
+import com.google.common.collect.Multimap;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -543,7 +544,9 @@ class InputParametersTest {
         doReturn(fhirContextR4).when(repository).fhirContext();
         doReturn(patient).when(repository).read(org.hl7.fhir.r4.model.Patient.class, patient.getIdElement());
         doReturn(valueSetBundle).when(repository).search(eq(Bundle.class), eq(ValueSet.class), any(Map.class));
-        doReturn(obsBundle).when(repository).search(eq(Bundle.class), eq(Observation.class), any(Map.class), any());
+        doReturn(obsBundle)
+                .when(repository)
+                .search(eq(Bundle.class), eq(Observation.class), any(Multimap.class), any());
         var resolver = IInputParameterResolver.createResolver(
                 repository, patient.getIdElement(), null, null, null, null, null, null);
         var inputReq = new DataRequirement()

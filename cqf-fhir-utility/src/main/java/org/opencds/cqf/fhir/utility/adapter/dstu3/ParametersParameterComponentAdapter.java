@@ -12,8 +12,6 @@ import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.Base;
-import org.hl7.fhir.r4.model.Tuple;
 import org.opencds.cqf.fhir.utility.adapter.BaseAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IParametersParameterComponentAdapter;
 
@@ -129,8 +127,6 @@ class ParametersParameterComponentAdapter extends BaseAdapter implements IParame
 
     @Override
     public IBase newTupleWithParts() {
-        var tuple = new Tuple();
-        getPart().forEach(p -> tuple.addProperty(p.getName(), List.of((Base) p.getPartValue(p))));
-        return tuple;
+        return null;
     }
 }

@@ -356,9 +356,63 @@
       "type": "group",
       "item": [
         {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-itemPopulationContext",
+              "valueExpression": {
+                "name": "PatientHistory",
+                "language": "text/cql-identifier",
+                "expression": "Patient history"
+              }
+            }
+          ],
           "linkId": "history|patient-history",
           "text": "Patient history including age at diagnosis",
-          "type": "string"
+          "type": "group",
+          "item": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+                  "valueExpression": {
+                    "language": "text/cql-expression",
+                    "expression": "%PatientHistory.diagnosis"
+                  }
+                }
+              ],
+              "linkId": "history|patient-history|diagnosis",
+              "text": "Diagnosis",
+              "type": "string"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+                  "valueExpression": {
+                    "language": "text/cql-expression",
+                    "expression": "%PatientHistory.ageAtOnset"
+                  }
+                }
+              ],
+              "linkId": "history|patient-history|age-at-onset",
+              "text": "Age at onset",
+              "type": "string"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression",
+                  "valueExpression": {
+                    "language": "text/cql-expression",
+                    "expression": "%PatientHistory.abatement"
+                  }
+                }
+              ],
+              "linkId": "history|patient-history|abatement",
+              "text": "Abatement",
+              "type": "string"
+            }
+          ]
         },
         {
           "linkId": "history|family-history",

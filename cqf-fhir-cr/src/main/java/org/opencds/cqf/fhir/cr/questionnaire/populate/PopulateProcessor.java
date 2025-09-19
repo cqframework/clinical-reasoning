@@ -15,21 +15,23 @@ import org.slf4j.LoggerFactory;
 
 public class PopulateProcessor implements IPopulateProcessor {
     protected static final Logger logger = LoggerFactory.getLogger(PopulateProcessor.class);
-    private final ProcessItem processItem;
-    private final ProcessItemWithContext processItemWithContext;
+    //    private final ProcessItem processItem;
+    //    private final ProcessItemWithContext processItemWithContext;
+    private final ItemProcessor itemProcessor;
     final ExpressionProcessor expressionProcessor;
 
     public PopulateProcessor() {
-        this(new ProcessItem(), new ProcessItemWithContext(), new ExpressionProcessor());
+        this(null, null);
     }
 
     private PopulateProcessor(
-            ProcessItem processItem,
-            ProcessItemWithContext processItemWithExtension,
-            ExpressionProcessor expressionProcessor) {
-        this.processItem = processItem;
-        this.processItemWithContext = processItemWithExtension;
-        this.expressionProcessor = expressionProcessor;
+            //            ProcessItem processItem,
+            //            ProcessItemWithContext processItemWithExtension,
+            ItemProcessor itemProcessor, ExpressionProcessor expressionProcessor) {
+        //        this.processItem = processItem;
+        //        this.processItemWithContext = processItemWithExtension;
+        this.expressionProcessor = expressionProcessor != null ? expressionProcessor : new ExpressionProcessor();
+        this.itemProcessor = itemProcessor != null ? itemProcessor : new ItemProcessor(this.expressionProcessor);
     }
 
     @Override
@@ -75,35 +77,43 @@ public class PopulateProcessor implements IPopulateProcessor {
             PopulateRequest request, IQuestionnaireItemComponentAdapter item) {
         var linkId = item.getLinkId();
         logger.info("Processing item {}", linkId);
-        var populationContextExt = item.getExtension().stream()
-                .filter(e -> e.getUrl().equals(Constants.SDC_QUESTIONNAIRE_ITEM_POPULATION_CONTEXT))
-                .findFirst()
-                .orElse(null);
 
-        return populationContextExt != null
-                ? processItemWithContext(request, item)
-                : List.of(processItem(request, item));
-    }
-
-    protected List<IQuestionnaireResponseItemComponentAdapter> processItemWithContext(
-            PopulateRequest request, IQuestionnaireItemComponentAdapter item) {
         try {
-            return processItemWithContext.processContextItem(request, item);
+            return itemProcessor.processItem(request, item);
         } catch (Exception e) {
             logger.error(e.getMessage());
             request.logException(e.getMessage());
-            return List.of();
+            return List.of(item.newResponseItem());
         }
+        //        var populationContextExt = item.getExtension().stream()
+        //                .filter(e -> e.getUrl().equals(Constants.SDC_QUESTIONNAIRE_ITEM_POPULATION_CONTEXT))
+        //                .findFirst()
+        //                .orElse(null);
+        //
+        //        return populationContextExt != null
+        //                ? processItemWithContext(request, item)
+        //                : List.of(processItem(request, item));
     }
 
-    protected IQuestionnaireResponseItemComponentAdapter processItem(
-            PopulateRequest request, IQuestionnaireItemComponentAdapter item) {
-        try {
-            return processItem.processItem(request, item);
-        } catch (Exception e) {
-            logger.error(e.getMessage());
-            request.logException(e.getMessage());
-            return item.newResponseItem();
-        }
-    }
+    //    protected List<IQuestionnaireResponseItemComponentAdapter> processItemWithContext(
+    //            PopulateRequest request, IQuestionnaireItemComponentAdapter item) {
+    //        try {
+    //            return processItemWithContext.processContextItem(request, item);
+    //        } catch (Exception e) {
+    //            logger.error(e.getMessage());
+    //            request.logException(e.getMessage());
+    //            return List.of();
+    //        }
+    //    }
+    //
+    //    protected IQuestionnaireResponseItemComponentAdapter processItem(
+    //            PopulateRequest request, IQuestionnaireItemComponentAdapter item) {
+    //        try {
+    //            return processItem.processItem(request, item);
+    //        } catch (Exception e) {
+    //            logger.error(e.getMessage());
+    //            request.logException(e.getMessage());
+    //            return item.newResponseItem();
+    //        }
+    //    }
 }

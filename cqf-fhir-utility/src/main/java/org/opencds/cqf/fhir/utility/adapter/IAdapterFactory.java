@@ -236,4 +236,6 @@ public interface IAdapterFactory {
      * @return an adapter exposing common api calls
      */
     IStructureDefinitionAdapter createStructureDefinition(IBaseResource structureDefinition);
+
+    ITupleAdapter createTuple(IBase tuple);
 }

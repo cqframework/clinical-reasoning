@@ -1,9 +1,10 @@
 library USCoreElements
 
-using USCore version '3.1.1'
 using FHIR version '4.0.1'
+using USCore version '7.0.0'
 
-include FHIRHelpers version '4.1.0'
+include hl7.fhir.uv.cql.FHIRHelpers version '4.0.1'
+include hl7.fhir.uv.cql.FHIRCommon version '2.0.0'
 include USCoreCommon called UC
 
 codesystem "LOINC": 'http://loinc.org'
@@ -11,9 +12,9 @@ codesystem "Identifier Type": 'http://terminology.hl7.org/CodeSystem/v2-0203'
 codesystem "Verification Status": 'http://terminology.hl7.org/CodeSystem/condition-ver-status'
 codesystem "Condition Clinical": 'http://terminology.hl7.org/CodeSystem/condition-clinical'
 
-valueset "Common allergy substances": 'http://hl7.org/fhir/us/core/ValueSet/us-core-allergy-substance'
+valueset "Common allergy substances": 'http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1186.8'
 
-code "No known allergy (situation)": '716186003' from UC.SNOMEDCT
+code "No known allergy (situation)": '716186003' from FHIRCommon.SNOMEDCT
 code "Member Number": 'MB' from "Identifier Type"
 code "Subscriber Number": 'SN' from "Identifier Type"
 code "Body surface area": '8277-6' from "LOINC" display 'Body surface area'
@@ -24,54 +25,103 @@ context Patient
 
 // Patient Patterns
 
+define fluent function ageInDaysAt(patient Patient, asOf Date):
+  CalculateAgeInDaysAt(Patient.birthDate, asOf)
+
+define fluent function ageInDays(patient Patient):
+  CalculateAgeInDaysAt(Patient.birthDate, Today())
+
+define fluent function ageInMonthsAt(patient Patient, asOf Date):
+  CalculateAgeInMonthsAt(Patient.birthDate, asOf)
+
+define fluent function ageInMonths(patient Patient):
+  CalculateAgeInMonthsAt(Patient.birthDate, Today())
+
 define fluent function ageInYearsAt(patient Patient, asOf Date):
-  CalculateAgeInYearsAt(date from Patient.birthDate, asOf)
+  CalculateAgeInYearsAt(Patient.birthDate, asOf)
 
 define fluent function ageInYears(patient Patient):
-  CalculateAgeInYearsAt(date from Patient.birthDate, Today())
+  CalculateAgeInYearsAt(Patient.birthDate, Today())
 
-define "Usual Name":
-  First(
-    Patient.name name
-      where name.use ~ 'usual'
-  )
+define fluent function usualName(patient Patient):
+  patient.name name
+    where name.use ~ 'usual'
+      and name.period is not null implies name.period includes Today()
+    sort by start of period desc
 
-define "Official Name":
-  First(
-    Patient.name name
-      where name.use ~ 'official'
-  )
+define fluent function officialName(patient Patient):
+  patient.name name
+    where name.use ~ 'official'
+      and name.period is not null implies name.period includes Today()
+    sort by start of period desc
 
-define "First Occurrence of Non-Official, Non-Usual Name":
+define fluent function firstNonOfficialNonUsualName(patient Patient):
   First(
-    Patient.name name
+    patient.name name
       where not(name.use ~ 'official') and not(name.use ~ 'usual')
+        and name.period is not null implies name.period includes Today()
+      sort by start of period desc
   )
 
-define "Name":
-  Coalesce("Official Name", "Usual Name", "First Occurrence of Non-Official, Non-Usual Name")
+define fluent function memberID(coverage FHIR.Coverage):
+  coverage.identifier.where(type ~ "Member Number").single().value
 
-define "First Name":
-  "Name".given[0]
+define fluent function policyNumber(coverage FHIR.Coverage):
+  singleton from (
+    coverage.identifier I
+      where I.type ~ "Subscriber Number"
+  ).value
 
-define "Middle Names":
-  Combine(Skip("Name".given, 1), ' ')
+define fluent function medicalRecordNumber(patient Patient):
+  patient.identifier.where(type ~ UC.MedicalRecordNumber).single().value
 
-define "Last Name":
-  "Name".family
+define fluent function name(practitioner Practitioner):
+  Coalesce(practitioner.officialName().first(), practitioner.usualName().first(), practitioner.firstNonOfficialNonUsualName())
 
-define "Name - First Middle(s) Last":
-  Combine("Name".given, ' ') + ' ' + "Name".family
+define fluent function usualName(practitioner Practitioner):
+  practitioner.name name
+    where name.use ~ 'usual'
+      and name.period is not null implies name.period includes Today()
+    sort by start of period desc
 
-define "Name - Last, First Middle(s)":
-  "Name".family + ', ' + Combine("Name".given, ' ')
+define fluent function officialName(practitioner Practitioner):
+  practitioner.name name
+    where name.use ~ 'official'
+      and name.period is not null implies name.period includes Today()
+    sort by start of period desc
+
+define fluent function firstNonOfficialNonUsualName(practitioner Practitioner):
+  First(
+    practitioner.name name
+      where not(name.use ~ 'official') and not(name.use ~ 'usual')
+        and name.period is not null implies name.period includes Today()
+      sort by start of period desc
+  )
+
+define fluent function name(practitioner Practitioner):
+  Coalesce(practitioner.officialName().first(), practitioner.usualName().first(), practitioner.firstNonOfficialNonUsualName())
+
+define fluent function firstName(name HumanName):
+  name.given.first()
+
+define fluent function middleNames(name HumanName):
+  Combine(Skip(name.given, 1), ' ')
+
+define fluent function lastName(name HumanName):
+  name.family
+
+define fluent function firstMiddleLast(name HumanName):
+  Combine(name.given, ' ') + ' ' + name.family
+
+define fluent function lastFirstMiddle(name HumanName):
+  name.family + ', ' + Combine(name.given, ' ')
 
 // Allergy/Intolerance
 
 /*
 @description: Returns all allergies and intolerances
-@comment: This definition returns all allergies and intolerances conforming to the US Core 3.1.1
-[AllergyIntolerance](https://hl7.org/fhir/us/core/STU3.1.1/StructureDefinition-us-core-allergyintolerance.html) profile.
+@comment: This definition returns all allergies and intolerances conforming to the US Core 7.0.0
+[AllergyIntolerance](https://hl7.org/fhir/us/core/STU7/StructureDefinition-us-core-allergyintolerance.html) profile.
 Allergies and intolerances returned by this definition include records with any clinical status (including none)
 and any verification status (including none).
 @profile: http://hl7.org/fhir/us/core/StructureDefinition/us-core-allergyintolerance
@@ -80,41 +130,42 @@ define "All Allergies and Intolerances":
   [USCore."AllergyIntolerance"]
 
 define "Active Confirmed Allergies and Intolerances":
-  "All Allergies and Intolerances".allergyActive().allergyConfirmed()
+  "All Allergies and Intolerances".active().confirmed()
 
 define "Common Allergies and Intolerances":
   "All Allergies and Intolerances" A
     where A.code in "Common allergy substances"
 
 define "Active Confirmed Common Allergies and Intolerances":
-  "Common Allergies and Intolerances".allergyActive().allergyConfirmed()
+  "Common Allergies and Intolerances".active().confirmed()
 
 // No Known Allergies (Not Asked)
 define "No Known Allergies (Not Asked)":
   "All Allergies and Intolerances" A
     where A.code ~ "No known allergy (situation)"
-      and A.isAllergyActive()
-      and A.isAllergyUnconfirmed()
+      and A.isActive()
+      and A.isUnconfirmed()
 
 // No Known Allergies (Confirmed)
 define "No Known Allergies (Confirmed)":
   "All Allergies and Intolerances" A
     where A.code ~ "No known allergy (situation)"
-      and A.isAllergyActive()
-      and A.isAllergyConfirmed()
+      and A.isActive()
+      and A.isConfirmed()
 
 // Condition
 
 /*
 @description: Returns all problem list items, encounter diagnoses, and health concerns
-@comment: This definition returns all conditions of any category conforming to the US Core 3.1.1
-[Condition](https://hl7.org/fhir/us/core/STU3.1.1/StructureDefinition-us-core-condition.html) profile.
+@comment: This definition returns all conditions of any category.
+[Condition Encounter Diagnosis](https://hl7.org/fhir/us/core/STU7/StructureDefinition-us-core-condition-encounter-diagnosis.html)
+[Condition Problems and Health Concerns](https://hl7.org/fhir/us/core/STU7/StructureDefinition-us-core-condition-problems-health-concerns.html)
 Conditions returned by this definition include records with any clinical status (including none) and
 any verification status (including none).
 @profile: http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition
 */
 define "All Conditions":
-  [USCore."Condition"]
+  [FHIR."Condition"]
 
 define "All Problem List Items":
   "All Conditions" C
@@ -134,7 +185,7 @@ define "All Health Concerns":
 // Laboratory Diagnostic Report
 
 /*
-@comment: [Diagnostic Report for Laboratory Results](https://hl7.org/fhir/us/core/STU3.1.1/StructureDefinition-us-core-diagnosticreport-lab.html)
+@comment: [Diagnostic Report for Laboratory Results](https://hl7.org/fhir/us/core/STU7/StructureDefinition-us-core-diagnosticreport-lab.html)
 @profile: http://hl7.org/fhir/us/core/StructureDefinition/us-core-diagnosticreport-lab
 */
 define "All Diagnostic Reports for Laboratory Results":
@@ -143,7 +194,7 @@ define "All Diagnostic Reports for Laboratory Results":
 // Diagnostic Report
 
 /*
-@comment: [Diagnostic Report Note](https://hl7.org/fhir/us/core/STU3.1.1/StructureDefinition-us-core-diagnosticreport-note.html)
+@comment: [Diagnostic Report Note](https://hl7.org/fhir/us/core/STU7/StructureDefinition-us-core-diagnosticreport-note.html)
 @profile: http://hl7.org/fhir/us/core/StructureDefinition/us-core-diagnosticreport-note
 */
 define "All Diagnostic Report Notes":
@@ -152,7 +203,7 @@ define "All Diagnostic Report Notes":
 // Encounter
 
 /*
-@comment: [Encounter](https://hl7.org/fhir/us/core/STU3.1.1/StructureDefinition-us-core-encounter.html)
+@comment: [Encounter](https://hl7.org/fhir/us/core/STU7/StructureDefinition-us-core-encounter.html)
 @profile: http://hl7.org/fhir/us/core/StructureDefinition/us-core-encounter
 */
 define "All Encounters":
@@ -165,7 +216,7 @@ define "All Performed Encounters":
 // Immunization
 
 /*
-@comment: [Immunization](https://hl7.org/fhir/us/core/STU3.1.1/StructureDefinition-us-core-immunization.html)
+@comment: [Immunization](https://hl7.org/fhir/us/core/STU7/StructureDefinition-us-core-immunization.html)
 @profile: http://hl7.org/fhir/us/core/StructureDefinition/us-core-immunization
 */
 define "All Immunizations":
@@ -178,7 +229,7 @@ define "All Completed Immunizations":
 // Implantable Device
 
 /*
-@comment: [Implantable Device](https://hl7.org/fhir/us/core/STU3.1.1/StructureDefinition-us-core-implantable-device.html)
+@comment: [Implantable Device](https://hl7.org/fhir/us/core/STU7/StructureDefinition-us-core-implantable-device.html)
 @profile: http://hl7.org/fhir/us/core/StructureDefinition/us-core-implantable-device
 */
 define "All Implantable Devices":
@@ -188,7 +239,7 @@ define "All Implantable Devices":
 
 /*
 @description: Returns all laboratory results
-@comment: [Laboratory Result](https://hl7.org/fhir/us/core/STU3.1.1/StructureDefinition-us-core-observation-lab.html)
+@comment: [Laboratory Result](https://hl7.org/fhir/us/core/STU7/StructureDefinition-us-core-observation-lab.html)
 @profile: http://hl7.org/fhir/us/core/StructureDefinition/us-core-observation-lab
 */
 define "All Laboratory Results":
@@ -202,11 +253,11 @@ define "Resulted Laboratory Results":
 
 /*
 @description: Returns all medication requests
-@comment: [Medication Request](https://hl7.org/fhir/us/core/STU3.1.1/StructureDefinition-us-core-medicationrequest.html)
+@comment: [Medication Request](https://hl7.org/fhir/us/core/STU7/StructureDefinition-us-core-medicationrequest.html)
 @profile: http://hl7.org/fhir/us/core/StructureDefinition/us-core-medicationrequest
 */
 define "Most Recent Medication Request":
-  UC.MostRecent("All Medication Requests")
+  "All Medication Requests".mostRecent()
 
 define "All Medication Requests":
   ["MedicationRequestProfile"]
@@ -222,7 +273,7 @@ define "All Medications":
 // Pediatric BMI for Age
 
 /*
-@comment: [Pediatric BMI for Age](https://hl7.org/fhir/us/core/STU3.1.1/StructureDefinition-pediatric-bmi-for-age.html)
+@comment: [Pediatric BMI for Age](https://hl7.org/fhir/us/core/STU7/StructureDefinition-pediatric-bmi-for-age.html)
 @profile: http://hl7.org/fhir/us/core/StructureDefinition/pediatric-bmi-for-age
 */
 define "Pediatric BMI for Age":
@@ -235,18 +286,17 @@ define "Pediatric BMI for Age All Statuses":
 // Pediatric Head Circumference Percentile
 
 /*
-@comment: [Pediatric Head Circumference Percentile](https://hl7.org/fhir/us/core/STU3.1.1/StructureDefinition-head-occipital-frontal-circumference-percentile.html)
+@comment: [Pediatric Head Circumference Percentile](https://hl7.org/fhir/us/core/STU7/StructureDefinition-head-occipital-frontal-circumference-percentile.html)
 @profile: http://hl7.org/fhir/us/core/StructureDefinition/head-occipital-frontal-circumference-percentile
 */
-//define "All Pediatric Head Circumference Percentile Measurements":
-  //TODO - profile not in modelinfo
-  //UsCorePediatricHeadOccipitalFrontalCircumferencePercentileProfile
-
+define "Pediatric Head Circumference Percentile":
+  ((["PediatricHeadOccipitalFrontalCircumferencePercentileProfile"]).resulted()) O
+    return O as "PediatricHeadOccipitalFrontalCircumferencePercentileProfile"
 
 // Pediatric Weight for Height
 
 /*
-@comment: [Pediatric Weight for Height](https://hl7.org/fhir/us/core/STU3.1.1/StructureDefinition-pediatric-weight-for-height.html)
+@comment: [Pediatric Weight for Height](https://hl7.org/fhir/us/core/STU7/StructureDefinition-pediatric-weight-for-height.html)
 @profile: http://hl7.org/fhir/us/core/StructureDefinition/pediatric-weight-for-height
 */
 define "Pediatric Weight for Height":
@@ -259,7 +309,7 @@ define "Pediatric Weight for Height All Statuses":
 // Procedure
 
 /*
-@comment: [Procedure](https://hl7.org/fhir/us/core/STU3.1.1/StructureDefinition-us-core-procedure.html)
+@comment: [Procedure](https://hl7.org/fhir/us/core/STU7/StructureDefinition-us-core-procedure.html)
 @profile: http://hl7.org/fhir/us/core/StructureDefinition/us-core-procedure
 */
 define "All Procedures":
@@ -273,7 +323,7 @@ define "All Performed Procedures":
 // Pulse Oximetry
 
 /*
-@comment: [Pulse Oximetry](https://hl7.org/fhir/us/core/STU3.1.1/StructureDefinition-us-core-pulse-oximetry.html)
+@comment: [Pulse Oximetry](https://hl7.org/fhir/us/core/STU7/StructureDefinition-us-core-pulse-oximetry.html)
 @profile: http://hl7.org/fhir/us/core/StructureDefinition/us-core-pulse-oximetry
 */
 define "Pulse Oximetry":
@@ -288,7 +338,7 @@ define "Pulse Oximetry All Statuses":
 /*
 @description: Returns all smoking status observations
 @comment: This definition returns all smoking status observations conforming to the US Core 3.1.1
-[Smoking Status](https://hl7.org/fhir/us/core/STU3.1.1/StructureDefinition-us-core-smokingstatus.html)
+[Smoking Status](https://hl7.org/fhir/us/core/STU7/StructureDefinition-us-core-smokingstatus.html)
 profile.
 @profile: http://hl7.org/fhir/us/core/StructureDefinition/us-core-smokingstatus
 */
@@ -302,7 +352,7 @@ define "Smoking Status All Statuses":
 /*
 @description: Returns the most recent smoking status
 @comment: This definition returns the most recent (by issued time) smoking status observation conforming to the
-US Core 3.1.1 [Smoking Status](https://hl7.org/fhir/us/core/STU3.1.1/StructureDefinition-us-core-smokingstatus.html)
+US Core [Smoking Status](https://hl7.org/fhir/us/core/STU7/StructureDefinition-us-core-smokingstatus.html)
 profile.
 */
 define "Most Recent Smoking Status":
@@ -312,175 +362,130 @@ define "Most Recent Smoking Status":
         sort by issued
   )
 
-// Vital Signs Panel
+// Vital Signs
 
 /*
-@comment: [Vital Signs Panel](http://hl7.org/fhir/R4/vitalspanel.html)
-@profile: http://hl7.org/fhir/StructureDefinition/vitalspanel
+@comment: [Vital Signs Panel](https://hl7.org/fhir/us/core/STU7/StructureDefinition-us-core-vital-signs.html)
+@profile: http://hl7.org/fhir/us/core/StructureDefinition/us-core-vital-signs
 */
-define "All Vital Signs Panels":
-  ((["observation-vitalspanel"]).resulted()) O
-    return O as "observation-vitalspanel"
+define "All Vital Signs":
+  ((["Vital Signs Profile"]).resulted()) O
+    return O as "Vital Signs Profile"
 
-define "All Vital Signs Panels All Statuses":
-  ["observation-vitalspanel"]
+define "All Vital Signs All Statuses":
+  ["Vital Signs Profile"]
 
 // Respiratory Rate
 
 /*
-@comment: [Respiratory Rate](http://hl7.org/fhir/R4/resprate.html)
-@profile: http://hl7.org/fhir/StructureDefinition/resprate
+@comment: [Respiratory Rate](https://hl7.org/fhir/us/core/STU7/StructureDefinition-us-core-respiratory-rate.html)
+@profile: http://hl7.org/fhir/us/core/StructureDefinition/us-core-respiratory-rate
 */
 define "All Respiratory Rate Measurements":
-  ((["observation-resprate"]).resulted()) O
-    return O as "observation-resprate"
+  ((["Respiratory Rate Profile"]).resulted()) O
+    return O as "Respiratory Rate Profile"
 
 define "All Respiratory Rate Measurements All Statuses":
-  ["observation-resprate"]
+  ["Respiratory Rate Profile"]
 
 // Heart Rate
 
 /*
-@comment: [Heart Rate](http://hl7.org/fhir/R4/heartrate.html)
-@profile:http://hl7.org/fhir/StructureDefinition/heartrate
+@comment: [Heart Rate](https://hl7.org/fhir/us/core/STU7/StructureDefinition-us-core-heart-rate.html)
+@profile: http://hl7.org/fhir/us/core/StructureDefinition/us-core-heart-rate
 */
 define "All Heart Rate Measurements":
-  ((["observation-heartrate"]).resulted()) O
-    return O as "observation-heartrate"
+  ((["Heart Rate Profile"]).resulted()) O
+    return O as "Heart Rate Profile"
 
 define "All Heart Rate Measurements All Statuses":
-  ["observation-heartrate"]
-
-// Oxygen Saturation
-
-/*
-@comment: [Oxygen Saturation](http://hl7.org/fhir/R4/oxygensat.html)
-@profile: http://hl7.org/fhir/StructureDefinition/oxygensat
-*/
-define "All Oxygen Saturation Measurements":
-  ((["observation-oxygensat"]).resulted()) O
-    return O as "observation-oxygensat"
-
-define "All Oxygen Saturation Measurements All Statuses":
-  ["observation-oxygensat"]
+  ["Heart Rate Profile"]
 
 // Body Temperature
 
 /*
-@comment: [Body Temperature](http://hl7.org/fhir/R4/bodytemp.html)
-@profile: http://hl7.org/fhir/StructureDefinition/bodytemp
+@comment: [Body Temperature](https://hl7.org/fhir/us/core/STU7/StructureDefinition-us-core-body-temperature.html)
+@profile: http://hl7.org/fhir/us/core/StructureDefinition/us-core-body-temperature
 */
 define "All Body Temperature Measurements":
-  ((["observation-bodytemp"]).resulted()) O
-    return O as "observation-bodytemp"
+  ((["Body Temperature Profile"]).resulted()) O
+    return O as "Body Temperature Profile"
 
 define "All Body Temperature Measurements All Statuses":
-  ["observation-bodytemp"]
+  ["Body Temperature Profile"]
 
 // Body Height
 
 /*
-@comment: [Body Height](http://hl7.org/fhir/R4/bodyheight.html)
-@profile: http://hl7.org/fhir/StructureDefinition/bodyheight
+@comment: [Body Height](https://hl7.org/fhir/us/core/STU7/StructureDefinition-us-core-body-height.html)
+@profile: http://hl7.org/fhir/us/core/StructureDefinition/us-core-body-height
 */
 define "All Body Height Measurements":
-   ((["observation-bodyheight"]).resulted()) O
-     return O as "observation-bodyheight"
+   ((["Body Height Profile"]).resulted()) O
+     return O as "Body Height Profile"
 
 define "All Body Height Measurements All Statuses":
-  ["observation-bodyheight"]
+  ["Body Height Profile"]
 
 // Head Circumference
 
 /*
-@comment: [Head Circumference](http://hl7.org/fhir/R4/headcircum.html)
-@profile: http://hl7.org/fhir/StructureDefinition/headcircum
+@comment: [Head Circumference](https://hl7.org/fhir/us/core/STU7/StructureDefinition-us-core-head-circumference.html)
+@profile: http://hl7.org/fhir/us/core/StructureDefinition/us-core-head-circumference
 */
 define "All Head Circumference Measurements":
-  ((["observation-headcircum"]).resulted()) O
-    return O as "observation-headcircum"
+  ((["Head Circumference Profile"]).resulted()) O
+    return O as "Head Circumference Profile"
 
 define "All Head Circumference Measurements All Statuses":
-  ["observation-headcircum"]
+  ["Head Circumference Profile"]
 
 // Body Weight
 
 /*
-@comment: [Body Weight](http://hl7.org/fhir/R4/bodyweight.html)
-@profile: http://hl7.org/fhir/StructureDefinition/bodyweight
+@comment: [Body Weight](https://hl7.org/fhir/us/core/STU7/StructureDefinition-us-core-body-weight.html)
+@profile: http://hl7.org/fhir/us/core/StructureDefinition/us-core-body-weight
 */
 define "All Body Weight Measurements":
-  ((["observation-bodyweight"]).resulted()) O
-    return O as "observation-bodyweight"
+  ((["Body Weight Profile"]).resulted()) O
+    return O as "Body Weight Profile"
 
 define "All Body Weight Measurements All Statuses":
-  ["observation-bodyweight"]
+  ["Body Weight Profile"]
 
 // Body Mass Index
 
 /*
-@comment: [Body Mass Index](http://hl7.org/fhir/R4/bmi.html)
-@profile: http://hl7.org/fhir/StructureDefinition/bmi
+@comment: [Body Mass Index](https://hl7.org/fhir/us/core/STU7/StructureDefinition-us-core-bmi.html)
+@profile: http://hl7.org/fhir/us/core/StructureDefinition/us-core-bmi
 */
 define "All Body Mass Index Measurements":
-  ((["observation-bmi"]).resulted()) O
-    return O as "observation-bmi"
+  ((["BMI Profile"]).resulted()) O
+    return O as "BMI Profile"
 
 define "All Body Mass Index Measurements All Statuses":
-  ["observation-bmi"]
+  ["BMI Profile"]
 
 // Blood Pressure
 
 /*
-@comment: [Blood Pressure](http://hl7.org/fhir/R4/bp.html)
-@profile: http://hl7.org/fhir/StructureDefinition/bp
+@comment: [Blood Pressure](https://hl7.org/fhir/us/core/STU7/StructureDefinition-us-core-blood-pressure.html)
+@profile: http://hl7.org/fhir/us/core/StructureDefinition/us-core-blood-pressure
 */
 define "All Blood Pressure Measurements":
-  ((["observation-bp"]).resulted()) O
-    return O as "observation-bp"
+  ((["Blood Pressure Profile"]).resulted()) O
+    return O as "Blood Pressure Profile"
 
 define "All Blood Pressure Measurements All Statuses":
-  ["observation-bp"]
+  ["Blood Pressure Profile"]
 
 // Systolic Blood Pressure
 define "Systolic Blood Pressure":
-  "All Blood Pressure Measurements".SystolicBP.value
+  "All Blood Pressure Measurements".mostRecent().systolic().value
 
 // Diastolic Blood Pressure
 define "Diastolic Blood Pressure":
-  "All Blood Pressure Measurements".DiastolicBP.value
-
-/* MBODA InitialExpressions */
-
-// TODO: Need to address how to identify which coverage is in use
-// define "Coverage":
-//   First(
-//     [FHIR.Coverage] C
-//       where EndsWith(C.beneficiary.reference, Patient.id)
-//         and C.period includes Today()
-//       sort by Coalesce(period.end, period.start) desc
-//   )
-
-// define "Member ID":
-//   Coverage.identifier.where(type ~ "Member Number").single().value
-
-define function MemberID(coverage FHIR.Coverage):
-  coverage.identifier.where(type ~ "Member Number").single().value
-
-define function PolicyNumber(coverage FHIR.Coverage):
-  singleton from (
-    coverage.identifier I
-      where I.type ~ "Subscriber Number"
-  ).value
-
-define "Medical Record Number":
-  Patient.identifier.where(type ~ UC.MedicalRecordNumber).single().value
-
-define function MostRecentObservation(observations List<"FHIR.Observation">):
-  Last(
-    observations O
-      sort by issued
-  )
+  "All Blood Pressure Measurements".mostRecent().diastolic().value
 
 define "Most Recent BSA":
   convert (([FHIR.Observation: "Body surface area"]).resulted().mostRecent() as FHIR.Observation).value to 'm2'
@@ -516,69 +521,28 @@ define fluent function mostRecentSR(serviceRequests List<"FHIR.ServiceRequest">)
       // sort by authoredOn
   )
 
-// define "Most Recent ServiceRequest":
-//   UC.MostRecent("All ServiceRequests")
-
-// define "Requesting Provider Practitioner"://assuming the requester is a practitioner
-//   [PractitionerProfile] P
-//     where EndsWith("Most Recent ServiceRequest".requester.reference.value, P.id)
-
 define function RequestingProvider(serviceRequest FHIR.ServiceRequest):
   [PractitionerProfile] P
     where EndsWith(serviceRequest.requester.reference.value, P.id)
-
-/*
-define "Requesting Provider Organization":
-  [OrganizationProfile] O
-    where EndsWith("Most Recent ServiceRequest".requester.reference.value, O.id)
-*/
-
-// define "Requesting Provider":
-//   "Requesting Provider Practitioner"
-
-// define "Servicing Provider"://assuming the servicing provider is a lab - (molecular/genetic testing)
-//   singleton from ([OrganizationProfile] O
-//     where EndsWith(First("Most Recent ServiceRequest".performer.reference.value), O.id))
 
 define function ServicingProvider(serviceRequest FHIR.ServiceRequest):
   [PractitionerProfile] P
     where EndsWith(First(serviceRequest.performer.reference.value), P.id)
 
-// define "Test Coverage":
-//   [FHIR.Coverage] C
-//     with "Most Recent ServiceRequest" SR such that EndsWith(First(SR.insurance.reference), C.id)
-
-// define "Billing Provider":
-//   singleton from([OrganizationProfile] O
-//     where EndsWith(First("Test Coverage".payor.reference.value), O.id))
-
 define function BillingProvider(coverage FHIR.Coverage):
   singleton from([OrganizationProfile] O
     where EndsWith(First(coverage.payor.reference.value), O.id))
 
-// define "Test Related Condition":
-//   [FHIR.Condition] C
-//     where EndsWith(First("Most Recent ServiceRequest".reasonReference.reference.value), C.id)
-//   //.reasonReference changed to .reason in FHIR R5
-
 define function RelatedCondition(serviceRequest FHIR.ServiceRequest):
   [FHIR.Condition] C
     where EndsWith(First(serviceRequest.reasonReference.reference.value), C.id)
-  //.reasonReference changed to .reason in FHIR R5
 
 define "Research Subject":
   [FHIR.ResearchSubject] R
     where  EndsWith(R.individual.reference, Patient.id)
-    //ResearchSubject.individual is from FHIR version v4.0.1 and has been replaced by R.subject in FHIR R5
 
 define "All Clinical Trials":
   [FHIR.ResearchStudy]
-
-//bug req (does not work if full statement is in USCoreElements and referenced in GMTPInitialExpressions)
-/*define "Clinical Trial":
-  [FHIR.ResearchStudy] R
-    with "Research Subject" S such that EndsWith(S.study.reference, R.id)
-    with  "Test Related Condition" C such that C.code in R.condition */
 
 define "Clinical Trial Organization":
   [OrganizationProfile] O
@@ -588,34 +552,15 @@ define function "GetServiceRequestReasonCondition"(serviceRequest ServiceRequest
     where EndsWith(First(serviceRequest.insurance.reference), C.id)
   return C
 
-// define "Policy Number":
-//   singleton from (
-//     Coverage.identifier I
-//       where I.type ~ "Subscriber Number"
-//   )
-
 define function Requester(medicationRequest MedicationRequestProfile):
   singleton from (
     [USCore.PractitionerProfile] P
       where EndsWith(medicationRequest.requester.reference, P.id)
   )
 
-// May not be appropriate for the Elements library, this is based on identifying a medication request...
-// define "Requester":
-//   singleton from (
-//     [USCore.PractitionerProfile] P
-//       where EndsWith("Most Recent Medication Request".requester.reference, P.id)
-//   )
-
 define function RequesterRole(medicationRequest MedicationRequestProfile):
   singleton from (
     [USCore.PractitionerRoleProfile] R
       where EndsWith(R.practitioner.reference, Requester(medicationRequest).id)
   )
-
-// define "RequesterRole":
-//   singleton from (
-//     [USCore.PractitionerRoleProfile] R
-//       where EndsWith(R.practitioner.reference, "Requester".id)
-//   )
 

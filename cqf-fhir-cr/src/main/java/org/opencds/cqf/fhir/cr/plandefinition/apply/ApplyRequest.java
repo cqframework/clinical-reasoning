@@ -28,7 +28,6 @@ import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
-import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
@@ -62,7 +61,6 @@ public class ApplyRequest implements ICpgRequest {
     private final Collection<IBaseResource> requestResources;
     private final Collection<IBaseResource> extractedResources;
     private IBaseOperationOutcome operationOutcome;
-    private IBaseResource questionnaire;
     private IQuestionnaireAdapter questionnaireAdapter;
     private Boolean containResources;
 
@@ -140,7 +138,7 @@ public class ApplyRequest implements ICpgRequest {
                         libraryEngine,
                         modelResolver,
                         inputParameterResolver)
-                .setQuestionnaire(questionnaire)
+                .setQuestionnaire(getQuestionnaire())
                 .setContainResources(containResources);
     }
 
@@ -166,7 +164,7 @@ public class ApplyRequest implements ICpgRequest {
     public GenerateRequest toGenerateRequest(IBaseResource profile) {
         return new GenerateRequest(profile, false, true, libraryEngine, modelResolver)
                 .setReferencedLibraries(referencedLibraries)
-                .setQuestionnaire(questionnaire);
+                .setQuestionnaire(getQuestionnaire());
     }
 
     public PopulateRequest toPopulateRequest() {
@@ -201,7 +199,7 @@ public class ApplyRequest implements ICpgRequest {
                     newPart(getFhirContext(), "Reference", "content", value)));
         });
         return new PopulateRequest(
-                questionnaire, subjectId, context, null, parameters, data, libraryEngine, modelResolver);
+                questionnaireAdapter.get(), subjectId, context, null, parameters, data, libraryEngine, modelResolver);
     }
 
     public IBaseResource getPlanDefinition() {
@@ -305,20 +303,17 @@ public class ApplyRequest implements ICpgRequest {
 
     @Override
     public IBaseResource getQuestionnaire() {
-        return questionnaire;
+        return questionnaireAdapter == null ? null : questionnaireAdapter.get();
     }
 
     @Override
     public IQuestionnaireAdapter getQuestionnaireAdapter() {
-        if (questionnaireAdapter == null && questionnaire != null) {
-            questionnaireAdapter = (IQuestionnaireAdapter)
-                    getAdapterFactory().createKnowledgeArtifactAdapter((IDomainResource) questionnaire);
-        }
         return questionnaireAdapter;
     }
 
     public ApplyRequest setQuestionnaire(IBaseResource questionnaire) {
-        this.questionnaire = questionnaire;
+        questionnaireAdapter =
+                questionnaire == null ? null : getAdapterFactory().createQuestionnaire(questionnaire);
         return this;
     }
 

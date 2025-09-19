@@ -1,42 +1,27 @@
 package org.opencds.cqf.fhir.utility.adapter.dstu3;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import org.hl7.fhir.dstu3.model.TriggerDefinition;
-import org.hl7.fhir.instance.model.api.ICompositeType;
-import org.opencds.cqf.cql.engine.model.ModelResolver;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.opencds.cqf.fhir.utility.adapter.BaseAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ITriggerDefinitionAdapter;
-import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 
-public class TriggerDefinitionAdapter implements ITriggerDefinitionAdapter {
+public class TriggerDefinitionAdapter extends BaseAdapter implements ITriggerDefinitionAdapter {
 
     private final TriggerDefinition triggerDefinition;
-    private final FhirContext fhirContext;
-    private final ModelResolver modelResolver;
 
-    public TriggerDefinitionAdapter(ICompositeType triggerDefinition) {
+    public TriggerDefinitionAdapter(IBase triggerDefinition) {
+        super(FhirVersionEnum.DSTU3, triggerDefinition);
         if (!(triggerDefinition instanceof TriggerDefinition)) {
             throw new IllegalArgumentException(
                     "object passed as triggerDefinition argument is not a TriggerDefinition data type");
         }
         this.triggerDefinition = (TriggerDefinition) triggerDefinition;
-        fhirContext = FhirContext.forDstu3Cached();
-        modelResolver = FhirModelResolverCache.resolverForVersion(FhirVersionEnum.DSTU3);
     }
 
     @Override
     public TriggerDefinition get() {
         return triggerDefinition;
-    }
-
-    @Override
-    public FhirContext fhirContext() {
-        return fhirContext;
-    }
-
-    @Override
-    public ModelResolver getModelResolver() {
-        return modelResolver;
     }
 
     @Override

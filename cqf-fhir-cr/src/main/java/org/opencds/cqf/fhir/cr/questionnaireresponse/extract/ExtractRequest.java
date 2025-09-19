@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
@@ -21,13 +20,15 @@ import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.common.IInputParameterResolver;
 import org.opencds.cqf.fhir.cr.common.IQuestionnaireRequest;
 import org.opencds.cqf.fhir.utility.Constants;
+import org.opencds.cqf.fhir.utility.adapter.IItemComponentAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireResponseAdapter;
 
+@SuppressWarnings("UnstableApiUsage")
 public class ExtractRequest implements IQuestionnaireRequest {
-    private final IBaseResource questionnaireResponse;
+    private final IQuestionnaireResponseAdapter questionnaireResponseAdapter;
     private final IQuestionnaireAdapter questionnaireAdapter;
     private final IIdType subjectId;
-    private final IBaseParameters parameters;
     private final IBaseBundle data;
     private final LibraryEngine libraryEngine;
     private final ModelResolver modelResolver;
@@ -49,24 +50,27 @@ public class ExtractRequest implements IQuestionnaireRequest {
         checkNotNull(questionnaireResponse, "expected non-null value for questionnaireResponse");
         checkNotNull(libraryEngine, "expected non-null value for libraryEngine");
         checkNotNull(modelResolver, "expected non-null value for modelResolver");
-        this.questionnaireResponse = questionnaireResponse;
-        fhirVersion = this.questionnaireResponse.getStructureFhirVersionEnum();
+        fhirVersion = questionnaireResponse.getStructureFhirVersionEnum();
+        questionnaireResponseAdapter = getAdapterFactory().createQuestionnaireResponse(questionnaireResponse);
         questionnaireAdapter =
                 questionnaire == null ? null : getAdapterFactory().createQuestionnaire(questionnaire);
         this.subjectId = subjectId;
-        this.parameters = parameters;
         this.data = bundle;
         this.libraryEngine = libraryEngine;
         this.modelResolver = modelResolver;
         this.inputParameterResolver = inputParameterResolver != null
                 ? inputParameterResolver
-                : createResolver(libraryEngine.getRepository(), this.subjectId, null, null, this.parameters, this.data);
+                : createResolver(libraryEngine.getRepository(), this.subjectId, null, null, parameters, this.data);
         fhirContext = this.libraryEngine.getRepository().fhirContext();
         referencedLibraries = Map.of();
     }
 
     public IBaseResource getQuestionnaireResponse() {
-        return questionnaireResponse;
+        return questionnaireResponseAdapter.get();
+    }
+
+    public IQuestionnaireResponseAdapter getQuestionnaireResponseAdapter() {
+        return questionnaireResponseAdapter;
     }
 
     public boolean hasQuestionnaire() {
@@ -81,14 +85,17 @@ public class ExtractRequest implements IQuestionnaireRequest {
         return questionnaireAdapter;
     }
 
-    public IBaseBackboneElement getQuestionnaireItem(IBaseBackboneElement item) {
-        return hasQuestionnaire() ? getQuestionnaireItem(item, getItems(getQuestionnaire())) : null;
+    public IItemComponentAdapter getQuestionnaireItem(IItemComponentAdapter item) {
+        return hasQuestionnaire()
+                ? getQuestionnaireItem(item, getQuestionnaireAdapter().getItem())
+                : null;
     }
 
-    public IBaseBackboneElement getQuestionnaireItem(IBaseBackboneElement item, List<IBaseBackboneElement> qItems) {
+    public <T extends IItemComponentAdapter> IItemComponentAdapter getQuestionnaireItem(
+            T item, List<? extends IItemComponentAdapter> qItems) {
         return qItems != null
                 ? qItems.stream()
-                        .filter(i -> getItemLinkId(i).equals(getItemLinkId(item)))
+                        .filter(i -> i.getLinkId().equals(item.getLinkId()))
                         .findFirst()
                         .orElse(null)
                 : null;
@@ -96,14 +103,14 @@ public class ExtractRequest implements IQuestionnaireRequest {
 
     public boolean isDefinitionItem(ItemPair item) {
         var targetItem = item.getItem() == null ? item.getResponseItem() : item.getItem();
-        return hasExtension(targetItem, Constants.SDC_QUESTIONNAIRE_ITEM_EXTRACTION_CONTEXT)
-                || hasExtension(targetItem, Constants.SDC_QUESTIONNAIRE_DEFINITION_EXTRACT)
-                || StringUtils.isNotBlank(resolvePathString(targetItem, "definition"));
+        return targetItem.hasExtension(Constants.SDC_QUESTIONNAIRE_ITEM_EXTRACTION_CONTEXT)
+                || targetItem.hasExtension(Constants.SDC_QUESTIONNAIRE_DEFINITION_EXTRACT)
+                || StringUtils.isNotBlank(targetItem.getDefinition());
     }
 
     @SuppressWarnings("unchecked")
     public <T extends IBaseExtension<?, ?>> T getDefinitionExtract() {
-        var qrExt = getExtensions(questionnaireResponse).stream()
+        var qrExt = questionnaireResponseAdapter.getExtension().stream()
                 .filter(e -> e.getUrl().equals(Constants.SDC_QUESTIONNAIRE_ITEM_EXTRACTION_CONTEXT)
                         || e.getUrl().equals(Constants.SDC_QUESTIONNAIRE_DEFINITION_EXTRACT))
                 .findFirst()
@@ -121,7 +128,7 @@ public class ExtractRequest implements IQuestionnaireRequest {
     }
 
     public String getExtractId() {
-        return "extract-" + questionnaireResponse.getIdElement().getIdPart();
+        return "extract-" + questionnaireResponseAdapter.get().getIdElement().getIdPart();
     }
 
     @Override

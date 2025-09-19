@@ -1,6 +1,5 @@
 package org.opencds.cqf.fhir.utility.adapter.dstu3;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.List;
 import org.hl7.fhir.dstu3.model.ElementDefinition;
@@ -9,43 +8,26 @@ import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseDatatypeElement;
-import org.hl7.fhir.instance.model.api.ICompositeType;
-import org.opencds.cqf.cql.engine.model.ModelResolver;
+import org.opencds.cqf.fhir.utility.adapter.BaseAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ICodingAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IElementDefinitionAdapter;
-import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 
-public class ElementDefinitionAdapter implements IElementDefinitionAdapter {
+public class ElementDefinitionAdapter extends BaseAdapter implements IElementDefinitionAdapter {
 
     private final ElementDefinition elementDefinition;
-    private final FhirContext fhirContext;
-    private final ModelResolver modelResolver;
-    private final AdapterFactory adapterFactory;
 
-    public ElementDefinitionAdapter(ICompositeType elementDefinition) {
+    public ElementDefinitionAdapter(IBase elementDefinition) {
+        super(FhirVersionEnum.DSTU3, elementDefinition);
         if (!(elementDefinition instanceof ElementDefinition)) {
             throw new IllegalArgumentException(
                     "object passed as elementDefinition argument is not a ElementDefinition data type");
         }
         this.elementDefinition = (ElementDefinition) elementDefinition;
-        fhirContext = FhirContext.forDstu3Cached();
-        modelResolver = FhirModelResolverCache.resolverForVersion(FhirVersionEnum.DSTU3);
-        adapterFactory = new AdapterFactory();
     }
 
     @Override
     public ElementDefinition get() {
         return elementDefinition;
-    }
-
-    @Override
-    public FhirContext fhirContext() {
-        return fhirContext;
-    }
-
-    @Override
-    public ModelResolver getModelResolver() {
-        return modelResolver;
     }
 
     @Override

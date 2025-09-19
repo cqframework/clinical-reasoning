@@ -4,10 +4,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.opencds.cqf.fhir.cr.common.IQuestionnaireRequest;
+import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireItemComponentAdapter;
 
 public class CodeMap {
     private CodeMap() {}
@@ -19,25 +18,24 @@ public class CodeMap {
             return Collections.emptyMap();
         }
         var questionnaireCodeMap = new HashMap<String, List<IBaseCoding>>();
-        request.getItems(request.getQuestionnaire())
-                .forEach(item -> processQuestionnaireItems(request, item, questionnaireCodeMap));
-
+        if (request.hasQuestionnaire()) {
+            request.getQuestionnaireAdapter()
+                    .getItem()
+                    .forEach(item -> processQuestionnaireItems(request, item, questionnaireCodeMap));
+        }
         return questionnaireCodeMap;
     }
 
     private static void processQuestionnaireItems(
             IQuestionnaireRequest request,
-            IBaseBackboneElement item,
+            IQuestionnaireItemComponentAdapter item,
             Map<String, List<IBaseCoding>> questionnaireCodeMap) {
-        var childItems = request.getItems(item);
-        if (!childItems.isEmpty()) {
-            childItems.forEach(child -> processQuestionnaireItems(request, child, questionnaireCodeMap));
+        if (item.hasItem()) {
+            item.getItem().stream()
+                    .map(IQuestionnaireItemComponentAdapter.class::cast)
+                    .forEach(child -> processQuestionnaireItems(request, child, questionnaireCodeMap));
         } else {
-            var linkId = request.resolvePathString(item, "linkId");
-            var codes = request.resolvePathList(item, "code").stream()
-                    .map(c -> (IBaseCoding) c)
-                    .collect(Collectors.toList());
-            questionnaireCodeMap.put(linkId, codes);
+            questionnaireCodeMap.put(item.getLinkId(), item.getCode());
         }
     }
 }

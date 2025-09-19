@@ -1,23 +1,18 @@
 package org.opencds.cqf.fhir.utility.adapter.dstu3;
 
-import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import org.hl7.fhir.dstu3.model.Attachment;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.ICompositeType;
-import org.opencds.cqf.cql.engine.model.ModelResolver;
+import org.opencds.cqf.fhir.utility.adapter.BaseAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IAttachmentAdapter;
-import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 
-class AttachmentAdapter implements IAttachmentAdapter {
+class AttachmentAdapter extends BaseAdapter implements IAttachmentAdapter {
 
     private final Attachment attachment;
-    private final FhirContext fhirContext;
-    private final ModelResolver modelResolver;
 
-    public AttachmentAdapter(ICompositeType attachment) {
-        if (attachment == null) {
-            throw new IllegalArgumentException("attachment can not be null");
-        }
-
+    public AttachmentAdapter(IBase attachment) {
+        super(FhirVersionEnum.DSTU3, attachment);
         if (!attachment.fhirType().equals("Attachment")) {
             throw new IllegalArgumentException("resource passed as attachment argument is not an Attachment resource");
         }
@@ -27,9 +22,6 @@ class AttachmentAdapter implements IAttachmentAdapter {
         }
 
         this.attachment = (Attachment) attachment;
-        fhirContext = FhirContext.forDstu3Cached();
-        modelResolver = FhirModelResolverCache.resolverForVersion(
-                fhirContext.getVersion().getVersion());
     }
 
     protected Attachment getAttachment() {
@@ -59,15 +51,5 @@ class AttachmentAdapter implements IAttachmentAdapter {
     @Override
     public void setData(byte[] data) {
         this.getAttachment().setData(data);
-    }
-
-    @Override
-    public FhirContext fhirContext() {
-        return fhirContext;
-    }
-
-    @Override
-    public ModelResolver getModelResolver() {
-        return modelResolver;
     }
 }

@@ -397,8 +397,8 @@ class PlanDefinitionProcessorTests {
                 .parameters(parameters)
                 .thenApplyR5()
                 .hasEntry(4)
-                .hasQuestionnaire()
-                .hasQuestionnaireResponse()
+                .hasQuestionnaire(true)
+                .hasQuestionnaireResponse(true)
                 .hasQuestionnaireResponseItemValue("1.1", "Claim/OPA-Claim1")
                 .hasQuestionnaireResponseItemValue("2.1", "Acme Clinic")
                 .hasQuestionnaireResponseItemValue("2.2.1", "1407071236")
@@ -416,8 +416,8 @@ class PlanDefinitionProcessorTests {
                 .additionalData(bundle)
                 .thenApplyR5()
                 .hasEntry(4)
-                .hasQuestionnaire()
-                .hasQuestionnaireResponse();
+                .hasQuestionnaire(true)
+                .hasQuestionnaireResponse(true);
     }
 
     @Test
@@ -435,8 +435,8 @@ class PlanDefinitionProcessorTests {
                 .parameters(parameters)
                 .thenApplyR5()
                 .hasEntry(3)
-                .hasQuestionnaire()
-                .hasQuestionnaireResponse()
+                .hasQuestionnaire(true)
+                .hasQuestionnaireResponse(true)
                 .questionnaireResponse;
         // First response Item is correct
         var responseItem1 = questionnaireResponse.getItem().get(0);
@@ -476,8 +476,25 @@ class PlanDefinitionProcessorTests {
                 .parameters(parameters)
                 .thenApplyR5()
                 .hasEntry(4)
-                .hasQuestionnaire()
-                .hasQuestionnaireResponse();
+                .hasQuestionnaire(true)
+                .hasQuestionnaireResponse(true);
+    }
+
+    @Test
+    void noUrl_DoesNotGenerate() {
+        var planDefinitionID = "no-url";
+        var patientID = "OPA-Patient1";
+        var parameters = org.opencds.cqf.fhir.utility.r5.Parameters.parameters(
+                org.opencds.cqf.fhir.utility.r5.Parameters.stringPart("ClaimId", "OPA-Claim1"));
+        given().repositoryFor(fhirContextR5, "r5")
+                .when()
+                .planDefinitionId(planDefinitionID)
+                .subjectId(patientID)
+                .parameters(parameters)
+                .thenApplyR5()
+                .hasEntry(2)
+                .hasQuestionnaire(false)
+                .hasQuestionnaireResponse(false);
     }
 
     @Test

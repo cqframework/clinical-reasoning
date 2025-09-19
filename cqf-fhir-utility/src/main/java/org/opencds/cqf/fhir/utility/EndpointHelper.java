@@ -1,4 +1,4 @@
-package org.opencds.cqf.fhir.cr.hapi.common;
+package org.opencds.cqf.fhir.utility;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;

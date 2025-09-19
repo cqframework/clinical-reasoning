@@ -1,0 +1,72 @@
+{
+  "resourceType": "GraphDefinition",
+  "id": "hr-pathway-event",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-computablegraphdefinition",
+      "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-caseplansummarydefinition"
+    ]
+  },
+  "url": "http://example.org/cdosdh/GraphDefinition/hr-pathway-event",
+  "name": "HRPathwayEventGraph",
+  "status": "active",
+  "date": "2025-12-02T09:05:00Z",
+  "publisher": "Smile Digital Health",
+  "description": "HR",
+  "start": "Observation",
+  "profile": "http://example.org/cdosdh/demo/StructureDefinition/cpg-casefeature-hr-pathway-event",
+  "link": [
+    {
+      "description": "Case Features",
+      "target": [
+        {
+          "type": "Observation",
+          "profile": "http://example.org/cdosdh/demo/StructureDefinition/cpg-casefeature-hr"
+        },
+        {
+          "type": "Observation",
+          "profile": "http://example.org/cdosdh/demo/StructureDefinition/cpg-casefeature-preop-hr"
+        }
+      ]
+    },
+    {
+      "description": "Orders",
+      "target": [
+        {
+          "type": "ServiceRequest",
+          "profile": "http://example.org/cdosdh/demo/StructureDefinition/cpg-casefeature-vitals-order"
+        }
+      ]
+    },
+    {
+      "description": "Goal",
+      "target": [
+        {
+          "type": "Goal",
+          "profile": "http://example.org/cdosdh/demo/StructureDefinition/cpg-casefeature-hr-goal"
+        }
+      ]
+    },
+    {
+      "description": "Metrics",
+      "target": [
+        {
+          "type": "Observation",
+          "profile": "http://example.org/cdosdh/demo/StructureDefinition/cpg-casefeature-goal-hr-metric"
+        },
+        {
+          "type": "Observation",
+          "profile": "http://example.org/cdosdh/demo/StructureDefinition/cpg-casefeature-hr-process-metric"
+        },
+        {
+          "type": "Observation",
+          "profile": "http://example.org/cdosdh/demo/StructureDefinition/cpg-casefeature-preop-hr-metric"
+        },
+        {
+          "type": "Observation",
+          "profile": "http://example.org/cdosdh/demo/StructureDefinition/cpg-casefeature-vitals-order-metric"
+        }
+      ]
+    }
+  ]
+}

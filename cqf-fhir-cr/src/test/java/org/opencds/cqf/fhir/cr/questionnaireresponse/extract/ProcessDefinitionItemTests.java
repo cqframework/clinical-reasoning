@@ -11,7 +11,7 @@ import static org.opencds.cqf.fhir.cr.questionnaireresponse.TestQuestionnaireRes
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.repository.IRepository;
-import java.util.Arrays;
+import java.util.List;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Condition;
@@ -19,6 +19,7 @@ import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent;
+import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent;
 import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseItemComponent;
@@ -32,6 +33,7 @@ import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.common.ExpressionProcessor;
 import org.opencds.cqf.fhir.utility.Constants;
 
+@SuppressWarnings("UnstableApiUsage")
 @ExtendWith(MockitoExtension.class)
 class ProcessDefinitionItemTests {
     private final FhirContext fhirContextR4 = FhirContext.forR4Cached();
@@ -59,7 +61,7 @@ class ProcessDefinitionItemTests {
         var fhirVersion = FhirVersionEnum.R4;
         var item = new QuestionnaireItemComponent();
         var responseItem = new QuestionnaireResponseItemComponent();
-        var itemPair = new ItemPair(item, responseItem);
+        var itemPair = new ItemPair(fhirVersion, item, responseItem);
         var questionnaire = new Questionnaire();
         var response = new QuestionnaireResponse();
         var request = newExtractRequestForVersion(fhirVersion, libraryEngine, response, questionnaire);
@@ -72,7 +74,7 @@ class ProcessDefinitionItemTests {
         var item = new QuestionnaireItemComponent();
         item.setDefinition("http://hl7.org/fhir/StructureDefinition/RelatedPerson.name.text");
         var responseItem = new QuestionnaireResponseItemComponent();
-        var itemPair = new ItemPair(item, responseItem);
+        var itemPair = new ItemPair(fhirVersion, item, responseItem);
         var questionnaire = new Questionnaire();
         var response = new QuestionnaireResponse();
         var request = newExtractRequestForVersion(fhirVersion, libraryEngine, response, questionnaire);
@@ -85,7 +87,7 @@ class ProcessDefinitionItemTests {
         var item = new QuestionnaireItemComponent().setLinkId("1");
         item.addExtension(Constants.SDC_QUESTIONNAIRE_ITEM_EXTRACTION_CONTEXT, new CodeType("Condition"));
         var responseItem = new QuestionnaireResponseItemComponent().setLinkId("1");
-        var itemPair = new ItemPair(item, responseItem);
+        var itemPair = new ItemPair(fhirVersion, item, responseItem);
         var questionnaire = new Questionnaire();
         var response = new QuestionnaireResponse();
         var request = newExtractRequestForVersion(fhirVersion, libraryEngine, response, questionnaire);
@@ -102,7 +104,7 @@ class ProcessDefinitionItemTests {
                 .setValue(new CanonicalType().setValue(profile));
         item.addExtension(extension);
         var responseItem = new QuestionnaireResponseItemComponent().setLinkId("1");
-        var itemPair = new ItemPair(item, responseItem);
+        var itemPair = new ItemPair(fhirVersion, item, responseItem);
         var questionnaire = new Questionnaire();
         var response = new QuestionnaireResponse();
         var request = newExtractRequestForVersion(fhirVersion, libraryEngine, response, questionnaire);
@@ -113,16 +115,16 @@ class ProcessDefinitionItemTests {
     @Test
     void testItemWithContextExtensionWithMultipleAnswers() {
         var fhirVersion = FhirVersionEnum.R4;
-        var item = new QuestionnaireItemComponent().setLinkId("1");
+        var item = new QuestionnaireItemComponent().setLinkId("1").setType(QuestionnaireItemType.STRING);
         item.setDefinition("http://hl7.org/fhir/Patient#Patient.name.given");
         var responseItem = new QuestionnaireResponseItemComponent().setLinkId("1");
         responseItem.addAnswer(new QuestionnaireResponseItemAnswerComponent().setValue(new StringType("test1")));
         responseItem.addAnswer(new QuestionnaireResponseItemAnswerComponent().setValue(new StringType("test2")));
-        var questionnaire = new Questionnaire().setItem(Arrays.asList(item));
+        var questionnaire = new Questionnaire().setItem(List.of(item));
         var extension =
                 new Extension(Constants.SDC_QUESTIONNAIRE_ITEM_EXTRACTION_CONTEXT).setValue(new CodeType("Patient"));
         questionnaire.addExtension(extension);
-        var response = new QuestionnaireResponse().setItem(Arrays.asList(responseItem));
+        var response = new QuestionnaireResponse().setItem(List.of(responseItem));
         var request = newExtractRequestForVersion(fhirVersion, libraryEngine, response, questionnaire);
         var itemPair = new ItemPair(null, null);
         var actual = fixture.processDefinitionItem(request, itemPair);
@@ -162,11 +164,11 @@ class ProcessDefinitionItemTests {
         var responseItem = new QuestionnaireResponseItemComponent().setLinkId("1");
         responseItem.addAnswer(new QuestionnaireResponseItemAnswerComponent().setValue(new StringType("test1")));
         responseItem.addAnswer(new QuestionnaireResponseItemAnswerComponent().setValue(new StringType("test2")));
-        var questionnaire = new Questionnaire().setItem(Arrays.asList(item));
+        var questionnaire = new Questionnaire().setItem(List.of(item));
         var extension =
                 new Extension(Constants.SDC_QUESTIONNAIRE_ITEM_EXTRACTION_CONTEXT).setValue(new CodeType("Patient"));
         questionnaire.addExtension(extension);
-        var response = new QuestionnaireResponse().setItem(Arrays.asList(responseItem));
+        var response = new QuestionnaireResponse().setItem(List.of(responseItem));
         var request = newExtractRequestForVersion(fhirVersion, libraryEngine, response, questionnaire);
         var itemPair = new ItemPair(null, null);
         var actual = fixture.processDefinitionItem(request, itemPair);

@@ -4,17 +4,17 @@ import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 
 public interface IDependencyInfo {
-    public String getReferenceSource();
+    String getReferenceSource();
 
-    public void setReferenceSource(String referenceSource);
+    void setReferenceSource(String referenceSource);
 
-    public String getReference();
+    String getReference();
 
-    public void setReference(String reference);
+    void setReference(String reference);
 
-    public String getReferencePackageId();
+    String getReferencePackageId();
 
-    public void setReferencePackageId(String referencePackageId);
+    void setReferencePackageId(String referencePackageId);
 
-    public <E extends IBaseExtension<?, ?>> List<E> getExtension();
+    <E extends IBaseExtension<?, ?>> List<E> getExtension();
 }

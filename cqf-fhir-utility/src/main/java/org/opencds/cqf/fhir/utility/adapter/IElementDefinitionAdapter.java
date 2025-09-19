@@ -4,9 +4,8 @@ import java.util.List;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseDatatypeElement;
-import org.hl7.fhir.instance.model.api.ICompositeType;
 
-public interface IElementDefinitionAdapter extends IAdapter<ICompositeType> {
+public interface IElementDefinitionAdapter extends IAdapter<IBase> {
     String getId();
 
     String getPath();

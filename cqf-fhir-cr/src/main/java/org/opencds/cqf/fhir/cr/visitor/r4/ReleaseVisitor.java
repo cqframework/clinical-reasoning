@@ -179,7 +179,8 @@ public class ReleaseVisitor {
 
         if (effectiveDataRequirementsLib != null) {
             var proposedExtensions = effectiveDataRequirementsLib.getExtension().stream()
-                    .filter(ext -> ext.getUrl().equals(Constants.CQFM_DIRECT_REFERENCE_EXTENSION))
+                    .filter(ext -> ext.getUrl().equals(Constants.CQFM_DIRECT_REFERENCE_EXTENSION)
+                            || ext.getUrl().equals(Constants.CQF_DIRECT_REFERENCE_EXTENSION))
                     .map(ext -> ext.setUrl(Constants.CQF_DIRECT_REFERENCE_EXTENSION))
                     .toList();
 

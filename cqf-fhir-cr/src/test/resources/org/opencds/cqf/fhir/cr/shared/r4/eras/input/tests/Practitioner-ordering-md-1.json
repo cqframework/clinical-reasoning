@@ -1,0 +1,17 @@
+{
+    "resourceType": "Practitioner",
+    "meta": { "profile": [ "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-practitioner" ] },
+    "id": "ordering-md-1",
+    "name": [
+        {
+            "use": "official",
+            "family": "Ordering",
+            "given": [
+                "MD"
+            ]
+        }
+    ]
+}
+
+
+

@@ -1,0 +1,32 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "cpg-metric-compliance",
+  "url": "http://example.org/cdosdh/CodeSystem/cpg-metric-compliance",
+  "name": "CPGMetricComplianceCodes",
+  "title": "CPG Metric Compliance Codes",
+  "status": "draft",
+  "experimental": true,
+  "publisher": "Smile Digital Health",
+  "description": "Codes indicating compliance status for CPG metrics",
+  "caseSensitive": true,
+  "content": "complete",
+  "concept": [
+    {
+      "code": "compliant",
+      "display": "Compliant",
+      "definition": "The subject is compliant with the metric"
+    },
+    {
+      "code": "at-risk-non-compliant",
+      "display": "At-Risk for Non-Compliant",
+      "definition": "The subject is at risk for non-compliance with the metric"
+    },
+    {
+      "code": "not-applicable",
+      "display": "Not Applicable",
+      "definition": "The metric does not apply to the subject/context"
+    }
+  ]
+}
+
+

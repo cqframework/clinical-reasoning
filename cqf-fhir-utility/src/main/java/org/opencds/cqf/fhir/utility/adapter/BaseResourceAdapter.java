@@ -4,6 +4,8 @@ import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import com.google.common.collect.Sets;
 import java.util.Set;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
+import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.utility.Constants;
@@ -64,5 +66,14 @@ public abstract class BaseResourceAdapter implements IResourceAdapter {
 
     public IAdapterFactory getAdapterFactory() {
         return adapterFactory;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <E extends IBaseExtension<?, ?>> E addExtension() {
+        if (get() instanceof IBaseHasExtensions baseHasExtensions) {
+            return (E) baseHasExtensions.addExtension();
+        }
+        return null;
     }
 }

@@ -2,11 +2,17 @@ package org.opencds.cqf.fhir.utility.adapter;
 
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 public interface IStructureDefinitionAdapter extends IKnowledgeArtifactAdapter {
+
     default String getType() {
         return resolvePathString(get(), "type");
     }
+
+    IPrimitiveType<String> getBaseDefinition();
+
+    boolean hasSnapshot();
 
     List<IElementDefinitionAdapter> getSnapshotElements();
 
@@ -25,7 +31,7 @@ public interface IStructureDefinitionAdapter extends IKnowledgeArtifactAdapter {
     /**
      * Returns the first element found with a matching path. Differential elements will be returned first. Elements with a slicing defined will be ignored.
      * @param path The path of the element without the preceding resource type. e.g. value[x] rather than Observation.value[x]
-     * @return
+     * @return IElementDefinitionAdapter
      */
     default IElementDefinitionAdapter getElementByPath(String path) {
         return getDifferentialElements().stream()

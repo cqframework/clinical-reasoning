@@ -11,6 +11,7 @@ import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cr.visitor.DataRequirementsVisitor;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 
+@SuppressWarnings("UnstableApiUsage")
 public class DataRequirementsProcessor implements IDataRequirementsProcessor {
     protected final IRepository repository;
     protected final FhirVersionEnum fhirVersion;

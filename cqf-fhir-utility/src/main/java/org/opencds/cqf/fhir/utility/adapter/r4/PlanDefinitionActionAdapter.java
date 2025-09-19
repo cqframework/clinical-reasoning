@@ -1,45 +1,30 @@
 package org.opencds.cqf.fhir.utility.adapter.r4;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.r4.model.PlanDefinition.PlanDefinitionActionComponent;
-import org.opencds.cqf.cql.engine.model.ModelResolver;
+import org.opencds.cqf.fhir.utility.adapter.BaseAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IPlanDefinitionActionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ITriggerDefinitionAdapter;
-import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 
-public class PlanDefinitionActionAdapter implements IPlanDefinitionActionAdapter {
+public class PlanDefinitionActionAdapter extends BaseAdapter implements IPlanDefinitionActionAdapter {
 
     private final PlanDefinitionActionComponent action;
-    private final FhirContext fhirContext;
-    private final ModelResolver modelResolver;
 
-    public PlanDefinitionActionAdapter(IBaseBackboneElement action) {
+    public PlanDefinitionActionAdapter(IBase action) {
+        super(FhirVersionEnum.R4, action);
         if (!(action instanceof PlanDefinitionActionComponent)) {
             throw new IllegalArgumentException(
                     "object passed as action argument is not a PlanDefinitionActionComponent data type");
         }
         this.action = (PlanDefinitionActionComponent) action;
-        fhirContext = FhirContext.forR4Cached();
-        modelResolver = FhirModelResolverCache.resolverForVersion(FhirVersionEnum.R4);
     }
 
     @Override
     public PlanDefinitionActionComponent get() {
         return action;
-    }
-
-    @Override
-    public FhirContext fhirContext() {
-        return fhirContext;
-    }
-
-    @Override
-    public ModelResolver getModelResolver() {
-        return modelResolver;
     }
 
     @Override
@@ -54,6 +39,6 @@ public class PlanDefinitionActionAdapter implements IPlanDefinitionActionAdapter
 
     @Override
     public List<String> getTriggerType() {
-        return get().getTrigger().stream().map(t -> t.getType().toCode()).collect(Collectors.toUnmodifiableList());
+        return get().getTrigger().stream().map(t -> t.getType().toCode()).toList();
     }
 }

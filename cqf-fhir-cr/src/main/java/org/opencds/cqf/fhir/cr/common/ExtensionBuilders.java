@@ -18,8 +18,8 @@ public class ExtensionBuilders {
         return new SimpleEntry<>(Constants.SDC_QUESTIONNAIRE_PREPOPULATE_SUBJECT, patientCode + "/" + patientId);
     }
 
-    public static SimpleEntry<String, String> crmiMessagesExtension(String operationOutcomeId) {
-        return new SimpleEntry<>(Constants.EXT_CRMI_MESSAGES, operationOutcomeId);
+    public static SimpleEntry<String, String> cqfMessagesExtension(String operationOutcomeId) {
+        return new SimpleEntry<>(Constants.CQF_MESSAGES, operationOutcomeId);
     }
 
     public static SimpleEntry<String, String> dtrQuestionnaireResponseExtension(String questionnaireId) {
@@ -38,17 +38,12 @@ public class ExtensionBuilders {
     public static <T extends IBaseExtension<?, ?>> T buildReferenceExt(
             FhirVersionEnum fhirVersion, SimpleEntry<String, String> entry, Boolean isContained) {
         var value = buildReference(fhirVersion, entry.getValue(), isContained);
-        switch (fhirVersion) {
-            case DSTU3:
-                return (T) new org.hl7.fhir.dstu3.model.Extension(entry.getKey(), value);
-            case R4:
-                return (T) new org.hl7.fhir.r4.model.Extension(entry.getKey(), value);
-            case R5:
-                return (T) new org.hl7.fhir.r5.model.Extension(entry.getKey(), value);
-
-            default:
-                return null;
-        }
+        return switch (fhirVersion) {
+            case DSTU3 -> (T) new org.hl7.fhir.dstu3.model.Extension(entry.getKey(), value);
+            case R4 -> (T) new org.hl7.fhir.r4.model.Extension(entry.getKey(), value);
+            case R5 -> (T) new org.hl7.fhir.r5.model.Extension(entry.getKey(), value);
+            default -> null;
+        };
     }
 
     public static IBaseReference buildReference(FhirVersionEnum fhirVersion, String id) {
@@ -57,48 +52,33 @@ public class ExtensionBuilders {
 
     public static IBaseReference buildReference(FhirVersionEnum fhirVersion, String id, Boolean isContained) {
         var reference = Boolean.TRUE.equals(isContained) ? "#".concat(id) : id;
-        switch (fhirVersion) {
-            case DSTU3:
-                return new org.hl7.fhir.dstu3.model.Reference(reference);
-            case R4:
-                return new org.hl7.fhir.r4.model.Reference(reference);
-            case R5:
-                return new org.hl7.fhir.r5.model.Reference(reference);
-
-            default:
-                return null;
-        }
+        return switch (fhirVersion) {
+            case DSTU3 -> new org.hl7.fhir.dstu3.model.Reference(reference);
+            case R4 -> new org.hl7.fhir.r4.model.Reference(reference);
+            case R5 -> new org.hl7.fhir.r5.model.Reference(reference);
+            default -> null;
+        };
     }
 
     public static IBaseBooleanDatatype buildBooleanType(FhirVersionEnum fhirVersion, Boolean value) {
-        switch (fhirVersion) {
-            case DSTU3:
-                return new org.hl7.fhir.dstu3.model.BooleanType(value);
-            case R4:
-                return new org.hl7.fhir.r4.model.BooleanType(value);
-            case R5:
-                return new org.hl7.fhir.r5.model.BooleanType(value);
-
-            default:
-                return null;
-        }
+        return switch (fhirVersion) {
+            case DSTU3 -> new org.hl7.fhir.dstu3.model.BooleanType(value);
+            case R4 -> new org.hl7.fhir.r4.model.BooleanType(value);
+            case R5 -> new org.hl7.fhir.r5.model.BooleanType(value);
+            default -> null;
+        };
     }
 
     @SuppressWarnings("unchecked")
     public static <T extends IBaseExtension<?, ?>> T buildBooleanExt(
             FhirVersionEnum fhirVersion, SimpleEntry<String, Boolean> entry) {
         var value = buildBooleanType(fhirVersion, entry.getValue());
-        switch (fhirVersion) {
-            case DSTU3:
-                return (T) new org.hl7.fhir.dstu3.model.Extension(entry.getKey(), value);
-            case R4:
-                return (T) new org.hl7.fhir.r4.model.Extension(entry.getKey(), value);
-            case R5:
-                return (T) new org.hl7.fhir.r5.model.Extension(entry.getKey(), value);
-
-            default:
-                return null;
-        }
+        return switch (fhirVersion) {
+            case DSTU3 -> (T) new org.hl7.fhir.dstu3.model.Extension(entry.getKey(), value);
+            case R4 -> (T) new org.hl7.fhir.r4.model.Extension(entry.getKey(), value);
+            case R5 -> (T) new org.hl7.fhir.r5.model.Extension(entry.getKey(), value);
+            default -> null;
+        };
     }
 
     public static <T extends IBaseExtension<?, ?>> T buildSdcLaunchContextExt(
@@ -145,14 +125,12 @@ public class ExtensionBuilders {
             case R4:
                 var r4Ext = new org.hl7.fhir.r4.model.Extension(Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT);
                 r4Ext.addExtension("name", new org.hl7.fhir.r4.model.Coding(system, code, display));
-                acceptedResourceTypes.stream()
-                        .forEach(r -> r4Ext.addExtension("type", new org.hl7.fhir.r4.model.CodeType(r)));
+                acceptedResourceTypes.forEach(r -> r4Ext.addExtension("type", new org.hl7.fhir.r4.model.CodeType(r)));
                 return (T) r4Ext;
             case R5:
                 var r5Ext = new org.hl7.fhir.r5.model.Extension(Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT);
                 r5Ext.addExtension("name", new org.hl7.fhir.r5.model.Coding(system, code, display));
-                acceptedResourceTypes.stream()
-                        .forEach(r -> r5Ext.addExtension("type", new org.hl7.fhir.r5.model.CodeType(r)));
+                acceptedResourceTypes.forEach(r -> r5Ext.addExtension("type", new org.hl7.fhir.r5.model.CodeType(r)));
                 return (T) r5Ext;
 
             default:

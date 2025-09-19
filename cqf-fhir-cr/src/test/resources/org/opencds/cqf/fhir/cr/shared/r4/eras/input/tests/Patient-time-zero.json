@@ -1,0 +1,22 @@
+{
+    "resourceType": "Patient",
+    "meta": { "profile": [ "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-patient" ] },
+    "id": "time-zero",
+    "identifier": [
+        {
+            "system": "http://example.org/cpg/identifier/patient",
+            "value": "patient-zero"
+        }
+    ],
+    "name": [
+        {
+            "use": "official",
+            "family": "Zero",
+            "given": [
+                "Patient"
+            ]
+        }
+    ],
+    "gender": "male",
+    "birthDate": "1966-02-14"
+}

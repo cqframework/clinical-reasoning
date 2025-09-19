@@ -78,7 +78,7 @@ public class StructureDefinitionAdapter extends ResourceAdapter implements IStru
         get().getExtensionsByUrl(Constants.CPG_ASSERTION_EXPRESSION).stream()
                 .filter(e -> e.getValue() instanceof Expression)
                 .map(e -> (Expression) e.getValue())
-                .filter(e -> e.hasReference())
+                .filter(Expression::hasReference)
                 .forEach(expression -> references.add(new DependencyInfo(
                         referenceSource,
                         expression.getReference(),
@@ -87,7 +87,7 @@ public class StructureDefinitionAdapter extends ResourceAdapter implements IStru
         get().getExtensionsByUrl(Constants.CPG_FEATURE_EXPRESSION).stream()
                 .filter(e -> e.getValue() instanceof Expression)
                 .map(e -> (Expression) e.getValue())
-                .filter(e -> e.hasReference())
+                .filter(Expression::hasReference)
                 .forEach(expression -> references.add(new DependencyInfo(
                         referenceSource,
                         expression.getReference(),
@@ -96,7 +96,7 @@ public class StructureDefinitionAdapter extends ResourceAdapter implements IStru
         get().getExtensionsByUrl(Constants.CPG_INFERENCE_EXPRESSION).stream()
                 .filter(e -> e.getValue() instanceof Expression)
                 .map(e -> (Expression) e.getValue())
-                .filter(e -> e.hasReference())
+                .filter(Expression::hasReference)
                 .forEach(expression -> references.add(new DependencyInfo(
                         referenceSource,
                         expression.getReference(),
@@ -266,8 +266,20 @@ public class StructureDefinitionAdapter extends ResourceAdapter implements IStru
     }
 
     @Override
+    public IPrimitiveType<String> getBaseDefinition() {
+        return get().getBaseDefinitionElement();
+    }
+
+    @Override
+    public boolean hasSnapshot() {
+        return get().hasSnapshot();
+    }
+
+    @Override
     public List<IElementDefinitionAdapter> getSnapshotElements() {
         return get().getSnapshot().getElement().stream()
+                .filter(ElementDefinition::hasPath)
+                .filter(e -> e.getPath().split("\\.").length > 1)
                 .map(adapterFactory::createElementDefinition)
                 .toList();
     }
@@ -275,6 +287,8 @@ public class StructureDefinitionAdapter extends ResourceAdapter implements IStru
     @Override
     public List<IElementDefinitionAdapter> getDifferentialElements() {
         return get().getDifferential().getElement().stream()
+                .filter(ElementDefinition::hasPath)
+                .filter(e -> e.getPath().split("\\.").length > 1)
                 .map(adapterFactory::createElementDefinition)
                 .toList();
     }

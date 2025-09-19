@@ -26,6 +26,7 @@ import org.opencds.cqf.fhir.utility.monad.Either;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@SuppressWarnings("UnstableApiUsage")
 public class QuestionnaireResponseProcessor {
     protected static final Logger logger = LoggerFactory.getLogger(QuestionnaireResponseProcessor.class);
     protected static final String QUESTIONNAIRE = "Questionnaire";

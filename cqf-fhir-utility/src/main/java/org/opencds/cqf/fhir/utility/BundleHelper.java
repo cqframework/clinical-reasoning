@@ -1,11 +1,13 @@
 package org.opencds.cqf.fhir.utility;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.RuntimeSearchParam.RuntimeSearchParamStatusEnum;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import jakarta.annotation.Nonnull;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -30,47 +32,43 @@ public class BundleHelper {
      * Returns the resource of the first entry in a Bundle
      *
      * @param bundle IBaseBundle type
-     * @return
+     * @return IBaseBackboneElement
      */
     public static IBaseBackboneElement getEntryFirstRep(IBaseBundle bundle) {
         var fhirVersion = bundle.getStructureFhirVersionEnum();
-        switch (fhirVersion) {
-            case DSTU3:
-                return ((org.hl7.fhir.dstu3.model.Bundle) bundle).getEntryFirstRep();
-            case R4:
-                return ((org.hl7.fhir.r4.model.Bundle) bundle).getEntryFirstRep();
-            case R5:
-                return ((org.hl7.fhir.r5.model.Bundle) bundle).getEntryFirstRep();
-
-            default:
-                throw new IllegalArgumentException(
-                        UNSUPPORTED_VERSION_OF_FHIR.formatted(fhirVersion.getFhirVersionString()));
-        }
+        return switch (fhirVersion) {
+            case DSTU3 -> ((Bundle) bundle).getEntryFirstRep();
+            case R4 -> ((org.hl7.fhir.r4.model.Bundle) bundle).getEntryFirstRep();
+            case R5 -> ((org.hl7.fhir.r5.model.Bundle) bundle).getEntryFirstRep();
+            default -> throw new IllegalArgumentException(
+                    UNSUPPORTED_VERSION_OF_FHIR.formatted(fhirVersion.getFhirVersionString()));
+        };
     }
 
     /**
      * Returns the resource of the first entry in a Bundle
      *
      * @param bundle IBaseBundle type
-     * @return
+     * @return IBaseResource
      */
     public static IBaseResource getEntryResourceFirstRep(IBaseBundle bundle) {
         var fhirVersion = bundle.getStructureFhirVersionEnum();
-        switch (fhirVersion) {
-            case DSTU3:
-                var dstu3Entry = ((org.hl7.fhir.dstu3.model.Bundle) bundle).getEntryFirstRep();
-                return dstu3Entry != null && dstu3Entry.hasResource() ? dstu3Entry.getResource() : null;
-            case R4:
+        return switch (fhirVersion) {
+            case DSTU3 -> {
+                var dstu3Entry = ((Bundle) bundle).getEntryFirstRep();
+                yield dstu3Entry != null && dstu3Entry.hasResource() ? dstu3Entry.getResource() : null;
+            }
+            case R4 -> {
                 var r4Entry = ((org.hl7.fhir.r4.model.Bundle) bundle).getEntryFirstRep();
-                return r4Entry != null && r4Entry.hasResource() ? r4Entry.getResource() : null;
-            case R5:
+                yield r4Entry != null && r4Entry.hasResource() ? r4Entry.getResource() : null;
+            }
+            case R5 -> {
                 var r5Entry = ((org.hl7.fhir.r5.model.Bundle) bundle).getEntryFirstRep();
-                return r5Entry != null && r5Entry.hasResource() ? r5Entry.getResource() : null;
-
-            default:
-                throw new IllegalArgumentException(
-                        UNSUPPORTED_VERSION_OF_FHIR.formatted(fhirVersion.getFhirVersionString()));
-        }
+                yield r5Entry != null && r5Entry.hasResource() ? r5Entry.getResource() : null;
+            }
+            default -> throw new IllegalArgumentException(
+                    UNSUPPORTED_VERSION_OF_FHIR.formatted(fhirVersion.getFhirVersionString()));
+        };
     }
 
     /**
@@ -115,21 +113,16 @@ public class BundleHelper {
      *
      * @param fhirVersion FhirVersionEnum
      * @param entry IBaseBackboneElement type
-     * @return
+     * @return IBaseResource
      */
     public static IBaseResource getEntryResource(FhirVersionEnum fhirVersion, IBaseBackboneElement entry) {
-        switch (fhirVersion) {
-            case DSTU3:
-                return ((org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent) entry).getResource();
-            case R4:
-                return ((org.hl7.fhir.r4.model.Bundle.BundleEntryComponent) entry).getResource();
-            case R5:
-                return ((org.hl7.fhir.r5.model.Bundle.BundleEntryComponent) entry).getResource();
-
-            default:
-                throw new IllegalArgumentException(
-                        UNSUPPORTED_VERSION_OF_FHIR.formatted(fhirVersion.getFhirVersionString()));
-        }
+        return switch (fhirVersion) {
+            case DSTU3 -> ((Bundle.BundleEntryComponent) entry).getResource();
+            case R4 -> ((BundleEntryComponent) entry).getResource();
+            case R5 -> ((org.hl7.fhir.r5.model.Bundle.BundleEntryComponent) entry).getResource();
+            default -> throw new IllegalArgumentException(
+                    UNSUPPORTED_VERSION_OF_FHIR.formatted(fhirVersion.getFhirVersionString()));
+        };
     }
 
     /**
@@ -137,30 +130,25 @@ public class BundleHelper {
      *
      * @param fhirVersion FhirVersionEnum
      * @param entry IBaseBackboneElement type
-     * @return
+     * @return boolean
      */
     public static boolean isEntryRequestPut(FhirVersionEnum fhirVersion, IBaseBackboneElement entry) {
-        switch (fhirVersion) {
-            case DSTU3:
-                return Optional.ofNullable(((org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent) entry).getRequest())
-                        .map(r -> r.getMethod())
-                        .filter(r -> r == org.hl7.fhir.dstu3.model.Bundle.HTTPVerb.PUT)
-                        .isPresent();
-            case R4:
-                return Optional.ofNullable(((org.hl7.fhir.r4.model.Bundle.BundleEntryComponent) entry).getRequest())
-                        .map(r -> r.getMethod())
-                        .filter(r -> r == org.hl7.fhir.r4.model.Bundle.HTTPVerb.PUT)
-                        .isPresent();
-            case R5:
-                return Optional.ofNullable(((org.hl7.fhir.r5.model.Bundle.BundleEntryComponent) entry).getRequest())
-                        .map(r -> r.getMethod())
-                        .filter(r -> r == org.hl7.fhir.r5.model.Bundle.HTTPVerb.PUT)
-                        .isPresent();
-
-            default:
-                throw new IllegalArgumentException(
-                        UNSUPPORTED_VERSION_OF_FHIR.formatted(fhirVersion.getFhirVersionString()));
-        }
+        return switch (fhirVersion) {
+            case DSTU3 -> Optional.ofNullable(((Bundle.BundleEntryComponent) entry).getRequest())
+                    .map(Bundle.BundleEntryRequestComponent::getMethod)
+                    .filter(r -> r == Bundle.HTTPVerb.PUT)
+                    .isPresent();
+            case R4 -> Optional.ofNullable(((BundleEntryComponent) entry).getRequest())
+                    .map(BundleEntryRequestComponent::getMethod)
+                    .filter(r -> r == org.hl7.fhir.r4.model.Bundle.HTTPVerb.PUT)
+                    .isPresent();
+            case R5 -> Optional.ofNullable(((org.hl7.fhir.r5.model.Bundle.BundleEntryComponent) entry).getRequest())
+                    .map(org.hl7.fhir.r5.model.Bundle.BundleEntryRequestComponent::getMethod)
+                    .filter(r -> r == org.hl7.fhir.r5.model.Bundle.HTTPVerb.PUT)
+                    .isPresent();
+            default -> throw new IllegalArgumentException(
+                    UNSUPPORTED_VERSION_OF_FHIR.formatted(fhirVersion.getFhirVersionString()));
+        };
     }
 
     /**
@@ -168,30 +156,25 @@ public class BundleHelper {
      *
      * @param fhirVersion FhirVersionEnum
      * @param entry IBaseBackboneElement type
-     * @return
+     * @return boolean
      */
     public static boolean isEntryRequestPost(FhirVersionEnum fhirVersion, IBaseBackboneElement entry) {
-        switch (fhirVersion) {
-            case DSTU3:
-                return Optional.ofNullable(((org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent) entry).getRequest())
-                        .map(r -> r.getMethod())
-                        .filter(r -> r == org.hl7.fhir.dstu3.model.Bundle.HTTPVerb.POST)
-                        .isPresent();
-            case R4:
-                return Optional.ofNullable(((org.hl7.fhir.r4.model.Bundle.BundleEntryComponent) entry).getRequest())
-                        .map(r -> r.getMethod())
-                        .filter(r -> r == org.hl7.fhir.r4.model.Bundle.HTTPVerb.POST)
-                        .isPresent();
-            case R5:
-                return Optional.ofNullable(((org.hl7.fhir.r5.model.Bundle.BundleEntryComponent) entry).getRequest())
-                        .map(r -> r.getMethod())
-                        .filter(r -> r == org.hl7.fhir.r5.model.Bundle.HTTPVerb.POST)
-                        .isPresent();
-
-            default:
-                throw new IllegalArgumentException(
-                        UNSUPPORTED_VERSION_OF_FHIR.formatted(fhirVersion.getFhirVersionString()));
-        }
+        return switch (fhirVersion) {
+            case DSTU3 -> Optional.ofNullable(((Bundle.BundleEntryComponent) entry).getRequest())
+                    .map(Bundle.BundleEntryRequestComponent::getMethod)
+                    .filter(r -> r == Bundle.HTTPVerb.POST)
+                    .isPresent();
+            case R4 -> Optional.ofNullable(((BundleEntryComponent) entry).getRequest())
+                    .map(BundleEntryRequestComponent::getMethod)
+                    .filter(r -> r == org.hl7.fhir.r4.model.Bundle.HTTPVerb.POST)
+                    .isPresent();
+            case R5 -> Optional.ofNullable(((org.hl7.fhir.r5.model.Bundle.BundleEntryComponent) entry).getRequest())
+                    .map(org.hl7.fhir.r5.model.Bundle.BundleEntryRequestComponent::getMethod)
+                    .filter(r -> r == org.hl7.fhir.r5.model.Bundle.HTTPVerb.POST)
+                    .isPresent();
+            default -> throw new IllegalArgumentException(
+                    UNSUPPORTED_VERSION_OF_FHIR.formatted(fhirVersion.getFhirVersionString()));
+        };
     }
 
     /**
@@ -199,53 +182,43 @@ public class BundleHelper {
      *
      * @param fhirVersion FhirVersionEnum
      * @param entry IBaseBackboneElement type
-     * @return
+     * @return boolean
      */
     public static boolean isEntryRequestDelete(FhirVersionEnum fhirVersion, IBaseBackboneElement entry) {
-        switch (fhirVersion) {
-            case DSTU3:
-                return Optional.ofNullable(((org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent) entry).getRequest())
-                        .map(Bundle.BundleEntryRequestComponent::getMethod)
-                        .filter(r -> r == org.hl7.fhir.dstu3.model.Bundle.HTTPVerb.DELETE)
-                        .isPresent();
-            case R4:
-                return Optional.ofNullable(((org.hl7.fhir.r4.model.Bundle.BundleEntryComponent) entry).getRequest())
-                        .map(BundleEntryRequestComponent::getMethod)
-                        .filter(r -> r == org.hl7.fhir.r4.model.Bundle.HTTPVerb.DELETE)
-                        .isPresent();
-            case R5:
-                return Optional.ofNullable(((org.hl7.fhir.r5.model.Bundle.BundleEntryComponent) entry).getRequest())
-                        .map(org.hl7.fhir.r5.model.Bundle.BundleEntryRequestComponent::getMethod)
-                        .filter(r -> r == org.hl7.fhir.r5.model.Bundle.HTTPVerb.DELETE)
-                        .isPresent();
-
-            default:
-                throw new IllegalArgumentException(
-                        UNSUPPORTED_VERSION_OF_FHIR.formatted(fhirVersion.getFhirVersionString()));
-        }
+        return switch (fhirVersion) {
+            case DSTU3 -> Optional.ofNullable(((Bundle.BundleEntryComponent) entry).getRequest())
+                    .map(Bundle.BundleEntryRequestComponent::getMethod)
+                    .filter(r -> r == Bundle.HTTPVerb.DELETE)
+                    .isPresent();
+            case R4 -> Optional.ofNullable(((BundleEntryComponent) entry).getRequest())
+                    .map(BundleEntryRequestComponent::getMethod)
+                    .filter(r -> r == org.hl7.fhir.r4.model.Bundle.HTTPVerb.DELETE)
+                    .isPresent();
+            case R5 -> Optional.ofNullable(((org.hl7.fhir.r5.model.Bundle.BundleEntryComponent) entry).getRequest())
+                    .map(org.hl7.fhir.r5.model.Bundle.BundleEntryRequestComponent::getMethod)
+                    .filter(r -> r == org.hl7.fhir.r5.model.Bundle.HTTPVerb.DELETE)
+                    .isPresent();
+            default -> throw new IllegalArgumentException(
+                    UNSUPPORTED_VERSION_OF_FHIR.formatted(fhirVersion.getFhirVersionString()));
+        };
     }
 
     /**
      * Returns the list of entries from the Bundle
      *
      * @param bundle IBaseBundle type
-     * @return
+     * @return IBaseBackboneElement
      */
     @SuppressWarnings("unchecked")
     public static <T extends IBaseBackboneElement> List<T> getEntry(IBaseBundle bundle) {
         var fhirVersion = bundle.getStructureFhirVersionEnum();
-        switch (fhirVersion) {
-            case DSTU3:
-                return (List<T>) ((org.hl7.fhir.dstu3.model.Bundle) bundle).getEntry();
-            case R4:
-                return (List<T>) ((org.hl7.fhir.r4.model.Bundle) bundle).getEntry();
-            case R5:
-                return (List<T>) ((org.hl7.fhir.r5.model.Bundle) bundle).getEntry();
-
-            default:
-                throw new IllegalArgumentException(
-                        UNSUPPORTED_VERSION_OF_FHIR.formatted(fhirVersion.getFhirVersionString()));
-        }
+        return switch (fhirVersion) {
+            case DSTU3 -> (List<T>) ((Bundle) bundle).getEntry();
+            case R4 -> (List<T>) ((org.hl7.fhir.r4.model.Bundle) bundle).getEntry();
+            case R5 -> (List<T>) ((org.hl7.fhir.r5.model.Bundle) bundle).getEntry();
+            default -> throw new IllegalArgumentException(
+                    UNSUPPORTED_VERSION_OF_FHIR.formatted(fhirVersion.getFhirVersionString()));
+        };
     }
 
     /**
@@ -253,33 +226,46 @@ public class BundleHelper {
      *
      * @param fhirVersion FhirVersionEnum
      * @param entry IBaseBackboneElement type
-     * @return
+     * @return Optional IIdType
      */
     public static Optional<IIdType> getEntryRequestId(FhirVersionEnum fhirVersion, IBaseBackboneElement entry) {
-        switch (fhirVersion) {
-            case DSTU3:
-                return Optional.ofNullable(((org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent) entry)
-                                .getRequest()
-                                .getUrl())
-                        .map(Canonicals::getIdPart)
-                        .map(IdType::new);
-            case R4:
-                return Optional.ofNullable(((org.hl7.fhir.r4.model.Bundle.BundleEntryComponent) entry)
-                                .getRequest()
-                                .getUrl())
-                        .map(Canonicals::getIdPart)
-                        .map(org.hl7.fhir.r4.model.IdType::new);
-            case R5:
-                return Optional.ofNullable(((org.hl7.fhir.r5.model.Bundle.BundleEntryComponent) entry)
-                                .getRequest()
-                                .getUrl())
-                        .map(Canonicals::getIdPart)
-                        .map(org.hl7.fhir.r5.model.IdType::new);
+        return switch (fhirVersion) {
+            case DSTU3 -> Optional.ofNullable(
+                            ((Bundle.BundleEntryComponent) entry).getRequest().getUrl())
+                    .map(Canonicals::getIdPart)
+                    .map(IdType::new);
+            case R4 -> Optional.ofNullable(
+                            ((BundleEntryComponent) entry).getRequest().getUrl())
+                    .map(Canonicals::getIdPart)
+                    .map(org.hl7.fhir.r4.model.IdType::new);
+            case R5 -> Optional.ofNullable(((org.hl7.fhir.r5.model.Bundle.BundleEntryComponent) entry)
+                            .getRequest()
+                            .getUrl())
+                    .map(Canonicals::getIdPart)
+                    .map(org.hl7.fhir.r5.model.IdType::new);
+            default -> throw new IllegalArgumentException(
+                    UNSUPPORTED_VERSION_OF_FHIR.formatted(fhirVersion.getFhirVersionString()));
+        };
+    }
 
-            default:
-                throw new IllegalArgumentException(
-                        UNSUPPORTED_VERSION_OF_FHIR.formatted(fhirVersion.getFhirVersionString()));
+    public static List<IIdType> getBundleEntryResourceIds(FhirContext fhirContext, IBaseBundle bundle) {
+        return getBundleEntryResourceIds(fhirContext.getVersion().getVersion(), bundle);
+    }
+
+    public static List<IIdType> getBundleEntryResourceIds(FhirVersionEnum fhirVersion, IBaseBundle bundle) {
+
+        List<IBaseBackboneElement> entry = getEntry(bundle);
+        if (entry.isEmpty()) {
+            return Collections.emptyList();
         }
+
+        List<IIdType> retVal = new ArrayList<>(entry.size());
+
+        entry.forEach(e -> {
+            retVal.add(getEntryResource(fhirVersion, e).getIdElement());
+        });
+
+        return retVal;
     }
 
     /**
@@ -336,7 +322,7 @@ public class BundleHelper {
      *
      * @param bundle IBaseBundle type
      * @param entry IBaseBackboneElement type
-     * @return
+     * @return IBaseBundle
      */
     public static IBaseBundle addEntry(IBaseBundle bundle, IBaseBackboneElement entry) {
         var fhirVersion = bundle.getStructureFhirVersionEnum();
@@ -366,10 +352,21 @@ public class BundleHelper {
      * Returns a new Bundle for the given version of FHIR
      *
      * @param fhirVersion FhirVersionEnum
-     * @return
+     * @return IBaseBundle
      */
     public static IBaseBundle newBundle(FhirVersionEnum fhirVersion) {
         return newBundle(fhirVersion, null, null);
+    }
+
+    /**
+     * Returns a new Bundle for the given version of FHIR and type
+     *
+     * @param fhirVersion FhirVersionEnum
+     * @param type The type of Bundle to return, defaults to COLLECTION
+     * @return IBaseBundle
+     */
+    public static IBaseBundle newBundle(FhirVersionEnum fhirVersion, String type) {
+        return newBundle(fhirVersion, null, type);
     }
 
     /**
@@ -378,21 +375,16 @@ public class BundleHelper {
      * @param fhirVersion FhirVersionEnum
      * @param id Id to set on the Bundle, will ignore if null
      * @param type The type of Bundle to return, defaults to COLLECTION
-     * @return
+     * @return IBaseBundle
      */
     public static IBaseBundle newBundle(FhirVersionEnum fhirVersion, String id, String type) {
-        switch (fhirVersion) {
-            case DSTU3:
-                return newDstu3Bundle(id, type);
-            case R4:
-                return newR4Bundle(id, type);
-            case R5:
-                return newR5Bundle(id, type);
-
-            default:
-                throw new IllegalArgumentException(
-                        UNSUPPORTED_VERSION_OF_FHIR.formatted(fhirVersion.getFhirVersionString()));
-        }
+        return switch (fhirVersion) {
+            case DSTU3 -> newDstu3Bundle(id, type);
+            case R4 -> newR4Bundle(id, type);
+            case R5 -> newR5Bundle(id, type);
+            default -> throw new IllegalArgumentException(
+                    UNSUPPORTED_VERSION_OF_FHIR.formatted(fhirVersion.getFhirVersionString()));
+        };
     }
 
     @Nonnull
@@ -434,324 +426,246 @@ public class BundleHelper {
 
     /**
      * Sets the BundleType of the Bundle and returns the Bundle
-     * @param bundle
-     * @param bundleType
-     * @return
+     * @param bundle IBaseBundle
+     * @param bundleType String
+     * @return IBaseBundle
      */
     public static IBaseBundle setBundleType(IBaseBundle bundle, String bundleType) {
         var fhirVersion = bundle.getStructureFhirVersionEnum();
-        switch (fhirVersion) {
-            case DSTU3:
-                return ((org.hl7.fhir.dstu3.model.Bundle) bundle)
-                        .setType(org.hl7.fhir.dstu3.model.Bundle.BundleType.fromCode(bundleType));
-            case R4:
-                return ((org.hl7.fhir.r4.model.Bundle) bundle)
-                        .setType(org.hl7.fhir.r4.model.Bundle.BundleType.fromCode(bundleType));
-            case R5:
-                return ((org.hl7.fhir.r5.model.Bundle) bundle)
-                        .setType(org.hl7.fhir.r5.model.Bundle.BundleType.fromCode(bundleType));
-
-            default:
-                throw new IllegalArgumentException(
-                        UNSUPPORTED_VERSION_OF_FHIR.formatted(fhirVersion.getFhirVersionString()));
-        }
+        return switch (fhirVersion) {
+            case DSTU3 -> ((Bundle) bundle).setType(Bundle.BundleType.fromCode(bundleType));
+            case R4 -> ((org.hl7.fhir.r4.model.Bundle) bundle)
+                    .setType(org.hl7.fhir.r4.model.Bundle.BundleType.fromCode(bundleType));
+            case R5 -> ((org.hl7.fhir.r5.model.Bundle) bundle)
+                    .setType(org.hl7.fhir.r5.model.Bundle.BundleType.fromCode(bundleType));
+            default -> throw new IllegalArgumentException(
+                    UNSUPPORTED_VERSION_OF_FHIR.formatted(fhirVersion.getFhirVersionString()));
+        };
     }
 
     /**
      * Sets the total property of the Bundle and returns the Bundle
-     * @param bundle
-     * @param total
-     * @return
+     * @param bundle IBaseBundle
+     * @param total int
+     * @return IBaseBundle
      */
     public static IBaseBundle setBundleTotal(IBaseBundle bundle, int total) {
         var fhirVersion = bundle.getStructureFhirVersionEnum();
-        switch (fhirVersion) {
-            case DSTU3:
-                return ((org.hl7.fhir.dstu3.model.Bundle) bundle).setTotal(total);
-            case R4:
-                return ((org.hl7.fhir.r4.model.Bundle) bundle).setTotal(total);
-            case R5:
-                return ((org.hl7.fhir.r5.model.Bundle) bundle).setTotal(total);
-
-            default:
-                throw new IllegalArgumentException(
-                        UNSUPPORTED_VERSION_OF_FHIR.formatted(fhirVersion.getFhirVersionString()));
-        }
+        return switch (fhirVersion) {
+            case DSTU3 -> ((Bundle) bundle).setTotal(total);
+            case R4 -> ((org.hl7.fhir.r4.model.Bundle) bundle).setTotal(total);
+            case R5 -> ((org.hl7.fhir.r5.model.Bundle) bundle).setTotal(total);
+            default -> throw new IllegalArgumentException(
+                    UNSUPPORTED_VERSION_OF_FHIR.formatted(fhirVersion.getFhirVersionString()));
+        };
     }
 
     /**
      * Returns a new entry element
-     * @param fhirVersion
-     * @return
+     * @param fhirVersion FhirVersionEnum
+     * @return IBaseBackboneElement
      */
     public static IBaseBackboneElement newEntry(FhirVersionEnum fhirVersion) {
-        switch (fhirVersion) {
-            case DSTU3:
-                return new org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent();
-            case R4:
-                return new org.hl7.fhir.r4.model.Bundle.BundleEntryComponent();
-            case R5:
-                return new org.hl7.fhir.r5.model.Bundle.BundleEntryComponent();
-
-            default:
-                throw new IllegalArgumentException(
-                        UNSUPPORTED_VERSION_OF_FHIR.formatted(fhirVersion.getFhirVersionString()));
-        }
+        return switch (fhirVersion) {
+            case DSTU3 -> new Bundle.BundleEntryComponent();
+            case R4 -> new BundleEntryComponent();
+            case R5 -> new org.hl7.fhir.r5.model.Bundle.BundleEntryComponent();
+            default -> throw new IllegalArgumentException(
+                    UNSUPPORTED_VERSION_OF_FHIR.formatted(fhirVersion.getFhirVersionString()));
+        };
     }
 
     /**
      * Returns a new entry element with the Resource
-     * @param resource
-     * @return
+     * @param resource IBaseResource
+     * @return IBaseBackboneElement
      */
     public static IBaseBackboneElement newEntryWithResource(IBaseResource resource) {
         var fhirVersion = resource.getStructureFhirVersionEnum();
-        switch (fhirVersion) {
-            case DSTU3:
-                return new org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent()
-                        .setResource((org.hl7.fhir.dstu3.model.Resource) resource);
-            case R4:
-                return new org.hl7.fhir.r4.model.Bundle.BundleEntryComponent()
-                        .setResource((org.hl7.fhir.r4.model.Resource) resource);
-            case R5:
-                return new org.hl7.fhir.r5.model.Bundle.BundleEntryComponent()
-                        .setResource((org.hl7.fhir.r5.model.Resource) resource);
-
-            default:
-                throw new IllegalArgumentException(
-                        UNSUPPORTED_VERSION_OF_FHIR.formatted(fhirVersion.getFhirVersionString()));
-        }
+        return switch (fhirVersion) {
+            case DSTU3 -> new Bundle.BundleEntryComponent().setResource((org.hl7.fhir.dstu3.model.Resource) resource);
+            case R4 -> new BundleEntryComponent().setResource((org.hl7.fhir.r4.model.Resource) resource);
+            case R5 -> new org.hl7.fhir.r5.model.Bundle.BundleEntryComponent()
+                    .setResource((org.hl7.fhir.r5.model.Resource) resource);
+            default -> throw new IllegalArgumentException(
+                    UNSUPPORTED_VERSION_OF_FHIR.formatted(fhirVersion.getFhirVersionString()));
+        };
     }
 
     /**
      * Returns a new entry element with the Response
-     * @param fhirVersion
-     * @param response
-     * @return
+     * @param fhirVersion FhirVersionEnum
+     * @param response IBaseBackboneElement
+     * @return IBaseBackboneElement
      */
     public static IBaseBackboneElement newEntryWithResponse(
             FhirVersionEnum fhirVersion, IBaseBackboneElement response) {
-        switch (fhirVersion) {
-            case DSTU3:
-                return new org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent()
-                        .setResponse((org.hl7.fhir.dstu3.model.Bundle.BundleEntryResponseComponent) response);
-            case R4:
-                return new org.hl7.fhir.r4.model.Bundle.BundleEntryComponent()
-                        .setResponse((org.hl7.fhir.r4.model.Bundle.BundleEntryResponseComponent) response);
-            case R5:
-                return new org.hl7.fhir.r5.model.Bundle.BundleEntryComponent()
-                        .setResponse((org.hl7.fhir.r5.model.Bundle.BundleEntryResponseComponent) response);
-
-            default:
-                throw new IllegalArgumentException(
-                        UNSUPPORTED_VERSION_OF_FHIR.formatted(fhirVersion.getFhirVersionString()));
-        }
+        return switch (fhirVersion) {
+            case DSTU3 -> new Bundle.BundleEntryComponent().setResponse((Bundle.BundleEntryResponseComponent) response);
+            case R4 -> new BundleEntryComponent()
+                    .setResponse((org.hl7.fhir.r4.model.Bundle.BundleEntryResponseComponent) response);
+            case R5 -> new org.hl7.fhir.r5.model.Bundle.BundleEntryComponent()
+                    .setResponse((org.hl7.fhir.r5.model.Bundle.BundleEntryResponseComponent) response);
+            default -> throw new IllegalArgumentException(
+                    UNSUPPORTED_VERSION_OF_FHIR.formatted(fhirVersion.getFhirVersionString()));
+        };
     }
 
     /**
      * Returns a new BundleEntryResponse element with the location
-     * @param fhirVersion
-     * @param location
-     * @return
+     * @param fhirVersion FhirVersionEnum
+     * @param location String
+     * @return IBaseBackboneElement
      */
     public static IBaseBackboneElement newResponseWithLocation(FhirVersionEnum fhirVersion, String location) {
-        switch (fhirVersion) {
-            case DSTU3:
-                return new org.hl7.fhir.dstu3.model.Bundle.BundleEntryResponseComponent().setLocation(location);
-            case R4:
-                return new org.hl7.fhir.r4.model.Bundle.BundleEntryResponseComponent().setLocation(location);
-            case R5:
-                return new org.hl7.fhir.r5.model.Bundle.BundleEntryResponseComponent().setLocation(location);
-
-            default:
-                throw new IllegalArgumentException(
-                        UNSUPPORTED_VERSION_OF_FHIR.formatted(fhirVersion.getFhirVersionString()));
-        }
+        return switch (fhirVersion) {
+            case DSTU3 -> new Bundle.BundleEntryResponseComponent().setLocation(location);
+            case R4 -> new org.hl7.fhir.r4.model.Bundle.BundleEntryResponseComponent().setLocation(location);
+            case R5 -> new org.hl7.fhir.r5.model.Bundle.BundleEntryResponseComponent().setLocation(location);
+            default -> throw new IllegalArgumentException(
+                    UNSUPPORTED_VERSION_OF_FHIR.formatted(fhirVersion.getFhirVersionString()));
+        };
     }
 
     /**
      * Returns a new BundleEntryRequest element with the method and url
-     * @param fhirVersion
-     * @param method
-     * @param url
-     * @return
+     * @param fhirVersion FhirVersionEnum
+     * @param method String
+     * @param url String
+     * @return IBaseBackboneElement
      */
     public static IBaseBackboneElement newRequest(FhirVersionEnum fhirVersion, String method, String url) {
-        switch (fhirVersion) {
-            case DSTU3:
-                return new org.hl7.fhir.dstu3.model.Bundle.BundleEntryRequestComponent()
-                        .setMethod(org.hl7.fhir.dstu3.model.Bundle.HTTPVerb.fromCode(method))
-                        .setUrl(url);
-            case R4:
-                return new org.hl7.fhir.r4.model.Bundle.BundleEntryRequestComponent()
-                        .setMethod(org.hl7.fhir.r4.model.Bundle.HTTPVerb.fromCode(method))
-                        .setUrl(url);
-            case R5:
-                return new org.hl7.fhir.r5.model.Bundle.BundleEntryRequestComponent()
-                        .setMethod(org.hl7.fhir.r5.model.Bundle.HTTPVerb.fromCode(method))
-                        .setUrl(url);
-
-            default:
-                throw new IllegalArgumentException(
-                        UNSUPPORTED_VERSION_OF_FHIR.formatted(fhirVersion.getFhirVersionString()));
-        }
+        return switch (fhirVersion) {
+            case DSTU3 -> new Bundle.BundleEntryRequestComponent()
+                    .setMethod(Bundle.HTTPVerb.fromCode(method))
+                    .setUrl(url);
+            case R4 -> new BundleEntryRequestComponent()
+                    .setMethod(org.hl7.fhir.r4.model.Bundle.HTTPVerb.fromCode(method))
+                    .setUrl(url);
+            case R5 -> new org.hl7.fhir.r5.model.Bundle.BundleEntryRequestComponent()
+                    .setMethod(org.hl7.fhir.r5.model.Bundle.HTTPVerb.fromCode(method))
+                    .setUrl(url);
+            default -> throw new IllegalArgumentException(
+                    UNSUPPORTED_VERSION_OF_FHIR.formatted(fhirVersion.getFhirVersionString()));
+        };
     }
 
     /**
      * Returns a new BundleEntryRequest element with the method
-     * @param fhirVersion
-     * @param method
-     * @return
+     * @param fhirVersion FhirVersionEnum
+     * @param method String
+     * @return IBaseBackboneElement
      */
     public static IBaseBackboneElement newRequest(FhirVersionEnum fhirVersion, String method) {
-        switch (fhirVersion) {
-            case DSTU3:
-                return new org.hl7.fhir.dstu3.model.Bundle.BundleEntryRequestComponent()
-                        .setMethod(org.hl7.fhir.dstu3.model.Bundle.HTTPVerb.fromCode(method));
-            case R4:
-                return new org.hl7.fhir.r4.model.Bundle.BundleEntryRequestComponent()
-                        .setMethod(org.hl7.fhir.r4.model.Bundle.HTTPVerb.fromCode(method));
-            case R5:
-                return new org.hl7.fhir.r5.model.Bundle.BundleEntryRequestComponent()
-                        .setMethod(org.hl7.fhir.r5.model.Bundle.HTTPVerb.fromCode(method));
-
-            default:
-                throw new IllegalArgumentException(
-                        UNSUPPORTED_VERSION_OF_FHIR.formatted(fhirVersion.getFhirVersionString()));
-        }
+        return switch (fhirVersion) {
+            case DSTU3 -> new Bundle.BundleEntryRequestComponent().setMethod(Bundle.HTTPVerb.fromCode(method));
+            case R4 -> new BundleEntryRequestComponent()
+                    .setMethod(org.hl7.fhir.r4.model.Bundle.HTTPVerb.fromCode(method));
+            case R5 -> new org.hl7.fhir.r5.model.Bundle.BundleEntryRequestComponent()
+                    .setMethod(org.hl7.fhir.r5.model.Bundle.HTTPVerb.fromCode(method));
+            default -> throw new IllegalArgumentException(
+                    UNSUPPORTED_VERSION_OF_FHIR.formatted(fhirVersion.getFhirVersionString()));
+        };
     }
 
     /**
      * Sets the BundleEntryRequest url
-     * @param fhirVersion
-     * @param request
-     * @param url
-     * @return
+     * @param fhirVersion FhirVersionEnum
+     * @param request IBaseBackboneElement
+     * @param url String
+     * @return IBaseBackboneElement
      */
     public static IBaseBackboneElement setRequestUrl(
             FhirVersionEnum fhirVersion, IBaseBackboneElement request, String url) {
-        if (request == null) {
-            request = newRequest(fhirVersion, null);
-        }
-        switch (fhirVersion) {
-            case DSTU3:
-                return ((org.hl7.fhir.dstu3.model.Bundle.BundleEntryRequestComponent) request).setUrl(url);
-            case R4:
-                return ((org.hl7.fhir.r4.model.Bundle.BundleEntryRequestComponent) request).setUrl(url);
-            case R5:
-                return ((org.hl7.fhir.r5.model.Bundle.BundleEntryRequestComponent) request).setUrl(url);
-
-            default:
-                throw new IllegalArgumentException(
-                        UNSUPPORTED_VERSION_OF_FHIR.formatted(fhirVersion.getFhirVersionString()));
-        }
+        return switch (fhirVersion) {
+            case DSTU3 -> ((Bundle.BundleEntryRequestComponent) request).setUrl(url);
+            case R4 -> ((BundleEntryRequestComponent) request).setUrl(url);
+            case R5 -> ((org.hl7.fhir.r5.model.Bundle.BundleEntryRequestComponent) request).setUrl(url);
+            default -> throw new IllegalArgumentException(
+                    UNSUPPORTED_VERSION_OF_FHIR.formatted(fhirVersion.getFhirVersionString()));
+        };
     }
 
     /**
      * Sets the BundleEntryRequest ifNoneExist property
-     * @param fhirVersion
-     * @param request
-     * @param ifNoneExist
-     * @return
+     * @param fhirVersion FhirVersionEnum
+     * @param request IBaseBackboneElement
+     * @param ifNoneExist String
+     * @return IBaseBackboneElement
      */
     public static IBaseBackboneElement setRequestIfNoneExist(
             FhirVersionEnum fhirVersion, IBaseBackboneElement request, String ifNoneExist) {
-        if (request == null) {
-            request = newRequest(fhirVersion, null);
-        }
-        switch (fhirVersion) {
-            case DSTU3:
-                return ((org.hl7.fhir.dstu3.model.Bundle.BundleEntryRequestComponent) request)
-                        .setIfNoneExist(ifNoneExist);
-            case R4:
-                return ((org.hl7.fhir.r4.model.Bundle.BundleEntryRequestComponent) request).setIfNoneExist(ifNoneExist);
-            case R5:
-                return ((org.hl7.fhir.r5.model.Bundle.BundleEntryRequestComponent) request).setIfNoneExist(ifNoneExist);
-
-            default:
-                throw new IllegalArgumentException(
-                        UNSUPPORTED_VERSION_OF_FHIR.formatted(fhirVersion.getFhirVersionString()));
-        }
+        return switch (fhirVersion) {
+            case DSTU3 -> ((Bundle.BundleEntryRequestComponent) request).setIfNoneExist(ifNoneExist);
+            case R4 -> ((BundleEntryRequestComponent) request).setIfNoneExist(ifNoneExist);
+            case R5 -> ((org.hl7.fhir.r5.model.Bundle.BundleEntryRequestComponent) request).setIfNoneExist(ifNoneExist);
+            default -> throw new IllegalArgumentException(
+                    UNSUPPORTED_VERSION_OF_FHIR.formatted(fhirVersion.getFhirVersionString()));
+        };
     }
 
     /**
      * Sets the BundleEntry fullUrl property
-     * @param fhirVersion
-     * @param entry
-     * @param fullUrl
-     * @return
+     * @param fhirVersion FhirVersionEnum
+     * @param entry IBaseBackboneElement
+     * @param fullUrl String
+     * @return IBaseBackboneElement
      */
     public static IBaseBackboneElement setEntryFullUrl(
             FhirVersionEnum fhirVersion, IBaseBackboneElement entry, String fullUrl) {
-        if (entry == null) {
-            entry = newEntry(fhirVersion);
-        }
-        switch (fhirVersion) {
-            case DSTU3:
-                return ((org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent) entry).setFullUrl(fullUrl);
-            case R4:
-                return ((org.hl7.fhir.r4.model.Bundle.BundleEntryComponent) entry).setFullUrl(fullUrl);
-            case R5:
-                return ((org.hl7.fhir.r5.model.Bundle.BundleEntryComponent) entry).setFullUrl(fullUrl);
-
-            default:
-                throw new IllegalArgumentException(
-                        UNSUPPORTED_VERSION_OF_FHIR.formatted(fhirVersion.getFhirVersionString()));
-        }
+        return switch (fhirVersion) {
+            case DSTU3 -> ((Bundle.BundleEntryComponent) entry).setFullUrl(fullUrl);
+            case R4 -> ((BundleEntryComponent) entry).setFullUrl(fullUrl);
+            case R5 -> ((org.hl7.fhir.r5.model.Bundle.BundleEntryComponent) entry).setFullUrl(fullUrl);
+            default -> throw new IllegalArgumentException(
+                    UNSUPPORTED_VERSION_OF_FHIR.formatted(fhirVersion.getFhirVersionString()));
+        };
     }
 
     /**
      * Sets the BundleEntry request property
-     * @param fhirVersion
-     * @param entry
-     * @param request
-     * @return
+     * @param fhirVersion FhirVersionEnum
+     * @param entry IBaseBackboneElement
+     * @param request IBaseBackboneElement
+     * @return IBaseBackboneElement
      */
     public static IBaseBackboneElement setEntryRequest(
             FhirVersionEnum fhirVersion, IBaseBackboneElement entry, IBaseBackboneElement request) {
-        if (entry == null) {
-            entry = newEntry(fhirVersion);
-        }
-        if (request == null) {
-            request = newRequest(fhirVersion, null);
-        }
         String requestTypeError = "Request should be of type: %s";
-        switch (fhirVersion) {
-            case DSTU3:
-                if (request != null
-                        && !(request instanceof org.hl7.fhir.dstu3.model.Bundle.BundleEntryRequestComponent)) {
+        return switch (fhirVersion) {
+            case DSTU3 -> {
+                if (request != null && !(request instanceof Bundle.BundleEntryRequestComponent)) {
                     throw new IllegalArgumentException(
                             requestTypeError.formatted("org.hl7.fhir.dstu3.model.Bundle.BundleEntryRequestComponent"));
                 }
-                return ((org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent) entry)
-                        .setRequest((org.hl7.fhir.dstu3.model.Bundle.BundleEntryRequestComponent) request);
-            case R4:
-                if (request != null && !(request instanceof org.hl7.fhir.r4.model.Bundle.BundleEntryRequestComponent)) {
+                yield ((Bundle.BundleEntryComponent) entry).setRequest((Bundle.BundleEntryRequestComponent) request);
+            }
+            case R4 -> {
+                if (request != null && !(request instanceof BundleEntryRequestComponent)) {
                     throw new IllegalArgumentException(
                             requestTypeError.formatted("org.hl7.fhir.r4.model.Bundle.BundleEntryRequestComponent"));
                 }
-                return ((org.hl7.fhir.r4.model.Bundle.BundleEntryComponent) entry)
-                        .setRequest((org.hl7.fhir.r4.model.Bundle.BundleEntryRequestComponent) request);
-            case R5:
+                yield ((BundleEntryComponent) entry).setRequest((BundleEntryRequestComponent) request);
+            }
+            case R5 -> {
                 if (request != null && !(request instanceof org.hl7.fhir.r5.model.Bundle.BundleEntryRequestComponent)) {
                     throw new IllegalArgumentException(
                             requestTypeError.formatted("org.hl7.fhir.r5.model.Bundle.BundleEntryRequestComponent"));
                 }
-                return ((org.hl7.fhir.r5.model.Bundle.BundleEntryComponent) entry)
+                yield ((org.hl7.fhir.r5.model.Bundle.BundleEntryComponent) entry)
                         .setRequest((org.hl7.fhir.r5.model.Bundle.BundleEntryRequestComponent) request);
-
-            default:
-                throw new IllegalArgumentException(
-                        UNSUPPORTED_VERSION_OF_FHIR.formatted(fhirVersion.getFhirVersionString()));
-        }
+            }
+            default -> throw new IllegalArgumentException(
+                    UNSUPPORTED_VERSION_OF_FHIR.formatted(fhirVersion.getFhirVersionString()));
+        };
     }
 
     public static RuntimeSearchParam resourceToRuntimeSearchParam(IBaseResource resource) {
         var fhirVersion = resource.getStructureFhirVersionEnum();
-        switch (fhirVersion) {
-            case DSTU3:
+        return switch (fhirVersion) {
+            case DSTU3 -> {
                 var res = (SearchParameter) resource;
-                return new RuntimeSearchParam(
+                yield new RuntimeSearchParam(
                         res.getIdElement(),
                         res.getUrl(),
                         res.getCode(),
@@ -762,9 +676,10 @@ public class BundleHelper {
                         res.getTarget().stream().map(StringType::toString).collect(Collectors.toSet()),
                         RuntimeSearchParamStatusEnum.ACTIVE,
                         res.getBase().stream().map(StringType::toString).toList());
-            case R4:
+            }
+            case R4 -> {
                 var resR4 = (org.hl7.fhir.r4.model.SearchParameter) resource;
-                return new RuntimeSearchParam(
+                yield new RuntimeSearchParam(
                         resR4.getIdElement(),
                         resR4.getUrl(),
                         resR4.getCode(),
@@ -779,9 +694,10 @@ public class BundleHelper {
                         resR4.getBase().stream()
                                 .map(org.hl7.fhir.r4.model.StringType::toString)
                                 .toList());
-            case R5:
+            }
+            case R5 -> {
                 var resR5 = (org.hl7.fhir.r5.model.SearchParameter) resource;
-                return new RuntimeSearchParam(
+                yield new RuntimeSearchParam(
                         resR5.getIdElement(),
                         resR5.getUrl(),
                         resR5.getCode(),
@@ -792,10 +708,9 @@ public class BundleHelper {
                         resR5.getTarget().stream().map(PrimitiveType::toString).collect(Collectors.toSet()),
                         RuntimeSearchParamStatusEnum.ACTIVE,
                         resR5.getBase().stream().map(PrimitiveType::toString).toList());
-
-            default:
-                throw new IllegalArgumentException(
-                        UNSUPPORTED_VERSION_OF_FHIR.formatted(fhirVersion.getFhirVersionString()));
-        }
+            }
+            default -> throw new IllegalArgumentException(
+                    UNSUPPORTED_VERSION_OF_FHIR.formatted(fhirVersion.getFhirVersionString()));
+        };
     }
 }

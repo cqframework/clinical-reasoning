@@ -115,6 +115,7 @@
       }
     }
   ],
+  "questionnaire": "#sigmoidoscopy-complication-casefeature-definition",
   "status": "in-progress",
   "subject": {
     "reference": "Patient/nocoverageconcern-sedconcern-sigcomp"

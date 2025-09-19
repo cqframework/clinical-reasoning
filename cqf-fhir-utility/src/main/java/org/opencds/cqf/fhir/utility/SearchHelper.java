@@ -6,6 +6,8 @@ import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -401,6 +403,26 @@ public class SearchHelper {
             IRepository repository,
             Class<T> resourceType,
             Map<String, List<IQueryParameterType>> searchParameters,
+            Map<String, String> headers) {
+
+        return (R) searchRepositoryWithPaging(repository, resourceType, Multimaps.forMap(searchParameters), headers);
+    }
+
+    /**
+     * Searches the given Repository and handles paging to return all resources found in the search
+     *
+     * @param <T> an IBaseResource type
+     * @param <R> an IBaseBundle type
+     * @param repository the repository to search
+     * @param resourceType the class of the resource being searched for
+     * @param searchParameters the search parameters
+     * @param headers the search headers
+     * @return
+     */
+    public static <T extends IBaseResource, R extends IBaseBundle> R searchRepositoryWithPaging(
+            IRepository repository,
+            Class<T> resourceType,
+            Multimap<String, List<IQueryParameterType>> searchParameters,
             Map<String, String> headers) {
         var bundleClass = getBundleClass(repository);
         var result = repository.search(bundleClass, resourceType, searchParameters, headers);

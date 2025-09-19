@@ -18,7 +18,6 @@ import ca.uhn.fhir.repository.IRepository;
 import java.util.Collections;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType;
@@ -32,6 +31,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.common.ExpressionProcessor;
 import org.opencds.cqf.fhir.utility.CqfExpression;
+import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
+import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireItemComponentAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireResponseItemComponentAdapter;
 
 @SuppressWarnings("UnstableApiUsage")
 @ExtendWith(MockitoExtension.class)
@@ -62,55 +64,56 @@ class ProcessItemTests {
     @Test
     void processItemShouldReturnQuestionnaireResponseItemComponentR4() {
         // setup
-        final Questionnaire questionnaire = new Questionnaire();
+        final var fhirVersion = FhirVersionEnum.R4;
+        final var questionnaire = new Questionnaire();
         doReturn(FhirContext.forR4Cached()).when(repository).fhirContext();
-        final PopulateRequest populateRequest =
-                newPopulateRequestForVersion(FhirVersionEnum.R4, libraryEngine, questionnaire);
-        final IBaseBackboneElement originalQuestionnaireItemComponent = new QuestionnaireItemComponent().setLinkId("1");
+        final var populateRequest = newPopulateRequestForVersion(fhirVersion, libraryEngine, questionnaire);
+        final var originalQuestionnaireItemComponent =
+                new QuestionnaireItemComponent().setLinkId("1").setType(QuestionnaireItemType.DECIMAL);
+        final var itemAdapter = (IQuestionnaireItemComponentAdapter)
+                IAdapterFactory.createAdapterForBase(fhirVersion, originalQuestionnaireItemComponent);
         final CqfExpression expression = withExpression();
-        final List<IBase> expressionResults = withExpressionResults(FhirVersionEnum.R4);
-        doReturn(expression)
-                .when(expressionProcessor)
-                .getItemInitialExpression(populateRequest, originalQuestionnaireItemComponent);
+        final List<IBase> expressionResults = withExpressionResults(fhirVersion);
+        doReturn(expression).when(expressionProcessor).getItemInitialExpression(populateRequest, itemAdapter);
         doReturn(expressionResults)
                 .when(expressionProcessor)
                 .getExpressionResultForItem(eq(populateRequest), eq(expression), eq("1"), any(), any());
         // execute
-        final IBaseBackboneElement actual =
-                processItem.processItem(populateRequest, originalQuestionnaireItemComponent);
+        final var actual = processItem.processItem(populateRequest, itemAdapter);
         // validate
-        final var answers = populateRequest.resolvePathList(actual, "answer", IBaseBackboneElement.class);
+        final var answers = actual.getAnswer();
         assertEquals(3, answers.size());
         for (int i = 0; i < answers.size(); i++) {
-            assertEquals(expressionResults.get(i), populateRequest.resolvePath(answers.get(i), "value"));
+            assertEquals(expressionResults.get(i), answers.get(i).getValue(), "value");
         }
     }
 
     @Test
     void processItemShouldReturnQuestionnaireResponseItemComponentR5() {
         // setup
-        final org.hl7.fhir.r5.model.Questionnaire questionnaire = new org.hl7.fhir.r5.model.Questionnaire();
+        final var fhirVersion = FhirVersionEnum.R5;
+        final var questionnaire = new org.hl7.fhir.r5.model.Questionnaire();
         doReturn(FhirContext.forR5Cached()).when(repository).fhirContext();
-        final PopulateRequest populateRequest =
-                newPopulateRequestForVersion(FhirVersionEnum.R5, libraryEngine, questionnaire);
-        final IBaseBackboneElement originalQuestionnaireItemComponent =
-                new org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemComponent().setLinkId("1");
+        final var populateRequest = newPopulateRequestForVersion(fhirVersion, libraryEngine, questionnaire);
+        final var originalQuestionnaireItemComponent =
+                new org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemComponent()
+                        .setLinkId("1")
+                        .setType(org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemType.DECIMAL);
+        final var itemAdapter = (IQuestionnaireItemComponentAdapter)
+                IAdapterFactory.createAdapterForBase(fhirVersion, originalQuestionnaireItemComponent);
         final CqfExpression expression = withExpression();
-        final List<IBase> expressionResults = withExpressionResults(FhirVersionEnum.R5);
-        doReturn(expression)
-                .when(expressionProcessor)
-                .getItemInitialExpression(populateRequest, originalQuestionnaireItemComponent);
+        final List<IBase> expressionResults = withExpressionResults(fhirVersion);
+        doReturn(expression).when(expressionProcessor).getItemInitialExpression(populateRequest, itemAdapter);
         doReturn(expressionResults)
                 .when(expressionProcessor)
                 .getExpressionResultForItem(eq(populateRequest), eq(expression), eq("1"), any(), any());
         // execute
-        final IBaseBackboneElement actual =
-                processItem.processItem(populateRequest, originalQuestionnaireItemComponent);
+        final var actual = processItem.processItem(populateRequest, itemAdapter);
         // validate
-        final var answers = populateRequest.resolvePathList(actual, "answer", IBaseBackboneElement.class);
+        final var answers = actual.getAnswer();
         assertEquals(3, answers.size());
         for (int i = 0; i < answers.size(); i++) {
-            assertEquals(expressionResults.get(i), populateRequest.resolvePath(answers.get(i), "value"));
+            assertEquals(expressionResults.get(i), answers.get(i).getValue(), "value");
         }
     }
 
@@ -131,50 +134,51 @@ class ProcessItemTests {
     @Test
     void getExpressionResultsShouldReturnEmptyListIfInitialExpressionIsNull() {
         // setup
-        final Questionnaire questionnaire = new Questionnaire();
+        final var fhirVersion = FhirVersionEnum.R4;
+        final var questionnaire = new Questionnaire();
         doReturn(FhirContext.forR4Cached()).when(repository).fhirContext();
-        final PopulateRequest prePopulateRequest =
-                newPopulateRequestForVersion(FhirVersionEnum.R4, libraryEngine, questionnaire);
-        final QuestionnaireItemComponent questionnaireItemComponent = new QuestionnaireItemComponent();
-        final QuestionnaireResponseItemComponent questionnaireResponseItemComponent =
-                new QuestionnaireResponseItemComponent();
-        doReturn(null)
-                .when(expressionProcessor)
-                .getItemInitialExpression(prePopulateRequest, questionnaireItemComponent);
+        final var prePopulateRequest = newPopulateRequestForVersion(fhirVersion, libraryEngine, questionnaire);
+        final var questionnaireItemComponent = new QuestionnaireItemComponent();
+        final var questionnaireResponseItemComponent = new QuestionnaireResponseItemComponent();
+        final var itemAdapter = (IQuestionnaireItemComponentAdapter)
+                IAdapterFactory.createAdapterForBase(fhirVersion, questionnaireItemComponent);
+        final var responseItemAdapter = (IQuestionnaireResponseItemComponentAdapter)
+                IAdapterFactory.createAdapterForBase(fhirVersion, questionnaireResponseItemComponent);
+        doReturn(null).when(expressionProcessor).getItemInitialExpression(prePopulateRequest, itemAdapter);
         // execute
-        final List<IBase> actual = processItem.getInitialValue(
-                prePopulateRequest, questionnaireItemComponent, questionnaireResponseItemComponent, null);
+        final List<IBase> actual =
+                processItem.getInitialValue(prePopulateRequest, itemAdapter, responseItemAdapter, null);
         // validate
         assertTrue(actual.isEmpty());
-        verify(expressionProcessor).getItemInitialExpression(prePopulateRequest, questionnaireItemComponent);
+        verify(expressionProcessor).getItemInitialExpression(prePopulateRequest, itemAdapter);
         verify(expressionProcessor, never()).getExpressionResultForItem(prePopulateRequest, null, "linkId", null, null);
     }
 
     @Test
     void getExpressionResultsShouldReturnListOfResourcesIfInitialExpressionIsNotNull() {
         // setup
-        final List<IBase> expected = withExpressionResults(FhirVersionEnum.R4);
-        final Questionnaire questionnaire = new Questionnaire();
+        final var fhirVersion = FhirVersionEnum.R4;
+        final var expected = withExpressionResults(FhirVersionEnum.R4);
+        final var questionnaire = new Questionnaire();
         doReturn(FhirContext.forR4Cached()).when(repository).fhirContext();
-        final PopulateRequest prePopulateRequest =
-                newPopulateRequestForVersion(FhirVersionEnum.R4, libraryEngine, questionnaire);
-        final QuestionnaireItemComponent questionnaireItemComponent = new QuestionnaireItemComponent();
-        questionnaireItemComponent.setLinkId("linkId");
-        final QuestionnaireResponseItemComponent questionnaireResponseItemComponent =
-                new QuestionnaireResponseItemComponent();
-        final CqfExpression expression = withExpression();
-        doReturn(expression)
-                .when(expressionProcessor)
-                .getItemInitialExpression(prePopulateRequest, questionnaireItemComponent);
+        final var prePopulateRequest = newPopulateRequestForVersion(FhirVersionEnum.R4, libraryEngine, questionnaire);
+        final var questionnaireItemComponent = new QuestionnaireItemComponent().setLinkId("linkId");
+        final var questionnaireResponseItemComponent = new QuestionnaireResponseItemComponent();
+        final var itemAdapter = (IQuestionnaireItemComponentAdapter)
+                IAdapterFactory.createAdapterForBase(fhirVersion, questionnaireItemComponent);
+        final var responseItemAdapter = (IQuestionnaireResponseItemComponentAdapter)
+                IAdapterFactory.createAdapterForBase(fhirVersion, questionnaireResponseItemComponent);
+        final var expression = withExpression();
+        doReturn(expression).when(expressionProcessor).getItemInitialExpression(prePopulateRequest, itemAdapter);
         doReturn(expected)
                 .when(expressionProcessor)
                 .getExpressionResultForItem(prePopulateRequest, expression, "linkId", null, null);
         // execute
-        final List<IBase> actual = processItem.getInitialValue(
-                prePopulateRequest, questionnaireItemComponent, questionnaireResponseItemComponent, null);
+        final List<IBase> actual =
+                processItem.getInitialValue(prePopulateRequest, itemAdapter, responseItemAdapter, null);
         // validate
         assertEquals(expected, actual);
-        verify(expressionProcessor).getItemInitialExpression(prePopulateRequest, questionnaireItemComponent);
+        verify(expressionProcessor).getItemInitialExpression(prePopulateRequest, itemAdapter);
         verify(expressionProcessor).getExpressionResultForItem(prePopulateRequest, expression, "linkId", null, null);
     }
 
@@ -184,15 +188,18 @@ class ProcessItemTests {
 
     @Test
     void processItemShouldCorrectlyProcessNonGroupItemsWithChildren() {
-        final Questionnaire questionnaire = new Questionnaire();
+        final var fhirVersion = FhirVersionEnum.R4;
+        final var questionnaire = new Questionnaire();
         doReturn(FhirContext.forR4Cached()).when(repository).fhirContext();
         final var populateRequest = newPopulateRequestForVersion(FhirVersionEnum.R4, libraryEngine, questionnaire);
         var parentItem = questionnaire.addItem().setLinkId("1").setType(QuestionnaireItemType.BOOLEAN);
-        parentItem.addItem().setLinkId("1.1");
-        parentItem.addItem().setLinkId("1.2");
+        parentItem.addItem().setLinkId("1.1").setType(QuestionnaireItemType.BOOLEAN);
+        parentItem.addItem().setLinkId("1.2").setType(QuestionnaireItemType.BOOLEAN);
+        final var itemAdapter =
+                (IQuestionnaireItemComponentAdapter) IAdapterFactory.createAdapterForBase(fhirVersion, parentItem);
         doReturn(null).when(expressionProcessor).getItemInitialExpression(eq(populateRequest), any());
         var actual = (QuestionnaireResponseItemComponent)
-                processItem.processItem(populateRequest, questionnaire.getItem().get(0));
+                processItem.processItem(populateRequest, itemAdapter).get();
         assertNotNull(actual);
         assertFalse(actual.hasItem());
         assertTrue(actual.hasAnswer());

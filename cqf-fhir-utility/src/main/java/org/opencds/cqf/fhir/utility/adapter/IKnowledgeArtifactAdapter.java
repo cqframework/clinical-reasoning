@@ -71,7 +71,7 @@ public interface IKnowledgeArtifactAdapter extends IResourceAdapter {
     }
 
     default void setTitle(String title) {
-        getModelResolver().setValue(get(), "title", title);
+        getModelResolver().setValue(get(), "title", newStringType(get().getStructureFhirVersionEnum(), title));
     }
 
     default String getDescriptor() {

@@ -17,6 +17,7 @@ import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 import org.opencds.cqf.fhir.utility.iterable.BundleMappingIterable;
+import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 public class RepositoryRetrieveProvider extends BaseRetrieveProvider {
@@ -137,5 +138,12 @@ public class RepositoryRetrieveProvider extends BaseRetrieveProvider {
     private class SearchConfig {
         public Map<String, List<IQueryParameterType>> searchParams = new HashMap<>();
         public Predicate<IBaseResource> filter = x -> true;
+    }
+
+    @Override
+    protected boolean inModifierSupported(String valueSet, String resourceName, String searchParamName) {
+        // The IN modifier is not currently supported by the ResourceMatcher used by the InMemoryRepository
+        return !(repository instanceof InMemoryFhirRepository)
+                && super.inModifierSupported(valueSet, resourceName, searchParamName);
     }
 }

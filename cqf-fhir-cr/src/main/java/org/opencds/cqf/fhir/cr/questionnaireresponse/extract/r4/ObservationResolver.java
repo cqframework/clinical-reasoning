@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseReference;
@@ -25,19 +24,21 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.opencds.cqf.fhir.cr.questionnaireresponse.extract.ExtractRequest;
 import org.opencds.cqf.fhir.utility.Constants;
+import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireItemComponentAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireResponseItemAnswerComponentAdapter;
 
 public class ObservationResolver {
     public IBaseResource resolve(
             ExtractRequest request,
-            IBaseBackboneElement baseAnswer,
-            IBaseBackboneElement baseItem,
+            IQuestionnaireResponseItemAnswerComponentAdapter answerAdapter,
+            IQuestionnaireItemComponentAdapter itemAdapter,
             String linkId,
             IBaseReference subject,
             Map<String, List<IBaseCoding>> questionnaireCodeMap,
             IBaseExtension<?, ?> categoryExt) {
         var questionnaireResponse = (QuestionnaireResponse) request.getQuestionnaireResponse();
-        var answer = (QuestionnaireResponseItemAnswerComponent) baseAnswer;
-        var item = (QuestionnaireItemComponent) baseItem;
+        var answer = (QuestionnaireResponseItemAnswerComponent) answerAdapter.get();
+        var item = (QuestionnaireItemComponent) (itemAdapter == null ? null : itemAdapter.get());
         var obs = new Observation();
         obs.setId(request.getExtractId() + "." + linkId);
         obs.setBasedOn(questionnaireResponse.getBasedOn());
@@ -74,7 +75,7 @@ public class ObservationResolver {
                 obs.setValue(new DateTimeType(((DateType) answer.getValue()).getValue()));
                 break;
             case "decimal", "integer":
-                if (item.hasExtension(Constants.QUESTIONNAIRE_UNIT)) {
+                if (item != null && item.hasExtension(Constants.QUESTIONNAIRE_UNIT)) {
                     obs.setValue(getQuantity(answer, item));
                 } else {
                     obs.setValue(answer.getValue());

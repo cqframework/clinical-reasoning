@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cr.plandefinition;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
@@ -401,13 +402,21 @@ public class TestPlanDefinition {
             return this;
         }
 
-        public GeneratedBundle hasQuestionnaire() {
-            assertNotNull(questionnaire);
+        public GeneratedBundle hasQuestionnaire(boolean value) {
+            if (value) {
+                assertNotNull(questionnaire);
+            } else {
+                assertNull(questionnaire);
+            }
             return this;
         }
 
-        public GeneratedBundle hasQuestionnaireResponse() {
-            assertNotNull(questionnaireResponse);
+        public GeneratedBundle hasQuestionnaireResponse(boolean value) {
+            if (value) {
+                assertNotNull(questionnaireResponse);
+            } else {
+                assertNull(questionnaireResponse);
+            }
             return this;
         }
 

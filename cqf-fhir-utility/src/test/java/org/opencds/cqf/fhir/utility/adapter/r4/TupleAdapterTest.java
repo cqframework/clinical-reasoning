@@ -11,7 +11,7 @@ import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Tuple;
 import org.junit.jupiter.api.Test;
 
-public class TupleAdapterTest {
+class TupleAdapterTest {
     private final org.opencds.cqf.fhir.utility.adapter.IAdapterFactory adapterFactory = new AdapterFactory();
 
     @Test

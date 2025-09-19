@@ -147,7 +147,7 @@ public class ItemProcessor {
         return populationContext.stream()
                 .map(context ->
                         processPopulationContext(request, item, contextExpression.getName(), context, profileAdapter))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     protected void populateAnswer(
@@ -187,7 +187,7 @@ public class ItemProcessor {
         } else {
             results = item.getInitial().stream()
                     .map(i -> request.resolvePath(i, "value", IBase.class))
-                    .collect(Collectors.toList());
+                    .toList();
         }
         return results;
     }

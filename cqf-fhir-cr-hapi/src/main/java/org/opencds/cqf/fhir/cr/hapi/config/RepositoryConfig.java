@@ -67,15 +67,18 @@ public class RepositoryConfig {
                     .setAction(RestOperationTypeEnum.SEARCH_TYPE)
                     .addHeaders(headers)
                     .create();
+
+            SearchConverter converter = new SearchConverter();
+            converter.convertParameters(searchParameters, fhirContext());
+            details.setParameters(converter.myResultParameters);
+            details.setResourceName(daoRegistry.getFhirContext().getResourceType(resourceType));
+
             // This adds a 10,000 count to searches that are system level and would
             // otherwise result in a SimpleBundleProvider that only returns 50 resutlts.
             if (details instanceof SystemRequestDetails) {
                 details.addParameter("_count", new String[] {"10000"});
             }
-            SearchConverter converter = new SearchConverter();
-            converter.convertParameters(searchParameters, fhirContext());
-            details.setParameters(converter.myResultParameters);
-            details.setResourceName(daoRegistry.getFhirContext().getResourceType(resourceType));
+            
             IBundleProvider bundleProvider =
                     daoRegistry.getResourceDao(resourceType).search(converter.mySearchParameterMap, details);
 

@@ -24,6 +24,8 @@ public class CompositeEvaluationResultsPerMeasure {
     private final Map<IIdType, Map<String, EvaluationResult>> resultsPerMeasure;
     // We may get several errors for a given measure
     private final Map<IIdType, List<String>> errorsPerMeasure;
+    // We may get several warnings for a given measure
+    private final Map<IIdType, List<String>> warningsPerMeasure;
 
     private CompositeEvaluationResultsPerMeasure(Builder builder) {
 
@@ -34,6 +36,10 @@ public class CompositeEvaluationResultsPerMeasure {
         var errorsBuilder = ImmutableMap.<IIdType, List<String>>builder();
         builder.errorsPerMeasure.forEach((key, value) -> errorsBuilder.put(key, List.copyOf(value)));
         errorsPerMeasure = errorsBuilder.build();
+
+        var warningsBuilder = ImmutableMap.<IIdType, List<String>>builder();
+        builder.warningsPerMeasure.forEach((key, value) -> warningsBuilder.put(key, List.copyOf(value)));
+        warningsPerMeasure = warningsBuilder.build();
     }
 
     /**
@@ -83,6 +89,7 @@ public class CompositeEvaluationResultsPerMeasure {
     public static class Builder {
         private final Map<IIdType, Map<String, EvaluationResult>> resultsPerMeasure = new HashMap<>();
         private final Map<IIdType, List<String>> errorsPerMeasure = new HashMap<>();
+        private final Map<IIdType, List<String>> warningsPerMeasure = new HashMap<>();
 
         public CompositeEvaluationResultsPerMeasure build() {
             return new CompositeEvaluationResultsPerMeasure(this);
@@ -116,7 +123,17 @@ public class CompositeEvaluationResultsPerMeasure {
             }
         }
 
-        public void addError(IIdType measureId, String error) {
+        public void addWarnings(List<? extends IIdType> measureIds, String warning) {
+            if (warning == null || warning.isEmpty()) {
+                return;
+            }
+
+            for (IIdType measureId : measureIds) {
+                addWarning(measureId, warning);
+            }
+        }
+
+        private void addError(IIdType measureId, String error) {
             if (error == null || error.isBlank()) {
                 return;
             }
@@ -124,6 +141,16 @@ public class CompositeEvaluationResultsPerMeasure {
             errorsPerMeasure
                     .computeIfAbsent(measureId.toUnqualifiedVersionless(), k -> new ArrayList<>())
                     .add(error);
+        }
+
+        private void addWarning(IIdType measureId, String warning) {
+            if (warning == null || warning.isBlank()) {
+                return;
+            }
+
+            warningsPerMeasure
+                .computeIfAbsent(measureId.toUnqualifiedVersionless(), k -> new ArrayList<>())
+                .add(warning);
         }
     }
 }

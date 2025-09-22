@@ -4,11 +4,18 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import java.util.Collections;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Endpoint;
+import org.hl7.fhir.r4.model.Endpoint.EndpointStatus;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.hapi.r4.library.LibraryDataRequirementsProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.library.LibraryEvaluateProvider;
@@ -77,6 +84,50 @@ class LibraryOperationsProviderIT extends BaseCrR4TestServer {
         var requestDetails = setupRequestDetails();
         var result = libraryReleaseProvider.releaseLibrary(
                 "Library/ASLPDataElements", "1.0.0", new CodeType("default"), null, null, null, null, requestDetails);
+        assertInstanceOf(Bundle.class, result);
+    }
+
+    @Test
+    void testManifestRelease() {
+        loadBundle("org/opencds/cqf/fhir/cr/hapi/r4/Bundle-CMS165.json");
+        loadBundle("org/opencds/cqf/fhir/cr/hapi/r4/uscore-package-bundle.json");
+        loadResourceFromPath("org/opencds/cqf/fhir/cr/hapi/r4/Library-Manifest-Partial-Set-FinalDraft-2025.json");
+        var requestDetails = setupRequestDetails();
+
+        var terminologyEndpoint = new Endpoint();
+        terminologyEndpoint.addExtension("vsacUsername", new StringType("apikey"));
+        terminologyEndpoint.addExtension("apiKey", new StringType("FILL THIS OUT WITH YOUR API KEY"));
+        terminologyEndpoint.setAddress("https://cts.nlm.nih.gov/fhir");
+        terminologyEndpoint.setConnectionType(
+                new Coding("http://hl7.org/fhir/ValueSet/endpoint-connection-type", "hl7-fhir-rest", null));
+        terminologyEndpoint.setStatus(EndpointStatus.ACTIVE);
+        terminologyEndpoint.setPayloadType(Collections.singletonList(
+                new CodeableConcept(new Coding("http://hl7.org/fhir/ValueSet/endpoint-payload-type", "any", null))));
+
+        var result = libraryReleaseProvider.releaseLibrary(
+                "Library/Manifest-Partial-Set-FinalDraft-2025",
+                "1.0.0",
+                new CodeType("force"),
+                new BooleanType(false),
+                null,
+                null,
+                null,
+                requestDetails);
+        assertInstanceOf(Bundle.class, result);
+
+        var resultRelease = read(new IdType("Library/Manifest-Partial-Set-FinalDraft-2025"));
+
+        var terminologyEndpointParam = new Parameters.ParametersParameterComponent();
+        terminologyEndpointParam.setName("terminologyEndpoint");
+        terminologyEndpointParam.setResource(terminologyEndpoint);
+        result = libraryPackageProvider.packageLibrary(
+                "Library/Manifest-Partial-Set-FinalDraft-2025",
+                null,
+                null,
+                null,
+                terminologyEndpointParam,
+                null,
+                requestDetails);
         assertInstanceOf(Bundle.class, result);
     }
 }

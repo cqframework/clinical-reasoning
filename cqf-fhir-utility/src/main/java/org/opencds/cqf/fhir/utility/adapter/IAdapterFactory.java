@@ -236,4 +236,12 @@ public interface IAdapterFactory {
      * @return an adapter exposing common api calls
      */
     IStructureDefinitionAdapter createStructureDefinition(IBaseResource structureDefinition);
+
+    /**
+     * Creates an adapter that exposes common StructureDefinition operations across multiple versions of FHIR
+     *
+     * @param implementationGuide a FHIR ImplementationGuide Resource
+     * @return an adapter exposing common api calls
+     */
+    IImplementationGuideAdapter createImplementationGuide(IBaseResource implementationGuide);
 }

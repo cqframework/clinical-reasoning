@@ -10,6 +10,7 @@ import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.util.FhirTerser;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -150,10 +151,21 @@ public abstract class BaseKnowledgeArtifactVisitor implements IKnowledgeArtifact
                             }
                         }
                     })
-                    .map(ra -> Optional.ofNullable(
-                                    SearchHelper.searchRepositoryByCanonicalWithPaging(repository, ra.getReference()))
-                            .map(bundle -> (IDomainResource) BundleHelper.getEntryResourceFirstRep(bundle))
-                            .orElseGet(() -> tryGetValueSetsFromTxServer(ra, client, terminologyEndpoint)))
+                    .map(ra -> {
+                        var hasUrl = new FhirTerser(fhirContext())
+                                .fieldExists(
+                                        "url",
+                                        fhirContext()
+                                                .getResourceDefinition(Canonicals.getResourceType(ra.getReference()))
+                                                .newInstance());
+                        if (hasUrl) {
+                            return Optional.ofNullable(SearchHelper.searchRepositoryByCanonicalWithPaging(
+                                            repository, ra.getReference()))
+                                    .map(bundle -> (IDomainResource) BundleHelper.getEntryResourceFirstRep(bundle))
+                                    .orElseGet(() -> tryGetValueSetsFromTxServer(ra, client, terminologyEndpoint));
+                        }
+                        return null;
+                    })
                     .filter(r -> r != null)
                     .map(r -> IAdapterFactory.forFhirVersion(fhirVersion()).createKnowledgeArtifactAdapter(r))
                     .forEach(component -> recursiveGather(

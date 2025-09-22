@@ -92,23 +92,14 @@ public class ExpandRunner implements Runnable {
                         .execute();
                 scheduler.shutdown();
             }
-        } catch (BaseServerResponseException bsre) {
-            boolean isTransient =
-                    switch (bsre.getStatusCode()) {
-                        case HttpStatus.SC_REQUEST_TIMEOUT,
-                                HttpStatus.SC_TOO_MANY_REQUESTS,
-                                HttpStatus.SC_INTERNAL_SERVER_ERROR,
-                                HttpStatus.SC_BAD_GATEWAY,
-                                HttpStatus.SC_SERVICE_UNAVAILABLE,
-                                HttpStatus.SC_GATEWAY_TIMEOUT -> true;
-                        default -> false;
-                    };
+        } catch (Exception ex) {
+            var isTransient = isTransient(ex);
             logger.info(
                     "Expansion attempt {} failed{}: {}.",
                     expansionAttempt,
                     isTransient ? " due to transient fault" : "",
-                    bsre.getMessage());
-            if (isTransient && expansionAttempt < terminologyServerClientSettings.getMaxRetryCount()) {
+                    ex.getMessage());
+            if (expansionAttempt < terminologyServerClientSettings.getMaxRetryCount()) {
                 scheduler.schedule(
                         this,
                         terminologyServerClientSettings.getRetryIntervalMillis() * expansionAttempt,
@@ -116,10 +107,22 @@ public class ExpandRunner implements Runnable {
             } else {
                 scheduler.shutdown();
             }
-        } catch (Exception ex) {
-            logger.info("Expansion attempt {} failed: {}", expansionAttempt, ex.getMessage());
-            scheduler.shutdown();
         }
+    }
+
+    private static boolean isTransient(Exception ex) {
+        var isTransient = false;
+        if (ex instanceof BaseServerResponseException bsre) {
+            isTransient = switch (bsre.getStatusCode()) {
+                case HttpStatus.SC_REQUEST_TIMEOUT,
+                        HttpStatus.SC_TOO_MANY_REQUESTS,
+                        HttpStatus.SC_INTERNAL_SERVER_ERROR,
+                        HttpStatus.SC_BAD_GATEWAY,
+                        HttpStatus.SC_SERVICE_UNAVAILABLE,
+                        HttpStatus.SC_GATEWAY_TIMEOUT -> true;
+                default -> false;};
+        }
+        return isTransient;
     }
 
     private Class<IBaseResource> getValueSetClass() {

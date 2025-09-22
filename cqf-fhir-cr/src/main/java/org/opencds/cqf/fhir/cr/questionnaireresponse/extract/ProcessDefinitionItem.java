@@ -15,16 +15,15 @@ import ca.uhn.fhir.context.RuntimeChildExtension;
 import ca.uhn.fhir.context.RuntimeChildPrimitiveDatatypeDefinition;
 import ca.uhn.fhir.context.RuntimeChildPrimitiveEnumerationDatatypeDefinition;
 import ca.uhn.fhir.context.RuntimeChildResourceBlockDefinition;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IDomainResource;
@@ -35,10 +34,13 @@ import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.CqfExpression;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.adapter.IElementDefinitionAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IItemComponentAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireResponseItemAnswerComponentAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IStructureDefinitionAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class ProcessDefinitionItem {
     protected static final String ID_PATH = "id";
     protected static final String DEFINITION_PATH = "definition";
@@ -58,13 +60,12 @@ public class ProcessDefinitionItem {
         // Definition-based extraction -
         // http://build.fhir.org/ig/HL7/sdc/extraction.html#definition-based-extraction
 
-        var linkId = request.getItemLinkId(item.getResponseItem());
-        if (StringUtils.isBlank(linkId)) {
-            linkId = "Questionnaire.root";
-        }
+        var linkId = item.getResponseItem() == null
+                ? "Questionnaire.root"
+                : item.getResponseItem().getLinkId();
         var definitionProfile = getDefinitionProfile(request, item);
         var valueExtensions = getValueExtensions(request, item);
-        var definition = getDefinition(request, item);
+        var definition = getDefinition(item);
         var profileUrl = definitionProfile.right == null ? definition : definitionProfile.right;
         var profile = getProfile(request, profileUrl);
         var resourceType = getResourceType(linkId, definitionProfile, definition, profile);
@@ -87,7 +88,7 @@ public class ProcessDefinitionItem {
             if (profile.isPresent()) {
                 resourceType = profile.get().getType();
             } else if (definitionProfile.right != null) {
-                var split = definitionProfile.right.split("\\/");
+                var split = definitionProfile.right.split("/");
                 resourceType = split[split.length - 1];
             } else {
                 if (definition == null) {
@@ -119,10 +120,10 @@ public class ProcessDefinitionItem {
         // Second, check the QuestionnaireResponse.item
         // Third, check the Questionnaire
         IBase element;
-        if (request.hasExtension(item.getItem(), url)) {
-            element = item.getItem();
-        } else if (request.hasExtension(item.getResponseItem(), url)) {
-            element = item.getResponseItem();
+        if (item.getItem() != null && item.getItem().hasExtension(url)) {
+            element = item.getItem().get();
+        } else if (item.getResponseItem() != null && item.getResponseItem().hasExtension(url)) {
+            element = item.getResponseItem().get();
         } else {
             element = request.getQuestionnaire();
         }
@@ -166,7 +167,9 @@ public class ProcessDefinitionItem {
         var resourceDefinition = request.getFhirContext().getElementDefinition(resource.getClass());
         if (isCreatedResource) {
             var id = request.getExtractId();
-            var linkId = request.getItemLinkId(item.getResponseItem());
+            var linkId = item.getResponseItem() == null
+                    ? null
+                    : item.getResponseItem().getLinkId();
             if (StringUtils.isNotBlank(linkId)) {
                 id = id.concat("-%s".formatted(linkId));
             }
@@ -175,16 +178,20 @@ public class ProcessDefinitionItem {
             resolveMeta(resource, profile);
         }
         valueExtensions.forEach(valueExt -> processValueExtension(request, resource, profile, valueExt));
-        List<IBaseBackboneElement> responseItems;
-        List<IBaseBackboneElement> questionnaireItems;
-        if (item.getResponseItem() != null
-                && request.getItems(item.getResponseItem()).isEmpty()) {
-            responseItems = Arrays.asList(item.getResponseItem());
-            questionnaireItems = Arrays.asList(item.getItem());
+        List<? extends IItemComponentAdapter> responseItems;
+        List<? extends IItemComponentAdapter> questionnaireItems;
+        if (item.getResponseItem() != null && !item.getResponseItem().hasItem()) {
+            responseItems = List.of(item.getResponseItem());
+            questionnaireItems = List.of(item.getItem());
         } else {
-            responseItems = request.getItems(
-                    item.getResponseItem() == null ? request.getQuestionnaireResponse() : item.getResponseItem());
-            questionnaireItems = request.getItems(item.getItem() == null ? request.getQuestionnaire() : item.getItem());
+            responseItems = item.getResponseItem() != null
+                    ? item.getResponseItem().getItem()
+                    : request.getQuestionnaireResponseAdapter().getItem();
+            questionnaireItems = item.getItem() != null
+                    ? item.getItem().getItem()
+                    : request.getQuestionnaireAdapter() != null
+                            ? request.getQuestionnaireAdapter().getItem()
+                            : List.of();
         }
         processItems(
                 request,
@@ -202,8 +209,8 @@ public class ProcessDefinitionItem {
         // If we have the profile go through each differential element and add any default values
         if (profile.isPresent()) {
             var defaultElements = profile.get().getDifferentialElements().stream()
-                    .filter(e -> e.hasDefaultOrFixedOrPattern())
-                    .collect(Collectors.toList());
+                    .filter(IElementDefinitionAdapter::hasDefaultOrFixedOrPattern)
+                    .toList();
             defaultElements.forEach(e -> {
                 var value = e.getDefaultOrFixedOrPattern();
                 if (value != null) {
@@ -271,7 +278,7 @@ public class ProcessDefinitionItem {
             BaseRuntimeElementDefinition<?> resourceDefinition,
             Optional<IStructureDefinitionAdapter> profile,
             IBase resource,
-            ImmutablePair<List<IBaseBackboneElement>, List<IBaseBackboneElement>> items,
+            ImmutablePair<List<? extends IItemComponentAdapter>, List<? extends IItemComponentAdapter>> items,
             boolean isNestedRepeating,
             String parentPath) {
         var responseItems = items.left;
@@ -280,12 +287,6 @@ public class ProcessDefinitionItem {
             var itemPair = new ItemPair(request.getQuestionnaireItem(childItem, questionnaireItems), childItem);
             processChildItem(request, resourceDefinition, profile, resource, itemPair, isNestedRepeating, parentPath);
         });
-    }
-
-    @SuppressWarnings("unchecked")
-    protected boolean getIsRepeating(ExtractRequest request, IBaseBackboneElement questionnaireItem) {
-        var repeats = request.resolvePath(questionnaireItem, "repeats");
-        return repeats != null && ((IPrimitiveType<Boolean>) repeats).getValue();
     }
 
     protected String stripTypeFromPath(String path) {
@@ -317,23 +318,23 @@ public class ProcessDefinitionItem {
             ItemPair itemPair,
             boolean isNestedRepeating,
             String parentPath) {
-        var definition = getDefinition(request, itemPair);
-        var children = request.getItems(itemPair.getResponseItem());
-        var repeats = getIsRepeating(request, itemPair.getItem());
+        var definition = getDefinition(itemPair);
+        var children = itemPair.getResponseItem().getItem();
+        var repeats = itemPair.getItem() != null && itemPair.getItem().getRepeats();
         if (StringUtils.isBlank(definition)) {
             processItems(
                     request,
                     resourceDefinition,
                     profile,
                     parent,
-                    new ImmutablePair<>(children, request.getItems(itemPair.getItem())),
+                    new ImmutablePair<>(children, itemPair.getItem().getItem()),
                     repeats,
                     parentPath);
             return;
         }
         if (!definition.contains("#")) {
             throw new IllegalArgumentException("Invalid definition encountered for item %s"
-                    .formatted(request.getItemLinkId(itemPair.getResponseItem())));
+                    .formatted(itemPair.getResponseItem().getLinkId()));
         }
         var pathAdapter = getPathAdapter(request, profile, definition);
         var path = pathAdapter.left;
@@ -355,6 +356,10 @@ public class ProcessDefinitionItem {
                     element = newBaseForVersion(elementDef.getTypeCode(), request.getFhirVersion());
                 } else if (propertyDefs.get(prop) instanceof RuntimeChildChoiceDefinition choiceDef) {
                     element = newBase(getChoices(choiceDef).get(0));
+                } else {
+                    throw new UnprocessableEntityException(String.format(
+                            "Unable to determine type for item: %s",
+                            itemPair.getResponseItem().getLinkId()));
                 }
             }
             processItems(
@@ -362,18 +367,17 @@ public class ProcessDefinitionItem {
                     resourceDefinition,
                     profile,
                     element,
-                    new ImmutablePair<>(children, request.getItems(itemPair.getItem())),
+                    new ImmutablePair<>(children, itemPair.getItem().getItem()),
                     repeats,
                     path);
             request.getModelResolver().setValue(parent, prop, List.of(element));
         } else {
-            var answers = request.resolvePathList(itemPair.getResponseItem(), "answer", IBaseBackboneElement.class);
             processItem(
                     request,
                     parent,
                     isNestedRepeating,
                     parentPath,
-                    answers,
+                    itemPair.getResponseItem().getAnswer(),
                     repeats,
                     adapter,
                     path,
@@ -388,7 +392,7 @@ public class ProcessDefinitionItem {
             IBase parent,
             boolean isNestedRepeating,
             String parentPath,
-            List<IBaseBackboneElement> answers,
+            List<IQuestionnaireResponseItemAnswerComponentAdapter> answers,
             boolean repeats,
             IStructureDefinitionAdapter profile,
             String path,
@@ -400,8 +404,8 @@ public class ProcessDefinitionItem {
             processRepeatingWithNested(request, parent, isNestedRepeating, answers, identifiers, propertyDefs, profile);
         } else {
             var answerPath = StringUtils.isBlank(parentPath) ? path : path.replace(parentPath + ".", "");
-            answers.stream().forEach(answer -> {
-                var answerValue = request.resolvePath(answer, VALUE_PATH);
+            answers.forEach(answer -> {
+                var answerValue = answer.getValue();
                 if (answerValue != null) {
                     setAnswerValue(request, parent, propertyDefs.get(answerPath), answerPath, answerValue, profile);
                 }
@@ -413,7 +417,7 @@ public class ProcessDefinitionItem {
             ExtractRequest request,
             IBase parent,
             boolean isNestedRepeating,
-            List<IBaseBackboneElement> answers,
+            List<IQuestionnaireResponseItemAnswerComponentAdapter> answers,
             String[] identifiers,
             HashMap<String, BaseRuntimeChildDefinition> propertyDefs,
             IStructureDefinitionAdapter profile) {
@@ -424,8 +428,8 @@ public class ProcessDefinitionItem {
         // element
         // otherwise we will create a new value for each answer and add that to the parent
         var useParent = isNestedRepeating || isChildList;
-        answers.stream().forEach(answer -> {
-            var answerValue = request.resolvePath(answer, VALUE_PATH);
+        answers.forEach(answer -> {
+            var answerValue = answer.getValue();
             if (answerValue != null) {
                 var parentValue = useParent
                         ? parent
@@ -445,7 +449,7 @@ public class ProcessDefinitionItem {
             ExtractRequest request,
             IStructureDefinitionAdapter profile,
             IBase parent,
-            List<IBaseBackboneElement> answers,
+            List<IQuestionnaireResponseItemAnswerComponentAdapter> answers,
             String[] identifiers,
             HashMap<String, BaseRuntimeChildDefinition> propertyDefs) {
         if (profile == null) {
@@ -470,8 +474,8 @@ public class ProcessDefinitionItem {
         var sliceElements = profile.getSliceElements(sliceName);
         var answerPath = getChildProperty(identifiers, sliceIndex + 1);
         var extensionUrl = getExtensionUrl(profile, sliceName);
-        answers.stream().forEach(answer -> {
-            var answerValue = request.resolvePath(answer, VALUE_PATH);
+        answers.forEach(answer -> {
+            var answerValue = answer.getValue();
             if (answerValue != null) {
                 var sliceValue = newBase(sliceClass);
                 setAnswerValue(request, sliceValue, propertyDefs.get(answerPath), answerPath, answerValue, profile);
@@ -603,16 +607,16 @@ public class ProcessDefinitionItem {
             }
         }
         return pathDefinition != null && pathDefinition.isMultipleCardinality()
-                ? Arrays.asList(answerValue)
+                ? Collections.singletonList(answerValue)
                 : answerValue;
     }
 
-    protected String getDefinition(ExtractRequest request, ItemPair itemPair) {
-        var definition = request.resolvePathString(itemPair.getItem(), DEFINITION_PATH);
-        if (definition == null) {
-            definition = request.resolvePathString(itemPair.getResponseItem(), DEFINITION_PATH);
-        }
-        return definition;
+    protected String getDefinition(ItemPair itemPair) {
+        return itemPair.getItem() != null && itemPair.getItem().hasDefinition()
+                ? itemPair.getItem().getDefinition()
+                : itemPair.getResponseItem() != null
+                        ? itemPair.getResponseItem().getDefinition()
+                        : null;
     }
 
     protected String getDefinitionType(String definition) {
@@ -626,8 +630,6 @@ public class ProcessDefinitionItem {
     protected void resolveMeta(IBaseResource resource, Optional<IStructureDefinitionAdapter> profile) {
         var meta = resource.getMeta();
         // Consider setting source and lastUpdated here?
-        if (profile.isPresent()) {
-            meta.addProfile(profile.get().getCanonical());
-        }
+        profile.ifPresent(iStructureDefinitionAdapter -> meta.addProfile(iStructureDefinitionAdapter.getCanonical()));
     }
 }

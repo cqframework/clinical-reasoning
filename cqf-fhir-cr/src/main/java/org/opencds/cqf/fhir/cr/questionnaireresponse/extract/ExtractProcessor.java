@@ -1,19 +1,16 @@
 package org.opencds.cqf.fhir.cr.questionnaireresponse.extract;
 
-import static org.opencds.cqf.fhir.cr.questionnaireresponse.extract.ResponseBundle.createBundleR4;
-import static org.opencds.cqf.fhir.cr.questionnaireresponse.extract.ResponseBundle.createBundleR5;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import org.apache.commons.lang3.SerializationUtils;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Constants;
+import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireResponseItemComponentAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,10 +43,9 @@ public class ExtractProcessor implements IExtractProcessor {
             processDefinitionItem(request, new ItemPair(null, null), resources);
         } else {
             var questionnaireCodeMap = CodeMap.create(request);
-            request.getItems(request.getQuestionnaireResponse()).forEach(item -> {
-                var questionnaireItem = request.getQuestionnaireItem(item);
-                var itemPair = new ItemPair(questionnaireItem, item);
-                if (!request.getItems(item).isEmpty()) {
+            request.getQuestionnaireResponseAdapter().getItem().forEach(item -> {
+                var itemPair = new ItemPair(request.getQuestionnaireItem(item), item);
+                if (!item.getItem().isEmpty()) {
                     processGroupItem(request, itemPair, questionnaireCodeMap, resources, subject);
                 } else {
                     processItem(request, itemPair, questionnaireCodeMap, resources, subject);
@@ -61,15 +57,14 @@ public class ExtractProcessor implements IExtractProcessor {
     }
 
     protected IBaseBundle createBundle(ExtractRequest request, List<IBaseResource> resources) {
-        switch (request.getFhirVersion()) {
-            case R4:
-                return createBundleR4(request.getExtractId(), resources);
-            case R5:
-                return createBundleR5(request.getExtractId(), resources);
-
-            default:
-                return null;
-        }
+        var bundle = BundleHelper.newBundle(request.getFhirVersion(), request.getExtractId(), "transaction");
+        resources.forEach(r -> {
+            var entry = BundleHelper.newEntryWithResource(r);
+            BundleHelper.setEntryRequest(
+                    request.getFhirVersion(), entry, BundleHelper.newRequest(request.getFhirVersion(), "POST"));
+            BundleHelper.addEntry(bundle, entry);
+        });
+        return bundle;
     }
 
     protected void processGroupItem(
@@ -78,29 +73,28 @@ public class ExtractProcessor implements IExtractProcessor {
             Map<String, List<IBaseCoding>> questionnaireCodeMap,
             List<IBaseResource> resources,
             IBaseReference subject) {
-        var subjectItems = request.getItems(item.getResponseItem()).stream()
+        var subjectItems = item.getResponseItem().getItem().stream()
                 .filter(child -> child.getExtension().stream()
                         .anyMatch(e -> e.getUrl().equals(Constants.SDC_QUESTIONNAIRE_RESPONSE_IS_SUBJECT)))
-                .collect(Collectors.toList());
+                .map(IQuestionnaireResponseItemComponentAdapter.class::cast)
+                .toList();
         var groupSubject = !subjectItems.isEmpty()
-                ? (IBaseReference) request.resolvePath(
-                        request.resolvePathList(subjectItems.get(0), "answer", IBaseBackboneElement.class)
-                                .get(0),
-                        "value")
-                : (IBaseReference) SerializationUtils.clone(subject);
+                ? (IBaseReference) subjectItems.get(0).getAnswer().get(0).getValue()
+                : SerializationUtils.clone(subject);
         if (request.isDefinitionItem(item)) {
             processDefinitionItem(request, item, resources);
         } else {
-            request.getItems(item.getResponseItem()).forEach(childResponseItem -> {
+            item.getResponseItem().getItem().forEach(childResponseItem -> {
                 if (childResponseItem.getExtension().stream()
                         .noneMatch(e -> e.getUrl().equals(Constants.SDC_QUESTIONNAIRE_RESPONSE_IS_SUBJECT))) {
-                    var childItem = new ItemPair(
-                            request.getQuestionnaireItem(childResponseItem, request.getItems(item.getItem())),
+                    var childPair = new ItemPair(
+                            request.getQuestionnaireItem(
+                                    childResponseItem, item.getItem().getItem()),
                             childResponseItem);
-                    if (!request.getItems(childResponseItem).isEmpty()) {
-                        processGroupItem(request, childItem, questionnaireCodeMap, resources, groupSubject);
+                    if (childResponseItem.hasItem()) {
+                        processGroupItem(request, childPair, questionnaireCodeMap, resources, groupSubject);
                     } else {
-                        processItem(request, childItem, questionnaireCodeMap, resources, groupSubject);
+                        processItem(request, childPair, questionnaireCodeMap, resources, groupSubject);
                     }
                 }
             });
@@ -127,8 +121,7 @@ public class ExtractProcessor implements IExtractProcessor {
             List<IBaseResource> resources,
             IBaseReference subject) {
         try {
-            itemProcessor.processItem(
-                    request, item.getResponseItem(), item.getItem(), questionnaireCodeMap, resources, subject);
+            itemProcessor.processItem(request, item, questionnaireCodeMap, resources, subject);
         } catch (Exception e) {
             request.logException(e.getMessage());
             throw e;

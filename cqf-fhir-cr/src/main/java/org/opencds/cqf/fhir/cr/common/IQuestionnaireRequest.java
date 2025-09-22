@@ -2,17 +2,15 @@ package org.opencds.cqf.fhir.cr.common;
 
 import static org.opencds.cqf.fhir.utility.VersionUtilities.canonicalTypeForVersion;
 
-import java.util.Collections;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireItemComponentAdapter;
 
 /**
  * This interface exposes common functionality across Operations that use Questionnaires
@@ -22,8 +20,10 @@ public interface IQuestionnaireRequest extends ICqlOperationRequest {
 
     IQuestionnaireAdapter getQuestionnaireAdapter();
 
-    default void addQuestionnaireItem(IBaseBackboneElement item) {
-        getModelResolver().setValue(getQuestionnaire(), "item", Collections.singletonList(item));
+    default void addQuestionnaireItem(IQuestionnaireItemComponentAdapter item) {
+        if (getQuestionnaireAdapter() != null) {
+            getQuestionnaireAdapter().addItem(item);
+        }
     }
 
     default <T extends IBaseExtension<?, ?>> void addLaunchContextExtensions(List<T> launchContextExts) {
@@ -66,17 +66,5 @@ public interface IQuestionnaireRequest extends ICqlOperationRequest {
                 libraryExt.setValue(canonicalTypeForVersion(getFhirVersion(), library));
             }
         });
-    }
-
-    default List<IBaseBackboneElement> getItems(IBase base) {
-        return resolvePathList(base, "item", IBaseBackboneElement.class);
-    }
-
-    default boolean hasItems(IBase base) {
-        return !getItems(base).isEmpty();
-    }
-
-    default String getItemLinkId(IBaseBackboneElement item) {
-        return resolvePathString(item, "linkId");
     }
 }

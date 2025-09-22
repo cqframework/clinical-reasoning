@@ -2,6 +2,8 @@ package org.opencds.cqf.fhir.utility.adapter.dstu3;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -32,6 +34,7 @@ class StructureDefinitionAdapterTest {
     void invalid_object_fails() {
         var library = new Library();
         assertThrows(IllegalArgumentException.class, () -> new StructureDefinitionAdapter(library));
+        assertNotNull(adapterFactory.createStructureDefinition(new StructureDefinition()));
     }
 
     @Test
@@ -107,7 +110,7 @@ class StructureDefinitionAdapterTest {
         structureDef.setDate(date);
         var adapter = adapterFactory.createKnowledgeArtifactAdapter(structureDef);
         assertEquals(date, adapter.getDate());
-        assertEquals(null, adapter.getApprovalDate());
+        assertNull(adapter.getApprovalDate());
         assertNotEquals(effectivePeriod, adapter.getEffectivePeriod());
         var newDate = new Date();
         newDate.setTime(100);
@@ -116,7 +119,7 @@ class StructureDefinitionAdapterTest {
         var newApprovalDate = new Date();
         newApprovalDate.setTime(100);
         adapter.setApprovalDate(newApprovalDate);
-        assertEquals(null, adapter.getApprovalDate());
+        assertNull(adapter.getApprovalDate());
         var newEffectivePeriod = new Period()
                 .setStart(java.sql.Date.valueOf(LocalDate.parse("2021-01-01")))
                 .setEnd(java.sql.Date.valueOf(LocalDate.parse("2021-12-31")));
@@ -175,18 +178,34 @@ class StructureDefinitionAdapterTest {
         var extractedDependencies = adapter.getDependencies();
         assertEquals(dependencies.size(), extractedDependencies.size());
         extractedDependencies.forEach(dep -> {
-            assertTrue(dependencies.indexOf(dep.getReference()) >= 0);
+            assertTrue(dependencies.contains(dep.getReference()));
         });
     }
 
     @Test
     void adapter_get_elements() {
-        var structureDef = new StructureDefinition();
-        structureDef.getDifferential().addElement().addType().setCode("String");
-        structureDef.getDifferential().addElement().addType().setCode("Quantity");
+        var baseDefinition = "http://hl7.org/fhir/Observation";
+        var structureDef = new StructureDefinition().setBaseDefinition(baseDefinition);
+        structureDef.getSnapshot().addElement().setPath("Observation");
+        structureDef.getSnapshot().addElement().setPath("Observation.id");
+        structureDef.getDifferential().addElement().setPath("Observation");
+        structureDef
+                .getDifferential()
+                .addElement()
+                .setPath("Observation.code")
+                .addType()
+                .setCode("String");
+        structureDef
+                .getDifferential()
+                .addElement()
+                .setPath("Observation.value")
+                .addType()
+                .setCode("Quantity");
         var adapter = (IStructureDefinitionAdapter) adapterFactory.createKnowledgeArtifactAdapter(structureDef);
+        assertTrue(adapter.hasSnapshot());
+        assertEquals(baseDefinition, adapter.getBaseDefinition().getValue());
         var snapshotElements = adapter.getSnapshotElements();
-        assertEquals(0, snapshotElements.size());
+        assertEquals(1, snapshotElements.size());
         var differentialElements = adapter.getDifferentialElements();
         assertEquals(2, differentialElements.size());
     }

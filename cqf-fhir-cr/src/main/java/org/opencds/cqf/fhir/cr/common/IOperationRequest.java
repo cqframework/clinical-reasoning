@@ -1,7 +1,7 @@
 package org.opencds.cqf.fhir.cr.common;
 
 import static org.opencds.cqf.fhir.cr.common.ExtensionBuilders.buildReferenceExt;
-import static org.opencds.cqf.fhir.cr.common.ExtensionBuilders.crmiMessagesExtension;
+import static org.opencds.cqf.fhir.cr.common.ExtensionBuilders.cqfMessagesExtension;
 import static org.opencds.cqf.fhir.utility.OperationOutcomes.addExceptionToOperationOutcome;
 import static org.opencds.cqf.fhir.utility.OperationOutcomes.newOperationOutcome;
 
@@ -68,7 +68,7 @@ public interface IOperationRequest {
                             "extension",
                             Collections.singletonList(buildReferenceExt(
                                     getFhirVersion(),
-                                    crmiMessagesExtension(
+                                    cqfMessagesExtension(
                                             getOperationOutcome().getIdElement().getIdPart()),
                                     true)));
         }

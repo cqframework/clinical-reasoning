@@ -32,7 +32,7 @@ import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
-@SuppressWarnings("squid:S2699")
+@SuppressWarnings({"squid:S2699", "UnstableApiUsage"})
 class QuestionnaireProcessorTests {
     private final FhirContext fhirContextR4 = FhirContext.forR4Cached();
     private final FhirContext fhirContextR5 = FhirContext.forR5Cached();
@@ -272,7 +272,8 @@ class QuestionnaireProcessorTests {
                 .profileId(Ids.newId(fhirContextR4, "StructureDefinition", "LaunchContexts"))
                 .thenGenerate()
                 .hasItems(2)
-                .questionnaire;
+                .questionnaire
+                .get();
         var questionnaireResponse = (QuestionnaireResponse) given().repository(repositoryR4)
                 .when()
                 .questionnaire(questionnaire)
@@ -293,7 +294,8 @@ class QuestionnaireProcessorTests {
                 .hasItems(2)
                 .itemHasAnswer("1.1")
                 .itemHasAuthorExt("1.1")
-                .questionnaireResponse;
+                .questionnaireResponse
+                .get();
         assertEquals("Patient/" + patientId, questionnaireResponse.getSubject().getReference());
         assertNotNull(questionnaireResponse.getAuthored());
         var bundle = TestQuestionnaireResponse.given()
@@ -337,6 +339,6 @@ class QuestionnaireProcessorTests {
                 .itemHasAnswerValue(
                         "test-requested|diagnosis-description",
                         "Type 2 diabetes mellitus with other diabetic arthropathy")
-                .itemHasAnswer("history|other-findings");
+                .itemHasNoAnswer("history|other-findings");
     }
 }

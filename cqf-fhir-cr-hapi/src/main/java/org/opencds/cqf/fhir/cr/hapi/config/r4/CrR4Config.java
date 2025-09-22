@@ -10,6 +10,7 @@ import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cr.cpg.r4.R4CqlExecutionService;
 import org.opencds.cqf.fhir.cr.crmi.R4ApproveService;
 import org.opencds.cqf.fhir.cr.crmi.R4DraftService;
+import org.opencds.cqf.fhir.cr.crmi.R4PackageService;
 import org.opencds.cqf.fhir.cr.crmi.R4ReleaseService;
 import org.opencds.cqf.fhir.cr.hapi.common.StringTimePeriodHandler;
 import org.opencds.cqf.fhir.cr.hapi.config.CrBaseConfig;
@@ -22,6 +23,7 @@ import org.opencds.cqf.fhir.cr.hapi.r4.ICollectDataServiceFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.ICqlExecutionServiceFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.IDataRequirementsServiceFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.IDraftServiceFactory;
+import org.opencds.cqf.fhir.cr.hapi.r4.IPackageServiceFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.IReleaseServiceFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.ISubmitDataProcessorFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureEvaluatorMultipleFactory;
@@ -30,6 +32,7 @@ import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureServiceUtilsFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.cpg.CqlExecutionOperationProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.crmi.ApproveProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.crmi.DraftProvider;
+import org.opencds.cqf.fhir.cr.hapi.r4.crmi.PackageProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.crmi.ReleaseProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.measure.CareGapsOperationProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.measure.CollectDataOperationProvider;
@@ -161,6 +164,16 @@ public class CrR4Config {
     }
 
     @Bean
+    IPackageServiceFactory packageServiceFactory(IRepositoryFactory repositoryFactory) {
+        return rd -> new R4PackageService(repositoryFactory.create(rd));
+    }
+
+    @Bean
+    PackageProvider r4PackageProvider(IPackageServiceFactory r4PackageServiceFactory) {
+        return new PackageProvider(r4PackageServiceFactory);
+    }
+
+    @Bean
     IReleaseServiceFactory releaseServiceFactory(IRepositoryFactory repositoryFactory) {
         return rd -> new R4ReleaseService(repositoryFactory.create(rd));
     }
@@ -201,6 +214,7 @@ public class CrR4Config {
                                 DataRequirementsOperationProvider.class,
                                 DraftProvider.class,
                                 ApproveProvider.class,
+                                PackageProvider.class,
                                 ReleaseProvider.class)));
 
         return new ProviderLoader(restfulServer, applicationContext, selector);

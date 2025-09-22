@@ -6,6 +6,7 @@ import org.hl7.fhir.dstu3.model.ElementDefinition;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IElementDefinitionAdapter;
@@ -103,8 +104,20 @@ public class StructureDefinitionAdapter extends KnowledgeArtifactAdapter impleme
     }
 
     @Override
+    public IPrimitiveType<String> getBaseDefinition() {
+        return get().getBaseDefinitionElement();
+    }
+
+    @Override
+    public boolean hasSnapshot() {
+        return get().hasSnapshot();
+    }
+
+    @Override
     public List<IElementDefinitionAdapter> getSnapshotElements() {
         return get().getSnapshot().getElement().stream()
+                .filter(ElementDefinition::hasPath)
+                .filter(e -> e.getPath().split("\\.").length > 1)
                 .map(adapterFactory::createElementDefinition)
                 .toList();
     }
@@ -112,6 +125,8 @@ public class StructureDefinitionAdapter extends KnowledgeArtifactAdapter impleme
     @Override
     public List<IElementDefinitionAdapter> getDifferentialElements() {
         return get().getDifferential().getElement().stream()
+                .filter(ElementDefinition::hasPath)
+                .filter(e -> e.getPath().split("\\.").length > 1)
                 .map(adapterFactory::createElementDefinition)
                 .toList();
     }

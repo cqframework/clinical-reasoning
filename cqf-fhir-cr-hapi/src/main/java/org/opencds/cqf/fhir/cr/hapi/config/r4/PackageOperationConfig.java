@@ -5,6 +5,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import java.util.Arrays;
 import java.util.Map;
+import org.opencds.cqf.fhir.cr.hapi.common.IGraphDefinitionProcessorFactory;
 import org.opencds.cqf.fhir.cr.hapi.common.ILibraryProcessorFactory;
 import org.opencds.cqf.fhir.cr.hapi.common.IPlanDefinitionProcessorFactory;
 import org.opencds.cqf.fhir.cr.hapi.common.IQuestionnaireProcessorFactory;
@@ -12,6 +13,7 @@ import org.opencds.cqf.fhir.cr.hapi.common.IValueSetProcessorFactory;
 import org.opencds.cqf.fhir.cr.hapi.config.CrProcessorConfig;
 import org.opencds.cqf.fhir.cr.hapi.config.ProviderLoader;
 import org.opencds.cqf.fhir.cr.hapi.config.ProviderSelector;
+import org.opencds.cqf.fhir.cr.hapi.r4.graphdefinition.GraphDefinitionPackageProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.library.LibraryPackageProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.plandefinition.PlanDefinitionPackageProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.questionnaire.QuestionnairePackageProvider;
@@ -46,6 +48,12 @@ public class PackageOperationConfig {
         return new ValueSetPackageProvider(valueSetProcessorFactory);
     }
 
+    @Bean
+    GraphDefinitionPackageProvider r4GraphDefinitionPackageProvider(
+            IGraphDefinitionProcessorFactory graphDefinitionProcessorFactory) {
+        return new GraphDefinitionPackageProvider(graphDefinitionProcessorFactory);
+    }
+
     @Bean(name = "packageOperationLoader")
     public ProviderLoader packageOperationLoader(
             ApplicationContext applicationContext, FhirContext fhirContext, RestfulServer restfulServer) {
@@ -57,7 +65,8 @@ public class PackageOperationConfig {
                                 LibraryPackageProvider.class,
                                 QuestionnairePackageProvider.class,
                                 PlanDefinitionPackageProvider.class,
-                                ValueSetPackageProvider.class)));
+                                ValueSetPackageProvider.class,
+                                GraphDefinitionPackageProvider.class)));
 
         return new ProviderLoader(restfulServer, applicationContext, selector);
     }

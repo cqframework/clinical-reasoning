@@ -206,11 +206,6 @@ public class AdapterFactory implements IAdapterFactory {
     }
 
     @Override
-    public IImplementationGuideAdapter createImplementationGuide(IBaseResource implementationGuide) {
-        return new ImplementationGuideAdapter((IDomainResource) implementationGuide);
-    }
-
-    @Override
     public IGraphDefinitionAdapter createGraphDefinition(IBaseResource graphDefinition) {
         return new GraphDefinitionAdapter((IDomainResource) graphDefinition);
     }
@@ -218,5 +213,10 @@ public class AdapterFactory implements IAdapterFactory {
     @Override
     public IStructureDefinitionAdapter createStructureDefinition(IBaseResource structureDefinition) {
         return new StructureDefinitionAdapter((IDomainResource) structureDefinition);
+    }
+
+    @Override
+    public IImplementationGuideAdapter createImplementationGuide(IBaseResource implementationGuide) {
+        return new ImplementationGuideAdapter((IDomainResource) implementationGuide);
     }
 }

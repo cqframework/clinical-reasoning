@@ -19,7 +19,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
-public class FederatedRepositoryTest {
+class FederatedRepositoryTest {
     private static IRepository repository;
     private static IRepository localRepository;
     private static IRepository mockInMemoryFhirRepository;

@@ -34,6 +34,10 @@ class ItemValueTransformerTests {
         var transformValue = transformValueToItem(fhirVersion, code);
         assertEquals(coding, transformValue);
 
+        var codeWithText = new org.hl7.fhir.dstu3.model.CodeableConcept().setTextElement(stringType);
+        var transformCodeWithText = transformValueToItem(fhirVersion, codeWithText);
+        assertEquals(stringType, transformCodeWithText);
+
         var enumeration =
                 new org.hl7.fhir.dstu3.model.Enumeration<>(new org.hl7.fhir.dstu3.model.Patient.LinkTypeEnumFactory());
         enumeration.setValue(org.hl7.fhir.dstu3.model.Patient.LinkType.REFER);
@@ -66,6 +70,10 @@ class ItemValueTransformerTests {
         var transformValue = transformValueToItem(fhirVersion, code);
         assertEquals(coding, transformValue);
 
+        var codeWithText = new org.hl7.fhir.r4.model.CodeableConcept().setTextElement(stringType);
+        var transformCodeWithText = transformValueToItem(fhirVersion, codeWithText);
+        assertEquals(stringType, transformCodeWithText);
+
         var enumeration =
                 new org.hl7.fhir.r4.model.Enumeration<>(new org.hl7.fhir.r4.model.Patient.LinkTypeEnumFactory());
         enumeration.setValue(org.hl7.fhir.r4.model.Patient.LinkType.REFER);
@@ -97,6 +105,10 @@ class ItemValueTransformerTests {
         var code = new org.hl7.fhir.r5.model.CodeableConcept().addCoding(coding);
         var transformValue = transformValueToItem(fhirVersion, code);
         assertEquals(coding, transformValue);
+
+        var codeWithText = new org.hl7.fhir.r5.model.CodeableConcept().setTextElement(stringType);
+        var transformCodeWithText = transformValueToItem(fhirVersion, codeWithText);
+        assertEquals(stringType, transformCodeWithText);
 
         var enumeration =
                 new org.hl7.fhir.r5.model.Enumeration<>(new org.hl7.fhir.r5.model.Patient.LinkTypeEnumFactory());

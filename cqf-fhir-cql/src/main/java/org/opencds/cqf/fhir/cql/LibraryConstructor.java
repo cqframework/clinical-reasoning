@@ -7,6 +7,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.fhirpath.IFhirPath;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.opencds.cqf.fhir.cql.engine.parameters.CqlParameterDefinition;
 import org.opencds.cqf.fhir.utility.FhirPathCache;
@@ -34,13 +35,13 @@ public class LibraryConstructor {
             List<CqlParameterDefinition> parameters) {
         logger.debug("Constructing expression for local evaluation");
         return constructCqlLibrary(
-                name, version, List.of("%ndefine \"return\":%n       %s".formatted(expression)), libraries, parameters);
+                name, version, Set.of("define \"return\":%n  %s".formatted(expression)), libraries, parameters);
     }
 
     public String constructCqlLibrary(
             String name,
             String version,
-            List<String> expressions,
+            Set<String> expressions,
             Map<String, String> libraries,
             List<CqlParameterDefinition> parameters) {
 
@@ -96,6 +97,7 @@ public class LibraryConstructor {
                     .append(this.getTypeDeclaration(cpd.getType(), cpd.getIsList()))
                     .append("%n".formatted());
         }
+        sb.append("%n".formatted());
     }
 
     private String getTypeDeclaration(String type, Boolean isList) {

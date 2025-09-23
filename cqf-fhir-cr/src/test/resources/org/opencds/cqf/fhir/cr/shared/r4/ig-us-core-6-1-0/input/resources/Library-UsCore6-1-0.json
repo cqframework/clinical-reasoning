@@ -1,6 +1,6 @@
 {
   "resourceType": "Library",
-  "id": "UsCore6-1-0",
+  "id": "uscore-vsp-6-1-0",
   "meta": {
     "profile": [ "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-manifestlibrary" ]
   },
@@ -23,10 +23,10 @@
       "reference": "Device/cqf-tooling"
     }
   } ],
-  "url": "http://hl7.org/fhir/us/core-vsp/Library/hl7.fhir.us.core-vsp",
+  "url": "http://hl7.org/fhir/us/core-vsp/6.1.0/Library/hl7.fhir.us.core-vsp-6-1-0",
   "version": "2025-09-draft",
-  "name": "VSRefreshUsCore6-1-0",
-  "title": "ValueSet Refresh US Core 6.1.0",
+  "name": "USCore610ValueSetPackage",
+  "title": "US Core 6.1.0 Value Set Package",
   "status": "draft",
   "experimental": false,
   "type": {

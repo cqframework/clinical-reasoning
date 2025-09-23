@@ -10,7 +10,10 @@ import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.nio.file.Path;
+import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Library;
+import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -120,11 +123,15 @@ class LibraryProcessorTests {
 
     @Test
     void releaseR4() {
+        var releaseParameters = new Parameters();
+        releaseParameters.addParameter("version", new StringType("1.0.0"));
+        releaseParameters.addParameter("versionBehavior", new CodeType("force"));
+
         given().repositoryFor(fhirContextR4, "r4/ig-us-core-6-1-0")
             .when()
             .libraryId("UsCore6-1-0")
             .isPut(Boolean.TRUE)
-            .thenRelease()
+            .thenRelease(releaseParameters)
             .hasEntry(1);
     }
 

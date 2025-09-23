@@ -28,6 +28,7 @@ import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Parameters;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
@@ -236,17 +237,18 @@ public class TestLibrary {
             }
         }
 
-        public GeneratedRelease thenRelease() {
+        public GeneratedRelease thenRelease(IBaseParameters releaseParameters) {
             if (isPackagePut == null) {
                 return new GeneratedRelease(
                     processor.releaseLibrary(
-                        Eithers.forMiddle3(Ids.newId(repository.fhirContext(), "Library", libraryId))),
+                        Eithers.forMiddle3(Ids.newId(repository.fhirContext(), "Library", libraryId)),
+                        releaseParameters),
                     repository.fhirContext());
             } else {
                 return new GeneratedRelease(
                     processor.releaseLibrary(
                         Eithers.forMiddle3(Ids.newId(repository.fhirContext(), "Library", libraryId)),
-                        isPackagePut),
+                        releaseParameters),
                     repository.fhirContext());
             }
         }

@@ -1,22 +1,26 @@
 package org.opencds.cqf.fhir.utility.repository;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.repository.IRepository;
-import ca.uhn.fhir.rest.api.MethodOutcome;
-import com.google.common.collect.Multimap;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
+
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import com.google.common.collect.Multimap;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.repository.IRepository;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 
 public class ProxyRepository implements IRepository {
 
@@ -109,7 +113,28 @@ public class ProxyRepository implements IRepository {
 
     @Override
     public <B extends IBaseBundle> B link(Class<B> bundleType, String url, Map<String, String> headers) {
-        return null;
+        return Stream.of(this.data, this.content, this.terminology)
+            .map(repo -> tryLink(repo, bundleType, url, headers))
+            .flatMap(Optional::stream)
+            .filter(this::hasResourceEntries)
+            .findFirst()
+            .orElse(null);
+    }
+
+    private <B extends IBaseBundle> Optional<B> tryLink(
+        IRepository repo, Class<B> type, String url, Map<String, String> headers) {
+        try {
+            return Optional.ofNullable(repo.link(type, url, headers));
+        } catch (Exception e) {
+            // swallow and try next
+            return Optional.empty();
+        }
+    }
+
+    private Boolean hasResourceEntries(IBaseBundle bundle) {
+        var bundleFactory = FhirContext.forCached(bundle.getStructureFhirVersionEnum()).newBundleFactory();
+        bundleFactory.initializeWithBundleResource(bundle);
+        return !bundleFactory.toListOfResources().isEmpty();
     }
 
     @Override

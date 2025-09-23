@@ -1,9 +1,9 @@
 package org.opencds.cqf.fhir.cr.hapi.config;
 
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.repository.BundleProviderUtil;
 import ca.uhn.fhir.jpa.repository.HapiFhirRepository;
-import ca.uhn.fhir.jpa.repository.SearchConverter;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
@@ -66,9 +66,12 @@ public class ClinicalIntelligenceHapiFhirRepository extends HapiFhirRepository {
                 .addHeaders(headers)
                 .create();
 
-        SearchConverter converter = new SearchConverter();
+        ClinicalIntelligenceSearchConverter converter = new ClinicalIntelligenceSearchConverter();
         converter.convertParameters(searchParameters, fhirContext());
         details.setParameters(converter.myResultParameters);
+        requestDetails.getParameters()
+            .forEach(details::addParameter);
+
         details.setResourceName(daoRegistry.getFhirContext().getResourceType(resourceType));
 
         //        // LUKETODO: change this:
@@ -78,8 +81,9 @@ public class ClinicalIntelligenceHapiFhirRepository extends HapiFhirRepository {
         //            details.addParameter("_count", new String[]{"10000"});
         //        }
 
-        IBundleProvider bundleProvider =
-                daoRegistry.getResourceDao(resourceType).search(converter.mySearchParameterMap, details);
+        final IFhirResourceDao<T> resourceDao = daoRegistry.getResourceDao(resourceType);
+        final IBundleProvider bundleProvider =
+            resourceDao.search(converter.mySearchParameterMap, details);
 
         if (bundleProvider == null) {
             return null;

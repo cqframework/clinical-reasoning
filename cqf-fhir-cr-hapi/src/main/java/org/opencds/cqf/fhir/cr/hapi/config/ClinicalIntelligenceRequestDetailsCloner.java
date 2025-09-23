@@ -11,8 +11,7 @@ import java.util.Map;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-// LUKETODO:  javadoc
-// LUKETODO:  tests?
+// LUKETODO:  do we really need this?
 
 // This class is copied from HAPI too, it's just along for the ride with the hacked repository above.
 // once the above is fixed upstream, this can go away too.
@@ -30,7 +29,7 @@ class ClinicalIntelligenceRequestDetailsCloner {
         newDetails.setRequestType(RequestTypeEnum.POST);
         newDetails.setOperation(null);
         newDetails.setResource(null);
-        newDetails.setParameters(new HashMap<>());
+        newDetails.setParameters(new HashMap<>(details.getParameters()));
         newDetails.setResourceName(null);
         newDetails.setCompartmentName(null);
         newDetails.setResponse(details.getResponse());

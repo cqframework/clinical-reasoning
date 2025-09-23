@@ -1,0 +1,34 @@
+package org.opencds.cqf.fhir.cr.helpers;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.IParser;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.opencds.cqf.fhir.utility.BundleHelper.getEntry;
+import static org.opencds.cqf.fhir.utility.BundleHelper.getEntryResourceFirstRep;
+
+public class GeneratedRelease {
+    final IBaseBundle generatedBundle;
+    final IParser jsonParser;
+
+    public GeneratedRelease(IBaseBundle generatedBundle, FhirContext fhirContext) {
+        this.generatedBundle = generatedBundle;
+        jsonParser = fhirContext.newJsonParser().setPrettyPrint(true);
+    }
+
+    public GeneratedRelease hasEntry(int count) {
+        assertEquals(count, getEntry(generatedBundle).size());
+        return this;
+    }
+
+    public <R extends IBaseResource> GeneratedRelease firstEntryIsType(Class<R> resourceType) {
+        assertEquals(resourceType, getEntryResourceFirstRep(generatedBundle).getClass());
+        return this;
+    }
+
+    public IBaseBundle getBundle() {
+        return generatedBundle;
+    }
+}

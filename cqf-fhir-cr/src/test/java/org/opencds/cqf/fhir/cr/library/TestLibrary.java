@@ -36,6 +36,7 @@ import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_
 import org.opencds.cqf.fhir.cr.TestOperationProvider;
 import org.opencds.cqf.fhir.cr.helpers.DataRequirementsLibrary;
 import org.opencds.cqf.fhir.cr.helpers.GeneratedPackage;
+import org.opencds.cqf.fhir.cr.helpers.GeneratedRelease;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.client.TerminologyServerClientSettings;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
@@ -232,6 +233,21 @@ public class TestLibrary {
                                 Eithers.forMiddle3(Ids.newId(repository.fhirContext(), "Library", libraryId)),
                                 isPackagePut),
                         repository.fhirContext());
+            }
+        }
+
+        public GeneratedRelease thenRelease() {
+            if (isPackagePut == null) {
+                return new GeneratedRelease(
+                    processor.releaseLibrary(
+                        Eithers.forMiddle3(Ids.newId(repository.fhirContext(), "Library", libraryId))),
+                    repository.fhirContext());
+            } else {
+                return new GeneratedRelease(
+                    processor.releaseLibrary(
+                        Eithers.forMiddle3(Ids.newId(repository.fhirContext(), "Library", libraryId)),
+                        isPackagePut),
+                    repository.fhirContext());
             }
         }
 

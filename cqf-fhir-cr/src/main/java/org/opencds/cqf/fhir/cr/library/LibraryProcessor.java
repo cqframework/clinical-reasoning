@@ -107,6 +107,16 @@ public class LibraryProcessor {
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseBundle releaseLibrary(
+        Either3<C, IIdType, R> library) {
+        return releaseLibrary(library, false);
+    }
+
+    public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseBundle releaseLibrary(
+        Either3<C, IIdType, R> library, boolean isPut) {
+        return releaseLibrary(library, packageParameters(fhirVersion, null, isPut));
+    }
+
+    public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseBundle releaseLibrary(
             Either3<C, IIdType, R> library, IBaseParameters parameters) {
         return releaseLibrary(resolveLibrary(library), parameters);
     }

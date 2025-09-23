@@ -99,6 +99,13 @@ class LibraryProcessorTests {
                 .isPut(Boolean.TRUE)
                 .thenPackage()
                 .hasEntry(2);
+
+        given().repositoryFor(fhirContextR4, "r4/ig-us-core-6-1-0")
+            .when()
+            .libraryId("UsCore6-1-0")
+            .isPut(Boolean.TRUE)
+            .thenPackage()
+            .hasEntry(1);
     }
 
     @Test
@@ -109,6 +116,16 @@ class LibraryProcessorTests {
                 .isPut(Boolean.TRUE)
                 .thenPackage()
                 .hasEntry(2);
+    }
+
+    @Test
+    void releaseR4() {
+        given().repositoryFor(fhirContextR4, "r4/ig-us-core-6-1-0")
+            .when()
+            .libraryId("UsCore6-1-0")
+            .isPut(Boolean.TRUE)
+            .thenRelease()
+            .hasEntry(1);
     }
 
     @Test

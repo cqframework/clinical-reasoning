@@ -1,0 +1,45 @@
+{
+  "resourceType": "Library",
+  "id": "UsCore6-1-0",
+  "meta": {
+    "profile": [ "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-manifestlibrary" ]
+  },
+  "contained": [ {
+    "resourceType": "Parameters",
+    "id": "exp-params",
+    "parameter": [ {
+      "name": "activeOnly",
+      "valueBoolean": true
+    } ]
+  }],
+  "extension": [ {
+    "url": "http://hl7.org/fhir/StructureDefinition/cqf-expansionParameters",
+    "valueReference": {
+      "reference": "#exp-params"
+    }
+  }, {
+    "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem",
+    "valueReference": {
+      "reference": "Device/cqf-tooling"
+    }
+  } ],
+  "url": "http://hl7.org/fhir/us/core-vsp/Library/hl7.fhir.us.core-vsp",
+  "version": "2025-09-draft",
+  "status": "draft",
+  "experimental": false,
+  "type": {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/library-type",
+      "code": "asset-collection"
+    } ]
+  },
+  "description":  "This is a Value Set Refresh Package for the US Core 6.1.0 implementation guide. It contains expansions of any value sets in the US Core 6.1.0 implementation guide, but refreshed using the code systems versions specified in the manifest expansion parameters",
+  "lastReviewDate": "2025-09-23",
+  "approvalDate": "2025-09-23",
+  "relatedArtifact": [
+    {
+      "type": "composed-of",
+      "resource": "http://hl7.org/fhir/us/core/ImplementationGuide/hl7.fhir.us.core|6.1.0"
+    }
+  ]
+}

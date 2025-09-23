@@ -11,12 +11,14 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import com.google.common.collect.Multimap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -69,17 +71,27 @@ public class ClinicalIntelligenceHapiFhirRepository extends HapiFhirRepository {
         ClinicalIntelligenceSearchConverter converter = new ClinicalIntelligenceSearchConverter();
         converter.convertParameters(searchParameters, fhirContext());
         details.setParameters(converter.myResultParameters);
-        requestDetails.getParameters()
-            .forEach(details::addParameter);
 
         details.setResourceName(daoRegistry.getFhirContext().getResourceType(resourceType));
 
-        //        // LUKETODO: change this:
-        //        // This adds a 10,000 count to searches that are system level and would
-        //        // otherwise result in a SimpleBundleProvider that only returns 50 resutlts.
-        //        if (details instanceof SystemRequestDetails) {
-        //            details.addParameter("_count", new String[]{"10000"});
-        //        }
+        /*
+        If (_count present)
+           use count
+        elif (not system request details) <- implying paging is supported
+           use default paging values
+        else
+           use dao config
+         */
+
+        // LUKETODO:  document this
+        if (details instanceof SystemRequestDetails) {
+            requestDetails.getParameters()
+                .entrySet()
+                .stream()
+                .filter(param -> Constants.PARAM_COUNT.equals(param.getKey()))
+                .map(Entry::getValue)
+                .forEach(paramValue -> details.addParameter(Constants.PARAM_COUNT, paramValue));
+        }
 
         final IFhirResourceDao<T> resourceDao = daoRegistry.getResourceDao(resourceType);
         final IBundleProvider bundleProvider =

@@ -36,10 +36,6 @@ public class ItemProcessor {
     private static final Logger logger = LoggerFactory.getLogger(ItemProcessor.class);
     final ExpressionProcessor expressionProcessor;
 
-    public ItemProcessor() {
-        this(new ExpressionProcessor());
-    }
-
     public ItemProcessor(ExpressionProcessor expressionProcessor) {
         this.expressionProcessor = expressionProcessor;
     }

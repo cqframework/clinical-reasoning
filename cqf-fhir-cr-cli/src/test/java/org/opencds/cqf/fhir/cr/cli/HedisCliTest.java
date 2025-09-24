@@ -117,8 +117,8 @@ class HedisCliTest {
 
     @Test
     public void testOnePatient() throws Exception {
-        String measureCode = "AAB";
-        var testPatientId = "patient.2024.aab.1.96302";
+        String measureCode = "AHU";
+        var testPatientId = "patient.2024.ahu.1.95004";
 //        95134 - palliative care exclusion criteria
 //        95270 - palliative care exclusion criteria
 //        95338 - palliative care exclusion criteria
@@ -126,18 +126,19 @@ class HedisCliTest {
 //        95610
         var directory = "/Users/justinmckelvy/Documents/DCSv2-Cert-A/";
         var suffix = "/A/v0_tests/tests/Patient/";
+//            "/A/v0_tests/tests/Patient/";
 //            "/Sample/v0_tests/tests/Patient/";
         var patientPath = "/Users/justinmckelvy/Documents/DCSv2-Cert-A/";
         var cqlContentDirectory = "/Users/justinmckelvy/alphora/DCS-HEDIS-2024-v2";
         var resultsPath = patientPath + "_Results_single/";
-        var measurePath = cqlContentDirectory + "/src/Measure/";
-        var measureId = measureCode + "Reporting";
-        var periodStart = "2024-01-01";
-        var periodEnd = "2024-12-31";
+//        var measurePath = cqlContentDirectory + "/src/Measure/";
+//        var measureId = measureCode + "Reporting";
+//        var periodStart = "2024-01-01";
+//        var periodEnd = "2024-12-31";
         String patientBundles = directory + measureCode + suffix;
 
         run(measureCode + "Reporting",
-            patientBundles + testPatientId, 250000, cqlContentDirectory, resultsPath, measurePath, measureId, periodStart, periodEnd, testPatientId);
+            patientBundles + testPatientId, 250000, cqlContentDirectory, resultsPath, null, null, null,null, testPatientId);
 
 
 

@@ -13,41 +13,51 @@ class JPTest2 {
     @Test
     void hedis_DCSv2CertDeck() throws IOException {
         List<String> measureCodes = new ArrayList<>();
+//        measureCodes.add("APME");
+//        measureCodes.add("BPD");
+//        measureCodes.add("CBP");
+//        measureCodes.add("COLE");
+//        measureCodes.add("CRE");
+        measureCodes.add("DMH");
         var patientPath = "/Users/justinmckelvy/Documents/DCSv2-Cert-A/"; //where your test deck data is
         var testingPath = "/A/v0_tests"; //test deck data path suffix
         var cqlContentDirectory = "/Users/justinmckelvy/alphora/DCS-HEDIS-2024-v2"; // the CQL that will be used for test
         var resultsPath = patientPath + "_Results/"; // the path where results will save
         var measurePath = cqlContentDirectory + "/src/Measure/";
-        var measureCode = "AAB";
-        var measureId = measureCode + "Reporting";
+
         var periodStart = "2024-01-01";
         var periodEnd = "2024-12-31";
-        measureCodes.add(measureCode); //measure(s) to evaluate, add more if wanting to test multiple
-
 
         for (String measure : measureCodes) {
-            run(measureCode + "Reporting",
-                    patientPath + measure + testingPath, 100000, cqlContentDirectory, resultsPath, measurePath, measureId, periodStart, periodEnd);
+            var measureId = measure + "Reporting";
+
+            run(measureId,
+                    patientPath + measure + testingPath, 200000, cqlContentDirectory, resultsPath, measurePath, measureId, periodStart, periodEnd);
         }
     }
 
     @Test
     void hedis_DCSv2CertDeck2() throws IOException {
         List<String> measureCodes = new ArrayList<>();
+//        measureCodes.add("DAE");
+//        measureCodes.add("DDE");
+//        measureCodes.add("DSU");
+//        measureCodes.add("EED");
+//        measureCodes.add("FMC");
+        measureCodes.add("APP");
         var patientPath = "/Users/justinmckelvy/Documents/DCSv2-Cert-A/"; //where your test deck data is
         var testingPath = "/A/v0_tests"; //test deck data path suffix
         var cqlContentDirectory = "/Users/justinmckelvy/alphora/DCS-HEDIS-2024-v2"; // the CQL that will be used for test
         var resultsPath = patientPath + "_Results/"; // the path where results will save
         var measurePath = cqlContentDirectory + "/src/Measure/";
-        var measureCode = "BCSE";
-        var measureId = measureCode + "Reporting";
+
         var periodStart = "2024-01-01";
         var periodEnd = "2024-12-31";
-        measureCodes.add(measureCode); //measure(s) to evaluate, add more if wanting to test multiple
-
 
         for (String measure : measureCodes) {
-            run(measureCode + "Reporting",
+            var measureId = measure + "Reporting";
+
+            run(measureId,
                 patientPath + measure + testingPath, 200000, cqlContentDirectory, resultsPath, measurePath, measureId, periodStart, periodEnd);
         }
     }
@@ -55,41 +65,52 @@ class JPTest2 {
     @Test
     void hedis_DCSv2CertDeck3() throws IOException {
         List<String> measureCodes = new ArrayList<>();
+//        measureCodes.add("FUM");
+//        measureCodes.add("KED");
+//        measureCodes.add("OMW");
+//        measureCodes.add("OSW");
+//        measureCodes.add("PBH");
+        measureCodes.add("AHU");
         var patientPath = "/Users/justinmckelvy/Documents/DCSv2-Cert-A/"; //where your test deck data is
         var testingPath = "/A/v0_tests"; //test deck data path suffix
         var cqlContentDirectory = "/Users/justinmckelvy/alphora/DCS-HEDIS-2024-v2"; // the CQL that will be used for test
         var resultsPath = patientPath + "_Results/"; // the path where results will save
         var measurePath = cqlContentDirectory + "/src/Measure/";
-        var measureCode = "GSD";
-        var measureId = measureCode + "Reporting";
+
         var periodStart = "2024-01-01";
         var periodEnd = "2024-12-31";
-        measureCodes.add(measureCode); //measure(s) to evaluate, add more if wanting to test multiple
-
 
         for (String measure : measureCodes) {
-            run(measureCode + "Reporting",
-                    patientPath + measure + testingPath, 200000, cqlContentDirectory, resultsPath, measurePath, measureId, periodStart, periodEnd);
+            var measureId = measure + "Reporting";
+
+            run(measureId,
+                patientPath + measure + testingPath, 200000, cqlContentDirectory, resultsPath, measurePath, measureId, periodStart, periodEnd);
         }
     }
 
     @Test
     void hedis_DCSv2CertDeck4() throws IOException {
         List<String> measureCodes = new ArrayList<>();
+//        measureCodes.add("SMC");
+//        measureCodes.add("SMD");
+//        measureCodes.add("SSD");
+//        measureCodes.add("URI");
+//        measureCodes.add("W30");
+//        measureCodes.add("WCC");
+        measureCodes.add("WCV");
         var patientPath = "/Users/justinmckelvy/Documents/DCSv2-Cert-A/"; //where your test deck data is
         var testingPath = "/A/v0_tests"; //test deck data path suffix
         var cqlContentDirectory = "/Users/justinmckelvy/alphora/DCS-HEDIS-2024-v2"; // the CQL that will be used for test
         var resultsPath = patientPath + "_Results/"; // the path where results will save
         var measurePath = cqlContentDirectory + "/src/Measure/";
-        var measureCode = "IMAE";
-        var measureId = measureCode + "Reporting";
+
         var periodStart = "2024-01-01";
         var periodEnd = "2024-12-31";
-        measureCodes.add(measureCode); //measure(s) to evaluate, add more if wanting to test multiple
-
 
         for (String measure : measureCodes) {
-            run(measureCode + "Reporting",
+            var measureId = measure + "Reporting";
+
+            run(measureId,
                 patientPath + measure + testingPath, 200000, cqlContentDirectory, resultsPath, measurePath, measureId, periodStart, periodEnd);
         }
     }
@@ -101,7 +122,7 @@ class JPTest2 {
         var testingPath = "/Sample/v0_tests"; //test deck data path suffix
         var cqlContentDirectory = "/Users/justinmckelvy/alphora/DCS-HEDIS-2024-v2"; // the CQL that will be used for test
         var resultsPath = patientPath + "_Results/"; // the path where results will save
-        measureCodes.add("COU"); //measure(s) to evaluate, add more if wanting to test multiple
+        measureCodes.add("PSA"); //measure(s) to evaluate, add more if wanting to test multiple
 
 
         for (String measureCode : measureCodes) {
@@ -117,7 +138,7 @@ class JPTest2 {
         var testingPath = "/Sample/v0_tests";
         var cqlContentDirectory = "/Users/justinmckelvy/alphora/DCS-HEDIS-2024-v2";
         var resultsPath = patientPath + "_Results/";
-        measureCodes.add("SPC");
+        measureCodes.add("LDM");
 
         for (String measureCode : measureCodes) {
             run(measureCode + "Reporting",

@@ -37,6 +37,7 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Measure;
+import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r5.context.IWorkerContext.ILoggingService;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
@@ -421,12 +422,35 @@ public class CqlCommand implements Callable<Integer> {
             // Ensure parent directories exist
             Files.createDirectories(outputPath.getParent());
 
+//            try (BufferedWriter writer = Files.newBufferedWriter(outputPath)) {
+//                for (Map.Entry<String, ExpressionResult> libraryEntry : result.expressionResults.entrySet()) {
+//                    String key = libraryEntry.getKey();
+//                    Object value = this.tempConvert(libraryEntry.getValue().value());
+//                    writer.write(key + "=" + value); // initial result value
+//                    writer.newLine();
+//                }
+//            }
             try (BufferedWriter writer = Files.newBufferedWriter(outputPath)) {
                 for (Map.Entry<String, ExpressionResult> libraryEntry : result.expressionResults.entrySet()) {
                     String key = libraryEntry.getKey();
-                    Object value = this.tempConvert(libraryEntry.getValue().value());
+                    ExpressionResult exprResult = libraryEntry.getValue();
+
+                    // 1️⃣ Write the original key=value line
+                    Object value = this.tempConvert(exprResult.value());
                     writer.write(key + "=" + value);
                     writer.newLine();
+
+                    // 2️⃣ Extract evaluatedResources IDs
+                    if (exprResult.evaluatedResources() != null && !exprResult.evaluatedResources().isEmpty()) {
+                        List<String> resourceIds = exprResult.evaluatedResources().stream()
+                            .map(t->(Resource) t)
+                            .map(resource -> resource.getIdElement().getIdPart()) // Extract just the ID part
+                            .toList();
+
+                        // 3️⃣ Write the evaluatedResources line
+                        writer.write(key + "-evaluatedResources=" + resourceIds);
+                        writer.newLine();
+                    }
                 }
             }
 

@@ -237,22 +237,6 @@ public class TestLibrary {
             }
         }
 
-        public GeneratedRelease thenRelease(IBaseParameters releaseParameters) {
-            if (isPackagePut == null) {
-                return new GeneratedRelease(
-                    processor.releaseLibrary(
-                        Eithers.forMiddle3(Ids.newId(repository.fhirContext(), "Library", libraryId)),
-                        releaseParameters),
-                    repository.fhirContext());
-            } else {
-                return new GeneratedRelease(
-                    processor.releaseLibrary(
-                        Eithers.forMiddle3(Ids.newId(repository.fhirContext(), "Library", libraryId)),
-                        releaseParameters),
-                    repository.fhirContext());
-            }
-        }
-
         public DataRequirementsLibrary thenDataRequirements() {
             return new DataRequirementsLibrary(processor.dataRequirements(
                     Eithers.forMiddle3(Ids.newId(repository.fhirContext(), "Library", libraryId)), parameters));

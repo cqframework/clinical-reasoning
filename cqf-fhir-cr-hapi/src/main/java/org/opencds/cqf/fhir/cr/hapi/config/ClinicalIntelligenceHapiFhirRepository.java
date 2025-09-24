@@ -1,9 +1,9 @@
 package org.opencds.cqf.fhir.cr.hapi.config;
 
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.repository.BundleProviderUtil;
 import ca.uhn.fhir.jpa.repository.HapiFhirRepository;
+import ca.uhn.fhir.jpa.repository.SearchConverter;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
@@ -45,14 +45,13 @@ public class ClinicalIntelligenceHapiFhirRepository extends HapiFhirRepository {
         this.daoRegistry = daoRegistry;
     }
 
-    // LUKETODO:  unit test
     /**
-     * Override {@link HapiFhirRepository#search(Class, Class, Map, Map)} to ensure that _count
-     * and other request parameters (such as _sort) are passed through to the DAO layer instead
-     * of dropping them.
+     * Override {@link HapiFhirRepository#search(Class, Class, Map, Map)} to ensure that the
+     * _count {@link RequestDetails} parameter is passed through to the DAO layer instead of
+     * dropping it.
      * <p/>
-     * Regarding the _count parameter, this is particularly important for system-level searches
-     * that use a SystemRequestDetails, which results in a SimpleBundleProvider that only returns
+     * We need to keep the _count parameter for system-level searches that use a
+     * SystemRequestDetails, which results in a SimpleBundleProvider that only returns
      * 50 results by default, which means only partial results are returned when doing synchronous
      * searches that results in a SimpleBundleProvider.
      */
@@ -63,39 +62,26 @@ public class ClinicalIntelligenceHapiFhirRepository extends HapiFhirRepository {
             Multimap<String, List<IQueryParameterType>> searchParameters,
             Map<String, String> headers) {
 
-        RequestDetails details = ClinicalIntelligenceRequestDetailsCloner.startWith(requestDetails)
+        var details = ClinicalIntelligenceRequestDetailsCloner.startWith(requestDetails)
                 .setAction(RestOperationTypeEnum.SEARCH_TYPE)
                 .addHeaders(headers)
                 .create();
 
-        ClinicalIntelligenceSearchConverter converter = new ClinicalIntelligenceSearchConverter();
+        var converter = new SearchConverter();
         converter.convertParameters(searchParameters, fhirContext());
         details.setParameters(converter.myResultParameters);
 
         details.setResourceName(daoRegistry.getFhirContext().getResourceType(resourceType));
 
-        /*
-        If (_count present)
-           use count
-        elif (not system request details) <- implying paging is supported
-           use default paging values
-        else
-           use dao config
-         */
-
-        // LUKETODO:  document this
         if (details instanceof SystemRequestDetails) {
-            requestDetails.getParameters()
-                .entrySet()
-                .stream()
-                .filter(param -> Constants.PARAM_COUNT.equals(param.getKey()))
-                .map(Entry::getValue)
-                .forEach(paramValue -> details.addParameter(Constants.PARAM_COUNT, paramValue));
+            requestDetails.getParameters().entrySet().stream()
+                    .filter(param -> Constants.PARAM_COUNT.equals(param.getKey()))
+                    .map(Entry::getValue)
+                    .forEach(paramValue -> details.addParameter(Constants.PARAM_COUNT, paramValue));
         }
 
-        final IFhirResourceDao<T> resourceDao = daoRegistry.getResourceDao(resourceType);
-        final IBundleProvider bundleProvider =
-            resourceDao.search(converter.mySearchParameterMap, details);
+        var resourceDao = daoRegistry.getResourceDao(resourceType);
+        var bundleProvider = resourceDao.search(converter.mySearchParameterMap, details);
 
         if (bundleProvider == null) {
             return null;

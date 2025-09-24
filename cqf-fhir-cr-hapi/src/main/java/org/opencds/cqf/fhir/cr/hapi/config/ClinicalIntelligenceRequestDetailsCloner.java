@@ -11,10 +11,10 @@ import java.util.Map;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-// LUKETODO:  do we really need this?
-
-// This class is copied from HAPI too, it's just along for the ride with the hacked repository above.
-// once the above is fixed upstream, this can go away too.
+/**
+ * This is an exact copy of the RequestDetailsCloner from hapi-fhir, which is package-private, so
+ * we can't access it.
+ */
 class ClinicalIntelligenceRequestDetailsCloner {
 
     private ClinicalIntelligenceRequestDetailsCloner() {}

@@ -45,6 +45,12 @@ public class ClinicalIntelligenceHapiFhirRepository extends HapiFhirRepository {
         this.daoRegistry = daoRegistry;
     }
 
+    // LUKETODO:  figure out how to address the max page size problem:
+    /*
+        1) hijacking the pagingprovider, setting the max page size to _count, then setting it back to the orig value once I’m done
+        2) relying on us setting the max page size cdr config
+     */
+
     /**
      * Override {@link HapiFhirRepository#search(Class, Class, Map, Map)} to ensure that the
      * _count {@link RequestDetails} parameter is passed through to the DAO layer instead of

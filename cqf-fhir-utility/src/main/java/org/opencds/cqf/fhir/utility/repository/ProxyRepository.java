@@ -7,6 +7,7 @@ import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import com.google.common.collect.Multimap;
+import jakarta.annotation.Nonnull;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -19,8 +20,12 @@ import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+@SuppressWarnings("UnstableApiUsage")
 public class ProxyRepository implements IRepository {
+    public static final Logger logger = LoggerFactory.getLogger(ProxyRepository.class);
 
     // One data server, one terminology server (content defaults to data)
     // One data server, one content server (terminology defaults to data)
@@ -125,6 +130,10 @@ public class ProxyRepository implements IRepository {
             return Optional.ofNullable(repo.link(type, url, headers));
         } catch (Exception e) {
             // swallow and try next
+            logger.debug(
+                    "Encountered error attempting to fetch link from repository of type {}: {}",
+                    repo.getClass().getName(),
+                    e.getMessage());
             return Optional.empty();
         }
     }
@@ -206,18 +215,19 @@ public class ProxyRepository implements IRepository {
     }
 
     @Override
+    @Nonnull
     public FhirContext fhirContext() {
         return data.fhirContext();
     }
 
-    private static Set<String> terminologyResourceSet =
+    private static final Set<String> terminologyResourceSet =
             new HashSet<>(Arrays.asList("ValueSet", "CodeSystem", "ConceptMap"));
 
     private boolean isTerminologyResource(String type) {
         return (terminologyResourceSet.contains(type));
     }
 
-    private static Set<String> contentResourceSet = new HashSet<>(Arrays.asList(
+    private static final Set<String> contentResourceSet = new HashSet<>(Arrays.asList(
             "Library", "Measure", "PlanDefinition", "StructureDefinition", "ActivityDefinition", "Questionnaire"));
 
     private boolean isContentResource(String type) {

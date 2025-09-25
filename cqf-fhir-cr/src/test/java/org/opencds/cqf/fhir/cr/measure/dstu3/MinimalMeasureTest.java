@@ -28,7 +28,7 @@ class MinimalMeasureTest {
 
         var report = when.then().report();
         assertNotNull(report);
-        assertEquals(1, report.getGroup().size());
+        assertEquals(0, report.getGroup().size());
         assertEquals(0, report.getGroupFirstRep().getPopulation().size());
     }
 

@@ -121,6 +121,7 @@ import org.opencds.cqf.fhir.utility.repository.operations.IRepositoryOperationPr
  */
 public class IgRepository implements IRepository {
     private final FhirContext fhirContext;
+    private final IParser jsonParser;
     private final Path root;
     private final IgConventions conventions;
     private final ResourceMatcher resourceMatcher;
@@ -149,13 +150,16 @@ public class IgRepository implements IRepository {
         }
     }
 
+    public static final String INPUT = "input";
+    public static final String SRC_FHIR = "src/fhir";
+    public static final String TESTS_DATA_FHIR = "tests/data/fhir";
     // Mapping of category layouts to resource categories and their corresponding directories.
     // These are relative to the root directory of the IG or the root directory of the KALM project
     static final Table<CategoryLayout, ResourceCategory, Directories> TYPE_DIRECTORIES = new ImmutableTable.Builder<
                     CategoryLayout, ResourceCategory, Directories>()
-            .put(CategoryLayout.FLAT, ResourceCategory.CONTENT, new Directories(List.of("input")))
-            .put(CategoryLayout.FLAT, ResourceCategory.TERMINOLOGY, new Directories(List.of("input")))
-            .put(CategoryLayout.FLAT, ResourceCategory.DATA, new Directories(List.of("input")))
+            .put(CategoryLayout.FLAT, ResourceCategory.CONTENT, new Directories(List.of(INPUT)))
+            .put(CategoryLayout.FLAT, ResourceCategory.TERMINOLOGY, new Directories(List.of(INPUT)))
+            .put(CategoryLayout.FLAT, ResourceCategory.DATA, new Directories(List.of(INPUT)))
             .put(
                     CategoryLayout.DIRECTORY_PER_CATEGORY,
                     ResourceCategory.CONTENT,
@@ -171,15 +175,15 @@ public class IgRepository implements IRepository {
             .put(
                     CategoryLayout.DEFINITIONAL_AND_DATA,
                     ResourceCategory.CONTENT,
-                    new Directories(List.of("src/fhir", "tests/data/fhir")))
+                    new Directories(List.of(SRC_FHIR, TESTS_DATA_FHIR)))
             .put(
                     CategoryLayout.DEFINITIONAL_AND_DATA,
                     ResourceCategory.TERMINOLOGY,
-                    new Directories(List.of("src/fhir", "tests/data/fhir")))
+                    new Directories(List.of(SRC_FHIR, TESTS_DATA_FHIR)))
             .put(
                     CategoryLayout.DEFINITIONAL_AND_DATA,
                     ResourceCategory.DATA,
-                    new Directories(List.of("tests/data/fhir", "src/fhir")))
+                    new Directories(List.of(TESTS_DATA_FHIR, SRC_FHIR)))
             .build();
 
     static final BiMap<EncodingEnum, String> FILE_EXTENSIONS = new ImmutableBiMap.Builder<EncodingEnum, String>()
@@ -233,6 +237,7 @@ public class IgRepository implements IRepository {
             IgConventions conventions,
             IRepositoryOperationProvider operationProvider) {
         this.fhirContext = requireNonNull(fhirContext, "fhirContext cannot be null");
+        this.jsonParser = fhirContext.newJsonParser();
         this.root = requireNonNull(root, "root cannot be null");
         this.conventions = requireNonNull(conventions, "conventions cannot be null");
         this.resourceMatcher = Repositories.getResourceMatcher(this.fhirContext);
@@ -295,7 +300,7 @@ public class IgRepository implements IRepository {
                 resourceType.getSimpleName(),
                 id.getIdPart(),
                 this.conventions.encodingBehavior().preferredEncoding());
-        return directory.findFirst().get().resolve(fileName);
+        return directory.findFirst().map(path -> path.resolve(fileName)).orElse(null);
     }
 
     /**
@@ -361,7 +366,7 @@ public class IgRepository implements IRepository {
             Class<T> resourceType, IgRepositoryCompartment igRepositoryCompartment) {
         var category = ResourceCategory.forType(resourceType.getSimpleName());
         var categoryPaths = TYPE_DIRECTORIES.rowMap().get(this.conventions.categoryLayout()).get(category).stream()
-                .map(path -> this.root.resolve(path));
+                .map(this.root::resolve);
         if (category == ResourceCategory.DATA
                 && this.conventions.compartmentLayout() == CompartmentLayout.DIRECTORY_PER_COMPARTMENT) {
             var compartmentPath = pathForCompartment(resourceType, this.fhirContext, igRepositoryCompartment);
@@ -517,7 +522,7 @@ public class IgRepository implements IRepository {
         }
 
         return this.conventions.encodingBehavior().enabledEncodings().stream()
-                .map(e -> FILE_EXTENSIONS.get(e))
+                .map(FILE_EXTENSIONS::get)
                 .anyMatch(ext -> ext.equalsIgnoreCase(extension));
     }
 
@@ -651,6 +656,7 @@ public class IgRepository implements IRepository {
         var resource = paths.map(this::cachedReadResource)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
+                .map(this::duplicateResource)
                 .findFirst();
 
         if (resource.isPresent()) {
@@ -894,7 +900,7 @@ public class IgRepository implements IRepository {
 
         for (var resource : candidates) {
             if (allParametersMatch(searchParameters, resource)) {
-                builder.addCollectionEntry(resource);
+                builder.addCollectionEntry(duplicateResource(resource));
             }
         }
 
@@ -1006,5 +1012,17 @@ public class IgRepository implements IRepository {
 
         // resource names are lowercase as directories
         return igRepositoryCompartment.getType().toLowerCase() + "/" + igRepositoryCompartment.getId();
+    }
+
+    // LUKETODO:  document why we're doing this
+    private IBaseResource duplicateResource(IBaseResource originalResource) {
+
+        final String measureJson = jsonParser.encodeResourceToString(originalResource);
+        final IBaseResource duplicateResource = jsonParser.parseResource(originalResource.getClass(), measureJson);
+
+        // The JSON parser does not copy user data, so we need to copy the source path
+        duplicateResource.setUserData(SOURCE_PATH_TAG, originalResource.getUserData(SOURCE_PATH_TAG));
+
+        return duplicateResource;
     }
 }

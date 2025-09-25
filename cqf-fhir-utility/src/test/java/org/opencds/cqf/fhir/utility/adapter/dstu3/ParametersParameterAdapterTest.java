@@ -3,11 +3,13 @@ package org.opencds.cqf.fhir.utility.adapter.dstu3;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.List;
+import org.hl7.fhir.dstu3.model.BooleanType;
 import org.hl7.fhir.dstu3.model.IntegerType;
 import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.dstu3.model.Patient;
@@ -88,5 +90,18 @@ class ParametersParameterAdapterTest {
         adapter.setValue(new StringType("test"));
         assertTrue(adapter.hasPrimitiveValue());
         assertEquals("test", adapter.getPrimitiveValue());
+    }
+
+    @Test
+    void testNewTupleWithParts() {
+        var stringType = new StringType("test");
+        var booleanType = new BooleanType(true);
+        var parameter = new ParametersParameterComponent().setName("param");
+        parameter.addPart().setName("part1").setValue(stringType);
+        parameter.addPart().setName("part2").setValue(booleanType);
+        var adapter = adapterFactory.createParametersParameter(parameter);
+        assertTrue(adapter.hasPart());
+        var tuple = adapter.newTupleWithParts();
+        assertNull(tuple);
     }
 }

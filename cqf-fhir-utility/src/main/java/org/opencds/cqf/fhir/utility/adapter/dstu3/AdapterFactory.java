@@ -43,6 +43,7 @@ import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireResponseItemComponentA
 import org.opencds.cqf.fhir.utility.adapter.IRequestActionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IResourceAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IStructureDefinitionAdapter;
+import org.opencds.cqf.fhir.utility.adapter.ITupleAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
 
 public class AdapterFactory implements IAdapterFactory {
@@ -209,5 +210,10 @@ public class AdapterFactory implements IAdapterFactory {
     @Override
     public IStructureDefinitionAdapter createStructureDefinition(IBaseResource structureDefinition) {
         return new StructureDefinitionAdapter((IDomainResource) structureDefinition);
+    }
+
+    @Override
+    public ITupleAdapter createTuple(IBase tuple) {
+        throw new UnprocessableEntityException("No FHIR type Tuple exists in version DSTU3");
     }
 }

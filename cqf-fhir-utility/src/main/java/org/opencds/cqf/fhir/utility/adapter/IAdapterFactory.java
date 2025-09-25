@@ -236,4 +236,12 @@ public interface IAdapterFactory {
      * @return an adapter exposing common api calls
      */
     IStructureDefinitionAdapter createStructureDefinition(IBaseResource structureDefinition);
+
+    /**
+     * Creates an adapter that exposes common Tuple operations across multiple versions of FHIR
+     *
+     * @param tuple a HAPI FHIR Tuple object
+     * @return an adapter exposing common api calls
+     */
+    ITupleAdapter createTuple(IBase tuple);
 }

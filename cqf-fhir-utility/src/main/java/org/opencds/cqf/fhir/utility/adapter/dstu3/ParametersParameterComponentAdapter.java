@@ -124,4 +124,9 @@ class ParametersParameterComponentAdapter extends BaseAdapter implements IParame
                 ? this.parametersParameterComponent.getValue().primitiveValue()
                 : null;
     }
+
+    @Override
+    public IBase newTupleWithParts() {
+        return null;
+    }
 }

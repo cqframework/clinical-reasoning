@@ -35,6 +35,7 @@ import org.opencds.cqf.fhir.cr.hapi.config.r4.EvaluateOperationConfig;
 import org.opencds.cqf.fhir.cr.hapi.config.r4.ExtractOperationConfig;
 import org.opencds.cqf.fhir.cr.hapi.config.r4.PackageOperationConfig;
 import org.opencds.cqf.fhir.cr.hapi.config.r4.PopulateOperationConfig;
+import org.opencds.cqf.fhir.cr.hapi.config.r4.RiskAdjustmentOperationConfig;
 import org.opencds.cqf.fhir.cr.hapi.config.test.TestCrStorageSettingsConfigurer;
 import org.opencds.cqf.fhir.cr.hapi.config.test.r4.TestCrR4Config;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,7 +51,8 @@ import org.springframework.test.context.ContextConfiguration;
             EvaluateOperationConfig.class,
             ExtractOperationConfig.class,
             PackageOperationConfig.class,
-            PopulateOperationConfig.class
+            PopulateOperationConfig.class,
+            RiskAdjustmentOperationConfig.class
         })
 public abstract class BaseCrR4TestServer extends BaseJpaR4Test implements IResourceLoader {
 

@@ -1,0 +1,61 @@
+{
+  "resourceType" : "MeasureReport",
+  "id" : "ra-datax-measurereport01",
+  "meta" : {
+    "extension" : [
+      {
+        "url" : "http://hl7.org/fhir/StructureDefinition/instance-name",
+        "valueString" : "Data Exchange MeasureReport Example01"
+      },
+      {
+        "url" : "http://hl7.org/fhir/StructureDefinition/instance-description",
+        "valueMarkdown" : "This is an example for the Risk Adjustment Data Exchange MeasureReport profile. It evaluatedResource references an example C-CDA document that is being submitted."
+      }
+    ],
+    "profile" : [
+      "http://hl7.org/fhir/us/davinci-ra/StructureDefinition/ra-datax-measurereport"
+    ]
+  },
+  "extension" : [
+    {
+      "url" : "http://hl7.org/fhir/StructureDefinition/measurereport-category",
+      "valueCodeableConcept" : {
+        "coding" : [
+          {
+            "system" : "http://hl7.org/fhir/CodeSystem/measurereport-category",
+            "code" : "ra"
+          }
+        ]
+      }
+    },
+    {
+      "url" : "http://hl7.org/fhir/us/davinci-ra/StructureDefinition/ra-payerCodingGapReportId",
+      "valueId" : "ra-measurereport01"
+    },
+    {
+      "url" : "http://hl7.org/fhir/us/davinci-ra/StructureDefinition/ra-reportingVendor",
+      "valueReference" : {
+        "reference" : "Organization/ra-vendor01"
+      }
+    }
+  ],
+  "status" : "complete",
+  "type" : "data-collection",
+  "measure" : "http://hl7.org/fhir/us/davinci-ra/Measure/RAModelExample01",
+  "subject" : {
+    "reference" : "Patient/ra-patient01"
+  },
+  "date" : "2021-11-10",
+  "reporter" : {
+    "reference" : "Organization/ra-org02pat02"
+  },
+  "period" : {
+    "start" : "2021-01-01",
+    "end" : "2021-09-30"
+  },
+  "evaluatedResource" : [
+    {
+      "reference" : "DocumentReference/ra-documentreference01pat01"
+    }
+  ]
+}

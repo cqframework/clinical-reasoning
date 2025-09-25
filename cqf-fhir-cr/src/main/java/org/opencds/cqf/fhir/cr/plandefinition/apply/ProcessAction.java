@@ -23,9 +23,6 @@ import org.opencds.cqf.fhir.cr.common.ExtensionProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.GenerateProcessor;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.Constants.CqfApplicabilityBehavior;
-import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
-import org.opencds.cqf.fhir.utility.adapter.IPlanDefinitionActionAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IRequestActionAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

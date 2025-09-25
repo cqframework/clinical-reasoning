@@ -1,5 +1,8 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
+import static kotlinx.io.CoreKt.buffered;
+import static kotlinx.io.JvmCoreKt.asSource;
+
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -157,7 +160,7 @@ public class R4DataRequirementsService {
     public static CqlTranslator getTranslator(InputStream cqlStream, LibraryManager libraryManager) {
         CqlTranslator translator;
         try {
-            translator = CqlTranslator.fromStream(cqlStream, libraryManager);
+            translator = CqlTranslator.fromSource(buffered(asSource(cqlStream)), libraryManager);
         } catch (IOException e) {
             throw new IllegalArgumentException("Errors occurred translating library: %s".formatted(e.getMessage()));
         }

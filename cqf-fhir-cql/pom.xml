@@ -35,6 +35,10 @@
       <groupId>info.cqframework</groupId>
       <artifactId>cql-to-elm</artifactId>
     </dependency>
+    <dependency>
+      <groupId>info.cqframework</groupId>
+      <artifactId>ucum</artifactId>
+    </dependency>
       <dependency>
           <groupId>info.cqframework</groupId>
           <artifactId>elm-fhir</artifactId>
@@ -63,13 +67,6 @@
       <groupId>org.opencds.cqf.fhir</groupId>
       <artifactId>cqf-fhir-test</artifactId>
       <version>3.27.0-SNAPSHOT</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.opencds.cqf.fhir</groupId>
-      <artifactId>cqf-fhir-jackson</artifactId>
-      <version>3.27.0-SNAPSHOT</version>
-      <type>pom</type>
       <scope>test</scope>
     </dependency>
     <dependency>

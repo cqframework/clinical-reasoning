@@ -23,6 +23,9 @@ import org.opencds.cqf.fhir.cr.common.ExtensionProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.GenerateProcessor;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.Constants.CqfApplicabilityBehavior;
+import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
+import org.opencds.cqf.fhir.utility.adapter.IPlanDefinitionActionAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IRequestActionAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -119,21 +122,24 @@ public class ProcessAction {
                 if (profiles.isEmpty()) {
                     return;
                 }
-                var profile = searchRepositoryByCanonical(repository, profiles.get(0));
-                var generateRequest = request.toGenerateRequest(profile);
-                var item = generateProcessor.generateItem(generateRequest);
-                if (item != null) {
-                    // If input has text extension use it to override
-                    if (request.hasExtension(input, Constants.CPG_INPUT_TEXT)) {
-                        item.getLeft()
-                                .setText(((IPrimitiveType<String>)
-                                                request.getExtensionByUrl(input, Constants.CPG_INPUT_TEXT)
-                                                        .getValue())
-                                        .getValueAsString());
-                        // item Constants.CPG_INPUT_DESCRIPTION
+                var profileUrl = profiles.get(0);
+                if (!request.questionnaireItemExistsForProfile(profileUrl)) {
+                    var profile = searchRepositoryByCanonical(repository, profileUrl);
+                    var generateRequest = request.toGenerateRequest(profile);
+                    var item = generateProcessor.generateItem(generateRequest);
+                    if (item != null) {
+                        // If input has text extension use it to override
+                        if (request.hasExtension(input, Constants.CPG_INPUT_TEXT)) {
+                            item.getLeft()
+                                    .setText(((IPrimitiveType<String>)
+                                                    request.getExtensionByUrl(input, Constants.CPG_INPUT_TEXT)
+                                                            .getValue())
+                                            .getValueAsString());
+                            // item Constants.CPG_INPUT_DESCRIPTION
+                        }
+                        request.addQuestionnaireItem(item.getLeft());
+                        request.addLaunchContextExtensions(item.getRight());
                     }
-                    request.addQuestionnaireItem(item.getLeft());
-                    request.addLaunchContextExtensions(item.getRight());
                 }
             }
         } catch (Exception e) {

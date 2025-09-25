@@ -37,7 +37,7 @@ public class GraphDefinitionProcessor {
     protected TerminologyServerClientSettings terminologyServerClientSettings;
 
     public GraphDefinitionProcessor(IRepository repository) {
-        this(repository, EvaluationSettings.getDefault(), new TerminologyServerClientSettings());
+        this(repository, EvaluationSettings.getDefault(), TerminologyServerClientSettings.getDefault());
     }
 
     public GraphDefinitionProcessor(

@@ -1,4 +1,4 @@
-package org.opencds.cqf.fhir.cr.hapi.config;
+package org.opencds.cqf.fhir.cr.hapi.repository;
 
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;

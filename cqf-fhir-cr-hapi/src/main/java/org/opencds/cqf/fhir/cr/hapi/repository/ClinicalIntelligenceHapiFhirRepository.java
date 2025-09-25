@@ -1,7 +1,6 @@
-package org.opencds.cqf.fhir.cr.hapi.config;
+package org.opencds.cqf.fhir.cr.hapi.repository;
 
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.repository.BundleProviderUtil;
 import ca.uhn.fhir.jpa.repository.HapiFhirRepository;
 import ca.uhn.fhir.jpa.repository.SearchConverter;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -44,12 +43,6 @@ public class ClinicalIntelligenceHapiFhirRepository extends HapiFhirRepository {
         this.restfulServer = restfulServer;
         this.daoRegistry = daoRegistry;
     }
-
-    // LUKETODO:  figure out how to address the max page size problem:
-    /*
-        1) hijacking the pagingprovider, setting the max page size to _count, then setting it back to the orig value once I’m done
-        2) relying on us setting the max page size cdr config
-     */
 
     /**
      * Override {@link HapiFhirRepository#search(Class, Class, Map, Map)} to ensure that the
@@ -127,7 +120,7 @@ public class ClinicalIntelligenceHapiFhirRepository extends HapiFhirRepository {
             bundleType = BundleTypeEnum.SEARCHSET;
         }
 
-        return unsafeCast(BundleProviderUtil.createBundleFromBundleProvider(
+        return unsafeCast(ClinicalIntelligenceBundleProviderUtil.createBundleFromBundleProvider(
                 restfulServer, requestDetails, count, linkSelf, includes, bundleProvider, start, bundleType, null));
     }
 

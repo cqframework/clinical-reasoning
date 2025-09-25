@@ -191,6 +191,7 @@ public class MeasureEvaluator {
         denominator = evaluatePopulationMembership(subjectType, subjectId, denominator, evaluationResult);
         numerator = evaluatePopulationMembership(subjectType, subjectId, numerator, evaluationResult);
         if (applyScoring) {
+            // LUKETODO:  custom List and Set implementations that work off of IDs for hashcode/equals
             // remove denominator values not in IP
             denominator.getResources().retainAll(initialPopulation.getResources());
             denominator.getSubjects().retainAll(initialPopulation.getSubjects());

@@ -50,7 +50,7 @@ public class PlanDefinitionProcessor {
     protected TerminologyServerClientSettings terminologyServerClientSettings;
 
     public PlanDefinitionProcessor(IRepository repository) {
-        this(repository, EvaluationSettings.getDefault(), new TerminologyServerClientSettings());
+        this(repository, EvaluationSettings.getDefault(), TerminologyServerClientSettings.getDefault());
     }
 
     public PlanDefinitionProcessor(

@@ -47,7 +47,7 @@ public class SubmitDataProvider {
             shortDefinition = "$ra-submit-data",
             value =
                     "Implements the <a href=\"http://hl7.org/fhir/us/davinci-ra/OperationDefinition/submit-data\">$ra-submit-data</a> operation.")
-    @Operation(name = OPERATION_NAME, type = Measure.class, idempotent = false)
+    @Operation(name = OPERATION_NAME, type = Measure.class)
     public Bundle submitData(
             RequestDetails requestDetails,
             @OperationParam(name = "measureReport", min = 1, max = 1) MeasureReport report,

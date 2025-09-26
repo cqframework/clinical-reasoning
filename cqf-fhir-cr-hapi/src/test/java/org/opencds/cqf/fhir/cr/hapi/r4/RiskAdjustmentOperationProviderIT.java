@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 public class RiskAdjustmentOperationProviderIT extends BaseCrR4TestServer {
 
     @Test
-    void testRiskAdjustmentOperationInvalidRequest() {
+    void testRiskAdjustmentSubmitDataOperationInvalidRequest() {
         try {
             ourClient
                     .operation()
@@ -25,7 +25,22 @@ public class RiskAdjustmentOperationProviderIT extends BaseCrR4TestServer {
     }
 
     @Test
-    void testRiskAdjustmentOperationInvalidProfile() {
+    void testRiskAdjustmentSubmitRemarkDataOperationInvalidRequest() {
+        try {
+            ourClient
+                    .operation()
+                    .onType("Measure")
+                    .named("submit-remark-data")
+                    .withNoParameters(Parameters.class)
+                    .execute();
+            Assertions.fail();
+        } catch (InvalidRequestException ire) {
+            // Passes
+        }
+    }
+
+    @Test
+    void testRiskAdjustmentSubmitDataOperationInvalidProfile() {
         var mr = (MeasureReport) readResource("ra-datax-measurereport01.json");
         mr.getMeta().setProfile(null);
         var params = org.opencds.cqf.fhir.utility.r4.Parameters.parameters(
@@ -44,7 +59,25 @@ public class RiskAdjustmentOperationProviderIT extends BaseCrR4TestServer {
     }
 
     @Test
-    void testRiskAdjustmentOperationValidRequest() {
+    void testRiskAdjustmentSubmitRemarkDataOperationInvalidProfile() {
+        var mr = (MeasureReport) readResource("ra-datax-measurereport01.json");
+        var params = org.opencds.cqf.fhir.utility.r4.Parameters.parameters(
+                org.opencds.cqf.fhir.utility.r4.Parameters.part("measureReport", mr));
+        try {
+            ourClient
+                    .operation()
+                    .onType("Measure")
+                    .named("submit-remark-data")
+                    .withParameters(params)
+                    .execute();
+            Assertions.fail();
+        } catch (InvalidRequestException ire) {
+            // Passes
+        }
+    }
+
+    @Test
+    void testRiskAdjustmentSubmitDataOperationValidRequest() {
         var mr = readResource("ra-datax-measurereport01.json");
         var params = org.opencds.cqf.fhir.utility.r4.Parameters.parameters(
                 org.opencds.cqf.fhir.utility.r4.Parameters.part("measureReport", (Resource) mr));

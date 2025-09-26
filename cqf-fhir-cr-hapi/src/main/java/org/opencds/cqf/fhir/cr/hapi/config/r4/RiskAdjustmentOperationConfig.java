@@ -11,6 +11,7 @@ import org.opencds.cqf.fhir.cr.hapi.config.ProviderSelector;
 import org.opencds.cqf.fhir.cr.hapi.config.RepositoryConfig;
 import org.opencds.cqf.fhir.cr.hapi.r4.ISubmitDataProcessorFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.ra.SubmitDataProvider;
+import org.opencds.cqf.fhir.cr.hapi.r4.ra.SubmitRemarkDataProvider;
 import org.opencds.cqf.fhir.cr.measure.r4.R4SubmitDataService;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -31,11 +32,18 @@ public class RiskAdjustmentOperationConfig {
         return new SubmitDataProvider(r4SubmitDataProcessorFactory);
     }
 
+    @Bean(name = "riskAdjustmentSubmitRemarkDataProvider")
+    SubmitRemarkDataProvider r4RaSubmitDataRemarkProvider(ISubmitDataProcessorFactory r4SubmitDataProcessorFactory) {
+        return new SubmitRemarkDataProvider(r4SubmitDataProcessorFactory);
+    }
+
     @Bean(name = "riskAdjustmentOperationLoader")
     public ProviderLoader riskAdjustmentOperationLoader(
             ApplicationContext applicationContext, FhirContext fhirContext, RestfulServer restfulServer) {
 
-        var selector = new ProviderSelector(fhirContext, Map.of(FhirVersionEnum.R4, List.of(SubmitDataProvider.class)));
+        var selector = new ProviderSelector(
+                fhirContext,
+                Map.of(FhirVersionEnum.R4, List.of(SubmitDataProvider.class, SubmitRemarkDataProvider.class)));
 
         return new ProviderLoader(restfulServer, applicationContext, selector);
     }

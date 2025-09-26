@@ -15,7 +15,7 @@ import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
-import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
+import org.opencds.cqf.fhir.utility.repository.ig.IgRepositoryForTests;
 
 public class Library {
     public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/cpg/r4";
@@ -84,7 +84,7 @@ public class Library {
         }
 
         public Library.Given repositoryFor(String repositoryPath) {
-            this.repository = new IgRepository(
+            this.repository = new IgRepositoryForTests(
                     FhirContext.forR4Cached(),
                     Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
             return this;

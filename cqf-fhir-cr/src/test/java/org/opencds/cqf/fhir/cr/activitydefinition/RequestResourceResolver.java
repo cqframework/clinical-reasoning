@@ -14,7 +14,7 @@ import org.opencds.cqf.fhir.cr.activitydefinition.apply.BaseRequestResourceResol
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.IRequestResolverFactory;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
-import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
+import org.opencds.cqf.fhir.utility.repository.ig.IgRepositoryForTests;
 
 public class RequestResourceResolver {
     public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/shared";
@@ -32,7 +32,7 @@ public class RequestResourceResolver {
         }
 
         public Given repositoryFor(FhirContext fhirContext, String repositoryPath) {
-            this.repository = new IgRepository(
+            this.repository = new IgRepositoryForTests(
                     fhirContext, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
             this.resolverFactory =
                     IRequestResolverFactory.getDefault(fhirContext.getVersion().getVersion());

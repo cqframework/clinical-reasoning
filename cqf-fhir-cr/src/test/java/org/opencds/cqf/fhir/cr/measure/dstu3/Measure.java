@@ -25,7 +25,7 @@ import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.opencds.cqf.fhir.cr.measure.dstu3.Measure.SelectedGroup.SelectedReference;
-import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
+import org.opencds.cqf.fhir.utility.repository.ig.IgRepositoryForTests;
 
 public class Measure {
     public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/measure/dstu3";
@@ -76,7 +76,7 @@ public class Measure {
         }
 
         public Given repositoryFor(String repositoryPath) {
-            this.repository = new IgRepository(
+            this.repository = new IgRepositoryForTests(
                     FhirContext.forDstu3Cached(),
                     Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
             return this;

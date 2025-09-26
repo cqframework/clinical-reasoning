@@ -43,7 +43,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
-import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
+import org.opencds.cqf.fhir.utility.repository.ig.IgRepositoryForTests;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,7 +64,7 @@ public class ApplyProcessorTest {
 
     @BeforeEach
     void beforeEach() {
-        repository = new IgRepository(getFhirContext(), getClassPath());
+        repository = new IgRepositoryForTests(getFhirContext(), getClassPath());
         fixture = new ApplyProcessor(repository, modelResolver);
     }
 

@@ -8,13 +8,13 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.repository.IRepository;
 import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
-import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
+import org.opencds.cqf.fhir.utility.repository.ig.IgRepositoryForTests;
 
 @SuppressWarnings("UnstableApiUsage")
 class GraphDefinitionProcessorTest {
     private final FhirContext fhirContextR4 = FhirContext.forR4Cached();
-    private final IRepository r4Repository =
-            new IgRepository(fhirContextR4, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r4/eras"));
+    private final IRepository r4Repository = new IgRepositoryForTests(
+            fhirContextR4, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r4/eras"));
 
     @Test
     void testApply_returnsBundleResource2() {

@@ -14,7 +14,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.TestDataGenerator;
-import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
+import org.opencds.cqf.fhir.utility.repository.ig.IgRepositoryForTests;
 
 /**
  * When Measure Evaluation produces a Measure Report of type 'Individual', a evaluatedResources field
@@ -27,7 +27,7 @@ import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 @SuppressWarnings("squid:S2699")
 class MeasureEvaluatedResourcesTest {
     private static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/measure/r4";
-    private static final IRepository repository = new IgRepository(
+    private static final IRepository repository = new IgRepositoryForTests(
             FhirContext.forR4Cached(),
             Path.of(getResourcePath(MeasureEvaluatedResourcesTest.class) + "/" + CLASS_PATH + "/" + "MeasureTest"));
     private final Given given = Measure.given().repository(repository);

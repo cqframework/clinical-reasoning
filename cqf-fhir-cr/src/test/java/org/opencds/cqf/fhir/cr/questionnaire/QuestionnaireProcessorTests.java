@@ -15,7 +15,6 @@ import static org.opencds.cqf.fhir.utility.VersionUtilities.canonicalTypeForVers
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -30,16 +29,16 @@ import org.opencds.cqf.fhir.cr.questionnaire.populate.PopulateProcessor;
 import org.opencds.cqf.fhir.cr.questionnaireresponse.TestQuestionnaireResponse;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Ids;
-import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
+import org.opencds.cqf.fhir.utility.repository.ig.IgRepositoryForTests;
 
 @SuppressWarnings({"squid:S2699", "UnstableApiUsage"})
 class QuestionnaireProcessorTests {
     private final FhirContext fhirContextR4 = FhirContext.forR4Cached();
     private final FhirContext fhirContextR5 = FhirContext.forR5Cached();
-    private final IRepository repositoryR4 =
-            new IgRepository(fhirContextR4, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r4"));
-    private final IRepository repositoryR5 =
-            new IgRepository(fhirContextR5, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r5"));
+    private final IgRepositoryForTests repositoryR4 = new IgRepositoryForTests(
+            fhirContextR4, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r4"));
+    private final IgRepositoryForTests repositoryR5 = new IgRepositoryForTests(
+            fhirContextR5, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r5"));
 
     @Test
     void processors() {

@@ -24,6 +24,7 @@ import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -735,8 +736,10 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
     }
 
     protected String getPopulationResourceIds(Object resourceObject) {
-        var resource = (Resource) resourceObject;
-        return resource.getId();
+        if (resourceObject instanceof IBaseResource resource) {
+            return resource.getIdElement().toVersionless().getValueAsString();
+        }
+        return null;
     }
 
     private void buildPopulation(

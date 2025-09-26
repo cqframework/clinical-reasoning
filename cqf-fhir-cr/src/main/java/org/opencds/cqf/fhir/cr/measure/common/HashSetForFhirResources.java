@@ -30,6 +30,7 @@ public class HashSetForFhirResources<T> extends HashSet<T> {
 
     // If we don't override this logic, we'll get duplicate resources since the comparison to
     // existing resources in the set will be based on object identity, not FHIR resource identity
+    // The default implementation calls to HashMap, which means it's not based on contains()
     @Override
     public boolean add(T newElement) {
         final IBaseResource newElementResource = castToResourceIfApplicable(newElement);
@@ -43,6 +44,26 @@ public class HashSetForFhirResources<T> extends HashSet<T> {
         }
 
         return super.add(newElement);
+    }
+
+    // If we don't override this logic, we'll get duplicate resources since the comparison to
+    // existing resources in the set will be based on object identity, not FHIR resource identity
+    // The default implementation calls to HashMap, which means it's not based on contains()
+    @Override
+    public boolean remove(Object removalCandidate) {
+        final IBaseResource removalCandidateResource = castToResourceIfApplicable(removalCandidate);
+
+        if (removalCandidateResource != null) {
+            for (T next : this) {
+                if (next instanceof IBaseResource nextResource) {
+                    if (areEqual(nextResource, removalCandidateResource)) {
+                        return super.remove(nextResource);
+                    }
+                }
+            }
+            return false;
+        }
+        return super.remove(removalCandidate);
     }
 
     private IBaseResource castToResourceIfApplicable(Object obj) {

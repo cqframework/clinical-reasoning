@@ -18,7 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.When;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.TestDataGenerator;
-import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
+import org.opencds.cqf.fhir.utility.repository.ig.IgRepositoryForTests;
 
 /**
  * Measure Stratifier Testing to validate Measure defined Stratifier elements and the resulting MeasureReport Stratifier elements
@@ -28,7 +28,7 @@ import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 @SuppressWarnings("squid:S2699")
 class MeasureStratifierTest {
     private static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/measure/r4";
-    private static final IRepository repository = new IgRepository(
+    private static final IRepository repository = new IgRepositoryForTests(
             FhirContext.forR4Cached(),
             Path.of(getResourcePath(MeasureStratifierTest.class) + "/" + CLASS_PATH + "/" + "MeasureTest"));
     private final Given given = Measure.given().repository(repository);

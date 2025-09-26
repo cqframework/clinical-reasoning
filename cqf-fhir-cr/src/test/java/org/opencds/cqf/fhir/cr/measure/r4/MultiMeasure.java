@@ -46,7 +46,7 @@ import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.opencds.cqf.fhir.utility.BundleHelper;
-import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
+import org.opencds.cqf.fhir.utility.repository.ig.IgRepositoryForTests;
 
 @SuppressWarnings("squid:S1135")
 class MultiMeasure {
@@ -124,7 +124,7 @@ class MultiMeasure {
         }
 
         public MultiMeasure.Given repositoryFor(String repositoryPath) {
-            this.repository = new IgRepository(
+            this.repository = new IgRepositoryForTests(
                     FhirContext.forR4Cached(),
                     Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
             return this;

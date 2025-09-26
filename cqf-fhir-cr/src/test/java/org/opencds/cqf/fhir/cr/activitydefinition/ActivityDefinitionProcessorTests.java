@@ -37,7 +37,7 @@ import org.opencds.cqf.fhir.cr.activitydefinition.apply.IRequestResolverFactory;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.monad.Either3;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
-import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
+import org.opencds.cqf.fhir.utility.repository.ig.IgRepositoryForTests;
 
 @TestInstance(Lifecycle.PER_CLASS)
 @ExtendWith(MockitoExtension.class)
@@ -53,7 +53,7 @@ class ActivityDefinitionProcessorTests {
     LibraryEngine libraryEngine;
 
     private IRepository createRepository(FhirContext fhirContext, String version) {
-        return new IgRepository(
+        return new IgRepositoryForTests(
                 fhirContext, Path.of(getResourcePath(this.getClass()) + "/org/opencds/cqf/fhir/cr/shared/" + version));
     }
 

@@ -31,6 +31,7 @@ import org.opencds.cqf.fhir.cr.graphdefinition.apply.ApplyRequestBuilder;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
+import org.opencds.cqf.fhir.utility.repository.ig.IgRepositoryForTests;
 
 @SuppressWarnings("UnstableApiUsage")
 public class TestGraphDefinition {
@@ -74,7 +75,7 @@ public class TestGraphDefinition {
         }
 
         public Given repositoryFor(FhirContext fhirContext, String repositoryPath) {
-            this.repository = new IgRepository(
+            this.repository = new IgRepositoryForTests(
                     fhirContext, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
             return this;
         }

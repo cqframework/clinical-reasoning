@@ -62,7 +62,7 @@ import org.opencds.cqf.fhir.cr.measure.r4.Measure.SelectedGroup.SelectedReferenc
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.r4.ContainedHelper;
-import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
+import org.opencds.cqf.fhir.utility.repository.ig.IgRepositoryForTests;
 
 @SuppressWarnings({"squid:S2699", "squid:S5960", "squid:S1135"})
 public class Measure {
@@ -154,7 +154,7 @@ public class Measure {
         }
 
         public Given repositoryFor(String repositoryPath) {
-            this.repository = new IgRepository(
+            this.repository = new IgRepositoryForTests(
                     FhirContext.forR4Cached(),
                     Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
 

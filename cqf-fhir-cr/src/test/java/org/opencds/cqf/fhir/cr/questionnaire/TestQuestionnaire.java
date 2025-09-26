@@ -49,7 +49,7 @@ import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireResponseAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireResponseItemAnswerComponentAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireResponseItemComponentAdapter;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
-import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
+import org.opencds.cqf.fhir.utility.repository.ig.IgRepositoryForTests;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 @SuppressWarnings("UnstableApiUsage")
@@ -74,7 +74,7 @@ public class TestQuestionnaire {
         }
 
         public Given repositoryFor(FhirContext fhirContext, String repositoryPath) {
-            this.repository = new IgRepository(
+            this.repository = new IgRepositoryForTests(
                     fhirContext, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
             return this;
         }

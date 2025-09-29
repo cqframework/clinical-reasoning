@@ -68,7 +68,7 @@ class LibraryProcessorTests {
         var processor = new LibraryProcessor(
                 repository,
                 EvaluationSettings.getDefault(),
-                new TerminologyServerClientSettings(),
+                TerminologyServerClientSettings.getDefault(),
                 packageProcessor,
                 releaseProcessor,
                 dataRequirementsProcessor,

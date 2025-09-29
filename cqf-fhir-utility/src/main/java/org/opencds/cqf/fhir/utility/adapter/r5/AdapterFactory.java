@@ -45,6 +45,7 @@ import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireResponseItemComponentA
 import org.opencds.cqf.fhir.utility.adapter.IRequestActionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IResourceAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IStructureDefinitionAdapter;
+import org.opencds.cqf.fhir.utility.adapter.ITupleAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
 
 public class AdapterFactory implements IAdapterFactory {
@@ -218,5 +219,9 @@ public class AdapterFactory implements IAdapterFactory {
     @Override
     public IImplementationGuideAdapter createImplementationGuide(IBaseResource implementationGuide) {
         return new ImplementationGuideAdapter((IDomainResource) implementationGuide);
+    }
+
+    public ITupleAdapter createTuple(IBase tuple) {
+        return new TupleAdapter(tuple);
     }
 }

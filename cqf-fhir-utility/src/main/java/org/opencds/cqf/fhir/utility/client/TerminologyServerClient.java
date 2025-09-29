@@ -41,7 +41,7 @@ public class TerminologyServerClient {
         this.fhirContext = requireNonNull(fhirContext);
         this.terminologyServerClientSettings = terminologyServerClientSettings != null
                 ? terminologyServerClientSettings
-                : new TerminologyServerClientSettings();
+                : TerminologyServerClientSettings.getDefault();
     }
 
     public TerminologyServerClientSettings getTerminologyServerClientSettings() {

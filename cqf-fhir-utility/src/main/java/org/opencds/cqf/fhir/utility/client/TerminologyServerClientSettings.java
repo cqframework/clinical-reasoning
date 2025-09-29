@@ -8,16 +8,17 @@ public class TerminologyServerClientSettings {
     private int socketTimeout = 60;
     private String crmiVersion = "1.0.0";
 
-    /*
-     * Default constructor for TerminologySettings
-     */
-    public TerminologyServerClientSettings() {
+    public static TerminologyServerClientSettings getDefault() {
+        return new TerminologyServerClientSettings();
+    }
+
+    TerminologyServerClientSettings() {
         // intentionally empty
     }
 
     /**
      * Copy constructor for ExpandSettings
-     * @param terminologyServerClientSettings
+     * @param terminologyServerClientSettings the TerminologyServerClientSettings to copy
      */
     public TerminologyServerClientSettings(TerminologyServerClientSettings terminologyServerClientSettings) {
         this.maxRetryCount = terminologyServerClientSettings.maxRetryCount;

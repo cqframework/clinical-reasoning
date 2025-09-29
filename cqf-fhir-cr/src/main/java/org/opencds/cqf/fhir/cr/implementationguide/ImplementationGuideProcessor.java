@@ -32,7 +32,7 @@ public class ImplementationGuideProcessor {
     protected TerminologyServerClientSettings terminologyServerClientSettings;
 
     public ImplementationGuideProcessor(IRepository repository) {
-        this(repository, EvaluationSettings.getDefault(), new TerminologyServerClientSettings());
+        this(repository, EvaluationSettings.getDefault(), TerminologyServerClientSettings.getDefault());
     }
 
     public ImplementationGuideProcessor(
@@ -51,8 +51,8 @@ public class ImplementationGuideProcessor {
             IDataRequirementsProcessor dataRequirementsProcessor,
             IEvaluateProcessor evaluateProcessor) {
         this.repository = requireNonNull(repository, "repository can not be null");
-        this.terminologyServerClientSettings =
-                requireNonNull(terminologyServerClientSettings, "terminologyServerClientSettings can not be null");
+        this.terminologyServerClientSettings = requireNonNull(terminologyServerClientSettings,
+                "terminologyServerClientSettings can not be null");
         fhirVersion = this.repository.fhirContext().getVersion().getVersion();
         modelResolver = FhirModelResolverCache.resolverForVersion(fhirVersion);
         this.packageProcessor = packageProcessor;

@@ -1,5 +1,8 @@
 package org.opencds.cqf.fhir.cr.questionnaire.populate;
 
+import static org.opencds.cqf.fhir.cr.common.ExtensionBuilders.QUESTIONNAIRE_RESPONSE_AUTHOR_EXTENSION;
+import static org.opencds.cqf.fhir.cr.common.ExtensionBuilders.buildReferenceExt;
+import static org.opencds.cqf.fhir.cr.common.ItemValueTransformer.transformValueToItem;
 import static org.opencds.cqf.fhir.utility.SearchHelper.searchRepositoryByCanonical;
 import static org.opencds.cqf.fhir.utility.VersionUtilities.canonicalTypeForVersion;
 import static org.opencds.cqf.fhir.utility.VersionUtilities.stringTypeForVersion;
@@ -7,6 +10,7 @@ import static org.opencds.cqf.fhir.utility.VersionUtilities.stringTypeForVersion
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
@@ -14,6 +18,7 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.opencds.cqf.cql.engine.runtime.Tuple;
 import org.opencds.cqf.fhir.cr.common.ExpressionProcessor;
 import org.opencds.cqf.fhir.cr.common.IOperationRequest;
 import org.opencds.cqf.fhir.cr.questionnaire.Helpers;
@@ -21,23 +26,62 @@ import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.CqfExpression;
 import org.opencds.cqf.fhir.utility.adapter.IElementDefinitionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireItemComponentAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireResponseItemAnswerComponentAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireResponseItemComponentAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IStructureDefinitionAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ProcessItemWithContext extends ProcessItem {
-    private static final Logger logger = LoggerFactory.getLogger(ProcessItemWithContext.class);
+public class ItemProcessor {
+    private static final Logger logger = LoggerFactory.getLogger(ItemProcessor.class);
+    final ExpressionProcessor expressionProcessor;
 
-    public ProcessItemWithContext() {
-        super();
+    public ItemProcessor(ExpressionProcessor expressionProcessor) {
+        this.expressionProcessor = expressionProcessor;
     }
 
-    public ProcessItemWithContext(ExpressionProcessor expressionProcessor) {
-        super(expressionProcessor);
+    public List<IQuestionnaireResponseItemComponentAdapter> processItem(
+            PopulateRequest request, IQuestionnaireItemComponentAdapter item) {
+        var populationContextExt = item.getExtensionByUrl(Constants.SDC_QUESTIONNAIRE_ITEM_POPULATION_CONTEXT);
+        return populationContextExt != null
+                ? processContextItem(request, item)
+                : List.of(processSingleItem(request, item));
     }
 
-    List<IQuestionnaireResponseItemComponentAdapter> processContextItem(
+    protected IQuestionnaireResponseItemComponentAdapter processSingleItem(
+            PopulateRequest request, IQuestionnaireItemComponentAdapter item) {
+        final var responseItem = item.newResponseItem();
+        var childItems = item.getItem().stream()
+                .map(IQuestionnaireItemComponentAdapter.class::cast)
+                .toList();
+        if (item.isGroupItem()) {
+            final List<IQuestionnaireResponseItemComponentAdapter> groupChildItems = new ArrayList<>();
+            childItems.forEach(childItem -> {
+                groupChildItems.addAll(processItem(request, childItem));
+            });
+            responseItem.setItem(groupChildItems);
+        } else {
+            request.setContextVariable(responseItem.get());
+            var rawParams = request.getRawParameters();
+            rawParams.put("%qitem", item.get());
+            populateAnswer(request, responseItem, getInitialValue(request, item, responseItem, rawParams));
+            if (!childItems.isEmpty()) {
+                // children of non group items go under each answer
+                var childResponseItems = childItems.stream()
+                        .map(c -> processSingleItem(request, c))
+                        .toList();
+                var answers = responseItem.getAnswer();
+                if (answers.isEmpty()) {
+                    answers.add(responseItem.newAnswer(null));
+                    responseItem.setAnswer(answers);
+                }
+                answers.forEach(a -> a.setItem(childResponseItems));
+            }
+        }
+        return responseItem;
+    }
+
+    protected List<IQuestionnaireResponseItemComponentAdapter> processContextItem(
             PopulateRequest request, IQuestionnaireItemComponentAdapter item) {
         var itemLinkId = item.getLinkId();
         if (!item.isGroupItem()) {
@@ -63,23 +107,20 @@ public class ProcessItemWithContext extends ProcessItem {
                         request.getAdapterFactory().createKnowledgeArtifactAdapter((IDomainResource) profile);
         final CqfExpression contextExpression = expressionProcessor.getCqfExpression(
                 request, item.getExtension(), Constants.SDC_QUESTIONNAIRE_ITEM_POPULATION_CONTEXT);
-        List<IBaseResource> populationContext;
+        List<Object> populationContext;
         try {
             populationContext =
                     expressionProcessor
                             .getExpressionResultForItem(request, contextExpression, itemLinkId, null, null)
                             .stream()
                             .map(r -> {
-                                if (r instanceof IBaseResource baseResource) {
-                                    return baseResource;
-                                } else {
-                                    var message =
-                                            "Encountered error populating item (%s): Context value is expected to be a resource."
-                                                    .formatted(itemLinkId);
-                                    logger.error(message);
-                                    request.logException(message);
-                                    return null;
+                                if (r.fhirType().equals("Tuple")) {
+                                    return new Tuple()
+                                            .withElements(request.getAdapterFactory()
+                                                    .createTuple(r)
+                                                    .getProperties());
                                 }
+                                return r;
                             })
                             // filtering nulls here to prevent unnecessary duplicate responseItems
                             .filter(Objects::nonNull)
@@ -102,14 +143,60 @@ public class ProcessItemWithContext extends ProcessItem {
         return populationContext.stream()
                 .map(context ->
                         processPopulationContext(request, item, contextExpression.getName(), context, profileAdapter))
-                .collect(Collectors.toList());
+                .toList();
     }
 
-    IQuestionnaireResponseItemComponentAdapter processPopulationContext(
+    protected void populateAnswer(
+            PopulateRequest request, IQuestionnaireResponseItemComponentAdapter responseItem, List<IBase> answerValue) {
+        if (answerValue == null || answerValue.isEmpty()) {
+            return;
+        }
+        var answers = new ArrayList<IQuestionnaireResponseItemAnswerComponentAdapter>();
+        for (var value : answerValue) {
+            answers.add(responseItem.newAnswer(transformValueToItem(request.getFhirVersion(), value)));
+        }
+        responseItem.setAnswer(answers);
+    }
+
+    protected List<IBase> getInitialValue(
+            PopulateRequest request,
+            IQuestionnaireItemComponentAdapter item,
+            IQuestionnaireResponseItemComponentAdapter responseItem,
+            Map<String, Object> rawParameters) {
+        List<IBase> results;
+        var expression = expressionProcessor.getItemInitialExpression(request, item);
+        if (expression != null) {
+            var itemLinkId = item.getLinkId();
+            try {
+                results = expressionProcessor.getExpressionResultForItem(
+                        request, expression, itemLinkId, null, rawParameters);
+                if (results != null && !results.isEmpty()) {
+                    addAuthorExtension(request, responseItem);
+                }
+            } catch (Exception e) {
+                var message = "Encountered error evaluating initial expression for item %s: %s"
+                        .formatted(itemLinkId, e.getMessage());
+                logger.error(message);
+                request.logException(message);
+                results = new ArrayList<>();
+            }
+        } else {
+            results = item.getInitial().stream()
+                    .map(i -> request.resolvePath(i, "value", IBase.class))
+                    .toList();
+        }
+        return results;
+    }
+
+    protected void addAuthorExtension(PopulateRequest request, IQuestionnaireResponseItemComponentAdapter item) {
+        item.addExtension(buildReferenceExt(request.getFhirVersion(), QUESTIONNAIRE_RESPONSE_AUTHOR_EXTENSION, false));
+    }
+
+    protected IQuestionnaireResponseItemComponentAdapter processPopulationContext(
             PopulateRequest request,
             IQuestionnaireItemComponentAdapter groupItem,
             String contextName,
-            IBaseResource context,
+            Object context,
             IStructureDefinitionAdapter profile) {
         final var contextItem = groupItem.newResponseItem();
         groupItem.getItem().stream()
@@ -134,14 +221,14 @@ public class ProcessItemWithContext extends ProcessItem {
     }
 
     @SuppressWarnings("unchecked")
-    IQuestionnaireResponseItemComponentAdapter createResponseContextItem(
+    protected IQuestionnaireResponseItemComponentAdapter createResponseContextItem(
             PopulateRequest request,
             IQuestionnaireItemComponentAdapter item,
             String contextName,
-            IBaseResource context,
+            Object context,
             IStructureDefinitionAdapter profile) {
         if (item.hasInitial()) {
-            return processItem(request, item);
+            return processSingleItem(request, item);
         }
         final var responseItem = item.newResponseItem();
         request.setContextVariable(responseItem.get());
@@ -171,8 +258,8 @@ public class ProcessItemWithContext extends ProcessItem {
         return responseItem;
     }
 
-    public Object getPathValue(
-            IOperationRequest request, IBaseResource context, String definition, IStructureDefinitionAdapter profile) {
+    protected Object getPathValue(
+            IOperationRequest request, Object context, String definition, IStructureDefinitionAdapter profile) {
         Object pathValue = null;
         var elementId = definition.split("#")[1];
         var sliceName = Helpers.getSliceName(elementId);
@@ -200,7 +287,7 @@ public class ProcessItemWithContext extends ProcessItem {
         return pathValue;
     }
 
-    private Object getSliceValue(
+    protected Object getSliceValue(
             IOperationRequest request,
             IStructureDefinitionAdapter profile,
             String path,

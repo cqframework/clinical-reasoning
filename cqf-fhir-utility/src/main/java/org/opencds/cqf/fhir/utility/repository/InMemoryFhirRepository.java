@@ -17,6 +17,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.BundleUtil;
 import com.google.common.collect.Multimap;
+import jakarta.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -35,6 +36,7 @@ import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.matcher.ResourceMatcher;
 import org.opencds.cqf.fhir.utility.operation.OperationRegistry;
 
+@SuppressWarnings("UnstableApiUsage")
 public class InMemoryFhirRepository implements IRepository {
 
     private final Map<String, Map<IIdType, IBaseResource>> resourceMap;
@@ -149,6 +151,7 @@ public class InMemoryFhirRepository implements IRepository {
             // The _id param can be a list of ids
             var idResources = new ArrayList<IBaseResource>(idQueries.size());
             for (var idQuery : idQueries) {
+                assert idQuery != null;
                 for (var query : idQuery) {
                     if (query instanceof TokenParam idToken) {
                         // Need to construct the equivalent "UnqualifiedVersionless" id that the map is
@@ -341,6 +344,7 @@ public class InMemoryFhirRepository implements IRepository {
     }
 
     @Override
+    @Nonnull
     public FhirContext fhirContext() {
         return this.context;
     }

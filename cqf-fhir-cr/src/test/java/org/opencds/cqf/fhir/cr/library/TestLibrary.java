@@ -105,7 +105,7 @@ public class TestLibrary {
                         .getTerminologySettings()
                         .setValuesetExpansionMode(VALUESET_EXPANSION_MODE.PERFORM_NAIVE_EXPANSION);
             }
-            return new LibraryProcessor(repository, evaluationSettings, new TerminologyServerClientSettings());
+            return new LibraryProcessor(repository, evaluationSettings, TerminologyServerClientSettings.getDefault());
         }
 
         public When when() {

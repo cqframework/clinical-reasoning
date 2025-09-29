@@ -144,6 +144,6 @@ public class TestCrDstu3Config {
 
     @Bean
     public TerminologyServerClientSettings terminologyServerClientSettings() {
-        return new TerminologyServerClientSettings();
+        return TerminologyServerClientSettings.getDefault();
     }
 }

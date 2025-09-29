@@ -1,5 +1,9 @@
 package org.opencds.cqf.fhir.cr.hapi.repository;
 
+import static ca.uhn.fhir.model.valueset.BundleTypeEnum.SEARCHSET;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
+
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.repository.HapiFhirRepository;
 import ca.uhn.fhir.jpa.repository.SearchConverter;
@@ -13,6 +17,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
+import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import com.google.common.collect.Multimap;
 import java.util.HashSet;
 import java.util.List;
@@ -21,6 +26,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class is intended as a shim that extends HapiFhirRepository in order to selectively
@@ -31,6 +38,8 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
  * within our more flexible release cadence.
  */
 public class ClinicalIntelligenceHapiFhirRepository extends HapiFhirRepository {
+
+    private static final Logger ourLog = LoggerFactory.getLogger(ClinicalIntelligenceHapiFhirRepository.class);
 
     private final RequestDetails requestDetails;
     private final RestfulServer restfulServer;
@@ -82,11 +91,48 @@ public class ClinicalIntelligenceHapiFhirRepository extends HapiFhirRepository {
         var resourceDao = daoRegistry.getResourceDao(resourceType);
         var bundleProvider = resourceDao.search(converter.mySearchParameterMap, details);
 
-        if (bundleProvider == null) {
-            return null;
-        }
+        bundleProvider = sanitizeBundleProvider(bundleProvider);
 
         return createBundle(details, bundleProvider);
+    }
+
+    protected IBundleProvider sanitizeBundleProvider(IBundleProvider bundleProvider) {
+        return nonNull(bundleProvider) ? bundleProvider : new SimpleBundleProvider();
+    }
+
+    protected Set<Include> extractIncludesFromRequestParameters(Map<String, String[]> parameters) {
+        Set<Include> includes = new HashSet<>();
+
+        String[] reqIncludes = parameters.get(Constants.PARAM_INCLUDE);
+        if (reqIncludes != null) {
+            for (String nextInclude : reqIncludes) {
+                includes.add(new Include(nextInclude));
+            }
+        }
+
+        return includes;
+    }
+
+    protected BundleTypeEnum extractBundleTypeFromRequestParameters(Map<String, String[]> parameters) {
+        BundleTypeEnum bundleType;
+
+        String[] bundleTypeValues = parameters.get(Constants.PARAM_BUNDLETYPE);
+
+        if (isNull(bundleTypeValues)) {
+            return SEARCHSET;
+        }
+
+        bundleType = BundleTypeEnum.VALUESET_BINDER.fromCodeString(bundleTypeValues[0]);
+
+        if (isNull(bundleType)) {
+            ourLog.error(
+                    "Could not convert value {} to a BundleTypeEnum.  Defaulting to {}",
+                    bundleTypeValues[0],
+                    bundleType);
+            bundleType = SEARCHSET;
+        }
+
+        return bundleType;
     }
 
     private <B extends IBaseBundle> B createBundle(RequestDetails requestDetails, IBundleProvider bundleProvider) {
@@ -94,13 +140,7 @@ public class ClinicalIntelligenceHapiFhirRepository extends HapiFhirRepository {
         Integer count = RestfulServerUtils.extractCountParameter(requestDetails);
         String linkSelf = RestfulServerUtils.createLinkSelf(requestDetails.getFhirServerBase(), requestDetails);
 
-        Set<Include> includes = new HashSet<>();
-        String[] reqIncludes = requestDetails.getParameters().get(Constants.PARAM_INCLUDE);
-        if (reqIncludes != null) {
-            for (String nextInclude : reqIncludes) {
-                includes.add(new Include(nextInclude));
-            }
-        }
+        Set<Include> includes = extractIncludesFromRequestParameters(requestDetails.getParameters());
 
         Integer offset = RestfulServerUtils.tryToExtractNamedParameter(requestDetails, Constants.PARAM_PAGINGOFFSET);
         if (offset == null || offset < 0) {
@@ -112,13 +152,7 @@ public class ClinicalIntelligenceHapiFhirRepository extends HapiFhirRepository {
             start = Math.max(0, Math.min(offset, size));
         }
 
-        BundleTypeEnum bundleType;
-        String[] bundleTypeValues = requestDetails.getParameters().get(Constants.PARAM_BUNDLETYPE);
-        if (bundleTypeValues != null) {
-            bundleType = BundleTypeEnum.VALUESET_BINDER.fromCodeString(bundleTypeValues[0]);
-        } else {
-            bundleType = BundleTypeEnum.SEARCHSET;
-        }
+        BundleTypeEnum bundleType = extractBundleTypeFromRequestParameters(requestDetails.getParameters());
 
         return unsafeCast(ClinicalIntelligenceBundleProviderUtil.createBundleFromBundleProvider(
                 restfulServer, requestDetails, count, linkSelf, includes, bundleProvider, start, bundleType, null));

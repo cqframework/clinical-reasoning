@@ -51,8 +51,8 @@ public class ImplementationGuideProcessor {
             IDataRequirementsProcessor dataRequirementsProcessor,
             IEvaluateProcessor evaluateProcessor) {
         this.repository = requireNonNull(repository, "repository can not be null");
-        this.terminologyServerClientSettings = requireNonNull(terminologyServerClientSettings,
-                "terminologyServerClientSettings can not be null");
+        this.terminologyServerClientSettings =
+                requireNonNull(terminologyServerClientSettings, "terminologyServerClientSettings can not be null");
         fhirVersion = this.repository.fhirContext().getVersion().getVersion();
         modelResolver = FhirModelResolverCache.resolverForVersion(fhirVersion);
         this.packageProcessor = packageProcessor;

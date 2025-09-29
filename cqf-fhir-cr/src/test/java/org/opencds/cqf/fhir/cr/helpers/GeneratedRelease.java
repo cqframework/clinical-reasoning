@@ -1,13 +1,13 @@
 package org.opencds.cqf.fhir.cr.helpers;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.opencds.cqf.fhir.utility.BundleHelper.getEntry;
+import static org.opencds.cqf.fhir.utility.BundleHelper.getEntryResourceFirstRep;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.opencds.cqf.fhir.utility.BundleHelper.getEntry;
-import static org.opencds.cqf.fhir.utility.BundleHelper.getEntryResourceFirstRep;
 
 public class GeneratedRelease {
     final IBaseBundle generatedBundle;

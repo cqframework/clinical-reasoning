@@ -12,7 +12,7 @@ class TerminologyServerClientSettingsTest {
         var interval = 500;
         var timeout = 10;
         var socketTimeout = 45;
-        var settings = new TerminologyServerClientSettings()
+        var settings = TerminologyServerClientSettings.getDefault()
                 .setMaxRetryCount(retryCount)
                 .setRetryIntervalMillis(interval)
                 .setTimeoutSeconds(timeout)

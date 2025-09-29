@@ -57,7 +57,7 @@ class PlanDefinitionProcessorTests {
         var processor = new PlanDefinitionProcessor(
                 repository,
                 EvaluationSettings.getDefault(),
-                new TerminologyServerClientSettings(),
+                TerminologyServerClientSettings.getDefault(),
                 new ApplyProcessor(repository, modelResolver, activityProcessor),
                 packageProcessor,
                 dataRequirementsProcessor,

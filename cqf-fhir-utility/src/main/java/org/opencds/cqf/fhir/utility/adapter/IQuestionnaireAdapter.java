@@ -1,6 +1,8 @@
 package org.opencds.cqf.fhir.utility.adapter;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 
 /**
@@ -19,4 +21,21 @@ public interface IQuestionnaireAdapter extends IKnowledgeArtifactAdapter {
     void addItem(IQuestionnaireItemComponentAdapter item);
 
     void addItems(List<IQuestionnaireItemComponentAdapter> items);
+
+    default Set<String> getAllItemDefinitions() {
+        return getItemDefs(getItem());
+    }
+
+    default Set<String> getItemDefs(List<? extends IItemComponentAdapter> items) {
+        var defs = new HashSet<String>();
+        items.forEach(item -> {
+            if (item.hasDefinition()) {
+                defs.add(item.getDefinition());
+            }
+            if (item.hasItem()) {
+                defs.addAll(getItemDefs(item.getItem()));
+            }
+        });
+        return defs;
+    }
 }

@@ -75,7 +75,7 @@ public class TestValueSet {
             return new ValueSetProcessor(
                     repository,
                     evaluationSettings,
-                    new TerminologyServerClientSettings(),
+                    TerminologyServerClientSettings.getDefault(),
                     packageProcessor,
                     dataRequirementsProcessor);
         }

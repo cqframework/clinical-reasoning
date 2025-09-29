@@ -41,7 +41,10 @@ public class ApplyProcessor implements IApplyProcessor {
             Constants.CQFM_SOFTWARE_SYSTEM,
             Constants.CPG_QUESTIONNAIRE_GENERATE,
             Constants.CQFM_LOGIC_DEFINITION,
-            Constants.CQFM_EFFECTIVE_DATA_REQUIREMENTS);
+            Constants.CQFM_EFFECTIVE_DATA_REQUIREMENTS,
+            Constants.CQF_DIRECT_REFERENCE_EXTENSION,
+            Constants.CQF_LOGIC_DEFINITION,
+            Constants.SDC_QUESTIONNAIRE_ADAPTIVE);
 
     protected final IRepository repository;
     protected final ModelResolver modelResolver;

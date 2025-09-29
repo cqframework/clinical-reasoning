@@ -30,7 +30,6 @@ import org.opencds.cqf.fhir.cr.graphdefinition.apply.ApplyRequest;
 import org.opencds.cqf.fhir.cr.graphdefinition.apply.ApplyRequestBuilder;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
-import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepositoryForTests;
 
 @SuppressWarnings("UnstableApiUsage")
@@ -81,7 +80,7 @@ public class TestGraphDefinition {
         }
 
         public GraphDefinitionProcessor buildProcessor(IRepository repository) {
-            if (repository instanceof IgRepository igRepository) {
+            if (repository instanceof IgRepositoryForTests igRepository) {
                 igRepository.setOperationProvider(TestOperationProvider.newProvider(repository.fhirContext()));
             }
             if (evaluationSettings == null) {
@@ -161,7 +160,7 @@ public class TestGraphDefinition {
             return this;
         }
 
-        public When dataRepository(IgRepository theRepository) {
+        public When dataRepository(IgRepositoryForTests theRepository) {
             applyRequestBuilder.withDataRepository(theRepository);
             return this;
         }

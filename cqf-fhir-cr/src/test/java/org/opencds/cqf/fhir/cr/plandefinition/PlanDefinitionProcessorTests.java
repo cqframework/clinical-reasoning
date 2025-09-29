@@ -28,7 +28,7 @@ import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.client.TerminologyServerClientSettings;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
-import org.opencds.cqf.fhir.utility.repository.ig.IgRepositoryForTests;
+import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 @SuppressWarnings("squid:S2699")
 class PlanDefinitionProcessorTests {
@@ -38,16 +38,16 @@ class PlanDefinitionProcessorTests {
 
     @Test
     void defaultSettings() {
-        var repository = new IgRepositoryForTests(
-                fhirContextR4, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r4"));
+        var repository =
+                new IgRepository(fhirContextR4, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r4"));
         var processor = new PlanDefinitionProcessor(repository);
         assertNotNull(processor.evaluationSettings());
     }
 
     @Test
     void processor() {
-        var repository = new IgRepositoryForTests(
-                fhirContextR5, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r5"));
+        var repository =
+                new IgRepository(fhirContextR5, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r5"));
         var modelResolver = FhirModelResolverCache.resolverForVersion(FhirVersionEnum.R5);
         var activityProcessor = new org.opencds.cqf.fhir.cr.activitydefinition.apply.ApplyProcessor(
                 repository, IRequestResolverFactory.getDefault(FhirVersionEnum.R5));
@@ -176,7 +176,7 @@ class PlanDefinitionProcessorTests {
         var planDefinitionId = "ANCDT17";
         var patientId = "Patient/5946f880-b197-400b-9caa-a3c661d23041";
         var encounterId = "Encounter/helloworld-patient-1-encounter-1";
-        var repository = new IgRepositoryForTests(
+        var repository = new IgRepository(
                 fhirContextR4, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r4/anc-dak"));
         var parameters = org.opencds.cqf.fhir.utility.r4.Parameters.parameters(
                 org.opencds.cqf.fhir.utility.r4.Parameters.part("encounter", "helloworld-patient-1-encounter-1"));

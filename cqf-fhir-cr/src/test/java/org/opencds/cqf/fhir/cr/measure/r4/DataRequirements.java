@@ -13,7 +13,7 @@ import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_M
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
-import org.opencds.cqf.fhir.utility.repository.ig.IgRepositoryForTests;
+import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 public class DataRequirements {
     public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/measure/r4";
@@ -90,7 +90,7 @@ public class DataRequirements {
         }
 
         public Given repositoryFor(String repositoryPath) {
-            this.repository = new IgRepositoryForTests(
+            this.repository = new IgRepository(
                     FhirContext.forR4Cached(),
                     Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
             return this;

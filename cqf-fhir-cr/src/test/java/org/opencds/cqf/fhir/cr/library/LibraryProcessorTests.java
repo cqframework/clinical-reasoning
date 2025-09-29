@@ -25,7 +25,7 @@ import org.opencds.cqf.fhir.cr.library.evaluate.EvaluateProcessor;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.client.TerminologyServerClientSettings;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
-import org.opencds.cqf.fhir.utility.repository.ig.IgRepositoryForTests;
+import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings("squid:S2699")
@@ -39,8 +39,8 @@ class LibraryProcessorTests {
 
     @Test
     void defaultSettings() {
-        var repository = new IgRepositoryForTests(
-                fhirContextR4, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r4"));
+        var repository =
+                new IgRepository(fhirContextR4, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r4"));
         var processor = new LibraryProcessor(repository);
         assertNotNull(processor.evaluationSettings());
     }
@@ -56,8 +56,8 @@ class LibraryProcessorTests {
 
     @Test
     void processor() {
-        var repository = new IgRepositoryForTests(
-                fhirContextR5, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r5"));
+        var repository =
+                new IgRepository(fhirContextR5, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r5"));
         var packageProcessor = new PackageProcessor(repository);
         var releaseProcessor = new ReleaseProcessor(repository);
         var dataRequirementsProcessor = new DataRequirementsProcessor(repository);

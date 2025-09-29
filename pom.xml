@@ -338,13 +338,6 @@
                 <version>3.15.6</version>
                 <scope>test</scope>
             </dependency>
-
-            <!-- Deep cloning of resources -->
-            <dependency>
-                <groupId>io.github.kostaskougios</groupId>
-                <artifactId>cloning</artifactId>
-                <version>1.12.0</version>
-            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -623,6 +616,55 @@
                             </goals>
                         </execution>
                     </executions>
+                </plugin>
+                <plugin>
+                    <groupId>com.societegenerale.commons</groupId>
+                    <artifactId>arch-unit-maven-plugin</artifactId>
+                    <version>4.0.2</version>
+                    <configuration>
+                        <properties>
+                            <archunit.propertyName>propertyValue</archunit.propertyName>
+                        </properties>
+                        <rules>
+                            <preConfiguredRules>
+                                <rule>com.societegenerale.commons.plugin.rules.NoStandardStreamRuleTest</rule>
+                                <rule>com.societegenerale.commons.plugin.rules.NoJunitAssertRuleTest</rule>
+                                <rule>com.societegenerale.commons.plugin.rules.NoJodaTimeRuleTest</rule>
+                                <rule>com.societegenerale.commons.plugin.rules.NoJavaUtilDateRuleTest</rule>
+                                <rule>com.societegenerale.commons.plugin.rules.NoPowerMockRuleTest</rule>
+                                <rule>com.societegenerale.commons.plugin.rules.NoPrefixForInterfacesRuleTest</rule>
+                                <rule>com.societegenerale.commons.plugin.rules.NoPublicFieldRuleTest</rule>
+
+                                <!-- you may want to use one of the below rules, but not both at same time -->
+                                <rule>com.societegenerale.commons.plugin.rules.NoTestIgnoreRuleTest</rule>
+                                <rule>com.societegenerale.commons.plugin.rules.NoTestIgnoreWithoutCommentRuleTest</rule>
+
+                                <rule>com.societegenerale.commons.plugin.rules.NoInjectedFieldTest</rule>
+                                <rule>com.societegenerale.commons.plugin.rules.NoAutowiredFieldTest</rule>
+                            </preConfiguredRules>
+                        </rules>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <phase>test</phase>
+                            <goals>
+                                <goal>arch-test</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+<!--                    <dependencies>-->
+<!--                        <dependency>-->
+<!--                            &lt;!&ndash;-->
+<!--                                 A version of the core jar is included by default, but don't hesitate-->
+<!--                                 to upgrade to a later one if you need :-->
+<!--                                 we will be able to add rules and behavior in arch-unit-build-plugin-core-->
+<!--                                 without releasing a new version of arch-unit-maven-plugin-->
+<!--                             &ndash;&gt;-->
+<!--                            <groupId>com.societegenerale.commons</groupId>-->
+<!--                            <artifactId>arch-unit-build-plugin-core</artifactId>-->
+<!--                            <version>4.0.1</version>-->
+<!--                        </dependency>-->
+<!--                    </dependencies>-->
                 </plugin>
             </plugins>
         </pluginManagement>

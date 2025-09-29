@@ -97,9 +97,5 @@
           <artifactId>slf4j-test</artifactId>
           <scope>test</scope>
       </dependency>
-      <dependency>
-          <groupId>io.github.kostaskougios</groupId>
-          <artifactId>cloning</artifactId>
-      </dependency>
   </dependencies>
 </project>

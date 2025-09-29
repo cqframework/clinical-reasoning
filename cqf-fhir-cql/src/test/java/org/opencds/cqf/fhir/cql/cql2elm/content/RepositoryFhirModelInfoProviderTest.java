@@ -13,7 +13,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cql.cql2elm.util.LibraryVersionSelector;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
-import org.opencds.cqf.fhir.utility.repository.ig.IgRepositoryForTests;
+import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 @SuppressWarnings("UnstableApiUsage")
 class RepositoryFhirModelInfoProviderTest {
@@ -28,7 +28,7 @@ class RepositoryFhirModelInfoProviderTest {
     @BeforeEach
     void beforeEach() {
         var path = Path.of(getResourcePath(RepositoryFhirModelInfoProviderTest.class) + "/org/opencds/cqf/fhir/cql");
-        repository = new IgRepositoryForTests(fhirContextR4, path);
+        repository = new IgRepository(fhirContextR4, path);
         adapterFactory = IAdapterFactory.forFhirContext(repository.fhirContext());
         fixture = new RepositoryFhirModelInfoProvider(
                 repository, adapterFactory, new LibraryVersionSelector(adapterFactory));

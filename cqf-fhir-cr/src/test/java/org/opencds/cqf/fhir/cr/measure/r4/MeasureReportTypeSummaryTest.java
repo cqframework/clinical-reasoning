@@ -12,7 +12,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.TestDataGenerator;
-import org.opencds.cqf.fhir.utility.repository.ig.IgRepositoryForTests;
+import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 /**
  * This test is to verify and confirm that created Summary report has required format and output
@@ -26,7 +26,7 @@ import org.opencds.cqf.fhir.utility.repository.ig.IgRepositoryForTests;
 @SuppressWarnings("squid:S2699")
 class MeasureReportTypeSummaryTest {
     private static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/measure/r4";
-    private static final IRepository repository = new IgRepositoryForTests(
+    private static final IRepository repository = new IgRepository(
             FhirContext.forR4Cached(),
             Path.of(getResourcePath(MeasureReportTypeSummaryTest.class) + "/" + CLASS_PATH + "/" + "MeasureTest"));
     private final Given given = Measure.given().repository(repository);

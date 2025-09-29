@@ -51,7 +51,7 @@ import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
-import org.opencds.cqf.fhir.utility.repository.ig.IgRepositoryForTests;
+import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 @SuppressWarnings({"squid:S5960"})
@@ -108,7 +108,7 @@ public class TestPlanDefinition {
         }
 
         public Given repositoryFor(FhirContext fhirContext, String repositoryPath) {
-            this.repository = new IgRepositoryForTests(
+            this.repository = new IgRepository(
                     fhirContext,
                     Path.of("%s/%s/%s".formatted(getResourcePath(this.getClass()), CLASS_PATH, repositoryPath)));
             return this;
@@ -120,7 +120,7 @@ public class TestPlanDefinition {
         }
 
         public PlanDefinitionProcessor buildProcessor(IRepository repository) {
-            if (repository instanceof IgRepositoryForTests igRepository) {
+            if (repository instanceof IgRepository igRepository) {
                 igRepository.setOperationProvider(TestOperationProvider.newProvider(repository.fhirContext()));
             }
             if (evaluationSettings == null) {

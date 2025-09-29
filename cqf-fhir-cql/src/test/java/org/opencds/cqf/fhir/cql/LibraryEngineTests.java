@@ -33,7 +33,7 @@ import org.hl7.fhir.r4.model.Task;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.utility.CqfExpression;
-import org.opencds.cqf.fhir.utility.repository.ig.IgRepositoryForTests;
+import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 class LibraryEngineTests {
 
@@ -43,7 +43,7 @@ class LibraryEngineTests {
     @BeforeEach
     public void beforeEach() {
         var path = Path.of(getResourcePath(LibraryEngineTests.class) + "/org/opencds/cqf/fhir/cql");
-        repository = new IgRepositoryForTests(FhirContext.forR4Cached(), path);
+        repository = new IgRepository(FhirContext.forR4Cached(), path);
         libraryEngine = new LibraryEngine(repository, EvaluationSettings.getDefault());
     }
 
@@ -156,7 +156,7 @@ class LibraryEngineTests {
         libraryEngine = new LibraryEngine(repository, evaluationSettings);
         repository.create(
                 new Patient().addName(new HumanName().addGiven("me")).setId("Patient/Patient1"),
-                Map.of(IgRepositoryForTests.FHIR_COMPARTMENT_HEADER, "Patient/Patient1"));
+                Map.of(IgRepository.FHIR_COMPARTMENT_HEADER, "Patient/Patient1"));
         var patientId = "Patient/Patient1";
         var expression = new CqfExpression(
                 "text/cql", "MyLibrary.MyNameReturner", Map.of("MyLibrary", "http://fhir.test/Library/MyLibrary"));

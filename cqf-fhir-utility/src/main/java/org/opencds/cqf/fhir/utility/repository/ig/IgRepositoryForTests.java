@@ -13,8 +13,14 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.fhir.utility.repository.operations.IRepositoryOperationProvider;
 
-// LUKETODO:  javadoc
-// LUKETODO:  explain why
+/**
+ * This class exists for testing only, and is meant strictly to mimic the behaviour of an actual
+ * production repository, backed by a database.   More specifically, it ensures that each query
+ * for a resource will return a new instance of that resource, as opposed to returning the same
+ * object in memory with the same reference, as the superclass does.  This is mean to help us
+ * detect bugs that would occur in a real-world scenario, where a resource is fetched with a new
+ * instance each time.
+ */
 public class IgRepositoryForTests extends IgRepository implements IRepository {
 
     private static final Cloner cloner = new Cloner();

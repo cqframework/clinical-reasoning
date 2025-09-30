@@ -1,7 +1,8 @@
-package org.opencds.cqf.fhir.cr.hapi.config;
+package org.opencds.cqf.fhir.cr.hapi.repository;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -10,26 +11,36 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.repository.HapiFhirRepository;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
+import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import com.google.common.collect.ImmutableMultimap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Claim;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.opencds.cqf.fhir.cr.hapi.repository.ClinicalIntelligenceHapiFhirRepository;
 
 // Admittedly, these aren't fantastic tests, but they prove we don't lose the _count parameter
 class ClinicalIntelligenceHapiFhirRepositoryTest {
@@ -129,6 +140,104 @@ class ClinicalIntelligenceHapiFhirRepositoryTest {
     @Test
     void testSameResourcesAsHighDefaultNullCountParam() {
         triggerTestCase(50, 100, null, 100, 50);
+    }
+
+    @ParameterizedTest
+    @MethodSource("bundleProviders")
+    void testSanitizeBundleProvider(IBundleProvider bundleProvider) {
+        var testSubject = getTestSubject(DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE, null, 0);
+
+        IBundleProvider result = testSubject.sanitizeBundleProvider(bundleProvider);
+        assertNotNull(result);
+    }
+
+    @Test
+    void testExtractIncludesFromRequestParameters_NoIncludes() {
+        var testSubject = getTestSubject(DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE, null, 0);
+
+        Map<String, String[]> parameters = createRequestParametersWithIncludes(null);
+        Set<Include> includes = testSubject.extractIncludesFromRequestParameters(parameters);
+
+        assertNotNull(includes);
+        assertEquals(0, includes.size());
+    }
+
+    @Test
+    void testExtractIncludesFromRequestParameters_SingleInclude() {
+        var testSubject = getTestSubject(DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE, null, 0);
+
+        Map<String, String[]> parameters = createRequestParametersWithIncludes(new String[] {"Patient:name"});
+        Set<Include> includes = testSubject.extractIncludesFromRequestParameters(parameters);
+
+        assertNotNull(includes);
+        assertEquals(1, includes.size());
+        assertEquals("Patient:name", includes.iterator().next().getValue());
+    }
+
+    @Test
+    void testExtractIncludesFromRequestParameters_MultipleIncludes() {
+        var testSubject = getTestSubject(DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE, null, 0);
+
+        Map<String, String[]> parameters =
+                createRequestParametersWithIncludes(new String[] {"Patient:name", "Observation:subject"});
+        Set<Include> includes = testSubject.extractIncludesFromRequestParameters(parameters);
+
+        assertNotNull(includes);
+        assertEquals(2, includes.size());
+        assertTrue(includes.stream().anyMatch(include -> include.getValue().equals("Patient:name")));
+        Assertions.assertTrue(
+                includes.stream().anyMatch(include -> include.getValue().equals("Observation:subject")));
+    }
+
+    @Test
+    void testExtractBundleTypeFromRequestParameters_Default() {
+        var testSubject = getTestSubject(DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE, null, 0);
+
+        Map<String, String[]> parameters = createRequestParametersWithBundleType(null);
+        BundleTypeEnum bundleType = testSubject.extractBundleTypeFromRequestParameters(parameters);
+
+        assertNotNull(bundleType);
+        assertEquals(BundleTypeEnum.SEARCHSET, bundleType, "Default bundle type should be SEARCHSET");
+    }
+
+    @ParameterizedTest
+    @EnumSource(BundleTypeEnum.class)
+    void testExtractBundleTypeFromRequestParameters_withExplicitValue(BundleTypeEnum bundleType) {
+        var testSubject = getTestSubject(DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE, null, 0);
+
+        String typeStr = bundleType.getCode().toLowerCase();
+        Map<String, String[]> parameters = createRequestParametersWithBundleType(typeStr);
+        BundleTypeEnum extractedBundleType = testSubject.extractBundleTypeFromRequestParameters(parameters);
+
+        assertNotNull(extractedBundleType);
+        assertEquals(bundleType, extractedBundleType, "Bundle type should match explicitly provided value");
+    }
+
+    @Test
+    void testExtractBundleTypeFromRequestParameters_InvalidValue() {
+        var testSubject = getTestSubject(DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE, null, 0);
+
+        Map<String, String[]> parameters = createRequestParametersWithBundleType("invalid");
+        BundleTypeEnum bundleType = testSubject.extractBundleTypeFromRequestParameters(parameters);
+
+        assertNotNull(bundleType);
+        assertEquals(BundleTypeEnum.SEARCHSET, bundleType, "Default bundle type should be SEARCHSET");
+    }
+
+    private Map<String, String[]> createRequestParametersWithIncludes(String[] includes) {
+        HashMap<String, String[]> retVal = new HashMap<>();
+        retVal.put(Constants.PARAM_INCLUDE, includes);
+        return retVal;
+    }
+
+    private Map<String, String[]> createRequestParametersWithBundleType(String bundleType) {
+        HashMap<String, String[]> retVal = new HashMap<>();
+        retVal.put(Constants.PARAM_BUNDLETYPE, new String[] {bundleType});
+        return retVal;
+    }
+
+    private static Stream<Arguments> bundleProviders() {
+        return Stream.of(Arguments.of((IBundleProvider) null), Arguments.of(new SimpleBundleProvider()));
     }
 
     private void triggerTestCase(

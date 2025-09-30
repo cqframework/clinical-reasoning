@@ -65,7 +65,6 @@ import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
 import org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.r4.LibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.r4.ValueSetAdapter;
-import org.opencds.cqf.fhir.utility.client.ExpandRunner.TerminologyServerExpansionException;
 import org.opencds.cqf.fhir.utility.client.TerminologyServerClient;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 

@@ -453,12 +453,13 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
                     tryFindLatestDependency(dependency.getReference(), resourceType, latestFromTxServer, endpoint);
 
             // Only add the expansion parameters entry for versionless references
-            maybeAdapter.ifPresent(iKnowledgeArtifactAdapter -> ((ILibraryAdapter) artifactBeingReleasedAdapter)
-                    .ensureExpansionParametersEntry(
-                            iKnowledgeArtifactAdapter,
-                            terminologyServerClient
-                                    .getTerminologyServerClientSettings()
-                                    .getCrmiVersion()));
+            if (maybeAdapter.isPresent() && artifactBeingReleasedAdapter instanceof ILibraryAdapter libraryAdapter) {
+                libraryAdapter.ensureExpansionParametersEntry(
+                        maybeAdapter.get(),
+                        terminologyServerClient
+                                .getTerminologyServerClientSettings()
+                                .getCrmiVersion());
+            }
         }
 
         return maybeAdapter;

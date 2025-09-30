@@ -16,6 +16,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.hapi.r4.library.LibraryDataRequirementsProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.library.LibraryEvaluateProvider;
@@ -88,6 +89,7 @@ class LibraryOperationsProviderIT extends BaseCrR4TestServer {
     }
 
     @Test
+    @Disabled("This is only useful running locally with a valid apiKey")
     void testManifestRelease() {
         loadBundle("org/opencds/cqf/fhir/cr/hapi/r4/Bundle-CMS165.json");
         loadBundle("org/opencds/cqf/fhir/cr/hapi/r4/uscore-package-bundle.json");

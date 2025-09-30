@@ -159,9 +159,9 @@ class PackageVisitorTests {
     void packageOperation_expansion_should_fail() {
         String username = "someUsername";
         String apiKey = "some-api-key";
-        String expectedError = " Server could not process expansion requests";
+        String expectedError = "Cannot expand ValueSet without a terminology server: ValueSet/dxtc";
         Bundle loadedBundle = (Bundle) jsonParser.parseResource(
-                PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
+                PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active-intensional-vs.json"));
         repo.transaction(loadedBundle);
         PackageVisitor packageVisitor = new PackageVisitor(repo);
         Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
@@ -173,7 +173,7 @@ class PackageVisitorTests {
         terminologyEndpoint.setAddress("test.com");
         Parameters params = parameters(part("terminologyEndpoint", terminologyEndpoint));
 
-        var exception = assertThrows(TerminologyServerExpansionException.class, () -> {
+        var exception = assertThrows(UnprocessableEntityException.class, () -> {
             libraryAdapter.accept(packageVisitor, params);
         });
 

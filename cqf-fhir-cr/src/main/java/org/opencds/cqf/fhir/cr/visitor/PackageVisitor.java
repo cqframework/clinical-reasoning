@@ -261,11 +261,7 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
                     .map(IParametersParameterComponentAdapter::get)
                     .toList());
             // TODO try/catch (UnprocessableEntityException) -> operation outcome
-            try {
-                expandHelper.expandValueSet(valueSet, params, terminologyEndpoint, valueSets, expandedList, new Date());
-            } catch (Exception e) {
-
-            }
+            expandHelper.expandValueSet(valueSet, params, terminologyEndpoint, valueSets, expandedList, new Date());
             var elapsed = String.valueOf(((new Date()).getTime() - expansionStartTime) / 1000);
             myLogger.info("Expanded {} in {}s", url, elapsed);
             if (expansionCache.isPresent()) {

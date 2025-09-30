@@ -26,6 +26,7 @@ import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IParametersParameterComponentAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
+import org.opencds.cqf.fhir.utility.client.ExpandRunner.TerminologyServerExpansionException;
 import org.opencds.cqf.fhir.utility.client.TerminologyServerClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,7 +91,7 @@ public class ExpandHelper {
             try {
                 terminologyServerExpand(valueSet, expansionParameters, terminologyEndpoint.get());
                 return;
-            } catch (Exception e) {
+            } catch (TerminologyServerExpansionException e) {
                 log.warn(
                         "Failed to expand value set {}. Reason: {}. Will attempt to expand locally.",
                         valueSet.getUrl(),

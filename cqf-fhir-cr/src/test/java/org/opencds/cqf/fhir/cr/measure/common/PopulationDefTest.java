@@ -41,10 +41,8 @@ class PopulationDefTest {
         final PopulationDef popDef1 = new PopulationDef("one", null, null, null);
         final PopulationDef popDef2 = new PopulationDef("two", null, null, null);
 
-        final Encounter enc1a = (Encounter)new Encounter().setId(
-            new IdType(ResourceType.Encounter.name(), "enc1"));
-        final Encounter enc1b = (Encounter)new Encounter().setId(
-            new IdType(ResourceType.Encounter.name(), "enc1"));
+        final Encounter enc1a = (Encounter) new Encounter().setId(new IdType(ResourceType.Encounter.name(), "enc1"));
+        final Encounter enc1b = (Encounter) new Encounter().setId(new IdType(ResourceType.Encounter.name(), "enc1"));
 
         popDef1.addResource(enc1a);
         popDef2.addResource(enc1b);

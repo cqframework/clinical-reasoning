@@ -988,7 +988,7 @@ public class Measure {
         }
     }
 
-    static class SelectedStratifier
+    public static class SelectedStratifier
             extends Selected<MeasureReport.MeasureReportGroupStratifierComponent, SelectedGroup> {
 
         public SelectedStratifier(MeasureReportGroupStratifierComponent value, SelectedGroup parent) {
@@ -999,7 +999,7 @@ public class Measure {
             return stratum(MeasureReport.MeasureReportGroupStratifierComponent::getStratumFirstRep);
         }
 
-        public SelectedStratifier stratumCount(int stratumCount) {
+        public SelectedStratifier hasStratumCount(int stratumCount) {
             assertEquals(stratumCount, value().getStratum().size());
             return this;
         }
@@ -1041,9 +1041,19 @@ public class Measure {
             var s = stratumSelector.select(value());
             return new SelectedStratum(s, this);
         }
+
+        public SelectedStratifier hasCode(String stratifierCode) {
+            var hasCode = value().getCode().stream()
+                    .filter(CodeableConcept::hasCoding)
+                    .anyMatch(coding -> stratifierCode.equals(coding.getText()));
+
+            assertTrue(hasCode, "Stratifier does not have expected code: " + stratifierCode);
+
+            return this;
+        }
     }
 
-    static class SelectedStratum extends Selected<MeasureReport.StratifierGroupComponent, SelectedStratifier> {
+    public static class SelectedStratum extends Selected<MeasureReport.StratifierGroupComponent, SelectedStratifier> {
 
         public SelectedStratum(MeasureReport.StratifierGroupComponent value, SelectedStratifier parent) {
             super(value, parent);
@@ -1080,7 +1090,7 @@ public class Measure {
         }
     }
 
-    static class SelectedStratumPopulation
+    public static class SelectedStratumPopulation
             extends Selected<MeasureReport.StratifierGroupPopulationComponent, SelectedStratum> {
 
         public SelectedStratumPopulation(

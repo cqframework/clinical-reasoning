@@ -37,6 +37,7 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
      * For any given stratifier expression, we don't know if it was evaluated in the patient context or it's a valid
      * expression, so we'll apply this heuristic for now
      */
+    // LUKETODO:  should we add encounters here?
     private static final Set<Class<?>> ALLOWED_STRATIFIER_BOOLEAN_BASIS_TYPES = new HashSet<>(Arrays.asList(
             CodeableConcept.class,
             Quantity.class,
@@ -126,6 +127,21 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
 
         var resultClasses = extractClassesFromSingleOrListResult(expressionResult.value());
         var groupPopulationBasisCode = groupDef.getPopulationBasis().code();
+
+        // types of stratifiers
+        // 1. path-based stratifier (FHIR path expression) >>> use the resource type of the population basis
+        // 2. value-based stratifier >>> based on the values returned from that expression  ex age of the patient at the
+        // end of the measurement period   break down into stratums per value
+        // 3. criteria stratifier NOT implement >> mix of the previous 2
+
+        // LUKETODO:  match with the other population basis types
+        // because population basis's match, this is a criteria stratifier, otherwise, it's a value stratifier
+
+        // LUKETODO: think about how to refine this:
+        // LUKETODO: comment about component stratifiers
+        if (!resultClasses.isEmpty() && resultClasses.get(0).getSimpleName().equals(groupPopulationBasisCode)) {
+            return;
+        }
 
         var resultMatchingClasses = resultClasses.stream()
                 .filter(resultClass ->

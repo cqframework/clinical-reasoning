@@ -1,0 +1,8 @@
+{
+  "resourceType": "Encounter",
+  "id": "enc_finished_1",
+  "status": "finished",
+  "subject": {
+    "reference": "Patient/patient1"
+  }
+}

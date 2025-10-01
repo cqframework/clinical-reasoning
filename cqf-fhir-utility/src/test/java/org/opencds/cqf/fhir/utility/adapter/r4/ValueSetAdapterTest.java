@@ -194,6 +194,17 @@ class ValueSetAdapterTest {
     }
 
     @Test
+    void testGetExpansionTotal() {
+        var total = 1536;
+        var expansion = new ValueSet.ValueSetExpansionComponent();
+        expansion.setTotal(total);
+        var valueSet = new ValueSet().setExpansion(expansion);
+        var adapter = (IValueSetAdapter) adapterFactory.createKnowledgeArtifactAdapter(valueSet);
+
+        assertEquals(total, adapter.getExpansionTotal());
+    }
+
+    @Test
     void testAppendExpansionContains() {
         var contains = new ValueSet.ValueSetExpansionContainsComponent().setCode("test");
         var expansion = new ValueSet.ValueSetExpansionComponent().addContains(contains);

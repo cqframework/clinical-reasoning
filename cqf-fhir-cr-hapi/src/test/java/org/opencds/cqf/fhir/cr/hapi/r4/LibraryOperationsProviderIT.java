@@ -98,7 +98,7 @@ class LibraryOperationsProviderIT extends BaseCrR4TestServer {
 
         var terminologyEndpoint = new Endpoint();
         terminologyEndpoint.addExtension("vsacUsername", new StringType("apikey"));
-        terminologyEndpoint.addExtension("apiKey", new StringType("FILL THIS OUT WITH YOUR API KEY"));
+        terminologyEndpoint.addExtension("apiKey", new StringType("8aade097-3e8a-4047-877c-4d77c915593e"));
         terminologyEndpoint.setAddress("https://cts.nlm.nih.gov/fhir");
         terminologyEndpoint.setConnectionType(
                 new Coding("http://hl7.org/fhir/ValueSet/endpoint-connection-type", "hl7-fhir-rest", null));

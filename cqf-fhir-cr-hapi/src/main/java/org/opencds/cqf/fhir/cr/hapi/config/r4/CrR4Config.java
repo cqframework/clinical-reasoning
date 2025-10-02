@@ -12,6 +12,7 @@ import org.opencds.cqf.fhir.cr.crmi.R4ApproveService;
 import org.opencds.cqf.fhir.cr.crmi.R4DraftService;
 import org.opencds.cqf.fhir.cr.crmi.R4PackageService;
 import org.opencds.cqf.fhir.cr.crmi.R4ReleaseService;
+import org.opencds.cqf.fhir.cr.ecr.r4.R4ERSDTransformService;
 import org.opencds.cqf.fhir.cr.hapi.common.StringTimePeriodHandler;
 import org.opencds.cqf.fhir.cr.hapi.config.CrBaseConfig;
 import org.opencds.cqf.fhir.cr.hapi.config.ProviderLoader;
@@ -23,6 +24,7 @@ import org.opencds.cqf.fhir.cr.hapi.r4.ICollectDataServiceFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.ICqlExecutionServiceFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.IDataRequirementsServiceFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.IDraftServiceFactory;
+import org.opencds.cqf.fhir.cr.hapi.r4.IERSDV2ImportServiceFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.IPackageServiceFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.IReleaseServiceFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.ISubmitDataProcessorFactory;
@@ -34,6 +36,7 @@ import org.opencds.cqf.fhir.cr.hapi.r4.crmi.ApproveProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.crmi.DraftProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.crmi.PackageProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.crmi.ReleaseProvider;
+import org.opencds.cqf.fhir.cr.hapi.r4.ecr.ERSDTransformProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.measure.CareGapsOperationProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.measure.CollectDataOperationProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.measure.DataRequirementsOperationProvider;
@@ -164,6 +167,16 @@ public class CrR4Config {
     }
 
     @Bean
+    IERSDV2ImportServiceFactory ersdV2ImportServiceFactory(IRepositoryFactory repositoryFactory) {
+        return rd -> new R4ERSDTransformService(repositoryFactory.create(rd));
+    }
+
+    @Bean
+    ERSDTransformProvider eRSDTransformProvider(IERSDV2ImportServiceFactory iersdV2ImportServiceFactory) {
+        return new ERSDTransformProvider(iersdV2ImportServiceFactory);
+    }
+
+    @Bean
     IPackageServiceFactory packageServiceFactory(IRepositoryFactory repositoryFactory) {
         return rd -> new R4PackageService(repositoryFactory.create(rd));
     }
@@ -214,6 +227,7 @@ public class CrR4Config {
                                 DataRequirementsOperationProvider.class,
                                 DraftProvider.class,
                                 ApproveProvider.class,
+                                ERSDTransformProvider.class,
                                 PackageProvider.class,
                                 ReleaseProvider.class)));
 

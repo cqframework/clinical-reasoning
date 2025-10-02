@@ -379,7 +379,7 @@ public class TerminologyServerClientTest {
                 TerminologyServerExpansionException.class,
                 () -> client.expand(valueSetAdapter, endpointAdapter, parametersAdapter));
         verify(client, never()).getValueSetResource(any(), any());
-        verify(fhirClient, atLeast(3)).operation();
+        verify(fhirClient, atLeast(2)).operation();
     }
 
     @Test

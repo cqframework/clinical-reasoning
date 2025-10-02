@@ -15,7 +15,11 @@ public interface IValueSetAdapter extends IKnowledgeArtifactAdapter {
 
     boolean hasExpansionContains();
 
+    int getExpansionTotal();
+
     List<IValueSetExpansionContainsAdapter> getExpansionContains();
+
+    void appendExpansionContains(List<IValueSetExpansionContainsAdapter> expansionContains);
 
     <T extends IBaseBackboneElement> T newExpansion();
 

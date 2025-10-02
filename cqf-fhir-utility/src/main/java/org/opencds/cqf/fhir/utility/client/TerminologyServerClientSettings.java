@@ -7,6 +7,8 @@ public class TerminologyServerClientSettings {
     private int timeoutSeconds = 30;
     private int socketTimeout = 60;
     private String crmiVersion = "1.0.0";
+    private int expansionsPerPage = 1000;
+    private int maxExpansionPages = 1000;
 
     public static TerminologyServerClientSettings getDefault() {
         return new TerminologyServerClientSettings();
@@ -26,6 +28,8 @@ public class TerminologyServerClientSettings {
         this.timeoutSeconds = terminologyServerClientSettings.timeoutSeconds;
         this.socketTimeout = terminologyServerClientSettings.socketTimeout;
         this.crmiVersion = terminologyServerClientSettings.crmiVersion;
+        this.expansionsPerPage = terminologyServerClientSettings.expansionsPerPage;
+        this.maxExpansionPages = terminologyServerClientSettings.maxExpansionPages;
     }
 
     public int getMaxRetryCount() {
@@ -70,6 +74,24 @@ public class TerminologyServerClientSettings {
 
     public TerminologyServerClientSettings setCrmiVersion(String crmiVersion) {
         this.crmiVersion = crmiVersion;
+        return this;
+    }
+
+    public int getExpansionsPerPage() {
+        return expansionsPerPage;
+    }
+
+    public TerminologyServerClientSettings setExpansionsPerPage(int expansionsPerPage) {
+        this.expansionsPerPage = expansionsPerPage;
+        return this;
+    }
+
+    public int getMaxExpansionPages() {
+        return maxExpansionPages;
+    }
+
+    public TerminologyServerClientSettings setMaxExpansionPages(int maxExpansionPages) {
+        this.maxExpansionPages = maxExpansionPages;
         return this;
     }
 }

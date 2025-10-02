@@ -1069,6 +1069,11 @@ public class Measure {
             return this;
         }
 
+        public SelectedStratum hasPopulationCount(int count) {
+            assertEquals(count, this.value().getPopulation().size());
+            return this;
+        }
+
         public SelectedStratumPopulation firstPopulation() {
             return population(MeasureReport.StratifierGroupComponent::getPopulationFirstRep);
         }

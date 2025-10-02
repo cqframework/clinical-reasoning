@@ -25,6 +25,7 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationBasisValidator;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
+import org.opencds.cqf.fhir.cr.measure.common.StratifierUtils;
 
 /**
  * Validates group populations and stratifiers against population basis-es for R4 only.
@@ -37,7 +38,6 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
      * For any given stratifier expression, we don't know if it was evaluated in the patient context or it's a valid
      * expression, so we'll apply this heuristic for now
      */
-    // LUKETODO:  should we add encounters here?
     private static final Set<Class<?>> ALLOWED_STRATIFIER_BOOLEAN_BASIS_TYPES = new HashSet<>(Arrays.asList(
             CodeableConcept.class,
             Quantity.class,
@@ -134,12 +134,8 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
         // end of the measurement period   break down into stratums per value
         // 3. criteria stratifier NOT implement >> mix of the previous 2
 
-        // LUKETODO:  match with the other population basis types
-        // because population basis's match, this is a criteria stratifier, otherwise, it's a value stratifier
-
-        // LUKETODO: think about how to refine this:
-        // LUKETODO: comment about component stratifiers
-        if (!resultClasses.isEmpty() && resultClasses.get(0).getSimpleName().equals(groupPopulationBasisCode)) {
+        // LUKETODO:  why are we doing this?
+        if (StratifierUtils.isCriteriaBasedStratifier(groupDef, expressionResult.value())) {
             return;
         }
 
@@ -187,6 +183,7 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
         return Optional.empty();
     }
 
+    // LUKETODO:  code duplication
     private List<Class<?>> extractClassesFromSingleOrListResult(Object result) {
         if (result == null) {
             return Collections.emptyList();

@@ -1,7 +1,7 @@
 {
   "resourceType": "Encounter",
-  "id": "enc_triaged_1",
-  "status": "triaged",
+  "id": "enc_finished_pat1_1",
+  "status": "finished",
   "subject": {
     "reference": "Patient/patient1"
   }

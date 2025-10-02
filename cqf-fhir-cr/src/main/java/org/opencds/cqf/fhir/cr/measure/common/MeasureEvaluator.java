@@ -393,16 +393,16 @@ public class MeasureEvaluator {
 
     protected void evaluateStratifiers(
             String subjectId, List<StratifierDef> stratifierDefs, EvaluationResult evaluationResult) {
-        for (StratifierDef sd : stratifierDefs) {
+        for (StratifierDef stratifierDef : stratifierDefs) {
 
-            if (!sd.components().isEmpty()) {
-                addStratifierComponentResult(sd.components(), evaluationResult, subjectId);
+            if (!stratifierDef.components().isEmpty()) {
+                addStratifierComponentResult(stratifierDef.components(), evaluationResult, subjectId);
             } else {
 
-                var expressionResult = evaluationResult.forExpression(sd.expression());
+                var expressionResult = evaluationResult.forExpression(stratifierDef.expression());
                 Object result = addStratifierResult(expressionResult.value(), subjectId);
                 if (result != null) {
-                    sd.putResult(
+                    stratifierDef.putResult(
                             subjectId, // context of CQL expression ex: Patient based
                             result,
                             expressionResult.evaluatedResources());

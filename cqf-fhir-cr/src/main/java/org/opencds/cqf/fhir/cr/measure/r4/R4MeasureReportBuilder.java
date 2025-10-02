@@ -398,6 +398,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             List<MeasureGroupPopulationComponent> populations,
             GroupDef groupDef) {
         // the top level stratifier 'id' and 'code'
+        // LUKETODO:  do we need to literally set this to "in-progress encounters" ?
         reportStratifier.setCode(Collections.singletonList(measureStratifier.getCode()));
         reportStratifier.setId(measureStratifier.getId());
         // if description is defined, add to MeasureReport
@@ -415,12 +416,12 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             // one or more criteria expression defined, one set of criteria results per component specified
             // results of component stratifier are an intersection of membership to both component result sets
 
-            stratifierDef.components().forEach(component -> {
-                component.getResults().forEach((subject, result) -> {
-                    ValueWrapper valueWrapper = new ValueWrapper(result.rawValue());
-                    subjectResultTable.put(ResourceType.Patient + "/" + subject, valueWrapper, component);
-                });
-            });
+            stratifierDef
+                    .components()
+                    .forEach(component -> component.getResults().forEach((subject, result) -> {
+                        ValueWrapper valueWrapper = new ValueWrapper(result.rawValue());
+                        subjectResultTable.put(ResourceType.Patient + "/" + subject, valueWrapper, component);
+                    }));
 
             // Stratifiers should be of the same basis as population
             // Split subjects by result values
@@ -444,7 +445,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
     public record ValueDef(ValueWrapper value, StratifierComponentDef def) {}
 
-    public static Map<Set<ValueDef>, List<String>> groupSubjectsByValueDefSet(
+    private static Map<Set<ValueDef>, List<String>> groupSubjectsByValueDefSet(
             Table<String, ValueWrapper, StratifierComponentDef> table) {
         // input format
         // | Subject (String) | CriteriaResult (ValueWrapper) | StratifierComponentDef |
@@ -588,7 +589,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                     StratifierGroupComponentComponent sgcc = new StratifierGroupComponentComponent();
                     // component stratifier example: code: "gender", value: 'M'
                     // value being stratified: 'M'
-                    sgcc.setValue(new CodeableConcept().setText(value.getValueAsString()));
+                    sgcc.setValue(expressionResultToCodableConcept(value));
                     // code specified from componentDef: "gender"
                     sgcc.setCode(
                             new CodeableConcept().setText(componentDef.code().text()));
@@ -603,11 +604,14 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                 // component stratifier example: code: "gender", value: 'M'
                 StratifierGroupComponentComponent sgcc = new StratifierGroupComponentComponent();
                 // value being stratified: 'M'
-                sgcc.setValue(new CodeableConcept().setText(value.getValueAsString()));
+                sgcc.setValue(expressionResultToCodableConcept(value));
                 // code specified from componentDef: "gender"
                 sgcc.setCode(new CodeableConcept().setText(componentDef.code().text()));
                 // set component on MeasureReport
                 stratum.addComponent(sgcc);
+            } else if (StratifierUtils.isCriteriaBasedStratifier(groupDef, value.getValue())) {
+                // LUKETODO:
+                System.out.println("componentDef = " + componentDef);
             } else {
                 // non-component stratifiers only set stratified value, code is set on stratifier object
                 // value being stratified: 'M'
@@ -618,7 +622,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                  * stratifier element will retain all pertinent definitions to assist in identifying stratifiers (codeable concept, text, id)
                  * stratum will not have only id, population results, and if applicable a score
                  */
-                stratum.setValue(new CodeableConcept().setText(value.getValueAsString()));
+                stratum.setValue(expressionResultToCodableConcept(value));
             }
         }
 
@@ -637,6 +641,14 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             var stratumPopulation = stratum.addPopulation();
             buildStratumPopulation(bc, stratifierDef, stratumPopulation, subjectIds, mgpc, groupDef);
         }
+    }
+
+    private CodeableConcept populationDefToCodableConcept(PopulationDef populationDef) {
+        return new CodeableConcept().setText(populationDef.code().text());
+    }
+
+    private CodeableConcept expressionResultToCodableConcept(ValueWrapper value) {
+        return new CodeableConcept().setText(value.getValueAsString());
     }
 
     private void buildBooleanBasisStratumPopulation(
@@ -961,7 +973,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         for (Map.Entry<ValueWrapper, Long> accumulator : accumulated.entrySet()) {
 
             Resource obs;
-            if (!(accumulator.getKey().getValue() instanceof Resource)) {
+            if (!(accumulator.getKey().getValue() instanceof Resource resource)) {
                 String valueCode = accumulator.getKey().getValueAsString();
                 Long valueCount = accumulator.getValue();
 
@@ -976,8 +988,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
                 bc.addCriteriaExtensionToSupplementalData(obs, sde.id());
             } else {
-                Resource r = (Resource) accumulator.getKey().getValue();
-                bc.addCriteriaExtensionToSupplementalData(r, sde.id());
+                bc.addCriteriaExtensionToSupplementalData(resource, sde.id());
             }
         }
     }
@@ -1193,13 +1204,11 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         public String getKey() {
             String key = null;
             if (value instanceof Coding coding) {
-                Coding c = coding;
                 // ASSUMPTION: We won't have different systems with the same code
                 // within a given stratifier / sde
-                key = joinValues("coding", c.getCode());
+                key = joinValues("coding", coding.getCode());
             } else if (value instanceof CodeableConcept concept) {
-                CodeableConcept c = concept;
-                key = joinValues("codeable-concept", c.getCodingFirstRep().getCode());
+                key = joinValues("codeable-concept", concept.getCodingFirstRep().getCode());
             } else if (value instanceof Code c) {
                 key = joinValues("code", c.getCode());
             } else if (value instanceof Enum<?> e) {
@@ -1222,38 +1231,16 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         }
 
         public String getValueAsString() {
-            if (value instanceof Coding coding) {
-                Coding c = coding;
-                return c.getCode();
-            } else if (value instanceof CodeableConcept concept) {
-                CodeableConcept c = concept;
-                return c.getCodingFirstRep().getCode();
-            } else if (value instanceof Code c) {
-                return c.getCode();
-            } else if (value instanceof Enum<?> e) {
-                return e.toString();
-            } else if (value instanceof IPrimitiveType<?> p) {
-                return p.getValueAsString();
-            } else if (value instanceof Identifier identifier) {
-                return identifier.getValue();
-            } else if (value instanceof Resource resource) {
-                return resource.getIdElement().toVersionless().getValue();
-            } else if (value != null) {
-                return value.toString();
-            } else {
-                return "<null>";
-            }
+            return getValueAsString(this.value);
         }
 
         public String getDescription() {
             if (value instanceof Coding coding) {
-                Coding c = coding;
-                return c.hasDisplay() ? c.getDisplay() : c.getCode();
+                return coding.hasDisplay() ? coding.getDisplay() : coding.getCode();
             } else if (value instanceof CodeableConcept concept) {
-                CodeableConcept c = concept;
-                return c.getCodingFirstRep().hasDisplay()
-                        ? c.getCodingFirstRep().getDisplay()
-                        : c.getCodingFirstRep().getCode();
+                return concept.getCodingFirstRep().hasDisplay()
+                        ? concept.getCodingFirstRep().getDisplay()
+                        : concept.getCodingFirstRep().getCode();
             } else if (value instanceof Code c) {
                 return c.getDisplay() != null ? c.getDisplay() : c.getCode();
             } else if (value instanceof Enum<?> e) {
@@ -1285,6 +1272,32 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
         private String joinValues(String... elements) {
             return String.join("-", elements);
+        }
+
+        private String getValueAsString(Object valueInner) {
+            if (valueInner instanceof Coding coding) {
+                return coding.getCode();
+            } else if (valueInner instanceof CodeableConcept concept) {
+                return concept.getCodingFirstRep().getCode();
+            } else if (valueInner instanceof Code c) {
+                return c.getCode();
+            } else if (valueInner instanceof Enum<?> e) {
+                return e.toString();
+            } else if (valueInner instanceof IPrimitiveType<?> p) {
+                return p.getValueAsString();
+            } else if (valueInner instanceof Identifier identifier) {
+                return identifier.getValue();
+            } else if (valueInner instanceof Resource resource) {
+                return resource.getIdElement().toVersionless().getValue();
+            } else if (valueInner instanceof Iterable<?> iterable) {
+                return StreamSupport.stream(iterable.spliterator(), false)
+                        .map(this::getValueAsString)
+                        .collect(Collectors.joining(","));
+            } else if (valueInner != null) {
+                return valueInner.toString();
+            } else {
+                return "<null>";
+            }
         }
     }
 }

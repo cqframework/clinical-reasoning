@@ -293,6 +293,11 @@ public class Measure {
             return this.value();
         }
 
+        public SelectedReport hasGroupCount(int count) {
+            assertEquals(count, report().getGroup().size());
+            return this;
+        }
+
         public SelectedGroup firstGroup() {
             return this.group(MeasureReport::getGroupFirstRep);
         }
@@ -809,6 +814,11 @@ public class Measure {
 
         public SelectedGroup(MeasureReportGroupComponent value, SelectedReport parent) {
             super(value, parent);
+        }
+
+        public SelectedGroup hasPopulationCount(int count) {
+            assertEquals(count, this.value().getPopulation().size());
+            return this;
         }
 
         public SelectedGroup hasScore(String score) {

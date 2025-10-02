@@ -363,20 +363,18 @@ public class MeasureEvaluator {
         }
     }
 
-    protected Object addStratifierResult(Object result, String subjectId) {
-        if (result instanceof Iterable<?> iterable) {
-            var resultIter = iterable.iterator();
-            if (!resultIter.hasNext()) {
-                result = null;
-            } else {
-                result = resultIter.next();
-            }
-
-            if (resultIter.hasNext()) {
-                throw new InvalidRequestException(
-                        "stratifiers may not return multiple values for subjectId: " + subjectId);
-            }
-        }
+    protected Object addStratifierResult(Object result) {
+        // LUKETODO:  figure out what to ultimately do about this:
+        //        if (result instanceof Iterable<?> iterable) {
+        //            var resultIter = iterable.iterator();
+        //            if (!resultIter.hasNext()) {
+        //                result = null;
+        //            } else {
+        //                result = resultIter.next();
+        //            }
+        //
+        //            // Any number of results is permitted
+        //        }
         return result;
     }
 
@@ -384,7 +382,7 @@ public class MeasureEvaluator {
             List<StratifierComponentDef> components, EvaluationResult evaluationResult, String subjectId) {
         for (StratifierComponentDef component : components) {
             var expressionResult = evaluationResult.forExpression(component.expression());
-            Object result = addStratifierResult(expressionResult.value(), subjectId);
+            Object result = addStratifierResult(expressionResult.value());
             if (result != null) {
                 component.putResult(subjectId, result, expressionResult.evaluatedResources());
             }
@@ -400,7 +398,7 @@ public class MeasureEvaluator {
             } else {
 
                 var expressionResult = evaluationResult.forExpression(stratifierDef.expression());
-                Object result = addStratifierResult(expressionResult.value(), subjectId);
+                Object result = addStratifierResult(expressionResult.value());
                 if (result != null) {
                     stratifierDef.putResult(
                             subjectId, // context of CQL expression ex: Patient based

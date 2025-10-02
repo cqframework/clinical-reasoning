@@ -119,7 +119,7 @@ class CriteriaBasedStratifiersTest {
         selectedReport
                 .firstGroup()
                 .population("initial-population")
-                .hasCount(8)
+                .hasCount(9)
                 .up()
                 .hasStratifierCount(1)
                 .firstStratifier()

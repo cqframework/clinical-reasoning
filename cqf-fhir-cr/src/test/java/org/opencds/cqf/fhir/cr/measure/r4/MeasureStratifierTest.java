@@ -16,9 +16,12 @@ import org.hl7.fhir.r4.model.Period;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
+import org.opencds.cqf.fhir.cr.measure.r4.Measure.SelectedReport;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.When;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.TestDataGenerator;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Measure Stratifier Testing to validate Measure defined Stratifier elements and the resulting MeasureReport Stratifier elements
@@ -27,6 +30,8 @@ import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
  */
 @SuppressWarnings("squid:S2699")
 class MeasureStratifierTest {
+    private static final Logger logger = LoggerFactory.getLogger(MeasureStratifierTest.class);
+
     private static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/measure/r4";
     private static final IRepository repository = new IgRepository(
             FhirContext.forR4Cached(),
@@ -273,17 +278,101 @@ class MeasureStratifierTest {
 
     /**
      * Ratio Measure with Resource Basis where Stratifier defined by expression that results in Encounter.status per subject.
-     * Given that Encounter.status will return multiple results for a single subject, it is considered an invalid Stratifier
+     * Multiple results for a single subject are allowed
      */
     @Test
     void ratioResourceDifferentTypeStrat() {
-        given.when()
+        final SelectedReport selectedReport = given.when()
                 .measureId("RatioResourceStratDifferentType")
                 .evaluate()
-                .then()
-                .hasContainedOperationOutcome()
-                .hasContainedOperationOutcomeMsg("stratifiers may not return multiple values for subject")
-                .report();
+                .then();
+
+        var jsonParser = FhirContext.forR4Cached().newJsonParser();
+
+        logger.info(jsonParser.setPrettyPrint(true).encodeResourceToString(selectedReport.report()));
+
+        selectedReport
+                .hasGroupCount(1)
+                .firstGroup()
+                .hasPopulationCount(3)
+                .population("initial-population")
+                .hasCount(11)
+                .up()
+                .population("denominator")
+                .hasCount(11)
+                .up()
+                .population("numerator")
+                .hasCount(2)
+                .up()
+                .hasMeasureScore(true)
+                .hasScore("0.18181818181818182")
+                .hasStratifierCount(1)
+                .firstStratifier()
+                .hasStratumCount(6)
+                .stratum("in-progress")
+                .hasPopulationCount(3)
+                .population("initial-population")
+                .hasCount(2)
+                .up()
+                .population("denominator")
+                .hasCount(2)
+                .up()
+                .population("numerator")
+                .hasCount(0)
+                .up()
+                .hasScore("0.0")
+                .up()
+                .stratum("triaged")
+                .hasPopulationCount(3)
+                .population("initial-population")
+                .hasCount(2)
+                .up()
+                .population("denominator")
+                .hasCount(2)
+                .up()
+                .population("numerator")
+                .hasCount(0)
+                .up()
+                .hasScore("0.0")
+                .up()
+                .stratum("finished")
+                .hasPopulationCount(3)
+                .population("initial-population")
+                .hasCount(1)
+                .up()
+                .population("denominator")
+                .hasCount(1)
+                .up()
+                .population("numerator")
+                .hasCount(1)
+                .up()
+                .hasScore("1.0")
+                .up()
+                .stratum("cancelled")
+                .hasPopulationCount(3)
+                .population("initial-population")
+                .hasCount(2)
+                .up()
+                .population("denominator")
+                .hasCount(2)
+                .up()
+                .population("numerator")
+                .hasCount(0)
+                .up()
+                .hasScore("0.0")
+                .up()
+                .stratum("arrived")
+                .hasPopulationCount(3)
+                .population("initial-population")
+                .hasCount(2)
+                .up()
+                .population("denominator")
+                .hasCount(2)
+                .up()
+                .population("numerator")
+                .hasCount(0)
+                .up()
+                .hasScore("0.0");
     }
 
     /**

@@ -392,6 +392,24 @@ class MeasureStratifierTest {
                 .hasScore("0.5");
     }
 
+    @Test
+    void ratioResourceSameTypeStrat() {
+        final SelectedReport selectedReport = given.when()
+            .measureId("RatioResourceStratSameType")
+            .evaluate()
+            .then();
+
+        var jsonParser = FhirContext.forR4Cached().newJsonParser();
+
+        logger.info(
+            jsonParser.setPrettyPrint(true).encodeResourceToString(selectedReport.report()));
+
+        // LUKETODO:  add way more assertions
+
+        selectedReport
+            .hasGroupCount(1);
+    }
+
     /**
      * Ratio Measure with Boolean Basis where Stratifier defined by expression that results in gender stratification for the Measure population.
      * intersection of results should be allowed

@@ -1,17 +1,22 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupPopulationComponent;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupStratifierComponent;
 import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupComponent;
 import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupPopulationComponent;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Quantity;
 import org.opencds.cqf.fhir.cr.measure.common.BaseMeasureReportScorer;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
+import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 
 /**
@@ -89,7 +94,8 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
             scoreGroup(
                     getGroupMeasureScoring(mrgc, measureDef),
                     mrgc,
-                    getGroupDef(measureDef, mrgc).isIncreaseImprovementNotation());
+                    getGroupDef(measureDef, mrgc).isIncreaseImprovementNotation(),
+                    getGroupDef(measureDef, mrgc));
         }
     }
 
@@ -145,7 +151,7 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
     }
 
     protected void scoreGroup(
-            MeasureScoring measureScoring, MeasureReportGroupComponent mrgc, boolean isIncreaseImprovementNotation) {
+            MeasureScoring measureScoring, MeasureReportGroupComponent mrgc, boolean isIncreaseImprovementNotation, GroupDef groupDef) {
 
         switch (measureScoring) {
             case PROPORTION:
@@ -166,6 +172,10 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
                     }
                 }
                 break;
+
+            case CONTINUOUSVARIABLE:
+                scoreContinuousVariable(measureScoring, mrgc, groupDef);
+                break;
             default:
                 break;
         }
@@ -173,6 +183,94 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
         for (MeasureReportGroupStratifierComponent stratifierComponent : mrgc.getStratifier()) {
             scoreStratifier(measureScoring, stratifierComponent);
         }
+    }
+
+    protected void scoreContinuousVariable(MeasureScoring measureScoring, MeasureReportGroupComponent mrgc, GroupDef groupDef) {
+        var popDef = groupDef.getSingle(MeasurePopulationType.MEASUREOBSERVATION);
+        var observationQuantity = collectQuantities(popDef.getResources());
+        var aggregateMethod = groupDef.getAggregateMethod();
+        mrgc.setMeasureScore(aggregate(observationQuantity,aggregateMethod));
+    }
+
+    public static Quantity aggregate(List<Quantity> quantities, String method) {
+        if (quantities == null || quantities.isEmpty()) {
+            return null;
+        }
+
+        // assume all quantities share the same unit/system/code
+        Quantity base = quantities.get(0);
+        String unit = base.getUnit();
+        String system = base.getSystem();
+        String code = base.getCode();
+
+        double result;
+
+        switch (method.toLowerCase()) {
+            case "sum":
+                result = quantities.stream()
+                    .mapToDouble(q -> q.getValue().doubleValue())
+                    .sum();
+                break;
+            case "max":
+                result = quantities.stream()
+                    .mapToDouble(q -> q.getValue().doubleValue())
+                    .max()
+                    .orElse(Double.NaN);
+                break;
+            case "min":
+                result = quantities.stream()
+                    .mapToDouble(q -> q.getValue().doubleValue())
+                    .min()
+                    .orElse(Double.NaN);
+                break;
+            case "avg":
+                result = quantities.stream()
+                    .mapToDouble(q -> q.getValue().doubleValue())
+                    .average()
+                    .orElse(Double.NaN);
+                break;
+            case "count":
+                result = quantities.size();
+                break;
+            case "median":
+                List<Double> sorted = quantities.stream()
+                    .map(q -> q.getValue().doubleValue())
+                    .sorted()
+                    .toList();
+                int n = sorted.size();
+                if (n % 2 == 1) {
+                    result = sorted.get(n / 2);
+                } else {
+                    result = (sorted.get(n / 2 - 1) + sorted.get(n / 2)) / 2.0;
+                }
+                break;
+            default:
+                throw new IllegalArgumentException("Unsupported aggregation method: " + method);
+        }
+
+        return new Quantity()
+            .setValue(result)
+            .setUnit(unit)
+            .setSystem(system)
+            .setCode(code);
+    }
+
+    public List<Quantity> collectQuantities(Set<Object> resources) {
+        List<Quantity> quantities = new ArrayList<>();
+
+        for (Object resource : resources) {
+            if (resource instanceof Map<?,?> map) {
+                for (Object value : map.values()) {
+                    if (value instanceof Observation obs) {
+                        if (obs.hasValueQuantity()) {
+                            quantities.add(obs.getValueQuantity());
+                        }
+                    }
+                }
+            }
+        }
+
+        return quantities;
     }
 
     protected void scoreStratum(MeasureScoring measureScoring, StratifierGroupComponent stratum) {

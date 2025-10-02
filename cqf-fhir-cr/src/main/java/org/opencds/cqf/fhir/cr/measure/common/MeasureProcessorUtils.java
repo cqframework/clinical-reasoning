@@ -10,19 +10,31 @@ import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import org.apache.commons.lang3.tuple.Pair;
+import org.cqframework.cql.cql2elm.CqlCompilerException;
+import org.cqframework.cql.cql2elm.CqlIncludeException;
+import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.hl7.elm.r1.FunctionDef;
 import org.hl7.elm.r1.IntervalTypeSpecifier;
 import org.hl7.elm.r1.NamedTypeSpecifier;
 import org.hl7.elm.r1.ParameterDef;
 import org.hl7.elm.r1.VersionedIdentifier;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Quantity;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.EvaluationResultsForMultiLib;
+import org.opencds.cqf.cql.engine.execution.ExpressionResult;
 import org.opencds.cqf.cql.engine.execution.Libraries;
 import org.opencds.cqf.cql.engine.execution.Variable;
 import org.opencds.cqf.cql.engine.runtime.Date;
@@ -30,6 +42,7 @@ import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.opencds.cqf.fhir.cr.measure.helper.DateHelper;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -88,20 +101,29 @@ public class MeasureProcessorUtils {
         for (GroupDef groupDef : measureDef.groups()) {
             // Measure Observation defined?
             if (groupDef.measureScoring().equals(MeasureScoring.CONTINUOUSVARIABLE)
-                    && groupDef.getSingle(MeasurePopulationType.MEASUREOBSERVATION) != null) {
+                && groupDef.getSingle(MeasurePopulationType.MEASUREOBSERVATION) != null) {
 
                 PopulationDef measurePopulation = groupDef.getSingle(MEASUREPOPULATION);
-                PopulationDef measureObservation = groupDef.getSingle(MeasurePopulationType.MEASUREOBSERVATION);
+                PopulationDef measureObservation = groupDef.getSingle(
+                    MeasurePopulationType.MEASUREOBSERVATION);
 
                 // Inject MeasurePopulation results into Measure Observation Function
-                for (Object resource : measurePopulation.getResources()) {
-                    Object observationResult = evaluateObservationCriteria(
+                Map<String, Set<Object>> subjectResources = measurePopulation.getSubjectResources();
+
+                for (Map.Entry<String, Set<Object>> entry : subjectResources.entrySet()) {
+                    String subjectId = entry.getKey();
+                    Set<Object> resourcesForSubject = entry.getValue();
+
+                    for (Object resource : resourcesForSubject) {
+                        Object observationResult = evaluateObservationCriteria(
                             resource,
                             measureObservation.expression(),
                             measureObservation.getEvaluatedResources(),
                             groupDef.isBooleanBasis(),
                             context);
-                    measureObservation.addResource(observationResult);
+                        measureObservation.addResource(observationResult);
+                        measureObservation.addResource(subjectId, observationResult);
+                    }
                 }
             }
         }
@@ -290,7 +312,7 @@ public class MeasureProcessorUtils {
         clearEvaluatedResources(context);
     }
 
-    // reset evaluated resources followed by a context evaluation
+     //reset evaluated resources followed by a context evaluation
     private void clearEvaluatedResources(CqlEngine context) {
         context.getState().clearEvaluatedResources();
     }
@@ -330,6 +352,8 @@ public class MeasureProcessorUtils {
                         .push(new Variable(functionDef.getOperand().get(0).getName()).withValue(resource));
             }
             result = context.getEvaluationVisitor().visitExpression(ed.getExpression(), context.getState());
+            // wrap result as Observation
+
         } finally {
             context.getState().popActivationFrame();
         }
@@ -385,14 +409,93 @@ public class MeasureProcessorUtils {
                                 zonedMeasurementPeriod,
                                 context);
 
+
+
                 for (var libraryVersionedIdentifier : libraryIdentifiers) {
                     validateEvaluationResultExistsForIdentifier(
                             libraryVersionedIdentifier, evaluationResultsForMultiLib);
-
+                    // standard CQL expression results
                     var evaluationResult = evaluationResultsForMultiLib.getResultFor(libraryVersionedIdentifier);
 
-                    var measureIds =
+                    // measure Observation Path, have to re-initialize everything again
+                    // TODO: extend library evaluated context so library initialization isn't having to be built for both, and takes advantage of caching
+                    var compiledLibraries = getCompiledLibraries(libraryIdentifiers, context);
+
+                    var libraries =
+                        compiledLibraries.stream().map(CompiledLibrary::getLibrary).toList();
+
+                    // Add back the libraries to the stack, since we popped them off during CQL
+                    context.getState().init(libraries);
+
+                    // Measurement Period: operation parameter defined measurement period
+                    // this necessary?
+                    //Interval measurementPeriodParams = buildMeasurementPeriod(periodStart, periodEnd);
+
+//                    setMeasurementPeriod(
+//                        measurementPeriodParams,
+//                        context,
+//                        Optional.ofNullable(measureDef.).map(List::of).orElse(List.of("Unknown Measure URL")));
+                    // one Library may be linked to multiple Measures
+                    var measureDefs =
                             multiLibraryIdMeasureEngineDetails.getMeasureIdsForLibrary(libraryVersionedIdentifier);
+                    List<IIdType> measureIds = measureDeftoIIdType(measureDefs);
+
+                    for (MeasureDef measureDef : measureDefs) {
+                        // if measure contains measure-observation, otherwise short circuit
+                        if(hasMeasureObservation(measureDef)) {
+
+                            // get function for measure-observation from populationDef
+                            for(GroupDef groupDef: measureDef.groups()) {
+                                for(PopulationDef populationDef: groupDef.populations()) {
+                                    // each measureObservation is evaluated
+                                    if(populationDef.type().equals(MeasurePopulationType.MEASUREOBSERVATION)) {
+                                        // get criteria input for results to get (measure-population, numerator, denominator)
+                                        var criteriaPopulationId = populationDef.getCriteriaReference();
+                                        // function that will be evaluated
+                                        var observationExpression = populationDef.expression();
+                                        // get expression from criteriaPopulation reference
+                                        String criteriaExpressionInput = groupDef.populations().stream()
+                                            .filter(t->t.id().equals(criteriaPopulationId))
+                                            .map(PopulationDef::expression)
+                                            .findFirst()
+                                            .orElse(null);
+                                        ExpressionResult expressionResult = evaluationResult.forExpression(criteriaExpressionInput);
+                                        // makes expression results iterable
+                                        var resultsIter = getResultIterable(evaluationResult, expressionResult, subjectTypePart);
+                                        // make new expression name for uniquely extracting results
+                                        // this will be used in MeasureEvaluator
+                                        var expressionName = criteriaPopulationId + "-" + observationExpression;
+                                        // loop through measure-population results
+                                        int i = 0;
+                                        Map<Object, Object> functionResults = new HashMap<>();
+                                        Set<Object> evaluatedResources = new HashSet<>();
+                                        for(Object result : resultsIter) {
+                                            Object observationResult = evaluateObservationCriteria(
+                                                result,
+                                                observationExpression,
+                                                evaluatedResources,
+                                                groupDef.isBooleanBasis(),
+                                                context);
+                                            var observationId = expressionName + "-" + i;
+                                            // wrap result in Observation resource to avoid duplicate results data loss in set object
+                                            Observation observation = wrapResultAsObservation(observationId, observationId, observationResult);
+                                            // add function results to existing EvaluationResult under new expression name
+                                            // need a way to capture input parameter here too, otherwise we have no way to connect input objects related to output object
+                                            // key= input parameter to function
+                                            // value= the output Observation resource containing calculated value
+                                            functionResults.put(result, observation);
+                                        }
+                                        evaluationResult.expressionResults
+                                            .put(
+                                            expressionName,
+                                            new ExpressionResult(functionResults, evaluatedResources)
+                                        );
+                                    }
+                                }
+                            }
+                        }
+
+                    }
 
                     resultsBuilder.addResults(measureIds, subjectId, evaluationResult);
 
@@ -408,7 +511,7 @@ public class MeasureProcessorUtils {
             } catch (Exception e) {
                 // If there's any error we didn't anticipate, catch it here:
                 var error = EXCEPTION_FOR_SUBJECT_ID_MESSAGE_TEMPLATE.formatted(subjectId, e.getMessage());
-                var measureIds = multiLibraryIdMeasureEngineDetails.getAllMeasureIds();
+                var measureIds = measureDeftoIIdType(multiLibraryIdMeasureEngineDetails.getAllMeasureIds());
 
                 resultsBuilder.addErrors(measureIds, error);
                 logger.error(error, e);
@@ -416,6 +519,127 @@ public class MeasureProcessorUtils {
         }
 
         return resultsBuilder.build();
+    }
+
+    public List<CompiledLibrary> getCompiledLibraries(List<VersionedIdentifier> ids, CqlEngine context) {
+        try {
+            var resolvedLibraryResults =
+                context.getEnvironment().getLibraryManager().resolveLibraries(ids);
+
+            var allErrors = resolvedLibraryResults.allErrors();
+            if (resolvedLibraryResults.hasErrors() || ids.size() > allErrors.size()) {
+                return resolvedLibraryResults.allCompiledLibraries();
+            }
+
+            if (ids.size() == 1) {
+                final List<CqlCompilerException> cqlCompilerExceptions =
+                    resolvedLibraryResults.getErrorsFor(ids.get(0));
+
+                if (cqlCompilerExceptions.size() == 1) {
+                    throw new IllegalStateException(
+                        "Unable to load CQL/ELM for library: %s. Verify that the Library resource is available in your environment and has CQL/ELM content embedded."
+                            .formatted(ids.get(0).getId()),
+                        cqlCompilerExceptions.get(0));
+                } else {
+                    throw new IllegalStateException(
+                        "Unable to load CQL/ELM for library: %s. Verify that the Library resource is available in your environment and has CQL/ELM content embedded. Errors: %s"
+                            .formatted(
+                                ids.get(0).getId(),
+                                cqlCompilerExceptions.stream()
+                                    .map(CqlCompilerException::getMessage)
+                                    .reduce((s1, s2) -> s1 + "; " + s2)
+                                    .orElse("No error messages found.")));
+                }
+            }
+
+            throw new IllegalStateException(
+                "Unable to load CQL/ELM for libraries: %s Verify that the Library resource is available in your environment and has CQL/ELM content embedded. Errors: %s"
+                    .formatted(ids, allErrors));
+
+        } catch (CqlIncludeException exception) {
+            throw new IllegalStateException(
+                "Unable to load CQL/ELM for libraries: %s. Verify that the Library resource is available in your environment and has CQL/ELM content embedded."
+                    .formatted(
+                        ids.stream().map(VersionedIdentifier::getId).toList()),
+                exception);
+        }
+    }
+
+    protected Observation wrapResultAsObservation(String id, String observationName, Object result) {
+
+        Observation obs = new Observation();
+        obs.setStatus(Observation.ObservationStatus.FINAL);
+        obs.setId(id);
+        CodeableConcept cc = new CodeableConcept();
+        cc.setText(observationName);
+        obs.setValue(convertToQuantity(result));
+        obs.setCode(cc);
+        return obs;
+    }
+
+    public Quantity convertToQuantity(Object obj) {
+        if (obj == null) return null;
+
+        Quantity q = new Quantity();
+
+        if (obj instanceof Quantity existing) {
+            return existing;
+        } else if (obj instanceof Number number) {
+            q.setValue(number.doubleValue());
+        } else if (obj instanceof String s) {
+            try {
+                q.setValue(Double.parseDouble(s));
+            } catch (NumberFormatException e) {
+                throw new IllegalArgumentException("String is not a valid number: " + s, e);
+            }
+        } else {
+            throw new IllegalArgumentException("Cannot convert object of type " + obj.getClass() + " to Quantity");
+        }
+
+        return q;
+    }
+
+    private List<IIdType> measureDeftoIIdType(List<MeasureDef> measureDefs){
+        return measureDefs.stream().map(t->new IdType(t.id())).map(x->(IIdType)x).toList();
+    }
+
+    private Iterable<Object> getResultIterable(EvaluationResult evaluationResult, ExpressionResult expressionResult, String subjectTypePart){
+        if (expressionResult.value() instanceof Boolean) {
+            if ((Boolean.TRUE.equals(expressionResult.value()))) {
+                // if Boolean, returns context by SubjectType
+                Object booleanResult =
+                    evaluationResult.forExpression(subjectTypePart).value();
+                // remove evaluated resources
+                return Collections.singletonList(booleanResult);
+            } else {
+                // false result shows nothing
+                return Collections.emptyList();
+            }
+        }
+
+        Object value = expressionResult.value();
+        if (value instanceof Iterable<?>) {
+            return (Iterable<Object>) value;
+        } else {
+            return Collections.singletonList(value);
+        }
+    }
+    /**
+     * Checks if a MeasureDef has at least one PopulationDef of type MEASUREOBSERVATION
+     * across all of its groups.
+     *
+     * @param measureDef the MeasureDef to check
+     * @return true if any PopulationDef in any GroupDef is MEASUREOBSERVATION
+     */
+    public static boolean hasMeasureObservation(MeasureDef measureDef) {
+        if (measureDef == null || measureDef.groups() == null) {
+            return false;
+        }
+
+        return measureDef.groups().stream()
+            .filter(group -> group.populations() != null)
+            .flatMap(group -> group.populations().stream())
+            .anyMatch(pop -> pop.type() == MeasurePopulationType.MEASUREOBSERVATION);
     }
 
     private void validateEvaluationResultExistsForIdentifier(

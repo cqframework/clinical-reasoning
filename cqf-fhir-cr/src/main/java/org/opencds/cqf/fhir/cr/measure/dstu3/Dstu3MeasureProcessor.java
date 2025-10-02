@@ -31,6 +31,7 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorUtils;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
 import org.opencds.cqf.fhir.cr.measure.common.MultiLibraryIdMeasureEngineDetails;
 import org.opencds.cqf.fhir.cr.measure.common.SubjectProvider;
+import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureDefBuilder;
 import org.opencds.cqf.fhir.utility.repository.FederatedRepository;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
@@ -140,9 +141,11 @@ public class Dstu3MeasureProcessor {
 
         final LibraryEngine libraryEngine = getLibraryEngine(parameters, libraryVersionIdentifier, context);
 
+        var measureDef = new Dstu3MeasureDefBuilder().build(measure);
+
         return MultiLibraryIdMeasureEngineDetails.builder(libraryEngine)
                 .addLibraryIdToMeasureId(
-                        new VersionedIdentifier().withId(libraryVersionIdentifier.getId()), measure.getIdElement())
+                        new VersionedIdentifier().withId(libraryVersionIdentifier.getId()), measureDef)
                 .build();
     }
 

@@ -1,8 +1,11 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
 import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.DATEOFCOMPLIANCE;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.CQFM_AGGREGATE_METHODS;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.CQFM_SCORING_EXT_URL;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_CQFM_AGGREGATE_METHOD_URL;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_CQFM_CRITERIA_REFERENCE;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.FHIR_ALL_TYPES_SYSTEM_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.IMPROVEMENT_NOTATION_SYSTEM_DECREASE;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.IMPROVEMENT_NOTATION_SYSTEM_INCREASE;
@@ -20,7 +23,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Element;
-import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.Enumerations.FHIRAllTypes;
 import org.hl7.fhir.r4.model.Expression;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Measure;
@@ -74,19 +77,52 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
             // improvement Notation
             var groupImpNotation = getGroupImpNotation(measure, group);
             var hasGroupImpNotation = groupImpNotation != null;
-
+            // aggregateMethod is used to capture continuous-variable method of aggregating MeasureObservation
+            String aggregateMethod = null;
             // Populations
             List<PopulationDef> populations = new ArrayList<>();
             for (MeasureGroupPopulationComponent pop : group.getPopulation()) {
                 checkId(pop);
                 MeasurePopulationType populationType = MeasurePopulationType.fromCode(
                         pop.getCode().getCodingFirstRep().getCode());
+                String criteriaReference = null;
 
+                // For measures with Measure-Observation populations
+                if (populationType != null && populationType.equals(MeasurePopulationType.MEASUREOBSERVATION)) {
+                    var aggMethodExt = pop.getExtensionByUrl(EXT_CQFM_AGGREGATE_METHOD_URL);
+                    if(aggMethodExt != null) {
+                        // this method is only required if scoringType = continuous-variable
+                        aggregateMethod = aggMethodExt.getValue().toString();
+                        // check that method is accepted
+                        if(!CQFM_AGGREGATE_METHODS.contains(aggregateMethod)){
+                            throw new InvalidRequestException("Measure Observation method: %s is not a valid value for Measure: %s"
+                                .formatted(aggregateMethod, measure.getUrl()));
+                        };
+                    }
+                    var populationCriteriaExt = pop.getExtensionByUrl(EXT_CQFM_CRITERIA_REFERENCE);
+                    if(populationCriteriaExt != null) {
+                        // required for measure-observation populations
+                        // the underlying expression is a cql function
+                        // the criteria reference is what is used to populate parameters of the function
+                        String critReference = populationCriteriaExt.getValue().toString();
+                        // check that the reference exists in the GroupDef.populationId
+                        if(group.getPopulation().stream()
+                            .map(Element::getId)
+                            .noneMatch(id -> id.equals(critReference))){
+                            throw new InvalidRequestException("no matching criteria reference was found for extension: %s for Measure: %s"
+                                .formatted(EXT_CQFM_CRITERIA_REFERENCE, measure.getUrl()));
+                        }
+                        // assign validated reference
+                        criteriaReference = critReference;
+                    }
+
+                }
                 populations.add(new PopulationDef(
                         pop.getId(),
                         conceptToConceptDef(pop.getCode()),
                         populationType,
-                        pop.getCriteria().getExpression()));
+                        pop.getCriteria().getExpression(),
+                    criteriaReference));
             }
 
             if (group.getExtensionByUrl(CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL) != null
@@ -100,7 +136,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                 }
                 var expression = expressionType.getExpression();
                 populations.add(new PopulationDef(
-                        "dateOfCompliance", totalConceptDefCreator(DATEOFCOMPLIANCE), DATEOFCOMPLIANCE, expression));
+                        "dateOfCompliance", totalConceptDefCreator(DATEOFCOMPLIANCE), DATEOFCOMPLIANCE, expression, null));
             }
 
             // Stratifiers
@@ -143,7 +179,8 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                     getScoringDef(measure, measureScoring, groupScoring),
                     hasGroupImpNotation,
                     getImprovementNotation(measureImpNotation, groupImpNotation),
-                    getPopulationBasisDef(measureBasis, groupBasis));
+                    getPopulationBasisDef(measureBasis, groupBasis),
+                    aggregateMethod);
             groups.add(groupDef);
         }
         return new MeasureDef(measure.getId(), measure.getUrl(), measure.getVersion(), groups, sdes);
@@ -268,7 +305,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
     private CodeDef makeCodeDefFromExtension(Extension extension) {
         var code = extension.getValue().toString();
         // validate code membership
-        assert Enumerations.FHIRAllTypes.fromCode(code) != null;
+        assert FHIRAllTypes.fromCode(code) != null;
         return new CodeDef(MeasureConstants.POPULATION_BASIS_URL, code);
     }
 

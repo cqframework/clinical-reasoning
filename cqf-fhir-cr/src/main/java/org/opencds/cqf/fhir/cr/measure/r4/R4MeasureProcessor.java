@@ -128,7 +128,7 @@ public class R4MeasureProcessor {
 
         // Populate populationDefs that require MeasureDef results
         // blocking certain continuous-variable Measures due to need of CQL context
-        continuousVariableObservationCheck(measureDef, measure);
+        //continuousVariableObservationCheck(measureDef, measure);
 
         // Build Measure Report with Results
         return new R4MeasureReportBuilder()
@@ -210,7 +210,7 @@ public class R4MeasureProcessor {
         var libraryVersionedIdentifiers =
                 getMultiLibraryIdMeasureEngineDetails(List.of(measure)).getLibraryIdentifiers();
 
-        var compiledLibraries = getCompiledLibraries(libraryVersionedIdentifiers, context);
+        var compiledLibraries = measureProcessorUtils.getCompiledLibraries(libraryVersionedIdentifiers, context);
 
         var libraries =
                 compiledLibraries.stream().map(CompiledLibrary::getLibrary).toList();
@@ -221,15 +221,15 @@ public class R4MeasureProcessor {
         // Measurement Period: operation parameter defined measurement period
         Interval measurementPeriodParams = buildMeasurementPeriod(periodStart, periodEnd);
 
-        measureProcessorUtils.setMeasurementPeriod(
-                measurementPeriodParams,
-                context,
-                Optional.ofNullable(measure.getUrl()).map(List::of).orElse(List.of("Unknown Measure URL")));
+//        measureProcessorUtils.setMeasurementPeriod(
+//                measurementPeriodParams,
+//                context,
+//                Optional.ofNullable(measure.getUrl()).map(List::of).orElse(List.of("Unknown Measure URL")));
 
         // DON'T pop the library off the stack yet, because we need it for continuousVariableObservation()
 
         // Populate populationDefs that require MeasureDef results
-        measureProcessorUtils.continuousVariableObservation(measureDef, context);
+        //measureProcessorUtils.continuousVariableObservation(measureDef, context);
 
         // Now that we've done continuousVariableObservation(), we're safe to pop the libraries off
         // the stack
@@ -357,7 +357,7 @@ public class R4MeasureProcessor {
             CqlEngine context,
             Interval measurementPeriodParams) {
 
-        var compiledLibraries = getCompiledLibraries(libraryVersionedIdentifiers, context);
+        var compiledLibraries = measureProcessorUtils.getCompiledLibraries(libraryVersionedIdentifiers, context);
 
         var libraries =
                 compiledLibraries.stream().map(CompiledLibrary::getLibrary).toList();
@@ -386,10 +386,10 @@ public class R4MeasureProcessor {
     private MultiLibraryIdMeasureEngineDetails getMultiLibraryIdMeasureEngineDetails(List<Measure> measures) {
 
         var libraryIdentifiersToMeasureIds = measures.stream()
-                .collect(ImmutableListMultimap.toImmutableListMultimap(
-                        this::getLibraryVersionIdentifier, // Key function
-                        Resource::getIdElement // Value function
-                        ));
+            .collect(ImmutableListMultimap.toImmutableListMultimap(
+                this::getLibraryVersionIdentifier,   // key function
+                measure -> new R4MeasureDefBuilder().build(measure) // value function
+            ));
 
         var libraryEngine = new LibraryEngine(repository, this.measureEvaluationOptions.getEvaluationSettings());
 
@@ -408,20 +408,20 @@ public class R4MeasureProcessor {
      * @param measureDef defined measure definition object used to capture criteria expression results
      * @param measure measure resource used for evaluation
      */
-    protected void continuousVariableObservationCheck(MeasureDef measureDef, Measure measure) {
-        for (GroupDef groupDef : measureDef.groups()) {
-            // Measure Observation defined?
-            if (groupDef.measureScoring().equals(MeasureScoring.CONTINUOUSVARIABLE)
-                    && groupDef.getSingle(MeasurePopulationType.MEASUREOBSERVATION) != null) {
-                throw new InvalidRequestException(
-                        "Measure Evaluation Mode does not have CQL engine context to support: Measure Scoring Type: %s, Measure Population Type: %s, for Measure: %s"
-                                .formatted(
-                                        MeasureScoring.CONTINUOUSVARIABLE,
-                                        MeasurePopulationType.MEASUREOBSERVATION,
-                                        measure.getUrl()));
-            }
-        }
-    }
+//    protected void continuousVariableObservationCheck(MeasureDef measureDef, Measure measure) {
+//        for (GroupDef groupDef : measureDef.groups()) {
+//            // Measure Observation defined?
+//            if (groupDef.measureScoring().equals(MeasureScoring.CONTINUOUSVARIABLE)
+//                    && groupDef.getSingle(MeasurePopulationType.MEASUREOBSERVATION) != null) {
+//                throw new InvalidRequestException(
+//                        "Measure Evaluation Mode does not have CQL engine context to support: Measure Scoring Type: %s, Measure Population Type: %s, for Measure: %s"
+//                                .formatted(
+//                                        MeasureScoring.CONTINUOUSVARIABLE,
+//                                        MeasurePopulationType.MEASUREOBSERVATION,
+//                                        measure.getUrl()));
+//            }
+//        }
+//    }
 
     /**
      * method used to extract appropriate Measure Report type from operation defined Evaluation Type
@@ -481,49 +481,6 @@ public class R4MeasureProcessor {
         return new LibraryEngine(repository, this.measureEvaluationOptions.getEvaluationSettings());
     }
 
-    private List<CompiledLibrary> getCompiledLibraries(List<VersionedIdentifier> ids, CqlEngine context) {
-        try {
-            var resolvedLibraryResults =
-                    context.getEnvironment().getLibraryManager().resolveLibraries(ids);
-
-            var allErrors = resolvedLibraryResults.allErrors();
-            if (resolvedLibraryResults.hasErrors() || ids.size() > allErrors.size()) {
-                return resolvedLibraryResults.allCompiledLibraries();
-            }
-
-            if (ids.size() == 1) {
-                final List<CqlCompilerException> cqlCompilerExceptions =
-                        resolvedLibraryResults.getErrorsFor(ids.get(0));
-
-                if (cqlCompilerExceptions.size() == 1) {
-                    throw new IllegalStateException(
-                            "Unable to load CQL/ELM for library: %s. Verify that the Library resource is available in your environment and has CQL/ELM content embedded."
-                                    .formatted(ids.get(0).getId()),
-                            cqlCompilerExceptions.get(0));
-                } else {
-                    throw new IllegalStateException(
-                            "Unable to load CQL/ELM for library: %s. Verify that the Library resource is available in your environment and has CQL/ELM content embedded. Errors: %s"
-                                    .formatted(
-                                            ids.get(0).getId(),
-                                            cqlCompilerExceptions.stream()
-                                                    .map(CqlCompilerException::getMessage)
-                                                    .reduce((s1, s2) -> s1 + "; " + s2)
-                                                    .orElse("No error messages found.")));
-                }
-            }
-
-            throw new IllegalStateException(
-                    "Unable to load CQL/ELM for libraries: %s Verify that the Library resource is available in your environment and has CQL/ELM content embedded. Errors: %s"
-                            .formatted(ids, allErrors));
-
-        } catch (CqlIncludeException exception) {
-            throw new IllegalStateException(
-                    "Unable to load CQL/ELM for libraries: %s. Verify that the Library resource is available in your environment and has CQL/ELM content embedded."
-                            .formatted(
-                                    ids.stream().map(VersionedIdentifier::getId).toList()),
-                    exception);
-        }
-    }
 
     protected void checkMeasureLibrary(Measure measure) {
         if (!measure.hasLibrary()) {

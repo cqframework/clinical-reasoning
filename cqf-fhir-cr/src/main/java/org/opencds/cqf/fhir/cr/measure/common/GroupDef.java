@@ -16,6 +16,7 @@ public class GroupDef {
     private final CodeDef populationBasis;
     private final CodeDef improvementNotation;
     private final Map<MeasurePopulationType, List<PopulationDef>> populationIndex;
+    private final String aggregateMethod;
 
     public GroupDef(
             String id,
@@ -25,7 +26,8 @@ public class GroupDef {
             MeasureScoring measureScoring,
             boolean isGroupImprovementNotation,
             CodeDef improvementNotation,
-            CodeDef populationBasis) {
+            CodeDef populationBasis,
+            String aggregateMethod) {
         //
         this.id = id;
         this.code = code;
@@ -36,6 +38,7 @@ public class GroupDef {
         this.isGroupImpNotation = isGroupImprovementNotation;
         this.improvementNotation = improvementNotation;
         this.populationBasis = populationBasis;
+        this.aggregateMethod = aggregateMethod;
     }
 
     public String id() {
@@ -103,4 +106,6 @@ public class GroupDef {
     public CodeDef getImprovementNotation() {
         return this.improvementNotation;
     }
+
+    public String getAggregateMethod() { return this.aggregateMethod; }
 }

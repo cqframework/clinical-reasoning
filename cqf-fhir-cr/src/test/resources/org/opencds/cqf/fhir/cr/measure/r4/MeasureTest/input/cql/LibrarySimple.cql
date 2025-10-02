@@ -93,8 +93,9 @@ define "SDE Sex":
 // number of hours for encounter
 
 define function "MeasureObservation"(Encounter Encounter):
-    Encounter e
-        where (difference in hours between start of e.period and end of e.period)>0
+    duration in minutes of Encounter.period
+    //Encounter e
+        //where (difference in hours between start of e.period and end of e.period)>0
 
 // component stratifier
 

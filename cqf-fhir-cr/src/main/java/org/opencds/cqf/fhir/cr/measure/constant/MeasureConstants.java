@@ -1,5 +1,7 @@
 package org.opencds.cqf.fhir.cr.measure.constant;
 
+import java.util.Set;
+
 /*
 constants used on Measure resources
  */
@@ -21,6 +23,8 @@ public class MeasureConstants {
     public static final String URL_CODESYSTEM_MEASURE_POPULATION =
             "http://teminology.hl7.org/CodeSystem/measure-population";
     // http://hl7.org/fhir/us/davinci-deqm/2023Jan/StructureDefinition-extension-populationReference.html
+public static final String EXT_CQFM_AGGREGATE_METHOD_URL= "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-aggregateMethod";
+    public static final String EXT_CQFM_CRITERIA_REFERENCE = "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-criteriaReference";
     public static final String EXT_DAVINCI_POPULATION_REFERENCE =
             "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-populationReference";
     // http://build.fhir.org/ig/HL7/davinci-deqm/StructureDefinition-extension-supplementalData.html
@@ -43,4 +47,6 @@ public class MeasureConstants {
     public static final String FHIR_ALL_TYPES_SYSTEM_URL = "http://hl7.org/fhir/fhir-types";
     public static final String POPULATION_BASIS_URL =
             "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-populationBasis";
+    public static final Set<String> CQFM_AGGREGATE_METHODS =
+        Set.of("sum", "max", "min", "avg", "count", "median");
 }

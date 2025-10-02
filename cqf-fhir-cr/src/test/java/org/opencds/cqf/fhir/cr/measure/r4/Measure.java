@@ -1014,6 +1014,12 @@ public class Measure {
             return this;
         }
 
+        public SelectedStratifier hasStratum(String textValue) {
+            final SelectedStratum stratum = stratum(textValue);
+            assertNotNull(stratum.value());
+            return this;
+        }
+
         public SelectedStratum stratum(CodeableConcept value) {
             return stratum(s -> s.getStratum().stream()
                     .filter(x -> x.hasValue() && x.getValue().equalsDeep(value))
@@ -1080,7 +1086,9 @@ public class Measure {
         }
 
         public SelectedStratum hasPopulationCount(int count) {
-            assertEquals(count, this.value().getPopulation().size());
+            final StratifierGroupComponent value = this.value();
+            final List<StratifierGroupPopulationComponent> population = value.getPopulation();
+            assertEquals(count, population.size());
             return this;
         }
 

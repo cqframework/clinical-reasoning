@@ -8,6 +8,8 @@ import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_SDE_
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import com.google.common.collect.Sets.SetView;
 import com.google.common.collect.Table;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -22,7 +24,6 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import javax.annotation.Nonnull;
 import org.apache.commons.lang3.StringUtils;
@@ -420,7 +421,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                     .components()
                     .forEach(component -> component.getResults().forEach((subject, result) -> {
                         ValueWrapper valueWrapper = new ValueWrapper(result.rawValue());
-                        subjectResultTable.put(ResourceType.Patient + "/" + subject, valueWrapper, component);
+                        subjectResultTable.put(addPatientQualifier(subject), valueWrapper, component);
                     }));
 
             // Stratifiers should be of the same basis as population
@@ -525,6 +526,17 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         // subject2: 'gender'--> 'F'
         // stratifier criteria results are: 'M', 'F'
 
+        if (StratifierUtils.isCriteriaBasedStratifierFromMeasureDefBuilder(groupDef, stratifierDef)) {
+            var reportStratum = reportStratifier.addStratum();
+            // LUKETODO: ??
+            var stratValues = Set.<ValueDef>of();
+            // LUKETODO: should match context of CQL, not only Patient
+            var patients = List.<String>of();
+
+            buildStratum(bc, stratifierDef, reportStratum, stratValues, patients, populations, groupDef);
+            return;
+        }
+
         Map<ValueWrapper, List<String>> subjectsByValue = subjectValues.keySet().stream()
                 .collect(Collectors.groupingBy(
                         x -> new ValueWrapper(subjectValues.get(x).rawValue())));
@@ -538,7 +550,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             // patch Patient values with prefix of ResourceType to match with incoming population subjects for stratum
             // TODO: should match context of CQL, not only Patient
             var patients = stratValue.getValue().stream()
-                    .map(t -> ResourceType.Patient.toString().concat("/").concat(t))
+                    .map(this::addPatientQualifier)
                     .collect(Collectors.toList());
             // build the stratum for each unique value
             // non-component stratifiers will populate a 'null' for componentStratifierDef, since it doesn't have
@@ -609,19 +621,12 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                 sgcc.setCode(new CodeableConcept().setText(componentDef.code().text()));
                 // set component on MeasureReport
                 stratum.addComponent(sgcc);
-            } else if (StratifierUtils.isCriteriaBasedStratifier(groupDef, value.getValue())) {
-                // LUKETODO:
+            } else if (StratifierUtils.isCriteriaBasedStratifierFromMeasureDefBuilder(groupDef, stratifierDef)) {
+                // LUKETODO: is this condition just a no-op?
                 System.out.println("componentDef = " + componentDef);
             } else {
                 // non-component stratifiers only set stratified value, code is set on stratifier object
                 // value being stratified: 'M'
-                /*
-                 * You can't specify multiple criteria expressions as component stratifiers
-                 * If expression result type is of the same basis as the group.populations (Encounter and Encounter) then it will be assumed to be 'criteria' based and not 'value' based
-                 * Criteria based stratifiers will use set membership to retain matching results from group.population results
-                 * stratifier element will retain all pertinent definitions to assist in identifying stratifiers (codeable concept, text, id)
-                 * stratum will not have only id, population results, and if applicable a score
-                 */
                 stratum.setValue(expressionResultToCodableConcept(value));
             }
         }
@@ -643,10 +648,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         }
     }
 
-    private CodeableConcept populationDefToCodableConcept(PopulationDef populationDef) {
-        return new CodeableConcept().setText(populationDef.code().text());
-    }
-
+    // LUKETODO:  what's with Enumeration[in-progress] AND Enumeration[finished] ???
     private CodeableConcept expressionResultToCodableConcept(ValueWrapper value) {
         return new CodeableConcept().setText(value.getValueAsString());
     }
@@ -657,7 +659,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             List<String> subjectIds,
             PopulationDef populationDef) {
         var popSubjectIds = populationDef.getSubjects().stream()
-                .map(t -> ResourceType.Patient.toString().concat("/").concat(t))
+                .map(this::addPatientQualifier)
                 .toList();
         if (popSubjectIds.isEmpty()) {
             sgpc.setCount(0);
@@ -687,7 +689,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
         final List<String> resourceIds = getResourceIds(subjectIds, groupDef, populationDef);
 
-        final int stratumCount = getStratumCountUpper(stratifierDef, subjectIds, groupDef, resourceIds);
+        final int stratumCount = getStratumCountUpper(stratifierDef, groupDef, populationDef, resourceIds);
 
         sgpc.setCount(stratumCount);
 
@@ -704,27 +706,22 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
     }
 
     private int getStratumCountUpper(
-            StratifierDef stratifierDef, List<String> subjectIds, GroupDef groupDef, List<String> resourceIds) {
+            StratifierDef stratifierDef, GroupDef groupDef, PopulationDef populationDef, List<String> resourceIds) {
 
-        final Map<String, CriteriaResult> results = stratifierDef.getResults();
+        // types of stratifiers
+        // 1. path-based stratifier (FHIR path expression) >>> use the resource type of the population basis
+        // 2. value-based stratifier >>> based on the values returned from that expression  ex age of the patient at
+        // the
+        // end of the measurement period   break down into stratums per value
+        // 3. criteria stratifier NOT implement >> mix of the previous 2
 
-        for (String subjectId : subjectIds) {
-
-            final CriteriaResult criteriaResult = results.get(stripPatientQualifier(subjectId));
-            final Object value = criteriaResult.rawValue();
-
-            var resultClasses = extractClassesFromSingleOrListResult(value);
-
-            // types of stratifiers
-            // 1. path-based stratifier (FHIR path expression) >>> use the resource type of the population basis
-            // 2. value-based stratifier >>> based on the values returned from that expression  ex age of the patient at
-            // the
-            // end of the measurement period   break down into stratums per value
-            // 3. criteria stratifier NOT implement >> mix of the previous 2
-
-            if (StratifierUtils.isCriteriaBasedStratifier(groupDef, value)) {
-                return resultClasses.size();
-            }
+        if (StratifierUtils.isCriteriaBasedStratifierFromMeasureDefBuilder(groupDef, stratifierDef)) {
+            final Set<Object> resources = populationDef.getResources();
+            final Set<?> results = stratifierDef.getAllCriteriaResultValues();
+            // LUKETODO:  Set intersection here:
+            final SetView<Object> populationResourcesPresentInStratumResults = Sets.intersection(resources, results);
+            //            return populationResourcesPresentInStratumResults.size();
+            return results.size();
         }
 
         if (resourceIds.isEmpty()) {
@@ -767,37 +764,6 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             }
         }
         return resourceIds;
-    }
-
-    // LUKETODO:  util method somewhere
-    @Nonnull
-    private String stripPatientQualifier(String subjectId) {
-        return subjectId.replace(ResourceType.Patient.toString().concat("/"), "");
-    }
-
-    private List<Class<?>> extractClassesFromSingleOrListResult(Object result) {
-        if (result == null) {
-            return Collections.emptyList();
-        }
-
-        if (!(result instanceof Iterable<?> iterable)) {
-            return Collections.singletonList(result.getClass());
-        }
-
-        // Need to this to return List<Class<?>> and get rid of Sonar warnings.
-        final Stream<Class<?>> classStream =
-                getStream(iterable).filter(Objects::nonNull).map(Object::getClass);
-
-        return classStream.toList();
-    }
-
-    private Stream<?> getStream(Iterable<?> iterable) {
-        if (iterable instanceof List<?> list) {
-            return list.stream();
-        }
-
-        // It's entirely possible CQL returns an Iterable that is not a List, so we need to handle that case
-        return StreamSupport.stream(iterable.spliterator(), false);
     }
 
     private void buildStratumPopulation(
@@ -867,7 +833,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         Set<String> populationSet;
         if (groupDef.isBooleanBasis()) {
             populationSet = populationDef.getSubjects().stream()
-                    .map(t -> ResourceType.Patient.toString().concat("/").concat(t))
+                    .map(this::addPatientQualifier)
                     .collect(Collectors.toSet());
         } else {
             populationSet = populationDef.getResources().stream()
@@ -1299,5 +1265,17 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                 return "<null>";
             }
         }
+    }
+
+    //  LUKETODO:  utils?
+    @Nonnull
+    private String addPatientQualifier(String t) {
+        return ResourceType.Patient.toString().concat("/").concat(t);
+    }
+
+    // LUKETODO:  util method somewhere
+    @Nonnull
+    private String stripPatientQualifier(String subjectId) {
+        return subjectId.replace(ResourceType.Patient.toString().concat("/"), "");
     }
 }

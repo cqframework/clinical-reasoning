@@ -291,6 +291,9 @@ class MeasureStratifierTest {
 
         logger.info(jsonParser.setPrettyPrint(true).encodeResourceToString(selectedReport.report()));
 
+        // LUKETODO: this is NOT a criteria stratifier
+        // LUKETODO: write a similar test where the stratifier returns Encounters
+
         selectedReport
                 .hasGroupCount(1)
                 .firstGroup()
@@ -309,7 +312,7 @@ class MeasureStratifierTest {
                 .hasStratifierCount(1)
                 .firstStratifier()
                 .hasStratumCount(6)
-                .stratum("in-progress")
+                .stratum("triaged")
                 .hasPopulationCount(3)
                 .population("initial-population")
                 .hasCount(2)
@@ -322,7 +325,33 @@ class MeasureStratifierTest {
                 .up()
                 .hasScore("0.0")
                 .up()
-                .stratum("triaged")
+                .stratum("arrived")
+                .hasPopulationCount(3)
+                .population("initial-population")
+                .hasCount(2)
+                .up()
+                .population("denominator")
+                .hasCount(2)
+                .up()
+                .population("numerator")
+                .hasCount(0)
+                .up()
+                .hasScore("0.0")
+                .up()
+                .stratum("cancelled")
+                .hasPopulationCount(3)
+                .population("initial-population")
+                .hasCount(2)
+                .up()
+                .population("denominator")
+                .hasCount(2)
+                .up()
+                .population("numerator")
+                .hasCount(0)
+                .up()
+                .hasScore("0.0")
+                .up()
+                .stratum("in-progress")
                 .hasPopulationCount(3)
                 .population("initial-population")
                 .hasCount(2)
@@ -348,7 +377,8 @@ class MeasureStratifierTest {
                 .up()
                 .hasScore("1.0")
                 .up()
-                .stratum("cancelled")
+                // LUKETODO:  document this weirdness
+                .stratum("in-progress,finished")
                 .hasPopulationCount(3)
                 .population("initial-population")
                 .hasCount(2)
@@ -357,22 +387,9 @@ class MeasureStratifierTest {
                 .hasCount(2)
                 .up()
                 .population("numerator")
-                .hasCount(0)
+                .hasCount(1)
                 .up()
-                .hasScore("0.0")
-                .up()
-                .stratum("arrived")
-                .hasPopulationCount(3)
-                .population("initial-population")
-                .hasCount(2)
-                .up()
-                .population("denominator")
-                .hasCount(2)
-                .up()
-                .population("numerator")
-                .hasCount(0)
-                .up()
-                .hasScore("0.0");
+                .hasScore("0.5");
     }
 
     /**

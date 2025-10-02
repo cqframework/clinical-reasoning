@@ -102,6 +102,12 @@ class CriteriaBasedStratifiersTest {
     //    }
     //    ]
 
+    /*
+    two patients
+    9 total encounters
+    1 encounter for patient 1 in-progress
+    2 encounter for patient 2 in-progress
+     */
     @Test
     void allPatientsTwoEncounters() {
         final SelectedReport selectedReport = GIVEN_REPO
@@ -123,13 +129,14 @@ class CriteriaBasedStratifiersTest {
                 .up()
                 .hasStratifierCount(1)
                 .firstStratifier()
-                //                .hasCode("in-progress encounters")
                 .hasStratumCount(1)
                 .firstStratum()
                 .hasPopulationCount(1)
                 .firstPopulation()
-                .hasCount(2);
+                .hasCount(3);
     }
+
+    // LUKETODO:  replicate the other test, but with encounters instead of statuses
 
     /*
         {

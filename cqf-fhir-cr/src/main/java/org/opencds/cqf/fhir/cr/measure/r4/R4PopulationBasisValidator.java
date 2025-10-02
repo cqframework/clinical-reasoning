@@ -135,7 +135,7 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
         // 3. criteria stratifier NOT implement >> mix of the previous 2
 
         // LUKETODO:  why are we doing this?
-        if (StratifierUtils.isCriteriaBasedStratifier(groupDef, expressionResult.value())) {
+        if (StratifierUtils.isCriteriaBasedStratifierFromMeasureEvaluation(groupDef, expressionResult.value())) {
             return;
         }
 

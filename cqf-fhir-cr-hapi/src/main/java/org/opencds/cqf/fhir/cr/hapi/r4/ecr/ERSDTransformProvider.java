@@ -3,9 +3,9 @@ package org.opencds.cqf.fhir.cr.hapi.r4.ecr;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.opencds.cqf.fhir.cr.ecr.FhirResourceExistsException;
 import org.opencds.cqf.fhir.cr.hapi.r4.IERSDV2ImportServiceFactory;
@@ -30,12 +30,12 @@ public class ERSDTransformProvider {
     @Description(shortDefinition = "Imports a v2 ERSD bundle", value = "Imports a v2 ERSD bundle")
     @Operation(idempotent = true, name = "$ersd-v2-import")
     public OperationOutcome eRSDV2ImportOperation(
-        RequestDetails requestDetails,
-        @OperationParam(name = "bundle") IBaseResource maybeBundle,
-        @OperationParam(name = "appAuthoritativeUrl") String appAuthoritativeUrl
-    ) throws UnprocessableEntityException, FhirResourceExistsException {
+            RequestDetails requestDetails,
+            @OperationParam(name = "bundle") IBaseResource maybeBundle,
+            @OperationParam(name = "appAuthoritativeUrl") String appAuthoritativeUrl)
+            throws UnprocessableEntityException, FhirResourceExistsException {
         return ersdv2ImportServiceFactory
-            .create(requestDetails)
-            .eRSDV2ImportOperation(maybeBundle, appAuthoritativeUrl);
+                .create(requestDetails)
+                .eRSDV2ImportOperation(maybeBundle, appAuthoritativeUrl);
     }
 }

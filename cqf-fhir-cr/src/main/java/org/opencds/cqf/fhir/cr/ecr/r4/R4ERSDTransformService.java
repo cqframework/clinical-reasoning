@@ -2,20 +2,19 @@ package org.opencds.cqf.fhir.cr.ecr.r4;
 
 import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.OperationOutcome;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.opencds.cqf.fhir.cr.ecr.FhirResourceExistsException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 public class R4ERSDTransformService {
     private static final Logger logger = LoggerFactory.getLogger(R4ERSDTransformService.class);
@@ -34,10 +33,8 @@ public class R4ERSDTransformService {
      * @param maybeBundle         the v2 bundle to import
      * @return the OperationOutcome
      */
-    public OperationOutcome eRSDV2ImportOperation(
-        IBaseResource maybeBundle,
-        String appAuthoritativeUrl
-    ) throws UnprocessableEntityException, FhirResourceExistsException {
+    public OperationOutcome eRSDV2ImportOperation(IBaseResource maybeBundle, String appAuthoritativeUrl)
+            throws UnprocessableEntityException, FhirResourceExistsException {
 
         if (appAuthoritativeUrl == null) {
             throw new UnprocessableEntityException("appAuthoritativeUrl is missing, e.g. http://example.com/fhir");
@@ -49,7 +46,7 @@ public class R4ERSDTransformService {
 
         Bundle v2Bundle = (Bundle) maybeBundle;
         List<Bundle.BundleEntryComponent> importTxBundleEntries =
-            R4ImportBundleProducer.transformImportBundle(v2Bundle, this.repository, appAuthoritativeUrl);
+                R4ImportBundleProducer.transformImportBundle(v2Bundle, this.repository, appAuthoritativeUrl);
 
         List<List<Bundle.BundleEntryComponent>> subLists = splitList(importTxBundleEntries, 74);
         long startTime = System.nanoTime();
@@ -61,19 +58,17 @@ public class R4ERSDTransformService {
             Bundle txBundle = this.createTransactionBundle(subLists.get(i));
 
             final int sublistIndex = i;
-            CompletableFuture<Void> future = CompletableFuture
-                .runAsync(() -> this.repository.transaction(txBundle))
-                .exceptionally(ex -> {
-                    logger.error("Transaction failed for sublist {}", sublistIndex, ex);
-                    return null;
-                });
+            CompletableFuture<Void> future = CompletableFuture.runAsync(() -> this.repository.transaction(txBundle))
+                    .exceptionally(ex -> {
+                        logger.error("Transaction failed for sublist {}", sublistIndex, ex);
+                        return null;
+                    });
 
             futures.add(future);
         }
 
         // Combine all futures and block until they finish
-        CompletableFuture<Void> allFutures =
-            CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
+        CompletableFuture<Void> allFutures = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
 
         allFutures.join(); // <-- waits for all to complete
 
@@ -92,11 +87,10 @@ public class R4ERSDTransformService {
         return response;
     }
 
-
     public static <T> List<List<T>> splitList(List<T> list, int chunkSize) {
         return IntStream.range(0, (list.size() + chunkSize - 1) / chunkSize)
-            .mapToObj(i -> list.subList(i * chunkSize, Math.min((i + 1) * chunkSize, list.size())))
-            .collect(Collectors.toList());
+                .mapToObj(i -> list.subList(i * chunkSize, Math.min((i + 1) * chunkSize, list.size())))
+                .collect(Collectors.toList());
     }
 
     private Bundle createTransactionBundle(List<BundleEntryComponent> bundleEntry) {

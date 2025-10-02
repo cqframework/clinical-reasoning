@@ -9,6 +9,7 @@ import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.util.FhirTerser;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -339,7 +340,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
                 artifactAdapter.setRelatedArtifact(updatedRelatedArtifacts);
             }
 
-            var dependencies = artifactAdapter.getDependencies();
+            var dependencies = artifactAdapter.getDependencies(this.repository);
             // Step 2: update dependencies recursively
             for (var dependency : dependencies) {
                 IKnowledgeArtifactAdapter dependencyAdapter = null;
@@ -452,12 +453,13 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
                     tryFindLatestDependency(dependency.getReference(), resourceType, latestFromTxServer, endpoint);
 
             // Only add the expansion parameters entry for versionless references
-            maybeAdapter.ifPresent(iKnowledgeArtifactAdapter -> ((ILibraryAdapter) artifactBeingReleasedAdapter)
-                    .ensureExpansionParametersEntry(
-                            iKnowledgeArtifactAdapter,
-                            terminologyServerClient
-                                    .getTerminologyServerClientSettings()
-                                    .getCrmiVersion()));
+            if (maybeAdapter.isPresent() && artifactBeingReleasedAdapter instanceof ILibraryAdapter libraryAdapter) {
+                libraryAdapter.ensureExpansionParametersEntry(
+                        maybeAdapter.get(),
+                        terminologyServerClient
+                                .getTerminologyServerClientSettings()
+                                .getCrmiVersion());
+            }
         }
 
         return maybeAdapter;
@@ -465,7 +467,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
 
     private Optional<IKnowledgeArtifactAdapter> tryFindLatestDependency(
             String reference, String resourceType, boolean latestFromTxServer, IEndpointAdapter endpoint) {
-        Optional<IKnowledgeArtifactAdapter> maybeAdapter;
+        Optional<IKnowledgeArtifactAdapter> maybeAdapter = Optional.empty();
         // we trust in this case that the Endpoint URL matches up with the Authoritative Source in the ValueSet
         // if this assumption is faulty the only consequence is that the VSet doesn't get resolved
         if (resourceType != null && resourceType.equals(Constants.RESOURCETYPE_VALUESET) && latestFromTxServer) {
@@ -479,10 +481,21 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
                     .getCodeSystemResource(endpoint, reference)
                     .map(r -> (IKnowledgeArtifactAdapter) createAdapterForResource(r));
         } else {
-            // get the latest ACTIVE version, if not fallback to the latest non-DRAFT version
-            maybeAdapter = VisitorHelper.tryGetLatestVersionWithStatus(reference, repository, Constants.STATUS_ACTIVE)
-                    .or(() -> VisitorHelper.tryGetLatestVersionExceptStatus(
-                            reference, repository, Constants.STATUS_DRAFT));
+            if (resourceType == null) {
+                return maybeAdapter;
+            }
+            // TODO: this not bad... do a little better tho
+            var hasUrl = new FhirTerser(fhirContext())
+                    .fieldExists(
+                            "url",
+                            fhirContext().getResourceDefinition(resourceType).newInstance());
+            if (hasUrl) {
+                // get the latest ACTIVE version, if not fallback to the latest non-DRAFT version
+                maybeAdapter = VisitorHelper.tryGetLatestVersionWithStatus(
+                                reference, repository, Constants.STATUS_ACTIVE)
+                        .or(() -> VisitorHelper.tryGetLatestVersionExceptStatus(
+                                reference, repository, Constants.STATUS_DRAFT));
+            }
         }
         return maybeAdapter;
     }

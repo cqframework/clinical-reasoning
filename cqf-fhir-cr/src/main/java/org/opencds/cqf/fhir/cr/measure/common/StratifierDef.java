@@ -50,10 +50,7 @@ public class StratifierDef {
     }
 
     public void putResult(String subject, Object value, Set<Object> evaluatedResources) {
-        this.getResults().put(subject,
-            new CriteriaResult(
-                value,
-                new HashSetForFhirResources<>(evaluatedResources)));
+        this.getResults().put(subject, new CriteriaResult(value, new HashSetForFhirResources<>(evaluatedResources)));
     }
 
     public Map<String, CriteriaResult> getResults() {
@@ -79,8 +76,7 @@ public class StratifierDef {
         }
 
         if (value instanceof Iterable<?> iterable) {
-            return StreamSupport.stream(iterable.spliterator(), false)
-                .collect(Collectors.toUnmodifiableSet());
+            return StreamSupport.stream(iterable.spliterator(), false).collect(Collectors.toUnmodifiableSet());
         } else {
             return Set.of(value);
         }

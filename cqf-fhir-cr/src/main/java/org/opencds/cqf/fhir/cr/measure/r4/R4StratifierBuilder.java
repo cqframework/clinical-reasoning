@@ -434,9 +434,7 @@ class R4StratifierBuilder {
     }
 
     protected static ListResource createIdList(String id, Collection<String> ids) {
-        return createReferenceList(id, ids.stream()
-            .map(Reference::new)
-            .toList());
+        return createReferenceList(id, ids.stream().map(Reference::new).toList());
     }
 
     protected static ListResource createReferenceList(String id, Collection<Reference> references) {

@@ -110,7 +110,7 @@ public class ExpandRunner implements Runnable {
                         paramsWithOffset.addParameter("offset", offset);
                         var nextExpansion = fhirClient
                                 .operation()
-                                .onType("ValueSet")
+                                .onInstance(id)
                                 .named("$expand")
                                 .withParameters((IBaseParameters) paramsWithOffset.get())
                                 .returnResourceType(getValueSetClass())

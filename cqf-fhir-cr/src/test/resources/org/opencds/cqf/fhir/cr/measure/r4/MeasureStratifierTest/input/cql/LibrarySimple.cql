@@ -133,6 +133,10 @@ define "Encounter Status":
     [Encounter] E
          return E.status
 
+define "in-progress encounters":
+    [Encounter] E
+        where E.status='in-progress'
+
 define "Encounter InProgress":
     [Encounter] E
        where E.status = 'in-progress'

@@ -1,7 +1,7 @@
 {
-  "id": "RatioResourceStratSameType",
+  "id": "RatioResourceStratValue",
   "resourceType": "Measure",
-  "url": "http://example.com/Measure/RatioResourceStratSameype",
+  "url": "http://example.com/Measure/RatioResourceStratValue",
   "library": [
     "http://example.com/Library/LibrarySimple"
   ],
@@ -77,7 +77,7 @@
           "id": "stratifier-2",
           "criteria": {
             "language": "text/cql.identifier",
-            "expression": "in progress encounters"
+            "expression": "Age"
           }
         }
       ]

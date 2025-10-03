@@ -8,15 +8,11 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportStatus;
-import org.hl7.fhir.r4.model.Period;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.SelectedReport;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.When;
-import org.opencds.cqf.fhir.cr.measure.r4.utils.TestDataGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,18 +25,9 @@ import org.slf4j.LoggerFactory;
 class MeasureStratifierTest {
     private static final Logger logger = LoggerFactory.getLogger(MeasureStratifierTest.class);
 
-    private static final Given GIVEN_MEASURE_TEST = Measure.given().repositoryFor("MeasureTest");
+    private static final Given GIVEN_MEASURE_TEST = Measure.given().repositoryFor("MeasureStratifierTest");
     private static final Given GIVEN_CRITERIA_BASED_STRAT = Measure.given().repositoryFor("CriteriaBasedStratifiers");
-    private static final TestDataGenerator TEST_DATA_GENERATOR =
-            new TestDataGenerator(GIVEN_MEASURE_TEST.getRepository());
 
-    @BeforeAll
-    static void init() {
-        Period period = new Period();
-        period.setStartElement(new DateTimeType("2024-01-01T01:00:00Z"));
-        period.setEndElement(new DateTimeType("2024-01-01T03:00:00Z"));
-        TEST_DATA_GENERATOR.makePatient(null, null, period);
-    }
     /**
      * Boolean Basis Measure with Stratifier defined by component expression that results in CodeableConcept value of 'M' or 'F' for the Measure population. For 'Individual' reportType
      */
@@ -321,6 +308,7 @@ class MeasureStratifierTest {
                 .hasScore("0.18181818181818182")
                 .hasStratifierCount(1)
                 .firstStratifier()
+                .hasCodeText(null)
                 .hasStratumCount(6)
                 .stratum("triaged")
                 .hasPopulationCount(3)
@@ -417,7 +405,31 @@ class MeasureStratifierTest {
         // LUKETODO:  add way more assertions
         // LUKETODO: write a similar test where the stratifier returns Encounters
 
-        selectedReport.hasGroupCount(1);
+        selectedReport.hasGroupCount(1)
+            .firstGroup()
+            .hasPopulationCount(3)
+            .population("initial-population")
+            .hasCount(11)
+            .up()
+            .population("denominator")
+            .hasCount(11)
+            .up()
+            .population("numerator")
+            .hasCount(2)
+            .up()
+            .hasMeasureScore(true)
+            .hasScore("0.18181818181818182")
+            .hasStratifierCount(1)
+            .firstStratifier()
+            .hasCodeText("in-progress encounters")
+            .hasStratumCount(1)
+            .firstStratum()
+            .hasPopulationCount(3)
+            .population("initial-population")
+            .up()
+            .population("denominator")
+            .up()
+            .population("numerator");
     }
 
     /**
@@ -498,7 +510,7 @@ class MeasureStratifierTest {
                 .hasStratumCount(1)
                 .firstStratum()
                 .hasPopulationCount(1)
-                .firstPopulation()
+                .population("initial-population")
                 .hasCount(1);
     }
 

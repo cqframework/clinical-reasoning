@@ -41,7 +41,10 @@ import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureReportBuilder.BuilderContext;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureReportBuilder.ValueWrapper;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4ResourceIdUtils;
 
-// LUKETODO:  javadoc
+/**
+ * Convenience class with functionality split out from {@link R4MeasureReportBuilder } to
+ * handle stratifiers
+ */
 class R4StratifierBuilder {
 
     static void buildStratifier(
@@ -52,7 +55,6 @@ class R4StratifierBuilder {
             List<MeasureGroupPopulationComponent> populations,
             GroupDef groupDef) {
         // the top level stratifier 'id' and 'code'
-        // LUKETODO:  do we need to literally set this to "in-progress encounters" ?
         reportStratifier.setCode(getCodeForReportStratifier(groupDef, stratifierDef, measureStratifier));
         reportStratifier.setId(measureStratifier.getId());
         // if description is defined, add to MeasureReport
@@ -130,9 +132,9 @@ class R4StratifierBuilder {
 
         if (StratifierUtils.isCriteriaBasedStratifier(groupDef, stratifierDef)) {
             var reportStratum = reportStratifier.addStratum();
-            // LUKETODO: ??
+            // Seems to be irrelevant for criteria based stratifiers
             var stratValues = Set.<ValueDef>of();
-            // LUKETODO: should match context of CQL, not only Patient
+            // Seems to be irrelevant for criteria based stratifiers
             var patients = List.<String>of();
 
             buildStratum(bc, stratifierDef, reportStratum, stratValues, patients, populations, groupDef);
@@ -244,10 +246,7 @@ class R4StratifierBuilder {
                 sgcc.setCode(new CodeableConcept().setText(componentDef.code().text()));
                 // set component on MeasureReport
                 stratum.addComponent(sgcc);
-            } else if (StratifierUtils.isCriteriaBasedStratifier(groupDef, stratifierDef)) {
-                // LUKETODO: is this condition just a no-op?
-                System.out.println("componentDef = " + componentDef);
-            } else {
+            } else if (!StratifierUtils.isCriteriaBasedStratifier(groupDef, stratifierDef)) {
                 // non-component stratifiers only set stratified value, code is set on stratifier object
                 // value being stratified: 'M'
                 stratum.setValue(expressionResultToCodableConcept(value));

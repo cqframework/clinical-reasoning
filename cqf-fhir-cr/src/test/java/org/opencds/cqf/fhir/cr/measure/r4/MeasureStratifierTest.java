@@ -4,14 +4,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportStatus;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
-import org.opencds.cqf.fhir.cr.measure.r4.Measure.SelectedReport;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.When;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -286,18 +284,11 @@ class MeasureStratifierTest {
      */
     @Test
     void ratioResourceDifferentTypeStratNotCriteriaBased() {
-        // LUKETODO:  implement this
-        final SelectedReport selectedReport = GIVEN_MEASURE_STRATIFIER_TEST
+        GIVEN_MEASURE_STRATIFIER_TEST
                 .when()
                 .measureId("RatioResourceStratDifferentType")
                 .evaluate()
-                .then();
-
-        var jsonParser = FhirContext.forR4Cached().newJsonParser();
-
-        logger.info(jsonParser.setPrettyPrint(true).encodeResourceToString(selectedReport.report()));
-
-        selectedReport
+                .then()
                 .hasGroupCount(1)
                 .firstGroup()
                 .hasPopulationCount(3)
@@ -499,26 +490,17 @@ class MeasureStratifierTest {
 
     @Disabled
     @Test
-    void newnewnewnewmultiexpressionstratifiercriteriabasedtest() {
-        final SelectedReport selectedReport = GIVEN_CRITERIA_BASED_STRAT_COMPLEX
+    void criteriaBasedStratifiersComplexSetsDifferentForInitialDenominatorAndNumerator() {
+        GIVEN_CRITERIA_BASED_STRAT_COMPLEX
                 .when()
                 .measureId("CriteriaBasedStratifiersComplex")
                 .evaluate()
-                .then();
-
-        var jsonParser = FhirContext.forR4Cached().newJsonParser();
-
-        logger.info(jsonParser.setPrettyPrint(true).encodeResourceToString(selectedReport.report()));
-
-        // LUKETODO:  add way more assertions
-        // LUKETODO: write a similar test where the stratifier returns Encounters
-
-        selectedReport
+                .then()
                 .hasGroupCount(1)
                 .firstGroup()
                 .hasPopulationCount(3)
                 .population("initial-population")
-                .hasCount(10)
+                .hasCount(11)
                 .up()
                 .population("denominator")
                 .hasCount(8)
@@ -536,10 +518,9 @@ class MeasureStratifierTest {
                 .firstStratum()
                 .hasPopulationCount(3)
                 .population("initial-population")
-                .hasCount(2)
+                .hasCount(3)
                 .up()
                 .population("denominator")
-                // LUKETODO:  make sure this count is different from the initial pop and the numerator
                 .hasCount(2)
                 .up()
                 .population("numerator")

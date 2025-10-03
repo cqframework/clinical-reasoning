@@ -3,12 +3,10 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.repository.IRepository;
+import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import java.nio.file.Path;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportStatus;
@@ -19,7 +17,6 @@ import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.SelectedReport;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.When;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.TestDataGenerator;
-import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,18 +30,21 @@ class MeasureStratifierTest {
     private static final Logger logger = LoggerFactory.getLogger(MeasureStratifierTest.class);
 
     private static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/measure/r4";
-    private static final IRepository repository = new IgRepository(
-            FhirContext.forR4Cached(),
-            Path.of(getResourcePath(MeasureStratifierTest.class) + "/" + CLASS_PATH + "/" + "MeasureTest"));
-    private final Given given = Measure.given().repository(repository);
-    private static final TestDataGenerator testDataGenerator = new TestDataGenerator(repository);
+    //    private static final IRepository repository = new IgRepository(
+    //            FhirContext.forR4Cached(),
+    //            Path.of(getResourcePath(MeasureStratifierTest.class) + "/" + CLASS_PATH + "/" + "MeasureTest"));
+    //    private final Given given = Measure.given().repository(repository);
+    private static final Given GIVEN_MEASURE_TEST = Measure.given().repositoryFor("MeasureTest");
+    private static final Given GIVEN_CRITERIA_BASED_STRAT = Measure.given().repositoryFor("CriteriaBasedStratifiers");
+    private static final TestDataGenerator TEST_DATA_GENERATOR =
+            new TestDataGenerator(GIVEN_MEASURE_TEST.getRepository());
 
     @BeforeAll
     static void init() {
         Period period = new Period();
         period.setStartElement(new DateTimeType("2024-01-01T01:00:00Z"));
         period.setEndElement(new DateTimeType("2024-01-01T03:00:00Z"));
-        testDataGenerator.makePatient(null, null, period);
+        TEST_DATA_GENERATOR.makePatient(null, null, period);
     }
     /**
      * Boolean Basis Measure with Stratifier defined by component expression that results in CodeableConcept value of 'M' or 'F' for the Measure population. For 'Individual' reportType
@@ -53,7 +53,8 @@ class MeasureStratifierTest {
     void cohortBooleanHasCodeStratIndividualResult() {
         var mCC = new CodeableConcept().setText("M");
 
-        given.when()
+        GIVEN_MEASURE_TEST
+                .when()
                 .measureId("CohortBooleanStratCode")
                 .subject("Patient/patient-9")
                 .evaluate()
@@ -78,7 +79,8 @@ class MeasureStratifierTest {
         var mCC = new CodeableConcept().setText("M");
         var fCC = new CodeableConcept().setText("F");
 
-        given.when()
+        GIVEN_MEASURE_TEST
+                .when()
                 .measureId("CohortBooleanStratCode")
                 .evaluate()
                 .then()
@@ -107,7 +109,8 @@ class MeasureStratifierTest {
         var isUnfinished = new CodeableConcept().setText("true");
         var notUnfinished = new CodeableConcept().setText("false");
 
-        given.when()
+        GIVEN_MEASURE_TEST
+                .when()
                 .measureId("CohortBooleanStratValue")
                 .evaluate()
                 .then()
@@ -141,7 +144,8 @@ class MeasureStratifierTest {
         var mCC = new CodeableConcept().setText("M");
         var fCC = new CodeableConcept().setText("F");
 
-        given.when()
+        GIVEN_MEASURE_TEST
+                .when()
                 .measureId("CohortBooleanStratMulti")
                 .evaluate()
                 .then()
@@ -180,7 +184,8 @@ class MeasureStratifierTest {
      */
     @Test
     void cohortBooleanNoIdStrat() {
-        final When evaluate = given.when().measureId("CohortBooleanStratNoId").evaluate();
+        final When evaluate =
+                GIVEN_MEASURE_TEST.when().measureId("CohortBooleanStratNoId").evaluate();
         try {
             evaluate.then();
             fail("should throw a missing Id scenario");
@@ -194,7 +199,11 @@ class MeasureStratifierTest {
     @Test
     void cohortBooleanDifferentTypeStrat() {
         try {
-            given.when().measureId("CohortBooleanStratDifferentType").evaluate().then();
+            GIVEN_MEASURE_TEST
+                    .when()
+                    .measureId("CohortBooleanStratDifferentType")
+                    .evaluate()
+                    .then();
         } catch (InvalidRequestException exception) {
             assertEquals(
                     "stratifier expression criteria results for expression: [resource strat not finished] must fall within accepted types for boolean population basis: [boolean] for Measure: http://example.com/Measure/CohortBooleanStratDifferentType",
@@ -209,7 +218,8 @@ class MeasureStratifierTest {
      */
     @Test
     void cohortBooleanComponentStrat() {
-        given.when()
+        GIVEN_MEASURE_TEST
+                .when()
                 .measureId("CohortBooleanStratComponent")
                 .evaluate()
                 .then()
@@ -246,7 +256,8 @@ class MeasureStratifierTest {
     @Test
     void ratioResourceValueStrat() {
 
-        given.when()
+        GIVEN_MEASURE_TEST
+                .when()
                 .measureId("RatioResourceStratValue")
                 .evaluate()
                 .reportType("subject-list")
@@ -282,7 +293,8 @@ class MeasureStratifierTest {
      */
     @Test
     void ratioResourceDifferentTypeStrat() {
-        final SelectedReport selectedReport = given.when()
+        final SelectedReport selectedReport = GIVEN_MEASURE_TEST
+                .when()
                 .measureId("RatioResourceStratDifferentType")
                 .evaluate()
                 .then();
@@ -394,20 +406,19 @@ class MeasureStratifierTest {
 
     @Test
     void ratioResourceSameTypeStrat() {
-        final SelectedReport selectedReport = given.when()
-            .measureId("RatioResourceStratSameType")
-            .evaluate()
-            .then();
+        final SelectedReport selectedReport = GIVEN_MEASURE_TEST
+                .when()
+                .measureId("RatioResourceStratSameType")
+                .evaluate()
+                .then();
 
         var jsonParser = FhirContext.forR4Cached().newJsonParser();
 
-        logger.info(
-            jsonParser.setPrettyPrint(true).encodeResourceToString(selectedReport.report()));
+        logger.info(jsonParser.setPrettyPrint(true).encodeResourceToString(selectedReport.report()));
 
         // LUKETODO:  add way more assertions
 
-        selectedReport
-            .hasGroupCount(1);
+        selectedReport.hasGroupCount(1);
     }
 
     /**
@@ -417,7 +428,8 @@ class MeasureStratifierTest {
     @Test
     void ratioBooleanValueStrat() {
 
-        given.when()
+        GIVEN_MEASURE_TEST
+                .when()
                 .measureId("RatioBooleanStratValue")
                 .evaluate()
                 .then()
@@ -444,7 +456,8 @@ class MeasureStratifierTest {
     @Test
     void twoStatifierCriteria() {
         try {
-            given.when()
+            GIVEN_MEASURE_TEST
+                    .when()
                     .measureId("CohortBooleanStratComponentInvalid")
                     .evaluate()
                     .then()
@@ -458,4 +471,186 @@ class MeasureStratifierTest {
                                     "Measure stratifier: stratifier-1, has both component and stratifier criteria expression defined. Only one should be specified"));
         }
     }
+
+    @Test
+    void criteriaBasedStratSinglePatientSingleEncounter() {
+        final SelectedReport selectedReport = GIVEN_CRITERIA_BASED_STRAT
+                .when()
+                .measureId("CriteriaBasedStratifiers")
+                .subject("Patient/patient1")
+                .evaluate()
+                .then();
+
+        final IParser jsonParser = FhirContext.forR4Cached().newJsonParser();
+
+        final String serialized = jsonParser.setPrettyPrint(true).encodeResourceToString(selectedReport.report());
+
+        logger.info(serialized);
+
+        selectedReport
+                .firstGroup()
+                .population("initial-population")
+                .hasCount(4)
+                .up()
+                .hasStratifierCount(1)
+                .firstStratifier()
+                // LUKETODO:  what do we do about this?
+                //                .hasCode("in-progress encounters")
+                .hasStratumCount(1)
+                .firstStratum()
+                .hasPopulationCount(1)
+                .firstPopulation()
+                .hasCount(1);
+    }
+
+    // LUKETODO:  test with multiple stratifiers and multiple strata and assert exception
+
+    //      "group": [
+    //    {
+    //        "id": "group-1",
+    //        "population": [
+    //        {
+    //            "code": {
+    //            "coding": [
+    //            {
+    //                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+    //                "code": "initial-population",
+    //                "display": "Initial Population"
+    //            }
+    //            ]
+    //        },
+    //            "count": 2
+    //        }
+    //      ],
+    //        "stratifier": [
+    //        {
+    //            "id": "stratifier-1",
+    //            "code": [
+    //            {
+    //                "text": "in-progress encounters"
+    //            }
+    //          ],
+    //            "stratum": [
+    //            {
+    //                "population": [
+    //                {
+    //                    "id": "stratifier-1-initial-population",
+    //                    "extension": [
+    //                    {
+    //                        "url":
+    // "http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.population.description",
+    //                        "valueString": "Initial Population"
+    //                    }
+    //                ],
+    //                    "code": {
+    //                    "coding": [
+    //                    {
+    //                        "system": "https://ncqa.org/fhir/CodeSystem/measure-group",
+    //                        "code": "initial-population"
+    //                    }
+    //                  ]
+    //                },
+    //                    "count": 1
+    //                }
+    //            ]
+    //            }
+    //          ]
+    //        }
+    //        ]
+    //    }
+    //    ]
+
+    /*
+    two patients
+    9 total encounters
+    1 encounter for patient 1 in-progress
+    2 encounter for patient 2 in-progress
+     */
+    @Test
+    void criteriaBasedStratAllPatientsTwoEncounters() {
+        final SelectedReport selectedReport = GIVEN_CRITERIA_BASED_STRAT
+                .when()
+                .measureId("CriteriaBasedStratifiers")
+                .evaluate()
+                .then();
+
+        final IParser jsonParser = FhirContext.forR4Cached().newJsonParser();
+
+        final String serialized = jsonParser.setPrettyPrint(true).encodeResourceToString(selectedReport.report());
+
+        logger.info(serialized);
+
+        selectedReport
+                .firstGroup()
+                .population("initial-population")
+                .hasCount(9)
+                .up()
+                .hasStratifierCount(1)
+                .firstStratifier()
+                .hasStratumCount(1)
+                .firstStratum()
+                .hasPopulationCount(1)
+                .firstPopulation()
+                .hasCount(3);
+    }
+
+    // LUKETODO:  replicate the other test, but with encounters instead of statuses
+
+    /*
+        {
+      "resourceType": "MeasureReport",
+      "status": "complete",
+      "type": "summary",
+      "measure": "http://example.com/Measure/CriteriaBasedStratifiers",
+      "date": "2025-10-02T10:04:56-04:00",
+      "group": [ {
+        "id": "group-1",
+        "population": [ {
+          "id": "initial-population",
+          "code": {
+            "coding": [ {
+              "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+              "code": "initial-population",
+              "display": "Initial Population"
+            } ]
+          },
+          "count": 8
+        } ],
+        "stratifier": [ {
+          "id": "stratifier-1",
+          "stratum": [ {
+            "value": {
+              "text": "Encounter/enc_in_progress_pat1_1"
+            },
+            "population": [ {
+              "id": "initial-population",
+              "code": {
+                "coding": [ {
+                  "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                  "code": "initial-population",
+                  "display": "Initial Population"
+                } ]
+              },
+              "count": 1
+            } ]
+          }, {
+            "value": {
+              "text": "Encounter/enc_in_progress_pat2_1"
+            },
+            "population": [ {
+              "id": "initial-population",
+              "code": {
+                "coding": [ {
+                  "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                  "code": "initial-population",
+                  "display": "Initial Population"
+                } ]
+              },
+              "count": 1
+            } ]
+          } ]
+        } ]
+      } ]
+    }
+         */
 }

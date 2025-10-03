@@ -1,15 +1,14 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.annotation.Nullable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 public class StratifierDef {
@@ -90,7 +89,7 @@ public class StratifierDef {
 
         var resultClasses = results.values().stream()
                 .map(CriteriaResult::rawValue)
-                .map(this::extractClassesFromSingleOrListResult)
+                .map(StratifierUtils::extractClassesFromSingleOrListResult)
                 .flatMap(Collection::stream)
                 .collect(Collectors.toUnmodifiableSet());
 
@@ -102,34 +101,8 @@ public class StratifierDef {
             return null;
         }
 
-        // LUKETODO:  do we ever get this?
-        throw new RuntimeException("There should be only one result type for this StratifierDef but there was: %s"
-                .formatted(resultClasses));
-    }
-
-    // LUKETODO:  code duplication
-    private List<Class<?>> extractClassesFromSingleOrListResult(Object result) {
-        if (result == null) {
-            return Collections.emptyList();
-        }
-
-        if (!(result instanceof Iterable<?> iterable)) {
-            return Collections.singletonList(result.getClass());
-        }
-
-        // Need to this to return List<Class<?>> and get rid of Sonar warnings.
-        final Stream<Class<?>> classStream =
-                getStream(iterable).filter(Objects::nonNull).map(Object::getClass);
-
-        return classStream.toList();
-    }
-
-    private Stream<?> getStream(Iterable<?> iterable) {
-        if (iterable instanceof List<?> list) {
-            return list.stream();
-        }
-
-        // It's entirely possible CQL returns an Iterable that is not a List, so we need to handle that case
-        return StreamSupport.stream(iterable.spliterator(), false);
+        throw new InvalidRequestException(
+                "There should be only one result type for this StratifierDef but there was: %s"
+                        .formatted(resultClasses));
     }
 }

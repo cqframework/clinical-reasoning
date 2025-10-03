@@ -304,9 +304,6 @@ class MeasureStratifierTest {
 
         logger.info(jsonParser.setPrettyPrint(true).encodeResourceToString(selectedReport.report()));
 
-        // LUKETODO: this is NOT a criteria stratifier
-        // LUKETODO: write a similar test where the stratifier returns Encounters
-
         selectedReport
                 .hasGroupCount(1)
                 .firstGroup()
@@ -418,6 +415,7 @@ class MeasureStratifierTest {
         logger.info(jsonParser.setPrettyPrint(true).encodeResourceToString(selectedReport.report()));
 
         // LUKETODO:  add way more assertions
+        // LUKETODO: write a similar test where the stratifier returns Encounters
 
         selectedReport.hasGroupCount(1);
     }

@@ -19,7 +19,6 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
-import javax.annotation.Nonnull;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -63,6 +62,7 @@ import org.opencds.cqf.fhir.cr.measure.common.SdeDef;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4DateHelper;
+import org.opencds.cqf.fhir.cr.measure.r4.utils.R4ResourceIdUtils;
 
 public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, MeasureReport, DomainResource> {
 
@@ -440,7 +440,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         Set<String> populationSet;
         if (groupDef.isBooleanBasis()) {
             populationSet = populationDef.getSubjects().stream()
-                    .map(this::addPatientQualifier)
+                    .map(R4ResourceIdUtils::addPatientQualifier)
                     .collect(Collectors.toSet());
         } else {
             populationSet = populationDef.getResources().stream()
@@ -870,11 +870,5 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                 return "<null>";
             }
         }
-    }
-
-    //  LUKETODO:  utils?
-    @Nonnull
-    private String addPatientQualifier(String t) {
-        return ResourceType.Patient.toString().concat("/").concat(t);
     }
 }

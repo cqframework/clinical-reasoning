@@ -14,6 +14,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
@@ -363,29 +364,13 @@ public class MeasureEvaluator {
         }
     }
 
-    protected Object addStratifierResult(Object result) {
-        // LUKETODO:  figure out what to ultimately do about this:
-        //        if (result instanceof Iterable<?> iterable) {
-        //            var resultIter = iterable.iterator();
-        //            if (!resultIter.hasNext()) {
-        //                result = null;
-        //            } else {
-        //                result = resultIter.next();
-        //            }
-        //
-        //            // Any number of results is permitted
-        //        }
-        return result;
-    }
-
     protected void addStratifierComponentResult(
             List<StratifierComponentDef> components, EvaluationResult evaluationResult, String subjectId) {
         for (StratifierComponentDef component : components) {
             var expressionResult = evaluationResult.forExpression(component.expression());
-            Object result = addStratifierResult(expressionResult.value());
-            if (result != null) {
-                component.putResult(subjectId, result, expressionResult.evaluatedResources());
-            }
+            Optional.ofNullable(expressionResult.value())
+                    .ifPresent(nonNullValue ->
+                            component.putResult(subjectId, nonNullValue, expressionResult.evaluatedResources()));
         }
     }
 
@@ -398,13 +383,11 @@ public class MeasureEvaluator {
             } else {
 
                 var expressionResult = evaluationResult.forExpression(stratifierDef.expression());
-                Object result = addStratifierResult(expressionResult.value());
-                if (result != null) {
-                    stratifierDef.putResult(
-                            subjectId, // context of CQL expression ex: Patient based
-                            result,
-                            expressionResult.evaluatedResources());
-                }
+                Optional.ofNullable(expressionResult.value())
+                        .ifPresent(nonNullValue -> stratifierDef.putResult(
+                                subjectId, // context of CQL expression ex: Patient based
+                                nonNullValue,
+                                expressionResult.evaluatedResources()));
             }
         }
     }

@@ -39,6 +39,7 @@ import org.opencds.cqf.fhir.cr.measure.common.StratifierUtils;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureReportBuilder.BuilderContext;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureReportBuilder.ValueWrapper;
+import org.opencds.cqf.fhir.cr.measure.r4.utils.R4ResourceIdUtils;
 
 // LUKETODO:  javadoc
 class R4StratifierBuilder {
@@ -73,7 +74,7 @@ class R4StratifierBuilder {
                     .components()
                     .forEach(component -> component.getResults().forEach((subject, result) -> {
                         ValueWrapper valueWrapper = new ValueWrapper(result.rawValue());
-                        subjectResultTable.put(addPatientQualifier(subject), valueWrapper, component);
+                        subjectResultTable.put(R4ResourceIdUtils.addPatientQualifier(subject), valueWrapper, component);
                     }));
 
             // Stratifiers should be of the same basis as population
@@ -127,7 +128,7 @@ class R4StratifierBuilder {
         // subject2: 'gender'--> 'F'
         // stratifier criteria results are: 'M', 'F'
 
-        if (StratifierUtils.isCriteriaBasedStratifierFromMeasureDefBuilder(groupDef, stratifierDef)) {
+        if (StratifierUtils.isCriteriaBasedStratifier(groupDef, stratifierDef)) {
             var reportStratum = reportStratifier.addStratum();
             // LUKETODO: ??
             var stratValues = Set.<ValueDef>of();
@@ -151,7 +152,7 @@ class R4StratifierBuilder {
             // patch Patient values with prefix of ResourceType to match with incoming population subjects for stratum
             // TODO: should match context of CQL, not only Patient
             var patients = stratValue.getValue().stream()
-                    .map(R4StratifierBuilder::addPatientQualifier)
+                    .map(R4ResourceIdUtils::addPatientQualifier)
                     .collect(Collectors.toList());
             // build the stratum for each unique value
             // non-component stratifiers will populate a 'null' for componentStratifierDef, since it doesn't have
@@ -243,7 +244,7 @@ class R4StratifierBuilder {
                 sgcc.setCode(new CodeableConcept().setText(componentDef.code().text()));
                 // set component on MeasureReport
                 stratum.addComponent(sgcc);
-            } else if (StratifierUtils.isCriteriaBasedStratifierFromMeasureDefBuilder(groupDef, stratifierDef)) {
+            } else if (StratifierUtils.isCriteriaBasedStratifier(groupDef, stratifierDef)) {
                 // LUKETODO: is this condition just a no-op?
                 System.out.println("componentDef = " + componentDef);
             } else {
@@ -314,7 +315,7 @@ class R4StratifierBuilder {
             List<String> subjectIds,
             PopulationDef populationDef) {
         var popSubjectIds = populationDef.getSubjects().stream()
-                .map(R4StratifierBuilder::addPatientQualifier)
+                .map(R4ResourceIdUtils::addPatientQualifier)
                 .toList();
         if (popSubjectIds.isEmpty()) {
             sgpc.setCount(0);
@@ -372,7 +373,7 @@ class R4StratifierBuilder {
         // end of the measurement period   break down into stratums per value
         // 3. criteria stratifier NOT implement >> mix of the previous 2
 
-        if (StratifierUtils.isCriteriaBasedStratifierFromMeasureDefBuilder(groupDef, stratifierDef)) {
+        if (StratifierUtils.isCriteriaBasedStratifier(groupDef, stratifierDef)) {
             final Set<Object> resources = populationDef.getResources();
             final Set<?> results = stratifierDef.getAllCriteriaResultValues();
             // LUKETODO:  Set intersection here:
@@ -408,7 +409,8 @@ class R4StratifierBuilder {
         if (populationDef.getSubjectResources() != null) {
             for (String subjectId : subjectIds) {
                 // retrieve criteria results by subject Key
-                var resources = populationDef.getSubjectResources().get(stripPatientQualifier(subjectId));
+                var resources =
+                        populationDef.getSubjectResources().get(R4ResourceIdUtils.stripPatientQualifier(subjectId));
                 if (resources != null) {
                     if (isResourceType) {
                         resourceIds.addAll(resources.stream()
@@ -450,7 +452,7 @@ class R4StratifierBuilder {
 
         final Expression criteria = measureStratifier.getCriteria();
 
-        if (StratifierUtils.isCriteriaBasedStratifierFromMeasureDefBuilder(groupDef, stratifierDef)
+        if (StratifierUtils.isCriteriaBasedStratifier(groupDef, stratifierDef)
                 && criteria != null
                 && criteria.hasLanguage()
                 && "text/cql.identifier".equals(criteria.getLanguage())) {
@@ -460,17 +462,5 @@ class R4StratifierBuilder {
         }
 
         return Collections.singletonList(measureStratifier.getCode());
-    }
-
-    //  LUKETODO:  utils?
-    @Nonnull
-    private static String addPatientQualifier(String t) {
-        return ResourceType.Patient.toString().concat("/").concat(t);
-    }
-
-    // LUKETODO:  util method somewhere
-    @Nonnull
-    private static String stripPatientQualifier(String subjectId) {
-        return subjectId.replace(ResourceType.Patient.toString().concat("/"), "");
     }
 }

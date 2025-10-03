@@ -29,11 +29,6 @@ import org.slf4j.LoggerFactory;
 class MeasureStratifierTest {
     private static final Logger logger = LoggerFactory.getLogger(MeasureStratifierTest.class);
 
-    private static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/measure/r4";
-    //    private static final IRepository repository = new IgRepository(
-    //            FhirContext.forR4Cached(),
-    //            Path.of(getResourcePath(MeasureStratifierTest.class) + "/" + CLASS_PATH + "/" + "MeasureTest"));
-    //    private final Given given = Measure.given().repository(repository);
     private static final Given GIVEN_MEASURE_TEST = Measure.given().repositoryFor("MeasureTest");
     private static final Given GIVEN_CRITERIA_BASED_STRAT = Measure.given().repositoryFor("CriteriaBasedStratifiers");
     private static final TestDataGenerator TEST_DATA_GENERATOR =
@@ -292,7 +287,7 @@ class MeasureStratifierTest {
      * Multiple results for a single subject are allowed
      */
     @Test
-    void ratioResourceDifferentTypeStrat() {
+    void ratioResourceDifferentTypeStratNotCriteriaBased() {
         final SelectedReport selectedReport = GIVEN_MEASURE_TEST
                 .when()
                 .measureId("RatioResourceStratDifferentType")

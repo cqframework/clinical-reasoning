@@ -8,6 +8,7 @@ import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.GraphDefinition;
+import org.hl7.fhir.r4.model.ImplementationGuide;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MetadataResource;
@@ -30,6 +31,7 @@ import org.opencds.cqf.fhir.utility.adapter.IDataRequirementAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IElementDefinitionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IGraphDefinitionAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IImplementationGuideAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
@@ -86,6 +88,8 @@ public class AdapterFactory implements IAdapterFactory {
             adapter = new MeasureAdapter(measure);
         } else if (resource instanceof ActivityDefinition activityDefinition) {
             adapter = new ActivityDefinitionAdapter(activityDefinition);
+        } else if (resource instanceof ImplementationGuide implementationGuide) {
+            adapter = new ImplementationGuideAdapter(implementationGuide);
         } else if (resource instanceof PlanDefinition planDefinition) {
             adapter = new PlanDefinitionAdapter(planDefinition);
         } else if (resource instanceof Questionnaire questionnaire) {
@@ -210,6 +214,11 @@ public class AdapterFactory implements IAdapterFactory {
     @Override
     public IStructureDefinitionAdapter createStructureDefinition(IBaseResource structureDefinition) {
         return new StructureDefinitionAdapter((IDomainResource) structureDefinition);
+    }
+
+    @Override
+    public IImplementationGuideAdapter createImplementationGuide(IBaseResource implementationGuide) {
+        return new ImplementationGuideAdapter((IDomainResource) implementationGuide);
     }
 
     @Override

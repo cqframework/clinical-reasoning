@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.crmi;
 
 public class TransformProperties {
+
     public static final String usPHTriggeringVSProfile =
             "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-triggering-valueset";
     public static final String usPHTriggeringVSLibProfile =

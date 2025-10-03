@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doReturn;
@@ -22,6 +23,11 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.gclient.IOperation;
+import ca.uhn.fhir.rest.gclient.IOperationUnnamed;
+import ca.uhn.fhir.rest.gclient.IOperationUntyped;
+import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
+import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInputAndPartialOutput;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.IUntypedQuery;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -300,6 +306,8 @@ public class TerminologyServerClientTest {
         // ensure that the grouper is not expanded using the Tx Server
         var grouperUrl = "www.test.com/fhir/ValueSet/grouper";
         var grouper = new org.hl7.fhir.r4.model.ValueSet();
+        var id = "grouper";
+        grouper.setId(id);
         grouper.setUrl(grouperUrl);
         grouper.getCompose().getIncludeFirstRep().getValueSet().add(new org.hl7.fhir.r4.model.CanonicalType(leafUrl));
         grouper.addExtension()
@@ -322,9 +330,9 @@ public class TerminologyServerClientTest {
         when(fhirClient.getFhirContext().getVersion().getVersion()).thenReturn(FhirVersionEnum.R4);
         when(fhirClient
                         .operation()
-                        .onType(eq(VALUE_SET))
+                        .onInstance(any(String.class))
                         .named(eq(EXPAND_OPERATION))
-                        .withParameters(any(IBaseParameters.class))
+                        .withNoParameters(any())
                         .returnResourceType(any())
                         .execute())
                 .thenThrow(new UnprocessableEntityException())
@@ -369,9 +377,9 @@ public class TerminologyServerClientTest {
         when(fhirClient.getFhirContext().getVersion().getVersion()).thenReturn(FhirVersionEnum.R4);
         when(fhirClient
                         .operation()
-                        .onType(eq(VALUE_SET))
+                        .onInstance(any(String.class))
                         .named(eq(EXPAND_OPERATION))
-                        .withParameters(any(IBaseParameters.class))
+                        .withNoParameters(any())
                         .returnResourceType(any())
                         .execute())
                 .thenThrow(new UnprocessableEntityException())
@@ -384,7 +392,7 @@ public class TerminologyServerClientTest {
                 TerminologyServerExpansionException.class,
                 () -> client.expand(valueSetAdapter, endpointAdapter, parametersAdapter));
         verify(client, never()).getValueSetResource(any(), any());
-        verify(fhirClient, atLeast(3)).operation();
+        verify(fhirClient, atLeast(2)).operation();
     }
 
     @Test
@@ -551,16 +559,30 @@ public class TerminologyServerClientTest {
 
         var fhirClient = mock(IGenericClient.class, new ReturnsDeepStubs());
         when(fhirClient.getFhirContext().getVersion().getVersion()).thenReturn(FhirVersionEnum.R4);
-        when(fhirClient
-                        .operation()
-                        .onType(eq(VALUE_SET))
-                        .named(eq(EXPAND_OPERATION))
-                        .withParameters(any(IBaseParameters.class))
-                        .returnResourceType(any())
-                        .execute())
-                .thenReturn(leaf)
-                .thenReturn(leafPage2)
-                .thenReturn(leafPage3);
+
+        // Explicit mocking for each of the chained methods for fhirClient to ensure that correct response
+        // is produced for expansion calls using withNoParameters() and withParameters() methods
+        var operation = mock(IOperation.class);
+        var operationUnnamed = mock(IOperationUnnamed.class);
+        var operationUntyped = mock(IOperationUntyped.class);
+        var operationUntypedWithInput = mock(IOperationUntypedWithInput.class);
+        var operationUntypedWithInputAndPartialOutput = mock(IOperationUntypedWithInputAndPartialOutput.class);
+        var operationUntypedWithInputResource = mock(IOperationUntypedWithInput.class);
+        var operationUntypedWithInputAndPartialOutputResource = mock(IOperationUntypedWithInput.class);
+
+        when(fhirClient.operation()).thenReturn(operation);
+        when(operation.onInstance(anyString())).thenReturn(operationUnnamed);
+        when(operationUnnamed.named(any(String.class))).thenReturn(operationUntyped);
+
+        when(operationUntyped.withNoParameters(any())).thenReturn(operationUntypedWithInput);
+        when(operationUntypedWithInput.returnResourceType(any())).thenReturn(operationUntypedWithInputResource);
+        when(operationUntypedWithInputResource.execute()).thenReturn(leaf);
+
+        when(operationUntyped.withParameters(any(IBaseParameters.class)))
+                .thenReturn(operationUntypedWithInputAndPartialOutput);
+        when(operationUntypedWithInputAndPartialOutput.returnResourceType(any()))
+                .thenReturn(operationUntypedWithInputAndPartialOutputResource);
+        when(operationUntypedWithInputAndPartialOutputResource.execute()).thenReturn(leafPage2, leafPage3);
 
         // Max expansions per page is 1 to ensure paging occurs
         var settings = TerminologyServerClientSettings.getDefault();
@@ -573,7 +595,7 @@ public class TerminologyServerClientTest {
 
         // ensure that the 3 codes from different pages are included
         assertEquals(3, actual.getExpansion().getContains().size());
-        // ensure 3 expansion calls (+1 from when() invocation)
-        verify(fhirClient, times(4)).operation();
+        // ensure 3 expansion calls
+        verify(fhirClient, times(3)).operation();
     }
 }

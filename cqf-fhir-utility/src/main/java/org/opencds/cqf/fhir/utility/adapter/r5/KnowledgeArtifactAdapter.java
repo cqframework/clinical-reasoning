@@ -10,9 +10,9 @@ import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r5.model.CanonicalResource;
 import org.hl7.fhir.r5.model.DateTimeType;
 import org.hl7.fhir.r5.model.Enumerations.PublicationStatus;
-import org.hl7.fhir.r5.model.MetadataResource;
 import org.hl7.fhir.r5.model.Period;
 import org.hl7.fhir.r5.model.RelatedArtifact;
 import org.hl7.fhir.r5.model.RelatedArtifact.RelatedArtifactType;
@@ -21,29 +21,29 @@ import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
 
 public class KnowledgeArtifactAdapter extends ResourceAdapter implements IKnowledgeArtifactAdapter {
-    MetadataResource adaptedResource;
+    CanonicalResource adaptedResource;
 
     public KnowledgeArtifactAdapter(IDomainResource resource) {
         super(resource);
-        if (!(resource instanceof MetadataResource)) {
+        if (!(resource instanceof CanonicalResource)) {
             throw new IllegalArgumentException(
-                    "resource passed as resource argument is not a MetadataResource resource");
+                    "resource passed as resource argument is not a CanonicalResource resource");
         }
-        adaptedResource = (MetadataResource) resource;
+        adaptedResource = (CanonicalResource) resource;
     }
 
-    public KnowledgeArtifactAdapter(MetadataResource resource) {
+    public KnowledgeArtifactAdapter(CanonicalResource resource) {
         super(resource);
         adaptedResource = resource;
     }
 
     @Override
-    public MetadataResource get() {
+    public CanonicalResource get() {
         return adaptedResource;
     }
 
     @Override
-    public MetadataResource copy() {
+    public CanonicalResource copy() {
         return get().copy();
     }
 

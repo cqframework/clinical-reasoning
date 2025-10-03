@@ -45,6 +45,7 @@ import org.opencds.cqf.fhir.cr.measure.r4.utils.R4ResourceIdUtils;
  * Convenience class with functionality split out from {@link R4MeasureReportBuilder } to
  * handle stratifiers
  */
+@SuppressWarnings("squid:S1135")
 class R4StratifierBuilder {
 
     static void buildStratifier(
@@ -155,7 +156,7 @@ class R4StratifierBuilder {
             // TODO: should match context of CQL, not only Patient
             var patients = stratValue.getValue().stream()
                     .map(R4ResourceIdUtils::addPatientQualifier)
-                    .collect(Collectors.toList());
+                    .toList();
             // build the stratum for each unique value
             // non-component stratifiers will populate a 'null' for componentStratifierDef, since it doesn't have
             // multiple criteria
@@ -368,7 +369,7 @@ class R4StratifierBuilder {
 
         if (StratifierUtils.isCriteriaBasedStratifier(groupDef, stratifierDef)) {
             final Set<Object> resources = populationDef.getResources();
-            final Set<?> results = stratifierDef.getAllCriteriaResultValues();
+            final Set<Object> results = stratifierDef.getAllCriteriaResultValues();
 
             if (resources.isEmpty() || results.isEmpty()) {
                 // There's no intersection, so no point in going further.
@@ -433,7 +434,9 @@ class R4StratifierBuilder {
     }
 
     protected static ListResource createIdList(String id, Collection<String> ids) {
-        return createReferenceList(id, ids.stream().map(Reference::new).collect(Collectors.toList()));
+        return createReferenceList(id, ids.stream()
+            .map(Reference::new)
+            .toList());
     }
 
     protected static ListResource createReferenceList(String id, Collection<Reference> references) {

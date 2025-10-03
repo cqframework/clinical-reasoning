@@ -50,7 +50,10 @@ public class StratifierDef {
     }
 
     public void putResult(String subject, Object value, Set<Object> evaluatedResources) {
-        this.getResults().put(subject, new CriteriaResult(value, evaluatedResources));
+        this.getResults().put(subject,
+            new CriteriaResult(
+                value,
+                new HashSetForFhirResources<>(evaluatedResources)));
     }
 
     public Map<String, CriteriaResult> getResults() {
@@ -62,7 +65,7 @@ public class StratifierDef {
     }
 
     // Ensure we handle FHIR resource identity properly
-    public Set<?> getAllCriteriaResultValues() {
+    public Set<Object> getAllCriteriaResultValues() {
         return new HashSetForFhirResources<>(this.getResults().values().stream()
                 .map(CriteriaResult::rawValue)
                 .map(this::toSet)
@@ -70,13 +73,14 @@ public class StratifierDef {
                 .collect(Collectors.toUnmodifiableSet()));
     }
 
-    private Set<?> toSet(Object value) {
+    private Set<Object> toSet(Object value) {
         if (value == null) {
             return Set.of();
         }
 
         if (value instanceof Iterable<?> iterable) {
-            return StreamSupport.stream(iterable.spliterator(), false).collect(Collectors.toUnmodifiableSet());
+            return StreamSupport.stream(iterable.spliterator(), false)
+                .collect(Collectors.toUnmodifiableSet());
         } else {
             return Set.of(value);
         }

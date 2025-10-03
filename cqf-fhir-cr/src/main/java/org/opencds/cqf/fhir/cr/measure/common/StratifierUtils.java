@@ -12,6 +12,10 @@ import java.util.stream.StreamSupport;
  */
 public class StratifierUtils {
 
+    private StratifierUtils() {
+        // Static utility class
+    }
+
     public static boolean isCriteriaBasedStratifier(GroupDef groupDef, StratifierDef stratifierDef) {
         return isCriteriaBasedStratifier(groupDef, stratifierDef.getResultType());
     }

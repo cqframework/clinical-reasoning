@@ -195,4 +195,35 @@ class ValueSetAdapterTest {
         assertTrue(adapter.hasComposeInclude());
         assertEquals(set, adapter.getComposeInclude().get(0).get());
     }
+
+    @Test
+    void testGetExpansionTotal() {
+        var total = 1536;
+        var expansion = new ValueSet.ValueSetExpansionComponent();
+        expansion.setTotal(total);
+        var valueSet = new ValueSet().setExpansion(expansion);
+        var adapter = (IValueSetAdapter) adapterFactory.createKnowledgeArtifactAdapter(valueSet);
+
+        assertEquals(total, adapter.getExpansionTotal());
+    }
+
+    @Test
+    void testAppendExpansionContains() {
+        var contains = new ValueSetExpansionContainsComponent().setCode("test");
+        var expansion = new ValueSetExpansionComponent().addContains(contains);
+        expansion.setId("test-expansion-page-1");
+        var valueSet = new ValueSet().setExpansion(expansion);
+        var adapter = (IValueSetAdapter) adapterFactory.createKnowledgeArtifactAdapter(valueSet);
+
+        var additionalContains = new ValueSetExpansionContainsComponent().setCode("other-test");
+        var additionalExpansion = new ValueSetExpansionComponent().addContains(additionalContains);
+        additionalExpansion.setId("test-expansion-page-2");
+        var additionalValueSet = new ValueSet().setExpansion(additionalExpansion);
+        var additionalExpansionAdapter =
+                (IValueSetAdapter) adapterFactory.createKnowledgeArtifactAdapter(additionalValueSet);
+
+        adapter.appendExpansionContains(additionalExpansionAdapter.getExpansionContains());
+
+        assertEquals(2, adapter.getExpansionContains().size());
+    }
 }

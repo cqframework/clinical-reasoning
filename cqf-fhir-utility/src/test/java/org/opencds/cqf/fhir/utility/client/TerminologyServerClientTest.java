@@ -49,14 +49,12 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
 import org.opencds.cqf.fhir.utility.BundleHelper;
-import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter;
@@ -580,8 +578,10 @@ public class TerminologyServerClientTest {
         when(operationUntypedWithInput.returnResourceType(any())).thenReturn(operationUntypedWithInputResource);
         when(operationUntypedWithInputResource.execute()).thenReturn(leaf);
 
-        when(operationUntyped.withParameters(any(IBaseParameters.class))).thenReturn(operationUntypedWithInputAndPartialOutput);
-        when(operationUntypedWithInputAndPartialOutput.returnResourceType(any())).thenReturn(operationUntypedWithInputAndPartialOutputResource);
+        when(operationUntyped.withParameters(any(IBaseParameters.class)))
+                .thenReturn(operationUntypedWithInputAndPartialOutput);
+        when(operationUntypedWithInputAndPartialOutput.returnResourceType(any()))
+                .thenReturn(operationUntypedWithInputAndPartialOutputResource);
         when(operationUntypedWithInputAndPartialOutputResource.execute()).thenReturn(leafPage2, leafPage3);
 
         // Max expansions per page is 1 to ensure paging occurs

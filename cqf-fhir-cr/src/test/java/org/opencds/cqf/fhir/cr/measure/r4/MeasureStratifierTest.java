@@ -500,10 +500,9 @@ class MeasureStratifierTest {
     @Disabled
     @Test
     void newnewnewnewmultiexpressionstratifiercriteriabasedtest() {
-        // LUKETODO:   this test needs to be re-writter from the ground
-        final SelectedReport selectedReport = GIVEN_MEASURE_STRATIFIER_TEST
+        final SelectedReport selectedReport = GIVEN_CRITERIA_BASED_STRAT_COMPLEX
                 .when()
-                .measureId("RatioResourceStratSameType")
+                .measureId("CriteriaBasedStratifiersComplex")
                 .evaluate()
                 .then();
 
@@ -519,30 +518,31 @@ class MeasureStratifierTest {
                 .firstGroup()
                 .hasPopulationCount(3)
                 .population("initial-population")
-                .hasCount(11)
+                .hasCount(10)
                 .up()
                 .population("denominator")
-                .hasCount(11)
+                .hasCount(8)
                 .up()
                 .population("numerator")
-                .hasCount(2)
+                // due to apply scoring, we keep only those numerator encounters that are also in the denominator
+                .hasCount(5)
                 .up()
                 .hasMeasureScore(true)
-                .hasScore("0.18181818181818182")
+                .hasScore("0.625")
                 .hasStratifierCount(1)
                 .firstStratifier()
-                .hasCodeText("in-progress encounters")
+                .hasCodeText("Encounters in Period")
                 .hasStratumCount(1)
                 .firstStratum()
                 .hasPopulationCount(3)
                 .population("initial-population")
-                .hasCount(4)
+                .hasCount(2)
                 .up()
                 .population("denominator")
-                .hasCount(4)
+                // LUKETODO:  make sure this count is different from the initial pop and the numerator
+                .hasCount(2)
                 .up()
                 .population("numerator")
-                // LUKETODO:  make this work
-                .hasCount(3);
+                .hasCount(1);
     }
 }

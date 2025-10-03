@@ -61,12 +61,13 @@ public class StratifierDef {
         return this.results;
     }
 
+    // Ensure we handle FHIR resource identity properly
     public Set<?> getAllCriteriaResultValues() {
-        return this.getResults().values().stream()
+        return new HashSetForFhirResources<>(this.getResults().values().stream()
                 .map(CriteriaResult::rawValue)
                 .map(this::toSet)
                 .flatMap(Collection::stream)
-                .collect(Collectors.toUnmodifiableSet());
+                .collect(Collectors.toUnmodifiableSet()));
     }
 
     private Set<?> toSet(Object value) {

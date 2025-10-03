@@ -1,8 +1,0 @@
-{
-  "resourceType": "Encounter",
-  "id": "enc_finished_pat1_1",
-  "status": "finished",
-  "subject": {
-    "reference": "Patient/patient1"
-  }
-}

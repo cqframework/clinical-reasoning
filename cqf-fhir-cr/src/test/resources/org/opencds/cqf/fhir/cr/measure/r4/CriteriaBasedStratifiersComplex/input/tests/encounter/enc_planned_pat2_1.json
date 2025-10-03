@@ -1,8 +1,0 @@
-{
-  "resourceType": "Encounter",
-  "id": "enc_planned_pat2_1",
-  "status": "planned",
-  "subject": {
-    "reference": "Patient/patient2"
-  }
-}

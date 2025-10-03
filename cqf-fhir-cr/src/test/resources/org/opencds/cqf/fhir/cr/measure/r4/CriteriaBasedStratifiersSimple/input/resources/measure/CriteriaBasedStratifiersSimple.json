@@ -1,10 +1,10 @@
 {
-  "id": "CriteriaBasedStratifiers",
+  "id": "CriteriaBasedStratifiersSimple",
   "resourceType": "Measure",
-  "name": "CriteriaBasedStratifiers",
-  "url": "http://example.com/Measure/CriteriaBasedStratifiers",
+  "name": "CriteriaBasedStratifiersSimple",
+  "url": "http://example.com/Measure/CriteriaBasedStratifiersSimple",
   "library": [
-    "http://example.com/Library/CriteriaBasedStratifiers"
+    "http://example.com/Library/CriteriaBasedStratifiersSimple"
   ],
   "extension": [
     {

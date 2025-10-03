@@ -366,20 +366,26 @@ class R4StratifierBuilder {
     private static int getStratumCountUpper(
             StratifierDef stratifierDef, GroupDef groupDef, PopulationDef populationDef, List<String> resourceIds) {
 
-        // types of stratifiers
-        // 1. path-based stratifier (FHIR path expression) >>> use the resource type of the population basis
-        // 2. value-based stratifier >>> based on the values returned from that expression  ex age of the patient at
-        // the
-        // end of the measurement period   break down into stratums per value
-        // 3. criteria stratifier NOT implement >> mix of the previous 2
-
         if (StratifierUtils.isCriteriaBasedStratifier(groupDef, stratifierDef)) {
             final Set<Object> resources = populationDef.getResources();
             final Set<?> results = stratifierDef.getAllCriteriaResultValues();
-            // LUKETODO:  Set intersection here:
-            final SetView<Object> populationResourcesPresentInStratumResults = Sets.intersection(resources, results);
-            //            return populationResourcesPresentInStratumResults.size();
-            return results.size();
+
+            if (resources.isEmpty() || results.isEmpty()) {
+                // There's no intersection, so no point in going further.
+                return 0;
+            }
+
+            final Class<?> resourcesClassFirst = resources.iterator().next().getClass();
+            final Class<?> resultClassFirst = results.iterator().next().getClass();
+
+            // Sanity check: isCriteriaBasedStratifier() should have filtered this out
+            if (resourcesClassFirst != resultClassFirst) {
+                // Different classes, so no point in going further.
+                return 0;
+            }
+
+            final SetView<Object> intersection = Sets.intersection(resources, results);
+            return intersection.size();
         }
 
         if (resourceIds.isEmpty()) {

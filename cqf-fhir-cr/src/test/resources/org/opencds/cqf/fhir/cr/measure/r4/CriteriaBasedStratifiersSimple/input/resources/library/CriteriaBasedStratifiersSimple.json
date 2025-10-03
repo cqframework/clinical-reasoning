@@ -1,8 +1,8 @@
 {
   "resourceType": "Library",
-  "id": "CriteriaBasedStratifiers",
-  "url": "http://example.com/Library/CriteriaBasedStratifiers",
-  "name": "CriteriaBasedStratifiers",
+  "id": "CriteriaBasedStratifiersSimple",
+  "url": "http://example.com/Library/CriteriaBasedStratifiersSimple",
+  "name": "CriteriaBasedStratifiersSimple",
   "status": "active",
   "type": {
     "coding": [ {
@@ -12,7 +12,7 @@
   },
   "content": [ {
     "contentType": "text/cql",
-    "url": "../../cql/CriteriaBasedStratifiers.cql"
+    "url": "../../cql/CriteriaBasedStratifiersSimple.cql"
     }
   ]
 }

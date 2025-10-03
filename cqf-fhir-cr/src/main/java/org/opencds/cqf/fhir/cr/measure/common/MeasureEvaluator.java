@@ -383,7 +383,8 @@ public class MeasureEvaluator {
             } else {
 
                 var expressionResult = evaluationResult.forExpression(stratifierDef.expression());
-                Optional.ofNullable(expressionResult.value())
+                Optional.ofNullable(expressionResult)
+                        .map(ExpressionResult::value)
                         .ifPresent(nonNullValue -> stratifierDef.putResult(
                                 subjectId, // context of CQL expression ex: Patient based
                                 nonNullValue,

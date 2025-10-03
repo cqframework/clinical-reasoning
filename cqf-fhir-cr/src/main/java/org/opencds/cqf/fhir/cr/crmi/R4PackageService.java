@@ -257,7 +257,7 @@ public class R4PackageService {
         //            visitor = new PackageVisitor(repository, terminologyServerClient);
         //            log.warn("Redis service not found, running package without expansion cache");
         //        }
-        var visitor = new PackageVisitor(repository, new TerminologyServerClientSettings());
+        var visitor = new PackageVisitor(repository, TerminologyServerClientSettings.getDefault());
         var retVal = (Bundle) adapter.accept(visitor, params);
         retVal.getEntry().stream()
                 .map(e -> (MetadataResource) e.getResource())

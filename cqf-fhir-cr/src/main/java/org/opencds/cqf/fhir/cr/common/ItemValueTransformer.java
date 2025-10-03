@@ -18,7 +18,7 @@ public class ItemValueTransformer {
 
     public static org.hl7.fhir.dstu3.model.Type transformValueToItem(org.hl7.fhir.dstu3.model.Type value) {
         if (value instanceof org.hl7.fhir.dstu3.model.CodeableConcept codeType) {
-            return codeType.getCoding().get(0);
+            return codeType.hasCoding() ? codeType.getCoding().get(0) : codeType.getTextElement();
         }
         if (value instanceof org.hl7.fhir.dstu3.model.Enumeration<?> enumType) {
             return new org.hl7.fhir.dstu3.model.StringType(enumType.asStringValue());
@@ -34,7 +34,7 @@ public class ItemValueTransformer {
 
     public static org.hl7.fhir.r4.model.Type transformValueToItem(org.hl7.fhir.r4.model.Type value) {
         if (value instanceof org.hl7.fhir.r4.model.CodeableConcept codeType) {
-            return codeType.getCoding().get(0);
+            return codeType.hasCoding() ? codeType.getCoding().get(0) : codeType.getTextElement();
         }
         if (value instanceof org.hl7.fhir.r4.model.Enumeration<?> enumType) {
             return new org.hl7.fhir.r4.model.StringType(enumType.getCode());
@@ -50,7 +50,7 @@ public class ItemValueTransformer {
 
     public static org.hl7.fhir.r5.model.DataType transformValueToItem(org.hl7.fhir.r5.model.DataType value) {
         if (value instanceof org.hl7.fhir.r5.model.CodeableConcept codeType) {
-            return codeType.getCoding().get(0);
+            return codeType.hasCoding() ? codeType.getCoding().get(0) : codeType.getTextElement();
         }
         if (value instanceof org.hl7.fhir.r5.model.Enumeration<?> enumType) {
             return new org.hl7.fhir.r5.model.StringType(enumType.getCode());

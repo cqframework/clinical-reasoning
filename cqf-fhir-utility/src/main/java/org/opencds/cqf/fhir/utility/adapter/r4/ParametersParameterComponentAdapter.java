@@ -8,9 +8,11 @@ import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.Base;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.Tuple;
 import org.hl7.fhir.r4.model.Type;
 import org.opencds.cqf.fhir.utility.adapter.BaseAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IParametersParameterComponentAdapter;
@@ -124,5 +126,12 @@ class ParametersParameterComponentAdapter extends BaseAdapter implements IParame
         return hasPrimitiveValue()
                 ? this.getParametersParameterComponent().getValue().primitiveValue()
                 : null;
+    }
+
+    @Override
+    public IBase newTupleWithParts() {
+        var tuple = new Tuple();
+        getPart().forEach(p -> tuple.addProperty(p.getName(), List.of((Base) p.getPartValue(p))));
+        return tuple;
     }
 }

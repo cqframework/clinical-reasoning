@@ -39,4 +39,17 @@ public interface IParametersParameterComponentAdapter extends IAdapter<IBase> {
     void setValue(IBaseDatatype value);
 
     IBaseDatatype getValue();
+
+    IBase newTupleWithParts();
+
+    default IBase getPartValue(IParametersParameterComponentAdapter part) {
+        if (part.hasValue()) {
+            return part.getValue();
+        } else if (part.hasResource()) {
+            return part.getResource();
+        } else if (part.hasPart()) {
+            return part.newTupleWithParts();
+        }
+        return null;
+    }
 }

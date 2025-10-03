@@ -45,7 +45,7 @@ public class LibraryProcessor {
     protected TerminologyServerClientSettings terminologyServerClientSettings;
 
     public LibraryProcessor(IRepository repository) {
-        this(repository, EvaluationSettings.getDefault(), new TerminologyServerClientSettings());
+        this(repository, EvaluationSettings.getDefault(), TerminologyServerClientSettings.getDefault());
     }
 
     public LibraryProcessor(

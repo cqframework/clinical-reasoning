@@ -8,12 +8,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.List;
+import org.hl7.fhir.r5.model.BooleanType;
 import org.hl7.fhir.r5.model.IntegerType;
 import org.hl7.fhir.r5.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r5.model.Patient;
 import org.hl7.fhir.r5.model.PlanDefinition.PlanDefinitionActionComponent;
 import org.hl7.fhir.r5.model.Quantity;
 import org.hl7.fhir.r5.model.StringType;
+import org.hl7.fhir.r5.model.Tuple;
 import org.junit.jupiter.api.Test;
 
 class ParametersParameterAdapterTest {
@@ -88,5 +90,22 @@ class ParametersParameterAdapterTest {
         adapter.setValue(new StringType("test"));
         assertTrue(adapter.hasPrimitiveValue());
         assertEquals("test", adapter.getPrimitiveValue());
+    }
+
+    @Test
+    void testNewTupleWithParts() {
+        var stringType = new StringType("test");
+        var booleanType = new BooleanType(true);
+        var parameter = new ParametersParameterComponent().setName("param");
+        parameter.addPart().setName("part1").setValue(stringType);
+        parameter.addPart().setName("part2").setValue(booleanType);
+        var adapter = adapterFactory.createParametersParameter(parameter);
+        assertTrue(adapter.hasPart());
+        var tuple = (Tuple) adapter.newTupleWithParts();
+        assertEquals(2, tuple.children().size());
+        var part1Value = tuple.listChildrenByName("part1").get(0);
+        assertEquals(stringType, part1Value);
+        var part2Value = tuple.listChildrenByName("part2").get(0);
+        assertEquals(booleanType, part2Value);
     }
 }

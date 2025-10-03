@@ -1,7 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -42,7 +41,7 @@ public class PopulationDef {
 
     public Set<Object> getEvaluatedResources() {
         if (this.evaluatedResources == null) {
-            this.evaluatedResources = new HashSet<>();
+            this.evaluatedResources = new HashSetForFhirResources<>();
         }
 
         return this.evaluatedResources;
@@ -58,7 +57,7 @@ public class PopulationDef {
 
     public Set<String> getSubjects() {
         if (this.subjects == null) {
-            this.subjects = new HashSet<>();
+            this.subjects = new HashSetForFhirResources<>();
         }
 
         return this.subjects;
@@ -70,7 +69,7 @@ public class PopulationDef {
 
     public Set<Object> getResources() {
         if (this.resources == null) {
-            this.resources = new HashSet<>();
+            this.resources = new HashSetForFhirResources<>();
         }
 
         return this.resources;
@@ -87,7 +86,9 @@ public class PopulationDef {
 
     // Add an element to Set<Object> under a key (Creates a new set if key is missing)
     public void addResource(String key, Object value) {
-        subjectResources.computeIfAbsent(key, k -> new HashSet<>()).add(value);
+        subjectResources
+                .computeIfAbsent(key, k -> new HashSetForFhirResources<>())
+                .add(value);
     }
 
     public void removeOverlaps(Map<String, Set<Object>> overlap) {

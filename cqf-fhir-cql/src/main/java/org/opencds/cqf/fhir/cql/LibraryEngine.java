@@ -11,7 +11,6 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -27,12 +26,15 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.EvaluationResultsForMultiLib;
+import org.opencds.cqf.cql.engine.runtime.Tuple;
 import org.opencds.cqf.fhir.cql.engine.parameters.CqlFhirParametersConverter;
 import org.opencds.cqf.fhir.cql.engine.parameters.CqlParameterDefinition;
 import org.opencds.cqf.fhir.utility.CqfExpression;
+import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@SuppressWarnings("UnstableApiUsage")
 public class LibraryEngine {
 
     private static final Logger logger = LoggerFactory.getLogger(LibraryEngine.class);
@@ -40,11 +42,13 @@ public class LibraryEngine {
     protected final IRepository repository;
     protected final FhirContext fhirContext;
     protected final EvaluationSettings settings;
+    protected final IAdapterFactory adapterFactory;
 
     public LibraryEngine(IRepository repository, EvaluationSettings evaluationSettings) {
         this.repository = requireNonNull(repository, "repository can not be null");
         this.settings = requireNonNull(evaluationSettings, "evaluationSettings can not be null");
         fhirContext = repository.fhirContext();
+        adapterFactory = IAdapterFactory.forFhirContext(fhirContext);
     }
 
     public IRepository getRepository() {
@@ -112,6 +116,13 @@ public class LibraryEngine {
         if (base instanceof List<?> list) {
             return getModelName(list.get(0));
         }
+        if (base instanceof Tuple tuple) {
+            var properties = new ArrayList<String>();
+            tuple.getElements().forEach((propertyName, value) -> {
+                properties.add("%s %s".formatted(propertyName, getModelName(value)));
+            });
+            return "Tuple { %s }".formatted(String.join(", ", properties));
+        }
         var fhirType = ((IBase) base).fhirType();
         if (fhirType.contains(".")) {
             var split = fhirType.split("\\.");
@@ -132,44 +143,34 @@ public class LibraryEngine {
         var libraryConstructor = new LibraryConstructor(fhirContext);
         var cqlFhirParametersConverter = Engines.getCqlFhirParametersConverter(fhirContext);
         var cqlParameters = cqlFhirParametersConverter.toCqlParameterDefinitions(parameters);
-        var fhirPathContextName = "%fhirpathcontext";
+        var evaluationParameters = cqlFhirParametersConverter.toCqlParameters(parameters);
         if (contextParameter != null) {
             var contextType = getModelName(contextParameter);
-            cqlParameters.add(new CqlParameterDefinition(fhirPathContextName, contextType, false));
+            cqlParameters.add(new CqlParameterDefinition("%context", contextType, false));
+            evaluationParameters.put("%context", contextParameter);
+
             var resourceType = resourceParameter == null ? contextType : getModelName(resourceParameter);
             cqlParameters.add(new CqlParameterDefinition("%resource", resourceType, false));
+            evaluationParameters.put("%resource", resourceParameter == null ? contextParameter : resourceParameter);
         }
         if (rawParameters != null) {
-            rawParameters.forEach(
-                    (k, v) -> cqlParameters.add(new CqlParameterDefinition(k, getModelName(v), v instanceof List<?>)));
-        }
-        // There is currently a bug in the CQL compiler that causes the FHIRPath %context variable to fail.
-        // This bit of hackery finds any uses of %context in the expression being evaluated and switches it to
-        // fhirpathcontext to allow for successful evaluation.
-        if (expression.contains("%context")) {
-            expression = expression.replace("%context", fhirPathContextName);
+            rawParameters.forEach((k, v) -> {
+                cqlParameters.add(new CqlParameterDefinition(k, getModelName(v), v instanceof List<?>));
+                evaluationParameters.put(k, v);
+            });
         }
         var libraryName = "expression";
         var libraryVersion = "1.0.0";
         var cql = libraryConstructor.constructCqlLibrary(
                 libraryName, libraryVersion, expression, referencedLibraries, cqlParameters);
-        Set<String> expressions = new HashSet<>();
-        expressions.add("return");
 
         var requestSettings = new EvaluationSettings(settings);
         requestSettings.getLibrarySourceProviders().add(new StringLibrarySourceProvider(Lists.newArrayList(cql)));
         var engine = Engines.forRepository(repository, requestSettings, bundle);
 
-        var evaluationParameters = cqlFhirParametersConverter.toCqlParameters(parameters);
-        if (contextParameter != null) {
-            evaluationParameters.put(fhirPathContextName, contextParameter);
-            evaluationParameters.put("%resource", resourceParameter == null ? contextParameter : resourceParameter);
-        }
-        if (rawParameters != null) {
-            evaluationParameters.putAll(rawParameters);
-        }
         var id = new VersionedIdentifier().withId(libraryName).withVersion(libraryVersion);
-        var result = engine.evaluate(id.getId(), expressions, buildContextParameter(patientId), evaluationParameters);
+        var result =
+                engine.evaluate(id.getId(), Set.of("return"), buildContextParameter(patientId), evaluationParameters);
 
         return cqlFhirParametersConverter.toFhirParameters(result);
     }
@@ -252,43 +253,20 @@ public class LibraryEngine {
             return null;
         }
 
-        List<IBase> returnValues = new ArrayList<>();
-        switch (fhirContext.getVersion().getVersion()) {
-            case DSTU3:
-                values.forEach(v -> {
-                    var param = (org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent) v;
+        return values.stream()
+                .map(adapterFactory::createParametersParameter)
+                .map(param -> {
                     if (param.hasValue()) {
-                        returnValues.add(param.getValue());
+                        return param.getValue();
                     } else if (param.hasResource()) {
-                        returnValues.add(param.getResource());
+                        return param.getResource();
+                    } else if (param.hasPart()) {
+                        return param.newTupleWithParts();
                     }
-                });
-                break;
-            case R4:
-                values.forEach(v -> {
-                    var param = (org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent) v;
-                    if (param.hasValue()) {
-                        returnValues.add(param.getValue());
-                    } else if (param.hasResource()) {
-                        returnValues.add(param.getResource());
-                    }
-                });
-                break;
-            case R5:
-                values.forEach(v -> {
-                    var param = (org.hl7.fhir.r5.model.Parameters.ParametersParameterComponent) v;
-                    if (param.hasValue()) {
-                        returnValues.add(param.getValue());
-                    } else if (param.hasResource()) {
-                        returnValues.add(param.getResource());
-                    }
-                });
-                break;
-            default:
-                throw new IllegalArgumentException("unsupported FHIR version: %s".formatted(fhirContext));
-        }
-
-        return returnValues;
+                    return null;
+                })
+                .filter(Objects::nonNull)
+                .toList();
     }
 
     public List<IBase> resolveExpression(

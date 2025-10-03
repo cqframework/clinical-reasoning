@@ -863,6 +863,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             } else if (valueInner instanceof Iterable<?> iterable) {
                 return StreamSupport.stream(iterable.spliterator(), false)
                         .map(this::getValueAsString)
+                        .limit(5) // stop a massively long string if we have a huge list
                         .collect(Collectors.joining(","));
             } else if (valueInner != null) {
                 return valueInner.toString();

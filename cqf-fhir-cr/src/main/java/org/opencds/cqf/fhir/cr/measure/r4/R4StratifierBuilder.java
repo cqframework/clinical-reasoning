@@ -270,7 +270,8 @@ class R4StratifierBuilder {
         }
     }
 
-    // LUKETODO:  what's with Enumeration[in-progress] AND Enumeration[finished] ???
+    // This is weird pattern where we have multiple qualifying values within a single stratum,
+    // which was previously unsupported.  So for now, comma-delim the first five values.
     private static CodeableConcept expressionResultToCodableConcept(ValueWrapper value) {
         return new CodeableConcept().setText(value.getValueAsString());
     }

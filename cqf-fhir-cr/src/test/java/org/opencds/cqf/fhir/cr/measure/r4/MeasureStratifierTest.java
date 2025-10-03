@@ -372,7 +372,9 @@ class MeasureStratifierTest {
                 .up()
                 .hasScore("1.0")
                 .up()
-                // LUKETODO:  document this weirdness
+                // This brings up a weird use case where we have two qualifying values within a
+                // single stratum, which was previously unsupported.  There may be a better way to
+                // handle this, but for now this is what we're doing:
                 .stratum("in-progress,finished")
                 .hasPopulationCount(3)
                 .population("initial-population")

@@ -9,6 +9,6 @@ context Patient
 define "initial population":
     [Encounter]
 
-define "in progress encounters":
+define "in-progress encounters":
     [Encounter] E
         where E.status='in-progress'

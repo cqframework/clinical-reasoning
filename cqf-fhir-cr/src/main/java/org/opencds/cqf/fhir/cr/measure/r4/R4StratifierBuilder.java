@@ -19,6 +19,7 @@ import javax.annotation.Nonnull;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Expression;
 import org.hl7.fhir.r4.model.ListResource;
 import org.hl7.fhir.r4.model.Measure.MeasureGroupPopulationComponent;
 import org.hl7.fhir.r4.model.Measure.MeasureGroupStratifierComponent;
@@ -51,7 +52,7 @@ class R4StratifierBuilder {
             GroupDef groupDef) {
         // the top level stratifier 'id' and 'code'
         // LUKETODO:  do we need to literally set this to "in-progress encounters" ?
-        reportStratifier.setCode(Collections.singletonList(measureStratifier.getCode()));
+        reportStratifier.setCode(getCodeForReportStratifier(groupDef, stratifierDef, measureStratifier));
         reportStratifier.setId(measureStratifier.getId());
         // if description is defined, add to MeasureReport
         if (measureStratifier.hasDescription()) {
@@ -441,6 +442,24 @@ class R4StratifierBuilder {
             return resource.getIdElement().toVersionless().getValueAsString();
         }
         return null;
+    }
+
+    @Nonnull
+    private static List<CodeableConcept> getCodeForReportStratifier(
+            GroupDef groupDef, StratifierDef stratifierDef, MeasureGroupStratifierComponent measureStratifier) {
+
+        final Expression criteria = measureStratifier.getCriteria();
+
+        if (StratifierUtils.isCriteriaBasedStratifierFromMeasureDefBuilder(groupDef, stratifierDef)
+                && criteria != null
+                && criteria.hasLanguage()
+                && "text/cql.identifier".equals(criteria.getLanguage())) {
+            final CodeableConcept codableConcept = new CodeableConcept();
+            codableConcept.setText(criteria.getExpression());
+            return Collections.singletonList(codableConcept);
+        }
+
+        return Collections.singletonList(measureStratifier.getCode());
     }
 
     //  LUKETODO:  utils?

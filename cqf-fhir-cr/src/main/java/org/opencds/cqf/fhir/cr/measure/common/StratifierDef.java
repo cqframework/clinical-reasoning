@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
+import jakarta.annotation.Nullable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -10,7 +11,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
-import javax.annotation.Nullable;
 
 public class StratifierDef {
 
@@ -20,6 +20,7 @@ public class StratifierDef {
 
     private final List<StratifierComponentDef> components;
 
+    @Nullable
     private Map<String, CriteriaResult> results;
 
     public StratifierDef(String id, ConceptDef code, String expression) {
@@ -83,6 +84,10 @@ public class StratifierDef {
 
     @Nullable
     public Class<?> getResultType() {
+        if (this.results == null || this.results.isEmpty()) {
+            return null;
+        }
+
         var resultClasses = results.values().stream()
                 .map(CriteriaResult::rawValue)
                 .map(this::extractClassesFromSingleOrListResult)

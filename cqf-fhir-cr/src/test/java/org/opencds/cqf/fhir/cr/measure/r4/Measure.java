@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -1058,12 +1059,18 @@ public class Measure {
             return new SelectedStratum(s, this);
         }
 
-        public SelectedStratifier hasCode(String stratifierCode) {
-            var hasCode = value().getCode().stream()
-                    .filter(CodeableConcept::hasCoding)
-                    .anyMatch(coding -> stratifierCode.equals(coding.getText()));
+        public SelectedStratifier hasCodeText(String stratifierCodeText) {
+            var firstCodeText = value().getCode().stream()
+                    .map(CodeableConcept::getText)
+                    .filter(Objects::nonNull)
+                    .findFirst()
+                    .orElse(null);
 
-            assertTrue(hasCode, "Stratifier does not have expected code: " + stratifierCode);
+            assertEquals(
+                    firstCodeText,
+                    stratifierCodeText,
+                    "Stratifier does not have expected code: %s but instead has: %s"
+                            .formatted(stratifierCodeText, firstCodeText));
 
             return this;
         }

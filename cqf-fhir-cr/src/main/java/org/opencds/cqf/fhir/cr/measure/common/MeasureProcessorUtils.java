@@ -403,6 +403,14 @@ public class MeasureProcessorUtils {
                                 resultsBuilder.addErrors(measureIds, error);
                                 logger.error(error, exception);
                             });
+
+                    Optional.ofNullable(evaluationResultsForMultiLib.getWarningFor(libraryVersionedIdentifier))
+                        .ifPresent(warning -> {
+                            var warningMessage = EXCEPTION_FOR_SUBJECT_ID_MESSAGE_TEMPLATE.formatted(
+                                subjectId, warning.getMessage());
+                            resultsBuilder.addWarnings(measureIds, warningMessage);
+                            logger.warn(warningMessage, warning);
+                        });
                 }
 
             } catch (Exception e) {

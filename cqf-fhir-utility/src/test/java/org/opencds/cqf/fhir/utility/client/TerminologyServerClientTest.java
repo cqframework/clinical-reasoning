@@ -377,7 +377,7 @@ public class TerminologyServerClientTest {
         when(fhirClient.getFhirContext().getVersion().getVersion()).thenReturn(FhirVersionEnum.R4);
         when(fhirClient
                         .operation()
-                        .onInstance(any(String.class))
+                        .onInstance(eq(VALUE_SET))
                         .named(eq(EXPAND_OPERATION))
                         .withNoParameters(any())
                         .returnResourceType(any())

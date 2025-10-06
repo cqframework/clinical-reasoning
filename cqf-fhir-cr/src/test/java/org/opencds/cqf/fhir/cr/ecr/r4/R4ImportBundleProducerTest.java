@@ -14,6 +14,7 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -23,6 +24,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.MetadataResource;
 import org.hl7.fhir.r4.model.PlanDefinition;
@@ -30,6 +32,7 @@ import org.hl7.fhir.r4.model.PrimitiveType;
 import org.hl7.fhir.r4.model.RelatedArtifact;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ResourceType;
+import org.hl7.fhir.r4.model.UsageContext;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -257,43 +260,51 @@ class R4ImportBundleProducerTest {
 
     @Test
     void testExtractPrioritiesAndConditionsPopulatesLists() {
-        var context1 = new org.hl7.fhir.r4.model.UsageContext();
-        context1.getCode().setCode("focus");
+        // focus usage context → goes to conditions
+        UsageContext context1 = new UsageContext();
+        context1.setCode(new Coding().setCode("focus"));
         context1.setValue(new CodeableConcept().setText("Condition1"));
 
-        var context2 = new org.hl7.fhir.r4.model.UsageContext();
-        context2.getCode().setCode("priority");
-        context2.setValue(new CodeableConcept().addCoding().setCode("routine"));
+        // priority usage context → goes to priorities
+        UsageContext context2 = new UsageContext();
+        context2.setCode(new Coding().setCode("priority"));
+        context2.setValue(new CodeableConcept().addCoding(new Coding().setCode("routine")));
 
-        List<CodeableConcept> priorities = new java.util.ArrayList<>();
-        List<CodeableConcept> conditions = new java.util.ArrayList<>();
+        List<CodeableConcept> priorities = new ArrayList<>();
+        List<CodeableConcept> conditions = new ArrayList<>();
 
+        // Execute
         R4ImportBundleProducer.extractPrioritiesAndConditions(
-                List.of(context1, context2), priorities, conditions, "fakeUrl");
+            Arrays.asList(context1, context2),
+            priorities, conditions,
+            "fakeUrl");
 
+        // Verify
         assertEquals(1, priorities.size());
+        assertEquals("routine", priorities.get(0).getCodingFirstRep().getCode());
         assertEquals(1, conditions.size());
+        assertEquals("Condition1", conditions.get(0).getText());
     }
 
     @Test
     void testExtractPrioritiesAndConditionsConflictingPrioritiesThrows() {
-        var c1 = new org.hl7.fhir.r4.model.UsageContext();
-        c1.getCode().setCode("priority");
-        c1.setValue(new CodeableConcept().addCoding().setCode("routine"));
+        UsageContext context1 = new UsageContext();
+        context1.setCode(new Coding().setCode("priority"));
+        context1.setValue(new CodeableConcept().addCoding(new Coding().setCode("urgent")));
 
-        var c2 = new org.hl7.fhir.r4.model.UsageContext();
-        c2.getCode().setCode("priority");
-        c2.setValue(new CodeableConcept().addCoding().setCode("urgent"));
+        UsageContext context2 = new UsageContext();
+        context2.setCode(new Coding().setCode("priority"));
+        context2.setValue(new CodeableConcept().addCoding(new Coding().setCode("routine")));
 
-        List<CodeableConcept> priorities = new java.util.ArrayList<>();
-        CodeableConcept concept = new CodeableConcept();
-        concept.addCoding().setCode("routine");
-        priorities.add(concept);
+        List<CodeableConcept> priorities = new ArrayList<>();
+        List<CodeableConcept> conditions = new ArrayList<>();
 
         assertThrows(
-                UnprocessableEntityException.class,
-                () -> R4ImportBundleProducer.extractPrioritiesAndConditions(
-                        List.of(c1, c2), priorities, new java.util.ArrayList<>(), "fakeUrl"));
+            UnprocessableEntityException.class,
+            () -> R4ImportBundleProducer.extractPrioritiesAndConditions(
+                Arrays.asList(context1, context2),
+                priorities, conditions,
+                "http://example.com/fhir"));
     }
 
     @Test

@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.r4.model.CanonicalType;
@@ -323,9 +324,9 @@ public class TerminologyServerClientTest {
         when(fhirClient.getFhirContext().getVersion().getVersion()).thenReturn(FhirVersionEnum.R4);
         when(fhirClient
                         .operation()
-                        .onInstance(any(String.class))
+                        .onType(eq(VALUE_SET))
                         .named(eq(EXPAND_OPERATION))
-                        .withNoParameters(any())
+                        .withParameters(any(IBaseParameters.class))
                         .returnResourceType(any())
                         .execute())
                 .thenThrow(new UnprocessableEntityException())
@@ -370,9 +371,9 @@ public class TerminologyServerClientTest {
         when(fhirClient.getFhirContext().getVersion().getVersion()).thenReturn(FhirVersionEnum.R4);
         when(fhirClient
                         .operation()
-                        .onInstance(any(String.class))
+                        .onInstance(eq(VALUE_SET))
                         .named(eq(EXPAND_OPERATION))
-                        .withNoParameters(any())
+                        .withParameters(any(IBaseParameters.class))
                         .returnResourceType(any())
                         .execute())
                 .thenThrow(new UnprocessableEntityException())

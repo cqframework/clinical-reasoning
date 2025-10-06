@@ -38,6 +38,7 @@ import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.ImplementationGuide;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.Parameters;
@@ -850,5 +851,30 @@ class ReleaseVisitorTests {
                 releasedLibrary.getContained(((Reference) runtimeExpansionParamsExt.getValue()).getReference());
         assertEquals(1, authoredExpansionParams.getParameter().size());
         assertEquals(3, runtimeExpansionParams.getParameter().size());
+    }
+
+    @Test
+    void release_us_core_6_1_1() {
+        var bundle = (Bundle)
+                jsonParser.parseResource(ReleaseVisitorTests.class.getResourceAsStream("uscore-package-bundle.json"));
+        repo.transaction(bundle);
+        var ig = (ImplementationGuide) jsonParser.parseResource(
+                ReleaseVisitorTests.class.getResourceAsStream("ImplementationGuide-hl7.fhir.us.core-6-1-0.json"));
+        repo.update(ig);
+
+        var releaseVisitor = new ReleaseVisitor(repo);
+        var testLibrary = (Library) jsonParser.parseResource(
+                ReleaseVisitorTests.class.getResourceAsStream("Library-uscore-vsp-6-1-0.json"));
+        var libraryAdapter = new AdapterFactory().createLibrary(testLibrary);
+        var params =
+                parameters(part("version", new StringType("6.1.0")), part("versionBehavior", new CodeType("force")));
+        var returnResource = (Bundle) libraryAdapter.accept(releaseVisitor, params);
+        var maybeLib = returnResource.getEntry().stream()
+                .filter(entry -> entry.getResponse().getLocation().contains("Library/uscore-vsp-6-1-0"))
+                .findFirst();
+        assertTrue(maybeLib.isPresent());
+        var releasedLibrary =
+                repo.read(Library.class, new IdType(maybeLib.get().getResponse().getLocation()));
+        assertNotNull(releasedLibrary);
     }
 }

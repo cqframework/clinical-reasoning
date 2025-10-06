@@ -9,6 +9,7 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import org.apache.http.HttpStatus;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.fhir.utility.Resources;
@@ -125,7 +126,12 @@ public class ExpandRunner implements Runnable {
                 scheduler.shutdown();
             }
         } catch (Exception ex) {
-            logger.info("Expansion attempt {} failed: {}", expansionAttempt, ex.getMessage());
+            var isTransient = isTransient(ex);
+            logger.info(
+                    "Expansion attempt {} failed{}: {}.",
+                    expansionAttempt,
+                    isTransient ? " due to transient fault" : "",
+                    ex.getMessage());
             if (expansionAttempt < terminologyServerClientSettings.getMaxRetryCount()) {
                 scheduler.schedule(
                         this,
@@ -135,6 +141,21 @@ public class ExpandRunner implements Runnable {
                 scheduler.shutdown();
             }
         }
+    }
+
+    private static boolean isTransient(Exception ex) {
+        var isTransient = false;
+        if (ex instanceof BaseServerResponseException bsre) {
+            isTransient = switch (bsre.getStatusCode()) {
+                case HttpStatus.SC_REQUEST_TIMEOUT,
+                        HttpStatus.SC_TOO_MANY_REQUESTS,
+                        HttpStatus.SC_INTERNAL_SERVER_ERROR,
+                        HttpStatus.SC_BAD_GATEWAY,
+                        HttpStatus.SC_SERVICE_UNAVAILABLE,
+                        HttpStatus.SC_GATEWAY_TIMEOUT -> true;
+                default -> false;};
+        }
+        return isTransient;
     }
 
     private Class<IBaseResource> getValueSetClass() {

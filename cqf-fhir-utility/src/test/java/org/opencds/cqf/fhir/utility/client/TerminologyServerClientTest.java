@@ -300,6 +300,8 @@ public class TerminologyServerClientTest {
         // ensure that the grouper is not expanded using the Tx Server
         var grouperUrl = "www.test.com/fhir/ValueSet/grouper";
         var grouper = new org.hl7.fhir.r4.model.ValueSet();
+        var id = "grouper";
+        grouper.setId(id);
         grouper.setUrl(grouperUrl);
         grouper.getCompose().getIncludeFirstRep().getValueSet().add(new org.hl7.fhir.r4.model.CanonicalType(leafUrl));
         grouper.addExtension()
@@ -369,7 +371,7 @@ public class TerminologyServerClientTest {
         when(fhirClient.getFhirContext().getVersion().getVersion()).thenReturn(FhirVersionEnum.R4);
         when(fhirClient
                         .operation()
-                        .onType(eq(VALUE_SET))
+                        .onInstance(eq(VALUE_SET))
                         .named(eq(EXPAND_OPERATION))
                         .withParameters(any(IBaseParameters.class))
                         .returnResourceType(any())

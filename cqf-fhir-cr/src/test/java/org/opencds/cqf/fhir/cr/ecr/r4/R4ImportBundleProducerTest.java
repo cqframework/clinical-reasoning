@@ -275,9 +275,7 @@ class R4ImportBundleProducerTest {
 
         // Execute
         R4ImportBundleProducer.extractPrioritiesAndConditions(
-            Arrays.asList(context1, context2),
-            priorities, conditions,
-            "fakeUrl");
+                Arrays.asList(context1, context2), priorities, conditions, "fakeUrl");
 
         // Verify
         assertEquals(1, priorities.size());
@@ -300,11 +298,9 @@ class R4ImportBundleProducerTest {
         List<CodeableConcept> conditions = new ArrayList<>();
 
         assertThrows(
-            UnprocessableEntityException.class,
-            () -> R4ImportBundleProducer.extractPrioritiesAndConditions(
-                Arrays.asList(context1, context2),
-                priorities, conditions,
-                "http://example.com/fhir"));
+                UnprocessableEntityException.class,
+                () -> R4ImportBundleProducer.extractPrioritiesAndConditions(
+                        Arrays.asList(context1, context2), priorities, conditions, "http://example.com/fhir"));
     }
 
     @Test

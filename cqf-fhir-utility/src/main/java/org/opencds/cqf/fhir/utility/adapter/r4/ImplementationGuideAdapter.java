@@ -74,7 +74,9 @@ public class ImplementationGuideAdapter extends KnowledgeArtifactAdapter impleme
 
         for (var dr : getImplementationGuide().getDefinition().getResource()) {
             if (dr.hasReference() && dr.getReference().hasReference()) {
-                if (dr.hasExampleBooleanType() && dr.getExampleBooleanType().booleanValue()) {
+                if (dr.hasExampleCanonicalType()
+                        || (dr.hasExampleBooleanType()
+                                && dr.getExampleBooleanType().booleanValue())) {
                     continue;
                 }
                 var refValue = dr.getReference().getReference();

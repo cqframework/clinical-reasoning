@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cr.ecr.r4;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.opencds.cqf.fhir.cr.ecr.r4.R4ImportBundleProducer.isRootSpecificationLibrary;
@@ -12,6 +13,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import java.net.MalformedURLException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -52,8 +54,55 @@ class R4ImportBundleProducerTest {
         repository = new InMemoryFhirRepository(fhirContext);
     }
 
+    @Test
+    void testEnsureHttpsConvertsHttpToHttps() throws Exception {
+        String input = "http://example.com/path";
+        String output = R4ImportBundleProducer.ensureHttps(input);
+        assertTrue(output.startsWith("https://"));
+    }
+
+    @Test
+    void testEnsureHttpsPreservesHttps() throws Exception {
+        String input = "https://secure.com";
+        String output = R4ImportBundleProducer.ensureHttps(input);
+        assertEquals(input, output);
+    }
+
+    @Test
+    void testEnsureHttpsMalformedUrl() {
+        assertThrows(MalformedURLException.class, () -> R4ImportBundleProducer.ensureHttps("://bad-url"));
+    }
+
+    @Test
+    void testFixIdentifiersAddsUrnOidPrefix() {
+        var id1 = new org.hl7.fhir.r4.model.Identifier();
+        id1.setSystem("urn:ietf:rfc:3986");
+        id1.setValue("12345");
+        var id2 = new org.hl7.fhir.r4.model.Identifier();
+        id2.setSystem("urn:ietf:rfc:3986");
+        id2.setValue("http://already.ok");
+
+        var fixed = R4ImportBundleProducer.fixIdentifiers(List.of(id1, id2));
+
+        assertTrue(fixed.get(0).getValue().startsWith("urn:oid:"));
+        assertEquals("http://already.ok", fixed.get(1).getValue());
+    }
+
+    @Test
+    void testRemoveProfileFromListRemovesMatchingValue() {
+        var profiles = List.of(new CanonicalType("keep"), new CanonicalType("remove"));
+        var result = R4ImportBundleProducer.removeProfileFromList(profiles, "remove");
+        assertEquals(1, result.size());
+        assertEquals("keep", result.get(0).getValue());
+    }
+
+    @Test
+    void testRemoveProfileFromListHandlesNull() {
+        var result = R4ImportBundleProducer.removeProfileFromList(null, "remove");
+        assertTrue(result.isEmpty());
+    }
+
     /**
-     * Tests transformImportBundle() in R4ImportBundleProducer
      * @throws FhirResourceExistsException
      */
     @Test
@@ -207,6 +256,47 @@ class R4ImportBundleProducerTest {
     }
 
     @Test
+    void testExtractPrioritiesAndConditionsPopulatesLists() {
+        var context1 = new org.hl7.fhir.r4.model.UsageContext();
+        context1.getCode().setCode("focus");
+        context1.setValue(new CodeableConcept().setText("Condition1"));
+
+        var context2 = new org.hl7.fhir.r4.model.UsageContext();
+        context2.getCode().setCode("priority");
+        context2.setValue(new CodeableConcept().addCoding().setCode("routine"));
+
+        List<CodeableConcept> priorities = new java.util.ArrayList<>();
+        List<CodeableConcept> conditions = new java.util.ArrayList<>();
+
+        R4ImportBundleProducer.extractPrioritiesAndConditions(
+                List.of(context1, context2), priorities, conditions, "fakeUrl");
+
+        assertEquals(1, priorities.size());
+        assertEquals(1, conditions.size());
+    }
+
+    @Test
+    void testExtractPrioritiesAndConditionsConflictingPrioritiesThrows() {
+        var c1 = new org.hl7.fhir.r4.model.UsageContext();
+        c1.getCode().setCode("priority");
+        c1.setValue(new CodeableConcept().addCoding().setCode("routine"));
+
+        var c2 = new org.hl7.fhir.r4.model.UsageContext();
+        c2.getCode().setCode("priority");
+        c2.setValue(new CodeableConcept().addCoding().setCode("urgent"));
+
+        List<CodeableConcept> priorities = new java.util.ArrayList<>();
+        CodeableConcept concept = new CodeableConcept();
+        concept.addCoding().setCode("routine");
+        priorities.add(concept);
+
+        assertThrows(
+                UnprocessableEntityException.class,
+                () -> R4ImportBundleProducer.extractPrioritiesAndConditions(
+                        List.of(c1, c2), priorities, new java.util.ArrayList<>(), "fakeUrl"));
+    }
+
+    @Test
     void testImportOperation_conflicting_priorities() {
         Bundle v2Bundle = (Bundle) jsonParser.parseResource(
                 R4ImportBundleProducerTest.class.getResourceAsStream("ersd-bundle-example-conflicting-priority.json"));
@@ -241,6 +331,40 @@ class R4ImportBundleProducerTest {
             }
         }
         assertTrue(atLeastOneRelatedArtifactIsAValueSetWithPriority);
+    }
+
+    @Test
+    void testAddAuthoritativeSourceAddsOnlyOnce() {
+        var vs = new ValueSet();
+        R4ImportBundleProducer.addAuthoritativeSource(vs, "http://auth");
+        R4ImportBundleProducer.addAuthoritativeSource(vs, "http://auth");
+        long count = vs.getExtension().stream()
+                .filter(e -> e.getUrl().equals(TransformProperties.authoritativeSourceExtUrl))
+                .count();
+        assertEquals(1, count);
+    }
+
+    @Test
+    void testAddMetaProfileUrlRemovesDuplicates() {
+        var meta = new org.hl7.fhir.r4.model.Meta();
+        meta.addProfile("keep");
+        meta.addProfile("dup");
+        var result = R4ImportBundleProducer.addMetaProfileUrl(meta, List.of("dup", "new"));
+        assertTrue(result.stream()
+                .map(CanonicalType::getValue)
+                .collect(Collectors.toSet())
+                .contains("new"));
+        assertEquals(3, result.size()); // keep, dup, new
+    }
+
+    @Test
+    void testProcessCodeableConceptMapForLibraryCreatesExtensions() {
+        var cc = new CodeableConcept().setText("test");
+        var extensions =
+                R4ImportBundleProducer.processCodeableConceptMapForLibrary(List.of(cc), "http://example.org/ext");
+        assertEquals(1, extensions.size());
+        assertEquals("http://example.org/ext", extensions.get(0).getUrl());
+        assertEquals("test", ((CodeableConcept) extensions.get(0).getValue()).getText());
     }
 
     @Test
@@ -303,57 +427,10 @@ class R4ImportBundleProducerTest {
         return (Library) rootLibraryEntry.get();
     }
 
-    //    private String stringFromResource(String theLocation) {
-    //        InputStream is = null;
-    //        try {
-    //            if (theLocation.startsWith(File.separator)) {
-    //                is = new FileInputStream(theLocation);
-    //            } else {
-    //                DefaultResourceLoader resourceLoader = new DefaultResourceLoader();
-    //                org.springframework.core.io.Resource resource = resourceLoader.getResource(theLocation);
-    //                is = resource.getInputStream();
-    //            }
-    //            return IOUtils.toString(is, StandardCharsets.UTF_8);
-    //        } catch (Exception e) {
-    //            throw new RuntimeException(String.format("Error loading resource from %s", theLocation), e);
-    //        }
-    //
-    //    }
-
     private Optional<Resource> getResourceFromEntriesById(List<BundleEntryComponent> bundle, String id) {
         return bundle.stream()
                 .map(e -> e.getResource())
                 .filter(r -> r.getIdElement().getIdPart().equals(id))
                 .findFirst();
     }
-
-    //    private FhirContext getFhirContext() {
-    //        return this.fhirContext;
-    //    }
-
-    //    private IBaseResource readResource(String theLocation) {
-    //        String resourceString = stringFromResource(theLocation);
-    //        if (theLocation.endsWith("json")) {
-    //            return parseResource("json", resourceString);
-    //        } else {
-    //            return parseResource("xml", resourceString);
-    //        }
-    //    }
-
-    //    private IBaseResource parseResource(String encoding, String resourceString) {
-    //        IParser parser;
-    //        switch (encoding.toLowerCase()) {
-    //            case "json":
-    //                parser = getFhirContext().newJsonParser();
-    //                break;
-    //            case "xml":
-    //                parser = getFhirContext().newXmlParser();
-    //                break;
-    //            default:
-    //                throw new IllegalArgumentException(
-    //                    String.format("Expected encoding xml, or json.  %s is not a valid encoding", encoding));
-    //        }
-    //
-    //        return parser.parseResource(resourceString);
-    //    }
 }

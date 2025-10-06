@@ -80,7 +80,7 @@ public class R4ImportBundleProducer {
         }
     }
 
-    private static void addAuthoritativeSource(ValueSet vs, String url) {
+    static void addAuthoritativeSource(ValueSet vs, String url) {
         if (vs.getExtensionByUrl(TransformProperties.authoritativeSourceExtUrl) == null) {
             var ext = new Extension();
             ext.setUrl(TransformProperties.authoritativeSourceExtUrl);
@@ -233,7 +233,7 @@ public class R4ImportBundleProducer {
         }
     }
 
-    private static List<Identifier> fixIdentifiers(List<Identifier> identifiers) {
+    static List<Identifier> fixIdentifiers(List<Identifier> identifiers) {
         return identifiers.stream()
                 .map(i -> {
                     if (i.getSystem().equals("urn:ietf:rfc:3986")
@@ -249,7 +249,7 @@ public class R4ImportBundleProducer {
                 .collect(Collectors.toList());
     }
 
-    private static List<CanonicalType> removeProfileFromList(List<CanonicalType> profiles, String profileToRemove) {
+    static List<CanonicalType> removeProfileFromList(List<CanonicalType> profiles, String profileToRemove) {
         if (profiles == null) {
             return new ArrayList<CanonicalType>();
         }
@@ -258,7 +258,7 @@ public class R4ImportBundleProducer {
                 .collect(Collectors.toList());
     }
 
-    private static void extractPrioritiesAndConditions(
+    static void extractPrioritiesAndConditions(
             List<UsageContext> contexts,
             List<CodeableConcept> priorityList,
             List<CodeableConcept> conditionsList,
@@ -312,7 +312,7 @@ public class R4ImportBundleProducer {
         return bundleEntry;
     }
 
-    private static List<CanonicalType> addMetaProfileUrl(Meta meta, List<String> urls) {
+    static List<CanonicalType> addMetaProfileUrl(Meta meta, List<String> urls) {
         List<CanonicalType> profiles = meta.getProfile();
 
         // Add to profile and ensure not duplicated
@@ -424,7 +424,7 @@ public class R4ImportBundleProducer {
         return t -> seen.add(keyExtractor.apply(t));
     }
 
-    private static List<Extension> processCodeableConceptMapForLibrary(List<CodeableConcept> v, String extensionUrl) {
+    static List<Extension> processCodeableConceptMapForLibrary(List<CodeableConcept> v, String extensionUrl) {
         var extensions = new ArrayList<Extension>();
         v.forEach(codeableConcept -> {
             var extension = new Extension();

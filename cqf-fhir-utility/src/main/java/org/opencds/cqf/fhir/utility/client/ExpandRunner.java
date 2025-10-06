@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.utility.client;
 
 import static java.util.Objects.requireNonNull;
+import static org.opencds.cqf.fhir.utility.adapter.IAdapterFactory.createAdapterForResource;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
@@ -13,6 +14,8 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.Resources;
+import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -90,6 +93,38 @@ public class ExpandRunner implements Runnable {
                         .withNoParameters(parameters.getClass())
                         .returnResourceType(getValueSetClass())
                         .execute();
+
+                var expandedValueSetAdapter = (IValueSetAdapter) createAdapterForResource(expandedValueSet);
+
+                if (expandedValueSetAdapter.getExpansionTotal()
+                        > terminologyServerClientSettings.getExpansionsPerPage()) {
+                    var paramsWithOffset = (IParametersAdapter) createAdapterForResource(
+                            createAdapterForResource(parameters).copy());
+                    var offset = terminologyServerClientSettings.getExpansionsPerPage();
+
+                    for (int expansionPage = 2;
+                            expansionPage <= terminologyServerClientSettings.getMaxExpansionPages()
+                                    && offset < expandedValueSetAdapter.getExpansionTotal();
+                            expansionPage++) {
+                        logger.info("Expanding page: {} for ValueSet: {}", expansionPage, valueSetUrl);
+                        paramsWithOffset.addParameter("offset", offset);
+                        var nextExpansion = fhirClient
+                                .operation()
+                                .onType("ValueSet")
+                                .named("$expand")
+                                .withParameters((IBaseParameters) paramsWithOffset.get())
+                                .returnResourceType(getValueSetClass())
+                                .execute();
+
+                        var nextExpansionValueSetAdapter = (IValueSetAdapter) createAdapterForResource(nextExpansion);
+
+                        expandedValueSetAdapter.appendExpansionContains(
+                                nextExpansionValueSetAdapter.getExpansionContains());
+
+                        offset += terminologyServerClientSettings.getExpansionsPerPage();
+                    }
+                }
+
                 scheduler.shutdown();
             }
         } catch (Exception ex) {

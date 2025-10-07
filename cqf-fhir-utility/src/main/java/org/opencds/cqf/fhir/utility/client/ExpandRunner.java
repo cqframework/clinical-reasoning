@@ -12,6 +12,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.http.HttpStatus;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.Resources;
 import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
@@ -84,9 +85,10 @@ public class ExpandRunner implements Runnable {
             expansionAttempt++;
             if (expansionAttempt <= terminologyServerClientSettings.getMaxRetryCount()) {
                 logger.info("Expansion attempt: {} for ValueSet: {}", expansionAttempt, valueSetUrl);
+                var id = Canonicals.getResourceType(valueSetUrl) + "/" + Canonicals.getIdPart(valueSetUrl);
                 expandedValueSet = fhirClient
                         .operation()
-                        .onType("ValueSet")
+                        .onInstance(id)
                         .named("$expand")
                         .withParameters(parameters)
                         .returnResourceType(getValueSetClass())
@@ -105,10 +107,10 @@ public class ExpandRunner implements Runnable {
                                     && offset < expandedValueSetAdapter.getExpansionTotal();
                             expansionPage++) {
                         logger.info("Expanding page: {} for ValueSet: {}", expansionPage, valueSetUrl);
-                        paramsWithOffset.addParameter("offset", offset);
+                        paramsWithOffset.setParameter("offset", offset);
                         var nextExpansion = fhirClient
                                 .operation()
-                                .onType("ValueSet")
+                                .onInstance(id)
                                 .named("$expand")
                                 .withParameters((IBaseParameters) paramsWithOffset.get())
                                 .returnResourceType(getValueSetClass())

@@ -1,11 +1,9 @@
 package org.opencds.cqf.fhir.utility.npm;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-
-import ca.uhn.fhir.context.FhirVersionEnum;
+import jakarta.annotation.Nonnull;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 public abstract class BaseNpmResourceInfoForCqlTest {
 
@@ -41,7 +39,6 @@ public abstract class BaseNpmResourceInfoForCqlTest {
     protected static final String CROSS_PACKAGE_SOURCE_NAMESPACE = NAMESPACE_PREFIX + CROSS_PACKAGE_SOURCE;
     protected static final String CROSS_PACKAGE_TARGET_NAMESPACE = NAMESPACE_PREFIX + CROSS_PACKAGE_TARGET;
 
-
     protected static final String SIMPLE_ALPHA_TGZ = SIMPLE_ALPHA_LOWER + DOT_TGZ;
     protected static final String SIMPLE_BRAVO_TGZ = SIMPLE_BRAVO_LOWER + DOT_TGZ;
     protected static final Path WITH_DERIVED_LIBRARY_TGZ = Paths.get(WITH_DERIVED_LIBRARY_LOWER + DOT_TGZ);
@@ -73,18 +70,14 @@ public abstract class BaseNpmResourceInfoForCqlTest {
             SIMPLE_BRAVO_NAMESPACE_URL + SLASH_MEASURE_SLASH + SIMPLE_BRAVO_MIXED;
     protected static final String MEASURE_URL_WITH_DERIVED_LIBRARY =
             WITH_DERIVED_URL + SLASH_MEASURE_SLASH + WITH_DERIVED_LIBRARY_MIXED;
-    protected static final String MEASURE_URL_WITH_DERIVED_LIBRARY_WITH_VERSION =
-            MEASURE_URL_WITH_DERIVED_LIBRARY + PIPE + VERSION_0_4;
     protected static final String MEASURE_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES =
             WITH_TWO_LAYERS_DERIVED_URL + SLASH_MEASURE_SLASH + WITH_TWO_LAYERS_DERIVED_LIBRARIES_UPPER;
-    protected static final String MEASURE_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES_WITH_VERSION =
-            MEASURE_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES + PIPE + VERSION_0_5;
 
     protected static final String MEASURE_URL_CROSS_PACKAGE_SOURCE =
             CROSS_PACKAGE_SOURCE_URL + SLASH_MEASURE_SLASH + CROSS_PACKAGE_SOURCE_ID;
 
     protected static final String MEASURE_URL_CROSS_PACKAGE_TARGET =
-        CROSS_PACKAGE_TARGET_URL + SLASH_MEASURE_SLASH + CROSS_PACKAGE_TARGET_ID;
+            CROSS_PACKAGE_TARGET_URL + SLASH_MEASURE_SLASH + CROSS_PACKAGE_TARGET_ID;
 
     protected static final String LIBRARY_URL_ALPHA_NO_VERSION =
             SIMPLE_ALPHA_NAMESPACE_URL + SLASH_LIBRARY_SLASH + SIMPLE_ALPHA_MIXED;
@@ -107,7 +100,7 @@ public abstract class BaseNpmResourceInfoForCqlTest {
     protected static final String LIBRARY_URL_CROSS_PACKAGE_TARGET_NO_VERSION =
             CROSS_PACKAGE_TARGET_URL + SLASH_LIBRARY_SLASH + CROSS_PACKAGE_TARGET_ID;
     protected static final String LIBRARY_URL_CROSS_PACKAGE_TARGET_WITH_VERSION =
-        LIBRARY_URL_CROSS_PACKAGE_TARGET_NO_VERSION + PIPE + VERSION_0_3;
+            LIBRARY_URL_CROSS_PACKAGE_TARGET_NO_VERSION + PIPE + VERSION_0_3;
 
     protected static final String LIBRARY_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES_NO_VERSION =
             WITH_TWO_LAYERS_DERIVED_URL + SLASH_LIBRARY_SLASH + WITH_TWO_LAYERS_DERIVED_LIBRARIES_UPPER;
@@ -123,115 +116,9 @@ public abstract class BaseNpmResourceInfoForCqlTest {
     protected static final String LIBRARY_URL_WITH_TWO_LAYERS_DERIVED_LIBRARY_2B =
             WITH_TWO_LAYERS_DERIVED_URL + SLASH_LIBRARY_SLASH + DERIVED_LAYER_2_B;
 
-    protected abstract FhirVersionEnum getExpectedFhirVersion();
+    @Nonnull
+    protected abstract BaseNpmPackageLoaderInMemory setup(Path... npmPackagePaths);
 
-    //    protected void derivedLibraryTwoLayers(
-    //            String expectedCql,
-    //            String expectedCqlDerived1a,
-    //            String expectedCqlDerived1b,
-    //            String expectedCqlDerived2a,
-    //            String expectedCqlDerived2b) {
-    //
-    //        final R4NpmPackageLoaderInMemory loader = setup(WITH_TWO_LAYERS_DERIVED_LIBRARIES_TGZ);
-    //
-    //        var expectedNamespaceInfos = List.of(new NamespaceInfo(WITH_TWO_LAYERS_NAMESPACE,
-    // WITH_DERIVED_TWO_LAYERS_URL));
-    //
-    //        final NpmResourceHolder resourceInfoNoVersion =
-    //                loader.loadNpmResources(new CanonicalType(MEASURE_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES));
-    //        sanityCheckNpmResourceHolder(resourceInfoNoVersion);
-    //        assertEquals(expectedNamespaceInfos, resourceInfoNoVersion.getNamespaceInfos());
-    //        verifyMeasure(
-    //                MEASURE_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES,
-    //                LIBRARY_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES_WITH_VERSION,
-    //                resourceInfoNoVersion);
-    //        verifyLibrary(
-    //                LIBRARY_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES_NO_VERSION,
-    //                expectedCql,
-    //                resourceInfoNoVersion.getOptMainLibrary().orElse(null));
-    //
-    //        final NpmResourceHolder resourceInfoWithVersion =
-    //                loader.loadNpmResources(new
-    // CanonicalType(MEASURE_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES_WITH_VERSION));
-    //        sanityCheckNpmResourceHolder(resourceInfoWithVersion);
-    //        assertEquals(expectedNamespaceInfos, resourceInfoWithVersion.getNamespaceInfos());
-    //        verifyMeasure(
-    //                MEASURE_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES,
-    //                LIBRARY_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES_WITH_VERSION,
-    //                resourceInfoWithVersion);
-    //        verifyLibrary(
-    //                LIBRARY_URL_WITH_TWO_LAYERS_DERIVED_LIBRARIES_NO_VERSION,
-    //                expectedCql,
-    //                resourceInfoWithVersion.getOptMainLibrary().orElse(null));
-    //
-    //        final ILibraryAdapter derivedLibrary1a = resourceInfoWithVersion
-    //                .findMatchingLibrary(new VersionedIdentifier()
-    //                        .withId(DERIVED_LAYER_1_A)
-    //                        .withVersion(VERSION_0_5)
-    //                        .withSystem(WITH_DERIVED_TWO_LAYERS_URL))
-    //                .orElse(null);
-    //
-    //        verifyLibrary(LIBRARY_URL_WITH_TWO_LAYERS_DERIVED_LIBRARY_1A, expectedCqlDerived1a, derivedLibrary1a);
-    //
-    //        final ILibraryAdapter derivedLibrary1b = resourceInfoWithVersion
-    //                .findMatchingLibrary(
-    //                        new VersionedIdentifier().withId(DERIVED_LAYER_1_B).withVersion(VERSION_0_5))
-    //                .orElse(null);
-    //
-    //        verifyLibrary(LIBRARY_URL_WITH_TWO_LAYERS_DERIVED_LIBRARY_1B, expectedCqlDerived1b, derivedLibrary1b);
-    //
-    //        final ILibraryAdapter derivedLibrary2a = resourceInfoWithVersion
-    //                .findMatchingLibrary(
-    //                        new VersionedIdentifier().withId(DERIVED_LAYER_2_A).withVersion(VERSION_0_5))
-    //                .orElse(null);
-    //
-    //        verifyLibrary(LIBRARY_URL_WITH_TWO_LAYERS_DERIVED_LIBRARY_2A, expectedCqlDerived2a, derivedLibrary2a);
-    //
-    //        final ILibraryAdapter derivedLibrary2b = resourceInfoWithVersion
-    //                .findMatchingLibrary(
-    //                        new VersionedIdentifier().withId(DERIVED_LAYER_2_B).withVersion(VERSION_0_5))
-    //                .orElse(null);
-    //
-    //        verifyLibrary(LIBRARY_URL_WITH_TWO_LAYERS_DERIVED_LIBRARY_2B, expectedCqlDerived2b, derivedLibrary2b);
-    //    }
-
-    //    protected void crossPackage(String expectedCqlSource, String expectedCqlTarget) {
-    //
-    //        final R4NpmPackageLoaderInMemory loader = setup(CROSS_PACKAGE_SOURCE_TGZ, CROSS_PACKAGE_TARGET_TGZ);
-    //
-    //        final NpmResourceHolder resourceInfoWithNoVersion =
-    //                loader.loadNpmResources(new CanonicalType(MEASURE_URL_CROSS_PACKAGE_SOURCE));
-    //        sanityCheckNpmResourceHolder(resourceInfoWithNoVersion);
-    //        verifyMeasure(
-    //                MEASURE_URL_CROSS_PACKAGE_SOURCE,
-    //                LIBRARY_URL_CROSS_PACKAGE_SOURCE_WITH_VERSION,
-    //                resourceInfoWithNoVersion);
-    //        final NpmResourceHolder resourceInfoWithVersion =
-    //                loader.loadNpmResources(new CanonicalType(MEASURE_URL_CROSS_PACKAGE_SOURCE_WITH_VERSION));
-    //        sanityCheckNpmResourceHolder(resourceInfoWithVersion);
-    //        verifyMeasure(
-    //                MEASURE_URL_CROSS_PACKAGE_SOURCE,
-    //                LIBRARY_URL_CROSS_PACKAGE_SOURCE_WITH_VERSION,
-    //                resourceInfoWithVersion);
-    //
-    //        verifyLibrary(
-    //                LIBRARY_URL_CROSS_PACKAGE_SOURCE,
-    //                expectedCqlSource,
-    //                resourceInfoWithVersion.getOptMainLibrary().orElse(null));
-    //
-    //        final Optional<ILibraryAdapter> matchingLibraryWithSourceResult =
-    //                resourceInfoWithVersion.findMatchingLibrary(new
-    // VersionedIdentifier().withId(CROSS_PACKAGE_TARGET_ID));
-    //
-    //        // We expect NOT to find the target Library here since it's not in the source package at all
-    //        assertTrue(matchingLibraryWithSourceResult.isEmpty());
-    //
-    //        // On the other hand, we can load the Library directly from the loader by URL:
-    //        final Optional<ILibraryAdapter> optLibraryTarget =
-    // loader.loadLibraryByUrl(LIBRARY_URL_CROSS_PACKAGE_TARGET);
-    //
-    //        assertTrue(optLibraryTarget.isPresent());
-    //        verifyLibrary(LIBRARY_URL_CROSS_PACKAGE_TARGET, expectedCqlTarget, optLibraryTarget.get());
-    //    }
-
+    @Nonnull
+    protected abstract BaseNpmPackageLoaderInMemory setup(List<Path> npmPackagePaths);
 }

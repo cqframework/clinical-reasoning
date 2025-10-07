@@ -11,23 +11,24 @@ import org.opencds.cqf.fhir.utility.npm.BaseNpmPackageLoaderInMemory;
 import org.opencds.cqf.fhir.utility.npm.NpmNamespaceManager;
 import org.opencds.cqf.fhir.utility.npm.NpmPackageLoader;
 
-// LUKETODO:  redo java
 /**
  * Simplistic implementation of {@link NpmPackageLoader} that loads NpmPackages from the classpath
- * and stores {@link NpmResourceHolder}s in a Map. This class is recommended for testing
+ * and stores {@link NpmPackage}s in a Set. This class is recommended for testing
  * and NOT for production.
- * <p/
+ * <p/>
  * Optionally uses a custom {@link NpmNamespaceManager} but can also resolve all NamespaceInfos
  * by extracting them from all loaded packages at construction time.
+ * <p/>
+ * This is for R4 only.
  */
 public class R4NpmPackageLoaderInMemory extends BaseNpmPackageLoaderInMemory implements NpmPackageLoader {
-    
+
     public static R4NpmPackageLoaderInMemory fromNpmPackageAbsolutePath(List<Path> tgzPaths) {
         return fromNpmPackageAbsolutePath(null, tgzPaths);
     }
 
     public static R4NpmPackageLoaderInMemory fromNpmPackageAbsolutePath(
-        NpmNamespaceManager npmNamespaceManager, List<Path> tgzPaths) {
+            NpmNamespaceManager npmNamespaceManager, List<Path> tgzPaths) {
         final Set<NpmPackage> npmPackages = buildNpmPackagesFromAbsolutePath(tgzPaths);
 
         return new R4NpmPackageLoaderInMemory(npmPackages, npmNamespaceManager);
@@ -53,8 +54,7 @@ public class R4NpmPackageLoaderInMemory extends BaseNpmPackageLoaderInMemory imp
         return new R4NpmPackageLoaderInMemory(npmPackages, npmNamespaceManager);
     }
 
-    public R4NpmPackageLoaderInMemory(
-            Set<NpmPackage> npmPackages, @Nullable NpmNamespaceManager npmNamespaceManager) {
+    public R4NpmPackageLoaderInMemory(Set<NpmPackage> npmPackages, @Nullable NpmNamespaceManager npmNamespaceManager) {
         super(npmPackages, npmNamespaceManager);
     }
 

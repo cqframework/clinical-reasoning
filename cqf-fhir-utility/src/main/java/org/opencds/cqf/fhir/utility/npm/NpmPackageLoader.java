@@ -15,17 +15,15 @@ import org.hl7.cql.model.NamespaceManager;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.opencds.cqf.fhir.utility.FhirVersions;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IResourceAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-// LUKETODO:  redo java
 /**
  * FHIR version agnostic Interface for loading NPM resources including Measures, Libraries and
- * NpmPackages as captured within {@link NpmResourceHolder}.
+ * potentially other qualifying resources.
  * <p/>
  * This javadoc documents the entire NPM package feature in the clinical-reasoning project.  Please
  * read below:
@@ -41,18 +39,8 @@ import org.slf4j.LoggerFactory;
  * {@link #initNamespaceMappings(LibraryManager)}, as due to how CQL libraries are loaded, it
  * won't work automatically.
  * <p/>
- * The {@link NpmResourceHolder} class is used to capture the results of query the NPM
- * package with a given measure URL.  It's effectively a container for the Measure, its directly
- * associated Library, and its NPM package information.  In theory, there could be more than one
- * NPM package for a given Measure.  When CQL runs and calls a custom {@link LibrarySourceProvider},
- * it will first check to see if the directly associated Library matches the provided
- * {@link VersionedIdentifier}.  If not, it will query all NPM packages within the
- * R4NpmResourceInfoForCql to find the Library.  And if there is still no match, it will pass the
- * VersionedIdentifier, and build a URL from the system and ID before calling
- * {@link #loadLibraryByUrl(String)} to load that Library from another package, with the
- * VersionedIdentifier already resolved correctly with the help of the NamespaceInfos provided above.
- * The implementor is responsible for implementing loadLibraryByUrl to properly return the Library
- * from any packages maintained by the application.
+ * When CQL runs and calls a custom {@link LibrarySourceProvider}, it will query all NPM packages
+ * accessible by the backing implementation.
  * <p/>
  * The above should also work with multiple layers of includes across packages.
  * <p/>
@@ -67,11 +55,11 @@ import org.slf4j.LoggerFactory;
  * to read the namespace info and resolve ID Y to URL <a href='http://packageY.org'>...</a>.  This
  * can only be accomplished via an explicit mapping.
  * <p/>
- * Note that there is the real possibility of Measures corresponding to the same canonical URL
- * among multiple NPM packages.  As such, clients who unintentionally add Measures with the same
- * URL in at least two different packages may see the Measure they're not expecting during an
- * $evaluate-measure-by-url, and may file production issues accordingly.   This may be mitigated
- * by new APIs in IHapiPackageCacheManager.
+ * Note that, depending on the implementation, there is the real possibility of Measures
+ * corresponding to the same canonical URL among multiple NPM packages.  As such, clients who
+ * unintentionally add Measures with the same URL in at least two different packages may see the
+ * Measure they're not expecting during an $evaluate-measure-by-url, and may file production
+ * issues accordingly.
  */
 public interface NpmPackageLoader {
     Logger logger = LoggerFactory.getLogger(NpmPackageLoader.class);
@@ -98,11 +86,15 @@ public interface NpmPackageLoader {
     String LIBRARY = "Library";
     String MEASURE = "Measure";
 
-    // LUKETODO:  redo java
     /**
-     * @param resourceUrl The Measure URL provided by the caller, corresponding to a Measure contained
-     *                   withing one of the stored NPM packages.
-     * @return The Measure corresponding to the URL.
+     * Query the NPM package repo for the resource corresponding to the provided resource class and
+     * canonical URL corresponding to the NPM package repo.
+     *
+     * @param resourceClass        The expected class of the resource to be returned, which will
+     *                             be checked via instanceof before being cast and returned.
+     * @param canonicalResourceUrl The resource URL provided by the caller, corresponding to a
+     *                             resource contained within one of the stored NPM packages.
+     * @return The resource (any {@link IBaseResource}) corresponding to the URL.
      */
     default <T extends IBaseResource> Optional<T> loadNpmResource(
             Class<T> resourceClass, IPrimitiveType<String> canonicalResourceUrl) {
@@ -122,34 +114,6 @@ public interface NpmPackageLoader {
 
         return Optional.of(resourceClass.cast(resource));
     }
-
-    // LUKETODO:  which is the better API of the two?
-    default Optional<? extends IResourceAdapter> loadNpmResourceAsAdapter(
-            IPrimitiveType<String> canonicalResourceUrl) {
-
-        return loadNpmResource(canonicalResourceUrl)
-            .map(this::toResourceAdapter);
-
-    }
-
-//    default <T extends IResourceAdapter> Optional<T> loadNpmResource(
-//        Class<T> resourceClass, IPrimitiveType<String> canonicalResourceUrl) {
-//        final Optional<? extends IBaseResource> optResource = loadNpmResource(canonicalResourceUrl);
-//
-//        if (optResource.isEmpty()) {
-//            return Optional.empty();
-//        }
-//
-//        final IBaseResource resource = optResource.get();
-//
-//        if (!resourceClass.isInstance(resource)) {
-//            throw new IllegalArgumentException("Expected resource to be a %s, but was a %s"
-//                .formatted(resourceClass.getSimpleName(), resource.fhirType()));
-//        }
-//
-//        return Optional.of(resourceClass.cast(resource));
-//    }
-
 
     default IAdapterFactory getAdapterFactory() {
         return IAdapterFactory.forFhirVersion(getFhirContext().getVersion().getVersion());
@@ -240,8 +204,7 @@ public interface NpmPackageLoader {
     default Optional<ILibraryAdapter> loadLibraryByUrl(String libraryUrl) {
 
         return toLibraryAdapter(
-                loadNpmResource(getLibraryClass(), toPrimitiveType(libraryUrl))
-                    .orElse(null));
+                loadNpmResource(getLibraryClass(), toPrimitiveType(libraryUrl)).orElse(null));
     }
 
     default Optional<ILibraryAdapter> toLibraryAdapter(IBaseResource resource) {
@@ -303,14 +266,14 @@ public interface NpmPackageLoader {
             switch (resource.fhirType()) {
                 case LIBRARY -> {
                     return new org.opencds.cqf.fhir.utility.adapter.r4.LibraryAdapter(
-                        (org.hl7.fhir.r4.model.Library) resource);
+                            (org.hl7.fhir.r4.model.Library) resource);
                 }
                 case MEASURE -> {
                     return new org.opencds.cqf.fhir.utility.adapter.r4.MeasureAdapter(
-                        (org.hl7.fhir.r4.model.Measure) resource);
+                            (org.hl7.fhir.r4.model.Measure) resource);
                 }
                 default -> throw new IllegalArgumentException(
-                    "Expected resource to be a Library or Measure, but was a " + resource.fhirType());
+                        "Expected resource to be a Library or Measure, but was a " + resource.fhirType());
             }
         }
 
@@ -318,19 +281,19 @@ public interface NpmPackageLoader {
             switch (resource.fhirType()) {
                 case LIBRARY -> {
                     return new org.opencds.cqf.fhir.utility.adapter.r5.LibraryAdapter(
-                        (org.hl7.fhir.r5.model.Library) resource);
+                            (org.hl7.fhir.r5.model.Library) resource);
                 }
                 case MEASURE -> {
                     return new org.opencds.cqf.fhir.utility.adapter.r5.MeasureAdapter(
-                        (org.hl7.fhir.r5.model.Measure) resource);
+                            (org.hl7.fhir.r5.model.Measure) resource);
                 }
                 default -> throw new IllegalArgumentException(
-                    "Expected resource to be a Library or Measure, but was a " + resource.fhirType());
+                        "Expected resource to be a Library or Measure, but was a " + resource.fhirType());
             }
         }
 
         throw new InvalidRequestException("Unsupported FHIR version: %s"
-            .formatted(getFhirContext().getVersion().getVersion().toString()));
+                .formatted(getFhirContext().getVersion().getVersion().toString()));
     }
 
     private String getUrl(VersionedIdentifier versionedIdentifier) {

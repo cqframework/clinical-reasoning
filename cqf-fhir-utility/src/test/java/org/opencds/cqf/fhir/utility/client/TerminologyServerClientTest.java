@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doReturn;
@@ -300,6 +301,8 @@ public class TerminologyServerClientTest {
         // ensure that the grouper is not expanded using the Tx Server
         var grouperUrl = "www.test.com/fhir/ValueSet/grouper";
         var grouper = new org.hl7.fhir.r4.model.ValueSet();
+        var id = "grouper";
+        grouper.setId(id);
         grouper.setUrl(grouperUrl);
         grouper.getCompose().getIncludeFirstRep().getValueSet().add(new org.hl7.fhir.r4.model.CanonicalType(leafUrl));
         grouper.addExtension()
@@ -322,9 +325,9 @@ public class TerminologyServerClientTest {
         when(fhirClient.getFhirContext().getVersion().getVersion()).thenReturn(FhirVersionEnum.R4);
         when(fhirClient
                         .operation()
-                        .onType(eq(VALUE_SET))
+                        .onInstance(any(String.class))
                         .named(eq(EXPAND_OPERATION))
-                        .withParameters(any(IBaseParameters.class))
+                        .withParameters(any())
                         .returnResourceType(any())
                         .execute())
                 .thenThrow(new UnprocessableEntityException())
@@ -369,9 +372,9 @@ public class TerminologyServerClientTest {
         when(fhirClient.getFhirContext().getVersion().getVersion()).thenReturn(FhirVersionEnum.R4);
         when(fhirClient
                         .operation()
-                        .onType(eq(VALUE_SET))
+                        .onInstance(eq(VALUE_SET))
                         .named(eq(EXPAND_OPERATION))
-                        .withParameters(any(IBaseParameters.class))
+                        .withNoParameters(any())
                         .returnResourceType(any())
                         .execute())
                 .thenThrow(new UnprocessableEntityException())
@@ -384,7 +387,7 @@ public class TerminologyServerClientTest {
                 TerminologyServerExpansionException.class,
                 () -> client.expand(valueSetAdapter, endpointAdapter, parametersAdapter));
         verify(client, never()).getValueSetResource(any(), any());
-        verify(fhirClient, atLeast(3)).operation();
+        verify(fhirClient, atLeast(2)).operation();
     }
 
     @Test
@@ -553,7 +556,7 @@ public class TerminologyServerClientTest {
         when(fhirClient.getFhirContext().getVersion().getVersion()).thenReturn(FhirVersionEnum.R4);
         when(fhirClient
                         .operation()
-                        .onType(eq(VALUE_SET))
+                        .onInstance(anyString())
                         .named(eq(EXPAND_OPERATION))
                         .withParameters(any(IBaseParameters.class))
                         .returnResourceType(any())

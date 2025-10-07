@@ -559,30 +559,16 @@ public class TerminologyServerClientTest {
 
         var fhirClient = mock(IGenericClient.class, new ReturnsDeepStubs());
         when(fhirClient.getFhirContext().getVersion().getVersion()).thenReturn(FhirVersionEnum.R4);
-
-        // Explicit mocking for each of the chained methods for fhirClient to ensure that correct response
-        // is produced for expansion calls using withNoParameters() and withParameters() methods
-        var operation = mock(IOperation.class);
-        var operationUnnamed = mock(IOperationUnnamed.class);
-        var operationUntyped = mock(IOperationUntyped.class);
-        var operationUntypedWithInput = mock(IOperationUntypedWithInput.class);
-        var operationUntypedWithInputAndPartialOutput = mock(IOperationUntypedWithInputAndPartialOutput.class);
-        var operationUntypedWithInputResource = mock(IOperationUntypedWithInput.class);
-        var operationUntypedWithInputAndPartialOutputResource = mock(IOperationUntypedWithInput.class);
-
-        when(fhirClient.operation()).thenReturn(operation);
-        when(operation.onInstance(anyString())).thenReturn(operationUnnamed);
-        when(operationUnnamed.named(any(String.class))).thenReturn(operationUntyped);
-
-        when(operationUntyped.withNoParameters(any())).thenReturn(operationUntypedWithInput);
-        when(operationUntypedWithInput.returnResourceType(any())).thenReturn(operationUntypedWithInputResource);
-        when(operationUntypedWithInputResource.execute()).thenReturn(leaf);
-
-        when(operationUntyped.withParameters(any(IBaseParameters.class)))
-                .thenReturn(operationUntypedWithInputAndPartialOutput);
-        when(operationUntypedWithInputAndPartialOutput.returnResourceType(any()))
-                .thenReturn(operationUntypedWithInputAndPartialOutputResource);
-        when(operationUntypedWithInputAndPartialOutputResource.execute()).thenReturn(leafPage2, leafPage3);
+        when(fhirClient
+            .operation()
+            .onInstance(anyString())
+            .named(eq(EXPAND_OPERATION))
+            .withParameters(any(IBaseParameters.class))
+            .returnResourceType(any())
+            .execute())
+            .thenReturn(leaf)
+            .thenReturn(leafPage2)
+            .thenReturn(leafPage3);
 
         // Max expansions per page is 1 to ensure paging occurs
         var settings = TerminologyServerClientSettings.getDefault();
@@ -595,7 +581,7 @@ public class TerminologyServerClientTest {
 
         // ensure that the 3 codes from different pages are included
         assertEquals(3, actual.getExpansion().getContains().size());
-        // ensure 3 expansion calls
-        verify(fhirClient, times(3)).operation();
+        // ensure 3 expansion calls (+1 from when() invocation)
+        verify(fhirClient, times(4)).operation();
     }
 }

@@ -90,7 +90,7 @@ public class ExpandRunner implements Runnable {
                         .operation()
                         .onInstance(id)
                         .named("$expand")
-                        .withNoParameters(parameters.getClass())
+                        .withParameters(parameters)
                         .returnResourceType(getValueSetClass())
                         .execute();
 

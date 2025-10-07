@@ -107,7 +107,7 @@ public class ExpandRunner implements Runnable {
                                     && offset < expandedValueSetAdapter.getExpansionTotal();
                             expansionPage++) {
                         logger.info("Expanding page: {} for ValueSet: {}", expansionPage, valueSetUrl);
-                        paramsWithOffset.addParameter("offset", offset);
+                        paramsWithOffset.setParameter("offset", offset);
                         var nextExpansion = fhirClient
                                 .operation()
                                 .onInstance(id)

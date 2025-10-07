@@ -1,0 +1,47 @@
+{
+  "resourceType": "Measure",
+  "id": "SampleReporting-2024.2.0",
+  "url": "http://sample.org/fhir/Library/SampleReporting-2024.2.0",
+  "version": "2024.2.0",
+  "name": "Sample_Reporting",
+  "library": [
+    "http://sample.org/fhir/Library/SampleReporting-2024.2.0"
+  ],
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-populationBasis",
+      "valueCode": "Encounter"
+    }
+  ],
+  "scoring": {
+    "coding": [
+      {
+        "system": "http://hl7.org/fhir/measure-scoring",
+        "code": "cohort"
+      }
+    ]
+  },
+  "group": [
+    {
+      "id": "group-1",
+      "population": [
+        {
+          "id": "initial-population",
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code": "initial-population",
+                "display": "Initial Population"
+              }
+            ]
+          },
+          "criteria": {
+            "language": "text/cql-identifier",
+            "expression": "Initial Population"
+          }
+        }
+      ]
+    }
+  ]
+}

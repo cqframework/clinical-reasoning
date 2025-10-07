@@ -33,7 +33,6 @@ import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.fhir.model.R4FhirModelResolver;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
-import org.opencds.cqf.fhir.cql.VersionedIdentifiers;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.CompositeEvaluationResultsPerMeasure;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
@@ -447,12 +446,19 @@ public class R4MeasureProcessor {
     protected VersionedIdentifier getLibraryVersionIdentifier(Measure measure) {
         var url = measure.getLibrary().get(0).asStringValue();
 
-        Bundle b = this.repository.search(Bundle.class, Library.class, Searches.byCanonical(url), null);
-        if (b.getEntry().isEmpty()) {
+        final Bundle bundleWithLibrary =
+                this.repository.search(Bundle.class, Library.class, Searches.byCanonical(url), null);
+
+        if (bundleWithLibrary.getEntry().isEmpty()) {
             var errorMsg = "Unable to find Library with url: %s".formatted(url);
             throw new ResourceNotFoundException(errorMsg);
         }
-        return VersionedIdentifiers.forUrl(url);
+
+        // old code:
+        //        return VersionedIdentifiers.forUrl(url);
+
+        // new code:
+        return R4VersionedLibraryIdentifierUtils.buildLibraryVersionedIdentifier(bundleWithLibrary, url);
     }
 
     /**

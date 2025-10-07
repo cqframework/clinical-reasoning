@@ -1,0 +1,12 @@
+{
+  "resourceType": "Encounter",
+  "id": "enc1",
+  "status": "planned",
+  "subject": {
+    "reference": "Patient/Patient1"
+  },
+  "period": {
+    "start": "2001-01-01T00:00:00-05:00",
+    "end": "2001-12-31T00:00:00-05:00"
+  }
+}

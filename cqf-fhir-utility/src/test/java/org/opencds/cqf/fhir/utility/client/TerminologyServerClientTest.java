@@ -23,11 +23,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.gclient.IOperation;
-import ca.uhn.fhir.rest.gclient.IOperationUnnamed;
-import ca.uhn.fhir.rest.gclient.IOperationUntyped;
-import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
-import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInputAndPartialOutput;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.IUntypedQuery;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -560,15 +555,15 @@ public class TerminologyServerClientTest {
         var fhirClient = mock(IGenericClient.class, new ReturnsDeepStubs());
         when(fhirClient.getFhirContext().getVersion().getVersion()).thenReturn(FhirVersionEnum.R4);
         when(fhirClient
-            .operation()
-            .onInstance(anyString())
-            .named(eq(EXPAND_OPERATION))
-            .withParameters(any(IBaseParameters.class))
-            .returnResourceType(any())
-            .execute())
-            .thenReturn(leaf)
-            .thenReturn(leafPage2)
-            .thenReturn(leafPage3);
+                        .operation()
+                        .onInstance(anyString())
+                        .named(eq(EXPAND_OPERATION))
+                        .withParameters(any(IBaseParameters.class))
+                        .returnResourceType(any())
+                        .execute())
+                .thenReturn(leaf)
+                .thenReturn(leafPage2)
+                .thenReturn(leafPage3);
 
         // Max expansions per page is 1 to ensure paging occurs
         var settings = TerminologyServerClientSettings.getDefault();

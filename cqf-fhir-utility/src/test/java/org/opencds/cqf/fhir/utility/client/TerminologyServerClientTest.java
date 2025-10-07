@@ -327,7 +327,7 @@ public class TerminologyServerClientTest {
                         .operation()
                         .onInstance(any(String.class))
                         .named(eq(EXPAND_OPERATION))
-                        .withNoParameters(any())
+                        .withParameters(any())
                         .returnResourceType(any())
                         .execute())
                 .thenThrow(new UnprocessableEntityException())

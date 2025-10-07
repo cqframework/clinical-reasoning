@@ -16,6 +16,13 @@ import org.opencds.cqf.fhir.cql.VersionedIdentifiers;
  */
 // LUKETODO:  repurpose this to check for non-conformant libraries and fail hard and immediately
     // Library cannot be resolved because the name does not match the url, something along those lines
+    /*
+    When a Library resource embeds CQL content as an artifact of 'CQL/text' it is requiring alignment of Library.id, library.name, library.url and CQL identifier (name in cql file) to match according to CQL naming conventions. The standard for cql naming says only FHIR Library resource.name, resource.url and resource.version should match what is in the cql file.
+When an error does occur because CQL or Library are not named correctly, it is difficult to understand what needs to be fixed. Suggest we provide better error handling on how to fix specific scenarios
+library.url & name have characters that are not CQL compliant ('.', '-')
+cql identifier contains illegal character
+library.url and library.name does not match embedded cql identifier
+     */
 public class R4VersionedLibraryIdentifierUtils {
 
     private static final Pattern LIBRARY_REGEX = Pattern.compile("/Library/");

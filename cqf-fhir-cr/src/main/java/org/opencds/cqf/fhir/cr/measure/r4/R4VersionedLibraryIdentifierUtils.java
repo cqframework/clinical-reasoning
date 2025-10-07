@@ -14,6 +14,8 @@ import org.opencds.cqf.fhir.cql.VersionedIdentifiers;
 /**
  * Maintain logic for building and validating {@link VersionedIdentifier} from {@link Library}
  */
+// LUKETODO:  repurpose this to check for non-conformant libraries and fail hard and immediately
+    // Library cannot be resolved because the name does not match the url, something along those lines
 public class R4VersionedLibraryIdentifierUtils {
 
     private static final Pattern LIBRARY_REGEX = Pattern.compile("/Library/");

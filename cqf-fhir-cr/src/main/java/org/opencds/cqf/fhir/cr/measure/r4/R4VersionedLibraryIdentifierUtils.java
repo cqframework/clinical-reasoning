@@ -11,7 +11,9 @@ import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Library;
 import org.opencds.cqf.fhir.cql.VersionedIdentifiers;
 
-// LUKETODO:  javadoc
+/**
+ * Maintain logic for building and validating {@link VersionedIdentifier} from {@link Library}
+ */
 public class R4VersionedLibraryIdentifierUtils {
 
     private static final Pattern LIBRARY_REGEX = Pattern.compile("/Library/");

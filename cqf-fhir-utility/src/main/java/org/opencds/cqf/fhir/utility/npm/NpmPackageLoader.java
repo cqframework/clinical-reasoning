@@ -1,7 +1,9 @@
 package org.opencds.cqf.fhir.utility.npm;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.repository.IRepository;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
@@ -13,7 +15,10 @@ import org.hl7.cql.model.NamespaceManager;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.opencds.cqf.fhir.utility.FhirVersions;
+import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IResourceAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -90,6 +95,8 @@ public interface NpmPackageLoader {
             return FhirContext.forR4Cached();
         }
     };
+    String LIBRARY = "Library";
+    String MEASURE = "Measure";
 
     // LUKETODO:  redo java
     /**
@@ -99,6 +106,7 @@ public interface NpmPackageLoader {
      */
     default <T extends IBaseResource> Optional<T> loadNpmResource(
             Class<T> resourceClass, IPrimitiveType<String> canonicalResourceUrl) {
+
         final Optional<? extends IBaseResource> optResource = loadNpmResource(canonicalResourceUrl);
 
         if (optResource.isEmpty()) {
@@ -113,6 +121,38 @@ public interface NpmPackageLoader {
         }
 
         return Optional.of(resourceClass.cast(resource));
+    }
+
+    // LUKETODO:  which is the better API of the two?
+    default Optional<? extends IResourceAdapter> loadNpmResourceAsAdapter(
+            IPrimitiveType<String> canonicalResourceUrl) {
+
+        return loadNpmResource(canonicalResourceUrl)
+            .map(this::toResourceAdapter);
+
+    }
+
+//    default <T extends IResourceAdapter> Optional<T> loadNpmResource(
+//        Class<T> resourceClass, IPrimitiveType<String> canonicalResourceUrl) {
+//        final Optional<? extends IBaseResource> optResource = loadNpmResource(canonicalResourceUrl);
+//
+//        if (optResource.isEmpty()) {
+//            return Optional.empty();
+//        }
+//
+//        final IBaseResource resource = optResource.get();
+//
+//        if (!resourceClass.isInstance(resource)) {
+//            throw new IllegalArgumentException("Expected resource to be a %s, but was a %s"
+//                .formatted(resourceClass.getSimpleName(), resource.fhirType()));
+//        }
+//
+//        return Optional.of(resourceClass.cast(resource));
+//    }
+
+
+    default IAdapterFactory getAdapterFactory() {
+        return IAdapterFactory.forFhirVersion(getFhirContext().getVersion().getVersion());
     }
 
     /**
@@ -200,7 +240,8 @@ public interface NpmPackageLoader {
     default Optional<ILibraryAdapter> loadLibraryByUrl(String libraryUrl) {
 
         return toLibraryAdapter(
-                loadNpmResource(getLibraryClass(), toPrimitiveType(libraryUrl)).orElse(null));
+                loadNpmResource(getLibraryClass(), toPrimitiveType(libraryUrl))
+                    .orElse(null));
     }
 
     default Optional<ILibraryAdapter> toLibraryAdapter(IBaseResource resource) {
@@ -252,6 +293,44 @@ public interface NpmPackageLoader {
             default -> throw new IllegalStateException(
                     "Unsupported FHIR version: " + getFhirContext().getVersion().getVersion());
         }
+    }
+
+    default IResourceAdapter toResourceAdapter(IBaseResource resource) {
+        if (resource == null) {
+            return null;
+        }
+        if (FhirVersionEnum.R4 == getFhirContext().getVersion().getVersion()) {
+            switch (resource.fhirType()) {
+                case LIBRARY -> {
+                    return new org.opencds.cqf.fhir.utility.adapter.r4.LibraryAdapter(
+                        (org.hl7.fhir.r4.model.Library) resource);
+                }
+                case MEASURE -> {
+                    return new org.opencds.cqf.fhir.utility.adapter.r4.MeasureAdapter(
+                        (org.hl7.fhir.r4.model.Measure) resource);
+                }
+                default -> throw new IllegalArgumentException(
+                    "Expected resource to be a Library or Measure, but was a " + resource.fhirType());
+            }
+        }
+
+        if (FhirVersionEnum.R5 == getFhirContext().getVersion().getVersion()) {
+            switch (resource.fhirType()) {
+                case LIBRARY -> {
+                    return new org.opencds.cqf.fhir.utility.adapter.r5.LibraryAdapter(
+                        (org.hl7.fhir.r5.model.Library) resource);
+                }
+                case MEASURE -> {
+                    return new org.opencds.cqf.fhir.utility.adapter.r5.MeasureAdapter(
+                        (org.hl7.fhir.r5.model.Measure) resource);
+                }
+                default -> throw new IllegalArgumentException(
+                    "Expected resource to be a Library or Measure, but was a " + resource.fhirType());
+            }
+        }
+
+        throw new InvalidRequestException("Unsupported FHIR version: %s"
+            .formatted(getFhirContext().getVersion().getVersion().toString()));
     }
 
     private String getUrl(VersionedIdentifier versionedIdentifier) {

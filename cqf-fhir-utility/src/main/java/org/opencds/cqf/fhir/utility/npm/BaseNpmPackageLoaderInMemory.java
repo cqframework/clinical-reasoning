@@ -6,6 +6,14 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import org.hl7.cql.model.NamespaceInfo;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.utilities.npm.NpmPackage;
+import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IResourceAdapter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -21,16 +29,9 @@ import java.util.Set;
 import java.util.StringJoiner;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import org.hl7.cql.model.NamespaceInfo;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.utilities.npm.NpmPackage;
-import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IResourceAdapter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 // LUKETODO:  redo java
+
 /**
  * Simplistic implementation of {@link NpmPackageLoader} that loads NpmPackages from the classpath
  * and stores {@link NpmResourceHolder}s in a Map. This class is recommended for testing
@@ -39,47 +40,45 @@ import org.slf4j.LoggerFactory;
  * Optionally uses a custom {@link NpmNamespaceManager} but can also resolve all NamespaceInfos
  * by extracting them from all loaded packages at construction time.
  */
-public class R4NpmPackageLoaderInMemory implements NpmPackageLoader {
+abstract public class BaseNpmPackageLoaderInMemory implements NpmPackageLoader {
 
-    private static final Logger logger = LoggerFactory.getLogger(R4NpmPackageLoaderInMemory.class);
+    private static final Logger logger = LoggerFactory.getLogger(BaseNpmPackageLoaderInMemory.class);
 
     private static final Pattern PATTERN_PIPE = Pattern.compile("\\|");
     public static final String FAILED_TO_LOAD_RESOURCE_TEMPLATE = "Failed to load resource: %s";
 
     private final Set<NpmPackage> npmPackages;
-    //    private final Map<UrlAndVersion, IBaseResource> resourceUrlToResource = new HashMap<>();
-    //    private final Map<UrlAndVersion, NpmPackage> libraryUrlToPackage = new HashMap<>();
     private final NpmNamespaceManager npmNamespaceManager;
 
-    public static R4NpmPackageLoaderInMemory fromNpmPackageAbsolutePath(List<Path> tgzPaths) {
+    public static BaseNpmPackageLoaderInMemory fromNpmPackageAbsolutePath(List<Path> tgzPaths) {
         return fromNpmPackageAbsolutePath(null, tgzPaths);
     }
 
-    public static R4NpmPackageLoaderInMemory fromNpmPackageAbsolutePath(
+    public static BaseNpmPackageLoaderInMemory fromNpmPackageAbsolutePath(
             NpmNamespaceManager npmNamespaceManager, List<Path> tgzPaths) {
         final Set<NpmPackage> npmPackages = buildNpmPackagesFromAbsolutePath(tgzPaths);
 
-        return new R4NpmPackageLoaderInMemory(npmPackages, npmNamespaceManager);
+        return null;
     }
 
-    public static R4NpmPackageLoaderInMemory fromNpmPackageClasspath(Class<?> clazz, Path... tgzPaths) {
+    public static BaseNpmPackageLoaderInMemory fromNpmPackageClasspath(Class<?> clazz, Path... tgzPaths) {
         return fromNpmPackageClasspath(null, clazz, tgzPaths);
     }
 
-    public static R4NpmPackageLoaderInMemory fromNpmPackageClasspath(
+    public static BaseNpmPackageLoaderInMemory fromNpmPackageClasspath(
             @Nullable NpmNamespaceManager npmNamespaceManager, Class<?> clazz, Path... tgzPaths) {
         return fromNpmPackageClasspath(npmNamespaceManager, clazz, Arrays.asList(tgzPaths));
     }
 
-    public static R4NpmPackageLoaderInMemory fromNpmPackageClasspath(Class<?> clazz, List<Path> tgzPaths) {
+    public static BaseNpmPackageLoaderInMemory fromNpmPackageClasspath(Class<?> clazz, List<Path> tgzPaths) {
         return fromNpmPackageClasspath(null, clazz, tgzPaths);
     }
 
-    public static R4NpmPackageLoaderInMemory fromNpmPackageClasspath(
+    public static BaseNpmPackageLoaderInMemory fromNpmPackageClasspath(
             @Nullable NpmNamespaceManager npmNamespaceManager, Class<?> clazz, List<Path> tgzPaths) {
         final Set<NpmPackage> npmPackages = buildNpmPackageFromClasspath(clazz, tgzPaths);
 
-        return new R4NpmPackageLoaderInMemory(npmPackages, npmNamespaceManager);
+        return null;
     }
 
     record UrlAndVersion(String url, @Nullable String version) {
@@ -146,29 +145,7 @@ public class R4NpmPackageLoaderInMemory implements NpmPackageLoader {
         }
     }
 
-    @Override
-    public FhirContext getFhirContext() {
-        return FhirContext.forR4Cached();
-    }
-
-    //    @Override
-    //    public Optional<ILibraryAdapter> loadLibraryByUrl(String url) {
-    //        for (NpmPackage npmPackage : libraryUrlToPackage.values()) {
-    //            final FhirContext fhirContext = getFhirContext(npmPackage);
-    //            try (InputStream libraryInputStream = npmPackage.loadByCanonical(url)) {
-    //                if (libraryInputStream != null) {
-    //                    final IResourceAdapter resourceAdapter = IAdapterFactory.createAdapterForResource(
-    //                            fhirContext.newJsonParser().parseResource(libraryInputStream));
-    //                    if (resourceAdapter instanceof ILibraryAdapter libraryAdapter) {
-    //                        return Optional.of(libraryAdapter);
-    //                    }
-    //                }
-    //            } catch (IOException exception) {
-    //                throw new InternalErrorException(exception);
-    //            }
-    //        }
-    //        return Optional.empty();
-    //    }
+    abstract public FhirContext getFhirContext();
 
     @Override
     public NpmNamespaceManager getNamespaceManager() {
@@ -176,14 +153,14 @@ public class R4NpmPackageLoaderInMemory implements NpmPackageLoader {
     }
 
     @Nonnull
-    private static Set<NpmPackage> buildNpmPackagesFromAbsolutePath(List<Path> tgzPaths) {
+    protected static Set<NpmPackage> buildNpmPackagesFromAbsolutePath(List<Path> tgzPaths) {
         return tgzPaths.stream()
-                .map(R4NpmPackageLoaderInMemory::getNpmPackageFromAbsolutePaths)
+                .map(BaseNpmPackageLoaderInMemory::getNpmPackageFromAbsolutePaths)
                 .collect(Collectors.toUnmodifiableSet());
     }
 
     @Nonnull
-    private static Set<NpmPackage> buildNpmPackageFromClasspath(Class<?> clazz, List<Path> tgzPaths) {
+    protected static Set<NpmPackage> buildNpmPackageFromClasspath(Class<?> clazz, List<Path> tgzPaths) {
         return tgzPaths.stream()
                 .map(path -> getNpmPackageFromClasspath(clazz, path))
                 .collect(Collectors.toUnmodifiableSet());
@@ -211,7 +188,7 @@ public class R4NpmPackageLoaderInMemory implements NpmPackageLoader {
         }
     }
 
-    private R4NpmPackageLoaderInMemory(Set<NpmPackage> npmPackages, @Nullable NpmNamespaceManager npmNamespaceManager) {
+    protected BaseNpmPackageLoaderInMemory(Set<NpmPackage> npmPackages, @Nullable NpmNamespaceManager npmNamespaceManager) {
 
         if (npmNamespaceManager == null) {
             var namespaceInfos = npmPackages.stream()

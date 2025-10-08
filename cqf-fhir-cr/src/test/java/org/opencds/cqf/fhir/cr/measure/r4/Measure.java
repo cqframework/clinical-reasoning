@@ -59,7 +59,6 @@ import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.SelectedGroup.SelectedReference;
-import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.r4.ContainedHelper;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
@@ -120,7 +119,6 @@ public class Measure {
         private IRepository repository;
         private MeasureEvaluationOptions evaluationOptions;
         private final MeasurePeriodValidator measurePeriodValidator;
-        private final R4MeasureServiceUtils measureServiceUtils;
 
         public Given(@Nullable Boolean applyScoringSetMembership) {
             this.evaluationOptions = MeasureEvaluationOptions.defaultOptions();
@@ -144,8 +142,10 @@ public class Measure {
                     .setValuesetExpansionMode(VALUESET_EXPANSION_MODE.PERFORM_NAIVE_EXPANSION);
 
             this.measurePeriodValidator = new MeasurePeriodValidator();
+        }
 
-            this.measureServiceUtils = new R4MeasureServiceUtils(repository);
+        public IRepository getRepository() {
+            return repository;
         }
 
         public Given repository(IRepository repository) {

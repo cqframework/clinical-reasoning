@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.utility.adapter.dstu3;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import org.hl7.fhir.dstu3.model.IntegerType;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.dstu3.model.Resource;
@@ -57,6 +58,15 @@ class ParametersAdapter extends ResourceAdapter implements IParametersAdapter {
     @Override
     public void addParameter(String name, String value) {
         getParameters().addParameter().setName(name).setValue(new StringType(value));
+    }
+
+    @Override
+    public void setParameter(String name, int value) {
+        if (hasParameter(name)) {
+            getParameter(name).setValue(new IntegerType(value));
+        } else {
+            getParameters().addParameter().setName(name).setValue(new IntegerType(value));
+        }
     }
 
     @Override

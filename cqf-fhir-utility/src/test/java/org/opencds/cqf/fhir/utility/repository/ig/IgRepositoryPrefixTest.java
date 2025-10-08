@@ -47,6 +47,7 @@ import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.MethodOrderer;
@@ -264,11 +265,11 @@ class IgRepositoryPrefixTest {
 
     @Test
     void searchBySearchParameterIntersection() {
-        IIdType org2Id = new IdType("Organization", "2");
+        IIdType org2Id = new IdType(ResourceType.Observation.name(), "2");
 
-        createOrganization(withId("1"), withEffectiveDate("2021-01-01"));
-        createOrganization(withId(org2Id), withEffectiveDate("2023-01-01"));
-        createOrganization(withId("3"), withEffectiveDate("2025-01-01"));
+        createObservation(withId("1"), withEffectiveDate("2021-01-01"));
+        createObservation(withId(org2Id), withEffectiveDate("2023-01-01"));
+        createObservation(withId("3"), withEffectiveDate("2025-01-01"));
 
         SearchBuilder searchBuilder = new SearchBuilder();
 
@@ -293,12 +294,12 @@ class IgRepositoryPrefixTest {
 
     @Test
     void searchBySearchParameterUnion() {
-        IIdType org1Id = new IdType("Organization", "1");
-        IIdType org3Id = new IdType("Organization", "3");
+        IIdType obs1Id = new IdType(ResourceType.Observation.name(), "1");
+        IIdType obs3Id = new IdType(ResourceType.Observation.name(), "3");
 
-        createOrganization(withId(org1Id), withEffectiveDate("2021-01-01"));
-        createOrganization(withId("2"), withEffectiveDate("2023-01-01"));
-        createOrganization(withId(org3Id), withEffectiveDate("2025-01-01"));
+        createObservation(withId(obs1Id), withEffectiveDate("2021-01-01"));
+        createObservation(withId("2"), withEffectiveDate("2023-01-01"));
+        createObservation(withId(obs3Id), withEffectiveDate("2025-01-01"));
 
         SearchBuilder searchBuilder = new SearchBuilder();
 
@@ -319,16 +320,16 @@ class IgRepositoryPrefixTest {
 
         var actualSorted = sortBundleEntryResourceIds(bundledResourceIds);
 
-        assertIterableEquals(List.of(org1Id, org3Id), actualSorted);
+        assertIterableEquals(List.of(obs1Id, obs3Id), actualSorted);
     }
 
     @Test
     void searchByReference() {
         String patientReference = "Patient/123";
-        IIdType org1Id = new IdType("Organization", "1");
+        IIdType observationId = new IdType(ResourceType.Observation.name(), "1");
 
-        createOrganization(withId(org1Id), withSubjectReference(patientReference));
-        createOrganization(withId("2"), withEffectiveDate("2023-01-01"));
+        createObservation(withId(observationId), withSubjectReference(patientReference));
+        createObservation(withId("2"), withEffectiveDate("2023-01-01"));
 
         SearchBuilder searchBuilder = new SearchBuilder();
         Multimap<String, List<IQueryParameterType>> multimap =
@@ -342,11 +343,11 @@ class IgRepositoryPrefixTest {
 
         List<IIdType> bundledResourceIds = BundleHelper.getBundleEntryResourceIds(getFhirContext(), bundle);
 
-        assertIterableEquals(List.of(org1Id), bundledResourceIds);
+        assertIterableEquals(List.of(observationId), bundledResourceIds);
     }
 
-    IIdType createOrganization(ICreationArgument... modifiers) {
-        return createResource("Observation", modifiers);
+    void createObservation(ICreationArgument... modifiers) {
+        createResource(ResourceType.Observation.name(), modifiers);
     }
 
     ICreationArgument withSubjectReference(String subjectReference) {

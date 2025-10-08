@@ -74,7 +74,8 @@ class ParametersAdapterTest {
                 .setValue(new StringType("value5"));
         assertTrue(adapter.hasParameter("param5"));
         assertEquals("value5", adapter.getParameter("param5").getPrimitiveValue());
-        assertEquals(5, parameters.getParameter().size());
+        adapter.setParameter("param6", 100);
+        assertEquals(6, parameters.getParameter().size());
         adapter.setParameter(null);
         assertFalse(adapter.hasParameter());
         adapter.setParameter(

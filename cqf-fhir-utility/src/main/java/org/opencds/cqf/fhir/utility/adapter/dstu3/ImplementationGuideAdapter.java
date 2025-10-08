@@ -84,12 +84,12 @@ public class ImplementationGuideAdapter extends KnowledgeArtifactAdapter impleme
                     var refValue = dr.hasSourceReference()
                             ? dr.getSourceReference()
                             : new Reference(dr.getSource().primitiveValue());
-                    var refElement = new IdType(refValue.primitiveValue());
+                    var refElement = new IdType(refValue.getReference());
                     var refClass = fhirContext
                             .getResourceDefinition(refElement.getResourceType())
                             .newInstance()
                             .getClass();
-                    var read = repository.read(refClass, new IdType(refValue.primitiveValue()));
+                    var read = repository.read(refClass, new IdType(refValue.getReference()));
                     if (read instanceof MetadataResource mr && (mr.hasUrl() || mr.hasUrlElement())) {
                         var url = mr.hasUrlElement() ? mr.getUrlElement() : new UriType(mr.getUrl());
                         references.add(new DependencyInfo(

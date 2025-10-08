@@ -1,7 +1,10 @@
 package org.opencds.cqf.fhir.utility.adapter.r5;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -13,12 +16,15 @@ import static org.mockito.Mockito.verify;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.List;
+import org.hl7.fhir.r5.model.DateType;
 import org.hl7.fhir.r5.model.Enumerations.PublicationStatus;
+import org.hl7.fhir.r5.model.Extension;
 import org.hl7.fhir.r5.model.ImplementationGuide;
 import org.hl7.fhir.r5.model.ImplementationGuide.ImplementationGuideDefinitionComponent;
 import org.hl7.fhir.r5.model.ImplementationGuide.ImplementationGuideDefinitionResourceComponent;
 import org.hl7.fhir.r5.model.PlanDefinition;
 import org.hl7.fhir.r5.model.Reference;
+import org.hl7.fhir.r5.model.StringType;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.TestVisitor;
@@ -140,5 +146,75 @@ public class ImplementationGuideAdapterTest {
         extractedDependencies.forEach(dep -> {
             assertTrue(dependencies.contains(dep.getReference()));
         });
+    }
+
+    @Test
+    void adapter_canonical_with_version_and_without_version() {
+        var ig = new ImplementationGuide();
+        ig.setUrl("http://example.org/ig");
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(ig);
+
+        // No version
+        assertFalse(adapter.hasVersion());
+        assertEquals("http://example.org/ig", adapter.getCanonical());
+
+        // With version
+        ig.setVersion("1.2.3");
+        assertTrue(adapter.hasVersion());
+        assertEquals("http://example.org/ig|1.2.3", adapter.getCanonical());
+
+        // Blank version (treated as no version)
+        ig.setVersion("   ");
+        assertFalse(adapter.hasVersion());
+        assertEquals("http://example.org/ig", adapter.getCanonical());
+    }
+
+    @Test
+    void getApprovalDate_no_extension_returns_null() {
+        var ig = new ImplementationGuide();
+        var adapter = adapterFactory.createImplementationGuide(ig);
+        assertNull(adapter.getApprovalDate());
+    }
+
+    @Test
+    void getApprovalDate_empty_value_returns_null() {
+        var ig = new ImplementationGuide();
+        ig.addExtension(new Extension(
+                "http://hl7.org/fhir/StructureDefinition/artifact-approvalDate", new DateType())); // no value set
+        var adapter = adapterFactory.createImplementationGuide(ig);
+        assertNull(adapter.getApprovalDate());
+    }
+
+    @Test
+    void getApprovalDate_wrong_type_returns_null() {
+        var ig = new ImplementationGuide();
+        ig.addExtension(new Extension(
+                "http://hl7.org/fhir/StructureDefinition/artifact-approvalDate", new StringType("not-a-date")));
+        var adapter = adapterFactory.createImplementationGuide(ig);
+        assertNull(adapter.getApprovalDate());
+    }
+
+    @Test
+    void getApprovalDate_valid_date_returns_java_util_date() {
+        var ig = new ImplementationGuide();
+        var dt = new DateType("2024-01-15");
+        ig.addExtension(new Extension("http://hl7.org/fhir/StructureDefinition/artifact-approvalDate", dt));
+        var adapter = adapterFactory.createImplementationGuide(ig);
+        assertNotNull(adapter.getApprovalDate());
+        // DateType#getValue() is java.util.Date
+        assertEquals(dt.getValue(), adapter.getApprovalDate());
+    }
+
+    @Test
+    void adapter_experimental_default_false_and_set_true_false() {
+        var ig = new ImplementationGuide();
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(ig);
+        assertFalse(adapter.getExperimental()); // default false
+
+        ig.setExperimental(Boolean.TRUE);
+        assertTrue(adapter.getExperimental());
+
+        ig.setExperimental(Boolean.FALSE);
+        assertFalse(adapter.getExperimental());
     }
 }

@@ -24,10 +24,10 @@ import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.ImplementationGuide;
 import org.hl7.fhir.r4.model.ImplementationGuide.ImplementationGuideDefinitionComponent;
 import org.hl7.fhir.r4.model.ImplementationGuide.ImplementationGuideDefinitionResourceComponent;
+import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.PlanDefinition;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StructureDefinition;
-import org.hl7.fhir.r4.model.Library;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.TestVisitor;
@@ -155,7 +155,7 @@ public class ImplementationGuideAdapterTest {
         ig.getMeta().addProfile(profileCanonical);
 
         var igDefinitionResourceComponent =
-            new ImplementationGuideDefinitionResourceComponent(new Reference(libraryRef));
+                new ImplementationGuideDefinitionResourceComponent(new Reference(libraryRef));
         var igDefinitionComponent = new ImplementationGuideDefinitionComponent();
         igDefinitionComponent.setResource(List.of(igDefinitionResourceComponent));
         ig.setDefinition(igDefinitionComponent);
@@ -183,13 +183,13 @@ public class ImplementationGuideAdapterTest {
         // Assertions: exactly the two dependencies referenced by the IG
         assertEquals(2, extractedDependencies.size());
 
-        var refs = extractedDependencies.stream().map(IDependencyInfo::getReference).toList();
+        var refs = extractedDependencies.stream()
+                .map(IDependencyInfo::getReference)
+                .toList();
         // The profile should be returned as the canonical from meta.profile
         assertTrue(refs.contains(profileCanonical));
         // The library may be returned as the literal reference (Library/SpecLib) or canonicalized using repo metadata
-        assertTrue(
-            refs.contains(libraryRef) || refs.contains(libUrl)
-        );
+        assertTrue(refs.contains(libraryRef) || refs.contains(libUrl));
     }
 
     @Test

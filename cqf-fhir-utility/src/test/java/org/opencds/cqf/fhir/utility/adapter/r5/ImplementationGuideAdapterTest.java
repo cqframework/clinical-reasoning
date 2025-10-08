@@ -18,17 +18,17 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.List;
 import org.hl7.fhir.r5.model.Bundle;
-import org.hl7.fhir.r5.model.Library;
-import org.hl7.fhir.r5.model.StructureDefinition;
 import org.hl7.fhir.r5.model.DateType;
 import org.hl7.fhir.r5.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r5.model.Extension;
 import org.hl7.fhir.r5.model.ImplementationGuide;
 import org.hl7.fhir.r5.model.ImplementationGuide.ImplementationGuideDefinitionComponent;
 import org.hl7.fhir.r5.model.ImplementationGuide.ImplementationGuideDefinitionResourceComponent;
+import org.hl7.fhir.r5.model.Library;
 import org.hl7.fhir.r5.model.PlanDefinition;
 import org.hl7.fhir.r5.model.Reference;
 import org.hl7.fhir.r5.model.StringType;
+import org.hl7.fhir.r5.model.StructureDefinition;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
@@ -165,7 +165,7 @@ public class ImplementationGuideAdapterTest {
         ig.getMeta().addProfile(profileCanonical);
 
         var igDefinitionResourceComponent =
-            new ImplementationGuide.ImplementationGuideDefinitionResourceComponent(new Reference(libraryRef));
+                new ImplementationGuide.ImplementationGuideDefinitionResourceComponent(new Reference(libraryRef));
         var igDefinitionComponent = new ImplementationGuide.ImplementationGuideDefinitionComponent();
         igDefinitionComponent.setResource(List.of(igDefinitionResourceComponent));
         ig.setDefinition(igDefinitionComponent);
@@ -193,13 +193,13 @@ public class ImplementationGuideAdapterTest {
         // Assertions: exactly the two dependencies referenced by the IG
         assertEquals(2, extractedDependencies.size());
 
-        var refs = extractedDependencies.stream().map(IDependencyInfo::getReference).toList();
+        var refs = extractedDependencies.stream()
+                .map(IDependencyInfo::getReference)
+                .toList();
         // The profile should be returned as the canonical from meta.profile
         assertTrue(refs.contains(profileCanonical));
         // The library may be returned as the literal reference (Library/SpecLib) or canonicalized using repo metadata
-        assertTrue(
-            refs.contains(libraryRef) || refs.contains(libUrl)
-        );
+        assertTrue(refs.contains(libraryRef) || refs.contains(libUrl));
     }
 
     @Test

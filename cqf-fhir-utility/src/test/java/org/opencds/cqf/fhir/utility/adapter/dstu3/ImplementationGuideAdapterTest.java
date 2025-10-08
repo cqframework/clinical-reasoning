@@ -18,17 +18,17 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.List;
 import org.hl7.fhir.dstu3.model.BooleanType;
+import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.DateType;
 import org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.ImplementationGuide;
 import org.hl7.fhir.dstu3.model.ImplementationGuide.ImplementationGuidePackageComponent;
 import org.hl7.fhir.dstu3.model.ImplementationGuide.ImplementationGuidePackageResourceComponent;
+import org.hl7.fhir.dstu3.model.Library;
 import org.hl7.fhir.dstu3.model.PlanDefinition;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.StringType;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Library;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
@@ -158,9 +158,9 @@ public class ImplementationGuideAdapterTest {
         var ig = new ImplementationGuide();
         ig.getMeta().addProfile(profileCanonical);
 
-        var implementationGuidePackageComponent =
-            new ImplementationGuide.ImplementationGuidePackageComponent();
-        implementationGuidePackageComponent.addResource(new ImplementationGuidePackageResourceComponent(new BooleanType(false), new Reference(libraryRef)));
+        var implementationGuidePackageComponent = new ImplementationGuide.ImplementationGuidePackageComponent();
+        implementationGuidePackageComponent.addResource(
+                new ImplementationGuidePackageResourceComponent(new BooleanType(false), new Reference(libraryRef)));
         ig.addPackage(implementationGuidePackageComponent);
 
         // Repository bundle contains resources that the IG references
@@ -186,13 +186,13 @@ public class ImplementationGuideAdapterTest {
         // Assertions: exactly the two dependencies referenced by the IG
         assertEquals(2, extractedDependencies.size());
 
-        var refs = extractedDependencies.stream().map(IDependencyInfo::getReference).toList();
+        var refs = extractedDependencies.stream()
+                .map(IDependencyInfo::getReference)
+                .toList();
         // The profile should be returned as the canonical from meta.profile
         assertTrue(refs.contains(profileCanonical));
         // The library may be returned as the literal reference (Library/SpecLib) or canonicalized using repo metadata
-        assertTrue(
-            refs.contains(libraryRef) || refs.contains(libUrl)
-        );
+        assertTrue(refs.contains(libraryRef) || refs.contains(libUrl));
     }
 
     @Test

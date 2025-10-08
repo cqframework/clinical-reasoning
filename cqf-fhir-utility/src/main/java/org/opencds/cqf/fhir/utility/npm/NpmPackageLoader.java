@@ -63,13 +63,16 @@ import org.slf4j.LoggerFactory;
  */
 public interface NpmPackageLoader {
     Logger logger = LoggerFactory.getLogger(NpmPackageLoader.class);
+
     String LIBRARY_URL_TEMPLATE = "%s/Library/%s";
+    String LIBRARY = "Library";
+    String MEASURE = "Measure";
 
     // effectively a no-op implementation
     NpmPackageLoader R4_DEFAULT = new NpmPackageLoader() {
 
         @Override
-        public Optional<? extends IBaseResource> loadNpmResource(IPrimitiveType<String> canonicalUrl) {
+        public Optional<IBaseResource> loadNpmResource(IPrimitiveType<String> canonicalUrl) {
             return Optional.empty();
         }
 
@@ -83,8 +86,6 @@ public interface NpmPackageLoader {
             return FhirContext.forR4Cached();
         }
     };
-    String LIBRARY = "Library";
-    String MEASURE = "Measure";
 
     /**
      * Query the NPM package repo for the resource corresponding to the provided resource class and
@@ -127,7 +128,7 @@ public interface NpmPackageLoader {
      * @param canonicalResourceUrl The type-enclosed String canonical URL of the resource to load.
      * @return The resource corresponding to the URL, if it exists.
      */
-    Optional<? extends IBaseResource> loadNpmResource(IPrimitiveType<String> canonicalResourceUrl);
+    Optional<IBaseResource> loadNpmResource(IPrimitiveType<String> canonicalResourceUrl);
 
     /**
      * Implementors must commit to supporting a specific FHIR version, in order to ensure that
@@ -221,7 +222,6 @@ public interface NpmPackageLoader {
             }
             case R5 -> {
                 if (!(resource instanceof org.hl7.fhir.r5.model.Library r5Library)) {
-                    ;
                     throw new IllegalArgumentException(
                             "Expected resource to be a Library, but was a " + resource.fhirType());
                 }

@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.utility.npm;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -28,7 +29,7 @@ public abstract class BaseNpmPackageLoaderInMemory implements NpmPackageLoader {
     private final NpmNamespaceManager npmNamespaceManager;
 
     @Override
-    public Optional<? extends IBaseResource> loadNpmResource(IPrimitiveType<String> resourceUrl) {
+    public Optional<IBaseResource> loadNpmResource(IPrimitiveType<String> resourceUrl) {
         return npmPackages.stream()
                 .filter(npmPackage -> doesPackageMatch(resourceUrl, npmPackage))
                 .map(npmPackage -> getResource(npmPackage, resourceUrl))
@@ -39,7 +40,8 @@ public abstract class BaseNpmPackageLoaderInMemory implements NpmPackageLoader {
         try {
             return tryGetResource(npmPackage, resourceUrl);
         } catch (IOException exception) {
-            throw new RuntimeException(FAILED_TO_LOAD_RESOURCE_TEMPLATE.formatted(resourceUrl.getValue()), exception);
+            throw new InternalErrorException(
+                    FAILED_TO_LOAD_RESOURCE_TEMPLATE.formatted(resourceUrl.getValue()), exception);
         }
     }
 
@@ -59,11 +61,9 @@ public abstract class BaseNpmPackageLoaderInMemory implements NpmPackageLoader {
         try {
             return npmPackage.hasCanonical(resourceUrl.getValue());
         } catch (IOException exception) {
-            throw new RuntimeException(FAILED_TO_LOAD_RESOURCE_TEMPLATE, exception);
+            throw new InternalErrorException(FAILED_TO_LOAD_RESOURCE_TEMPLATE, exception);
         }
     }
-
-    public abstract FhirContext getFhirContext();
 
     @Override
     public NpmNamespaceManager getNamespaceManager() {

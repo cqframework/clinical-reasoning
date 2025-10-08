@@ -175,28 +175,29 @@ class MeasureScoringTypeContinuousVariableTest {
                 .report();
     }
 
+    // sum
     @Test
     void continuousVariableResourceMeasureObservation() {
 
         given.when()
-            .measureId("ContinuousVariableResourceMeasureObservation")
-            .evaluate()
-            .then()
-            .firstGroup()
-            .population("initial-population")
-            .hasCount(11)
-            .up()
-            .population("measure-population")
-            .hasCount(11)
-            .up()
-            .population("measure-population-exclusion")
-            .hasCount(0)
-            .up()
-            .population("measure-observation")
-            .hasCount(11)
-            .up()
-            .hasScore("1320.0")
-            .up()
-            .report();
+                .measureId("ContinuousVariableResourceMeasureObservation")
+                .evaluate()
+                .then()
+                .firstGroup()
+                .population("initial-population")
+                .hasCount(11)
+                .up()
+                .population("measure-population")
+                .hasCount(11)
+                .up()
+                .population("measure-population-exclusion")
+                .hasCount(0)
+                .up()
+                .population("measure-observation")
+                .hasCount(11)
+                .up()
+                .hasScore("1320.0")
+                .up()
+                .report();
     }
 }

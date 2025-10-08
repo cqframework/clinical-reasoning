@@ -16,7 +16,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
@@ -146,12 +145,16 @@ public class MeasureEvaluator {
     }
 
     protected PopulationDef evaluatePopulationMembership(
-            String subjectType, String subjectId, PopulationDef inclusionDef, EvaluationResult evaluationResult, String expression) {
+            String subjectType,
+            String subjectId,
+            PopulationDef inclusionDef,
+            EvaluationResult evaluationResult,
+            String expression) {
         // use expressionName passed in instead of criteria expression defined on populationDef
         // this is mainly for measureObservation functions
 
         ExpressionResult matchingResult;
-        if(expression ==null || expression.isEmpty()) {
+        if (expression == null || expression.isEmpty()) {
             // find matching expression
             matchingResult = evaluationResult.forExpression(inclusionDef.expression());
         } else {
@@ -199,7 +202,8 @@ public class MeasureEvaluator {
         // add subject
 
         // Evaluate Population Expressions
-        initialPopulation = evaluatePopulationMembership(subjectType, subjectId, initialPopulation, evaluationResult, null);
+        initialPopulation =
+                evaluatePopulationMembership(subjectType, subjectId, initialPopulation, evaluationResult, null);
         denominator = evaluatePopulationMembership(subjectType, subjectId, denominator, evaluationResult, null);
         numerator = evaluatePopulationMembership(subjectType, subjectId, numerator, evaluationResult, null);
         if (applyScoring) {
@@ -299,43 +303,46 @@ public class MeasureEvaluator {
         R4MeasureScoringTypePopulations.validateScoringTypePopulations(
                 groupDef.populations().stream().map(PopulationDef::type).toList(), MeasureScoring.CONTINUOUSVARIABLE);
 
-        initialPopulation = evaluatePopulationMembership(subjectType, subjectId, initialPopulation, evaluationResult, null);
+        initialPopulation =
+                evaluatePopulationMembership(subjectType, subjectId, initialPopulation, evaluationResult, null);
         measurePopulation =
-            evaluatePopulationMembership(subjectType, subjectId, measurePopulation, evaluationResult, null);
-            // Evaluate Population Expressions
-            measurePopulation =
-                    evaluatePopulationMembership(subjectType, subjectId, measurePopulation, evaluationResult, null);
-            if(measurePopulation != null && initialPopulation != null) {
-                if (applyScoring) {
-                    // verify initial-population are in measure-population
-                    measurePopulation.getResources().retainAll(initialPopulation.getResources());
-                    measurePopulation.getSubjects().retainAll(initialPopulation.getSubjects());
-                }
+                evaluatePopulationMembership(subjectType, subjectId, measurePopulation, evaluationResult, null);
+        // Evaluate Population Expressions
+        measurePopulation =
+                evaluatePopulationMembership(subjectType, subjectId, measurePopulation, evaluationResult, null);
+        if (measurePopulation != null && initialPopulation != null) {
+            if (applyScoring) {
+                // verify initial-population are in measure-population
+                measurePopulation.getResources().retainAll(initialPopulation.getResources());
+                measurePopulation.getSubjects().retainAll(initialPopulation.getSubjects());
             }
+        }
 
-            if (measurePopulationExclusion != null) {
-                evaluatePopulationMembership(
-                        subjectType, subjectId, groupDef.getSingle(MEASUREPOPULATIONEXCLUSION), evaluationResult, null);
-                if (applyScoring) {
-                    // verify exclusions are in measure-population
-                    measurePopulationExclusion.getResources().retainAll(measurePopulation.getResources());
-                    measurePopulationExclusion.getSubjects().retainAll(measurePopulation.getSubjects());
-                }
+        if (measurePopulationExclusion != null) {
+            evaluatePopulationMembership(
+                    subjectType, subjectId, groupDef.getSingle(MEASUREPOPULATIONEXCLUSION), evaluationResult, null);
+            if (applyScoring) {
+                // verify exclusions are in measure-population
+                measurePopulationExclusion.getResources().retainAll(measurePopulation.getResources());
+                measurePopulationExclusion.getSubjects().retainAll(measurePopulation.getSubjects());
             }
-            if (measurePopulationObservation != null) {
-                // only Measure Population resources need to be removed
-                var expressionName = measurePopulationObservation.getCriteriaReference() + "-" + measurePopulationObservation.expression();
-                // assumes only one population
-                evaluatePopulationMembership(
+        }
+        if (measurePopulationObservation != null) {
+            // only Measure Population resources need to be removed
+            var expressionName = measurePopulationObservation.getCriteriaReference() + "-"
+                    + measurePopulationObservation.expression();
+            // assumes only one population
+            evaluatePopulationMembership(
                     subjectType, subjectId, groupDef.getSingle(MEASUREOBSERVATION), evaluationResult, expressionName);
-                if (applyScoring) {
-                    //only measureObservations that intersect with finalized measure-population results should be retained
-                    pruneObservationResources(measurePopulationObservation.getResources(), measurePopulation, measurePopulationObservation);
-                    // what about subjects?
-                    pruneObservationSubjectResources(measurePopulation.subjectResources, measurePopulationObservation.getSubjectResources());
-                }
-
+            if (applyScoring) {
+                // only measureObservations that intersect with finalized measure-population results should be retained
+                pruneObservationResources(
+                        measurePopulationObservation.getResources(), measurePopulation, measurePopulationObservation);
+                // what about subjects?
+                pruneObservationSubjectResources(
+                        measurePopulation.subjectResources, measurePopulationObservation.getSubjectResources());
             }
+        }
         // measure Observation
         // source expression result population.id-function-name?
         // retainAll MeasureObservations found in MeasurePopulation
@@ -347,14 +354,15 @@ public class MeasureEvaluator {
      */
     @SuppressWarnings("unchecked")
     public void pruneObservationSubjectResources(
-        Map<String, Set<Object>> measurePopulation,
-        Map<String, Set<Object>> measureObservation) {
+            Map<String, Set<Object>> measurePopulation, Map<String, Set<Object>> measureObservation) {
 
         if (measurePopulation == null || measureObservation == null) {
             return;
         }
 
-        for (Iterator<Map.Entry<String, Set<Object>>> it = measureObservation.entrySet().iterator(); it.hasNext();) {
+        for (Iterator<Map.Entry<String, Set<Object>>> it =
+                        measureObservation.entrySet().iterator();
+                it.hasNext(); ) {
             Map.Entry<String, Set<Object>> entry = it.next();
             String subjectId = entry.getKey();
 
@@ -387,13 +395,14 @@ public class MeasureEvaluator {
         }
     }
 
-    protected void pruneObservationResources(Set<Object> resources, PopulationDef measurePopulation, PopulationDef measurePopulationObservation){
+    protected void pruneObservationResources(
+            Set<Object> resources, PopulationDef measurePopulation, PopulationDef measurePopulationObservation) {
         for (Object resource : resources) {
             if (resource instanceof Map<?, ?> map) {
                 for (var entry : map.entrySet()) {
                     var measurePopResult = entry.getKey();
-                    if (measurePopulation != null && !measurePopulation.getResources()
-                        .contains(measurePopResult)) {
+                    if (measurePopulation != null
+                            && !measurePopulation.getResources().contains(measurePopResult)) {
                         // remove observation results not found in measure population
                         measurePopulationObservation.getResources().remove(resource);
                     }
@@ -401,7 +410,6 @@ public class MeasureEvaluator {
             }
         }
     }
-
 
     protected void evaluateCohort(
             GroupDef groupDef,

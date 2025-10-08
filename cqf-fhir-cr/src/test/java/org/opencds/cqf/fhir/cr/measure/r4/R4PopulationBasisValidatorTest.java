@@ -414,7 +414,15 @@ class R4PopulationBasisValidatorTest {
     private static GroupDef buildGroupDef(
             Basis basis, List<PopulationDef> populationDefs, List<StratifierDef> stratifierDefs) {
         return new GroupDef(
-                null, null, stratifierDefs, populationDefs, MeasureScoring.PROPORTION, false, null, basis.codeDef, null);
+                null,
+                null,
+                stratifierDefs,
+                populationDefs,
+                MeasureScoring.PROPORTION,
+                false,
+                null,
+                basis.codeDef,
+                null);
     }
 
     @Nonnull
@@ -430,7 +438,8 @@ class R4PopulationBasisValidatorTest {
                 measurePopulationType.toCode(),
                 null,
                 measurePopulationType,
-                resolveExpressionFor(measurePopulationType), null);
+                resolveExpressionFor(measurePopulationType),
+                null);
     }
 
     private static String resolveExpressionFor(MeasurePopulationType theMeasurePopulationType) {

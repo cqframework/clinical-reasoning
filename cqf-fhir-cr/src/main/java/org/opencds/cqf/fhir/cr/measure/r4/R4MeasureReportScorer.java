@@ -151,7 +151,10 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
     }
 
     protected void scoreGroup(
-            MeasureScoring measureScoring, MeasureReportGroupComponent mrgc, boolean isIncreaseImprovementNotation, GroupDef groupDef) {
+            MeasureScoring measureScoring,
+            MeasureReportGroupComponent mrgc,
+            boolean isIncreaseImprovementNotation,
+            GroupDef groupDef) {
 
         switch (measureScoring) {
             case PROPORTION:
@@ -185,11 +188,12 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
         }
     }
 
-    protected void scoreContinuousVariable(MeasureScoring measureScoring, MeasureReportGroupComponent mrgc, GroupDef groupDef) {
+    protected void scoreContinuousVariable(
+            MeasureScoring measureScoring, MeasureReportGroupComponent mrgc, GroupDef groupDef) {
         var popDef = groupDef.getSingle(MeasurePopulationType.MEASUREOBSERVATION);
         var observationQuantity = collectQuantities(popDef.getResources());
         var aggregateMethod = groupDef.getAggregateMethod();
-        mrgc.setMeasureScore(aggregate(observationQuantity,aggregateMethod));
+        mrgc.setMeasureScore(aggregate(observationQuantity, aggregateMethod));
     }
 
     public static Quantity aggregate(List<Quantity> quantities, String method) {
@@ -208,35 +212,35 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
         switch (method.toLowerCase()) {
             case "sum":
                 result = quantities.stream()
-                    .mapToDouble(q -> q.getValue().doubleValue())
-                    .sum();
+                        .mapToDouble(q -> q.getValue().doubleValue())
+                        .sum();
                 break;
             case "max":
                 result = quantities.stream()
-                    .mapToDouble(q -> q.getValue().doubleValue())
-                    .max()
-                    .orElse(Double.NaN);
+                        .mapToDouble(q -> q.getValue().doubleValue())
+                        .max()
+                        .orElse(Double.NaN);
                 break;
             case "min":
                 result = quantities.stream()
-                    .mapToDouble(q -> q.getValue().doubleValue())
-                    .min()
-                    .orElse(Double.NaN);
+                        .mapToDouble(q -> q.getValue().doubleValue())
+                        .min()
+                        .orElse(Double.NaN);
                 break;
             case "avg":
                 result = quantities.stream()
-                    .mapToDouble(q -> q.getValue().doubleValue())
-                    .average()
-                    .orElse(Double.NaN);
+                        .mapToDouble(q -> q.getValue().doubleValue())
+                        .average()
+                        .orElse(Double.NaN);
                 break;
             case "count":
                 result = quantities.size();
                 break;
             case "median":
                 List<Double> sorted = quantities.stream()
-                    .map(q -> q.getValue().doubleValue())
-                    .sorted()
-                    .toList();
+                        .map(q -> q.getValue().doubleValue())
+                        .sorted()
+                        .toList();
                 int n = sorted.size();
                 if (n % 2 == 1) {
                     result = sorted.get(n / 2);
@@ -248,18 +252,14 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
                 throw new IllegalArgumentException("Unsupported aggregation method: " + method);
         }
 
-        return new Quantity()
-            .setValue(result)
-            .setUnit(unit)
-            .setSystem(system)
-            .setCode(code);
+        return new Quantity().setValue(result).setUnit(unit).setSystem(system).setCode(code);
     }
 
     public List<Quantity> collectQuantities(Set<Object> resources) {
         List<Quantity> quantities = new ArrayList<>();
 
         for (Object resource : resources) {
-            if (resource instanceof Map<?,?> map) {
+            if (resource instanceof Map<?, ?> map) {
                 for (Object value : map.values()) {
                     if (value instanceof Observation obs) {
                         if (obs.hasValueQuantity()) {

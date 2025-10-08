@@ -90,39 +90,41 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                 // For measures with Measure-Observation populations
                 if (populationType != null && populationType.equals(MeasurePopulationType.MEASUREOBSERVATION)) {
                     var aggMethodExt = pop.getExtensionByUrl(EXT_CQFM_AGGREGATE_METHOD_URL);
-                    if(aggMethodExt != null) {
+                    if (aggMethodExt != null) {
                         // this method is only required if scoringType = continuous-variable
                         aggregateMethod = aggMethodExt.getValue().toString();
                         // check that method is accepted
-                        if(!CQFM_AGGREGATE_METHODS.contains(aggregateMethod)){
-                            throw new InvalidRequestException("Measure Observation method: %s is not a valid value for Measure: %s"
-                                .formatted(aggregateMethod, measure.getUrl()));
-                        };
+                        if (!CQFM_AGGREGATE_METHODS.contains(aggregateMethod)) {
+                            throw new InvalidRequestException(
+                                    "Measure Observation method: %s is not a valid value for Measure: %s"
+                                            .formatted(aggregateMethod, measure.getUrl()));
+                        }
+                        ;
                     }
                     var populationCriteriaExt = pop.getExtensionByUrl(EXT_CQFM_CRITERIA_REFERENCE);
-                    if(populationCriteriaExt != null) {
+                    if (populationCriteriaExt != null) {
                         // required for measure-observation populations
                         // the underlying expression is a cql function
                         // the criteria reference is what is used to populate parameters of the function
                         String critReference = populationCriteriaExt.getValue().toString();
                         // check that the reference exists in the GroupDef.populationId
-                        if(group.getPopulation().stream()
-                            .map(Element::getId)
-                            .noneMatch(id -> id.equals(critReference))){
-                            throw new InvalidRequestException("no matching criteria reference was found for extension: %s for Measure: %s"
-                                .formatted(EXT_CQFM_CRITERIA_REFERENCE, measure.getUrl()));
+                        if (group.getPopulation().stream()
+                                .map(Element::getId)
+                                .noneMatch(id -> id.equals(critReference))) {
+                            throw new InvalidRequestException(
+                                    "no matching criteria reference was found for extension: %s for Measure: %s"
+                                            .formatted(EXT_CQFM_CRITERIA_REFERENCE, measure.getUrl()));
                         }
                         // assign validated reference
                         criteriaReference = critReference;
                     }
-
                 }
                 populations.add(new PopulationDef(
                         pop.getId(),
                         conceptToConceptDef(pop.getCode()),
                         populationType,
                         pop.getCriteria().getExpression(),
-                    criteriaReference));
+                        criteriaReference));
             }
 
             if (group.getExtensionByUrl(CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL) != null
@@ -136,7 +138,11 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                 }
                 var expression = expressionType.getExpression();
                 populations.add(new PopulationDef(
-                        "dateOfCompliance", totalConceptDefCreator(DATEOFCOMPLIANCE), DATEOFCOMPLIANCE, expression, null));
+                        "dateOfCompliance",
+                        totalConceptDefCreator(DATEOFCOMPLIANCE),
+                        DATEOFCOMPLIANCE,
+                        expression,
+                        null));
             }
 
             // Stratifiers

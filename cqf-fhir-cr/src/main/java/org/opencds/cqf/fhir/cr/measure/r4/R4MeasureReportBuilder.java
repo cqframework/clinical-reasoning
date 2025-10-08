@@ -356,7 +356,8 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
         // add extension to group for totalDenominator and totalNumerator
         if (groupDef.measureScoring().equals(MeasureScoring.PROPORTION)
-                || groupDef.measureScoring().equals(MeasureScoring.RATIO) || groupDef.measureScoring().equals(MeasureScoring.CONTINUOUSVARIABLE)) {
+                || groupDef.measureScoring().equals(MeasureScoring.RATIO)
+                || groupDef.measureScoring().equals(MeasureScoring.CONTINUOUSVARIABLE)) {
 
             // add extension to group for
             if (bc.measureReport.getType().equals(MeasureReport.MeasureReportType.INDIVIDUAL)) {
@@ -755,11 +756,11 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         if (groupDef.isBooleanBasis()) {
             reportPopulation.setCount(populationDef.getSubjects().size());
         } else {
-            if(populationDef.type().equals(MeasurePopulationType.MEASUREOBSERVATION)){
+            if (populationDef.type().equals(MeasurePopulationType.MEASUREOBSERVATION)) {
                 // resources has nested maps containing correct qty of resources
                 reportPopulation.setCount(countObservations(populationDef));
             } else {
-                //standard behavior
+                // standard behavior
                 reportPopulation.setCount(populationDef.getResources().size());
             }
         }
@@ -810,7 +811,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
         int count = 0;
         for (Object resource : populationDef.getResources()) {
-            if (resource instanceof Map<?,?> map) {
+            if (resource instanceof Map<?, ?> map) {
                 count += map.size(); // each value is an Observation
             }
         }

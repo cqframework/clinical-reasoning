@@ -107,5 +107,7 @@ public class GroupDef {
         return this.improvementNotation;
     }
 
-    public String getAggregateMethod() { return this.aggregateMethod; }
+    public String getAggregateMethod() {
+        return this.aggregateMethod;
+    }
 }

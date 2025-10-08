@@ -97,7 +97,8 @@ public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                     measureScoring,
                     false, // no group scoring
                     getImprovementNotation(measureImpNotation),
-                    getPopulationBasisDef(measureBasis), null);
+                    getPopulationBasisDef(measureBasis),
+                    null);
             groups.add(groupDef);
         }
 

@@ -17,7 +17,12 @@ public class PopulationDef {
     protected Set<String> subjects;
     protected Map<String, Set<Object>> subjectResources = new HashMap<>();
 
-    public PopulationDef(String id, ConceptDef code, MeasurePopulationType measurePopulationType, String expression, String criteriaReference) {
+    public PopulationDef(
+            String id,
+            ConceptDef code,
+            MeasurePopulationType measurePopulationType,
+            String expression,
+            String criteriaReference) {
         this.id = id;
         this.code = code;
         this.measurePopulationType = measurePopulationType;
@@ -77,7 +82,9 @@ public class PopulationDef {
         return this.resources;
     }
 
-    public String getCriteriaReference() {return this.criteriaReference;}
+    public String getCriteriaReference() {
+        return this.criteriaReference;
+    }
 
     public String expression() {
         return this.expression;

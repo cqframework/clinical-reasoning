@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.cqframework.cql.cql2elm.CqlIncludeException;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.hl7.elm.r1.VersionedIdentifier;
@@ -27,7 +26,6 @@ import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Parameters;
-import org.hl7.fhir.r4.model.Resource;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.fhir.model.R4FhirModelResolver;
@@ -36,13 +34,10 @@ import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cql.VersionedIdentifiers;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.CompositeEvaluationResultsPerMeasure;
-import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
-import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorUtils;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
-import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 import org.opencds.cqf.fhir.cr.measure.common.MultiLibraryIdMeasureEngineDetails;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4DateHelper;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
@@ -128,7 +123,7 @@ public class R4MeasureProcessor {
 
         // Populate populationDefs that require MeasureDef results
         // blocking certain continuous-variable Measures due to need of CQL context
-        //continuousVariableObservationCheck(measureDef, measure);
+        // continuousVariableObservationCheck(measureDef, measure);
 
         // Build Measure Report with Results
         return new R4MeasureReportBuilder()
@@ -221,15 +216,15 @@ public class R4MeasureProcessor {
         // Measurement Period: operation parameter defined measurement period
         Interval measurementPeriodParams = buildMeasurementPeriod(periodStart, periodEnd);
 
-//        measureProcessorUtils.setMeasurementPeriod(
-//                measurementPeriodParams,
-//                context,
-//                Optional.ofNullable(measure.getUrl()).map(List::of).orElse(List.of("Unknown Measure URL")));
+        //        measureProcessorUtils.setMeasurementPeriod(
+        //                measurementPeriodParams,
+        //                context,
+        //                Optional.ofNullable(measure.getUrl()).map(List::of).orElse(List.of("Unknown Measure URL")));
 
         // DON'T pop the library off the stack yet, because we need it for continuousVariableObservation()
 
         // Populate populationDefs that require MeasureDef results
-        //measureProcessorUtils.continuousVariableObservation(measureDef, context);
+        // measureProcessorUtils.continuousVariableObservation(measureDef, context);
 
         // Now that we've done continuousVariableObservation(), we're safe to pop the libraries off
         // the stack
@@ -386,10 +381,10 @@ public class R4MeasureProcessor {
     private MultiLibraryIdMeasureEngineDetails getMultiLibraryIdMeasureEngineDetails(List<Measure> measures) {
 
         var libraryIdentifiersToMeasureIds = measures.stream()
-            .collect(ImmutableListMultimap.toImmutableListMultimap(
-                this::getLibraryVersionIdentifier,   // key function
-                measure -> new R4MeasureDefBuilder().build(measure) // value function
-            ));
+                .collect(ImmutableListMultimap.toImmutableListMultimap(
+                        this::getLibraryVersionIdentifier, // key function
+                        measure -> new R4MeasureDefBuilder().build(measure) // value function
+                        ));
 
         var libraryEngine = new LibraryEngine(repository, this.measureEvaluationOptions.getEvaluationSettings());
 
@@ -408,20 +403,21 @@ public class R4MeasureProcessor {
      * @param measureDef defined measure definition object used to capture criteria expression results
      * @param measure measure resource used for evaluation
      */
-//    protected void continuousVariableObservationCheck(MeasureDef measureDef, Measure measure) {
-//        for (GroupDef groupDef : measureDef.groups()) {
-//            // Measure Observation defined?
-//            if (groupDef.measureScoring().equals(MeasureScoring.CONTINUOUSVARIABLE)
-//                    && groupDef.getSingle(MeasurePopulationType.MEASUREOBSERVATION) != null) {
-//                throw new InvalidRequestException(
-//                        "Measure Evaluation Mode does not have CQL engine context to support: Measure Scoring Type: %s, Measure Population Type: %s, for Measure: %s"
-//                                .formatted(
-//                                        MeasureScoring.CONTINUOUSVARIABLE,
-//                                        MeasurePopulationType.MEASUREOBSERVATION,
-//                                        measure.getUrl()));
-//            }
-//        }
-//    }
+    //    protected void continuousVariableObservationCheck(MeasureDef measureDef, Measure measure) {
+    //        for (GroupDef groupDef : measureDef.groups()) {
+    //            // Measure Observation defined?
+    //            if (groupDef.measureScoring().equals(MeasureScoring.CONTINUOUSVARIABLE)
+    //                    && groupDef.getSingle(MeasurePopulationType.MEASUREOBSERVATION) != null) {
+    //                throw new InvalidRequestException(
+    //                        "Measure Evaluation Mode does not have CQL engine context to support: Measure Scoring
+    // Type: %s, Measure Population Type: %s, for Measure: %s"
+    //                                .formatted(
+    //                                        MeasureScoring.CONTINUOUSVARIABLE,
+    //                                        MeasurePopulationType.MEASUREOBSERVATION,
+    //                                        measure.getUrl()));
+    //            }
+    //        }
+    //    }
 
     /**
      * method used to extract appropriate Measure Report type from operation defined Evaluation Type
@@ -480,7 +476,6 @@ public class R4MeasureProcessor {
 
         return new LibraryEngine(repository, this.measureEvaluationOptions.getEvaluationSettings());
     }
-
 
     protected void checkMeasureLibrary(Measure measure) {
         if (!measure.hasLibrary()) {

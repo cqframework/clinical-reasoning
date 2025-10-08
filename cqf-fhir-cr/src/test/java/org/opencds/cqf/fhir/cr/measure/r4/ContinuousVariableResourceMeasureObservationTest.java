@@ -29,6 +29,7 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .population("measure-observation")
                 .hasCount(11)
                 .up()
+            // LUKETODO:  figure out what the MeasureObservation function will do before determining a score
                 .hasScore("1320.0")
                 .up()
                 .report();
@@ -54,7 +55,7 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .population("measure-observation")
                 .hasCount(11)
                 .up()
-                .hasScore("1320.0")
+                .hasScore("268.72727272727275")
                 .up()
                 .report();
     }
@@ -80,6 +81,7 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .population("measure-observation")
                 .hasCount(11)
                 .up()
+            // LUKETODO:  figure out what the MeasureObservation function will do before determining a score
                 .hasScore("11.0")
                 .up()
                 .report();
@@ -130,6 +132,7 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .population("measure-observation")
                 .hasCount(11)
                 .up()
+            // LUKETODO:  figure out what the MeasureObservation function will do before determining a score
                 .hasScore("1320.0")
                 .up()
                 .report();
@@ -155,7 +158,7 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .population("measure-observation")
                 .hasCount(11)
                 .up()
-                .hasScore("1320.0")
+                .hasScore("120.0")
                 .up()
                 .report();
     }
@@ -180,6 +183,7 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .population("measure-observation")
                 .hasCount(11)
                 .up()
+            // LUKETODO:  figure out what the MeasureObservation function will do before determining a score
                 .hasScore("1320.0")
                 .up()
                 .report();
@@ -205,7 +209,7 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .population("measure-observation")
                 .hasCount(11)
                 .up()
-                .hasScore("1320.0")
+                .hasScore("15.0")
                 .up()
                 .report();
     }
@@ -230,6 +234,7 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .population("measure-observation")
                 .hasCount(11)
                 .up()
+            // LUKETODO:  figure out what the MeasureObservation function will do before determining a score
                 .hasScore("1320.0")
                 .up()
                 .report();
@@ -255,7 +260,7 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .population("measure-observation")
                 .hasCount(11)
                 .up()
-                .hasScore("1320.0")
+                .hasScore("840.0")
                 .up()
                 .report();
     }
@@ -281,6 +286,7 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .population("measure-observation")
                 .hasCount(11)
                 .up()
+            // LUKETODO:  figure out what the MeasureObservation function will do before determining a score
                 .hasScore("1320.0")
                 .up()
                 .report();
@@ -306,8 +312,22 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .population("measure-observation")
                 .hasCount(11)
                 .up()
-                .hasScore("1320.0")
+                .hasScore("2956.0")
                 .up()
                 .report();
     }
+
+    /*
+        540.0
+        30.0
+        420.0
+        60.0
+        120.0
+        600.0
+        120.0
+        121.0
+        90.0
+        15.0
+        840.0
+     */
 }

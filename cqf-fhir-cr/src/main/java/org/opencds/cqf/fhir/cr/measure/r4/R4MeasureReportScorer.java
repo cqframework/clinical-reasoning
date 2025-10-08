@@ -17,7 +17,10 @@ import org.opencds.cqf.fhir.cr.measure.common.BaseMeasureReportScorer;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorUtils;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Evaluation of Measure Report Data showing raw CQL criteria results compared to resulting Measure Report.
@@ -71,6 +74,8 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
  * <p> (v3.18.0 and below) Previous calculation of measure score from MeasureReport only interpreted Numerator, Denominator membership since exclusions and exceptions were already applied. Now exclusions and exceptions are present in Denominator and Numerator populations, the measure scorer calculation has to take into account additional population membership to determine Final-Numerator and Final-Denominator values</p>
  */
 public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport> {
+
+    private static final Logger logger = LoggerFactory.getLogger(MeasureProcessorUtils.class);
 
     private static final String NUMERATOR = "numerator";
     private static final String DENOMINATOR = "denominator";
@@ -263,6 +268,8 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
                 for (Object value : map.values()) {
                     if (value instanceof Observation obs) {
                         if (obs.hasValueQuantity()) {
+                            logger.info("1234: observation value quantity: {}",
+                                obs.getValueQuantity().getValue().doubleValue());
                             quantities.add(obs.getValueQuantity());
                         }
                     }

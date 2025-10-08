@@ -13,9 +13,11 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.List;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r4.model.Extension;
@@ -24,8 +26,12 @@ import org.hl7.fhir.r4.model.ImplementationGuide.ImplementationGuideDefinitionCo
 import org.hl7.fhir.r4.model.ImplementationGuide.ImplementationGuideDefinitionResourceComponent;
 import org.hl7.fhir.r4.model.PlanDefinition;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.StructureDefinition;
+import org.hl7.fhir.r4.model.Library;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.TestVisitor;
+import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
 public class ImplementationGuideAdapterTest {
     private final org.opencds.cqf.fhir.utility.adapter.IAdapterFactory adapterFactory = new AdapterFactory();
@@ -130,14 +136,60 @@ public class ImplementationGuideAdapterTest {
         igDefinitionComponent.setResource(List.of(igDefinitionResourceComponent));
         ig.setDefinition(igDefinitionComponent);
 
-        // TODO: is the dependsOn element needed?
-
         var adapter = adapterFactory.createKnowledgeArtifactAdapter(ig);
         var extractedDependencies = adapter.getDependencies();
         assertEquals(extractedDependencies.size(), dependencies.size());
         extractedDependencies.forEach(dep -> {
             assertTrue(dependencies.contains(dep.getReference()));
         });
+    }
+
+    @Test
+    void adapter_get_all_dependencies_with_repo() {
+        // IG references: a StructureDefinition canonical in meta.profile and a Library reference in definition.resource
+        var profileCanonical = "http://example.org/StructureDefinition/SampleProfile";
+        var libUrl = "http://example.org/Library/SpecLib";
+        var libraryRef = "Library/SpecLib";
+
+        var ig = new ImplementationGuide();
+        ig.getMeta().addProfile(profileCanonical);
+
+        var igDefinitionResourceComponent =
+            new ImplementationGuideDefinitionResourceComponent(new Reference(libraryRef));
+        var igDefinitionComponent = new ImplementationGuideDefinitionComponent();
+        igDefinitionComponent.setResource(List.of(igDefinitionResourceComponent));
+        ig.setDefinition(igDefinitionComponent);
+
+        // Repository bundle contains resources that the IG references
+        var sd = new StructureDefinition();
+        sd.setId("SampleProfile");
+        sd.setUrl(profileCanonical);
+
+        var lib = new Library();
+        lib.setId("Library/SpecLib");
+        lib.setUrl(libUrl);
+        lib.setVersion("1.0.0");
+
+        var bundle = new Bundle();
+        bundle.setType(Bundle.BundleType.COLLECTION);
+        bundle.addEntry().setResource(sd);
+        bundle.addEntry().setResource(lib);
+
+        var repo = new InMemoryFhirRepository(FhirContext.forR4(), bundle);
+
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(ig);
+        var extractedDependencies = adapter.getDependencies(repo);
+
+        // Assertions: exactly the two dependencies referenced by the IG
+        assertEquals(2, extractedDependencies.size());
+
+        var refs = extractedDependencies.stream().map(IDependencyInfo::getReference).toList();
+        // The profile should be returned as the canonical from meta.profile
+        assertTrue(refs.contains(profileCanonical));
+        // The library may be returned as the literal reference (Library/SpecLib) or canonicalized using repo metadata
+        assertTrue(
+            refs.contains(libraryRef) || refs.contains(libUrl)
+        );
     }
 
     @Test

@@ -25,8 +25,13 @@ define "Measure Population Boolean":
 // Continuous Variable
 // number of hours for encounter
 
-define function "MeasureObservation"():
-	CalendarAgeInYearsAt(Patient.birthDate, Today())
+// LUKETODO:  this won't work because of the code block in MeasureProcessorUtils that doesn't push the "encounter" variable to the CQL variables stack
+//define function "MeasureObservation"(encounter Encounter):
+//    duration in minutes of encounter.period
+
+//// LUKETODO:  this is not interesting, because there are only 2 patients and each is counted multiple times
+//define function "MeasureObservation"():
+//	CalendarAgeInYearsAt(Patient.birthDate, Today())
 
 define function "CalendarAgeInYearsAt"(BirthDate Date, AsOf DateTime):
 	years between BirthDate and ToDate(AsOf)

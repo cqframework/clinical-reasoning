@@ -344,6 +344,7 @@ public class MeasureProcessorUtils {
         Object result;
         context.getState().pushActivationFrame(functionDef, functionDef.getContext());
         try {
+            // LUKETODO:  this is why we get the "encounter" variable with encounter basis but not with boolean basis
             if (!isBooleanBasis) {
                 // subject based observations don't have a parameter to pass in
                 context.getState()

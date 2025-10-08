@@ -16,6 +16,7 @@ import org.hl7.fhir.r5.model.PrimitiveType;
 import org.hl7.fhir.r5.model.ValueSet;
 import org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.r5.model.ValueSet.ValueSetExpansionComponent;
+import org.hl7.fhir.r5.model.ValueSet.ValueSetExpansionContainsComponent;
 import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
@@ -105,10 +106,24 @@ public class ValueSetAdapter extends KnowledgeArtifactAdapter implements IValueS
     }
 
     @Override
+    public int getExpansionTotal() {
+        return getExpansion().getTotal();
+    }
+
+    @Override
     public List<IValueSetExpansionContainsAdapter> getExpansionContains() {
         return getExpansion().getContains().stream()
                 .map(ValueSetExpansionContainsAdapter::new)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public void appendExpansionContains(List<IValueSetExpansionContainsAdapter> expansionContains) {
+        getExpansion()
+                .getContains()
+                .addAll((expansionContains.stream()
+                        .map(e -> (ValueSetExpansionContainsComponent) e.get())
+                        .toList()));
     }
 
     @SuppressWarnings("unchecked")

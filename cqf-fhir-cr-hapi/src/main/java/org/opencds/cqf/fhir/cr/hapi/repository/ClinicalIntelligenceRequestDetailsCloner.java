@@ -1,6 +1,5 @@
 package org.opencds.cqf.fhir.cr.hapi.repository;
 
-import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -8,7 +7,6 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import java.util.HashMap;
 import java.util.Map;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 /**
@@ -60,28 +58,8 @@ class ClinicalIntelligenceRequestDetailsCloner {
             return this;
         }
 
-        DetailsBuilder setParameters(IBaseParameters parameters) {
-            IParser parser = details.getServer().getFhirContext().newJsonParser();
-            details.setRequestContents(parser.encodeResourceToString(parameters).getBytes());
-
-            return this;
-        }
-
         DetailsBuilder setParameters(Map<String, String[]> parameters) {
             details.setParameters(parameters);
-
-            return this;
-        }
-
-        DetailsBuilder withRestOperationType(RequestTypeEnum type) {
-            details.setRequestType(type);
-
-            return this;
-        }
-
-        DetailsBuilder setOperation(String operation) {
-            details.setOperation(operation);
-
             return this;
         }
 

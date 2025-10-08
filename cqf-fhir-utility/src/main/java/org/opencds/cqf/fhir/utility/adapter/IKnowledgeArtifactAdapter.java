@@ -119,6 +119,11 @@ public interface IKnowledgeArtifactAdapter extends IResourceAdapter {
 
     List<IDependencyInfo> getDependencies();
 
+    default List<IDependencyInfo> getDependencies(IRepository repository) {
+        // TODO: this should be smarter
+        return getDependencies();
+    }
+
     default String getReferenceSource() {
         return hasVersion() ? getUrl() + "|" + getVersion() : getUrl();
     }

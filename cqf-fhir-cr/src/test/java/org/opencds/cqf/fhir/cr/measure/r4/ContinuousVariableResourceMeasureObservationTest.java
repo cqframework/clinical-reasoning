@@ -7,8 +7,8 @@ public class ContinuousVariableResourceMeasureObservationTest {
 
     private static final Given GIVEN = Measure.given().repositoryFor("ContinuousVariableObservation");
 
-    // LUKETODO:  add stratifies to the mix?
 
+    // LUKETODO:   add patients with various birth dates and base measure observation on age
     @Test
     void continuousVariableResourceMeasureObservationBooleanBasisAvg() {
 
@@ -137,6 +137,12 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .up()
                 .report();
     }
+
+    // LUKETODO:  stratifiers
+    /*
+    I just want a stratifier use case to make sure the scoring shows up for stratum
+    can be any stratifier type, just need to validate stratifiers score as cont-variable scoring type
+     */
 
     @Test
     void continuousVariableResourceMeasureObservationEncounterBasisMedian() {
@@ -292,6 +298,7 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .report();
     }
 
+    // LUKETODO:  for encounters, leave two encounter periods the same so we can test set logic doesn't eliminate dupes
     @Test
     void continuousVariableResourceMeasureObservationEncounterBasisSum() {
 

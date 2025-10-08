@@ -81,23 +81,27 @@ public class ImplementationGuideAdapter extends KnowledgeArtifactAdapter impleme
                     if (dr.hasExample() && dr.getExample()) {
                         continue;
                     }
-                    var refValue = dr.hasSourceReference() ? dr.getSourceReference() : new Reference(dr.getSource().primitiveValue());
+                    var refValue = dr.hasSourceReference()
+                            ? dr.getSourceReference()
+                            : new Reference(dr.getSource().primitiveValue());
                     var refElement = new IdType(refValue.primitiveValue());
                     var refClass = fhirContext
-                        .getResourceDefinition(refElement.getResourceType())
-                        .newInstance()
-                        .getClass();
+                            .getResourceDefinition(refElement.getResourceType())
+                            .newInstance()
+                            .getClass();
                     var read = repository.read(refClass, new IdType(refValue.primitiveValue()));
                     if (read instanceof MetadataResource mr && (mr.hasUrl() || mr.hasUrlElement())) {
                         var url = mr.hasUrlElement() ? mr.getUrlElement() : new UriType(mr.getUrl());
-                        references.add(
-                            new DependencyInfo(refValue.getReference(), url.getValueAsString(), mr.getExtension(), url::setValue));
-                    } else if (read instanceof DomainResource domRes && domRes.getExtensionByUrl(artifactUrlExt) != null) {
+                        references.add(new DependencyInfo(
+                                refValue.getReference(), url.getValueAsString(), mr.getExtension(), url::setValue));
+                    } else if (read instanceof DomainResource domRes
+                            && domRes.getExtensionByUrl(artifactUrlExt) != null) {
                         // TODO: ensure this extension is accounted for during the gather step
                         var ext = domRes.getExtensionByUrl(artifactUrlExt);
-                        var url = new org.hl7.fhir.r5.model.UriType(ext.getValue().primitiveValue());
-                        references.add(
-                            new DependencyInfo(refValue.getReference(), url.getValueAsString(), domRes.getExtension(), url::setValue));
+                        var url =
+                                new org.hl7.fhir.r5.model.UriType(ext.getValue().primitiveValue());
+                        references.add(new DependencyInfo(
+                                refValue.getReference(), url.getValueAsString(), domRes.getExtension(), url::setValue));
                     } else {
                         IAdapter.logger.warn("Unable to resolve dependency URL for reference: {}", refValue);
                     }

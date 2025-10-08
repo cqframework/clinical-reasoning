@@ -17,8 +17,8 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.List;
 import org.hl7.fhir.r5.model.DateType;
-import org.hl7.fhir.r5.model.Extension;
 import org.hl7.fhir.r5.model.Enumerations.PublicationStatus;
+import org.hl7.fhir.r5.model.Extension;
 import org.hl7.fhir.r5.model.ImplementationGuide;
 import org.hl7.fhir.r5.model.ImplementationGuide.ImplementationGuideDefinitionComponent;
 import org.hl7.fhir.r5.model.ImplementationGuide.ImplementationGuideDefinitionResourceComponent;
@@ -180,7 +180,7 @@ public class ImplementationGuideAdapterTest {
     void getApprovalDate_empty_value_returns_null() {
         var ig = new ImplementationGuide();
         ig.addExtension(new Extension(
-            "http://hl7.org/fhir/StructureDefinition/artifact-approvalDate", new DateType())); // no value set
+                "http://hl7.org/fhir/StructureDefinition/artifact-approvalDate", new DateType())); // no value set
         var adapter = adapterFactory.createImplementationGuide(ig);
         assertNull(adapter.getApprovalDate());
     }
@@ -189,8 +189,7 @@ public class ImplementationGuideAdapterTest {
     void getApprovalDate_wrong_type_returns_null() {
         var ig = new ImplementationGuide();
         ig.addExtension(new Extension(
-            "http://hl7.org/fhir/StructureDefinition/artifact-approvalDate",
-            new StringType("not-a-date")));
+                "http://hl7.org/fhir/StructureDefinition/artifact-approvalDate", new StringType("not-a-date")));
         var adapter = adapterFactory.createImplementationGuide(ig);
         assertNull(adapter.getApprovalDate());
     }

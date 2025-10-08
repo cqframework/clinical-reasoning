@@ -1,15 +1,15 @@
 package org.opencds.cqf.fhir.utility.adapter.r5;
 
+import ca.uhn.fhir.repository.IRepository;
 import java.util.ArrayList;
 import java.util.List;
-import ca.uhn.fhir.repository.IRepository;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.r5.model.DomainResource;
 import org.hl7.fhir.r5.model.IdType;
+import org.hl7.fhir.r5.model.ImplementationGuide;
 import org.hl7.fhir.r5.model.MetadataResource;
 import org.hl7.fhir.r5.model.UriType;
 import org.hl7.fhir.r5.model.UrlType;
-import org.hl7.fhir.r5.model.ImplementationGuide;
 import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
@@ -71,20 +71,20 @@ public class ImplementationGuideAdapter extends KnowledgeArtifactAdapter impleme
                 var refValue = dr.getReference().getReference();
                 var refElement = dr.getReference().getReferenceElement();
                 var refClass = fhirContext
-                    .getResourceDefinition(refElement.getResourceType())
-                    .newInstance()
-                    .getClass();
+                        .getResourceDefinition(refElement.getResourceType())
+                        .newInstance()
+                        .getClass();
                 var read = repository.read(refClass, new IdType(refValue));
                 if (read instanceof MetadataResource mr && (mr.hasUrl() || mr.hasUrlElement())) {
                     var url = mr.hasUrlElement() ? mr.getUrlElement() : new UrlType(mr.getUrl());
                     references.add(
-                        new DependencyInfo(refValue, url.getValueAsString(), mr.getExtension(), url::setValue));
+                            new DependencyInfo(refValue, url.getValueAsString(), mr.getExtension(), url::setValue));
                 } else if (read instanceof DomainResource domRes && domRes.getExtensionByUrl(artifactUrlExt) != null) {
                     // TODO: ensure this extension is accounted for during the gather step
                     var ext = domRes.getExtensionByUrl(artifactUrlExt);
                     var url = new UriType(ext.getValue().primitiveValue());
                     references.add(
-                        new DependencyInfo(refValue, url.getValueAsString(), domRes.getExtension(), url::setValue));
+                            new DependencyInfo(refValue, url.getValueAsString(), domRes.getExtension(), url::setValue));
                 } else {
                     IAdapter.logger.warn("Unable to resolve dependency URL for reference: {}", refValue);
                 }

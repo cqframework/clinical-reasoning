@@ -175,7 +175,7 @@ class MeasureScoringTypeContinuousVariableTest {
                 .report();
     }
 
-    // sum
+    // Encounter basis:  sum
     @Test
     void continuousVariableResourceMeasureObservation() {
 

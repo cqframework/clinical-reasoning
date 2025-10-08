@@ -413,6 +413,12 @@ public class MeasureProcessorUtils {
                     // standard CQL expression results
                     var evaluationResult = evaluationResultsForMultiLib.getResultFor(libraryVersionedIdentifier);
 
+                    if (evaluationResult == null) {
+                        // this should never happen due to validateEvaluationResultExistsForIdentifier
+                        throw new IllegalStateException(
+                                "No evaluation result found for library: %s".formatted(libraryVersionedIdentifier));
+                    }
+
                     // measure Observation Path, have to re-initialize everything again
                     // TODO: extend library evaluated context so library initialization isn't having to be built for
                     // both, and takes advantage of caching
@@ -460,7 +466,7 @@ public class MeasureProcessorUtils {
                                                 .findFirst()
                                                 .orElse(null);
                                         ExpressionResult expressionResult =
-                                                evaluationResult.forExpression(criteriaExpressionInput);
+                                                tryGetExpressionResult(criteriaExpressionInput, evaluationResult);
                                         // makes expression results iterable
                                         var resultsIter =
                                                 getResultIterable(evaluationResult, expressionResult, subjectTypePart);
@@ -522,6 +528,20 @@ public class MeasureProcessorUtils {
         }
 
         return resultsBuilder.build();
+    }
+
+    public ExpressionResult tryGetExpressionResult(String expressionName, EvaluationResult evaluationResult) {
+        if (evaluationResult == null || expressionName == null) {
+            throw new InvalidRequestException("evaluationResult is null: " + expressionName);
+        }
+
+        final Map<String, ExpressionResult> expressionResults = evaluationResult.expressionResults;
+
+        if (!expressionResults.containsKey(expressionName)) {
+            throw new InvalidRequestException("Could not find expression result for expression: " + expressionName);
+        }
+
+        return evaluationResult.expressionResults.get(expressionName);
     }
 
     public List<CompiledLibrary> getCompiledLibraries(List<VersionedIdentifier> ids, CqlEngine context) {
@@ -653,6 +673,7 @@ public class MeasureProcessorUtils {
             VersionedIdentifier versionedIdentifierFromQuery,
             EvaluationResultsForMultiLib evaluationResultsForMultiLib) {
 
+        // LUKETODO:  this should hopefully be fixed with the next version of CQL
         var containsResults = evaluationResultsForMultiLib.containsResultsFor(versionedIdentifierFromQuery);
         var containsExceptions = evaluationResultsForMultiLib.containsExceptionsFor(versionedIdentifierFromQuery);
 

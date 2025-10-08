@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.r4.utils;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.repository.IRepository;
 import java.time.LocalDateTime;
 import java.time.Month;
@@ -88,6 +89,12 @@ public class TestDataGenerator {
         if (organization != null) {
             patient.setManagingOrganization(new Reference("Organization/" + organization));
         }
+
+        final String patientJson =
+                FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(patient);
+
+        ourLog.info("Patient created: \n{}", patientJson);
+
         repository.create(patient);
     }
 
@@ -103,6 +110,12 @@ public class TestDataGenerator {
         encounter.setPeriod(encounterPeriod);
         encounter.setStatus(encounterStatus);
         encounter.setSubject(new Reference(patientId));
+
+        final String encounterJson =
+                FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(encounter);
+
+        ourLog.info("Encounter created: \n{}", encounterJson);
+
         repository.create(encounter);
     }
 }

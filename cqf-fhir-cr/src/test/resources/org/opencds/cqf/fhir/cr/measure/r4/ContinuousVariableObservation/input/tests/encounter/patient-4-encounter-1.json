@@ -1,0 +1,12 @@
+{
+  "resourceType": "Encounter",
+  "id": "patient-4-encounter-1",
+  "status": "triaged",
+  "subject": {
+    "reference": "Patient/patient-4"
+  },
+  "period": {
+    "start": "2024-01-01T01:00:00Z",
+    "end": "2024-01-01T03:00:00Z"
+  }
+}

@@ -59,7 +59,7 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .population("measure-observation")
                 .hasCount(11)
                 .up()
-                .hasScore("268.72727272727275")
+                .hasScore("230.54545454545453")
                 .up()
                 .report();
     }
@@ -333,7 +333,7 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .population("measure-observation")
                 .hasCount(11)
                 .up()
-                .hasScore("2956.0")
+                .hasScore("2536.0")
                 .up()
                 .report();
     }

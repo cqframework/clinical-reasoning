@@ -6,10 +6,13 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -28,8 +31,10 @@ import org.hl7.elm.r1.ParameterDef;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Quantity;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
@@ -344,13 +349,24 @@ public class MeasureProcessorUtils {
         Object result;
         context.getState().pushActivationFrame(functionDef, functionDef.getContext());
         try {
-            // LUKETODO:  this is why we get the "encounter" variable with encounter basis but not with boolean basis
             if (!isBooleanBasis) {
                 // subject based observations don't have a parameter to pass in
                 context.getState()
                         .push(new Variable(functionDef.getOperand().get(0).getName()).withValue(resource));
             }
             result = context.getEvaluationVisitor().visitExpression(ed.getExpression(), context.getState());
+
+            // LUKETODO:  get rid of this during final cleanup
+            String id;
+            Period period;
+            if (resource instanceof Encounter encounter) {
+                id = encounter.getId();
+                period = encounter.getPeriod();
+            } else {
+                id = null;
+                period = null;
+            }
+            logger.info("id: {}, period: {}, expression result: {}", id, printPeriod(period), result);
             // wrap result as Observation
 
         } finally {
@@ -360,6 +376,17 @@ public class MeasureProcessorUtils {
         captureEvaluatedResources(outEvaluatedResources, context);
 
         return result;
+    }
+
+    private static final DateFormat DATE_FORMAT = new SimpleDateFormat("HH:mm");
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm:ssXXX");
+
+    private String printPeriod(Period period) {
+        if (period == null) {
+            return "null";
+        }
+        return "start: %s, finish: %s"
+                .formatted(DATE_FORMAT.format(period.getStart()), DATE_FORMAT.format(period.getEnd()));
     }
 
     /**
@@ -630,7 +657,7 @@ public class MeasureProcessorUtils {
                 .toList();
     }
 
-    private Iterable<Object> getResultIterable(
+    private Iterable<?> getResultIterable(
             EvaluationResult evaluationResult, ExpressionResult expressionResult, String subjectTypePart) {
         if (expressionResult.value() instanceof Boolean) {
             if ((Boolean.TRUE.equals(expressionResult.value()))) {
@@ -646,8 +673,8 @@ public class MeasureProcessorUtils {
         }
 
         Object value = expressionResult.value();
-        if (value instanceof Iterable<?>) {
-            return (Iterable<Object>) value;
+        if (value instanceof Iterable<?> iterable) {
+            return iterable;
         } else {
             return Collections.singletonList(value);
         }

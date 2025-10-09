@@ -268,8 +268,10 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
                 for (Object value : map.values()) {
                     if (value instanceof Observation obs) {
                         if (obs.hasValueQuantity()) {
-                            logger.info("1234: observation value quantity: {}",
-                                obs.getValueQuantity().getValue().doubleValue());
+                            // LUKETODO:  get rid of this during final cleanup
+                            logger.info(
+                                    "1234: observation value quantity: {}",
+                                    obs.getValueQuantity().getValue().doubleValue());
                             quantities.add(obs.getValueQuantity());
                         }
                     }

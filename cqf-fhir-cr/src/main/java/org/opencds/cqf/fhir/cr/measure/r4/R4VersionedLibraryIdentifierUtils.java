@@ -10,6 +10,8 @@ import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Library;
+import org.opencds.cqf.fhir.utility.Canonicals;
+import org.opencds.cqf.fhir.utility.Canonicals.CanonicalParts;
 
 /**
  * Maintain logic for working with {@link VersionedIdentifier} from {@link Library}
@@ -24,19 +26,24 @@ public class R4VersionedLibraryIdentifierUtils {
     }
 
     static void validateLibraryVersionedIdentifierAndUrl(Bundle bundleWithLibrary, String measureLibraryUrl) {
-        final List<BundleEntryComponent> bundleEntries = bundleWithLibrary.getEntry();
+        final CanonicalParts measureLibraryUrlCanonicalParts = Canonicals.getParts(measureLibraryUrl);
 
-        final Library libraryFromQuery = validateBundle(measureLibraryUrl, bundleEntries);
+        final Library libraryFromQuery = validateBundle(measureLibraryUrlCanonicalParts, bundleWithLibrary.getEntry());
 
         final String libraryUrlFromLibrary = libraryFromQuery.getUrl();
+        final CanonicalParts libraryUrlFromLibraryCanonicalParts = Canonicals.getParts(libraryUrlFromLibrary);
 
-        validateMatchingLibraryUrls(measureLibraryUrl, libraryUrlFromLibrary);
+        validateMatchingLibraryUrls(
+                measureLibraryUrlCanonicalParts, libraryUrlFromLibraryCanonicalParts, libraryFromQuery.getVersion());
 
-        validateLibraryNameVsUrl(libraryUrlFromLibrary, libraryFromQuery);
+        //        validateLibraryNameVsUrl(libraryUrlFromLibraryCanonicalParts.url(), libraryFromQuery);
+        validateLibraryNameVsUrl(libraryUrlFromLibraryCanonicalParts, libraryFromQuery);
     }
 
     @Nonnull
-    private static Library validateBundle(String measureLibraryUrl, List<BundleEntryComponent> bundleEntries) {
+    private static Library validateBundle(
+            CanonicalParts measureLibraryUrlCanonicalParts, List<BundleEntryComponent> bundleEntries) {
+        final String measureLibraryUrl = measureLibraryUrlCanonicalParts.url();
 
         if (bundleEntries.isEmpty()) {
             var errorMsg = "Unable to find Library with url: %s".formatted(measureLibraryUrl);
@@ -53,41 +60,37 @@ public class R4VersionedLibraryIdentifierUtils {
 
     // A measure library URL may be versioned with a pipe, but the URL from the library will not
     // have a piped version, only a separate version field.
-    private static void validateMatchingLibraryUrls(String measureLibraryUrl, String urlFromLibrary) {
+    private static void validateMatchingLibraryUrls(
+            CanonicalParts measureLibraryUrlCanonicalParts,
+            CanonicalParts urlFromLibraryCanonicalParts,
+            String versionFromLibrary) {
 
-        final String[] measureLibraryUrlVersionSplit = PIPE_REGEX.split(measureLibraryUrl);
-
-        // Strip off version if it exists
-        final String measureLibraryUrlWithoutVersion =
-                measureLibraryUrlVersionSplit.length == 2 ? measureLibraryUrlVersionSplit[0] : measureLibraryUrl;
-
-        if (!measureLibraryUrlWithoutVersion.equals(urlFromLibrary)) {
+        if (!measureLibraryUrlCanonicalParts.url().equals(urlFromLibraryCanonicalParts.url())) {
             throw new InvalidRequestException(
-                    "Library cannot be resolved because its URL: %s does not match the measure's library URL: %s"
-                            .formatted(urlFromLibrary, measureLibraryUrl));
+                    "Library cannot be resolved because its URL: %s does not match the measure's library URL: %s, which is version-less"
+                            .formatted(measureLibraryUrlCanonicalParts.url(), urlFromLibraryCanonicalParts.url()));
+        }
+
+        final String versionFromMeasureLibraryUrl = measureLibraryUrlCanonicalParts.version();
+
+        if (versionFromMeasureLibraryUrl != null && !versionFromMeasureLibraryUrl.equals(versionFromLibrary)) {
+            throw new InvalidRequestException(
+                    "Library cannot be resolved because its URL: %s and version: %s do not match the measure's library URL: %s and version: %s"
+                            .formatted(
+                                    urlFromLibraryCanonicalParts.url(),
+                                    versionFromLibrary,
+                                    measureLibraryUrlCanonicalParts.url(),
+                                    measureLibraryUrlCanonicalParts.version()));
         }
     }
 
-    private static void validateLibraryNameVsUrl(String urlFromLibrary, Library libraryFromQuery) {
+    private static void validateLibraryNameVsUrl(
+            CanonicalParts urlFromLibraryCanonicalParts, Library libraryFromQuery) {
 
-        final String[] libraryUrlSplit = LIBRARY_REGEX.split(urlFromLibrary);
-
-        if (libraryUrlSplit.length != 2) {
-            throw new InvalidRequestException(
-                    "Library cannot be resolved because its URL: %s is not valid".formatted(urlFromLibrary));
-        }
-
-        final String libraryNameAndVersionFromUrl = libraryUrlSplit[1];
-        final String[] nameVersionSplit = PIPE_REGEX.split(libraryNameAndVersionFromUrl);
-
-        // Strip off version if it exists
-        final String libraryNameFromUrl =
-                nameVersionSplit.length == 2 ? nameVersionSplit[0] : libraryNameAndVersionFromUrl;
-
-        if (!libraryNameFromUrl.equals(libraryFromQuery.getName())) {
+        if (!urlFromLibraryCanonicalParts.idPart().equals(libraryFromQuery.getName())) {
             throw new InvalidRequestException(
                     "Library cannot be resolved because the name: %s does not match the version-less last part of the URL: %s"
-                            .formatted(libraryFromQuery.getName(), urlFromLibrary));
+                            .formatted(libraryFromQuery.getName(), libraryFromQuery.getUrl()));
         }
     }
 }

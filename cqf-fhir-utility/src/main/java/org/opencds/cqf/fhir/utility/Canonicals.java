@@ -5,6 +5,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.StringJoiner;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 public class Canonicals {
@@ -254,6 +256,35 @@ public class Canonicals {
 
         public String fragment() {
             return this.fragment;
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            if (other == null || getClass() != other.getClass()) {
+                return false;
+            }
+            final CanonicalParts that = (CanonicalParts) other;
+            return Objects.equals(url, that.url)
+                    && Objects.equals(idPart, that.idPart)
+                    && Objects.equals(resourceType, that.resourceType)
+                    && Objects.equals(version, that.version)
+                    && Objects.equals(fragment, that.fragment);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(url, idPart, resourceType, version, fragment);
+        }
+
+        @Override
+        public String toString() {
+            return new StringJoiner(", ", CanonicalParts.class.getSimpleName() + "[", "]")
+                    .add("url='" + url + "'")
+                    .add("idPart='" + idPart + "'")
+                    .add("resourceType='" + resourceType + "'")
+                    .add("version='" + version + "'")
+                    .add("fragment='" + fragment + "'")
+                    .toString();
         }
     }
 }

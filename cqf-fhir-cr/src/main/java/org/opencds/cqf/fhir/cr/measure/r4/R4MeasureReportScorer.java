@@ -195,7 +195,12 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
 
     protected void scoreContinuousVariable(
             MeasureScoring measureScoring, MeasureReportGroupComponent mrgc, GroupDef groupDef) {
+        // LUKETODO:  this could be null:  is it possible that any test that fails here is badly formed?
         var popDef = groupDef.getSingle(MeasurePopulationType.MEASUREOBSERVATION);
+        if (popDef == null) {
+            // nothing more to do
+//            return;
+        }
         var observationQuantity = collectQuantities(popDef.getResources());
         var aggregateMethod = groupDef.getAggregateMethod();
         mrgc.setMeasureScore(aggregate(observationQuantity, aggregateMethod));

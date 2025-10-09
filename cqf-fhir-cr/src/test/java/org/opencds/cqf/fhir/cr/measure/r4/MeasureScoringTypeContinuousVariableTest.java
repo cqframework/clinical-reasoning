@@ -1,10 +1,5 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
-import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.repository.IRepository;
-import java.nio.file.Path;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportStatus;
 import org.hl7.fhir.r4.model.Period;
@@ -12,7 +7,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.TestDataGenerator;
-import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 /**
  * the purpose of this test is to validate the output and required fields for evaluating MeasureScoring type Continuous-Variable
@@ -26,13 +20,8 @@ class MeasureScoringTypeContinuousVariableTest {
     // resource based
     // boolean based
     // group scoring def
-    private static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/measure/r4";
-    private static final IRepository repository = new IgRepository(
-            FhirContext.forR4Cached(),
-            Path.of(getResourcePath(MeasureScoringTypeContinuousVariableTest.class) + "/" + CLASS_PATH + "/"
-                    + "MeasureTest"));
-    private final Given given = Measure.given().repository(repository);
-    private static final TestDataGenerator testDataGenerator = new TestDataGenerator(repository);
+    private static final Given GIVEN = Measure.given().repositoryFor("MeasureScoringTypeContinuousVariable");
+    private static final TestDataGenerator testDataGenerator = new TestDataGenerator(GIVEN.getRepository());
 
     @BeforeAll
     static void init() {
@@ -45,7 +34,7 @@ class MeasureScoringTypeContinuousVariableTest {
     @Test
     void continuousVariableBooleanPopulation() {
 
-        given.when()
+        GIVEN.when()
                 .measureId("ContinuousVariableBooleanAllPopulations")
                 .evaluate()
                 .then()
@@ -66,7 +55,7 @@ class MeasureScoringTypeContinuousVariableTest {
     @Test
     void continuousVariableBooleanIndividual() {
 
-        given.when()
+        GIVEN.when()
                 .measureId("ContinuousVariableBooleanAllPopulations")
                 .subject("Patient/patient-9")
                 .evaluate()
@@ -88,7 +77,7 @@ class MeasureScoringTypeContinuousVariableTest {
     @Test
     void continuousVariableResourcePopulation() {
 
-        given.when()
+        GIVEN.when()
                 .measureId("ContinuousVariableResourceAllPopulations")
                 .evaluate()
                 .then()
@@ -108,7 +97,7 @@ class MeasureScoringTypeContinuousVariableTest {
 
     @Test
     void continuousVariableBooleanMissingRequiredPopulation() {
-        given.when()
+        GIVEN.when()
                 .measureId("ContinuousVariableBooleanMissingReqdPopulation")
                 .evaluate()
                 .then()
@@ -122,7 +111,7 @@ class MeasureScoringTypeContinuousVariableTest {
     @Test
     void continuousVariableResourceIndividual() {
 
-        given.when()
+        GIVEN.when()
                 .measureId("ContinuousVariableResourceAllPopulations")
                 .subject("Patient/patient-9")
                 .evaluate()
@@ -143,7 +132,7 @@ class MeasureScoringTypeContinuousVariableTest {
 
     @Test
     void continuousVariableBooleanExtraInvalidPopulation() {
-        given.when()
+        GIVEN.when()
                 .measureId("ContinuousVariableBooleanExtraInvalidPopulation")
                 .evaluate()
                 .then()
@@ -157,7 +146,7 @@ class MeasureScoringTypeContinuousVariableTest {
     @Test
     void continuousVariableBooleanGroupScoringDef() {
 
-        given.when()
+        GIVEN.when()
                 .measureId("ContinuousVariableBooleanGroupScoringDef")
                 .evaluate()
                 .then()
@@ -171,32 +160,6 @@ class MeasureScoringTypeContinuousVariableTest {
                 .population("measure-population-exclusion")
                 .hasCount(0)
                 .up()
-                .up()
-                .report();
-    }
-
-    // Encounter basis:  sum
-    @Test
-    void continuousVariableResourceMeasureObservation() {
-
-        given.when()
-                .measureId("ContinuousVariableResourceMeasureObservation")
-                .evaluate()
-                .then()
-                .firstGroup()
-                .population("initial-population")
-                .hasCount(11)
-                .up()
-                .population("measure-population")
-                .hasCount(11)
-                .up()
-                .population("measure-population-exclusion")
-                .hasCount(0)
-                .up()
-                .population("measure-observation")
-                .hasCount(11)
-                .up()
-                .hasScore("1320.0")
                 .up()
                 .report();
     }

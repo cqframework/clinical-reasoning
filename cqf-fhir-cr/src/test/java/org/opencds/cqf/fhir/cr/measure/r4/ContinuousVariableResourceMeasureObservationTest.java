@@ -5,6 +5,8 @@ import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 
 public class ContinuousVariableResourceMeasureObservationTest {
 
+    // LUKETODO:  DSTU3 tests fail
+
     private static final Given GIVEN_BOOLEAN_BASIS =
             Measure.given().repositoryFor("ContinuousVariableObservationBooleanBasis");
     private static final Given GIVEN_ENCOUNTER_BASIS =

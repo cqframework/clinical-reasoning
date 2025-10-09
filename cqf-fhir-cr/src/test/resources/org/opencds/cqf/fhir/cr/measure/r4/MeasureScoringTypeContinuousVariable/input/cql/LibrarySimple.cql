@@ -89,6 +89,13 @@ define "SDE Sex":
  define "SDE Encounters":
     "All Encounters"
 
+// Continuous Variable
+// number of hours for encounter
+
+define function "MeasureObservation"(Encounter Encounter):
+    Encounter e
+        where (difference in hours between start of e.period and end of e.period)>0
+
 // component stratifier
 
 define "Gender Stratification":

@@ -18,6 +18,8 @@ import org.opencds.cqf.fhir.utility.Constants;
  */
 public interface ILibraryAdapter extends IKnowledgeArtifactAdapter {
 
+    public final String CQF_MESSAGES_EXT_URL = "http://hl7.org/fhir/StructureDefinition/cqf-messages";
+
     boolean hasContent();
 
     <T extends ICompositeType> List<T> getContent();
@@ -159,9 +161,9 @@ public interface ILibraryAdapter extends IKnowledgeArtifactAdapter {
     }
 
     default void addCqfMessagesExtension(IBaseOperationOutcome messages) {
-        getContained().add(messages);
+        addContained(messages);
         var ext = addExtension();
-        ext.setUrl("http://hl7.org/fhir/StructureDefinition/cqf-messages");
+        ext.setUrl(CQF_MESSAGES_EXT_URL);
         var ref =
                 (IBaseReference) fhirContext().getElementDefinition("Reference").newInstance();
         ext.setValue(ref.setReference("#messages"));

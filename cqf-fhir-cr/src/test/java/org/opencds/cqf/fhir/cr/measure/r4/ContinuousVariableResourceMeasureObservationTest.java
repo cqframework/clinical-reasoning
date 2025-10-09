@@ -5,14 +5,17 @@ import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 
 public class ContinuousVariableResourceMeasureObservationTest {
 
-    private static final Given GIVEN = Measure.given().repositoryFor("ContinuousVariableObservation");
-
+    private static final Given GIVEN_BOOLEAN_BASIS =
+            Measure.given().repositoryFor("ContinuousVariableObservationBooleanBasis");
+    private static final Given GIVEN_ENCOUNTER_BASIS =
+            Measure.given().repositoryFor("ContinuousVariableObservationEncounterBasis");
 
     // LUKETODO:   add patients with various birth dates and base measure observation on age
     @Test
     void continuousVariableResourceMeasureObservationBooleanBasisAvg() {
 
-        GIVEN.when()
+        GIVEN_BOOLEAN_BASIS
+                .when()
                 .measureId("ContinuousVariableResourceMeasureObservationBooleanBasisAvg")
                 .evaluate()
                 .then()
@@ -29,7 +32,7 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .population("measure-observation")
                 .hasCount(11)
                 .up()
-            // LUKETODO:  figure out what the MeasureObservation function will do before determining a score
+                // LUKETODO:  figure out what the MeasureObservation function will do before determining a score
                 .hasScore("1320.0")
                 .up()
                 .report();
@@ -38,7 +41,8 @@ public class ContinuousVariableResourceMeasureObservationTest {
     @Test
     void continuousVariableResourceMeasureObservationEncounterBasisAvg() {
 
-        GIVEN.when()
+        GIVEN_ENCOUNTER_BASIS
+                .when()
                 .measureId("ContinuousVariableResourceMeasureObservationEncounterBasisAvg")
                 .evaluate()
                 .then()
@@ -64,7 +68,8 @@ public class ContinuousVariableResourceMeasureObservationTest {
     @Test
     void continuousVariableResourceMeasureObservationBooleanBasisCount() {
 
-        GIVEN.when()
+        GIVEN_BOOLEAN_BASIS
+                .when()
                 .measureId("ContinuousVariableResourceMeasureObservationBooleanBasisCount")
                 .evaluate()
                 .then()
@@ -81,7 +86,7 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .population("measure-observation")
                 .hasCount(11)
                 .up()
-            // LUKETODO:  figure out what the MeasureObservation function will do before determining a score
+                // LUKETODO:  figure out what the MeasureObservation function will do before determining a score
                 .hasScore("11.0")
                 .up()
                 .report();
@@ -90,7 +95,8 @@ public class ContinuousVariableResourceMeasureObservationTest {
     @Test
     void continuousVariableResourceMeasureObservationEncounterBasisCount() {
 
-        GIVEN.when()
+        GIVEN_ENCOUNTER_BASIS
+                .when()
                 .measureId("ContinuousVariableResourceMeasureObservationEncounterBasisCount")
                 .evaluate()
                 .then()
@@ -115,7 +121,8 @@ public class ContinuousVariableResourceMeasureObservationTest {
     @Test
     void continuousVariableResourceMeasureObservationBooleanBasisMedian() {
 
-        GIVEN.when()
+        GIVEN_BOOLEAN_BASIS
+                .when()
                 .measureId("ContinuousVariableResourceMeasureObservationBooleanBasisMedian")
                 .evaluate()
                 .then()
@@ -132,7 +139,7 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .population("measure-observation")
                 .hasCount(11)
                 .up()
-            // LUKETODO:  figure out what the MeasureObservation function will do before determining a score
+                // LUKETODO:  figure out what the MeasureObservation function will do before determining a score
                 .hasScore("1320.0")
                 .up()
                 .report();
@@ -147,7 +154,8 @@ public class ContinuousVariableResourceMeasureObservationTest {
     @Test
     void continuousVariableResourceMeasureObservationEncounterBasisMedian() {
 
-        GIVEN.when()
+        GIVEN_ENCOUNTER_BASIS
+                .when()
                 .measureId("ContinuousVariableResourceMeasureObservationEncounterBasisMedian")
                 .evaluate()
                 .then()
@@ -172,7 +180,8 @@ public class ContinuousVariableResourceMeasureObservationTest {
     @Test
     void continuousVariableResourceMeasureObservationBooleanBasisMin() {
 
-        GIVEN.when()
+        GIVEN_BOOLEAN_BASIS
+                .when()
                 .measureId("ContinuousVariableResourceMeasureObservationBooleanBasisMin")
                 .evaluate()
                 .then()
@@ -189,7 +198,7 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .population("measure-observation")
                 .hasCount(11)
                 .up()
-            // LUKETODO:  figure out what the MeasureObservation function will do before determining a score
+                // LUKETODO:  figure out what the MeasureObservation function will do before determining a score
                 .hasScore("1320.0")
                 .up()
                 .report();
@@ -198,7 +207,8 @@ public class ContinuousVariableResourceMeasureObservationTest {
     @Test
     void continuousVariableResourceMeasureObservationEncounterBasisMin() {
 
-        GIVEN.when()
+        GIVEN_ENCOUNTER_BASIS
+                .when()
                 .measureId("ContinuousVariableResourceMeasureObservationEncounterBasisMin")
                 .evaluate()
                 .then()
@@ -223,7 +233,8 @@ public class ContinuousVariableResourceMeasureObservationTest {
     @Test
     void continuousVariableResourceMeasureObservationBooleanBasisMax() {
 
-        GIVEN.when()
+        GIVEN_BOOLEAN_BASIS
+                .when()
                 .measureId("ContinuousVariableResourceMeasureObservationBooleanBasisMax")
                 .evaluate()
                 .then()
@@ -240,7 +251,7 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .population("measure-observation")
                 .hasCount(11)
                 .up()
-            // LUKETODO:  figure out what the MeasureObservation function will do before determining a score
+                // LUKETODO:  figure out what the MeasureObservation function will do before determining a score
                 .hasScore("1320.0")
                 .up()
                 .report();
@@ -249,7 +260,8 @@ public class ContinuousVariableResourceMeasureObservationTest {
     @Test
     void continuousVariableResourceMeasureObservationEncounterBasisMax() {
 
-        GIVEN.when()
+        GIVEN_ENCOUNTER_BASIS
+                .when()
                 .measureId("ContinuousVariableResourceMeasureObservationEncounterBasisMax")
                 .evaluate()
                 .then()
@@ -274,7 +286,8 @@ public class ContinuousVariableResourceMeasureObservationTest {
     @Test
     void continuousVariableResourceMeasureObservationBooleanBasisSum() {
 
-        GIVEN.when()
+        GIVEN_BOOLEAN_BASIS
+                .when()
                 .measureId("ContinuousVariableResourceMeasureObservationBooleanBasisSum")
                 .evaluate()
                 .then()
@@ -292,7 +305,7 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .population("measure-observation")
                 .hasCount(11)
                 .up()
-            // LUKETODO:  figure out what the MeasureObservation function will do before determining a score
+                // LUKETODO:  figure out what the MeasureObservation function will do before determining a score
                 .hasScore("1320.0")
                 .up()
                 .report();
@@ -302,7 +315,8 @@ public class ContinuousVariableResourceMeasureObservationTest {
     @Test
     void continuousVariableResourceMeasureObservationEncounterBasisSum() {
 
-        GIVEN.when()
+        GIVEN_ENCOUNTER_BASIS
+                .when()
                 .measureId("ContinuousVariableResourceMeasureObservationEncounterBasisSum")
                 .evaluate()
                 .then()
@@ -323,18 +337,4 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .up()
                 .report();
     }
-
-    /*
-        540.0
-        30.0
-        420.0
-        60.0
-        120.0
-        600.0
-        120.0
-        121.0
-        90.0
-        15.0
-        840.0
-     */
 }

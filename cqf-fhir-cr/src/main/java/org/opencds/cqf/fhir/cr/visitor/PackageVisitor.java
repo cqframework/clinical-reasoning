@@ -8,6 +8,7 @@ import static org.opencds.cqf.fhir.utility.adapter.IAdapterFactory.createAdapter
 import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.util.OperationOutcomeUtil;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -21,6 +22,7 @@ import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -51,6 +53,7 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
     protected final ExpandHelper expandHelper;
 
     protected Map<String, List<?>> resourceTypes = new HashMap<>();
+    private IBaseOperationOutcome messages;
 
     public PackageVisitor(IRepository repository) {
         this(repository, (TerminologyServerClient) null, null);
@@ -201,6 +204,10 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
             BundleHelper.setEntry(packagedBundle, included);
         }
         handleValueSets(packagedBundle, terminologyEndpoint);
+        if (messages != null) {
+            messages.setId("messages");
+            getRootSpecificationLibrary(packagedBundle).addCqfMessagesExtension(messages);
+        }
         setCorrectBundleType(count, offset, packagedBundle);
         pageBundleBasedOnCountAndOffset(count, offset, packagedBundle);
         return packagedBundle;
@@ -260,12 +267,22 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
                             .contains(p.getName()))
                     .map(IParametersParameterComponentAdapter::get)
                     .toList());
-            // TODO try/catch (UnprocessableEntityException) -> operation outcome
-            expandHelper.expandValueSet(valueSet, params, terminologyEndpoint, valueSets, expandedList, new Date());
-            var elapsed = String.valueOf(((new Date()).getTime() - expansionStartTime) / 1000);
-            myLogger.info("Expanded {} in {}s", url, elapsed);
-            if (expansionCache.isPresent()) {
-                expansionCache.get().addToCache(valueSet, expansionParamsHash.orElse(null));
+            try {
+                expandHelper.expandValueSet(valueSet, params, terminologyEndpoint, valueSets, expandedList, new Date());
+                var elapsed = String.valueOf(((new Date()).getTime() - expansionStartTime) / 1000);
+                myLogger.info("Expanded {} in {}s", url, elapsed);
+                if (expansionCache.isPresent()) {
+                    expansionCache.get().addToCache(valueSet, expansionParamsHash.orElse(null));
+                }
+            } catch (Exception e) {
+                myLogger.warn("Failed to expand {}. Reporting in outcome manifest", url);
+                if (messages == null) {
+                    messages = OperationOutcomeUtil.createOperationOutcome(
+                            "warning", e.getMessage(), "processing", fhirContext(), null);
+                } else {
+                    OperationOutcomeUtil.addIssue(
+                            fhirContext(), messages, "warning", e.getMessage(), null, "processing");
+                }
             }
         });
     }

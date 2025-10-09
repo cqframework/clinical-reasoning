@@ -13,6 +13,7 @@ import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.PrimitiveType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent;
@@ -120,12 +121,16 @@ public class ValueSetAdapter extends KnowledgeArtifactAdapter implements IValueS
 
     @Override
     public void appendExpansionContains(List<IValueSetExpansionContainsAdapter> expansionContains) {
-        getValueSet()
-                .getExpansion()
+        getExpansion()
                 .getContains()
                 .addAll((expansionContains.stream()
                         .map(e -> (ValueSetExpansionContainsComponent) e.get())
                         .toList()));
+
+        var countParam = getExpansion().getParameter("count");
+        var count = ((IntegerType) countParam.getValue()).getValue();
+        count += expansionContains.size();
+        countParam.setValue(new IntegerType(count));
     }
 
     @SuppressWarnings("unchecked")

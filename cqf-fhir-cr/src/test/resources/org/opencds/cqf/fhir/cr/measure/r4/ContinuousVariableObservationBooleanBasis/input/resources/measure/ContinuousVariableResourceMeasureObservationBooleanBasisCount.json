@@ -37,7 +37,7 @@
           },
           "criteria": {
             "language": "text/cql-identifier",
-            "expression": "Initial Population Resource"
+            "expression": "Initial Population Boolean"
           }
         },
         {

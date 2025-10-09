@@ -37,7 +37,7 @@
           },
           "criteria": {
             "language": "text/cql-identifier",
-            "expression": "Initial Population Resource"
+            "expression": "Initial Population Boolean"
           }
         },
         {
@@ -53,7 +53,7 @@
           },
           "criteria": {
             "language": "text/cql-identifier",
-            "expression": "Measure Population Resource"
+            "expression": "Measure Population Boolean"
           }
         },
         {
@@ -69,7 +69,7 @@
           },
           "criteria": {
             "language": "text/cql-identifier",
-            "expression": "Measure Population Exclusion Resource"
+            "expression": "Measure Population Exclusion Boolean"
           }
         },
         {

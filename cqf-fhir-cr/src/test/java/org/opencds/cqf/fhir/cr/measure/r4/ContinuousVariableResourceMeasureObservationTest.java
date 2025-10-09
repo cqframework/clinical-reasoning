@@ -10,7 +10,6 @@ public class ContinuousVariableResourceMeasureObservationTest {
     private static final Given GIVEN_ENCOUNTER_BASIS =
             Measure.given().repositoryFor("ContinuousVariableObservationEncounterBasis");
 
-    // LUKETODO:   add patients with various birth dates and base measure observation on age
     @Test
     void continuousVariableResourceMeasureObservationBooleanBasisAvg() {
 
@@ -21,19 +20,20 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .then()
                 .firstGroup()
                 .population("initial-population")
-                .hasCount(11)
+                // 10 encounters in all
+                .hasCount(10)
                 .up()
                 .population("measure-population")
-                .hasCount(11)
+                .hasCount(10)
                 .up()
                 .population("measure-population-exclusion")
                 .hasCount(0)
                 .up()
                 .population("measure-observation")
-                .hasCount(11)
+                // There are 10 patients in all
+                .hasCount(10)
                 .up()
-                // LUKETODO:  figure out what the MeasureObservation function will do before determining a score
-                .hasScore("1320.0")
+                .hasScore("74.0")
                 .up()
                 .report();
     }
@@ -64,7 +64,6 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .report();
     }
 
-    // LUKETODO:  this should be the easiest one:
     @Test
     void continuousVariableResourceMeasureObservationBooleanBasisCount() {
 
@@ -75,19 +74,20 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .then()
                 .firstGroup()
                 .population("initial-population")
-                .hasCount(11)
+                // 10 encounters in all
+                .hasCount(10)
                 .up()
                 .population("measure-population")
-                .hasCount(11)
+                .hasCount(10)
                 .up()
                 .population("measure-population-exclusion")
                 .hasCount(0)
                 .up()
                 .population("measure-observation")
-                .hasCount(11)
+                // There are 10 patients in all
+                .hasCount(10)
                 .up()
-                // LUKETODO:  figure out what the MeasureObservation function will do before determining a score
-                .hasScore("11.0")
+                .hasScore("10.0")
                 .up()
                 .report();
     }
@@ -128,19 +128,20 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .then()
                 .firstGroup()
                 .population("initial-population")
-                .hasCount(11)
+                // 10 encounters in all
+                .hasCount(10)
                 .up()
                 .population("measure-population")
-                .hasCount(11)
+                .hasCount(10)
                 .up()
                 .population("measure-population-exclusion")
                 .hasCount(0)
                 .up()
                 .population("measure-observation")
-                .hasCount(11)
+                // There are 10 patients in all
+                .hasCount(10)
                 .up()
-                // LUKETODO:  figure out what the MeasureObservation function will do before determining a score
-                .hasScore("1320.0")
+                .hasScore("77.5")
                 .up()
                 .report();
     }
@@ -187,19 +188,20 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .then()
                 .firstGroup()
                 .population("initial-population")
-                .hasCount(11)
+                // 10 encounters in all
+                .hasCount(10)
                 .up()
                 .population("measure-population")
-                .hasCount(11)
+                .hasCount(10)
                 .up()
                 .population("measure-population-exclusion")
                 .hasCount(0)
                 .up()
                 .population("measure-observation")
-                .hasCount(11)
+                // There are 10 patients in all
+                .hasCount(10)
                 .up()
-                // LUKETODO:  figure out what the MeasureObservation function will do before determining a score
-                .hasScore("1320.0")
+                .hasScore("55.0")
                 .up()
                 .report();
     }
@@ -240,19 +242,20 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .then()
                 .firstGroup()
                 .population("initial-population")
-                .hasCount(11)
+                // 10 encounters in all
+                .hasCount(10)
                 .up()
                 .population("measure-population")
-                .hasCount(11)
+                .hasCount(10)
                 .up()
                 .population("measure-population-exclusion")
                 .hasCount(0)
                 .up()
                 .population("measure-observation")
-                .hasCount(11)
+                // There are 10 patients in all
+                .hasCount(10)
                 .up()
-                // LUKETODO:  figure out what the MeasureObservation function will do before determining a score
-                .hasScore("1320.0")
+                .hasScore("85.0")
                 .up()
                 .report();
     }
@@ -293,25 +296,24 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .then()
                 .firstGroup()
                 .population("initial-population")
-                // LUKETODO:  why do we have 10 if this is a boolean basis?
-                .hasCount(11)
+                // 10 encounters in all
+                .hasCount(10)
                 .up()
                 .population("measure-population")
-                .hasCount(11)
+                .hasCount(10)
                 .up()
                 .population("measure-population-exclusion")
                 .hasCount(0)
                 .up()
                 .population("measure-observation")
-                .hasCount(11)
+                // There are 10 patients in all
+                .hasCount(10)
                 .up()
-                // LUKETODO:  figure out what the MeasureObservation function will do before determining a score
-                .hasScore("1320.0")
+                .hasScore("740.0")
                 .up()
                 .report();
     }
 
-    // LUKETODO:  for encounters, leave two encounter periods the same so we can test set logic doesn't eliminate dupes
     @Test
     void continuousVariableResourceMeasureObservationEncounterBasisSum() {
 

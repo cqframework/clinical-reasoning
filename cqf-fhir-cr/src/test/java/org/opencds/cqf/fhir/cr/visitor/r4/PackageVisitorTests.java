@@ -40,6 +40,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.MetadataResource;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
@@ -65,7 +66,6 @@ import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
 import org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.r4.LibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.r4.ValueSetAdapter;
-import org.opencds.cqf.fhir.utility.client.ExpandRunner.TerminologyServerExpansionException;
 import org.opencds.cqf.fhir.utility.client.TerminologyServerClient;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
@@ -148,20 +148,22 @@ class PackageVisitorTests {
         terminologyEndpoint.setAddress("test.com");
         Parameters params = parameters(part("terminologyEndpoint", terminologyEndpoint));
 
-        var exception = assertThrows(UnprocessableEntityException.class, () -> {
-            libraryAdapter.accept(packageVisitor, params);
-        });
+        libraryAdapter.accept(packageVisitor, params);
 
-        assertTrue(exception.getMessage().contains(expectedError));
+        assertTrue(libraryAdapter.hasExtension(ILibraryAdapter.CQF_MESSAGES_EXT_URL));
+        assertTrue(libraryAdapter.hasContained());
+        assertTrue(libraryAdapter.getContained().stream().allMatch(c -> c instanceof OperationOutcome));
+        var oo = (OperationOutcome) libraryAdapter.getContained().get(0);
+        assertEquals(oo.getIssueFirstRep().getDiagnostics(), expectedError);
     }
 
     @Test
     void packageOperation_expansion_should_fail() {
         String username = "someUsername";
         String apiKey = "some-api-key";
-        String expectedError = " Server could not process expansion requests";
+        String expectedError = "Cannot expand ValueSet without a terminology server: ValueSet/dxtc";
         Bundle loadedBundle = (Bundle) jsonParser.parseResource(
-                PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
+                PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active-intensional-vs.json"));
         repo.transaction(loadedBundle);
         PackageVisitor packageVisitor = new PackageVisitor(repo);
         Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
@@ -173,11 +175,9 @@ class PackageVisitorTests {
         terminologyEndpoint.setAddress("test.com");
         Parameters params = parameters(part("terminologyEndpoint", terminologyEndpoint));
 
-        var exception = assertThrows(TerminologyServerExpansionException.class, () -> {
-            libraryAdapter.accept(packageVisitor, params);
-        });
+        libraryAdapter.accept(packageVisitor, params);
 
-        assertTrue(exception.getMessage().contains(expectedError));
+        assertTrue(libraryAdapter.hasExtension(ILibraryAdapter.CQF_MESSAGES_EXT_URL));
     }
 
     @Test

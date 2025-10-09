@@ -22,7 +22,7 @@
         ],
         "extension": [
           {
-            "url": "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-messages",
+            "url": "http://hl7.org/fhir/StructureDefinition/cqf-messages",
             "valueReference": {
               "reference": "#apply-outcome-opioidcds-10-patient-view"
             }

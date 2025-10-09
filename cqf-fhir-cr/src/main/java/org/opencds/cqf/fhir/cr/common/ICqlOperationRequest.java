@@ -15,6 +15,7 @@ import org.opencds.cqf.fhir.utility.BundleHelper;
 /**
  * This interface exposes common functionality across Operations that use CQL evaluation
  */
+@SuppressWarnings("UnstableApiUsage")
 public interface ICqlOperationRequest extends IOperationRequest {
 
     /**

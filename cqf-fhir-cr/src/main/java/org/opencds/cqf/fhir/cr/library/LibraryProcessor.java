@@ -45,7 +45,7 @@ public class LibraryProcessor {
     protected TerminologyServerClientSettings terminologyServerClientSettings;
 
     public LibraryProcessor(IRepository repository) {
-        this(repository, EvaluationSettings.getDefault(), new TerminologyServerClientSettings());
+        this(repository, EvaluationSettings.getDefault(), TerminologyServerClientSettings.getDefault());
     }
 
     public LibraryProcessor(
@@ -104,6 +104,16 @@ public class LibraryProcessor {
                 ? packageProcessor
                 : new PackageProcessor(repository, terminologyServerClientSettings);
         return processor.packageResource(library, parameters);
+    }
+
+    public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseBundle releaseLibrary(
+            Either3<C, IIdType, R> library) {
+        return releaseLibrary(library, false);
+    }
+
+    public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseBundle releaseLibrary(
+            Either3<C, IIdType, R> library, boolean isPut) {
+        return releaseLibrary(library, packageParameters(fhirVersion, null, isPut));
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseBundle releaseLibrary(

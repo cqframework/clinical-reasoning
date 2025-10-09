@@ -5,6 +5,7 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.DataType;
+import org.hl7.fhir.r5.model.IntegerType;
 import org.hl7.fhir.r5.model.Parameters;
 import org.hl7.fhir.r5.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r5.model.Resource;
@@ -72,6 +73,15 @@ class ParametersAdapter extends ResourceAdapter implements IParametersAdapter {
     @Override
     public void addParameter(String name, String value) {
         getParameters().addParameter(name, value);
+    }
+
+    @Override
+    public void setParameter(String name, int value) {
+        if (hasParameter(name)) {
+            getParameter(name).setValue(new IntegerType(value));
+        } else {
+            getParameters().addParameter(name, value);
+        }
     }
 
     @Override

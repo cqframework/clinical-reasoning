@@ -7,22 +7,31 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.BundleBuilder;
 import com.google.common.collect.Multimap;
+import jakarta.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Stream;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.fhir.utility.iterable.BundleIterator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 // wip
+@SuppressWarnings("UnstableApiUsage")
 public class FederatedRepository implements IRepository {
-    private IRepository local;
-    private List<IRepository> repositoryList;
+    public static final Logger logger = LoggerFactory.getLogger(FederatedRepository.class);
+
+    private final IRepository local;
+    private final List<IRepository> repositoryList;
 
     public FederatedRepository(IRepository local, IRepository... repositories) {
         this.local = local;
@@ -30,12 +39,11 @@ public class FederatedRepository implements IRepository {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public <T extends IBaseResource, I extends IIdType> T read(
             Class<T> resourceType, I id, Map<String, String> headers) {
 
         // Check local first, then go through the list if nothing is found
-        IBaseResource result = null;
+        T result = null;
         try {
             result = local.read(resourceType, id, headers);
 
@@ -60,7 +68,7 @@ public class FederatedRepository implements IRepository {
             throw new ResourceNotFoundException("No resource found with id: %s".formatted(id.getValue()));
         }
 
-        return (T) result;
+        return result;
     }
 
     @Override
@@ -114,7 +122,10 @@ public class FederatedRepository implements IRepository {
         this.repositoryList.forEach(r -> futureList.add(CompletableFuture.supplyAsync(
                 () -> conductSearch(r, bundleType, resourceType, searchParameters, headers))));
 
-        futureList.stream().map(c -> c.join()).flatMap(b -> b.stream()).forEach(builder::addCollectionEntry);
+        futureList.stream()
+                .map(CompletableFuture::join)
+                .flatMap(Collection::stream)
+                .forEach(builder::addCollectionEntry);
         builder.setType("searchset");
 
         return builder.getBundleTyped();
@@ -122,7 +133,33 @@ public class FederatedRepository implements IRepository {
 
     @Override
     public <B extends IBaseBundle> B link(Class<B> bundleType, String url, Map<String, String> headers) {
-        return null;
+        return Stream.concat(Stream.of(local), repositoryList.stream())
+                .map(repo -> tryLink(repo, bundleType, url, headers))
+                .flatMap(Optional::stream)
+                .filter(this::hasResourceEntries)
+                .findFirst()
+                .orElse(null);
+    }
+
+    private <B extends IBaseBundle> Optional<B> tryLink(
+            IRepository repo, Class<B> type, String url, Map<String, String> headers) {
+        try {
+            return Optional.ofNullable(repo.link(type, url, headers));
+        } catch (Exception e) {
+            // swallow and try next
+            logger.debug(
+                    "Encountered error attempting to fetch link from repository of type {}: {}",
+                    repo.getClass().getName(),
+                    e.getMessage());
+            return Optional.empty();
+        }
+    }
+
+    private Boolean hasResourceEntries(IBaseBundle bundle) {
+        var bundleFactory =
+                FhirContext.forCached(bundle.getStructureFhirVersionEnum()).newBundleFactory();
+        bundleFactory.initializeWithBundleResource(bundle);
+        return !bundleFactory.toListOfResources().isEmpty();
     }
 
     @Override
@@ -189,6 +226,7 @@ public class FederatedRepository implements IRepository {
     }
 
     @Override
+    @Nonnull
     public FhirContext fhirContext() {
         return local.fhirContext();
     }

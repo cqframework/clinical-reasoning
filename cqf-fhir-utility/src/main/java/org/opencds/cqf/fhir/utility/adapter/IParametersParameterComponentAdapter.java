@@ -1,41 +1,55 @@
 package org.opencds.cqf.fhir.utility.adapter;
 
 import java.util.List;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-public interface IParametersParameterComponentAdapter extends IAdapter<IBaseBackboneElement> {
+public interface IParametersParameterComponentAdapter extends IAdapter<IBase> {
 
-    public IBaseBackboneElement get();
+    IBaseBackboneElement get();
 
-    public String getName();
+    String getName();
 
-    public void setName(String name);
+    void setName(String name);
 
-    public List<IParametersParameterComponentAdapter> getPart();
+    List<IParametersParameterComponentAdapter> getPart();
 
-    public List<IBaseDatatype> getPartValues(String name);
+    List<IBaseDatatype> getPartValues(String name);
 
-    public void setPart(List<IBaseBackboneElement> parametersParameterComponents);
+    void setPart(List<IBaseBackboneElement> parametersParameterComponents);
 
-    public IBaseBackboneElement addPart();
+    IBaseBackboneElement addPart();
 
-    public boolean hasPart();
+    boolean hasPart();
 
-    public boolean hasResource();
+    boolean hasResource();
 
-    public IBaseResource getResource();
+    IBaseResource getResource();
 
-    public void setResource(IBaseResource resource);
+    void setResource(IBaseResource resource);
 
-    public boolean hasValue();
+    boolean hasValue();
 
-    public boolean hasPrimitiveValue();
+    boolean hasPrimitiveValue();
 
-    public String getPrimitiveValue();
+    String getPrimitiveValue();
 
-    public void setValue(IBaseDatatype value);
+    void setValue(IBaseDatatype value);
 
-    public IBaseDatatype getValue();
+    IBaseDatatype getValue();
+
+    IBase newTupleWithParts();
+
+    default IBase getPartValue(IParametersParameterComponentAdapter part) {
+        if (part.hasValue()) {
+            return part.getValue();
+        } else if (part.hasResource()) {
+            return part.getResource();
+        } else if (part.hasPart()) {
+            return part.newTupleWithParts();
+        }
+        return null;
+    }
 }

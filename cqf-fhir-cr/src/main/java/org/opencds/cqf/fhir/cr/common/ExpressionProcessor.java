@@ -14,6 +14,7 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.CqfExpression;
+import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireItemComponentAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -148,7 +149,7 @@ public class ExpressionProcessor {
      * @param item the item
      * @return a CqfExpression
      */
-    public CqfExpression getItemInitialExpression(IOperationRequest request, IBaseBackboneElement item) {
+    public CqfExpression getItemInitialExpression(IOperationRequest request, IQuestionnaireItemComponentAdapter item) {
         if (!item.hasExtension()) {
             return null;
         }

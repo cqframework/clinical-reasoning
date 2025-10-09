@@ -7,25 +7,29 @@ import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
  * This interface exposes common functionality across all FHIR ValueSet versions.
  */
 public interface IValueSetAdapter extends IKnowledgeArtifactAdapter {
-    public <T extends IBaseBackboneElement> void setExpansion(T expansion);
+    <T extends IBaseBackboneElement> void setExpansion(T expansion);
 
-    public <T extends IBaseBackboneElement> T getExpansion();
+    <T extends IBaseBackboneElement> T getExpansion();
 
-    public boolean hasExpansion();
+    boolean hasExpansion();
 
-    public boolean hasExpansionContains();
+    boolean hasExpansionContains();
 
-    public List<IValueSetExpansionContainsAdapter> getExpansionContains();
+    int getExpansionTotal();
 
-    public <T extends IBaseBackboneElement> T newExpansion();
+    List<IValueSetExpansionContainsAdapter> getExpansionContains();
 
-    public List<IValueSetConceptSetAdapter> getComposeInclude();
+    void appendExpansionContains(List<IValueSetExpansionContainsAdapter> expansionContains);
 
-    public List<String> getValueSetIncludes();
+    <T extends IBaseBackboneElement> T newExpansion();
 
-    public boolean hasCompose();
+    List<IValueSetConceptSetAdapter> getComposeInclude();
 
-    public boolean hasComposeInclude();
+    List<String> getValueSetIncludes();
+
+    boolean hasCompose();
+
+    boolean hasComposeInclude();
 
     /**
      * A simple compose element of a ValueSet must have a compose without an exclude element. Each element of the
@@ -33,7 +37,7 @@ public interface IValueSetAdapter extends IKnowledgeArtifactAdapter {
      *
      * @return boolean
      */
-    public boolean hasSimpleCompose();
+    boolean hasSimpleCompose();
 
     /**
      * A grouping compose element of a ValueSet must have a compose without an exclude element and each element of the
@@ -41,14 +45,14 @@ public interface IValueSetAdapter extends IKnowledgeArtifactAdapter {
      *
      * @return boolean
      */
-    public boolean hasGroupingCompose();
+    boolean hasGroupingCompose();
 
     /**
      * Performs a naive expansion on the ValueSet by collecting all codes within the compose.  Can only be performed on a ValueSet with a simple compose.
      */
-    public void naiveExpand();
+    void naiveExpand();
 
-    public boolean hasNaiveParameter();
+    boolean hasNaiveParameter();
 
-    public <T extends IBaseBackboneElement> T createNaiveParameter();
+    <T extends IBaseBackboneElement> T createNaiveParameter();
 }

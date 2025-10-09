@@ -37,6 +37,7 @@ import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.cql2elm.content.RepositoryFhirLibrarySourceProvider;
 import org.opencds.cqf.fhir.cql.cql2elm.util.LibraryVersionSelector;
 import org.opencds.cqf.fhir.utility.Libraries;
+import org.opencds.cqf.fhir.utility.adapter.IAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
@@ -89,7 +90,10 @@ public class DataRequirementsVisitor extends BaseKnowledgeArtifactVisitor {
                         true,
                         true);
                 var convertedLibrary = convertAndCreateAdapter(r5Library);
-                convertedLibrary.getDataRequirement().forEach(dataReq -> library.addDataRequirement(dataReq.get()));
+                convertedLibrary.getDataRequirement().stream()
+                        .map(IAdapter::get)
+                        .map(ICompositeType.class::cast)
+                        .forEach(library::addDataRequirement);
                 convertedLibrary.getRelatedArtifact().forEach(library::addRelatedArtifact);
             });
         }

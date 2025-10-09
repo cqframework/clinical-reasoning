@@ -8,48 +8,52 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public interface IResourceAdapter extends IAdapter<IBaseResource> {
 
-    public IBaseResource get();
+    IBaseResource get();
 
-    public IAdapterFactory getAdapterFactory();
+    IBase setProperty(String name, IBase value) throws FHIRException;
 
-    public IBase setProperty(String name, IBase value) throws FHIRException;
+    IBase addChild(String name) throws FHIRException;
 
-    public IBase addChild(String name) throws FHIRException;
+    IBase getSingleProperty(String name) throws FHIRException;
 
-    public IBase getSingleProperty(String name) throws FHIRException;
+    IBase[] getProperty(String name) throws FHIRException;
 
-    public IBase[] getProperty(String name) throws FHIRException;
+    IBase[] getProperty(String name, boolean checkValid) throws FHIRException;
 
-    public IBase[] getProperty(String name, boolean checkValid) throws FHIRException;
+    IBase makeProperty(String name) throws FHIRException;
 
-    public IBase makeProperty(String name) throws FHIRException;
+    String[] getTypesForProperty(String name) throws FHIRException;
 
-    public String[] getTypesForProperty(String name) throws FHIRException;
+    IBaseResource copy();
 
-    public IBaseResource copy();
+    void copyValues(IBaseResource destination);
 
-    public void copyValues(IBaseResource destination);
+    boolean equalsDeep(IBase other);
 
-    public boolean equalsDeep(IBase other);
+    boolean equalsShallow(IBase other);
 
-    public boolean equalsShallow(IBase other);
-
-    public default <R extends IBaseResource> List<R> getContained() {
+    default <R extends IBaseResource> List<R> getContained() {
         return getContained(get());
     }
 
-    public default boolean hasContained() {
+    default boolean hasContained() {
         return hasContained(get());
     }
 
     @SuppressWarnings("unchecked")
-    public default <R extends IBaseResource> List<R> getContained(IBaseResource base) {
+    default <R extends IBaseResource> List<R> getContained(IBaseResource base) {
         return resolvePathList(base, "contained", IBaseResource.class).stream()
                 .map(r -> (R) r)
                 .collect(Collectors.toList());
     }
 
-    public default Boolean hasContained(IBaseResource base) {
+    default Boolean hasContained(IBaseResource base) {
         return !getContained(base).isEmpty();
+    }
+
+    default void addContained(IBaseResource base) {
+        var res = resolvePathList(get(), "contained", IBaseResource.class);
+        res.add(base);
+        getModelResolver().setValue(get(), "contained", res);
     }
 }

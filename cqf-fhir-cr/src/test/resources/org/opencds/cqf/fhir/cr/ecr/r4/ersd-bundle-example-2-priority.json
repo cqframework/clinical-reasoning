@@ -1,0 +1,1771 @@
+{
+	"resourceType": "Bundle",
+	"id": "bundle-ersd-specification-example2",
+	"meta": {
+		"versionId": "1",
+		"lastUpdated": "2022-04-15T18:26:27.000+00:00",
+		"source": "#8zRKOv2AelmrnTVL"
+	},
+	"type": "collection",
+	"timestamp": "2022-04-05T10:06:42.482-04:00",
+	"entry": [
+		{
+			"fullUrl": "http://hl7.org/fhir/us/ecr/Library/SpecificationLibrary",
+			"resource": {
+				"resourceType": "Library",
+				"id": "SpecificationLibrary",
+				"meta": {
+					"versionId": "1.0.02",
+					"profile": [
+						"http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-specification-library"
+					]
+				},
+				"text": {
+					"status": "generated",
+					"div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p><b>Generated Narrative: Library</b></p><div style=\"display: inline-block; background-color: #d9e0e7; padding: 6px; margin: 4px; border: 1px solid #8da1b4; border-radius: 5px; line-height: 60%\"><p style=\"margin-bottom: 0px\">Resource Library \"SpecificationLibrary\" Version \"1.0.0\" </p><p style=\"margin-bottom: 0px\">Profile: <a href=\"StructureDefinition-us-ph-specification-library.html\">US Public Health Specification Library</a></p></div><p><b>url</b>: <code>http://hl7.org/fhir/us/ecr/Library/SpecificationLibrary</code></p><p><b>version</b>: 1.0.0</p><p><b>name</b>: SpecificationLibrary</p><p><b>title</b>: Specification Library</p><p><b>status</b>: active</p><p><b>experimental</b>: true</p><p><b>type</b>: Asset Collection <span style=\"background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki\"> (<a href=\"http://terminology.hl7.org/3.1.0/CodeSystem-library-type.html\">LibraryType</a>#asset-collection)</span></p><p><b>publisher</b>: eCR</p><p><b>description</b>: Defines the asset-collection library containing the US Public Health specification assets.</p></div>"
+				},
+				"url": "http://hl7.org/fhir/us/ecr/Library/SpecificationLibrary",
+				"version": "1.0.02",
+				"name": "SpecificationLibrary",
+				"title": "Specification Library",
+				"status": "active",
+				"experimental": true,
+				"type": {
+					"coding": [
+						{
+							"system": "http://terminology.hl7.org/CodeSystem/library-type",
+							"code": "asset-collection"
+						}
+					]
+				},
+				"publisher": "eCR",
+				"description": "Defines the asset-collection library containing the US Public Health specification assets.",
+				"useContext": [
+					{
+						"code": {
+							"system": "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context-type",
+							"code": "reporting"
+						},
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context",
+									"code": "triggering"
+								}
+							]
+						}
+					},
+					{
+						"code": {
+							"system": "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context-type",
+							"code": "specification-type"
+						},
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context",
+									"code": "program"
+								}
+							]
+						}
+					}
+				],
+				"relatedArtifact": [
+					{
+						"type": "composed-of",
+						"resource": "http://hl7.org/fhir/us/ecr/PlanDefinition/plandefinition-ersd-instance-example",
+						"extension":[
+							{
+								"url":"http://hl7.org/fhir/StructureDefinition/artifact-isOwned",
+								"valueBoolean": true
+							}
+						]
+					},
+					{
+						"type": "composed-of",
+						"resource": "http://hl7.org/fhir/us/ecr/Library/library-rctc-example",
+						"extension":[
+							{
+								"url":"http://hl7.org/fhir/StructureDefinition/artifact-isOwned",
+								"valueBoolean": true
+							}
+						]
+					}
+				]
+			}
+		},
+		{
+			"fullUrl": "http://hl7.org/fhir/us/ecr/PlanDefinition/plandefinition-ersd-instance-example",
+			"resource": {
+				"resourceType": "PlanDefinition",
+				"id": "plandefinition-ersd-instance-example",
+				"meta": {
+					"profile": [
+						"http://hl7.org/fhir/us/ecr/StructureDefinition/ersd-plandefinition"
+					]
+				},
+				"text": {
+					"status": "extensions",
+					"div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p><b>Generated Narrative: PlanDefinition</b></p><div style=\"display: inline-block; background-color: #d9e0e7; padding: 6px; margin: 4px; border: 1px solid #8da1b4; border-radius: 5px; line-height: 60%\"><p style=\"margin-bottom: 0px\">Resource PlanDefinition \"plandefinition-ersd-instance-example\" </p><p style=\"margin-bottom: 0px\">Profile: <a href=\"StructureDefinition-ersd-plandefinition.html\">eRSD PlanDefinition</a></p></div><p><b>Variable</b>: <span title=\"text/fhirpath\"><code>14</code></span>(<b>normalReportingDuration</b>)</p><p><b>url</b>: <code>http://hl7.org/fhir/us/ecr/PlanDefinition/plandefinition-ersd-instance-example</code></p><p><b>version</b>: 0.1</p><p><b>name</b>: PlanDefinition_eRSD_Instance_Example</p><p><b>title</b>: eRSD PlanDefinition Instance Example</p><p><b>type</b>: Workflow Definition <span style=\"background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki\"> (<a href=\"http://terminology.hl7.org/3.1.0/CodeSystem-plan-definition-type.html\">PlanDefinitionType</a>#workflow-definition)</span></p><p><b>status</b>: active</p><p><b>experimental</b>: true</p><p><b>date</b>: 2020-07-31 12:32:29-0500</p><p><b>publisher</b>: HL7 Public Health Work Group</p><p><b>description</b>: An example ersd PlanDefinition</p><p><b>jurisdiction</b>: United States of America <span style=\"background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki\"> (unknown#US)</span></p><p><b>effectivePeriod</b>: 2020-12-01 --&gt; (ongoing)</p><blockquote><p><b>action</b></p><p><b>description</b>: This action represents the start of the reporting workflow in response to the encounter-start event.</p><p><b>textEquivalent</b>: Start the reporting workflow in response to an encounter-start event</p><p><b>code</b>: Initiate a reporting workflow <span style=\"background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki\"> (<a href=\"CodeSystem-us-ph-plandefinition-actions.html\">US Public Health PlanDefinition Action Codes</a>#initiate-reporting-workflow)</span></p><h3>RelatedActions</h3><table class=\"grid\"><tr><td>-</td><td><b>ActionId</b></td><td><b>Relationship</b></td><td><b>Offset[x]</b></td></tr><tr><td>*</td><td>check-suspected-disorder</td><td>before-start</td><td>1 h<span style=\"background: LightGoldenRodYellow\"> (Details: UCUM code h = 'h')</span></td></tr></table></blockquote><blockquote><p><b>action</b></p><p><b>description</b>: This action represents the start of the check suspected disorder reporting workflow in response to the encounter-start event.</p><p><b>textEquivalent</b>: Check suspected disorders for immediate reportability and setup jobs for future reportability checks.</p><p><b>code</b>: Execute a series of actions to accomplish reporting <span style=\"background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki\"> (<a href=\"CodeSystem-us-ph-plandefinition-actions.html\">US Public Health PlanDefinition Action Codes</a>#execute-reporting-workflow)</span></p><blockquote><p><b>action</b></p><p><b>description</b>: This action represents the check for suspected disorder reportability to create the patients eICR.</p><p><b>textEquivalent</b>: Check Trigger Codes based on Suspected Reportable Value set.</p><p><b>code</b>: Evaluate candidate patient's data against trigger codes to determine reportability <span style=\"background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki\"> (<a href=\"CodeSystem-us-ph-plandefinition-actions.html\">US Public Health PlanDefinition Action Codes</a>#check-trigger-codes)</span></p></blockquote><blockquote><p><b>action</b></p><p><b>code</b>: Evaluate condition to determine reportability <span style=\"background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki\"> (<a href=\"CodeSystem-us-ph-plandefinition-actions.html\">US Public Health PlanDefinition Action Codes</a>#evaluate-condition)</span></p></blockquote></blockquote><blockquote><p><b>action</b></p><p><b>description</b>: This action represents the check for suspected reportability of the eICR.</p><p><b>textEquivalent</b>: Check Reportability and setup jobs for future reportability checks.</p><p><b>code</b>: Execute a series of actions to accomplish reporting <span style=\"background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki\"> (<a href=\"CodeSystem-us-ph-plandefinition-actions.html\">US Public Health PlanDefinition Action Codes</a>#execute-reporting-workflow)</span></p><blockquote><p><b>action</b></p><p><b>description</b>: This action represents the check for reportability to create the patients eICR.</p><p><b>textEquivalent</b>: Check Trigger Codes based on RCTC Value sets.</p><p><b>code</b>: Evaluate candidate patient's data against trigger codes to determine reportability <span style=\"background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki\"> (<a href=\"CodeSystem-us-ph-plandefinition-actions.html\">US Public Health PlanDefinition Action Codes</a>#check-trigger-codes)</span></p></blockquote><blockquote><p><b>action</b></p><p><b>code</b>: Evaluate condition to determine reportability <span style=\"background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki\"> (<a href=\"CodeSystem-us-ph-plandefinition-actions.html\">US Public Health PlanDefinition Action Codes</a>#evaluate-condition)</span></p></blockquote><blockquote><p><b>action</b></p><p><b>code</b>: Evaluate condition to determine reportability <span style=\"background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki\"> (<a href=\"CodeSystem-us-ph-plandefinition-actions.html\">US Public Health PlanDefinition Action Codes</a>#evaluate-condition)</span></p></blockquote><blockquote><p><b>action</b></p><p><b>code</b>: Complete reporting for the patient <span style=\"background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki\"> (<a href=\"CodeSystem-us-ph-plandefinition-actions.html\">US Public Health PlanDefinition Action Codes</a>#complete-reporting)</span></p></blockquote></blockquote><blockquote><p><b>action</b></p><p><b>description</b>: This action represents the creation of the eICR. It subsequently calls validate.</p><p><b>textEquivalent</b>: Create eICR</p><p><b>code</b>: Create a Report containing Patient's data for patients who passed the check-reportability test <span style=\"background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki\"> (<a href=\"CodeSystem-us-ph-plandefinition-actions.html\">US Public Health PlanDefinition Action Codes</a>#create-report)</span></p><h3>RelatedActions</h3><table class=\"grid\"><tr><td>-</td><td><b>ActionId</b></td><td><b>Relationship</b></td></tr><tr><td>*</td><td>validate-eicr</td><td>before-start</td></tr></table></blockquote><blockquote><p><b>action</b></p><p><b>description</b>: This action represents the validation of the eICR. It subsequently calls route-and-send.</p><p><b>textEquivalent</b>: Validate eICR</p><p><b>code</b>: Validate Report against specified profiles and terminologies. <span style=\"background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki\"> (<a href=\"CodeSystem-us-ph-plandefinition-actions.html\">US Public Health PlanDefinition Action Codes</a>#validate-report)</span></p><h3>RelatedActions</h3><table class=\"grid\"><tr><td>-</td><td><b>ActionId</b></td><td><b>Relationship</b></td></tr><tr><td>*</td><td>route-and-send-eicr</td><td>before-start</td></tr></table></blockquote><blockquote><p><b>action</b></p><p><b>description</b>: This action represents the routing and sending of the eICR.</p><p><b>textEquivalent</b>: Route and send eICR</p><p><b>code</b>: Submit the report to specified endpoint <span style=\"background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki\"> (<a href=\"CodeSystem-us-ph-plandefinition-actions.html\">US Public Health PlanDefinition Action Codes</a>#submit-report)</span></p></blockquote><blockquote><p><b>action</b></p><p><b>description</b>: This action represents the start of the reporting workflow in response to the encounter-modified event</p><p><b>textEquivalent</b>: Start the reporting workflow in response to an encounter-modified event</p><p><b>code</b>: Initiate a reporting workflow <span style=\"background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki\"> (<a href=\"CodeSystem-us-ph-plandefinition-actions.html\">US Public Health PlanDefinition Action Codes</a>#initiate-reporting-workflow)</span></p><blockquote><p><b>condition</b></p><p><b>kind</b>: applicability</p></blockquote><h3>RelatedActions</h3><table class=\"grid\"><tr><td>-</td><td><b>ActionId</b></td><td><b>Relationship</b></td></tr><tr><td>*</td><td>create-eicr</td><td>before-start</td></tr></table></blockquote></div>"
+				},
+				"extension": [
+					{
+						"url": "http://hl7.org/fhir/StructureDefinition/variable",
+						"valueExpression": {
+							"name": "normalReportingDuration",
+							"language": "text/fhirpath",
+							"expression": "14"
+						}
+					}
+				],
+				"url": "http://hl7.org/fhir/us/ecr/PlanDefinition/plandefinition-ersd-instance-example",
+				"version": "0.12",
+				"name": "PlanDefinition_eRSD_Instance_Example",
+				"title": "eRSD PlanDefinition Instance Example",
+				"type": {
+					"coding": [
+						{
+							"system": "http://terminology.hl7.org/CodeSystem/plan-definition-type",
+							"code": "workflow-definition",
+							"display": "Workflow Definition"
+						}
+					]
+				},
+				"status": "active",
+				"experimental": true,
+				"date": "2020-07-31T12:32:29.858-05:00",
+				"publisher": "HL7 Public Health Work Group",
+				"description": "An example ersd PlanDefinition",
+				"jurisdiction": [
+					{
+						"coding": [
+							{
+								"system": "urn:iso:std:iso:3166",
+								"code": "US",
+								"display": "United States of America"
+							}
+						],
+						"text": "United States of America"
+					}
+				],
+				"effectivePeriod": {
+					"start": "2020-12-01"
+				},
+				"relatedArtifact": [
+					{
+						"type": "depends-on",
+						"label": "RCTC Value Set Library of Trigger Codes",
+						"resource": "http://hl7.org/fhir/us/ecr/Library/library-rctc-example|2022-01-01"
+					}
+				],
+				"action": [
+					{
+						"id": "start-workflow",
+						"description": "This action represents the start of the reporting workflow in response to the encounter-start event.",
+						"textEquivalent": "Start the reporting workflow in response to an encounter-start event",
+						"code": [
+							{
+								"coding": [
+									{
+										"system": "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-plandefinition-actions",
+										"code": "initiate-reporting-workflow",
+										"display": "Initiate a reporting workflow"
+									}
+								]
+							}
+						],
+						"trigger": [
+							{
+								"id": "encounter-start",
+								"extension": [
+									{
+										"url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-named-eventtype-extension",
+										"valueCodeableConcept": {
+											"coding": [
+												{
+													"system": "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-triggerdefinition-namedevents",
+													"code": "encounter-start",
+													"display": "Indicates the start of an encounter"
+												}
+											]
+										}
+									}
+								],
+								"type": "named-event",
+								"name": "encounter-start"
+							}
+						],
+						"input": [
+							{
+								"id": "patient",
+								"extension": [
+									{
+										"url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-fhirquerypattern-extension",
+										"valueString": "Patient/{{context.patientId}}"
+									}
+								],
+								"type": "Patient"
+							},
+							{
+								"id": "encounter",
+								"extension": [
+									{
+										"url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-fhirquerypattern-extension",
+										"valueString": "Encounter/{{context.encounterId}}"
+									}
+								],
+								"type": "Encounter"
+							}
+						],
+						"relatedAction": [
+							{
+								"actionId": "check-suspected-disorder",
+								"relationship": "before-start",
+								"offsetDuration": {
+									"value": 1,
+									"system": "http://unitsofmeasure.org",
+									"code": "h"
+								}
+							}
+						]
+					},
+					{
+						"id": "check-suspected-disorder",
+						"description": "This action represents the start of the check suspected disorder reporting workflow in response to the encounter-start event.",
+						"textEquivalent": "Check suspected disorders for immediate reportability and setup jobs for future reportability checks.",
+						"code": [
+							{
+								"coding": [
+									{
+										"system": "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-plandefinition-actions",
+										"code": "execute-reporting-workflow"
+									}
+								]
+							}
+						],
+						"action": [
+							{
+								"id": "is-encounter-suspected-disorder",
+								"description": "This action represents the check for suspected disorder reportability to create the patients eICR.",
+								"textEquivalent": "Check Trigger Codes based on Suspected Reportable Value set.",
+								"code": [
+									{
+										"coding": [
+											{
+												"system": "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-plandefinition-actions",
+												"code": "check-trigger-codes"
+											}
+										]
+									}
+								],
+								"condition": [
+									{
+										"kind": "applicability",
+										"expression": {
+											"extension": [
+												{
+													"url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-alternative-expression-extension",
+													"valueExpression": {
+														"language": "text/cql-identifier",
+														"expression": "Is Suspected Disorder?",
+														"reference": "http://hl7.org/fhir/us/ecr/Library/RuleFilters|2.1.0"
+													}
+												}
+											],
+											"language": "text/fhirpath",
+											"expression": "%modifiedConditions.exists() or %modifiedLabResults.exists() or %modifiedMedicationOrders.exists()"
+										}
+									}
+								],
+								"input": [
+									{
+										"id": "modifiedConditions",
+										"extension": [
+											{
+												"url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-fhirquerypattern-extension",
+												"valueString": "Condition?patient=Patient/{{context.patientId}}"
+											}
+										],
+										"type": "Condition",
+										"codeFilter": [
+											{
+												"path": "code",
+												"valueSet": "http://hl7.org/fhir/us/ecr/ValueSet/sdtc"
+											}
+										]
+									},
+									{
+										"id": "modifiedLabResults",
+										"extension": [
+											{
+												"url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-fhirquerypattern-extension",
+												"valueString": "Observation?patient=Patient/{{context.patientId}}"
+											}
+										],
+										"type": "Observation",
+										"codeFilter": [
+											{
+												"path": "value",
+												"valueSet": "http://hl7.org/fhir/us/ecr/ValueSet/lotc"
+											}
+										]
+									},
+									{
+										"id": "modifiedMedicationOrders",
+										"extension": [
+											{
+												"url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-fhirquerypattern-extension",
+												"valueString": "MedicationRequest?patient=Patient/{{context.patientId}}"
+											}
+										],
+										"type": "MedicationRequest",
+										"codeFilter": [
+											{
+												"path": "medication",
+												"valueSet": "http://hl7.org/fhir/us/ecr/ValueSet/mrtc"
+											}
+										]
+									}
+								],
+								"relatedAction": [
+									{
+										"actionId": "create-eicr",
+										"relationship": "before-start"
+									}
+								]
+							},
+							{
+								"id": "continue-check-reportable",
+								"code": [
+									{
+										"coding": [
+											{
+												"system": "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-plandefinition-actions",
+												"code": "evaluate-condition"
+											}
+										]
+									}
+								],
+								"condition": [
+									{
+										"kind": "applicability",
+										"expression": {
+											"extension": [
+												{
+													"url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-alternative-expression-extension",
+													"valueExpression": {
+														"language": "text/cql-identifier",
+														"expression": "Is Encounter In Progress and Within Normal Reporting Duration or 72h or less after end of encounter?",
+														"reference": "http://hl7.org/fhir/us/ecr/Library/RuleFilters|2.1.0"
+													}
+												}
+											],
+											"language": "text/fhirpath",
+											"expression": "%encounter.where((status = 'in-progress' and period.start + 1 day * %normalReportingDuration >= now()) or (status = 'finished' and period.end + 72 hours >= now())).select(true)"
+										}
+									}
+								],
+								"relatedAction": [
+									{
+										"actionId": "check-reportable",
+										"relationship": "before-start",
+										"offsetDuration": {
+											"value": 6,
+											"comparator": "<=",
+											"system": "http://unitsofmeasure.org",
+											"code": "h"
+										}
+									}
+								]
+							}
+						]
+					},
+					{
+						"id": "check-reportable",
+						"description": "This action represents the check for suspected reportability of the eICR.",
+						"textEquivalent": "Check Reportability and setup jobs for future reportability checks.",
+						"code": [
+							{
+								"coding": [
+									{
+										"system": "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-plandefinition-actions",
+										"code": "execute-reporting-workflow"
+									}
+								]
+							}
+						],
+						"action": [
+							{
+								"id": "is-encounter-reportable",
+								"description": "This action represents the check for reportability to create the patients eICR.",
+								"textEquivalent": "Check Trigger Codes based on RCTC Value sets.",
+								"code": [
+									{
+										"coding": [
+											{
+												"system": "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-plandefinition-actions",
+												"code": "check-trigger-codes"
+											}
+										]
+									}
+								],
+								"condition": [
+									{
+										"kind": "applicability",
+										"expression": {
+											"extension": [
+												{
+													"url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-alternative-expression-extension",
+													"valueExpression": {
+														"language": "text/cql-identifier",
+														"expression": "Is Encounter Reportable and Within Normal Reporting Duration?",
+														"reference": "http://hl7.org/fhir/us/ecr/Library/RuleFilters|2.1.0"
+													}
+												}
+											],
+											"language": "text/fhirpath",
+											"expression": "%encounter.where(period.start + 1 day * %normalReportingDuration >= now()).select(true) and (%conditions.exists() or %encounters.exists() or %immunizations.exists() or %procedures.exists() or %procedureOrders.exists() or %labOrders.exists() or %labTests.exists() or %labResults.exists() or %medicationAdministrations.exists() or %medicationOrders.exists() or %medicationDispenses.exists())"
+										}
+									}
+								],
+								"input": [
+									{
+										"id": "conditions",
+										"extension": [
+											{
+												"url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-fhirquerypattern-extension",
+												"valueString": "Condition?patient=Patient/{{context.patientId}}"
+											}
+										],
+										"type": "Condition",
+										"codeFilter": [
+											{
+												"path": "code",
+												"valueSet": "http://hl7.org/fhir/us/ecr/ValueSet/dxtc"
+											}
+										]
+									},
+									{
+										"id": "encounters",
+										"extension": [
+											{
+												"url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-relateddata-extension",
+												"valueString": "encounter"
+											}
+										],
+										"type": "Encounter",
+										"codeFilter": [
+											{
+												"path": "reasonCode",
+												"valueSet": "http://hl7.org/fhir/us/ecr/ValueSet/dxtc"
+											}
+										]
+									},
+									{
+										"id": "immunizations",
+										"extension": [
+											{
+												"url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-fhirquerypattern-extension",
+												"valueString": "Immunization?patient=Patient/{{context.patientId}}"
+											}
+										],
+										"type": "Immunization",
+										"codeFilter": [
+											{
+												"path": "vaccineCode",
+												"valueSet": "http://hl7.org/fhir/us/ecr/ValueSet/mrtc"
+											}
+										]
+									},
+									{
+										"id": "labOrders",
+										"extension": [
+											{
+												"url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-fhirquerypattern-extension",
+												"valueString": "ServiceRequest?patient=Patient/{{context.patientId}}"
+											}
+										],
+										"type": "ServiceRequest",
+										"codeFilter": [
+											{
+												"path": "code",
+												"valueSet": "http://hl7.org/fhir/us/ecr/ValueSet/lotc"
+											}
+										]
+									},
+									{
+										"id": "labTests",
+										"extension": [
+											{
+												"url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-fhirquerypattern-extension",
+												"valueString": "Observation?patient=Patient/{{context.patientId}}"
+											}
+										],
+										"type": "Observation",
+										"codeFilter": [
+											{
+												"path": "code",
+												"valueSet": "http://hl7.org/fhir/us/ecr/ValueSet/lotc"
+											}
+										]
+									},
+									{
+										"id": "diagnosticOrders",
+										"extension": [
+											{
+												"url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-fhirquerypattern-extension",
+												"valueString": "DiagnosticReport?patient=Patient/{{context.patientId}}"
+											}
+										],
+										"type": "DiagnosticReport",
+										"codeFilter": [
+											{
+												"path": "code",
+												"valueSet": "http://hl7.org/fhir/us/ecr/ValueSet/lotc"
+											}
+										]
+									},
+									{
+										"id": "procedureOrders",
+										"extension": [
+											{
+												"url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-fhirquerypattern-extension",
+												"valueString": "ServiceRequest?patient=Patient/{{context.patientId}}"
+											}
+										],
+										"type": "ServiceRequest",
+										"codeFilter": [
+											{
+												"path": "code",
+												"valueSet": "http://hl7.org/fhir/us/ecr/ValueSet/valueset-pctc-example"
+											}
+										]
+									},
+									{
+										"id": "procedures",
+										"extension": [
+											{
+												"url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-fhirquerypattern-extension",
+												"valueString": "Procedure?patient=Patient/{{context.patientId}}"
+											}
+										],
+										"type": "Procedure",
+										"codeFilter": [
+											{
+												"path": "code",
+												"valueSet": "http://hl7.org/fhir/us/ecr/ValueSet/valueset-pctc-example"
+											}
+										]
+									},
+									{
+										"id": "medicationOrders",
+										"extension": [
+											{
+												"url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-fhirquerypattern-extension",
+												"valueString": "MedicationRequest?patient=Patient/{{context.patientId}}"
+											}
+										],
+										"type": "MedicationRequest",
+										"codeFilter": [
+											{
+												"path": "medication",
+												"valueSet": "http://hl7.org/fhir/us/ecr/ValueSet/mrtc"
+											}
+										]
+									},
+									{
+										"id": "medicationDispenses",
+										"extension": [
+											{
+												"url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-fhirquerypattern-extension",
+												"valueString": "MedicationDispense?patient=Patient/{{context.patientId}}"
+											}
+										],
+										"type": "MedicationDispense",
+										"codeFilter": [
+											{
+												"path": "medication",
+												"valueSet": "http://hl7.org/fhir/us/ecr/ValueSet/mrtc"
+											}
+										]
+									},
+									{
+										"id": "medicationAdministrations",
+										"extension": [
+											{
+												"url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-fhirquerypattern-extension",
+												"valueString": "MedicationAdministration?patient=Patient/{{context.patientId}}"
+											}
+										],
+										"type": "MedicationAdministration",
+										"codeFilter": [
+											{
+												"path": "medication",
+												"valueSet": "http://hl7.org/fhir/us/ecr/ValueSet/mrtc"
+											}
+										]
+									},
+									{
+										"id": "labResults",
+										"extension": [
+											{
+												"url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-relateddata-extension",
+												"valueString": "labTests"
+											}
+										],
+										"type": "Observation",
+										"codeFilter": [
+											{
+												"path": "value",
+												"valueSet": "http://hl7.org/fhir/us/ecr/ValueSet/ostc"
+											}
+										]
+									},
+									{
+										"id": "diagnosticResults",
+										"extension": [
+											{
+												"url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-relateddata-extension",
+												"valueString": "diagnosticOrders"
+											}
+										],
+										"type": "DiagnosticReport",
+										"codeFilter": [
+											{
+												"path": "code",
+												"valueSet": "http://hl7.org/fhir/us/ecr/ValueSet/ostc"
+											}
+										]
+									}
+								],
+								"relatedAction": [
+									{
+										"actionId": "create-eicr",
+										"relationship": "before-start"
+									}
+								]
+							},
+							{
+								"id": "check-update-eicr",
+								"code": [
+									{
+										"coding": [
+											{
+												"system": "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-plandefinition-actions",
+												"code": "evaluate-condition"
+											}
+										]
+									}
+								],
+								"condition": [
+									{
+										"kind": "applicability",
+										"expression": {
+											"extension": [
+												{
+													"url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-alternative-expression-extension",
+													"valueExpression": {
+														"language": "text/cql-identifier",
+														"expression": "Most recent eICR sent over 72 hours ago?",
+														"reference": "http://hl7.org/fhir/us/ecr/Library/RuleFilters|2.1.0"
+													}
+												}
+											],
+											"language": "text/fhirpath",
+											"expression": "((%lasteicr.last().entry[2].resource as Bundle).entry.first().resource as Composition).date < now() - 72 hours"
+										}
+									}
+								],
+								"input": [
+									{
+										"id": "lasteicr",
+										"extension": [
+											{
+												"url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-relateddata-extension",
+												"valueString": "eicrreport"
+											}
+										],
+										"type": "Bundle",
+										"profile": [
+											"http://hl7.org/fhir/us/ecr/StructureDefinition/eicr-document-bundle"
+										]
+									}
+								],
+								"relatedAction": [
+									{
+										"actionId": "create-eicr",
+										"relationship": "before-start"
+									}
+								]
+							},
+							{
+								"id": "is-encounter-in-progress",
+								"code": [
+									{
+										"coding": [
+											{
+												"system": "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-plandefinition-actions",
+												"code": "evaluate-condition"
+											}
+										]
+									}
+								],
+								"condition": [
+									{
+										"kind": "applicability",
+										"expression": {
+											"extension": [
+												{
+													"url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-alternative-expression-extension",
+													"valueExpression": {
+														"language": "text/cql-identifier",
+														"expression": "Is Encounter In Progress and Within Normal Reporting Duration or 72h or less after end of encounter?",
+														"reference": "http://hl7.org/fhir/us/ecr/Library/RuleFilters|2.1.0"
+													}
+												}
+											],
+											"language": "text/fhirpath",
+											"expression": "%inprogressencounter.where(status = 'in-progress' and period.start + 1 day * %normalReportingDuration >= now() or (status = 'finished' and period.end + 72 hours >= now())).exists()"
+										}
+									}
+								],
+								"input": [
+									{
+										"id": "inprogressencounter",
+										"extension": [
+											{
+												"url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-relateddata-extension",
+												"valueString": "encounter"
+											}
+										],
+										"type": "Encounter"
+									}
+								],
+								"relatedAction": [
+									{
+										"actionId": "check-reportable",
+										"relationship": "before-start",
+										"offsetDuration": {
+											"value": 6,
+											"comparator": "<=",
+											"system": "http://unitsofmeasure.org",
+											"code": "h"
+										}
+									}
+								]
+							},
+							{
+								"id": "is-encounter-completed",
+								"code": [
+									{
+										"coding": [
+											{
+												"system": "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-plandefinition-actions",
+												"code": "complete-reporting"
+											}
+										]
+									}
+								],
+								"condition": [
+									{
+										"kind": "applicability",
+										"expression": {
+											"extension": [
+												{
+													"url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-alternative-expression-extension",
+													"valueExpression": {
+														"language": "text/cql-identifier",
+														"expression": "Is Encounter Complete",
+														"reference": "http://aphl.org/fhir/ecr/Library/RuleFilters|2.1.0"
+													}
+												}
+											],
+											"language": "text/fhirpath",
+											"expression": "%completedEncounter.exists(status = 'finished')"
+										}
+									}
+								],
+								"input": [
+									{
+										"id": "completedEncounter",
+										"extension": [
+											{
+												"url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-relateddata-extension",
+												"valueString": "encounter"
+											}
+										],
+										"type": "Encounter"
+									}
+								]
+							}
+						]
+					},
+					{
+						"id": "create-eicr",
+						"description": "This action represents the creation of the eICR. It subsequently calls validate.",
+						"textEquivalent": "Create eICR",
+						"code": [
+							{
+								"coding": [
+									{
+										"system": "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-plandefinition-actions",
+										"code": "create-report"
+									}
+								]
+							}
+						],
+						"input": [
+							{
+								"id": "patientdata",
+								"extension": [
+									{
+										"url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-relateddata-extension",
+										"valueString": "patient"
+									}
+								],
+								"type": "Patient",
+								"profile": [
+									"http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
+								]
+							},
+							{
+								"id": "conditiondata",
+								"extension": [
+									{
+										"url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-relateddata-extension",
+										"valueString": "conditions"
+									}
+								],
+								"type": "Condition",
+								"profile": [
+									"http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition"
+								]
+							},
+							{
+								"id": "encounterdata",
+								"extension": [
+									{
+										"url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-relateddata-extension",
+										"valueString": "encounter"
+									}
+								],
+								"type": "Encounter",
+								"profile": [
+									"http://hl7.org/fhir/us/core/StructureDefinition/us-core-encounter"
+								]
+							},
+							{
+								"id": "mrdata",
+								"extension": [
+									{
+										"url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-relateddata-extension",
+										"valueString": "medicationOrders"
+									}
+								],
+								"type": "MedicationRequest",
+								"profile": [
+									"http://hl7.org/fhir/us/core/StructureDefinition/us-core-medicationrequest"
+								]
+							},
+							{
+								"id": "immzdata",
+								"extension": [
+									{
+										"url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-relateddata-extension",
+										"valueString": "immunizations"
+									}
+								],
+								"type": "Immunization",
+								"profile": [
+									"http://hl7.org/fhir/us/core/StructureDefinition/us-core-immunization"
+								]
+							},
+							{
+								"id": "procdata",
+								"extension": [
+									{
+										"url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-relateddata-extension",
+										"valueString": "procedures"
+									}
+								],
+								"type": "Procedure",
+								"profile": [
+									"http://hl7.org/fhir/us/core/StructureDefinition/us-core-procedure"
+								]
+							},
+							{
+								"id": "labResultdata",
+								"extension": [
+									{
+										"url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-relateddata-extension",
+										"valueString": "labResults"
+									}
+								],
+								"type": "Observation",
+								"profile": [
+									"http://hl7.org/fhir/us/core/StructureDefinition/us-core-observation-lab"
+								]
+							},
+							{
+								"id": "labOrderdata",
+								"extension": [
+									{
+										"url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-relateddata-extension",
+										"valueString": "labOrders"
+									}
+								],
+								"type": "ServiceRequest",
+								"profile": [
+									"http://hl7.org/fhir/StructureDefinition/ServiceRequest"
+								]
+							},
+							{
+								"id": "diagnosticResultdata",
+								"extension": [
+									{
+										"url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-relateddata-extension",
+										"valueString": "diagnosticResults"
+									}
+								],
+								"type": "DiagnosticReport",
+								"profile": [
+									"http://hl7.org/fhir/us/core/StructureDefinition/us-core-diagnosticreport-lab"
+								]
+							},
+							{
+								"id": "diagnosticOrderdata",
+								"extension": [
+									{
+										"url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-relateddata-extension",
+										"valueString": "diagnosticOrders"
+									}
+								],
+								"type": "DiagnosticReport",
+								"profile": [
+									"http://hl7.org/fhir/us/core/StructureDefinition/us-core-diagnosticreport-lab"
+								]
+							}
+						],
+						"output": [
+							{
+								"id": "eicrreport",
+								"type": "Bundle",
+								"profile": [
+									"http://hl7.org/fhir/us/ecr/StructureDefinition/eicr-document-bundle"
+								]
+							}
+						],
+						"relatedAction": [
+							{
+								"actionId": "validate-eicr",
+								"relationship": "before-start"
+							}
+						]
+					},
+					{
+						"id": "validate-eicr",
+						"description": "This action represents the validation of the eICR. It subsequently calls route-and-send.",
+						"textEquivalent": "Validate eICR",
+						"code": [
+							{
+								"coding": [
+									{
+										"system": "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-plandefinition-actions",
+										"code": "validate-report"
+									}
+								]
+							}
+						],
+						"input": [
+							{
+								"id": "generatedeicrreport",
+								"extension": [
+									{
+										"url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-relateddata-extension",
+										"valueString": "eicrreport"
+									}
+								],
+								"type": "Bundle",
+								"profile": [
+									"http://hl7.org/fhir/us/ecr/StructureDefinition/eicr-document-bundle"
+								]
+							}
+						],
+						"output": [
+							{
+								"id": "valideicrreport",
+								"type": "Bundle",
+								"profile": [
+									"http://hl7.org/fhir/us/ecr/StructureDefinition/eicr-document-bundle"
+								]
+							}
+						],
+						"relatedAction": [
+							{
+								"actionId": "route-and-send-eicr",
+								"relationship": "before-start"
+							}
+						]
+					},
+					{
+						"id": "route-and-send-eicr",
+						"description": "This action represents the routing and sending of the eICR.",
+						"textEquivalent": "Route and send eICR",
+						"code": [
+							{
+								"coding": [
+									{
+										"system": "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-plandefinition-actions",
+										"code": "submit-report"
+									}
+								]
+							}
+						],
+						"input": [
+							{
+								"id": "validatedeicrreport",
+								"extension": [
+									{
+										"url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-relateddata-extension",
+										"valueString": "valideicrreport"
+									}
+								],
+								"type": "Bundle",
+								"profile": [
+									"http://hl7.org/fhir/us/ecr/StructureDefinition/eicr-document-bundle"
+								]
+							}
+						],
+						"output": [
+							{
+								"id": "submittedeicrreport",
+								"type": "Bundle",
+								"profile": [
+									"http://hl7.org/fhir/us/ecr/StructureDefinition/eicr-document-bundle"
+								]
+							}
+						]
+					},
+					{
+						"id": "encounter-modified",
+						"description": "This action represents the start of the reporting workflow in response to the encounter-modified event",
+						"textEquivalent": "Start the reporting workflow in response to an encounter-modified event",
+						"code": [
+							{
+								"coding": [
+									{
+										"system": "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-plandefinition-actions",
+										"code": "initiate-reporting-workflow",
+										"display": "Initiate a reporting workflow"
+									}
+								]
+							}
+						],
+						"trigger": [
+							{
+								"id": "encounter-modified-trigger",
+								"extension": [
+									{
+										"url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-named-eventtype-extension",
+										"valueCodeableConcept": {
+											"coding": [
+												{
+													"system": "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-triggerdefinition-namedevents",
+													"code": "encounter-modified",
+													"display": "Indicates modifications to data elements of an encounter"
+												}
+											]
+										}
+									}
+								],
+								"type": "named-event",
+								"name": "encounter-modified"
+							}
+						],
+						"condition": [
+							{
+								"kind": "applicability",
+								"expression": {
+									"extension": [
+										{
+											"url": "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-alternative-expression-extension",
+											"valueExpression": {
+												"language": "text/cql-identifier",
+												"expression": "Is Encounter Longer Than Normal Reporting Duration?",
+												"reference": "http://hl7.org/fhir/us/ecr/Library/RuleFilters|2.1.0"
+											}
+										}
+									],
+									"language": "text/fhirpath",
+									"expression": "%encounter.where(period.start + 1 day * %normalReportingDuration < now()).select(true)"
+								}
+							}
+						],
+						"relatedAction": [
+							{
+								"actionId": "create-eicr",
+								"relationship": "before-start"
+							}
+						]
+					}
+				]
+			}
+		},
+		{
+			"fullUrl": "http://hl7.org/fhir/us/ecr/Library/library-rctc-example",
+			"resource": {
+				"resourceType": "Library",
+				"id": "library-rctc-example",
+				"meta": {
+					"versionId": "2",
+					"lastUpdated": "2021-08-20T01:12:21.049-06:00",
+					"source": "#zJ5jHSo1bnD4qTAW",
+					"profile": [
+						"http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-triggering-valueset-library"
+					]
+				},
+				"text": {
+					"status": "generated",
+					"div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p><b>Generated Narrative: Library</b></p><div style=\"display: inline-block; background-color: #d9e0e7; padding: 6px; margin: 4px; border: 1px solid #8da1b4; border-radius: 5px; line-height: 60%\"><p style=\"margin-bottom: 0px\">Resource Library \"library-rctc-example\" Version \"2\" Updated \"2021-08-20 01:12:21-0600\" </p><p style=\"margin-bottom: 0px\">Information Source: #zJ5jHSo1bnD4qTAW!</p><p style=\"margin-bottom: 0px\">Profile: <a href=\"StructureDefinition-us-ph-triggering-valueset-library.html\">US Public Health Triggering ValueSet Library</a></p></div><p><b>url</b>: <code>http://hl7.org/fhir/us/ecr/Library/library-rctc-example</code></p><p><b>identifier</b>: id: urn:oid:2.16.840.1.114222.4.11.7508</p><p><b>version</b>: 2019-06-17</p><p><b>name</b>: Reportable_Condition_Trigger_Codes</p><p><b>title</b>: Reportable Condition Trigger Codes (RCTC) Example Library</p><p><b>status</b>: active</p><p><b>experimental</b>: true</p><p><b>type</b>: Asset Collection <span style=\"background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki\"> (<a href=\"http://terminology.hl7.org/3.1.0/CodeSystem-library-type.html\">LibraryType</a>#asset-collection)</span></p><p><b>publisher</b>: {site.data.fhir.ig.publisher}</p><p><b>description</b>: This release includes code updates for the existing conditions and adds codes for Parkinsonâ€™s disease and 13 enteric conditions. Medication codes have also been added to this version.</p><p><b>jurisdiction</b>: United States of America <span style=\"background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki\"> (unknown#US)</span></p><p><b>purpose</b>: Triggers for initiating decision support for electronic case reports</p><p><b>effectivePeriod</b>: 2019-11-01 --&gt; (ongoing)</p></div>"
+				},
+				"url": "http://hl7.org/fhir/us/ecr/Library/library-rctc-example",
+				"identifier": [
+					{
+						"system": "urn:ietf:rfc:3986",
+						"value": "urn:oid:2.16.840.1.114222.4.11.7508"
+					}
+				],
+				"version": "2019-06-172",
+				"name": "Reportable_Condition_Trigger_Codes",
+				"title": "Reportable Condition Trigger Codes (RCTC) Example Library",
+				"status": "active",
+				"experimental": true,
+				"type": {
+					"coding": [
+						{
+							"system": "http://terminology.hl7.org/CodeSystem/library-type",
+							"code": "asset-collection"
+						}
+					]
+				},
+				"publisher": "{site.data.fhir.ig.publisher}",
+				"description": "This release includes code updates for the existing conditions and adds codes for Parkinsonâ€™s disease and 13 enteric conditions. Medication codes have also been added to this version.",
+				"useContext": [
+					{
+						"code": {
+							"system": "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context-type",
+							"code": "reporting",
+							"display": "Reporting"
+						},
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context",
+									"code": "triggering",
+									"display": "Triggering"
+								}
+							]
+						}
+					},
+					{
+						"code": {
+							"system": "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context-type",
+							"code": "specification-type",
+							"display": "Specification Type"
+						},
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context",
+									"code": "value-set-library",
+									"display": "ValueSet Library"
+								}
+							]
+						}
+					}
+				],
+				"jurisdiction": [
+					{
+						"coding": [
+							{
+								"system": "urn:iso:std:iso:3166",
+								"code": "US",
+								"display": "United States of America"
+							}
+						],
+						"text": "United States of America"
+					}
+				],
+				"purpose": "Triggers for initiating decision support for electronic case reports",
+				"effectivePeriod": {
+					"start": "2019-11-01"
+				},
+				"relatedArtifact": [
+					{
+						"type": "composed-of",
+						"resource": "http://hl7.org/fhir/us/ecr/ValueSet/dxtc",
+						"extension":[
+							{
+								"url":"http://hl7.org/fhir/StructureDefinition/artifact-isOwned",
+								"valueBoolean": true
+							}
+						]
+					}
+				]
+			}
+		},
+		{
+			"fullUrl": "http://hl7.org/fhir/us/ecr/ValueSet/dxtc",
+			"resource": {
+				"resourceType": "ValueSet",
+				"id": "dxtc",
+				"meta": {
+					"profile": [
+						"http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-triggering-valueset"
+					]
+				},
+				"text": {
+					"status": "extensions",
+					"div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p><b>Generated Narrative: ValueSet</b></p><div style=\"display: inline-block; background-color: #d9e0e7; padding: 6px; margin: 4px; border: 1px solid #8da1b4; border-radius: 5px; line-height: 60%\"><p style=\"margin-bottom: 0px\">Resource ValueSet \"dxtc\" </p><p style=\"margin-bottom: 0px\">Profile: <a href=\"StructureDefinition-us-ph-triggering-valueset.html\">US Public Health Triggering ValueSet</a></p></div><p><b>author</b>: CSTE Author: </p><p><b>steward</b>: CSTE Steward: </p><p><b>url</b>: <code>http://hl7.org/fhir/us/ecr/ValueSet/dxtc</code></p><p><b>identifier</b>: id: urn:oid:2.16.840.1.113762.1.4.1146.627</p><p><b>version</b>: 1.0.0</p><p><b>name</b>: Diagnosis_ProblemTriggersforPublicHealthReporting</p><p><b>title</b>: Diagnosis_Problem Triggers for Public Health Reporting</p><p><b>status</b>: draft</p><p><b>experimental</b>: true</p><p><b>publisher</b>: eCR</p><p><b>description</b>: Purpose: Clinical Focus - This set of values contains diagnoses or problems that represent that the patient may have a potentially reportable condition. For example, these may be diagnoses recorded in an EHR problem list and diagnosis codes used for billing for the encounter. Purpose: Data Element Scope - Diagnoses or problems documented in a clinical record. Purpose: Inclusion Criteria - See individual value sets. Purpose: Exclusion Criteria - See individual value sets. Note - Includes codes from selected value sets used in the Reportable Condition Knowledge Management System (RCKMS) reporting logic. RCKMS value sets in VSAC are for informational use only. When implementing trigger codes for electronic case reporting, use the Reportable Condition Trigger Codes (RCTC) file.</p><p><b>purpose</b>: Diagnoses or problems documented in a clinical record.</p><blockquote><p><b>compose</b></p><blockquote><p><b>include</b></p><p><b>valueSet</b>: <a href=\"https://vsac.nlm.nih.gov/valueset/2.16.840.1.113762.1.4.1146.1506/expansion\">Acanthamoeba Disease [Keratitis] (Disorders) (ICD10CM)</a></p></blockquote><blockquote><p><b>include</b></p><p><b>valueSet</b>: <a href=\"https://vsac.nlm.nih.gov/valueset/2.16.840.1.113762.1.4.1146.1505/expansion\">Acanthamoeba Disease [Keratitis] (Disorders) (SNOMED)</a></p></blockquote><blockquote><p><b>include</b></p><p><b>valueSet</b>: <a href=\"https://vsac.nlm.nih.gov/valueset/2.16.840.1.113762.1.4.1146.1508/expansion\">Arsenic Exposure and Toxicity (Disorders) (ICD10CM)</a></p></blockquote><blockquote><p><b>include</b></p><p><b>valueSet</b>: <a href=\"https://vsac.nlm.nih.gov/valueset/2.16.840.1.113762.1.4.1146.1507/expansion\">Arsenic Exposure and Toxicity (Disorders) (SNOMED)</a></p></blockquote><blockquote><p><b>include</b></p><p><b>valueSet</b>: <a href=\"https://vsac.nlm.nih.gov/valueset/2.16.840.1.113762.1.4.1146.6/expansion\">Diphtheria (Disorders) (SNOMED)</a></p></blockquote></blockquote><blockquote><p><b>expansion</b></p><p><b>timestamp</b>: 2022-04-05 10:06:43-0400</p><blockquote><p><b>contains</b></p><p><b>system</b>: <a href=\"http://terminology.hl7.org/3.1.0/CodeSystem-icd10CM.html\">International Classification of Diseases, 10th Revision, Clinical Modification (ICD-10-CM)</a></p><p><b>version</b>: Provisional_2022-01-12</p><p><b>code</b>: B60.12</p></blockquote><blockquote><p><b>contains</b></p><p><b>system</b>: <a href=\"http://terminology.hl7.org/3.1.0/CodeSystem-icd10CM.html\">International Classification of Diseases, 10th Revision, Clinical Modification (ICD-10-CM)</a></p><p><b>version</b>: Provisional_2022-01-12</p><p><b>code</b>: B60.13</p></blockquote><blockquote><p><b>contains</b></p><p><b>system</b>: <a href=\"http://hl7.org/fhir/R4/codesystem-snomedct.html\">SNOMED CT (all versions)</a></p><p><b>version</b>: Provisional_2022-01-10</p><p><b>code</b>: 127631000119105</p></blockquote><blockquote><p><b>contains</b></p><p><b>system</b>: <a href=\"http://hl7.org/fhir/R4/codesystem-snomedct.html\">SNOMED CT (all versions)</a></p><p><b>version</b>: Provisional_2022-01-10</p><p><b>code</b>: 15693201000119102</p></blockquote><blockquote><p><b>contains</b></p><p><b>system</b>: <a href=\"http://hl7.org/fhir/R4/codesystem-snomedct.html\">SNOMED CT (all versions)</a></p><p><b>version</b>: Provisional_2022-01-10</p><p><b>code</b>: 15693241000119100</p></blockquote><blockquote><p><b>contains</b></p><p><b>system</b>: <a href=\"http://hl7.org/fhir/R4/codesystem-snomedct.html\">SNOMED CT (all versions)</a></p><p><b>version</b>: Provisional_2022-01-10</p><p><b>code</b>: 15693281000119105</p></blockquote><blockquote><p><b>contains</b></p><p><b>system</b>: <a href=\"http://hl7.org/fhir/R4/codesystem-snomedct.html\">SNOMED CT (all versions)</a></p><p><b>version</b>: Provisional_2022-01-10</p><p><b>code</b>: 15698841000119105</p></blockquote><blockquote><p><b>contains</b></p><p><b>system</b>: <a href=\"http://hl7.org/fhir/R4/codesystem-snomedct.html\">SNOMED CT (all versions)</a></p><p><b>version</b>: Provisional_2022-01-10</p><p><b>code</b>: 15698881000119100</p></blockquote><blockquote><p><b>contains</b></p><p><b>system</b>: <a href=\"http://hl7.org/fhir/R4/codesystem-snomedct.html\">SNOMED CT (all versions)</a></p><p><b>version</b>: Provisional_2022-01-10</p><p><b>code</b>: 231896005</p></blockquote><blockquote><p><b>contains</b></p><p><b>system</b>: <a href=\"http://hl7.org/fhir/R4/codesystem-snomedct.html\">SNOMED CT (all versions)</a></p><p><b>version</b>: Provisional_2022-01-10</p><p><b>code</b>: 711645008</p></blockquote><blockquote><p><b>contains</b></p><p><b>system</b>: <a href=\"http://hl7.org/fhir/R4/codesystem-snomedct.html\">SNOMED CT (all versions)</a></p><p><b>version</b>: Provisional_2022-01-10</p><p><b>code</b>: 840444002</p></blockquote><blockquote><p><b>contains</b></p><p><b>system</b>: <a href=\"http://hl7.org/fhir/R4/codesystem-snomedct.html\">SNOMED CT (all versions)</a></p><p><b>version</b>: Provisional_2022-01-10</p><p><b>code</b>: 840484006</p></blockquote><blockquote><p><b>contains</b></p><p><b>system</b>: <a href=\"http://terminology.hl7.org/3.1.0/CodeSystem-icd10CM.html\">International Classification of Diseases, 10th Revision, Clinical Modification (ICD-10-CM)</a></p><p><b>version</b>: Provisional_2022-01-12</p><p><b>code</b>: T57.0X</p></blockquote><blockquote><p><b>contains</b></p><p><b>system</b>: <a href=\"http://terminology.hl7.org/3.1.0/CodeSystem-icd10CM.html\">International Classification of Diseases, 10th Revision, Clinical Modification (ICD-10-CM)</a></p><p><b>version</b>: Provisional_2022-01-12</p><p><b>code</b>: T57.0X1</p></blockquote><blockquote><p><b>contains</b></p><p><b>system</b>: <a href=\"http://terminology.hl7.org/3.1.0/CodeSystem-icd10CM.html\">International Classification of Diseases, 10th Revision, Clinical Modification (ICD-10-CM)</a></p><p><b>version</b>: Provisional_2022-01-12</p><p><b>code</b>: T57.0X1A</p></blockquote><blockquote><p><b>contains</b></p><p><b>system</b>: <a href=\"http://terminology.hl7.org/3.1.0/CodeSystem-icd10CM.html\">International Classification of Diseases, 10th Revision, Clinical Modification (ICD-10-CM)</a></p><p><b>version</b>: Provisional_2022-01-12</p><p><b>code</b>: T57.0X1D</p></blockquote><blockquote><p><b>contains</b></p><p><b>system</b>: <a href=\"http://terminology.hl7.org/3.1.0/CodeSystem-icd10CM.html\">International Classification of Diseases, 10th Revision, Clinical Modification (ICD-10-CM)</a></p><p><b>version</b>: Provisional_2022-01-12</p><p><b>code</b>: T57.0X1S</p></blockquote><blockquote><p><b>contains</b></p><p><b>system</b>: <a href=\"http://terminology.hl7.org/3.1.0/CodeSystem-icd10CM.html\">International Classification of Diseases, 10th Revision, Clinical Modification (ICD-10-CM)</a></p><p><b>version</b>: Provisional_2022-01-12</p><p><b>code</b>: T57.0X4</p></blockquote><blockquote><p><b>contains</b></p><p><b>system</b>: <a href=\"http://terminology.hl7.org/3.1.0/CodeSystem-icd10CM.html\">International Classification of Diseases, 10th Revision, Clinical Modification (ICD-10-CM)</a></p><p><b>version</b>: Provisional_2022-01-12</p><p><b>code</b>: T57.0X4A</p></blockquote><blockquote><p><b>contains</b></p><p><b>system</b>: <a href=\"http://terminology.hl7.org/3.1.0/CodeSystem-icd10CM.html\">International Classification of Diseases, 10th Revision, Clinical Modification (ICD-10-CM)</a></p><p><b>version</b>: Provisional_2022-01-12</p><p><b>code</b>: T57.0X4D</p></blockquote><blockquote><p><b>contains</b></p><p><b>system</b>: <a href=\"http://terminology.hl7.org/3.1.0/CodeSystem-icd10CM.html\">International Classification of Diseases, 10th Revision, Clinical Modification (ICD-10-CM)</a></p><p><b>version</b>: Provisional_2022-01-12</p><p><b>code</b>: T57.0X4S</p></blockquote><blockquote><p><b>contains</b></p><p><b>system</b>: <a href=\"http://hl7.org/fhir/R4/codesystem-snomedct.html\">SNOMED CT (all versions)</a></p><p><b>version</b>: Provisional_2022-01-10</p><p><b>code</b>: 212516009</p></blockquote><blockquote><p><b>contains</b></p><p><b>system</b>: <a href=\"http://hl7.org/fhir/R4/codesystem-snomedct.html\">SNOMED CT (all versions)</a></p><p><b>version</b>: Provisional_2022-01-10</p><p><b>code</b>: 216792005</p></blockquote><blockquote><p><b>contains</b></p><p><b>system</b>: <a href=\"http://hl7.org/fhir/R4/codesystem-snomedct.html\">SNOMED CT (all versions)</a></p><p><b>version</b>: Provisional_2022-01-10</p><p><b>code</b>: 216794006</p></blockquote><blockquote><p><b>contains</b></p><p><b>system</b>: <a href=\"http://hl7.org/fhir/R4/codesystem-snomedct.html\">SNOMED CT (all versions)</a></p><p><b>version</b>: Provisional_2022-01-10</p><p><b>code</b>: 216795007</p></blockquote><blockquote><p><b>contains</b></p><p><b>system</b>: <a href=\"http://hl7.org/fhir/R4/codesystem-snomedct.html\">SNOMED CT (all versions)</a></p><p><b>version</b>: Provisional_2022-01-10</p><p><b>code</b>: 241770003</p></blockquote><blockquote><p><b>contains</b></p><p><b>system</b>: <a href=\"http://hl7.org/fhir/R4/codesystem-snomedct.html\">SNOMED CT (all versions)</a></p><p><b>version</b>: Provisional_2022-01-10</p><p><b>code</b>: 241771004</p></blockquote><blockquote><p><b>contains</b></p><p><b>system</b>: <a href=\"http://hl7.org/fhir/R4/codesystem-snomedct.html\">SNOMED CT (all versions)</a></p><p><b>version</b>: Provisional_2022-01-10</p><p><b>code</b>: 360406006</p></blockquote><blockquote><p><b>contains</b></p><p><b>system</b>: <a href=\"http://hl7.org/fhir/R4/codesystem-snomedct.html\">SNOMED CT (all versions)</a></p><p><b>version</b>: Provisional_2022-01-10</p><p><b>code</b>: 36730005</p></blockquote><blockquote><p><b>contains</b></p><p><b>system</b>: <a href=\"http://hl7.org/fhir/R4/codesystem-snomedct.html\">SNOMED CT (all versions)</a></p><p><b>version</b>: Provisional_2022-01-10</p><p><b>code</b>: 403740003</p></blockquote><blockquote><p><b>contains</b></p><p><b>system</b>: <a href=\"http://hl7.org/fhir/R4/codesystem-snomedct.html\">SNOMED CT (all versions)</a></p><p><b>version</b>: Provisional_2022-01-10</p><p><b>code</b>: 403741004</p></blockquote><blockquote><p><b>contains</b></p><p><b>system</b>: <a href=\"http://hl7.org/fhir/R4/codesystem-snomedct.html\">SNOMED CT (all versions)</a></p><p><b>version</b>: Provisional_2022-01-10</p><p><b>code</b>: 403743001</p></blockquote><blockquote><p><b>contains</b></p><p><b>system</b>: <a href=\"http://hl7.org/fhir/R4/codesystem-snomedct.html\">SNOMED CT (all versions)</a></p><p><b>version</b>: Provisional_2022-01-10</p><p><b>code</b>: 403744007</p></blockquote><blockquote><p><b>contains</b></p><p><b>system</b>: <a href=\"http://hl7.org/fhir/R4/codesystem-snomedct.html\">SNOMED CT (all versions)</a></p><p><b>version</b>: Provisional_2022-01-10</p><p><b>code</b>: 403745008</p></blockquote><blockquote><p><b>contains</b></p><p><b>system</b>: <a href=\"http://hl7.org/fhir/R4/codesystem-snomedct.html\">SNOMED CT (all versions)</a></p><p><b>version</b>: Provisional_2022-01-10</p><p><b>code</b>: 418685002</p></blockquote><blockquote><p><b>contains</b></p><p><b>system</b>: <a href=\"http://hl7.org/fhir/R4/codesystem-snomedct.html\">SNOMED CT (all versions)</a></p><p><b>version</b>: Provisional_2022-01-10</p><p><b>code</b>: 62210001</p></blockquote><blockquote><p><b>contains</b></p><p><b>system</b>: <a href=\"http://hl7.org/fhir/R4/codesystem-snomedct.html\">SNOMED CT (all versions)</a></p><p><b>version</b>: Provisional_2022-01-10</p><p><b>code</b>: 72501006</p></blockquote><blockquote><p><b>contains</b></p><p><b>system</b>: <a href=\"http://hl7.org/fhir/R4/codesystem-snomedct.html\">SNOMED CT (all versions)</a></p><p><b>version</b>: Provisional_2022-01-10</p><p><b>code</b>: 767146004</p></blockquote><blockquote><p><b>contains</b></p><p><b>system</b>: <a href=\"http://hl7.org/fhir/R4/codesystem-snomedct.html\">SNOMED CT (all versions)</a></p><p><b>version</b>: Provisional_2022-01-10</p><p><b>code</b>: 871783000</p></blockquote><blockquote><p><b>contains</b></p><p><b>system</b>: <a href=\"http://hl7.org/fhir/R4/codesystem-snomedct.html\">SNOMED CT (all versions)</a></p><p><b>version</b>: Provisional_2022-01-10</p><p><b>code</b>: 89738003</p></blockquote><blockquote><p><b>contains</b></p><p><b>system</b>: <a href=\"http://hl7.org/fhir/R4/codesystem-snomedct.html\">SNOMED CT (all versions)</a></p><p><b>version</b>: Provisional_2022-01-10</p><p><b>code</b>: 403742006</p></blockquote><blockquote><p><b>contains</b></p><p><b>system</b>: <a href=\"http://hl7.org/fhir/R4/codesystem-snomedct.html\">SNOMED CT (all versions)</a></p><p><b>version</b>: Provisional_2022-01-10</p><p><b>code</b>: 1086051000119107</p></blockquote><blockquote><p><b>contains</b></p><p><b>system</b>: <a href=\"http://hl7.org/fhir/R4/codesystem-snomedct.html\">SNOMED CT (all versions)</a></p><p><b>version</b>: Provisional_2022-01-10</p><p><b>code</b>: 1086061000119109</p></blockquote><blockquote><p><b>contains</b></p><p><b>system</b>: <a href=\"http://hl7.org/fhir/R4/codesystem-snomedct.html\">SNOMED CT (all versions)</a></p><p><b>version</b>: Provisional_2022-01-10</p><p><b>code</b>: 1086071000119103</p></blockquote><blockquote><p><b>contains</b></p><p><b>system</b>: <a href=\"http://hl7.org/fhir/R4/codesystem-snomedct.html\">SNOMED CT (all versions)</a></p><p><b>version</b>: Provisional_2022-01-10</p><p><b>code</b>: 1090211000119102</p></blockquote><blockquote><p><b>contains</b></p><p><b>system</b>: <a href=\"http://hl7.org/fhir/R4/codesystem-snomedct.html\">SNOMED CT (all versions)</a></p><p><b>version</b>: Provisional_2022-01-10</p><p><b>code</b>: 129667001</p></blockquote><blockquote><p><b>contains</b></p><p><b>system</b>: <a href=\"http://hl7.org/fhir/R4/codesystem-snomedct.html\">SNOMED CT (all versions)</a></p><p><b>version</b>: Provisional_2022-01-10</p><p><b>code</b>: 13596001</p></blockquote><blockquote><p><b>contains</b></p><p><b>system</b>: <a href=\"http://hl7.org/fhir/R4/codesystem-snomedct.html\">SNOMED CT (all versions)</a></p><p><b>version</b>: Provisional_2022-01-10</p><p><b>code</b>: 15682004</p></blockquote><blockquote><p><b>contains</b></p><p><b>system</b>: <a href=\"http://hl7.org/fhir/R4/codesystem-snomedct.html\">SNOMED CT (all versions)</a></p><p><b>version</b>: Provisional_2022-01-10</p><p><b>code</b>: 186347006</p></blockquote><blockquote><p><b>contains</b></p><p><b>system</b>: <a href=\"http://hl7.org/fhir/R4/codesystem-snomedct.html\">SNOMED CT (all versions)</a></p><p><b>version</b>: Provisional_2022-01-10</p><p><b>code</b>: 18901009</p></blockquote><blockquote><p><b>contains</b></p><p><b>system</b>: <a href=\"http://hl7.org/fhir/R4/codesystem-snomedct.html\">SNOMED CT (all versions)</a></p><p><b>version</b>: Provisional_2022-01-10</p><p><b>code</b>: 194945009</p></blockquote><blockquote><p><b>contains</b></p><p><b>system</b>: <a href=\"http://hl7.org/fhir/R4/codesystem-snomedct.html\">SNOMED CT (all versions)</a></p><p><b>version</b>: Provisional_2022-01-10</p><p><b>code</b>: 230596007</p></blockquote><blockquote><p><b>contains</b></p><p><b>system</b>: <a href=\"http://hl7.org/fhir/R4/codesystem-snomedct.html\">SNOMED CT (all versions)</a></p><p><b>version</b>: Provisional_2022-01-10</p><p><b>code</b>: 240422004</p></blockquote><blockquote><p><b>contains</b></p><p><b>system</b>: <a href=\"http://hl7.org/fhir/R4/codesystem-snomedct.html\">SNOMED CT (all versions)</a></p><p><b>version</b>: Provisional_2022-01-10</p><p><b>code</b>: 26117009</p></blockquote><blockquote><p><b>contains</b></p><p><b>system</b>: <a href=\"http://hl7.org/fhir/R4/codesystem-snomedct.html\">SNOMED CT (all versions)</a></p><p><b>version</b>: Provisional_2022-01-10</p><p><b>code</b>: 276197005</p></blockquote><blockquote><p><b>contains</b></p><p><b>system</b>: <a href=\"http://hl7.org/fhir/R4/codesystem-snomedct.html\">SNOMED CT (all versions)</a></p><p><b>version</b>: Provisional_2022-01-10</p><p><b>code</b>: 3419005</p></blockquote><blockquote><p><b>contains</b></p><p><b>system</b>: <a href=\"http://hl7.org/fhir/R4/codesystem-snomedct.html\">SNOMED CT (all versions)</a></p><p><b>version</b>: Provisional_2022-01-10</p><p><b>code</b>: 397428000</p></blockquote><blockquote><p><b>contains</b></p><p><b>system</b>: <a href=\"http://hl7.org/fhir/R4/codesystem-snomedct.html\">SNOMED CT (all versions)</a></p><p><b>version</b>: Provisional_2022-01-10</p><p><b>code</b>: 397430003</p></blockquote><blockquote><p><b>contains</b></p><p><b>system</b>: <a href=\"http://hl7.org/fhir/R4/codesystem-snomedct.html\">SNOMED CT (all versions)</a></p><p><b>version</b>: Provisional_2022-01-10</p><p><b>code</b>: 48278001</p></blockquote><blockquote><p><b>contains</b></p><p><b>system</b>: <a href=\"http://hl7.org/fhir/R4/codesystem-snomedct.html\">SNOMED CT (all versions)</a></p><p><b>version</b>: Provisional_2022-01-10</p><p><b>code</b>: 50215002</p></blockquote><blockquote><p><b>contains</b></p><p><b>system</b>: <a href=\"http://hl7.org/fhir/R4/codesystem-snomedct.html\">SNOMED CT (all versions)</a></p><p><b>version</b>: Provisional_2022-01-10</p><p><b>code</b>: 715659006</p></blockquote><blockquote><p><b>contains</b></p><p><b>system</b>: <a href=\"http://hl7.org/fhir/R4/codesystem-snomedct.html\">SNOMED CT (all versions)</a></p><p><b>version</b>: Provisional_2022-01-10</p><p><b>code</b>: 75589004</p></blockquote><blockquote><p><b>contains</b></p><p><b>system</b>: <a href=\"http://hl7.org/fhir/R4/codesystem-snomedct.html\">SNOMED CT (all versions)</a></p><p><b>version</b>: Provisional_2022-01-10</p><p><b>code</b>: 7773002</p></blockquote><blockquote><p><b>contains</b></p><p><b>system</b>: <a href=\"http://hl7.org/fhir/R4/codesystem-snomedct.html\">SNOMED CT (all versions)</a></p><p><b>version</b>: Provisional_2022-01-10</p><p><b>code</b>: 789005009</p></blockquote></blockquote></div>"
+				},
+				"extension": [
+					{
+						"url": "http://hl7.org/fhir/StructureDefinition/valueset-author",
+						"valueContactDetail": {
+							"name": "CSTE Author"
+						}
+					},
+					{
+						"url": "http://hl7.org/fhir/StructureDefinition/valueset-steward",
+						"valueContactDetail": {
+							"name": "CSTE Steward"
+						}
+					}
+				],
+				"url": "http://hl7.org/fhir/us/ecr/ValueSet/dxtc",
+				"identifier": [
+					{
+						"system": "urn:ietf:rfc:3986",
+						"value": "urn:oid:2.16.840.1.113762.1.4.1146.627"
+					}
+				],
+				"version": "1.0.02",
+				"name": "Diagnosis_ProblemTriggersforPublicHealthReporting",
+				"title": "Diagnosis_Problem Triggers for Public Health Reporting",
+				"status": "draft",
+				"experimental": true,
+				"publisher": "eCR",
+				"description": "Purpose: Clinical Focus - This set of values contains diagnoses or problems that represent that the patient may have a potentially reportable condition. For example, these may be diagnoses recorded in an EHR problem list and diagnosis codes used for billing for the encounter. Purpose: Data Element Scope - Diagnoses or problems documented in a clinical record. Purpose: Inclusion Criteria - See individual value sets. Purpose: Exclusion Criteria - See individual value sets. Note - Includes codes from selected value sets used in the Reportable Condition Knowledge Management System (RCKMS) reporting logic. RCKMS value sets in VSAC are for informational use only. When implementing trigger codes for electronic case reporting, use the Reportable Condition Trigger Codes (RCTC) file.",
+				"useContext": [
+					{
+						"code": {
+							"system": "http://terminology.hl7.org/CodeSystem/usage-context-type",
+							"code": "program"
+						},
+						"valueReference": {
+							"reference": "http://hl7.org/fhir/us/ecr/PlanDefinition/plandefinition-ersd-instance-example"
+						}
+					},
+					{
+						"code": {
+							"system": "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context-type",
+							"code": "reporting"
+						},
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context",
+									"code": "triggering"
+								}
+							]
+						}
+					},
+					{
+						"code": {
+							"system": "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context-type",
+							"code": "priority"
+						},
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context",
+									"code": "routine"
+								}
+							]
+						}
+					}
+				],
+				"purpose": "Diagnoses or problems documented in a clinical record.",
+				"compose": {
+					"include": [
+						{
+							"valueSet": [
+								"http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1506"
+							]
+						}
+					]
+				},
+				"expansion": {
+					"timestamp": "2022-04-05T10:06:43-04:00",
+					"contains": [
+						{
+							"system": "http://hl7.org/fhir/sid/icd-10-cm",
+							"version": "Provisional_2022-01-12",
+							"code": "B60.12"
+						},
+						{
+							"system": "http://hl7.org/fhir/sid/icd-10-cm",
+							"version": "Provisional_2022-01-12",
+							"code": "B60.13"
+						},
+						{
+							"system": "http://snomed.info/sct",
+							"version": "Provisional_2022-01-10",
+							"code": "127631000119105"
+						},
+						{
+							"system": "http://snomed.info/sct",
+							"version": "Provisional_2022-01-10",
+							"code": "15693201000119102"
+						},
+						{
+							"system": "http://snomed.info/sct",
+							"version": "Provisional_2022-01-10",
+							"code": "15693241000119100"
+						},
+						{
+							"system": "http://snomed.info/sct",
+							"version": "Provisional_2022-01-10",
+							"code": "15693281000119105"
+						},
+						{
+							"system": "http://snomed.info/sct",
+							"version": "Provisional_2022-01-10",
+							"code": "15698841000119105"
+						},
+						{
+							"system": "http://snomed.info/sct",
+							"version": "Provisional_2022-01-10",
+							"code": "15698881000119100"
+						},
+						{
+							"system": "http://snomed.info/sct",
+							"version": "Provisional_2022-01-10",
+							"code": "231896005"
+						},
+						{
+							"system": "http://snomed.info/sct",
+							"version": "Provisional_2022-01-10",
+							"code": "711645008"
+						},
+						{
+							"system": "http://snomed.info/sct",
+							"version": "Provisional_2022-01-10",
+							"code": "840444002"
+						},
+						{
+							"system": "http://snomed.info/sct",
+							"version": "Provisional_2022-01-10",
+							"code": "840484006"
+						},
+						{
+							"system": "http://hl7.org/fhir/sid/icd-10-cm",
+							"version": "Provisional_2022-01-12",
+							"code": "T57.0X"
+						},
+						{
+							"system": "http://hl7.org/fhir/sid/icd-10-cm",
+							"version": "Provisional_2022-01-12",
+							"code": "T57.0X1"
+						},
+						{
+							"system": "http://hl7.org/fhir/sid/icd-10-cm",
+							"version": "Provisional_2022-01-12",
+							"code": "T57.0X1A"
+						},
+						{
+							"system": "http://hl7.org/fhir/sid/icd-10-cm",
+							"version": "Provisional_2022-01-12",
+							"code": "T57.0X1D"
+						},
+						{
+							"system": "http://hl7.org/fhir/sid/icd-10-cm",
+							"version": "Provisional_2022-01-12",
+							"code": "T57.0X1S"
+						},
+						{
+							"system": "http://hl7.org/fhir/sid/icd-10-cm",
+							"version": "Provisional_2022-01-12",
+							"code": "T57.0X4"
+						},
+						{
+							"system": "http://hl7.org/fhir/sid/icd-10-cm",
+							"version": "Provisional_2022-01-12",
+							"code": "T57.0X4A"
+						},
+						{
+							"system": "http://hl7.org/fhir/sid/icd-10-cm",
+							"version": "Provisional_2022-01-12",
+							"code": "T57.0X4D"
+						},
+						{
+							"system": "http://hl7.org/fhir/sid/icd-10-cm",
+							"version": "Provisional_2022-01-12",
+							"code": "T57.0X4S"
+						},
+						{
+							"system": "http://snomed.info/sct",
+							"version": "Provisional_2022-01-10",
+							"code": "212516009"
+						},
+						{
+							"system": "http://snomed.info/sct",
+							"version": "Provisional_2022-01-10",
+							"code": "216792005"
+						},
+						{
+							"system": "http://snomed.info/sct",
+							"version": "Provisional_2022-01-10",
+							"code": "216794006"
+						},
+						{
+							"system": "http://snomed.info/sct",
+							"version": "Provisional_2022-01-10",
+							"code": "216795007"
+						},
+						{
+							"system": "http://snomed.info/sct",
+							"version": "Provisional_2022-01-10",
+							"code": "241770003"
+						},
+						{
+							"system": "http://snomed.info/sct",
+							"version": "Provisional_2022-01-10",
+							"code": "241771004"
+						},
+						{
+							"system": "http://snomed.info/sct",
+							"version": "Provisional_2022-01-10",
+							"code": "360406006"
+						},
+						{
+							"system": "http://snomed.info/sct",
+							"version": "Provisional_2022-01-10",
+							"code": "36730005"
+						},
+						{
+							"system": "http://snomed.info/sct",
+							"version": "Provisional_2022-01-10",
+							"code": "403740003"
+						},
+						{
+							"system": "http://snomed.info/sct",
+							"version": "Provisional_2022-01-10",
+							"code": "403741004"
+						},
+						{
+							"system": "http://snomed.info/sct",
+							"version": "Provisional_2022-01-10",
+							"code": "403743001"
+						},
+						{
+							"system": "http://snomed.info/sct",
+							"version": "Provisional_2022-01-10",
+							"code": "403744007"
+						},
+						{
+							"system": "http://snomed.info/sct",
+							"version": "Provisional_2022-01-10",
+							"code": "403745008"
+						},
+						{
+							"system": "http://snomed.info/sct",
+							"version": "Provisional_2022-01-10",
+							"code": "418685002"
+						},
+						{
+							"system": "http://snomed.info/sct",
+							"version": "Provisional_2022-01-10",
+							"code": "62210001"
+						},
+						{
+							"system": "http://snomed.info/sct",
+							"version": "Provisional_2022-01-10",
+							"code": "72501006"
+						},
+						{
+							"system": "http://snomed.info/sct",
+							"version": "Provisional_2022-01-10",
+							"code": "767146004"
+						},
+						{
+							"system": "http://snomed.info/sct",
+							"version": "Provisional_2022-01-10",
+							"code": "871783000"
+						},
+						{
+							"system": "http://snomed.info/sct",
+							"version": "Provisional_2022-01-10",
+							"code": "89738003"
+						},
+						{
+							"system": "http://snomed.info/sct",
+							"version": "Provisional_2022-01-10",
+							"code": "403742006"
+						},
+						{
+							"system": "http://snomed.info/sct",
+							"version": "Provisional_2022-01-10",
+							"code": "1086051000119107"
+						},
+						{
+							"system": "http://snomed.info/sct",
+							"version": "Provisional_2022-01-10",
+							"code": "1086061000119109"
+						},
+						{
+							"system": "http://snomed.info/sct",
+							"version": "Provisional_2022-01-10",
+							"code": "1086071000119103"
+						},
+						{
+							"system": "http://snomed.info/sct",
+							"version": "Provisional_2022-01-10",
+							"code": "1090211000119102"
+						},
+						{
+							"system": "http://snomed.info/sct",
+							"version": "Provisional_2022-01-10",
+							"code": "129667001"
+						},
+						{
+							"system": "http://snomed.info/sct",
+							"version": "Provisional_2022-01-10",
+							"code": "13596001"
+						},
+						{
+							"system": "http://snomed.info/sct",
+							"version": "Provisional_2022-01-10",
+							"code": "15682004"
+						},
+						{
+							"system": "http://snomed.info/sct",
+							"version": "Provisional_2022-01-10",
+							"code": "186347006"
+						},
+						{
+							"system": "http://snomed.info/sct",
+							"version": "Provisional_2022-01-10",
+							"code": "18901009"
+						},
+						{
+							"system": "http://snomed.info/sct",
+							"version": "Provisional_2022-01-10",
+							"code": "194945009"
+						},
+						{
+							"system": "http://snomed.info/sct",
+							"version": "Provisional_2022-01-10",
+							"code": "230596007"
+						},
+						{
+							"system": "http://snomed.info/sct",
+							"version": "Provisional_2022-01-10",
+							"code": "240422004"
+						},
+						{
+							"system": "http://snomed.info/sct",
+							"version": "Provisional_2022-01-10",
+							"code": "26117009"
+						},
+						{
+							"system": "http://snomed.info/sct",
+							"version": "Provisional_2022-01-10",
+							"code": "276197005"
+						},
+						{
+							"system": "http://snomed.info/sct",
+							"version": "Provisional_2022-01-10",
+							"code": "3419005"
+						},
+						{
+							"system": "http://snomed.info/sct",
+							"version": "Provisional_2022-01-10",
+							"code": "397428000"
+						},
+						{
+							"system": "http://snomed.info/sct",
+							"version": "Provisional_2022-01-10",
+							"code": "397430003"
+						},
+						{
+							"system": "http://snomed.info/sct",
+							"version": "Provisional_2022-01-10",
+							"code": "48278001"
+						},
+						{
+							"system": "http://snomed.info/sct",
+							"version": "Provisional_2022-01-10",
+							"code": "50215002"
+						},
+						{
+							"system": "http://snomed.info/sct",
+							"version": "Provisional_2022-01-10",
+							"code": "715659006"
+						},
+						{
+							"system": "http://snomed.info/sct",
+							"version": "Provisional_2022-01-10",
+							"code": "75589004"
+						},
+						{
+							"system": "http://snomed.info/sct",
+							"version": "Provisional_2022-01-10",
+							"code": "7773002"
+						},
+						{
+							"system": "http://snomed.info/sct",
+							"version": "Provisional_2022-01-10",
+							"code": "789005009"
+						}
+					]
+				}
+			}
+		},
+		{
+			"fullUrl": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1506",
+			"resource": {
+				"resourceType": "ValueSet",
+				"id": "2.16.840.1.113762.1.4.1146.1506",
+				"meta": {
+					"profile": [
+						"http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-triggering-valueset"
+					]
+				},
+				"text": {
+					"status": "extensions",
+					"div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p><b>Generated Narrative: ValueSet</b></p><div style=\"display: inline-block; background-color: #d9e0e7; padding: 6px; margin: 4px; border: 1px solid #8da1b4; border-radius: 5px; line-height: 60%\"><p style=\"margin-bottom: 0px\">Resource ValueSet \"2.16.840.1.113762.1.4.1146.1506\" </p><p style=\"margin-bottom: 0px\">Profile: <a href=\"StructureDefinition-us-ph-triggering-valueset.html\">US Public Health Triggering ValueSet</a></p></div><p><b>author</b>: CSTE Author: </p><p><b>steward</b>: CSTE Steward: </p><p><b>url</b>: <code>http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1506</code></p><p><b>identifier</b>: id: urn:oid:2.16.840.1.113762.1.4.1146.1506</p><p><b>version</b>: 1.0.0</p><p><b>name</b>: AcanthamoebaDiseaseKeratitisDisordersICD10CM</p><p><b>title</b>: Acanthamoeba Disease [Keratitis] (Disorders) (ICD10CM)</p><p><b>status</b>: active</p><p><b>experimental</b>: true</p><p><b>publisher</b>: eCR</p><p><b>description</b>: Acanthamoeba Disease [Keratitis] (Disorders) (ICD10CM)</p><blockquote><p><b>compose</b></p><blockquote><p><b>include</b></p><p><b>system</b>: <a href=\"http://terminology.hl7.org/3.1.0/CodeSystem-icd10CM.html\">International Classification of Diseases, 10th Revision, Clinical Modification (ICD-10-CM)</a></p><p><b>version</b>: Provisional_2022-01-12</p><blockquote><p><b>concept</b></p><p><b>code</b>: B60.12</p><p><b>display</b>: Conjunctivitis due to Acanthamoeba</p></blockquote><blockquote><p><b>concept</b></p><p><b>code</b>: B60.13</p><p><b>display</b>: Keratoconjunctivitis due to Acanthamoeba</p></blockquote></blockquote></blockquote><blockquote><p><b>expansion</b></p><p><b>timestamp</b>: 2022-04-05 10:06:43-0400</p><blockquote><p><b>contains</b></p><p><b>system</b>: <a href=\"http://terminology.hl7.org/3.1.0/CodeSystem-icd10CM.html\">International Classification of Diseases, 10th Revision, Clinical Modification (ICD-10-CM)</a></p><p><b>version</b>: Provisional_2022-01-12</p><p><b>code</b>: B60.12</p></blockquote><blockquote><p><b>contains</b></p><p><b>system</b>: <a href=\"http://terminology.hl7.org/3.1.0/CodeSystem-icd10CM.html\">International Classification of Diseases, 10th Revision, Clinical Modification (ICD-10-CM)</a></p><p><b>version</b>: Provisional_2022-01-12</p><p><b>code</b>: B60.13</p></blockquote></blockquote></div>"
+				},
+				"extension": [
+					{
+						"url": "http://hl7.org/fhir/StructureDefinition/valueset-author",
+						"valueContactDetail": {
+							"name": "CSTE Author"
+						}
+					},
+					{
+						"url": "http://hl7.org/fhir/StructureDefinition/valueset-steward",
+						"valueContactDetail": {
+							"name": "CSTE Steward"
+						}
+					}
+				],
+				"url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.1506",
+				"identifier": [
+					{
+						"system": "urn:ietf:rfc:3986",
+						"value": "urn:oid:2.16.840.1.113762.1.4.1146.1506"
+					}
+				],
+				"version": "1.0.02",
+				"name": "AcanthamoebaDiseaseKeratitisDisordersICD10CM",
+				"title": "Acanthamoeba Disease [Keratitis] (Disorders) (ICD10CM)",
+				"status": "active",
+				"experimental": true,
+				"publisher": "eCR",
+				"description": "Acanthamoeba Disease [Keratitis] (Disorders) (ICD10CM)",
+				"useContext": [
+					{
+						"code": {
+							"system": "http://terminology.hl7.org/CodeSystem/usage-context-type",
+							"code": "focus"
+						},
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://snomed.info/sct",
+									"code": "49649001"
+								}
+							],
+							"text": "Infection caused by Acanthamoeba (disorder)"
+						}
+					},
+					{
+						"code": {
+							"system": "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context-type",
+							"code": "reporting"
+						},
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context",
+									"code": "triggering"
+								}
+							]
+						}
+					},
+					{
+						"code": {
+							"system": "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context-type",
+							"code": "priority"
+						},
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context",
+									"code": "routine"
+								}
+							]
+						}
+					},{
+						"code": {
+							"system": "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context-type",
+							"code": "priority"
+						},
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context",
+									"code": "routine"
+								}
+							]
+						}
+					}
+				],
+				"compose": {
+					"include": [
+						{
+							"system": "http://hl7.org/fhir/sid/icd-10-cm",
+							"version": "Provisional_2022-01-12",
+							"concept": [
+								{
+									"code": "B60.12",
+									"display": "Conjunctivitis due to Acanthamoeba"
+								},
+								{
+									"code": "B60.13",
+									"display": "Keratoconjunctivitis due to Acanthamoeba"
+								}
+							]
+						}
+					]
+				},
+				"expansion": {
+					"timestamp": "2022-04-05T10:06:43-04:00",
+					"contains": [
+						{
+							"system": "http://hl7.org/fhir/sid/icd-10-cm",
+							"version": "Provisional_2022-01-12",
+							"code": "B60.12"
+						},
+						{
+							"system": "http://hl7.org/fhir/sid/icd-10-cm",
+							"version": "Provisional_2022-01-12",
+							"code": "B60.13"
+						}
+					]
+				}
+			}
+		}
+	]
+}

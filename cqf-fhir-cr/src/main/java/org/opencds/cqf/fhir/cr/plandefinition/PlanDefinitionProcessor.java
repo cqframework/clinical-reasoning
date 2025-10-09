@@ -36,7 +36,7 @@ import org.opencds.cqf.fhir.utility.client.TerminologyServerClientSettings;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.monad.Either3;
 
-@SuppressWarnings({"squid:S107", "squid:S1172"})
+@SuppressWarnings({"squid:S107", "squid:S1172", "UnstableApiUsage"})
 public class PlanDefinitionProcessor {
     protected final ModelResolver modelResolver;
     protected final FhirVersionEnum fhirVersion;
@@ -50,7 +50,7 @@ public class PlanDefinitionProcessor {
     protected TerminologyServerClientSettings terminologyServerClientSettings;
 
     public PlanDefinitionProcessor(IRepository repository) {
-        this(repository, EvaluationSettings.getDefault(), new TerminologyServerClientSettings());
+        this(repository, EvaluationSettings.getDefault(), TerminologyServerClientSettings.getDefault());
     }
 
     public PlanDefinitionProcessor(

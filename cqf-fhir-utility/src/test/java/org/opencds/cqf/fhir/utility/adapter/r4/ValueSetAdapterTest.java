@@ -15,6 +15,7 @@ import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
+import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.RelatedArtifact;
@@ -40,7 +41,7 @@ class ValueSetAdapterTest {
     void adapter_accepts_visitor() {
         var spyVisitor = spy(new TestVisitor());
         var valueSet = new ValueSet();
-        var adapter = adapterFactory.createKnowledgeArtifactAdapter(valueSet);
+        var adapter = adapterFactory.createValueSet(valueSet);
         doReturn(valueSet).when(spyVisitor).visit(any(ValueSetAdapter.class), any());
         adapter.accept(spyVisitor, null);
         verify(spyVisitor, times(1)).visit(any(ValueSetAdapter.class), any());
@@ -191,5 +192,47 @@ class ValueSetAdapterTest {
         assertTrue(adapter.hasCompose());
         assertTrue(adapter.hasComposeInclude());
         assertEquals(set, adapter.getComposeInclude().get(0).get());
+    }
+
+    @Test
+    void testGetExpansionTotal() {
+        var total = 1536;
+        var expansion = new ValueSet.ValueSetExpansionComponent();
+        expansion.setTotal(total);
+        var valueSet = new ValueSet().setExpansion(expansion);
+        var adapter = (IValueSetAdapter) adapterFactory.createKnowledgeArtifactAdapter(valueSet);
+
+        assertEquals(total, adapter.getExpansionTotal());
+    }
+
+    @Test
+    void testAppendExpansionContains() {
+        var contains = new ValueSet.ValueSetExpansionContainsComponent().setCode("test");
+        var expansion = new ValueSet.ValueSetExpansionComponent().addContains(contains);
+        expansion.setId("test-expansion-page-1");
+        expansion
+                .addParameter()
+                .setName("count")
+                .setValue(new IntegerType(expansion.getContains().size()));
+        var valueSet = new ValueSet().setExpansion(expansion);
+        var adapter = (IValueSetAdapter) adapterFactory.createKnowledgeArtifactAdapter(valueSet);
+
+        var additionalContains = new ValueSet.ValueSetExpansionContainsComponent().setCode("other-test");
+        var additionalExpansion = new ValueSet.ValueSetExpansionComponent().addContains(additionalContains);
+        additionalExpansion.setId("test-expansion-page-2");
+        var additionalValueSet = new ValueSet().setExpansion(additionalExpansion);
+        var additionalExpansionAdapter =
+                (IValueSetAdapter) adapterFactory.createKnowledgeArtifactAdapter(additionalValueSet);
+
+        adapter.appendExpansionContains(additionalExpansionAdapter.getExpansionContains());
+
+        assertEquals(2, adapter.getExpansionContains().size());
+        assertEquals(
+                2,
+                ((IntegerType) ((ValueSetExpansionComponent) adapter.getExpansion())
+                                .getParameter("count")
+                                .getValue())
+                        .getValue()
+                        .intValue());
     }
 }

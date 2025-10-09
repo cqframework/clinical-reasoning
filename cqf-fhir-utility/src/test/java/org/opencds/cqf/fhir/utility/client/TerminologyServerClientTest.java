@@ -37,6 +37,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Endpoint;
+import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -541,16 +542,19 @@ public class TerminologyServerClientTest {
         leaf.setUrl(url);
         leaf.getExpansion().setTotal(3);
         leaf.getExpansion().addContains().setSystem("system1").setCode("code1");
+        leaf.getExpansion().addParameter().setName("count").setValue(new IntegerType(1));
 
         var leafPage2 = new ValueSet();
         leafPage2.setUrl(url);
         leafPage2.getExpansion().setTotal(3);
         leafPage2.getExpansion().addContains().setSystem("system2").setCode("code2");
+        leafPage2.getExpansion().addParameter().setName("count").setValue(new IntegerType(1));
 
         var leafPage3 = new ValueSet();
         leafPage3.setUrl(url);
         leafPage3.getExpansion().setTotal(3);
         leafPage3.getExpansion().addContains().setSystem("system2").setCode("code3");
+        leafPage3.getExpansion().addParameter().setName("count").setValue(new IntegerType(1));
 
         var fhirClient = mock(IGenericClient.class, new ReturnsDeepStubs());
         when(fhirClient.getFhirContext().getVersion().getVersion()).thenReturn(FhirVersionEnum.R4);

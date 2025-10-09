@@ -6,7 +6,9 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.utility.Constants;
@@ -154,5 +156,14 @@ public interface ILibraryAdapter extends IKnowledgeArtifactAdapter {
                 && resourceType.equals(Constants.RESOURCETYPE_VALUESET);
 
         return isV1AndQualifies || isV2AndQualifies;
+    }
+
+    default void addCqfMessagesExtension(IBaseOperationOutcome messages) {
+        getContained().add(messages);
+        var ext = addExtension();
+        ext.setUrl("http://hl7.org/fhir/StructureDefinition/cqf-messages");
+        var ref =
+                (IBaseReference) fhirContext().getElementDefinition("Reference").newInstance();
+        ext.setValue(ref.setReference("#messages"));
     }
 }

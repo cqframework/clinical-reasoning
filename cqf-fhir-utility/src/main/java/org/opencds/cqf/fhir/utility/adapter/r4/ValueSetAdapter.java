@@ -128,9 +128,11 @@ public class ValueSetAdapter extends KnowledgeArtifactAdapter implements IValueS
                         .toList()));
 
         var countParam = getExpansion().getParameter("count");
-        var count = ((IntegerType) countParam.getValue()).getValue();
-        count += expansionContains.size();
-        countParam.setValue(new IntegerType(count));
+        if (countParam != null) {
+            var count = ((IntegerType) countParam.getValue()).getValue();
+            count += expansionContains.size();
+            countParam.setValue(new IntegerType(count));
+        }
     }
 
     @SuppressWarnings("unchecked")

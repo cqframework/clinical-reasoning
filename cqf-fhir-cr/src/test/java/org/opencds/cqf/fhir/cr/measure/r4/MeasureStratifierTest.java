@@ -3,22 +3,16 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import java.nio.file.Path;
 import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportStatus;
-import org.hl7.fhir.r4.model.Period;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.When;
-import org.opencds.cqf.fhir.cr.measure.r4.utils.TestDataGenerator;
-import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Measure Stratifier Testing to validate Measure defined Stratifier elements and the resulting MeasureReport Stratifier elements
@@ -27,20 +21,14 @@ import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
  */
 @SuppressWarnings("squid:S2699")
 class MeasureStratifierTest {
-    private static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/measure/r4";
-    private static final IRepository repository = new IgRepository(
-            FhirContext.forR4Cached(),
-            Path.of(getResourcePath(MeasureStratifierTest.class) + "/" + CLASS_PATH + "/" + "MeasureTest"));
-    private final Given given = Measure.given().repository(repository);
-    private static final TestDataGenerator testDataGenerator = new TestDataGenerator(repository);
+    private static final Logger logger = LoggerFactory.getLogger(MeasureStratifierTest.class);
 
-    @BeforeAll
-    static void init() {
-        Period period = new Period();
-        period.setStartElement(new DateTimeType("2024-01-01T01:00:00Z"));
-        period.setEndElement(new DateTimeType("2024-01-01T03:00:00Z"));
-        testDataGenerator.makePatient(null, null, period);
-    }
+    private static final Given GIVEN_MEASURE_STRATIFIER_TEST = Measure.given().repositoryFor("MeasureStratifierTest");
+    private static final Given GIVEN_CRITERIA_BASED_STRAT_SIMPLE =
+            Measure.given().repositoryFor("CriteriaBasedStratifiersSimple");
+    private static final Given GIVEN_CRITERIA_BASED_STRAT_COMPLEX =
+            Measure.given().repositoryFor("CriteriaBasedStratifiersComplex");
+
     /**
      * Boolean Basis Measure with Stratifier defined by component expression that results in CodeableConcept value of 'M' or 'F' for the Measure population. For 'Individual' reportType
      */
@@ -48,14 +36,16 @@ class MeasureStratifierTest {
     void cohortBooleanHasCodeStratIndividualResult() {
         var mCC = new CodeableConcept().setText("M");
 
-        given.when()
+        GIVEN_MEASURE_STRATIFIER_TEST
+                .when()
                 .measureId("CohortBooleanStratCode")
                 .subject("Patient/patient-9")
                 .evaluate()
                 .then()
                 .firstGroup()
                 .firstStratifier()
-                .stratumCount(1)
+                .hasCodeText("stratifier-sex")
+                .hasStratumCount(1)
                 .stratum(mCC)
                 .firstPopulation()
                 .hasCount(1)
@@ -73,13 +63,15 @@ class MeasureStratifierTest {
         var mCC = new CodeableConcept().setText("M");
         var fCC = new CodeableConcept().setText("F");
 
-        given.when()
+        GIVEN_MEASURE_STRATIFIER_TEST
+                .when()
                 .measureId("CohortBooleanStratCode")
                 .evaluate()
                 .then()
                 .firstGroup()
                 .firstStratifier()
-                .stratumCount(2)
+                .hasCodeText("stratifier-sex")
+                .hasStratumCount(2)
                 .stratum(mCC)
                 .firstPopulation()
                 .hasCount(5)
@@ -102,13 +94,15 @@ class MeasureStratifierTest {
         var isUnfinished = new CodeableConcept().setText("true");
         var notUnfinished = new CodeableConcept().setText("false");
 
-        given.when()
+        GIVEN_MEASURE_STRATIFIER_TEST
+                .when()
                 .measureId("CohortBooleanStratValue")
                 .evaluate()
                 .then()
                 .firstGroup()
                 .firstStratifier()
-                .stratumCount(2)
+                .hasCodeText(null)
+                .hasStratumCount(2)
                 .stratum(isUnfinished)
                 .firstPopulation()
                 .hasCount(9)
@@ -136,13 +130,15 @@ class MeasureStratifierTest {
         var mCC = new CodeableConcept().setText("M");
         var fCC = new CodeableConcept().setText("F");
 
-        given.when()
+        GIVEN_MEASURE_STRATIFIER_TEST
+                .when()
                 .measureId("CohortBooleanStratMulti")
                 .evaluate()
                 .then()
                 .firstGroup()
                 .stratifierById("stratifier-1")
-                .stratumCount(2)
+                .hasCodeText(null)
+                .hasStratumCount(2)
                 .stratum(isUnfinished)
                 .firstPopulation()
                 .hasCount(9)
@@ -155,7 +151,7 @@ class MeasureStratifierTest {
                 .up()
                 .up()
                 .stratifierById("stratifier-2")
-                .stratumCount(2)
+                .hasStratumCount(2)
                 .stratum(mCC)
                 .firstPopulation()
                 .hasCount(5)
@@ -175,7 +171,10 @@ class MeasureStratifierTest {
      */
     @Test
     void cohortBooleanNoIdStrat() {
-        final When evaluate = given.when().measureId("CohortBooleanStratNoId").evaluate();
+        final When evaluate = GIVEN_MEASURE_STRATIFIER_TEST
+                .when()
+                .measureId("CohortBooleanStratNoId")
+                .evaluate();
         try {
             evaluate.then();
             fail("should throw a missing Id scenario");
@@ -189,7 +188,11 @@ class MeasureStratifierTest {
     @Test
     void cohortBooleanDifferentTypeStrat() {
         try {
-            given.when().measureId("CohortBooleanStratDifferentType").evaluate().then();
+            GIVEN_MEASURE_STRATIFIER_TEST
+                    .when()
+                    .measureId("CohortBooleanStratDifferentType")
+                    .evaluate()
+                    .then();
         } catch (InvalidRequestException exception) {
             assertEquals(
                     "stratifier expression criteria results for expression: [resource strat not finished] must fall within accepted types for boolean population basis: [boolean] for Measure: http://example.com/Measure/CohortBooleanStratDifferentType",
@@ -204,14 +207,16 @@ class MeasureStratifierTest {
      */
     @Test
     void cohortBooleanComponentStrat() {
-        given.when()
+        GIVEN_MEASURE_STRATIFIER_TEST
+                .when()
                 .measureId("CohortBooleanStratComponent")
                 .evaluate()
                 .then()
                 .hasStatus(MeasureReportStatus.COMPLETE)
                 .group("group-1")
                 .stratifierById("stratifier-1")
-                .stratumCount(2)
+                .hasCodeText("Gender and Age")
+                .hasStratumCount(2)
                 .stratumByComponentCodeText("Age")
                 .up()
                 .stratumByComponentValueText("38")
@@ -241,7 +246,8 @@ class MeasureStratifierTest {
     @Test
     void ratioResourceValueStrat() {
 
-        given.when()
+        GIVEN_MEASURE_STRATIFIER_TEST
+                .when()
                 .measureId("RatioResourceStratValue")
                 .evaluate()
                 .reportType("subject-list")
@@ -249,6 +255,7 @@ class MeasureStratifierTest {
                 .subjectResultsValidation()
                 .firstGroup()
                 .stratifierById("stratifier-2")
+                .hasCodeText(null)
                 .stratum("35")
                 .population("denominator")
                 .hasCount(6)
@@ -273,17 +280,113 @@ class MeasureStratifierTest {
 
     /**
      * Ratio Measure with Resource Basis where Stratifier defined by expression that results in Encounter.status per subject.
-     * Given that Encounter.status will return multiple results for a single subject, it is considered an invalid Stratifier
+     * Multiple results for a single subject are allowed
      */
     @Test
-    void ratioResourceDifferentTypeStrat() {
-        given.when()
+    void ratioResourceDifferentTypeStratNotCriteriaBased() {
+        GIVEN_MEASURE_STRATIFIER_TEST
+                .when()
                 .measureId("RatioResourceStratDifferentType")
                 .evaluate()
                 .then()
-                .hasContainedOperationOutcome()
-                .hasContainedOperationOutcomeMsg("stratifiers may not return multiple values for subject")
-                .report();
+                .hasGroupCount(1)
+                .firstGroup()
+                .hasPopulationCount(3)
+                .population("initial-population")
+                .hasCount(11)
+                .up()
+                .population("denominator")
+                .hasCount(11)
+                .up()
+                .population("numerator")
+                .hasCount(2)
+                .up()
+                .hasMeasureScore(true)
+                .hasScore("0.18181818181818182")
+                .hasStratifierCount(1)
+                .firstStratifier()
+                .hasCodeText(null)
+                .hasStratumCount(6)
+                .stratum("triaged")
+                .hasPopulationCount(3)
+                .population("initial-population")
+                .hasCount(2)
+                .up()
+                .population("denominator")
+                .hasCount(2)
+                .up()
+                .population("numerator")
+                .hasCount(0)
+                .up()
+                .hasScore("0.0")
+                .up()
+                .stratum("arrived")
+                .hasPopulationCount(3)
+                .population("initial-population")
+                .hasCount(2)
+                .up()
+                .population("denominator")
+                .hasCount(2)
+                .up()
+                .population("numerator")
+                .hasCount(0)
+                .up()
+                .hasScore("0.0")
+                .up()
+                .stratum("cancelled")
+                .hasPopulationCount(3)
+                .population("initial-population")
+                .hasCount(2)
+                .up()
+                .population("denominator")
+                .hasCount(2)
+                .up()
+                .population("numerator")
+                .hasCount(0)
+                .up()
+                .hasScore("0.0")
+                .up()
+                .stratum("in-progress")
+                .hasPopulationCount(3)
+                .population("initial-population")
+                .hasCount(2)
+                .up()
+                .population("denominator")
+                .hasCount(2)
+                .up()
+                .population("numerator")
+                .hasCount(0)
+                .up()
+                .hasScore("0.0")
+                .up()
+                .stratum("finished")
+                .hasPopulationCount(3)
+                .population("initial-population")
+                .hasCount(1)
+                .up()
+                .population("denominator")
+                .hasCount(1)
+                .up()
+                .population("numerator")
+                .hasCount(1)
+                .up()
+                .hasScore("1.0")
+                .up()
+                // This brings up a weird use case where we have two qualifying values within a
+                // single stratum, which was previously unsupported.  There may be a better way to
+                // handle this, but for now this is what we're doing:
+                .stratum("in-progress,finished")
+                .hasPopulationCount(3)
+                .population("initial-population")
+                .hasCount(2)
+                .up()
+                .population("denominator")
+                .hasCount(2)
+                .up()
+                .population("numerator")
+                .hasCount(1)
+                .up()
+                .hasScore("0.5");
     }
 
     /**
@@ -293,7 +396,8 @@ class MeasureStratifierTest {
     @Test
     void ratioBooleanValueStrat() {
 
-        given.when()
+        GIVEN_MEASURE_STRATIFIER_TEST
+                .when()
                 .measureId("RatioBooleanStratValue")
                 .evaluate()
                 .then()
@@ -302,7 +406,8 @@ class MeasureStratifierTest {
                 .hasCount(10)
                 .up()
                 .firstStratifier()
-                .stratumCount(2)
+                .hasCodeText(null)
+                .hasStratumCount(2)
                 .stratum("M")
                 .hasScore("0.2") // make sure stratum are scored
                 .population("initial-population")
@@ -320,7 +425,8 @@ class MeasureStratifierTest {
     @Test
     void twoStatifierCriteria() {
         try {
-            given.when()
+            GIVEN_MEASURE_STRATIFIER_TEST
+                    .when()
                     .measureId("CohortBooleanStratComponentInvalid")
                     .evaluate()
                     .then()
@@ -333,5 +439,93 @@ class MeasureStratifierTest {
                             .contains(
                                     "Measure stratifier: stratifier-1, has both component and stratifier criteria expression defined. Only one should be specified"));
         }
+    }
+
+    @Test
+    void criteriaBasedStratSinglePatientSingleEncounter() {
+        GIVEN_CRITERIA_BASED_STRAT_SIMPLE
+                .when()
+                .measureId("CriteriaBasedStratifiersSimple")
+                .subject("Patient/patient1")
+                .evaluate()
+                .then()
+                .firstGroup()
+                .population("initial-population")
+                .hasCount(4)
+                .up()
+                .hasStratifierCount(1)
+                .firstStratifier()
+                .hasCodeText("in-progress encounters")
+                .hasStratumCount(1)
+                .firstStratum()
+                .hasPopulationCount(1)
+                .population("initial-population")
+                .hasCount(1);
+    }
+
+    /*
+    two patients
+    9 total encounters
+    1 encounter for patient 1 in-progress
+    2 encounter for patient 2 in-progress
+     */
+    @Test
+    void criteriaBasedStratAllPatientsTwoEncounters() {
+        GIVEN_CRITERIA_BASED_STRAT_SIMPLE
+                .when()
+                .measureId("CriteriaBasedStratifiersSimple")
+                .evaluate()
+                .then()
+                .firstGroup()
+                .population("initial-population")
+                .hasCount(9)
+                .up()
+                .hasStratifierCount(1)
+                .firstStratifier()
+                .hasCodeText("in-progress encounters")
+                .hasStratumCount(1)
+                .firstStratum()
+                .hasPopulationCount(1)
+                .firstPopulation()
+                .hasCount(3);
+    }
+
+    @Disabled
+    @Test
+    void criteriaBasedStratifiersComplexSetsDifferentForInitialDenominatorAndNumerator() {
+        GIVEN_CRITERIA_BASED_STRAT_COMPLEX
+                .when()
+                .measureId("CriteriaBasedStratifiersComplex")
+                .evaluate()
+                .then()
+                .hasGroupCount(1)
+                .firstGroup()
+                .hasPopulationCount(3)
+                .population("initial-population")
+                .hasCount(11)
+                .up()
+                .population("denominator")
+                .hasCount(8)
+                .up()
+                .population("numerator")
+                // due to apply scoring, we keep only those numerator encounters that are also in the denominator
+                .hasCount(5)
+                .up()
+                .hasMeasureScore(true)
+                .hasScore("0.625")
+                .hasStratifierCount(1)
+                .firstStratifier()
+                .hasCodeText("Encounters in Period")
+                .hasStratumCount(1)
+                .firstStratum()
+                .hasPopulationCount(3)
+                .population("initial-population")
+                .hasCount(3)
+                .up()
+                .population("denominator")
+                .hasCount(2)
+                .up()
+                .population("numerator")
+                .hasCount(1);
     }
 }

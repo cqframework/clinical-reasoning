@@ -18,6 +18,14 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
  */
 public class HashSetForFhirResources<T> extends HashSet<T> {
 
+    public HashSetForFhirResources() {
+        super();
+    }
+
+    public HashSetForFhirResources(Collection<T> collection) {
+        super(collection);
+    }
+
     /**
      * This logic is triggered by retainAll() and removeAll(), whose behaviour we're trying
      * to modify to use FHIR resource identity rules.

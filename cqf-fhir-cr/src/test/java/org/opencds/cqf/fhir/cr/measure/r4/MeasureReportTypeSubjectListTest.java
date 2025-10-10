@@ -173,7 +173,7 @@ class MeasureReportTypeSubjectListTest {
                 .hasSubjectResults()
                 .up()
                 .firstStratifier()
-                .stratumCount(2)
+                .hasStratumCount(2)
                 .stratum("M")
                 .hasScore("0.2") // make sure stratum are scored
                 .population("initial-population")

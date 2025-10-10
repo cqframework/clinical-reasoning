@@ -3,14 +3,10 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Enumeration;
@@ -25,6 +21,7 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationBasisValidator;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
+import org.opencds.cqf.fhir.cr.measure.common.StratifierUtils;
 
 /**
  * Validates group populations and stratifiers against population basis-es for R4 only.
@@ -78,7 +75,7 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
             return;
         }
 
-        var resultClasses = extractClassesFromSingleOrListResult(expressionResult.value());
+        var resultClasses = StratifierUtils.extractClassesFromSingleOrListResult(expressionResult.value());
         // Encounter
         var groupPopulationBasisCode = groupDef.getPopulationBasis().code();
         var optResourceClass = extractResourceType(groupPopulationBasisCode);
@@ -124,8 +121,13 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
             return;
         }
 
-        var resultClasses = extractClassesFromSingleOrListResult(expressionResult.value());
+        var resultClasses = StratifierUtils.extractClassesFromSingleOrListResult(expressionResult.value());
         var groupPopulationBasisCode = groupDef.getPopulationBasis().code();
+
+        // criteria-based stratifier, skip validation, since the boolean basis test is irrelevant
+        if (StratifierUtils.isCriteriaBasedStratifier(groupDef, expressionResult.value())) {
+            return;
+        }
 
         var resultMatchingClasses = resultClasses.stream()
                 .filter(resultClass ->
@@ -169,31 +171,6 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
             }
         }
         return Optional.empty();
-    }
-
-    private List<Class<?>> extractClassesFromSingleOrListResult(Object result) {
-        if (result == null) {
-            return Collections.emptyList();
-        }
-
-        if (!(result instanceof Iterable<?> iterable)) {
-            return Collections.singletonList(result.getClass());
-        }
-
-        // Need to this to return List<Class<?>> and get rid of Sonar warnings.
-        final Stream<Class<?>> classStream =
-                getStream(iterable).filter(Objects::nonNull).map(Object::getClass);
-
-        return classStream.toList();
-    }
-
-    private Stream<?> getStream(Iterable<?> iterable) {
-        if (iterable instanceof List<?> list) {
-            return list.stream();
-        }
-
-        // It's entirely possible CQL returns an Iterable that is not a List, so we need to handle that case
-        return StreamSupport.stream(iterable.spliterator(), false);
     }
 
     private List<String> prettyClassNames(List<Class<?>> classes) {

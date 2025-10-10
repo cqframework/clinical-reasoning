@@ -88,7 +88,8 @@ public class CompositeEvaluationResultsPerMeasure {
             return new CompositeEvaluationResultsPerMeasure(this);
         }
 
-        public void addResults(List<IIdType> measureIds, String subjectId, EvaluationResult evaluationResult) {
+        public void addResults(
+                List<? extends IIdType> measureIds, String subjectId, EvaluationResult evaluationResult) {
             for (IIdType measureId : measureIds) {
                 addResult(measureId, subjectId, evaluationResult);
             }

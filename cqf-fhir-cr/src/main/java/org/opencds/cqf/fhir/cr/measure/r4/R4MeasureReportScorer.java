@@ -199,7 +199,7 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
         var popDef = groupDef.getSingle(MeasurePopulationType.MEASUREOBSERVATION);
         if (popDef == null) {
             // nothing more to do
-//            return;
+            //            return;
         }
         var observationQuantity = collectQuantities(popDef.getResources());
         var aggregateMethod = groupDef.getAggregateMethod();

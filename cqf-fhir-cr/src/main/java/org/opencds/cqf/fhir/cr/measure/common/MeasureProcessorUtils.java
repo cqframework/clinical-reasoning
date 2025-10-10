@@ -438,110 +438,24 @@ public class MeasureProcessorUtils {
                 for (var libraryVersionedIdentifier : libraryIdentifiers) {
                     validateEvaluationResultExistsForIdentifier(
                             libraryVersionedIdentifier, evaluationResultsForMultiLib);
-                    // standard CQL expression results
+                    // standard CQL expression results:  if there are
                     var evaluationResult = evaluationResultsForMultiLib.getResultFor(libraryVersionedIdentifier);
 
+                    final List<? extends IIdType> measureIds;
+                    // An evaluationResult of null is possible in the case where there was an exception during
+                    // evaluation,
+                    // but we must support partial failures and partial successes, so we continue processing.
                     if (evaluationResult == null) {
-                        // this should never happen due to validateEvaluationResultExistsForIdentifier
-                        throw new IllegalStateException(
-                                "No evaluation result found for library: %s".formatted(libraryVersionedIdentifier));
-                    }
-
-                    // measure Observation Path, have to re-initialize everything again
-                    // TODO: extend library evaluated context so library initialization isn't having to be built for
-                    // both, and takes advantage of caching
-                    var compiledLibraries = getCompiledLibraries(libraryIdentifiers, context);
-
-                    var libraries = compiledLibraries.stream()
-                            .map(CompiledLibrary::getLibrary)
-                            .toList();
-
-                    // Add back the libraries to the stack, since we popped them off during CQL
-                    context.getState().init(libraries);
-
-                    // Measurement Period: operation parameter defined measurement period
-                    // this necessary?
-                    // Interval measurementPeriodParams = buildMeasurementPeriod(periodStart, periodEnd);
-
-                    //                    setMeasurementPeriod(
-                    //                        measurementPeriodParams,
-                    //                        context,
-                    //                        Optional.ofNullable(measureDef.).map(List::of).orElse(List.of("Unknown
-                    // Measure URL")));
-                    // one Library may be linked to multiple Measures
-                    var measureDefs =
-                            multiLibraryIdMeasureEngineDetails.getMeasureIdsForLibrary(libraryVersionedIdentifier);
-                    List<IIdType> measureIds = measureDeftoIIdType(measureDefs);
-
-                    for (MeasureDef measureDef : measureDefs) {
-                        // if measure contains measure-observation, otherwise short circuit
-                        if (hasMeasureObservation(measureDef)) {
-
-                            // get function for measure-observation from populationDef
-                            for (GroupDef groupDef : measureDef.groups()) {
-                                for (PopulationDef populationDef : groupDef.populations()) {
-                                    // each measureObservation is evaluated
-                                    if (populationDef.type().equals(MeasurePopulationType.MEASUREOBSERVATION)) {
-                                        // get criteria input for results to get (measure-population, numerator,
-                                        // denominator)
-                                        var criteriaPopulationId = populationDef.getCriteriaReference();
-                                        // function that will be evaluated
-                                        var observationExpression = populationDef.expression();
-                                        // get expression from criteriaPopulation reference
-                                        String criteriaExpressionInput = groupDef.populations().stream()
-                                                .filter(t -> t.id().equals(criteriaPopulationId))
-                                                .map(PopulationDef::expression)
-                                                .findFirst()
-                                                .orElse(null);
-                                        ExpressionResult expressionResult =
-                                                tryGetExpressionResult(criteriaExpressionInput, evaluationResult);
-                                        // makes expression results iterable
-                                        var resultsIter =
-                                                getResultIterable(evaluationResult, expressionResult, subjectTypePart);
-                                        // make new expression name for uniquely extracting results
-                                        // this will be used in MeasureEvaluator
-                                        var expressionName = criteriaPopulationId + "-" + observationExpression;
-                                        // loop through measure-population results
-                                        int i = 0;
-                                        Map<Object, Object> functionResults = new HashMap<>();
-                                        Set<Object> evaluatedResources = new HashSet<>();
-                                        for (Object result : resultsIter) {
-                                            Object observationResult = evaluateObservationCriteria(
-                                                    result,
-                                                    observationExpression,
-                                                    evaluatedResources,
-                                                    groupDef.isBooleanBasis(),
-                                                    context);
-
-                                            if (!(observationResult instanceof String
-                                                    || observationResult instanceof Integer
-                                                    || observationResult instanceof Double)) {
-                                                throw new IllegalArgumentException(
-                                                        "continuous variable observation CQL \"MeasureObservation\" function result must be of type String, Integer or Double but was: "
-                                                                + result.getClass()
-                                                                        .getSimpleName());
-                                            }
-
-                                            var observationId = expressionName + "-" + i;
-                                            // wrap result in Observation resource to avoid duplicate results data loss
-                                            // in set object
-                                            Observation observation = wrapResultAsObservation(
-                                                    observationId, observationId, observationResult);
-                                            // add function results to existing EvaluationResult under new expression
-                                            // name
-                                            // need a way to capture input parameter here too, otherwise we have no way
-                                            // to connect input objects related to output object
-                                            // key= input parameter to function
-                                            // value= the output Observation resource containing calculated value
-                                            functionResults.put(result, observation);
-                                        }
-                                        evaluationResult.expressionResults.put(
-                                                expressionName,
-                                                new ExpressionResult(functionResults, evaluatedResources));
-                                    }
-                                }
-                            }
-                        }
+                        measureIds =
+                                multiLibraryIdMeasureEngineDetails.getMeasureIdsForLibrary(libraryVersionedIdentifier);
+                    } else {
+                        measureIds = continuousVariableEvaluation(
+                                context,
+                                multiLibraryIdMeasureEngineDetails,
+                                libraryVersionedIdentifier,
+                                libraryIdentifiers,
+                                evaluationResult,
+                                subjectTypePart);
                     }
 
                     resultsBuilder.addResults(measureIds, subjectId, evaluationResult);
@@ -566,6 +480,109 @@ public class MeasureProcessorUtils {
         }
 
         return resultsBuilder.build();
+    }
+
+    // LUKETODO:  refactor this a lot
+    @Nonnull
+    private List<IIdType> continuousVariableEvaluation(
+            CqlEngine context,
+            MultiLibraryIdMeasureEngineDetails multiLibraryIdMeasureEngineDetails,
+            VersionedIdentifier libraryVersionedIdentifier,
+            List<VersionedIdentifier> libraryIdentifiers,
+            EvaluationResult evaluationResult,
+            String subjectTypePart) {
+        // measure Observation Path, have to re-initialize everything again
+        // TODO: extend library evaluated context so library initialization isn't having to be built for
+        // both, and takes advantage of caching
+        var compiledLibraries = getCompiledLibraries(libraryIdentifiers, context);
+
+        var libraries =
+                compiledLibraries.stream().map(CompiledLibrary::getLibrary).toList();
+
+        // Add back the libraries to the stack, since we popped them off during CQL
+        context.getState().init(libraries);
+
+        // Measurement Period: operation parameter defined measurement period
+        // this necessary?
+        // Interval measurementPeriodParams = buildMeasurementPeriod(periodStart, periodEnd);
+
+        //                    setMeasurementPeriod(
+        //                        measurementPeriodParams,
+        //                        context,
+        //                        Optional.ofNullable(measureDef.).map(List::of).orElse(List.of("Unknown
+        // Measure URL")));
+        // one Library may be linked to multiple Measures
+        var measureDefs = multiLibraryIdMeasureEngineDetails.getMeasureDefsForLibrary(libraryVersionedIdentifier);
+        List<IIdType> measureIds = measureDeftoIIdType(measureDefs);
+
+        for (MeasureDef measureDef : measureDefs) {
+            // if measure contains measure-observation, otherwise short circuit
+            if (hasMeasureObservation(measureDef)) {
+
+                // get function for measure-observation from populationDef
+                for (GroupDef groupDef : measureDef.groups()) {
+                    for (PopulationDef populationDef : groupDef.populations()) {
+                        // each measureObservation is evaluated
+                        if (populationDef.type().equals(MeasurePopulationType.MEASUREOBSERVATION)) {
+                            // get criteria input for results to get (measure-population, numerator,
+                            // denominator)
+                            var criteriaPopulationId = populationDef.getCriteriaReference();
+                            // function that will be evaluated
+                            var observationExpression = populationDef.expression();
+                            // get expression from criteriaPopulation reference
+                            String criteriaExpressionInput = groupDef.populations().stream()
+                                    .filter(t -> t.id().equals(criteriaPopulationId))
+                                    .map(PopulationDef::expression)
+                                    .findFirst()
+                                    .orElse(null);
+                            ExpressionResult expressionResult =
+                                    tryGetExpressionResult(criteriaExpressionInput, evaluationResult);
+                            // makes expression results iterable
+                            var resultsIter = getResultIterable(evaluationResult, expressionResult, subjectTypePart);
+                            // make new expression name for uniquely extracting results
+                            // this will be used in MeasureEvaluator
+                            var expressionName = criteriaPopulationId + "-" + observationExpression;
+                            // loop through measure-population results
+                            int i = 0;
+                            Map<Object, Object> functionResults = new HashMap<>();
+                            Set<Object> evaluatedResources = new HashSet<>();
+                            for (Object result : resultsIter) {
+                                Object observationResult = evaluateObservationCriteria(
+                                        result,
+                                        observationExpression,
+                                        evaluatedResources,
+                                        groupDef.isBooleanBasis(),
+                                        context);
+
+                                if (!(observationResult instanceof String
+                                        || observationResult instanceof Integer
+                                        || observationResult instanceof Double)) {
+                                    throw new IllegalArgumentException(
+                                            "continuous variable observation CQL \"MeasureObservation\" function result must be of type String, Integer or Double but was: "
+                                                    + result.getClass().getSimpleName());
+                                }
+
+                                var observationId = expressionName + "-" + i;
+                                // wrap result in Observation resource to avoid duplicate results data loss
+                                // in set object
+                                Observation observation =
+                                        wrapResultAsObservation(observationId, observationId, observationResult);
+                                // add function results to existing EvaluationResult under new expression
+                                // name
+                                // need a way to capture input parameter here too, otherwise we have no way
+                                // to connect input objects related to output object
+                                // key= input parameter to function
+                                // value= the output Observation resource containing calculated value
+                                functionResults.put(result, observation);
+                            }
+                            evaluationResult.expressionResults.put(
+                                    expressionName, new ExpressionResult(functionResults, evaluatedResources));
+                        }
+                    }
+                }
+            }
+        }
+        return measureIds;
     }
 
     public ExpressionResult tryGetExpressionResult(String expressionName, EvaluationResult evaluationResult) {

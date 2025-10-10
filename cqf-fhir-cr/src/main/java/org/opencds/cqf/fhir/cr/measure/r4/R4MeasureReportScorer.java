@@ -97,6 +97,7 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
 
         for (MeasureReportGroupComponent mrgc : measureReport.getGroup()) {
             scoreGroup(
+                    measureUrl,
                     getGroupMeasureScoring(mrgc, measureDef),
                     mrgc,
                     getGroupDef(measureDef, mrgc).isIncreaseImprovementNotation(),
@@ -156,6 +157,7 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
     }
 
     protected void scoreGroup(
+            String measureUrl,
             MeasureScoring measureScoring,
             MeasureReportGroupComponent mrgc,
             boolean isIncreaseImprovementNotation,
@@ -182,7 +184,7 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
                 break;
 
             case CONTINUOUSVARIABLE:
-                scoreContinuousVariable(measureScoring, mrgc, groupDef);
+                scoreContinuousVariable(measureUrl, mrgc, groupDef);
                 break;
             default:
                 break;
@@ -194,12 +196,15 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
     }
 
     protected void scoreContinuousVariable(
-            MeasureScoring measureScoring, MeasureReportGroupComponent mrgc, GroupDef groupDef) {
+            String measureUrl, MeasureReportGroupComponent mrgc, GroupDef groupDef) {
         // LUKETODO:  this could be null:  is it possible that any test that fails here is badly formed?
         var popDef = groupDef.getSingle(MeasurePopulationType.MEASUREOBSERVATION);
         if (popDef == null) {
-            // nothing more to do
-            //            return;
+            // In the case where we're missing a measure population definition, we don't want to
+            // throw an Exception, but we want the existing error handling to include this
+            // error in the MeasureReport output.
+            logger.warn("Measure population group has no measure population defined for measure: {}", measureUrl);
+            return;
         }
         var observationQuantity = collectQuantities(popDef.getResources());
         var aggregateMethod = groupDef.getAggregateMethod();

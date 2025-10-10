@@ -6,6 +6,7 @@ import static org.opencds.cqf.fhir.utility.VersionUtilities.codeTypeForVersion;
 import static org.opencds.cqf.fhir.utility.adapter.IAdapterFactory.forFhirVersion;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -13,8 +14,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * This class consists exclusively of static methods that assist with packaging FHIR Resources.
@@ -52,7 +51,7 @@ public class PackageHelper {
         var params = forFhirVersion(fhirVersion)
                 .createParameters((IBaseParameters) newBaseForVersion("Parameters", fhirVersion));
         if (include != null) {
-            for (String i:include) {
+            for (String i : include) {
                 params.addParameter("include", codeTypeForVersion(fhirVersion, i));
             }
         }

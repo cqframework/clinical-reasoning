@@ -512,6 +512,16 @@ public class MeasureProcessorUtils {
                                                     evaluatedResources,
                                                     groupDef.isBooleanBasis(),
                                                     context);
+
+                                            if (!(observationResult instanceof String
+                                                    || observationResult instanceof Integer
+                                                    || observationResult instanceof Double)) {
+                                                throw new IllegalArgumentException(
+                                                        "continuous variable observation CQL \"MeasureObservation\" function result must be of type String, Integer or Double but was: "
+                                                                + result.getClass()
+                                                                        .getSimpleName());
+                                            }
+
                                             var observationId = expressionName + "-" + i;
                                             // wrap result in Observation resource to avoid duplicate results data loss
                                             // in set object
@@ -616,6 +626,7 @@ public class MeasureProcessorUtils {
         }
     }
 
+    // LUKETDO:  if there's no measure observation, DON'T DO this at all
     protected Observation wrapResultAsObservation(String id, String observationName, Object result) {
 
         Observation obs = new Observation();
@@ -623,8 +634,14 @@ public class MeasureProcessorUtils {
         obs.setId(id);
         CodeableConcept cc = new CodeableConcept();
         cc.setText(observationName);
+        // LUKETODO:  if for some reason we fail to obtain an Integer result, we have an Encounter here and this fails
+        // in a rather spectacular way
+        // LUKETODO:  validate that we have the function
+        // LUKETODO:  validate the function is getting us the correct output
         obs.setValue(convertToQuantity(result));
         obs.setCode(cc);
+
+        // LUKETODO:  fix test data to not have denominator and numerator for continous variable
         return obs;
     }
 

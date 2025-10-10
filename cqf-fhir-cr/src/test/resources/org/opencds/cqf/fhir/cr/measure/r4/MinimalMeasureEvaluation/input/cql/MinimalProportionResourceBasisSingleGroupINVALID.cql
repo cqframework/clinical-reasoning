@@ -1,4 +1,4 @@
-library MinimalProportionResourceBasisSingleGroup
+library MinimalProportionResourceBasisSingleGroupINVALID
 
 using FHIR version '4.0.1'
 
@@ -34,8 +34,10 @@ define "Numerator":
             such that "CalendarAgeInYearsAt"(FHIRHelpers.ToDate(BirthDate.birthDate), start of InpatientEncounter.period) > 2
                 where "LengthInDays"(FHIRHelpers.ToInterval(InpatientEncounter.period)) < 10
 
-define function "MeasureObservation"(encounter Encounter):
-    duration in minutes of encounter.period
+// This function is DELIBERATELY incorrect to test error handling
+define function "MeasureObservation"(Encounter Encounter):
+    Encounter e
+        where (difference in days between start of e.period and end of e.period)>0
 
 define "Measure Population Exclusions":
     "Denominator Exclusion"

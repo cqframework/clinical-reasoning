@@ -187,6 +187,7 @@
                                                     <include>org.opencds.cqf.cql:*</include>
                                                     <include>org.opencds.cqf.fhir:*</include>
                                                     <include>info.cqframework:*</include>
+                                                    <include>org.cqframework:*</include>
                                                 </includes>
                                             </requireReleaseDeps>
                                         </rules>

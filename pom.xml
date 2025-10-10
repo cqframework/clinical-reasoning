@@ -114,47 +114,42 @@
 
             <!-- CQL dependencies -->
             <dependency>
-                <groupId>info.cqframework</groupId>
+                <groupId>org.cqframework</groupId>
                 <artifactId>engine</artifactId>
                 <version>${cql.version}</version>
             </dependency>
             <dependency>
-                <groupId>info.cqframework</groupId>
+                <groupId>org.cqframework</groupId>
                 <artifactId>cql-to-elm</artifactId>
                 <version>${cql.version}</version>
             </dependency>
             <dependency>
-                <groupId>info.cqframework</groupId>
+                <groupId>org.cqframework</groupId>
                 <artifactId>ucum</artifactId>
                 <version>${cql.version}</version>
             </dependency>
             <dependency>
-                <groupId>info.cqframework</groupId>
+                <groupId>org.cqframework</groupId>
                 <artifactId>engine-fhir</artifactId>
                 <version>${cql.version}</version>
             </dependency>
             <dependency>
-                <groupId>info.cqframework</groupId>
+                <groupId>org.cqframework</groupId>
                 <artifactId>quick</artifactId>
                 <version>${cql.version}</version>
             </dependency>
             <dependency>
-                <groupId>info.cqframework</groupId>
-                <artifactId>fhir-r4</artifactId>
-                <version>${cql.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>info.cqframework</groupId>
+                <groupId>org.cqframework</groupId>
                 <artifactId>elm-fhir</artifactId>
                 <version>${cql.version}</version>
             </dependency>
             <dependency>
-                <groupId>info.cqframework</groupId>
+                <groupId>org.cqframework</groupId>
                 <artifactId>cqf-fhir</artifactId>
                 <version>${cql.version}</version>
             </dependency>
             <dependency>
-                <groupId>info.cqframework</groupId>
+                <groupId>org.cqframework</groupId>
                 <artifactId>cqf-fhir-npm</artifactId>
                 <version>${cql.version}</version>
             </dependency>

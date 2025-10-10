@@ -160,7 +160,8 @@ public class Utilities {
         var writer = new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8));
         try {
             // Write the result to the output stream
-            for (Map.Entry<String, ExpressionResult> libraryEntry : result.expressionResults.entrySet()) {
+            for (Map.Entry<String, ExpressionResult> libraryEntry :
+                    result.getExpressionResults().entrySet()) {
                 String key = libraryEntry.getKey();
                 Object value = Utilities.tempConvert(libraryEntry.getValue().value());
                 writer.write(key + "=" + value);

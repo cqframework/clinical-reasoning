@@ -22,8 +22,7 @@ class RepositoryFhirModelInfoProviderTest {
     private IRepository repository;
     private IAdapterFactory adapterFactory;
     private RepositoryFhirModelInfoProvider fixture;
-    private ModelIdentifier usCoreModelId =
-            new ModelIdentifier().withId("USCore").withVersion("7.0.0");
+    private ModelIdentifier usCoreModelId = new ModelIdentifier("USCore", null, "7.0.0");
 
     @BeforeEach
     void beforeEach() {
@@ -53,7 +52,7 @@ class RepositoryFhirModelInfoProviderTest {
 
     @Test
     void testLoadModelInfo_Exception() {
-        var actual = fixture.load(new ModelIdentifier().withId("Invalid").withVersion("1.0.0"));
+        var actual = fixture.load(new ModelIdentifier("Invalid", null, "1.0.0"));
         assertNull(actual);
     }
 }

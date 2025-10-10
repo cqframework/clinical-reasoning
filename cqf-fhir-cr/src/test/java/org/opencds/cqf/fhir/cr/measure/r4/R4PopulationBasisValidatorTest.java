@@ -452,19 +452,23 @@ class R4PopulationBasisValidatorTest {
     @Nonnull
     private static EvaluationResult buildEvaluationResult(Map<String, Object> expressionResultMap) {
         final EvaluationResult evaluationResult = new EvaluationResult();
-        expressionResultMap.forEach(
-                (key, value) -> evaluationResult.expressionResults.put(key, new ExpressionResult(value, Set.of())));
+        expressionResultMap.forEach((key, value) ->
+                evaluationResult.getExpressionResults().put(key, new ExpressionResult(value, Set.of())));
         return evaluationResult;
     }
 
     @Nonnull
     private static EvaluationResult buildEvaluationResult(Object expressionResult) {
         final EvaluationResult evaluationResult = new EvaluationResult();
-        evaluationResult.expressionResults.put(
-                EXPRESSION_INITIALPOPULATION, new ExpressionResult(expressionResult, Set.of()));
-        evaluationResult.expressionResults.put(
-                EXPRESSION_DENOMINATOR, new ExpressionResult(expressionResult, Set.of()));
-        evaluationResult.expressionResults.put(EXPRESSION_NUMERATOR, new ExpressionResult(expressionResult, Set.of()));
+        evaluationResult
+                .getExpressionResults()
+                .put(EXPRESSION_INITIALPOPULATION, new ExpressionResult(expressionResult, Set.of()));
+        evaluationResult
+                .getExpressionResults()
+                .put(EXPRESSION_DENOMINATOR, new ExpressionResult(expressionResult, Set.of()));
+        evaluationResult
+                .getExpressionResults()
+                .put(EXPRESSION_NUMERATOR, new ExpressionResult(expressionResult, Set.of()));
         return evaluationResult;
     }
 }

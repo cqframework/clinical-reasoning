@@ -108,7 +108,8 @@ public class CqlFhirParametersConverter {
 
         IParametersAdapter pa = this.adapterFactory.createParameters(params);
 
-        for (Map.Entry<String, ExpressionResult> entry : evaluationResult.expressionResults.entrySet()) {
+        for (Map.Entry<String, ExpressionResult> entry :
+                evaluationResult.getExpressionResults().entrySet()) {
             String name = entry.getKey();
             Object value = entry.getValue().value();
 

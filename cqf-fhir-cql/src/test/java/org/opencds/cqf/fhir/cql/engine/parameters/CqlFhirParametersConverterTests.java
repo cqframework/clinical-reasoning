@@ -53,8 +53,8 @@ class CqlFhirParametersConverterTests {
         expected.addParameter().setName("Numerator").setValue(new BooleanType(true));
 
         EvaluationResult testData = new EvaluationResult();
-        testData.expressionResults.put("Patient", new ExpressionResult(new Patient(), null));
-        testData.expressionResults.put("Numerator", new ExpressionResult(true, null));
+        testData.getExpressionResults().put("Patient", new ExpressionResult(new Patient(), null));
+        testData.getExpressionResults().put("Numerator", new ExpressionResult(true, null));
 
         Parameters actual = (Parameters) cqlFhirParametersConverter.toFhirParameters(testData);
 
@@ -70,8 +70,8 @@ class CqlFhirParametersConverterTests {
         expected.addParameter().setName("Encounters").setValue(nullBooleanValue);
 
         EvaluationResult testData = new EvaluationResult();
-        testData.expressionResults.put("Patient", new ExpressionResult(new Patient(), null));
-        testData.expressionResults.put("Encounters", new ExpressionResult(Collections.emptyList(), null));
+        testData.getExpressionResults().put("Patient", new ExpressionResult(new Patient(), null));
+        testData.getExpressionResults().put("Encounters", new ExpressionResult(Collections.emptyList(), null));
 
         Parameters actual = (Parameters) cqlFhirParametersConverter.toFhirParameters(testData);
 
@@ -88,8 +88,8 @@ class CqlFhirParametersConverterTests {
         expected.addParameter().setName("Null").setValue(nullBooleanValue);
 
         EvaluationResult testData = new EvaluationResult();
-        testData.expressionResults.put("Patient", new ExpressionResult(new Patient(), null));
-        testData.expressionResults.put("Null", new ExpressionResult(null, null));
+        testData.getExpressionResults().put("Patient", new ExpressionResult(new Patient(), null));
+        testData.getExpressionResults().put("Null", new ExpressionResult(null, null));
 
         Parameters actual = (Parameters) cqlFhirParametersConverter.toFhirParameters(testData);
 

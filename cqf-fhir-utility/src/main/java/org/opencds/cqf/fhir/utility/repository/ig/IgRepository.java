@@ -125,6 +125,9 @@ public class IgRepository implements IRepository {
 
     private final Cache<Path, Optional<IBaseResource>> resourceCache =
             CacheBuilder.newBuilder().maximumSize(5000).build();
+    private final ResourcePathResolver pathResolver;
+    private final CompartmentResolver compartmentResolver;
+    private final Map<ResourceKey, Path> resourcePathIndex = new ConcurrentHashMap<>();
 
     // Metadata fields attached to resources that are read from the repository
     // This fields are used to determine if a resource is external, and to
@@ -186,6 +189,42 @@ public class IgRepository implements IRepository {
             .put(EncodingEnum.NDJSON, "ndjson")
             .build();
 
+    private record ResourceKey(String resourceType, String idPart) {
+        static ResourceKey from(Class<? extends IBaseResource> resourceType, String idPart) {
+            if (resourceType == null || idPart == null || idPart.isBlank()) {
+                return null;
+            }
+
+            return new ResourceKey(resourceType.getSimpleName(), idPart);
+        }
+
+        static ResourceKey from(IBaseResource resource) {
+            if (resource == null || resource.fhirType() == null || resource.fhirType().isBlank()) {
+                return null;
+            }
+
+            var idElement = resource.getIdElement();
+            if (idElement == null || !idElement.hasIdPart()) {
+                return null;
+            }
+
+            return new ResourceKey(resource.fhirType(), idElement.getIdPart());
+        }
+
+        static ResourceKey from(IIdType id, Class<? extends IBaseResource> resourceType) {
+            if (id == null || !id.hasIdPart()) {
+                return null;
+            }
+
+            var typeName = id.hasResourceType() ? id.getResourceType() : resourceType.getSimpleName();
+            return new ResourceKey(typeName, id.getIdPart());
+        }
+
+        boolean isValid() {
+            return resourceType != null && !resourceType.isBlank() && idPart != null && !idPart.isBlank();
+        }
+    }
+
     private static IParser parserForEncoding(FhirContext fhirContext, EncodingEnum encodingEnum) {
         return switch (encodingEnum) {
             case JSON -> fhirContext.newJsonParser();
@@ -229,6 +268,8 @@ public class IgRepository implements IRepository {
         this.conventions = requireNonNull(conventions, "conventions cannot be null");
         this.resourceMatcher = Repositories.getResourceMatcher(this.fhirContext);
         this.operationProvider = operationProvider;
+        this.pathResolver = new ResourcePathResolver(this.root, this.conventions, this.fhirContext);
+        this.compartmentResolver = new CompartmentResolver(this.fhirContext, this.conventions);
     }
 
     public void setOperationProvider(IRepositoryOperationProvider operationProvider) {
@@ -237,10 +278,20 @@ public class IgRepository implements IRepository {
 
     public void clearCache() {
         this.resourceCache.invalidateAll();
+        this.resourcePathIndex.clear();
     }
 
     public void clearCache(Iterable<Path> paths) {
         this.resourceCache.invalidate(paths);
+        var pathSet = new java.util.HashSet<Path>();
+        paths.forEach(pathSet::add);
+        var iterator = this.resourcePathIndex.entrySet().iterator();
+        while (iterator.hasNext()) {
+            var entry = iterator.next();
+            if (pathSet.contains(entry.getValue())) {
+                iterator.remove();
+            }
+        }
     }
 
     private boolean isExternalPath(Path path) {
@@ -280,12 +331,17 @@ public class IgRepository implements IRepository {
      *         resource.
      */
     protected <T extends IBaseResource, I extends IIdType> Path preferredPathForResource(Class<T> resourceType, I idt) {
-        var directory = directoryForResource(resourceType);
+        return preferredPathForResource(resourceType, idt, Optional.empty());
+    }
+
+    protected <T extends IBaseResource, I extends IIdType> Path preferredPathForResource(
+            Class<T> resourceType, I idt, Optional<CompartmentAssignment> assignment) {
+        var directory = this.pathResolver.preferredDirectory(resourceType, assignment);
         var fileName = fileNameForResource(
                 resourceType.getSimpleName(),
                 idt.getIdPart(),
                 this.conventions.encodingBehavior().preferredEncoding());
-        return directory.findFirst().get().resolve(fileName);
+        return directory.resolve(fileName);
     }
 
     /**
@@ -301,10 +357,59 @@ public class IgRepository implements IRepository {
     protected <T extends IBaseResource, I extends IIdType> Stream<Path> potentialPathsForResource(
             Class<T> resourceType, I id) {
 
-        var directories = directoryForResource(resourceType);
+        var key = ResourceKey.from(resourceType, id.getIdPart());
         var encodings = this.conventions.encodingBehavior().enabledEncodings();
-        return directories.flatMap(d -> encodings.stream()
-                .map(ext -> d.resolve(fileNameForResource(resourceType.getSimpleName(), id.getIdPart(), ext))));
+        var candidateNames = encodings.stream()
+                .map(ext -> fileNameForResource(resourceType.getSimpleName(), id.getIdPart(), ext))
+                .toList();
+
+        var results = new java.util.LinkedHashSet<Path>();
+        if (key != null) {
+            var cached = this.resourcePathIndex.get(key);
+            if (cached != null) {
+                results.add(cached);
+            }
+        }
+
+        var candidateDirectories = this.pathResolver.candidateDirectoriesForId(resourceType, id.getIdPart());
+        for (var directory : candidateDirectories) {
+            for (var name : candidateNames) {
+                var candidate = directory.resolve(name);
+                try {
+                    if (Files.exists(candidate)) {
+                        results.add(candidate);
+                    }
+                } catch (SecurityException ignored) {
+                    // Continue to broader search below if direct probe is not permitted.
+                }
+            }
+        }
+
+        if (!results.isEmpty()) {
+            return results.stream();
+        }
+
+        var searchDirectories = this.pathResolver.searchDirectories(resourceType);
+        for (var directory : searchDirectories) {
+            if (!Files.exists(directory)) {
+                continue;
+            }
+
+            try (var stream = Files.find(
+                    directory,
+                    Integer.MAX_VALUE,
+                    (path, attrs) -> attrs.isRegularFile()
+                            && candidateNames.contains(path.getFileName().toString()))) {
+                stream.forEach(results::add);
+            } catch (IOException e) {
+                throw new UnclassifiedServerFailureException(
+                        500,
+                        "Unable to search for resource %s under %s"
+                                .formatted(id.toUnqualifiedVersionless(), directory));
+            }
+        }
+
+        return results.stream();
     }
 
     /**
@@ -324,89 +429,6 @@ public class IgRepository implements IRepository {
         } else {
             return resourceType + "-" + name;
         }
-    }
-
-    /**
-     * Determines the directory paths for a resource category, considering compartment layout.
-     *
-     * <p>Directory selection based on layout:</p>
-     * <ul>
-     * <li>{@code CategoryLayout.FLAT}: Returns the root directory (e.g., `input/`)</li>
-     * <li>{@code CategoryLayout.DIRECTORY_PER_CATEGORY}: Returns category-specific
-     *     subdirectories (e.g., `input/resources/`, `input/vocabulary/`)</li>
-     * <li>{@code CategoryLayout.DEFINITIONAL_AND_DATA}: Returns KALM project directories
-     *     (e.g., `src/fhir/`, `tests/data/fhir/`)</li>
-     * </ul>
-     *
-     * <p>When a {@code CompartmentMode} other than {@code CompartmentMode.NONE} is used with DATA resources,
-     * compartment path is appended (e.g., `tests/data/fhir/Patient/123/`).</p>
-     *
-     * @param <T>                     The type of the FHIR resource.
-     * @param resourceType            The class representing the FHIR resource type.
-     * @return A stream of directory paths for the resource category.
-     */
-    protected <T extends IBaseResource> Stream<Path> directoriesForCategory(Class<T> resourceType) {
-        var category = ResourceCategory.forType(resourceType.getSimpleName());
-        var categoryPaths = TYPE_DIRECTORIES.rowMap().get(this.conventions.categoryLayout()).get(category).stream()
-                .map(path -> this.root.resolve(path));
-        if (category == ResourceCategory.DATA) {
-            var compartmentPath = pathForCompartment(resourceType, this.fhirContext);
-            return categoryPaths.map(path -> path.resolve(compartmentPath));
-        }
-
-        return categoryPaths;
-    }
-
-    /**
-     * Determines the directory paths for a specific resource type, including external directories
-     * for terminology resources when applicable.
-     *
-     * <p>Directory selection based on type layout:</p>
-     * <ul>
-     * <li>{@code FhirTypeLayout.FLAT}: Returns the base category directory</li>
-     * <li>{@code FhirTypeLayout.DIRECTORY_PER_TYPE}: Returns type-specific
-     *     subdirectories within the base directory (e.g., `patient/`, `observation/`)</li>
-     * </ul>
-     *
-     * <p>
-     * Example paths (based on {@code FhirTypeLayout}):
-     * </p>
-     *
-     * <pre>
-     * Standard IG: /path/to/ig/root/input/resources/[[patient/]]
-     * KALM:        /path/to/kalm/root/src/fhir/[[patient/]]
-     * </pre>
-     *
-     * <p>Special handling for terminology resources in non-KALM projects:</p>
-     * <ul>
-     * <li>Includes an additional `external/` directory for read-only terminology resources</li>
-     * <li>KALM projects use separate `src/` and `tests/` directories instead</li>
-     * </ul>
-     *
-     * @param <T>                     The type of the FHIR resource.
-     * @param resourceType            The class representing the FHIR resource type.
-     * @return A stream of directory paths for the resource type.
-     */
-    protected <T extends IBaseResource> Stream<Path> directoryForResource(Class<T> resourceType) {
-        var directories = directoriesForCategory(resourceType);
-
-        if (this.conventions.typeLayout() == FhirTypeLayout.FLAT) {
-            return directories;
-        }
-
-        var resourceDirectories =
-                directories.map(dir -> dir.resolve(resourceType.getSimpleName().toLowerCase()));
-
-        var category = ResourceCategory.forType(resourceType.getSimpleName());
-        if (category == ResourceCategory.TERMINOLOGY
-                && this.conventions.categoryLayout() != CategoryLayout.DEFINITIONAL_AND_DATA) {
-            // Non-KALM projects support "external" directory for terminology resources data
-            // that is defined outside of the main IG structure, but included for convenience.
-            // KALM projects separate this into "src" and "test" directories, so the "external" directory is not used.
-            return resourceDirectories.flatMap(dir -> Stream.of(dir, dir.resolve(EXTERNAL_DIRECTORY)));
-        }
-
-        return resourceDirectories;
     }
 
     /**
@@ -478,9 +500,17 @@ public class IgRepository implements IRepository {
                 stream.write(result.getBytes());
                 resource.setUserData(SOURCE_PATH_TAG, path);
                 this.resourceCache.put(path, Optional.of(resource));
+                indexResourceLocation(resource, path);
             }
         } catch (IOException | SecurityException e) {
             throw new UnclassifiedServerFailureException(500, "Unable to write resource to path %s".formatted(path));
+        }
+    }
+
+    private void indexResourceLocation(IBaseResource resource, Path path) {
+        var key = ResourceKey.from(resource);
+        if (key != null && key.isValid()) {
+            this.resourcePathIndex.put(key, path);
         }
     }
 
@@ -540,7 +570,7 @@ public class IgRepository implements IRepository {
      * @return Map of resource IDs to resources found in the directories.
      */
     protected <T extends IBaseResource> Map<IIdType, T> readDirectoryForResourceType(Class<T> resourceClass) {
-        var paths = this.directoryForResource(resourceClass);
+        var directories = this.pathResolver.searchDirectories(resourceClass);
 
         var resources = new ConcurrentHashMap<IIdType, T>();
         Predicate<Path> resourceFileFilter;
@@ -554,7 +584,7 @@ public class IgRepository implements IRepository {
                 break;
         }
 
-        for (var dir : paths.toList()) {
+        for (var dir : directories) {
             if (!Files.exists(dir)) {
                 continue;
             }
@@ -669,7 +699,8 @@ public class IgRepository implements IRepository {
         requireNonNull(resource, "resource cannot be null");
         requireNonNull(resource.getIdElement().getIdPart(), "resource id cannot be null");
 
-        var path = this.preferredPathForResource(resource.getClass(), resource.getIdElement());
+        var assignment = this.compartmentResolver.resolve(resource);
+        var path = this.preferredPathForResource(resource.getClass(), resource.getIdElement(), assignment);
         writeResource(resource, path);
 
         return new MethodOutcome(resource.getIdElement(), true);
@@ -710,6 +741,10 @@ public class IgRepository implements IRepository {
                                     resource.getIdElement().getVersionIdPart()));
         }
 
+        if (path != null) {
+            indexResourceLocation(resource, path);
+        }
+
         return resourceType.cast(resource);
     }
 
@@ -738,7 +773,8 @@ public class IgRepository implements IRepository {
         requireNonNull(resource, "resource cannot be null");
         requireNonNull(resource.getIdElement().getIdPart(), "resource id cannot be null");
 
-        var preferred = this.preferredPathForResource(resource.getClass(), resource.getIdElement());
+        var assignment = this.compartmentResolver.resolve(resource);
+        var preferred = this.preferredPathForResource(resource.getClass(), resource.getIdElement(), assignment);
         var actual = (Path) resource.getUserData(SOURCE_PATH_TAG);
         if (actual == null) {
             actual = preferred;
@@ -757,6 +793,7 @@ public class IgRepository implements IRepository {
                 && this.conventions.encodingBehavior().preserveEncoding()
                         == PreserveEncoding.OVERWRITE_WITH_PREFERRED_ENCODING) {
             try {
+                this.resourceCache.invalidate(actual);
                 Files.deleteIfExists(actual);
             } catch (IOException e) {
                 throw new UnclassifiedServerFailureException(500, "Couldn't change encoding for %s".formatted(actual));
@@ -795,11 +832,11 @@ public class IgRepository implements IRepository {
     public <T extends IBaseResource, I extends IIdType> MethodOutcome delete(
             Class<T> resourceType, I id, Map<String, String> headers) {
         requireNonNull(resourceType, "resourceType cannot be null");
-        requireNonNull(id, "id cannot be null");
+       requireNonNull(id, "id cannot be null");
 
-        var paths = this.potentialPathsForResource(resourceType, id);
+        var pathCandidates = this.potentialPathsForResource(resourceType, id).toList();
         boolean deleted = false;
-        for (var path : paths.toList()) {
+        for (var path : pathCandidates) {
             try {
                 deleted = Files.deleteIfExists(path);
                 if (deleted) {
@@ -812,6 +849,12 @@ public class IgRepository implements IRepository {
 
         if (!deleted) {
             throw new ResourceNotFoundException(id);
+        }
+
+        this.resourceCache.invalidate(pathCandidates);
+        var key = ResourceKey.from(resourceType, id.getIdPart());
+        if (key != null) {
+            this.resourcePathIndex.remove(key);
         }
 
         return new MethodOutcome(id);
@@ -951,25 +994,5 @@ public class IgRepository implements IRepository {
             throw new IllegalArgumentException("No operation provider found. Unable to invoke operations.");
         }
         return operationProvider.invokeOperation(this, id, resourceType, operationName, parameters);
-    }
-
-    protected String pathForCompartment(Class<? extends IBaseResource> resourceType, FhirContext fhirContext) {
-        if (this.conventions.categoryLayout() == CategoryLayout.DEFINITIONAL_AND_DATA) {
-            if (!this.conventions
-                    .compartmentMode()
-                    .resourceBelongsToCompartment(fhirContext, resourceType.getSimpleName())) {
-                return "shared";
-            }
-
-            return this.conventions.compartmentMode().name().toLowerCase();
-        } else {
-            if (!this.conventions
-                    .compartmentMode()
-                    .resourceBelongsToCompartment(fhirContext, resourceType.getSimpleName())) {
-                return "";
-            }
-
-            return this.conventions.compartmentMode().name().toLowerCase();
-        }
     }
 }

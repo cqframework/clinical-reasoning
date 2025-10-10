@@ -37,7 +37,7 @@ public class MeasureValidationUtils {
     protected static void validatePopulation(
             MeasureReport.MeasureReportGroupPopulationComponent population, int count) {
         assertEquals(
-            count,
+                count,
                 population.getCount(),
                 "expected count for population \"%s\" did not match".formatted(population.getId()));
     }

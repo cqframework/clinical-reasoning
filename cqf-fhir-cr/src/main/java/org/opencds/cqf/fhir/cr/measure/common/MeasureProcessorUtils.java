@@ -441,30 +441,19 @@ public class MeasureProcessorUtils {
                     // standard CQL expression results:  if there are
                     var evaluationResult = evaluationResultsForMultiLib.getResultFor(libraryVersionedIdentifier);
 
-                    final List<? extends IIdType> measureIds;
-                    // An evaluationResult of null is possible in the case where there was an exception during
-                    // evaluation,
-                    // but we must support partial failures and partial successes, so we continue processing.
-                    if (evaluationResult == null) {
-                        measureIds =
-                                multiLibraryIdMeasureEngineDetails.getMeasureIdsForLibrary(libraryVersionedIdentifier);
-                    } else {
-                        measureIds = continuousVariableEvaluation(
-                                context,
-                                multiLibraryIdMeasureEngineDetails,
-                                libraryVersionedIdentifier,
-                                libraryIdentifiers,
-                                evaluationResult,
-                                subjectTypePart);
-                    }
+                    var measureDefs =
+                            multiLibraryIdMeasureEngineDetails.getMeasureDefsForLibrary(libraryVersionedIdentifier);
 
-                    resultsBuilder.addResults(measureIds, subjectId, evaluationResult);
+                    continuousVariableEvaluation(
+                            context, measureDefs, libraryIdentifiers, evaluationResult, subjectTypePart);
+
+                    resultsBuilder.addResults(measureDefs, subjectId, evaluationResult);
 
                     Optional.ofNullable(evaluationResultsForMultiLib.getExceptionFor(libraryVersionedIdentifier))
                             .ifPresent(exception -> {
                                 var error = EXCEPTION_FOR_SUBJECT_ID_MESSAGE_TEMPLATE.formatted(
                                         subjectId, exception.getMessage());
-                                resultsBuilder.addErrors(measureIds, error);
+                                resultsBuilder.addErrors(measureDefs, error);
                                 logger.error(error, exception);
                             });
                 }
@@ -472,9 +461,9 @@ public class MeasureProcessorUtils {
             } catch (Exception e) {
                 // If there's any error we didn't anticipate, catch it here:
                 var error = EXCEPTION_FOR_SUBJECT_ID_MESSAGE_TEMPLATE.formatted(subjectId, e.getMessage());
-                var measureIds = measureDeftoIIdType(multiLibraryIdMeasureEngineDetails.getAllMeasureIds());
+                var measureDefs = multiLibraryIdMeasureEngineDetails.getAllMeasureDefs();
 
-                resultsBuilder.addErrors(measureIds, error);
+                resultsBuilder.addErrors(measureDefs, error);
                 logger.error(error, e);
             }
         }
@@ -484,16 +473,16 @@ public class MeasureProcessorUtils {
 
     // LUKETODO:  refactor this a lot
     @Nonnull
-    private List<IIdType> continuousVariableEvaluation(
+    private void continuousVariableEvaluation(
             CqlEngine context,
-            MultiLibraryIdMeasureEngineDetails multiLibraryIdMeasureEngineDetails,
-            VersionedIdentifier libraryVersionedIdentifier,
+            List<MeasureDef> measureDefs,
             List<VersionedIdentifier> libraryIdentifiers,
             EvaluationResult evaluationResult,
             String subjectTypePart) {
         // measure Observation Path, have to re-initialize everything again
         // TODO: extend library evaluated context so library initialization isn't having to be built for
         // both, and takes advantage of caching
+        // LUKETODO:  figure out how to skip this if we're not doing continuous variable
         var compiledLibraries = getCompiledLibraries(libraryIdentifiers, context);
 
         var libraries =
@@ -512,9 +501,6 @@ public class MeasureProcessorUtils {
         //                        Optional.ofNullable(measureDef.).map(List::of).orElse(List.of("Unknown
         // Measure URL")));
         // one Library may be linked to multiple Measures
-        var measureDefs = multiLibraryIdMeasureEngineDetails.getMeasureDefsForLibrary(libraryVersionedIdentifier);
-        List<IIdType> measureIds = measureDeftoIIdType(measureDefs);
-
         for (MeasureDef measureDef : measureDefs) {
             // if measure contains measure-observation, otherwise short circuit
             if (hasMeasureObservation(measureDef)) {
@@ -535,8 +521,14 @@ public class MeasureProcessorUtils {
                                     .map(PopulationDef::expression)
                                     .findFirst()
                                     .orElse(null);
-                            ExpressionResult expressionResult =
+                            Optional<ExpressionResult> optExpressionResult =
                                     tryGetExpressionResult(criteriaExpressionInput, evaluationResult);
+
+                            // LUKETODO:  better pattern
+                            if (optExpressionResult.isEmpty()) {
+                                continue;
+                            }
+                            final ExpressionResult expressionResult = optExpressionResult.get();
                             // makes expression results iterable
                             var resultsIter = getResultIterable(evaluationResult, expressionResult, subjectTypePart);
                             // make new expression name for uniquely extracting results
@@ -582,12 +574,16 @@ public class MeasureProcessorUtils {
                 }
             }
         }
-        return measureIds;
     }
 
-    public ExpressionResult tryGetExpressionResult(String expressionName, EvaluationResult evaluationResult) {
-        if (evaluationResult == null || expressionName == null) {
-            throw new InvalidRequestException("evaluationResult is null: " + expressionName);
+    public Optional<ExpressionResult> tryGetExpressionResult(String expressionName, EvaluationResult evaluationResult) {
+        // LUKETODO:  add more context to this exception
+        if (expressionName == null) {
+            throw new InvalidRequestException("expressionName is null");
+        }
+
+        if (evaluationResult == null) {
+            return Optional.empty();
         }
 
         final Map<String, ExpressionResult> expressionResults = evaluationResult.expressionResults;
@@ -596,7 +592,7 @@ public class MeasureProcessorUtils {
             throw new InvalidRequestException("Could not find expression result for expression: " + expressionName);
         }
 
-        return evaluationResult.expressionResults.get(expressionName);
+        return Optional.of(evaluationResult.expressionResults.get(expressionName));
     }
 
     public List<CompiledLibrary> getCompiledLibraries(List<VersionedIdentifier> ids, CqlEngine context) {
@@ -684,6 +680,7 @@ public class MeasureProcessorUtils {
         return q;
     }
 
+    // LUKETODO:  how do we handle DSTU3 and R4 interchangeably here?
     private List<IIdType> measureDeftoIIdType(List<MeasureDef> measureDefs) {
         return measureDefs.stream()
                 .map(t -> new IdType(t.id()))

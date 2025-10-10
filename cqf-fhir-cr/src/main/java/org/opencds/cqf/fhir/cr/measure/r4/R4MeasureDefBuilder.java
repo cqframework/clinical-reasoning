@@ -23,7 +23,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Element;
-import org.hl7.fhir.r4.model.Enumerations.FHIRAllTypes;
+import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Expression;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Measure;

@@ -164,7 +164,7 @@ public class R4MeasureProcessor {
         final IIdType measureId = measure.getIdElement().toUnqualifiedVersionless();
         // populate results from Library $evaluate
         final Map<String, EvaluationResult> resultForThisMeasure =
-                compositeEvaluationResultsPerMeasure.processMeasureForSuccessOrFailure(measureId, measureDef);
+                compositeEvaluationResultsPerMeasure.processMeasureForSuccessOrFailure(measureDef);
 
         measureProcessorUtils.processResults(
                 resultForThisMeasure,

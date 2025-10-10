@@ -17,11 +17,7 @@ public class PopulationDef {
     protected Set<String> subjects;
     protected Map<String, Set<Object>> subjectResources = new HashMap<>();
 
-    public PopulationDef(
-            String id,
-            ConceptDef code,
-            MeasurePopulationType measurePopulationType,
-            String expression) {
+    public PopulationDef(String id, ConceptDef code, MeasurePopulationType measurePopulationType, String expression) {
         this(id, code, measurePopulationType, expression, null);
     }
 

@@ -2,6 +2,8 @@ package org.opencds.cqf.fhir.cr.measure.common;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.StringJoiner;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 
 public class MeasureDef {
@@ -54,5 +56,34 @@ public class MeasureDef {
 
     public void addError(String error) {
         this.errors.add(error);
+    }
+
+    // We need to limit the contract of equality to id, url, and version only
+    @Override
+    public boolean equals(Object other) {
+        if (other == null || getClass() != other.getClass()) {
+            return false;
+        }
+        MeasureDef that = (MeasureDef) other;
+        return Objects.equals(id, that.id) && Objects.equals(url, that.url) && Objects.equals(version, that.version);
+    }
+
+    // We need to limit the contract of equality to id, url, and version only
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, url, version);
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", MeasureDef.class.getSimpleName() + "[", "]")
+                .add("id='" + id + "'")
+                .add("url='" + url + "'")
+                .add("version='" + version + "'")
+                .add("defaultMeasurementPeriod=" + defaultMeasurementPeriod)
+                .add("groups=" + groups.size())
+                .add("sdes=" + sdes.size())
+                .add("errors=" + errors)
+                .toString();
     }
 }

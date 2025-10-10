@@ -3,10 +3,7 @@ package org.opencds.cqf.fhir.cr.measure.common;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ListMultimap;
 import java.util.List;
-import java.util.Objects;
 import org.hl7.elm.r1.VersionedIdentifier;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.IdType;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 
 /**
@@ -31,14 +28,6 @@ public class MultiLibraryIdMeasureEngineDetails {
         return List.copyOf(libraryIdToMeasureDef.keySet());
     }
 
-    public List<? extends IIdType> getMeasureIdsForLibrary(VersionedIdentifier libraryId) {
-        return getMeasureDefsForLibrary(libraryId).stream()
-                .filter(Objects::nonNull)
-                .map(MeasureDef::id)
-                .map(IdType::new)
-                .toList();
-    }
-
     public List<MeasureDef> getMeasureDefsForLibrary(VersionedIdentifier libraryId) {
         return libraryIdToMeasureDef.get(libraryId);
     }
@@ -47,7 +36,7 @@ public class MultiLibraryIdMeasureEngineDetails {
         return new Builder(engine);
     }
 
-    public List<MeasureDef> getAllMeasureIds() {
+    public List<MeasureDef> getAllMeasureDefs() {
         return List.copyOf(libraryIdToMeasureDef.values());
     }
 

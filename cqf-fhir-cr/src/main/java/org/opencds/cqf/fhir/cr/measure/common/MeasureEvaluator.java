@@ -145,11 +145,8 @@ public class MeasureEvaluator {
     }
 
     protected PopulationDef evaluatePopulationMembership(
-        String subjectType,
-        String subjectId,
-        PopulationDef inclusionDef,
-        EvaluationResult evaluationResult) {
-        return evaluatePopulationMembership(subjectType, subjectId, inclusionDef, evaluationResult);
+            String subjectType, String subjectId, PopulationDef inclusionDef, EvaluationResult evaluationResult) {
+        return evaluatePopulationMembership(subjectType, subjectId, inclusionDef, evaluationResult, null);
     }
 
     protected PopulationDef evaluatePopulationMembership(
@@ -310,13 +307,10 @@ public class MeasureEvaluator {
         R4MeasureScoringTypePopulations.validateScoringTypePopulations(
                 groupDef.populations().stream().map(PopulationDef::type).toList(), MeasureScoring.CONTINUOUSVARIABLE);
 
-        initialPopulation =
-                evaluatePopulationMembership(subjectType, subjectId, initialPopulation, evaluationResult);
-        measurePopulation =
-                evaluatePopulationMembership(subjectType, subjectId, measurePopulation, evaluationResult);
+        initialPopulation = evaluatePopulationMembership(subjectType, subjectId, initialPopulation, evaluationResult);
+        measurePopulation = evaluatePopulationMembership(subjectType, subjectId, measurePopulation, evaluationResult);
         // Evaluate Population Expressions
-        measurePopulation =
-                evaluatePopulationMembership(subjectType, subjectId, measurePopulation, evaluationResult);
+        measurePopulation = evaluatePopulationMembership(subjectType, subjectId, measurePopulation, evaluationResult);
         if (measurePopulation != null && initialPopulation != null) {
             if (applyScoring) {
                 // verify initial-population are in measure-population

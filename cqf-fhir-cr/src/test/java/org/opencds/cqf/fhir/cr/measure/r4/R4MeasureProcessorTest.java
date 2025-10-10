@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.util.List;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
-import org.hl7.fhir.r4.model.ResourceType;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
@@ -16,8 +15,9 @@ import org.opencds.cqf.fhir.cr.measure.r4.MultiMeasure.Given;
 
 class R4MeasureProcessorTest {
     private static final Given GIVEN_REPO = MultiMeasure.given().repositoryFor("MinimalMeasureEvaluation");
-    private static final IdType MINIMAL_COHORT_BOOLEAN_BASIS_SINGLE_GROUP =
-            new IdType(ResourceType.Measure.name(), "MinimalCohortBooleanBasisSingleGroup");
+    private static final MeasureDef MINIMAL_COHORT_BOOLEAN_BASIS_SINGLE_GROUP = buildMeasureDef(
+            "Measure/MinimalCohortBooleanBasisSingleGroup",
+            "http://example.com/Measure/MinimalCohortBooleanBasisSingleGroup");
     private static final String SUBJECT_ID = "Patient/female-1914";
 
     // This test could probably be improved with better data and more assertions, but it's to
@@ -32,16 +32,14 @@ class R4MeasureProcessorTest {
 
         var results = r4MeasureProcessor.evaluateMultiMeasureIdsWithCqlEngine(
                 List.of(SUBJECT_ID),
-                List.of(MINIMAL_COHORT_BOOLEAN_BASIS_SINGLE_GROUP),
+                List.of(new IdType(MINIMAL_COHORT_BOOLEAN_BASIS_SINGLE_GROUP.id())),
                 null,
                 null,
                 new Parameters(),
                 cqlEngine);
 
         assertNotNull(results);
-        var measureDef = new MeasureDef("", "", "", List.of(), List.of());
-        var evaluationResults =
-                results.processMeasureForSuccessOrFailure(MINIMAL_COHORT_BOOLEAN_BASIS_SINGLE_GROUP, measureDef);
+        var evaluationResults = results.processMeasureForSuccessOrFailure(MINIMAL_COHORT_BOOLEAN_BASIS_SINGLE_GROUP);
 
         assertNotNull(evaluationResults);
 
@@ -56,5 +54,10 @@ class R4MeasureProcessorTest {
 
         var evaluatedResources = expressionResult.evaluatedResources();
         assertEquals(1, evaluatedResources.size());
+    }
+
+    // LUKETODO:  util
+    private static MeasureDef buildMeasureDef(String id, String url) {
+        return new MeasureDef(id, url, null, List.of(), List.of());
     }
 }

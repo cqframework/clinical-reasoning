@@ -101,6 +101,7 @@ public class Dstu3MeasureProcessor {
         // measureProcessorUtils.setMeasurementPeriod(), otherwise, we get an NPE.
         var measureLibraryIdEngineDetails = buildLibraryIdEngineDetails(measure, parameters, context);
 
+        // LUKETODO:  can we get rid of this?
         // set measurement Period from CQL if operation parameters are empty
         measureProcessorUtils.setMeasurementPeriod(
                 measurementPeriodParams,
@@ -118,7 +119,7 @@ public class Dstu3MeasureProcessor {
 
             // Process Criteria Expression Results
             measureProcessorUtils.processResults(
-                    results.processMeasureForSuccessOrFailure(measure.getIdElement(), measureDef),
+                    results.processMeasureForSuccessOrFailure(measureDef),
                     measureDef,
                     evalType,
                     measureEvaluationOptions.getApplyScoringSetMembership(),

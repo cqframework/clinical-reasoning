@@ -215,6 +215,11 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
             return null;
         }
 
+        if (method == null || method.isEmpty()) {
+            throw new InvalidRequestException(
+                    "Aggregate method must be provided for continuous variable scoring, but is null.");
+        }
+
         // assume all quantities share the same unit/system/code
         Quantity base = quantities.get(0);
         String unit = base.getUnit();

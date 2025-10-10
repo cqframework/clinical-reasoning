@@ -6,6 +6,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -149,31 +150,31 @@ public record IgConventions(
             // or more directories. If more directories exist, and the directory name is not a
             // FHIR type, then we have a compartment directory.
             if (tests.toFile().exists()) {
-                var potentialCompartments = FHIR_TYPE_NAMES.stream()
+                var compartmentSelection = FHIR_TYPE_NAMES.stream()
                         .map(tests::resolve)
-                        .filter(x -> x.toFile().exists());
-
-                // Check if any of the potential compartment directories
-                // have subdirectories that are not FHIR types (e.g. "input/tests/patient/test1).
-                var compartment = potentialCompartments
-                        .flatMap(IgConventions::listFiles)
-                        .filter(Files::isDirectory)
-                        .filter(f -> !matchesAnyResourceType(f))
+                        .filter(Files::exists)
+                        .map(compartmentDir -> Map.entry(
+                                compartmentDir,
+                                listFiles(compartmentDir)
+                                        .filter(Files::isDirectory)
+                                        .filter(f -> !matchesAnyResourceType(f))
+                                        .findFirst()
+                                        .orElse(null)))
+                        .filter(entry -> entry.getValue() != null)
                         .findFirst()
-                        .orElse(categoryPath);
+                        .orElse(null);
 
-                // If we found a compartment directory, we need to determine its type.
-                if (!compartment.equals(categoryPath)) {
+                if (compartmentSelection != null) {
+                    var compartmentDir = compartmentSelection.getKey();
+                    var discoveredCategory = compartmentSelection.getValue();
                     compartmentMode =
-                            CompartmentMode.fromType(compartment.getFileName().toString());
+                            CompartmentMode.fromType(compartmentDir.getFileName().toString());
                     if (compartmentMode == CompartmentMode.NONE) {
                         throw new IllegalArgumentException(
-                                "The compartment directory does not match any known compartment type: " + compartment);
+                                "The compartment directory does not match any known compartment type: "
+                                        + compartmentDir);
                     }
-                }
-
-                if (compartmentMode != CompartmentMode.NONE) {
-                    categoryPath = compartment;
+                    categoryPath = discoveredCategory;
                 }
             }
         }

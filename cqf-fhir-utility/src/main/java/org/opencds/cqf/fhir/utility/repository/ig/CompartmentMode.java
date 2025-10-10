@@ -58,7 +58,7 @@ public enum CompartmentMode {
         return !compartmentSearchParams(fhirContext, resourceType).isEmpty();
     }
 
-    private Set<RuntimeSearchParam> compartmentSearchParams(FhirContext fhirContext, String resourceType) {
+    public Set<RuntimeSearchParam> compartmentSearchParams(FhirContext fhirContext, String resourceType) {
         var compartmentMap = compartmentMembershipCache.row(this.type);
         if (compartmentMap.containsKey(resourceType)) {
             return compartmentMap.get(resourceType);

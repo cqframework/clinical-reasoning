@@ -1,18 +1,26 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupPopulationComponent;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupStratifierComponent;
 import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupComponent;
 import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupPopulationComponent;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Quantity;
 import org.opencds.cqf.fhir.cr.measure.common.BaseMeasureReportScorer;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
+import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorUtils;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Evaluation of Measure Report Data showing raw CQL criteria results compared to resulting Measure Report.
@@ -67,6 +75,8 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
  */
 public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport> {
 
+    private static final Logger logger = LoggerFactory.getLogger(MeasureProcessorUtils.class);
+
     private static final String NUMERATOR = "numerator";
     private static final String DENOMINATOR = "denominator";
     private static final String DENOMINATOR_EXCLUSION = "denominator-exclusion";
@@ -87,9 +97,11 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
 
         for (MeasureReportGroupComponent mrgc : measureReport.getGroup()) {
             scoreGroup(
+                    measureUrl,
                     getGroupMeasureScoring(mrgc, measureDef),
                     mrgc,
-                    getGroupDef(measureDef, mrgc).isIncreaseImprovementNotation());
+                    getGroupDef(measureDef, mrgc).isIncreaseImprovementNotation(),
+                    getGroupDef(measureDef, mrgc));
         }
     }
 
@@ -145,7 +157,11 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
     }
 
     protected void scoreGroup(
-            MeasureScoring measureScoring, MeasureReportGroupComponent mrgc, boolean isIncreaseImprovementNotation) {
+            String measureUrl,
+            MeasureScoring measureScoring,
+            MeasureReportGroupComponent mrgc,
+            boolean isIncreaseImprovementNotation,
+            GroupDef groupDef) {
 
         switch (measureScoring) {
             case PROPORTION:
@@ -166,6 +182,10 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
                     }
                 }
                 break;
+
+            case CONTINUOUSVARIABLE:
+                scoreContinuousVariable(measureUrl, mrgc, groupDef);
+                break;
             default:
                 break;
         }
@@ -173,6 +193,106 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
         for (MeasureReportGroupStratifierComponent stratifierComponent : mrgc.getStratifier()) {
             scoreStratifier(measureScoring, stratifierComponent);
         }
+    }
+
+    protected void scoreContinuousVariable(String measureUrl, MeasureReportGroupComponent mrgc, GroupDef groupDef) {
+        var popDef = groupDef.getSingle(MeasurePopulationType.MEASUREOBSERVATION);
+        if (popDef == null) {
+            // In the case where we're missing a measure population definition, we don't want to
+            // throw an Exception, but we want the existing error handling to include this
+            // error in the MeasureReport output.
+            logger.warn("Measure population group has no measure population defined for measure: {}", measureUrl);
+            return;
+        }
+        var observationQuantity = collectQuantities(popDef.getResources());
+        var aggregateMethod = groupDef.getAggregateMethod();
+        mrgc.setMeasureScore(aggregate(observationQuantity, aggregateMethod));
+    }
+
+    public static Quantity aggregate(List<Quantity> quantities, String method) {
+        if (quantities == null || quantities.isEmpty()) {
+            return null;
+        }
+
+        if (method == null || method.isEmpty()) {
+            throw new InvalidRequestException(
+                    "Aggregate method must be provided for continuous variable scoring, but is null.");
+        }
+
+        // assume all quantities share the same unit/system/code
+        Quantity base = quantities.get(0);
+        String unit = base.getUnit();
+        String system = base.getSystem();
+        String code = base.getCode();
+
+        double result;
+
+        switch (method.toLowerCase()) {
+            case "sum":
+                result = quantities.stream()
+                        .mapToDouble(q -> q.getValue().doubleValue())
+                        .sum();
+                break;
+            case "max":
+                result = quantities.stream()
+                        .mapToDouble(q -> q.getValue().doubleValue())
+                        .max()
+                        .orElse(Double.NaN);
+                break;
+            case "min":
+                result = quantities.stream()
+                        .mapToDouble(q -> q.getValue().doubleValue())
+                        .min()
+                        .orElse(Double.NaN);
+                break;
+            case "avg":
+                result = quantities.stream()
+                        .mapToDouble(q -> q.getValue().doubleValue())
+                        .average()
+                        .orElse(Double.NaN);
+                break;
+            case "count":
+                result = quantities.size();
+                break;
+            case "median":
+                List<Double> sorted = quantities.stream()
+                        .map(q -> q.getValue().doubleValue())
+                        .sorted()
+                        .toList();
+                int n = sorted.size();
+                if (n % 2 == 1) {
+                    result = sorted.get(n / 2);
+                } else {
+                    result = (sorted.get(n / 2 - 1) + sorted.get(n / 2)) / 2.0;
+                }
+                break;
+            default:
+                throw new IllegalArgumentException("Unsupported aggregation method: " + method);
+        }
+
+        return new Quantity().setValue(result).setUnit(unit).setSystem(system).setCode(code);
+    }
+
+    public List<Quantity> collectQuantities(Set<Object> resources) {
+        List<Quantity> quantities = new ArrayList<>();
+
+        for (Object resource : resources) {
+            if (resource instanceof Map<?, ?> map) {
+                for (Object value : map.values()) {
+                    if (value instanceof Observation obs) {
+                        if (obs.hasValueQuantity()) {
+                            // LUKETODO:  get rid of this during final cleanup
+                            logger.info(
+                                    "1234: observation value quantity: {}",
+                                    obs.getValueQuantity().getValue().doubleValue());
+                            quantities.add(obs.getValueQuantity());
+                        }
+                    }
+                }
+            }
+        }
+
+        return quantities;
     }
 
     protected void scoreStratum(MeasureScoring measureScoring, StratifierGroupComponent stratum) {

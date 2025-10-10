@@ -118,7 +118,7 @@ public class Dstu3MeasureProcessor {
 
             // Process Criteria Expression Results
             measureProcessorUtils.processResults(
-                    results.processMeasureForSuccessOrFailure(measure.getIdElement(), measureDef),
+                    results.processMeasureForSuccessOrFailure(measureDef),
                     measureDef,
                     evalType,
                     measureEvaluationOptions.getApplyScoringSetMembership(),
@@ -140,9 +140,10 @@ public class Dstu3MeasureProcessor {
 
         final LibraryEngine libraryEngine = getLibraryEngine(parameters, libraryVersionIdentifier, context);
 
+        var measureDef = new Dstu3MeasureDefBuilder().build(measure);
+
         return MultiLibraryIdMeasureEngineDetails.builder(libraryEngine)
-                .addLibraryIdToMeasureId(
-                        new VersionedIdentifier().withId(libraryVersionIdentifier.getId()), measure.getIdElement())
+                .addLibraryIdToMeasureId(new VersionedIdentifier().withId(libraryVersionIdentifier.getId()), measureDef)
                 .build();
     }
 

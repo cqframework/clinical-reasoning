@@ -505,8 +505,6 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
 
         if (measurementPeriod != null) {
             report.setPeriod(getPeriod(measurementPeriod));
-        } else if (measureDef.getDefaultMeasurementPeriod() != null) {
-            report.setPeriod(getPeriod(measureDef.getDefaultMeasurementPeriod()));
         }
 
         report.setMeasure(new Reference(measure.getId()));

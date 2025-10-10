@@ -6,23 +6,39 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import org.apache.commons.lang3.tuple.Pair;
+import org.cqframework.cql.cql2elm.CqlCompilerException;
+import org.cqframework.cql.cql2elm.CqlIncludeException;
+import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.hl7.elm.r1.FunctionDef;
 import org.hl7.elm.r1.IntervalTypeSpecifier;
 import org.hl7.elm.r1.NamedTypeSpecifier;
 import org.hl7.elm.r1.ParameterDef;
 import org.hl7.elm.r1.VersionedIdentifier;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Encounter;
+import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Period;
+import org.hl7.fhir.r4.model.Quantity;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.EvaluationResultsForMultiLib;
+import org.opencds.cqf.cql.engine.execution.ExpressionResult;
 import org.opencds.cqf.cql.engine.execution.Libraries;
 import org.opencds.cqf.cql.engine.execution.Variable;
 import org.opencds.cqf.cql.engine.runtime.Date;
@@ -94,14 +110,22 @@ public class MeasureProcessorUtils {
                 PopulationDef measureObservation = groupDef.getSingle(MeasurePopulationType.MEASUREOBSERVATION);
 
                 // Inject MeasurePopulation results into Measure Observation Function
-                for (Object resource : measurePopulation.getResources()) {
-                    Object observationResult = evaluateObservationCriteria(
-                            resource,
-                            measureObservation.expression(),
-                            measureObservation.getEvaluatedResources(),
-                            groupDef.isBooleanBasis(),
-                            context);
-                    measureObservation.addResource(observationResult);
+                Map<String, Set<Object>> subjectResources = measurePopulation.getSubjectResources();
+
+                for (Map.Entry<String, Set<Object>> entry : subjectResources.entrySet()) {
+                    String subjectId = entry.getKey();
+                    Set<Object> resourcesForSubject = entry.getValue();
+
+                    for (Object resource : resourcesForSubject) {
+                        Object observationResult = evaluateObservationCriteria(
+                                resource,
+                                measureObservation.expression(),
+                                measureObservation.getEvaluatedResources(),
+                                groupDef.isBooleanBasis(),
+                                context);
+                        measureObservation.addResource(observationResult);
+                        measureObservation.addResource(subjectId, observationResult);
+                    }
                 }
             }
         }
@@ -330,6 +354,20 @@ public class MeasureProcessorUtils {
                         .push(new Variable(functionDef.getOperand().get(0).getName()).withValue(resource));
             }
             result = context.getEvaluationVisitor().visitExpression(ed.getExpression(), context.getState());
+
+            // LUKETODO:  get rid of this during final cleanup
+            String id;
+            Period period;
+            if (resource instanceof Encounter encounter) {
+                id = encounter.getId();
+                period = encounter.getPeriod();
+            } else {
+                id = null;
+                period = null;
+            }
+            logger.info("id: {}, period: {}, expression result: {}", id, printPeriod(period), result);
+            // wrap result as Observation
+
         } finally {
             context.getState().popActivationFrame();
         }
@@ -337,6 +375,17 @@ public class MeasureProcessorUtils {
         captureEvaluatedResources(outEvaluatedResources, context);
 
         return result;
+    }
+
+    private static final DateFormat DATE_FORMAT = new SimpleDateFormat("HH:mm");
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm:ssXXX");
+
+    private String printPeriod(Period period) {
+        if (period == null) {
+            return "null";
+        }
+        return "start: %s, finish: %s"
+                .formatted(DATE_FORMAT.format(period.getStart()), DATE_FORMAT.format(period.getEnd()));
     }
 
     /**
@@ -388,19 +437,22 @@ public class MeasureProcessorUtils {
                 for (var libraryVersionedIdentifier : libraryIdentifiers) {
                     validateEvaluationResultExistsForIdentifier(
                             libraryVersionedIdentifier, evaluationResultsForMultiLib);
-
+                    // standard CQL expression results:  if there are
                     var evaluationResult = evaluationResultsForMultiLib.getResultFor(libraryVersionedIdentifier);
 
-                    var measureIds =
-                            multiLibraryIdMeasureEngineDetails.getMeasureIdsForLibrary(libraryVersionedIdentifier);
+                    var measureDefs =
+                            multiLibraryIdMeasureEngineDetails.getMeasureDefsForLibrary(libraryVersionedIdentifier);
 
-                    resultsBuilder.addResults(measureIds, subjectId, evaluationResult);
+                    continuousVariableEvaluation(
+                            context, measureDefs, libraryIdentifiers, evaluationResult, subjectTypePart);
+
+                    resultsBuilder.addResults(measureDefs, subjectId, evaluationResult);
 
                     Optional.ofNullable(evaluationResultsForMultiLib.getExceptionFor(libraryVersionedIdentifier))
                             .ifPresent(exception -> {
                                 var error = EXCEPTION_FOR_SUBJECT_ID_MESSAGE_TEMPLATE.formatted(
                                         subjectId, exception.getMessage());
-                                resultsBuilder.addErrors(measureIds, error);
+                                resultsBuilder.addErrors(measureDefs, error);
                                 logger.error(error, exception);
                             });
                 }
@@ -408,9 +460,9 @@ public class MeasureProcessorUtils {
             } catch (Exception e) {
                 // If there's any error we didn't anticipate, catch it here:
                 var error = EXCEPTION_FOR_SUBJECT_ID_MESSAGE_TEMPLATE.formatted(subjectId, e.getMessage());
-                var measureIds = multiLibraryIdMeasureEngineDetails.getAllMeasureIds();
+                var measureDefs = multiLibraryIdMeasureEngineDetails.getAllMeasureDefs();
 
-                resultsBuilder.addErrors(measureIds, error);
+                resultsBuilder.addErrors(measureDefs, error);
                 logger.error(error, e);
             }
         }
@@ -418,10 +470,281 @@ public class MeasureProcessorUtils {
         return resultsBuilder.build();
     }
 
+    // LUKETODO:  new class with unit tests?
+    // LUKETODO:  refactor this a lot
+    private void continuousVariableEvaluation(
+            CqlEngine context,
+            List<MeasureDef> measureDefs,
+            List<VersionedIdentifier> libraryIdentifiers,
+            EvaluationResult evaluationResult,
+            String subjectTypePart) {
+
+        final List<MeasureDef> measureDefsWithMeasureObservations = measureDefs.stream()
+                // if measure contains measure-observation, otherwise short circuit
+                .filter(MeasureProcessorUtils::hasMeasureObservation)
+                .toList();
+
+        if (measureDefsWithMeasureObservations.isEmpty()) {
+            // Don't need to do anything if there are no measure observations to process
+            return;
+        }
+
+        // measure Observation Path, have to re-initialize everything again
+        // TODO: extend library evaluated context so library initialization isn't having to be built for
+        // both, and takes advantage of caching
+        // LUKETODO:  figure out how to reuse this pattern:
+        var compiledLibraries = getCompiledLibraries(libraryIdentifiers, context);
+
+        var libraries =
+                compiledLibraries.stream().map(CompiledLibrary::getLibrary).toList();
+
+        // Add back the libraries to the stack, since we popped them off during CQL
+        context.getState().init(libraries);
+
+        // Measurement Period: operation parameter defined measurement period
+        // this necessary?
+        // Interval measurementPeriodParams = buildMeasurementPeriod(periodStart, periodEnd);
+
+        //                    setMeasurementPeriod(
+        //                        measurementPeriodParams,
+        //                        context,
+        //                        Optional.ofNullable(measureDef.).map(List::of).orElse(List.of("Unknown
+        // Measure URL")));
+        // one Library may be linked to multiple Measures
+        for (MeasureDef measureDefWithMeasureObservations : measureDefsWithMeasureObservations) {
+
+            // get function for measure-observation from populationDef
+            for (GroupDef groupDef : measureDefWithMeasureObservations.groups()) {
+
+                final List<PopulationDef> measureObservationPopulations = groupDef.populations().stream()
+                        .filter(populationDef -> MeasurePopulationType.MEASUREOBSERVATION.equals(populationDef.type()))
+                        .toList();
+                for (PopulationDef populationDef : measureObservationPopulations) {
+                    // each measureObservation is evaluated
+                    var results = processMeasureObservation(
+                            context, evaluationResult, subjectTypePart, groupDef, populationDef);
+
+                    // LUKETODO: this is a little less gross but far from ideal
+                    for (MeasureObservationResult result : results) {
+                        evaluationResult.expressionResults.put(result.expressionName, result.expressionResult);
+                    }
+                }
+            }
+        }
+    }
+
+    record MeasureObservationResult(String expressionName, ExpressionResult expressionResult) {}
+
+    // LUKETODO:  javadoc
+    private List<MeasureObservationResult> processMeasureObservation(
+            CqlEngine context,
+            EvaluationResult evaluationResult,
+            String subjectTypePart,
+            GroupDef groupDef,
+            PopulationDef populationDef) {
+        // get criteria input for results to get (measure-population, numerator,
+        // denominator)
+        var criteriaPopulationId = populationDef.getCriteriaReference();
+        // function that will be evaluated
+        var observationExpression = populationDef.expression();
+        // get expression from criteriaPopulation reference
+        String criteriaExpressionInput = groupDef.populations().stream()
+                .filter(t -> t.id().equals(criteriaPopulationId))
+                .map(PopulationDef::expression)
+                .findFirst()
+                .orElse(null);
+        Optional<ExpressionResult> optExpressionResult =
+                tryGetExpressionResult(criteriaExpressionInput, evaluationResult);
+
+        if (optExpressionResult.isEmpty()) {
+            return List.of();
+        }
+
+        final ExpressionResult expressionResult = optExpressionResult.get();
+        // makes expression results iterable
+        var resultsIter = getResultIterable(evaluationResult, expressionResult, subjectTypePart);
+        // make new expression name for uniquely extracting results
+        // this will be used in MeasureEvaluator
+        var expressionName = criteriaPopulationId + "-" + observationExpression;
+        // loop through measure-population results
+        int i = 0;
+        Map<Object, Object> functionResults = new HashMap<>();
+        Set<Object> evaluatedResources = new HashSet<>();
+        final List<MeasureObservationResult> results = new ArrayList<>();
+        for (Object result : resultsIter) {
+            Object observationResult = evaluateObservationCriteria(
+                    result, observationExpression, evaluatedResources, groupDef.isBooleanBasis(), context);
+
+            if (!(observationResult instanceof String
+                    || observationResult instanceof Integer
+                    || observationResult instanceof Double)) {
+                throw new IllegalArgumentException(
+                        "continuous variable observation CQL \"MeasureObservation\" function result must be of type String, Integer or Double but was: "
+                                + result.getClass().getSimpleName());
+            }
+
+            var observationId = expressionName + "-" + i;
+            // wrap result in Observation resource to avoid duplicate results data loss
+            // in set object
+            Observation observation = wrapResultAsObservation(observationId, observationId, observationResult);
+            // add function results to existing EvaluationResult under new expression
+            // name
+            // need a way to capture input parameter here too, otherwise we have no way
+            // to connect input objects related to output object
+            // key= input parameter to function
+            // value= the output Observation resource containing calculated value
+            functionResults.put(result, observation);
+
+            results.add(new MeasureObservationResult(
+                    expressionName, new ExpressionResult(functionResults, evaluatedResources)));
+        }
+
+        return results;
+    }
+
+    public Optional<ExpressionResult> tryGetExpressionResult(String expressionName, EvaluationResult evaluationResult) {
+        // LUKETODO:  add more context to this exception
+        if (expressionName == null) {
+            throw new InvalidRequestException("expressionName is null");
+        }
+
+        if (evaluationResult == null) {
+            return Optional.empty();
+        }
+
+        final Map<String, ExpressionResult> expressionResults = evaluationResult.expressionResults;
+
+        if (!expressionResults.containsKey(expressionName)) {
+            throw new InvalidRequestException("Could not find expression result for expression: " + expressionName);
+        }
+
+        return Optional.of(evaluationResult.expressionResults.get(expressionName));
+    }
+
+    public List<CompiledLibrary> getCompiledLibraries(List<VersionedIdentifier> ids, CqlEngine context) {
+        try {
+            var resolvedLibraryResults =
+                    context.getEnvironment().getLibraryManager().resolveLibraries(ids);
+
+            var allErrors = resolvedLibraryResults.allErrors();
+            if (resolvedLibraryResults.hasErrors() || ids.size() > allErrors.size()) {
+                return resolvedLibraryResults.allCompiledLibraries();
+            }
+
+            if (ids.size() == 1) {
+                final List<CqlCompilerException> cqlCompilerExceptions =
+                        resolvedLibraryResults.getErrorsFor(ids.get(0));
+
+                if (cqlCompilerExceptions.size() == 1) {
+                    throw new IllegalStateException(
+                            "Unable to load CQL/ELM for library: %s. Verify that the Library resource is available in your environment and has CQL/ELM content embedded."
+                                    .formatted(ids.get(0).getId()),
+                            cqlCompilerExceptions.get(0));
+                } else {
+                    throw new IllegalStateException(
+                            "Unable to load CQL/ELM for library: %s. Verify that the Library resource is available in your environment and has CQL/ELM content embedded. Errors: %s"
+                                    .formatted(
+                                            ids.get(0).getId(),
+                                            cqlCompilerExceptions.stream()
+                                                    .map(CqlCompilerException::getMessage)
+                                                    .reduce((s1, s2) -> s1 + "; " + s2)
+                                                    .orElse("No error messages found.")));
+                }
+            }
+
+            throw new IllegalStateException(
+                    "Unable to load CQL/ELM for libraries: %s Verify that the Library resource is available in your environment and has CQL/ELM content embedded. Errors: %s"
+                            .formatted(ids, allErrors));
+
+        } catch (CqlIncludeException exception) {
+            throw new IllegalStateException(
+                    "Unable to load CQL/ELM for libraries: %s. Verify that the Library resource is available in your environment and has CQL/ELM content embedded."
+                            .formatted(
+                                    ids.stream().map(VersionedIdentifier::getId).toList()),
+                    exception);
+        }
+    }
+
+    protected Observation wrapResultAsObservation(String id, String observationName, Object result) {
+
+        Observation obs = new Observation();
+        obs.setStatus(Observation.ObservationStatus.FINAL);
+        obs.setId(id);
+        CodeableConcept cc = new CodeableConcept();
+        cc.setText(observationName);
+        obs.setValue(convertToQuantity(result));
+        obs.setCode(cc);
+
+        return obs;
+    }
+
+    public Quantity convertToQuantity(Object obj) {
+        if (obj == null) return null;
+
+        Quantity q = new Quantity();
+
+        if (obj instanceof Quantity existing) {
+            return existing;
+        } else if (obj instanceof Number number) {
+            q.setValue(number.doubleValue());
+        } else if (obj instanceof String s) {
+            try {
+                q.setValue(Double.parseDouble(s));
+            } catch (NumberFormatException e) {
+                throw new IllegalArgumentException("String is not a valid number: " + s, e);
+            }
+        } else {
+            throw new IllegalArgumentException("Cannot convert object of type " + obj.getClass() + " to Quantity");
+        }
+
+        return q;
+    }
+
+    private Iterable<?> getResultIterable(
+            EvaluationResult evaluationResult, ExpressionResult expressionResult, String subjectTypePart) {
+        if (expressionResult.value() instanceof Boolean) {
+            if ((Boolean.TRUE.equals(expressionResult.value()))) {
+                // if Boolean, returns context by SubjectType
+                Object booleanResult =
+                        evaluationResult.forExpression(subjectTypePart).value();
+                // remove evaluated resources
+                return Collections.singletonList(booleanResult);
+            } else {
+                // false result shows nothing
+                return Collections.emptyList();
+            }
+        }
+
+        Object value = expressionResult.value();
+        if (value instanceof Iterable<?> iterable) {
+            return iterable;
+        } else {
+            return Collections.singletonList(value);
+        }
+    }
+    /**
+     * Checks if a MeasureDef has at least one PopulationDef of type MEASUREOBSERVATION
+     * across all of its groups.
+     *
+     * @param measureDef the MeasureDef to check
+     * @return true if any PopulationDef in any GroupDef is MEASUREOBSERVATION
+     */
+    public static boolean hasMeasureObservation(MeasureDef measureDef) {
+        if (measureDef == null || measureDef.groups() == null) {
+            return false;
+        }
+
+        return measureDef.groups().stream()
+                .filter(group -> group.populations() != null)
+                .flatMap(group -> group.populations().stream())
+                .anyMatch(pop -> pop.type() == MeasurePopulationType.MEASUREOBSERVATION);
+    }
+
     private void validateEvaluationResultExistsForIdentifier(
             VersionedIdentifier versionedIdentifierFromQuery,
             EvaluationResultsForMultiLib evaluationResultsForMultiLib) {
 
+        // LUKETODO:  this should hopefully be fixed with the next version of CQL
         var containsResults = evaluationResultsForMultiLib.containsResultsFor(versionedIdentifierFromQuery);
         var containsExceptions = evaluationResultsForMultiLib.containsExceptionsFor(versionedIdentifierFromQuery);
 

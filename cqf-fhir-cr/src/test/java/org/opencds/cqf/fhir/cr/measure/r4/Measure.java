@@ -746,7 +746,7 @@ public class Measure {
         }
     }
 
-    static class SelectedExtension extends Selected<Extension, SelectedReport> {
+    public static class SelectedExtension extends Selected<Extension, SelectedReport> {
 
         public SelectedExtension(Extension value, SelectedReport parent) {
             super(value, parent);
@@ -768,7 +768,7 @@ public class Measure {
         }
     }
 
-    static class SelectedContained extends Selected<Resource, SelectedReport> {
+    public static class SelectedContained extends Selected<Resource, SelectedReport> {
 
         public SelectedContained(Resource value, SelectedReport parent) {
             super(value, parent);
@@ -898,7 +898,7 @@ public class Measure {
             return new SelectedStratifier(s, this);
         }
 
-        static class SelectedReference extends Selected<Reference, SelectedReport> {
+        public static class SelectedReference extends Selected<Reference, SelectedReport> {
 
             public SelectedReference(Reference value, SelectedReport parent) {
                 super(value, parent);

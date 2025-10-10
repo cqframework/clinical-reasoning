@@ -20,8 +20,11 @@ import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.PrimitiveType;
 import org.opencds.cqf.fhir.cr.hapi.common.ILibraryProcessorFactory;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class LibraryPackageProvider {
     private final ILibraryProcessorFactory libraryProcessorFactory;
@@ -51,7 +54,7 @@ public class LibraryPackageProvider {
             @OperationParam(name = "canonical") String canonical,
             @OperationParam(name = "url") String url,
             @OperationParam(name = "version") String version,
-            @OperationParam(name = "include") CodeType include,
+            @OperationParam(name = "include") List<CodeType> include,
             @OperationParam(name = "terminologyEndpoint") Parameters.ParametersParameterComponent terminologyEndpoint,
             @OperationParam(name = "usePut") BooleanType usePut,
             RequestDetails requestDetails)
@@ -60,7 +63,9 @@ public class LibraryPackageProvider {
         var terminologyEndpointParam = getEndpoint(fhirVersion, terminologyEndpoint);
         var params = packageParameters(
                 fhirVersion,
-                include == null ? null : include.getValueAsString(),
+                include == null ? null : include.stream()
+                    .map(PrimitiveType::getValueAsString) // Apply the toUpperCase method
+                    .collect(Collectors.toList()),
                 terminologyEndpointParam,
                 usePut == null ? Boolean.FALSE : usePut.booleanValue());
         return libraryProcessorFactory
@@ -74,7 +79,7 @@ public class LibraryPackageProvider {
             @OperationParam(name = "canonical") String canonical,
             @OperationParam(name = "url") String url,
             @OperationParam(name = "version") String version,
-            @OperationParam(name = "include") CodeType include,
+            @OperationParam(name = "include") List<CodeType> include,
             @OperationParam(name = "terminologyEndpoint") Parameters.ParametersParameterComponent terminologyEndpoint,
             @OperationParam(name = "usePut") BooleanType usePut,
             RequestDetails requestDetails)
@@ -84,7 +89,9 @@ public class LibraryPackageProvider {
         var terminologyEndpointParam = getEndpoint(fhirVersion, terminologyEndpoint);
         var params = packageParameters(
                 fhirVersion,
-                include == null ? null : include.getValueAsString(),
+                include == null ? null : include.stream()
+                    .map(PrimitiveType::getValueAsString) // Apply the toUpperCase method
+                    .collect(Collectors.toList()),
                 terminologyEndpointParam,
                 usePut == null ? Boolean.FALSE : usePut.booleanValue());
         return libraryProcessorFactory

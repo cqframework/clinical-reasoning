@@ -13,6 +13,8 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * This class consists exclusively of static methods that assist with packaging FHIR Resources.
@@ -46,11 +48,13 @@ public class PackageHelper {
      * @return FHIR Parameters resource
      */
     public static IBaseParameters packageParameters(
-            FhirVersionEnum fhirVersion, String include, IBaseResource terminologyEndpoint, boolean isPut) {
+            FhirVersionEnum fhirVersion, List<String> include, IBaseResource terminologyEndpoint, boolean isPut) {
         var params = forFhirVersion(fhirVersion)
                 .createParameters((IBaseParameters) newBaseForVersion("Parameters", fhirVersion));
         if (include != null) {
-            params.addParameter("include", codeTypeForVersion(fhirVersion, include));
+            for (String i:include) {
+                params.addParameter("include", codeTypeForVersion(fhirVersion, i));
+            }
         }
         if (terminologyEndpoint != null) {
             params.addParameter("terminologyEndpoint", terminologyEndpoint);

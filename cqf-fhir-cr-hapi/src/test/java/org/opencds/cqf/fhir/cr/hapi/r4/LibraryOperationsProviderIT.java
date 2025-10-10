@@ -91,14 +91,13 @@ class LibraryOperationsProviderIT extends BaseCrR4TestServer {
     @Test
     @Disabled("This is only useful running locally with a valid apiKey")
     void testManifestRelease() {
-        loadBundle("org/opencds/cqf/fhir/cr/hapi/r4/Bundle-CMS165.json");
         loadBundle("org/opencds/cqf/fhir/cr/hapi/r4/uscore-package-bundle.json");
         loadResourceFromPath("org/opencds/cqf/fhir/cr/hapi/r4/Library-Manifest-Partial-Set-FinalDraft-2025.json");
         var requestDetails = setupRequestDetails();
 
         var terminologyEndpoint = new Endpoint();
         terminologyEndpoint.addExtension("vsacUsername", new StringType("apikey"));
-        terminologyEndpoint.addExtension("apiKey", new StringType("FILL THIS OUT WITH YOUR API KEY"));
+        terminologyEndpoint.addExtension("apiKey", new StringType("API_KEY"));
         terminologyEndpoint.setAddress("https://cts.nlm.nih.gov/fhir");
         terminologyEndpoint.setConnectionType(
                 new Coding("http://hl7.org/fhir/ValueSet/endpoint-connection-type", "hl7-fhir-rest", null));
@@ -110,9 +109,9 @@ class LibraryOperationsProviderIT extends BaseCrR4TestServer {
                 "Library/Manifest-Partial-Set-FinalDraft-2025",
                 "1.0.0",
                 new CodeType("force"),
-                new BooleanType(false),
+                new BooleanType(true),
                 null,
-                null,
+                terminologyEndpoint,
                 null,
                 requestDetails);
         assertInstanceOf(Bundle.class, result);

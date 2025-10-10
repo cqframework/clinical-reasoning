@@ -67,7 +67,7 @@ public class CqlExecutionProcessor {
             return new VersionedIdentifier()
                     .withId(
                             r4Library.hasUrl()
-                                    ? Canonicals.getIdPart(r4Library.getUrl())
+                                    ? Canonicals.getTail(r4Library.getUrl())
                                     : r4Library.hasName() ? r4Library.getName() : null)
                     .withVersion(
                             r4Library.hasVersion()

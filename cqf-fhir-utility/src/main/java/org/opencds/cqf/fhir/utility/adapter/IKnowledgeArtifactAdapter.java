@@ -380,7 +380,7 @@ public interface IKnowledgeArtifactAdapter extends IResourceAdapter {
         return getExtension().stream()
                 .filter(e -> e.getUrl().equals(Constants.CQF_LIBRARY))
                 .map(e -> ((IPrimitiveType<String>) e.getValue()).getValue())
-                .collect(Collectors.toMap(l -> requireNonNull(Canonicals.getIdPart(l)), l -> l));
+                .collect(Collectors.toMap(l -> requireNonNull(Canonicals.getTail(l)), l -> l));
     }
 
     String VALID_RELATED_ARTIFACT = "Must be a valid RelatedArtifact";

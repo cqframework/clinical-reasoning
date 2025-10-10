@@ -164,7 +164,7 @@ public class PlanDefinitionAdapter extends KnowledgeArtifactAdapter implements I
     @Override
     public Map<String, String> getReferencedLibraries() {
         var libraries = getPlanDefinition().getLibrary().stream()
-                .collect(toMap(l -> requireNonNull(Canonicals.getIdPart(l)), CanonicalType::getValueAsString));
+                .collect(toMap(l -> requireNonNull(Canonicals.getTail(l)), CanonicalType::getValueAsString));
         libraries.putAll(resolveCqfLibraries());
         return libraries;
     }

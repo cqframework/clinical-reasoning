@@ -26,8 +26,8 @@ public class VersionedIdentifiers {
                     "Invalid libraryUrl, Library.libraryUrl SHALL be <CQL namespace libraryUrl>/Library/<CQL library name>");
         }
 
-        if (libraryUrlCanonicalParts.idPart() == null
-                || libraryUrlCanonicalParts.idPart().isBlank()) {
+        if (libraryUrlCanonicalParts.tail() == null
+                || libraryUrlCanonicalParts.tail().isBlank()) {
             throw new IllegalArgumentException("libraryUrl must contain a library name");
         }
 
@@ -38,8 +38,8 @@ public class VersionedIdentifiers {
             versionedIdentifier.setVersion(libraryUrlCanonicalParts.version());
         }
 
-        versionedIdentifier.setId(libraryUrlCanonicalParts.idPart());
-        versionedIdentifier.setSystem(libraryUrlCanonicalParts.system());
+        versionedIdentifier.setId(libraryUrlCanonicalParts.tail());
+        versionedIdentifier.setSystem(libraryUrlCanonicalParts.canonicalBase());
 
         return versionedIdentifier;
     }

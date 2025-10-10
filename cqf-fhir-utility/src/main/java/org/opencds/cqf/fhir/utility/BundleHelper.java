@@ -232,16 +232,16 @@ public class BundleHelper {
         return switch (fhirVersion) {
             case DSTU3 -> Optional.ofNullable(
                             ((Bundle.BundleEntryComponent) entry).getRequest().getUrl())
-                    .map(Canonicals::getIdPart)
+                    .map(Canonicals::getTail)
                     .map(IdType::new);
             case R4 -> Optional.ofNullable(
                             ((BundleEntryComponent) entry).getRequest().getUrl())
-                    .map(Canonicals::getIdPart)
+                    .map(Canonicals::getTail)
                     .map(org.hl7.fhir.r4.model.IdType::new);
             case R5 -> Optional.ofNullable(((org.hl7.fhir.r5.model.Bundle.BundleEntryComponent) entry)
                             .getRequest()
                             .getUrl())
-                    .map(Canonicals::getIdPart)
+                    .map(Canonicals::getTail)
                     .map(org.hl7.fhir.r5.model.IdType::new);
             default -> throw new IllegalArgumentException(
                     UNSUPPORTED_VERSION_OF_FHIR.formatted(fhirVersion.getFhirVersionString()));

@@ -75,7 +75,7 @@ public class ActivityDefinitionAdapter extends KnowledgeArtifactAdapter implemen
     @Override
     public Map<String, String> getReferencedLibraries() {
         var libraries = getActivityDefinition().getLibrary().stream()
-                .collect(toMap(l -> requireNonNull(Canonicals.getIdPart(l)), CanonicalType::getValueAsString));
+                .collect(toMap(l -> requireNonNull(Canonicals.getTail(l)), CanonicalType::getValueAsString));
         libraries.putAll(resolveCqfLibraries());
         return libraries;
     }

@@ -83,7 +83,7 @@ public class R4VersionedLibraryIdentifierUtils {
     private static void validateLibraryNameVsUrl(
             CanonicalParts urlFromLibraryCanonicalParts, Library libraryFromQuery) {
 
-        if (!urlFromLibraryCanonicalParts.idPart().equals(libraryFromQuery.getName())) {
+        if (!urlFromLibraryCanonicalParts.tail().equals(libraryFromQuery.getName())) {
             throw new InvalidRequestException(
                     "Library cannot be resolved because the name: %s does not match the version-less last part of the URL: %s"
                             .formatted(libraryFromQuery.getName(), libraryFromQuery.getUrl()));

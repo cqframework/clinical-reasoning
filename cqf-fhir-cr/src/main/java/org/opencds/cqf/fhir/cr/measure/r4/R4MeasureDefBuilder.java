@@ -138,11 +138,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                 }
                 var expression = expressionType.getExpression();
                 populations.add(new PopulationDef(
-                        "dateOfCompliance",
-                        totalConceptDefCreator(DATEOFCOMPLIANCE),
-                        DATEOFCOMPLIANCE,
-                        expression,
-                        null));
+                        "dateOfCompliance", totalConceptDefCreator(DATEOFCOMPLIANCE), DATEOFCOMPLIANCE, expression));
             }
 
             // Stratifiers
@@ -311,7 +307,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
     private CodeDef makeCodeDefFromExtension(Extension extension) {
         var code = extension.getValue().toString();
         // validate code membership
-        assert FHIRAllTypes.fromCode(code) != null;
+        assert Enumerations.FHIRAllTypes.fromCode(code) != null;
         return new CodeDef(MeasureConstants.POPULATION_BASIS_URL, code);
     }
 

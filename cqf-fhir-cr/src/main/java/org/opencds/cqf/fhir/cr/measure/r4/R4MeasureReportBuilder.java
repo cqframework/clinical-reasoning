@@ -809,6 +809,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             return 0;
         }
 
+        // LUKETODO:  stream instead
         int count = 0;
         for (Object resource : populationDef.getResources()) {
             if (resource instanceof Map<?, ?> map) {

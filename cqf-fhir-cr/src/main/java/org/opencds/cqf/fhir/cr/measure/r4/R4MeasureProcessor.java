@@ -216,6 +216,7 @@ public class R4MeasureProcessor {
         // Measurement Period: operation parameter defined measurement period
         Interval measurementPeriodParams = buildMeasurementPeriod(periodStart, periodEnd);
 
+        // LUKETODO:  can we get rid of this for good?
         //        measureProcessorUtils.setMeasurementPeriod(
         //                measurementPeriodParams,
         //                context,
@@ -398,6 +399,7 @@ public class R4MeasureProcessor {
         return builder.build();
     }
 
+    // LUKETODO:   can we get rid of this for good?
     /**  Temporary check for Measures that are being blocked from use by evaluateResults method
      *
      * @param measureDef defined measure definition object used to capture criteria expression results

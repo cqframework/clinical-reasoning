@@ -12,8 +12,8 @@ class PopulationDefTest {
 
     @Test
     void setHandlingStrings() {
-        final PopulationDef popDef1 = new PopulationDef("one", null, null, null, null);
-        final PopulationDef popDef2 = new PopulationDef("two", null, null, null, null);
+        final PopulationDef popDef1 = new PopulationDef("one", null, null, null);
+        final PopulationDef popDef2 = new PopulationDef("two", null, null, null);
 
         popDef1.addResource("string1");
         popDef2.addResource("string1");
@@ -25,8 +25,8 @@ class PopulationDefTest {
 
     @Test
     void setHandlingIntegers() {
-        final PopulationDef popDef1 = new PopulationDef("one", null, null, null, null);
-        final PopulationDef popDef2 = new PopulationDef("two", null, null, null, null);
+        final PopulationDef popDef1 = new PopulationDef("one", null, null, null);
+        final PopulationDef popDef2 = new PopulationDef("two", null, null, null);
 
         popDef1.addResource(123);
         popDef2.addResource(123);
@@ -38,8 +38,8 @@ class PopulationDefTest {
 
     @Test
     void setHandlingEncounters() {
-        final PopulationDef popDef1 = new PopulationDef("one", null, null, null, null);
-        final PopulationDef popDef2 = new PopulationDef("two", null, null, null, null);
+        final PopulationDef popDef1 = new PopulationDef("one", null, null, null);
+        final PopulationDef popDef2 = new PopulationDef("two", null, null, null);
 
         final Encounter enc1a = (Encounter) new Encounter().setId(new IdType(ResourceType.Encounter.name(), "enc1"));
         final Encounter enc1b = (Encounter) new Encounter().setId(new IdType(ResourceType.Encounter.name(), "enc1"));

@@ -19,6 +19,27 @@ public class GroupDef {
     private final String aggregateMethod;
 
     public GroupDef(
+        String id,
+        ConceptDef code,
+        List<StratifierDef> stratifiers,
+        List<PopulationDef> populations,
+        MeasureScoring measureScoring,
+        boolean isGroupImprovementNotation,
+        CodeDef improvementNotation,
+        CodeDef populationBasis) {
+        this(
+            id,
+            code,
+            stratifiers,
+            populations,
+            measureScoring,
+            isGroupImprovementNotation,
+            improvementNotation,
+            populationBasis,
+            null);
+    }
+
+    public GroupDef(
             String id,
             ConceptDef code,
             List<StratifierDef> stratifiers,

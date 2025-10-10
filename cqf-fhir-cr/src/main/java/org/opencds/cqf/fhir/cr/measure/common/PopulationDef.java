@@ -21,6 +21,14 @@ public class PopulationDef {
             String id,
             ConceptDef code,
             MeasurePopulationType measurePopulationType,
+            String expression) {
+        this(id, code, measurePopulationType, expression, null);
+    }
+
+    public PopulationDef(
+            String id,
+            ConceptDef code,
+            MeasurePopulationType measurePopulationType,
             String expression,
             String criteriaReference) {
         this.id = id;

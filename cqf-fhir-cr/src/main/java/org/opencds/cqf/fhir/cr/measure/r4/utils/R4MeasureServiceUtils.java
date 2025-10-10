@@ -366,7 +366,7 @@ public class R4MeasureServiceUtils {
     private static Measure resolveByUrl(CanonicalType url, IRepository repository) {
         var parts = Canonicals.getParts(url);
         var result = repository.search(
-                Bundle.class, Measure.class, Searches.byNameAndVersion(parts.idPart(), parts.version()));
+                Bundle.class, Measure.class, Searches.byNameAndVersion(parts.tail(), parts.version()));
         return (Measure) result.getEntryFirstRep().getResource();
     }
 

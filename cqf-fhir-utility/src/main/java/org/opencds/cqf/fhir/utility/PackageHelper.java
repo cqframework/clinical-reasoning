@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.utility;
 
 import static org.opencds.cqf.fhir.utility.Resources.newBaseForVersion;
 import static org.opencds.cqf.fhir.utility.VersionUtilities.booleanTypeForVersion;
+import static org.opencds.cqf.fhir.utility.VersionUtilities.codeTypeForVersion;
 import static org.opencds.cqf.fhir.utility.adapter.IAdapterFactory.forFhirVersion;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -29,6 +30,28 @@ public class PackageHelper {
             FhirVersionEnum fhirVersion, IBaseResource terminologyEndpoint, boolean isPut) {
         var params = forFhirVersion(fhirVersion)
                 .createParameters((IBaseParameters) newBaseForVersion("Parameters", fhirVersion));
+        if (terminologyEndpoint != null) {
+            params.addParameter("terminologyEndpoint", terminologyEndpoint);
+        }
+        params.addParameter("isPut", booleanTypeForVersion(fhirVersion, isPut));
+        return (IBaseParameters) params.get();
+    }
+
+    /**
+     * Returns a FHIR Parameters resource of the specified version containing the supplied parameters with the correct parameter name.
+     * @param fhirVersion the FHIR version to create Parameters for
+     * @param include Specifies what contents should only be included in the resulting package.
+     * @param terminologyEndpoint the FHIR Endpoint resource to use to access terminology (i.e. valuesets, codesystems, naming systems, concept maps, and membership testing) referenced by the Resource. If no terminology endpoint is supplied, the evaluation will attempt to use the server on which the operation is being performed as the terminology server.
+     * @param isPut the boolean value to determine if the Bundle returned uses PUT or POST request methods.
+     * @return FHIR Parameters resource
+     */
+    public static IBaseParameters packageParameters(
+            FhirVersionEnum fhirVersion, String include, IBaseResource terminologyEndpoint, boolean isPut) {
+        var params = forFhirVersion(fhirVersion)
+                .createParameters((IBaseParameters) newBaseForVersion("Parameters", fhirVersion));
+        if (include != null) {
+            params.addParameter("include", codeTypeForVersion(fhirVersion, include));
+        }
         if (terminologyEndpoint != null) {
             params.addParameter("terminologyEndpoint", terminologyEndpoint);
         }

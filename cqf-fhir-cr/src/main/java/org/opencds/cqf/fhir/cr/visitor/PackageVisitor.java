@@ -350,7 +350,9 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
         var adapterFactory = IAdapterFactory.forFhirVersion(fhirVersion());
         List<T> filteredList = new ArrayList<>();
         entries.stream().forEach(entry -> {
-            if (isValidResourceType(include, entry) || isExtensionOrProfile(include, adapter, entry)) {
+            if (isValidResourceType(include, entry)
+                    || isExtensionOrProfile(include, adapter, entry)
+                    || isIncludedFhirType(include, entry)) {
                 filteredList.add(entry);
             }
             if (include.stream().anyMatch(type -> type.equals("tests"))
@@ -389,6 +391,11 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
                         .equals("StructureDefinition")
                 && adapter.resolvePathString(BundleHelper.getEntryResource(fhirVersion(), entry), "type")
                         .equals("Extension");
+    }
+
+    private <T extends IBaseBackboneElement> boolean isIncludedFhirType(List<String> include, T entry) {
+        return include.contains(
+                BundleHelper.getEntryResource(fhirVersion(), entry).fhirType());
     }
 
     protected <T extends IBaseBackboneElement> boolean isValidResourceType(List<String> include, T entry) {

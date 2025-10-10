@@ -393,28 +393,6 @@ public class R4MeasureProcessor {
         return builder.build();
     }
 
-    // LUKETODO:   can we get rid of this for good?
-    /**  Temporary check for Measures that are being blocked from use by evaluateResults method
-     *
-     * @param measureDef defined measure definition object used to capture criteria expression results
-     * @param measure measure resource used for evaluation
-     */
-    //    protected void continuousVariableObservationCheck(MeasureDef measureDef, Measure measure) {
-    //        for (GroupDef groupDef : measureDef.groups()) {
-    //            // Measure Observation defined?
-    //            if (groupDef.measureScoring().equals(MeasureScoring.CONTINUOUSVARIABLE)
-    //                    && groupDef.getSingle(MeasurePopulationType.MEASUREOBSERVATION) != null) {
-    //                throw new InvalidRequestException(
-    //                        "Measure Evaluation Mode does not have CQL engine context to support: Measure Scoring
-    // Type: %s, Measure Population Type: %s, for Measure: %s"
-    //                                .formatted(
-    //                                        MeasureScoring.CONTINUOUSVARIABLE,
-    //                                        MeasurePopulationType.MEASUREOBSERVATION,
-    //                                        measure.getUrl()));
-    //            }
-    //        }
-    //    }
-
     /**
      * method used to extract appropriate Measure Report type from operation defined Evaluation Type
      * @param measureEvalType operation evaluation type
@@ -436,7 +414,17 @@ public class R4MeasureProcessor {
      * @param measure resource that has desired Library
      * @return version identifier of Library
      */
-    protected VersionedIdentifier getLibraryVersionIdentifier(Measure measure) {
+    private VersionedIdentifier getLibraryVersionIdentifier(Measure measure) {
+
+        if (measure == null) {
+            throw new InvalidRequestException("Measure provided is null");
+        }
+
+        if (!measure.hasLibrary() || measure.getLibrary().isEmpty()) {
+            throw new InvalidRequestException(
+                    "Measure %s does not have a primary library specified".formatted(measure.getUrl()));
+        }
+
         var url = measure.getLibrary().get(0).asStringValue();
 
         Bundle b = this.repository.search(Bundle.class, Library.class, Searches.byCanonical(url), null);

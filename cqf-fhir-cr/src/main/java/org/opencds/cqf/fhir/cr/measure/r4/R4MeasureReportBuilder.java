@@ -809,14 +809,11 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             return 0;
         }
 
-        // LUKETODO:  stream instead
-        int count = 0;
-        for (Object resource : populationDef.getResources()) {
-            if (resource instanceof Map<?, ?> map) {
-                count += map.size(); // each value is an Observation
-            }
-        }
-        return count;
+        return populationDef.getResources().stream()
+                .filter(Map.class::isInstance)
+                .map(Map.class::cast)
+                .mapToInt(Map::size)
+                .sum();
     }
 
     protected void buildMeasureObservations(BuilderContext bc, String observationName, Set<Object> resources) {

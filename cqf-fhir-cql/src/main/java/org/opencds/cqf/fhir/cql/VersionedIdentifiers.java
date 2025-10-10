@@ -1,36 +1,45 @@
 package org.opencds.cqf.fhir.cql;
 
+import java.util.regex.Pattern;
 import org.hl7.elm.r1.VersionedIdentifier;
+import org.opencds.cqf.fhir.utility.Canonicals;
+import org.opencds.cqf.fhir.utility.Canonicals.CanonicalParts;
 
 public class VersionedIdentifiers {
+
+    private static final Pattern LIBRARY_REGEX = Pattern.compile("/Library/");
 
     private VersionedIdentifiers() {
         // empty
     }
 
-    public static VersionedIdentifier forUrl(String url) {
-        if (!url.contains("/Library/") && !url.startsWith("Library/")) {
+    public static VersionedIdentifier forUrl(String libraryUrl) {
+        final CanonicalParts libraryUrlCanonicalParts = Canonicals.getParts(libraryUrl);
+
+        if (!libraryUrlCanonicalParts.resourceType().equals("Library")) {
             throw new IllegalArgumentException(
                     "Invalid resource type for determining library version identifier: Library");
         }
 
-        String[] urlSplit = url.split("Library/");
-        if (urlSplit.length > 2) {
+        if (LIBRARY_REGEX.split(libraryUrlCanonicalParts.url()).length > 2) {
             throw new IllegalArgumentException(
-                    "Invalid url, Library.url SHALL be <CQL namespace url>/Library/<CQL library name>");
+                    "Invalid libraryUrl, Library.libraryUrl SHALL be <CQL namespace libraryUrl>/Library/<CQL library name>");
         }
 
-        String cqlName = urlSplit.length == 1 ? urlSplit[0] : urlSplit[1];
-        VersionedIdentifier versionedIdentifier = new VersionedIdentifier();
-        if (cqlName.contains("|")) {
-            String[] nameVersion = cqlName.split("\\|");
-            String name = nameVersion[0];
-            String version = nameVersion[1];
-            versionedIdentifier.setId(name);
-            versionedIdentifier.setVersion(version);
-        } else {
-            versionedIdentifier.setId(cqlName);
+        if (libraryUrlCanonicalParts.idPart() == null
+                || libraryUrlCanonicalParts.idPart().isBlank()) {
+            throw new IllegalArgumentException("libraryUrl must contain a library name");
         }
+
+        final VersionedIdentifier versionedIdentifier = new VersionedIdentifier();
+
+        if (libraryUrlCanonicalParts.version() != null
+                && !libraryUrlCanonicalParts.version().isBlank()) {
+            versionedIdentifier.setVersion(libraryUrlCanonicalParts.version());
+        }
+
+        versionedIdentifier.setId(libraryUrlCanonicalParts.idPart());
+        versionedIdentifier.setSystem(libraryUrlCanonicalParts.system());
 
         return versionedIdentifier;
     }

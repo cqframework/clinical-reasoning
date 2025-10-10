@@ -5,7 +5,6 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import jakarta.annotation.Nonnull;
 import java.util.List;
-import java.util.regex.Pattern;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
@@ -17,9 +16,6 @@ import org.opencds.cqf.fhir.utility.Canonicals.CanonicalParts;
  * Maintain logic for working with {@link VersionedIdentifier} from {@link Library}
  */
 public class R4VersionedLibraryIdentifierUtils {
-
-    private static final Pattern LIBRARY_REGEX = Pattern.compile("/Library/");
-    private static final Pattern PIPE_REGEX = Pattern.compile("\\|");
 
     private R4VersionedLibraryIdentifierUtils() {
         // static class

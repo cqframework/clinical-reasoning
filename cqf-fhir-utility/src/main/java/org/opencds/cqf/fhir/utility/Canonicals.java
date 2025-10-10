@@ -7,9 +7,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.StringJoiner;
+import java.util.regex.Pattern;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 public class Canonicals {
+
+    private static final Pattern LIBRARY_REGEX = Pattern.compile("/Library/");
 
     private Canonicals() {}
 
@@ -74,6 +77,22 @@ public class Canonicals {
         int lastIndex = calculateLastIndex(canonical);
 
         return canonical.substring(canonical.lastIndexOf("/") + 1, lastIndex);
+    }
+
+    private static String getSystem(String canonical, String resourceType) {
+        checkNotNull(canonical);
+
+        if (resourceType == null || resourceType.isBlank()) {
+            return null;
+        }
+
+        final Pattern resourceTypePattern = "Library".equals(resourceType)
+                // Pre-compiled because this is the most common use case
+                ? LIBRARY_REGEX
+                // In case we get another type of resource
+                : Pattern.compile("/%s/".formatted(resourceType)); //
+
+        return getSystem(canonical, resourceTypePattern);
     }
 
     /**
@@ -204,9 +223,10 @@ public class Canonicals {
         String url = getUrl(canonical);
         String id = getIdPart(canonical);
         String resourceType = getResourceType(canonical);
+        String system = getSystem(canonical, resourceType);
         String version = getVersion(canonical);
         String fragment = getFragment(canonical);
-        return new CanonicalParts(url, id, resourceType, version, fragment);
+        return new CanonicalParts(url, system, id, resourceType, version, fragment);
     }
 
     private static int calculateLastIndex(String canonical) {
@@ -223,15 +243,31 @@ public class Canonicals {
         return lastIndex;
     }
 
+    private static String getSystem(String canonical, Pattern resourceTypePattern) {
+        checkNotNull(canonical);
+
+        if (resourceTypePattern == null) {
+            return null;
+        }
+
+        if (!resourceTypePattern.matcher(canonical).find()) {
+            return null;
+        }
+
+        return resourceTypePattern.split(canonical)[0];
+    }
+
     public static final class CanonicalParts {
         private final String url;
+        private final String system;
         private final String idPart;
         private final String resourceType;
         private final String version;
         private final String fragment;
 
-        CanonicalParts(String url, String idPart, String resourceType, String version, String fragment) {
+        CanonicalParts(String url, String system, String idPart, String resourceType, String version, String fragment) {
             this.url = url;
+            this.system = system;
             this.idPart = idPart;
             this.resourceType = resourceType;
             this.version = version;
@@ -240,6 +276,10 @@ public class Canonicals {
 
         public String url() {
             return this.url;
+        }
+
+        public String system() {
+            return this.system;
         }
 
         public String idPart() {
@@ -259,12 +299,13 @@ public class Canonicals {
         }
 
         @Override
-        public boolean equals(Object other) {
-            if (other == null || getClass() != other.getClass()) {
+        public boolean equals(Object o) {
+            if (o == null || getClass() != o.getClass()) {
                 return false;
             }
-            final CanonicalParts that = (CanonicalParts) other;
+            CanonicalParts that = (CanonicalParts) o;
             return Objects.equals(url, that.url)
+                    && Objects.equals(system, that.system)
                     && Objects.equals(idPart, that.idPart)
                     && Objects.equals(resourceType, that.resourceType)
                     && Objects.equals(version, that.version)
@@ -273,13 +314,14 @@ public class Canonicals {
 
         @Override
         public int hashCode() {
-            return Objects.hash(url, idPart, resourceType, version, fragment);
+            return Objects.hash(url, system, idPart, resourceType, version, fragment);
         }
 
         @Override
         public String toString() {
             return new StringJoiner(", ", CanonicalParts.class.getSimpleName() + "[", "]")
                     .add("url='" + url + "'")
+                    .add("system='" + system + "'")
                     .add("idPart='" + idPart + "'")
                     .add("resourceType='" + resourceType + "'")
                     .add("version='" + version + "'")

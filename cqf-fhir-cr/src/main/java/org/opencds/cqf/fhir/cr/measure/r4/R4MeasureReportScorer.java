@@ -196,7 +196,6 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
     }
 
     protected void scoreContinuousVariable(String measureUrl, MeasureReportGroupComponent mrgc, GroupDef groupDef) {
-        // LUKETODO:  this could be null:  is it possible that any test that fails here is badly formed?
         var popDef = groupDef.getSingle(MeasurePopulationType.MEASUREOBSERVATION);
         if (popDef == null) {
             // In the case where we're missing a measure population definition, we don't want to

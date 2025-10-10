@@ -216,12 +216,6 @@ public class R4MeasureProcessor {
         // Measurement Period: operation parameter defined measurement period
         Interval measurementPeriodParams = buildMeasurementPeriod(periodStart, periodEnd);
 
-        // LUKETODO:  can we get rid of this for good?
-        //        measureProcessorUtils.setMeasurementPeriod(
-        //                measurementPeriodParams,
-        //                context,
-        //                Optional.ofNullable(measure.getUrl()).map(List::of).orElse(List.of("Unknown Measure URL")));
-
         // DON'T pop the library off the stack yet, because we need it for continuousVariableObservation()
 
         // Populate populationDefs that require MeasureDef results

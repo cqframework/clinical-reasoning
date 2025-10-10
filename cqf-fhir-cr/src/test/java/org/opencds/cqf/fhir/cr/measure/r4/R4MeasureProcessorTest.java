@@ -15,7 +15,7 @@ import org.opencds.cqf.fhir.cr.measure.r4.MultiMeasure.Given;
 
 class R4MeasureProcessorTest {
     private static final Given GIVEN_REPO = MultiMeasure.given().repositoryFor("MinimalMeasureEvaluation");
-    private static final MeasureDef MINIMAL_COHORT_BOOLEAN_BASIS_SINGLE_GROUP = buildMeasureDef(
+    private static final MeasureDef MINIMAL_COHORT_BOOLEAN_BASIS_SINGLE_GROUP = MeasureDef.fromIdAndUrl(
             "Measure/MinimalCohortBooleanBasisSingleGroup",
             "http://example.com/Measure/MinimalCohortBooleanBasisSingleGroup");
     private static final String SUBJECT_ID = "Patient/female-1914";
@@ -54,10 +54,5 @@ class R4MeasureProcessorTest {
 
         var evaluatedResources = expressionResult.evaluatedResources();
         assertEquals(1, evaluatedResources.size());
-    }
-
-    // LUKETODO:  util
-    private static MeasureDef buildMeasureDef(String id, String url) {
-        return new MeasureDef(id, url, null, List.of(), List.of());
     }
 }

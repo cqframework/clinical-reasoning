@@ -16,8 +16,8 @@ class CompositeEvaluationResultsPerMeasureTest {
     @Test
     void gettersContainExpectedData() {
         // Arrange
-        var measureDef1 = buildMeasureDef("Measure/one");
-        var measureDef2 = buildMeasureDef("Measure/two");
+        var measureDef1 = MeasureDef.fromIdAndUrl("Measure/one", "http://example.com/Measure/one");
+        var measureDef2 = MeasureDef.fromIdAndUrl("Measure/two", "http://example.com/Measure/two");
 
         // Create a non-empty EvaluationResult without depending on ExpressionResult constructors
         EvaluationResult er = new EvaluationResult();
@@ -48,7 +48,7 @@ class CompositeEvaluationResultsPerMeasureTest {
 
     @Test
     void gettersReturnImmutableViews() {
-        var measureDef1 = buildMeasureDef("Measure/immutable");
+        var measureDef1 = MeasureDef.fromIdAndUrl("Measure/immutable", "http://example.com/Measure/immutable");
 
         EvaluationResult er = new EvaluationResult();
         er.expressionResults.put("s", null);
@@ -63,10 +63,5 @@ class CompositeEvaluationResultsPerMeasureTest {
         assertThrows(UnsupportedOperationException.class, () -> resultsPerMeasure.put(measureDef1, Map.of("s", er)));
 
         assertThrows(UnsupportedOperationException.class, () -> errorsPerMeasure.put(measureDef1, List.of("err")));
-    }
-
-    // LUKETODO:  util
-    private static MeasureDef buildMeasureDef(String id) {
-        return new MeasureDef(id, null, null, List.of(), List.of());
     }
 }

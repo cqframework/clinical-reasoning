@@ -111,14 +111,14 @@ class MeasureScoringTypeContinuousVariableTest {
     @Test
     void continuousVariableBooleanProhibitedPopulations() {
         GIVEN.when()
-            .measureId("ContinuousVariableBooleanProhibitedPopulations")
-            .evaluate()
-            .then()
-            .hasStatus(MeasureReportStatus.ERROR)
-            .hasContainedOperationOutcome()
-            .hasContainedOperationOutcomeMsg(
-                "MeasurePopulationType: denominator, is not a member of allowed 'continuous-variable' populations.")
-            .report();
+                .measureId("ContinuousVariableBooleanProhibitedPopulations")
+                .evaluate()
+                .then()
+                .hasStatus(MeasureReportStatus.ERROR)
+                .hasContainedOperationOutcome()
+                .hasContainedOperationOutcomeMsg(
+                        "MeasurePopulationType: denominator, is not a member of allowed 'continuous-variable' populations.")
+                .report();
     }
 
     @Test

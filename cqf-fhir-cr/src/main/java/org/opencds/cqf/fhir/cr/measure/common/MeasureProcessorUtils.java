@@ -472,7 +472,6 @@ public class MeasureProcessorUtils {
     }
 
     // LUKETODO:  refactor this a lot
-    @Nonnull
     private void continuousVariableEvaluation(
             CqlEngine context,
             List<MeasureDef> measureDefs,

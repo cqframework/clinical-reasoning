@@ -46,8 +46,6 @@ public class CompositeEvaluationResultsPerMeasure {
     public Map<String, EvaluationResult> processMeasureForSuccessOrFailure(MeasureDef measureDef) {
         errorsPerMeasure.getOrDefault(measureDef, List.of()).forEach(measureDef::addError);
 
-        // LUKETODO:  this is failing on dstu3 because we seem to be comparing a DSTU3 IdType to an R4 IdType
-        // LUKETODO:  the map key is a R4 IdType:  fix this to DSTU3
         // We are explicitly maintaining the logic of accepting the lack of any sort of results,
         // either errors or successes, and returning an empty map.
         return resultsPerMeasure.getOrDefault(measureDef, Map.of());

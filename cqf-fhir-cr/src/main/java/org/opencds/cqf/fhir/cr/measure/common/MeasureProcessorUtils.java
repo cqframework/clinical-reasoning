@@ -13,6 +13,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -29,10 +30,8 @@ import org.hl7.elm.r1.IntervalTypeSpecifier;
 import org.hl7.elm.r1.NamedTypeSpecifier;
 import org.hl7.elm.r1.ParameterDef;
 import org.hl7.elm.r1.VersionedIdentifier;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Encounter;
-import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Quantity;
@@ -471,6 +470,7 @@ public class MeasureProcessorUtils {
         return resultsBuilder.build();
     }
 
+    // LUKETODO:  new class with unit tests?
     // LUKETODO:  refactor this a lot
     private void continuousVariableEvaluation(
             CqlEngine context,
@@ -485,14 +485,14 @@ public class MeasureProcessorUtils {
                 .toList();
 
         if (measureDefsWithMeasureObservations.isEmpty()) {
-            // Not
+            // Don't need to do anything if there are no measure observations to process
             return;
         }
 
         // measure Observation Path, have to re-initialize everything again
         // TODO: extend library evaluated context so library initialization isn't having to be built for
         // both, and takes advantage of caching
-        // LUKETODO:  figure out how to skip this if we're not doing continuous variable
+        // LUKETODO:  figure out how to reuse this pattern:
         var compiledLibraries = getCompiledLibraries(libraryIdentifiers, context);
 
         var libraries =
@@ -515,76 +515,91 @@ public class MeasureProcessorUtils {
 
             // get function for measure-observation from populationDef
             for (GroupDef groupDef : measureDefWithMeasureObservations.groups()) {
-                for (PopulationDef populationDef : groupDef.populations()) {
+
+                final List<PopulationDef> measureObservationPopulations = groupDef.populations().stream()
+                        .filter(populationDef -> MeasurePopulationType.MEASUREOBSERVATION.equals(populationDef.type()))
+                        .toList();
+                for (PopulationDef populationDef : measureObservationPopulations) {
                     // each measureObservation is evaluated
-                    processMeasureObservation(context, evaluationResult, subjectTypePart, groupDef, populationDef);
+                    var results = processMeasureObservation(
+                            context, evaluationResult, subjectTypePart, groupDef, populationDef);
+
+                    // LUKETODO: this is a little less gross but far from ideal
+                    for (MeasureObservationResult result : results) {
+                        evaluationResult.expressionResults.put(result.expressionName, result.expressionResult);
+                    }
                 }
             }
         }
     }
 
-    private void processMeasureObservation(
+    record MeasureObservationResult(String expressionName, ExpressionResult expressionResult) {}
+
+    // LUKETODO:  javadoc
+    private List<MeasureObservationResult> processMeasureObservation(
             CqlEngine context,
             EvaluationResult evaluationResult,
             String subjectTypePart,
             GroupDef groupDef,
             PopulationDef populationDef) {
-        if (populationDef.type().equals(MeasurePopulationType.MEASUREOBSERVATION)) {
-            // get criteria input for results to get (measure-population, numerator,
-            // denominator)
-            var criteriaPopulationId = populationDef.getCriteriaReference();
-            // function that will be evaluated
-            var observationExpression = populationDef.expression();
-            // get expression from criteriaPopulation reference
-            String criteriaExpressionInput = groupDef.populations().stream()
-                    .filter(t -> t.id().equals(criteriaPopulationId))
-                    .map(PopulationDef::expression)
-                    .findFirst()
-                    .orElse(null);
-            Optional<ExpressionResult> optExpressionResult =
-                    tryGetExpressionResult(criteriaExpressionInput, evaluationResult);
+        // get criteria input for results to get (measure-population, numerator,
+        // denominator)
+        var criteriaPopulationId = populationDef.getCriteriaReference();
+        // function that will be evaluated
+        var observationExpression = populationDef.expression();
+        // get expression from criteriaPopulation reference
+        String criteriaExpressionInput = groupDef.populations().stream()
+                .filter(t -> t.id().equals(criteriaPopulationId))
+                .map(PopulationDef::expression)
+                .findFirst()
+                .orElse(null);
+        Optional<ExpressionResult> optExpressionResult =
+                tryGetExpressionResult(criteriaExpressionInput, evaluationResult);
 
-            // LUKETODO:  better pattern
-            if (optExpressionResult.isEmpty()) {
-                return;
-            }
-            final ExpressionResult expressionResult = optExpressionResult.get();
-            // makes expression results iterable
-            var resultsIter = getResultIterable(evaluationResult, expressionResult, subjectTypePart);
-            // make new expression name for uniquely extracting results
-            // this will be used in MeasureEvaluator
-            var expressionName = criteriaPopulationId + "-" + observationExpression;
-            // loop through measure-population results
-            int i = 0;
-            Map<Object, Object> functionResults = new HashMap<>();
-            Set<Object> evaluatedResources = new HashSet<>();
-            for (Object result : resultsIter) {
-                Object observationResult = evaluateObservationCriteria(
-                        result, observationExpression, evaluatedResources, groupDef.isBooleanBasis(), context);
-
-                if (!(observationResult instanceof String
-                        || observationResult instanceof Integer
-                        || observationResult instanceof Double)) {
-                    throw new IllegalArgumentException(
-                            "continuous variable observation CQL \"MeasureObservation\" function result must be of type String, Integer or Double but was: "
-                                    + result.getClass().getSimpleName());
-                }
-
-                var observationId = expressionName + "-" + i;
-                // wrap result in Observation resource to avoid duplicate results data loss
-                // in set object
-                Observation observation = wrapResultAsObservation(observationId, observationId, observationResult);
-                // add function results to existing EvaluationResult under new expression
-                // name
-                // need a way to capture input parameter here too, otherwise we have no way
-                // to connect input objects related to output object
-                // key= input parameter to function
-                // value= the output Observation resource containing calculated value
-                functionResults.put(result, observation);
-            }
-            evaluationResult.expressionResults.put(
-                    expressionName, new ExpressionResult(functionResults, evaluatedResources));
+        if (optExpressionResult.isEmpty()) {
+            return List.of();
         }
+
+        final ExpressionResult expressionResult = optExpressionResult.get();
+        // makes expression results iterable
+        var resultsIter = getResultIterable(evaluationResult, expressionResult, subjectTypePart);
+        // make new expression name for uniquely extracting results
+        // this will be used in MeasureEvaluator
+        var expressionName = criteriaPopulationId + "-" + observationExpression;
+        // loop through measure-population results
+        int i = 0;
+        Map<Object, Object> functionResults = new HashMap<>();
+        Set<Object> evaluatedResources = new HashSet<>();
+        final List<MeasureObservationResult> results = new ArrayList<>();
+        for (Object result : resultsIter) {
+            Object observationResult = evaluateObservationCriteria(
+                    result, observationExpression, evaluatedResources, groupDef.isBooleanBasis(), context);
+
+            if (!(observationResult instanceof String
+                    || observationResult instanceof Integer
+                    || observationResult instanceof Double)) {
+                throw new IllegalArgumentException(
+                        "continuous variable observation CQL \"MeasureObservation\" function result must be of type String, Integer or Double but was: "
+                                + result.getClass().getSimpleName());
+            }
+
+            var observationId = expressionName + "-" + i;
+            // wrap result in Observation resource to avoid duplicate results data loss
+            // in set object
+            Observation observation = wrapResultAsObservation(observationId, observationId, observationResult);
+            // add function results to existing EvaluationResult under new expression
+            // name
+            // need a way to capture input parameter here too, otherwise we have no way
+            // to connect input objects related to output object
+            // key= input parameter to function
+            // value= the output Observation resource containing calculated value
+            functionResults.put(result, observation);
+
+            results.add(new MeasureObservationResult(
+                    expressionName, new ExpressionResult(functionResults, evaluatedResources)));
+        }
+
+        return results;
     }
 
     public Optional<ExpressionResult> tryGetExpressionResult(String expressionName, EvaluationResult evaluationResult) {
@@ -650,7 +665,6 @@ public class MeasureProcessorUtils {
         }
     }
 
-    // LUKETDO:  if there's no measure observation, DON'T DO this at all
     protected Observation wrapResultAsObservation(String id, String observationName, Object result) {
 
         Observation obs = new Observation();
@@ -658,14 +672,9 @@ public class MeasureProcessorUtils {
         obs.setId(id);
         CodeableConcept cc = new CodeableConcept();
         cc.setText(observationName);
-        // LUKETODO:  if for some reason we fail to obtain an Integer result, we have an Encounter here and this fails
-        // in a rather spectacular way
-        // LUKETODO:  validate that we have the function
-        // LUKETODO:  validate the function is getting us the correct output
         obs.setValue(convertToQuantity(result));
         obs.setCode(cc);
 
-        // LUKETODO:  fix test data to not have denominator and numerator for continous variable
         return obs;
     }
 
@@ -689,14 +698,6 @@ public class MeasureProcessorUtils {
         }
 
         return q;
-    }
-
-    // LUKETODO:  how do we handle DSTU3 and R4 interchangeably here?
-    private List<IIdType> measureDeftoIIdType(List<MeasureDef> measureDefs) {
-        return measureDefs.stream()
-                .map(t -> new IdType(t.id()))
-                .map(x -> (IIdType) x)
-                .toList();
     }
 
     private Iterable<?> getResultIterable(

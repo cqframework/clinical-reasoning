@@ -51,7 +51,7 @@ class ResourcePathResolver {
     List<Path> searchDirectories(Class<? extends IBaseResource> resourceType) {
         var category = ResourceCategory.forType(resourceType.getSimpleName());
         var basePaths = categoryDirectories(category);
-        var result = new ArrayList<Path>(basePaths);
+        var result = new ArrayList<Path>();
 
         if (conventions.typeLayout() == FhirTypeLayout.DIRECTORY_PER_TYPE) {
             for (var base : basePaths) {

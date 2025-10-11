@@ -4,7 +4,6 @@ import static java.util.Objects.requireNonNull;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -24,7 +23,6 @@ import com.google.common.collect.Table;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -44,9 +42,12 @@ import org.opencds.cqf.fhir.utility.matcher.ResourceMatcher;
 import org.opencds.cqf.fhir.utility.repository.Repositories;
 import org.opencds.cqf.fhir.utility.repository.ig.EncodingBehavior.PreserveEncoding;
 import org.opencds.cqf.fhir.utility.repository.ig.IgConventions.CategoryLayout;
-import org.opencds.cqf.fhir.utility.repository.ig.IgConventions.FhirTypeLayout;
 import org.opencds.cqf.fhir.utility.repository.ig.IgConventions.FilenameMode;
 import org.opencds.cqf.fhir.utility.repository.operations.IRepositoryOperationProvider;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.nio.charset.StandardCharsets;
+import ca.uhn.fhir.parser.DataFormatException;
 
 /**
  * Provides access to FHIR resources stored in a directory structure following
@@ -189,6 +190,8 @@ public class IgRepository implements IRepository {
             .put(EncodingEnum.NDJSON, "ndjson")
             .build();
 
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
     private record ResourceKey(String resourceType, String idPart) {
         static ResourceKey from(Class<? extends IBaseResource> resourceType, String idPart) {
             if (resourceType == null || idPart == null || idPart.isBlank()) {
@@ -209,15 +212,6 @@ public class IgRepository implements IRepository {
             }
 
             return new ResourceKey(resource.fhirType(), idElement.getIdPart());
-        }
-
-        static ResourceKey from(IIdType id, Class<? extends IBaseResource> resourceType) {
-            if (id == null || !id.hasIdPart()) {
-                return null;
-            }
-
-            var typeName = id.hasResourceType() ? id.getResourceType() : resourceType.getSimpleName();
-            return new ResourceKey(typeName, id.getIdPart());
         }
 
         boolean isValid() {
@@ -446,20 +440,56 @@ public class IgRepository implements IRepository {
 
         var encoding = encodingForPath(path);
 
+        String content;
         try {
-            String s = new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
-            var resource = parserForEncoding(fhirContext, encoding).parseResource(s);
+            content = new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
+        } catch (FileNotFoundException e) {
+            return Optional.empty();
+        } catch (IOException e) {
+            throw new UnclassifiedServerFailureException(500, "Unable to read resource from path %s".formatted(path));
+        }
+
+        try {
+            var resource = parserForEncoding(fhirContext, encoding).parseResource(content);
 
             resource.setUserData(SOURCE_PATH_TAG, path);
             CqlContent.loadCqlContent(resource, path.getParent());
 
             return Optional.of(resource);
-        } catch (FileNotFoundException e) {
-            return Optional.empty();
         } catch (DataFormatException e) {
+            var fallback = tryParseEmbeddedResource(path, encoding, content);
+            if (fallback.isPresent()) {
+                return fallback;
+            }
             throw new ResourceNotFoundException("Found empty or invalid content at path %s".formatted(path));
-        } catch (IOException e) {
-            throw new UnclassifiedServerFailureException(500, "Unable to read resource from path %s".formatted(path));
+        }
+    }
+
+    private Optional<IBaseResource> tryParseEmbeddedResource(Path path, EncodingEnum encoding, String content) {
+        try {
+            var raw = content.trim();
+            if (!raw.startsWith("\"resource\"") && !raw.startsWith("{\"resource\"")) {
+                return Optional.empty();
+            }
+
+            var wrapped = raw.startsWith("{") ? raw : "{%s}".formatted(raw);
+            JsonNode node = OBJECT_MAPPER.readTree(wrapped);
+            if (node == null || !node.has("resource")) {
+                return Optional.empty();
+            }
+
+            var resourceNode = node.get("resource");
+            if (resourceNode == null || resourceNode.isMissingNode()) {
+                return Optional.empty();
+            }
+
+            var resourceContent = OBJECT_MAPPER.writeValueAsString(resourceNode);
+            var resource = parserForEncoding(fhirContext, encoding).parseResource(resourceContent);
+            resource.setUserData(SOURCE_PATH_TAG, path);
+            CqlContent.loadCqlContent(resource, path.getParent());
+            return Optional.of(resource);
+        } catch (IOException | DataFormatException ignored) {
+            return Optional.empty();
         }
     }
 
@@ -774,32 +804,43 @@ public class IgRepository implements IRepository {
         requireNonNull(resource.getIdElement().getIdPart(), "resource id cannot be null");
 
         var assignment = this.compartmentResolver.resolve(resource);
-        var preferred = this.preferredPathForResource(resource.getClass(), resource.getIdElement(), assignment);
         var actual = (Path) resource.getUserData(SOURCE_PATH_TAG);
-        if (actual == null) {
-            actual = preferred;
-        }
 
-        if (isExternalPath(actual)) {
+        if (actual != null && isExternalPath(actual)) {
             throw new ForbiddenOperationException(
                     "Unable to create or update: %s. Resource is marked as external, and external resources are read-only."
                             .formatted(resource.getIdElement().toUnqualifiedVersionless()));
         }
 
-        // If the preferred path and the actual path are different, and the encoding
-        // behavior is set to overwrite,
-        // move the resource to the preferred path and delete the old one.
-        if (!preferred.equals(actual)
+        Path targetPath;
+        if (actual != null
                 && this.conventions.encodingBehavior().preserveEncoding()
-                        == PreserveEncoding.OVERWRITE_WITH_PREFERRED_ENCODING) {
+                        == PreserveEncoding.PRESERVE_ORIGINAL_ENCODING) {
+            var existingEncoding = encodingForPath(actual);
+            if (existingEncoding != null) {
+                targetPath = this.pathResolver
+                        .preferredDirectory(resource.getClass(), assignment)
+                        .resolve(fileNameForResource(
+                                resource.getClass().getSimpleName(), resource.getIdElement().getIdPart(), existingEncoding));
+            } else {
+                targetPath = this.preferredPathForResource(resource.getClass(), resource.getIdElement(), assignment);
+            }
+        } else {
+            targetPath = this.preferredPathForResource(resource.getClass(), resource.getIdElement(), assignment);
+        }
+
+        if (actual == null) {
+            actual = targetPath;
+        } else if (!actual.equals(targetPath)) {
             try {
                 this.resourceCache.invalidate(actual);
                 Files.deleteIfExists(actual);
             } catch (IOException e) {
-                throw new UnclassifiedServerFailureException(500, "Couldn't change encoding for %s".formatted(actual));
+                throw new UnclassifiedServerFailureException(
+                        500, "Couldn't relocate resource from %s to %s".formatted(actual, targetPath));
             }
 
-            actual = preferred;
+            actual = targetPath;
         }
 
         writeResource(resource, actual);

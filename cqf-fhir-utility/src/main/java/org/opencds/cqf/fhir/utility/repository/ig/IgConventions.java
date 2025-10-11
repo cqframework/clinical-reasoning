@@ -153,14 +153,12 @@ public record IgConventions(
                 var compartmentSelection = FHIR_TYPE_NAMES.stream()
                         .map(tests::resolve)
                         .filter(Files::exists)
-                        .map(compartmentDir -> Map.entry(
-                                compartmentDir,
-                                listFiles(compartmentDir)
-                                        .filter(Files::isDirectory)
-                                        .filter(f -> !matchesAnyResourceType(f))
-                                        .findFirst()
-                                        .orElse(null)))
-                        .filter(entry -> entry.getValue() != null)
+                        .flatMap(compartmentDir -> listFiles(compartmentDir)
+                                .filter(Files::isDirectory)
+                                .filter(f -> !matchesAnyResourceType(f))
+                                .findFirst()
+                                .map(found -> java.util.stream.Stream.of(Map.entry(compartmentDir, found)))
+                                .orElseGet(java.util.stream.Stream::empty))
                         .findFirst()
                         .orElse(null);
 
@@ -208,7 +206,7 @@ public record IgConventions(
                 hasCategoryDirectory ? CategoryLayout.DIRECTORY_PER_CATEGORY : CategoryLayout.FLAT,
                 compartmentMode,
                 hasTypeFilename ? FilenameMode.TYPE_AND_ID : FilenameMode.ID_ONLY,
-                EncodingBehavior.DEFAULT);
+                org.opencds.cqf.fhir.utility.repository.ig.EncodingBehavior.DEFAULT);
 
         logger.info("Auto-detected repository configuration: {}", config);
 

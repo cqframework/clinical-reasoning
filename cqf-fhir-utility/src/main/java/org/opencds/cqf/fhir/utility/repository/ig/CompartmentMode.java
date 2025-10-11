@@ -3,13 +3,11 @@ package org.opencds.cqf.fhir.utility.repository.ig;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
-import com.google.common.base.Supplier;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Table;
-import com.google.common.collect.Tables;
-
-import java.util.Map;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import java.util.Collections;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
 
 /**
@@ -24,16 +22,8 @@ public enum CompartmentMode {
     GROUP("Group"),
     NONE("");
 
-    // | Compartment Type | Resource Type | Candidate Search Params |
-    // |------------------|---------------|-------------------------|
-    // | Patient          | Encounter     | ["subject"]             |
-    // | Patient          | Library       | []                      |
-    private static Table<String, String, Set<RuntimeSearchParam>> compartmentMembershipCache =
-            Tables.newCustomTable(Maps.newLinkedHashMap(), new Supplier<>() {
-                public Map<String, Set<RuntimeSearchParam>> get() {
-                    return Maps.newLinkedHashMap();
-                }
-            });
+    private static final ConcurrentMap<CacheKey, Set<RuntimeSearchParam>> COMPARTMENT_MEMBERSHIP_CACHE =
+            new ConcurrentHashMap<>();
 
     private final String type;
 
@@ -59,32 +49,29 @@ public enum CompartmentMode {
     }
 
     public Set<RuntimeSearchParam> compartmentSearchParams(FhirContext fhirContext, String resourceType) {
-        var compartmentMap = compartmentMembershipCache.row(this.type);
-        if (compartmentMap.containsKey(resourceType)) {
-            return compartmentMap.get(resourceType);
-        }
+        var key = new CacheKey(this.type, fhirContext.getVersion().getVersion(), resourceType);
+        return COMPARTMENT_MEMBERSHIP_CACHE.computeIfAbsent(key, k -> computeSearchParams(fhirContext, resourceType));
+    }
 
+    private Set<RuntimeSearchParam> computeSearchParams(FhirContext fhirContext, String resourceType) {
         Set<RuntimeSearchParam> params;
         if (this.type.equals(resourceType)) {
-            // If the compartment type is the same as the resource type, we can assume that the resource
-            // belongs to its own compartment.
             params = fhirContext.getResourceDefinition(resourceType).getSearchParams().stream()
                     .filter(param -> param.getName().equals("_id"))
                     .collect(Collectors.toSet());
             if (params.isEmpty()) {
-                // Should be impossible
                 throw new IllegalStateException("No _id search parameter found for resource type: " + resourceType);
             }
-        }
-        else {
+        } else {
             params = fhirContext.getResourceDefinition(resourceType).getSearchParams().stream()
-                .filter(param -> param.getParamType() == RestSearchParameterTypeEnum.REFERENCE)
-                .filter(param -> param.getProvidesMembershipInCompartments() != null
-                        && param.getProvidesMembershipInCompartments().contains(this.type)).collect(Collectors.toSet());
+                    .filter(param -> param.getParamType() == RestSearchParameterTypeEnum.REFERENCE)
+                    .filter(param -> param.getProvidesMembershipInCompartments() != null
+                            && param.getProvidesMembershipInCompartments().contains(this.type))
+                    .collect(Collectors.toSet());
         }
 
-
-        compartmentMembershipCache.put(this.type, resourceType, params);
-        return params;
+        return params.isEmpty() ? Collections.emptySet() : Set.copyOf(params);
     }
+
+    private record CacheKey(String compartmentType, FhirVersionEnum version, String resourceType) {}
 }

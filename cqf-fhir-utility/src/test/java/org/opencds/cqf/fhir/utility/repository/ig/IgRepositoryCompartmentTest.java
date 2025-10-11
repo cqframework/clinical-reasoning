@@ -77,7 +77,12 @@ class IgRepositoryCompartmentTest {
     @Test
     void readPatientNoCompartment() {
         var id = Ids.newId(Patient.class, "123");
-        assertThrows(ResourceNotFoundException.class, () -> repository.read(Patient.class, id));
+        var patient = repository.read(Patient.class, id);
+
+        assertNotNull(patient);
+        var sourcePath = (Path) patient.getUserData(IgRepository.SOURCE_PATH_TAG);
+        assertNotNull(sourcePath);
+        assertTrue(sourcePath.toString().contains("patient/123"));
     }
 
     @Test
@@ -93,12 +98,14 @@ class IgRepositoryCompartmentTest {
     void searchEncounterNoCompartment() {
         var encounters = repository.search(Bundle.class, Encounter.class, Searches.ALL);
         assertNotNull(encounters);
-        assertEquals(0, encounters.getEntry().size());
+        assertEquals(2, encounters.getEntry().size());
     }
 
     @Test
     void searchEncounter() {
-        var encounters = repository.search(Bundle.class, Encounter.class, Searches.ALL);
+        var bySubject = Searches.toFlattenedMap(
+                Searches.builder().withReferenceParam("subject", "Patient/123").build());
+        var encounters = repository.search(Bundle.class, Encounter.class, bySubject);
         assertNotNull(encounters);
         assertEquals(1, encounters.getEntry().size());
     }
@@ -196,7 +203,9 @@ class IgRepositoryCompartmentTest {
 
     @Test
     void searchNonExistentType() {
-        var results = repository.search(Bundle.class, Encounter.class, Searches.ALL);
+        var unknownSubject = Searches.toFlattenedMap(
+                Searches.builder().withReferenceParam("subject", "Patient/DoesNotExist").build());
+        var results = repository.search(Bundle.class, Encounter.class, unknownSubject);
         assertNotNull(results);
         assertEquals(0, results.getEntry().size());
     }

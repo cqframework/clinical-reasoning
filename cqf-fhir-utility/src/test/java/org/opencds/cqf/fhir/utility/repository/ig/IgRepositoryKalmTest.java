@@ -22,6 +22,7 @@ import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.ValueSet;
+import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
@@ -80,7 +81,12 @@ class IgRepositoryKalmTest {
     @Test
     void readPatientNoCompartment() {
         var id = Ids.newId(Patient.class, "123");
-        assertThrows(ResourceNotFoundException.class, () -> repository.read(Patient.class, id));
+        var patient = repository.read(Patient.class, id);
+
+        assertNotNull(patient);
+        var sourcePath = (Path) patient.getUserData(IgRepository.SOURCE_PATH_TAG);
+        assertNotNull(sourcePath);
+        assertTrue(sourcePath.toString().contains("patient/123"));
     }
 
     @Test
@@ -96,12 +102,14 @@ class IgRepositoryKalmTest {
     void searchEncounterNoCompartment() {
         var encounters = repository.search(Bundle.class, Encounter.class, Searches.ALL);
         assertNotNull(encounters);
-        assertEquals(0, encounters.getEntry().size());
+        assertEquals(2, encounters.getEntry().size());
     }
 
     @Test
     void searchEncounter() {
-        var encounters = repository.search(Bundle.class, Encounter.class, Searches.ALL);
+        var bySubject = Searches.toFlattenedMap(
+                Searches.builder().withReferenceParam("subject", "Patient/123").build());
+        var encounters = repository.search(Bundle.class, Encounter.class, bySubject);
         assertNotNull(encounters);
         assertEquals(1, encounters.getEntry().size());
     }
@@ -212,6 +220,26 @@ class IgRepositoryKalmTest {
     }
 
     @Test
+    void updateMovesDataResourceFromSharedToCompartment() {
+        var encounter = new Encounter();
+        encounter.setId("enc-shared");
+        repository.create(encounter);
+        var sharedPath = tempDir.resolve("tests/data/fhir/shared/encounter/enc-shared.json");
+        assertTrue(Files.exists(sharedPath));
+
+        var stored = repository.read(Encounter.class, encounter.getIdElement());
+        stored.setSubject(new Reference("Patient/123"));
+
+        repository.update(stored);
+
+        var compartmentPath = tempDir.resolve("tests/data/fhir/patient/123/encounter/enc-shared.json");
+        assertTrue(Files.exists(compartmentPath));
+        assertFalse(Files.exists(sharedPath));
+
+        repository.delete(Encounter.class, stored.getIdElement());
+    }
+
+    @Test
     void updatePatient() {
         var id = Ids.newId(Patient.class, "123");
         var p = repository.read(Patient.class, id);
@@ -266,7 +294,9 @@ class IgRepositoryKalmTest {
 
     @Test
     void searchNonExistentType() {
-        var results = repository.search(Bundle.class, Encounter.class, Searches.ALL);
+        var unknownSubject = Searches.toFlattenedMap(
+                Searches.builder().withReferenceParam("subject", "Patient/DoesNotExist").build());
+        var results = repository.search(Bundle.class, Encounter.class, unknownSubject);
         assertNotNull(results);
         assertEquals(0, results.getEntry().size());
     }

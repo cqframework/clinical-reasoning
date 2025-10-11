@@ -56,7 +56,17 @@ class CompartmentResolver {
         }
 
         var params = compartmentMode.compartmentSearchParams(fhirContext, resourceType);
-        return resolveFromParameters(resource, params);
+        var assignment = resolveFromParameters(resource, params);
+        if (assignment.isPresent()) {
+            return assignment;
+        }
+
+        if (resourceCategory == ResourceCategory.DATA
+                && conventions.categoryLayout() == IgConventions.CategoryLayout.DEFINITIONAL_AND_DATA) {
+            return Optional.of(CompartmentAssignment.shared());
+        }
+
+        return Optional.empty();
     }
 
     private Optional<CompartmentAssignment> resolveFromParameters(
@@ -69,7 +79,12 @@ class CompartmentResolver {
         var compartmentType = conventions.compartmentMode().type();
 
         for (var param : searchParams) {
-            for (var path : param.getPathsSplit()) {
+            for (var originalPath : param.getPathsSplit()) {
+                var path = sanitizeSearchPath(originalPath);
+                if (path == null || path.isBlank()) {
+                    continue;
+                }
+
                 var values = terser.getValues(resource, path);
                 for (var value : values) {
                     var reference = extractReference(value);
@@ -88,6 +103,21 @@ class CompartmentResolver {
         }
 
         return Optional.empty();
+    }
+
+    private String sanitizeSearchPath(String path) {
+        if (path == null) {
+            return null;
+        }
+
+        var sanitized = path;
+        var whereIndex = sanitized.indexOf(".where(");
+        if (whereIndex >= 0) {
+            sanitized = sanitized.substring(0, whereIndex);
+        }
+
+        // The terser expects paths relative to the resource and does not understand resolve()
+        return sanitized.replace(".resolve()", "");
     }
 
     private IIdType extractReference(Object value) {

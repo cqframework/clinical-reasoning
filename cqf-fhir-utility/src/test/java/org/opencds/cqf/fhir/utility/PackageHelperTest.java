@@ -12,24 +12,8 @@ class PackageHelperTest {
 
     @Test
     void testPackageParameters() {
-        var actual = packageParameters(
-            FhirVersionEnum.R4,
-            null,
-            false);
+        var actual = packageParameters(FhirVersionEnum.R4, null, false);
         assertInstanceOf(org.hl7.fhir.r4.model.Parameters.class, actual);
-        assertFalse(((org.hl7.fhir.r4.model.Parameters) actual).hasParameter("terminologyEndpoint"));
-        assertTrue(((org.hl7.fhir.r4.model.Parameters) actual).hasParameter("isPut"));
-    }
-
-    @Test
-    void testPackageParametersWithInclude() {
-        var actual = packageParameters(
-            FhirVersionEnum.R4,
-            null,
-            null,
-            false);
-        assertInstanceOf(org.hl7.fhir.r4.model.Parameters.class, actual);
-        assertFalse(((org.hl7.fhir.r4.model.Parameters) actual).hasParameter("include"));
         assertFalse(((org.hl7.fhir.r4.model.Parameters) actual).hasParameter("terminologyEndpoint"));
         assertTrue(((org.hl7.fhir.r4.model.Parameters) actual).hasParameter("isPut"));
     }

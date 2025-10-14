@@ -30,11 +30,9 @@ class ResponseEncoderMethodResoveSourceTest {
         repository = mock(IRepository.class);
         fixture = spy(new CdsResponseEncoderService(repository, adapterFactory));
 
-        requestGroupActionComponent = new RequestGroupActionComponent()
-            .setTitle("Test Title")
-            .setDescription("Test Description");
+        requestGroupActionComponent =
+                new RequestGroupActionComponent().setTitle("Test Title").setDescription("Test Description");
     }
-
 
     @Test
     void testResolveSource_withValidDocumentation() {
@@ -43,12 +41,12 @@ class ResponseEncoderMethodResoveSourceTest {
         String expectedUrl = "http://example/url";
         String expectedIconUrl = "http://example/icon";
 
-        RelatedArtifact relatedArtifact = new RelatedArtifact().setDisplay(expectedLabel).setUrl(expectedUrl);
+        RelatedArtifact relatedArtifact =
+                new RelatedArtifact().setDisplay(expectedLabel).setUrl(expectedUrl);
         relatedArtifact.setDocument(new Attachment().setUrl(expectedIconUrl));
         requestGroupActionComponent.setDocumentation(List.of(relatedArtifact));
 
-        IRequestActionAdapter requestAction = adapterFactory.createRequestAction(
-            requestGroupActionComponent);
+        IRequestActionAdapter requestAction = adapterFactory.createRequestAction(requestGroupActionComponent);
 
         // when
         CdsServiceResponseCardSourceJson result = fixture.resolveSource(requestAction);

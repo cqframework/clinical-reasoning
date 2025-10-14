@@ -59,7 +59,8 @@ class ResponseEncoderMethodResolveResourceTest {
     @Test
     void testResolveResource_fromContainedResources() {
         // given
-        var questionnaireResponse = (QuestionnaireResponse) new QuestionnaireResponse().setId(new IdType("QuestionnaireResponse", "1"));
+        var questionnaireResponse =
+                (QuestionnaireResponse) new QuestionnaireResponse().setId(new IdType("QuestionnaireResponse", "1"));
         var contained1 = (Questionnaire) new Questionnaire().setId(new IdType("Questionnaire", "1"));
         var contained2 = (Questionnaire) new Questionnaire().setId(new IdType("Questionnaire", "2"));
         questionnaireResponse.setContained(List.of(contained1, contained2));
@@ -76,7 +77,5 @@ class ResponseEncoderMethodResolveResourceTest {
         // then
         assertNotNull(resolvedResource);
         assertEquals(contained2, resolvedResource);
-
     }
-
 }

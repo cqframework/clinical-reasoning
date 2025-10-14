@@ -15,10 +15,11 @@ public class CdsCrService implements ICdsCrService {
     private final CdsResponseEncoderService cdsResponseEncoderService;
     private final CdsParametersEncoderService cdsParametersEncoderService;
 
-    public CdsCrService(IRepository repository,
-        IAdapterFactory adapterFactory,
-        CdsResponseEncoderService cdsResponseEncoderService,
-        CdsParametersEncoderService cdsParametersEncoderService) {
+    public CdsCrService(
+            IRepository repository,
+            IAdapterFactory adapterFactory,
+            CdsResponseEncoderService cdsResponseEncoderService,
+            CdsParametersEncoderService cdsParametersEncoderService) {
 
         this.repository = repository;
         this.adapterFactory = adapterFactory;
@@ -36,13 +37,10 @@ public class CdsCrService implements ICdsCrService {
 
     public IBaseParameters encodeParams(CdsServiceRequestJson json, RequestDetails requestDetails) {
         return cdsParametersEncoderService.encodeParams(json, requestDetails);
-
-
     }
 
     @SuppressWarnings("unchecked")
     public CdsServiceResponseJson encodeResponse(Object response, RequestDetails requestDetails) {
         return cdsResponseEncoderService.encodeResponse(response, requestDetails);
     }
-
 }

@@ -38,13 +38,10 @@ public class CdsResponseEncoderService {
 
     protected IResourceAdapter responseAdapter;
 
-    public CdsResponseEncoderService(
-        IRepository repository,
-        IAdapterFactory adapterFactory) {
+    public CdsResponseEncoderService(IRepository repository, IAdapterFactory adapterFactory) {
 
         this.adapterFactory = adapterFactory;
         this.repository = repository;
-
     }
 
     public CdsServiceResponseJson encodeResponse(Object response, RequestDetails requestDetails) {
@@ -58,9 +55,9 @@ public class CdsResponseEncoderService {
         if (response instanceof IBaseParameters parameters) {
             var parametersAdapter = adapterFactory.createParameters(parameters);
             var bundle = parametersAdapter.getParameter().stream()
-                .map(p -> (IBaseBundle) p.getResource())
-                .findFirst()
-                .orElse(null);
+                    .map(p -> (IBaseBundle) p.getResource())
+                    .findFirst()
+                    .orElse(null);
             if (bundle == null) {
                 throw new InternalErrorException("response does not contain a Bundle");
             }
@@ -92,13 +89,12 @@ public class CdsResponseEncoderService {
         }
 
         var planDef = (IPlanDefinitionAdapter)
-            adapterFactory.createResource(
-                SearchHelper.searchRepositoryByCanonical(repository, canonical));
+                adapterFactory.createResource(SearchHelper.searchRepositoryByCanonical(repository, canonical));
         var links = resolvePlanLinks(planDef);
 
         Stream.of(mainRequest.getProperty("action"))
-            .map(adapterFactory::createRequestAction)
-            .forEach(action -> serviceResponse.addCard(resolveAction(action, links)));
+                .map(adapterFactory::createRequestAction)
+                .forEach(action -> serviceResponse.addCard(resolveAction(action, links)));
 
         return serviceResponse;
     }
@@ -118,8 +114,8 @@ public class CdsResponseEncoderService {
                     }
                     if (ra.hasExtension()) {
                         link.setType(((IPrimitiveType<String>)
-                            ra.getExtension().get(0).getValue())
-                            .getValueAsString());
+                                        ra.getExtension().get(0).getValue())
+                                .getValueAsString());
                     } else link.setType("absolute"); // default
                     links.add(link);
                 }
@@ -129,11 +125,11 @@ public class CdsResponseEncoderService {
     }
 
     protected CdsServiceResponseCardJson resolveAction(
-        IRequestActionAdapter action, List<CdsServiceResponseLinkJson> links) {
+            IRequestActionAdapter action, List<CdsServiceResponseLinkJson> links) {
         var card = new CdsServiceResponseCardJson()
-            .setSummary(action.getTitle())
-            .setDetail(action.getDescription())
-            .setLinks(links);
+                .setSummary(action.getTitle())
+                .setDetail(action.getDescription())
+                .setLinks(links);
 
         if (action.hasPriority()) {
             card.setIndicator(resolveIndicator(action.getPriority()));
@@ -158,18 +154,18 @@ public class CdsResponseEncoderService {
 
     protected CdsServiceIndicatorEnum resolveIndicator(String code) {
         return switch (code) {
-                case "routine" -> CdsServiceIndicatorEnum.INFO;
-                case "urgent" -> CdsServiceIndicatorEnum.WARNING;
-                case "stat" -> CdsServiceIndicatorEnum.CRITICAL;
-                default -> throw new IllegalArgumentException("Invalid priority code: " + code);
-            };
+            case "routine" -> CdsServiceIndicatorEnum.INFO;
+            case "urgent" -> CdsServiceIndicatorEnum.WARNING;
+            case "stat" -> CdsServiceIndicatorEnum.CRITICAL;
+            default -> throw new IllegalArgumentException("Invalid priority code: " + code);
+        };
     }
 
     protected CdsServiceResponseCardSourceJson resolveSource(IRequestActionAdapter action) {
         var documentation = action.getDocumentation().get(0);
         var source = new CdsServiceResponseCardSourceJson()
-            .setLabel(action.resolvePathString(documentation, "display"))
-            .setUrl(action.resolvePathString(documentation, "url"));
+                .setLabel(action.resolvePathString(documentation, "display"))
+                .setUrl(action.resolvePathString(documentation, "url"));
 
         var document = action.resolvePath(documentation, "document");
         String documentUrl = document == null ? null : action.resolvePathString(document, "url");
@@ -182,8 +178,8 @@ public class CdsResponseEncoderService {
 
     protected CdsServiceResponseSuggestionJson resolveSuggestion(IRequestActionAdapter action) {
         CdsServiceResponseSuggestionJson suggestion = new CdsServiceResponseSuggestionJson()
-            .setLabel(action.getTitle())
-            .setUuid(action.getId());
+                .setLabel(action.getTitle())
+                .setUuid(action.getId());
         action.getAction().forEach(x -> suggestion.addAction(resolveSuggestionAction(x)));
 
         return suggestion;
@@ -191,11 +187,11 @@ public class CdsResponseEncoderService {
 
     protected CdsServiceResponseSuggestionActionJson resolveSuggestionAction(IRequestActionAdapter action) {
         CdsServiceResponseSuggestionActionJson suggestionAction =
-            new CdsServiceResponseSuggestionActionJson().setDescription(action.getDescription());
+                new CdsServiceResponseSuggestionActionJson().setDescription(action.getDescription());
         if (action.hasType()
-            && action.getType().hasCoding()
-            && action.getType().getCoding().get(0).hasCode()
-            && !action.getType().getCoding().get(0).getCode().equals("fire-event")) {
+                && action.getType().hasCoding()
+                && action.getType().getCoding().get(0).hasCode()
+                && !action.getType().getCoding().get(0).getCode().equals("fire-event")) {
             String actionCode = action.getType().getCoding().get(0).getCode();
             suggestionAction.setType(actionCode);
         }
@@ -221,13 +217,14 @@ public class CdsResponseEncoderService {
             var id = ref.contains("/") ? split[1] : ref;
             var resourceType = Canonicals.getResourceType(ref);
             var results = BundleHelper.getEntryResources(bundle).stream()
-                .filter(r -> r.fhirType().equals(resourceType)
-                    && r.getIdElement().getIdPart().equals(id))
-                .toList();
+                    .filter(r -> r.fhirType().equals(resourceType)
+                            && r.getIdElement().getIdPart().equals(id))
+                    .toList();
             return results.isEmpty() ? null : results.get(0);
         } else {
             IBaseResource retVal = null;
-            String referenceValue = replacePrefixIgnoreCase(reference.getReferenceElement().getValueAsString(), "#", EMPTY);
+            String referenceValue =
+                    replacePrefixIgnoreCase(reference.getReferenceElement().getValueAsString(), "#", EMPTY);
 
             for (IBaseResource contained : localResponseAdapter.getContained()) {
                 if (contained.getIdElement().getValueAsString().equals(referenceValue)) {

@@ -72,5 +72,4 @@ class ResponseEncoderSuggestionResolverTest {
         assertEquals(1, result.getActions().size());
         assertEquals(nestedSuggestionAction, result.getActions().get(0));
     }
-
 }

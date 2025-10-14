@@ -39,22 +39,22 @@ public class CdsParametersEncoderService {
 
     public IBaseParameters encodeParams(CdsServiceRequestJson json, RequestDetails requestDetails) {
         var parameters = adapterFactory.createParameters(
-            (IBaseParameters) Resources.newBaseForVersion("Parameters", getFhirVersion()));
+                (IBaseParameters) Resources.newBaseForVersion("Parameters", getFhirVersion()));
         parameters.addParameter(APPLY_PARAMETER_SUBJECT, json.getContext().getString(CDS_PARAMETER_PATIENT_ID));
         if (json.getContext().containsKey(CDS_PARAMETER_USER_ID)) {
             parameters.addParameter(
-                APPLY_PARAMETER_PRACTITIONER, json.getContext().getString(CDS_PARAMETER_USER_ID));
+                    APPLY_PARAMETER_PRACTITIONER, json.getContext().getString(CDS_PARAMETER_USER_ID));
         }
         if (json.getContext().containsKey(CDS_PARAMETER_ENCOUNTER_ID)) {
             parameters.addParameter(APPLY_PARAMETER_ENCOUNTER, json.getContext().getString(CDS_PARAMETER_ENCOUNTER_ID));
         }
         var cqlParameters = adapterFactory.createParameters(
-            (IBaseParameters) Resources.newBaseForVersion("Parameters", getFhirVersion()));
+                (IBaseParameters) Resources.newBaseForVersion("Parameters", getFhirVersion()));
         if (json.getContext().containsKey(CDS_PARAMETER_DRAFT_ORDERS)) {
             addCqlParameters(
-                cqlParameters,
-                json.getContext().getResource(CDS_PARAMETER_DRAFT_ORDERS),
-                CDS_PARAMETER_DRAFT_ORDERS);
+                    cqlParameters,
+                    json.getContext().getResource(CDS_PARAMETER_DRAFT_ORDERS),
+                    CDS_PARAMETER_DRAFT_ORDERS);
         }
         if (cqlParameters.hasParameter()) {
             parameters.addParameter(APPLY_PARAMETER_PARAMETERS, cqlParameters.get());
@@ -79,11 +79,11 @@ public class CdsParametersEncoderService {
             listExtension.setUrl(Constants.CPG_PARAMETER_DEFINITION);
             var paramDef = (IBaseDatatype) Resources.newBaseForVersion("ParameterDefinition", getFhirVersion());
             parameters
-                .getModelResolver()
-                .setValue(paramDef, "max", VersionUtilities.stringTypeForVersion(getFhirVersion(), "*"));
+                    .getModelResolver()
+                    .setValue(paramDef, "max", VersionUtilities.stringTypeForVersion(getFhirVersion(), "*"));
             parameters
-                .getModelResolver()
-                .setValue(paramDef, "name", VersionUtilities.codeTypeForVersion(getFhirVersion(), paramName));
+                    .getModelResolver()
+                    .setValue(paramDef, "name", VersionUtilities.codeTypeForVersion(getFhirVersion(), paramName));
             listExtension.setValue(paramDef);
         }
     }
@@ -92,7 +92,7 @@ public class CdsParametersEncoderService {
         // using HashMap to avoid duplicates
         Map<String, IBaseResource> resourceMap = new HashMap<>();
         BundleHelper.getEntryResources(bundle)
-            .forEach(r -> resourceMap.put(r.fhirType() + r.getIdElement().getIdPart(), r));
+                .forEach(r -> resourceMap.put(r.fhirType() + r.getIdElement().getIdPart(), r));
         return resourceMap;
     }
 
@@ -113,7 +113,7 @@ public class CdsParametersEncoderService {
             }
         }
         resourceMap.forEach(
-            (key, value) -> BundleHelper.addEntry(prefetchResources, BundleHelper.newEntryWithResource(value)));
+                (key, value) -> BundleHelper.addEntry(prefetchResources, BundleHelper.newEntryWithResource(value)));
         return prefetchResources;
     }
 

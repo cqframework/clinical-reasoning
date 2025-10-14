@@ -27,12 +27,11 @@ class CdsResponseEncoderServiceTest {
         IAdapterFactory mockAdapterFactory = mock(IAdapterFactory.class);
         IRepository mockRepository = mock(IRepository.class);
 
-        CdsResponseEncoderService encoder =
-                new CdsResponseEncoderService(mockRepository, mockAdapterFactory);
+        CdsResponseEncoderService encoder = new CdsResponseEncoderService(mockRepository, mockAdapterFactory);
 
         // when
-        Exception exception = assertThrows(RuntimeException.class, () ->
-            encoder.encodeResponse(invalidResponse, requestDetails));
+        Exception exception =
+                assertThrows(RuntimeException.class, () -> encoder.encodeResponse(invalidResponse, requestDetails));
 
         // then
         assertEquals("response is not an instance of a Resource", exception.getMessage());
@@ -50,12 +49,11 @@ class CdsResponseEncoderServiceTest {
         when(mockAdapterFactory.createParameters(mockParameters)).thenReturn(mockParametersAdapter);
         when(mockParametersAdapter.getParameter()).thenReturn(List.of());
 
-        CdsResponseEncoderService encoder =
-                new CdsResponseEncoderService(mockRepository, mockAdapterFactory);
+        CdsResponseEncoderService encoder = new CdsResponseEncoderService(mockRepository, mockAdapterFactory);
 
         // when
-        Exception exception = assertThrows(RuntimeException.class, () ->
-            encoder.encodeResponse(mockParameters, requestDetails));
+        Exception exception =
+                assertThrows(RuntimeException.class, () -> encoder.encodeResponse(mockParameters, requestDetails));
 
         // then
         assertEquals("response does not contain a Bundle", exception.getMessage());
@@ -70,19 +68,16 @@ class CdsResponseEncoderServiceTest {
         var emptyBundle = new Bundle();
 
         final Parameters parameters = new Parameters()
-            .addParameter(
-                new ParametersParameterComponent().setName("return").setResource(emptyBundle));
+                .addParameter(
+                        new ParametersParameterComponent().setName("return").setResource(emptyBundle));
 
-
-        CdsResponseEncoderService encoder =
-                new CdsResponseEncoderService(mockRepository, adapterFactory );
+        CdsResponseEncoderService encoder = new CdsResponseEncoderService(mockRepository, adapterFactory);
 
         // when
-        Exception exception = assertThrows(RuntimeException.class,() ->
-            encoder.encodeResponse(parameters, requestDetails));
+        Exception exception =
+                assertThrows(RuntimeException.class, () -> encoder.encodeResponse(parameters, requestDetails));
 
         // then
         assertEquals("unable to resolve response", exception.getMessage());
     }
-
 }

@@ -51,7 +51,8 @@ class CdsCrServiceR4Test extends BaseCdsCrServiceTest {
         fhirContext = FhirContext.forR4Cached();
         adapterFactory = IAdapterFactory.forFhirContext(fhirContext);
         objectMapper = new CdsHooksObjectMapperFactory(fhirContext).newMapper();
-        testSubject = new CdsCrService(getRepository(), getAdapterFactory(), getCdsResponseEncoderService(), getCdsParametersEncoderService());
+        testSubject = new CdsCrService(
+                getRepository(), getAdapterFactory(), getCdsResponseEncoderService(), getCdsParametersEncoderService());
     }
 
     @Test
@@ -72,8 +73,8 @@ class CdsCrServiceR4Test extends BaseCdsCrServiceTest {
         final IdType planDefinitionId = new IdType(PLAN_DEFINITION_RESOURCE_NAME, "ASLPCrd");
         localRequestDetails.setId(planDefinitionId);
 
-        CdsCrService cdsCrService = new CdsCrService(localRepository, getAdapterFactory(),
-            getCdsResponseEncoderService(), getCdsParametersEncoderService());
+        CdsCrService cdsCrService = new CdsCrService(
+                localRepository, getAdapterFactory(), getCdsResponseEncoderService(), getCdsParametersEncoderService());
 
         IBaseParameters iBaseParameters = cdsCrService.encodeParams(cdsServiceRequestJson, localRequestDetails);
 
@@ -141,7 +142,6 @@ class CdsCrServiceR4Test extends BaseCdsCrServiceTest {
         assertEquals("*", parameterDefinition.getMax());
     }
 
-
     @Test
     void testR4Response() {
         final Bundle bundle = ClasspathUtil.loadResource(
@@ -157,10 +157,9 @@ class CdsCrServiceR4Test extends BaseCdsCrServiceTest {
         final IdType planDefinitionId = new IdType(PLAN_DEFINITION_RESOURCE_NAME, "ASLPCrd");
         requestDetails.setId(planDefinitionId);
 
-        CdsCrService cdsCrService = new CdsCrService(localRepository, getAdapterFactory(),
-            encoder, getCdsParametersEncoderService());
-        final CdsServiceResponseJson cdsServiceResponseJson = cdsCrService
-                .encodeResponse(response, requestDetails);
+        CdsCrService cdsCrService =
+                new CdsCrService(localRepository, getAdapterFactory(), encoder, getCdsParametersEncoderService());
+        final CdsServiceResponseJson cdsServiceResponseJson = cdsCrService.encodeResponse(response, requestDetails);
 
         assertEquals(1, cdsServiceResponseJson.getCards().size());
         assertFalse(cdsServiceResponseJson.getCards().get(0).getSummary().isEmpty());
@@ -186,5 +185,4 @@ class CdsCrServiceR4Test extends BaseCdsCrServiceTest {
         assertTrue(resourceMap.containsKey(patientKey));
         assertEquals(patient, resourceMap.get(patientKey));
     }
-
 }

@@ -31,9 +31,8 @@ class ResponseEncoderSuggestionActionResolverTest {
         repository = mock(IRepository.class);
         fixture = spy(new CdsResponseEncoderService(repository, adapterFactory));
 
-        requestGroupActionComponent = new RequestGroupActionComponent()
-            .setTitle("Test Title")
-            .setDescription("Test Description");
+        requestGroupActionComponent =
+                new RequestGroupActionComponent().setTitle("Test Title").setDescription("Test Description");
     }
 
     @Test
@@ -105,5 +104,4 @@ class ResponseEncoderSuggestionActionResolverTest {
         assertNotNull(result);
         assertNull(result.getType()); // "fire-event" should not be set as type
     }
-
 }

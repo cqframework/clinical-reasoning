@@ -24,7 +24,8 @@ class CdsCrServiceDstu3Test extends BaseCdsCrServiceTest {
     void beforeEach() {
         fhirContext = FhirContext.forDstu3Cached();
         repository = getRepository();
-        testSubject = new CdsCrService(repository, getAdapterFactory(), getCdsResponseEncoderService(), getCdsParametersEncoderService());
+        testSubject = new CdsCrService(
+                repository, getAdapterFactory(), getCdsResponseEncoderService(), getCdsParametersEncoderService());
     }
 
     @Test
@@ -42,44 +43,44 @@ class CdsCrServiceDstu3Test extends BaseCdsCrServiceTest {
         // setup
         IAdapterFactory iAdapterFactory = IAdapterFactory.forFhirContext(fhirContext);
         final var bundle = ClasspathUtil.loadResource(
-            fhirContext, Bundle.class, "org/opencds/cqf/fhir/cr/hapi/dstu3/hello-world/hello-world-patient-view-bundle.json");
+                fhirContext,
+                Bundle.class,
+                "org/opencds/cqf/fhir/cr/hapi/dstu3/hello-world/hello-world-patient-view-bundle.json");
         final IRepository repository = new InMemoryFhirRepository(fhirContext, bundle);
 
         var carePlanResponse = getCarePLanAsResponse();
 
-        CdsResponseEncoderService encoder =
-            new CdsResponseEncoderService(repository, iAdapterFactory);
+        CdsResponseEncoderService encoder = new CdsResponseEncoderService(repository, iAdapterFactory);
 
         CdsServiceResponseJson cdsServiceResponseJson = encoder.encodeResponse(carePlanResponse, requestDetails);
 
         assertEquals(1, cdsServiceResponseJson.getCards().size());
         assertFalse(cdsServiceResponseJson.getCards().get(0).getSummary().isEmpty());
         assertFalse(cdsServiceResponseJson.getCards().get(0).getDetail().isEmpty());
-
     }
 
     private CarePlan getCarePLanAsResponse() {
         var carePlanResourceLocation = "org/opencds/cqf/fhir/cr/hapi/dstu3/hello-world/hello-world-careplan.json";
 
         var retVal = ClasspathUtil.loadResource(
-            fhirContext, org.hl7.fhir.dstu3.model.CarePlan.class, carePlanResourceLocation);
+                fhirContext, org.hl7.fhir.dstu3.model.CarePlan.class, carePlanResourceLocation);
 
-//        Method ClasspathUtil.loadResource will invoke the hapi-fhir json parser to parse and inflate file Resources.
-//        There is a bug in the parser where the value of a contained resource's resourceType is ignored during deserialization.
-//        See issue https://github.com/hapifhir/hapi-fhir/issues/7289
-//
-//        Until the issue is resolved, we set the value for resourceType manually.
+        //        Method ClasspathUtil.loadResource will invoke the hapi-fhir json parser to parse and inflate file
+        // Resources.
+        //        There is a bug in the parser where the value of a contained resource's resourceType is ignored during
+        // deserialization.
+        //        See issue https://github.com/hapifhir/hapi-fhir/issues/7289
+        //
+        //        Until the issue is resolved, we set the value for resourceType manually.
 
         var resource = retVal.getContained().get(0);
         String incompleteId = resource.getId();
         resource.setId(new IdType("RequestGroup/" + incompleteId));
 
         return retVal;
-
     }
 
     public FhirVersionEnum getFhirVersion() {
         return repository.fhirContext().getVersion().getVersion();
     }
-
 }

@@ -36,9 +36,8 @@ class ResponseEncoderMethodResolveActionTest {
         repository = mock(IRepository.class);
         fixture = spy(new CdsResponseEncoderService(repository, adapterFactory));
 
-        requestGroupActionComponent = new RequestGroupActionComponent()
-            .setTitle("Test Title")
-            .setDescription("Test Description");
+        requestGroupActionComponent =
+                new RequestGroupActionComponent().setTitle("Test Title").setDescription("Test Description");
     }
 
     @Test
@@ -46,9 +45,8 @@ class ResponseEncoderMethodResolveActionTest {
         // given
         var expectedTitle = "Sample Title";
         var expectedDescription = "Sample Description";
-        requestGroupActionComponent = new RequestGroupActionComponent()
-            .setTitle(expectedTitle)
-            .setDescription(expectedDescription);
+        requestGroupActionComponent =
+                new RequestGroupActionComponent().setTitle(expectedTitle).setDescription(expectedDescription);
 
         var actionAdapter = adapterFactory.createRequestAction(requestGroupActionComponent);
 
@@ -100,7 +98,8 @@ class ResponseEncoderMethodResolveActionTest {
 
         var actionAdapter = adapterFactory.createRequestAction(requestGroupActionComponent);
 
-        var responseCardSourceJson = new CdsServiceResponseCardSourceJson().setLabel("Mock Label").setUrl("http://mocksource.com");
+        var responseCardSourceJson =
+                new CdsServiceResponseCardSourceJson().setLabel("Mock Label").setUrl("http://mocksource.com");
         doReturn(responseCardSourceJson).when(fixture).resolveSource(actionAdapter);
 
         // when
@@ -116,9 +115,7 @@ class ResponseEncoderMethodResolveActionTest {
         // given
         var expectedBehavior = ActionSelectionBehavior.ALL;
 
-        requestGroupActionComponent
-            .setSelectionBehavior(expectedBehavior)
-            .setAction(List.of());
+        requestGroupActionComponent.setSelectionBehavior(expectedBehavior).setAction(List.of());
 
         var actionAdapter = adapterFactory.createRequestAction(requestGroupActionComponent);
 

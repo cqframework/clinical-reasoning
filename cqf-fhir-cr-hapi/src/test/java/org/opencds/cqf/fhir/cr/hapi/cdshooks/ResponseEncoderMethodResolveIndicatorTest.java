@@ -21,7 +21,7 @@ class ResponseEncoderMethodResolveIndicatorTest {
     private IAdapterFactory adapterFactory;
 
     private CdsResponseEncoderService fixture;
-    
+
     @BeforeEach
     void beforeEach() {
         adapterFactory = mock(IAdapterFactory.class);
@@ -29,7 +29,6 @@ class ResponseEncoderMethodResolveIndicatorTest {
         fixture = new CdsResponseEncoderService(repository, adapterFactory);
     }
 
-    
     @ParameterizedTest
     @MethodSource("provideResolveIndicatorTestCases")
     void testResolveIndicator_routineCode(String indicator, CdsServiceIndicatorEnum expectedIndicator) {
@@ -39,20 +38,16 @@ class ResponseEncoderMethodResolveIndicatorTest {
 
     @Test
     void testResolveIndicator_invalidCode() {
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
-                () -> fixture.resolveIndicator("invalid")
-        );
+        IllegalArgumentException exception =
+                assertThrows(IllegalArgumentException.class, () -> fixture.resolveIndicator("invalid"));
 
         assertTrue(exception.getMessage().contains("Invalid priority code: invalid"));
     }
 
     private static Stream<Arguments> provideResolveIndicatorTestCases() {
         return Stream.of(
-            Arguments.of("routine", CdsServiceIndicatorEnum.INFO),
-            Arguments.of("urgent", CdsServiceIndicatorEnum.WARNING),
-            Arguments.of("stat", CdsServiceIndicatorEnum.CRITICAL)
-        );
+                Arguments.of("routine", CdsServiceIndicatorEnum.INFO),
+                Arguments.of("urgent", CdsServiceIndicatorEnum.WARNING),
+                Arguments.of("stat", CdsServiceIndicatorEnum.CRITICAL));
     }
-
 }

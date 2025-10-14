@@ -65,9 +65,6 @@ class R4StratifierBuilder {
                     new StringType(measureStratifier.getDescription()));
         }
 
-        reportStratifier.addExtension(
-                MeasureConstants.EXT_STRATIFIER_TYPE,
-                new StringType(getStratifierExtensionType(groupDef, stratifierDef)));
 
         if (!stratifierDef.components().isEmpty()) {
 

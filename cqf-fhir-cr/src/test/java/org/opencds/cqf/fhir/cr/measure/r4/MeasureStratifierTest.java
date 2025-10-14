@@ -278,12 +278,22 @@ class MeasureStratifierTest {
                 .report();
     }
 
+    // LUKETODO:  read the stratifier type extension if it exists, if it's criteria or value, set it, otherwise, default to "value"
+    // LUKETODO:  keep existing code for determining if this is criteria base stratifier, but use it only as validation for a user doing something nonsensical, and only if they already have the extension
+
+    // LUKETODO:  fix naming for existing tests as per code review feedback
+    // LUKETODO:  for existing value stratifier tests, just add comments and text assertions reinforcing that it's the default behaviour, which is value-based
+    // LUKETODO:  define a bad CQL expression for a criteria based stratifier:  something like periods in minutes where it's expecting a list of encounters
+
     /**
      * Ratio Measure with Resource Basis where Stratifier defined by expression that results in Encounter.status per subject.
-     * Multiple results for a single subject are allowed
+     * Multiple results for a single subject are allowed.
+     * This is a value-based stratifier, but is weird
+     * Note that this is a weird scenario that's not an error, but is not a normal expectation for
+     * a user to set up.
      */
     @Test
-    void ratioResourceDifferentTypeStratNotCriteriaBased() {
+    void ratioResourceDifferentTypeStratNotCriteriaBasedWeirdScenario() {
         GIVEN_MEASURE_STRATIFIER_TEST
                 .when()
                 .measureId("RatioResourceStratDifferentType")
@@ -373,8 +383,8 @@ class MeasureStratifierTest {
                 .hasScore("1.0")
                 .up()
                 // This brings up a weird use case where we have two qualifying values within a
-                // single stratum, which was previously unsupported.  There may be a better way to
-                // handle this, but for now this is what we're doing:
+                // single stratum, which was previously unsupported. This is an indicator of
+                // the nonsensical nature of the scenario:
                 .stratum("in-progress,finished")
                 .hasPopulationCount(3)
                 .population("initial-population")

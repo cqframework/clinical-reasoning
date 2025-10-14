@@ -61,8 +61,12 @@ class ParametersAdapter extends ResourceAdapter implements IParametersAdapter {
     }
 
     @Override
-    public void addParameter(String name, int value) {
-        getParameters().addParameter().setName(name).setValue(new IntegerType(value));
+    public void setParameter(String name, int value) {
+        if (hasParameter(name)) {
+            getParameter(name).setValue(new IntegerType(value));
+        } else {
+            getParameters().addParameter().setName(name).setValue(new IntegerType(value));
+        }
     }
 
     @Override

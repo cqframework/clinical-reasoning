@@ -15,6 +15,7 @@ import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import org.hl7.fhir.r5.model.Enumerations.PublicationStatus;
+import org.hl7.fhir.r5.model.IntegerType;
 import org.hl7.fhir.r5.model.Library;
 import org.hl7.fhir.r5.model.Period;
 import org.hl7.fhir.r5.model.RelatedArtifact;
@@ -212,6 +213,10 @@ class ValueSetAdapterTest {
         var contains = new ValueSetExpansionContainsComponent().setCode("test");
         var expansion = new ValueSetExpansionComponent().addContains(contains);
         expansion.setId("test-expansion-page-1");
+        expansion
+                .addParameter()
+                .setName("count")
+                .setValue(new IntegerType(expansion.getContains().size()));
         var valueSet = new ValueSet().setExpansion(expansion);
         var adapter = (IValueSetAdapter) adapterFactory.createKnowledgeArtifactAdapter(valueSet);
 
@@ -225,5 +230,13 @@ class ValueSetAdapterTest {
         adapter.appendExpansionContains(additionalExpansionAdapter.getExpansionContains());
 
         assertEquals(2, adapter.getExpansionContains().size());
+        assertEquals(
+                2,
+                ((IntegerType) ((ValueSetExpansionComponent) adapter.getExpansion())
+                                .getParameter()
+                                .get(0)
+                                .getValue())
+                        .getValue()
+                        .intValue());
     }
 }

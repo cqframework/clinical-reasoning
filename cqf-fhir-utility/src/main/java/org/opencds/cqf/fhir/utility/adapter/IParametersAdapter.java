@@ -24,7 +24,7 @@ public interface IParametersAdapter extends IResourceAdapter {
 
     void addParameter(String name, String value);
 
-    void addParameter(String name, int value);
+    void setParameter(String name, int value);
 
     void addParameter(String name, IBase value);
 

@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doReturn;
@@ -36,6 +37,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Endpoint;
+import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -300,6 +302,8 @@ public class TerminologyServerClientTest {
         // ensure that the grouper is not expanded using the Tx Server
         var grouperUrl = "www.test.com/fhir/ValueSet/grouper";
         var grouper = new org.hl7.fhir.r4.model.ValueSet();
+        var id = "grouper";
+        grouper.setId(id);
         grouper.setUrl(grouperUrl);
         grouper.getCompose().getIncludeFirstRep().getValueSet().add(new org.hl7.fhir.r4.model.CanonicalType(leafUrl));
         grouper.addExtension()
@@ -322,9 +326,9 @@ public class TerminologyServerClientTest {
         when(fhirClient.getFhirContext().getVersion().getVersion()).thenReturn(FhirVersionEnum.R4);
         when(fhirClient
                         .operation()
-                        .onType(eq(VALUE_SET))
+                        .onInstance(any(String.class))
                         .named(eq(EXPAND_OPERATION))
-                        .withParameters(any(IBaseParameters.class))
+                        .withParameters(any())
                         .returnResourceType(any())
                         .execute())
                 .thenThrow(new UnprocessableEntityException())
@@ -369,9 +373,9 @@ public class TerminologyServerClientTest {
         when(fhirClient.getFhirContext().getVersion().getVersion()).thenReturn(FhirVersionEnum.R4);
         when(fhirClient
                         .operation()
-                        .onType(eq(VALUE_SET))
+                        .onInstance(eq(VALUE_SET))
                         .named(eq(EXPAND_OPERATION))
-                        .withParameters(any(IBaseParameters.class))
+                        .withNoParameters(any())
                         .returnResourceType(any())
                         .execute())
                 .thenThrow(new UnprocessableEntityException())
@@ -384,7 +388,7 @@ public class TerminologyServerClientTest {
                 TerminologyServerExpansionException.class,
                 () -> client.expand(valueSetAdapter, endpointAdapter, parametersAdapter));
         verify(client, never()).getValueSetResource(any(), any());
-        verify(fhirClient, atLeast(3)).operation();
+        verify(fhirClient, atLeast(2)).operation();
     }
 
     @Test
@@ -538,22 +542,25 @@ public class TerminologyServerClientTest {
         leaf.setUrl(url);
         leaf.getExpansion().setTotal(3);
         leaf.getExpansion().addContains().setSystem("system1").setCode("code1");
+        leaf.getExpansion().addParameter().setName("count").setValue(new IntegerType(1));
 
         var leafPage2 = new ValueSet();
         leafPage2.setUrl(url);
         leafPage2.getExpansion().setTotal(3);
         leafPage2.getExpansion().addContains().setSystem("system2").setCode("code2");
+        leafPage2.getExpansion().addParameter().setName("count").setValue(new IntegerType(1));
 
         var leafPage3 = new ValueSet();
         leafPage3.setUrl(url);
         leafPage3.getExpansion().setTotal(3);
         leafPage3.getExpansion().addContains().setSystem("system2").setCode("code3");
+        leafPage3.getExpansion().addParameter().setName("count").setValue(new IntegerType(1));
 
         var fhirClient = mock(IGenericClient.class, new ReturnsDeepStubs());
         when(fhirClient.getFhirContext().getVersion().getVersion()).thenReturn(FhirVersionEnum.R4);
         when(fhirClient
                         .operation()
-                        .onType(eq(VALUE_SET))
+                        .onInstance(anyString())
                         .named(eq(EXPAND_OPERATION))
                         .withParameters(any(IBaseParameters.class))
                         .returnResourceType(any())

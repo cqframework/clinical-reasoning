@@ -12,6 +12,7 @@ import java.util.stream.Stream;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.r5.model.BooleanType;
+import org.hl7.fhir.r5.model.IntegerType;
 import org.hl7.fhir.r5.model.PrimitiveType;
 import org.hl7.fhir.r5.model.ValueSet;
 import org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent;
@@ -124,6 +125,15 @@ public class ValueSetAdapter extends KnowledgeArtifactAdapter implements IValueS
                 .addAll((expansionContains.stream()
                         .map(e -> (ValueSetExpansionContainsComponent) e.get())
                         .toList()));
+
+        var countParam = (getExpansion().getParameter().stream()
+                .filter(param -> param.getName().equals("count"))
+                .findFirst());
+        if (countParam.isPresent()) {
+            var count = ((IntegerType) countParam.get().getValue()).getValue();
+            count += expansionContains.size();
+            countParam.get().setValue(new IntegerType(count));
+        }
     }
 
     @SuppressWarnings("unchecked")

@@ -66,7 +66,8 @@ public class LibraryPackageProvider {
                 include == null
                         ? null
                         : include.stream()
-                                .map(PrimitiveType::getValueAsString) // Apply the toUpperCase method
+                                .distinct()
+                                .map(PrimitiveType::getValueAsString)
                                 .collect(Collectors.toList()),
                 terminologyEndpointParam,
                 usePut == null ? Boolean.FALSE : usePut.booleanValue());
@@ -94,7 +95,8 @@ public class LibraryPackageProvider {
                 include == null
                         ? null
                         : include.stream()
-                                .map(PrimitiveType::getValueAsString) // Apply the toUpperCase method
+                                .distinct()
+                                .map(PrimitiveType::getValueAsString)
                                 .collect(Collectors.toList()),
                 terminologyEndpointParam,
                 usePut == null ? Boolean.FALSE : usePut.booleanValue());

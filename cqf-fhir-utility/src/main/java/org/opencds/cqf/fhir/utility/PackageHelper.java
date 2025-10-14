@@ -29,13 +29,7 @@ public class PackageHelper {
      */
     public static IBaseParameters packageParameters(
             FhirVersionEnum fhirVersion, IBaseResource terminologyEndpoint, boolean isPut) {
-        var params = forFhirVersion(fhirVersion)
-                .createParameters((IBaseParameters) newBaseForVersion("Parameters", fhirVersion));
-        if (terminologyEndpoint != null) {
-            params.addParameter("terminologyEndpoint", terminologyEndpoint);
-        }
-        params.addParameter("isPut", booleanTypeForVersion(fhirVersion, isPut));
-        return (IBaseParameters) params.get();
+        return packageParameters(fhirVersion, null, terminologyEndpoint, isPut);
     }
 
     /**

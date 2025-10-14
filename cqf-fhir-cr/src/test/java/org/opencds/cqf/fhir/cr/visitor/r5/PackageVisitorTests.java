@@ -23,6 +23,7 @@ import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -417,6 +418,16 @@ class PackageVisitorTests {
         includeOptions.put("profiles", Arrays.asList());
         includeOptions.put("tests", Arrays.asList());
         includeOptions.put("examples", Arrays.asList());
+        // FHIR Types
+        includeOptions.put(
+                "PlanDefinition",
+                Arrays.asList("http://ersd.aimsplatform.org/fhir/PlanDefinition/us-ecr-specification"));
+        includeOptions.put(
+                "ValueSet",
+                Arrays.asList(
+                        "http://ersd.aimsplatform.org/fhir/ValueSet/dxtc",
+                        "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.6",
+                        "http://cts.nlm.nih.gov/fhir/ValueSet/123-this-will-be-routine"));
         for (Entry<String, List<String>> includedTypeURLs : includeOptions.entrySet()) {
             Parameters params = parameters(part("include", includedTypeURLs.getKey()));
             Bundle packaged = (Bundle) libraryAdapter.accept(packageVisitor, params);
@@ -434,6 +445,32 @@ class PackageVisitorTests {
                 assertTrue(expectedResourceReturned);
             }
         }
+    }
+
+    @Test
+    void packageOperation_include_get_resources_by_fhir_type_only() {
+        Bundle bundle = (Bundle) jsonParser.parseResource(
+                PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
+        repo.transaction(bundle);
+        var packageVisitor = new PackageVisitor(repo);
+        Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
+                .copy();
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+
+        List<String> expectedUrls = Arrays.asList(
+                "http://ersd.aimsplatform.org/fhir/ValueSet/dxtc",
+                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.6",
+                "http://cts.nlm.nih.gov/fhir/ValueSet/123-this-will-be-routine",
+                "http://ersd.aimsplatform.org/fhir/PlanDefinition/us-ecr-specification");
+
+        Parameters params = parameters(part("include", "PlanDefinition"), part("include", "ValueSet"));
+        Bundle packaged = (Bundle) libraryAdapter.accept(packageVisitor, params);
+        List<String> actualUrls = packaged.getEntry().stream()
+                .map(entry -> ((MetadataResource) entry.getResource()).getUrl())
+                .sorted()
+                .toList();
+        Collections.sort(expectedUrls);
+        assertEquals(actualUrls, expectedUrls);
     }
 
     @Test

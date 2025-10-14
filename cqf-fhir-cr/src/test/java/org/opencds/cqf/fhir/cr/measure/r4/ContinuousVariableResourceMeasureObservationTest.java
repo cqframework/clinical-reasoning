@@ -1,14 +1,10 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
-import org.hl7.fhir.r4.model.MeasureReport;
-import org.junit.jupiter.api.Test;
-import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.Period;
-import java.time.Year;
-import java.time.temporal.ChronoField;
-import java.time.temporal.ChronoUnit;
+import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 
 public class ContinuousVariableResourceMeasureObservationTest {
 
@@ -45,8 +41,45 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .report();
     }
 
+    // LUKETODO:  refactor for code reuse
     @Test
     void continuousVariableResourceMeasureObservationEncounterBasisAvg() {
+
+        /*
+        # total sum: 2536.0
+
+        # first stratum:  84:
+
+        patient-0-encounter-1: 00:00 to 02:00 (120 minutes)
+        patient-1-encounter-1: 00:00 to 02:00 (120 minutes)
+
+        sum: 240.0
+
+        # second stratum:  74:
+
+        patient-2-encounter-1: 03:00 to 12:00 (540 minutes)
+        patient-3-encounter-1: 07:00 to 14:00 (420 minutes)
+        patient-4-encounter-1: 05:00 to 19:00 (840 minutes)
+        patient-5-encounter-1: 02:00 to 04:00 (120 minutes)
+
+        sum: 1920.0
+
+        # third stratum:  64:
+
+        patient-6-encounter-1: 03:00 to 03:30 (30 minutes)
+        patient-7-encounter-1: 01:00 to 02:30 (90 minutes)
+        patient-8-encounter-1: 00:00 to 00:15 (15 minutes)
+        patient-9-encounter-1: 01:01 to 03:02 (121 minutes)
+        patient-9-encounter-2: 01:00 to 03:00 (120 minutes)
+
+        sum: 376.0
+         */
+
+        final LocalDate measurementPeriodStart = LocalDate.of(2024, 1, 1);
+
+        final int expectedAgeStratum1 = computeAge(measurementPeriodStart, LocalDate.of(1940, Month.JANUARY, 1));
+        final int expectedAgeStratum2 = computeAge(measurementPeriodStart, LocalDate.of(1950, Month.JANUARY, 1));
+        final int expectedAgeStratum3 = computeAge(measurementPeriodStart, LocalDate.of(1960, Month.JANUARY, 1));
 
         GIVEN_ENCOUNTER_BASIS
                 .when()
@@ -67,6 +100,21 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .hasCount(11)
                 .up()
                 .hasScore("230.54545454545453")
+                .stratifierById("stratifier-age")
+                .stratumCount(3)
+                .firstStratum()
+                .hasValue(Integer.toString(expectedAgeStratum1))
+                .hasScore("120.0")
+                .up()
+                .stratumByPosition(2)
+                .hasValue(Integer.toString(expectedAgeStratum2))
+                .hasScore("480.0")
+                .up()
+                .stratumByPosition(3)
+                .hasValue(Integer.toString(expectedAgeStratum3))
+                .hasScore("75.2")
+                .up()
+                .up()
                 .up()
                 .report();
     }
@@ -102,6 +150,42 @@ public class ContinuousVariableResourceMeasureObservationTest {
     @Test
     void continuousVariableResourceMeasureObservationEncounterBasisCount() {
 
+        /*
+        # total sum: 2536.0
+
+        # first stratum:  84:
+
+        patient-0-encounter-1: 00:00 to 02:00 (120 minutes)
+        patient-1-encounter-1: 00:00 to 02:00 (120 minutes)
+
+        sum: 240.0
+
+        # second stratum:  74:
+
+        patient-2-encounter-1: 03:00 to 12:00 (540 minutes)
+        patient-3-encounter-1: 07:00 to 14:00 (420 minutes)
+        patient-4-encounter-1: 05:00 to 19:00 (840 minutes)
+        patient-5-encounter-1: 02:00 to 04:00 (120 minutes)
+
+        sum: 1920.0
+
+        # third stratum:  64:
+
+        patient-6-encounter-1: 03:00 to 03:30 (30 minutes)
+        patient-7-encounter-1: 01:00 to 02:30 (90 minutes)
+        patient-8-encounter-1: 00:00 to 00:15 (15 minutes)
+        patient-9-encounter-1: 01:01 to 03:02 (121 minutes)
+        patient-9-encounter-2: 01:00 to 03:00 (120 minutes)
+
+        sum: 376.0
+         */
+
+        final LocalDate measurementPeriodStart = LocalDate.of(2024, 1, 1);
+
+        final int expectedAgeStratum1 = computeAge(measurementPeriodStart, LocalDate.of(1940, Month.JANUARY, 1));
+        final int expectedAgeStratum2 = computeAge(measurementPeriodStart, LocalDate.of(1950, Month.JANUARY, 1));
+        final int expectedAgeStratum3 = computeAge(measurementPeriodStart, LocalDate.of(1960, Month.JANUARY, 1));
+
         GIVEN_ENCOUNTER_BASIS
                 .when()
                 .measureId("ContinuousVariableResourceMeasureObservationEncounterBasisCount")
@@ -121,6 +205,21 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .hasCount(11)
                 .up()
                 .hasScore("11.0") // I assume this is the straight-up count of encounters?
+                .stratifierById("stratifier-age")
+                .stratumCount(3)
+                .firstStratum()
+                .hasValue(Integer.toString(expectedAgeStratum1))
+                .hasScore("2.0")
+                .up()
+                .stratumByPosition(2)
+                .hasValue(Integer.toString(expectedAgeStratum2))
+                .hasScore("4.0")
+                .up()
+                .stratumByPosition(3)
+                .hasValue(Integer.toString(expectedAgeStratum3))
+                .hasScore("5.0")
+                .up()
+                .up()
                 .up()
                 .report();
     }
@@ -161,6 +260,41 @@ public class ContinuousVariableResourceMeasureObservationTest {
 
     @Test
     void continuousVariableResourceMeasureObservationEncounterBasisMedian() {
+        /*
+        # total sum: 2536.0
+
+        # first stratum:  84:
+
+        patient-0-encounter-1: 00:00 to 02:00 (120 minutes)
+        patient-1-encounter-1: 00:00 to 02:00 (120 minutes)
+
+        sum: 240.0
+
+        # second stratum:  74:
+
+        patient-2-encounter-1: 03:00 to 12:00 (540 minutes)
+        patient-3-encounter-1: 07:00 to 14:00 (420 minutes)
+        patient-4-encounter-1: 05:00 to 19:00 (840 minutes)
+        patient-5-encounter-1: 02:00 to 04:00 (120 minutes)
+
+        sum: 1920.0
+
+        # third stratum:  64:
+
+        patient-6-encounter-1: 03:00 to 03:30 (30 minutes)
+        patient-7-encounter-1: 01:00 to 02:30 (90 minutes)
+        patient-8-encounter-1: 00:00 to 00:15 (15 minutes)
+        patient-9-encounter-1: 01:01 to 03:02 (121 minutes)
+        patient-9-encounter-2: 01:00 to 03:00 (120 minutes)
+
+        sum: 376.0
+         */
+
+        final LocalDate measurementPeriodStart = LocalDate.of(2024, 1, 1);
+
+        final int expectedAgeStratum1 = computeAge(measurementPeriodStart, LocalDate.of(1940, Month.JANUARY, 1));
+        final int expectedAgeStratum2 = computeAge(measurementPeriodStart, LocalDate.of(1950, Month.JANUARY, 1));
+        final int expectedAgeStratum3 = computeAge(measurementPeriodStart, LocalDate.of(1960, Month.JANUARY, 1));
 
         GIVEN_ENCOUNTER_BASIS
                 .when()
@@ -181,6 +315,21 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .hasCount(11)
                 .up()
                 .hasScore("120.0")
+                .stratifierById("stratifier-age")
+                .stratumCount(3)
+                .firstStratum()
+                .hasValue(Integer.toString(expectedAgeStratum1))
+                .hasScore("120.0")
+                .up()
+                .stratumByPosition(2)
+                .hasValue(Integer.toString(expectedAgeStratum2))
+                .hasScore("480.0")
+                .up()
+                .stratumByPosition(3)
+                .hasValue(Integer.toString(expectedAgeStratum3))
+                .hasScore("90.0")
+                .up()
+                .up()
                 .up()
                 .report();
     }
@@ -216,6 +365,42 @@ public class ContinuousVariableResourceMeasureObservationTest {
     @Test
     void continuousVariableResourceMeasureObservationEncounterBasisMin() {
 
+        /*
+        # total sum: 2536.0
+
+        # first stratum:  84:
+
+        patient-0-encounter-1: 00:00 to 02:00 (120 minutes)
+        patient-1-encounter-1: 00:00 to 02:00 (120 minutes)
+
+        sum: 240.0
+
+        # second stratum:  74:
+
+        patient-2-encounter-1: 03:00 to 12:00 (540 minutes)
+        patient-3-encounter-1: 07:00 to 14:00 (420 minutes)
+        patient-4-encounter-1: 05:00 to 19:00 (840 minutes)
+        patient-5-encounter-1: 02:00 to 04:00 (120 minutes)
+
+        sum: 1920.0
+
+        # third stratum:  64:
+
+        patient-6-encounter-1: 03:00 to 03:30 (30 minutes)
+        patient-7-encounter-1: 01:00 to 02:30 (90 minutes)
+        patient-8-encounter-1: 00:00 to 00:15 (15 minutes)
+        patient-9-encounter-1: 01:01 to 03:02 (121 minutes)
+        patient-9-encounter-2: 01:00 to 03:00 (120 minutes)
+
+        sum: 376.0
+         */
+
+        final LocalDate measurementPeriodStart = LocalDate.of(2024, 1, 1);
+
+        final int expectedAgeStratum1 = computeAge(measurementPeriodStart, LocalDate.of(1940, Month.JANUARY, 1));
+        final int expectedAgeStratum2 = computeAge(measurementPeriodStart, LocalDate.of(1950, Month.JANUARY, 1));
+        final int expectedAgeStratum3 = computeAge(measurementPeriodStart, LocalDate.of(1960, Month.JANUARY, 1));
+
         GIVEN_ENCOUNTER_BASIS
                 .when()
                 .measureId("ContinuousVariableResourceMeasureObservationEncounterBasisMin")
@@ -235,6 +420,21 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .hasCount(11)
                 .up()
                 .hasScore("15.0")
+                .stratifierById("stratifier-age")
+                .stratumCount(3)
+                .firstStratum()
+                .hasValue(Integer.toString(expectedAgeStratum1))
+                .hasScore("120.0")
+                .up()
+                .stratumByPosition(2)
+                .hasValue(Integer.toString(expectedAgeStratum2))
+                .hasScore("120.0")
+                .up()
+                .stratumByPosition(3)
+                .hasValue(Integer.toString(expectedAgeStratum3))
+                .hasScore("15.0")
+                .up()
+                .up()
                 .up()
                 .report();
     }
@@ -270,6 +470,42 @@ public class ContinuousVariableResourceMeasureObservationTest {
     @Test
     void continuousVariableResourceMeasureObservationEncounterBasisMax() {
 
+        /*
+        # total sum: 2536.0
+
+        # first stratum:  84:
+
+        patient-0-encounter-1: 00:00 to 02:00 (120 minutes)
+        patient-1-encounter-1: 00:00 to 02:00 (120 minutes)
+
+        sum: 240.0
+
+        # second stratum:  74:
+
+        patient-2-encounter-1: 03:00 to 12:00 (540 minutes)
+        patient-3-encounter-1: 07:00 to 14:00 (420 minutes)
+        patient-4-encounter-1: 05:00 to 19:00 (840 minutes)
+        patient-5-encounter-1: 02:00 to 04:00 (120 minutes)
+
+        sum: 1920.0
+
+        # third stratum:  64:
+
+        patient-6-encounter-1: 03:00 to 03:30 (30 minutes)
+        patient-7-encounter-1: 01:00 to 02:30 (90 minutes)
+        patient-8-encounter-1: 00:00 to 00:15 (15 minutes)
+        patient-9-encounter-1: 01:01 to 03:02 (121 minutes)
+        patient-9-encounter-2: 01:00 to 03:00 (120 minutes)
+
+        sum: 376.0
+         */
+
+        final LocalDate measurementPeriodStart = LocalDate.of(2024, 1, 1);
+
+        final int expectedAgeStratum1 = computeAge(measurementPeriodStart, LocalDate.of(1940, Month.JANUARY, 1));
+        final int expectedAgeStratum2 = computeAge(measurementPeriodStart, LocalDate.of(1950, Month.JANUARY, 1));
+        final int expectedAgeStratum3 = computeAge(measurementPeriodStart, LocalDate.of(1960, Month.JANUARY, 1));
+
         GIVEN_ENCOUNTER_BASIS
                 .when()
                 .measureId("ContinuousVariableResourceMeasureObservationEncounterBasisMax")
@@ -289,6 +525,21 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .hasCount(11)
                 .up()
                 .hasScore("840.0")
+                .stratifierById("stratifier-age")
+                .stratumCount(3)
+                .firstStratum()
+                .hasValue(Integer.toString(expectedAgeStratum1))
+                .hasScore("120.0")
+                .up()
+                .stratumByPosition(2)
+                .hasValue(Integer.toString(expectedAgeStratum2))
+                .hasScore("840.0")
+                .up()
+                .stratumByPosition(3)
+                .hasValue(Integer.toString(expectedAgeStratum3))
+                .hasScore("121.0")
+                .up()
+                .up()
                 .up()
                 .report();
     }
@@ -323,52 +574,48 @@ public class ContinuousVariableResourceMeasureObservationTest {
 
     @Test
     void continuousVariableResourceMeasureObservationEncounterBasisSum() {
-        final LocalDate measurementPeriodStart = LocalDate.of(2024, 1,1);
+        final LocalDate measurementPeriodStart = LocalDate.of(2024, 1, 1);
 
-        final int expectedAgeStratum1 =
-            computeAge(measurementPeriodStart, LocalDate.of(1940, Month.JANUARY, 1));
-        final int expectedAgeStratum2 =
-            computeAge(measurementPeriodStart, LocalDate.of(1950, Month.JANUARY, 1));
-        final int expectedAgeStratum3 =
-            computeAge(measurementPeriodStart, LocalDate.of(1960, Month.JANUARY, 1));
+        final int expectedAgeStratum1 = computeAge(measurementPeriodStart, LocalDate.of(1940, Month.JANUARY, 1));
+        final int expectedAgeStratum2 = computeAge(measurementPeriodStart, LocalDate.of(1950, Month.JANUARY, 1));
+        final int expectedAgeStratum3 = computeAge(measurementPeriodStart, LocalDate.of(1960, Month.JANUARY, 1));
 
-        final MeasureReport report = GIVEN_ENCOUNTER_BASIS
-            .when()
-            .measureId("ContinuousVariableResourceMeasureObservationEncounterBasisSum")
-            .evaluate()
-            .then()
-            .firstGroup()
-            .population("initial-population")
-            .hasCount(11)
-            .up()
-            .population("measure-population")
-            .hasCount(11)
-            .up()
-            .population("measure-population-exclusion")
-            .hasCount(0)
-            .up()
-            .population("measure-observation")
-            .hasCount(11)
-            .up()
-            .hasScore("2536.0")
-            .stratifierById("stratifier-age")
-            .stratumCount(3)
-            .firstStratum()
-            .hasValue(Integer.toString(expectedAgeStratum1))
-//            // LUKETODO:  figure out what the appropriate split it is per statum
-//            .hasScore("2536.0")
-            .up()
-            .stratumByPosition(2)
-            .hasValue(Integer.toString(expectedAgeStratum2))
-            .up()
-            .stratumByPosition(3)
-            .hasValue(Integer.toString(expectedAgeStratum3))
-            .up()
-            .up()
-            .up()
-            .report();
-
-        System.out.println("report = " + report);
+        GIVEN_ENCOUNTER_BASIS
+                .when()
+                .measureId("ContinuousVariableResourceMeasureObservationEncounterBasisSum")
+                .evaluate()
+                .then()
+                .firstGroup()
+                .population("initial-population")
+                .hasCount(11)
+                .up()
+                .population("measure-population")
+                .hasCount(11)
+                .up()
+                .population("measure-population-exclusion")
+                .hasCount(0)
+                .up()
+                .population("measure-observation")
+                .hasCount(11)
+                .up()
+                .hasScore("2536.0")
+                .stratifierById("stratifier-age")
+                .stratumCount(3)
+                .firstStratum()
+                .hasValue(Integer.toString(expectedAgeStratum1))
+                .hasScore("240.0")
+                .up()
+                .stratumByPosition(2)
+                .hasValue(Integer.toString(expectedAgeStratum2))
+                .hasScore("1920.0")
+                .up()
+                .stratumByPosition(3)
+                .hasValue(Integer.toString(expectedAgeStratum3))
+                .hasScore("376.0")
+                .up()
+                .up()
+                .up()
+                .report();
     }
 
     int computeAge(LocalDate measurementPeriod, LocalDate birthDate) {

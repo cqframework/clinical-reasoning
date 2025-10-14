@@ -98,6 +98,15 @@
             "expression" : "MeasureObservation"
           }
         }
+      ],
+      "stratifier": [
+        {
+          "id": "stratifier-age",
+          "criteria": {
+            "language": "text/cql.identifier",
+            "expression": "Age"
+          }
+        }
       ]
     }]
 }

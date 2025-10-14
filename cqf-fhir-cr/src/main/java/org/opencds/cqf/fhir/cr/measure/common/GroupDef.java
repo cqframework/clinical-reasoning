@@ -128,6 +128,7 @@ public class GroupDef {
         return this.improvementNotation;
     }
 
+    // LUKETODO:  enum?
     public String getAggregateMethod() {
         return this.aggregateMethod;
     }

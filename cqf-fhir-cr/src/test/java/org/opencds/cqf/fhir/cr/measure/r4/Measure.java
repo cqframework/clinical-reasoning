@@ -849,10 +849,12 @@ public class Measure {
                     .get(0)
                     .getValue()
                     .isEmpty());
-            assertInstanceOf(Period.class, this.value()
-                .getExtensionsByUrl(CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL)
-                .get(0)
-                .getValue());
+            assertInstanceOf(
+                    Period.class,
+                    this.value()
+                            .getExtensionsByUrl(CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL)
+                            .get(0)
+                            .getValue());
             return this;
         }
 
@@ -885,10 +887,14 @@ public class Measure {
         }
 
         public SelectedStratifier stratifierById(String stratId) {
-            return this.stratifier(g -> g.getStratifier().stream()
+            final SelectedStratifier stratifier = this.stratifier(g -> g.getStratifier().stream()
                     .filter(t -> t.getId().equals(stratId))
                     .findFirst()
                     .orElse(null));
+
+            assertNotNull(stratifier);
+
+            return stratifier;
         }
 
         public SelectedStratifier stratifier(
@@ -1002,7 +1008,7 @@ public class Measure {
         public SelectedStratum stratumByPosition(int position) {
             assertTrue(value().getStratum().size() >= position && position > 0);
 
-            return new SelectedStratum(value().getStratum().get(position -1 ), this);
+            return new SelectedStratum(value().getStratum().get(position - 1), this);
         }
 
         public SelectedStratifier stratumCount(int stratumCount) {

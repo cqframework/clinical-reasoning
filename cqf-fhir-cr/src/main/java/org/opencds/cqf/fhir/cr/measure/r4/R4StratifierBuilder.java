@@ -65,6 +65,10 @@ class R4StratifierBuilder {
                     new StringType(measureStratifier.getDescription()));
         }
 
+        reportStratifier.addExtension(
+                MeasureConstants.EXT_STRATIFIER_TYPE,
+                new StringType(getStratifierExtensionType(groupDef, stratifierDef)));
+
         if (!stratifierDef.components().isEmpty()) {
 
             Table<String, ValueWrapper, StratifierComponentDef> subjectResultTable = HashBasedTable.create();
@@ -91,6 +95,13 @@ class R4StratifierBuilder {
             Map<String, CriteriaResult> subjectValues = stratifierDef.getResults();
             nonComponentStratifier(bc, stratifierDef, reportStratifier, populations, groupDef, subjectValues);
         }
+    }
+
+    private static String getStratifierExtensionType(GroupDef groupDef, StratifierDef stratifierDef) {
+        if (StratifierUtils.isCriteriaBasedStratifier(groupDef, stratifierDef)) {
+            return "criteria";
+        }
+        return "value";
     }
 
     private static void componentStratifier(

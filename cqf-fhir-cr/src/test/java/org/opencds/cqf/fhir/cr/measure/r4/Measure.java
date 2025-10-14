@@ -71,7 +71,7 @@ public class Measure {
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     @FunctionalInterface
-    interface Validator<T> {
+    public interface Validator<T> {
         void validate(T value);
     }
 
@@ -974,7 +974,7 @@ public class Measure {
             }
         }
 
-        static class SelectedPopulation
+        public static class SelectedPopulation
                 extends Selected<MeasureReport.MeasureReportGroupPopulationComponent, SelectedGroup> {
 
             public SelectedPopulation(MeasureReportGroupPopulationComponent value, SelectedGroup parent) {
@@ -1012,6 +1012,12 @@ public class Measure {
 
         public SelectedStratifier hasStratumCount(int stratumCount) {
             assertEquals(stratumCount, value().getStratum().size());
+            return this;
+        }
+
+        public SelectedStratifier hasExtensionStratifierType(String type) {
+            assertEquals(1, value().getExtension().size());
+            assertEquals(type, value().getExtension().get(0).getValue().toString());
             return this;
         }
 

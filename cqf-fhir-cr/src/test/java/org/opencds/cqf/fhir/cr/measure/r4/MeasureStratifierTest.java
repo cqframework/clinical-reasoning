@@ -408,6 +408,7 @@ class MeasureStratifierTest {
                 .firstStratifier()
                 .hasCodeText(null)
                 .hasStratumCount(2)
+                .hasExtensionStratifierType("value")
                 .stratum("M")
                 .hasScore("0.2") // make sure stratum are scored
                 .population("initial-population")
@@ -456,6 +457,7 @@ class MeasureStratifierTest {
                 .hasStratifierCount(1)
                 .firstStratifier()
                 .hasCodeText("in-progress encounters")
+                .hasExtensionStratifierType("criteria")
                 .hasStratumCount(1)
                 .firstStratum()
                 .hasPopulationCount(1)

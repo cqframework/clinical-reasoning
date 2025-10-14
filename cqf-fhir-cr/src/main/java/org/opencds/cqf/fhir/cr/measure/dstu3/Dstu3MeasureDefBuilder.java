@@ -28,6 +28,7 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.SdeDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
+import org.opencds.cqf.fhir.cr.measure.common.StratifierUtils;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 
 public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
@@ -85,7 +86,8 @@ public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                         mgsc.getId(),
                         null, // No code on stratifier
                         // in dstu3
-                        mgsc.getCriteria());
+                        mgsc.getCriteria(),
+                        StratifierUtils.getStratifierType(mgsc));
 
                 stratifiers.add(stratifierDef);
             }

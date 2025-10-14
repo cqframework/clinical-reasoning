@@ -10,26 +10,34 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 
 public class StratifierDef {
 
     private final String id;
     private final ConceptDef code;
     private final String expression;
+    private final MeasureStratifierType stratifierType;
 
     private final List<StratifierComponentDef> components;
 
     @Nullable
     private Map<String, CriteriaResult> results;
 
-    public StratifierDef(String id, ConceptDef code, String expression) {
-        this(id, code, expression, Collections.emptyList());
+    public StratifierDef(String id, ConceptDef code, String expression, MeasureStratifierType stratifierType) {
+        this(id, code, expression, stratifierType, Collections.emptyList());
     }
 
-    public StratifierDef(String id, ConceptDef code, String expression, List<StratifierComponentDef> components) {
+    public StratifierDef(
+            String id,
+            ConceptDef code,
+            String expression,
+            MeasureStratifierType stratifierType,
+            List<StratifierComponentDef> components) {
         this.id = id;
         this.code = code;
         this.expression = expression;
+        this.stratifierType = stratifierType;
         this.components = components;
     }
 
@@ -68,6 +76,10 @@ public class StratifierDef {
                 .map(this::toSet)
                 .flatMap(Collection::stream)
                 .collect(Collectors.toUnmodifiableSet()));
+    }
+
+    public MeasureStratifierType getStratifierType() {
+        return stratifierType;
     }
 
     private Set<Object> toSet(Object value) {

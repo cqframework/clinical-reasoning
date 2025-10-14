@@ -30,12 +30,12 @@ import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupPopulationComponent;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
+import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 import org.opencds.cqf.fhir.cr.measure.common.CriteriaResult;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierComponentDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
-import org.opencds.cqf.fhir.cr.measure.common.StratifierUtils;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureReportBuilder.BuilderContext;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureReportBuilder.ValueWrapper;
@@ -65,7 +65,6 @@ class R4StratifierBuilder {
                     new StringType(measureStratifier.getDescription()));
         }
 
-
         if (!stratifierDef.components().isEmpty()) {
 
             Table<String, ValueWrapper, StratifierComponentDef> subjectResultTable = HashBasedTable.create();
@@ -92,13 +91,6 @@ class R4StratifierBuilder {
             Map<String, CriteriaResult> subjectValues = stratifierDef.getResults();
             nonComponentStratifier(bc, stratifierDef, reportStratifier, populations, groupDef, subjectValues);
         }
-    }
-
-    private static String getStratifierExtensionType(GroupDef groupDef, StratifierDef stratifierDef) {
-        if (StratifierUtils.isCriteriaBasedStratifier(groupDef, stratifierDef)) {
-            return "criteria";
-        }
-        return "value";
     }
 
     private static void componentStratifier(
@@ -139,7 +131,7 @@ class R4StratifierBuilder {
         // subject2: 'gender'--> 'F'
         // stratifier criteria results are: 'M', 'F'
 
-        if (StratifierUtils.isCriteriaBasedStratifier(groupDef, stratifierDef)) {
+        if (MeasureStratifierType.CRITERIA == stratifierDef.getStratifierType()) {
             var reportStratum = reportStratifier.addStratum();
             // Seems to be irrelevant for criteria based stratifiers
             var stratValues = Set.<ValueDef>of();
@@ -255,7 +247,8 @@ class R4StratifierBuilder {
                 sgcc.setCode(new CodeableConcept().setText(componentDef.code().text()));
                 // set component on MeasureReport
                 stratum.addComponent(sgcc);
-            } else if (!StratifierUtils.isCriteriaBasedStratifier(groupDef, stratifierDef)) {
+                //            } else if (!StratifierUtils.isCriteriaBasedStratifier(groupDef, stratifierDef)) {
+            } else if (MeasureStratifierType.VALUE == stratifierDef.getStratifierType()) {
                 // non-component stratifiers only set stratified value, code is set on stratifier object
                 // value being stratified: 'M'
                 stratum.setValue(expressionResultToCodableConcept(value));
@@ -375,7 +368,7 @@ class R4StratifierBuilder {
     private static int getStratumCountUpper(
             StratifierDef stratifierDef, GroupDef groupDef, PopulationDef populationDef, List<String> resourceIds) {
 
-        if (StratifierUtils.isCriteriaBasedStratifier(groupDef, stratifierDef)) {
+        if (MeasureStratifierType.CRITERIA == stratifierDef.getStratifierType()) {
             final Set<Object> resources = populationDef.getResources();
             final Set<Object> results = stratifierDef.getAllCriteriaResultValues();
 
@@ -467,7 +460,7 @@ class R4StratifierBuilder {
 
         final Expression criteria = measureStratifier.getCriteria();
 
-        if (StratifierUtils.isCriteriaBasedStratifier(groupDef, stratifierDef)
+        if (MeasureStratifierType.CRITERIA == stratifierDef.getStratifierType()
                 && criteria != null
                 && criteria.hasLanguage()
                 && "text/cql.identifier".equals(criteria.getLanguage())) {

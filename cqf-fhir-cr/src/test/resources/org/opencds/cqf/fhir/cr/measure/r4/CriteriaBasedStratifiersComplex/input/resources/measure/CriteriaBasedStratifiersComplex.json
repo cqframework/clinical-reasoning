@@ -79,8 +79,15 @@
           "criteria": {
             "language": "text/cql.identifier",
             "expression": "Encounters in Period"
-          }
+          },
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-population-stratifier-type",
+              "valueCode": "criteria"
+            }
+          ]
         }
       ]
-    }]
+    }
+  ]
 }

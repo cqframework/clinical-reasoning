@@ -41,6 +41,7 @@ import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.SdeDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierComponentDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
+import org.opencds.cqf.fhir.cr.measure.common.StratifierUtils;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 
 public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
@@ -130,6 +131,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                         mgsc.getId(),
                         conceptToConceptDef(mgsc.getCode()),
                         mgsc.getCriteria().getExpression(),
+                        StratifierUtils.getStratifierType(mgsc),
                         components);
 
                 stratifiers.add(stratifierDef);

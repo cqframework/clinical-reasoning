@@ -1,8 +1,8 @@
 {
-  "id": "CriteriaBasedStratifiersSimple",
+  "id": "CriteriaBasedStratifiersSimpleBad",
   "resourceType": "Measure",
-  "name": "CriteriaBasedStratifiersSimple",
-  "url": "http://example.com/Measure/CriteriaBasedStratifiersSimple",
+  "name": "CriteriaBasedStratifiersSimpleBad",
+  "url": "http://example.com/Measure/CriteriaBasedStratifiersSimpleBad",
   "library": [
     "http://example.com/Library/CriteriaBasedStratifiersSimple"
   ],
@@ -43,10 +43,10 @@
       ],
       "stratifier": [
         {
-          "id": "stratifier-1",
+          "id": "stratifier-bad",
           "criteria": {
             "language": "text/cql.identifier",
-            "expression": "in-progress encounters"
+            "expression": "bad criteria stratifier"
           },
           "extension": [
             {

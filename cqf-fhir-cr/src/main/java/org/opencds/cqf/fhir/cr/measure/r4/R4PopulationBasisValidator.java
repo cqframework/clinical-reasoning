@@ -16,6 +16,7 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.runtime.Code;
+import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationBasisValidator;
@@ -105,15 +106,19 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
 
         if (!stratifierDef.components().isEmpty()) {
             for (var component : stratifierDef.components()) {
-                validateExpressionResultType(groupDef, component.expression(), evaluationResult, url);
+                validateExpressionResultType(groupDef, stratifierDef, component.expression(), evaluationResult, url);
             }
         } else {
-            validateExpressionResultType(groupDef, stratifierDef.expression(), evaluationResult, url);
+            validateExpressionResultType(groupDef, stratifierDef, stratifierDef.expression(), evaluationResult, url);
         }
     }
 
     private void validateExpressionResultType(
-            GroupDef groupDef, String expression, EvaluationResult evaluationResult, String url) {
+            GroupDef groupDef,
+            StratifierDef stratifierDef,
+            String expression,
+            EvaluationResult evaluationResult,
+            String url) {
 
         var expressionResult = evaluationResult.forExpression(expression);
 
@@ -125,7 +130,7 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
         var groupPopulationBasisCode = groupDef.getPopulationBasis().code();
 
         // criteria-based stratifier, skip validation, since the boolean basis test is irrelevant
-        if (StratifierUtils.isCriteriaBasedStratifier(groupDef, expressionResult.value())) {
+        if (MeasureStratifierType.CRITERIA == stratifierDef.getStratifierType()) {
             return;
         }
 

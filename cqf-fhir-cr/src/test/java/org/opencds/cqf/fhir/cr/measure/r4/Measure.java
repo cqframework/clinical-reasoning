@@ -1015,12 +1015,6 @@ public class Measure {
             return this;
         }
 
-        public SelectedStratifier hasExtensionStratifierType(String type) {
-            assertEquals(1, value().getExtension().size());
-            assertEquals(type, value().getExtension().get(0).getValue().toString());
-            return this;
-        }
-
         public SelectedStratifier hasStratum(String textValue) {
             final SelectedStratum stratum = stratum(textValue);
             assertNotNull(stratum.value());
@@ -1073,8 +1067,8 @@ public class Measure {
                     .orElse(null);
 
             assertEquals(
-                    firstCodeText,
                     stratifierCodeText,
+                    firstCodeText,
                     "Stratifier does not have expected code: %s but instead has: %s"
                             .formatted(stratifierCodeText, firstCodeText));
 

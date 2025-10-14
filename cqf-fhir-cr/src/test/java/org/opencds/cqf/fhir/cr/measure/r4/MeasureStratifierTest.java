@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportStatus;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.When;
@@ -278,12 +277,16 @@ class MeasureStratifierTest {
                 .report();
     }
 
-    // LUKETODO:  read the stratifier type extension if it exists, if it's criteria or value, set it, otherwise, default to "value"
-    // LUKETODO:  keep existing code for determining if this is criteria base stratifier, but use it only as validation for a user doing something nonsensical, and only if they already have the extension
+    // LUKETODO:  read the stratifier type extension if it exists, if it's criteria or value, set it, otherwise, default
+    // to "value"
+    // LUKETODO:  keep existing code for determining if this is criteria base stratifier, but use it only as validation
+    // for a user doing something nonsensical, and only if they already have the extension
 
     // LUKETODO:  fix naming for existing tests as per code review feedback
-    // LUKETODO:  for existing value stratifier tests, just add comments and text assertions reinforcing that it's the default behaviour, which is value-based
-    // LUKETODO:  define a bad CQL expression for a criteria based stratifier:  something like periods in minutes where it's expecting a list of encounters
+    // LUKETODO:  for existing value stratifier tests, just add comments and text assertions reinforcing that it's the
+    // default behaviour, which is value-based
+    // LUKETODO:  define a bad CQL expression for a criteria based stratifier:  something like periods in minutes where
+    // it's expecting a list of encounters
 
     /**
      * Ratio Measure with Resource Basis where Stratifier defined by expression that results in Encounter.status per subject.
@@ -418,7 +421,6 @@ class MeasureStratifierTest {
                 .firstStratifier()
                 .hasCodeText(null)
                 .hasStratumCount(2)
-                .hasExtensionStratifierType("value")
                 .stratum("M")
                 .hasScore("0.2") // make sure stratum are scored
                 .population("initial-population")
@@ -467,7 +469,30 @@ class MeasureStratifierTest {
                 .hasStratifierCount(1)
                 .firstStratifier()
                 .hasCodeText("in-progress encounters")
-                .hasExtensionStratifierType("criteria")
+                .hasStratumCount(1)
+                .firstStratum()
+                .hasPopulationCount(1)
+                .population("initial-population")
+                .hasCount(1);
+    }
+
+    // LUKETODO:  this needs to fail with the stratifier logic
+    // LUKETODO:  should we carry the extension to the measure report stratifier?
+    @Test
+    void criteriaBasedStratSingleBadExpressionForValue() {
+        GIVEN_CRITERIA_BASED_STRAT_SIMPLE
+                .when()
+                .measureId("CriteriaBasedStratifiersSimpleBad")
+                .subject("Patient/patient1")
+                .evaluate()
+                .then()
+                .firstGroup()
+                .population("initial-population")
+                .hasCount(4)
+                .up()
+                .hasStratifierCount(1)
+                .firstStratifier()
+                .hasCodeText(null)
                 .hasStratumCount(1)
                 .firstStratum()
                 .hasPopulationCount(1)

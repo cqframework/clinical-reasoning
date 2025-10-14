@@ -23,8 +23,8 @@ class CdsCrServiceDstu3Test extends BaseCdsCrServiceTest {
     @BeforeEach
     void beforeEach() {
         fhirContext = FhirContext.forDstu3Cached();
-        repository = new InMemoryFhirRepository(fhirContext);
-        testSubject = new CdsCrService(REQUEST_DETAILS, repository);
+        repository = getRepository();
+        testSubject = new CdsCrService(repository, getAdapterFactory(), getCdsResponseEncoderService(), getCdsParametersEncoderService());
     }
 
     @Test
@@ -45,13 +45,12 @@ class CdsCrServiceDstu3Test extends BaseCdsCrServiceTest {
             fhirContext, Bundle.class, "org/opencds/cqf/fhir/cr/hapi/dstu3/hello-world/hello-world-patient-view-bundle.json");
         final IRepository repository = new InMemoryFhirRepository(fhirContext, bundle);
 
-
         var carePlanResponse = getCarePLanAsResponse();
 
-        CdsServiceResponseEncoder encoder =
-            new CdsServiceResponseEncoder(carePlanResponse, iAdapterFactory, repository);
+        CdsResponseEncoderService encoder =
+            new CdsResponseEncoderService(repository, iAdapterFactory);
 
-        CdsServiceResponseJson cdsServiceResponseJson = encoder.encodeResponse();
+        CdsServiceResponseJson cdsServiceResponseJson = encoder.encodeResponse(carePlanResponse, requestDetails);
 
         assertEquals(1, cdsServiceResponseJson.getCards().size());
         assertFalse(cdsServiceResponseJson.getCards().get(0).getSummary().isEmpty());
@@ -77,6 +76,10 @@ class CdsCrServiceDstu3Test extends BaseCdsCrServiceTest {
 
         return retVal;
 
+    }
+
+    public FhirVersionEnum getFhirVersion() {
+        return repository.fhirContext().getVersion().getVersion();
     }
 
 }

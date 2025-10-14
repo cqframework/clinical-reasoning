@@ -4,6 +4,8 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestJson;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseJson;
@@ -12,18 +14,19 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public interface ICdsCrService {
-    IBaseParameters encodeParams(CdsServiceRequestJson json);
+    IBaseParameters encodeParams(CdsServiceRequestJson json, RequestDetails requestDetails);
 
-    CdsServiceResponseJson encodeResponse(Object response);
+    CdsServiceResponseJson encodeResponse(Object response, RequestDetails requestDetails);
 
     FhirVersionEnum getFhirVersion();
 
     IRepository getRepository();
 
     default Object invoke(IModelJson json) {
-        IBaseParameters params = encodeParams((CdsServiceRequestJson) json);
+        SystemRequestDetails systemRequestDetails = new SystemRequestDetails();
+        IBaseParameters params = encodeParams((CdsServiceRequestJson) json, systemRequestDetails);
         IBaseResource response = invokeApply(params);
-        return encodeResponse(response);
+        return encodeResponse(response, systemRequestDetails);
     }
 
     default IBaseResource invokeApply(IBaseParameters params) {

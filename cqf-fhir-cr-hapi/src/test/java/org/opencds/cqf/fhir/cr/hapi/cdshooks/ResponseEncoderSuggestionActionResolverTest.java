@@ -3,111 +3,105 @@ package org.opencds.cqf.fhir.cr.hapi.cdshooks;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.spy;
 
+import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseSuggestionActionJson;
-import java.util.List;
-import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.RequestGroup.RequestGroupActionComponent;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.opencds.cqf.fhir.cr.hapi.cdshooks.CdsServiceResponseEncoder.ResponseEncoderResourceResolver;
-import org.opencds.cqf.fhir.cr.hapi.cdshooks.CdsServiceResponseEncoder.ResponseEncoderSuggestionActionResolver;
-import org.opencds.cqf.fhir.utility.adapter.ICodeableConceptAdapter;
-import org.opencds.cqf.fhir.utility.adapter.ICodingAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IRequestActionAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
+import org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory;
 
 class ResponseEncoderSuggestionActionResolverTest {
 
-    @Test
-    void testResolveSuggestionAction_WithDescriptionAndType() {
-        // Arrange
-        IRequestActionAdapter mockAction = mock(IRequestActionAdapter.class);
-        ResponseEncoderResourceResolver mockResolver = mock(ResponseEncoderResourceResolver.class);
-        ResponseEncoderSuggestionActionResolver resolver = new ResponseEncoderSuggestionActionResolver(mockResolver);
+    private IRepository repository;
+    private IAdapterFactory adapterFactory;
+    private CdsResponseEncoderService fixture;
+    private RequestGroupActionComponent requestGroupActionComponent;
 
+    @BeforeEach
+    void beforeEach() {
+        adapterFactory = new AdapterFactory();
+        repository = mock(IRepository.class);
+        fixture = spy(new CdsResponseEncoderService(repository, adapterFactory));
+
+        requestGroupActionComponent = new RequestGroupActionComponent()
+            .setTitle("Test Title")
+            .setDescription("Test Description");
+    }
+
+    @Test
+    void testResolveSuggestionAction_withDescriptionAndType() {
+        // given
         String expectedDescription = "Test description";
         String expectedActionType = "actionType";
-        when(mockAction.getDescription()).thenReturn(expectedDescription);
-        when(mockAction.hasType()).thenReturn(true);
-        ICodeableConceptAdapter mockType = mock(ICodeableConceptAdapter.class);
-        when(mockAction.getType()).thenReturn(mockType);
-        when(mockType.hasCoding()).thenReturn(true);
-        var coding = mock(ICodingAdapter.class);
-        when(mockType.getCoding()).thenReturn(List.of(coding));
-        when(coding.hasCode()).thenReturn(true);
-        when(coding.getCode()).thenReturn(expectedActionType);
 
-        // Act
-        CdsServiceResponseSuggestionActionJson result = resolver.resolveSuggestionAction(mockAction);
+        CodeableConcept codeableConcept = new CodeableConcept();
+        codeableConcept.addCoding().setCode(expectedActionType);
 
-        // Assert
+        requestGroupActionComponent.setType(codeableConcept);
+        requestGroupActionComponent.setDescription(expectedDescription);
+        var actionAdapter = adapterFactory.createRequestAction(requestGroupActionComponent);
+
+        // when
+        CdsServiceResponseSuggestionActionJson result = fixture.resolveSuggestionAction(actionAdapter);
+
+        // then
         assertNotNull(result);
         assertEquals(expectedDescription, result.getDescription());
         assertEquals(expectedActionType, result.getType());
     }
 
     @Test
-    void testResolveSuggestionAction_WithResource() {
-        // Arrange
-        IRequestActionAdapter mockAction = mock(IRequestActionAdapter.class);
-        ResponseEncoderResourceResolver mockResolver = mock(ResponseEncoderResourceResolver.class);
-        ResponseEncoderSuggestionActionResolver resolver = new ResponseEncoderSuggestionActionResolver(mockResolver);
+    void testResolveSuggestionAction_withResource() {
+        // given
+        Reference reference = new Reference("Action/123");
+        IBaseResource expectedResource = mock(IBaseResource.class);
+        requestGroupActionComponent.setResource(reference);
+        var actionAdapter = adapterFactory.createRequestAction(requestGroupActionComponent);
+        doReturn(expectedResource).when(fixture).resolveResource(reference);
 
-        IBaseReference mockReference = mock(IBaseReference.class);
-        when(mockAction.hasResource()).thenReturn(true);
-        when(mockAction.getResource()).thenReturn(mockReference);
-        IBaseResource mockResource = mock(IBaseResource.class);
-        when(mockResolver.resolveResource(mockReference)).thenReturn(mockResource);
+        // when
+        CdsServiceResponseSuggestionActionJson result = fixture.resolveSuggestionAction(actionAdapter);
 
-        // Act
-        CdsServiceResponseSuggestionActionJson result = resolver.resolveSuggestionAction(mockAction);
-
-        // Assert
+        // then
         assertNotNull(result);
-        assertEquals(mockResource, result.getResource());
+        assertEquals(expectedResource, result.getResource());
     }
 
     @Test
-    void testResolveSuggestionAction_NoTypeCodeOrResource() {
-        // Arrange
-        IRequestActionAdapter mockAction = mock(IRequestActionAdapter.class);
-        ResponseEncoderResourceResolver mockResolver = mock(ResponseEncoderResourceResolver.class);
-        ResponseEncoderSuggestionActionResolver resolver = new ResponseEncoderSuggestionActionResolver(mockResolver);
+    void testResolveSuggestionAction_noTypeCodeOrResource() {
+        // given
+        var actionAdapter = adapterFactory.createRequestAction(requestGroupActionComponent);
 
-        when(mockAction.getDescription()).thenReturn("No Type or Resource");
-        when(mockAction.hasType()).thenReturn(false);
-        when(mockAction.hasResource()).thenReturn(false);
+        // when
+        CdsServiceResponseSuggestionActionJson result = fixture.resolveSuggestionAction(actionAdapter);
 
-        // Act
-        CdsServiceResponseSuggestionActionJson result = resolver.resolveSuggestionAction(mockAction);
-
-        // Assert
+        // then
         assertNotNull(result);
-        assertEquals("No Type or Resource", result.getDescription());
         assertNull(result.getType());
         assertNull(result.getResource());
     }
 
     @Test
-    void testResolveSuggestionAction_WithFireEventTypeCode() {
-        // Arrange
-        IRequestActionAdapter mockAction = mock(IRequestActionAdapter.class);
-        ResponseEncoderResourceResolver mockResolver = mock(ResponseEncoderResourceResolver.class);
-        ResponseEncoderSuggestionActionResolver resolver = new ResponseEncoderSuggestionActionResolver(mockResolver);
+    void testResolveSuggestionAction_withFireEventTypeCode() {
+        // given
+        CodeableConcept codeableConcept = new CodeableConcept();
+        codeableConcept.addCoding().setCode("fire-event");
 
-        when(mockAction.hasType()).thenReturn(true);
-        ICodeableConceptAdapter mockType = mock(ICodeableConceptAdapter.class);
-        when(mockAction.getType()).thenReturn(mockType);
-        when(mockType.hasCoding()).thenReturn(true);
-        var coding = mock(ICodingAdapter.class);
-        when(mockType.getCoding()).thenReturn(List.of(coding));
-        when(coding.getCode()).thenReturn("fire-event");
+        requestGroupActionComponent.setType(codeableConcept);
+        var actionAdapter = adapterFactory.createRequestAction(requestGroupActionComponent);
 
-        // Act
-        CdsServiceResponseSuggestionActionJson result = resolver.resolveSuggestionAction(mockAction);
+        // when
+        CdsServiceResponseSuggestionActionJson result = fixture.resolveSuggestionAction(actionAdapter);
 
-        // Assert
+        // then
         assertNotNull(result);
         assertNull(result.getType()); // "fire-event" should not be set as type
     }

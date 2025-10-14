@@ -3,68 +3,69 @@ package org.opencds.cqf.fhir.cr.hapi.cdshooks;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.spy;
 
+import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseSuggestionActionJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseSuggestionJson;
 import java.util.List;
+import org.hl7.fhir.r4.model.RequestGroup.RequestGroupActionComponent;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.opencds.cqf.fhir.cr.hapi.cdshooks.CdsServiceResponseEncoder.ResponseEncoderSuggestionActionResolver;
-import org.opencds.cqf.fhir.cr.hapi.cdshooks.CdsServiceResponseEncoder.ResponseEncoderSuggestionResolver;
-import org.opencds.cqf.fhir.utility.adapter.IRequestActionAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
+import org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory;
 
 class ResponseEncoderSuggestionResolverTest {
 
-    @Test
-    void testResolveSuggestion_WithValidAction() {
-        IRequestActionAdapter action = mock(IRequestActionAdapter.class);
-        ResponseEncoderSuggestionActionResolver suggestionActionResolver = mock(ResponseEncoderSuggestionActionResolver.class);
-        ResponseEncoderSuggestionResolver suggestionResolver = new ResponseEncoderSuggestionResolver(suggestionActionResolver);
+    private IRepository repository;
+    private IAdapterFactory adapterFactory;
+    private CdsResponseEncoderService fixture;
+    private RequestGroupActionComponent requestGroupActionComponent;
 
-        // Mock the methods for the action
-        String expectedSuggestion = "Test Suggestion";
-        String expectedId = "test-id";
-        when(action.getTitle()).thenReturn(expectedSuggestion);
-        when(action.getId()).thenReturn(expectedId);
-        when(action.getAction()).thenReturn(List.of());
+    private final String expectedSuggestion = "Test Suggestion";
+    private final String expectedId = "test-id";
 
-        CdsServiceResponseSuggestionJson result = suggestionResolver.resolveSuggestion(action);
+    @BeforeEach
+    void beforeEach() {
+        adapterFactory = new AdapterFactory();
+        repository = mock(IRepository.class);
+        fixture = spy(new CdsResponseEncoderService(repository, adapterFactory));
 
-        // Assertions
-        assertNotNull(result);
-        assertEquals(expectedSuggestion, result.getLabel());
-        assertEquals(expectedId, result.getUuid());
-        assertTrue(result.getActions().isEmpty());
+        requestGroupActionComponent = new RequestGroupActionComponent().setTitle(expectedSuggestion);
+        requestGroupActionComponent.setId(expectedId);
     }
 
     @Test
-    void testResolveSuggestion_WithNestedActions() {
-        IRequestActionAdapter nestedAction = mock(IRequestActionAdapter.class);
-        IRequestActionAdapter mainAction = mock(IRequestActionAdapter.class);
-        ResponseEncoderSuggestionActionResolver suggestionActionResolver = mock(ResponseEncoderSuggestionActionResolver.class);
-        ResponseEncoderSuggestionResolver suggestionResolver = new ResponseEncoderSuggestionResolver(suggestionActionResolver);
+    void testResolveSuggestion_noAction() {
+        // given
+        requestGroupActionComponent.setAction(List.of());
+        var actionAdapter = adapterFactory.createRequestAction(requestGroupActionComponent);
 
-        // Mock the methods for the nested action
-        String nestedActionDescription = "Nested Action Description";
-        when(nestedAction.getDescription()).thenReturn(nestedActionDescription);
+        // when
+        CdsServiceResponseSuggestionJson result = fixture.resolveSuggestion(actionAdapter);
 
-        // Mock suggestion action resolver
-        CdsServiceResponseSuggestionActionJson nestedSuggestionAction = new CdsServiceResponseSuggestionActionJson()
-                .setDescription(nestedActionDescription);
-        when(suggestionActionResolver.resolveSuggestionAction(nestedAction)).thenReturn(nestedSuggestionAction);
+        // then
+        assertNotNull(result);
+        assertEquals(expectedSuggestion, result.getLabel());
+        assertEquals(expectedId, result.getUuid());
+        assertNull(result.getActions());
+    }
 
-        // Mock the methods for the main action
-        String expectedSuggestion = "Main Suggestion";
-        String expectedId = "main-id";
-        when(mainAction.getTitle()).thenReturn(expectedSuggestion);
-        when(mainAction.getId()).thenReturn(expectedId);
-        when(mainAction.getAction()).thenReturn(List.of(nestedAction));
+    @Test
+    void testResolveSuggestion_withNestedActions() {
+        // given
+        CdsServiceResponseSuggestionActionJson nestedSuggestionAction = new CdsServiceResponseSuggestionActionJson();
+        requestGroupActionComponent.addAction();
+        var actionAdapter = adapterFactory.createRequestAction(requestGroupActionComponent);
 
-        CdsServiceResponseSuggestionJson result = suggestionResolver.resolveSuggestion(mainAction);
+        // when
+        doReturn(nestedSuggestionAction).when(fixture).resolveSuggestionAction(any());
+        CdsServiceResponseSuggestionJson result = fixture.resolveSuggestion(actionAdapter);
 
-        // Assertions
+        // then
         assertNotNull(result);
         assertEquals(expectedSuggestion, result.getLabel());
         assertEquals(expectedId, result.getUuid());
@@ -72,23 +73,4 @@ class ResponseEncoderSuggestionResolverTest {
         assertEquals(nestedSuggestionAction, result.getActions().get(0));
     }
 
-    @Test
-    void testResolveSuggestion_WithEmptyValues() {
-        IRequestActionAdapter action = mock(IRequestActionAdapter.class);
-        ResponseEncoderSuggestionActionResolver suggestionActionResolver = mock(ResponseEncoderSuggestionActionResolver.class);
-        ResponseEncoderSuggestionResolver suggestionResolver = new ResponseEncoderSuggestionResolver(suggestionActionResolver);
-
-        // Mock the methods for the action with null or empty values
-        when(action.getTitle()).thenReturn(null);
-        when(action.getId()).thenReturn(null);
-        when(action.getAction()).thenReturn(List.of());
-
-        CdsServiceResponseSuggestionJson result = suggestionResolver.resolveSuggestion(action);
-
-        // Assertions
-        assertNotNull(result);
-        assertNull(result.getLabel());
-        assertNull(result.getUuid());
-        assertTrue(result.getActions().isEmpty());
-    }
 }

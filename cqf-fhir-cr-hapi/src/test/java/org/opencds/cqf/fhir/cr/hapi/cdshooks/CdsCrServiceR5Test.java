@@ -6,7 +6,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
 class CdsCrServiceR5Test extends BaseCdsCrServiceTest {
 
@@ -15,8 +14,8 @@ class CdsCrServiceR5Test extends BaseCdsCrServiceTest {
     @BeforeEach
     void beforeEach() {
         fhirContext = FhirContext.forR5Cached();
-        repository = new InMemoryFhirRepository(fhirContext);
-        testSubject = new CdsCrService(REQUEST_DETAILS, repository);
+        repository = getRepository();
+        testSubject = new CdsCrService(repository, getAdapterFactory(), getCdsResponseEncoderService(), getCdsParametersEncoderService());
     }
 
     @Test

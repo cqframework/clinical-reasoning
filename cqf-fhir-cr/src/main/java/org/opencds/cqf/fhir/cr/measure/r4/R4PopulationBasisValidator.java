@@ -129,8 +129,17 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
         var resultClasses = StratifierUtils.extractClassesFromSingleOrListResult(expressionResult.value());
         var groupPopulationBasisCode = groupDef.getPopulationBasis().code();
 
-        // criteria-based stratifier, skip validation, since the boolean basis test is irrelevant
         if (MeasureStratifierType.CRITERIA == stratifierDef.getStratifierType()) {
+            if (resultClasses.stream()
+                    .map(Class::getSimpleName)
+                    .noneMatch(simpleName -> simpleName.equals(groupPopulationBasisCode))) {
+
+                throw new InvalidRequestException(
+                        "criteria-based stratifier is invalid for expression: [%s] due to mismatch between population basis: [%s] and result types: %s for measure URL: %s"
+                                .formatted(expression, groupPopulationBasisCode, prettyClassNames(resultClasses), url));
+            }
+
+            // skip validation below since for criteria-based stratifier, the boolean basis test is irrelevant
             return;
         }
 

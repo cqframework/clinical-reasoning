@@ -486,18 +486,9 @@ class MeasureStratifierTest {
                 .subject("Patient/patient1")
                 .evaluate()
                 .then()
-                .firstGroup()
-                .population("initial-population")
-                .hasCount(4)
-                .up()
-                .hasStratifierCount(1)
-                .firstStratifier()
-                .hasCodeText(null)
-                .hasStratumCount(1)
-                .firstStratum()
-                .hasPopulationCount(1)
-                .population("initial-population")
-                .hasCount(1);
+                .hasContainedOperationOutcome()
+                .hasContainedOperationOutcomeMsg(
+                        "criteria-based stratifier is invalid for expression: [bad criteria stratifier] due to mismatch between population basis: [Encounter] and result types: [Boolean] for measure URL: http://example.com/Measure/CriteriaBasedStratifiersSimpleBad");
     }
 
     /*

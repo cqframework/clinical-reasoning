@@ -1,6 +1,5 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
-import jakarta.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -42,6 +41,7 @@ public class StratifierUtils {
                 .filter(Objects::nonNull)
                 .map(Object::toString)
                 .anyMatch("value"::equals)) {
+
             return MeasureStratifierType.CRITERIA;
         }
 
@@ -72,16 +72,6 @@ public class StratifierUtils {
         }
 
         return MeasureStratifierType.VALUE;
-    }
-
-    // LUKETODO:  turn this into validation only
-    public static boolean validateStratifier(GroupDef groupDef, @Nullable Object expressionValue) {
-        var resultClasses = extractClassesFromSingleOrListResult(expressionValue);
-        var groupPopulationBasisCode = groupDef.getPopulationBasis().code();
-
-        return resultClasses.stream()
-                .map(Class::getSimpleName)
-                .anyMatch(simpleName -> simpleName.equals(groupPopulationBasisCode));
     }
 
     public static List<Class<?>> extractClassesFromSingleOrListResult(Object result) {

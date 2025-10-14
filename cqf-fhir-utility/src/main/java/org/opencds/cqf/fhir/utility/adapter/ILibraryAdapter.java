@@ -6,7 +6,9 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.utility.Constants;
@@ -15,6 +17,8 @@ import org.opencds.cqf.fhir.utility.Constants;
  * This interface exposes common functionality across all FHIR Library versions.
  */
 public interface ILibraryAdapter extends IKnowledgeArtifactAdapter {
+
+    public final String CQF_MESSAGES_EXT_URL = "http://hl7.org/fhir/StructureDefinition/cqf-messages";
 
     boolean hasContent();
 
@@ -154,5 +158,14 @@ public interface ILibraryAdapter extends IKnowledgeArtifactAdapter {
                 && resourceType.equals(Constants.RESOURCETYPE_VALUESET);
 
         return isV1AndQualifies || isV2AndQualifies;
+    }
+
+    default void addCqfMessagesExtension(IBaseOperationOutcome messages) {
+        addContained(messages);
+        var ext = addExtension();
+        ext.setUrl(CQF_MESSAGES_EXT_URL);
+        var ref =
+                (IBaseReference) fhirContext().getElementDefinition("Reference").newInstance();
+        ext.setValue(ref.setReference("#messages"));
     }
 }

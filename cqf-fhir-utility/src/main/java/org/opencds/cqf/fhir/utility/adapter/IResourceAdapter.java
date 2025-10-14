@@ -50,4 +50,10 @@ public interface IResourceAdapter extends IAdapter<IBaseResource> {
     default Boolean hasContained(IBaseResource base) {
         return !getContained(base).isEmpty();
     }
+
+    default void addContained(IBaseResource base) {
+        var res = resolvePathList(get(), "contained", IBaseResource.class);
+        res.add(base);
+        getModelResolver().setValue(get(), "contained", res);
+    }
 }

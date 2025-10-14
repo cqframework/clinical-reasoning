@@ -41,6 +41,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.MetadataResource;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
@@ -148,11 +149,13 @@ class PackageVisitorTests {
         terminologyEndpoint.setAddress("test.com");
         Parameters params = parameters(part("terminologyEndpoint", terminologyEndpoint));
 
-        var exception = assertThrows(UnprocessableEntityException.class, () -> {
-            libraryAdapter.accept(packageVisitor, params);
-        });
+        libraryAdapter.accept(packageVisitor, params);
 
-        assertTrue(exception.getMessage().contains(expectedError));
+        assertTrue(libraryAdapter.hasExtension(ILibraryAdapter.CQF_MESSAGES_EXT_URL));
+        assertTrue(libraryAdapter.hasContained());
+        assertTrue(libraryAdapter.getContained().stream().allMatch(c -> c instanceof OperationOutcome));
+        var oo = (OperationOutcome) libraryAdapter.getContained().get(0);
+        assertEquals(oo.getIssueFirstRep().getDiagnostics(), expectedError);
     }
 
     @Test
@@ -173,11 +176,9 @@ class PackageVisitorTests {
         terminologyEndpoint.setAddress("test.com");
         Parameters params = parameters(part("terminologyEndpoint", terminologyEndpoint));
 
-        var exception = assertThrows(UnprocessableEntityException.class, () -> {
-            libraryAdapter.accept(packageVisitor, params);
-        });
+        libraryAdapter.accept(packageVisitor, params);
 
-        assertTrue(exception.getMessage().contains(expectedError));
+        assertTrue(libraryAdapter.hasExtension(ILibraryAdapter.CQF_MESSAGES_EXT_URL));
     }
 
     @Test

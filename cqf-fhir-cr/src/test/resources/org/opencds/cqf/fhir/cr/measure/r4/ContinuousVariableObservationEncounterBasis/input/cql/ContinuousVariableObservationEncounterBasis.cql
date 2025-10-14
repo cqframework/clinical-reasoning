@@ -36,3 +36,8 @@ define "All Encounters":
 define "Encounter Cancelled":
     [Encounter] E
        where E.status = 'cancelled'
+
+// For stratifier
+
+define "Age":
+    AgeInYearsAt(start of "Measurement Period")

@@ -1,7 +1,14 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
+import org.hl7.fhir.r4.model.MeasureReport;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
+import java.time.LocalDate;
+import java.time.Month;
+import java.time.Period;
+import java.time.Year;
+import java.time.temporal.ChronoField;
+import java.time.temporal.ChronoUnit;
 
 public class ContinuousVariableResourceMeasureObservationTest {
 
@@ -316,27 +323,55 @@ public class ContinuousVariableResourceMeasureObservationTest {
 
     @Test
     void continuousVariableResourceMeasureObservationEncounterBasisSum() {
+        final LocalDate measurementPeriodStart = LocalDate.of(2024, 1,1);
 
-        GIVEN_ENCOUNTER_BASIS
-                .when()
-                .measureId("ContinuousVariableResourceMeasureObservationEncounterBasisSum")
-                .evaluate()
-                .then()
-                .firstGroup()
-                .population("initial-population")
-                .hasCount(11)
-                .up()
-                .population("measure-population")
-                .hasCount(11)
-                .up()
-                .population("measure-population-exclusion")
-                .hasCount(0)
-                .up()
-                .population("measure-observation")
-                .hasCount(11)
-                .up()
-                .hasScore("2536.0")
-                .up()
-                .report();
+        final int expectedAgeStratum1 =
+            computeAge(measurementPeriodStart, LocalDate.of(1940, Month.JANUARY, 1));
+        final int expectedAgeStratum2 =
+            computeAge(measurementPeriodStart, LocalDate.of(1950, Month.JANUARY, 1));
+        final int expectedAgeStratum3 =
+            computeAge(measurementPeriodStart, LocalDate.of(1960, Month.JANUARY, 1));
+
+        final MeasureReport report = GIVEN_ENCOUNTER_BASIS
+            .when()
+            .measureId("ContinuousVariableResourceMeasureObservationEncounterBasisSum")
+            .evaluate()
+            .then()
+            .firstGroup()
+            .population("initial-population")
+            .hasCount(11)
+            .up()
+            .population("measure-population")
+            .hasCount(11)
+            .up()
+            .population("measure-population-exclusion")
+            .hasCount(0)
+            .up()
+            .population("measure-observation")
+            .hasCount(11)
+            .up()
+            .hasScore("2536.0")
+            .stratifierById("stratifier-age")
+            .stratumCount(3)
+            .firstStratum()
+            .hasValue(Integer.toString(expectedAgeStratum1))
+//            // LUKETODO:  figure out what the appropriate split it is per statum
+//            .hasScore("2536.0")
+            .up()
+            .stratumByPosition(2)
+            .hasValue(Integer.toString(expectedAgeStratum2))
+            .up()
+            .stratumByPosition(3)
+            .hasValue(Integer.toString(expectedAgeStratum3))
+            .up()
+            .up()
+            .up()
+            .report();
+
+        System.out.println("report = " + report);
+    }
+
+    int computeAge(LocalDate measurementPeriod, LocalDate birthDate) {
+        return Period.between(birthDate, measurementPeriod).getYears();
     }
 }

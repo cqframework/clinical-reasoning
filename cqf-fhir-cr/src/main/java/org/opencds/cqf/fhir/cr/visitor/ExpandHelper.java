@@ -10,6 +10,7 @@ import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -114,10 +115,14 @@ public class ExpandHelper {
                     expansionTimestamp);
         } else if (valueSet.hasCompose()) {
             try {
+                var headers = new HashMap<String, String>();
+                headers.put("Content-Type", "application/json");
                 var vs = repository.invoke(
+                        valueSet.get().getClass(),
                         "$expand",
                         (IBaseParameters) expansionParameters.get(),
-                        valueSet.get().getClass());
+                        valueSet.get().getClass(),
+                        headers);
                 valueSet = (IValueSetAdapter) IAdapterFactory.createAdapterForResource(vs);
             } catch (Exception e) {
                 throw new UnprocessableEntityException(

@@ -492,7 +492,6 @@ class MeasureStratifierTest {
                 .hasCount(3);
     }
 
-    @Disabled
     @Test
     void criteriaBasedStratifiersComplexSetsDifferentForInitialDenominatorAndNumerator() {
         GIVEN_CRITERIA_BASED_STRAT_COMPLEX

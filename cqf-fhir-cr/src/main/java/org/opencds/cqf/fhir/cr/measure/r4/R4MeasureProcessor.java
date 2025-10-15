@@ -27,7 +27,6 @@ import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Parameters;
-import org.hl7.fhir.r4.model.Resource;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.fhir.model.R4FhirModelResolver;
@@ -128,7 +127,8 @@ public class R4MeasureProcessor {
 
         // Populate populationDefs that require MeasureDef results
         // blocking certain continuous-variable Measures due to need of CQL context
-        continuousVariableObservationCheck(measureDef, measure);
+        // LUKETODO:  what do we do with this?
+        // continuousVariableObservationCheck(measureDef, measure);
 
         // Build Measure Report with Results
         return new R4MeasureReportBuilder()
@@ -169,7 +169,7 @@ public class R4MeasureProcessor {
         final IIdType measureId = measure.getIdElement().toUnqualifiedVersionless();
         // populate results from Library $evaluate
         final Map<String, EvaluationResult> resultForThisMeasure =
-                compositeEvaluationResultsPerMeasure.processMeasureForSuccessOrFailure(measureId, measureDef);
+                compositeEvaluationResultsPerMeasure.processMeasureForSuccessOrFailure(measureDef);
 
         measureProcessorUtils.processResults(
                 resultForThisMeasure,
@@ -178,6 +178,7 @@ public class R4MeasureProcessor {
                 this.measureEvaluationOptions.getApplyScoringSetMembership(),
                 new R4PopulationBasisValidator());
 
+        // LUKETODO:  figure out if we still need this:
         var measurementPeriod = postLibraryEvaluationPeriodProcessingAndContinuousVariableObservation(
                 measure, measureDef, periodStart, periodEnd, context);
 
@@ -221,15 +222,11 @@ public class R4MeasureProcessor {
         // Measurement Period: operation parameter defined measurement period
         Interval measurementPeriodParams = buildMeasurementPeriod(periodStart, periodEnd);
 
-        measureProcessorUtils.setMeasurementPeriod(
-                measurementPeriodParams,
-                context,
-                Optional.ofNullable(measure.getUrl()).map(List::of).orElse(List.of("Unknown Measure URL")));
-
         // DON'T pop the library off the stack yet, because we need it for continuousVariableObservation()
 
         // Populate populationDefs that require MeasureDef results
-        measureProcessorUtils.continuousVariableObservation(measureDef, context);
+        // LUKETODO:  can we get rid of this?
+        // measureProcessorUtils.continuousVariableObservation(measureDef, context);
 
         // Now that we've done continuousVariableObservation(), we're safe to pop the libraries off
         // the stack
@@ -387,8 +384,8 @@ public class R4MeasureProcessor {
 
         var libraryIdentifiersToMeasureIds = measures.stream()
                 .collect(ImmutableListMultimap.toImmutableListMultimap(
-                        this::getLibraryVersionIdentifier, // Key function
-                        Resource::getIdElement // Value function
+                        this::getLibraryVersionIdentifier, // key function
+                        measure -> new R4MeasureDefBuilder().build(measure) // value function
                         ));
 
         var libraryEngine = new LibraryEngine(repository, this.measureEvaluationOptions.getEvaluationSettings());
@@ -444,7 +441,17 @@ public class R4MeasureProcessor {
      * @param measure resource that has desired Library
      * @return version identifier of Library
      */
-    protected VersionedIdentifier getLibraryVersionIdentifier(Measure measure) {
+    private VersionedIdentifier getLibraryVersionIdentifier(Measure measure) {
+
+        if (measure == null) {
+            throw new InvalidRequestException("Measure provided is null");
+        }
+
+        if (!measure.hasLibrary() || measure.getLibrary().isEmpty()) {
+            throw new InvalidRequestException(
+                    "Measure %s does not have a primary library specified".formatted(measure.getUrl()));
+        }
+
         var url = measure.getLibrary().get(0).asStringValue();
 
         Bundle b = this.repository.search(Bundle.class, Library.class, Searches.byCanonical(url), null);

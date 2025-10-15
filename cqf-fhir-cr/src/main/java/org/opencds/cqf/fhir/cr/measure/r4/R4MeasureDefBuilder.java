@@ -84,6 +84,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                 MeasurePopulationType populationType = MeasurePopulationType.fromCode(
                         pop.getCode().getCodingFirstRep().getCode());
 
+                // LUKETODO:  start merging in changes to this class from the continuous variable branch
                 populations.add(new PopulationDef(
                         pop.getId(),
                         conceptToConceptDef(pop.getCode()),

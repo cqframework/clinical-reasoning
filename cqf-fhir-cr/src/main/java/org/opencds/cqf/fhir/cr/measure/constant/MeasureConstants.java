@@ -1,7 +1,5 @@
 package org.opencds.cqf.fhir.cr.measure.constant;
 
-import java.util.Set;
-
 /*
 constants used on Measure resources
  */
@@ -49,5 +47,4 @@ public class MeasureConstants {
     public static final String FHIR_ALL_TYPES_SYSTEM_URL = "http://hl7.org/fhir/fhir-types";
     public static final String POPULATION_BASIS_URL =
             "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-populationBasis";
-    public static final Set<String> CQFM_AGGREGATE_METHODS = Set.of("sum", "max", "min", "avg", "count", "median");
 }

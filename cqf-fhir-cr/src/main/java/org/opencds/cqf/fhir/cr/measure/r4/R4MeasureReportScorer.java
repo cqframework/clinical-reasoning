@@ -22,6 +22,7 @@ import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.opencds.cqf.fhir.cr.measure.common.BaseMeasureReportScorer;
+import org.opencds.cqf.fhir.cr.measure.common.ContinuousVariableObservationAggregateMethod;
 import org.opencds.cqf.fhir.cr.measure.common.CriteriaResult;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
@@ -231,19 +232,19 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
 
     @Nullable
     private static Quantity calculateContinuousVariableAggregateQuantity(
-            String aggregateMethod, Set<Object> qualifyingResources) {
+            ContinuousVariableObservationAggregateMethod aggregateMethod, Set<Object> qualifyingResources) {
         var observationQuantity = collectQuantities(qualifyingResources);
         return aggregate(observationQuantity, aggregateMethod);
     }
 
-    private static Quantity aggregate(List<Quantity> quantities, String method) {
+    private static Quantity aggregate(List<Quantity> quantities, ContinuousVariableObservationAggregateMethod method) {
         if (quantities == null || quantities.isEmpty()) {
             return null;
         }
 
-        if (method == null || method.isEmpty()) {
+        if (ContinuousVariableObservationAggregateMethod.N_A == method) {
             throw new InvalidRequestException(
-                    "Aggregate method must be provided for continuous variable scoring, but is null.");
+                    "Aggregate method must be provided for continuous variable scoring, but is NO-OP.");
         }
 
         // assume all quantities share the same unit/system/code
@@ -254,34 +255,34 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
 
         double result;
 
-        switch (method.toLowerCase()) {
-            case "sum":
+        switch (method) {
+            case SUM:
                 result = quantities.stream()
                         .mapToDouble(q -> q.getValue().doubleValue())
                         .sum();
                 break;
-            case "max":
+            case MAX:
                 result = quantities.stream()
                         .mapToDouble(q -> q.getValue().doubleValue())
                         .max()
                         .orElse(Double.NaN);
                 break;
-            case "min":
+            case MIN:
                 result = quantities.stream()
                         .mapToDouble(q -> q.getValue().doubleValue())
                         .min()
                         .orElse(Double.NaN);
                 break;
-            case "avg":
+            case AVG:
                 result = quantities.stream()
                         .mapToDouble(q -> q.getValue().doubleValue())
                         .average()
                         .orElse(Double.NaN);
                 break;
-            case "count":
+            case COUNT:
                 result = quantities.size();
                 break;
-            case "median":
+            case MEDIAN:
                 List<Double> sorted = quantities.stream()
                         .map(q -> q.getValue().doubleValue())
                         .sorted()

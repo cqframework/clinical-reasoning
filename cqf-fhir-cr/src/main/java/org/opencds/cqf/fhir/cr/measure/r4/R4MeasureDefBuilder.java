@@ -1,7 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
 import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.DATEOFCOMPLIANCE;
-import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.CQFM_AGGREGATE_METHODS;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.CQFM_SCORING_EXT_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_CQFM_AGGREGATE_METHOD_URL;
@@ -18,7 +17,7 @@ import jakarta.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -35,6 +34,7 @@ import org.hl7.fhir.r4.model.Measure.MeasureSupplementalDataComponent;
 import org.hl7.fhir.r4.model.Resource;
 import org.opencds.cqf.fhir.cr.measure.common.CodeDef;
 import org.opencds.cqf.fhir.cr.measure.common.ConceptDef;
+import org.opencds.cqf.fhir.cr.measure.common.ContinuousVariableObservationAggregateMethod;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDefBuilder;
@@ -78,7 +78,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
             var groupImpNotation = getGroupImpNotation(measure, group);
             var hasGroupImpNotation = groupImpNotation != null;
             // aggregateMethod is used to capture continuous-variable method of aggregating MeasureObservation
-            String aggregateMethod = null;
+            ContinuousVariableObservationAggregateMethod aggregateMethod = null;
             // Populations
             List<PopulationDef> populations = new ArrayList<>();
             for (MeasureGroupPopulationComponent pop : group.getPopulation()) {
@@ -92,14 +92,17 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                     var aggMethodExt = pop.getExtensionByUrl(EXT_CQFM_AGGREGATE_METHOD_URL);
                     if (aggMethodExt != null) {
                         // this method is only required if scoringType = continuous-variable
-                        aggregateMethod = aggMethodExt.getValue().toString();
+                        var aggregateMethodString = aggMethodExt.getValue().toString();
+
+                        aggregateMethod =
+                                ContinuousVariableObservationAggregateMethod.fromString(aggregateMethodString);
+
                         // check that method is accepted
-                        if (!CQFM_AGGREGATE_METHODS.contains(aggregateMethod)) {
+                        if (aggregateMethod == null) {
                             throw new InvalidRequestException(
                                     "Measure Observation method: %s is not a valid value for Measure: %s"
-                                            .formatted(aggregateMethod, measure.getUrl()));
+                                            .formatted(aggregateMethodString, measure.getUrl()));
                         }
-                        ;
                     }
                     var populationCriteriaExt = pop.getExtensionByUrl(EXT_CQFM_CRITERIA_REFERENCE);
                     if (populationCriteriaExt != null) {
@@ -226,8 +229,8 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
             Measure measure, MeasureSupplementalDataComponent measureSupplementalDataComponent) {
         var hasUsage = measureSupplementalDataComponent.getUsage().stream()
                 .filter(t -> t.getCodingFirstRep().getCode().equals(SDE_USAGE_CODE))
-                .collect(Collectors.toList());
-        if (hasUsage == null || hasUsage.isEmpty()) {
+                .toList();
+        if (CollectionUtils.isEmpty(hasUsage)) {
             throw new InvalidRequestException("SupplementalDataComponent usage is missing code: %s for Measure: %s"
                     .formatted(SDE_USAGE_CODE, measure.getUrl()));
         }

@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
+import jakarta.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -16,7 +17,7 @@ public class GroupDef {
     private final CodeDef populationBasis;
     private final CodeDef improvementNotation;
     private final Map<MeasurePopulationType, List<PopulationDef>> populationIndex;
-    private final String aggregateMethod;
+    private final ContinuousVariableObservationAggregateMethod aggregateMethod;
 
     public GroupDef(
             String id,
@@ -48,7 +49,7 @@ public class GroupDef {
             boolean isGroupImprovementNotation,
             CodeDef improvementNotation,
             CodeDef populationBasis,
-            String aggregateMethod) {
+            @Nullable ContinuousVariableObservationAggregateMethod aggregateMethod) {
         //
         this.id = id;
         this.code = code;
@@ -128,8 +129,7 @@ public class GroupDef {
         return this.improvementNotation;
     }
 
-    // LUKETODO:  enum?
-    public String getAggregateMethod() {
+    public ContinuousVariableObservationAggregateMethod getAggregateMethod() {
         return this.aggregateMethod;
     }
 }

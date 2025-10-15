@@ -14,6 +14,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
@@ -363,50 +364,31 @@ public class MeasureEvaluator {
         }
     }
 
-    protected Object addStratifierResult(Object result, String subjectId) {
-        if (result instanceof Iterable<?> iterable) {
-            var resultIter = iterable.iterator();
-            if (!resultIter.hasNext()) {
-                result = null;
-            } else {
-                result = resultIter.next();
-            }
-
-            if (resultIter.hasNext()) {
-                throw new InvalidRequestException(
-                        "stratifiers may not return multiple values for subjectId: " + subjectId);
-            }
-        }
-        return result;
-    }
-
     protected void addStratifierComponentResult(
             List<StratifierComponentDef> components, EvaluationResult evaluationResult, String subjectId) {
         for (StratifierComponentDef component : components) {
             var expressionResult = evaluationResult.forExpression(component.expression());
-            Object result = addStratifierResult(expressionResult.value(), subjectId);
-            if (result != null) {
-                component.putResult(subjectId, result, expressionResult.evaluatedResources());
-            }
+            Optional.ofNullable(expressionResult.value())
+                    .ifPresent(nonNullValue ->
+                            component.putResult(subjectId, nonNullValue, expressionResult.evaluatedResources()));
         }
     }
 
     protected void evaluateStratifiers(
             String subjectId, List<StratifierDef> stratifierDefs, EvaluationResult evaluationResult) {
-        for (StratifierDef sd : stratifierDefs) {
+        for (StratifierDef stratifierDef : stratifierDefs) {
 
-            if (!sd.components().isEmpty()) {
-                addStratifierComponentResult(sd.components(), evaluationResult, subjectId);
+            if (!stratifierDef.components().isEmpty()) {
+                addStratifierComponentResult(stratifierDef.components(), evaluationResult, subjectId);
             } else {
 
-                var expressionResult = evaluationResult.forExpression(sd.expression());
-                Object result = addStratifierResult(expressionResult.value(), subjectId);
-                if (result != null) {
-                    sd.putResult(
-                            subjectId, // context of CQL expression ex: Patient based
-                            result,
-                            expressionResult.evaluatedResources());
-                }
+                var expressionResult = evaluationResult.forExpression(stratifierDef.expression());
+                Optional.ofNullable(expressionResult)
+                        .map(ExpressionResult::value)
+                        .ifPresent(nonNullValue -> stratifierDef.putResult(
+                                subjectId, // context of CQL expression ex: Patient based
+                                nonNullValue,
+                                expressionResult.evaluatedResources()));
             }
         }
     }

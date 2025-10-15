@@ -27,6 +27,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
 import org.opencds.cqf.cql.engine.runtime.Code;
+import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 import org.opencds.cqf.fhir.cr.measure.common.CodeDef;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
@@ -446,7 +447,7 @@ class R4PopulationBasisValidatorTest {
 
     @Nonnull
     private static StratifierDef buildStratifierDef(String expression) {
-        return new StratifierDef(null, null, expression, List.of());
+        return new StratifierDef(null, null, expression, MeasureStratifierType.VALUE, List.of());
     }
 
     @Nonnull

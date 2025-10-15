@@ -10,6 +10,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Enumeration;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupPopulationComponent;
@@ -305,13 +307,20 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
 
         for (Object resource : resources) {
             if (resource instanceof Map<?, ?> map) {
+                // LUKETODO:  get rid of this during final cleanup
+                for (Entry<?, ?> entry : map.entrySet()) {
+                    if (entry.getKey() instanceof IBaseResource fhirResource) {
+                        if (entry.getValue() instanceof Observation obs) {
+                            logger.info(
+                                    "1234: key: {} observation value quantity: {}",
+                                    fhirResource.getIdElement().getValue(),
+                                    obs.getValueQuantity().getValue().doubleValue());
+                        }
+                    }
+                }
                 for (Object value : map.values()) {
                     if (value instanceof Observation obs) {
                         if (obs.hasValueQuantity()) {
-                            // LUKETODO:  get rid of this during final cleanup
-                            logger.info(
-                                    "1234: observation value quantity: {}",
-                                    obs.getValueQuantity().getValue().doubleValue());
                             quantities.add(obs.getValueQuantity());
                         }
                     }
@@ -441,7 +450,7 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
         return qualifyingStratumResources;
     }
 
-    // LUKETODO:  refine this:
+    // LUKETODO:  do we need to address more use cases?
     private boolean doesStratumMatch(String stratumValueAsString, Object rawValueFromStratifier) {
         if (rawValueFromStratifier == null || stratumValueAsString == null) {
             return false;
@@ -451,6 +460,10 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
             final int stratumValueAsInt = Integer.parseInt(stratumValueAsString);
 
             return stratumValueAsInt == rawValueFromStratifierAsInt;
+        }
+
+        if (rawValueFromStratifier instanceof Enumeration<?> rawValueFromStratifierAsEnumeration) {
+            return stratumValueAsString.equals(rawValueFromStratifierAsEnumeration.asStringValue());
         }
 
         return false;

@@ -1,0 +1,12 @@
+{
+  "resourceType": "Encounter",
+  "id": "patient-1945-male-encounter-1",
+  "status": "in-progress",
+  "subject": {
+    "reference": "Patient/patient-1945-male"
+  },
+  "period": {
+    "start": "2024-01-01T07:00:00Z",
+    "end": "2024-01-01T14:00:00Z"
+  }
+}

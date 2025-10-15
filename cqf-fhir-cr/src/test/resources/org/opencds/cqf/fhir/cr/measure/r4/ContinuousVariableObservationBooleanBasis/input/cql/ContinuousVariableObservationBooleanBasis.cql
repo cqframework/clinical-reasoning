@@ -39,3 +39,6 @@ define "All Encounters":
 define "Encounter Cancelled":
     [Encounter] E
        where E.status = 'cancelled'
+
+define "Gender":
+    Patient.gender

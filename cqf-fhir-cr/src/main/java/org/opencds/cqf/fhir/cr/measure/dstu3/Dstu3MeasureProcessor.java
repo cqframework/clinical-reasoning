@@ -26,6 +26,7 @@ import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
+import org.opencds.cqf.fhir.cr.measure.common.ContinuousVariableObservationHandler;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorUtils;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
@@ -125,7 +126,7 @@ public class Dstu3MeasureProcessor {
                     new Dstu3PopulationBasisValidator());
         }
         // Populate populationDefs that require MeasureDef results
-        measureProcessorUtils.continuousVariableObservation(measureDef, context);
+        ContinuousVariableObservationHandler.continuousVariableObservation(measureDef, context);
 
         // Build Measure Report with Results
         return new Dstu3MeasureReportBuilder()

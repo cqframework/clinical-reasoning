@@ -37,6 +37,25 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .hasCount(10)
                 .up()
                 .hasScore("74.0")
+                .stratifierById("stratifier-gender")
+                .stratumCount(4)
+                .firstStratum()
+                .hasValue("male")
+                .hasScore("120.0")
+                .up()
+                .stratumByPosition(2)
+                .hasValue("female")
+                .hasScore("480.0")
+                .up()
+                .stratumByPosition(3)
+                .hasValue("other")
+                .hasScore("75.2")
+                .up()
+                .stratumByPosition(4)
+                .hasValue("unknown")
+                .hasScore("75.2")
+                .up()
+                .up()
                 .up()
                 .report();
     }
@@ -121,6 +140,28 @@ public class ContinuousVariableResourceMeasureObservationTest {
 
     @Test
     void continuousVariableResourceMeasureObservationBooleanBasisCount() {
+        /*
+        female:
+
+        patient-1940-1
+        patient-1950
+        patient-1965
+        patient-1970
+
+        male:
+
+        patient-1940-2
+        patient-1945-2
+
+        other:
+
+        patient-1940-3
+        patient-1945-1
+        patient-1955
+
+        unknown:
+        patient-1960
+         */
 
         GIVEN_BOOLEAN_BASIS
                 .when()
@@ -143,6 +184,25 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .hasCount(10)
                 .up()
                 .hasScore("10.0")
+                .stratifierById("stratifier-gender")
+                .stratumCount(4)
+                .firstStratum()
+                .hasValue("male")
+                .hasScore("2.0")
+                .up()
+                .stratumByPosition(2)
+                .hasValue("unknown")
+                .hasScore("1.0")
+                .up()
+                .stratumByPosition(3)
+                .hasValue("other")
+                .hasScore("3.0")
+                .up()
+                .stratumByPosition(4)
+                .hasValue("female")
+                .hasScore("4.0")
+                .up()
+                .up()
                 .up()
                 .report();
     }
@@ -248,6 +308,25 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .hasCount(10)
                 .up()
                 .hasScore("77.5")
+                .stratifierById("stratifier-gender")
+                .stratumCount(4)
+                .firstStratum()
+                .hasValue("male")
+                .hasScore("120.0")
+                .up()
+                .stratumByPosition(2)
+                .hasValue("female")
+                .hasScore("480.0")
+                .up()
+                .stratumByPosition(3)
+                .hasValue("other")
+                .hasScore("75.2")
+                .up()
+                .stratumByPosition(4)
+                .hasValue("unknown")
+                .hasScore("75.2")
+                .up()
+                .up()
                 .up()
                 .report();
     }
@@ -358,6 +437,25 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .hasCount(10)
                 .up()
                 .hasScore("55.0")
+                .stratifierById("stratifier-gender")
+                .stratumCount(4)
+                .firstStratum()
+                .hasValue("male")
+                .hasScore("120.0")
+                .up()
+                .stratumByPosition(2)
+                .hasValue("female")
+                .hasScore("480.0")
+                .up()
+                .stratumByPosition(3)
+                .hasValue("other")
+                .hasScore("75.2")
+                .up()
+                .stratumByPosition(4)
+                .hasValue("unknown")
+                .hasScore("75.2")
+                .up()
+                .up()
                 .up()
                 .report();
     }
@@ -463,6 +561,25 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .hasCount(10)
                 .up()
                 .hasScore("85.0")
+                .stratifierById("stratifier-gender")
+                .stratumCount(4)
+                .firstStratum()
+                .hasValue("male")
+                .hasScore("120.0")
+                .up()
+                .stratumByPosition(2)
+                .hasValue("female")
+                .hasScore("480.0")
+                .up()
+                .stratumByPosition(3)
+                .hasValue("other")
+                .hasScore("75.2")
+                .up()
+                .stratumByPosition(4)
+                .hasValue("unknown")
+                .hasScore("75.2")
+                .up()
+                .up()
                 .up()
                 .report();
     }
@@ -546,6 +663,21 @@ public class ContinuousVariableResourceMeasureObservationTest {
 
     @Test
     void continuousVariableResourceMeasureObservationBooleanBasisSum() {
+        /*
+        patient-1940-female-encounter-1: 00:00 to 02:00 (120 minutes)
+        patient-1950-female-encounter-1: 03:00 to 03:30 (30 minutes)
+        patient-1965-female-encounter-1: 01:01 to 03:02 (121 minutes)
+        patient-1970-female-encounter-1: 01:00 to 03:00 (120 minutes)
+
+        patient-1940-male-encounter-1:   00:00 to 02:00 (120 minutes)
+        patient-1945-male-encounter-1:   05:00 to 19:00 (840 minutes)
+
+        patient-1940-other-encounter-1:  03:00 to 12:00 (540 minutes)
+        patient-1945-other-encounter-1:  05:00 to 19:00 (840 minutes)
+        patient-1955-other-encounter-1:  01:00 to 02:30 (90 minutes)
+
+        patient-1960-unknown-encounter-1: 00:00 to 00:15 (15 minutes)
+        */
 
         GIVEN_BOOLEAN_BASIS
                 .when()
@@ -568,6 +700,25 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .hasCount(10)
                 .up()
                 .hasScore("740.0")
+                .stratifierById("stratifier-gender")
+                .stratumCount(4)
+                .firstStratum()
+                .hasValue("male")
+                .hasScore("960.0")
+                .up()
+                .stratumByPosition(2)
+                .hasValue("female")
+                .hasScore("391.0")
+                .up()
+                .stratumByPosition(3)
+                .hasValue("other")
+                .hasScore("1470.0")
+                .up()
+                .stratumByPosition(4)
+                .hasValue("unknown")
+                .hasScore("64.0")
+                .up()
+                .up()
                 .up()
                 .report();
     }

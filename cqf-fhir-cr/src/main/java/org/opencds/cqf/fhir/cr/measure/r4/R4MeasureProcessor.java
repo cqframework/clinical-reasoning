@@ -173,6 +173,7 @@ public class R4MeasureProcessor {
                 this.measureEvaluationOptions.getApplyScoringSetMembership(),
                 new R4PopulationBasisValidator());
 
+        // LUKETODO:  figure out if we still need this:
         var measurementPeriod = postLibraryEvaluationPeriodProcessingAndContinuousVariableObservation(
                 measure, measureDef, periodStart, periodEnd, context);
 

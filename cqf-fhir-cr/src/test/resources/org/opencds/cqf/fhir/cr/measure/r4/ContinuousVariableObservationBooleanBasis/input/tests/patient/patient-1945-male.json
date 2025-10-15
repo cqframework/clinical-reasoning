@@ -1,6 +1,6 @@
 {
   "resourceType": "Patient",
-  "id": "patient-1945-1",
-  "gender": "female",
+  "id": "patient-1945-male",
+  "gender": "male",
   "birthDate": "1945-01-01"
 }

@@ -98,6 +98,15 @@
             "expression" : "MeasureObservation"
           }
         }
+      ],
+      "stratifier": [
+        {
+          "id": "stratifier-gender",
+          "criteria": {
+            "language": "text/cql.identifier",
+            "expression": "Gender"
+          }
+        }
       ]
     }]
 }

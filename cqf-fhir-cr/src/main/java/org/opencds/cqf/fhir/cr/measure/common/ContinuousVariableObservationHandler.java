@@ -108,6 +108,9 @@ public class ContinuousVariableObservationHandler {
         // function that will be evaluated
         var observationExpression = populationDef.expression();
         // get expression from criteriaPopulation reference
+        // LUKETODO:  is this the best behaviour?  rely on the populationDef having the
+        // criteriaReference populated or blow up in the next method?
+        // LUKETODO: figure out the best error handling?
         String criteriaExpressionInput = groupDef.populations().stream()
                 .filter(populationDefInner -> populationDefInner.id().equals(criteriaPopulationId))
                 .map(PopulationDef::expression)

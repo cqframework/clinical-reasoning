@@ -277,16 +277,9 @@ class MeasureStratifierTest {
                 .report();
     }
 
-    // LUKETODO:  read the stratifier type extension if it exists, if it's criteria or value, set it, otherwise, default
-    // to "value"
-    // LUKETODO:  keep existing code for determining if this is criteria base stratifier, but use it only as validation
-    // for a user doing something nonsensical, and only if they already have the extension
-
     // LUKETODO:  fix naming for existing tests as per code review feedback
     // LUKETODO:  for existing value stratifier tests, just add comments and text assertions reinforcing that it's the
     // default behaviour, which is value-based
-    // LUKETODO:  define a bad CQL expression for a criteria based stratifier:  something like periods in minutes where
-    // it's expecting a list of encounters
 
     /**
      * Ratio Measure with Resource Basis where Stratifier defined by expression that results in Encounter.status per subject.
@@ -476,7 +469,6 @@ class MeasureStratifierTest {
                 .hasCount(1);
     }
 
-    // LUKETODO:  this needs to fail with the stratifier logic
     // LUKETODO:  should we carry the extension to the measure report stratifier?
     @Test
     void criteriaBasedStratSingleBadExpressionForValue() {

@@ -12,12 +12,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Element;
+import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.Measure;
 import org.hl7.fhir.dstu3.model.Measure.MeasureGroupComponent;
 import org.hl7.fhir.dstu3.model.Measure.MeasureGroupPopulationComponent;
 import org.hl7.fhir.dstu3.model.Measure.MeasureGroupStratifierComponent;
 import org.hl7.fhir.dstu3.model.Measure.MeasureSupplementalDataComponent;
 import org.hl7.fhir.dstu3.model.Resource;
+import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 import org.opencds.cqf.fhir.cr.measure.common.CodeDef;
 import org.opencds.cqf.fhir.cr.measure.common.ConceptDef;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
@@ -87,7 +89,7 @@ public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                         null, // No code on stratifier
                         // in dstu3
                         mgsc.getCriteria(),
-                        StratifierUtils.getStratifierType(mgsc));
+                        getStratifierType(mgsc));
 
                 stratifiers.add(stratifierDef);
             }
@@ -104,6 +106,17 @@ public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         }
 
         return new MeasureDef(measure.getId(), measure.getUrl(), measure.getVersion(), groups, sdes);
+    }
+
+    private static MeasureStratifierType getStratifierType(
+            MeasureGroupStratifierComponent measureGroupStratifierComponent) {
+        if (measureGroupStratifierComponent == null) {
+            return MeasureStratifierType.VALUE;
+        }
+
+        final List<Extension> stratifierExtensions = measureGroupStratifierComponent.getExtension();
+
+        return StratifierUtils.getStratifierType(stratifierExtensions);
     }
 
     private PopulationDef checkPopulationForCode(

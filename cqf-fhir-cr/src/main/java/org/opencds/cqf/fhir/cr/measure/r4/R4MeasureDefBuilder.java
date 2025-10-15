@@ -30,6 +30,7 @@ import org.hl7.fhir.r4.model.Measure.MeasureGroupStratifierComponent;
 import org.hl7.fhir.r4.model.Measure.MeasureGroupStratifierComponentComponent;
 import org.hl7.fhir.r4.model.Measure.MeasureSupplementalDataComponent;
 import org.hl7.fhir.r4.model.Resource;
+import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 import org.opencds.cqf.fhir.cr.measure.common.CodeDef;
 import org.opencds.cqf.fhir.cr.measure.common.ConceptDef;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
@@ -131,7 +132,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                         mgsc.getId(),
                         conceptToConceptDef(mgsc.getCode()),
                         mgsc.getCriteria().getExpression(),
-                        StratifierUtils.getStratifierType(mgsc),
+                        getStratifierType(mgsc),
                         components);
 
                 stratifiers.add(stratifierDef);
@@ -153,6 +154,17 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
 
     public static void triggerFirstPassValidation(List<Measure> measures) {
         measures.forEach(R4MeasureDefBuilder::triggerFirstPassValidation);
+    }
+
+    private static MeasureStratifierType getStratifierType(
+            MeasureGroupStratifierComponent measureGroupStratifierComponent) {
+        if (measureGroupStratifierComponent == null) {
+            return MeasureStratifierType.VALUE;
+        }
+
+        final List<Extension> stratifierExtensions = measureGroupStratifierComponent.getExtension();
+
+        return StratifierUtils.getStratifierType(stratifierExtensions);
     }
 
     private static void triggerFirstPassValidation(Measure measure) {

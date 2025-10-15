@@ -23,10 +23,10 @@ define "Measure Population Boolean":
     "Initial Population Boolean"
 
 // Continuous Variable
-// age of patient in years
+// age of patient in years from Measurement Period start
 
 define function "MeasureObservation"():
-	CalendarAgeInYearsAt(Patient.birthDate, Today())
+	CalendarAgeInYearsAt(Patient.birthDate, "Measurement Period".low)
 
 define function "CalendarAgeInYearsAt"(BirthDate Date, AsOf DateTime):
 	years between BirthDate and ToDate(AsOf)

@@ -47,6 +47,7 @@ import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 
 public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
+    // LUKETODO:  break up this monster
     @Override
     public MeasureDef build(Measure measure) {
         checkId(measure);

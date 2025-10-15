@@ -42,7 +42,7 @@ import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureReportBuilder.ValueWrapper;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4ResourceIdUtils;
 
 /**
- * Convenience class with functionality split out from {@link R4MeasureReportBuilder } to
+ * Convenience class with functionality split out from {@link R4MeasureReportBuilder} to
  * handle stratifiers
  */
 @SuppressWarnings("squid:S1135")
@@ -56,7 +56,7 @@ class R4StratifierBuilder {
             List<MeasureGroupPopulationComponent> populations,
             GroupDef groupDef) {
         // the top level stratifier 'id' and 'code'
-        reportStratifier.setCode(getCodeForReportStratifier(groupDef, stratifierDef, measureStratifier));
+        reportStratifier.setCode(getCodeForReportStratifier(stratifierDef, measureStratifier));
         reportStratifier.setId(measureStratifier.getId());
         // if description is defined, add to MeasureReport
         if (measureStratifier.hasDescription()) {
@@ -455,7 +455,7 @@ class R4StratifierBuilder {
 
     @Nonnull
     private static List<CodeableConcept> getCodeForReportStratifier(
-            GroupDef groupDef, StratifierDef stratifierDef, MeasureGroupStratifierComponent measureStratifier) {
+            StratifierDef stratifierDef, MeasureGroupStratifierComponent measureStratifier) {
 
         final Expression criteria = measureStratifier.getCriteria();
 

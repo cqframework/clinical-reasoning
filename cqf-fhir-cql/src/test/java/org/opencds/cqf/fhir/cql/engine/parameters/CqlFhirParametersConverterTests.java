@@ -34,16 +34,16 @@ class CqlFhirParametersConverterTests {
     protected static CqlFhirParametersConverter cqlFhirParametersConverter;
 
     private static BooleanType nullValueMarker() {
-        var nullBooleanValue = new BooleanType((String) null);
-        nullBooleanValue.addExtension(
+        var nullValueMarker = new BooleanType((String) null);
+        nullValueMarker.addExtension(
                 "http://hl7.org/fhir/StructureDefinition/data-absent-reason", new CodeType("unknown"));
-        return nullBooleanValue;
+        return nullValueMarker;
     }
 
     private static BooleanType emptyListMarker() {
-        var emptyListBoolean = new BooleanType((String) null);
-        emptyListBoolean.addExtension("http://hl7.org/fhir/StructureDefinition/cqf-isEmptyList", new BooleanType(true));
-        return emptyListBoolean;
+        var emptyListMarker = new BooleanType((String) null);
+        emptyListMarker.addExtension("http://hl7.org/fhir/StructureDefinition/cqf-isEmptyList", new BooleanType(true));
+        return emptyListMarker;
     }
 
     @BeforeAll

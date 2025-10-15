@@ -1,7 +1,9 @@
 package org.opencds.cqf.fhir.cr.measure;
 
-// LUKETODO:  do we need text values?
-// LUKETODO:  javadoc
+/**
+ * Indicate whether a given {@link org.opencds.cqf.fhir.cr.measure.common.StratifierDef} is
+ * criteria or value based.
+ */
 public enum MeasureStratifierType {
     CRITERIA("criteria"),
     VALUE("value");

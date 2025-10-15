@@ -26,7 +26,6 @@ import org.opencds.cqf.fhir.cr.measure.common.CriteriaResult;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
-import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorUtils;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
@@ -86,7 +85,7 @@ import org.slf4j.LoggerFactory;
  */
 public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport> {
 
-    private static final Logger logger = LoggerFactory.getLogger(MeasureProcessorUtils.class);
+    private static final Logger logger = LoggerFactory.getLogger(R4MeasureReportScorer.class);
 
     private static final String NUMERATOR = "numerator";
     private static final String DENOMINATOR = "denominator";
@@ -175,8 +174,7 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
             GroupDef groupDef) {
 
         switch (measureScoring) {
-            case PROPORTION:
-            case RATIO:
+            case PROPORTION, RATIO:
                 var score = calcProportionScore(
                         getCountFromGroupPopulation(mrgc.getPopulation(), NUMERATOR)
                                 - getCountFromGroupPopulation(mrgc.getPopulation(), NUMERATOR_EXCLUSION),
@@ -309,20 +307,17 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
             if (resource instanceof Map<?, ?> map) {
                 // LUKETODO:  get rid of this during final cleanup
                 for (Entry<?, ?> entry : map.entrySet()) {
-                    if (entry.getKey() instanceof IBaseResource fhirResource) {
-                        if (entry.getValue() instanceof Observation obs) {
-                            logger.info(
-                                    "1234: key: {} observation value quantity: {}",
-                                    fhirResource.getIdElement().getValue(),
-                                    obs.getValueQuantity().getValue().doubleValue());
-                        }
+                    if (entry.getKey() instanceof IBaseResource fhirResource
+                            && entry.getValue() instanceof Observation obs) {
+                        logger.info(
+                                "1234: key: {} observation value quantity: {}",
+                                fhirResource.getIdElement().getValue(),
+                                obs.getValueQuantity().getValue().doubleValue());
                     }
                 }
                 for (Object value : map.values()) {
-                    if (value instanceof Observation obs) {
-                        if (obs.hasValueQuantity()) {
-                            quantities.add(obs.getValueQuantity());
-                        }
+                    if (value instanceof Observation obs && obs.hasValueQuantity()) {
+                        quantities.add(obs.getValueQuantity());
                     }
                 }
             }
@@ -348,17 +343,34 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
             MeasureReportGroupComponent measureReportGroupComponent,
             MeasureScoring measureScoring,
             StratifierGroupComponent stratum) {
+        final Quantity quantity =
+                getStratumScoreOrNull(measureUrl, groupDef, measureReportGroupComponent, measureScoring, stratum);
+
+        if (quantity != null) {
+            stratum.setMeasureScore(quantity);
+        }
+    }
+
+    @Nullable
+    private Quantity getStratumScoreOrNull(
+            String measureUrl,
+            GroupDef groupDef,
+            MeasureReportGroupComponent measureReportGroupComponent,
+            MeasureScoring measureScoring,
+            StratifierGroupComponent stratum) {
+
         switch (measureScoring) {
-            case PROPORTION:
-            case RATIO:
+            case PROPORTION, RATIO -> {
                 var score = calcProportionScore(
                         getCountFromStratifierPopulation(stratum.getPopulation(), NUMERATOR),
                         getCountFromStratifierPopulation(stratum.getPopulation(), DENOMINATOR));
+
                 if (score != null) {
-                    stratum.setMeasureScore(new Quantity(score));
+                    return new Quantity(score);
                 }
-                break;
-            case CONTINUOUSVARIABLE:
+                return null;
+            }
+            case CONTINUOUSVARIABLE -> {
                 // LUKETODO:  how do we break down the continuous variable scoring by stratifier?
                 logger.info("1234: stratum continuous variable scoring not yet implemented");
                 final List<StratifierDef> stratifiers = groupDef.stratifiers();
@@ -374,15 +386,14 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
                     logger.info("1234: subjectResults: {}", subjectResults.getReference());
                 }
 
-                final Quantity continuousVariableScore = calculateContinuousVariableAggregateQuantity(
+                return calculateContinuousVariableAggregateQuantity(
                         measureUrl,
                         groupDef,
                         populationDef -> getResultsForStratum(populationDef, stratifierDef, stratum));
-                if (continuousVariableScore != null) {
-                    stratum.setMeasureScore(continuousVariableScore);
-                }
-            default:
-                break;
+            }
+            default -> {
+                return null;
+            }
         }
     }
 
@@ -393,34 +404,6 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
     but we don't want that:  we want to filter only resources that belong to the patients captured by each stratum
     so we want to do some sort of wizardry that involves getting the stratum values, and using those to retrieve the associated resources
      */
-
-    private void getResultsForStratum(
-            GroupDef groupDef, StratifierDef stratifierDef, StratifierGroupComponent stratum) {
-        final String stratumValue = stratum.getValue().getText();
-
-        final PopulationDef measureObservationPopulation = groupDef.getSingle(MeasurePopulationType.MEASUREOBSERVATION);
-
-        final Set<String> subjectsWithStratumValue = stratifierDef.getResults().entrySet().stream()
-                .filter(entry -> doesStratumMatch(stratumValue, entry.getValue().rawValue()))
-                .map(Entry::getKey)
-                .collect(Collectors.toUnmodifiableSet());
-
-        logger.info("1234: stratum value: {}, qualifying subjects: {}", stratumValue, subjectsWithStratumValue);
-
-        final Set<Object> qualifyingStratumResources =
-                measureObservationPopulation.getSubjectResources().entrySet().stream()
-                        .filter(entry -> subjectsWithStratumValue.contains(entry.getKey()))
-                        .map(Entry::getValue)
-                        .flatMap(Collection::stream)
-                        .collect(Collectors.toUnmodifiableSet());
-
-        logger.info(
-                "1234: stratum value: {}, qualifying subjects: {}, qualifyingStratumResources: {}",
-                stratumValue,
-                subjectsWithStratumValue,
-                qualifyingStratumResources);
-    }
-
     private Set<Object> getResultsForStratum(
             PopulationDef measureObservationPopulationDef,
             StratifierDef stratifierDef,

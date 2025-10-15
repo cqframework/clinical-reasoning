@@ -86,9 +86,6 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         // improvement Notation
         var groupImpNotation = getGroupImpNotation(measure, group);
         var hasGroupImpNotation = groupImpNotation != null;
-        // aggregateMethod is used to capture continuous-variable method of aggregating MeasureObservation
-        ContinuousVariableObservationAggregateMethod aggregateMethod = null;
-        String criteriaReference = null;
         // Populations
         List<PopulationDef> populations = new ArrayList<>();
 
@@ -96,37 +93,37 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                 .filter(this::isMeasureObservation)
                 .findFirst();
 
+        // aggregateMethod is used to capture continuous-variable method of aggregating MeasureObservation
+        final ContinuousVariableObservationAggregateMethod aggregateMethod;
+        final String criteriaReference;
         if (optMeasureObservationPopulation.isPresent()) {
             final MeasureGroupPopulationComponent measureObservationPopulation = optMeasureObservationPopulation.get();
-            var aggMethodExt = measureObservationPopulation.getExtensionByUrl(EXT_CQFM_AGGREGATE_METHOD_URL);
-            if (aggMethodExt != null) {
-                // this method is only required if scoringType = continuous-variable
-                var aggregateMethodString = aggMethodExt.getValue().toString();
 
-                aggregateMethod = ContinuousVariableObservationAggregateMethod.fromString(aggregateMethodString);
+            aggregateMethod = getAggregateMethod(measure.getUrl(), measureObservationPopulation);
 
-                // check that method is accepted
-                if (aggregateMethod == null) {
-                    throw new InvalidRequestException(
-                            "Measure Observation method: %s is not a valid value for Measure: %s"
-                                    .formatted(aggregateMethodString, measure.getUrl()));
-                }
-            }
-            var populationCriteriaExt = measureObservationPopulation.getExtensionByUrl(EXT_CQFM_CRITERIA_REFERENCE);
-            if (populationCriteriaExt != null) {
-                // required for measure-observation populations
-                // the underlying expression is a cql function
-                // the criteria reference is what is used to populate parameters of the function
-                String critReference = populationCriteriaExt.getValue().toString();
-                // check that the reference exists in the GroupDef.populationId
-                if (group.getPopulation().stream().map(Element::getId).noneMatch(id -> id.equals(critReference))) {
-                    throw new InvalidRequestException(
-                            "no matching criteria reference was found for extension: %s for Measure: %s"
-                                    .formatted(EXT_CQFM_CRITERIA_REFERENCE, measure.getUrl()));
-                }
-                // assign validated reference
-                criteriaReference = critReference;
-            }
+            criteriaReference = getCriteriaReference(measure.getUrl(), group, measureObservationPopulation);
+            //            var populationCriteriaExt =
+            // measureObservationPopulation.getExtensionByUrl(EXT_CQFM_CRITERIA_REFERENCE);
+            //            if (populationCriteriaExt != null) {
+            //                // required for measure-observation populations
+            //                // the underlying expression is a cql function
+            //                // the criteria reference is what is used to populate parameters of the function
+            //                String critReference = populationCriteriaExt.getValue().toString();
+            //                // check that the reference exists in the GroupDef.populationId
+            //                if (group.getPopulation().stream().map(Element::getId).noneMatch(id ->
+            // id.equals(critReference))) {
+            //                    throw new InvalidRequestException(
+            //                            "no matching criteria reference was found for extension: %s for Measure: %s"
+            //                                    .formatted(EXT_CQFM_CRITERIA_REFERENCE, measure.getUrl()));
+            //                }
+            //                // assign validated reference
+            //                criteriaReference = critReference;
+            //            } else {
+            //                criteriaReference = null;
+            //            }
+        } else {
+            aggregateMethod = ContinuousVariableObservationAggregateMethod.N_A;
+            criteriaReference = null;
         }
 
         for (MeasureGroupPopulationComponent pop : group.getPopulation()) {
@@ -180,6 +177,31 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                 aggregateMethod);
     }
 
+    @Nullable
+    private String getCriteriaReference(
+            String measureUrl,
+            MeasureGroupComponent group,
+            MeasureGroupPopulationComponent measureObservationPopulation) {
+
+        var populationCriteriaExt = measureObservationPopulation.getExtensionByUrl(EXT_CQFM_CRITERIA_REFERENCE);
+        if (populationCriteriaExt != null) {
+            // required for measure-observation populations
+            // the underlying expression is a cql function
+            // the criteria reference is what is used to populate parameters of the function
+            String critReference = populationCriteriaExt.getValue().toString();
+            // check that the reference exists in the GroupDef.populationId
+            if (group.getPopulation().stream().map(Element::getId).noneMatch(id -> id.equals(critReference))) {
+                throw new InvalidRequestException(
+                        "no matching criteria reference was found for extension: %s for Measure: %s"
+                                .formatted(EXT_CQFM_CRITERIA_REFERENCE, measureUrl));
+            }
+            // assign validated reference
+            return critReference;
+        }
+
+        return null;
+    }
+
     private boolean isMeasureObservation(MeasureGroupPopulationComponent pop) {
 
         checkId(pop);
@@ -191,30 +213,22 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
     }
 
     private ContinuousVariableObservationAggregateMethod getAggregateMethod(
-            String measureUrl, List<MeasureGroupPopulationComponent> populations) {
-        for (MeasureGroupPopulationComponent population : populations) {
-            checkId(population);
-            MeasurePopulationType populationType = MeasurePopulationType.fromCode(
-                    population.getCode().getCodingFirstRep().getCode());
+            String measureUrl, MeasureGroupPopulationComponent measureObservationPopulation) {
 
-            // For measures with Measure-Observation populations
-            if (populationType != null && populationType.equals(MeasurePopulationType.MEASUREOBSERVATION)) {
-                var aggMethodExt = population.getExtensionByUrl(EXT_CQFM_AGGREGATE_METHOD_URL);
-                if (aggMethodExt != null) {
-                    // this method is only required if scoringType = continuous-variable
-                    var aggregateMethodString = aggMethodExt.getValue().toString();
+        var aggMethodExt = measureObservationPopulation.getExtensionByUrl(EXT_CQFM_AGGREGATE_METHOD_URL);
+        if (aggMethodExt != null) {
+            // this method is only required if scoringType = continuous-variable
+            var aggregateMethodString = aggMethodExt.getValue().toString();
 
-                    var aggregateMethod =
-                            ContinuousVariableObservationAggregateMethod.fromString(aggregateMethodString);
+            var aggregateMethod = ContinuousVariableObservationAggregateMethod.fromString(aggregateMethodString);
 
-                    // check that method is accepted
-                    if (aggregateMethod == null) {
-                        throw new InvalidRequestException(
-                                "Measure Observation method: %s is not a valid value for Measure: %s"
-                                        .formatted(aggregateMethodString, measureUrl));
-                    }
-                }
+            // check that method is accepted
+            if (aggregateMethod == null) {
+                throw new InvalidRequestException("Measure Observation method: %s is not a valid value for Measure: %s"
+                        .formatted(aggregateMethodString, measureUrl));
             }
+
+            return aggregateMethod;
         }
         return ContinuousVariableObservationAggregateMethod.N_A;
     }

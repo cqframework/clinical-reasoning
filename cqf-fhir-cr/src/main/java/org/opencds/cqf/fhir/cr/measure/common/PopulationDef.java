@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
+import jakarta.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -10,6 +11,8 @@ public class PopulationDef {
     private final String expression;
     private final ConceptDef code;
     private final MeasurePopulationType measurePopulationType;
+
+    @Nullable
     private final String criteriaReference;
 
     protected Set<Object> evaluatedResources;
@@ -26,7 +29,7 @@ public class PopulationDef {
             ConceptDef code,
             MeasurePopulationType measurePopulationType,
             String expression,
-            String criteriaReference) {
+            @Nullable String criteriaReference) {
         this.id = id;
         this.code = code;
         this.measurePopulationType = measurePopulationType;
@@ -86,6 +89,7 @@ public class PopulationDef {
         return this.resources;
     }
 
+    @Nullable
     public String getCriteriaReference() {
         return this.criteriaReference;
     }

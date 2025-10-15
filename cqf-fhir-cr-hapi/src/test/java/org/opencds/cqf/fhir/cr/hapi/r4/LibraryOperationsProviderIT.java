@@ -53,7 +53,7 @@ class LibraryOperationsProviderIT extends BaseCrR4TestServer {
                 url, patientId, null, parameters, new BooleanType(true), null, null, null, null, null, requestDetails);
 
         assertNotNull(result);
-        assertEquals(15, result.getParameter().size());
+        assertEquals(16, result.getParameter().size());
     }
 
     @Test

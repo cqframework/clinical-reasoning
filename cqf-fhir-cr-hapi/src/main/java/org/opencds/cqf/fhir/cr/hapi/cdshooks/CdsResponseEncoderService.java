@@ -37,15 +37,14 @@ public class CdsResponseEncoderService {
 
     protected IResourceAdapter responseAdapter;
 
-    public CdsResponseEncoderService(IRepository repository, IAdapterFactory adapterFactory) {
-        this.adapterFactory = adapterFactory;
+    public CdsResponseEncoderService(IRepository repository) {
+        this.adapterFactory = IAdapterFactory.forFhirContext(repository.fhirContext());
         this.repository = repository;
     }
 
     public CdsServiceResponseJson encodeResponse(Object response) {
-        if (!(response instanceof IBaseResource)) {
-            throw new InternalErrorException("response is not an instance of a Resource");
-        }
+        validateResponseObject(response);
+
         CdsServiceResponseJson serviceResponse = new CdsServiceResponseJson();
         IResourceAdapter mainRequest = null;
         IPrimitiveType<String> canonical = null;
@@ -238,4 +237,11 @@ public class CdsResponseEncoderService {
     protected IResourceAdapter getResponseAdapter() {
         return responseAdapter;
     }
+
+    private void validateResponseObject(Object response) {
+        if (!(response instanceof IBaseResource)) {
+            throw new InternalErrorException("response is not an instance of a Resource");
+        }
+    }
+
 }

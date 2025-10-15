@@ -42,6 +42,7 @@ import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
+@SuppressWarnings("UnstableApiUsage")
 class CdsCrServiceR4Test extends BaseCdsCrServiceTest {
 
     private CdsCrService testSubject;
@@ -49,7 +50,7 @@ class CdsCrServiceR4Test extends BaseCdsCrServiceTest {
     @BeforeEach
     void beforeEach() {
         fhirContext = FhirContext.forR4Cached();
-        repository = new InMemoryFhirRepository(fhirContext);
+        repository = getRepository();
         adapterFactory = IAdapterFactory.forFhirContext(fhirContext);
         objectMapper = new CdsHooksObjectMapperFactory(fhirContext).newMapper();
         testSubject = new CdsCrService(REQUEST_DETAILS, repository);
@@ -60,6 +61,7 @@ class CdsCrServiceR4Test extends BaseCdsCrServiceTest {
         assertEquals(FhirVersionEnum.R4, testSubject.getFhirVersion());
     }
 
+    @Test
     void testGetRepository() {
         assertEquals(repository, testSubject.getRepository());
     }
@@ -103,9 +105,8 @@ class CdsCrServiceR4Test extends BaseCdsCrServiceTest {
         final var params = adapterFactory.createParameters(iBaseParameters);
 
         assertEquals(3, params.getParameter().size());
-        assertEquals(
-                (params.getParameter(APPLY_PARAMETER_PRACTITIONER)).getValue().toString(), expectedUserId);
-        assertEquals((params.getParameter(APPLY_PARAMETER_ENCOUNTER)).getValue().toString(), expectedEncounterId);
+        assertEquals(expectedUserId, (params.getParameter(APPLY_PARAMETER_PRACTITIONER)).getValue().toString());
+        assertEquals(expectedEncounterId, (params.getParameter(APPLY_PARAMETER_ENCOUNTER)).getValue().toString());
 
         assertTrue(params.getParameter(APPLY_PARAMETER_DATA).hasResource());
         IBaseResource resource = params.getParameter(APPLY_PARAMETER_DATA).getResource();
@@ -180,7 +181,7 @@ class CdsCrServiceR4Test extends BaseCdsCrServiceTest {
 
         // Act
         CdsParametersEncoderService cdsParametersEncoderService =
-                new CdsParametersEncoderService(repository, adapterFactory);
+                new CdsParametersEncoderService(repository);
         Map<String, IBaseResource> resourceMap = cdsParametersEncoderService.getResourcesFromBundle(bundle);
 
         // Assert

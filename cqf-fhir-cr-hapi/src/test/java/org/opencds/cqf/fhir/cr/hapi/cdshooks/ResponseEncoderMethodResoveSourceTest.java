@@ -2,9 +2,9 @@ package org.opencds.cqf.fhir.cr.hapi.cdshooks;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseCardSourceJson;
 import java.util.List;
@@ -15,20 +15,20 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IRequestActionAdapter;
-import org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory;
+import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
+@SuppressWarnings("UnstableApiUsage")
 class ResponseEncoderMethodResoveSourceTest {
-
-    private IRepository repository;
+    private final FhirContext fhirContext = FhirContext.forR4Cached();
     private IAdapterFactory adapterFactory;
     private CdsResponseEncoderService fixture;
     private RequestGroupActionComponent requestGroupActionComponent;
 
     @BeforeEach
     void beforeEach() {
-        adapterFactory = new AdapterFactory();
-        repository = mock(IRepository.class);
-        fixture = spy(new CdsResponseEncoderService(repository, adapterFactory));
+        IRepository repository = new InMemoryFhirRepository(fhirContext);
+        adapterFactory = IAdapterFactory.forFhirContext(fhirContext);
+        fixture = spy(new CdsResponseEncoderService(repository));
 
         requestGroupActionComponent =
                 new RequestGroupActionComponent().setTitle("Test Title").setDescription("Test Description");

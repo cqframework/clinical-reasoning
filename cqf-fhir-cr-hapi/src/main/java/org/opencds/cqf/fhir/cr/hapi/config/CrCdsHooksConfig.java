@@ -31,6 +31,7 @@ import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
+@SuppressWarnings("UnstableApiUsage")
 @Configuration
 @Conditional(CrConfigCondition.class)
 @Import({RepositoryConfig.class, ApplyOperationConfig.class})
@@ -62,7 +63,6 @@ public class CrCdsHooksConfig {
     @Bean
     public ICdsCrServiceFactory cdsCrServiceFactory(
             FhirContext fhirContext, ICdsConfigService cdsConfigService, ICdsCrServiceRegistry cdsCrServiceRegistry) {
-
         return id -> {
             if (repositoryFactory == null) {
                 return null;

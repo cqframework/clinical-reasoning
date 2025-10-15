@@ -26,13 +26,14 @@ import org.opencds.cqf.fhir.utility.VersionUtilities;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
 
+@SuppressWarnings("UnstableApiUsage")
 public class CdsParametersEncoderService {
 
     private final IAdapterFactory adapterFactory;
     private final IRepository repository;
 
-    public CdsParametersEncoderService(IRepository repository, IAdapterFactory adapterFactory) {
-        this.adapterFactory = adapterFactory;
+    public CdsParametersEncoderService(IRepository repository) {
+        this.adapterFactory = IAdapterFactory.forFhirContext(repository.fhirContext());
         this.repository = repository;
     }
 

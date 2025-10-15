@@ -2,30 +2,31 @@ package org.opencds.cqf.fhir.cr.hapi.cdshooks;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.repository.IRepository;
-import java.util.List;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
-import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
-import org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory;
+import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
+@SuppressWarnings("UnstableApiUsage")
 class CdsResponseEncoderServiceTest {
+
+    private IRepository repository;
+
+    @BeforeEach
+    void beforeEach() {
+         repository = new InMemoryFhirRepository(FhirContext.forR4());
+    }
 
     @Test
     void methodEncodeResponse_shouldThrowExceptionWhenResponseIsNotIBaseResource() {
         // given
         Object invalidResponse = new Object();
-        IAdapterFactory mockAdapterFactory = mock(IAdapterFactory.class);
-        IRepository mockRepository = mock(IRepository.class);
-
-        CdsResponseEncoderService encoder = new CdsResponseEncoderService(mockRepository, mockAdapterFactory);
+        CdsResponseEncoderService encoder = new CdsResponseEncoderService(repository);
 
         // when
         Exception exception = assertThrows(RuntimeException.class, () -> encoder.encodeResponse(invalidResponse));
@@ -37,18 +38,12 @@ class CdsResponseEncoderServiceTest {
     @Test
     void methodEncodeResponse_shouldThrowExceptionWhenResponseIsParametersWithoutBundle() {
         // given
-        IBaseParameters mockParameters = mock(IBaseParameters.class);
-        IAdapterFactory mockAdapterFactory = mock(IAdapterFactory.class);
-        IRepository mockRepository = mock(IRepository.class);
+        Parameters parameters = new Parameters();
 
-        IParametersAdapter mockParametersAdapter = mock(IParametersAdapter.class);
-        when(mockAdapterFactory.createParameters(mockParameters)).thenReturn(mockParametersAdapter);
-        when(mockParametersAdapter.getParameter()).thenReturn(List.of());
-
-        CdsResponseEncoderService encoder = new CdsResponseEncoderService(mockRepository, mockAdapterFactory);
+        CdsResponseEncoderService encoder = new CdsResponseEncoderService(repository);
 
         // when
-        Exception exception = assertThrows(RuntimeException.class, () -> encoder.encodeResponse(mockParameters));
+        Exception exception = assertThrows(RuntimeException.class, () -> encoder.encodeResponse(parameters));
 
         // then
         assertEquals("response does not contain a Bundle", exception.getMessage());
@@ -57,15 +52,13 @@ class CdsResponseEncoderServiceTest {
     @Test
     void methodEncodeResponse_shouldThrowExceptionWhenUnableToResolveResponse() {
         // given
-        IRepository mockRepository = mock(IRepository.class);
-        var adapterFactory = new AdapterFactory();
         var emptyBundle = new Bundle();
 
         final Parameters parameters = new Parameters()
                 .addParameter(
                         new ParametersParameterComponent().setName("return").setResource(emptyBundle));
 
-        CdsResponseEncoderService encoder = new CdsResponseEncoderService(mockRepository, adapterFactory);
+        CdsResponseEncoderService encoder = new CdsResponseEncoderService(repository);
 
         // when
         Exception exception = assertThrows(RuntimeException.class, () -> encoder.encodeResponse(parameters));

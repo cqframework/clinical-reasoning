@@ -13,9 +13,9 @@ import org.hl7.fhir.dstu3.model.CarePlan;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
+@SuppressWarnings("UnstableApiUsage")
 class CdsCrServiceDstu3Test extends BaseCdsCrServiceTest {
 
     private CdsCrService testSubject;
@@ -40,16 +40,15 @@ class CdsCrServiceDstu3Test extends BaseCdsCrServiceTest {
     @Test
     void testDstu3Response() {
         // setup
-        IAdapterFactory iAdapterFactory = IAdapterFactory.forFhirContext(fhirContext);
         final var bundle = ClasspathUtil.loadResource(
                 fhirContext,
                 Bundle.class,
                 "org/opencds/cqf/fhir/cr/hapi/dstu3/hello-world/hello-world-patient-view-bundle.json");
-        final IRepository repository = new InMemoryFhirRepository(fhirContext, bundle);
+        final IRepository localRepository = new InMemoryFhirRepository(fhirContext, bundle);
 
         var carePlanResponse = getCarePLanAsResponse();
 
-        CdsResponseEncoderService encoder = new CdsResponseEncoderService(repository, iAdapterFactory);
+        CdsResponseEncoderService encoder = new CdsResponseEncoderService(localRepository);
 
         CdsServiceResponseJson cdsServiceResponseJson = encoder.encodeResponse(carePlanResponse);
 

@@ -40,6 +40,8 @@ class MeasureStratifierTest {
                 .then()
                 .firstGroup()
                 .firstStratifier()
+                // This is a value stratifier, which does not pull in the measure populations and
+                // does not use the CQL expression for the code text
                 .hasCodeText("stratifier-sex")
                 .hasStratumCount(1)
                 .stratum(mCC)
@@ -67,6 +69,8 @@ class MeasureStratifierTest {
                 .then()
                 .firstGroup()
                 .firstStratifier()
+                // This is a value stratifier, which does not pull in the measure populations and
+                // does not use the CQL expression for the code text
                 .hasCodeText("stratifier-sex")
                 .hasStratumCount(2)
                 .stratum(mCC)
@@ -98,6 +102,8 @@ class MeasureStratifierTest {
                 .then()
                 .firstGroup()
                 .firstStratifier()
+                // This is a value stratifier, which does not pull in the measure populations and
+                // does not use the CQL expression for the code text
                 .hasCodeText(null)
                 .hasStratumCount(2)
                 .stratum(isUnfinished)
@@ -134,6 +140,8 @@ class MeasureStratifierTest {
                 .then()
                 .firstGroup()
                 .stratifierById("stratifier-1")
+                // This is a value stratifier, which does not pull in the measure populations and
+                // does not use the CQL expression for the code text
                 .hasCodeText(null)
                 .hasStratumCount(2)
                 .stratum(isUnfinished)
@@ -212,6 +220,8 @@ class MeasureStratifierTest {
                 .hasStatus(MeasureReportStatus.COMPLETE)
                 .group("group-1")
                 .stratifierById("stratifier-1")
+                // This is a value stratifier, which does not pull in the measure populations and
+                // does not use the CQL expression for the code text
                 .hasCodeText("Gender and Age")
                 .hasStratumCount(2)
                 .stratumByComponentCodeText("Age")
@@ -252,6 +262,8 @@ class MeasureStratifierTest {
                 .subjectResultsValidation()
                 .firstGroup()
                 .stratifierById("stratifier-2")
+                // This is a value stratifier, which does not pull in the measure populations and
+                // does not use the CQL expression for the code text
                 .hasCodeText(null)
                 .stratum("35")
                 .population("denominator")
@@ -274,10 +286,6 @@ class MeasureStratifierTest {
                 .up()
                 .report();
     }
-
-    // LUKETODO:  fix naming for existing tests as per code review feedback
-    // LUKETODO:  for existing value stratifier tests, just add comments and text assertions reinforcing that it's the
-    // default behaviour, which is value-based
 
     /**
      * Ratio Measure with Resource Basis where Stratifier defined by expression that results in Encounter.status per subject.
@@ -309,6 +317,10 @@ class MeasureStratifierTest {
                 .hasScore("0.18181818181818182")
                 .hasStratifierCount(1)
                 .firstStratifier()
+                // This is NOT a criteria-based stratifier, both because the stratifier extension
+                // does not specify it as so and because the basis and returned resources don't
+                // match.  Its code text is not set to the expression name.  However, due to the
+                // bizarre way that it's defined, it does pull in the other measure populations.
                 .hasCodeText(null)
                 .hasStratumCount(6)
                 .stratum("triaged")
@@ -410,6 +422,8 @@ class MeasureStratifierTest {
                 .hasCount(10)
                 .up()
                 .firstStratifier()
+                // This is a value stratifier, because the expression it uses is based on age
+                // and not on a resource, and does not set the code text.
                 .hasCodeText(null)
                 .hasStratumCount(2)
                 .stratum("M")

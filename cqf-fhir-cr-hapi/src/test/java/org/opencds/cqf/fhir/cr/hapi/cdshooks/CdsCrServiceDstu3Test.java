@@ -24,8 +24,7 @@ class CdsCrServiceDstu3Test extends BaseCdsCrServiceTest {
     void beforeEach() {
         fhirContext = FhirContext.forDstu3Cached();
         repository = getRepository();
-        testSubject = new CdsCrService(
-                repository, getAdapterFactory(), getCdsResponseEncoderService(), getCdsParametersEncoderService());
+        testSubject = new CdsCrService(REQUEST_DETAILS, repository);
     }
 
     @Test
@@ -52,7 +51,7 @@ class CdsCrServiceDstu3Test extends BaseCdsCrServiceTest {
 
         CdsResponseEncoderService encoder = new CdsResponseEncoderService(repository, iAdapterFactory);
 
-        CdsServiceResponseJson cdsServiceResponseJson = encoder.encodeResponse(carePlanResponse, requestDetails);
+        CdsServiceResponseJson cdsServiceResponseJson = encoder.encodeResponse(carePlanResponse);
 
         assertEquals(1, cdsServiceResponseJson.getCards().size());
         assertFalse(cdsServiceResponseJson.getCards().get(0).getSummary().isEmpty());

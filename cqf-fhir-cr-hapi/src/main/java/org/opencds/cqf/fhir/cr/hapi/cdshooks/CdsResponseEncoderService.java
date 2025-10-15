@@ -5,7 +5,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static software.amazon.awssdk.utils.StringUtils.replacePrefixIgnoreCase;
 
 import ca.uhn.fhir.repository.IRepository;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceIndicatorEnum;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseCardJson;
@@ -39,12 +38,11 @@ public class CdsResponseEncoderService {
     protected IResourceAdapter responseAdapter;
 
     public CdsResponseEncoderService(IRepository repository, IAdapterFactory adapterFactory) {
-
         this.adapterFactory = adapterFactory;
         this.repository = repository;
     }
 
-    public CdsServiceResponseJson encodeResponse(Object response, RequestDetails requestDetails) {
+    public CdsServiceResponseJson encodeResponse(Object response) {
         if (!(response instanceof IBaseResource)) {
             throw new InternalErrorException("response is not an instance of a Resource");
         }

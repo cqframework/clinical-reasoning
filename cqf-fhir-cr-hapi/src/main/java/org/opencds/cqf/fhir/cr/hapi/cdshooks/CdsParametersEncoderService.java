@@ -12,7 +12,6 @@ import static org.opencds.cqf.fhir.cr.hapi.cdshooks.CdsCrConstants.CDS_PARAMETER
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.repository.IRepository;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestJson;
 import java.util.HashMap;
 import java.util.Map;
@@ -37,7 +36,7 @@ public class CdsParametersEncoderService {
         this.repository = repository;
     }
 
-    public IBaseParameters encodeParams(CdsServiceRequestJson json, RequestDetails requestDetails) {
+    public IBaseParameters encodeParams(CdsServiceRequestJson json) {
         var parameters = adapterFactory.createParameters(
                 (IBaseParameters) Resources.newBaseForVersion("Parameters", getFhirVersion()));
         parameters.addParameter(APPLY_PARAMETER_SUBJECT, json.getContext().getString(CDS_PARAMETER_PATIENT_ID));

@@ -8,21 +8,37 @@ import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseJson;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 
+/**
+ * This class mainly define encoding capabilities relevant to clinical decision support.
+ * It is expected that a new instance of this service will be created to handle each hook invocation
+ * by a Bean implementing ICdsCrServiceFactory. See {@code CrCdsHookConfig}.
+ */
 @SuppressWarnings("squid:S125")
 public class CdsCrService implements ICdsCrService {
+    protected final RequestDetails requestDetails;
     protected final IRepository repository;
-    protected final IAdapterFactory adapterFactory;
-    private final CdsResponseEncoderService cdsResponseEncoderService;
-    private final CdsParametersEncoderService cdsParametersEncoderService;
+
+    protected CdsResponseEncoderService cdsResponseEncoderService;
+    protected CdsParametersEncoderService cdsParametersEncoderService;
+
+    public CdsCrService(RequestDetails requestDetails, IRepository repository) {
+        this.requestDetails = requestDetails;
+        this.repository = repository;
+
+        IAdapterFactory iAdapterFactory = IAdapterFactory.forFhirContext(repository.fhirContext());
+
+        cdsResponseEncoderService = new CdsResponseEncoderService(repository, iAdapterFactory);
+        cdsParametersEncoderService = new CdsParametersEncoderService(repository, iAdapterFactory);
+    }
 
     public CdsCrService(
+            RequestDetails requestDetails,
             IRepository repository,
-            IAdapterFactory adapterFactory,
             CdsResponseEncoderService cdsResponseEncoderService,
             CdsParametersEncoderService cdsParametersEncoderService) {
 
+        this.requestDetails = requestDetails;
         this.repository = repository;
-        this.adapterFactory = adapterFactory;
         this.cdsResponseEncoderService = cdsResponseEncoderService;
         this.cdsParametersEncoderService = cdsParametersEncoderService;
     }
@@ -35,12 +51,12 @@ public class CdsCrService implements ICdsCrService {
         return repository.fhirContext().getVersion().getVersion();
     }
 
-    public IBaseParameters encodeParams(CdsServiceRequestJson json, RequestDetails requestDetails) {
-        return cdsParametersEncoderService.encodeParams(json, requestDetails);
+    public IBaseParameters encodeParams(CdsServiceRequestJson json) {
+        return cdsParametersEncoderService.encodeParams(json);
     }
 
     @SuppressWarnings("unchecked")
-    public CdsServiceResponseJson encodeResponse(Object response, RequestDetails requestDetails) {
-        return cdsResponseEncoderService.encodeResponse(response, requestDetails);
+    public CdsServiceResponseJson encodeResponse(Object response) {
+        return cdsResponseEncoderService.encodeResponse(response);
     }
 }

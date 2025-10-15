@@ -6,7 +6,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import ca.uhn.fhir.repository.IRepository;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.r4.model.Bundle;
@@ -22,7 +21,6 @@ class CdsResponseEncoderServiceTest {
     @Test
     void methodEncodeResponse_shouldThrowExceptionWhenResponseIsNotIBaseResource() {
         // given
-        RequestDetails requestDetails = mock(RequestDetails.class);
         Object invalidResponse = new Object();
         IAdapterFactory mockAdapterFactory = mock(IAdapterFactory.class);
         IRepository mockRepository = mock(IRepository.class);
@@ -30,8 +28,7 @@ class CdsResponseEncoderServiceTest {
         CdsResponseEncoderService encoder = new CdsResponseEncoderService(mockRepository, mockAdapterFactory);
 
         // when
-        Exception exception =
-                assertThrows(RuntimeException.class, () -> encoder.encodeResponse(invalidResponse, requestDetails));
+        Exception exception = assertThrows(RuntimeException.class, () -> encoder.encodeResponse(invalidResponse));
 
         // then
         assertEquals("response is not an instance of a Resource", exception.getMessage());
@@ -40,7 +37,6 @@ class CdsResponseEncoderServiceTest {
     @Test
     void methodEncodeResponse_shouldThrowExceptionWhenResponseIsParametersWithoutBundle() {
         // given
-        RequestDetails requestDetails = mock(RequestDetails.class);
         IBaseParameters mockParameters = mock(IBaseParameters.class);
         IAdapterFactory mockAdapterFactory = mock(IAdapterFactory.class);
         IRepository mockRepository = mock(IRepository.class);
@@ -52,8 +48,7 @@ class CdsResponseEncoderServiceTest {
         CdsResponseEncoderService encoder = new CdsResponseEncoderService(mockRepository, mockAdapterFactory);
 
         // when
-        Exception exception =
-                assertThrows(RuntimeException.class, () -> encoder.encodeResponse(mockParameters, requestDetails));
+        Exception exception = assertThrows(RuntimeException.class, () -> encoder.encodeResponse(mockParameters));
 
         // then
         assertEquals("response does not contain a Bundle", exception.getMessage());
@@ -62,7 +57,6 @@ class CdsResponseEncoderServiceTest {
     @Test
     void methodEncodeResponse_shouldThrowExceptionWhenUnableToResolveResponse() {
         // given
-        RequestDetails requestDetails = mock(RequestDetails.class);
         IRepository mockRepository = mock(IRepository.class);
         var adapterFactory = new AdapterFactory();
         var emptyBundle = new Bundle();
@@ -74,8 +68,7 @@ class CdsResponseEncoderServiceTest {
         CdsResponseEncoderService encoder = new CdsResponseEncoderService(mockRepository, adapterFactory);
 
         // when
-        Exception exception =
-                assertThrows(RuntimeException.class, () -> encoder.encodeResponse(parameters, requestDetails));
+        Exception exception = assertThrows(RuntimeException.class, () -> encoder.encodeResponse(parameters));
 
         // then
         assertEquals("unable to resolve response", exception.getMessage());

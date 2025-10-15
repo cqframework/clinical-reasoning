@@ -4,8 +4,6 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestJson;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseJson;
@@ -14,21 +12,25 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public interface ICdsCrService {
-    IBaseParameters encodeParams(CdsServiceRequestJson json, RequestDetails requestDetails);
+    IBaseParameters encodeParams(CdsServiceRequestJson json);
 
-    CdsServiceResponseJson encodeResponse(Object response, RequestDetails requestDetails);
+    CdsServiceResponseJson encodeResponse(Object response);
 
     FhirVersionEnum getFhirVersion();
 
     IRepository getRepository();
 
     default Object invoke(IModelJson json) {
-        SystemRequestDetails systemRequestDetails = new SystemRequestDetails();
-        IBaseParameters params = encodeParams((CdsServiceRequestJson) json, systemRequestDetails);
+        IBaseParameters params = encodeParams((CdsServiceRequestJson) json);
         IBaseResource response = invokeApply(params);
-        return encodeResponse(response, systemRequestDetails);
+        return encodeResponse(response);
     }
 
+    /**
+     * This method was intentionally declared in the interface definition to promote and facilitate extensibility.
+     * @param params parameters specifying the 'apply' operation.
+     * @return an encoded response to the operation invocation.
+     */
     default IBaseResource invokeApply(IBaseParameters params) {
         var operationName = getFhirVersion() == FhirVersionEnum.R4
                 ? ProviderConstants.CR_OPERATION_R5_APPLY

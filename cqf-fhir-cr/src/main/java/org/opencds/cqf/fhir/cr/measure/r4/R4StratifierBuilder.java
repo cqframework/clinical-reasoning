@@ -247,7 +247,6 @@ class R4StratifierBuilder {
                 sgcc.setCode(new CodeableConcept().setText(componentDef.code().text()));
                 // set component on MeasureReport
                 stratum.addComponent(sgcc);
-                //            } else if (!StratifierUtils.isCriteriaBasedStratifier(groupDef, stratifierDef)) {
             } else if (MeasureStratifierType.VALUE == stratifierDef.getStratifierType()) {
                 // non-component stratifiers only set stratified value, code is set on stratifier object
                 // value being stratified: 'M'
@@ -348,7 +347,7 @@ class R4StratifierBuilder {
 
         final List<String> resourceIds = getResourceIds(subjectIds, groupDef, populationDef);
 
-        final int stratumCount = getStratumCountUpper(stratifierDef, groupDef, populationDef, resourceIds);
+        final int stratumCount = getStratumCountUpper(stratifierDef, populationDef, resourceIds);
 
         sgpc.setCount(stratumCount);
 
@@ -366,7 +365,7 @@ class R4StratifierBuilder {
     }
 
     private static int getStratumCountUpper(
-            StratifierDef stratifierDef, GroupDef groupDef, PopulationDef populationDef, List<String> resourceIds) {
+            StratifierDef stratifierDef, PopulationDef populationDef, List<String> resourceIds) {
 
         if (MeasureStratifierType.CRITERIA == stratifierDef.getStratifierType()) {
             final Set<Object> resources = populationDef.getResources();

@@ -10,8 +10,6 @@ import org.hl7.fhir.r4.model.MeasureReport.MeasureReportStatus;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.When;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Measure Stratifier Testing to validate Measure defined Stratifier elements and the resulting MeasureReport Stratifier elements
@@ -20,7 +18,6 @@ import org.slf4j.LoggerFactory;
  */
 @SuppressWarnings("squid:S2699")
 class MeasureStratifierTest {
-    private static final Logger logger = LoggerFactory.getLogger(MeasureStratifierTest.class);
 
     private static final Given GIVEN_MEASURE_STRATIFIER_TEST = Measure.given().repositoryFor("MeasureStratifierTest");
     private static final Given GIVEN_CRITERIA_BASED_STRAT_SIMPLE =
@@ -32,7 +29,7 @@ class MeasureStratifierTest {
      * Boolean Basis Measure with Stratifier defined by component expression that results in CodeableConcept value of 'M' or 'F' for the Measure population. For 'Individual' reportType
      */
     @Test
-    void cohortBooleanHasCodeStratIndividualResult() {
+    void cohortBooleanValueStratHasCodeIndResult() {
         var mCC = new CodeableConcept().setText("M");
 
         GIVEN_MEASURE_STRATIFIER_TEST
@@ -54,11 +51,12 @@ class MeasureStratifierTest {
                 .up()
                 .report();
     }
+
     /**
      * Boolean Basis Measure with Stratifier defined by component expression that results in CodeableConcept value of 'M' or 'F' for the Measure population.
      */
     @Test
-    void cohortBooleanHasCodeStrat() {
+    void cohortBooleanValueStratHasCodeStratGender() {
         var mCC = new CodeableConcept().setText("M");
         var fCC = new CodeableConcept().setText("F");
 
@@ -89,7 +87,7 @@ class MeasureStratifierTest {
      * Boolean Basis Measure with Stratifier defined by value expression that results in CodeableConcept value of 'true' or 'false' for the Measure population.
      */
     @Test
-    void cohortBooleanValueStrat() {
+    void cohortBooleanValueStratHasBooleanNotFinished() {
         var isUnfinished = new CodeableConcept().setText("true");
         var notUnfinished = new CodeableConcept().setText("false");
 
@@ -123,7 +121,7 @@ class MeasureStratifierTest {
      * stratifier 2: 'M' or 'F' for the Measure population.
      */
     @Test
-    void cohortBooleanMultiStrat() {
+    void cohortBooleanValueStratMultiStratGenderAndBooleanNotFinished() {
         var isUnfinished = new CodeableConcept().setText("true");
         var notUnfinished = new CodeableConcept().setText("false");
         var mCC = new CodeableConcept().setText("M");
@@ -169,7 +167,7 @@ class MeasureStratifierTest {
      * Boolean Basis Measure with Stratifier defined without an 'id' populated. Result should throw an error.
      */
     @Test
-    void cohortBooleanNoIdStrat() {
+    void cohortBooleanValueStratNoIdStratInvalid() {
         final When evaluate = GIVEN_MEASURE_STRATIFIER_TEST
                 .when()
                 .measureId("CohortBooleanStratNoId")
@@ -185,7 +183,7 @@ class MeasureStratifierTest {
     // Previously, we didn't expect this to fail but with the new validation logic we decided that
     // it now ought to.
     @Test
-    void cohortBooleanDifferentTypeStrat() {
+    void cohortBooleanValueStratDifferentStratTypeFromBasisInvalid() {
         try {
             GIVEN_MEASURE_STRATIFIER_TEST
                     .when()
@@ -205,7 +203,7 @@ class MeasureStratifierTest {
      * This is allowed within the specification, but is not currently implemented
      */
     @Test
-    void cohortBooleanComponentStrat() {
+    void cohortBooleanValueStratComponentStrat() {
         GIVEN_MEASURE_STRATIFIER_TEST
                 .when()
                 .measureId("CohortBooleanStratComponent")
@@ -243,7 +241,7 @@ class MeasureStratifierTest {
      * related Encounters where their age matches the stratifier criteria results
      */
     @Test
-    void ratioResourceValueStrat() {
+    void ratioResourceValueStratAge() {
 
         GIVEN_MEASURE_STRATIFIER_TEST
                 .when()
@@ -289,7 +287,7 @@ class MeasureStratifierTest {
      * a user to set up.
      */
     @Test
-    void ratioResourceDifferentTypeStratNotCriteriaBasedWeirdScenario() {
+    void ratioResourceValueStratDifferentTypeStratNotCriteriaBasedWeirdScenario() {
         GIVEN_MEASURE_STRATIFIER_TEST
                 .when()
                 .measureId("RatioResourceStratDifferentType")
@@ -400,7 +398,7 @@ class MeasureStratifierTest {
      * intersection of results should be allowed
      */
     @Test
-    void ratioBooleanValueStrat() {
+    void ratioBooleanValueStratGender() {
 
         GIVEN_MEASURE_STRATIFIER_TEST
                 .when()
@@ -429,7 +427,7 @@ class MeasureStratifierTest {
      * You can only define one or the other
      */
     @Test
-    void twoStatifierCriteria() {
+    void cohortBooleanValueStratTwoStratifierCriteriaInvalid() {
         try {
             GIVEN_MEASURE_STRATIFIER_TEST
                     .when()
@@ -448,7 +446,7 @@ class MeasureStratifierTest {
     }
 
     @Test
-    void criteriaBasedStratSinglePatientSingleEncounter() {
+    void cohortBooleanCriteriaStratSinglePatientSingleEncounter() {
         GIVEN_CRITERIA_BASED_STRAT_SIMPLE
                 .when()
                 .measureId("CriteriaBasedStratifiersSimple")
@@ -469,9 +467,8 @@ class MeasureStratifierTest {
                 .hasCount(1);
     }
 
-    // LUKETODO:  should we carry the extension to the measure report stratifier?
     @Test
-    void criteriaBasedStratSingleBadExpressionForValue() {
+    void cohortResourceCriteriaStratSingleBadExpressionForValueInvalid() {
         GIVEN_CRITERIA_BASED_STRAT_SIMPLE
                 .when()
                 .measureId("CriteriaBasedStratifiersSimpleBad")
@@ -490,7 +487,7 @@ class MeasureStratifierTest {
     2 encounter for patient 2 in-progress
      */
     @Test
-    void criteriaBasedStratAllPatientsTwoEncounters() {
+    void cohortResourceCriteriaStratAllPatientsTwoEncounters() {
         GIVEN_CRITERIA_BASED_STRAT_SIMPLE
                 .when()
                 .measureId("CriteriaBasedStratifiersSimple")
@@ -511,7 +508,7 @@ class MeasureStratifierTest {
     }
 
     @Test
-    void criteriaBasedStratifiersComplexSetsDifferentForInitialDenominatorAndNumerator() {
+    void ratioResourceCriteriaStratComplexSetsDifferentForInitialDenominatorAndNumerator() {
         GIVEN_CRITERIA_BASED_STRAT_COMPLEX
                 .when()
                 .measureId("CriteriaBasedStratifiersComplex")

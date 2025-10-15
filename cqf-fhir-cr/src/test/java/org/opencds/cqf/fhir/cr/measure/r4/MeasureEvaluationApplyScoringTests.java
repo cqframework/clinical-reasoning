@@ -39,10 +39,10 @@ class MeasureEvaluationApplyScoringTests {
     private static final String IG_NAME_SINGLE_MEASURE = "MeasureTest";
     private static final String IG_NAME_MULTI_MEASURE = "MinimalMeasureEvaluation";
 
-    private static final Measure.Given GIVEN_1 = getGivenWithMockedRepositorySingleMeasure();
-    private static final TestDataGenerator testDataGenerator = new TestDataGenerator(GIVEN_1.getRepository());
+    private static final Measure.Given GIVEN_SINGLE = getGivenWithMockedRepositorySingleMeasure();
+    private static final TestDataGenerator testDataGenerator = new TestDataGenerator(GIVEN_SINGLE.getRepository());
 
-    private static final MultiMeasure.Given GIVEN_2 = getGivenWithMockedRepositoryMultiMeasure();
+    private static final MultiMeasure.Given GIVEN_MULTI = getGivenWithMockedRepositoryMultiMeasure();
 
     @BeforeAll
     static void init() {
@@ -55,7 +55,8 @@ class MeasureEvaluationApplyScoringTests {
     @Test
     void proportionResourceWithReportTypeParameterPatientGroup() {
         // Patients in Group
-        GIVEN_1.when()
+        GIVEN_SINGLE
+                .when()
                 .measureId("ProportionResourceAllPopulations")
                 .reportType("population")
                 .subject("Group/group-patients-1")
@@ -94,7 +95,8 @@ class MeasureEvaluationApplyScoringTests {
     @Test
     void proportionResourceWithReportTypeParameterPractitionerGroup() {
         // Patients with generalPractitioner.reference matching member of group
-        GIVEN_1.when()
+        GIVEN_SINGLE
+                .when()
                 .measureId("ProportionResourceAllPopulations")
                 .reportType("population")
                 .subject("Group/group-practitioners-1")
@@ -133,7 +135,8 @@ class MeasureEvaluationApplyScoringTests {
     @Test
     void proportionResourceWithReportTypeParameterPractitioner() {
         // Patients with generalPractitioner.reference matching member of group
-        GIVEN_1.when()
+        GIVEN_SINGLE
+                .when()
                 .measureId("ProportionResourceAllPopulations")
                 .reportType("population")
                 .subject("Practitioner/practitioner-1")
@@ -172,7 +175,8 @@ class MeasureEvaluationApplyScoringTests {
     @Test
     void proportionResourceWithNoReportType() {
         // this should default to 'Summary' for empty subject
-        GIVEN_1.when()
+        GIVEN_SINGLE
+                .when()
                 .measureId("ProportionResourceAllPopulations")
                 .evaluate()
                 .then()
@@ -209,7 +213,8 @@ class MeasureEvaluationApplyScoringTests {
     @Test
     void proportionResourceWithReportTypeParameterEmptySubject() {
         // All subjects
-        GIVEN_1.when()
+        GIVEN_SINGLE
+                .when()
                 .measureId("ProportionResourceAllPopulations")
                 .reportType("population")
                 .evaluate()
@@ -246,7 +251,8 @@ class MeasureEvaluationApplyScoringTests {
 
     @Test
     void MultiMeasure_EightMeasures_AllSubjects_MeasureUrl() {
-        var when = GIVEN_2.when()
+        var when = GIVEN_MULTI
+                .when()
                 .measureUrl("http://example.com/Measure/MinimalProportionNoBasisSingleGroup")
                 .measureUrl("http://example.com/Measure/MinimalProportionBooleanBasisSingleGroup")
                 .measureUrl("http://example.com/Measure/MinimalRatioBooleanBasisSingleGroup")
@@ -382,9 +388,29 @@ class MeasureEvaluationApplyScoringTests {
                 .hasCount(10);
     }
 
+    // This test is for a Measure that references CQL with an invalid "MeasureObservation" function that returns an
+    // Encounter instead of String, Integer or Double
+    @Test
+    void ContinuousVariableResourceMeasureObservationFunctionReturnsEncounterINVALID() {
+        GIVEN_MULTI
+                .when()
+                .measureId("MinimalContinuousVariableResourceBasisSingleGroupINVALID")
+                .periodStart("2024-01-01")
+                .periodEnd("2024-12-31")
+                .reportType("population")
+                .evaluate()
+                .then()
+                .hasMeasureReportCount(1)
+                .getFirstMeasureReport()
+                .hasContainedOperationOutcome()
+                .hasContainedOperationOutcomeMsg(
+                        "continuous variable observation CQL \"MeasureObservation\" function result must be of type String, Integer or Double but was: Encounter");
+    }
+
     @Test
     void MultiMeasure_EightMeasures_AllSubjects_MeasureId() {
-        var when = GIVEN_2.when()
+        var when = GIVEN_MULTI
+                .when()
                 .measureId("MinimalProportionNoBasisSingleGroup")
                 .measureId("MinimalProportionBooleanBasisSingleGroup")
                 .measureId("MinimalRatioBooleanBasisSingleGroup")

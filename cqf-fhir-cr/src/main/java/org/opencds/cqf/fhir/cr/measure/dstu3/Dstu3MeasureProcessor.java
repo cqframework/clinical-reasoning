@@ -26,6 +26,7 @@ import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
+import org.opencds.cqf.fhir.cr.measure.common.ContinuousVariableObservationHandler;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorUtils;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
@@ -118,14 +119,14 @@ public class Dstu3MeasureProcessor {
 
             // Process Criteria Expression Results
             measureProcessorUtils.processResults(
-                    results.processMeasureForSuccessOrFailure(measure.getIdElement(), measureDef),
+                    results.processMeasureForSuccessOrFailure(measureDef),
                     measureDef,
                     evalType,
                     measureEvaluationOptions.getApplyScoringSetMembership(),
                     new Dstu3PopulationBasisValidator());
         }
         // Populate populationDefs that require MeasureDef results
-        measureProcessorUtils.continuousVariableObservation(measureDef, context);
+        ContinuousVariableObservationHandler.continuousVariableObservation(measureDef, context);
 
         // Build Measure Report with Results
         return new Dstu3MeasureReportBuilder()
@@ -140,9 +141,10 @@ public class Dstu3MeasureProcessor {
 
         final LibraryEngine libraryEngine = getLibraryEngine(parameters, libraryVersionIdentifier, context);
 
+        var measureDef = new Dstu3MeasureDefBuilder().build(measure);
+
         return MultiLibraryIdMeasureEngineDetails.builder(libraryEngine)
-                .addLibraryIdToMeasureId(
-                        new VersionedIdentifier().withId(libraryVersionIdentifier.getId()), measure.getIdElement())
+                .addLibraryIdToMeasureId(new VersionedIdentifier().withId(libraryVersionIdentifier.getId()), measureDef)
                 .build();
     }
 

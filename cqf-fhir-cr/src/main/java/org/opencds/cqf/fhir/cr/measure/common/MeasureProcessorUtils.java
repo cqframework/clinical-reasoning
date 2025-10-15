@@ -1,7 +1,5 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
-import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.MEASUREPOPULATION;
-
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.annotation.Nonnull;
@@ -13,9 +11,10 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import org.apache.commons.lang3.tuple.Pair;
-import org.hl7.elm.r1.FunctionDef;
+import org.cqframework.cql.cql2elm.CqlCompilerException;
+import org.cqframework.cql.cql2elm.CqlIncludeException;
+import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.hl7.elm.r1.IntervalTypeSpecifier;
 import org.hl7.elm.r1.NamedTypeSpecifier;
 import org.hl7.elm.r1.ParameterDef;
@@ -23,8 +22,6 @@ import org.hl7.elm.r1.VersionedIdentifier;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.EvaluationResultsForMultiLib;
-import org.opencds.cqf.cql.engine.execution.Libraries;
-import org.opencds.cqf.cql.engine.execution.Variable;
 import org.opencds.cqf.cql.engine.runtime.Date;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.engine.runtime.Interval;
@@ -72,37 +69,6 @@ public class MeasureProcessorUtils {
                 // Capture error for MeasureReportBuilder
                 measureDef.addError(error);
                 logger.error(error, e);
-            }
-        }
-    }
-
-    /**
-     * Measures with defined scoring type of 'continuous-variable' where a defined 'measure-observation' population is used to evaluate results of 'measure-population'.
-     * This method is a downstream calculation given it requires calculated results before it can be called.
-     * Results are then added to associated MeasureDef
-     * @param measureDef measure defined objects that are populated from criteria expression results
-     * @param context cql engine context used to evaluate results
-     */
-    public void continuousVariableObservation(MeasureDef measureDef, CqlEngine context) {
-        // Continuous Variable?
-        for (GroupDef groupDef : measureDef.groups()) {
-            // Measure Observation defined?
-            if (groupDef.measureScoring().equals(MeasureScoring.CONTINUOUSVARIABLE)
-                    && groupDef.getSingle(MeasurePopulationType.MEASUREOBSERVATION) != null) {
-
-                PopulationDef measurePopulation = groupDef.getSingle(MEASUREPOPULATION);
-                PopulationDef measureObservation = groupDef.getSingle(MeasurePopulationType.MEASUREOBSERVATION);
-
-                // Inject MeasurePopulation results into Measure Observation Function
-                for (Object resource : measurePopulation.getResources()) {
-                    Object observationResult = evaluateObservationCriteria(
-                            resource,
-                            measureObservation.expression(),
-                            measureObservation.getEvaluatedResources(),
-                            groupDef.isBooleanBasis(),
-                            context);
-                    measureObservation.addResource(observationResult);
-                }
             }
         }
     }
@@ -279,67 +245,6 @@ public class MeasureProcessorUtils {
     }
 
     /**
-     * method used to extract evaluated resources touched by CQL criteria expressions
-     * @param outEvaluatedResources set object used to capture resources touched
-     * @param context cql engine context
-     */
-    public void captureEvaluatedResources(Set<Object> outEvaluatedResources, CqlEngine context) {
-        if (outEvaluatedResources != null && context.getState().getEvaluatedResources() != null) {
-            outEvaluatedResources.addAll(context.getState().getEvaluatedResources());
-        }
-        clearEvaluatedResources(context);
-    }
-
-    // reset evaluated resources followed by a context evaluation
-    private void clearEvaluatedResources(CqlEngine context) {
-        context.getState().clearEvaluatedResources();
-    }
-
-    /**
-     * method used to evaluate cql expression defined for 'continuous variable' scoring type measures that have 'measure observation' to calculate
-     * This method is called as a second round of processing given it uses 'measure population' results as input data for function
-     * @param resource object that stores results of cql
-     * @param criteriaExpression expression name to call
-     * @param outEvaluatedResources set to store evaluated resources touched
-     * @param isBooleanBasis the type of result created from expression
-     * @param context cql engine context used to evaluate expression
-     * @return cql results for subject requested
-     */
-    @SuppressWarnings({"deprecation", "removal"})
-    public Object evaluateObservationCriteria(
-            Object resource,
-            String criteriaExpression,
-            Set<Object> outEvaluatedResources,
-            boolean isBooleanBasis,
-            CqlEngine context) {
-
-        var ed = Libraries.resolveExpressionRef(
-                criteriaExpression, context.getState().getCurrentLibrary());
-
-        if (!(ed instanceof FunctionDef functionDef)) {
-            throw new InvalidRequestException(
-                    "Measure observation %s does not reference a function definition".formatted(criteriaExpression));
-        }
-
-        Object result;
-        context.getState().pushActivationFrame(functionDef, functionDef.getContext());
-        try {
-            if (!isBooleanBasis) {
-                // subject based observations don't have a parameter to pass in
-                context.getState()
-                        .push(new Variable(functionDef.getOperand().get(0).getName()).withValue(resource));
-            }
-            result = context.getEvaluationVisitor().visitExpression(ed.getExpression(), context.getState());
-        } finally {
-            context.getState().popActivationFrame();
-        }
-
-        captureEvaluatedResources(outEvaluatedResources, context);
-
-        return result;
-    }
-
-    /**
      * method used to execute generate CQL results via Library $evaluate
      *
      * @param subjectIds subjects to generate results for
@@ -388,19 +293,23 @@ public class MeasureProcessorUtils {
                 for (var libraryVersionedIdentifier : libraryIdentifiers) {
                     validateEvaluationResultExistsForIdentifier(
                             libraryVersionedIdentifier, evaluationResultsForMultiLib);
-
+                    // standard CQL expression results:  if there are
                     var evaluationResult = evaluationResultsForMultiLib.getResultFor(libraryVersionedIdentifier);
 
-                    var measureIds =
-                            multiLibraryIdMeasureEngineDetails.getMeasureIdsForLibrary(libraryVersionedIdentifier);
+                    var measureDefs =
+                            multiLibraryIdMeasureEngineDetails.getMeasureDefsForLibrary(libraryVersionedIdentifier);
 
-                    resultsBuilder.addResults(measureIds, subjectId, evaluationResult);
+                    final List<MeasureObservationResult> measureObservationResults =
+                            ContinuousVariableObservationHandler.continuousVariableEvaluation(
+                                    context, measureDefs, libraryIdentifiers, evaluationResult, subjectTypePart);
+
+                    resultsBuilder.addResults(measureDefs, subjectId, evaluationResult, measureObservationResults);
 
                     Optional.ofNullable(evaluationResultsForMultiLib.getExceptionFor(libraryVersionedIdentifier))
                             .ifPresent(exception -> {
                                 var error = EXCEPTION_FOR_SUBJECT_ID_MESSAGE_TEMPLATE.formatted(
                                         subjectId, exception.getMessage());
-                                resultsBuilder.addErrors(measureIds, error);
+                                resultsBuilder.addErrors(measureDefs, error);
                                 logger.error(error, exception);
                             });
                 }
@@ -408,9 +317,9 @@ public class MeasureProcessorUtils {
             } catch (Exception e) {
                 // If there's any error we didn't anticipate, catch it here:
                 var error = EXCEPTION_FOR_SUBJECT_ID_MESSAGE_TEMPLATE.formatted(subjectId, e.getMessage());
-                var measureIds = multiLibraryIdMeasureEngineDetails.getAllMeasureIds();
+                var measureDefs = multiLibraryIdMeasureEngineDetails.getAllMeasureDefs();
 
-                resultsBuilder.addErrors(measureIds, error);
+                resultsBuilder.addErrors(measureDefs, error);
                 logger.error(error, e);
             }
         }
@@ -418,10 +327,72 @@ public class MeasureProcessorUtils {
         return resultsBuilder.build();
     }
 
+    public static List<CompiledLibrary> getCompiledLibraries(List<VersionedIdentifier> ids, CqlEngine context) {
+        try {
+            var resolvedLibraryResults =
+                    context.getEnvironment().getLibraryManager().resolveLibraries(ids);
+
+            var allErrors = resolvedLibraryResults.allErrors();
+            if (resolvedLibraryResults.hasErrors() || ids.size() > allErrors.size()) {
+                return resolvedLibraryResults.allCompiledLibraries();
+            }
+
+            if (ids.size() == 1) {
+                final List<CqlCompilerException> cqlCompilerExceptions =
+                        resolvedLibraryResults.getErrorsFor(ids.get(0));
+
+                if (cqlCompilerExceptions.size() == 1) {
+                    throw new IllegalStateException(
+                            "Unable to load CQL/ELM for library: %s. Verify that the Library resource is available in your environment and has CQL/ELM content embedded."
+                                    .formatted(ids.get(0).getId()),
+                            cqlCompilerExceptions.get(0));
+                } else {
+                    throw new IllegalStateException(
+                            "Unable to load CQL/ELM for library: %s. Verify that the Library resource is available in your environment and has CQL/ELM content embedded. Errors: %s"
+                                    .formatted(
+                                            ids.get(0).getId(),
+                                            cqlCompilerExceptions.stream()
+                                                    .map(CqlCompilerException::getMessage)
+                                                    .reduce((s1, s2) -> s1 + "; " + s2)
+                                                    .orElse("No error messages found.")));
+                }
+            }
+
+            throw new IllegalStateException(
+                    "Unable to load CQL/ELM for libraries: %s Verify that the Library resource is available in your environment and has CQL/ELM content embedded. Errors: %s"
+                            .formatted(ids, allErrors));
+
+        } catch (CqlIncludeException exception) {
+            throw new IllegalStateException(
+                    "Unable to load CQL/ELM for libraries: %s. Verify that the Library resource is available in your environment and has CQL/ELM content embedded."
+                            .formatted(
+                                    ids.stream().map(VersionedIdentifier::getId).toList()),
+                    exception);
+        }
+    }
+    /**
+     * Checks if a MeasureDef has at least one PopulationDef of type MEASUREOBSERVATION
+     * across all of its groups.
+     *
+     * @param measureDef the MeasureDef to check
+     * @return true if any PopulationDef in any GroupDef is MEASUREOBSERVATION
+     */
+    public static boolean hasMeasureObservation(MeasureDef measureDef) {
+        if (measureDef == null || measureDef.groups() == null) {
+            return false;
+        }
+
+        return measureDef.groups().stream()
+                .filter(group -> group.populations() != null)
+                .flatMap(group -> group.populations().stream())
+                .anyMatch(pop -> pop.type() == MeasurePopulationType.MEASUREOBSERVATION);
+    }
+
     private void validateEvaluationResultExistsForIdentifier(
             VersionedIdentifier versionedIdentifierFromQuery,
             EvaluationResultsForMultiLib evaluationResultsForMultiLib) {
 
+        // LUKETODO:  this should hopefully be fixed with the next version of CQL
         var containsResults = evaluationResultsForMultiLib.containsResultsFor(versionedIdentifierFromQuery);
         var containsExceptions = evaluationResultsForMultiLib.containsExceptionsFor(versionedIdentifierFromQuery);
 

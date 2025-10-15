@@ -21,6 +21,10 @@ public class MeasureConstants {
     public static final String URL_CODESYSTEM_MEASURE_POPULATION =
             "http://teminology.hl7.org/CodeSystem/measure-population";
     // http://hl7.org/fhir/us/davinci-deqm/2023Jan/StructureDefinition-extension-populationReference.html
+    public static final String EXT_CQFM_AGGREGATE_METHOD_URL =
+            "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-aggregateMethod";
+    public static final String EXT_CQFM_CRITERIA_REFERENCE =
+            "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-criteriaReference";
     public static final String EXT_DAVINCI_POPULATION_REFERENCE =
             "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-populationReference";
     // http://build.fhir.org/ig/HL7/davinci-deqm/StructureDefinition-extension-supplementalData.html

@@ -2,17 +2,21 @@ package org.opencds.cqf.fhir.cr.measure.common;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.opencds.cqf.cql.engine.runtime.Interval;
+import java.util.Objects;
+import java.util.StringJoiner;
 
 public class MeasureDef {
 
     private final String id;
     private final String url;
     private final String version;
-    private Interval defaultMeasurementPeriod;
     private final List<GroupDef> groups;
     private final List<SdeDef> sdes;
     private final List<String> errors;
+
+    public static MeasureDef fromIdAndUrl(String id, String url) {
+        return new MeasureDef(id, url, null, List.of(), List.of());
+    }
 
     public MeasureDef(String id, String url, String version, List<GroupDef> groups, List<SdeDef> sdes) {
         this.id = id;
@@ -36,10 +40,6 @@ public class MeasureDef {
         return this.version;
     }
 
-    public Interval getDefaultMeasurementPeriod() {
-        return defaultMeasurementPeriod;
-    }
-
     public List<SdeDef> sdes() {
         return this.sdes;
     }
@@ -54,5 +54,33 @@ public class MeasureDef {
 
     public void addError(String error) {
         this.errors.add(error);
+    }
+
+    // We need to limit the contract of equality to id, url, and version only
+    @Override
+    public boolean equals(Object other) {
+        if (other == null || getClass() != other.getClass()) {
+            return false;
+        }
+        MeasureDef that = (MeasureDef) other;
+        return Objects.equals(id, that.id) && Objects.equals(url, that.url) && Objects.equals(version, that.version);
+    }
+
+    // We need to limit the contract of equality to id, url, and version only
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, url, version);
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", MeasureDef.class.getSimpleName() + "[", "]")
+                .add("id='" + id + "'")
+                .add("url='" + url + "'")
+                .add("version='" + version + "'")
+                .add("groups=" + groups.size())
+                .add("sdes=" + sdes.size())
+                .add("errors=" + errors)
+                .toString();
     }
 }

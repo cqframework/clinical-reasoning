@@ -13,6 +13,7 @@ import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.ME
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.SDE_USAGE_CODE;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -47,20 +48,10 @@ import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 
 public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
-    // LUKETODO:  break up this monster
     @Override
     public MeasureDef build(Measure measure) {
         checkId(measure);
 
-        // SDES
-        List<SdeDef> sdes = new ArrayList<>();
-        for (MeasureSupplementalDataComponent s : measure.getSupplementalData()) {
-            checkId(s);
-            checkSDEUsage(measure, s);
-            var sdeDef = new SdeDef(
-                    s.getId(), conceptToConceptDef(s.getCode()), s.getCriteria().getExpression());
-            sdes.add(sdeDef);
-        }
         // scoring
         var measureScoring = getMeasureScoring(measure);
         // populationBasis
@@ -71,129 +62,158 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         // Groups
         List<GroupDef> groups = new ArrayList<>();
         for (MeasureGroupComponent group : measure.getGroup()) {
-            // group Measure Scoring
-            var groupScoring = getGroupMeasureScoring(measure, group);
-            // populationBasis
-            var groupBasis = getGroupPopulationBasis(group);
-            // improvement Notation
-            var groupImpNotation = getGroupImpNotation(measure, group);
-            var hasGroupImpNotation = groupImpNotation != null;
-            // aggregateMethod is used to capture continuous-variable method of aggregating MeasureObservation
-            ContinuousVariableObservationAggregateMethod aggregateMethod = null;
-            // Populations
-            List<PopulationDef> populations = new ArrayList<>();
-            for (MeasureGroupPopulationComponent pop : group.getPopulation()) {
-                checkId(pop);
-                MeasurePopulationType populationType = MeasurePopulationType.fromCode(
-                        pop.getCode().getCodingFirstRep().getCode());
-                String criteriaReference = null;
+            var groupDef = buildGroupDef(measure, group, measureScoring, measureImpNotation, measureBasis, groups);
 
-                // For measures with Measure-Observation populations
-                if (populationType != null && populationType.equals(MeasurePopulationType.MEASUREOBSERVATION)) {
-                    var aggMethodExt = pop.getExtensionByUrl(EXT_CQFM_AGGREGATE_METHOD_URL);
-                    if (aggMethodExt != null) {
-                        // this method is only required if scoringType = continuous-variable
-                        var aggregateMethodString = aggMethodExt.getValue().toString();
-
-                        aggregateMethod =
-                                ContinuousVariableObservationAggregateMethod.fromString(aggregateMethodString);
-
-                        // check that method is accepted
-                        if (aggregateMethod == null) {
-                            throw new InvalidRequestException(
-                                    "Measure Observation method: %s is not a valid value for Measure: %s"
-                                            .formatted(aggregateMethodString, measure.getUrl()));
-                        }
-                    }
-                    var populationCriteriaExt = pop.getExtensionByUrl(EXT_CQFM_CRITERIA_REFERENCE);
-                    if (populationCriteriaExt != null) {
-                        // required for measure-observation populations
-                        // the underlying expression is a cql function
-                        // the criteria reference is what is used to populate parameters of the function
-                        String critReference = populationCriteriaExt.getValue().toString();
-                        // check that the reference exists in the GroupDef.populationId
-                        if (group.getPopulation().stream()
-                                .map(Element::getId)
-                                .noneMatch(id -> id.equals(critReference))) {
-                            throw new InvalidRequestException(
-                                    "no matching criteria reference was found for extension: %s for Measure: %s"
-                                            .formatted(EXT_CQFM_CRITERIA_REFERENCE, measure.getUrl()));
-                        }
-                        // assign validated reference
-                        criteriaReference = critReference;
-                    }
-                }
-                populations.add(new PopulationDef(
-                        pop.getId(),
-                        conceptToConceptDef(pop.getCode()),
-                        populationType,
-                        pop.getCriteria().getExpression(),
-                        criteriaReference));
-            }
-
-            if (group.getExtensionByUrl(CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL) != null
-                    && checkPopulationForCode(populations, DATEOFCOMPLIANCE) == null) {
-                // add to definition
-                var expressionType = (Expression) group.getExtensionByUrl(CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL)
-                        .getValue();
-                if (!expressionType.hasExpression()) {
-                    throw new InvalidRequestException("no expression was listed for extension: %s for Measure: %s"
-                            .formatted(CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL, measure.getUrl()));
-                }
-                var expression = expressionType.getExpression();
-                populations.add(new PopulationDef(
-                        "dateOfCompliance", totalConceptDefCreator(DATEOFCOMPLIANCE), DATEOFCOMPLIANCE, expression));
-            }
-
-            // Stratifiers
-            List<StratifierDef> stratifiers = new ArrayList<>();
-            for (MeasureGroupStratifierComponent mgsc : group.getStratifier()) {
-                checkId(mgsc);
-
-                // Components
-                var components = new ArrayList<StratifierComponentDef>();
-                for (MeasureGroupStratifierComponentComponent scc : mgsc.getComponent()) {
-                    checkId(scc);
-                    var scd = new StratifierComponentDef(
-                            scc.getId(),
-                            conceptToConceptDef(scc.getCode()),
-                            scc.hasCriteria() ? scc.getCriteria().getExpression() : null);
-
-                    components.add(scd);
-                }
-
-                if (!components.isEmpty() && mgsc.getCriteria().getExpression() != null) {
-                    throw new InvalidRequestException(
-                            "Measure stratifier: %s, has both component and stratifier criteria expression defined. Only one should be specified"
-                                    .formatted(mgsc.getId()));
-                }
-
-                var stratifierDef = new StratifierDef(
-                        mgsc.getId(),
-                        conceptToConceptDef(mgsc.getCode()),
-                        mgsc.getCriteria().getExpression(),
-                        components);
-
-                stratifiers.add(stratifierDef);
-            }
-
-            var groupDef = new GroupDef(
-                    group.getId(),
-                    conceptToConceptDef(group.getCode()),
-                    stratifiers,
-                    populations,
-                    getScoringDef(measure, measureScoring, groupScoring),
-                    hasGroupImpNotation,
-                    getImprovementNotation(measureImpNotation, groupImpNotation),
-                    getPopulationBasisDef(measureBasis, groupBasis),
-                    aggregateMethod);
             groups.add(groupDef);
         }
-        return new MeasureDef(measure.getId(), measure.getUrl(), measure.getVersion(), groups, sdes);
+
+        return new MeasureDef(measure.getId(), measure.getUrl(), measure.getVersion(), groups, getSdeDefs(measure));
+    }
+
+    // LUKETODO:  break up this monster
+    private GroupDef buildGroupDef(
+            Measure measure,
+            MeasureGroupComponent group,
+            MeasureScoring measureScoring,
+            CodeDef measureImpNotation,
+            CodeDef measureBasis,
+            List<GroupDef> groups) {
+
+        // group Measure Scoring
+        var groupScoring = getGroupMeasureScoring(measure, group);
+        // populationBasis
+        var groupBasis = getGroupPopulationBasis(group);
+        // improvement Notation
+        var groupImpNotation = getGroupImpNotation(measure, group);
+        var hasGroupImpNotation = groupImpNotation != null;
+        // aggregateMethod is used to capture continuous-variable method of aggregating MeasureObservation
+        ContinuousVariableObservationAggregateMethod aggregateMethod = null;
+        // Populations
+        List<PopulationDef> populations = new ArrayList<>();
+        for (MeasureGroupPopulationComponent pop : group.getPopulation()) {
+            checkId(pop);
+            MeasurePopulationType populationType = MeasurePopulationType.fromCode(
+                    pop.getCode().getCodingFirstRep().getCode());
+            String criteriaReference = null;
+
+            // For measures with Measure-Observation populations
+            if (populationType != null && populationType.equals(MeasurePopulationType.MEASUREOBSERVATION)) {
+                var aggMethodExt = pop.getExtensionByUrl(EXT_CQFM_AGGREGATE_METHOD_URL);
+                if (aggMethodExt != null) {
+                    // this method is only required if scoringType = continuous-variable
+                    var aggregateMethodString = aggMethodExt.getValue().toString();
+
+                    aggregateMethod = ContinuousVariableObservationAggregateMethod.fromString(aggregateMethodString);
+
+                    // check that method is accepted
+                    if (aggregateMethod == null) {
+                        throw new InvalidRequestException(
+                                "Measure Observation method: %s is not a valid value for Measure: %s"
+                                        .formatted(aggregateMethodString, measure.getUrl()));
+                    }
+                }
+                var populationCriteriaExt = pop.getExtensionByUrl(EXT_CQFM_CRITERIA_REFERENCE);
+                if (populationCriteriaExt != null) {
+                    // required for measure-observation populations
+                    // the underlying expression is a cql function
+                    // the criteria reference is what is used to populate parameters of the function
+                    String critReference = populationCriteriaExt.getValue().toString();
+                    // check that the reference exists in the GroupDef.populationId
+                    if (group.getPopulation().stream().map(Element::getId).noneMatch(id -> id.equals(critReference))) {
+                        throw new InvalidRequestException(
+                                "no matching criteria reference was found for extension: %s for Measure: %s"
+                                        .formatted(EXT_CQFM_CRITERIA_REFERENCE, measure.getUrl()));
+                    }
+                    // assign validated reference
+                    criteriaReference = critReference;
+                }
+            }
+
+            var populationDef = new PopulationDef(
+                    pop.getId(),
+                    conceptToConceptDef(pop.getCode()),
+                    populationType,
+                    pop.getCriteria().getExpression(),
+                    criteriaReference);
+
+            populations.add(populationDef);
+        }
+
+        if (group.getExtensionByUrl(CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL) != null
+                && checkPopulationForCode(populations, DATEOFCOMPLIANCE) == null) {
+            // add to definition
+            var expressionType = (Expression) group.getExtensionByUrl(CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL)
+                    .getValue();
+            if (!expressionType.hasExpression()) {
+                throw new InvalidRequestException("no expression was listed for extension: %s for Measure: %s"
+                        .formatted(CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL, measure.getUrl()));
+            }
+            var expression = expressionType.getExpression();
+            var populateDefDateOfCompliance = new PopulationDef(
+                    "dateOfCompliance", totalConceptDefCreator(DATEOFCOMPLIANCE), DATEOFCOMPLIANCE, expression);
+
+            populations.add(populateDefDateOfCompliance);
+        }
+
+        // Stratifiers
+        List<StratifierDef> stratifiers = new ArrayList<>();
+        for (MeasureGroupStratifierComponent mgsc : group.getStratifier()) {
+            checkId(mgsc);
+
+            // Components
+            var components = new ArrayList<StratifierComponentDef>();
+            for (MeasureGroupStratifierComponentComponent scc : mgsc.getComponent()) {
+                checkId(scc);
+                var scd = new StratifierComponentDef(
+                        scc.getId(),
+                        conceptToConceptDef(scc.getCode()),
+                        scc.hasCriteria() ? scc.getCriteria().getExpression() : null);
+
+                components.add(scd);
+            }
+
+            if (!components.isEmpty() && mgsc.getCriteria().getExpression() != null) {
+                throw new InvalidRequestException(
+                        "Measure stratifier: %s, has both component and stratifier criteria expression defined. Only one should be specified"
+                                .formatted(mgsc.getId()));
+            }
+
+            var stratifierDef = new StratifierDef(
+                    mgsc.getId(),
+                    conceptToConceptDef(mgsc.getCode()),
+                    mgsc.getCriteria().getExpression(),
+                    components);
+
+            stratifiers.add(stratifierDef);
+        }
+
+        return new GroupDef(
+                group.getId(),
+                conceptToConceptDef(group.getCode()),
+                stratifiers,
+                populations,
+                getScoringDef(measure, measureScoring, groupScoring),
+                hasGroupImpNotation,
+                getImprovementNotation(measureImpNotation, groupImpNotation),
+                getPopulationBasisDef(measureBasis, groupBasis),
+                aggregateMethod);
     }
 
     public static void triggerFirstPassValidation(List<Measure> measures) {
         measures.forEach(R4MeasureDefBuilder::triggerFirstPassValidation);
+    }
+
+    @Nonnull
+    private List<SdeDef> getSdeDefs(Measure measure) {
+        final List<SdeDef> sdes = new ArrayList<>();
+        for (MeasureSupplementalDataComponent s : measure.getSupplementalData()) {
+            checkId(s);
+            checkSDEUsage(measure, s);
+            var sdeDef = new SdeDef(
+                    s.getId(), conceptToConceptDef(s.getCode()), s.getCriteria().getExpression());
+            sdes.add(sdeDef);
+        }
+        return sdes;
     }
 
     private static void triggerFirstPassValidation(Measure measure) {

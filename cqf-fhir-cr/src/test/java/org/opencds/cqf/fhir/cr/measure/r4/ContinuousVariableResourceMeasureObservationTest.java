@@ -331,12 +331,6 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .report();
     }
 
-    // LUKETODO:  stratifiers
-    /*
-    I just want a stratifier use case to make sure the scoring shows up for stratum
-    can be any stratifier type, just need to validate stratifiers score as cont-variable scoring type
-     */
-
     @Test
     void continuousVariableResourceMeasureObservationEncounterBasisMedian() {
         /*

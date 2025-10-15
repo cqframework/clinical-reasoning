@@ -2,7 +2,9 @@ package org.opencds.cqf.fhir.cr.measure.common;
 
 import jakarta.annotation.Nullable;
 
-// LUKETODO:  javadoc
+/**
+ * All continuous variable scoring aggregation methods.
+ */
 public enum ContinuousVariableObservationAggregateMethod {
     AVG("avg"),
     COUNT("count"),

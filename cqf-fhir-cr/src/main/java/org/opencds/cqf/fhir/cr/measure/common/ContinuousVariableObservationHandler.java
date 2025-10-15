@@ -3,9 +3,6 @@ package org.opencds.cqf.fhir.cr.measure.common;
 import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.MEASUREPOPULATION;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -18,22 +15,22 @@ import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.hl7.elm.r1.FunctionDef;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Observation;
-import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Quantity;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
 import org.opencds.cqf.cql.engine.execution.Libraries;
 import org.opencds.cqf.cql.engine.execution.Variable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-// LUKETODO:  javadoc
+/**
+ * Capture all logic for measure evaluation for continuous variable scoring.
+ */
 public class ContinuousVariableObservationHandler {
 
-    private static final Logger logger = LoggerFactory.getLogger(ContinuousVariableObservationHandler.class);
+    private ContinuousVariableObservationHandler() {
+        // static class with private constructor
+    }
 
     // LUKETODO:  refactor this a lot
     static List<MeasureObservationResult> continuousVariableEvaluation(
@@ -240,19 +237,6 @@ public class ContinuousVariableObservationHandler {
             }
             result = context.getEvaluationVisitor().visitExpression(ed.getExpression(), context.getState());
 
-            // LUKETODO:  get rid of this during final cleanup
-            String id;
-            Period period;
-            if (resource instanceof Encounter encounter) {
-                id = encounter.getId();
-                period = encounter.getPeriod();
-            } else {
-                id = null;
-                period = null;
-            }
-            logger.info("id: {}, period: {}, expression result: {}", id, printPeriod(period), result);
-            // wrap result as Observation
-
         } finally {
             context.getState().popActivationFrame();
         }
@@ -282,7 +266,6 @@ public class ContinuousVariableObservationHandler {
         return Optional.of(evaluationResult.expressionResults.get(expressionName));
     }
 
-    // LUKETODO:  for a boolean basis measure, this will return a Patient, not an Encounter.  Is this correct?
     private static Iterable<?> getResultIterable(
             EvaluationResult evaluationResult, ExpressionResult expressionResult, String subjectTypePart) {
         if (expressionResult.value() instanceof Boolean) {
@@ -356,16 +339,5 @@ public class ContinuousVariableObservationHandler {
         }
 
         return q;
-    }
-
-    private static final DateFormat DATE_FORMAT = new SimpleDateFormat("HH:mm");
-    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm:ssXXX");
-
-    private static String printPeriod(Period period) {
-        if (period == null) {
-            return "null";
-        }
-        return "start: %s, finish: %s"
-                .formatted(DATE_FORMAT.format(period.getStart()), DATE_FORMAT.format(period.getEnd()));
     }
 }

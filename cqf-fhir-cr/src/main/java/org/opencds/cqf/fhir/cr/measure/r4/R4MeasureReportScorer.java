@@ -10,7 +10,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.apache.commons.collections4.CollectionUtils;
 import org.hl7.fhir.r4.model.Enumeration;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
@@ -20,10 +20,8 @@ import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupComponent;
 import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupPopulationComponent;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Quantity;
-import org.hl7.fhir.r4.model.Reference;
 import org.opencds.cqf.fhir.cr.measure.common.BaseMeasureReportScorer;
 import org.opencds.cqf.fhir.cr.measure.common.ContinuousVariableObservationAggregateMethod;
-import org.opencds.cqf.fhir.cr.measure.common.CriteriaResult;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
@@ -201,7 +199,7 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
         }
 
         for (MeasureReportGroupStratifierComponent stratifierComponent : mrgc.getStratifier()) {
-            scoreStratifier(measureUrl, groupDef, mrgc, measureScoring, stratifierComponent);
+            scoreStratifier(measureUrl, groupDef, measureScoring, stratifierComponent);
         }
     }
 
@@ -306,16 +304,6 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
 
         for (Object resource : resources) {
             if (resource instanceof Map<?, ?> map) {
-                // LUKETODO:  get rid of this during final cleanup
-                for (Entry<?, ?> entry : map.entrySet()) {
-                    if (entry.getKey() instanceof IBaseResource fhirResource
-                            && entry.getValue() instanceof Observation obs) {
-                        logger.info(
-                                "1234: key: {} observation value quantity: {}",
-                                fhirResource.getIdElement().getValue(),
-                                obs.getValueQuantity().getValue().doubleValue());
-                    }
-                }
                 for (Object value : map.values()) {
                     if (value instanceof Observation obs && obs.hasValueQuantity()) {
                         quantities.add(obs.getValueQuantity());
@@ -330,22 +318,16 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
     protected void scoreStratifier(
             String measureUrl,
             GroupDef groupDef,
-            MeasureReportGroupComponent measureReportGroupComponent,
             MeasureScoring measureScoring,
             MeasureReportGroupStratifierComponent stratifierComponent) {
         for (StratifierGroupComponent sgc : stratifierComponent.getStratum()) {
-            scoreStratum(measureUrl, groupDef, measureReportGroupComponent, measureScoring, sgc);
+            scoreStratum(measureUrl, groupDef, measureScoring, sgc);
         }
     }
 
     protected void scoreStratum(
-            String measureUrl,
-            GroupDef groupDef,
-            MeasureReportGroupComponent measureReportGroupComponent,
-            MeasureScoring measureScoring,
-            StratifierGroupComponent stratum) {
-        final Quantity quantity =
-                getStratumScoreOrNull(measureUrl, groupDef, measureReportGroupComponent, measureScoring, stratum);
+            String measureUrl, GroupDef groupDef, MeasureScoring measureScoring, StratifierGroupComponent stratum) {
+        final Quantity quantity = getStratumScoreOrNull(measureUrl, groupDef, measureScoring, stratum);
 
         if (quantity != null) {
             stratum.setMeasureScore(quantity);
@@ -354,11 +336,7 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
 
     @Nullable
     private Quantity getStratumScoreOrNull(
-            String measureUrl,
-            GroupDef groupDef,
-            MeasureReportGroupComponent measureReportGroupComponent,
-            MeasureScoring measureScoring,
-            StratifierGroupComponent stratum) {
+            String measureUrl, GroupDef groupDef, MeasureScoring measureScoring, StratifierGroupComponent stratum) {
 
         switch (measureScoring) {
             case PROPORTION, RATIO -> {
@@ -372,20 +350,14 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
                 return null;
             }
             case CONTINUOUSVARIABLE -> {
-                // LUKETODO:  how do we break down the continuous variable scoring by stratifier?
-                logger.info("1234: stratum continuous variable scoring not yet implemented");
                 final List<StratifierDef> stratifiers = groupDef.stratifiers();
-                final StratifierDef stratifierDef = stratifiers.get(0);
-                final Map<String, CriteriaResult> results = stratifierDef.getResults();
-                final List<MeasureReportGroupStratifierComponent> stratifier =
-                        measureReportGroupComponent.getStratifier();
-                final MeasureReportGroupStratifierComponent measureReportGroupStratifierComponent = stratifier.get(0);
-                final List<StratifierGroupPopulationComponent> stratumPopulations = stratum.getPopulation();
-                for (StratifierGroupPopulationComponent stratumPopulation : stratumPopulations) {
-                    final Reference subjectResults = stratumPopulation.getSubjectResults();
 
-                    logger.info("1234: subjectResults: {}", subjectResults.getReference());
+                if (CollectionUtils.isEmpty(stratifiers)) {
+                    return null;
                 }
+
+                // LUKETODO:  what if we have more than one stratifier??????
+                final StratifierDef stratifierDef = stratifiers.get(0);
 
                 return calculateContinuousVariableAggregateQuantity(
                         measureUrl,

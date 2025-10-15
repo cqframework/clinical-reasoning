@@ -1,0 +1,19 @@
+{
+  "resourceType": "Group",
+  "id": "group-patients-1",
+  "type": "person",
+  "actual": true,
+  "name": "Patient Group",
+  "member": [
+    {  "entity": {  "reference": "Patient/patient-1" } },
+    {  "entity": {  "reference": "Patient/patient-2" } },
+    {  "entity": {  "reference": "Patient/patient-3" } },
+    {  "entity": {  "reference": "Patient/patient-4" } },
+    {  "entity": {  "reference": "Patient/patient-5" } },
+    {  "entity": {  "reference": "Patient/patient-6" } },
+    {  "entity": {  "reference": "Patient/patient-7" } },
+    {  "entity": {  "reference": "Patient/patient-8" } },
+    {  "entity": {  "reference": "Patient/patient-9" } },
+    {  "entity": {  "reference": "Patient/patient-0" } }
+  ]
+}

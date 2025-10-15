@@ -29,6 +29,7 @@ import org.hl7.fhir.r4.model.Resource;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.cql.engine.runtime.Date;
 import org.opencds.cqf.cql.engine.runtime.Interval;
+import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 import org.opencds.cqf.fhir.cr.measure.common.CodeDef;
 import org.opencds.cqf.fhir.cr.measure.common.ConceptDef;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
@@ -282,7 +283,7 @@ class R4MeasureReportBuilderTest {
 
     @Nonnull
     private static StratifierDef buildStratifierDef() {
-        return new StratifierDef(null, null, null);
+        return new StratifierDef(null, null, null, MeasureStratifierType.VALUE);
     }
 
     private static Measure buildMeasure(String id, String url, int numGroups, int numSdes) {

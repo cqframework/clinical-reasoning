@@ -36,12 +36,14 @@ public class ContinuousVariableObservationHandler {
     private static final Logger logger = LoggerFactory.getLogger(ContinuousVariableObservationHandler.class);
 
     // LUKETODO:  refactor this a lot
-    static void continuousVariableEvaluation(
+    static List<MeasureObservationResult> continuousVariableEvaluation(
             CqlEngine context,
             List<MeasureDef> measureDefs,
             List<VersionedIdentifier> libraryIdentifiers,
             EvaluationResult evaluationResult,
             String subjectTypePart) {
+
+        final List<MeasureObservationResult> finalResults = new ArrayList<>();
 
         final List<MeasureDef> measureDefsWithMeasureObservations = measureDefs.stream()
                 // if measure contains measure-observation, otherwise short circuit
@@ -50,7 +52,7 @@ public class ContinuousVariableObservationHandler {
 
         if (measureDefsWithMeasureObservations.isEmpty()) {
             // Don't need to do anything if there are no measure observations to process
-            return;
+            return finalResults;
         }
 
         // measure Observation Path, have to re-initialize everything again
@@ -88,16 +90,13 @@ public class ContinuousVariableObservationHandler {
                     var results = processMeasureObservation(
                             context, evaluationResult, subjectTypePart, groupDef, populationDef);
 
-                    // LUKETODO: this is a little less gross but far from ideal
-                    for (MeasureObservationResult result : results) {
-                        evaluationResult.expressionResults.put(result.expressionName, result.expressionResult);
-                    }
+                    finalResults.addAll(results);
                 }
             }
         }
-    }
 
-    record MeasureObservationResult(String expressionName, ExpressionResult expressionResult) {}
+        return finalResults;
+    }
 
     // LUKETODO:  javadoc
     private static List<MeasureObservationResult> processMeasureObservation(

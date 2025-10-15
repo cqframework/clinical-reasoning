@@ -299,10 +299,11 @@ public class MeasureProcessorUtils {
                     var measureDefs =
                             multiLibraryIdMeasureEngineDetails.getMeasureDefsForLibrary(libraryVersionedIdentifier);
 
-                    ContinuousVariableObservationHandler.continuousVariableEvaluation(
-                            context, measureDefs, libraryIdentifiers, evaluationResult, subjectTypePart);
+                    final List<MeasureObservationResult> measureObservationResults =
+                            ContinuousVariableObservationHandler.continuousVariableEvaluation(
+                                    context, measureDefs, libraryIdentifiers, evaluationResult, subjectTypePart);
 
-                    resultsBuilder.addResults(measureDefs, subjectId, evaluationResult);
+                    resultsBuilder.addResults(measureDefs, subjectId, evaluationResult, measureObservationResults);
 
                     Optional.ofNullable(evaluationResultsForMultiLib.getExceptionFor(libraryVersionedIdentifier))
                             .ifPresent(exception -> {

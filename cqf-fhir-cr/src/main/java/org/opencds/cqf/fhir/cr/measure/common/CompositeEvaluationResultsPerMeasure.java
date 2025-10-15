@@ -82,17 +82,30 @@ public class CompositeEvaluationResultsPerMeasure {
             return new CompositeEvaluationResultsPerMeasure(this);
         }
 
-        public void addResults(List<MeasureDef> measureDefs, String subjectId, EvaluationResult evaluationResult) {
+        public void addResults(
+                List<MeasureDef> measureDefs,
+                String subjectId,
+                EvaluationResult evaluationResult,
+                List<MeasureObservationResult> measureObservationResults) {
             for (MeasureDef measureDef : measureDefs) {
-                addResult(measureDef, subjectId, evaluationResult);
+                addResult(measureDef, subjectId, evaluationResult, measureObservationResults);
             }
         }
 
-        public void addResult(MeasureDef measureDef, String subjectId, EvaluationResult evaluationResult) {
+        public void addResult(
+                MeasureDef measureDef,
+                String subjectId,
+                EvaluationResult evaluationResult,
+                List<MeasureObservationResult> measureObservationResults) {
+
             // if we have no results, we don't need to add anything
             if (evaluationResult == null || evaluationResult.expressionResults.isEmpty()) {
                 return;
             }
+
+            // Mutate the evaluationResults to include continuous variable evaluation results
+            measureObservationResults.forEach(measureObservationResult -> evaluationResult.expressionResults.put(
+                    measureObservationResult.expressionName(), measureObservationResult.expressionResult()));
 
             var resultPerMeasure = resultsPerMeasure.computeIfAbsent(measureDef, k -> new HashMap<>());
 

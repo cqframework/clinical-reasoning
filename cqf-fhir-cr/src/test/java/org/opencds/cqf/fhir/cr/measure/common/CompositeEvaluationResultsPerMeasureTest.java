@@ -24,7 +24,7 @@ class CompositeEvaluationResultsPerMeasureTest {
         er.expressionResults.put("subject-123", null); // non-empty map is all the Builder checks
 
         CompositeEvaluationResultsPerMeasure.Builder builder = CompositeEvaluationResultsPerMeasure.builder();
-        builder.addResult(measureDef1, "subject-123", er);
+        builder.addResult(measureDef1, "subject-123", er, List.of());
         builder.addError(measureDef1, "oops-1");
         builder.addError(measureDef2, "oops-2");
 

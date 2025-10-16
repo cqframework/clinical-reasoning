@@ -14,8 +14,7 @@ import org.slf4j.LoggerFactory;
 
 public class WithdrawVisitor extends BaseKnowledgeArtifactVisitor {
 
-    private Logger logger = LoggerFactory.getLogger(
-        WithdrawVisitor.class);
+    private Logger logger = LoggerFactory.getLogger(WithdrawVisitor.class);
 
     public WithdrawVisitor(IRepository repository) {
         super(repository);
@@ -34,11 +33,11 @@ public class WithdrawVisitor extends BaseKnowledgeArtifactVisitor {
 
         try {
             findArtifactCommentsToUpdate(rootAdapter.get(), fhirVersion.getFhirVersionString(), repository)
-                .forEach(artifact -> {
-                    var resource = BundleHelper.getEntryResource(fhirVersion, artifact);
-                    var entry = PackageHelper.deleteEntry(resource);
-                    BundleHelper.addEntry(transactionBundle, entry);
-                });
+                    .forEach(artifact -> {
+                        var resource = BundleHelper.getEntryResource(fhirVersion, artifact);
+                        var entry = PackageHelper.deleteEntry(resource);
+                        BundleHelper.addEntry(transactionBundle, entry);
+                    });
         } catch (Exception e) {
             logger.error("Error encountered attempting to delete ArtifactComments: {}", e.getMessage());
         }

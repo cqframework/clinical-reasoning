@@ -1,6 +1,5 @@
 package org.opencds.cqf.fhir.cr.hapi.r4;
 
-import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Parameters;
 import org.junit.jupiter.api.Assertions;
@@ -13,12 +12,12 @@ public class WithdrawProviderIT extends BaseCrR4TestServer {
 
     public Bundle callWithdraw(String id) {
         return ourClient
-            .operation()
-            .onInstance(id)
-            .named("$withdraw")
-            .withNoParameters(Parameters.class)
-            .returnResourceType(Bundle.class)
-            .execute();
+                .operation()
+                .onInstance(id)
+                .named("$withdraw")
+                .withNoParameters(Parameters.class)
+                .returnResourceType(Bundle.class)
+                .execute();
     }
 
     @Test
@@ -27,5 +26,4 @@ public class WithdrawProviderIT extends BaseCrR4TestServer {
         var result = callWithdraw("Library/SpecificationLibrary");
         Assertions.assertNotNull(result);
     }
-
 }

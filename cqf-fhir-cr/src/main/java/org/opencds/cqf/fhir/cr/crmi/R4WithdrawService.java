@@ -46,7 +46,4 @@ public class R4WithdrawService {
             throw new UnprocessableEntityException(e.getMessage());
         }
     }
-
-
-
 }

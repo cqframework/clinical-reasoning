@@ -106,6 +106,9 @@ public class ReleaseVisitor {
     public static Bundle searchArtifactAssessmentForArtifact(IIdType reference, IRepository repository) {
         Map<String, List<IQueryParameterType>> searchParams = new HashMap<>();
         List<IQueryParameterType> urlList = new ArrayList<>();
+
+        // TODO: This logic seems to be incorrect? It is throwing exceptions in the WithdrawProviderIT & ReleaseProviderIT. Needs review.
+        // TODO: InvalidRequestException: HAPI-1223: Unknown search parameter "artifact" for resource type "Basic". Valid search parameters for this search are: [_id, _lastUpdated, _profile, _security, _source, _tag, author, code, created, identifier, patient, subject]
         urlList.add(new ReferenceParam(reference.getResourceType() + "/" + reference.getIdPart()));
         searchParams.put("artifact", urlList);
         return repository.search(Bundle.class, Basic.class, searchParams);

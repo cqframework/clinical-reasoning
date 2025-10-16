@@ -11,6 +11,6 @@ public abstract class BaseCdsCrServiceTest extends BaseCdsCrTest {
     protected ICdsConfigService cdsConfigService;
 
     protected ICdsConfigService getCdsConfigService() {
-        return new CdsConfigServiceImpl(fhirContext, objectMapper, null, restfulServer);
+        return new CdsConfigServiceImpl(fhirContext, objectMapper, null, getRestfulServer());
     }
 }

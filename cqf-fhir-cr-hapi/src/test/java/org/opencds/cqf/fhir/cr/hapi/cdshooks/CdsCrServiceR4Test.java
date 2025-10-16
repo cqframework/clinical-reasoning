@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cr.hapi.cdshooks;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.opencds.cqf.fhir.cr.hapi.cdshooks.CdsCrConstants.APPLY_PARAMETER_DATA;
 import static org.opencds.cqf.fhir.cr.hapi.cdshooks.CdsCrConstants.APPLY_PARAMETER_ENCOUNTER;
@@ -23,6 +24,8 @@ import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseJson;
 import ca.uhn.hapi.fhir.cdshooks.module.CdsHooksObjectMapperFactory;
 import java.io.IOException;
+import java.util.Map;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
@@ -34,10 +37,12 @@ import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
+@SuppressWarnings("UnstableApiUsage")
 class CdsCrServiceR4Test extends BaseCdsCrServiceTest {
 
     private CdsCrService testSubject;
@@ -45,7 +50,7 @@ class CdsCrServiceR4Test extends BaseCdsCrServiceTest {
     @BeforeEach
     void beforeEach() {
         fhirContext = FhirContext.forR4Cached();
-        repository = new InMemoryFhirRepository(fhirContext);
+        repository = getRepository();
         adapterFactory = IAdapterFactory.forFhirContext(fhirContext);
         objectMapper = new CdsHooksObjectMapperFactory(fhirContext).newMapper();
         testSubject = new CdsCrService(REQUEST_DETAILS, repository);
@@ -62,20 +67,21 @@ class CdsCrServiceR4Test extends BaseCdsCrServiceTest {
     }
 
     @Test
-    public void testR4Params() throws IOException {
+    void testR4Params() throws IOException {
         final String rawRequest =
                 ClasspathUtil.loadResource("org/opencds/cqf/fhir/cr/hapi/cdshooks/ASLPCrdServiceRequest.json");
         final CdsServiceRequestJson cdsServiceRequestJson =
                 objectMapper.readValue(rawRequest, CdsServiceRequestJson.class);
         final Bundle bundle = ClasspathUtil.loadResource(
                 fhirContext, Bundle.class, "org/opencds/cqf/fhir/cr/hapi/cdshooks/Bundle-ASLPCrd-Content.json");
-        final IRepository repository = new InMemoryFhirRepository(fhirContext, bundle);
-        final RequestDetails requestDetails = new SystemRequestDetails();
+        final IRepository localRepository = new InMemoryFhirRepository(fhirContext, bundle);
+        final RequestDetails localRequestDetails = new SystemRequestDetails();
         final IdType planDefinitionId = new IdType(PLAN_DEFINITION_RESOURCE_NAME, "ASLPCrd");
-        requestDetails.setId(planDefinitionId);
+        localRequestDetails.setId(planDefinitionId);
 
-        IBaseParameters iBaseParameters =
-                new CdsCrService(requestDetails, repository).encodeParams(cdsServiceRequestJson);
+        CdsCrService cdsCrService = new CdsCrService(localRequestDetails, localRepository);
+
+        IBaseParameters iBaseParameters = cdsCrService.encodeParams(cdsServiceRequestJson);
 
         final var params = adapterFactory.createParameters(iBaseParameters);
 
@@ -84,27 +90,27 @@ class CdsCrServiceR4Test extends BaseCdsCrServiceTest {
     }
 
     @Test
-    public void testR4EncodeVariousParams() {
+    void testR4EncodeVariousParams() {
         final String expectedUserId = "user-id";
         final String expectedEncounterId = "encounter-id";
         final String expectedPatientId = "patient-id";
-
-        final RequestDetails requestDetails = new SystemRequestDetails();
 
         CdsServiceRequestJson cdsServiceRequestJson = new CdsServiceRequestJson();
         cdsServiceRequestJson.addContext(CDS_PARAMETER_USER_ID, expectedUserId);
         cdsServiceRequestJson.addContext(CDS_PARAMETER_ENCOUNTER_ID, expectedEncounterId);
         cdsServiceRequestJson.addPrefetch("patientKey", new Patient().setId(expectedPatientId));
 
-        IBaseParameters iBaseParameters =
-                new CdsCrService(requestDetails, repository).encodeParams(cdsServiceRequestJson);
+        IBaseParameters iBaseParameters = testSubject.encodeParams(cdsServiceRequestJson);
 
         final var params = adapterFactory.createParameters(iBaseParameters);
 
         assertEquals(3, params.getParameter().size());
         assertEquals(
-                (params.getParameter(APPLY_PARAMETER_PRACTITIONER)).getValue().toString(), expectedUserId);
-        assertEquals((params.getParameter(APPLY_PARAMETER_ENCOUNTER)).getValue().toString(), expectedEncounterId);
+                expectedUserId,
+                (params.getParameter(APPLY_PARAMETER_PRACTITIONER)).getValue().toString());
+        assertEquals(
+                expectedEncounterId,
+                (params.getParameter(APPLY_PARAMETER_ENCOUNTER)).getValue().toString());
 
         assertTrue(params.getParameter(APPLY_PARAMETER_DATA).hasResource());
         IBaseResource resource = params.getParameter(APPLY_PARAMETER_DATA).getResource();
@@ -118,14 +124,12 @@ class CdsCrServiceR4Test extends BaseCdsCrServiceTest {
     }
 
     @Test
-    public void testEncodeCqlParameters() {
-        final RequestDetails requestDetails = new SystemRequestDetails();
+    void testEncodeCqlParameters() {
 
         CdsServiceRequestJson cdsServiceRequestJson = new CdsServiceRequestJson();
         cdsServiceRequestJson.addContext(CDS_PARAMETER_DRAFT_ORDERS, new Patient().setId("patient-id"));
 
-        IBaseParameters iBaseParameters =
-                new CdsCrService(requestDetails, repository).encodeParams(cdsServiceRequestJson);
+        IBaseParameters iBaseParameters = testSubject.encodeParams(cdsServiceRequestJson);
 
         final var params = adapterFactory.createParameters(iBaseParameters);
 
@@ -147,13 +151,12 @@ class CdsCrServiceR4Test extends BaseCdsCrServiceTest {
     }
 
     @Test
-    public void testR4Response() {
+    void testR4Response() {
         final Bundle bundle = ClasspathUtil.loadResource(
                 fhirContext, Bundle.class, "org/opencds/cqf/fhir/cr/hapi/cdshooks/Bundle-ASLPCrd-Content.json");
         final IRepository repository = new InMemoryFhirRepository(fhirContext, bundle);
         final Bundle responseBundle = ClasspathUtil.loadResource(
                 fhirContext, Bundle.class, "org/opencds/cqf/fhir/cr/hapi/cdshooks/Bundle-ASLPCrd-Response.json");
-
         final Parameters response = new Parameters()
                 .addParameter(
                         new ParametersParameterComponent().setName("return").setResource(responseBundle));
@@ -162,11 +165,32 @@ class CdsCrServiceR4Test extends BaseCdsCrServiceTest {
         final IdType planDefinitionId = new IdType(PLAN_DEFINITION_RESOURCE_NAME, "ASLPCrd");
         requestDetails.setId(planDefinitionId);
 
-        final CdsServiceResponseJson cdsServiceResponseJson =
-                new CdsCrService(requestDetails, repository).encodeResponse(response);
+        CdsCrService cdsCrService = new CdsCrService(requestDetails, repository);
+        final CdsServiceResponseJson cdsServiceResponseJson = cdsCrService.encodeResponse(response);
 
         assertEquals(1, cdsServiceResponseJson.getCards().size());
         assertFalse(cdsServiceResponseJson.getCards().get(0).getSummary().isEmpty());
         assertFalse(cdsServiceResponseJson.getCards().get(0).getDetail().isEmpty());
+    }
+
+    @Test
+    void testGetResourcesFromBundle() {
+        // Arrange
+        final String patientKey = "Patient123";
+
+        Patient patient = new Patient();
+        patient.setId(new IdType("Patient", "123"));
+        IBaseBundle bundle = BundleHelper.newBundle(FhirVersionEnum.R4);
+        BundleHelper.addEntry(bundle, BundleHelper.newEntryWithResource(patient));
+
+        // Act
+        CdsParametersEncoderService cdsParametersEncoderService = new CdsParametersEncoderService(repository);
+        Map<String, IBaseResource> resourceMap = cdsParametersEncoderService.getResourcesFromBundle(bundle);
+
+        // Assert
+        assertNotNull(resourceMap);
+        assertEquals(1, resourceMap.size());
+        assertTrue(resourceMap.containsKey(patientKey));
+        assertEquals(patient, resourceMap.get(patientKey));
     }
 }

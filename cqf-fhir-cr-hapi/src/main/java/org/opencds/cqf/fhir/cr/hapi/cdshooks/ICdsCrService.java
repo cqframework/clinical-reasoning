@@ -26,6 +26,11 @@ public interface ICdsCrService {
         return encodeResponse(response);
     }
 
+    /**
+     * This method was intentionally declared in the interface definition to promote and facilitate extensibility.
+     * @param params parameters specifying the 'apply' operation.
+     * @return an encoded response to the operation invocation.
+     */
     default IBaseResource invokeApply(IBaseParameters params) {
         var operationName = getFhirVersion() == FhirVersionEnum.R4
                 ? ProviderConstants.CR_OPERATION_R5_APPLY

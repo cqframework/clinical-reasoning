@@ -27,8 +27,8 @@ class CompositeEvaluationResultsPerMeasureTest {
 
         CompositeEvaluationResultsPerMeasure.Builder builder = CompositeEvaluationResultsPerMeasure.builder();
         builder.addResult(m1, "subject-123", er);
-        builder.addError(m1, "oops-1");
-        builder.addError(m2, "oops-2");
+        builder.addErrors(List.of(m1), "oops-1");
+        builder.addErrors(List.of(m2), "oops-2");
 
         CompositeEvaluationResultsPerMeasure composite = builder.build();
 

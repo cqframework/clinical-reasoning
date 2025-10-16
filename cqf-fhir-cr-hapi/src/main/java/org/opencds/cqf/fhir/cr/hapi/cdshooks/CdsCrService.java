@@ -12,6 +12,7 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
  * It is expected that a new instance of this service will be created to handle each hook invocation
  * by a Bean implementing ICdsCrServiceFactory. See {@code CrCdsHookConfig}.
  */
+@SuppressWarnings("UnstableApiUsage")
 public class CdsCrService implements ICdsCrService {
     protected final RequestDetails requestDetails;
     protected final IRepository repository;
@@ -47,7 +48,6 @@ public class CdsCrService implements ICdsCrService {
         return cdsParametersEncoderService.encodeParams(json);
     }
 
-    @SuppressWarnings("unchecked")
     public CdsServiceResponseJson encodeResponse(Object response) {
         return cdsResponseEncoderService.encodeResponse(response);
     }

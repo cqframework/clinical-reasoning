@@ -22,19 +22,16 @@ import org.opencds.cqf.fhir.cr.hapi.cdshooks.ICdsCrServiceRegistry;
 import org.opencds.cqf.fhir.cr.hapi.cdshooks.discovery.CdsCrDiscoveryServiceRegistry;
 import org.opencds.cqf.fhir.cr.hapi.cdshooks.discovery.ICdsCrDiscoveryServiceRegistry;
 import org.opencds.cqf.fhir.cr.hapi.cdshooks.discovery.ICrDiscoveryServiceFactory;
-import org.opencds.cqf.fhir.cr.hapi.config.r4.ApplyOperationConfig;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 @SuppressWarnings("UnstableApiUsage")
 @Configuration
-@Conditional(CrConfigCondition.class)
-@Import({RepositoryConfig.class, ApplyOperationConfig.class})
+@Import({CrCdsConfig.class})
 public class CrCdsHooksConfig {
     private static final Logger ourLog = LoggerFactory.getLogger(CrCdsHooksConfig.class);
 

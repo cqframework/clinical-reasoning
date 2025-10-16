@@ -29,8 +29,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
+@SuppressWarnings("UnstableApiUsage")
 @Configuration
-@Import(CrCdsConfig.class)
+@Import({CrCdsConfig.class})
 public class CrCdsHooksConfig {
     private static final Logger ourLog = LoggerFactory.getLogger(CrCdsHooksConfig.class);
 

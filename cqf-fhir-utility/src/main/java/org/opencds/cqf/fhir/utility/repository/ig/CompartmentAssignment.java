@@ -19,7 +19,7 @@ record CompartmentAssignment(String compartmentType, String compartmentId) {
         return new CompartmentAssignment(normalizedType, normalizedId);
     }
 
-    boolean hasContextId() {
+    boolean hasCompartmentId() {
         return compartmentId != null && !compartmentId.isBlank();
     }
 

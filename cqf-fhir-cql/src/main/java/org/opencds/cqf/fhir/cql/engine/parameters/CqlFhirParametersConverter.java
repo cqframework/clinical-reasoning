@@ -113,16 +113,6 @@ public class CqlFhirParametersConverter {
             String name = entry.getKey();
             Object value = entry.getValue().value();
 
-            if (value == null) {
-                // Null value, add a single empty value with an extension indicating the reason
-                var dataAbsentValue = emptyBooleanWithExtension(
-                        fhirContext,
-                        DATA_ABSENT_REASON_EXT_URL,
-                        codeType(fhirContext, DATA_ABSENT_REASON_UNKNOWN_CODE));
-                addPart(pa, name, dataAbsentValue);
-                continue;
-            }
-
             if (value instanceof Iterable<?> iterable) {
                 if (!iterable.iterator().hasNext()) {
                     // Empty list
@@ -152,7 +142,8 @@ public class CqlFhirParametersConverter {
     @SuppressWarnings("unchecked")
     protected void addPart(IParametersAdapter pa, String name, Object value) {
         if (value == null) {
-            return;
+            value = emptyBooleanWithExtension(
+                    fhirContext, DATA_ABSENT_REASON_EXT_URL, codeType(fhirContext, DATA_ABSENT_REASON_UNKNOWN_CODE));
         }
 
         if (value instanceof Iterable) {

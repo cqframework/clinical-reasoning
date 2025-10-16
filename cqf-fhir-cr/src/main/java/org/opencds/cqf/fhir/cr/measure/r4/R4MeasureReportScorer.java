@@ -83,6 +83,7 @@ import org.slf4j.LoggerFactory;
  *
  * <p> (v3.18.0 and below) Previous calculation of measure score from MeasureReport only interpreted Numerator, Denominator membership since exclusions and exceptions were already applied. Now exclusions and exceptions are present in Denominator and Numerator populations, the measure scorer calculation has to take into account additional population membership to determine Final-Numerator and Final-Denominator values</p>
  */
+@SuppressWarnings("squid:S1135")
 public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport> {
 
     private static final Logger logger = LoggerFactory.getLogger(R4MeasureReportScorer.class);

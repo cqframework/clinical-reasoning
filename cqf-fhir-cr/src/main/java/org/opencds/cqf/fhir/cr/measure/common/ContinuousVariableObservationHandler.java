@@ -1,7 +1,5 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
-import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.MEASUREPOPULATION;
-
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.ArrayList;
@@ -13,6 +11,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import org.hl7.elm.r1.FunctionDef;
+import org.hl7.elm.r1.OperandDef;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Observation;
@@ -117,20 +116,20 @@ public class ContinuousVariableObservationHandler {
         // make new expression name for uniquely extracting results
         // this will be used in MeasureEvaluator
         var expressionName = criteriaPopulationId + "-" + observationExpression;
+
         // loop through measure-population results
         int index = 0;
         final Map<Object, Object> functionResults = new HashMap<>();
         final Set<Object> evaluatedResources = new HashSet<>();
+
         for (Object result : resultsIter) {
             final ObservationEvaluationResult observationResult =
                     evaluateObservationCriteria(result, observationExpression, groupDef.isBooleanBasis(), context);
 
-            validateObservationResult(result, observationResult.result);
-
             var observationId = expressionName + "-" + index;
             // wrap result in Observation resource to avoid duplicate results data loss
             // in set object
-            Observation observation = wrapResultAsObservation(observationId, observationId, observationResult.result);
+            var observation = wrapResultAsObservation(observationId, observationId, observationResult.result());
             // add function results to existing EvaluationResult under new expression
             // name
             // need a way to capture input parameter here too, otherwise we have no way
@@ -138,15 +137,13 @@ public class ContinuousVariableObservationHandler {
             // key= input parameter to function
             // value= the output Observation resource containing calculated value
             functionResults.put(result, observation);
-            evaluatedResources.addAll(observationResult.evaluatedResources);
+            evaluatedResources.addAll(observationResult.evaluatedResources());
 
             index++;
         }
 
         return new MeasureObservationResult(expressionName, evaluatedResources, functionResults);
     }
-
-    private record ObservationEvaluationResult(Object result, Set<Object> evaluatedResources) {}
 
     /**
      * method used to evaluate cql expression defined for 'continuous variable' scoring type measures that have 'measure observation' to calculate
@@ -158,7 +155,7 @@ public class ContinuousVariableObservationHandler {
      * @return cql results for subject requested
      */
     @SuppressWarnings({"deprecation", "removal"})
-    private static ObservationEvaluationResult evaluateObservationCriteria(
+    public static ObservationEvaluationResult evaluateObservationCriteria(
             Object resource, String criteriaExpression, boolean isBooleanBasis, CqlEngine context) {
 
         var ed = Libraries.resolveExpressionRef(
@@ -174,9 +171,15 @@ public class ContinuousVariableObservationHandler {
         try {
             if (!isBooleanBasis) {
                 // subject based observations don't have a parameter to pass in
-                // LUKETODO:  error handling
-                context.getState()
-                        .push(new Variable(functionDef.getOperand().get(0).getName()).withValue(resource));
+                final List<OperandDef> operands = functionDef.getOperand();
+
+                if (operands.isEmpty()) {
+                    throw new InternalErrorException("Measure observation %s does not reference a boolean basis");
+                }
+
+                final Variable variableToPush = new Variable(operands.get(0).getName()).withValue(resource);
+
+                context.getState().push(variableToPush);
             }
             result = context.getEvaluationVisitor().visitExpression(ed.getExpression(), context.getState());
 
@@ -184,7 +187,11 @@ public class ContinuousVariableObservationHandler {
             context.getState().popActivationFrame();
         }
 
-        return new ObservationEvaluationResult(result, captureEvaluatedResources(context));
+        final Set<Object> evaluatedResources = captureEvaluatedResources(context);
+
+        validateObservationResult(resource, result);
+
+        return new ObservationEvaluationResult(result, evaluatedResources);
     }
 
     private static Optional<ExpressionResult> tryGetExpressionResult(
@@ -312,41 +319,5 @@ public class ContinuousVariableObservationHandler {
         }
 
         return q;
-    }
-
-    // LUKETODO:  this is used by DSTU3 only:  what to do with this?
-    /**
-     * Measures with defined scoring type of 'continuous-variable' where a defined 'measure-observation' population is used to evaluate results of 'measure-population'.
-     * This method is a downstream calculation given it requires calculated results before it can be called.
-     * Results are then added to associated MeasureDef
-     * @param measureDef measure defined objects that are populated from criteria expression results
-     * @param context cql engine context used to evaluate results
-     */
-    public static void continuousVariableObservationLegacyLogic(MeasureDef measureDef, CqlEngine context) {
-        // Continuous Variable?
-        for (GroupDef groupDef : measureDef.groups()) {
-            // Measure Observation defined?
-            if (groupDef.measureScoring().equals(MeasureScoring.CONTINUOUSVARIABLE)
-                    && groupDef.getSingle(MeasurePopulationType.MEASUREOBSERVATION) != null) {
-
-                PopulationDef measurePopulation = groupDef.getSingle(MEASUREPOPULATION);
-                PopulationDef measureObservation = groupDef.getSingle(MeasurePopulationType.MEASUREOBSERVATION);
-
-                // Inject MeasurePopulation results into Measure Observation Function
-                Map<String, Set<Object>> subjectResources = measurePopulation.getSubjectResources();
-
-                for (Map.Entry<String, Set<Object>> entry : subjectResources.entrySet()) {
-                    String subjectId = entry.getKey();
-                    Set<Object> resourcesForSubject = entry.getValue();
-
-                    for (Object resource : resourcesForSubject) {
-                        final ObservationEvaluationResult observationResult = evaluateObservationCriteria(
-                                resource, measureObservation.expression(), groupDef.isBooleanBasis(), context);
-                        measureObservation.addResource(observationResult.result);
-                        measureObservation.addResource(subjectId, observationResult.evaluatedResources);
-                    }
-                }
-            }
-        }
     }
 }

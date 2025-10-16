@@ -1027,11 +1027,6 @@ public class Measure {
             return new SelectedStratum(value().getStratum().get(position - 1), this);
         }
 
-        public SelectedStratifier stratumCount(int stratumCount) {
-            assertEquals(stratumCount, value().getStratum().size());
-            return this;
-        }
-
         public SelectedStratifier hasStratum(String textValue) {
             final SelectedStratum stratum = stratum(textValue);
             assertNotNull(stratum.value());

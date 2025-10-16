@@ -255,7 +255,7 @@ public class R4MeasureProcessor {
 
         var measurementPeriodParams = buildMeasurementPeriod(periodStart, periodEnd);
         var zonedMeasurementPeriod = MeasureProcessorUtils.getZonedTimeZoneForEval(
-                measureProcessorUtils.getDefaultMeasurementPeriod(measurementPeriodParams, context));
+                MeasureProcessorUtils.getDefaultMeasurementPeriod(measurementPeriodParams, context));
 
         // Do this to be backwards compatible with the previous single-library evaluation:
         // Trigger first-pass validation on measure scoring as well as other aspects of the Measures

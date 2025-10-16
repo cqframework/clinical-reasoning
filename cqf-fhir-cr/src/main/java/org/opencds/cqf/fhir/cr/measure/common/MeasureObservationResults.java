@@ -5,22 +5,20 @@ import java.util.List;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
 
-public class MeasureObservationResults {
-    private final List<MeasureObservationResult> measureObservationResults;
+/**
+ * Capture results for multiple continuous variable populations.
+ */
+public record MeasureObservationResults(List<MeasureObservationResult> results) {
 
     static final MeasureObservationResults EMPTY = new MeasureObservationResults(List.of());
-
-    MeasureObservationResults(List<MeasureObservationResult> measureObservationResults) {
-        this.measureObservationResults = measureObservationResults;
-    }
 
     EvaluationResult withNewEvaluationResult(EvaluationResult origEvaluationResult) {
         final EvaluationResult evaluationResult = new EvaluationResult();
 
         var copyOfExpressionResults = new HashMap<>(origEvaluationResult.expressionResults);
 
-        measureObservationResults.forEach(measureObservationResult -> copyOfExpressionResults.put(
-                measureObservationResult.getExpressionName(), buildExpressionResult(measureObservationResult)));
+        results.forEach(measureObservationResult -> copyOfExpressionResults.put(
+                measureObservationResult.expressionName(), buildExpressionResult(measureObservationResult)));
 
         evaluationResult.expressionResults.putAll(copyOfExpressionResults);
 
@@ -29,6 +27,6 @@ public class MeasureObservationResults {
 
     private ExpressionResult buildExpressionResult(MeasureObservationResult measureObservationResult) {
         return new ExpressionResult(
-                measureObservationResult.getFunctionResults(), measureObservationResult.getEvaluatedResources());
+                measureObservationResult.functionResults(), measureObservationResult.evaluatedResources());
     }
 }

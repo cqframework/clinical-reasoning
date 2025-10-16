@@ -36,13 +36,13 @@ import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 class MeasureEvaluationApplyScoringTests {
 
     // These are "IG"'s used in other tests:
-    private static final String IG_NAME_SINGLE_MEASURE = "MeasureTest";
-    private static final String IG_NAME_MULTI_MEASURE = "MinimalMeasureEvaluation";
+    private static final String IG_NAME_MEASURE_TEST = "MeasureTest";
+    private static final String IG_NAME_MINIMAL_MEASURE_EVALUATION = "MinimalMeasureEvaluation";
 
     private static final Measure.Given GIVEN_SINGLE = getGivenWithMockedRepositorySingleMeasure();
     private static final TestDataGenerator testDataGenerator = new TestDataGenerator(GIVEN_SINGLE.getRepository());
 
-    private static final MultiMeasure.Given GIVEN_MULTI = getGivenWithMockedRepositoryMultiMeasure();
+    private static final MultiMeasure.Given GIVEN_MULTI = getGivenWithMockedRepositoryMinimalMeasure();
 
     @BeforeAll
     static void init() {
@@ -550,7 +550,7 @@ class MeasureEvaluationApplyScoringTests {
 
     // Use this if you want database-like behaviour of retrieving different objects per query
     private static Measure.Given getGivenWithMockedRepositorySingleMeasure() {
-        var origGiven = Measure.given().repositoryFor(IG_NAME_SINGLE_MEASURE);
+        var origGiven = Measure.given().repositoryFor(IG_NAME_MEASURE_TEST);
 
         var spiedRepository = spy(origGiven.getRepository());
 
@@ -560,8 +560,8 @@ class MeasureEvaluationApplyScoringTests {
     }
 
     // Use this if you want database-like behaviour of retrieving different objects per query
-    private static MultiMeasure.Given getGivenWithMockedRepositoryMultiMeasure() {
-        var origGiven = MultiMeasure.given().repositoryFor(IG_NAME_MULTI_MEASURE);
+    private static MultiMeasure.Given getGivenWithMockedRepositoryMinimalMeasure() {
+        var origGiven = MultiMeasure.given().repositoryFor(IG_NAME_MINIMAL_MEASURE_EVALUATION);
 
         var spiedRepository = spy(origGiven.getRepository());
 

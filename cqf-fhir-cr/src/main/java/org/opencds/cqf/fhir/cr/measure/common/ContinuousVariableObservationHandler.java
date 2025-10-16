@@ -32,7 +32,7 @@ public class ContinuousVariableObservationHandler {
         // static class with private constructor
     }
 
-    static List<MeasureObservationResult> continuousVariableEvaluation(
+    static MeasureObservationResults continuousVariableEvaluation(
             CqlEngine context,
             List<MeasureDef> measureDefs,
             List<VersionedIdentifier> libraryIdentifiers,
@@ -46,11 +46,11 @@ public class ContinuousVariableObservationHandler {
 
         if (measureDefsWithMeasureObservations.isEmpty()) {
             // Don't need to do anything if there are no measure observations to process
-            return List.of();
+            return MeasureObservationResults.EMPTY;
         }
 
         // measure Observation Path, have to re-initialize everything again
-        LibraryHandler.initLibraries(context, libraryIdentifiers);
+        LibraryInitHandler.initLibraries(context, libraryIdentifiers);
 
         final List<MeasureObservationResult> finalResults = new ArrayList<>();
 
@@ -65,19 +65,22 @@ public class ContinuousVariableObservationHandler {
                         .toList();
                 for (PopulationDef populationDef : measureObservationPopulations) {
                     // each measureObservation is evaluated
-                    var results = processMeasureObservation(
+                    var result = processMeasureObservation(
                             context, evaluationResult, subjectTypePart, groupDef, populationDef);
 
-                    finalResults.addAll(results);
+                    finalResults.add(result);
                 }
             }
         }
 
-        return finalResults;
+        return new MeasureObservationResults(finalResults);
     }
 
-    // LUKETODO:  javadoc
-    private static List<MeasureObservationResult> processMeasureObservation(
+    /**
+     * For a given measure observation population, do an ad-hoc function evaluation and
+     * accumulate the results that will be subsequently added to the CQL evaluation result.
+     */
+    private static MeasureObservationResult processMeasureObservation(
             CqlEngine context,
             EvaluationResult evaluationResult,
             String subjectTypePart,
@@ -105,7 +108,7 @@ public class ContinuousVariableObservationHandler {
                 tryGetExpressionResult(criteriaExpressionInput, evaluationResult);
 
         if (optExpressionResult.isEmpty()) {
-            return List.of();
+            return MeasureObservationResult.EMPTY;
         }
 
         final ExpressionResult expressionResult = optExpressionResult.get();
@@ -116,19 +119,18 @@ public class ContinuousVariableObservationHandler {
         var expressionName = criteriaPopulationId + "-" + observationExpression;
         // loop through measure-population results
         int index = 0;
-        Map<Object, Object> functionResults = new HashMap<>();
-        Set<Object> evaluatedResources = new HashSet<>();
-        final List<MeasureObservationResult> results = new ArrayList<>();
+        final Map<Object, Object> functionResults = new HashMap<>();
+        final Set<Object> evaluatedResources = new HashSet<>();
         for (Object result : resultsIter) {
-            Object observationResult = evaluateObservationCriteria(
-                    result, observationExpression, evaluatedResources, groupDef.isBooleanBasis(), context);
+            final ObservationEvaluationResult observationResult =
+                    evaluateObservationCriteria(result, observationExpression, groupDef.isBooleanBasis(), context);
 
-            validateObservationResult(result, observationResult);
+            validateObservationResult(result, observationResult.result);
 
             var observationId = expressionName + "-" + index;
             // wrap result in Observation resource to avoid duplicate results data loss
             // in set object
-            Observation observation = wrapResultAsObservation(observationId, observationId, observationResult);
+            Observation observation = wrapResultAsObservation(observationId, observationId, observationResult.result);
             // add function results to existing EvaluationResult under new expression
             // name
             // need a way to capture input parameter here too, otherwise we have no way
@@ -136,38 +138,28 @@ public class ContinuousVariableObservationHandler {
             // key= input parameter to function
             // value= the output Observation resource containing calculated value
             functionResults.put(result, observation);
-
-            final ExpressionResult expressionResultFromFunction =
-                    new ExpressionResult(functionResults, evaluatedResources);
-
-            final MeasureObservationResult measureObservationResult =
-                    new MeasureObservationResult(expressionName, expressionResultFromFunction);
-
-            results.add(measureObservationResult);
+            evaluatedResources.addAll(observationResult.evaluatedResources);
 
             index++;
         }
 
-        return results;
+        return new MeasureObservationResult(expressionName, evaluatedResources, functionResults);
     }
+
+    private record ObservationEvaluationResult(Object result, Set<Object> evaluatedResources) {}
 
     /**
      * method used to evaluate cql expression defined for 'continuous variable' scoring type measures that have 'measure observation' to calculate
      * This method is called as a second round of processing given it uses 'measure population' results as input data for function
      * @param resource object that stores results of cql
      * @param criteriaExpression expression name to call
-     * @param outEvaluatedResources set to store evaluated resources touched
      * @param isBooleanBasis the type of result created from expression
      * @param context cql engine context used to evaluate expression
      * @return cql results for subject requested
      */
     @SuppressWarnings({"deprecation", "removal"})
-    private static Object evaluateObservationCriteria(
-            Object resource,
-            String criteriaExpression,
-            Set<Object> outEvaluatedResources,
-            boolean isBooleanBasis,
-            CqlEngine context) {
+    private static ObservationEvaluationResult evaluateObservationCriteria(
+            Object resource, String criteriaExpression, boolean isBooleanBasis, CqlEngine context) {
 
         var ed = Libraries.resolveExpressionRef(
                 criteriaExpression, context.getState().getCurrentLibrary());
@@ -192,9 +184,7 @@ public class ContinuousVariableObservationHandler {
             context.getState().popActivationFrame();
         }
 
-        captureEvaluatedResources(outEvaluatedResources, context);
-
-        return result;
+        return new ObservationEvaluationResult(result, captureEvaluatedResources(context));
     }
 
     private static Optional<ExpressionResult> tryGetExpressionResult(
@@ -270,14 +260,18 @@ public class ContinuousVariableObservationHandler {
 
     /**
      * method used to extract evaluated resources touched by CQL criteria expressions
-     * @param outEvaluatedResources set object used to capture resources touched
      * @param context cql engine context
      */
-    private static void captureEvaluatedResources(Set<Object> outEvaluatedResources, CqlEngine context) {
-        if (outEvaluatedResources != null && context.getState().getEvaluatedResources() != null) {
-            outEvaluatedResources.addAll(context.getState().getEvaluatedResources());
+    private static Set<Object> captureEvaluatedResources(CqlEngine context) {
+        final Set<Object> evaluatedResources;
+        if (context.getState().getEvaluatedResources() != null) {
+            evaluatedResources = context.getState().getEvaluatedResources();
+        } else {
+            evaluatedResources = new HashSet<>();
         }
         clearEvaluatedResources(context);
+
+        return evaluatedResources;
     }
 
     // reset evaluated resources followed by a context evaluation
@@ -328,7 +322,7 @@ public class ContinuousVariableObservationHandler {
      * @param measureDef measure defined objects that are populated from criteria expression results
      * @param context cql engine context used to evaluate results
      */
-    public static void continuousVariableObservation(MeasureDef measureDef, CqlEngine context) {
+    public static void continuousVariableObservationLegacyLogic(MeasureDef measureDef, CqlEngine context) {
         // Continuous Variable?
         for (GroupDef groupDef : measureDef.groups()) {
             // Measure Observation defined?
@@ -346,14 +340,10 @@ public class ContinuousVariableObservationHandler {
                     Set<Object> resourcesForSubject = entry.getValue();
 
                     for (Object resource : resourcesForSubject) {
-                        Object observationResult = evaluateObservationCriteria(
-                                resource,
-                                measureObservation.expression(),
-                                measureObservation.getEvaluatedResources(),
-                                groupDef.isBooleanBasis(),
-                                context);
-                        measureObservation.addResource(observationResult);
-                        measureObservation.addResource(subjectId, observationResult);
+                        final ObservationEvaluationResult observationResult = evaluateObservationCriteria(
+                                resource, measureObservation.expression(), groupDef.isBooleanBasis(), context);
+                        measureObservation.addResource(observationResult.result);
+                        measureObservation.addResource(subjectId, observationResult.evaluatedResources);
                     }
                 }
             }

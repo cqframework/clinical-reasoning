@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.annotation.Nullable;
 import java.util.ArrayList;
@@ -7,10 +8,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import org.apache.commons.collections4.CollectionUtils;
 import org.hl7.fhir.r4.model.Enumeration;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
@@ -320,14 +321,29 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
             GroupDef groupDef,
             MeasureScoring measureScoring,
             MeasureReportGroupStratifierComponent stratifierComponent) {
+
         for (StratifierGroupComponent sgc : stratifierComponent.getStratum()) {
-            scoreStratum(measureUrl, groupDef, measureScoring, sgc);
+
+            // This isn't fantastic, but it seems to work
+            final Optional<StratifierDef> optStratifierDef = groupDef.stratifiers().stream()
+                    .filter(stratifierDef -> stratifierComponent.getId().equals(stratifierDef.id()))
+                    .findFirst();
+
+            if (optStratifierDef.isEmpty()) {
+                throw new InternalErrorException("Stratifier component " + sgc.getId() + " does not exist.");
+            }
+
+            scoreStratum(measureUrl, groupDef, optStratifierDef.get(), measureScoring, sgc);
         }
     }
 
     protected void scoreStratum(
-            String measureUrl, GroupDef groupDef, MeasureScoring measureScoring, StratifierGroupComponent stratum) {
-        final Quantity quantity = getStratumScoreOrNull(measureUrl, groupDef, measureScoring, stratum);
+            String measureUrl,
+            GroupDef groupDef,
+            StratifierDef stratifierDef,
+            MeasureScoring measureScoring,
+            StratifierGroupComponent stratum) {
+        final Quantity quantity = getStratumScoreOrNull(measureUrl, groupDef, stratifierDef, measureScoring, stratum);
 
         if (quantity != null) {
             stratum.setMeasureScore(quantity);
@@ -336,7 +352,11 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
 
     @Nullable
     private Quantity getStratumScoreOrNull(
-            String measureUrl, GroupDef groupDef, MeasureScoring measureScoring, StratifierGroupComponent stratum) {
+            String measureUrl,
+            GroupDef groupDef,
+            StratifierDef stratifierDef,
+            MeasureScoring measureScoring,
+            StratifierGroupComponent stratum) {
 
         switch (measureScoring) {
             case PROPORTION, RATIO -> {
@@ -350,15 +370,6 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
                 return null;
             }
             case CONTINUOUSVARIABLE -> {
-                final List<StratifierDef> stratifiers = groupDef.stratifiers();
-
-                if (CollectionUtils.isEmpty(stratifiers)) {
-                    return null;
-                }
-
-                // LUKETODO:  what if we have more than one stratifier??????
-                final StratifierDef stratifierDef = stratifiers.get(0);
-
                 return calculateContinuousVariableAggregateQuantity(
                         measureUrl,
                         groupDef,
@@ -381,6 +392,7 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
             PopulationDef measureObservationPopulationDef,
             StratifierDef stratifierDef,
             StratifierGroupComponent stratum) {
+
         final String stratumValue = stratum.getValue().getText();
 
         final Set<String> subjectsWithStratumValue = stratifierDef.getResults().entrySet().stream()
@@ -388,25 +400,15 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
                 .map(Entry::getKey)
                 .collect(Collectors.toUnmodifiableSet());
 
-        logger.info("1234: stratum value: {}, qualifying subjects: {}", stratumValue, subjectsWithStratumValue);
-
-        final Set<Object> qualifyingStratumResources =
-                measureObservationPopulationDef.getSubjectResources().entrySet().stream()
-                        .filter(entry -> subjectsWithStratumValue.contains(entry.getKey()))
-                        .map(Entry::getValue)
-                        .flatMap(Collection::stream)
-                        .collect(Collectors.toUnmodifiableSet());
-
-        logger.info(
-                "1234: stratum value: {}, qualifying subjects: {}, qualifyingStratumResources: {}",
-                stratumValue,
-                subjectsWithStratumValue,
-                qualifyingStratumResources);
-
-        return qualifyingStratumResources;
+        return measureObservationPopulationDef.getSubjectResources().entrySet().stream()
+                .filter(entry -> subjectsWithStratumValue.contains(entry.getKey()))
+                .map(Entry::getValue)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toUnmodifiableSet());
     }
 
-    // LUKETODO:  do we need to address more use cases?
+    // TODO: LD: we may need to match more types of stratum here:  The below logic deals with
+    // currently anticipated use cases
     private boolean doesStratumMatch(String stratumValueAsString, Object rawValueFromStratifier) {
         if (rawValueFromStratifier == null || stratumValueAsString == null) {
             return false;
@@ -420,6 +422,10 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
 
         if (rawValueFromStratifier instanceof Enumeration<?> rawValueFromStratifierAsEnumeration) {
             return stratumValueAsString.equals(rawValueFromStratifierAsEnumeration.asStringValue());
+        }
+
+        if (rawValueFromStratifier instanceof String rawValueFromStratifierAsString) {
+            return stratumValueAsString.equals(rawValueFromStratifierAsString);
         }
 
         return false;

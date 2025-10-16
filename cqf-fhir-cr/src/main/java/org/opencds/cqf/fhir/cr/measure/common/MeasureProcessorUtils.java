@@ -24,7 +24,6 @@ import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.opencds.cqf.fhir.cr.measure.helper.DateHelper;
-import org.opencds.cqf.fhir.cr.measure.r4.utils.R4DateHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -170,15 +169,12 @@ public class MeasureProcessorUtils {
         return getDefaultMeasurementPeriod(buildMeasurementPeriod(periodStart, periodEnd), context);
     }
 
-    // LUKETODO:  use DateHelper method instead
     private Interval buildMeasurementPeriod(ZonedDateTime periodStart, ZonedDateTime periodEnd) {
-        Interval measurementPeriod = null;
-        if (periodStart != null && periodEnd != null) {
-            // Operation parameter defined measurementPeriod
-            var helper = new R4DateHelper();
-            measurementPeriod = helper.buildMeasurementPeriodInterval(periodStart, periodEnd);
+        if (periodStart == null && periodEnd == null) {
+            return null;
         }
-        return measurementPeriod;
+        // Operation parameter defined measurementPeriod
+        return DateHelper.buildMeasurementPeriodInterval(periodStart, periodEnd);
     }
 
     /**
@@ -314,7 +310,7 @@ public class MeasureProcessorUtils {
                     var measureDefs =
                             multiLibraryIdMeasureEngineDetails.getMeasureDefsForLibrary(libraryVersionedIdentifier);
 
-                    final List<MeasureObservationResult> measureObservationResults =
+                    final MeasureObservationResults measureObservationResults =
                             ContinuousVariableObservationHandler.continuousVariableEvaluation(
                                     context, measureDefs, libraryIdentifiers, evaluationResult, subjectTypePart);
 

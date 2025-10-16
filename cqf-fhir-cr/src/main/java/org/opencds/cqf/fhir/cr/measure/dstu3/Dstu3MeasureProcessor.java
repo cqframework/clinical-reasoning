@@ -126,7 +126,7 @@ public class Dstu3MeasureProcessor {
                     new Dstu3PopulationBasisValidator());
         }
         // Populate populationDefs that require MeasureDef results
-        ContinuousVariableObservationHandler.continuousVariableObservation(measureDef, context);
+        ContinuousVariableObservationHandler.continuousVariableObservationLegacyLogic(measureDef, context);
 
         // Build Measure Report with Results
         return new Dstu3MeasureReportBuilder()

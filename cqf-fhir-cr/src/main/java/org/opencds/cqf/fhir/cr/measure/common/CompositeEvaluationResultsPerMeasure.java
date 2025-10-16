@@ -86,7 +86,7 @@ public class CompositeEvaluationResultsPerMeasure {
                 List<MeasureDef> measureDefs,
                 String subjectId,
                 EvaluationResult evaluationResult,
-                List<MeasureObservationResult> measureObservationResults) {
+                MeasureObservationResults measureObservationResults) {
             for (MeasureDef measureDef : measureDefs) {
                 addResult(measureDef, subjectId, evaluationResult, measureObservationResults);
             }
@@ -96,20 +96,18 @@ public class CompositeEvaluationResultsPerMeasure {
                 MeasureDef measureDef,
                 String subjectId,
                 EvaluationResult evaluationResult,
-                List<MeasureObservationResult> measureObservationResults) {
+                MeasureObservationResults measureObservationResults) {
 
             // if we have no results, we don't need to add anything
             if (evaluationResult == null || evaluationResult.expressionResults.isEmpty()) {
                 return;
             }
 
-            // Mutate the evaluationResults to include continuous variable evaluation results
-            measureObservationResults.forEach(measureObservationResult -> evaluationResult.expressionResults.put(
-                    measureObservationResult.expressionName(), measureObservationResult.expressionResult()));
+            var evaluationResultToUse = measureObservationResults.withNewEvaluationResult(evaluationResult);
 
             var resultPerMeasure = resultsPerMeasure.computeIfAbsent(measureDef, k -> new HashMap<>());
 
-            resultPerMeasure.put(subjectId, evaluationResult);
+            resultPerMeasure.put(subjectId, evaluationResultToUse);
         }
 
         public void addErrors(List<MeasureDef> measureDefs, String error) {

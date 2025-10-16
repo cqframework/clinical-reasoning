@@ -7,12 +7,13 @@ import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 
-// LUKETODO: javadoc
-public class LibraryHandler {
+/**
+ * Helper class to initialize CQL libraries for CQL evaluation.
+ */
+public class LibraryInitHandler {
 
     // LUKETODO: extend library evaluated context so library initialization isn't having to be built for
     // both, and takes advantage of caching
-    // LUKETODO:  figure out how to reuse this pattern:
     // LUKETODO:  are we reinitializing the cache here?  if so, should we try not to, somehow?
     public static void initLibraries(CqlEngine context, List<VersionedIdentifier> libraryIdentifiers) {
         var compiledLibraries = getCompiledLibraries(libraryIdentifiers, context);

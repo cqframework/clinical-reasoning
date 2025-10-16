@@ -35,13 +35,9 @@ import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cql.VersionedIdentifiers;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.CompositeEvaluationResultsPerMeasure;
-import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
-import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
-import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorUtils;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
-import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 import org.opencds.cqf.fhir.cr.measure.common.MultiLibraryIdMeasureEngineDetails;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4DateHelper;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
@@ -124,11 +120,6 @@ public class R4MeasureProcessor {
                 evaluationType,
                 this.measureEvaluationOptions.getApplyScoringSetMembership(),
                 new R4PopulationBasisValidator());
-
-        // Populate populationDefs that require MeasureDef results
-        // blocking certain continuous-variable Measures due to need of CQL context
-        // LUKETODO:  what do we do with this?
-        // continuousVariableObservationCheck(measureDef, measure);
 
         // Build Measure Report with Results
         return new R4MeasureReportBuilder()
@@ -349,26 +340,6 @@ public class R4MeasureProcessor {
                         new VersionedIdentifier().withId(entry.getKey().getId()), entry.getValue()));
 
         return builder.build();
-    }
-
-    /**  Temporary check for Measures that are being blocked from use by evaluateResults method
-     *
-     * @param measureDef defined measure definition object used to capture criteria expression results
-     * @param measure measure resource used for evaluation
-     */
-    protected void continuousVariableObservationCheck(MeasureDef measureDef, Measure measure) {
-        for (GroupDef groupDef : measureDef.groups()) {
-            // Measure Observation defined?
-            if (groupDef.measureScoring().equals(MeasureScoring.CONTINUOUSVARIABLE)
-                    && groupDef.getSingle(MeasurePopulationType.MEASUREOBSERVATION) != null) {
-                throw new InvalidRequestException(
-                        "Measure Evaluation Mode does not have CQL engine context to support: Measure Scoring Type: %s, Measure Population Type: %s, for Measure: %s"
-                                .formatted(
-                                        MeasureScoring.CONTINUOUSVARIABLE,
-                                        MeasurePopulationType.MEASUREOBSERVATION,
-                                        measure.getUrl()));
-            }
-        }
     }
 
     /**

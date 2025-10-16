@@ -195,7 +195,7 @@ public class Engines {
                 environment, settings.getCqlOptions().getCqlEngineOptions().getOptions());
         if (settings.getCqlOptions().getCqlEngineOptions().isDebugLoggingEnabled()) {
             var map = new DebugMap();
-            map.setIsLoggingEnabled(true);
+            map.setLoggingEnabled(true);
             engine.getState().setDebugMap(map);
         }
 

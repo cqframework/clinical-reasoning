@@ -23,7 +23,7 @@ class CompositeEvaluationResultsPerMeasureTest {
 
         // Create a non-empty EvaluationResult without depending on ExpressionResult constructors
         EvaluationResult er = new EvaluationResult();
-        er.expressionResults.put("subject-123", null); // non-empty map is all the Builder checks
+        er.getExpressionResults().put("subject-123", null); // non-empty map is all the Builder checks
 
         CompositeEvaluationResultsPerMeasure.Builder builder = CompositeEvaluationResultsPerMeasure.builder();
         builder.addResult(m1, "subject-123", er);
@@ -53,7 +53,7 @@ class CompositeEvaluationResultsPerMeasureTest {
         IIdType m = new IdType("Measure/immutable");
 
         EvaluationResult er = new EvaluationResult();
-        er.expressionResults.put("s", null);
+        er.getExpressionResults().put("s", null);
 
         CompositeEvaluationResultsPerMeasure composite =
                 CompositeEvaluationResultsPerMeasure.builder().build(); // empty instance to test top-level immutability

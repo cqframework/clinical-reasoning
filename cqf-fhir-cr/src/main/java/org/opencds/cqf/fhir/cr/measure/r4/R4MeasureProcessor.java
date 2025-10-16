@@ -175,9 +175,7 @@ public class R4MeasureProcessor {
                 this.measureEvaluationOptions.getApplyScoringSetMembership(),
                 new R4PopulationBasisValidator());
 
-        // LUKETODO:  figure out if we still need this:
-        var measurementPeriod = postLibraryEvaluationPeriodProcessingAndContinuousVariableObservation(
-                measure, periodStart, periodEnd, context);
+        var measurementPeriod = measureProcessorUtils.getMeasurementPeriod(periodStart, periodEnd, context);
 
         // Build Measure Report with Results
         return new R4MeasureReportBuilder()
@@ -187,49 +185,6 @@ public class R4MeasureProcessor {
                         r4EvalTypeToReportType(evaluationType, measure),
                         measurementPeriod,
                         subjectIds);
-    }
-
-    /**
-     * Do post-processing after the libraries have been evaluated, such as: setting the measurement period,
-     * once again, with the view to running continuousVariableObservation() and computing the
-     * interval used in the MeasureReportBuilder.
-     * <p/>
-     * Now that we've pushed and popped the current library stack, we're doing it again a 3rd time,
-     * since this is easier to reason about than leaving duplicate libraries on the stack that
-     * through good fortune before we didn't accidentally evaluate twice.
-     */
-    private Interval postLibraryEvaluationPeriodProcessingAndContinuousVariableObservation(
-            Measure measure,
-            @Nullable ZonedDateTime periodStart,
-            @Nullable ZonedDateTime periodEnd,
-            CqlEngine context) {
-
-        var libraryVersionedIdentifiers =
-                getMultiLibraryIdMeasureEngineDetails(List.of(measure)).getLibraryIdentifiers();
-
-        var compiledLibraries = getCompiledLibraries(libraryVersionedIdentifiers, context);
-
-        var libraries =
-                compiledLibraries.stream().map(CompiledLibrary::getLibrary).toList();
-
-        // Add back the libraries to the stack, since we popped them off during CQL
-        context.getState().init(libraries);
-
-        // Measurement Period: operation parameter defined measurement period
-        Interval measurementPeriodParams = buildMeasurementPeriod(periodStart, periodEnd);
-
-        // DON'T pop the library off the stack yet, because we need it for continuousVariableObservation()
-
-        // Populate populationDefs that require MeasureDef results
-        // LUKETODO:  can we get rid of this?
-        // measureProcessorUtils.continuousVariableObservation(measureDef, context);
-
-        // Now that we've done continuousVariableObservation(), we're safe to pop the libraries off
-        // the stack
-        popAllLibrariesFromCqlEngine(context, libraries);
-
-        // extract measurement Period from CQL to pass to report Builder
-        return measureProcessorUtils.getDefaultMeasurementPeriod(measurementPeriodParams, context);
     }
 
     public CompositeEvaluationResultsPerMeasure evaluateMeasureWithCqlEngine(

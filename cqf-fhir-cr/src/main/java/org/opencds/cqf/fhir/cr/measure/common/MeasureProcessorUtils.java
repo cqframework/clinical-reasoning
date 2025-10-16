@@ -24,6 +24,7 @@ import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.opencds.cqf.fhir.cr.measure.helper.DateHelper;
+import org.opencds.cqf.fhir.cr.measure.r4.utils.R4DateHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -163,13 +164,30 @@ public class MeasureProcessorUtils {
         context.getState().setParameter(null, MeasureConstants.MEASUREMENT_PERIOD_PARAMETER_NAME, convertedPeriod);
     }
 
+    public Interval getMeasurementPeriod(
+            @Nullable ZonedDateTime periodStart, @Nullable ZonedDateTime periodEnd, CqlEngine context) {
+
+        return getDefaultMeasurementPeriod(buildMeasurementPeriod(periodStart, periodEnd), context);
+    }
+
+    // LUKETODO:  use DateHelper method instead
+    private Interval buildMeasurementPeriod(ZonedDateTime periodStart, ZonedDateTime periodEnd) {
+        Interval measurementPeriod = null;
+        if (periodStart != null && periodEnd != null) {
+            // Operation parameter defined measurementPeriod
+            var helper = new R4DateHelper();
+            measurementPeriod = helper.buildMeasurementPeriodInterval(periodStart, periodEnd);
+        }
+        return measurementPeriod;
+    }
+
     /**
      * Get Cql MeasurementPeriod if parameters are empty
      * @param measurementPeriod Interval from operation parameters
      * @param context cql context to extract default values
      * @return operation parameters if populated, otherwise default CQL interval
      */
-    public Interval getDefaultMeasurementPeriod(Interval measurementPeriod, CqlEngine context) {
+    public static Interval getDefaultMeasurementPeriod(Interval measurementPeriod, CqlEngine context) {
         if (measurementPeriod == null) {
             return (Interval)
                     context.getState().getParameters().get(MeasureConstants.MEASUREMENT_PERIOD_PARAMETER_NAME);

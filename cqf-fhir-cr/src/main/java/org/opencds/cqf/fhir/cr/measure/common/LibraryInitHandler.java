@@ -12,9 +12,10 @@ import org.opencds.cqf.cql.engine.execution.CqlEngine;
  */
 public class LibraryInitHandler {
 
-    // LUKETODO: extend library evaluated context so library initialization isn't having to be built for
-    // both, and takes advantage of caching
-    // LUKETODO:  are we reinitializing the cache here?  if so, should we try not to, somehow?
+    private LibraryInitHandler() {
+        // static class
+    }
+
     public static void initLibraries(CqlEngine context, List<VersionedIdentifier> libraryIdentifiers) {
         var compiledLibraries = getCompiledLibraries(libraryIdentifiers, context);
 

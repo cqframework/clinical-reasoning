@@ -9,7 +9,6 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnclassifiedServerFailureException;
@@ -23,8 +22,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -34,7 +31,6 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.matcher.ResourceMatcher;
 import org.opencds.cqf.fhir.utility.repository.Repositories;
 import org.opencds.cqf.fhir.utility.repository.ig.EncodingBehavior.PreserveEncoding;
@@ -121,6 +117,7 @@ public class IgRepository implements IRepository {
     private final Cache<Path, Optional<IBaseResource>> resourceCache =
             CacheBuilder.newBuilder().maximumSize(5000).build();
     private final ResourcePathResolver pathResolver;
+    private final CompartmentAssigner compartmentAssigner;
 
     // Metadata fields attached to resources that are read from the repository
     // This fields are used to determine if a resource is external, and to
@@ -171,6 +168,7 @@ public class IgRepository implements IRepository {
         this.resourceMatcher = Repositories.getResourceMatcher(this.fhirContext);
         this.operationProvider = operationProvider;
         this.pathResolver = new ResourcePathResolver(this.root, this.conventions, this.fhirContext);
+        this.compartmentAssigner = new CompartmentAssigner(this.fhirContext, this.conventions.compartmentMode());
     }
 
     /**
@@ -296,9 +294,8 @@ public class IgRepository implements IRepository {
      * @param igRepositoryCompartment The compartment context for directory resolution.
      * @return Map of resource IDs to resources found in the directories.
      */
-    protected <T extends IBaseResource> Map<IIdType, T> readDirectoryForResourceType(Class<T> resourceClass) {
-        var directories = this.pathResolver.searchDirectories(resourceClass);
-
+    protected <T extends IBaseResource> Map<IIdType, T> readDirectoriesForResource(
+            List<Path> directories, Class<T> resourceClass) {
         var resources = new ConcurrentHashMap<IIdType, T>();
         Predicate<Path> resourceFileFilter = this.pathResolver.fileMatcher(resourceClass);
 
@@ -309,20 +306,20 @@ public class IgRepository implements IRepository {
 
             // Walk the directory and read all files that match the resource type
             // and file extension
-            try (var pathsStream = Files.walk(dir)) {
+            try (var pathsStream = Files.list(dir)) {
                 pathsStream
                         .filter(resourceFileFilter)
                         .parallel()
                         .map(this::cachedReadResource)
                         .filter(Optional::isPresent)
+                        .map(Optional::get)
                         .forEach(r -> {
-                            if (!r.get().fhirType().equals(resourceClass.getSimpleName())) {
+                            if (!r.fhirType().equals(resourceClass.getSimpleName())) {
                                 return;
                             }
 
-                            T validatedResource = validateResource(
-                                    resourceClass, r.get(), r.get().getIdElement());
-                            resources.put(r.get().getIdElement().toUnqualifiedVersionless(), validatedResource);
+                            T validatedResource = validateResource(resourceClass, r, r.getIdElement());
+                            resources.put(r.getIdElement().toUnqualifiedVersionless(), validatedResource);
                         });
             } catch (IOException e) {
                 throw new UnclassifiedServerFailureException(
@@ -376,8 +373,10 @@ public class IgRepository implements IRepository {
         requireNonNull(resourceType, "resourceType cannot be null");
         requireNonNull(id, "id cannot be null");
 
-        var paths = this.pathResolver.potentialPathsForResource(resourceType, id);
-        var resource = paths.map(this::cachedReadResource)
+        var assignment = this.compartmentAssigner.assign(resourceType.getSimpleName(), id);
+        var paths = this.pathResolver.candidates(resourceType, id.getIdPart(), assignment);
+        var resource = paths.stream()
+                .map(this::cachedReadResource)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .findFirst();
@@ -417,7 +416,8 @@ public class IgRepository implements IRepository {
         requireNonNull(resource, "resource cannot be null");
         requireNonNull(resource.getIdElement().getIdPart(), "resource id cannot be null");
 
-        var path = this.pathResolver.preferredPath(resource);
+        var assignment = this.compartmentAssigner.assign(resource);
+        var path = this.pathResolver.preferredPath(resource.getClass(), resource.getIdElement().getIdPart(), assignment);
         writeResource(resource, path);
 
         return new MethodOutcome(resource.getIdElement(), true);
@@ -494,14 +494,20 @@ public class IgRepository implements IRepository {
                             .formatted(resource.getIdElement().toUnqualifiedVersionless()));
         }
 
-        var targetPath = this.pathResolver.preferredPath(resource);
+        var assignment = this.compartmentAssigner.assign(resource);
+        var resourceType = resource.getClass();
+        var idPart = resource.getIdElement().getIdPart();
+        
+        var targetPath = this.pathResolver.preferredPath(resourceType, idPart, assignment);
         if (existingPath != null
                 && this.conventions.encodingBehavior().preserveEncoding()
                         == PreserveEncoding.PRESERVE_ORIGINAL_ENCODING) {
             var existingEncoding = this.pathResolver.encodingForPath(existingPath);
             if (existingEncoding != null) {
-                var targetFilename = this.pathResolver.filenameForEncoding(resource, existingEncoding);
-                targetPath = this.pathResolver.preferredDirectory(resource).resolve(targetFilename);
+                var targetFilename = this.pathResolver.filenameForEncoding(resourceType, idPart, existingEncoding);
+                targetPath = this.pathResolver
+                        .preferredDirectory(resourceType, assignment)
+                        .resolve(targetFilename);
             }
         }
 
@@ -547,10 +553,11 @@ public class IgRepository implements IRepository {
         requireNonNull(resourceType, "resourceType cannot be null");
         requireNonNull(id, "id cannot be null");
 
-        var pathCandidates =
-                this.pathResolver.potentialPathsForResource(resourceType, id).toList();
+        var assignment = this.compartmentAssigner.assign(resourceType.getSimpleName(), id);
+
+        var paths = this.pathResolver.candidates(resourceType, id.getIdPart(), assignment);
         var deleted = false;
-        for (var path : pathCandidates) {
+        for (var path : paths) {
             try {
                 deleted = Files.deleteIfExists(path);
                 if (deleted) {
@@ -601,52 +608,24 @@ public class IgRepository implements IRepository {
         requireNonNull(bundleType, "bundleType cannot be null");
         requireNonNull(resourceType, "resourceType cannot be null");
 
-        var resourceIdMap = readDirectoryForResourceType(resourceType);
+        var assignment = this.compartmentAssigner.assign(resourceType.getSimpleName(), searchParameters);
+        var directories = this.pathResolver.directories(resourceType, assignment);
+        var resourceIdMap = this.readDirectoriesForResource(directories, resourceType);
 
         var builder = new BundleBuilder(this.fhirContext);
         builder.setType("searchset");
-
         if (searchParameters == null || searchParameters.isEmpty()) {
             resourceIdMap.values().forEach(builder::addCollectionEntry);
             return (B) builder.getBundle();
         }
 
-        Collection<T> candidates;
-        if (searchParameters.containsKey("_id")) {
-            // We are consuming the _id parameter in this if statement
-            candidates = getIdCandidates(searchParameters.get("_id"), resourceIdMap, resourceType);
-            searchParameters.removeAll("_id");
-        } else {
-            candidates = resourceIdMap.values();
-        }
-
-        for (var resource : candidates) {
+        for (var resource : resourceIdMap.values()) {
             if (allParametersMatch(searchParameters, resource)) {
                 builder.addCollectionEntry(resource);
             }
         }
 
         return (B) builder.getBundle();
-    }
-
-    private <T extends IBaseResource> List<T> getIdCandidates(
-            Collection<List<IQueryParameterType>> idQueries, Map<IIdType, T> resourceIdMap, Class<T> resourceType) {
-        var idResources = new ArrayList<T>();
-        for (var idQuery : idQueries) {
-            for (var query : idQuery) {
-                if (query instanceof TokenParam idToken) {
-                    // Need to construct the equivalent "UnqualifiedVersionless" id that the map is
-                    // indexed by. If an id has a version it won't match. Need apples-to-apples Id
-                    // types
-                    var id = Ids.newId(fhirContext, resourceType.getSimpleName(), idToken.getValue());
-                    var resource = resourceIdMap.get(id);
-                    if (resource != null) {
-                        idResources.add(resource);
-                    }
-                }
-            }
-        }
-        return idResources;
     }
 
     private boolean allParametersMatch(

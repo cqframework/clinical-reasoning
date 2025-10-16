@@ -9,8 +9,18 @@ import java.util.Objects;
 record CompartmentAssignment(String compartmentType, String compartmentId) {
 
     static final String SHARED_COMPARTMENT = "shared";
-    public static final CompartmentAssignment NONE = new CompartmentAssignment(null, null);
-    public static final CompartmentAssignment SHARED = new CompartmentAssignment(SHARED_COMPARTMENT, null);
+
+    static CompartmentAssignment none() {
+        return new CompartmentAssignment(null, null);
+    }
+
+    static CompartmentAssignment shared() {
+        return new CompartmentAssignment(SHARED_COMPARTMENT, null);
+    }
+    // Returns an "unknown" compartment assignment of the specified type.
+    static CompartmentAssignment unknown(String compartmentType) {
+        return of(compartmentType, null);
+    }
 
     static CompartmentAssignment of(String compartmentType, String compartmentId) {
         Objects.requireNonNull(compartmentType, "compartmentType cannot be null");
@@ -19,11 +29,22 @@ record CompartmentAssignment(String compartmentType, String compartmentId) {
         return new CompartmentAssignment(normalizedType, normalizedId);
     }
 
-    boolean hasCompartmentId() {
+    boolean hasContextId() {
         return compartmentId != null && !compartmentId.isBlank();
     }
 
     boolean isPresent() {
-        return compartmentType != null;
+        return compartmentType != null && !compartmentType.isBlank();
+    }
+
+    // Returns an "unknown" compartment assignment of the specified type.
+    // An unknown compartment assignment has a type but no id, meaning that multiple
+    // compartments of that type may need to be searched.
+    boolean isUnknown() {
+        return isPresent() && !isShared() && !hasContextId();
+    }
+
+    boolean isShared() {
+        return compartmentType != null && compartmentType.equals(SHARED_COMPARTMENT);
     }
 }

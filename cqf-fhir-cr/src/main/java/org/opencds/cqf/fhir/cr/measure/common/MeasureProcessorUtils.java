@@ -12,9 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.apache.commons.lang3.tuple.Pair;
-import org.cqframework.cql.cql2elm.CqlCompilerException;
-import org.cqframework.cql.cql2elm.CqlIncludeException;
-import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.hl7.elm.r1.IntervalTypeSpecifier;
 import org.hl7.elm.r1.NamedTypeSpecifier;
 import org.hl7.elm.r1.ParameterDef;
@@ -327,72 +324,10 @@ public class MeasureProcessorUtils {
         return resultsBuilder.build();
     }
 
-    public static List<CompiledLibrary> getCompiledLibraries(List<VersionedIdentifier> ids, CqlEngine context) {
-        try {
-            var resolvedLibraryResults =
-                    context.getEnvironment().getLibraryManager().resolveLibraries(ids);
-
-            var allErrors = resolvedLibraryResults.allErrors();
-            if (resolvedLibraryResults.hasErrors() || ids.size() > allErrors.size()) {
-                return resolvedLibraryResults.allCompiledLibraries();
-            }
-
-            if (ids.size() == 1) {
-                final List<CqlCompilerException> cqlCompilerExceptions =
-                        resolvedLibraryResults.getErrorsFor(ids.get(0));
-
-                if (cqlCompilerExceptions.size() == 1) {
-                    throw new IllegalStateException(
-                            "Unable to load CQL/ELM for library: %s. Verify that the Library resource is available in your environment and has CQL/ELM content embedded."
-                                    .formatted(ids.get(0).getId()),
-                            cqlCompilerExceptions.get(0));
-                } else {
-                    throw new IllegalStateException(
-                            "Unable to load CQL/ELM for library: %s. Verify that the Library resource is available in your environment and has CQL/ELM content embedded. Errors: %s"
-                                    .formatted(
-                                            ids.get(0).getId(),
-                                            cqlCompilerExceptions.stream()
-                                                    .map(CqlCompilerException::getMessage)
-                                                    .reduce((s1, s2) -> s1 + "; " + s2)
-                                                    .orElse("No error messages found.")));
-                }
-            }
-
-            throw new IllegalStateException(
-                    "Unable to load CQL/ELM for libraries: %s Verify that the Library resource is available in your environment and has CQL/ELM content embedded. Errors: %s"
-                            .formatted(ids, allErrors));
-
-        } catch (CqlIncludeException exception) {
-            throw new IllegalStateException(
-                    "Unable to load CQL/ELM for libraries: %s. Verify that the Library resource is available in your environment and has CQL/ELM content embedded."
-                            .formatted(
-                                    ids.stream().map(VersionedIdentifier::getId).toList()),
-                    exception);
-        }
-    }
-    /**
-     * Checks if a MeasureDef has at least one PopulationDef of type MEASUREOBSERVATION
-     * across all of its groups.
-     *
-     * @param measureDef the MeasureDef to check
-     * @return true if any PopulationDef in any GroupDef is MEASUREOBSERVATION
-     */
-    public static boolean hasMeasureObservation(MeasureDef measureDef) {
-        if (measureDef == null || measureDef.groups() == null) {
-            return false;
-        }
-
-        return measureDef.groups().stream()
-                .filter(group -> group.populations() != null)
-                .flatMap(group -> group.populations().stream())
-                .anyMatch(pop -> pop.type() == MeasurePopulationType.MEASUREOBSERVATION);
-    }
-
     private void validateEvaluationResultExistsForIdentifier(
             VersionedIdentifier versionedIdentifierFromQuery,
             EvaluationResultsForMultiLib evaluationResultsForMultiLib) {
 
-        // LUKETODO:  this should hopefully be fixed with the next version of CQL
         var containsResults = evaluationResultsForMultiLib.containsResultsFor(versionedIdentifierFromQuery);
         var containsExceptions = evaluationResultsForMultiLib.containsExceptionsFor(versionedIdentifierFromQuery);
 

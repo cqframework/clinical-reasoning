@@ -21,7 +21,11 @@ public class CdsCrService implements ICdsCrService {
     protected CdsParametersEncoderService cdsParametersEncoderService;
 
     public CdsCrService(RequestDetails requestDetails, IRepository repository) {
-        this(requestDetails, repository, new CdsResponseEncoderService(repository), new CdsParametersEncoderService(repository));
+        this(
+                requestDetails,
+                repository,
+                new CdsResponseEncoderService(repository),
+                new CdsParametersEncoderService(repository));
     }
 
     public CdsCrService(

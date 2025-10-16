@@ -19,7 +19,7 @@ class CdsResponseEncoderServiceTest {
 
     @BeforeEach
     void beforeEach() {
-         repository = new InMemoryFhirRepository(FhirContext.forR4());
+        repository = new InMemoryFhirRepository(FhirContext.forR4());
     }
 
     @Test

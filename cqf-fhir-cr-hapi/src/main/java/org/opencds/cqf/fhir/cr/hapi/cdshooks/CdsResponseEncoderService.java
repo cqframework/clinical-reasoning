@@ -245,5 +245,4 @@ public class CdsResponseEncoderService {
             throw new InternalErrorException("response is not an instance of a Resource");
         }
     }
-
 }

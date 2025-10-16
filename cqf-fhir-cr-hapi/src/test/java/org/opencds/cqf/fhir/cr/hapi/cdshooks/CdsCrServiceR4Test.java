@@ -105,8 +105,12 @@ class CdsCrServiceR4Test extends BaseCdsCrServiceTest {
         final var params = adapterFactory.createParameters(iBaseParameters);
 
         assertEquals(3, params.getParameter().size());
-        assertEquals(expectedUserId, (params.getParameter(APPLY_PARAMETER_PRACTITIONER)).getValue().toString());
-        assertEquals(expectedEncounterId, (params.getParameter(APPLY_PARAMETER_ENCOUNTER)).getValue().toString());
+        assertEquals(
+                expectedUserId,
+                (params.getParameter(APPLY_PARAMETER_PRACTITIONER)).getValue().toString());
+        assertEquals(
+                expectedEncounterId,
+                (params.getParameter(APPLY_PARAMETER_ENCOUNTER)).getValue().toString());
 
         assertTrue(params.getParameter(APPLY_PARAMETER_DATA).hasResource());
         IBaseResource resource = params.getParameter(APPLY_PARAMETER_DATA).getResource();
@@ -180,8 +184,7 @@ class CdsCrServiceR4Test extends BaseCdsCrServiceTest {
         BundleHelper.addEntry(bundle, BundleHelper.newEntryWithResource(patient));
 
         // Act
-        CdsParametersEncoderService cdsParametersEncoderService =
-                new CdsParametersEncoderService(repository);
+        CdsParametersEncoderService cdsParametersEncoderService = new CdsParametersEncoderService(repository);
         Map<String, IBaseResource> resourceMap = cdsParametersEncoderService.getResourcesFromBundle(bundle);
 
         // Assert

@@ -8,5 +8,4 @@ import org.springframework.context.annotation.Import;
 @Configuration
 @Conditional({CrConfigCondition.class})
 @Import({RepositoryConfig.class, ApplyOperationConfig.class})
-public class CrCdsConfig {
-}
+public class CrCdsConfig {}

@@ -23,7 +23,6 @@ import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 class ResponseEncoderSuggestionActionResolverTest {
     private final FhirContext fhirContext = FhirContext.forR4Cached();
 
-
     private IAdapterFactory adapterFactory;
     private CdsResponseEncoderService fixture;
     private RequestGroupActionComponent requestGroupActionComponent;

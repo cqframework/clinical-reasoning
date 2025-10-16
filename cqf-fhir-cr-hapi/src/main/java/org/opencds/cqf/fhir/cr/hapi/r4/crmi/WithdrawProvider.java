@@ -18,15 +18,9 @@ public class WithdrawProvider {
         this.r4WithdrawServiceFactory = r4WithdrawServiceFactory;
     }
 
-    @Operation(
-        name = "$withdraw",
-        idempotent = true,
-        global = true,
-        type = MetadataResource.class
-    )
+    @Operation(name = "$withdraw", idempotent = true, global = true, type = MetadataResource.class)
     @Description(shortDefinition = "$withdraw", value = "Withdraw an existing draft artifact")
     public Bundle withdrawOperation(@IdParam IdType id, RequestDetails requestDetails) throws FHIRException {
         return r4WithdrawServiceFactory.create(requestDetails).withdraw(id);
     }
-
 }

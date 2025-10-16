@@ -1,4 +1,0 @@
-#NOTE: This is a Maven Resolver internal implementation file, its format can be changed without prior notice.
-#Fri Oct 10 12:39:57 MDT 2025
-ea53a8e1add46628c5a074e911cafa823c3300a6@default-central-https\://repo1.maven.org/maven2/.lastUpdated=1760121597894
-https\://repo1.maven.org/maven2/.error=Could not transfer artifact org.junit\:junit-bom\:pom\:5.10.2 from/to central (https\://repo1.maven.org/maven2)\: repo1.maven.org

@@ -21,8 +21,8 @@ import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
@@ -190,6 +190,25 @@ class IgRepositoryKalmTest {
     }
 
     @Test
+    void createValueSetPrefersSrcTerminologyDirectory() {
+        var valueSet = new ValueSet();
+        valueSet.setId("new-terminology");
+
+        var outcome = repository.create(valueSet);
+        var created = repository.read(ValueSet.class, outcome.getId());
+        assertNotNull(created);
+
+        var srcPath = tempDir.resolve("src/fhir/valueset/new-terminology.json");
+        var deprecatedPath = tempDir.resolve("tests/data/fhir/valueset/new-terminology.json");
+
+        assertTrue(Files.exists(srcPath));
+        assertFalse(Files.exists(deprecatedPath));
+
+        repository.delete(ValueSet.class, created.getIdElement());
+        assertFalse(Files.exists(srcPath));
+    }
+
+    @Test
     void createAndDeletePatient() {
         var p = new Patient();
         p.setId("new-patient");
@@ -294,8 +313,9 @@ class IgRepositoryKalmTest {
 
     @Test
     void searchNonExistentType() {
-        var unknownSubject = Searches.toFlattenedMap(
-                Searches.builder().withReferenceParam("subject", "Patient/DoesNotExist").build());
+        var unknownSubject = Searches.toFlattenedMap(Searches.builder()
+                .withReferenceParam("subject", "Patient/DoesNotExist")
+                .build());
         var results = repository.search(Bundle.class, Encounter.class, unknownSubject);
         assertNotNull(results);
         assertEquals(0, results.getEntry().size());

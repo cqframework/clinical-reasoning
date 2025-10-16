@@ -4,6 +4,7 @@ import static java.util.Objects.requireNonNull;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -13,16 +14,15 @@ import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnclassifiedServerFailureException;
 import ca.uhn.fhir.util.BundleBuilder;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.common.collect.BiMap;
-import com.google.common.collect.ImmutableBiMap;
-import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Multimap;
-import com.google.common.collect.Table;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -32,7 +32,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -41,13 +40,7 @@ import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.matcher.ResourceMatcher;
 import org.opencds.cqf.fhir.utility.repository.Repositories;
 import org.opencds.cqf.fhir.utility.repository.ig.EncodingBehavior.PreserveEncoding;
-import org.opencds.cqf.fhir.utility.repository.ig.IgConventions.CategoryLayout;
-import org.opencds.cqf.fhir.utility.repository.ig.IgConventions.FilenameMode;
 import org.opencds.cqf.fhir.utility.repository.operations.IRepositoryOperationProvider;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.nio.charset.StandardCharsets;
-import ca.uhn.fhir.parser.DataFormatException;
 
 /**
  * Provides access to FHIR resources stored in a directory structure following
@@ -76,6 +69,7 @@ import ca.uhn.fhir.parser.DataFormatException;
  * │       ├── ValueSet-ABC.json      (FilenameMode.TYPE_AND_ID)
  * |       ├── or
  * │       ├── DEF.json               (FilenameMode.ID_ONLY)
+ * │       ├── input/tests/vocabulary/valueset/ (Test-only terminology fallback)
  * │       └── external/              (External Resources - Read-only, Terminology-only)
  * │           └── CodeSystem-external.json
  * └── ...
@@ -88,6 +82,8 @@ import ca.uhn.fhir.parser.DataFormatException;
  * └── tests/
  *     └── data/
  *         └── fhir/          (Test Data Resources)
+ *           ├── shared/        (Non-compartmental data and overrides)
+ *           │   └── valueset/Example.json
  *           ├── [patient/]     (CompartmentMode.PATIENT)
  *           │   └── Patient/123/
  *           │       └── Observation-456.json
@@ -127,97 +123,13 @@ public class IgRepository implements IRepository {
     private final Cache<Path, Optional<IBaseResource>> resourceCache =
             CacheBuilder.newBuilder().maximumSize(5000).build();
     private final ResourcePathResolver pathResolver;
-    private final CompartmentResolver compartmentResolver;
-    private final Map<ResourceKey, Path> resourcePathIndex = new ConcurrentHashMap<>();
 
     // Metadata fields attached to resources that are read from the repository
     // This fields are used to determine if a resource is external, and to
     // maintain the original encoding of the resource.
     static final String SOURCE_PATH_TAG = "sourcePath"; // Path
 
-    static final String EXTERNAL_DIRECTORY = "external"; // Directory name for external resources
-
-    // Set of directories that are used to store resources of a given category.
-    // The first path is the primary directory for the category, and any additional
-    // paths are considered secondary or fallback directories.
-    record Directories(List<String> paths) {
-        public int count() {
-            return paths.size();
-        }
-
-        public Stream<String> stream() {
-            return paths.stream();
-        }
-    }
-
-    // Mapping of category layouts to resource categories and their corresponding directories.
-    // These are relative to the root directory of the IG or the root directory of the KALM project
-    static final Table<CategoryLayout, ResourceCategory, Directories> TYPE_DIRECTORIES = new ImmutableTable.Builder<
-                    CategoryLayout, ResourceCategory, Directories>()
-            .put(CategoryLayout.FLAT, ResourceCategory.CONTENT, new Directories(List.of("input")))
-            .put(CategoryLayout.FLAT, ResourceCategory.TERMINOLOGY, new Directories(List.of("input")))
-            .put(CategoryLayout.FLAT, ResourceCategory.DATA, new Directories(List.of("input")))
-            .put(
-                    CategoryLayout.DIRECTORY_PER_CATEGORY,
-                    ResourceCategory.CONTENT,
-                    new Directories(List.of("input/resources", "input/tests")))
-            .put(
-                    CategoryLayout.DIRECTORY_PER_CATEGORY,
-                    ResourceCategory.TERMINOLOGY,
-                    new Directories(List.of("input/vocabulary")))
-            .put(
-                    CategoryLayout.DIRECTORY_PER_CATEGORY,
-                    ResourceCategory.DATA,
-                    new Directories(List.of("input/tests", "input/resources")))
-            .put(
-                    CategoryLayout.DEFINITIONAL_AND_DATA,
-                    ResourceCategory.CONTENT,
-                    new Directories(List.of("src/fhir", "tests/data/fhir")))
-            .put(
-                    CategoryLayout.DEFINITIONAL_AND_DATA,
-                    ResourceCategory.TERMINOLOGY,
-                    new Directories(List.of("src/fhir", "tests/data/fhir")))
-            .put(
-                    CategoryLayout.DEFINITIONAL_AND_DATA,
-                    ResourceCategory.DATA,
-                    new Directories(List.of("tests/data/fhir", "src/fhir")))
-            .build();
-
-    static final BiMap<EncodingEnum, String> FILE_EXTENSIONS = new ImmutableBiMap.Builder<EncodingEnum, String>()
-            .put(EncodingEnum.JSON, "json")
-            .put(EncodingEnum.XML, "xml")
-            .put(EncodingEnum.RDF, "rdf")
-            .put(EncodingEnum.NDJSON, "ndjson")
-            .build();
-
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-
-    private record ResourceKey(String resourceType, String idPart) {
-        static ResourceKey from(Class<? extends IBaseResource> resourceType, String idPart) {
-            if (resourceType == null || idPart == null || idPart.isBlank()) {
-                return null;
-            }
-
-            return new ResourceKey(resourceType.getSimpleName(), idPart);
-        }
-
-        static ResourceKey from(IBaseResource resource) {
-            if (resource == null || resource.fhirType() == null || resource.fhirType().isBlank()) {
-                return null;
-            }
-
-            var idElement = resource.getIdElement();
-            if (idElement == null || !idElement.hasIdPart()) {
-                return null;
-            }
-
-            return new ResourceKey(resource.fhirType(), idElement.getIdPart());
-        }
-
-        boolean isValid() {
-            return resourceType != null && !resourceType.isBlank() && idPart != null && !idPart.isBlank();
-        }
-    }
 
     private static IParser parserForEncoding(FhirContext fhirContext, EncodingEnum encodingEnum) {
         return switch (encodingEnum) {
@@ -263,166 +175,32 @@ public class IgRepository implements IRepository {
         this.resourceMatcher = Repositories.getResourceMatcher(this.fhirContext);
         this.operationProvider = operationProvider;
         this.pathResolver = new ResourcePathResolver(this.root, this.conventions, this.fhirContext);
-        this.compartmentResolver = new CompartmentResolver(this.fhirContext, this.conventions);
     }
 
+    /**
+     * Assigns the operation provider used to execute custom FHIR operations against this repository.
+     *
+     * @param operationProvider the provider responsible for handling operation invocations
+     */
     public void setOperationProvider(IRepositoryOperationProvider operationProvider) {
         this.operationProvider = operationProvider;
     }
 
+    /**
+     * Clears all cached resources and path indexes maintained by the repository.
+     */
     public void clearCache() {
         this.resourceCache.invalidateAll();
-        this.resourcePathIndex.clear();
     }
 
+    /**
+     * Removes cached entries for the specified file system paths from both the resource cache and
+     * the internal path index.
+     *
+     * @param paths the set of paths to evict from the cache
+     */
     public void clearCache(Iterable<Path> paths) {
         this.resourceCache.invalidate(paths);
-        var pathSet = new java.util.HashSet<Path>();
-        paths.forEach(pathSet::add);
-        var iterator = this.resourcePathIndex.entrySet().iterator();
-        while (iterator.hasNext()) {
-            var entry = iterator.next();
-            if (pathSet.contains(entry.getValue())) {
-                iterator.remove();
-            }
-        }
-    }
-
-    private boolean isExternalPath(Path path) {
-        return path.getParent() != null
-                && path.getParent().toString().toLowerCase().endsWith(EXTERNAL_DIRECTORY);
-    }
-
-    /**
-     * Determines the preferred file system path for storing or retrieving a FHIR
-     * resource based on its resource type, identifier, and compartment context.
-     *
-     * <p>
-     * Example paths (based on conventions and compartment):
-     * </p>
-     *
-     * <pre>
-     * Standard IG Layout:
-     * /path/to/ig/root/input/[[resources/]][[patient/]]Patient-123.json
-     *
-     * KALM Layout with Compartment:
-     * /path/to/kalm/root/src/fhir/[[Patient/123/]]Observation-456.json
-     * </pre>
-     *
-     * Path components depend on configuration:
-     * - Category directory (e.g., `input/resources/`, `src/fhir/`) depends on {@code CategoryLayout}
-     * - Type directory (e.g., `patient/`) depends on {@code FhirTypeLayout.DIRECTORY_PER_TYPE}
-     * - Compartment directory (e.g., `Patient/123/`) depends on {@code CompartmentMode}
-     * - Filename format depends on {@code FilenameMode}:
-     *   - `TYPE_AND_ID`: `Patient-123.json`
-     *   - `ID_ONLY`: `123.json`
-     *
-     * @param <T>                     The type of the FHIR resource.
-     * @param <I>                     The type of the resource identifier.
-     * @param resourceType            The class representing the FHIR resource type.
-     * @param id                      The identifier of the resource.
-     * @return The {@code Path} representing the preferred location for the
-     *         resource.
-     */
-    protected <T extends IBaseResource, I extends IIdType> Path preferredPathForResource(Class<T> resourceType, I idt) {
-        return preferredPathForResource(resourceType, idt, Optional.empty());
-    }
-
-    protected <T extends IBaseResource, I extends IIdType> Path preferredPathForResource(
-            Class<T> resourceType, I idt, Optional<CompartmentAssignment> assignment) {
-        var directory = this.pathResolver.preferredDirectory(resourceType, assignment);
-        var fileName = fileNameForResource(
-                resourceType.getSimpleName(),
-                idt.getIdPart(),
-                this.conventions.encodingBehavior().preferredEncoding());
-        return directory.resolve(fileName);
-    }
-
-    /**
-     * Generates all possible file paths where a resource might be found,
-     * considering different encoding formats and directory structures.
-     *
-     * @param <T>                     The type of the FHIR resource.
-     * @param <I>                     The type of the resource identifier.
-     * @param resourceType            The class representing the FHIR resource type.
-     * @param id                      The identifier of the resource.
-     * @return A stream of potential paths for the resource.
-     */
-    protected <T extends IBaseResource, I extends IIdType> Stream<Path> potentialPathsForResource(
-            Class<T> resourceType, I id) {
-
-        var key = ResourceKey.from(resourceType, id.getIdPart());
-        var encodings = this.conventions.encodingBehavior().enabledEncodings();
-        var candidateNames = encodings.stream()
-                .map(ext -> fileNameForResource(resourceType.getSimpleName(), id.getIdPart(), ext))
-                .toList();
-
-        var results = new java.util.LinkedHashSet<Path>();
-        if (key != null) {
-            var cached = this.resourcePathIndex.get(key);
-            if (cached != null) {
-                results.add(cached);
-            }
-        }
-
-        var candidateDirectories = this.pathResolver.candidateDirectoriesForId(resourceType, id.getIdPart());
-        for (var directory : candidateDirectories) {
-            for (var name : candidateNames) {
-                var candidate = directory.resolve(name);
-                try {
-                    if (Files.exists(candidate)) {
-                        results.add(candidate);
-                    }
-                } catch (SecurityException ignored) {
-                    // Continue to broader search below if direct probe is not permitted.
-                }
-            }
-        }
-
-        if (!results.isEmpty()) {
-            return results.stream();
-        }
-
-        var searchDirectories = this.pathResolver.searchDirectories(resourceType);
-        for (var directory : searchDirectories) {
-            if (!Files.exists(directory)) {
-                continue;
-            }
-
-            try (var stream = Files.find(
-                    directory,
-                    Integer.MAX_VALUE,
-                    (path, attrs) -> attrs.isRegularFile()
-                            && candidateNames.contains(path.getFileName().toString()))) {
-                stream.forEach(results::add);
-            } catch (IOException e) {
-                throw new UnclassifiedServerFailureException(
-                        500,
-                        "Unable to search for resource %s under %s"
-                                .formatted(id.toUnqualifiedVersionless(), directory));
-            }
-        }
-
-        return results.stream();
-    }
-
-    /**
-     * Constructs the filename based on conventions:
-     * - ID_ONLY: "123.json"
-     * - TYPE_AND_ID: "Patient-123.json"
-     *
-     * @param resourceType The resource type (e.g., "Patient").
-     * @param resourceId   The resource ID (e.g., "123").
-     * @param encoding     The encoding (e.g., JSON).
-     * @return The filename.
-     */
-    protected String fileNameForResource(String resourceType, String resourceId, EncodingEnum encoding) {
-        var name = resourceId + "." + FILE_EXTENSIONS.get(encoding);
-        if (FilenameMode.ID_ONLY.equals(conventions.filenameMode())) {
-            return name;
-        } else {
-            return resourceType + "-" + name;
-        }
     }
 
     /**
@@ -438,7 +216,7 @@ public class IgRepository implements IRepository {
             return Optional.empty();
         }
 
-        var encoding = encodingForPath(path);
+        var encoding = this.pathResolver.encodingForPath(path);
 
         String content;
         try {
@@ -505,11 +283,6 @@ public class IgRepository implements IRepository {
         }
     }
 
-    protected EncodingEnum encodingForPath(Path path) {
-        var extension = fileExtension(path);
-        return FILE_EXTENSIONS.inverse().get(extension);
-    }
-
     /**
      * Writes a resource to the specified file path.
      *
@@ -524,57 +297,17 @@ public class IgRepository implements IRepository {
             }
 
             try (var stream = new FileOutputStream(path.toFile())) {
-                String result = parserForEncoding(fhirContext, encodingForPath(path))
+                var encoding = this.pathResolver.encodingForPath(path);
+                String result = parserForEncoding(fhirContext, encoding)
                         .setPrettyPrint(true)
                         .encodeResourceToString(resource);
                 stream.write(result.getBytes());
                 resource.setUserData(SOURCE_PATH_TAG, path);
                 this.resourceCache.put(path, Optional.of(resource));
-                indexResourceLocation(resource, path);
             }
         } catch (IOException | SecurityException e) {
             throw new UnclassifiedServerFailureException(500, "Unable to write resource to path %s".formatted(path));
         }
-    }
-
-    private void indexResourceLocation(IBaseResource resource, Path path) {
-        var key = ResourceKey.from(resource);
-        if (key != null && key.isValid()) {
-            this.resourcePathIndex.put(key, path);
-        }
-    }
-
-    private String fileExtension(Path path) {
-        var name = path.getFileName().toString();
-        var lastPeriod = name.lastIndexOf(".");
-        if (lastPeriod == -1) {
-            return null;
-        }
-
-        return name.substring(lastPeriod + 1).toLowerCase();
-    }
-
-    // True if the file extension is one of the supported file extensions
-    private boolean acceptByFileExtension(Path path) {
-        var extension = fileExtension(path);
-        if (extension == null) {
-            return false;
-        }
-
-        return this.conventions.encodingBehavior().enabledEncodings().stream()
-                .map(e -> FILE_EXTENSIONS.get(e))
-                .anyMatch(ext -> ext.equalsIgnoreCase(extension));
-    }
-
-    // True if the file extension is one of the supported file extensions
-    // and the file name starts with the given prefix (resource type name)
-    private boolean acceptByFileExtensionAndPrefix(Path path, String prefix) {
-        var extensionAccepted = this.acceptByFileExtension(path);
-        if (!extensionAccepted) {
-            return false;
-        }
-
-        return path.getFileName().toString().toLowerCase().startsWith(prefix.toLowerCase() + "-");
     }
 
     /**
@@ -603,16 +336,7 @@ public class IgRepository implements IRepository {
         var directories = this.pathResolver.searchDirectories(resourceClass);
 
         var resources = new ConcurrentHashMap<IIdType, T>();
-        Predicate<Path> resourceFileFilter;
-        switch (this.conventions.filenameMode()) {
-            case ID_ONLY:
-                resourceFileFilter = this::acceptByFileExtension;
-                break;
-            case TYPE_AND_ID:
-            default:
-                resourceFileFilter = p -> this.acceptByFileExtensionAndPrefix(p, resourceClass.getSimpleName());
-                break;
-        }
+        Predicate<Path> resourceFileFilter = this.pathResolver.fileMatcher(resourceClass);
 
         for (var dir : directories) {
             if (!Files.exists(dir)) {
@@ -659,7 +383,7 @@ public class IgRepository implements IRepository {
      * <li>TYPE_AND_ID: "Patient-123.json"</li>
      * </ul>
      *
-    * <p>Compartment context is determined by repository conventions and resource references.</p>
+     * <p>Compartment context is determined by repository conventions and resource references.</p>
      *
      * Utilizes cache to improve performance.
      *
@@ -678,7 +402,7 @@ public class IgRepository implements IRepository {
      * @param <I>          The type of the resource identifier.
      * @param resourceType The class representing the FHIR resource type.
      * @param id           The identifier of the resource.
-    * @param headers      Request headers
+     * @param headers      Request headers
      * @return The resource if found.
      * @throws ResourceNotFoundException if the resource is not found.
      */
@@ -688,7 +412,7 @@ public class IgRepository implements IRepository {
         requireNonNull(resourceType, "resourceType cannot be null");
         requireNonNull(id, "id cannot be null");
 
-        var paths = this.potentialPathsForResource(resourceType, id);
+        var paths = this.pathResolver.potentialPathsForResource(resourceType, id);
         var resource = paths.map(this::cachedReadResource)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
@@ -729,8 +453,7 @@ public class IgRepository implements IRepository {
         requireNonNull(resource, "resource cannot be null");
         requireNonNull(resource.getIdElement().getIdPart(), "resource id cannot be null");
 
-        var assignment = this.compartmentResolver.resolve(resource);
-        var path = this.preferredPathForResource(resource.getClass(), resource.getIdElement(), assignment);
+        var path = this.pathResolver.preferredPath(resource);
         writeResource(resource, path);
 
         return new MethodOutcome(resource.getIdElement(), true);
@@ -771,10 +494,6 @@ public class IgRepository implements IRepository {
                                     resource.getIdElement().getVersionIdPart()));
         }
 
-        if (path != null) {
-            indexResourceLocation(resource, path);
-        }
-
         return resourceType.cast(resource);
     }
 
@@ -803,47 +522,36 @@ public class IgRepository implements IRepository {
         requireNonNull(resource, "resource cannot be null");
         requireNonNull(resource.getIdElement().getIdPart(), "resource id cannot be null");
 
-        var assignment = this.compartmentResolver.resolve(resource);
-        var actual = (Path) resource.getUserData(SOURCE_PATH_TAG);
+        var existingPath = (Path) resource.getUserData(SOURCE_PATH_TAG);
 
-        if (actual != null && isExternalPath(actual)) {
+        if (existingPath != null && this.pathResolver.isExternalPath(existingPath)) {
             throw new ForbiddenOperationException(
                     "Unable to create or update: %s. Resource is marked as external, and external resources are read-only."
                             .formatted(resource.getIdElement().toUnqualifiedVersionless()));
         }
 
-        Path targetPath;
-        if (actual != null
+        var targetPath = this.pathResolver.preferredPath(resource);
+        if (existingPath != null
                 && this.conventions.encodingBehavior().preserveEncoding()
                         == PreserveEncoding.PRESERVE_ORIGINAL_ENCODING) {
-            var existingEncoding = encodingForPath(actual);
+            var existingEncoding = this.pathResolver.encodingForPath(existingPath);
             if (existingEncoding != null) {
-                targetPath = this.pathResolver
-                        .preferredDirectory(resource.getClass(), assignment)
-                        .resolve(fileNameForResource(
-                                resource.getClass().getSimpleName(), resource.getIdElement().getIdPart(), existingEncoding));
-            } else {
-                targetPath = this.preferredPathForResource(resource.getClass(), resource.getIdElement(), assignment);
+                var targetFilename = this.pathResolver.filenameForEncoding(resource, existingEncoding);
+                targetPath = this.pathResolver.preferredDirectory(resource).resolve(targetFilename);
             }
-        } else {
-            targetPath = this.preferredPathForResource(resource.getClass(), resource.getIdElement(), assignment);
         }
 
-        if (actual == null) {
-            actual = targetPath;
-        } else if (!actual.equals(targetPath)) {
+        if (existingPath != null && !existingPath.equals(targetPath)) {
             try {
-                this.resourceCache.invalidate(actual);
-                Files.deleteIfExists(actual);
+                this.resourceCache.invalidate(existingPath);
+                Files.deleteIfExists(existingPath);
             } catch (IOException e) {
                 throw new UnclassifiedServerFailureException(
-                        500, "Couldn't relocate resource from %s to %s".formatted(actual, targetPath));
+                        500, "Couldn't relocate resource from %s to %s".formatted(existingPath, targetPath));
             }
-
-            actual = targetPath;
         }
 
-        writeResource(resource, actual);
+        writeResource(resource, targetPath);
 
         return new MethodOutcome(resource.getIdElement(), false);
     }
@@ -873,14 +581,16 @@ public class IgRepository implements IRepository {
     public <T extends IBaseResource, I extends IIdType> MethodOutcome delete(
             Class<T> resourceType, I id, Map<String, String> headers) {
         requireNonNull(resourceType, "resourceType cannot be null");
-       requireNonNull(id, "id cannot be null");
+        requireNonNull(id, "id cannot be null");
 
-        var pathCandidates = this.potentialPathsForResource(resourceType, id).toList();
-        boolean deleted = false;
+        var pathCandidates =
+                this.pathResolver.potentialPathsForResource(resourceType, id).toList();
+        var deleted = false;
         for (var path : pathCandidates) {
             try {
                 deleted = Files.deleteIfExists(path);
                 if (deleted) {
+                    this.resourceCache.invalidate(path);
                     break;
                 }
             } catch (IOException e) {
@@ -890,12 +600,6 @@ public class IgRepository implements IRepository {
 
         if (!deleted) {
             throw new ResourceNotFoundException(id);
-        }
-
-        this.resourceCache.invalidate(pathCandidates);
-        var key = ResourceKey.from(resourceType, id.getIdPart());
-        if (key != null) {
-            this.resourcePathIndex.remove(key);
         }
 
         return new MethodOutcome(id);
@@ -930,9 +634,12 @@ public class IgRepository implements IRepository {
             Class<T> resourceType,
             Multimap<String, List<IQueryParameterType>> searchParameters,
             Map<String, String> headers) {
+        requireNonNull(bundleType, "bundleType cannot be null");
+        requireNonNull(resourceType, "resourceType cannot be null");
+
         var resourceIdMap = readDirectoryForResourceType(resourceType);
 
-        BundleBuilder builder = new BundleBuilder(this.fhirContext);
+        var builder = new BundleBuilder(this.fhirContext);
         builder.setType("searchset");
 
         if (searchParameters == null || searchParameters.isEmpty()) {

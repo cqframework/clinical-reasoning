@@ -391,6 +391,7 @@ public class TerminologyServerClientTest {
         verify(fhirClient, atLeast(2)).operation();
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     void getValueSetResource_found() {
         var txServerClient = spy(new TerminologyServerClient(fhirContextR4));
@@ -468,6 +469,7 @@ public class TerminologyServerClientTest {
         assertEquals(org.hl7.fhir.r4.model.CodeSystem.class, returnedClass);
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     void getCodeSystemResource_found() {
         var txServerClient = spy(new TerminologyServerClient(fhirContextR4));

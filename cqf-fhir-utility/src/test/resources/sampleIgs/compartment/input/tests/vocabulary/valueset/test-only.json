@@ -1,0 +1,5 @@
+{
+  "resourceType": "ValueSet",
+  "id": "test-only",
+  "url": "http://example.org/ValueSet/test-only"
+}

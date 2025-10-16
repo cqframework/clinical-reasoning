@@ -15,8 +15,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Encounter;
-import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Library;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.BeforeAll;
@@ -137,6 +137,22 @@ class IgRepositoryCompartmentTest {
     }
 
     @Test
+    void valueSetIsDiscoveredInTestsVocabularyDirectory() {
+        var id = Ids.newId(ValueSet.class, "test-only");
+        var valueSet = repository.read(ValueSet.class, id);
+
+        assertNotNull(valueSet);
+        var sourcePath = (Path) valueSet.getUserData(IgRepository.SOURCE_PATH_TAG);
+        assertNotNull(sourcePath);
+        assertTrue(sourcePath.toString().endsWith("input/tests/vocabulary/valueset/test-only.json"));
+
+        var search = repository.search(
+                Bundle.class, ValueSet.class, Searches.byUrl("http://example.org/ValueSet/test-only"));
+        assertNotNull(search);
+        assertEquals(1, search.getEntry().size());
+    }
+
+    @Test
     void createAndDeleteLibrary() {
         var lib = new Library();
         lib.setId("new-library");
@@ -203,8 +219,9 @@ class IgRepositoryCompartmentTest {
 
     @Test
     void searchNonExistentType() {
-        var unknownSubject = Searches.toFlattenedMap(
-                Searches.builder().withReferenceParam("subject", "Patient/DoesNotExist").build());
+        var unknownSubject = Searches.toFlattenedMap(Searches.builder()
+                .withReferenceParam("subject", "Patient/DoesNotExist")
+                .build());
         var results = repository.search(Bundle.class, Encounter.class, unknownSubject);
         assertNotNull(results);
         assertEquals(0, results.getEntry().size());
@@ -218,6 +235,19 @@ class IgRepositoryCompartmentTest {
     }
 
     @Test
+    void searchObservationByIdTraversesCompartmentDirectories() {
+        var bundle = repository.search(Bundle.class, Observation.class, Searches.byId("obs-test"));
+        assertNotNull(bundle);
+        assertEquals(1, bundle.getEntry().size());
+
+        var observation = repository.read(Observation.class, Ids.newId(Observation.class, "obs-test"));
+        assertNotNull(observation);
+        var sourcePath = (Path) observation.getUserData(IgRepository.SOURCE_PATH_TAG);
+        assertNotNull(sourcePath);
+        assertTrue(sourcePath.toString().contains("input/tests/patient/123/observation/obs-test.json"));
+    }
+
+    @Test
     void searchByIdNotFound() {
         var bundle = repository.search(Bundle.class, Library.class, Searches.byId("DoesNotExist"));
         assertNotNull(bundle);
@@ -227,8 +257,8 @@ class IgRepositoryCompartmentTest {
     @Test
     @Order(1) // Do this test first because it puts the filesystem (temporarily) in an invalid state
     void resourceMissingWhenCacheCleared() throws IOException {
-        var id = new IdType("Library", "ToDelete");
-        var lib = new Library().setIdElement(id);
+        var lib = new Library().setId("ToDelete");
+        var id = lib.getIdElement();
         var path = tempDir.resolve("input/resources/library/ToDelete.json");
 
         repository.create(lib);

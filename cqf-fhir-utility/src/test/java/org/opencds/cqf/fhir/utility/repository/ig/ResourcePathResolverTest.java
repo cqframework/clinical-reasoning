@@ -1,12 +1,12 @@
 package org.opencds.cqf.fhir.utility.repository.ig;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirContext;
+import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
-import java.util.Optional;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -20,7 +20,7 @@ class ResourcePathResolverTest {
     @Test
     void preferredDirectoryUsesCompartmentAssignmentForDataResources(@TempDir Path tempDir) {
         var resolver = new ResourcePathResolver(tempDir, IgConventions.KALM, FHIR_CONTEXT);
-        var assignment = Optional.of(CompartmentAssignment.of("patient", "123"));
+        var assignment = CompartmentAssignment.of("patient", "123");
 
         var path = resolver.preferredDirectory(Observation.class, assignment);
 
@@ -30,7 +30,7 @@ class ResourcePathResolverTest {
     @Test
     void preferredDirectoryFallsBackToSharedWhenSpecified(@TempDir Path tempDir) {
         var resolver = new ResourcePathResolver(tempDir, IgConventions.KALM, FHIR_CONTEXT);
-        var assignment = Optional.of(CompartmentAssignment.shared());
+        var assignment = CompartmentAssignment.SHARED;
 
         var path = resolver.preferredDirectory(Observation.class, assignment);
 
@@ -41,29 +41,45 @@ class ResourcePathResolverTest {
     void preferredDirectoryForContentResourceInStandardLayout(@TempDir Path tempDir) {
         var resolver = new ResourcePathResolver(tempDir, IgConventions.STANDARD, FHIR_CONTEXT);
 
-        var path = resolver.preferredDirectory(Library.class, Optional.empty());
+        var path = resolver.preferredDirectory(Library.class, CompartmentAssignment.NONE);
 
         assertEquals(tempDir.resolve("input/resources/library"), path);
     }
 
     @Test
-    void candidateDirectoriesIncludeCompartmentSharedAndBasePaths(@TempDir Path tempDir) {
+    void candidateDirectoriesIncludeCompartmentSharedAndSrcPaths(@TempDir Path tempDir) throws Exception {
+        Files.createDirectories(tempDir.resolve("tests/data/fhir/patient/123/observation"));
+        Files.createDirectories(tempDir.resolve("tests/data/fhir/shared/observation"));
+        Files.createDirectories(tempDir.resolve("src/fhir/observation"));
+
         var resolver = new ResourcePathResolver(tempDir, IgConventions.KALM, FHIR_CONTEXT);
 
-        List<Path> paths = resolver.candidateDirectoriesForId(Observation.class, "123");
+        var paths = resolver.candidateDirectoriesForResource(Observation.class);
 
         assertTrue(paths.contains(tempDir.resolve("tests/data/fhir/patient/123/observation")));
         assertTrue(paths.contains(tempDir.resolve("tests/data/fhir/shared/observation")));
-        assertTrue(paths.contains(tempDir.resolve("tests/data/fhir/observation")));
+        assertTrue(paths.contains(tempDir.resolve("src/fhir/observation")));
+        assertFalse(paths.contains(tempDir.resolve("tests/data/fhir/observation")));
     }
 
     @Test
-    void searchDirectoriesExpandTypeDirectories(@TempDir Path tempDir) {
+    void searchDirectoriesForTerminologyInKalmUseSharedDirectories(@TempDir Path tempDir) {
         var resolver = new ResourcePathResolver(tempDir, IgConventions.KALM, FHIR_CONTEXT);
 
-        List<Path> directories = resolver.searchDirectories(ValueSet.class);
-;
+        var directories = resolver.searchDirectories(ValueSet.class);
         assertTrue(directories.contains(tempDir.resolve("src/fhir/valueset")));
-        assertTrue(directories.contains(tempDir.resolve("tests/data/fhir/valueset")));
+        assertTrue(directories.contains(tempDir.resolve("tests/data/fhir/shared/valueset")));
+        assertFalse(directories.contains(tempDir.resolve("tests/data/fhir/valueset")));
+    }
+
+    @Test
+    void directoriesForTerminologyInKalmPreferSrcThenShared(@TempDir Path tempDir) {
+        var resolver = new ResourcePathResolver(tempDir, IgConventions.KALM, FHIR_CONTEXT);
+
+        var directories = resolver.directoriesForResource(ValueSet.class, CompartmentAssignment.NONE);
+
+        assertEquals(tempDir.resolve("src/fhir/valueset"), directories.get(0));
+        assertTrue(directories.contains(tempDir.resolve("tests/data/fhir/shared/valueset")));
+        assertFalse(directories.contains(tempDir.resolve("tests/data/fhir/valueset")));
     }
 }

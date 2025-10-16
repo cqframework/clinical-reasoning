@@ -30,6 +30,7 @@ import org.opencds.cqf.fhir.utility.adapter.IPlanDefinitionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IRequestActionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IResourceAdapter;
 
+@SuppressWarnings("UnstableApiUsage")
 public class CdsResponseEncoderService {
 
     private final IAdapterFactory adapterFactory;
@@ -42,6 +43,7 @@ public class CdsResponseEncoderService {
         this.repository = repository;
     }
 
+    @SuppressWarnings("unchecked")
     public CdsServiceResponseJson encodeResponse(Object response) {
         validateResponseObject(response);
 

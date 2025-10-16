@@ -34,7 +34,7 @@ public class ContinuousVariableObservationHandler {
     static MeasureObservationResults continuousVariableEvaluation(
             CqlEngine context,
             List<MeasureDef> measureDefs,
-            List<VersionedIdentifier> libraryIdentifiers,
+            VersionedIdentifier libraryIdentifier,
             EvaluationResult evaluationResult,
             String subjectTypePart) {
 
@@ -48,27 +48,34 @@ public class ContinuousVariableObservationHandler {
             return MeasureObservationResults.EMPTY;
         }
 
-        // measure Observation Path, have to re-initialize everything again
-        LibraryInitHandler.initLibraries(context, libraryIdentifiers);
+        final boolean hasLibraryInitialized = LibraryInitHandler.initLibrary(context, libraryIdentifier);
 
         final List<MeasureObservationResult> finalResults = new ArrayList<>();
 
-        // one Library may be linked to multiple Measures
-        for (MeasureDef measureDefWithMeasureObservations : measureDefsWithMeasureObservations) {
+        try {
+            // one Library may be linked to multiple Measures
+            for (MeasureDef measureDefWithMeasureObservations : measureDefsWithMeasureObservations) {
 
-            // get function for measure-observation from populationDef
-            for (GroupDef groupDef : measureDefWithMeasureObservations.groups()) {
+                // get function for measure-observation from populationDef
+                for (GroupDef groupDef : measureDefWithMeasureObservations.groups()) {
 
-                final List<PopulationDef> measureObservationPopulations = groupDef.populations().stream()
-                        .filter(populationDef -> MeasurePopulationType.MEASUREOBSERVATION.equals(populationDef.type()))
-                        .toList();
-                for (PopulationDef populationDef : measureObservationPopulations) {
-                    // each measureObservation is evaluated
-                    var result = processMeasureObservation(
-                            context, evaluationResult, subjectTypePart, groupDef, populationDef);
+                    final List<PopulationDef> measureObservationPopulations = groupDef.populations().stream()
+                            .filter(populationDef ->
+                                    MeasurePopulationType.MEASUREOBSERVATION.equals(populationDef.type()))
+                            .toList();
+                    for (PopulationDef populationDef : measureObservationPopulations) {
+                        // each measureObservation is evaluated
+                        var result = processMeasureObservation(
+                                context, evaluationResult, subjectTypePart, groupDef, populationDef);
 
-                    finalResults.add(result);
+                        finalResults.add(result);
+                    }
                 }
+            }
+        } finally {
+            // We don't want to pop a non-existent library
+            if (hasLibraryInitialized) {
+                LibraryInitHandler.popLibrary(context);
             }
         }
 
@@ -112,7 +119,7 @@ public class ContinuousVariableObservationHandler {
 
         final ExpressionResult expressionResult = optExpressionResult.get();
         // makes expression results iterable
-        var resultsIter = getResultIterable(evaluationResult, expressionResult, subjectTypePart);
+        final Iterable<?> resultsIter = getResultIterable(evaluationResult, expressionResult, subjectTypePart);
         // make new expression name for uniquely extracting results
         // this will be used in MeasureEvaluator
         var expressionName = criteriaPopulationId + "-" + observationExpression;
@@ -146,12 +153,14 @@ public class ContinuousVariableObservationHandler {
     }
 
     /**
-     * method used to evaluate cql expression defined for 'continuous variable' scoring type measures that have 'measure observation' to calculate
-     * This method is called as a second round of processing given it uses 'measure population' results as input data for function
-     * @param resource object that stores results of cql
-     * @param criteriaExpression expression name to call
-     * @param isBooleanBasis the type of result created from expression
-     * @param context cql engine context used to evaluate expression
+     * method used to evaluate cql expression defined for 'continuous variable' scoring type
+     * measures that have 'measure observation' to calculate This method is called as a second round
+     * of processing given it uses 'measure population' results as input data for function
+     *
+     * @param resource            object that stores results of cql
+     * @param criteriaExpression  expression name to call
+     * @param isBooleanBasis      the type of result created from expression
+     * @param context             cql engine context used to evaluate expression
      * @return cql results for subject requested
      */
     @SuppressWarnings({"deprecation", "removal"})

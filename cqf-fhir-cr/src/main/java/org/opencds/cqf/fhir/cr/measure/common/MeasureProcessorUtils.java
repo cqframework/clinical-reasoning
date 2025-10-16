@@ -304,7 +304,7 @@ public class MeasureProcessorUtils {
                 for (var libraryVersionedIdentifier : libraryIdentifiers) {
                     validateEvaluationResultExistsForIdentifier(
                             libraryVersionedIdentifier, evaluationResultsForMultiLib);
-                    // standard CQL expression results:  if there are
+                    // standard CQL expression results
                     var evaluationResult = evaluationResultsForMultiLib.getResultFor(libraryVersionedIdentifier);
 
                     var measureDefs =
@@ -312,7 +312,11 @@ public class MeasureProcessorUtils {
 
                     final MeasureObservationResults measureObservationResults =
                             ContinuousVariableObservationHandler.continuousVariableEvaluation(
-                                    context, measureDefs, libraryIdentifiers, evaluationResult, subjectTypePart);
+                                    context,
+                                    measureDefs,
+                                    libraryVersionedIdentifier,
+                                    evaluationResult,
+                                    subjectTypePart);
 
                     resultsBuilder.addResults(measureDefs, subjectId, evaluationResult, measureObservationResults);
 

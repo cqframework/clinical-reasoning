@@ -345,7 +345,8 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
         // add extension to group for totalDenominator and totalNumerator
         if (groupDef.measureScoring().equals(MeasureScoring.PROPORTION)
-                || groupDef.measureScoring().equals(MeasureScoring.RATIO)) {
+                || groupDef.measureScoring().equals(MeasureScoring.RATIO)
+                || groupDef.measureScoring().equals(MeasureScoring.CONTINUOUSVARIABLE)) {
 
             // add extension to group for
             if (bc.measureReport.getType().equals(MeasureReport.MeasureReportType.INDIVIDUAL)) {
@@ -424,7 +425,13 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         if (groupDef.isBooleanBasis()) {
             reportPopulation.setCount(populationDef.getSubjects().size());
         } else {
-            reportPopulation.setCount(populationDef.getResources().size());
+            if (populationDef.type().equals(MeasurePopulationType.MEASUREOBSERVATION)) {
+                // resources has nested maps containing correct qty of resources
+                reportPopulation.setCount(countObservations(populationDef));
+            } else {
+                // standard behavior
+                reportPopulation.setCount(populationDef.getResources().size());
+            }
         }
 
         if (measurePopulation.hasDescription()) {
@@ -463,6 +470,18 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         if (Objects.requireNonNull(populationDef.type()) == MeasurePopulationType.MEASUREOBSERVATION) {
             buildMeasureObservations(bc, populationDef.expression(), populationDef.getResources());
         }
+    }
+
+    public int countObservations(PopulationDef populationDef) {
+        if (populationDef == null || populationDef.getResources() == null) {
+            return 0;
+        }
+
+        return populationDef.getResources().stream()
+                .filter(Map.class::isInstance)
+                .map(Map.class::cast)
+                .mapToInt(Map::size)
+                .sum();
     }
 
     protected void buildMeasureObservations(BuilderContext bc, String observationName, Set<Object> resources) {

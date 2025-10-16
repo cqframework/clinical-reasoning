@@ -325,6 +325,7 @@ public class MeasureEvaluator {
                     subjectType, subjectId, groupDef.getSingle(MEASUREPOPULATIONEXCLUSION), evaluationResult);
             if (applyScoring) {
                 // verify exclusions are in measure-population
+                // LUKETODO:  null warnings
                 measurePopulationExclusion.getResources().retainAll(measurePopulation.getResources());
                 measurePopulationExclusion.getSubjects().retainAll(measurePopulation.getSubjects());
             }
@@ -342,6 +343,7 @@ public class MeasureEvaluator {
                         measurePopulationObservation.getResources(), measurePopulation, measurePopulationObservation);
                 // what about subjects?
                 pruneObservationSubjectResources(
+                        // LUKETODO:  null warnings
                         measurePopulation.subjectResources, measurePopulationObservation.getSubjectResources());
             }
         }

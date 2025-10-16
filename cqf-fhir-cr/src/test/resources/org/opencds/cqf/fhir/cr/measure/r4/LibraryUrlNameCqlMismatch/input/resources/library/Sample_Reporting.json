@@ -1,0 +1,11 @@
+{
+  "resourceType": "Library",
+  "id": "SampleReporting-2024.2.0",
+  "url": "http://sample.org/fhir/Library/SampleReporting-2024.2.0",
+  "version": "2024.2.0",
+  "name": "Sample_Reporting",
+  "content": [ {
+    "contentType": "text/cql",
+    "url": "../../cql/Sample_Reporting.cql"
+  } ]
+}

@@ -5,9 +5,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.StringJoiner;
+import java.util.regex.Pattern;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 public class Canonicals {
+
+    private static final Pattern LIBRARY_REGEX = Pattern.compile("/Library/");
 
     private Canonicals() {}
 
@@ -43,26 +48,26 @@ public class Canonicals {
     }
 
     /**
-     * Gets the ID component of a canonical url. Does not include resource name if present in the url.
+     * Gets the tail component of a canonical url. Does not include resource name if present in the url.
      *
      * @param <CanonicalType> A CanonicalType
      * @param canonicalType the canonical url to parse
-     * @return the Id, or null if one can not be parsed
+     * @return the tail, or null if one can not be parsed
      */
-    public static <CanonicalType extends IPrimitiveType<String>> String getIdPart(CanonicalType canonicalType) {
+    public static <CanonicalType extends IPrimitiveType<String>> String getTail(CanonicalType canonicalType) {
         checkNotNull(canonicalType);
         checkArgument(canonicalType.hasValue());
 
-        return getIdPart(canonicalType.getValue());
+        return getTail(canonicalType.getValue());
     }
 
     /**
-     * Gets the ID component of a canonical url. Does not include resource name if present in the url.
+     * Gets the tail component of a canonical url. Does not include resource name if present in the url.
      *
      * @param canonical the canonical url to parse
-     * @return the Id, or null if one can not be parsed
+     * @return the tail, or null if one can not be parsed
      */
-    public static String getIdPart(String canonical) {
+    public static String getTail(String canonical) {
         checkNotNull(canonical);
 
         if (!canonical.contains("/")) {
@@ -72,6 +77,22 @@ public class Canonicals {
         int lastIndex = calculateLastIndex(canonical);
 
         return canonical.substring(canonical.lastIndexOf("/") + 1, lastIndex);
+    }
+
+    public static String getCanonicalBase(String canonical, String resourceType) {
+        checkNotNull(canonical);
+
+        if (resourceType == null || resourceType.isBlank()) {
+            return null;
+        }
+
+        final Pattern resourceTypePattern = "Library".equals(resourceType)
+                // Pre-compiled because this is the most common use case
+                ? LIBRARY_REGEX
+                // In case we get another type of resource
+                : Pattern.compile("/%s/".formatted(resourceType)); //
+
+        return getCanonicalBase(canonical, resourceTypePattern);
     }
 
     /**
@@ -110,7 +131,7 @@ public class Canonicals {
     }
 
     /**
-     * Gets the Url component of a canonical url. Includes the base url, the resource type, and the id
+     * Gets the Url component of a canonical url. Includes the base url, the resource type, and the tail
      * if present.
      *
      * @param <CanonicalType> A CanonicalType
@@ -125,7 +146,7 @@ public class Canonicals {
     }
 
     /**
-     * Get the Url component of a canonical url. Includes the base url, the resource type, and the id
+     * Get the Url component of a canonical url. Includes the base url, the resource type, and the tail
      * if present.
      *
      * @param canonical the canonical url to parse
@@ -145,7 +166,7 @@ public class Canonicals {
 
     /**
      * Get the Url component for a set of canonical urls. Includes the base url, the resource type,
-     * and the id if present.
+     * and the tail if present.
      *
      * @param canonicals the set of canonical urls to parse
      * @return the set of Url and null (if one can not be parsed) values
@@ -200,11 +221,12 @@ public class Canonicals {
         checkNotNull(canonical);
 
         String url = getUrl(canonical);
-        String id = getIdPart(canonical);
+        String tail = getTail(canonical);
         String resourceType = getResourceType(canonical);
+        String canonicalBase = getCanonicalBase(canonical, resourceType);
         String version = getVersion(canonical);
         String fragment = getFragment(canonical);
-        return new CanonicalParts(url, id, resourceType, version, fragment);
+        return new CanonicalParts(url, canonicalBase, tail, resourceType, version, fragment);
     }
 
     private static int calculateLastIndex(String canonical) {
@@ -221,16 +243,33 @@ public class Canonicals {
         return lastIndex;
     }
 
+    private static String getCanonicalBase(String canonical, Pattern resourceTypePattern) {
+        checkNotNull(canonical);
+
+        if (resourceTypePattern == null) {
+            return null;
+        }
+
+        if (!resourceTypePattern.matcher(canonical).find()) {
+            return null;
+        }
+
+        return resourceTypePattern.split(canonical)[0];
+    }
+
     public static final class CanonicalParts {
         private final String url;
-        private final String idPart;
+        private final String canonicalBase;
+        private final String tail;
         private final String resourceType;
         private final String version;
         private final String fragment;
 
-        CanonicalParts(String url, String idPart, String resourceType, String version, String fragment) {
+        CanonicalParts(
+                String url, String canonicalBase, String tail, String resourceType, String version, String fragment) {
             this.url = url;
-            this.idPart = idPart;
+            this.canonicalBase = canonicalBase;
+            this.tail = tail;
             this.resourceType = resourceType;
             this.version = version;
             this.fragment = fragment;
@@ -240,8 +279,12 @@ public class Canonicals {
             return this.url;
         }
 
-        public String idPart() {
-            return this.idPart;
+        public String canonicalBase() {
+            return this.canonicalBase;
+        }
+
+        public String tail() {
+            return this.tail;
         }
 
         public String resourceType() {
@@ -254,6 +297,37 @@ public class Canonicals {
 
         public String fragment() {
             return this.fragment;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            CanonicalParts that = (CanonicalParts) o;
+            return Objects.equals(url, that.url)
+                    && Objects.equals(canonicalBase, that.canonicalBase)
+                    && Objects.equals(tail, that.tail)
+                    && Objects.equals(resourceType, that.resourceType)
+                    && Objects.equals(version, that.version)
+                    && Objects.equals(fragment, that.fragment);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(url, canonicalBase, tail, resourceType, version, fragment);
+        }
+
+        @Override
+        public String toString() {
+            return new StringJoiner(", ", CanonicalParts.class.getSimpleName() + "[", "]")
+                    .add("url='" + url + "'")
+                    .add("canonicalBase ='" + canonicalBase + "'")
+                    .add("tail='" + tail + "'")
+                    .add("resourceType='" + resourceType + "'")
+                    .add("version='" + version + "'")
+                    .add("fragment='" + fragment + "'")
+                    .toString();
         }
     }
 }

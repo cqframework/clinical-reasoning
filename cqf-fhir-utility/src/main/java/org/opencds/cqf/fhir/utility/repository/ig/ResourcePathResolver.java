@@ -96,25 +96,51 @@ class ResourcePathResolver {
                 this.fhirContext, this.conventions.compartmentMode(), this.conventions.categoryLayout());
     }
 
+    /**
+     * Returns the highest-priority directory for the supplied resource type and compartment assignment.
+     */
     Path preferredDirectory(Class<? extends IBaseResource> resourceType, CompartmentAssignment assignment) {
         return directoriesForResource(resourceType, assignment).stream()
                 .findFirst()
                 .orElse(root);
     }
 
+    /**
+     * Computes the preferred directory for a concrete resource instance.
+     */
     Path preferredDirectory(IBaseResource resource) {
         var assignment = this.compartmentAssigner.assign(resource);
         return preferredDirectory(resource.getClass(), assignment);
     }
 
+    /**
+     * Resolves the full preferred file path for the supplied resource instance.
+     */
     Path preferredPath(IBaseResource resource) {
         return preferredDirectory(resource).resolve(preferredFilename(resource));
     }
 
+    /**
+     * Resolves the full preferred file path for the supplied resource metadata.
+     */
+    Path preferredPath(Class<? extends IBaseResource> resourceType, String idPart, CompartmentAssignment assignment) {
+        return preferredDirectory(resourceType, assignment).resolve(preferredFilename(resourceType, idPart));
+    }
+
+    /**
+     * Computes the preferred filename for the supplied resource instance.
+     */
     String preferredFilename(IBaseResource resource) {
+        return preferredFilename(resource.getClass(), resource.getIdElement().getIdPart());
+    }
+
+    /**
+     * Computes the preferred filename for the supplied resource metadata.
+     */
+    String preferredFilename(Class<? extends IBaseResource> resourceType, String idPart) {
         return buildFilename(
-                resource.getClass().getSimpleName(),
-                resource.getIdElement().toUnqualifiedVersionless().getIdPart(),
+                resourceType.getSimpleName(),
+                idPart,
                 conventions.encodingBehavior().preferredEncoding());
     }
 
@@ -160,20 +186,32 @@ class ResourcePathResolver {
         return collectDirectories(resourceType, DirectoryIntent.CANDIDATE);
     }
 
+    /**
+     * Returns candidate file paths for a resource identifier using the configured directory priorities.
+     */
     List<Path> candidateFiles(Class<? extends IBaseResource> resourceType, String idPart) {
         return combine(candidateDirectoriesForResource(resourceType), candidateFilenames(resourceType, idPart));
     }
 
+    /**
+     * Returns search paths for a resource identifier by expanding all search directories and filename permutations.
+     */
     List<Path> searchFiles(Class<? extends IBaseResource> resourceType, String idPart) {
         return combine(searchDirectories(resourceType), candidateFilenames(resourceType, idPart));
     }
 
+    /**
+     * Produces file name permutations for all enabled encodings.
+     */
     List<String> candidateFilenames(Class<? extends IBaseResource> resourceType, String idPart) {
         return conventions.encodingBehavior().enabledEncodings().stream()
                 .map(encoding -> buildFilename(resourceType.getSimpleName(), idPart, encoding))
                 .toList();
     }
 
+    /**
+     * Produces a filename using the specified encoding.
+     */
     String filenameForEncoding(IBaseResource resource, EncodingEnum encoding) {
         return filenameForEncoding(
                 resource.getClass(),
@@ -181,14 +219,23 @@ class ResourcePathResolver {
                 encoding);
     }
 
+    /**
+     * Produces a filename using the specified encoding for a resource type.
+     */
     String filenameForEncoding(Class<? extends IBaseResource> resourceType, String idPart, EncodingEnum encoding) {
         return buildFilename(resourceType.getSimpleName(), idPart, encoding);
     }
 
+    /**
+     * Resolves the encoding associated with a path based on its extension.
+     */
     EncodingEnum encodingForPath(Path path) {
         return FILE_EXTENSIONS.inverse().get(fileExtension(path));
     }
 
+    /**
+     * Builds a predicate that matches filenames for the given resource type according to repository conventions.
+     */
     Predicate<Path> fileMatcher(Class<? extends IBaseResource> resourceType) {
         var typeName = resourceType.getSimpleName().toLowerCase();
         return switch (conventions.filenameMode()) {
@@ -240,7 +287,7 @@ class ResourcePathResolver {
             resolved = resolved.resolve(assignment.compartmentType());
         }
 
-        if (assignment.hasContextId()) {
+        if (assignment.hasCompartmentId()) {
             resolved = resolved.resolve(assignment.compartmentId());
         }
 
@@ -362,6 +409,9 @@ class ResourcePathResolver {
         };
     }
 
+    /**
+     * Returns {@code true} when the supplied path resides within an {@code external/} directory.
+     */
     public boolean isExternalPath(Path path) {
         return path.getParent() != null
                 && path.getParent().toString().toLowerCase().endsWith(EXTERNAL_DIRECTORY);
@@ -381,8 +431,7 @@ class ResourcePathResolver {
             Class<T> resourceType, I id) {
         var results = new LinkedHashSet<Path>();
 
-        var candidateFiles =
-                this.candidateFiles(resourceType, id.toUnqualifiedVersionless().getIdPart());
+        var candidateFiles = this.candidateFiles(resourceType, id.getIdPart());
         for (var candidate : candidateFiles) {
             try {
                 if (Files.exists(candidate)) {
@@ -397,8 +446,7 @@ class ResourcePathResolver {
             return results.stream();
         }
 
-        var searchFiles =
-                this.searchFiles(resourceType, id.toUnqualifiedVersionless().getIdPart());
+        var searchFiles = this.searchFiles(resourceType, id.getIdPart());
         for (var file : searchFiles) {
             try {
                 if (Files.exists(file)) {

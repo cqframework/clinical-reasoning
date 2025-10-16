@@ -30,6 +30,9 @@ class CompartmentAssigner {
         this.categoryLayout = Objects.requireNonNull(categoryLayout, "categoryLayout cannot be null");
     }
 
+    /**
+     * Determines the compartment assignment for the supplied resource based on repository conventions.
+     */
     CompartmentAssignment assign(IBaseResource resource) {
         requireNonNull(resource, "resource cannot be null");
         requireNonNull(resource.getIdElement().getIdPart(), "resource id cannot be null");
@@ -47,8 +50,7 @@ class CompartmentAssigner {
         // If the resource is of the compartment type, assign it to its own compartment.
         if (compartmentMode.type().equalsIgnoreCase(resourceType)) {
             return CompartmentAssignment.of(
-                    compartmentMode.type(),
-                    resource.getIdElement().toUnqualifiedVersionless().getIdPart());
+                    compartmentMode.type(), resource.getIdElement().getIdPart());
         }
 
         var params = compartmentMode.compartmentSearchParams(fhirContext, resourceType);
@@ -57,11 +59,9 @@ class CompartmentAssigner {
             return assignment.get();
         }
 
-        if (categoryLayout == IgConventions.CategoryLayout.DEFINITIONAL_AND_DATA) {
-            return CompartmentAssignment.SHARED;
-        }
-
-        return CompartmentAssignment.NONE;
+        return categoryLayout == IgConventions.CategoryLayout.DEFINITIONAL_AND_DATA
+                ? CompartmentAssignment.SHARED
+                : CompartmentAssignment.NONE;
     }
 
     private Optional<CompartmentAssignment> resolveFromParameters(

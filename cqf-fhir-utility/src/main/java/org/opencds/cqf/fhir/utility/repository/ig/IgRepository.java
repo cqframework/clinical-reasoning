@@ -14,8 +14,6 @@ import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnclassifiedServerFailureException;
 import ca.uhn.fhir.util.BundleBuilder;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Multimap;
@@ -129,8 +127,6 @@ public class IgRepository implements IRepository {
     // maintain the original encoding of the resource.
     static final String SOURCE_PATH_TAG = "sourcePath"; // Path
 
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-
     private static IParser parserForEncoding(FhirContext fhirContext, EncodingEnum encodingEnum) {
         return switch (encodingEnum) {
             case JSON -> fhirContext.newJsonParser();
@@ -235,39 +231,7 @@ public class IgRepository implements IRepository {
 
             return Optional.of(resource);
         } catch (DataFormatException e) {
-            var fallback = tryParseEmbeddedResource(path, encoding, content);
-            if (fallback.isPresent()) {
-                return fallback;
-            }
             throw new ResourceNotFoundException("Found empty or invalid content at path %s".formatted(path));
-        }
-    }
-
-    private Optional<IBaseResource> tryParseEmbeddedResource(Path path, EncodingEnum encoding, String content) {
-        try {
-            var raw = content.trim();
-            if (!raw.startsWith("\"resource\"") && !raw.startsWith("{\"resource\"")) {
-                return Optional.empty();
-            }
-
-            var wrapped = raw.startsWith("{") ? raw : "{%s}".formatted(raw);
-            JsonNode node = OBJECT_MAPPER.readTree(wrapped);
-            if (node == null || !node.has("resource")) {
-                return Optional.empty();
-            }
-
-            var resourceNode = node.get("resource");
-            if (resourceNode == null || resourceNode.isMissingNode()) {
-                return Optional.empty();
-            }
-
-            var resourceContent = OBJECT_MAPPER.writeValueAsString(resourceNode);
-            var resource = parserForEncoding(fhirContext, encoding).parseResource(resourceContent);
-            resource.setUserData(SOURCE_PATH_TAG, path);
-            CqlContent.loadCqlContent(resource, path.getParent());
-            return Optional.of(resource);
-        } catch (IOException | DataFormatException ignored) {
-            return Optional.empty();
         }
     }
 

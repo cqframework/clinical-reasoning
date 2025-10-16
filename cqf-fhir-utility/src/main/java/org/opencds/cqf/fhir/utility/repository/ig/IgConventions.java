@@ -165,8 +165,8 @@ public record IgConventions(
                 if (compartmentSelection != null) {
                     var compartmentDir = compartmentSelection.getKey();
                     var discoveredCategory = compartmentSelection.getValue();
-                    compartmentMode =
-                            CompartmentMode.fromType(compartmentDir.getFileName().toString());
+                    compartmentMode = CompartmentMode.fromType(
+                            compartmentDir.getFileName().toString());
                     if (compartmentMode == CompartmentMode.NONE) {
                         throw new IllegalArgumentException(
                                 "The compartment directory does not match any known compartment type: "

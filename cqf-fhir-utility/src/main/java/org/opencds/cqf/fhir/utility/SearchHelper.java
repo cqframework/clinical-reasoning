@@ -419,6 +419,7 @@ public class SearchHelper {
      * @param headers the search headers
      * @return
      */
+    @SuppressWarnings("unchecked")
     public static <T extends IBaseResource, R extends IBaseBundle> R searchRepositoryWithPaging(
             IRepository repository,
             Class<T> resourceType,

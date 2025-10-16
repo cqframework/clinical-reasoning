@@ -154,8 +154,7 @@ class LibraryEngineTests {
         var evaluationSettings = EvaluationSettings.getDefault().withLibrarySourceProviders(libraryResourceProvider);
 
         libraryEngine = new LibraryEngine(repository, evaluationSettings);
-        repository.create(
-                new Patient().addName(new HumanName().addGiven("me")).setId("Patient/Patient1"));
+        repository.create(new Patient().addName(new HumanName().addGiven("me")).setId("Patient/Patient1"));
         var patientId = "Patient/Patient1";
         var expression = new CqfExpression(
                 "text/cql", "MyLibrary.MyNameReturner", Map.of("MyLibrary", "http://fhir.test/Library/MyLibrary"));

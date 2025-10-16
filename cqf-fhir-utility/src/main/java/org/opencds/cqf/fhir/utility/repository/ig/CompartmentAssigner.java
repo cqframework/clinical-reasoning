@@ -1,5 +1,7 @@
 package org.opencds.cqf.fhir.utility.repository.ig;
 
+import static java.util.Objects.requireNonNull;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import java.util.Objects;
@@ -10,73 +12,67 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.utility.Ids;
+import org.opencds.cqf.fhir.utility.repository.ig.IgConventions.CategoryLayout;
 
 /**
  * Determines the compartment assignment for a resource based on repository conventions
  * and resource references.
  */
-class CompartmentResolver {
+class CompartmentAssigner {
 
     private final FhirContext fhirContext;
-    private final IgConventions conventions;
+    private final CompartmentMode compartmentMode;
+    private final CategoryLayout categoryLayout;
 
-    CompartmentResolver(FhirContext fhirContext, IgConventions conventions) {
+    CompartmentAssigner(FhirContext fhirContext, CompartmentMode compartmentMode, CategoryLayout categoryLayout) {
         this.fhirContext = Objects.requireNonNull(fhirContext, "fhirContext cannot be null");
-        this.conventions = Objects.requireNonNull(conventions, "conventions cannot be null");
+        this.compartmentMode = Objects.requireNonNull(compartmentMode, "compartmentMode cannot be null");
+        this.categoryLayout = Objects.requireNonNull(categoryLayout, "categoryLayout cannot be null");
     }
 
-    Optional<CompartmentAssignment> resolve(IBaseResource resource) {
-        Objects.requireNonNull(resource, "resource cannot be null");
+    CompartmentAssignment assign(IBaseResource resource) {
+        requireNonNull(resource, "resource cannot be null");
+        requireNonNull(resource.getIdElement().getIdPart(), "resource id cannot be null");
 
-        var compartmentMode = conventions.compartmentMode();
         if (compartmentMode == CompartmentMode.NONE) {
-            return Optional.empty();
+            return CompartmentAssignment.NONE;
         }
 
         var resourceType = resource.fhirType();
-        if (resourceType == null || resourceType.isBlank()) {
-            return Optional.empty();
-        }
-
         var resourceCategory = ResourceCategory.forType(resourceType);
-        if (!compartmentMode.resourceBelongsToCompartment(fhirContext, resourceType)) {
-            if (resourceCategory == ResourceCategory.DATA
-                    && conventions.categoryLayout() == IgConventions.CategoryLayout.DEFINITIONAL_AND_DATA) {
-                return Optional.of(CompartmentAssignment.shared());
-            }
-
-            return Optional.empty();
+        if (resourceCategory != ResourceCategory.DATA) {
+            return CompartmentAssignment.NONE;
         }
 
+        // If the resource is of the compartment type, assign it to its own compartment.
         if (compartmentMode.type().equalsIgnoreCase(resourceType)) {
-            var idElement = resource.getIdElement();
-            if (idElement != null && idElement.hasIdPart()) {
-                return Optional.of(CompartmentAssignment.of(compartmentMode.type(), idElement.getIdPart()));
-            }
+            return CompartmentAssignment.of(
+                    compartmentMode.type(),
+                    resource.getIdElement().toUnqualifiedVersionless().getIdPart());
         }
 
         var params = compartmentMode.compartmentSearchParams(fhirContext, resourceType);
         var assignment = resolveFromParameters(resource, params);
         if (assignment.isPresent()) {
-            return assignment;
+            return assignment.get();
         }
 
-        if (resourceCategory == ResourceCategory.DATA
-                && conventions.categoryLayout() == IgConventions.CategoryLayout.DEFINITIONAL_AND_DATA) {
-            return Optional.of(CompartmentAssignment.shared());
+        if (categoryLayout == IgConventions.CategoryLayout.DEFINITIONAL_AND_DATA) {
+            return CompartmentAssignment.SHARED;
         }
 
-        return Optional.empty();
+        return CompartmentAssignment.NONE;
     }
 
     private Optional<CompartmentAssignment> resolveFromParameters(
             IBaseResource resource, Set<RuntimeSearchParam> searchParams) {
+
         if (searchParams == null || searchParams.isEmpty()) {
             return Optional.empty();
         }
 
         var terser = fhirContext.newTerser();
-        var compartmentType = conventions.compartmentMode().type();
+        var compartmentType = compartmentMode.type();
 
         for (var param : searchParams) {
             for (var originalPath : param.getPathsSplit()) {
@@ -131,7 +127,7 @@ class CompartmentResolver {
                 return null;
             }
 
-            var ensured = Ids.ensureIdType(asString, conventions.compartmentMode().type());
+            var ensured = Ids.ensureIdType(asString, compartmentMode.type());
             return Ids.newId(fhirContext, ensured);
         }
 
@@ -142,7 +138,7 @@ class CompartmentResolver {
             }
 
             if (!element.hasResourceType()) {
-                return Ids.newId(fhirContext, conventions.compartmentMode().type(), element.getIdPart());
+                return Ids.newId(fhirContext, compartmentMode.type(), element.getIdPart());
             }
 
             return element;

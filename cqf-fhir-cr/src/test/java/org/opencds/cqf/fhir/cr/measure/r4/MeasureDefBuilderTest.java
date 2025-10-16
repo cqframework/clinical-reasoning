@@ -35,6 +35,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 import org.opencds.cqf.fhir.cr.measure.common.CodeDef;
 import org.opencds.cqf.fhir.cr.measure.common.ConceptDef;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
@@ -586,6 +587,7 @@ class MeasureDefBuilderTest {
                 expression,
                 new ConceptDef(List.of(new CodeDef("system", "code")), expression),
                 expression,
+                MeasureStratifierType.VALUE,
                 IntStream.range(0, componentCount)
                         .mapToObj(num -> buildOutputStratifierComponentDef(expression + num))
                         .toList());

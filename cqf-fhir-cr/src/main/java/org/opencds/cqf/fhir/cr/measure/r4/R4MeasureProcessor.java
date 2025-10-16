@@ -165,9 +165,6 @@ public class R4MeasureProcessor {
         // setup MeasureDef
         var measureDef = new R4MeasureDefBuilder().build(measure);
 
-        // Process Criteria Expression Results
-        final IIdType measureId = measure.getIdElement().toUnqualifiedVersionless();
-        // populate results from Library $evaluate
         final Map<String, EvaluationResult> resultForThisMeasure =
                 compositeEvaluationResultsPerMeasure.processMeasureForSuccessOrFailure(measureDef);
 
@@ -180,7 +177,7 @@ public class R4MeasureProcessor {
 
         // LUKETODO:  figure out if we still need this:
         var measurementPeriod = postLibraryEvaluationPeriodProcessingAndContinuousVariableObservation(
-                measure, measureDef, periodStart, periodEnd, context);
+                measure, periodStart, periodEnd, context);
 
         // Build Measure Report with Results
         return new R4MeasureReportBuilder()
@@ -203,7 +200,6 @@ public class R4MeasureProcessor {
      */
     private Interval postLibraryEvaluationPeriodProcessingAndContinuousVariableObservation(
             Measure measure,
-            MeasureDef measureDef,
             @Nullable ZonedDateTime periodStart,
             @Nullable ZonedDateTime periodEnd,
             CqlEngine context) {

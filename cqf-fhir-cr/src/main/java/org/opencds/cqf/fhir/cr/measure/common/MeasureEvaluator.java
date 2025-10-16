@@ -312,20 +312,17 @@ public class MeasureEvaluator {
         measurePopulation = evaluatePopulationMembership(subjectType, subjectId, measurePopulation, evaluationResult);
         // Evaluate Population Expressions
         measurePopulation = evaluatePopulationMembership(subjectType, subjectId, measurePopulation, evaluationResult);
-        if (measurePopulation != null && initialPopulation != null) {
-            if (applyScoring) {
-                // verify initial-population are in measure-population
-                measurePopulation.getResources().retainAll(initialPopulation.getResources());
-                measurePopulation.getSubjects().retainAll(initialPopulation.getSubjects());
-            }
+        if (measurePopulation != null && initialPopulation != null && applyScoring) {
+            // verify initial-population are in measure-population
+            measurePopulation.getResources().retainAll(initialPopulation.getResources());
+            measurePopulation.getSubjects().retainAll(initialPopulation.getSubjects());
         }
 
         if (measurePopulationExclusion != null) {
             evaluatePopulationMembership(
                     subjectType, subjectId, groupDef.getSingle(MEASUREPOPULATIONEXCLUSION), evaluationResult);
-            if (applyScoring) {
+            if (applyScoring && measurePopulation != null) {
                 // verify exclusions are in measure-population
-                // LUKETODO:  null warnings
                 measurePopulationExclusion.getResources().retainAll(measurePopulation.getResources());
                 measurePopulationExclusion.getSubjects().retainAll(measurePopulation.getSubjects());
             }
@@ -342,9 +339,10 @@ public class MeasureEvaluator {
                 pruneObservationResources(
                         measurePopulationObservation.getResources(), measurePopulation, measurePopulationObservation);
                 // what about subjects?
-                pruneObservationSubjectResources(
-                        // LUKETODO:  null warnings
-                        measurePopulation.subjectResources, measurePopulationObservation.getSubjectResources());
+                if (measurePopulation != null) {
+                    pruneObservationSubjectResources(
+                            measurePopulation.subjectResources, measurePopulationObservation.getSubjectResources());
+                }
             }
         }
         // measure Observation
@@ -416,11 +414,7 @@ public class MeasureEvaluator {
     }
 
     protected void evaluateCohort(
-            GroupDef groupDef,
-            String subjectType,
-            String subjectId,
-            EvaluationResult evaluationResult,
-            boolean applyScoring) {
+            GroupDef groupDef, String subjectType, String subjectId, EvaluationResult evaluationResult) {
         PopulationDef initialPopulation = groupDef.getSingle(INITIALPOPULATION);
         // Validate Required Populations are Present
         R4MeasureScoringTypePopulations.validateScoringTypePopulations(
@@ -452,7 +446,7 @@ public class MeasureEvaluator {
                 evaluateContinuousVariable(groupDef, subjectType, subjectId, evaluationResult, applyScoring);
                 break;
             case COHORT:
-                evaluateCohort(groupDef, subjectType, subjectId, evaluationResult, applyScoring);
+                evaluateCohort(groupDef, subjectType, subjectId, evaluationResult);
                 break;
         }
     }

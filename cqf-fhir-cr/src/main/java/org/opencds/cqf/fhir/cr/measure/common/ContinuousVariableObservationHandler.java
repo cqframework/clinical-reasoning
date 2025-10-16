@@ -64,15 +64,6 @@ public class ContinuousVariableObservationHandler {
         // Add back the libraries to the stack, since we popped them off during CQL
         context.getState().init(libraries);
 
-        // Measurement Period: operation parameter defined measurement period
-        // this necessary?
-        // Interval measurementPeriodParams = buildMeasurementPeriod(periodStart, periodEnd);
-
-        //                    setMeasurementPeriod(
-        //                        measurementPeriodParams,
-        //                        context,
-        //                        Optional.ofNullable(measureDef.).map(List::of).orElse(List.of("Unknown
-        // Measure URL")));
         // one Library may be linked to multiple Measures
         for (MeasureDef measureDefWithMeasureObservations : measureDefsWithMeasureObservations) {
 

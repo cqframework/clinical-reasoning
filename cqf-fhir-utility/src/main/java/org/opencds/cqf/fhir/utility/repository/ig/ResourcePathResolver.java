@@ -129,7 +129,13 @@ class ResourcePathResolver {
             var basePath = root.resolve(base);
             var expanded = applyCompartmentAssignment(basePath, assignment);
             for (var path : expanded) {
-                paths.add(typeSegment != null ? path.resolve(typeSegment) : path);
+                var typedPath = typeSegment != null ? path.resolve(typeSegment) : path;
+                paths.add(typedPath);
+                // Terminology resources may also be found in an 'external' directory for some conventions
+                if (category == ResourceCategory.TERMINOLOGY
+                        && conventions.categoryLayout() != CategoryLayout.DEFINITIONAL_AND_DATA) {
+                    paths.add(typedPath.resolve(EXTERNAL_DIRECTORY));
+                }
             }
         }
 

@@ -137,7 +137,7 @@ class IgRepositoryCompartmentTest {
     }
 
     @Test
-    void valueSetIsDiscoveredInTestsVocabularyDirectory() {
+    void searchTestOnlyValueSet() {
         var id = Ids.newId(ValueSet.class, "test-only");
         var valueSet = repository.read(ValueSet.class, id);
 

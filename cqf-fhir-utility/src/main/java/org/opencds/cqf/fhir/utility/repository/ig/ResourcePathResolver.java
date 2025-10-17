@@ -73,6 +73,10 @@ class ResourcePathResolver {
     }
 
     Path preferredDirectory(Class<? extends IBaseResource> resourceType, CompartmentAssignment assignment) {
+        requireNonNull(resourceType, "resourceType cannot be null");
+        requireNonNull(assignment, "assignment cannot be null");
+        validateAssignment(assignment);
+
         // In the "preferred" case, we remap an 'unknown' assignment to 'shared'
         var effectiveAssignment = assignment.isUnknown() ? CompartmentAssignment.shared() : assignment;
         return directories(resourceType, effectiveAssignment).stream()
@@ -81,10 +85,17 @@ class ResourcePathResolver {
     }
 
     Path preferredPath(Class<? extends IBaseResource> resourceType, String idPart, CompartmentAssignment assignment) {
-        return preferredDirectory(resourceType, assignment).resolve(preferredFilename(resourceType, idPart));
+        requireNonNull(resourceType, "resourceType cannot be null");
+        requireNonNull(idPart, "idPart cannot be null");
+        requireNonNull(assignment, "assignment cannot be null");
+        validateAssignment(assignment);
+
+        // In the "preferred" case, we remap an 'unknown' assignment to 'shared'
+        var effectiveAssignment = assignment.isUnknown() ? CompartmentAssignment.shared() : assignment;
+        return preferredDirectory(resourceType, effectiveAssignment).resolve(preferredFilename(resourceType, idPart));
     }
 
-    String preferredFilename(Class<? extends IBaseResource> resourceType, String idPart) {
+    private String preferredFilename(Class<? extends IBaseResource> resourceType, String idPart) {
         return buildFilename(
                 resourceType.getSimpleName(),
                 idPart,
@@ -103,6 +114,7 @@ class ResourcePathResolver {
     List<Path> directories(Class<? extends IBaseResource> resourceType, CompartmentAssignment assignment) {
         requireNonNull(resourceType, "resourceType cannot be null");
         requireNonNull(assignment, "assignment cannot be null");
+        validateAssignment(assignment);
 
         var category = ResourceCategory.forType(resourceType.getSimpleName());
         var bases = categoryDirectories(category);
@@ -124,13 +136,28 @@ class ResourcePathResolver {
         return List.copyOf(paths);
     }
 
+    private void validateAssignment(CompartmentAssignment assignment) {
+        if (assignment.isNone() && conventions.compartmentMode() != CompartmentMode.NONE) {
+            throw new IllegalArgumentException(
+                    "CompartmentAssignment cannot be 'none' when conventions specify compartments");
+        } else if (conventions.compartmentMode() == CompartmentMode.NONE && !assignment.isNone()) {
+            throw new IllegalArgumentException(
+                    "CompartmentAssignment must be 'none' when conventions specify no compartments");
+        }
+    }
+
     List<Path> candidates(
             Class<? extends IBaseResource> resourceType, String idPart, CompartmentAssignment assignment) {
+        requireNonNull(resourceType, "resourceType cannot be null");
+        requireNonNull(idPart, "idPart cannot be null");
+        requireNonNull(assignment, "assignment cannot be null");
+        validateAssignment(assignment);
+
         var directories = directories(resourceType, assignment);
         return combine(directories, candidateFilenames(resourceType, idPart));
     }
 
-    List<String> candidateFilenames(Class<? extends IBaseResource> resourceType, String idPart) {
+    private List<String> candidateFilenames(Class<? extends IBaseResource> resourceType, String idPart) {
         return conventions.encodingBehavior().enabledEncodings().stream()
                 .map(encoding -> buildFilename(resourceType.getSimpleName(), idPart, encoding))
                 .toList();

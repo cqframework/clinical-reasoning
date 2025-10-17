@@ -74,9 +74,23 @@ class ResourcePathResolverTest {
     void directoriesForTerminologyInKalmPreferSrcThenShared(@TempDir Path tempDir) {
         var resolver = new ResourcePathResolver(tempDir, IgConventions.KALM);
 
-        var directories = resolver.directories(ValueSet.class, CompartmentAssignment.none());
+        var directories = resolver.directories(ValueSet.class, CompartmentAssignment.shared());
 
         assertEquals(tempDir.resolve("src/fhir/valueset"), directories.get(0));
-        assertTrue(directories.contains(tempDir.resolve("tests/data/fhir/valueset")));
+        assertTrue(directories.contains(tempDir.resolve("tests/data/fhir/shared/valueset")));
+        assertFalse(directories.contains(tempDir.resolve("tests/data/fhir/valueset")));
+    }
+
+    @Test
+    void terminologyDirectoriesIncludeExternalFallbacks(@TempDir Path tempDir) throws Exception {
+        Files.createDirectories(tempDir.resolve("input/vocabulary/valueset"));
+        Files.createDirectories(tempDir.resolve("input/vocabulary/valueset/external"));
+
+        var resolver = new ResourcePathResolver(tempDir, IgConventions.STANDARD);
+
+        var directories = resolver.directories(ValueSet.class, CompartmentAssignment.none());
+
+        assertEquals(tempDir.resolve("input/vocabulary/valueset"), directories.get(0));
+        assertTrue(directories.contains(tempDir.resolve("input/vocabulary/valueset/external")));
     }
 }

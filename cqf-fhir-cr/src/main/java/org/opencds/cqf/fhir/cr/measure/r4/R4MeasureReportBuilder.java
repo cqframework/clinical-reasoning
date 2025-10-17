@@ -612,6 +612,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         return cd;
     }
 
+    // LUKETODO:  try to make this method work off ONLY a MeasureDef and not a FHIR measure at all
     protected MeasureReport createMeasureReport(
             Measure measure,
             MeasureDef measureDef,
@@ -630,9 +631,11 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             report.setPeriod(helper.buildMeasurementPeriod((measurementPeriod)));
         }
 
-        report.setMeasure(getMeasure(measure));
+//        report.setMeasure(getMeasure(measure));
+        report.setMeasure(measureDef.getUrlForMeasureReport());
         report.setDate(new java.util.Date());
-        report.setImplicitRules(measure.getImplicitRules());
+//        report.setImplicitRules(measure.getImplicitRules());
+        report.setImplicitRules(measureDef.getImplicitRules());
         if (measureDef.groups().isEmpty() || !measureDef.groups().get(0).isGroupImprovementNotation()) {
             // if true, all group components have the same improvement Notation
             report.setImprovementNotation(measure.getImprovementNotation());

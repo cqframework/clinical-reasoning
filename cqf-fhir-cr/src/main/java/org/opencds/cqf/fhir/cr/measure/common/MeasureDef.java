@@ -1,29 +1,39 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
+import org.apache.commons.lang3.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.StringJoiner;
 
+// LUKETODO:  or, do we really care about anything that deals with MeasureReports?  Maybe we just draw a box around anything that deals directly with the CQL engine or non-measure report code?
+// LUKETODO:  consider R4/DSTU3/etc Measure to MeasureDef adapter classes
+// LUKETODO: consider a Builder, because adding a massive constructor will not scale
+// LUKETODO: the MeasureDef will need to perhaps encapsulate part of the FHIR-version specific resource for conversions such as getImprovementNotation()
 public class MeasureDef {
 
     private final String id;
     private final String url;
     private final String version;
+    private String language;
+    private String description;
+    private String implicitRules;
     private final List<GroupDef> groups;
     private final List<SdeDef> sdes;
     private final List<String> errors;
+    private final List<LibraryDef> libraryDefs;
 
     public static MeasureDef fromIdAndUrl(String id, String url) {
-        return new MeasureDef(id, url, null, List.of(), List.of());
+        return new MeasureDef(id, url, null, List.of(), List.of(), List.of());
     }
 
-    public MeasureDef(String id, String url, String version, List<GroupDef> groups, List<SdeDef> sdes) {
+    public MeasureDef(String id, String url, String version, List<GroupDef> groups, List<SdeDef> sdes, List<LibraryDef> libraryDefs) {
         this.id = id;
         this.url = url;
         this.version = version;
         this.groups = groups;
         this.sdes = sdes;
+        this.libraryDefs = libraryDefs;
 
         this.errors = new ArrayList<>();
     }
@@ -50,6 +60,10 @@ public class MeasureDef {
 
     public List<String> errors() {
         return this.errors;
+    }
+
+    public List<LibraryDef> libraryDefs() {
+        return this.libraryDefs;
     }
 
     public void addError(String error) {
@@ -83,4 +97,21 @@ public class MeasureDef {
                 .add("errors=" + errors)
                 .toString();
     }
+
+    public String getUrlForMeasureReport() {
+        if (StringUtils.isNotBlank(url()) && !url().contains("|") && hasVersion()) {
+            return url() + "|" + version();
+        }
+        return url();
+    }
+
+    private boolean hasVersion() {
+        return StringUtils.isNotBlank(this.version);
+    }
+
+    public String getImplicitRules() {
+        return implicitRules;
+    }
+
+    // LUKETODO: need to represent an ImprovementNotation in a way the MeasureReport builder can take
 }

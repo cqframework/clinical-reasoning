@@ -13,6 +13,7 @@ import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.iterable.BundleIterable;
 import org.opencds.cqf.fhir.utility.search.Searches;
 
+// LUKETODO: Do we need this to return an IBaseResource, or just a LibraryDef, which will have the Base64 CQL library?
 public class RepositoryFhirLibrarySourceProvider extends BaseFhirLibrarySourceProvider {
 
     private final IRepository repository;

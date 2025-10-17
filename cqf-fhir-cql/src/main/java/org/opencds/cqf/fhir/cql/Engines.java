@@ -45,6 +45,13 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings("UnstableApiUsage")
 public class Engines {
 
+    // LUKETODO:  this class makes heavy of Repository, instead of acting directly on Libraries
+    // it uses Adapters to deal with FHIR libraries in version-agnostic ways, but the main thing
+    // seems to be to retrieve related libraries from a database, which stores the FHIR resource
+    // LUKETODO: The only thing we could potentially do is have a wrapper around the Repository that
+    // adapts a given Resource to a version-agnostic one for CQL
+    // LUKETODO: how do we handle ValueSets/Terminology/etc?
+
     private static Logger logger = LoggerFactory.getLogger(Engines.class);
 
     private Engines() {}

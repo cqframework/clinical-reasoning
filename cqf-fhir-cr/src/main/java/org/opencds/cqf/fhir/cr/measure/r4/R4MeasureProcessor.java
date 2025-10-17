@@ -35,6 +35,7 @@ import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cql.VersionedIdentifiers;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.CompositeEvaluationResultsPerMeasure;
+import org.opencds.cqf.fhir.cr.measure.common.LibraryDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorUtils;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
@@ -257,6 +258,7 @@ public class R4MeasureProcessor {
         var zonedMeasurementPeriod = MeasureProcessorUtils.getZonedTimeZoneForEval(
                 MeasureProcessorUtils.getDefaultMeasurementPeriod(measurementPeriodParams, context));
 
+        // LUKETODO:  can we roll this into the measureDef conversion?
         // Do this to be backwards compatible with the previous single-library evaluation:
         // Trigger first-pass validation on measure scoring as well as other aspects of the Measures
         R4MeasureDefBuilder.triggerFirstPassValidation(measures);
@@ -358,6 +360,7 @@ public class R4MeasureProcessor {
         };
     }
 
+    // LUKETODO:  here, or much earlier, can we just extract the Library, and add it as a LibraryDef to a MeasureDef
     /**
      * method to extract Library version defined on the Measure resource
      * @param measure resource that has desired Library
@@ -382,6 +385,27 @@ public class R4MeasureProcessor {
             throw new ResourceNotFoundException(errorMsg);
         }
         return VersionedIdentifiers.forUrl(url);
+    }
+
+    private LibraryDef getLibraryDef(Measure measure) {
+
+        if (measure == null) {
+            throw new InvalidRequestException("Measure provided is null");
+        }
+
+        if (!measure.hasLibrary() || measure.getLibrary().isEmpty()) {
+            throw new InvalidRequestException(
+                "Measure %s does not have a primary library specified".formatted(measure.getUrl()));
+        }
+
+        var url = measure.getLibrary().get(0).asStringValue();
+
+        Bundle b = this.repository.search(Bundle.class, Library.class, Searches.byCanonical(url), null);
+        if (b.getEntry().isEmpty()) {
+            var errorMsg = "Unable to find Library with url: %s".formatted(url);
+            throw new ResourceNotFoundException(errorMsg);
+        }
+        return new LibraryDef(VersionedIdentifiers.forUrl(url));
     }
 
     /**

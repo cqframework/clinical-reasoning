@@ -10,7 +10,6 @@ import com.google.common.collect.Table;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
@@ -33,6 +32,10 @@ class ResourcePathResolver {
             .put(EncodingEnum.NDJSON, "ndjson")
             .build();
 
+    // This table defines the base directories for each combination of category layout and resource category.
+    // The paths are relative to the IG root, and will be further modified based on compartment assignment and type
+    // layout.
+    // The order of the lists defines the search/read/write priority (index 0 is the preferred directory).
     private static final Table<CategoryLayout, ResourceCategory, List<String>> BASE_DIRECTORIES =
             new ImmutableTable.Builder<CategoryLayout, ResourceCategory, List<String>>()
                     .put(CategoryLayout.FLAT, ResourceCategory.CONTENT, List.of("input"))
@@ -272,18 +275,16 @@ class ResourcePathResolver {
 
     private List<Path> enumerateCompartments(Path base, String compartmentType) {
         var paths = new ArrayList<Path>();
-        paths.add(base.resolve(CompartmentAssignment.SHARED_COMPARTMENT));
-
         var compartmentRoot = base.resolve(compartmentType);
         if (Files.isDirectory(compartmentRoot)) {
             try (var stream = Files.list(compartmentRoot)) {
-                stream.filter(Files::isDirectory)
-                        .sorted(Comparator.comparing(path -> path.getFileName().toString()))
-                        .forEach(paths::add);
+                stream.filter(Files::isDirectory).forEach(paths::add);
             } catch (Exception e) {
                 throw new IllegalStateException("Failed to enumerate compartments", e);
             }
         }
+
+        paths.add(base.resolve(CompartmentAssignment.SHARED_COMPARTMENT));
 
         return paths;
     }

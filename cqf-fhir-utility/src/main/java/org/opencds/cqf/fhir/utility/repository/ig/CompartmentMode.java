@@ -65,8 +65,10 @@ public enum CompartmentMode {
         } else {
             params = fhirContext.getResourceDefinition(resourceType).getSearchParams().stream()
                     .filter(param -> param.getParamType() == RestSearchParameterTypeEnum.REFERENCE)
-                    .filter(param -> param.getProvidesMembershipInCompartments() != null
-                            && param.getProvidesMembershipInCompartments().contains(this.type))
+                    .filter(param -> (param.getProvidesMembershipInCompartments() != null
+                                    && param.getProvidesMembershipInCompartments()
+                                            .contains(this.type))
+                            || (param.getTargets() != null && param.getTargets().contains(this.type)))
                     .collect(Collectors.toSet());
         }
 

@@ -167,7 +167,7 @@ public class IgRepository implements IRepository {
         this.conventions = requireNonNull(conventions, "conventions cannot be null");
         this.resourceMatcher = Repositories.getResourceMatcher(this.fhirContext);
         this.operationProvider = operationProvider;
-        this.pathResolver = new ResourcePathResolver(this.root, this.conventions, this.fhirContext);
+        this.pathResolver = new ResourcePathResolver(this.root, this.conventions);
         this.compartmentAssigner = new CompartmentAssigner(this.fhirContext, this.conventions.compartmentMode());
     }
 
@@ -417,7 +417,8 @@ public class IgRepository implements IRepository {
         requireNonNull(resource.getIdElement().getIdPart(), "resource id cannot be null");
 
         var assignment = this.compartmentAssigner.assign(resource);
-        var path = this.pathResolver.preferredPath(resource.getClass(), resource.getIdElement().getIdPart(), assignment);
+        var path = this.pathResolver.preferredPath(
+                resource.getClass(), resource.getIdElement().getIdPart(), assignment);
         writeResource(resource, path);
 
         return new MethodOutcome(resource.getIdElement(), true);
@@ -497,7 +498,7 @@ public class IgRepository implements IRepository {
         var assignment = this.compartmentAssigner.assign(resource);
         var resourceType = resource.getClass();
         var idPart = resource.getIdElement().getIdPart();
-        
+
         var targetPath = this.pathResolver.preferredPath(resourceType, idPart, assignment);
         if (existingPath != null
                 && this.conventions.encodingBehavior().preserveEncoding()

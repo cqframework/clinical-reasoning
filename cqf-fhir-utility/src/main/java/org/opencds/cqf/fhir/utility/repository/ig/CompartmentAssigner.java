@@ -3,10 +3,14 @@ package org.opencds.cqf.fhir.utility.repository.ig;
 import static java.util.Objects.requireNonNull;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import com.google.common.collect.Multimap;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -19,6 +23,9 @@ import org.opencds.cqf.fhir.utility.Ids;
  */
 class CompartmentAssigner {
 
+    private static final List<String> COMPARTMENT_REFERENCE_PRIORITY =
+            List.of("subject", "patient", "beneficiary", "member", "individual", "encounter", "episodeofcare");
+
     private final FhirContext fhirContext;
     private final CompartmentMode compartmentMode;
 
@@ -30,7 +37,7 @@ class CompartmentAssigner {
     /**
      * Determines the compartment assignment for the supplied resource based on repository conventions.
      *
-     * Possile outcomes:
+     * Possible outcomes:
      * - NONE: No compartment assignment (repository is not compartmentalized)
      * - SHARED: Resource is shared across all compartments
      * - Specific compartment: Resource is assigned to a specific compartment (e.g. Patient/123)
@@ -67,7 +74,7 @@ class CompartmentAssigner {
     /**
      * Determines the compartment assignment for the supplied resource type and id
      *
-     * Possile outcomes:
+     * Possible outcomes:
      * - NONE: No compartment assignment (repository is not compartmentalized)
      * - SHARED: Resource is shared across all compartments
      * - Specific compartment: Resource is assigned to a specific compartment (e.g. Patient/123)
@@ -111,14 +118,11 @@ class CompartmentAssigner {
         var terser = fhirContext.newTerser();
         var compartmentType = compartmentMode.type();
 
-        // TODO: This currently only supports the first matching reference.
-        // CQL picks only one particular compartment if multiple are found,
-        // based on which relationship is likely to be the "primary" one.
-        // For example, a Coverage may reference a Patient as both the
-        // beneficiary and the policyholder, but only the beneficiary is used.
-        // See:
-        // https://github.com/cqframework/clinical_quality_language/blob/master/Src/java/engine-fhir/src/main/kotlin/org/opencds/cqf/cql/engine/fhir/model/R4FhirModelResolver.kt#L408-L414
-        for (var param : searchParams) {
+        var candidates = new ArrayList<ReferenceCandidate>();
+        var orderedParams = orderCompartmentParams(searchParams);
+        var sequence = 0;
+
+        for (var param : orderedParams) {
             for (var originalPath : param.getPathsSplit()) {
                 var path = sanitizeSearchPath(originalPath);
                 if (path == null || path.isBlank()) {
@@ -132,17 +136,27 @@ class CompartmentAssigner {
                         continue;
                     }
 
-                    var referencedType =
-                            reference.getResourceType() != null ? reference.getResourceType() : compartmentType;
+                    var referencedType = reference.getResourceType();
+                    if (referencedType == null || referencedType.isBlank()) {
+                        referencedType = compartmentType;
+                    }
 
                     if (compartmentType.equalsIgnoreCase(referencedType)) {
-                        return CompartmentAssignment.of(compartmentType, reference.getIdPart());
+                        candidates.add(new ReferenceCandidate(
+                                priorityIndex(param.getName()), sequence++, reference.getIdPart()));
                     }
                 }
             }
         }
 
-        return CompartmentAssignment.shared();
+        if (candidates.isEmpty()) {
+            return CompartmentAssignment.shared();
+        }
+
+        candidates.sort(
+                Comparator.comparingInt(ReferenceCandidate::priority).thenComparingInt(ReferenceCandidate::sequence));
+
+        return CompartmentAssignment.of(compartmentType, candidates.get(0).id());
     }
 
     /**
@@ -188,9 +202,26 @@ class CompartmentAssigner {
             }
         }
 
-        // TODO: Match up the compartment search parameters with the passed in search parameters
-        // and use those to determine the compartment assignment.
-        return CompartmentAssignment.shared();
+        var membershipParams =
+                orderCompartmentParams(compartmentMode.compartmentSearchParams(fhirContext, resourceType));
+
+        for (var param : membershipParams) {
+            var values = collectQueryParameters(searchParameters, param.getName());
+            if (values.isEmpty()) {
+                continue;
+            }
+
+            var assignment = resolveFromQuery(values);
+            if (assignment == null) {
+                continue;
+            }
+
+            if (assignment.hasCompartmentId()) {
+                return assignment;
+            }
+        }
+
+        return CompartmentAssignment.unknown(compartmentMode.type());
     }
 
     private String sanitizeSearchPath(String path) {
@@ -238,4 +269,85 @@ class CompartmentAssigner {
 
         return null;
     }
+
+    private List<RuntimeSearchParam> orderCompartmentParams(Set<RuntimeSearchParam> params) {
+        return params.stream()
+                .sorted(Comparator.comparingInt((RuntimeSearchParam param) -> priorityIndex(param.getName()))
+                        .thenComparing(RuntimeSearchParam::getName))
+                .toList();
+    }
+
+    private int priorityIndex(String name) {
+        if (name == null) {
+            return COMPARTMENT_REFERENCE_PRIORITY.size();
+        }
+        var normalized = name.toLowerCase();
+        var index = COMPARTMENT_REFERENCE_PRIORITY.indexOf(normalized);
+        return index >= 0 ? index : COMPARTMENT_REFERENCE_PRIORITY.size();
+    }
+
+    private List<IQueryParameterType> collectQueryParameters(
+            Multimap<String, List<IQueryParameterType>> searchParameters, String expectedName) {
+        var matches = new ArrayList<IQueryParameterType>();
+        if (searchParameters == null || expectedName == null) {
+            return matches;
+        }
+
+        var normalized = expectedName.toLowerCase();
+        for (var key : searchParameters.keySet()) {
+            if (key == null) {
+                continue;
+            }
+
+            var lowerKey = key.toLowerCase();
+            if (!lowerKey.equals(normalized) && !lowerKey.startsWith(normalized + ":")) {
+                continue;
+            }
+
+            for (var group : searchParameters.get(key)) {
+                if (group == null) {
+                    continue;
+                }
+                matches.addAll(group);
+            }
+        }
+
+        return matches;
+    }
+
+    private CompartmentAssignment resolveFromQuery(List<IQueryParameterType> values) {
+        if (values == null || values.isEmpty()) {
+            return null;
+        }
+
+        var compartmentType = compartmentMode.type();
+        var sawValue = false;
+        for (var queryValue : values) {
+            if (queryValue == null) {
+                continue;
+            }
+
+            sawValue = true;
+            var token = queryValue.getValueAsQueryToken(fhirContext);
+            if (token == null || token.isBlank()) {
+                continue;
+            }
+
+            var ensured = Ids.ensureIdType(token, compartmentType);
+            var id = Ids.newId(fhirContext, ensured);
+            if (!id.hasIdPart()) {
+                continue;
+            }
+
+            if (id.hasResourceType() && !compartmentType.equalsIgnoreCase(id.getResourceType())) {
+                continue;
+            }
+
+            return CompartmentAssignment.of(compartmentType, id.getIdPart());
+        }
+
+        return sawValue ? CompartmentAssignment.unknown(compartmentType) : null;
+    }
+
+    private record ReferenceCandidate(int priority, int sequence, String id) {}
 }

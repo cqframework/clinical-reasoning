@@ -18,6 +18,7 @@ import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Library;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -87,9 +88,44 @@ class ElmCacheResourceChangeListenerTest {
     }
 
     @Test
-    void testHandleChange_whenResourceIsLibrary_removesResourceFromCache() {
+    @DisplayName("Test to ensure an updated resource (POST) is removed from the cache")
+    void testUpdateHandleChange_removesResourceFromCache() {
         IResourceChangeEvent resourceChangeEvent = Mockito.mock(IResourceChangeEvent.class);
         when(resourceChangeEvent.getUpdatedResourceIds()).thenReturn(List.of(myLibraryId));
+
+        Library library = new Library().setName("Library").setVersion(myLibraryId.getVersionIdPart());
+        when(myLibraryDao.read(eq(myLibraryId), any())).thenReturn(library);
+
+        VersionedIdentifier vid =
+                new VersionedIdentifier().withId(library.getName()).withVersion(library.getVersion());
+
+        myListener.handleChange(resourceChangeEvent);
+
+        Mockito.verify(myGlobalLibraryCache).remove(vid);
+    }
+
+    @Test
+    @DisplayName("Test to ensure a deleted resource (DELETE) is removed from the cache")
+    void testDeleteHandleChange_removesResourceFromCache() {
+        IResourceChangeEvent resourceChangeEvent = Mockito.mock(IResourceChangeEvent.class);
+        when(resourceChangeEvent.getDeletedResourceIds()).thenReturn(List.of(myLibraryId));
+
+        Library library = new Library().setName("Library").setVersion(myLibraryId.getVersionIdPart());
+        when(myLibraryDao.read(eq(myLibraryId), any())).thenReturn(library);
+
+        VersionedIdentifier vid =
+                new VersionedIdentifier().withId(library.getName()).withVersion(library.getVersion());
+
+        myListener.handleChange(resourceChangeEvent);
+
+        Mockito.verify(myGlobalLibraryCache).remove(vid);
+    }
+
+    @Test
+    @DisplayName("Test to ensure a created resource (PUT) is removed from the cache")
+    void testCreateHandleChange_removesResourceFromCache() {
+        IResourceChangeEvent resourceChangeEvent = Mockito.mock(IResourceChangeEvent.class);
+        when(resourceChangeEvent.getCreatedResourceIds()).thenReturn(List.of(myLibraryId));
 
         Library library = new Library().setName("Library").setVersion(myLibraryId.getVersionIdPart());
         when(myLibraryDao.read(eq(myLibraryId), any())).thenReturn(library);

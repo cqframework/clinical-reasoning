@@ -18,6 +18,7 @@ import java.util.Set;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -104,9 +105,44 @@ class CodeCacheResourceChangeListenerTest {
     }
 
     @Test
-    void testHandleChange_whenResourceIsValueSet_removesResourceFromCache() {
+    @DisplayName("Test to ensure an updated resource (POST) is removed from the cache")
+    void testUpdateHandleChange_removesResourceFromCache() {
         IResourceChangeEvent resourceChangeEvent = Mockito.mock(IResourceChangeEvent.class);
         when(resourceChangeEvent.getUpdatedResourceIds()).thenReturn(List.of(myValueSetId));
+
+        ValueSet valueSet = new ValueSet().setUrl("acme.org/myValueset");
+
+        when(myValueSetDao.read(eq(myValueSetId.toUnqualifiedVersionless()), any()))
+                .thenReturn(valueSet);
+        when(myGlobalValueSetCache.keySet()).thenReturn(Set.of(valueSet.getUrl()));
+
+        myListener.handleChange(resourceChangeEvent);
+
+        Mockito.verify(myGlobalValueSetCache).remove(valueSet.getUrl());
+    }
+
+    @Test
+    @DisplayName("Test to ensure a deleted resource (DELETE) is removed from the cache")
+    void testDeleteHandleChange_removesResourceFromCache() {
+        IResourceChangeEvent resourceChangeEvent = Mockito.mock(IResourceChangeEvent.class);
+        when(resourceChangeEvent.getDeletedResourceIds()).thenReturn(List.of(myValueSetId));
+
+        ValueSet valueSet = new ValueSet().setUrl("acme.org/myValueset");
+
+        when(myValueSetDao.read(eq(myValueSetId.toUnqualifiedVersionless()), any()))
+                .thenReturn(valueSet);
+        when(myGlobalValueSetCache.keySet()).thenReturn(Set.of(valueSet.getUrl()));
+
+        myListener.handleChange(resourceChangeEvent);
+
+        Mockito.verify(myGlobalValueSetCache).remove(valueSet.getUrl());
+    }
+
+    @Test
+    @DisplayName("Test to ensure a created resource (PUT) is removed from the cache")
+    void testCreateHandleChange_removesResourceFromCache() {
+        IResourceChangeEvent resourceChangeEvent = Mockito.mock(IResourceChangeEvent.class);
+        when(resourceChangeEvent.getCreatedResourceIds()).thenReturn(List.of(myValueSetId));
 
         ValueSet valueSet = new ValueSet().setUrl("acme.org/myValueset");
 

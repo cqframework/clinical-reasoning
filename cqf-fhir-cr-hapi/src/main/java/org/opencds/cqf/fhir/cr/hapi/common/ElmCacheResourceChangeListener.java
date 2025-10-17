@@ -48,6 +48,7 @@ public class ElmCacheResourceChangeListener implements IResourceChangeListener {
         }
 
         this.invalidateCacheByIds(resourceChangeEvent.getDeletedResourceIds());
+        this.invalidateCacheByIds(resourceChangeEvent.getCreatedResourceIds());
         this.invalidateCacheByIds(resourceChangeEvent.getUpdatedResourceIds());
     }
 

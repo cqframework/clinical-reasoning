@@ -45,6 +45,7 @@ public class CodeCacheResourceChangeListener implements IResourceChangeListener 
         }
 
         this.invalidateCacheByIds(resourceChangeEvent.getDeletedResourceIds());
+        this.invalidateCacheByIds(resourceChangeEvent.getCreatedResourceIds());
         this.invalidateCacheByIds(resourceChangeEvent.getUpdatedResourceIds());
     }
 

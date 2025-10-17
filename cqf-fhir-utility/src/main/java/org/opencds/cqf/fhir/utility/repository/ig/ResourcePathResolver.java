@@ -270,7 +270,7 @@ class ResourcePathResolver {
 
     private boolean supportsCompartments(Path base) {
         var normalized = base.toString().toLowerCase();
-        return normalized.contains("test");
+        return normalized.contains("tests/data/fhir") || normalized.contains("input/tests");
     }
 
     private List<Path> enumerateCompartments(Path base, String compartmentType) {

@@ -12,6 +12,7 @@ import org.opencds.cqf.fhir.cr.crmi.R4ApproveService;
 import org.opencds.cqf.fhir.cr.crmi.R4DraftService;
 import org.opencds.cqf.fhir.cr.crmi.R4PackageService;
 import org.opencds.cqf.fhir.cr.crmi.R4ReleaseService;
+import org.opencds.cqf.fhir.cr.crmi.R4RetireService;
 import org.opencds.cqf.fhir.cr.ecr.r4.R4ERSDTransformService;
 import org.opencds.cqf.fhir.cr.hapi.common.StringTimePeriodHandler;
 import org.opencds.cqf.fhir.cr.hapi.config.CrBaseConfig;
@@ -27,6 +28,7 @@ import org.opencds.cqf.fhir.cr.hapi.r4.IDraftServiceFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.IERSDV2ImportServiceFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.IPackageServiceFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.IReleaseServiceFactory;
+import org.opencds.cqf.fhir.cr.hapi.r4.IRetireServiceFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.ISubmitDataProcessorFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureEvaluatorMultipleFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureEvaluatorSingleFactory;
@@ -36,6 +38,7 @@ import org.opencds.cqf.fhir.cr.hapi.r4.crmi.ApproveProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.crmi.DraftProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.crmi.PackageProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.crmi.ReleaseProvider;
+import org.opencds.cqf.fhir.cr.hapi.r4.crmi.RetireProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.ecr.ERSDTransformProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.measure.CareGapsOperationProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.measure.CollectDataOperationProvider;
@@ -197,6 +200,16 @@ public class CrR4Config {
     }
 
     @Bean
+    IRetireServiceFactory retireServiceFactory(IRepositoryFactory repositoryFactory) {
+        return rd -> new R4RetireService(repositoryFactory.create(rd));
+    }
+
+    @Bean
+    RetireProvider r4RetireProvider(IRetireServiceFactory r4RetireServiceFactory) {
+        return new RetireProvider(r4RetireServiceFactory);
+    }
+
+    @Bean
     SubmitDataProvider r4SubmitDataProvider(ISubmitDataProcessorFactory r4SubmitDataProcessorFactory) {
         return new SubmitDataProvider(r4SubmitDataProcessorFactory);
     }
@@ -229,7 +242,8 @@ public class CrR4Config {
                                 ApproveProvider.class,
                                 ERSDTransformProvider.class,
                                 PackageProvider.class,
-                                ReleaseProvider.class)));
+                                ReleaseProvider.class,
+                                RetireProvider.class)));
 
         return new ProviderLoader(restfulServer, applicationContext, selector);
     }

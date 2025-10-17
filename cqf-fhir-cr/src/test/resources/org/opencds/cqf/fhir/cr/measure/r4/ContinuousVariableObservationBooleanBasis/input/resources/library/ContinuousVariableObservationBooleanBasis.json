@@ -1,0 +1,17 @@
+{
+  "id": "ContinuousVariableObservationBooleanBasis",
+  "resourceType": "Library",
+  "url": "http://example.com/Library/ContinuousVariableObservationBooleanBasis",
+  "name": "ContinuousVariableObservationBooleanBasis",
+  "status": "active",
+  "type": {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/library-type",
+      "code": "logic-library"
+    } ]
+  },
+  "content": [ {
+    "contentType": "text/cql",
+    "url": "../../cql/ContinuousVariableObservationBooleanBasis.cql"
+  } ]
+}

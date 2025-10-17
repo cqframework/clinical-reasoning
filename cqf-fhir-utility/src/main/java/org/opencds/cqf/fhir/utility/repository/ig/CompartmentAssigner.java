@@ -123,7 +123,8 @@ class CompartmentAssigner {
                         .filter(i -> compartmentType.equals(i.getResourceType()))
                         .toList();
 
-                for (var id : ids) {
+                if (!ids.isEmpty()) {
+                    var id = ids.get(0);
                     return CompartmentAssignment.of(compartmentType, id.getIdPart());
                 }
             }

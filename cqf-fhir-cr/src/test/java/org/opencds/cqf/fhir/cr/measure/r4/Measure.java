@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -70,7 +71,7 @@ public class Measure {
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     @FunctionalInterface
-    interface Validator<T> {
+    public interface Validator<T> {
         void validate(T value);
     }
 
@@ -291,6 +292,11 @@ public class Measure {
 
         public MeasureReport report() {
             return this.value();
+        }
+
+        public SelectedReport hasGroupCount(int count) {
+            assertEquals(count, report().getGroup().size());
+            return this;
         }
 
         public SelectedGroup firstGroup() {
@@ -811,6 +817,11 @@ public class Measure {
             super(value, parent);
         }
 
+        public SelectedGroup hasPopulationCount(int count) {
+            assertEquals(count, this.value().getPopulation().size());
+            return this;
+        }
+
         public SelectedGroup hasScore(String score) {
             MeasureValidationUtils.validateGroupScore(this.value(), score);
             return this;
@@ -963,7 +974,7 @@ public class Measure {
             }
         }
 
-        static class SelectedPopulation
+        public static class SelectedPopulation
                 extends Selected<MeasureReport.MeasureReportGroupPopulationComponent, SelectedGroup> {
 
             public SelectedPopulation(MeasureReportGroupPopulationComponent value, SelectedGroup parent) {
@@ -988,7 +999,7 @@ public class Measure {
         }
     }
 
-    static class SelectedStratifier
+    public static class SelectedStratifier
             extends Selected<MeasureReport.MeasureReportGroupStratifierComponent, SelectedGroup> {
 
         public SelectedStratifier(MeasureReportGroupStratifierComponent value, SelectedGroup parent) {
@@ -999,8 +1010,14 @@ public class Measure {
             return stratum(MeasureReport.MeasureReportGroupStratifierComponent::getStratumFirstRep);
         }
 
-        public SelectedStratifier stratumCount(int stratumCount) {
+        public SelectedStratifier hasStratumCount(int stratumCount) {
             assertEquals(stratumCount, value().getStratum().size());
+            return this;
+        }
+
+        public SelectedStratifier hasStratum(String textValue) {
+            final SelectedStratum stratum = stratum(textValue);
+            assertNotNull(stratum.value());
             return this;
         }
 
@@ -1041,9 +1058,25 @@ public class Measure {
             var s = stratumSelector.select(value());
             return new SelectedStratum(s, this);
         }
+
+        public SelectedStratifier hasCodeText(String stratifierCodeText) {
+            var firstCodeText = value().getCode().stream()
+                    .map(CodeableConcept::getText)
+                    .filter(Objects::nonNull)
+                    .findFirst()
+                    .orElse(null);
+
+            assertEquals(
+                    stratifierCodeText,
+                    firstCodeText,
+                    "Stratifier does not have expected code: %s but instead has: %s"
+                            .formatted(stratifierCodeText, firstCodeText));
+
+            return this;
+        }
     }
 
-    static class SelectedStratum extends Selected<MeasureReport.StratifierGroupComponent, SelectedStratifier> {
+    public static class SelectedStratum extends Selected<MeasureReport.StratifierGroupComponent, SelectedStratifier> {
 
         public SelectedStratum(MeasureReport.StratifierGroupComponent value, SelectedStratifier parent) {
             super(value, parent);
@@ -1056,6 +1089,13 @@ public class Measure {
 
         public SelectedStratum hasComponentStratifierCount(int count) {
             assertEquals(count, value().getComponent().size());
+            return this;
+        }
+
+        public SelectedStratum hasPopulationCount(int count) {
+            final StratifierGroupComponent value = this.value();
+            final List<StratifierGroupPopulationComponent> population = value.getPopulation();
+            assertEquals(count, population.size());
             return this;
         }
 
@@ -1080,7 +1120,7 @@ public class Measure {
         }
     }
 
-    static class SelectedStratumPopulation
+    public static class SelectedStratumPopulation
             extends Selected<MeasureReport.StratifierGroupPopulationComponent, SelectedStratum> {
 
         public SelectedStratumPopulation(

@@ -29,3 +29,5 @@ jitdump.*
 .apt_generated
 
 *DS_Store
+
+.worktrees

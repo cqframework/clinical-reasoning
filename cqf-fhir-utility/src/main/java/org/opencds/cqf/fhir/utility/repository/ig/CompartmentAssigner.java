@@ -164,6 +164,11 @@ class CompartmentAssigner {
             return assignment;
         }
 
+        // Try to assign based on id
+        // TODO: This can fail when there are multiple ids being searched.
+        // (e.g. _id=123,456,789)
+        // A future version of this class might return mutliple potential
+        // Assignments, each of which can be searched.
         if (compartmentMode.type().equalsIgnoreCase(resourceType)) {
             var idString = searchParameters.get("_id").stream()
                     .flatMap(List::stream)

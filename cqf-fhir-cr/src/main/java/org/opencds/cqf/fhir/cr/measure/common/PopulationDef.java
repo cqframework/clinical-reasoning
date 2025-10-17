@@ -63,6 +63,22 @@ public class PopulationDef {
         return this.subjects;
     }
 
+    public void retainAllResources(Set<Object> resources) {
+        this.getResources().retainAll(resources);
+    }
+
+    public void retainAllSubjects(Set<String> subjects) {
+        this.getSubjects().retainAll(subjects);
+    }
+
+    public void removeAllResources(Set<Object> resources) {
+        this.getResources().removeAll(resources);
+    }
+
+    public void removeAllSubjects(Set<String> subjects) {
+        this.getSubjects().removeAll(subjects);
+    }
+
     public void addResource(Object resource) {
         this.getResources().add(resource);
     }

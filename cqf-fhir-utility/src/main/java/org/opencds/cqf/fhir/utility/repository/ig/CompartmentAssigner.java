@@ -11,6 +11,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -100,10 +101,16 @@ class CompartmentAssigner {
         var terser = fhirContext.newTerser();
         var compartmentType = compartmentMode.type();
 
-        var candidates = new ArrayList<ReferenceCandidate>();
         var orderedParams = orderCompartmentParams(searchParams);
-        var sequence = 0;
 
+        // Here we're looking at all the attributes on a FHIR resource that
+        // potentially provide compartment membership, by matching those up
+        // to search paramters that provide compartment membership. We're
+        // checking all those paths on the research in priority order
+        // (i.e. the "patient" search parameter is more specific than "subject"
+        // so search attributes that "patient" indexes on first) looking for
+        // references to our current compartment type. The first one we find
+        // is the compartment assignment.
         for (var param : orderedParams) {
             for (var originalPath : param.getPathsSplit()) {
                 var path = sanitizeSearchPath(originalPath);
@@ -112,40 +119,35 @@ class CompartmentAssigner {
                 }
 
                 var values = terser.getValues(resource, path);
-                for (var value : values) {
-                    var reference = extractReference(value);
-                    if (reference == null || !reference.hasIdPart()) {
-                        continue;
-                    }
+                var ids = referencedIds(values).stream()
+                        .filter(i -> compartmentType.equals(i.getResourceType()))
+                        .toList();
 
-                    var referencedType = reference.getResourceType();
-                    if (referencedType == null || referencedType.isBlank()) {
-                        continue;
-                    }
-
-                    if (compartmentType.equalsIgnoreCase(referencedType)) {
-                        candidates.add(new ReferenceCandidate(
-                                priorityIndex(param.getName()), sequence++, reference.getIdPart()));
-                    }
+                for (var id : ids) {
+                    return CompartmentAssignment.of(compartmentType, id.getIdPart());
                 }
             }
         }
 
-        if (candidates.isEmpty()) {
-            return CompartmentAssignment.shared();
+        return CompartmentAssignment.shared();
+    }
+
+    private List<IIdType> referencedIds(List<IBase> values) {
+        var ids = new ArrayList<IIdType>();
+        for (var value : values) {
+            var reference = extractReference(value);
+            if (reference != null && reference.hasResourceType() && reference.hasIdPart()) {
+                ids.add(reference);
+            }
         }
-
-        candidates.sort(
-                Comparator.comparingInt(ReferenceCandidate::priority).thenComparingInt(ReferenceCandidate::sequence));
-
-        return CompartmentAssignment.of(compartmentType, candidates.get(0).id());
+        return ids;
     }
 
     /**
      * Determines the compartment assignments based on search parameters. If there are multiple possible
      * compartment assignments, only the first is returned.
      *
-     * Possile outcomes:
+     * Possible outcomes:
      * - NONE: No compartment assignment (repository is not compartmentalized)
      * - SHARED: Resource is shared across all compartments
      * - Specific compartment: Resource is assigned to a specific compartment (e.g. Patient/123)
@@ -247,21 +249,11 @@ class CompartmentAssigner {
                 return null;
             }
 
-            var ensured = Ids.ensureIdType(asString, compartmentMode.type());
-            return Ids.newId(fhirContext, ensured);
+            return Ids.newId(fhirContext, asString);
         }
 
         if (value instanceof IBaseReference reference) {
-            var element = reference.getReferenceElement();
-            if (element == null || !element.hasIdPart()) {
-                return null;
-            }
-
-            if (!element.hasResourceType()) {
-                return Ids.newId(fhirContext, compartmentMode.type(), element.getIdPart());
-            }
-
-            return element;
+            return reference.getReferenceElement();
         }
 
         return null;
@@ -291,20 +283,18 @@ class CompartmentAssigner {
         }
 
         var normalized = expectedName.toLowerCase();
-        for (var key : searchParameters.keySet()) {
-            if (key == null) {
+        var searchParamKeys = searchParameters.keySet().stream()
+                .filter(Objects::nonNull)
+                .map(String::toLowerCase)
+                .toList();
+
+        for (var key : searchParamKeys) {
+            if (!key.startsWith(normalized)) {
                 continue;
             }
 
-            var lowerKey = key.toLowerCase();
-            if (!lowerKey.equals(normalized) && !lowerKey.startsWith(normalized + ":")) {
-                continue;
-            }
-
-            for (var group : searchParameters.get(key)) {
-                if (group == null) {
-                    continue;
-                }
+            var searchGroups = searchParameters.get(key);
+            for (var group : searchGroups) {
                 matches.addAll(group);
             }
         }
@@ -340,6 +330,4 @@ class CompartmentAssigner {
             return Ids.newId(fhirContext, ensured);
         }
     }
-
-    private record ReferenceCandidate(int priority, int sequence, String id) {}
 }

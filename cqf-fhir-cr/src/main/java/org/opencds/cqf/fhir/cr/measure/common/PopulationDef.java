@@ -13,7 +13,6 @@ public class PopulationDef {
 
     protected Set<Object> evaluatedResources;
     protected Set<Object> resources;
-    protected Set<String> subjects;
     protected Map<String, Set<Object>> subjectResources = new HashMap<>();
 
     public PopulationDef(String id, ConceptDef code, MeasurePopulationType measurePopulationType, String expression) {
@@ -56,11 +55,7 @@ public class PopulationDef {
     }
 
     public Set<String> getSubjects() {
-        if (this.subjects == null) {
-            this.subjects = new HashSetForFhirResources<>();
-        }
-
-        return this.subjects;
+        return this.getSubjectResources().keySet();
     }
 
     public void retainAllResources(Set<Object> resources) {

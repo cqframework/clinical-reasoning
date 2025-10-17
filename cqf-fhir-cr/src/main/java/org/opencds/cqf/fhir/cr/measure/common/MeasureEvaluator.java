@@ -158,10 +158,6 @@ public class MeasureEvaluator {
 
             i++;
         }
-        // If SubjectId Added Resources to Population
-        if (i > 0) {
-            inclusionDef.addSubject(subjectId);
-        }
         return inclusionDef;
     }
 

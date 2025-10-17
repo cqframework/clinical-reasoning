@@ -1,13 +1,17 @@
 package org.opencds.cqf.fhir.utility.repository.ig;
 
-import ca.uhn.fhir.context.FhirContext;
+import static java.util.Objects.requireNonNull;
+
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Table;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
@@ -53,7 +57,7 @@ class ResourcePathResolver {
                     .put(
                             CategoryLayout.DEFINITIONAL_AND_DATA,
                             ResourceCategory.TERMINOLOGY,
-                            List.of("src/fhir", "tests/data/fhir/shared"))
+                            List.of("src/fhir", "tests/data/fhir"))
                     .put(
                             CategoryLayout.DEFINITIONAL_AND_DATA,
                             ResourceCategory.DATA,
@@ -62,21 +66,18 @@ class ResourcePathResolver {
 
     private final Path root;
     private final IgConventions conventions;
-    private final FhirContext fhirContext;
 
-    ResourcePathResolver(Path root, IgConventions conventions, FhirContext fhirContext) {
+    ResourcePathResolver(Path root, IgConventions conventions) {
         this.root = Objects.requireNonNull(root, "root cannot be null");
         this.conventions = Objects.requireNonNull(conventions, "conventions cannot be null");
-        this.fhirContext = Objects.requireNonNull(fhirContext, "fhirContext cannot be null");
     }
 
     Path preferredDirectory(Class<? extends IBaseResource> resourceType, CompartmentAssignment assignment) {
         // In the "preferred" case, we remap an 'unknown' assignment to 'shared'
-        if (assignment.isUnknown()) {
-            assignment = CompartmentAssignment.shared();
-        }
-
-        return directories(resourceType, assignment).stream().findFirst().orElseThrow();
+        var effectiveAssignment = assignment.isUnknown() ? CompartmentAssignment.shared() : assignment;
+        return directories(resourceType, effectiveAssignment).stream()
+                .findFirst()
+                .orElseThrow();
     }
 
     Path preferredPath(Class<? extends IBaseResource> resourceType, String idPart, CompartmentAssignment assignment) {
@@ -90,14 +91,37 @@ class ResourcePathResolver {
                 conventions.encodingBehavior().preferredEncoding());
     }
 
-    // Flesh this out, ensure the the first directory is the most preferred
+    /**
+     * Get the list of directories to search for resources of the given type and compartment assignment.
+     *
+     * The order of the returned list reflects the search priority order, with first being highest priority.
+     * (i.e. the preferred directory is the first element of the list).
+     * @param resourceType the FHIR resource type class
+     * @param assignment the compartment assignment
+     * @return a list of directories to search
+     */
     List<Path> directories(Class<? extends IBaseResource> resourceType, CompartmentAssignment assignment) {
+        requireNonNull(resourceType, "resourceType cannot be null");
+        requireNonNull(assignment, "assignment cannot be null");
+
         var category = ResourceCategory.forType(resourceType.getSimpleName());
         var bases = categoryDirectories(category);
 
-        // TODO: Apply the compartment assignment to the base directories, "unknown" means
-        // all possible. Then apply the type layout.
-        return bases.stream().map(x -> root.resolve(x)).toList();
+        var typeSegment = conventions.typeLayout() == IgConventions.FhirTypeLayout.DIRECTORY_PER_TYPE
+                ? resourceType.getSimpleName().toLowerCase()
+                : null;
+
+        // LinkedHashSet to preserve order while ensuring uniqueness
+        var paths = new LinkedHashSet<Path>();
+        for (var base : bases) {
+            var basePath = root.resolve(base);
+            var expanded = applyCompartmentAssignment(basePath, assignment);
+            for (var path : expanded) {
+                paths.add(typeSegment != null ? path.resolve(typeSegment) : path);
+            }
+        }
+
+        return List.copyOf(paths);
     }
 
     List<Path> candidates(
@@ -136,10 +160,13 @@ class ResourcePathResolver {
                 && path.getParent().toString().toLowerCase().endsWith(EXTERNAL_DIRECTORY);
     }
 
+    // Helper to get the base directories for a given category and the current layout conventions.
+    // relative to the root.
     private List<String> categoryDirectories(ResourceCategory category) {
         var map = BASE_DIRECTORIES.rowMap().get(conventions.categoryLayout());
         if (map == null || !map.containsKey(category)) {
-            return List.of(".");
+            throw new IllegalStateException("No base directories configured for category " + category + " with layout "
+                    + conventions.categoryLayout());
         }
         return map.get(category);
     }
@@ -172,5 +199,52 @@ class ResourcePathResolver {
             case ID_ONLY -> idComponent;
             case TYPE_AND_ID -> resourceTypeName + "-" + idComponent;
         };
+    }
+
+    private List<Path> applyCompartmentAssignment(Path base, CompartmentAssignment assignment) {
+        requireNonNull(base, "base cannot be null");
+        requireNonNull(assignment, "assignment cannot be null");
+
+        if (!supportsCompartments(base) || assignment.isNone()) {
+            return List.of(base);
+        }
+
+        if (assignment.hasCompartmentId()) {
+            return List.of(base.resolve(assignment.compartmentType()).resolve(assignment.compartmentId()));
+        }
+
+        if (assignment.isShared()) {
+            return List.of(base.resolve(CompartmentAssignment.SHARED_COMPARTMENT));
+        }
+
+        if (assignment.isUnknown()) {
+            return enumerateCompartments(
+                    base, conventions.compartmentMode().type().toLowerCase());
+        }
+
+        throw new IllegalStateException("Unhandled compartment assignment: " + assignment);
+    }
+
+    private boolean supportsCompartments(Path base) {
+        var normalized = base.toString().toLowerCase();
+        return normalized.contains("test");
+    }
+
+    private List<Path> enumerateCompartments(Path base, String compartmentType) {
+        var paths = new ArrayList<Path>();
+        paths.add(base.resolve(CompartmentAssignment.SHARED_COMPARTMENT));
+
+        var compartmentRoot = base.resolve(compartmentType);
+        if (Files.isDirectory(compartmentRoot)) {
+            try (var stream = Files.list(compartmentRoot)) {
+                stream.filter(Files::isDirectory)
+                        .sorted(Comparator.comparing(path -> path.getFileName().toString()))
+                        .forEach(paths::add);
+            } catch (Exception e) {
+                throw new IllegalStateException("Failed to enumerate compartments", e);
+            }
+        }
+
+        return paths;
     }
 }

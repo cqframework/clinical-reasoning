@@ -29,19 +29,19 @@ record CompartmentAssignment(String compartmentType, String compartmentId) {
         return new CompartmentAssignment(normalizedType, normalizedId);
     }
 
-    boolean hasContextId() {
+    boolean hasCompartmentId() {
         return compartmentId != null && !compartmentId.isBlank();
     }
 
-    boolean isPresent() {
-        return compartmentType != null && !compartmentType.isBlank();
+    boolean isNone() {
+        return compartmentType == null || compartmentType.isBlank();
     }
 
     // Returns an "unknown" compartment assignment of the specified type.
     // An unknown compartment assignment has a type but no id, meaning that multiple
     // compartments of that type may need to be searched.
     boolean isUnknown() {
-        return isPresent() && !isShared() && !hasContextId();
+        return !isNone() && !isShared() && !hasCompartmentId();
     }
 
     boolean isShared() {

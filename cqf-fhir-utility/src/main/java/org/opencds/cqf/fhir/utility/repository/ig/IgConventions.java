@@ -1,12 +1,12 @@
 package org.opencds.cqf.fhir.utility.repository.ig;
 
-import jakarta.annotation.Nonnull;
+import static java.util.Objects.requireNonNull;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -150,29 +150,31 @@ public record IgConventions(
             // or more directories. If more directories exist, and the directory name is not a
             // FHIR type, then we have a compartment directory.
             if (tests.toFile().exists()) {
-                var compartmentSelection = FHIR_TYPE_NAMES.stream()
-                        .map(tests::resolve)
-                        .filter(Files::exists)
-                        .flatMap(compartmentDir -> listFiles(compartmentDir)
-                                .filter(Files::isDirectory)
-                                .filter(f -> !matchesAnyResourceType(f))
-                                .findFirst()
-                                .map(found -> java.util.stream.Stream.of(Map.entry(compartmentDir, found)))
-                                .orElseGet(java.util.stream.Stream::empty))
-                        .findFirst()
-                        .orElse(null);
+                var potentialCompartments =
+                        FHIR_TYPE_NAMES.stream().map(tests::resolve).filter(Files::exists);
 
-                if (compartmentSelection != null) {
-                    var compartmentDir = compartmentSelection.getKey();
-                    var discoveredCategory = compartmentSelection.getValue();
+                // Check if any of the potential compartment directories
+                // have subdirectories that are not FHIR types (e.g. "input/tests/patient/test1).
+                var compartment = potentialCompartments
+                        .flatMap(IgConventions::listFiles)
+                        .filter(Files::isDirectory)
+                        .filter(f -> !matchesAnyResourceType(f))
+                        .findFirst()
+                        .orElse(categoryPath);
+
+                var hasCompartmentDirectory = !categoryPath.equals(compartment);
+                if (hasCompartmentDirectory) {
+                    categoryPath = compartment;
+
+                    // Getting the parent here, because our "compartment" directory is a specific one,
+                    // e.g. tests/patient/123 (not just test/patient).
                     compartmentMode = CompartmentMode.fromType(
-                            compartmentDir.getFileName().toString());
+                            compartment.getParent().getFileName().toString());
+
                     if (compartmentMode == CompartmentMode.NONE) {
                         throw new IllegalArgumentException(
-                                "The compartment directory does not match any known compartment type: "
-                                        + compartmentDir);
+                                "The compartment directory does not match any known compartment type: " + compartment);
                     }
-                    categoryPath = discoveredCategory;
                 }
             }
         }
@@ -206,7 +208,7 @@ public record IgConventions(
                 hasCategoryDirectory ? CategoryLayout.DIRECTORY_PER_CATEGORY : CategoryLayout.FLAT,
                 compartmentMode,
                 hasTypeFilename ? FilenameMode.TYPE_AND_ID : FilenameMode.ID_ONLY,
-                org.opencds.cqf.fhir.utility.repository.ig.EncodingBehavior.DEFAULT);
+                EncodingBehavior.DEFAULT);
 
         logger.info("Auto-detected repository configuration: {}", config);
 
@@ -227,16 +229,16 @@ public record IgConventions(
     }
 
     private static boolean fileNameMatchesType(Path innerFile) {
-        Objects.requireNonNull(innerFile);
+        requireNonNull(innerFile);
         var fileName = innerFile.getFileName().toString();
         return FHIR_TYPE_NAMES.stream().anyMatch(type -> fileName.toLowerCase().startsWith(type));
     }
 
     private static boolean matchesAnyResourceType(Path innerFile) {
+        requireNonNull(innerFile);
         return FHIR_TYPE_NAMES.contains(innerFile.getFileName().toString().toLowerCase());
     }
 
-    @Nonnull
     private static Stream<Path> listFiles(Path innerPath) {
         try {
             return Files.list(innerPath);
@@ -306,7 +308,6 @@ public record IgConventions(
     }
 
     @Override
-    @Nonnull
     public String toString() {
         return "IGConventions [typeLayout=%s, categoryLayout=%s compartmentMode=%s, filenameMode=%s]"
                 .formatted(typeLayout, categoryLayout, compartmentMode, filenameMode);

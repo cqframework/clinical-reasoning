@@ -8,6 +8,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.junit.jupiter.api.Test;
 
+// LUKETODO:  once we get rid of the standalone resources, fix these tests
 class PopulationDefTest {
 
     @Test

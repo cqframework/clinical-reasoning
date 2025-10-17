@@ -152,6 +152,7 @@ public class MeasureEvaluator {
         int i = 0;
         for (Object resource : evaluatePopulationCriteria(
                 subjectType, matchingResult, evaluationResult, inclusionDef.getEvaluatedResources())) {
+            // LUKETODO:  we'd have to get rid of this and let the other method handle adding the resource
             inclusionDef.addResource(resource);
             // hashmap instead of set
             inclusionDef.addResource(subjectId, resource);
@@ -267,6 +268,7 @@ public class MeasureEvaluator {
         }
         if (reportType.equals(MeasureReportType.INDIVIDUAL) && dateOfCompliance != null) {
             var doc = evaluateDateOfCompliance(dateOfCompliance, evaluationResult);
+            // LUKETODO:  similarly, we'd have to add the subject as well here
             dateOfCompliance.addResource(doc);
         }
     }

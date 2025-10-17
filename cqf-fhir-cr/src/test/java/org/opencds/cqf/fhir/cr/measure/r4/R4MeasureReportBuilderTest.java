@@ -263,7 +263,7 @@ class R4MeasureReportBuilderTest {
                 null);
 
         if (resources != null) {
-            resources.forEach(populationDef::addResource);
+            resources.forEach(res -> populationDef.addResource("subj", res));
         }
 
         return populationDef;

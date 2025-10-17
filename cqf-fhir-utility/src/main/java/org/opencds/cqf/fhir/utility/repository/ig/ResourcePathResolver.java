@@ -242,12 +242,19 @@ class ResourcePathResolver {
             return List.of(base);
         }
 
-        if (assignment.hasCompartmentId()) {
-            return List.of(base.resolve(assignment.compartmentType()).resolve(assignment.compartmentId()));
+        if (assignment.isShared()) {
+            // The KALM style category layout has a dedicated shared compartment
+            if (conventions.categoryLayout() == CategoryLayout.DEFINITIONAL_AND_DATA) {
+                return List.of(base.resolve(CompartmentAssignment.SHARED_COMPARTMENT));
+            }
+            // Other layouts just use the base directory as the shared compartment
+            else {
+                return List.of(base);
+            }
         }
 
-        if (assignment.isShared()) {
-            return List.of(base.resolve(CompartmentAssignment.SHARED_COMPARTMENT));
+        if (assignment.hasCompartmentId()) {
+            return List.of(base.resolve(assignment.compartmentType()).resolve(assignment.compartmentId()));
         }
 
         if (assignment.isUnknown()) {

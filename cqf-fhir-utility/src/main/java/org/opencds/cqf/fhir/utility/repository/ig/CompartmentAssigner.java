@@ -48,20 +48,11 @@ class CompartmentAssigner {
         requireNonNull(resource, "resource cannot be null");
         requireNonNull(resource.getIdElement().getIdPart(), "resource id cannot be null");
 
-        if (compartmentMode == CompartmentMode.NONE) {
-            return CompartmentAssignment.none();
-        }
-
         var resourceType = resource.fhirType();
-        var resourceCategory = ResourceCategory.forType(resourceType);
-        if (resourceCategory != ResourceCategory.DATA) {
-            return CompartmentAssignment.shared();
+        var assignment = typeBasedAssignment(resourceType);
+        if (!assignment.isUnknown()) {
+            return assignment;
         }
-
-        if (!this.compartmentMode.resourceBelongsToCompartment(fhirContext, resourceType)) {
-            return CompartmentAssignment.shared();
-        }
-
         // If the resource is of the compartment type, assign it to its own compartment.
         if (compartmentMode.type().equalsIgnoreCase(resourceType)) {
             return CompartmentAssignment.of(
@@ -85,17 +76,9 @@ class CompartmentAssigner {
         requireNonNull(resourceType, "resourceType cannot be null");
         requireNonNull(id, "id cannot be null");
 
-        if (compartmentMode == CompartmentMode.NONE) {
-            return CompartmentAssignment.none();
-        }
-
-        var resourceCategory = ResourceCategory.forType(resourceType);
-        if (resourceCategory != ResourceCategory.DATA) {
-            return CompartmentAssignment.shared();
-        }
-
-        if (!this.compartmentMode.resourceBelongsToCompartment(fhirContext, resourceType)) {
-            return CompartmentAssignment.shared();
+        var assignment = typeBasedAssignment(resourceType);
+        if (!assignment.isUnknown()) {
+            return assignment;
         }
 
         // If the resource is of the compartment type, assign it to its own compartment.
@@ -107,12 +90,11 @@ class CompartmentAssigner {
     }
 
     private CompartmentAssignment resolveFrom(IBaseResource resource) {
-
         var resourceType = resource.fhirType();
         var searchParams = compartmentMode.compartmentSearchParams(fhirContext, resourceType);
-
         if (searchParams.isEmpty()) {
-            return CompartmentAssignment.shared();
+            throw new IllegalStateException(
+                    "Can't resolve a compartment for Resource that doesn't belong to the current compartment type");
         }
 
         var terser = fhirContext.newTerser();
@@ -138,7 +120,7 @@ class CompartmentAssigner {
 
                     var referencedType = reference.getResourceType();
                     if (referencedType == null || referencedType.isBlank()) {
-                        referencedType = compartmentType;
+                        continue;
                     }
 
                     if (compartmentType.equalsIgnoreCase(referencedType)) {
@@ -173,6 +155,56 @@ class CompartmentAssigner {
     public CompartmentAssignment assign(
             String resourceType, Multimap<String, List<IQueryParameterType>> searchParameters) {
         requireNonNull(resourceType, "resourceType cannot be null");
+
+        var assignment = typeBasedAssignment(resourceType);
+        if (!assignment.isUnknown()) {
+            return assignment;
+        }
+
+        if (compartmentMode.type().equalsIgnoreCase(resourceType)) {
+            var idString = searchParameters.get("_id").stream()
+                    .flatMap(List::stream)
+                    .findFirst()
+                    .map(x -> x.getValueAsQueryToken(fhirContext))
+                    .orElse(null);
+
+            var ensured = Ids.ensureIdType(idString, resourceType);
+            var id = Ids.newId(fhirContext, ensured);
+            return CompartmentAssignment.of(compartmentMode.type(), id.getIdPart());
+        }
+
+        var membershipParams =
+                orderCompartmentParams(compartmentMode.compartmentSearchParams(fhirContext, resourceType));
+
+        for (var param : membershipParams) {
+            var values = collectQueryParameters(searchParameters, param.getName());
+            if (values.isEmpty()) {
+                continue;
+            }
+
+            // Certain search parameters that target only one type can be abbreviated
+            // if they only target one type:
+            // Observation?patient=123
+            //
+            // Others are ambiguous if unspecified:
+            // Observation?subject=ABC (Bad! A Patient or Device?)
+            // Observation?subject=Patient/123 (Good! We can work with this)
+            var target = param.hasTargets() && param.getTargets().size() == 1
+                    ? param.getTargets().iterator().next()
+                    : null;
+            assignment = resolveFromQuery(target, values);
+
+            // We found and assignment, bail out.
+            if (!assignment.isUnknown()) {
+                return assignment;
+            }
+        }
+
+        // Did our best, coudln't determine the assignment.
+        return CompartmentAssignment.unknown(compartmentMode.type());
+    }
+
+    private CompartmentAssignment typeBasedAssignment(String resourceType) {
         if (compartmentMode == CompartmentMode.NONE) {
             return CompartmentAssignment.none();
         }
@@ -186,42 +218,7 @@ class CompartmentAssigner {
             return CompartmentAssignment.shared();
         }
 
-        if (compartmentMode.type().equalsIgnoreCase(resourceType)) {
-            var idString = searchParameters.get("_id").stream()
-                    .flatMap(List::stream)
-                    .findFirst()
-                    .map(x -> x.getValueAsQueryToken(fhirContext))
-                    .orElse(null);
-
-            var id = Ids.newId(fhirContext, idString);
-
-            if (id.hasIdPart()) {
-                return CompartmentAssignment.of(compartmentMode.type(), id.getIdPart());
-            } else {
-                return CompartmentAssignment.unknown(compartmentMode.type());
-            }
-        }
-
-        var membershipParams =
-                orderCompartmentParams(compartmentMode.compartmentSearchParams(fhirContext, resourceType));
-
-        for (var param : membershipParams) {
-            var values = collectQueryParameters(searchParameters, param.getName());
-            if (values.isEmpty()) {
-                continue;
-            }
-
-            var assignment = resolveFromQuery(values);
-            if (assignment == null) {
-                continue;
-            }
-
-            if (assignment.hasCompartmentId()) {
-                return assignment;
-            }
-        }
-
-        return CompartmentAssignment.unknown(compartmentMode.type());
+        return CompartmentAssignment.unknown(this.compartmentMode.type());
     }
 
     private String sanitizeSearchPath(String path) {
@@ -315,38 +312,33 @@ class CompartmentAssigner {
         return matches;
     }
 
-    private CompartmentAssignment resolveFromQuery(List<IQueryParameterType> values) {
-        if (values == null || values.isEmpty()) {
+    private CompartmentAssignment resolveFromQuery(String targetIfUnspecified, List<IQueryParameterType> values) {
+        requireNonNull(values, "values cannot be null");
+
+        var compartmentType = compartmentMode.type();
+        for (var queryValue : values) {
+            var token = queryValue.getValueAsQueryToken(fhirContext);
+            var id = idFromToken(targetIfUnspecified, token);
+            if (id != null && compartmentType.equalsIgnoreCase(id.getResourceType())) {
+                return CompartmentAssignment.of(compartmentType, id.getIdPart());
+            }
+        }
+
+        return CompartmentAssignment.unknown(this.compartmentMode.type());
+    }
+
+    private IIdType idFromToken(String target, String token) {
+        if (token == null || token.isBlank()) {
             return null;
         }
 
-        var compartmentType = compartmentMode.type();
-        var sawValue = false;
-        for (var queryValue : values) {
-            if (queryValue == null) {
-                continue;
-            }
-
-            sawValue = true;
-            var token = queryValue.getValueAsQueryToken(fhirContext);
-            if (token == null || token.isBlank()) {
-                continue;
-            }
-
-            var ensured = Ids.ensureIdType(token, compartmentType);
-            var id = Ids.newId(fhirContext, ensured);
-            if (!id.hasIdPart()) {
-                continue;
-            }
-
-            if (id.hasResourceType() && !compartmentType.equalsIgnoreCase(id.getResourceType())) {
-                continue;
-            }
-
-            return CompartmentAssignment.of(compartmentType, id.getIdPart());
+        // If no target is specified, assume the token is of the target compartment type
+        if (target == null || target.isBlank()) {
+            return Ids.newId(fhirContext, token);
+        } else {
+            var ensured = Ids.ensureIdType(token, target);
+            return Ids.newId(fhirContext, ensured);
         }
-
-        return sawValue ? CompartmentAssignment.unknown(compartmentType) : null;
     }
 
     private record ReferenceCandidate(int priority, int sequence, String id) {}

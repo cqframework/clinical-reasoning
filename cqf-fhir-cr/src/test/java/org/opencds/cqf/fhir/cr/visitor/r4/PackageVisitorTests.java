@@ -375,7 +375,7 @@ class PackageVisitorTests {
         Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
         ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
-        Map<String, List<String>> includeOptions = new HashMap<String, List<String>>();
+        Map<String, List<String>> includeOptions = new HashMap<>();
         includeOptions.put("artifact", Arrays.asList("http://ersd.aimsplatform.org/fhir/Library/SpecificationLibrary"));
         includeOptions.put(
                 "canonical",
@@ -395,21 +395,27 @@ class PackageVisitorTests {
         includeOptions.put(
                 "terminology",
                 Arrays.asList(
+                        "http://ersd.aimsplatform.org/fhir/Library/SpecificationLibrary",
                         "http://ersd.aimsplatform.org/fhir/ValueSet/dxtc",
                         "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.6",
                         "http://cts.nlm.nih.gov/fhir/ValueSet/123-this-will-be-routine"));
-        includeOptions.put("conformance", Arrays.asList());
-        includeOptions.put("extensions", Arrays.asList());
-        includeOptions.put("profiles", Arrays.asList());
-        includeOptions.put("tests", Arrays.asList());
-        includeOptions.put("examples", Arrays.asList());
+        includeOptions.put(
+                "conformance", Arrays.asList("http://ersd.aimsplatform.org/fhir/Library/SpecificationLibrary"));
+        includeOptions.put(
+                "extensions", Arrays.asList("http://ersd.aimsplatform.org/fhir/Library/SpecificationLibrary"));
+        includeOptions.put("profiles", Arrays.asList("http://ersd.aimsplatform.org/fhir/Library/SpecificationLibrary"));
+        includeOptions.put("tests", Arrays.asList("http://ersd.aimsplatform.org/fhir/Library/SpecificationLibrary"));
+        includeOptions.put("examples", Arrays.asList("http://ersd.aimsplatform.org/fhir/Library/SpecificationLibrary"));
         // FHIR Types
         includeOptions.put(
                 "PlanDefinition",
-                Arrays.asList("http://ersd.aimsplatform.org/fhir/PlanDefinition/us-ecr-specification"));
+                Arrays.asList(
+                        "http://ersd.aimsplatform.org/fhir/Library/SpecificationLibrary",
+                        "http://ersd.aimsplatform.org/fhir/PlanDefinition/us-ecr-specification"));
         includeOptions.put(
                 "ValueSet",
                 Arrays.asList(
+                        "http://ersd.aimsplatform.org/fhir/Library/SpecificationLibrary",
                         "http://ersd.aimsplatform.org/fhir/ValueSet/dxtc",
                         "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.6",
                         "http://cts.nlm.nih.gov/fhir/ValueSet/123-this-will-be-routine"));
@@ -446,7 +452,8 @@ class PackageVisitorTests {
                 "http://ersd.aimsplatform.org/fhir/ValueSet/dxtc",
                 "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.6",
                 "http://cts.nlm.nih.gov/fhir/ValueSet/123-this-will-be-routine",
-                "http://ersd.aimsplatform.org/fhir/PlanDefinition/us-ecr-specification");
+                "http://ersd.aimsplatform.org/fhir/PlanDefinition/us-ecr-specification",
+                "http://ersd.aimsplatform.org/fhir/Library/SpecificationLibrary");
 
         Parameters params = parameters(part("include", "PlanDefinition"), part("include", "ValueSet"));
         Bundle packaged = (Bundle) libraryAdapter.accept(packageVisitor, params);

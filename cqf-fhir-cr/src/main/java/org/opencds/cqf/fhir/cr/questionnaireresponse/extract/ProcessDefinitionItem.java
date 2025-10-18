@@ -33,12 +33,12 @@ import org.opencds.cqf.fhir.cr.common.ExpressionProcessor;
 import org.opencds.cqf.fhir.cr.common.ICqlOperationRequest;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.CqfExpression;
+import org.opencds.cqf.fhir.utility.FhirPathCache;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.adapter.IElementDefinitionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IItemComponentAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireResponseItemAnswerComponentAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IStructureDefinitionAdapter;
-import org.opencds.cqf.fhir.utility.FhirPathCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

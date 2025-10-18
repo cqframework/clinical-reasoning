@@ -43,11 +43,11 @@ public class ProcessDefinition {
         requireNonNull(action);
         requireNonNull(requestAction);
         IBaseResource resource = null;
-        var definition = action.getDefinition(); // getDefinition(request, action);
+        var definition = action.getDefinition();
         if (Boolean.TRUE.equals(isDefinitionCanonical(request, definition))) {
             resource = resolveDefinition(request, definition);
             if (resource != null) {
-                var actionId = action.getId(); // request.resolvePathString(action, "id");
+                var actionId = action.getId();
                 if (actionId != null) {
                     resource.setId(
                             "%s-%s".formatted(actionId, resource.getIdElement().getIdPart()));

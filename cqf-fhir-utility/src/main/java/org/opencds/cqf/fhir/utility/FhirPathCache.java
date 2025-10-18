@@ -1,4 +1,4 @@
-package org.opencds.cqf.fhir.utility.fhirpath;
+package org.opencds.cqf.fhir.utility;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;

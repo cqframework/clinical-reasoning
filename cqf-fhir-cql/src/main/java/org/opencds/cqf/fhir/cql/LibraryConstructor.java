@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.opencds.cqf.fhir.cql.engine.parameters.CqlParameterDefinition;
-import org.opencds.cqf.fhir.utility.fhirpath.FhirPathCache;
+import org.opencds.cqf.fhir.utility.FhirPathCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

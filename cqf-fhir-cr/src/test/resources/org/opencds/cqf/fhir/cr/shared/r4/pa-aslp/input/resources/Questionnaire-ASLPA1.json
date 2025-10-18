@@ -19,6 +19,54 @@
       "valueCode": "structured"
     },
     {
+      "extension": [
+        {
+          "url": "name",
+          "valueCoding": {
+            "system": "http://hl7.org/fhir/uv/sdc/CodeSystem/launchContext",
+            "code": "patient"
+          }
+        },
+        {
+          "url": "type",
+          "valueCode": "Patient"
+        }
+      ],
+      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-launchContext"
+    },
+    {
+      "extension": [
+        {
+          "url": "name",
+          "valueCoding": {
+            "system": "http://example.org/fhir/uv/sdc/CodeSystem/additionalLaunchContext",
+            "code": "ServiceRequest"
+          }
+        },
+        {
+          "url": "type",
+          "valueCode": "ServiceRequest"
+        }
+      ],
+      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-launchContext"
+    },
+    {
+      "extension": [
+        {
+          "url": "name",
+          "valueCoding": {
+            "system": "http://example.org/fhir/uv/sdc/CodeSystem/additionalLaunchContext",
+            "code": "Coverage"
+          }
+        },
+        {
+          "url": "type",
+          "valueCode": "Coverage"
+        }
+      ],
+      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-launchContext"
+    },
+    {
       "url": "http://hl7.org/fhir/StructureDefinition/cqf-library",
       "valueCanonical": "http://example.org/sdh/dtr/aslp/Library/ASLPDataElements"
     }

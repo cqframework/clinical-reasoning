@@ -4,34 +4,53 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import org.hl7.fhir.instance.model.api.IBaseDatatype;
+import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
+import org.hl7.fhir.instance.model.api.IBaseReference;
+import org.hl7.fhir.instance.model.api.ICompositeType;
+import org.hl7.fhir.r5.model.CodeableConcept;
+import org.hl7.fhir.r5.model.DataType;
+import org.hl7.fhir.r5.model.Enumerations.ActionSelectionBehavior;
+import org.hl7.fhir.r5.model.Enumerations.RequestPriority;
+import org.hl7.fhir.r5.model.PlanDefinition.PlanDefinitionActionConditionComponent;
+import org.hl7.fhir.r5.model.PlanDefinition.PlanDefinitionActionRelatedActionComponent;
 import org.hl7.fhir.r5.model.Reference;
 import org.hl7.fhir.r5.model.RelatedArtifact;
 import org.hl7.fhir.r5.model.RequestOrchestration.RequestOrchestrationActionComponent;
+import org.hl7.fhir.r5.model.RequestOrchestration.RequestOrchestrationActionConditionComponent;
+import org.hl7.fhir.r5.model.RequestOrchestration.RequestOrchestrationActionRelatedActionComponent;
 import org.opencds.cqf.fhir.utility.adapter.BaseAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ICodeableConceptAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IRequestActionAdapter;
 
 public class RequestActionAdapter extends BaseAdapter implements IRequestActionAdapter {
 
-    private final RequestOrchestrationActionComponent action;
+    private final RequestOrchestrationActionComponent requestAction;
 
-    public RequestActionAdapter(IBase action) {
-        super(FhirVersionEnum.R5, action);
-        if (!(action instanceof RequestOrchestrationActionComponent)) {
+    public RequestActionAdapter(IBase requestAction) {
+        super(FhirVersionEnum.R5, requestAction);
+        if (!(requestAction instanceof RequestOrchestrationActionComponent)) {
             throw new IllegalArgumentException(
                     "element passed as action argument is not a RequestOrchestrationActionComponent Element");
         }
-        this.action = (RequestOrchestrationActionComponent) action;
+        this.requestAction = (RequestOrchestrationActionComponent) requestAction;
     }
 
     @Override
     public RequestOrchestrationActionComponent get() {
-        return action;
+        return requestAction;
     }
 
     @Override
     public String getId() {
         return get().getId();
+    }
+
+    @Override
+    public IRequestActionAdapter setId(String id) {
+        get().setId(id);
+        return this;
     }
 
     @Override
@@ -45,6 +64,12 @@ public class RequestActionAdapter extends BaseAdapter implements IRequestActionA
     }
 
     @Override
+    public IRequestActionAdapter setTitle(String title) {
+        get().setTitle(title);
+        return this;
+    }
+
+    @Override
     public boolean hasDescription() {
         return get().hasDescription();
     }
@@ -55,13 +80,25 @@ public class RequestActionAdapter extends BaseAdapter implements IRequestActionA
     }
 
     @Override
-    public boolean hasType() {
-        return get().hasType();
+    public IRequestActionAdapter setDescription(String description) {
+        get().setDescription(description);
+        return this;
     }
 
     @Override
-    public ICodeableConceptAdapter getType() {
-        return new CodeableConceptAdapter(get().getType());
+    public boolean hasTextEquivalent() {
+        return get().hasTextEquivalent();
+    }
+
+    @Override
+    public String getTextEquivalent() {
+        return get().getTextEquivalent();
+    }
+
+    @Override
+    public IRequestActionAdapter setTextEquivalent(String text) {
+        get().setTextEquivalent(text);
+        return this;
     }
 
     @Override
@@ -72,6 +109,28 @@ public class RequestActionAdapter extends BaseAdapter implements IRequestActionA
     @Override
     public String getPriority() {
         return get().getPriority().toCode();
+    }
+
+    @Override
+    public IRequestActionAdapter setPriority(String priority) {
+        get().setPriority(RequestPriority.fromCode(priority));
+        return this;
+    }
+
+    @Override
+    public boolean hasCode() {
+        return get().hasCode();
+    }
+
+    @Override
+    public ICodeableConceptAdapter getCode() {
+        return getAdapterFactory().createCodeableConcept(get().getCode().get(0));
+    }
+
+    @Override
+    public IRequestActionAdapter setCode(ICodeableConceptAdapter code) {
+        get().setCode(code == null ? null : List.of((CodeableConcept) code.get()));
+        return this;
     }
 
     @Override
@@ -86,6 +145,75 @@ public class RequestActionAdapter extends BaseAdapter implements IRequestActionA
     }
 
     @Override
+    public <T extends ICompositeType & IBaseHasExtensions> IRequestActionAdapter setDocumentation(
+            List<T> documentation) {
+        get().setDocumentation(
+                        documentation.stream().map(RelatedArtifact.class::cast).toList());
+        return this;
+    }
+
+    @Override
+    public boolean hasCondition() {
+        return get().hasCondition();
+    }
+
+    @Override
+    public void addCondition(IBaseBackboneElement element) {
+        if (element instanceof PlanDefinitionActionConditionComponent condition) {
+            get().addCondition(new RequestOrchestrationActionConditionComponent()
+                    .setKind(condition.getKind())
+                    .setExpression(condition.getExpression()));
+        }
+    }
+
+    @Override
+    public boolean hasRelatedAction() {
+        return get().hasRelatedAction();
+    }
+
+    @Override
+    public void addRelatedAction(IBaseBackboneElement element) {
+        if (element instanceof PlanDefinitionActionRelatedActionComponent relatedAction) {
+            get().addRelatedAction(new RequestOrchestrationActionRelatedActionComponent()
+                    .setTargetId(relatedAction.getTargetId())
+                    .setRelationship(relatedAction.getRelationship())
+                    .setOffset(relatedAction.getOffset()));
+        }
+    }
+
+    @Override
+    public boolean hasTiming() {
+        return get().hasTiming();
+    }
+
+    @Override
+    public IBaseDatatype getTiming() {
+        return get().getTiming();
+    }
+
+    @Override
+    public IRequestActionAdapter setTiming(IBaseDatatype timing) {
+        get().setTiming((DataType) timing);
+        return this;
+    }
+
+    @Override
+    public boolean hasType() {
+        return get().hasType();
+    }
+
+    @Override
+    public ICodeableConceptAdapter getType() {
+        return new CodeableConceptAdapter(get().getType());
+    }
+
+    @Override
+    public IRequestActionAdapter setType(ICodeableConceptAdapter type) {
+        get().setType((CodeableConcept) type.get());
+        return this;
+    }
+
+    @Override
     public boolean hasSelectionBehavior() {
         return get().hasSelectionBehavior();
     }
@@ -93,6 +221,12 @@ public class RequestActionAdapter extends BaseAdapter implements IRequestActionA
     @Override
     public String getSelectionBehavior() {
         return get().getSelectionBehavior().toCode();
+    }
+
+    @Override
+    public IRequestActionAdapter setSelectionBehavior(String behavior) {
+        get().setSelectionBehavior(ActionSelectionBehavior.fromCode(behavior));
+        return this;
     }
 
     @Override
@@ -106,6 +240,12 @@ public class RequestActionAdapter extends BaseAdapter implements IRequestActionA
     }
 
     @Override
+    public IRequestActionAdapter setResource(IBaseReference resource) {
+        get().setResource((Reference) resource);
+        return this;
+    }
+
+    @Override
     public boolean hasAction() {
         return get().hasAction();
     }
@@ -113,5 +253,24 @@ public class RequestActionAdapter extends BaseAdapter implements IRequestActionA
     @Override
     public List<IRequestActionAdapter> getAction() {
         return get().getAction().stream().map(RequestActionAdapter::new).collect(Collectors.toUnmodifiableList());
+    }
+
+    @Override
+    public void addAction(IBaseBackboneElement element) {
+        if (element instanceof RequestOrchestrationActionComponent action) {
+            get().addAction(action);
+        }
+    }
+
+    @Override
+    public IRequestActionAdapter setAction(List<IRequestActionAdapter> actions) {
+        get().setAction(
+                        actions == null
+                                ? null
+                                : actions.stream()
+                                        .map(IRequestActionAdapter::get)
+                                        .map(RequestOrchestrationActionComponent.class::cast)
+                                        .toList());
+        return this;
     }
 }

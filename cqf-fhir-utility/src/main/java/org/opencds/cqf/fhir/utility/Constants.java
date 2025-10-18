@@ -72,6 +72,18 @@ public class Constants {
     public static final String CPG_CUSTOM_ACTIVITY_KIND =
             "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-custom-activity-kind";
     public static final String CPG_ACTIVITY_KIND = "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-activity-kind";
+    public static final String CPG_ACTIVITY_TYPE_CS = "http://hl7.org/fhir/uv/cpg/CodeSystem/cpg-activity-type-cs";
+
+    public enum CPG_ACTIVITY_TYPE_CODE {
+        SEND_MESSAGE("send-message"),
+        COLLECT_INFORMATION("collect-information");
+
+        public final String code;
+
+        CPG_ACTIVITY_TYPE_CODE(String code) {
+            this.code = code;
+        }
+    }
 
     public static final String CPG_SUMMARY_FOR = "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-summaryFor";
     public static final String CPG_GENERATED_FOR = "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-generatedFor";

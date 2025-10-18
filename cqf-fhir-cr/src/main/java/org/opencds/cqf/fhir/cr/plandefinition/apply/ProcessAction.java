@@ -161,9 +161,7 @@ public class ProcessAction {
     }
 
     protected Boolean meetsConditions(ApplyRequest request, IPlanDefinitionActionAdapter action) {
-        var conditions = action
-                .getCondition()
-                .stream() // request.resolvePathList(action, "condition", IBaseBackboneElement.class).stream()
+        var conditions = action.getCondition().stream()
                 .filter(c -> "applicability".equals(request.resolvePathString(c, "kind")))
                 .toList();
         if (conditions.isEmpty()) {

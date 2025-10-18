@@ -61,7 +61,6 @@ class QuestionnaireProcessorTests {
         given().repository(repositoryR4)
                 .when()
                 .questionnaireId(Ids.newId(fhirContextR4, "Questionnaire", "OutpatientPriorAuthorizationRequest"))
-                // .subjectId("OPA-Patient1")
                 .context(List.of(
                         (IBaseBackboneElement) newPart(
                                 fhirContextR4,
@@ -73,7 +72,6 @@ class QuestionnaireProcessorTests {
                                 "context",
                                 newStringPart(fhirContextR4, "name", "Claim"),
                                 newPart(fhirContextR4, "Reference", "content", "OPA-Claim1"))))
-                // .parameters(newParameters(fhirContextR4, newStringPart(fhirContextR4, "ClaimId", "OPA-Claim1")))
                 .thenPopulate(true)
                 .hasItems(35)
                 .itemHasAnswerValue("1.1", new org.hl7.fhir.r4.model.StringType("Acme Clinic"));
@@ -92,8 +90,6 @@ class QuestionnaireProcessorTests {
                                 "context",
                                 newStringPart(fhirContextR4, "name", "Claim"),
                                 newPart(fhirContextR4, "Reference", "content", "OPA-Claim1"))))
-                //                .subjectId("OPA-Patient1")
-                // .parameters(newParameters(fhirContextR4, newStringPart(fhirContextR4, "ClaimId", "OPA-Claim1")))
                 .thenPopulate(true)
                 .hasItems(2)
                 .hasNoErrors()
@@ -108,7 +104,6 @@ class QuestionnaireProcessorTests {
                 .when()
                 .questionnaireId(Ids.newId(fhirContextR5, "Questionnaire", "OutpatientPriorAuthorizationRequest"))
                 .subjectId("OPA-Patient1")
-                // .parameters(newParameters(fhirContextR5, newStringPart(fhirContextR5, "ClaimId", "OPA-Claim1")))
                 .thenPopulate(false);
     }
 
@@ -119,7 +114,6 @@ class QuestionnaireProcessorTests {
                 .questionnaireId(
                         Ids.newId(fhirContextR4, "Questionnaire", "OutpatientPriorAuthorizationRequest-noLibrary"))
                 .subjectId("OPA-Patient1")
-                // .parameters(newParameters(fhirContextR4, newStringPart(fhirContextR4, "ClaimId", "OPA-Claim1")))
                 .thenPopulate(true)
                 .hasItems(35)
                 .hasErrors();
@@ -132,7 +126,6 @@ class QuestionnaireProcessorTests {
                 .questionnaireId(
                         Ids.newId(fhirContextR4, "Questionnaire", "OutpatientPriorAuthorizationRequest-Errors"))
                 .subjectId("OPA-Patient1")
-                // .parameters(newParameters(fhirContextR4, newStringPart(fhirContextR4, "ClaimId", "OPA-Claim1")))
                 .thenPopulate(true)
                 .hasErrors();
     }

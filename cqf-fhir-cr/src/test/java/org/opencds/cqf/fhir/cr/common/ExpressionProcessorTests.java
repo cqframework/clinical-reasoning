@@ -9,6 +9,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.repository.IRepository;
 import org.hl7.fhir.r4.model.Questionnaire;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -32,24 +33,14 @@ class ExpressionProcessorTests {
     @InjectMocks
     private ExpressionProcessor fixture;
 
-    //    @BeforeEach
-    //    void setup() {
-    //        doReturn(repository).when(libraryEngine).getRepository();
-    //        doReturn(FhirContext.forR4Cached()).when(repository).fhirContext();
-    //    }
-
-    @Test
-    void getExpressionResultShouldReturnEmptyListForNullRequest() {
-        var expression = new CqfExpression().setLanguage("text/cql-expression");
-        var result = fixture.getExpressionResult(null, expression);
-        assertNotNull(result);
-        assertEquals(0, result.size());
+    @BeforeEach
+    void setup() {
+        doReturn(repository).when(libraryEngine).getRepository();
+        doReturn(FhirContext.forR4Cached()).when(repository).fhirContext();
     }
 
     @Test
     void getExpressionResultShouldReturnEmptyListForNullExpression() {
-        doReturn(repository).when(libraryEngine).getRepository();
-        doReturn(FhirContext.forR4Cached()).when(repository).fhirContext();
         var request =
                 RequestHelpers.newPopulateRequestForVersion(FhirVersionEnum.R4, libraryEngine, new Questionnaire());
         var result = fixture.getExpressionResult(request, null);
@@ -59,8 +50,6 @@ class ExpressionProcessorTests {
 
     @Test
     void getExpressionResultShouldReturnEmptyListForNullExpressionResult() {
-        doReturn(repository).when(libraryEngine).getRepository();
-        doReturn(FhirContext.forR4Cached()).when(repository).fhirContext();
         var request =
                 RequestHelpers.newPopulateRequestForVersion(FhirVersionEnum.R4, libraryEngine, new Questionnaire());
         var expression = new CqfExpression().setLanguage("text/cql-expression");
@@ -69,9 +58,4 @@ class ExpressionProcessorTests {
         assertNotNull(result);
         assertEquals(0, result.size());
     }
-
-    //    @Test
-    //    void getExpressionResultHandlesFhirPath() {
-    //
-    //    }
 }

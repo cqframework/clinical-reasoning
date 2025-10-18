@@ -45,27 +45,4 @@ class ExtensionBuildersTests {
         var r5Ext = (org.hl7.fhir.r5.model.Extension) ExtensionBuilders.buildBooleanExt(FhirVersionEnum.R5, entry);
         assertTrue(r5Ext.getValue() instanceof org.hl7.fhir.r5.model.BooleanType);
     }
-
-    //    @Test
-    //    void testBuildSdcLaunchContextExt() {
-    //        var dstu3Ext = ExtensionBuilders.buildSdcLaunchContextExt(FhirVersionEnum.DSTU3, "patient");
-    //        assertNull(dstu3Ext);
-    //
-    //        assertThrows(
-    //                IllegalArgumentException.class,
-    //                () -> ExtensionBuilders.buildSdcLaunchContextExt(FhirVersionEnum.R4, "subject"));
-    //
-    //        var r4Ext = (org.hl7.fhir.r4.model.Extension)
-    //                ExtensionBuilders.buildSdcLaunchContextExt(FhirVersionEnum.R4, "user",
-    // List.of("PractitionerRole"));
-    //        assertNull(r4Ext.getValue());
-    //        assertTrue(r4Ext.getExtensionByUrl("name").getValue() instanceof org.hl7.fhir.r4.model.Coding);
-    //        assertTrue(r4Ext.getExtensionByUrl("type").getValue() instanceof org.hl7.fhir.r4.model.CodeType);
-    //
-    //        var r5Ext = (org.hl7.fhir.r5.model.Extension)
-    //                ExtensionBuilders.buildSdcLaunchContextExt(FhirVersionEnum.R5, "patient");
-    //        assertNull(r5Ext.getValue());
-    //        assertTrue(r5Ext.getExtensionByUrl("name").getValue() instanceof org.hl7.fhir.r5.model.Coding);
-    //        assertTrue(r5Ext.getExtensionByUrl("type").getValue() instanceof org.hl7.fhir.r5.model.CodeType);
-    //    }
 }

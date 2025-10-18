@@ -22,14 +22,23 @@ public class FhirModelResolverCache {
     public static ModelResolver resolverForVersion(FhirVersionEnum fhirVersionEnum) {
         requireNonNull(fhirVersionEnum, "fhirVersionEnum can not be null");
         if (!cache.containsKey(fhirVersionEnum)) {
-            var resolver =
-                    switch (fhirVersionEnum) {
-                        case DSTU2 -> new DynamicModelResolver(new Dstu2FhirModelResolver());
-                        case DSTU3 -> new DynamicModelResolver(new Dstu3FhirModelResolver());
-                        case R4 -> new DynamicModelResolver(new R4FhirModelResolver());
-                        case R5 -> new DynamicModelResolver(new R5FhirModelResolver());
-                        default -> throw new IllegalArgumentException("unknown or unsupported FHIR version");
-                    };
+            ModelResolver resolver = null;
+            switch (fhirVersionEnum) {
+                case DSTU2:
+                    resolver = new DynamicModelResolver(new Dstu2FhirModelResolver());
+                    break;
+                case DSTU3:
+                    resolver = new DynamicModelResolver(new Dstu3FhirModelResolver());
+                    break;
+                case R4:
+                    resolver = new DynamicModelResolver(new R4FhirModelResolver());
+                    break;
+                case R5:
+                    resolver = new DynamicModelResolver(new R5FhirModelResolver());
+                    break;
+                default:
+                    throw new IllegalArgumentException("unknown or unsupported FHIR version");
+            }
 
             cache.put(fhirVersionEnum, resolver);
         }

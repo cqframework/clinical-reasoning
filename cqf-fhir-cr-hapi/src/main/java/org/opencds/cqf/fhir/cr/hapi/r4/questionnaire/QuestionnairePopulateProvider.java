@@ -53,7 +53,7 @@ public class QuestionnairePopulateProvider {
      * @param subject             The subject(s) that is/are the target of the Questionnaire.
      * @param context			 Resources containing information to be used to help populate the QuestionnaireResponse.
      * @param launchContext       The Questionnaire Launch Context extension containing Resources that provide context for form processing logic (pre-population) when creating/displaying/editing a QuestionnaireResponse.
-     * @param local				 Whether the server should use what resources and other knowledge it has about the referenced subject when pre-populating answers to questions.
+     * @param parameters		  This parameter has been deprecated and is no longer used
      * @param useServerData       Whether to use data from the server performing the evaluation.
      * @param data                Data to be made available during CQL evaluation.
      * @param bundle              Legacy support for data parameter.
@@ -86,8 +86,7 @@ public class QuestionnairePopulateProvider {
             @OperationParam(name = "terminologyEndpoint") Parameters.ParametersParameterComponent terminologyEndpoint,
             RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
-        var questionnaireMonad = getQuestionnaire(id, questionnaire, canonical, url, version);
-        // CanonicalType canonicalType = getCanonicalType(fhirVersion, canonical, url, version);
+        var questionnaireMonad = getQuestionnaireMonad(id, questionnaire, canonical, url, version);
         var dataToUse = data == null ? bundle : data;
         var subjectId = subject == null ? null : subject.getReference();
         var dataEndpointParam = getEndpoint(fhirVersion, dataEndpoint);
@@ -126,8 +125,7 @@ public class QuestionnairePopulateProvider {
             @OperationParam(name = "terminologyEndpoint") Parameters.ParametersParameterComponent terminologyEndpoint,
             RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
-        var questionnaireMonad = getQuestionnaire(null, questionnaire, canonical, url, version);
-        // CanonicalType canonicalType = getCanonicalType(fhirVersion, canonical, url, version);
+        var questionnaireMonad = getQuestionnaireMonad(null, questionnaire, canonical, url, version);
         var dataToUse = data == null ? bundle : data;
         var subjectId = subject == null ? null : subject.getReference();
         var dataEndpointParam = getEndpoint(fhirVersion, dataEndpoint);
@@ -160,7 +158,7 @@ public class QuestionnairePopulateProvider {
     }
 
     @SuppressWarnings("unchecked")
-    private <C extends IPrimitiveType<String>, R extends IBaseResource> Either3<C, IIdType, R> getQuestionnaire(
+    private <C extends IPrimitiveType<String>, R extends IBaseResource> Either3<C, IIdType, R> getQuestionnaireMonad(
             IIdType id,
             Parameters.ParametersParameterComponent questionnaireParam,
             String canonical,

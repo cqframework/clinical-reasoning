@@ -177,8 +177,8 @@ public class ProcessDefinitionItem {
             resource.setId((IIdType) Ids.newId(request.getFhirVersion(), id));
             resolveMeta(resource, profile);
         }
-        var valueExtensions = getValueExtensions(request, item);
-        valueExtensions.forEach(valueExt -> processValueExtension(request, resource, profile, valueExt));
+        getValueExtensions(request, item)
+                .forEach(valueExt -> processValueExtension(request, resource, profile, valueExt));
         List<? extends IItemComponentAdapter> responseItems;
         List<? extends IItemComponentAdapter> questionnaireItems;
         if (item.getResponseItem() != null && !item.getResponseItem().hasItem()) {

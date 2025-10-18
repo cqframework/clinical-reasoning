@@ -12,9 +12,8 @@ import static org.opencds.cqf.fhir.utility.Constants.CQF_APPLICABILITY_BEHAVIOR;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.repository.IRepository;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Expression;
@@ -36,7 +35,10 @@ import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.common.IInputParameterResolver;
 import org.opencds.cqf.fhir.cr.helpers.RequestHelpers;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.GenerateProcessor;
+import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
+import org.opencds.cqf.fhir.utility.adapter.IPlanDefinitionActionAdapter;
 
+@SuppressWarnings("UnstableApiUsage")
 @ExtendWith(MockitoExtension.class)
 class ProcessActionTests {
     @Mock
@@ -62,31 +64,30 @@ class ProcessActionTests {
     ProcessAction fixture;
 
     @Test
-    void unsupportedVersionShouldReturnNull() {
-        var action = new org.hl7.fhir.r4b.model.PlanDefinition.PlanDefinitionActionComponent();
-        var requestAction = fixture.generateRequestAction(FhirVersionEnum.R4B, action);
-        assertNull(requestAction);
-    }
-
-    @Test
     void dstu3Request() {
         var action = new org.hl7.fhir.dstu3.model.PlanDefinition.PlanDefinitionActionComponent();
-        var requestAction = fixture.generateRequestAction(FhirVersionEnum.DSTU3, action);
-        assertInstanceOf(org.hl7.fhir.dstu3.model.RequestGroup.RequestGroupActionComponent.class, requestAction);
+        var actionAdapter =
+                (IPlanDefinitionActionAdapter) IAdapterFactory.createAdapterForBase(FhirVersionEnum.DSTU3, action);
+        var requestAction = fixture.generateRequestAction(actionAdapter);
+        assertInstanceOf(org.hl7.fhir.dstu3.model.RequestGroup.RequestGroupActionComponent.class, requestAction.get());
     }
 
     @Test
     void r4Request() {
         var action = new org.hl7.fhir.r4.model.PlanDefinition.PlanDefinitionActionComponent();
-        var requestAction = fixture.generateRequestAction(FhirVersionEnum.R4, action);
-        assertInstanceOf(RequestGroupActionComponent.class, requestAction);
+        var actionAdapter =
+                (IPlanDefinitionActionAdapter) IAdapterFactory.createAdapterForBase(FhirVersionEnum.R4, action);
+        var requestAction = fixture.generateRequestAction(actionAdapter);
+        assertInstanceOf(RequestGroupActionComponent.class, requestAction.get());
     }
 
     @Test
     void r5Request() {
         var action = new org.hl7.fhir.r5.model.PlanDefinition.PlanDefinitionActionComponent();
-        var requestAction = fixture.generateRequestAction(FhirVersionEnum.R5, action);
-        assertInstanceOf(RequestOrchestrationActionComponent.class, requestAction);
+        var actionAdapter =
+                (IPlanDefinitionActionAdapter) IAdapterFactory.createAdapterForBase(FhirVersionEnum.R5, action);
+        var requestAction = fixture.generateRequestAction(actionAdapter);
+        assertInstanceOf(RequestOrchestrationActionComponent.class, requestAction.get());
     }
 
     @Test
@@ -95,8 +96,10 @@ class ProcessActionTests {
         action.addInput(new org.hl7.fhir.r4.model.DataRequirement()
                 .addProfile("http://fhir.org/test/StructureDefinition/test"));
         var request = RequestHelpers.newPDApplyRequestForVersion(
-                FhirVersionEnum.R4, libraryEngine, null, inputParameterResolver);
-        fixture.addQuestionnaireItemForInput(request, action);
+                FhirVersionEnum.R4, libraryEngine, null, null, inputParameterResolver);
+        var actionAdapter =
+                (IPlanDefinitionActionAdapter) IAdapterFactory.createAdapterForBase(FhirVersionEnum.R4, action);
+        fixture.addQuestionnaireItemForInput(request, actionAdapter);
         var oc = (org.hl7.fhir.r4.model.OperationOutcome) request.getOperationOutcome();
         assertTrue(oc.hasIssue());
         assertTrue(oc.getIssueFirstRep()
@@ -111,13 +114,16 @@ class ProcessActionTests {
         var expression = "test";
         action.addCondition()
                 .setKind(ActionConditionKind.APPLICABILITY)
-                .setExpression(new Expression().setLanguage("text/cql").setExpression(expression));
+                .setExpression(
+                        new Expression().setLanguage("text/cql-expression").setExpression(expression));
         var request = RequestHelpers.newPDApplyRequestForVersion(
-                FhirVersionEnum.R4, libraryEngine, null, inputParameterResolver);
+                FhirVersionEnum.R4, libraryEngine, null, null, inputParameterResolver);
         doThrow(new IllegalArgumentException())
                 .when(libraryEngine)
                 .resolveExpression(eq(RequestHelpers.PATIENT_ID), any(), eq(null), eq(null), eq(null), any(), eq(null));
-        fixture.meetsConditions(request, action);
+        var actionAdapter =
+                (IPlanDefinitionActionAdapter) IAdapterFactory.createAdapterForBase(FhirVersionEnum.R4, action);
+        fixture.meetsConditions(request, actionAdapter);
         var oc = (org.hl7.fhir.r4.model.OperationOutcome) request.getOperationOutcome();
         assertTrue(oc.hasIssue());
         assertTrue(oc.getIssueFirstRep()
@@ -132,11 +138,13 @@ class ProcessActionTests {
         var expression = new Expression().setLanguage("text/fhirpath").setExpression("null");
         action.addCondition().setKind(ActionConditionKind.APPLICABILITY).setExpression(expression);
         var request = RequestHelpers.newPDApplyRequestForVersion(
-                FhirVersionEnum.R4, libraryEngine, null, inputParameterResolver);
+                FhirVersionEnum.R4, libraryEngine, null, null, inputParameterResolver);
         doReturn(null)
                 .when(libraryEngine)
                 .resolveExpression(eq(RequestHelpers.PATIENT_ID), any(), eq(null), any(), eq(null), any(), eq(null));
-        var result = fixture.meetsConditions(request, action);
+        var actionAdapter =
+                (IPlanDefinitionActionAdapter) IAdapterFactory.createAdapterForBase(FhirVersionEnum.R4, action);
+        var result = fixture.meetsConditions(request, actionAdapter);
         Assertions.assertFalse(result);
         assertNull(request.getOperationOutcome());
     }
@@ -147,11 +155,13 @@ class ProcessActionTests {
         var expression = new Expression().setLanguage("text/fhirpath").setExpression("null");
         action.addCondition().setKind(ActionConditionKind.APPLICABILITY).setExpression(expression);
         var request = RequestHelpers.newPDApplyRequestForVersion(
-                FhirVersionEnum.R4, libraryEngine, null, inputParameterResolver);
+                FhirVersionEnum.R4, libraryEngine, null, null, inputParameterResolver);
         doReturn(List.of(new StringType("Test")))
                 .when(libraryEngine)
                 .resolveExpression(eq(RequestHelpers.PATIENT_ID), any(), eq(null), any(), eq(null), any(), eq(null));
-        var result = fixture.meetsConditions(request, action);
+        var actionAdapter =
+                (IPlanDefinitionActionAdapter) IAdapterFactory.createAdapterForBase(FhirVersionEnum.R4, action);
+        var result = fixture.meetsConditions(request, actionAdapter);
         Assertions.assertFalse(result);
         assertNull(request.getOperationOutcome());
     }
@@ -177,21 +187,23 @@ class ProcessActionTests {
     void testProcessChildActionsApplicabilityBehavior() {
         var action = actionWithChildren();
         var requestOrchestration = new RequestGroup();
-        var requestAction = (RequestGroupActionComponent) fixture.generateRequestActionR4(action);
+        var actionAdapter =
+                (IPlanDefinitionActionAdapter) IAdapterFactory.createAdapterForBase(FhirVersionEnum.R4, action);
+        var requestAction = fixture.generateRequestAction(actionAdapter);
         var request = RequestHelpers.newPDApplyRequestForVersion(
-                FhirVersionEnum.R4, libraryEngine, null, inputParameterResolver);
-        var metConditions = new HashMap<String, IBaseBackboneElement>();
+                FhirVersionEnum.R4, libraryEngine, null, null, inputParameterResolver);
+        var metConditions = new ArrayList<String>();
         doReturn(List.of(new BooleanType(true)))
                 .when(libraryEngine)
                 .resolveExpression(eq(RequestHelpers.PATIENT_ID), any(), eq(null), any(), eq(null), any(), eq(null));
-        fixture.processChildActions(request, requestOrchestration, metConditions, action, requestAction);
+        fixture.processChildActions(request, requestOrchestration, metConditions, actionAdapter, requestAction);
         assertEquals(3, requestAction.getAction().size());
 
         requestAction.setAction(null);
         assertTrue(requestAction.getAction().isEmpty());
-        metConditions = new HashMap<String, IBaseBackboneElement>();
+        metConditions = new ArrayList<String>();
         action.addExtension(CQF_APPLICABILITY_BEHAVIOR, new CodeType("any"));
-        fixture.processChildActions(request, requestOrchestration, metConditions, action, requestAction);
+        fixture.processChildActions(request, requestOrchestration, metConditions, actionAdapter, requestAction);
         assertEquals(1, requestAction.getAction().size());
     }
 
@@ -200,16 +212,18 @@ class ProcessActionTests {
         var action = actionWithChildren();
         action.addExtension(CQF_APPLICABILITY_BEHAVIOR, new BooleanType(true));
         var requestOrchestration = new RequestGroup();
-        var requestAction = (RequestGroupActionComponent) fixture.generateRequestActionR4(action);
+        var actionAdapter =
+                (IPlanDefinitionActionAdapter) IAdapterFactory.createAdapterForBase(FhirVersionEnum.R4, action);
+        var requestAction = fixture.generateRequestAction(actionAdapter);
         var request = RequestHelpers.newPDApplyRequestForVersion(
-                FhirVersionEnum.R4, libraryEngine, null, inputParameterResolver);
-        var metConditions = new HashMap<String, IBaseBackboneElement>();
-        fixture.processChildActions(request, requestOrchestration, metConditions, action, requestAction);
+                FhirVersionEnum.R4, libraryEngine, null, null, inputParameterResolver);
+        var metConditions = new ArrayList<String>();
+        fixture.processChildActions(request, requestOrchestration, metConditions, actionAdapter, requestAction);
         assertTrue(requestAction.getAction().isEmpty());
 
         action.setExtension(null);
         action.addExtension(CQF_APPLICABILITY_BEHAVIOR, new CodeType("bad"));
-        fixture.processChildActions(request, requestOrchestration, metConditions, action, requestAction);
+        fixture.processChildActions(request, requestOrchestration, metConditions, actionAdapter, requestAction);
         assertTrue(requestAction.getAction().isEmpty());
     }
 }

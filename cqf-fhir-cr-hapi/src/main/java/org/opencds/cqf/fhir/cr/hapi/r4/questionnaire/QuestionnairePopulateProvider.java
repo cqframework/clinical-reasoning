@@ -12,9 +12,12 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import java.util.List;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.IBaseReference;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IdType;
@@ -23,6 +26,7 @@ import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Reference;
 import org.opencds.cqf.fhir.cr.hapi.common.IQuestionnaireProcessorFactory;
+import org.opencds.cqf.fhir.utility.monad.Either3;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 
 @SuppressWarnings("java:S107")
@@ -49,7 +53,6 @@ public class QuestionnairePopulateProvider {
      * @param subject             The subject(s) that is/are the target of the Questionnaire.
      * @param context			 Resources containing information to be used to help populate the QuestionnaireResponse.
      * @param launchContext       The Questionnaire Launch Context extension containing Resources that provide context for form processing logic (pre-population) when creating/displaying/editing a QuestionnaireResponse.
-     * @param parameters			 Any input parameters defined in libraries referenced by the Questionnaire.
      * @param local				 Whether the server should use what resources and other knowledge it has about the referenced subject when pre-populating answers to questions.
      * @param useServerData       Whether to use data from the server performing the evaluation.
      * @param data                Data to be made available during CQL evaluation.
@@ -66,7 +69,7 @@ public class QuestionnairePopulateProvider {
     @Operation(name = ProviderConstants.CR_OPERATION_POPULATE, idempotent = true, type = Questionnaire.class)
     public QuestionnaireResponse populate(
             @IdParam IdType id,
-            @OperationParam(name = "questionnaire") Questionnaire questionnaire,
+            @OperationParam(name = "questionnaire") Parameters.ParametersParameterComponent questionnaire,
             @OperationParam(name = "canonical") String canonical,
             @OperationParam(name = "url") String url,
             @OperationParam(name = "version") String version,
@@ -83,8 +86,9 @@ public class QuestionnairePopulateProvider {
             @OperationParam(name = "terminologyEndpoint") Parameters.ParametersParameterComponent terminologyEndpoint,
             RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
-        CanonicalType canonicalType = getCanonicalType(fhirVersion, canonical, url, version);
-        Bundle dataToUse = data == null ? bundle : data;
+        var questionnaireMonad = getQuestionnaire(id, questionnaire, canonical, url, version);
+        // CanonicalType canonicalType = getCanonicalType(fhirVersion, canonical, url, version);
+        var dataToUse = data == null ? bundle : data;
         var subjectId = subject == null ? null : subject.getReference();
         var dataEndpointParam = getEndpoint(fhirVersion, dataEndpoint);
         var contentEndpointParam = getEndpoint(fhirVersion, contentEndpoint);
@@ -92,11 +96,10 @@ public class QuestionnairePopulateProvider {
         return (QuestionnaireResponse) questionnaireProcessorFactory
                 .create(requestDetails)
                 .populate(
-                        Eithers.for3(canonicalType, id, questionnaire),
+                        questionnaireMonad,
                         subjectId,
                         context,
                         launchContext,
-                        parameters,
                         dataToUse,
                         isUseServerData(local, useServerData),
                         dataEndpointParam,
@@ -106,7 +109,7 @@ public class QuestionnairePopulateProvider {
 
     @Operation(name = ProviderConstants.CR_OPERATION_POPULATE, idempotent = true, type = Questionnaire.class)
     public QuestionnaireResponse populate(
-            @OperationParam(name = "questionnaire") Questionnaire questionnaire,
+            @OperationParam(name = "questionnaire") Parameters.ParametersParameterComponent questionnaire,
             @OperationParam(name = "canonical") String canonical,
             @OperationParam(name = "url") String url,
             @OperationParam(name = "version") String version,
@@ -123,8 +126,9 @@ public class QuestionnairePopulateProvider {
             @OperationParam(name = "terminologyEndpoint") Parameters.ParametersParameterComponent terminologyEndpoint,
             RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
-        CanonicalType canonicalType = getCanonicalType(fhirVersion, canonical, url, version);
-        Bundle dataToUse = data == null ? bundle : data;
+        var questionnaireMonad = getQuestionnaire(null, questionnaire, canonical, url, version);
+        // CanonicalType canonicalType = getCanonicalType(fhirVersion, canonical, url, version);
+        var dataToUse = data == null ? bundle : data;
         var subjectId = subject == null ? null : subject.getReference();
         var dataEndpointParam = getEndpoint(fhirVersion, dataEndpoint);
         var contentEndpointParam = getEndpoint(fhirVersion, contentEndpoint);
@@ -132,11 +136,10 @@ public class QuestionnairePopulateProvider {
         return (QuestionnaireResponse) questionnaireProcessorFactory
                 .create(requestDetails)
                 .populate(
-                        Eithers.for3(canonicalType, null, questionnaire),
+                        questionnaireMonad,
                         subjectId,
                         context,
                         launchContext,
-                        parameters,
                         dataToUse,
                         isUseServerData(local, useServerData),
                         dataEndpointParam,
@@ -154,5 +157,27 @@ public class QuestionnairePopulateProvider {
         }
 
         return true;
+    }
+
+    @SuppressWarnings("unchecked")
+    private <C extends IPrimitiveType<String>, R extends IBaseResource> Either3<C, IIdType, R> getQuestionnaire(
+            IIdType id,
+            Parameters.ParametersParameterComponent questionnaireParam,
+            String canonical,
+            String url,
+            String version) {
+        var paramValue = questionnaireParam == null ? null : questionnaireParam.getValue();
+        var uriValue = paramValue instanceof IPrimitiveType<?> primitiveType ? primitiveType.getValueAsString() : null;
+        var referenceValue = paramValue instanceof IBaseReference reference
+                ? reference.getReferenceElement().getValueAsString()
+                : null;
+        var urlToUse = referenceValue == null ? url : referenceValue;
+        var canonicalToUse = uriValue == null ? canonical : uriValue;
+        var questionnaire = (R)
+                (questionnaireParam != null && questionnaireParam.hasResource()
+                        ? questionnaireParam.getResource()
+                        : null);
+        var canonicalType = (C) getCanonicalType(fhirVersion, canonicalToUse, urlToUse, version);
+        return Eithers.for3(canonicalType, id, questionnaire);
     }
 }

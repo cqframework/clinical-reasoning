@@ -126,7 +126,7 @@ class LibraryProcessorTests {
                 .when()
                 .libraryId("OutpatientPriorAuthorizationPrepopulation")
                 .thenDataRequirements()
-                .hasDataRequirements(30);
+                .hasDataRequirements(19);
     }
 
     @Test
@@ -135,7 +135,7 @@ class LibraryProcessorTests {
                 .when()
                 .libraryId("OutpatientPriorAuthorizationPrepopulation")
                 .thenDataRequirements()
-                .hasDataRequirements(30);
+                .hasDataRequirements(19);
     }
 
     @Test

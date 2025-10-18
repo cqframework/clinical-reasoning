@@ -158,10 +158,10 @@ public class TestQuestionnaire {
         private PopulateRequest buildRequest() {
             return new PopulateRequest(
                     processor.resolveQuestionnaire(Eithers.for3(questionnaireUrl, questionnaireId, questionnaire)),
-                    Ids.newId(fhirContext(), "Patient", subjectId),
+                    subjectId == null ? null : Ids.newId(fhirContext(), "Patient", subjectId),
                     context,
                     launchContext,
-                    parameters,
+                    // parameters,
                     data,
                     new LibraryEngine(repository, processor.evaluationSettings),
                     processor.modelResolver);
@@ -228,7 +228,7 @@ public class TestQuestionnaire {
                     subjectId,
                     context,
                     launchContext,
-                    parameters,
+                    // parameters,
                     data,
                     useServerData,
                     (IBaseResource) null,
@@ -319,6 +319,15 @@ public class TestQuestionnaire {
         public GeneratedQuestionnaire hasItems(int expectedItemCount) {
             assertEquals(expectedItemCount, items.size());
 
+            return this;
+        }
+
+        public GeneratedQuestionnaire hasExtension(String url) {
+            return hasExtensions(url, 1);
+        }
+
+        public GeneratedQuestionnaire hasExtensions(String url, int count) {
+            assertEquals(count, questionnaire.getExtensionsByUrl(url).size());
             return this;
         }
 

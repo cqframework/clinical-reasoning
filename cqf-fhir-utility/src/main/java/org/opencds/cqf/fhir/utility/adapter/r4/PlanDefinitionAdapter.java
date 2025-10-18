@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CanonicalType;
@@ -182,6 +183,16 @@ public class PlanDefinitionAdapter extends KnowledgeArtifactAdapter implements I
     @Override
     public List<String> getLibrary() {
         return get().getLibrary().stream().map(PrimitiveType::asStringValue).collect(Collectors.toList());
+    }
+
+    @Override
+    public boolean hasGoal() {
+        return get().hasGoal();
+    }
+
+    @Override
+    public List<IBaseBackboneElement> getGoal() {
+        return get().getGoal().stream().map(IBaseBackboneElement.class::cast).toList();
     }
 
     @Override

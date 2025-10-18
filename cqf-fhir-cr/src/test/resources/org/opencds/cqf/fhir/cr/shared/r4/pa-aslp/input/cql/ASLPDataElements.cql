@@ -7,15 +7,10 @@ include FHIRCommon version '1.1.000' called FC
 include SDHCommon called SC
 include ASLPConcepts called Cs
 
-parameter "Device Request" List<FHIR.DeviceRequest>
-parameter "Device Request Id" List<System.String>
-parameter "Medication Request" List<FHIR.MedicationRequest>
-parameter "Medication Request Id" List<System.String>
-parameter "Nutrition Order" List<FHIR.NutritionOrder>
-parameter "Nutrition Order Id" List<System.String>
-parameter "Service Request" List<FHIR.ServiceRequest>
-parameter "Service Request Id" List<System.String>
-parameter "Coverage Id" List<System.String>
+parameter "ServiceRequest" List<FHIR.ServiceRequest>
+parameter "ServiceRequestId" List<System.String>
+parameter "CoverageId" List<System.String>
+parameter "Coverage" List<FHIR.Coverage>
 
 context Patient
 
@@ -109,9 +104,9 @@ define "Neck Circumference":
 
 define "Sleep Study":
   Coalesce([ServiceRequest] SR
-      where SR.id in "Service Request Id", { null as FHIR.ServiceRequest }
+      where SR.id in "ServiceRequestId", { null as FHIR.ServiceRequest }
   )
-    union Coalesce("Service Request", { null as FHIR.ServiceRequest })
+    union Coalesce("ServiceRequest", { null as FHIR.ServiceRequest })
 
 define "Sleep Study Code":
   ( "Sleep Study" ).code

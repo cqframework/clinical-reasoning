@@ -49,6 +49,13 @@
       "type": "ResearchStudy"
     },
     {
+      "name": "StudyId",
+      "use": "in",
+      "min": 0,
+      "max": "1",
+      "type": "String"
+    },
+    {
       "name": "Patient",
       "use": "out",
       "min": 0,

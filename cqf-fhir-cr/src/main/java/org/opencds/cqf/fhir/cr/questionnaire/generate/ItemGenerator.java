@@ -1,29 +1,28 @@
 package org.opencds.cqf.fhir.cr.questionnaire.generate;
 
-import static org.opencds.cqf.fhir.cr.common.ExtensionBuilders.buildSdcLaunchContextExt;
 import static org.opencds.cqf.fhir.utility.SearchHelper.searchRepositoryByCanonical;
 import static org.opencds.cqf.fhir.utility.VersionUtilities.canonicalTypeForVersion;
 
 import ca.uhn.fhir.repository.IRepository;
 import jakarta.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
+import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IDomainResource;
-import org.opencds.cqf.cql.engine.execution.CqlEngine;
-import org.opencds.cqf.fhir.cql.Engines;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.cr.common.ExpressionProcessor;
 import org.opencds.cqf.fhir.cr.common.ExtensionProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.Helpers;
 import org.opencds.cqf.fhir.utility.Constants;
-import org.opencds.cqf.fhir.utility.Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT_CODE;
 import org.opencds.cqf.fhir.utility.CqfExpression;
+import org.opencds.cqf.fhir.utility.Resources;
 import org.opencds.cqf.fhir.utility.SearchHelper;
 import org.opencds.cqf.fhir.utility.VersionUtilities;
 import org.opencds.cqf.fhir.utility.adapter.IElementDefinitionAdapter;
@@ -41,19 +40,31 @@ public class ItemGenerator {
     protected static final String CHILD_LINK_ID_FORMAT = "%s.%s";
 
     protected final IRepository repository;
-    protected final CqlEngine engine;
     protected final ExpressionProcessor expressionProcessor;
     protected final ExtensionProcessor extensionProcessor;
     protected final ElementHasCaseFeature elementHasCaseFeature;
     protected final ItemTypeIsChoice itemTypeIsChoice;
 
     public ItemGenerator(IRepository repository) {
+        this(
+                repository,
+                new ExpressionProcessor(),
+                new ExtensionProcessor(),
+                new ElementHasCaseFeature(),
+                new ItemTypeIsChoice(repository));
+    }
+
+    public ItemGenerator(
+            IRepository repository,
+            ExpressionProcessor expressionProcessor,
+            ExtensionProcessor extensionProcessor,
+            ElementHasCaseFeature elementHasCaseFeature,
+            ItemTypeIsChoice itemTypeIsChoice) {
         this.repository = repository;
-        engine = Engines.forRepository(this.repository);
-        expressionProcessor = new ExpressionProcessor();
-        extensionProcessor = new ExtensionProcessor();
-        elementHasCaseFeature = new ElementHasCaseFeature();
-        itemTypeIsChoice = new ItemTypeIsChoice(repository);
+        this.expressionProcessor = expressionProcessor;
+        this.extensionProcessor = extensionProcessor;
+        this.elementHasCaseFeature = elementHasCaseFeature;
+        this.itemTypeIsChoice = itemTypeIsChoice;
     }
 
     @Nullable
@@ -86,27 +97,33 @@ public class ItemGenerator {
                 itemContextExt.setUrl(Constants.SDC_QUESTIONNAIRE_ITEM_POPULATION_CONTEXT);
                 itemContextExt.setValue(caseFeature.toExpressionType(request.getFhirVersion()));
                 // Assume Patient for now - this should probably be the context of the Library if we can determine that
-                launchContextExts.add(buildSdcLaunchContextExt(request.getFhirVersion(), "patient"));
+                launchContextExts.add(buildSdcLaunchContextExt(request, "patient", "Patient"));
                 var featureLibrary = request.getAdapterFactory()
                         .createLibrary(SearchHelper.searchRepositoryByCanonical(
                                 repository,
                                 VersionUtilities.canonicalTypeForVersion(
                                         request.getFhirVersion(), caseFeature.getLibraryUrl())));
 
-                // Add any other in parameters that match launch context codes
-                var inParameters = featureLibrary.getParameter().stream()
-                        .filter(p -> {
-                            var name = request.resolvePathString(p, "name").toUpperCase();
-                            return (name.equals("PRACTITIONER"))
-                                    || request.resolvePathString(p, "use").equals("in")
-                                            && Arrays.stream(SDC_QUESTIONNAIRE_LAUNCH_CONTEXT_CODE.values())
-                                                    .map(Object::toString)
-                                                    .toList()
-                                                    .contains(name);
-                        })
-                        .map(p -> request.resolvePathString(p, "name").toLowerCase())
-                        .toList();
-                inParameters.forEach(p -> launchContextExts.add(buildSdcLaunchContextExt(request.getFhirVersion(), p)));
+                // Add any other in parameters that with a type of Resource
+                //                var inParameters =
+                featureLibrary.getParameter().stream()
+                        .filter(p -> request.resolvePathString(p, "use").equals("in"))
+                        .filter(p -> request.getFHIRTypes().contains(request.resolvePathString(p, "type")))
+                        //                        .filter(p -> {
+                        //                            var name = request.resolvePathString(p, "name").toUpperCase();
+                        //                            return (name.equals("PRACTITIONER"))
+                        //                                    || request.resolvePathString(p, "use").equals("in")
+                        //                                    &&
+                        // Arrays.stream(SDC_QUESTIONNAIRE_LAUNCH_CONTEXT_CODE.values())
+                        //                                                    .map(Object::toString)
+                        //                                                    .toList()
+                        //                                                    .contains(name);
+                        //                        })
+                        .map(p -> new ImmutablePair<String, String>(
+                                request.resolvePathString(p, "name"), request.resolvePathString(p, "type")))
+                        //                        .toList();
+                        //                inParameters
+                        .forEach(p -> launchContextExts.add(buildSdcLaunchContextExt(request, p.left, p.right)));
             }
             return new ImmutablePair<>(questionnaireItem, launchContextExts);
         } catch (Exception ex) {
@@ -114,6 +131,54 @@ public class ItemGenerator {
             logger.error(message);
             return new ImmutablePair<>(createErrorItem(request, linkId, message), new ArrayList<>());
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    protected <T extends IBaseExtension<?, ?>> T buildSdcLaunchContextExt(
+            GenerateRequest request, String code, String type) {
+        var system = "http://hl7.org/fhir/uv/sdc/CodeSystem/launchContext";
+        var display = "";
+        switch (code.toLowerCase()) {
+            case "patient":
+                display = "Patient";
+                break;
+            case "encounter":
+                display = "Encounter";
+                break;
+            case "location":
+                display = "Location";
+                break;
+            case "practitioner", "user":
+                code = "user";
+                display = "User";
+                break;
+            case "study":
+                display = "ResearchStudy";
+                break;
+            case "clinical":
+                display = "Clinical";
+                break;
+
+            default:
+                display = code;
+                system = "http://example.org/fhir/uv/sdc/CodeSystem/additionalLaunchContext";
+                break;
+        }
+        var fhirVersion = request.getFhirVersion();
+        var ext = ((IBaseHasExtensions) Resources.newBaseForVersion("Extension", fhirVersion)).addExtension();
+        ext.setUrl(Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT);
+        var nameExt = ((IBaseHasExtensions) ext).addExtension();
+        nameExt.setUrl("name");
+        var nameCoding = request.getAdapterFactory().createCoding(Resources.newBaseForVersion("Coding", fhirVersion));
+        nameCoding.setDisplay(display);
+        nameCoding.setCode(code);
+        nameCoding.setSystem(system);
+        nameExt.setValue((IBaseDatatype) nameCoding.get());
+        var typeExt = ((IBaseHasExtensions) ext).addExtension();
+        typeExt.setUrl("type");
+        typeExt.setValue(
+                ((IPrimitiveType<String>) Resources.newBaseForVersion("CodeType", fhirVersion)).setValue(type));
+        return (T) ext;
     }
 
     protected CqfExpression getFeatureExpression(GenerateRequest request) {

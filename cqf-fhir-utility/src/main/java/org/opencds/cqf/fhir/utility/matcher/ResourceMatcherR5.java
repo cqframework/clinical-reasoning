@@ -20,7 +20,7 @@ import org.hl7.fhir.r5.model.CodeableConcept;
 import org.hl7.fhir.r5.model.Coding;
 import org.hl7.fhir.r5.model.Period;
 import org.hl7.fhir.r5.model.Timing;
-import org.opencds.cqf.fhir.utility.FhirPathCache;
+import org.opencds.cqf.fhir.utility.fhirpath.FhirPathCache;
 
 public class ResourceMatcherR5 implements ResourceMatcher {
 

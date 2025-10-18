@@ -43,6 +43,11 @@ public class QuestionnaireResponseAdapter extends ResourceAdapter implements IQu
     }
 
     @Override
+    public String getQuestionnaire() {
+        return get().getQuestionnaire().getReference();
+    }
+
+    @Override
     public IQuestionnaireResponseAdapter setQuestionnaire(String canonical) {
         get().setQuestionnaire(new Reference(canonical));
         return this;

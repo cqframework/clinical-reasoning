@@ -113,7 +113,6 @@ class ApplyRequestTests {
         doReturn(repository).when(libraryEngine).getRepository();
         doReturn(FhirContext.forCached(fhirVersion)).when(repository).fhirContext();
         doReturn(patient).when(repository).read(any(), eq(new IdType("Patient/patientId")));
-        // doReturn(deviceRequest).when(repository).read(any(), eq(new IdType("DeviceRequest/12345")));
         var request = RequestHelpers.newPDApplyRequestForVersion(
                         FhirVersionEnum.R4, libraryEngine, null, params, inputParameterResolver)
                 .setQuestionnaire(questionnaire);

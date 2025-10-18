@@ -103,26 +103,12 @@ public class ItemGenerator {
                                 repository,
                                 VersionUtilities.canonicalTypeForVersion(
                                         request.getFhirVersion(), caseFeature.getLibraryUrl())));
-
                 // Add any other in parameters that with a type of Resource
-                //                var inParameters =
                 featureLibrary.getParameter().stream()
                         .filter(p -> request.resolvePathString(p, "use").equals("in"))
                         .filter(p -> request.getFHIRTypes().contains(request.resolvePathString(p, "type")))
-                        //                        .filter(p -> {
-                        //                            var name = request.resolvePathString(p, "name").toUpperCase();
-                        //                            return (name.equals("PRACTITIONER"))
-                        //                                    || request.resolvePathString(p, "use").equals("in")
-                        //                                    &&
-                        // Arrays.stream(SDC_QUESTIONNAIRE_LAUNCH_CONTEXT_CODE.values())
-                        //                                                    .map(Object::toString)
-                        //                                                    .toList()
-                        //                                                    .contains(name);
-                        //                        })
                         .map(p -> new ImmutablePair<String, String>(
                                 request.resolvePathString(p, "name"), request.resolvePathString(p, "type")))
-                        //                        .toList();
-                        //                inParameters
                         .forEach(p -> launchContextExts.add(buildSdcLaunchContextExt(request, p.left, p.right)));
             }
             return new ImmutablePair<>(questionnaireItem, launchContextExts);

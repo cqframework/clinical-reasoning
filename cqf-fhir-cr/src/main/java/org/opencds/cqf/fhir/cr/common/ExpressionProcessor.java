@@ -18,7 +18,6 @@ import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireItemComponentAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@SuppressWarnings("UnstableApiUsage")
 public class ExpressionProcessor {
     protected static final Logger logger = LoggerFactory.getLogger(ExpressionProcessor.class);
     protected static final String EXCEPTION_MESSAGE_TEMPLATE =
@@ -72,20 +71,19 @@ public class ExpressionProcessor {
             CqfExpression expression,
             @Nullable IBaseParameters parameters,
             @Nullable Map<String, Object> rawParameters) {
-        if (expression == null || request == null) {
-            return List.of();
-        }
         parameters = parameters == null ? request.getParameters() : parameters;
         rawParameters = rawParameters == null ? request.getRawParameters() : rawParameters;
-        var result = request.getLibraryEngine()
-                .resolveExpression(
-                        request.getSubjectId().getIdPart(),
-                        expression,
-                        parameters,
-                        rawParameters,
-                        request.getData(),
-                        request.getContextVariable(),
-                        request.getResourceVariable());
+        var result = expression == null
+                ? null
+                : request.getLibraryEngine()
+                        .resolveExpression(
+                                request.getSubjectId().getIdPart(),
+                                expression,
+                                parameters,
+                                rawParameters,
+                                request.getData(),
+                                request.getContextVariable(),
+                                request.getResourceVariable());
         return result == null
                 ? new ArrayList<>()
                 : result.stream()

@@ -52,9 +52,6 @@ public interface IRequestActionAdapter extends IAdapter<IBase> {
 
     boolean hasCondition();
 
-    //    List<IBaseBackboneElement> getCondition();
-
-    // void addCondition(String kind, ICompositeType expression);
     void addCondition(IBaseBackboneElement condition);
 
     boolean hasRelatedAction();

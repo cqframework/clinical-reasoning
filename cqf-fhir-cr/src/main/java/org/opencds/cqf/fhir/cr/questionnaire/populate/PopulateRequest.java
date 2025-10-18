@@ -49,7 +49,6 @@ public class PopulateRequest implements IQuestionnaireRequest {
             IIdType subjectId,
             List<? extends IBaseBackboneElement> context,
             IBaseExtension<?, ?> launchContext,
-            // IBaseParameters parameters,
             IBaseBundle data,
             LibraryEngine libraryEngine,
             ModelResolver modelResolver) {
@@ -72,9 +71,7 @@ public class PopulateRequest implements IQuestionnaireRequest {
         if (launchContext != null) {
             launchContexts.add(launchContext);
         }
-        // if (parameters == null) {
         var parameters = (IBaseParameters) Resources.newBaseForVersion("Parameters", fhirVersion);
-        // }
         getAdapterFactory().createParameters(parameters).addParameter("%questionnaire", questionnaireAdapter.get());
         questionnaireResponseAdapter = createQuestionnaireResponse();
         contextVariable = questionnaireResponseAdapter.get();

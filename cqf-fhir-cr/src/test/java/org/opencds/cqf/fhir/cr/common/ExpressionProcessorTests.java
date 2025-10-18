@@ -9,7 +9,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.repository.IRepository;
 import org.hl7.fhir.r4.model.Questionnaire;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -20,6 +19,7 @@ import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.helpers.RequestHelpers;
 import org.opencds.cqf.fhir.utility.CqfExpression;
 
+@SuppressWarnings("UnstableApiUsage")
 @ExtendWith(MockitoExtension.class)
 class ExpressionProcessorTests {
     @Mock
@@ -32,14 +32,24 @@ class ExpressionProcessorTests {
     @InjectMocks
     private ExpressionProcessor fixture;
 
-    @BeforeEach
-    void setup() {
-        doReturn(repository).when(libraryEngine).getRepository();
-        doReturn(FhirContext.forR4Cached()).when(repository).fhirContext();
+    //    @BeforeEach
+    //    void setup() {
+    //        doReturn(repository).when(libraryEngine).getRepository();
+    //        doReturn(FhirContext.forR4Cached()).when(repository).fhirContext();
+    //    }
+
+    @Test
+    void getExpressionResultShouldReturnEmptyListForNullRequest() {
+        var expression = new CqfExpression().setLanguage("text/cql-expression");
+        var result = fixture.getExpressionResult(null, expression);
+        assertNotNull(result);
+        assertEquals(0, result.size());
     }
 
     @Test
     void getExpressionResultShouldReturnEmptyListForNullExpression() {
+        doReturn(repository).when(libraryEngine).getRepository();
+        doReturn(FhirContext.forR4Cached()).when(repository).fhirContext();
         var request =
                 RequestHelpers.newPopulateRequestForVersion(FhirVersionEnum.R4, libraryEngine, new Questionnaire());
         var result = fixture.getExpressionResult(request, null);
@@ -49,12 +59,19 @@ class ExpressionProcessorTests {
 
     @Test
     void getExpressionResultShouldReturnEmptyListForNullExpressionResult() {
-        var questionnaire = new Questionnaire();
-        var request = RequestHelpers.newPopulateRequestForVersion(FhirVersionEnum.R4, libraryEngine, questionnaire);
-        var expression = new CqfExpression();
+        doReturn(repository).when(libraryEngine).getRepository();
+        doReturn(FhirContext.forR4Cached()).when(repository).fhirContext();
+        var request =
+                RequestHelpers.newPopulateRequestForVersion(FhirVersionEnum.R4, libraryEngine, new Questionnaire());
+        var expression = new CqfExpression().setLanguage("text/cql-expression");
         doReturn(null).when(libraryEngine).resolveExpression(any(), any(), any(), any(), any(), any(), any());
         var result = fixture.getExpressionResult(request, expression);
         assertNotNull(result);
         assertEquals(0, result.size());
     }
+
+    //    @Test
+    //    void getExpressionResultHandlesFhirPath() {
+    //
+    //    }
 }

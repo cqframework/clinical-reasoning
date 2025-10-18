@@ -24,6 +24,22 @@
       "resource": "http://fhir.org/guides/cqf/common/Library/FHIRHelpers|4.0.1"
     }
   ],
+  "parameter":  [
+    {
+      "name": "ClaimId",
+      "use": "in",
+      "min": 0,
+      "max": "1",
+      "type": "String"
+    },
+    {
+      "name": "Claim",
+      "use": "in",
+      "min": 0,
+      "max": "1",
+      "type": "Claim"
+    }
+  ],
   "dataRequirement": [
     {
       "type": "ServiceRequest"

@@ -4,17 +4,8 @@ using FHIR version '4.0.1'
 
 include FHIRHelpers version '4.0.1' called FHIRHelpers
 
-// include FHIRCommon version '4.0.1' called FHIRCommon
-// include FHIRHelpers version '4.0.1' called FHIRHelpers
-// valueset "AAN MCI Encounters Outpt and Care Plan": 'https://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.11.1040'
-
-
-
-
 parameter ClaimId String default '14703'
-
-/* parameter EncounterId String */
-
+parameter Claim FHIR.Claim
 
 context Patient
 
@@ -22,9 +13,11 @@ define "Claim Is Applicable":
   true
 
 define ClaimResource:
-  First([Claim] C
-      where C.id = ClaimId
-  )
+  Coalesce(
+    First(
+    [FHIR.Claim] C
+      where C.id = ClaimId),
+    "Claim")
 
 define "ClaimResource.id":
     ClaimResource.id

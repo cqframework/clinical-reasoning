@@ -10,6 +10,7 @@ import org.hl7.fhir.dstu3.model.Measure;
 import org.hl7.fhir.dstu3.model.MetadataResource;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.PlanDefinition;
+import org.hl7.fhir.dstu3.model.PlanDefinition.PlanDefinitionActionComponent;
 import org.hl7.fhir.dstu3.model.Questionnaire;
 import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent;
@@ -36,6 +37,7 @@ import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IParametersParameterComponentAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IPlanDefinitionActionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IPlanDefinitionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireItemComponentAdapter;
@@ -71,6 +73,8 @@ public class AdapterFactory implements IAdapterFactory {
             return createQuestionnaireResponseItem(responseItem);
         } else if (element instanceof QuestionnaireResponseItemAnswerComponent answer) {
             return createQuestionnaireResponseItemAnswer(answer);
+        } else if (element instanceof PlanDefinitionActionComponent action) {
+            return createPlanDefinitionAction(action);
         } else if (element instanceof RequestGroupActionComponent requestAction) {
             return createRequestAction(requestAction);
         } else {
@@ -159,6 +163,11 @@ public class AdapterFactory implements IAdapterFactory {
     @Override
     public IPlanDefinitionAdapter createPlanDefinition(IBaseResource planDefinition) {
         return new PlanDefinitionAdapter((IDomainResource) planDefinition);
+    }
+
+    @Override
+    public IPlanDefinitionActionAdapter createPlanDefinitionAction(IBase action) {
+        return new PlanDefinitionActionAdapter(action);
     }
 
     @Override

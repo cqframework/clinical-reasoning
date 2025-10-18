@@ -270,7 +270,7 @@ public class ItemProcessor {
         if (StringUtils.isNotBlank(sliceName)) {
             path = path.split("\\.")[0];
         }
-        pathValue = request.getModelResolver().resolvePath(context, path);
+        pathValue = context == null ? null : request.getModelResolver().resolvePath(context, path);
         if (pathValue instanceof ArrayList<?> pathList) {
             if (elementId.contains(":")) {
                 pathValue = getSliceValue(request, profile, path, sliceName, pathList);

@@ -269,7 +269,8 @@ class ResourcePathResolver {
     }
 
     private boolean supportsCompartments(Path base) {
-        var normalized = base.toString().toLowerCase();
+        // Swapping backslashes to handle Windows paths
+        var normalized = base.toString().toLowerCase().replace('\\', '/');  
         return normalized.contains("tests/data/fhir") || normalized.contains("input/tests");
     }
 

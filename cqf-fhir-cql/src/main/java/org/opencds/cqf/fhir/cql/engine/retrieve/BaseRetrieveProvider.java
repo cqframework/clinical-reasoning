@@ -40,7 +40,7 @@ import org.opencds.cqf.cql.engine.terminology.ValueSetInfo;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.PROFILE_MODE;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.utility.CodeExtractor;
-import org.opencds.cqf.fhir.utility.fhirpath.FhirPathCache;
+import org.opencds.cqf.fhir.utility.FhirPathCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

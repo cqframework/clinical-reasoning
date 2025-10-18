@@ -38,7 +38,7 @@ import org.opencds.cqf.fhir.utility.adapter.IElementDefinitionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IItemComponentAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireResponseItemAnswerComponentAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IStructureDefinitionAdapter;
-import org.opencds.cqf.fhir.utility.fhirpath.FhirPathCache;
+import org.opencds.cqf.fhir.utility.FhirPathCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

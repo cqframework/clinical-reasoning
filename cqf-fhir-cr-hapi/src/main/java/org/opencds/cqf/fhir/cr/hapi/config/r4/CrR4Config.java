@@ -9,12 +9,10 @@ import java.util.Map;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cr.cpg.r4.R4CqlExecutionService;
 import org.opencds.cqf.fhir.cr.crmi.R4ApproveService;
-import org.opencds.cqf.fhir.cr.crmi.R4DeleteService;
 import org.opencds.cqf.fhir.cr.crmi.R4DraftService;
 import org.opencds.cqf.fhir.cr.crmi.R4PackageService;
 import org.opencds.cqf.fhir.cr.crmi.R4ReleaseService;
 import org.opencds.cqf.fhir.cr.ecr.r4.R4ERSDTransformService;
-import org.opencds.cqf.fhir.cr.hapi.IDeleteServiceFactory;
 import org.opencds.cqf.fhir.cr.hapi.common.StringTimePeriodHandler;
 import org.opencds.cqf.fhir.cr.hapi.config.CrBaseConfig;
 import org.opencds.cqf.fhir.cr.hapi.config.ProviderLoader;
@@ -35,7 +33,6 @@ import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureEvaluatorSingleFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureServiceUtilsFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.cpg.CqlExecutionOperationProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.crmi.ApproveProvider;
-import org.opencds.cqf.fhir.cr.hapi.r4.crmi.DeleteProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.crmi.DraftProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.crmi.PackageProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.crmi.ReleaseProvider;
@@ -61,7 +58,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 @Configuration
-@Import({RepositoryConfig.class, CrBaseConfig.class, ReleaseOperationConfig.class})
+@Import({RepositoryConfig.class, CrBaseConfig.class, ReleaseOperationConfig.class, DeleteOperationConfig.class})
 public class CrR4Config {
 
     @Bean
@@ -200,16 +197,6 @@ public class CrR4Config {
     }
 
     @Bean
-    IDeleteServiceFactory deleteServiceFactory(IRepositoryFactory repositoryFactory) {
-        return rd -> new R4DeleteService(repositoryFactory.create(rd));
-    }
-
-    @Bean
-    DeleteProvider r4DeleteProvider(IDeleteServiceFactory r4DeleteServiceFactory) {
-        return new DeleteProvider(r4DeleteServiceFactory);
-    }
-
-    @Bean
     SubmitDataProvider r4SubmitDataProvider(ISubmitDataProcessorFactory r4SubmitDataProcessorFactory) {
         return new SubmitDataProvider(r4SubmitDataProcessorFactory);
     }
@@ -242,8 +229,7 @@ public class CrR4Config {
                                 ApproveProvider.class,
                                 ERSDTransformProvider.class,
                                 PackageProvider.class,
-                                ReleaseProvider.class,
-                                DeleteProvider.class)));
+                                ReleaseProvider.class)));
 
         return new ProviderLoader(restfulServer, applicationContext, selector);
     }

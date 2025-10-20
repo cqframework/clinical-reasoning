@@ -19,7 +19,9 @@ import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.common.DataRequirementsProcessor;
+import org.opencds.cqf.fhir.cr.common.DeleteProcessor;
 import org.opencds.cqf.fhir.cr.common.IDataRequirementsProcessor;
+import org.opencds.cqf.fhir.cr.common.IDeleteProcessor;
 import org.opencds.cqf.fhir.cr.common.IPackageProcessor;
 import org.opencds.cqf.fhir.cr.common.IReleaseProcessor;
 import org.opencds.cqf.fhir.cr.common.PackageProcessor;
@@ -40,6 +42,7 @@ public class LibraryProcessor {
     protected IReleaseProcessor releaseProcessor;
     protected IDataRequirementsProcessor dataRequirementsProcessor;
     protected IEvaluateProcessor evaluateProcessor;
+    protected IDeleteProcessor deleteProcessor;
     protected IRepository repository;
     protected EvaluationSettings evaluationSettings;
     protected TerminologyServerClientSettings terminologyServerClientSettings;
@@ -218,5 +221,11 @@ public class LibraryProcessor {
                 : new EvaluateProcessor(this.repository, this.evaluationSettings);
         return processor.evaluate(
                 buildEvaluateRequest(library, subject, expression, parameters, data, prefetchData, libraryEngine));
+    }
+
+    public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseBundle deleteLibrary(
+            Either3<C, IIdType, R> library, IBaseParameters parameters) {
+        var processor = deleteProcessor != null ? deleteProcessor : new DeleteProcessor(repository);
+        return processor.deleteResource(resolveLibrary(library), parameters);
     }
 }

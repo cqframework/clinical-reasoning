@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
+import java.io.InputStream;
 import org.hl7.elm.r1.VersionedIdentifier;
 
 public class LibraryDef implements IDef {
@@ -17,5 +18,9 @@ public class LibraryDef implements IDef {
 
     public LibraryContentDef getContent() {
         return content;
+    }
+
+    public InputStream getContentAsStream() {
+        return content.getContentAsStream();
     }
 }

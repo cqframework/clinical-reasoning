@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
+import java.io.InputStream;
 import java.nio.file.Path;
 import org.opencds.cqf.fhir.utility.monad.Either;
 
@@ -14,5 +15,10 @@ public class LibraryContentDef implements IDef {
 
     public LibraryContentDef(Either<Path, byte[]> contentEither) {
         this.contentEither = contentEither;
+    }
+
+    // LUKETODO:  implement
+    public InputStream getContentAsStream() {
+        return null;
     }
 }

@@ -3,8 +3,11 @@ package org.opencds.cqf.fhir.cr.measure.common;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.StringJoiner;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.elm.r1.VersionedIdentifier;
 
 // LUKETODO:  or, do we really care about anything that deals with MeasureReports?  Maybe we just draw a box around
 // anything that deals directly with the CQL engine or non-measure report code?
@@ -68,6 +71,17 @@ public class MeasureDef implements IDef {
 
     public List<String> errors() {
         return this.errors;
+    }
+
+    // LUKETODO:  think about this
+    // LUKETODO:  any validation?  where would the validation happen?  against a Repository?
+    public Optional<VersionedIdentifier> validateAndReturnFirstLibraryVersionedIdentifier() {
+        if (CollectionUtils.isEmpty(this.libraryDefs)) {
+            // Let the calling code han
+            return Optional.empty();
+        }
+
+        return Optional.ofNullable(this.libraryDefs.get(0)).map(LibraryDef::getLibraryId);
     }
 
     public List<LibraryDef> libraryDefs() {

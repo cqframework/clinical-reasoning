@@ -51,6 +51,14 @@ public class Engines {
     // LUKETODO: The only thing we could potentially do is have a wrapper around the Repository that
     // adapts a given Resource to a version-agnostic one for CQL
     // LUKETODO: how do we handle ValueSets/Terminology/etc?
+    // LUKETODO: ideas:
+    /*
+    1. A read-only interface on top of IRepository, to only read and search for resources (check with Brenin)
+    2. A new interface that will retrieve given FHIR resources
+    3. A new interface that will retrieve the specific Def classes, such as MeasureDef/LibraryDef/etc
+    with the implementation handling the nitty gritty details of conversion between FHIR resources
+    and defs
+     */
 
     private static Logger logger = LoggerFactory.getLogger(Engines.class);
 

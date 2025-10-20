@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("squid:S107")
-public class GroupDef {
+public class GroupDef implements IDef {
 
     private final String id;
     private final ConceptDef code;

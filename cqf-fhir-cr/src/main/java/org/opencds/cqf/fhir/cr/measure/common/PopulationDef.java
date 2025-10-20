@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-public class PopulationDef {
+public class PopulationDef implements IDef {
 
     private final String id;
     private final String expression;

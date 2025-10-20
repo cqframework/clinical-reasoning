@@ -395,7 +395,7 @@ public class R4MeasureProcessor {
 
         if (!measure.hasLibrary() || measure.getLibrary().isEmpty()) {
             throw new InvalidRequestException(
-                "Measure %s does not have a primary library specified".formatted(measure.getUrl()));
+                    "Measure %s does not have a primary library specified".formatted(measure.getUrl()));
         }
 
         var url = measure.getLibrary().get(0).asStringValue();

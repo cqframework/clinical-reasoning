@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 
-public class StratifierDef {
+public class StratifierDef implements IDef {
 
     private final String id;
     private final ConceptDef code;

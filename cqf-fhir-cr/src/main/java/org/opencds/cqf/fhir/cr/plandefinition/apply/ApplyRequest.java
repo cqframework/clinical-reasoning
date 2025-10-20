@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -29,6 +30,7 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.common.ICpgRequest;
@@ -38,6 +40,7 @@ import org.opencds.cqf.fhir.cr.questionnaire.populate.PopulateRequest;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.IPlanDefinitionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireItemComponentAdapter;
 
 public class ApplyRequest implements ICpgRequest {
     private static final String ACTIVITY_DEFINITION = "ActivityDefinition";
@@ -63,6 +66,7 @@ public class ApplyRequest implements ICpgRequest {
     private IBaseOperationOutcome operationOutcome;
     private IQuestionnaireAdapter questionnaireAdapter;
     private Boolean containResources;
+    private Set<String> questionnaireDefinitions;
 
     public ApplyRequest(
             IBaseResource planDefinition,
@@ -311,9 +315,24 @@ public class ApplyRequest implements ICpgRequest {
         return questionnaireAdapter;
     }
 
+    @Override
+    public void addQuestionnaireItem(IQuestionnaireItemComponentAdapter item) {
+        if (questionnaireAdapter != null) {
+            questionnaireAdapter.addItem(item);
+            if (item.hasDefinition()) {
+                questionnaireDefinitions.add(item.getDefinition());
+            }
+        }
+    }
+
+    public boolean questionnaireItemExistsForProfile(IPrimitiveType<String> profile) {
+        return questionnaireDefinitions.contains(profile.getValueAsString());
+    }
+
     public ApplyRequest setQuestionnaire(IBaseResource questionnaire) {
         questionnaireAdapter =
                 questionnaire == null ? null : getAdapterFactory().createQuestionnaire(questionnaire);
+        questionnaireDefinitions = questionnaireAdapter == null ? null : questionnaireAdapter.getAllItemDefinitions();
         return this;
     }
 

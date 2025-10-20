@@ -24,6 +24,7 @@ import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import jakarta.annotation.Nullable;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +41,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.MetadataResource;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
@@ -65,7 +67,6 @@ import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
 import org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.r4.LibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.r4.ValueSetAdapter;
-import org.opencds.cqf.fhir.utility.client.ExpandRunner.TerminologyServerExpansionException;
 import org.opencds.cqf.fhir.utility.client.TerminologyServerClient;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
@@ -148,20 +149,22 @@ class PackageVisitorTests {
         terminologyEndpoint.setAddress("test.com");
         Parameters params = parameters(part("terminologyEndpoint", terminologyEndpoint));
 
-        var exception = assertThrows(UnprocessableEntityException.class, () -> {
-            libraryAdapter.accept(packageVisitor, params);
-        });
+        libraryAdapter.accept(packageVisitor, params);
 
-        assertTrue(exception.getMessage().contains(expectedError));
+        assertTrue(libraryAdapter.hasExtension(ILibraryAdapter.CQF_MESSAGES_EXT_URL));
+        assertTrue(libraryAdapter.hasContained());
+        assertTrue(libraryAdapter.getContained().stream().allMatch(c -> c instanceof OperationOutcome));
+        var oo = (OperationOutcome) libraryAdapter.getContained().get(0);
+        assertEquals(oo.getIssueFirstRep().getDiagnostics(), expectedError);
     }
 
     @Test
     void packageOperation_expansion_should_fail() {
         String username = "someUsername";
         String apiKey = "some-api-key";
-        String expectedError = " Server could not process expansion requests";
+        String expectedError = "Cannot expand ValueSet without a terminology server: ValueSet/dxtc";
         Bundle loadedBundle = (Bundle) jsonParser.parseResource(
-                PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
+                PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active-intensional-vs.json"));
         repo.transaction(loadedBundle);
         PackageVisitor packageVisitor = new PackageVisitor(repo);
         Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
@@ -173,11 +176,9 @@ class PackageVisitorTests {
         terminologyEndpoint.setAddress("test.com");
         Parameters params = parameters(part("terminologyEndpoint", terminologyEndpoint));
 
-        var exception = assertThrows(TerminologyServerExpansionException.class, () -> {
-            libraryAdapter.accept(packageVisitor, params);
-        });
+        libraryAdapter.accept(packageVisitor, params);
 
-        assertTrue(exception.getMessage().contains(expectedError));
+        assertTrue(libraryAdapter.hasExtension(ILibraryAdapter.CQF_MESSAGES_EXT_URL));
     }
 
     @Test
@@ -402,6 +403,16 @@ class PackageVisitorTests {
         includeOptions.put("profiles", Arrays.asList());
         includeOptions.put("tests", Arrays.asList());
         includeOptions.put("examples", Arrays.asList());
+        // FHIR Types
+        includeOptions.put(
+                "PlanDefinition",
+                Arrays.asList("http://ersd.aimsplatform.org/fhir/PlanDefinition/us-ecr-specification"));
+        includeOptions.put(
+                "ValueSet",
+                Arrays.asList(
+                        "http://ersd.aimsplatform.org/fhir/ValueSet/dxtc",
+                        "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.6",
+                        "http://cts.nlm.nih.gov/fhir/ValueSet/123-this-will-be-routine"));
         for (Entry<String, List<String>> includedTypeURLs : includeOptions.entrySet()) {
             Parameters params = parameters(part("include", includedTypeURLs.getKey()));
             Bundle packaged = (Bundle) libraryAdapter.accept(packageVisitor, params);
@@ -419,6 +430,32 @@ class PackageVisitorTests {
                 assertTrue(expectedResourceReturned);
             }
         }
+    }
+
+    @Test
+    void packageOperation_include_get_resources_by_fhir_type_only() {
+        Bundle bundle = (Bundle) jsonParser.parseResource(
+                PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
+        repo.transaction(bundle);
+        PackageVisitor packageVisitor = new PackageVisitor(repo);
+        Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
+                .copy();
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+
+        List<String> expectedUrls = Arrays.asList(
+                "http://ersd.aimsplatform.org/fhir/ValueSet/dxtc",
+                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.6",
+                "http://cts.nlm.nih.gov/fhir/ValueSet/123-this-will-be-routine",
+                "http://ersd.aimsplatform.org/fhir/PlanDefinition/us-ecr-specification");
+
+        Parameters params = parameters(part("include", "PlanDefinition"), part("include", "ValueSet"));
+        Bundle packaged = (Bundle) libraryAdapter.accept(packageVisitor, params);
+        List<String> actualUrls = packaged.getEntry().stream()
+                .map(entry -> ((MetadataResource) entry.getResource()).getUrl())
+                .sorted()
+                .toList();
+        Collections.sort(expectedUrls);
+        assertEquals(actualUrls, expectedUrls);
     }
 
     @Test

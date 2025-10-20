@@ -12,10 +12,12 @@ import java.util.stream.Stream;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.r5.model.BooleanType;
+import org.hl7.fhir.r5.model.IntegerType;
 import org.hl7.fhir.r5.model.PrimitiveType;
 import org.hl7.fhir.r5.model.ValueSet;
 import org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.r5.model.ValueSet.ValueSetExpansionComponent;
+import org.hl7.fhir.r5.model.ValueSet.ValueSetExpansionContainsComponent;
 import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
@@ -105,10 +107,33 @@ public class ValueSetAdapter extends KnowledgeArtifactAdapter implements IValueS
     }
 
     @Override
+    public int getExpansionTotal() {
+        return getExpansion().getTotal();
+    }
+
+    @Override
     public List<IValueSetExpansionContainsAdapter> getExpansionContains() {
         return getExpansion().getContains().stream()
                 .map(ValueSetExpansionContainsAdapter::new)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public void appendExpansionContains(List<IValueSetExpansionContainsAdapter> expansionContains) {
+        getExpansion()
+                .getContains()
+                .addAll((expansionContains.stream()
+                        .map(e -> (ValueSetExpansionContainsComponent) e.get())
+                        .toList()));
+
+        var countParam = (getExpansion().getParameter().stream()
+                .filter(param -> param.getName().equals("count"))
+                .findFirst());
+        if (countParam.isPresent()) {
+            var count = ((IntegerType) countParam.get().getValue()).getValue();
+            count += expansionContains.size();
+            countParam.get().setValue(new IntegerType(count));
+        }
     }
 
     @SuppressWarnings("unchecked")

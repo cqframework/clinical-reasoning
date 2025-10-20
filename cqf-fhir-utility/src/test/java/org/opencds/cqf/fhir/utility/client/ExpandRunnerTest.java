@@ -15,7 +15,7 @@ class ExpandRunnerTest {
     void testTimeout() {
         var url = "test";
         var params = new Parameters();
-        var settings = new TerminologyServerClientSettings().setTimeoutSeconds(2);
+        var settings = TerminologyServerClientSettings.getDefault().setTimeoutSeconds(2);
         var fhirClient = mock(IGenericClient.class, new ReturnsDeepStubs());
         var fixture = new ExpandRunner(fhirClient, settings, url, params);
         assertThrows(

@@ -168,6 +168,6 @@ public class TestCrR4Config {
 
     @Bean
     public TerminologyServerClientSettings terminologyServerClientSettings() {
-        return new TerminologyServerClientSettings();
+        return TerminologyServerClientSettings.getDefault();
     }
 }

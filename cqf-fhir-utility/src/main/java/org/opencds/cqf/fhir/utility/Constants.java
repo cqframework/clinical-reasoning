@@ -109,6 +109,7 @@ public class Constants {
     public static final String CQF_DIRECT_REFERENCE_EXTENSION =
             "http://hl7.org/fhir/StructureDefinition/cqf-directReferenceCode";
     public static final String CQF_MESSAGES = "http://hl7.org/fhir/StructureDefinition/cqf-messages";
+    public static final String CQF_LOGIC_DEFINITION = "http://hl7.org/fhir/StructureDefinition/cqf-logicDefinition";
 
     public static final String CQFM_EFFECTIVE_DATA_REQUIREMENTS =
             "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-effectiveDataRequirements";
@@ -162,6 +163,8 @@ public class Constants {
     public static final String SDC_CATEGORY_SURVEY = "survey";
     public static final String SDC_QUESTIONNAIRE_LAUNCH_CONTEXT =
             "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-launchContext";
+    public static final String SDC_QUESTIONNAIRE_ADAPTIVE =
+            "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-questionnaireAdaptive";
 
     public enum SDC_QUESTIONNAIRE_LAUNCH_CONTEXT_CODE {
         PATIENT,

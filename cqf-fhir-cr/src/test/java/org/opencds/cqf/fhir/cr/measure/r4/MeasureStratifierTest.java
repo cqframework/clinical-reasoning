@@ -4,8 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportStatus;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
@@ -212,37 +214,42 @@ class MeasureStratifierTest {
      */
     @Test
     void cohortBooleanValueStratComponentStrat() {
-        GIVEN_MEASURE_STRATIFIER_TEST
-                .when()
-                .measureId("CohortBooleanStratComponent")
-                .evaluate()
-                .then()
-                .hasStatus(MeasureReportStatus.COMPLETE)
-                .group("group-1")
-                .stratifierById("stratifier-1")
-                // This is a value stratifier, which does not pull in the measure populations and
-                // does not use the CQL expression for the code text
-                .hasCodeText("Gender and Age")
-                .hasStratumCount(2)
-                .stratumByComponentCodeText("Age")
-                .up()
-                .stratumByComponentValueText("38")
-                .hasComponentStratifierCount(2)
-                .firstPopulation()
-                .hasCount(5)
-                .up()
-                .up()
-                .stratumByComponentCodeText("Age")
-                .up()
-                .stratumByComponentValueText("35")
-                .hasComponentStratifierCount(2)
-                .firstPopulation()
-                .hasCount(5)
-                .up()
-                .up()
-                .up()
-                .up()
-                .report();
+        final MeasureReport report = GIVEN_MEASURE_STRATIFIER_TEST
+            .when()
+            .measureId("CohortBooleanStratComponent")
+            .evaluate()
+            .then()
+            .hasStatus(MeasureReportStatus.COMPLETE)
+            .group("group-1")
+            .stratifierById("stratifier-1")
+            // This is a value stratifier, which does not pull in the measure populations and
+            // does not use the CQL expression for the code text
+            .hasCodeText("Gender and Age")
+            .hasStratumCount(2)
+            .stratumByComponentCodeText("Age")
+            .up()
+            .stratumByComponentValueText("38")
+            .hasComponentStratifierCount(2)
+            .firstPopulation()
+            .hasCount(5)
+            .up()
+            .up()
+            .stratumByComponentCodeText("Age")
+            .up()
+            .stratumByComponentValueText("35")
+            .hasComponentStratifierCount(2)
+            .firstPopulation()
+            .hasCount(5)
+            .up()
+            .up()
+            .up()
+            .up()
+            .report();
+
+        final String json = FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true)
+            .encodeResourceToString(report);
+
+        System.out.println("json = " + json);
     }
 
     /**
@@ -502,23 +509,33 @@ class MeasureStratifierTest {
      */
     @Test
     void cohortResourceCriteriaStratAllPatientsTwoEncounters() {
-        GIVEN_CRITERIA_BASED_STRAT_SIMPLE
-                .when()
-                .measureId("CriteriaBasedStratifiersSimple")
-                .evaluate()
-                .then()
-                .firstGroup()
-                .population("initial-population")
-                .hasCount(9)
-                .up()
-                .hasStratifierCount(1)
-                .firstStratifier()
-                .hasCodeText("in-progress encounters")
-                .hasStratumCount(1)
-                .firstStratum()
-                .hasPopulationCount(1)
-                .firstPopulation()
-                .hasCount(3);
+        final MeasureReport report = GIVEN_CRITERIA_BASED_STRAT_SIMPLE
+            .when()
+            .measureId("CriteriaBasedStratifiersSimple")
+            .evaluate()
+            .then()
+            .firstGroup()
+            .population("initial-population")
+            .hasCount(9)
+            .up()
+            .hasStratifierCount(1)
+            .firstStratifier()
+            .hasCodeText("in-progress encounters")
+            .hasStratumCount(1)
+            .firstStratum()
+            .hasPopulationCount(1)
+            .firstPopulation()
+            .hasCount(3)
+            .up()
+            .up()
+            .up()
+            .up()
+            .report();
+
+        final String json = FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true)
+            .encodeResourceToString(report);
+
+        System.out.println("json = " + json);
     }
 
     @Test

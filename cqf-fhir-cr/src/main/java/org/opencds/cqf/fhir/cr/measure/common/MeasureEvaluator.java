@@ -333,6 +333,8 @@ public class MeasureEvaluator {
 
         evaluateStratifiers(subjectId, groupDef.stratifiers(), evaluationResult);
 
+        // LUKETODO:  do we want to validate criteria stratifiers versus scoring?  for example, a ratio scoring seems incompatible with criteria stratifiers
+
         var scoring = groupDef.measureScoring();
         switch (scoring) {
             case PROPORTION, RATIO:

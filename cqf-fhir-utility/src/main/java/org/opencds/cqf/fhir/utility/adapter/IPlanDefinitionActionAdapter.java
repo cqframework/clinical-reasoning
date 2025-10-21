@@ -45,7 +45,7 @@ public interface IPlanDefinitionActionAdapter extends IAdapter<IBase> {
 
     boolean hasCondition();
 
-    List<IBaseBackboneElement> getCondition();
+    <T extends IBaseBackboneElement> List<T> getCondition();
 
     boolean hasInput();
 
@@ -53,7 +53,7 @@ public interface IPlanDefinitionActionAdapter extends IAdapter<IBase> {
 
     boolean hasRelatedAction();
 
-    List<IBaseBackboneElement> getRelatedAction();
+    <T extends IBaseBackboneElement> List<T> getRelatedAction();
 
     boolean hasTiming();
 

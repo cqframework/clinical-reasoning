@@ -4,12 +4,13 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.PlanDefinition.PlanDefinitionActionComponent;
+import org.hl7.fhir.r4.model.PlanDefinition.PlanDefinitionActionConditionComponent;
+import org.hl7.fhir.r4.model.PlanDefinition.PlanDefinitionActionRelatedActionComponent;
 import org.hl7.fhir.r4.model.RequestGroup.RequestGroupActionComponent;
 import org.opencds.cqf.fhir.utility.adapter.BaseAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ICodeableConceptAdapter;
@@ -135,11 +136,10 @@ public class PlanDefinitionActionAdapter extends BaseAdapter implements IPlanDef
         return get().hasCondition();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public List<IBaseBackboneElement> getCondition() {
-        return get().getCondition().stream()
-                .map(IBaseBackboneElement.class::cast)
-                .toList();
+    public List<PlanDefinitionActionConditionComponent> getCondition() {
+        return get().getCondition();
     }
 
     @Override
@@ -159,11 +159,10 @@ public class PlanDefinitionActionAdapter extends BaseAdapter implements IPlanDef
         return get().hasRelatedAction();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public List<IBaseBackboneElement> getRelatedAction() {
-        return get().getRelatedAction().stream()
-                .map(IBaseBackboneElement.class::cast)
-                .toList();
+    public List<PlanDefinitionActionRelatedActionComponent> getRelatedAction() {
+        return get().getRelatedAction();
     }
 
     @Override

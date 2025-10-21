@@ -157,6 +157,12 @@ public class RequestActionAdapter extends BaseAdapter implements IRequestActionA
         return get().hasCondition();
     }
 
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<RequestGroupActionConditionComponent> getCondition() {
+        return get().getCondition();
+    }
+
     @Override
     public void addCondition(IBaseBackboneElement element) {
         if (element instanceof PlanDefinitionActionConditionComponent condition) {
@@ -169,6 +175,12 @@ public class RequestActionAdapter extends BaseAdapter implements IRequestActionA
     @Override
     public boolean hasRelatedAction() {
         return get().hasRelatedAction();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<RequestGroupActionRelatedActionComponent> getRelatedAction() {
+        return get().getRelatedAction();
     }
 
     @Override

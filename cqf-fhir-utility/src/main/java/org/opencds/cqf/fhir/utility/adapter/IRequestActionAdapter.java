@@ -52,9 +52,13 @@ public interface IRequestActionAdapter extends IAdapter<IBase> {
 
     boolean hasCondition();
 
+    <T extends IBaseBackboneElement> List<T> getCondition();
+
     void addCondition(IBaseBackboneElement condition);
 
     boolean hasRelatedAction();
+
+    <T extends IBaseBackboneElement> List<T> getRelatedAction();
 
     void addRelatedAction(IBaseBackboneElement relatedAction);
 

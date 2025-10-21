@@ -26,10 +26,12 @@ import org.opencds.cqf.fhir.cr.common.IOperationProcessor;
 import org.opencds.cqf.fhir.cr.common.IPackageProcessor;
 import org.opencds.cqf.fhir.cr.common.IReleaseProcessor;
 import org.opencds.cqf.fhir.cr.common.IRetireProcessor;
+import org.opencds.cqf.fhir.cr.common.IWithdrawProcessor;
 import org.opencds.cqf.fhir.cr.common.PackageProcessor;
 import org.opencds.cqf.fhir.cr.common.ReleaseProcessor;
 import org.opencds.cqf.fhir.cr.common.ResourceResolver;
 import org.opencds.cqf.fhir.cr.common.RetireProcessor;
+import org.opencds.cqf.fhir.cr.common.WithdrawProcessor;
 import org.opencds.cqf.fhir.cr.library.evaluate.EvaluateProcessor;
 import org.opencds.cqf.fhir.cr.library.evaluate.EvaluateRequest;
 import org.opencds.cqf.fhir.cr.library.evaluate.IEvaluateProcessor;
@@ -47,6 +49,7 @@ public class LibraryProcessor {
     protected IEvaluateProcessor evaluateProcessor;
     protected IDeleteProcessor deleteProcessor;
     protected IRetireProcessor retireProcessor;
+    protected IWithdrawProcessor withdrawProcessor;
     protected IRepository repository;
     protected CrSettings crSettings;
 
@@ -80,6 +83,9 @@ public class LibraryProcessor {
                 }
                 if (p instanceof IRetireProcessor retire) {
                     retireProcessor = retire;
+                }
+                if (p instanceof IWithdrawProcessor withdraw) {
+                    withdrawProcessor = withdraw;
                 }
             });
         }
@@ -238,5 +244,11 @@ public class LibraryProcessor {
             Either3<C, IIdType, R> library, IBaseParameters parameters) {
         var processor = retireProcessor != null ? retireProcessor : new RetireProcessor(repository);
         return processor.retireResource(resolveLibrary(library), parameters);
+    }
+
+    public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseBundle withdrawLibrary(
+            Either3<C, IIdType, R> library, IBaseParameters parameters) {
+        var processor = withdrawProcessor != null ? withdrawProcessor : new WithdrawProcessor(repository);
+        return processor.withdrawResource(resolveLibrary(library), parameters);
     }
 }

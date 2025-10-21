@@ -55,7 +55,7 @@ public class LibraryProcessor {
             IRepository repository,
             EvaluationSettings evaluationSettings,
             TerminologyServerClientSettings terminologyServerClientSettings) {
-        this(repository, evaluationSettings, terminologyServerClientSettings, null, null, null, null);
+        this(repository, evaluationSettings, terminologyServerClientSettings, null, null, null, null, null);
     }
 
     public LibraryProcessor(
@@ -65,7 +65,8 @@ public class LibraryProcessor {
             IPackageProcessor packageProcessor,
             IReleaseProcessor releaseProcessor,
             IDataRequirementsProcessor dataRequirementsProcessor,
-            IEvaluateProcessor evaluateProcessor) {
+            IEvaluateProcessor evaluateProcessor,
+            IDeleteProcessor deleteProcessor) {
         this.repository = requireNonNull(repository, "repository can not be null");
         this.evaluationSettings = requireNonNull(evaluationSettings, "evaluationSettings can not be null");
         this.terminologyServerClientSettings =
@@ -76,6 +77,7 @@ public class LibraryProcessor {
         this.releaseProcessor = releaseProcessor;
         this.dataRequirementsProcessor = dataRequirementsProcessor;
         this.evaluateProcessor = evaluateProcessor;
+        this.deleteProcessor = deleteProcessor;
     }
 
     public EvaluationSettings evaluationSettings() {

@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.common.IInputParameterResolver;
 import org.opencds.cqf.fhir.cr.helpers.RequestHelpers;
@@ -18,6 +17,7 @@ import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.Constants.CPG_ACTIVITY_TYPE_CODE;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IPlanDefinitionActionAdapter;
+import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 
 @SuppressWarnings("UnstableApiUsage")
 @ExtendWith(MockitoExtension.class)
@@ -28,9 +28,6 @@ class ActionResolverTests {
 
     @Mock
     private LibraryEngine libraryEngine;
-
-    @Mock
-    private ModelResolver modelResolver;
 
     @Mock
     private IInputParameterResolver inputParameterResolver;
@@ -49,7 +46,11 @@ class ActionResolverTests {
         var requestGroup = new org.hl7.fhir.r4.model.RequestGroup();
         requestGroup.setId("RequestGroup/TestQuestionnaireTask");
         var request = RequestHelpers.newPDApplyRequestForVersion(
-                        fhirVersion, libraryEngine, modelResolver, null, inputParameterResolver)
+                        fhirVersion,
+                        libraryEngine,
+                        FhirModelResolverCache.resolverForVersion(fhirVersion),
+                        null,
+                        inputParameterResolver)
                 .setQuestionnaire(questionnaire);
         var action = (IPlanDefinitionActionAdapter) IAdapterFactory.createAdapterForBase(
                 fhirVersion,

@@ -13,6 +13,7 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Endpoint.EndpointStatus;
+import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Parameters;
@@ -154,5 +155,25 @@ class LibraryOperationsProviderIT extends BaseCrR4TestServer {
                     .withId("SpecificationLibrary")
                     .execute();
         });
+    }
+
+    @Test
+    void testRetireLibrary() {
+        loadBundle("ersd-active-transaction-bundle-example.json");
+
+        ourClient
+                .operation()
+                .onInstance("Library/SpecificationLibrary")
+                .named("$retire")
+                .withNoParameters(Parameters.class)
+                .returnResourceType(Bundle.class)
+                .execute();
+
+        Library retiredLibrary = ourClient
+                .read()
+                .resource(Library.class)
+                .withId("SpecificationLibrary")
+                .execute();
+        Assertions.assertEquals(retiredLibrary.getStatus().name(), Enumerations.PublicationStatus.RETIRED.name());
     }
 }

@@ -548,7 +548,8 @@ class PackageVisitorTests {
                 PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
         repo.transaction(bundle);
         PackageVisitor packageVisitor = new PackageVisitor(repo);
-        Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary")).copy();
+        Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
+                .copy();
         ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
 
         Parameters params = parameters(part("include", "terminology"));
@@ -562,7 +563,10 @@ class PackageVisitorTests {
         // Everything after the manifest should be terminology-only
         for (int i = 1; i < packaged.getEntry().size(); i++) {
             String t = packaged.getEntry().get(i).getResource().fhirType();
-            boolean isTerminology = "ValueSet".equals(t) || "CodeSystem".equals(t) || "ConceptMap".equals(t) || "NamingSystem".equals(t);
+            boolean isTerminology = "ValueSet".equals(t)
+                    || "CodeSystem".equals(t)
+                    || "ConceptMap".equals(t)
+                    || "NamingSystem".equals(t);
             assertTrue(isTerminology, "Non-terminology entry returned with include=terminology: " + t);
         }
     }
@@ -573,7 +577,8 @@ class PackageVisitorTests {
                 PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
         repo.transaction(bundle);
         PackageVisitor packageVisitor = new PackageVisitor(repo);
-        Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary")).copy();
+        Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
+                .copy();
         ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
 
         Parameters params = parameters(part("include", "ValueSet"));
@@ -597,7 +602,8 @@ class PackageVisitorTests {
                 PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
         repo.transaction(bundle);
         PackageVisitor packageVisitor = new PackageVisitor(repo);
-        Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary")).copy();
+        Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
+                .copy();
         ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
 
         Parameters params = parameters(part("include", "not-a-real-category"));

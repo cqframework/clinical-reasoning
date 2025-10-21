@@ -380,7 +380,11 @@ public class ProcessDefinitionItem {
                     resourceDefinition,
                     profile,
                     element,
-                    new ImmutablePair<>(children, itemPair.getItem().getItem()),
+                    new ImmutablePair<>(
+                            children,
+                            itemPair.getItem() == null
+                                    ? null
+                                    : itemPair.getItem().getItem()),
                     repeats,
                     path);
             request.getModelResolver().setValue(parent, prop, List.of(element));

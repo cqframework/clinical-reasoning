@@ -97,6 +97,16 @@ class RequestActionAdapterTest {
     }
 
     @Test
+    void testCode() {
+        var code = new CodeableConcept()
+                .addCoding(new Coding().setSystem("test.com").setCode("test"));
+        var action = new RequestOrchestrationActionComponent().addCode(code);
+        var adapter = new RequestActionAdapter(action);
+        assertTrue(adapter.hasCode());
+        assertEquals(code, adapter.getCode().get());
+    }
+
+    @Test
     void testDocumentation() {
         var documentation = new RelatedArtifact().setDisplay("test");
         var action = new RequestOrchestrationActionComponent().addDocumentation(documentation);

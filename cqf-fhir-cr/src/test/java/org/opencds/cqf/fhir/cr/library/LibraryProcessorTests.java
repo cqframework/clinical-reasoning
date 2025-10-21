@@ -21,6 +21,7 @@ import org.opencds.cqf.fhir.cr.common.DataRequirementsProcessor;
 import org.opencds.cqf.fhir.cr.common.DeleteProcessor;
 import org.opencds.cqf.fhir.cr.common.PackageProcessor;
 import org.opencds.cqf.fhir.cr.common.ReleaseProcessor;
+import org.opencds.cqf.fhir.cr.common.RetireProcessor;
 import org.opencds.cqf.fhir.cr.helpers.RequestHelpers;
 import org.opencds.cqf.fhir.cr.library.evaluate.EvaluateProcessor;
 import org.opencds.cqf.fhir.utility.Ids;
@@ -64,6 +65,7 @@ class LibraryProcessorTests {
         var dataRequirementsProcessor = new DataRequirementsProcessor(repository);
         var evaluateProcessor = new EvaluateProcessor(repository, EvaluationSettings.getDefault());
         var deleteProcessor = new DeleteProcessor(repository);
+        var retireProcessor = new RetireProcessor(repository);
         var processor = new LibraryProcessor(
                 repository,
                 EvaluationSettings.getDefault(),
@@ -72,7 +74,8 @@ class LibraryProcessorTests {
                 releaseProcessor,
                 dataRequirementsProcessor,
                 evaluateProcessor,
-                deleteProcessor);
+                deleteProcessor,
+                retireProcessor);
         assertNotNull(processor.evaluationSettings());
         var result = processor.resolveLibrary(Eithers.forMiddle3(
                 Ids.newId(repository.fhirContext(), "Library", "OutpatientPriorAuthorizationPrepopulation")));

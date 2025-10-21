@@ -542,6 +542,72 @@ class PackageVisitorTests {
         assertTrue(containsVset);
     }
 
+    @Test
+    void packageOperation_manifest_is_first_with_include_terminology() {
+        Bundle bundle = (Bundle) jsonParser.parseResource(
+                PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
+        repo.transaction(bundle);
+        PackageVisitor packageVisitor = new PackageVisitor(repo);
+        Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary")).copy();
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+
+        Parameters params = parameters(part("include", "terminology"));
+        Bundle packaged = (Bundle) libraryAdapter.accept(packageVisitor, params);
+
+        assertNotNull(packaged);
+        assertTrue(packaged.hasEntry());
+        // First entry must be the outcome manifest Library
+        assertEquals("Library", packaged.getEntryFirstRep().getResource().fhirType());
+
+        // Everything after the manifest should be terminology-only
+        for (int i = 1; i < packaged.getEntry().size(); i++) {
+            String t = packaged.getEntry().get(i).getResource().fhirType();
+            boolean isTerminology = "ValueSet".equals(t) || "CodeSystem".equals(t) || "ConceptMap".equals(t) || "NamingSystem".equals(t);
+            assertTrue(isTerminology, "Non-terminology entry returned with include=terminology: " + t);
+        }
+    }
+
+    @Test
+    void packageOperation_manifest_is_first_with_include_valueset() {
+        Bundle bundle = (Bundle) jsonParser.parseResource(
+                PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
+        repo.transaction(bundle);
+        PackageVisitor packageVisitor = new PackageVisitor(repo);
+        Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary")).copy();
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+
+        Parameters params = parameters(part("include", "ValueSet"));
+        Bundle packaged = (Bundle) libraryAdapter.accept(packageVisitor, params);
+
+        assertNotNull(packaged);
+        assertTrue(packaged.hasEntry());
+        // Manifest always first
+        assertEquals("Library", packaged.getEntryFirstRep().getResource().fhirType());
+
+        // Remaining entries should be ValueSets only
+        for (int i = 1; i < packaged.getEntry().size(); i++) {
+            String t = packaged.getEntry().get(i).getResource().fhirType();
+            assertEquals("ValueSet", t, "Non-ValueSet entry returned with include=ValueSet: " + t);
+        }
+    }
+
+    @Test
+    void packageOperation_unknown_include_returns_only_manifest() {
+        Bundle bundle = (Bundle) jsonParser.parseResource(
+                PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
+        repo.transaction(bundle);
+        PackageVisitor packageVisitor = new PackageVisitor(repo);
+        Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary")).copy();
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+
+        Parameters params = parameters(part("include", "not-a-real-category"));
+        Bundle packaged = (Bundle) libraryAdapter.accept(packageVisitor, params);
+
+        assertNotNull(packaged);
+        assertEquals(1, packaged.getEntry().size());
+        assertEquals("Library", packaged.getEntryFirstRep().getResource().fhirType());
+    }
+
     private IEndpointAdapter createEndpoint(String authoritativeSource) {
         var factory = IAdapterFactory.forFhirVersion(FhirVersionEnum.R4);
         var endpoint = factory.createEndpoint(new org.hl7.fhir.r4.model.Endpoint());

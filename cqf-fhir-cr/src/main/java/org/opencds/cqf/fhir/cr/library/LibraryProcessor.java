@@ -19,7 +19,9 @@ import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.common.DataRequirementsProcessor;
+import org.opencds.cqf.fhir.cr.common.DeleteProcessor;
 import org.opencds.cqf.fhir.cr.common.IDataRequirementsProcessor;
+import org.opencds.cqf.fhir.cr.common.IDeleteProcessor;
 import org.opencds.cqf.fhir.cr.common.IPackageProcessor;
 import org.opencds.cqf.fhir.cr.common.IReleaseProcessor;
 import org.opencds.cqf.fhir.cr.common.PackageProcessor;
@@ -40,6 +42,7 @@ public class LibraryProcessor {
     protected IReleaseProcessor releaseProcessor;
     protected IDataRequirementsProcessor dataRequirementsProcessor;
     protected IEvaluateProcessor evaluateProcessor;
+    protected IDeleteProcessor deleteProcessor;
     protected IRepository repository;
     protected EvaluationSettings evaluationSettings;
     protected TerminologyServerClientSettings terminologyServerClientSettings;
@@ -52,7 +55,7 @@ public class LibraryProcessor {
             IRepository repository,
             EvaluationSettings evaluationSettings,
             TerminologyServerClientSettings terminologyServerClientSettings) {
-        this(repository, evaluationSettings, terminologyServerClientSettings, null, null, null, null);
+        this(repository, evaluationSettings, terminologyServerClientSettings, null, null, null, null, null);
     }
 
     public LibraryProcessor(
@@ -62,7 +65,8 @@ public class LibraryProcessor {
             IPackageProcessor packageProcessor,
             IReleaseProcessor releaseProcessor,
             IDataRequirementsProcessor dataRequirementsProcessor,
-            IEvaluateProcessor evaluateProcessor) {
+            IEvaluateProcessor evaluateProcessor,
+            IDeleteProcessor deleteProcessor) {
         this.repository = requireNonNull(repository, "repository can not be null");
         this.evaluationSettings = requireNonNull(evaluationSettings, "evaluationSettings can not be null");
         this.terminologyServerClientSettings =
@@ -73,6 +77,7 @@ public class LibraryProcessor {
         this.releaseProcessor = releaseProcessor;
         this.dataRequirementsProcessor = dataRequirementsProcessor;
         this.evaluateProcessor = evaluateProcessor;
+        this.deleteProcessor = deleteProcessor;
     }
 
     public EvaluationSettings evaluationSettings() {
@@ -218,5 +223,11 @@ public class LibraryProcessor {
                 : new EvaluateProcessor(this.repository, this.evaluationSettings);
         return processor.evaluate(
                 buildEvaluateRequest(library, subject, expression, parameters, data, prefetchData, libraryEngine));
+    }
+
+    public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseBundle deleteLibrary(
+            Either3<C, IIdType, R> library, IBaseParameters parameters) {
+        var processor = deleteProcessor != null ? deleteProcessor : new DeleteProcessor(repository);
+        return processor.deleteResource(resolveLibrary(library), parameters);
     }
 }

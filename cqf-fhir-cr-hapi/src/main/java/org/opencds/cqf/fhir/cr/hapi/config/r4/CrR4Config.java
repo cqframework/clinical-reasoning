@@ -58,7 +58,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 @Configuration
-@Import({RepositoryConfig.class, CrBaseConfig.class, ReleaseOperationConfig.class})
+@Import({
+    RepositoryConfig.class,
+    CrBaseConfig.class,
+    ReleaseOperationConfig.class,
+    DeleteOperationConfig.class,
+    RetireOperationConfig.class
+})
 public class CrR4Config {
 
     @Bean

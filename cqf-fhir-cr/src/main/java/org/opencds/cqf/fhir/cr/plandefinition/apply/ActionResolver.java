@@ -45,9 +45,8 @@ public class ActionResolver {
                 var code = request.getAdapterFactory().createCodeableConcept(codePath);
                 if (code.hasCoding(CPG_ACTIVITY_TYPE_CODE.COLLECT_INFORMATION.code)) {
                     var questionnaireAdapter = request.getQuestionnaireAdapter();
-                    var questionnaireReference = buildReference(
-                            request.getFhirVersion(),
-                            "%s|%s".formatted(questionnaireAdapter.getUrl(), questionnaireAdapter.getVersion()));
+                    var questionnaireReference =
+                            buildReference(request.getFhirVersion(), questionnaireAdapter.getUrl());
                     request.getModelResolver().setValue(task, "focus", questionnaireReference);
                 }
             }

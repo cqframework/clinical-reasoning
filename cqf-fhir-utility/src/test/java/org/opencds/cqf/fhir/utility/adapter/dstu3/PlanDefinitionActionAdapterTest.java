@@ -69,7 +69,6 @@ class PlanDefinitionActionAdapterTest {
 
     @Test
     void testPriority() {
-        var priority = "routine";
         var action = new PlanDefinition.PlanDefinitionActionComponent();
         var adapter = new PlanDefinitionActionAdapter(action);
         assertFalse(adapter.hasPriority());

@@ -92,6 +92,14 @@ class ApplyRequestTests {
     }
 
     @Test
+    void toPopulateReturnsNullWithNoQuestionnaire() {
+        var request = RequestHelpers.newPDApplyRequestForVersion(
+                FhirVersionEnum.R4, libraryEngine, null, null, inputParameterResolver);
+        var populateRequest = request.toPopulateRequest();
+        assertNull(populateRequest);
+    }
+
+    @Test
     void toPopulateRequestWithLaunchContextParameters() {
         var fhirVersion = FhirVersionEnum.R4;
         var deviceRequest = new org.hl7.fhir.r4.model.DeviceRequest();
@@ -105,6 +113,14 @@ class ApplyRequestTests {
         patientContext.setUrl(Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT);
         patientContext.addExtension("name", new org.hl7.fhir.r4.model.Coding("sdc", "patient", "Patient"));
         patientContext.addExtension("type", new org.hl7.fhir.r4.model.CodeType("Patient"));
+        var userContext = questionnaire.addExtension();
+        userContext.setUrl(Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT);
+        userContext.addExtension("name", new org.hl7.fhir.r4.model.Coding("sdc", "user", "User"));
+        userContext.addExtension("type", new org.hl7.fhir.r4.model.CodeType("Practitioner"));
+        var encounterContext = questionnaire.addExtension();
+        encounterContext.setUrl(Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT);
+        encounterContext.addExtension("name", new org.hl7.fhir.r4.model.Coding("sdc", "encounter", "Encounter"));
+        encounterContext.addExtension("type", new org.hl7.fhir.r4.model.CodeType("Encounter"));
         var deviceRequestContext = questionnaire.addExtension();
         deviceRequestContext.setUrl(Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT);
         deviceRequestContext.addExtension(
@@ -114,7 +130,7 @@ class ApplyRequestTests {
         doReturn(FhirContext.forCached(fhirVersion)).when(repository).fhirContext();
         doReturn(patient).when(repository).read(any(), eq(new IdType("Patient/patientId")));
         var request = RequestHelpers.newPDApplyRequestForVersion(
-                        FhirVersionEnum.R4, libraryEngine, null, params, inputParameterResolver)
+                        fhirVersion, libraryEngine, null, params, inputParameterResolver)
                 .setQuestionnaire(questionnaire);
         var populateRequest = request.toPopulateRequest();
         assertInstanceOf(PopulateRequest.class, populateRequest);

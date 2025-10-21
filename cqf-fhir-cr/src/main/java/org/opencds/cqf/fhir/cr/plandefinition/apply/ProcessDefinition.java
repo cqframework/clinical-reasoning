@@ -132,6 +132,8 @@ public class ProcessDefinition {
                     : resolveRepository(definition));
             var activityRequest = request.toActivityRequest(activityDefinition);
             result = applyProcessor.applyActivityDefinition(activityRequest);
+            // appending a count to the id when an ActivityDefinition is used in multiple actions
+            // resulting in multiple request resources with the same id
             var activityDefinitionId = activityDefinition.getIdElement().getIdPart();
             var requestId =
                     Ids.newId(request.getFhirVersion(), result.fhirType(), activityDefinitionId.replaceFirst("#", ""));

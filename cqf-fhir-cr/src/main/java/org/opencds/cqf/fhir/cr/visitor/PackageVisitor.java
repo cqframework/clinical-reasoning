@@ -413,6 +413,7 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
 
     @SuppressWarnings("unchecked")
     private <T extends IBaseBackboneElement> boolean isExampleEntry(T entry) {
+        // TODO: This is a placeholder for now - validate functionality once example include is implemented in full
         var r = BundleHelper.getEntryResource(fhirVersion(), entry);
         return ((IDomainResource) r)
                 .getExtension().stream()

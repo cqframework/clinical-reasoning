@@ -614,6 +614,100 @@ class PackageVisitorTests {
         assertEquals("Library", packaged.getEntryFirstRep().getResource().fhirType());
     }
 
+    @Test
+    void packageOperation_include_tests_returns_only_test_marked_entries() {
+        // Arrange
+        Bundle bundle = (Bundle) jsonParser.parseResource(
+                PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
+        // Mark one non-manifest Library as a test-case via extension that contains 'isTestCase'
+        Library manifest = (Library) bundle.getEntryFirstRep().getResource();
+        Library testLib = null;
+        for (int i = 1; i < bundle.getEntry().size(); i++) {
+            if (bundle.getEntry().get(i).getResource() instanceof Library) {
+                testLib = (Library) bundle.getEntry().get(i).getResource();
+                break;
+            }
+        }
+        assertNotNull(testLib, "Test library not found in fixture bundle");
+        testLib.addExtension("http://example.org/extensions/isTestCase", new org.hl7.fhir.r4.model.BooleanType(true));
+        repo.transaction(bundle);
+        PackageVisitor packageVisitor = new PackageVisitor(repo);
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(manifest.copy());
+
+        // Act
+        Parameters params = parameters(part("include", "tests"));
+        Bundle packaged = (Bundle) libraryAdapter.accept(packageVisitor, params);
+
+        // Assert
+        assertNotNull(packaged);
+        assertTrue(packaged.hasEntry());
+        // Manifest first
+        assertEquals("Library", packaged.getEntryFirstRep().getResource().fhirType());
+        // All subsequent resources must be the test-marked entry/entries
+        for (int i = 1; i < packaged.getEntry().size(); i++) {
+            var r = packaged.getEntry().get(i).getResource();
+            assertTrue(r instanceof Library, "Only test-marked Libraries should be returned for include=tests");
+            var extOk = ((Library) r)
+                    .getExtension().stream()
+                            .anyMatch(x -> x.getUrl().contains("isTestCase")
+                                    && ((org.hl7.fhir.r4.model.BooleanType) x.getValue()).booleanValue());
+            assertTrue(extOk, "Returned entry was not marked as test-case via isTestCase extension");
+        }
+    }
+
+    @Test
+    void packageOperation_include_examples_returns_only_example_marked_entries() {
+        // Arrange
+        Bundle bundle = (Bundle) jsonParser.parseResource(
+                PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
+        // Mark one non-manifest resource as example via extension that contains 'isExample'
+        Library manifest = (Library) bundle.getEntryFirstRep().getResource();
+        // Prefer a ValueSet if present; otherwise mark the next resource
+        org.hl7.fhir.r4.model.DomainResource exampleRes = null;
+        for (int i = 1; i < bundle.getEntry().size(); i++) {
+            if (bundle.getEntry().get(i).getResource() instanceof org.hl7.fhir.r4.model.ValueSet) {
+                exampleRes = (org.hl7.fhir.r4.model.ValueSet)
+                        bundle.getEntry().get(i).getResource();
+                break;
+            }
+        }
+        if (exampleRes == null) {
+            for (int i = 1; i < bundle.getEntry().size(); i++) {
+                if (bundle.getEntry().get(i).getResource() instanceof org.hl7.fhir.r4.model.DomainResource) {
+                    exampleRes = (org.hl7.fhir.r4.model.DomainResource)
+                            bundle.getEntry().get(i).getResource();
+                    break;
+                }
+            }
+        }
+        assertNotNull(exampleRes, "Example resource not found in fixture bundle");
+        exampleRes.addExtension("http://example.org/extensions/isExample", new org.hl7.fhir.r4.model.BooleanType(true));
+        repo.transaction(bundle);
+        PackageVisitor packageVisitor = new PackageVisitor(repo);
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(manifest.copy());
+
+        // Act
+        Parameters params = parameters(part("include", "examples"));
+        Bundle packaged = (Bundle) libraryAdapter.accept(packageVisitor, params);
+
+        // Assert
+        assertNotNull(packaged);
+        assertTrue(packaged.hasEntry());
+        // Manifest first
+        assertEquals("Library", packaged.getEntryFirstRep().getResource().fhirType());
+        // All subsequent resources must carry the isExample=true extension
+        for (int i = 1; i < packaged.getEntry().size(); i++) {
+            var r = packaged.getEntry().get(i).getResource();
+            assertTrue(
+                    r instanceof org.hl7.fhir.r4.model.DomainResource, "Expected DomainResource entries for examples");
+            var extOk = ((org.hl7.fhir.r4.model.DomainResource) r)
+                    .getExtension().stream()
+                            .anyMatch(x -> x.getUrl().contains("isExample")
+                                    && ((org.hl7.fhir.r4.model.BooleanType) x.getValue()).booleanValue());
+            assertTrue(extOk, "Returned entry was not marked as example via isExample extension");
+        }
+    }
+
     private IEndpointAdapter createEndpoint(String authoritativeSource) {
         var factory = IAdapterFactory.forFhirVersion(FhirVersionEnum.R4);
         var endpoint = factory.createEndpoint(new org.hl7.fhir.r4.model.Endpoint());

@@ -28,6 +28,7 @@ public class TestQuestionnaire {
         return new Given();
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     public static class Given {
         private IRepository repository;
         private EvaluationSettings evaluationSettings;
@@ -102,7 +103,6 @@ public class TestQuestionnaire {
                     subjectId,
                     context,
                     launchContext,
-                    parameters,
                     data,
                     useServerData,
                     (IBaseResource) null,

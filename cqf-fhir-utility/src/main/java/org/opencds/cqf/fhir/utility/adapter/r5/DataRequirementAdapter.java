@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r5.model.DataRequirement;
 import org.opencds.cqf.fhir.utility.adapter.BaseAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IDataRequirementAdapter;
@@ -45,6 +46,16 @@ public class DataRequirementAdapter extends BaseAdapter implements IDataRequirem
     @Override
     public String getType() {
         return get().getType().toCode();
+    }
+
+    @Override
+    public boolean hasProfile() {
+        return get().hasProfile();
+    }
+
+    @Override
+    public List<IPrimitiveType<String>> getProfile() {
+        return get().getProfile().stream().map(p -> (IPrimitiveType<String>) p).toList();
     }
 
     @Override

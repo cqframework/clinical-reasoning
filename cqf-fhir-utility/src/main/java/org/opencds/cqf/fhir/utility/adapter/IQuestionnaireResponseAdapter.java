@@ -13,6 +13,8 @@ public interface IQuestionnaireResponseAdapter extends IResourceAdapter {
 
     IQuestionnaireResponseAdapter setQuestionnaire(String canonical);
 
+    String getQuestionnaire();
+
     IQuestionnaireResponseAdapter setSubject(IIdType subject);
 
     IQuestionnaireResponseAdapter setAuthored(Date date);

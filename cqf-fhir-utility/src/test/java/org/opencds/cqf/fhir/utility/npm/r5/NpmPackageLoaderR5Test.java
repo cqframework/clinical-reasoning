@@ -1,4 +1,4 @@
-package org.opencds.cqf.fhir.utility.npm.r4;
+package org.opencds.cqf.fhir.utility.npm.r5;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
@@ -16,231 +16,228 @@ import java.util.Optional;
 import java.util.stream.Stream;
 import org.hl7.cql.model.NamespaceInfo;
 import org.hl7.elm.r1.VersionedIdentifier;
-import org.hl7.fhir.r4.model.Attachment;
-import org.hl7.fhir.r4.model.CanonicalType;
-import org.hl7.fhir.r4.model.Library;
-import org.hl7.fhir.r4.model.Measure;
+import org.hl7.fhir.r5.model.Attachment;
+import org.hl7.fhir.r5.model.CanonicalType;
+import org.hl7.fhir.r5.model.Library;
+import org.hl7.fhir.r5.model.Measure;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
-import org.opencds.cqf.fhir.utility.adapter.r4.LibraryAdapter;
+import org.opencds.cqf.fhir.utility.adapter.r5.LibraryAdapter;
 import org.opencds.cqf.fhir.utility.npm.BaseNpmPackageLoaderInMemory;
-import org.opencds.cqf.fhir.utility.npm.BaseNpmResourceInfoForCqlTest;
+import org.opencds.cqf.fhir.utility.npm.BaseNpmPackageLoaderTest;
 
 @SuppressWarnings("squid:S2699")
-class NpmResourceHolderR4Test extends BaseNpmResourceInfoForCqlTest {
+class NpmPackageLoaderR5Test extends BaseNpmPackageLoaderTest {
 
-    protected FhirVersionEnum fhirVersion = FhirVersionEnum.R4;
+    protected FhirVersionEnum fhirVersion = FhirVersionEnum.R5;
 
     private static final String EXPECTED_CQL_ALPHA =
             """
-        library opencds.simplealpha.SimpleAlpha
+            library opencds.simplealpha.SimpleAlpha
 
-        using FHIR version '4.0.1'
+            using FHIR version '5.0.1'
 
-        include FHIRHelpers version '4.0.1' called FHIRHelpers
+            include FHIRHelpers version '5.0.1' called FHIRHelpers
 
-        parameter "Measurement Period" Interval<DateTime>
-          default Interval[@2021-01-01T00:00:00.0-06:00, @2022-01-01T00:00:00.0-06:00)
+            parameter "Measurement Period" Interval<DateTime>
+              default Interval[@2021-01-01T00:00:00.0-06:00, @2022-01-01T00:00:00.0-06:00)
 
-        context Patient
+            context Patient
 
-        define "Initial Population":
-            exists ("Encounter Finished")
+            define "Initial Population":
+                exists ("Encounter Finished")
 
-        define "Encounter Finished":
-          [Encounter] E
-            where E.status = 'finished'
-        """;
-
+            define "Encounter Finished":
+              [Encounter] E
+                where E.status = 'finished'
+            """;
     private static final String EXPECTED_CQL_BRAVO =
             """
-        library opencds.simplealpha.SimpleBravo
+            library opencds.simplealpha.SimpleBravo
 
-        using FHIR version '4.0.1'
+            using FHIR version '5.0.1'
 
-        include FHIRHelpers version '4.0.1' called FHIRHelpers
+            include FHIRHelpers version '4.0.1' called FHIRHelpers
 
-        parameter "Measurement Period" Interval<DateTime>
-          default Interval[@2024-01-01T00:00:00.0-06:00, @2025-01-01T00:00:00.0-06:00)
+            parameter "Measurement Period" Interval<DateTime>
+              default Interval[@2024-01-01T00:00:00.0-06:00, @2025-01-01T00:00:00.0-06:00)
 
-        context Patient
+            context Patient
 
-        define "Initial Population":
-            exists ("Encounter Planned")
+            define "Initial Population":
+                exists ("Encounter Planned")
 
-        define "Encounter Planned":
-          [Encounter] E
-            where E.status = 'planned'
-        """;
-
+            define "Encounter Planned":
+              [Encounter] E
+                where E.status = 'planned'
+            """;
     private static final String EXPECTED_CQL_WITH_DERIVED =
             """
-        library opencds.withderivedlibrary WithDerivedLibrary version '0.4'
+            library opencds.withderivedlibrary WithDerivedLibrary version '0.4'
 
-        using FHIR version '4.0.1'
+            using FHIR version '5.0.1'
 
-        include FHIRHelpers version '4.0.1' called FHIRHelpers
-        include DerivedLibrary version '0.4'
+            include FHIRHelpers version '5.0.1' called FHIRHelpers
+            include DerivedLibrary version '0.4'
 
-        parameter "Measurement Period" Interval<DateTime>
-            default Interval[@2021-01-01T00:00:00.0-06:00, @2022-01-01T00:00:00.0-06:00)
+            parameter "Measurement Period" Interval<DateTime>
+                default Interval[@2021-01-01T00:00:00.0-06:00, @2022-01-01T00:00:00.0-06:00)
 
-        context Patient
+            context Patient
 
-        define "Initial Population":
-            exists (DerivedLibrary."Encounter Finished")
-        """;
-
+            define "Initial Population":
+                exists (DerivedLibrary."Encounter Finished")
+            """;
     private static final String EXPECTED_CQL_DERIVED =
             """
-        library opencds.withderivedlibrary.DerivedLibrary version '0.4'
+            library opencds.withderivedlibrary.DerivedLibrary version '0.4'
 
-        using FHIR version '4.0.1'
+            using FHIR version '5.0.1'
 
-        include FHIRHelpers version '4.0.1' called FHIRHelpers
+            include FHIRHelpers version '5.0.1' called FHIRHelpers
 
-        context Patient
+            context Patient
 
-        define "Encounter Finished":
-          [Encounter] E
-            where E.status = 'finished'
-        """;
+            define "Encounter Finished":
+              [Encounter] E
+                where E.status = 'finished'
+            """;
 
     private static final String EXPECTED_CQL_DERIVED_TWO_LAYERS =
             """
-        library opencds.withtwolayersderivedlibraries.WithTwoLayersDerivedLibraries version '0.5'
+            library opencds.withtwolayersderivedlibraries.WithTwoLayersDerivedLibraries version '0.5'
 
-        using FHIR version '4.0.1'
+            using FHIR version '5.0.1'
 
-        include DerivedLayer1a version '0.5'
-        include DerivedLayer1b version '0.5'
+            include DerivedLayer1a version '0.5'
+            include DerivedLayer1b version '0.5'
 
-        parameter "Measurement Period" Interval<DateTime>
-            default Interval[@2022-01-01T00:00:00.0-06:00, @2023-01-01T00:00:00.0-06:00)
+            parameter "Measurement Period" Interval<DateTime>
+                default Interval[@2022-01-01T00:00:00.0-06:00, @2023-01-01T00:00:00.0-06:00)
 
-        context Patient
+            context Patient
 
-        define "Initial Population":
-            DerivedLayer1a."Initial Population"
+            define "Initial Population":
+                DerivedLayer1a."Initial Population"
 
-        define "Denominator":
-            DerivedLayer1b."Denominator"
+            define "Denominator":
+                DerivedLayer1b."Denominator"
 
-        define "Numerator":
-            DerivedLayer1b."Numerator"
-        """;
+            define "Numerator":
+                DerivedLayer1b."Numerator"
+            """;
 
     private static final String EXPECTED_CQL_DERIVED_1_A =
             """
-        library opencds.withtwolayersderivedlibraries.DerivedLayer1a version '0.5'
+            library opencds.withtwolayersderivedlibraries.DerivedLayer1a version '0.5'
 
-        using FHIR version '4.0.1'
+            using FHIR version '5.0.1'
 
-        include DerivedLayer2a version '0.5'
-        include DerivedLayer2b version '0.5'
+            include DerivedLayer2a version '0.5'
+            include DerivedLayer2b version '0.5'
 
-        context Patient
+            context Patient
 
-        define "Initial Population":
-            DerivedLayer2a."Initial Population"
-        """;
+            define "Initial Population":
+                DerivedLayer2a."Initial Population"
+            """;
 
     private static final String EXPECTED_CQL_DERIVED_1_B =
             """
-        library opencds.withtwolayersderivedlibraries.DerivedLayer1b version '0.5'
+            library opencds.withtwolayersderivedlibraries.DerivedLayer1b version '0.5'
 
-        using FHIR version '4.0.1'
+            using FHIR version '5.0.1'
 
-        include DerivedLayer2a version '0.5'
-        include DerivedLayer2b version '0.5'
+            include DerivedLayer2a version '0.5'
+            include DerivedLayer2b version '0.5'
 
-        context Patient
+            context Patient
 
-        define "Denominator":
-            DerivedLayer2a."Denominator"
+            define "Denominator":
+                DerivedLayer2a."Denominator"
 
-        define "Numerator":
-            DerivedLayer2b."Numerator"
-        """;
+            define "Numerator":
+                DerivedLayer2b."Numerator"
+            """;
 
     private static final String EXPECTED_CQL_DERIVED_2_A =
             """
-        library opencds.withtwolayersderivedlibraries.DerivedLayer2a version '0.5'
+            library opencds.withtwolayersderivedlibraries.DerivedLayer2a version '0.5'
 
-        using FHIR version '4.0.1'
+            using FHIR version '5.0.1'
 
-        include FHIRHelpers version '4.0.1' called FHIRHelpers
+            include FHIRHelpers version '5.0.1' called FHIRHelpers
 
-        context Patient
+            context Patient
 
-        define "Initial Population":
-            exists ("Encounter Finished")
+            define "Initial Population":
+                exists ("Encounter Finished")
 
-        define "Denominator":
-            exists ("Encounter Planned")
+            define "Denominator":
+                exists ("Encounter Planned")
 
-        define "Encounter Finished":
-          [Encounter] E
-            where E.status = 'finished'
+            define "Encounter Finished":
+              [Encounter] E
+                where E.status = 'finished'
 
-        define "Encounter Planned":
-          [Encounter] E
-            where E.status = 'planned'
-        """;
+            define "Encounter Planned":
+              [Encounter] E
+                where E.status = 'planned'
+            """;
 
     private static final String EXPECTED_CQL_DERIVED_2_B =
             """
-        library opencds.withtwolayersderivedlibraries.DerivedLayer2b version '0.5'
+            library opencds.withtwolayersderivedlibraries.DerivedLayer2b version '0.5'
 
-        using FHIR version '4.0.1'
+            using FHIR version '5.0.1'
 
-        include FHIRHelpers version '4.0.1' called FHIRHelpers
+            include FHIRHelpers version '5.0.1' called FHIRHelpers
 
-        parameter "Measurement Period" Interval<DateTime>
-          default Interval[@2021-01-01T00:00:00.0-06:00, @2022-01-01T00:00:00.0-06:00)
+            parameter "Measurement Period" Interval<DateTime>
+              default Interval[@2021-01-01T00:00:00.0-06:00, @2022-01-01T00:00:00.0-06:00)
 
-        context Patient
+            context Patient
 
-        define "Numerator":
-            exists ("Encounter Triaged")
+            define "Numerator":
+                exists ("Encounter Triaged")
 
-        define "Encounter Triaged":
-          [Encounter] E
-            where E.status = 'triaged'
-        """;
+            define "Encounter Triaged":
+              [Encounter] E
+                where E.status = 'triaged'
+            """;
 
     private static final String EXPECTED_CQL_CROSS_SOURCE =
             """
-        library opencds.crosspackagesource.CrossPackageSource version '0.2'
+            library opencds.crosspackagesource.CrossPackageSource version '0.2'
 
-        using FHIR version '4.0.1'
+            using FHIR version '5.0.1'
 
-        include FHIRHelpers version '4.0.1' called FHIRHelpers
-        include opencds.crosspackagetarget.CrossPackageTarget version '0.3' called CrossPackageTarget
+            include FHIRHelpers version '4.0.1' called FHIRHelpers
+            include opencds.crosspackagetarget.CrossPackageTarget version '0.3' called CrossPackageTarget
 
-        parameter "Measurement Period" Interval<DateTime>
-            default Interval[@2020-01-01T00:00:00.0-06:00, @2021-01-01T00:00:00.0-06:00)
+            parameter "Measurement Period" Interval<DateTime>
+                default Interval[@2020-01-01T00:00:00.0-06:00, @2021-01-01T00:00:00.0-06:00)
 
-        context Patient
+            context Patient
 
-        define "Initial Population":
-            exists (CrossPackageTarget."Encounter Finished")
-        """;
+            define "Initial Population":
+                exists (CrossPackageTarget."Encounter Finished")
+            """;
 
     private static final String EXPECTED_CQL_CROSS_TARGET =
             """
-        library opencds.crosspackagetarget.CrossPackageTarget version '0.3'
+            library opencds.crosspackagetarget.CrossPackageTarget version '0.3'
 
-        using FHIR version '4.0.1'
+            using FHIR version '5.0.1'
 
-        include FHIRHelpers version '4.0.1' called FHIRHelpers
+            include FHIRHelpers version '5.0.1' called FHIRHelpers
 
-        context Patient
+            context Patient
 
-        define "Encounter Finished":
-          [Encounter] E
-            where E.status = 'finished'
-        """;
+            define "Encounter Finished":
+              [Encounter] E
+                where E.status = 'finished'
+            """;
 
     @Test
     void simpleAlpha() {
@@ -294,7 +291,8 @@ class NpmResourceHolderR4Test extends BaseNpmResourceInfoForCqlTest {
 
     @Test
     void multiplePackages() {
-        final BaseNpmPackageLoaderInMemory loader = setup(
+        final BaseNpmPackageLoaderInMemory loader = R5NpmPackageLoaderInMemory.fromNpmPackageClasspath(
+                getClass(),
                 Stream.of(SIMPLE_ALPHA_TGZ, SIMPLE_BRAVO_TGZ).map(Paths::get).toList());
 
         final List<NamespaceInfo> allNamespaceInfos =
@@ -600,13 +598,13 @@ class NpmResourceHolderR4Test extends BaseNpmResourceInfoForCqlTest {
 
     @Nonnull
     @Override
-    protected BaseNpmPackageLoaderInMemory setup(Path... npmPackagePaths) {
-        return R4NpmPackageLoaderInMemory.fromNpmPackageClasspath(getClass(), npmPackagePaths);
+    protected R5NpmPackageLoaderInMemory setup(Path... tgzPaths) {
+        return R5NpmPackageLoaderInMemory.fromNpmPackageClasspath(getClass(), tgzPaths);
     }
 
     @Nonnull
     @Override
-    protected BaseNpmPackageLoaderInMemory setup(List<Path> npmPackagePaths) {
-        return R4NpmPackageLoaderInMemory.fromNpmPackageClasspath(getClass(), npmPackagePaths);
+    protected R5NpmPackageLoaderInMemory setup(List<Path> tgzPaths) {
+        return R5NpmPackageLoaderInMemory.fromNpmPackageClasspath(getClass(), tgzPaths);
     }
 }

@@ -5,7 +5,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
-public abstract class BaseNpmResourceInfoForCqlTest {
+public abstract class BaseNpmPackageLoaderTest {
 
     protected static final String DOT_TGZ = ".tgz";
 

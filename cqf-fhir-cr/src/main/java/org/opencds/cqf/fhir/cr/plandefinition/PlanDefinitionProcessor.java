@@ -96,9 +96,7 @@ public class PlanDefinitionProcessor {
                             ? requestResolverFactory
                             : IRequestResolverFactory.getDefault(fhirVersion));
         }
-        applyProcessor = applyProcessor != null
-                ? applyProcessor
-                : new ApplyProcessor(repository, modelResolver, activityProcessor);
+        applyProcessor = applyProcessor != null ? applyProcessor : new ApplyProcessor(repository, activityProcessor);
     }
 
     protected <C extends IPrimitiveType<String>, R extends IBaseResource> R resolvePlanDefinition(

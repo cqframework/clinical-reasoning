@@ -342,45 +342,83 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
     @SuppressWarnings("unchecked")
     protected <T extends IBaseBackboneElement> List<T> findUnsupportedInclude(
             List<T> entries, List<String> include, IKnowledgeArtifactAdapter adapter) {
-        if (include == null
-                || include.isEmpty()
-                || include.stream().anyMatch(includedType -> includedType.equals("all"))) {
+
+        // CRMI: if include is empty or 'all', return as-is (manifest will already be first)
+        if (include == null || include.isEmpty() || include.stream().anyMatch("all"::equals)) {
             return entries;
         }
-        var adapterFactory = IAdapterFactory.forFhirVersion(fhirVersion());
-        List<T> filteredList = new ArrayList<>();
-        entries.stream().forEach(entry -> {
+
+        // 1) Identify the outcome-manifest Library (the "root" Library that corresponds to adapter)
+        //    We'll include it unconditionally and keep it first.
+        T manifestEntry = null;
+        List<T> remainder = new ArrayList<>(entries.size());
+        for (T e : entries) {
+            var res = BundleHelper.getEntryResource(fhirVersion(), e);
+            if (manifestEntry == null && isSameCanonical(res, adapter)) {
+                manifestEntry = e;
+            } else {
+                remainder.add(e);
+            }
+        }
+
+        // 2) Filter the remainder using existing rules
+        List<T> filteredRemainder = new ArrayList<>();
+        remainder.forEach(entry -> {
             if (isValidResourceType(include, entry)
                     || isExtensionOrProfile(include, adapter, entry)
                     || isIncludedFhirType(include, entry)) {
-                filteredList.add(entry);
+                filteredRemainder.add(entry);
             }
-            if (include.stream().anyMatch(type -> type.equals("tests"))
-                    && ((BundleHelper.getEntryResource(fhirVersion(), entry)
-                                            .fhirType()
-                                            .equals("Library")
-                                    && (adapterFactory
-                                            .createCodeableConcept(adapterFactory
-                                                    .createLibrary(BundleHelper.getEntryResource(fhirVersion(), entry))
-                                                    .getType())
-                                            .hasCoding("test-case")))
-                            || (((IDomainResource) BundleHelper.getEntryResource(fhirVersion(), entry))
-                                    .getExtension().stream()
-                                            .anyMatch(ext -> ext.getUrl().contains("isTestCase")
-                                                    && ((IPrimitiveType<Boolean>) ext.getValue()).getValue())))) {
-                filteredList.add(entry);
+            // tests
+            if (include.stream().anyMatch("tests"::equals) && isTestCaseEntry(entry)) {
+                filteredRemainder.add(entry);
             }
-
-            // idk if this is legit just a placeholder for now
-            if (include.stream().anyMatch(type -> type.equals("examples"))
-                    && ((IDomainResource) BundleHelper.getEntryResource(fhirVersion(), entry))
-                            .getExtension().stream()
-                                    .anyMatch(ext -> ext.getUrl().contains("isExample")
-                                            && ((IPrimitiveType<Boolean>) ext.getValue()).getValue())) {
-                filteredList.add(entry);
+            // examples (placeholder logic retained)
+            if (include.stream().anyMatch("examples"::equals) && isExampleEntry(entry)) {
+                filteredRemainder.add(entry);
             }
         });
-        return getDistinctFilteredEntries(filteredList);
+
+        // 3) Build result with manifest first, then distinct filtered remainder
+        List<T> result = new ArrayList<>(entries.size());
+        if (manifestEntry != null) {
+            result.add(manifestEntry);
+        }
+        result.addAll(getDistinctFilteredEntries(filteredRemainder));
+        return result;
+    }
+
+    // Helper: compare by canonical URL|version to detect the root manifest library for this package
+    private boolean isSameCanonical(IBaseResource res, IKnowledgeArtifactAdapter rootAdapter) {
+        if (!"Library".equals(res.fhirType())) return false;
+        var af = IAdapterFactory.forFhirVersion(res.getStructureFhirVersionEnum());
+        var lib = af.createLibrary((IDomainResource) res);
+        // equal when both URL and Version match; tolerate null versions if equal by string
+        return lib.getUrl().equals(rootAdapter.getUrl()) && lib.getVersion().equals(rootAdapter.getVersion());
+    }
+
+    // Extract existing test/example checks into helpers (no behavior change)
+    @SuppressWarnings("unchecked")
+    private <T extends IBaseBackboneElement> boolean isTestCaseEntry(T entry) {
+        var af = IAdapterFactory.forFhirVersion(fhirVersion());
+        var r = BundleHelper.getEntryResource(fhirVersion(), entry);
+        return ("Library".equals(r.fhirType())
+                        && af.createCodeableConcept(af.createLibrary(r).getType())
+                                .hasCoding("test-case"))
+                || (((IDomainResource) r)
+                        .getExtension().stream()
+                                .anyMatch(ext -> ext.getUrl().contains("isTestCase")
+                                        && ((IPrimitiveType<Boolean>) ext.getValue()).getValue()));
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T extends IBaseBackboneElement> boolean isExampleEntry(T entry) {
+        // TODO: This is a placeholder for now - validate functionality once example include is implemented in full
+        var r = BundleHelper.getEntryResource(fhirVersion(), entry);
+        return ((IDomainResource) r)
+                .getExtension().stream()
+                        .anyMatch(ext -> ext.getUrl().contains("isExample")
+                                && ((IPrimitiveType<Boolean>) ext.getValue()).getValue());
     }
 
     private <T extends IBaseBackboneElement> boolean isExtensionOrProfile(

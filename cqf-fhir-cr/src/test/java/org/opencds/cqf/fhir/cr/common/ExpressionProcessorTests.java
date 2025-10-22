@@ -20,6 +20,7 @@ import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.helpers.RequestHelpers;
 import org.opencds.cqf.fhir.utility.CqfExpression;
 
+@SuppressWarnings("UnstableApiUsage")
 @ExtendWith(MockitoExtension.class)
 class ExpressionProcessorTests {
     @Mock
@@ -49,9 +50,9 @@ class ExpressionProcessorTests {
 
     @Test
     void getExpressionResultShouldReturnEmptyListForNullExpressionResult() {
-        var questionnaire = new Questionnaire();
-        var request = RequestHelpers.newPopulateRequestForVersion(FhirVersionEnum.R4, libraryEngine, questionnaire);
-        var expression = new CqfExpression();
+        var request =
+                RequestHelpers.newPopulateRequestForVersion(FhirVersionEnum.R4, libraryEngine, new Questionnaire());
+        var expression = new CqfExpression().setLanguage("text/cql-expression");
         doReturn(null).when(libraryEngine).resolveExpression(any(), any(), any(), any(), any(), any(), any());
         var result = fixture.getExpressionResult(request, expression);
         assertNotNull(result);

@@ -33,6 +33,7 @@ import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.monad.Either3;
 
+@SuppressWarnings("UnstableApiUsage")
 public class QuestionnaireProcessor {
     protected static final String SUBJECT_TYPE = "Patient";
 
@@ -195,7 +196,6 @@ public class QuestionnaireProcessor {
             String subjectId,
             List<? extends IBaseBackboneElement> context,
             IBaseExtension<?, ?> launchContext,
-            IBaseParameters parameters,
             IBaseBundle data,
             LibraryEngine libraryEngine) {
         return new PopulateRequest(
@@ -203,7 +203,6 @@ public class QuestionnaireProcessor {
                 subjectId == null ? null : Ids.newId(fhirVersion, Ids.ensureIdType(subjectId, SUBJECT_TYPE)),
                 context,
                 launchContext,
-                parameters,
                 data,
                 libraryEngine != null ? libraryEngine : new LibraryEngine(repository, evaluationSettings),
                 modelResolver);
@@ -214,7 +213,6 @@ public class QuestionnaireProcessor {
             String subjectId,
             List<? extends IBaseBackboneElement> context,
             IBaseExtension<?, ?> launchContext,
-            IBaseParameters parameters,
             IBaseBundle data,
             boolean useServerData,
             IBaseResource dataEndpoint,
@@ -225,7 +223,6 @@ public class QuestionnaireProcessor {
                 subjectId,
                 context,
                 launchContext,
-                parameters,
                 data,
                 useServerData,
                 createRestRepository(repository.fhirContext(), dataEndpoint),
@@ -238,7 +235,6 @@ public class QuestionnaireProcessor {
             String subjectId,
             List<? extends IBaseBackboneElement> context,
             IBaseExtension<?, ?> launchContext,
-            IBaseParameters parameters,
             IBaseBundle data,
             boolean useServerData,
             IRepository dataRepository,
@@ -250,7 +246,6 @@ public class QuestionnaireProcessor {
                 subjectId,
                 context,
                 launchContext,
-                parameters,
                 data,
                 new LibraryEngine(repository, this.evaluationSettings));
     }
@@ -260,17 +255,9 @@ public class QuestionnaireProcessor {
             String subjectId,
             List<? extends IBaseBackboneElement> context,
             IBaseExtension<?, ?> launchContext,
-            IBaseParameters parameters,
             IBaseBundle data,
             LibraryEngine libraryEngine) {
-        return populate(
-                resolveQuestionnaire(questionnaire),
-                subjectId,
-                context,
-                launchContext,
-                parameters,
-                data,
-                libraryEngine);
+        return populate(resolveQuestionnaire(questionnaire), subjectId, context, launchContext, data, libraryEngine);
     }
 
     public IBaseResource populate(
@@ -278,11 +265,9 @@ public class QuestionnaireProcessor {
             String subjectId,
             List<? extends IBaseBackboneElement> context,
             IBaseExtension<?, ?> launchContext,
-            IBaseParameters parameters,
             IBaseBundle data,
             LibraryEngine libraryEngine) {
-        return populate(buildPopulateRequest(
-                questionnaire, subjectId, context, launchContext, parameters, data, libraryEngine));
+        return populate(buildPopulateRequest(questionnaire, subjectId, context, launchContext, data, libraryEngine));
     }
 
     public IBaseResource populate(PopulateRequest request) {

@@ -7,20 +7,16 @@ import static org.opencds.cqf.fhir.utility.BundleHelper.getEntry;
 import static org.opencds.cqf.fhir.utility.BundleHelper.getEntryResources;
 import static org.opencds.cqf.fhir.utility.BundleHelper.newBundle;
 import static org.opencds.cqf.fhir.utility.BundleHelper.newEntryWithResource;
-import static org.opencds.cqf.fhir.utility.VersionUtilities.stringTypeForVersion;
-import static org.opencds.cqf.fhir.utility.VersionUtilities.uriTypeForVersion;
 
 import ca.uhn.fhir.repository.IRepository;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cr.common.ExtensionProcessor;
 import org.opencds.cqf.fhir.cr.common.ICpgRequest;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.GenerateProcessor;
@@ -44,10 +40,10 @@ public class ApplyProcessor implements IApplyProcessor {
             Constants.CQFM_EFFECTIVE_DATA_REQUIREMENTS,
             Constants.CQF_DIRECT_REFERENCE_EXTENSION,
             Constants.CQF_LOGIC_DEFINITION,
-            Constants.SDC_QUESTIONNAIRE_ADAPTIVE);
+            Constants.SDC_QUESTIONNAIRE_ADAPTIVE,
+            Constants.CRMI_EFFECTIVE_DATA_REQUIREMENTS);
 
     protected final IRepository repository;
-    protected final ModelResolver modelResolver;
     protected final ExtensionProcessor extensionProcessor;
     protected final GenerateProcessor generateProcessor;
     protected final PopulateProcessor populateProcessor;
@@ -59,10 +55,8 @@ public class ApplyProcessor implements IApplyProcessor {
 
     public ApplyProcessor(
             IRepository repository,
-            ModelResolver modelResolver,
             org.opencds.cqf.fhir.cr.activitydefinition.apply.IApplyProcessor activityProcessor) {
         this.repository = repository;
-        this.modelResolver = modelResolver;
         this.activityProcessor = activityProcessor;
         extensionProcessor = new ExtensionProcessor();
         generateProcessor = new GenerateProcessor(this.repository);
@@ -122,29 +116,27 @@ public class ApplyProcessor implements IApplyProcessor {
     }
 
     protected void initApply(ApplyRequest request) {
-        var url = request.resolvePathString(request.getPlanDefinition(), "url");
+        var url = request.getPlanDefinitionAdapter().getUrl();
         // If the PlanDefinition has no URL we will not generate a Questionnaire
         // We will also add a warning to the result informing the user
         if (url != null) {
-            var questionnaire = generateProcessor.generate(
-                    request.getPlanDefinition().getIdElement().getIdPart());
-            request.getModelResolver()
-                    .setValue(
-                            questionnaire,
-                            "url",
-                            uriTypeForVersion(
-                                    request.getFhirVersion(), url.replace("/PlanDefinition/", "/Questionnaire/")));
-            var version = request.resolvePathString(request.getPlanDefinition(), "version");
+            var questionnaireUrl = url.replace("/PlanDefinition/", "/Questionnaire/");
+            List<IBaseResource> entryResources =
+                    request.getData() == null ? List.of() : getEntryResources(request.getData());
+            var questionnaire = entryResources.stream()
+                    .filter(r -> r.fhirType().equals("Questionnaire"))
+                    .map(q -> request.getAdapterFactory().createQuestionnaire(q))
+                    .filter(q -> q.getUrl().equals(questionnaireUrl))
+                    .findFirst()
+                    .orElse(request.getAdapterFactory()
+                            .createQuestionnaire(generateProcessor.generate(
+                                    request.getPlanDefinition().getIdElement().getIdPart())));
+            questionnaire.setUrl(questionnaireUrl);
+            var version = request.getPlanDefinitionAdapter().getVersion();
             if (version != null) {
-                var subject = request.getSubjectId().getIdPart();
                 var formatter = new SimpleDateFormat("yyyy-MM-dd-hh.mm.ss");
-                request.getModelResolver()
-                        .setValue(
-                                questionnaire,
-                                "version",
-                                stringTypeForVersion(
-                                        request.getFhirVersion(),
-                                        version.concat("-%s-%s".formatted(subject, formatter.format(new Date())))));
+                questionnaire.setVersion(version.concat(
+                        "-%s-%s".formatted(request.getSubjectId().getIdPart(), formatter.format(new Date()))));
             }
             request.setQuestionnaire(questionnaire);
             request.addCqlLibraryExtension();
@@ -156,33 +148,30 @@ public class ApplyProcessor implements IApplyProcessor {
     }
 
     protected void extractQuestionnaireResponse(ApplyRequest request) {
-        if (request.getData() == null) {
-            return;
-        }
-
-        var questionnaireResponses = getEntryResources(request.getData()).stream()
-                .filter(r -> r.fhirType().equals("QuestionnaireResponse"))
-                .toList();
-        if (!questionnaireResponses.isEmpty()) {
-            for (var questionnaireResponse : questionnaireResponses) {
-                try {
-                    var extractBundle = extractProcessor.extract(
-                            Eithers.forRight(questionnaireResponse),
-                            null,
-                            request.getParameters(),
-                            request.getData(),
-                            request.getLibraryEngine());
-                    for (var entry : getEntry(extractBundle)) {
-                        addEntry(request.getData(), entry);
-                        // Not adding extracted resources back into the response to reduce size of payload
-                        // $extract can be called on the QuestionnaireResponse if these are desired
-                        // request.getExtractedResources().add(getEntryResource(request.getFhirVersion(), entry))
-                    }
-                } catch (Exception e) {
-                    request.logException("Error encountered extracting %s: %s"
-                            .formatted(questionnaireResponse.getIdElement().getIdPart(), e.getMessage()));
-                }
-            }
+        if (request.getData() != null) {
+            getEntryResources(request.getData()).stream()
+                    .filter(r -> r.fhirType().equals("QuestionnaireResponse"))
+                    .map(qr -> request.getAdapterFactory().createQuestionnaireResponse(qr))
+                    .forEach(questionnaireResponse -> {
+                        try {
+                            var extractBundle = extractProcessor.extract(
+                                    Eithers.forRight(questionnaireResponse.get()),
+                                    Eithers.forRight(request.getQuestionnaire()),
+                                    request.getParameters(),
+                                    request.getData(),
+                                    request.getLibraryEngine());
+                            for (var entry : getEntry(extractBundle)) {
+                                addEntry(request.getData(), entry);
+                                // Not adding extracted resources back into the response to reduce size of payload
+                                // $extract can be called on the QuestionnaireResponse if these are desired
+                                // addEntry(request.getExtractedResources(), getEntryResource(request.getFhirVersion(),
+                                // entry))
+                            }
+                        } catch (Exception e) {
+                            request.logException("Error encountered extracting %s: %s"
+                                    .formatted(questionnaireResponse.getId().getIdPart(), e.getMessage()));
+                        }
+                    });
         }
     }
 
@@ -195,8 +184,8 @@ public class ApplyProcessor implements IApplyProcessor {
         extensionProcessor.processExtensions(
                 request, requestOrchestration, request.getPlanDefinition(), EXCLUDED_EXTENSION_LIST);
         processGoals(request, requestOrchestration);
-        var metConditions = new HashMap<String, IBaseBackboneElement>();
-        for (var action : request.resolvePathList(request.getPlanDefinition(), "action", IBaseBackboneElement.class)) {
+        var metConditions = new ArrayList<String>();
+        for (var action : request.getPlanDefinitionAdapter().getAction()) {
             request.getModelResolver()
                     .setValue(
                             requestOrchestration,
@@ -216,7 +205,7 @@ public class ApplyProcessor implements IApplyProcessor {
     }
 
     protected void processGoals(ApplyRequest request, IBaseResource requestOrchestration) {
-        var goals = request.resolvePathList(request.getPlanDefinition(), "goal", IBaseBackboneElement.class);
+        var goals = request.getPlanDefinitionAdapter().getGoal();
         for (int i = 0; i < goals.size(); i++) {
             var goal = processGoal.convertGoal(request, goals.get(i));
             if (Boolean.TRUE.equals(request.getContainResources())) {

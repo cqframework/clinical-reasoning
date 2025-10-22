@@ -179,7 +179,8 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .population("measure-observation")
                 .hasCount(11)
                 .up()
-                .hasScore("11.0") // I assume this is the straight-up count of encounters?
+                .hasScore("11.0")
+                // LUKETODO:  resolve this since Justin answered my question:
                 .stratifierById("stratifier-age")
                 .hasStratumCount(3)
                 .firstStratum()
@@ -549,6 +550,7 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .up()
                 .up()
                 .report();
+        // LUKETODO:  which test is he talking about?  I presume this is the first test in his branch
     }
 
     private static int computeAge(LocalDate birthDate) {

@@ -389,6 +389,7 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
     but we don't want that:  we want to filter only resources that belong to the patients captured by each stratum
     so we want to do some sort of wizardry that involves getting the stratum values, and using those to retrieve the associated resources
      */
+    // LUKETODO:  look at MeasureEvaluator and MeasureReportBuilder to see what they do regarding this:
     private Set<Object> getResultsForStratum(
             PopulationDef measureObservationPopulationDef,
             StratifierDef stratifierDef,

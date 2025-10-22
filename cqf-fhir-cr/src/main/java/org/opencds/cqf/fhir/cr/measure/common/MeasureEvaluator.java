@@ -339,6 +339,7 @@ public class MeasureEvaluator {
                 pruneObservationResources(
                         measurePopulationObservation.getResources(), measurePopulation, measurePopulationObservation);
                 // what about subjects?
+                // LUKETODO:  think about this
                 if (measurePopulation != null) {
                     pruneObservationSubjectResources(
                             measurePopulation.subjectResources, measurePopulationObservation.getSubjectResources());
@@ -347,7 +348,9 @@ public class MeasureEvaluator {
         }
         // measure Observation
         // source expression result population.id-function-name?
+        // LUKETODO:  think about this
         // retainAll MeasureObservations found in MeasurePopulation
+        // LUKETODO:  do we need to do a retainAll() call here?
 
     }
     /**

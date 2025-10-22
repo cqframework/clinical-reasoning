@@ -104,6 +104,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         // Populations
         var populationsWithCriteriaReference = group.getPopulation().stream()
                 .peek(R4MeasureDefBuilder::checkId)
+                // LUKETODO:  does Justin mean just renaming the method?
                 .map(population -> buildPopulationDefWithCriteriaReference(population, criteriaReference))
                 .toList();
 

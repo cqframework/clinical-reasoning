@@ -14,6 +14,7 @@ public class MeasureDef {
     private final List<SdeDef> sdes;
     private final List<String> errors;
 
+    // LUKETODO:  make URL nullable and have an ID-only constructor?
     public static MeasureDef fromIdAndUrl(String id, String url) {
         return new MeasureDef(id, url, null, List.of(), List.of());
     }

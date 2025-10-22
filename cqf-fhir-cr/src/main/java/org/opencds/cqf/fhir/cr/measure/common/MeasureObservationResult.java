@@ -7,6 +7,9 @@ import java.util.Set;
 /**
  * Capture a single set of results from continuous variable observations for a single population
  */
+// LUKETODO:  think about this:
+// LUKETODO:  I did this because I wanted a structure that I could mark as EMPTY and use an an input for building a new
+// EvaluationResult
 public record MeasureObservationResult(
         String expressionName, Set<Object> evaluatedResources, Map<Object, Object> functionResults) {
 

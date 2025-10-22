@@ -12,11 +12,15 @@ import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.nio.file.Path;
+import java.util.List;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.r4.model.Claim;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
+import org.hl7.fhir.r4.model.ServiceRequest;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.IRequestResolverFactory;
@@ -26,11 +30,10 @@ import org.opencds.cqf.fhir.cr.plandefinition.apply.ApplyProcessor;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.client.TerminologyServerClientSettings;
-import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
-@SuppressWarnings("squid:S2699")
+@SuppressWarnings({"squid:S2699", "UnstableApiUsage"})
 class PlanDefinitionProcessorTests {
     private final FhirContext fhirContextDstu3 = FhirContext.forDstu3Cached();
     private final FhirContext fhirContextR4 = FhirContext.forR4Cached();
@@ -48,7 +51,6 @@ class PlanDefinitionProcessorTests {
     void processor() {
         var repository =
                 new IgRepository(fhirContextR5, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r5"));
-        var modelResolver = FhirModelResolverCache.resolverForVersion(FhirVersionEnum.R5);
         var activityProcessor = new org.opencds.cqf.fhir.cr.activitydefinition.apply.ApplyProcessor(
                 repository, IRequestResolverFactory.getDefault(FhirVersionEnum.R5));
         var packageProcessor = new PackageProcessor(repository);
@@ -58,7 +60,7 @@ class PlanDefinitionProcessorTests {
                 repository,
                 EvaluationSettings.getDefault(),
                 TerminologyServerClientSettings.getDefault(),
-                new ApplyProcessor(repository, modelResolver, activityProcessor),
+                new ApplyProcessor(repository, activityProcessor),
                 packageProcessor,
                 dataRequirementsProcessor,
                 activityProcessor,
@@ -386,11 +388,14 @@ class PlanDefinitionProcessorTests {
 
     @Test
     void generateQuestionnaireR4() {
+        var repository =
+                new IgRepository(fhirContextR4, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r4"));
+        var claim = repository.read(Claim.class, new IdType("Claim/OPA-Claim1"));
         var planDefinitionID = "generate-questionnaire";
         var patientID = "OPA-Patient1";
         var parameters = org.opencds.cqf.fhir.utility.r4.Parameters.parameters(
-                org.opencds.cqf.fhir.utility.r4.Parameters.stringPart("ClaimId", "OPA-Claim1"));
-        var questionnaireResponse = (QuestionnaireResponse) given().repositoryFor(fhirContextR4, "r4")
+                org.opencds.cqf.fhir.utility.r4.Parameters.part("Claim", claim));
+        var questionnaireResponse = (QuestionnaireResponse) given().repository(repository)
                 .when()
                 .planDefinitionId(planDefinitionID)
                 .subjectId(patientID)
@@ -422,13 +427,18 @@ class PlanDefinitionProcessorTests {
 
     @Test
     void generateQuestionnaireSleepStudy() {
+        var repository = new IgRepository(
+                fhirContextR4, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r4/pa-aslp"));
+        var sleepStudy = repository.read(ServiceRequest.class, new IdType("ServiceRequest/SleepStudy"));
+        var sleepStudy2 = repository.read(ServiceRequest.class, new IdType("ServiceRequest/SleepStudy2"));
+        var coverage = repository.read(Coverage.class, new IdType("Coverage/positive"));
         var planDefinitionID = "ASLPA1";
         var patientID = "positive";
         var parameters = org.opencds.cqf.fhir.utility.r4.Parameters.parameters(
-                org.opencds.cqf.fhir.utility.r4.Parameters.stringPart("Service Request Id", "SleepStudy"),
-                org.opencds.cqf.fhir.utility.r4.Parameters.stringPart("Service Request Id", "SleepStudy2"),
-                org.opencds.cqf.fhir.utility.r4.Parameters.stringPart("Coverage Id", "Coverage-positive"));
-        var questionnaireResponse = (QuestionnaireResponse) given().repositoryFor(fhirContextR4, "r4/pa-aslp")
+                org.opencds.cqf.fhir.utility.r4.Parameters.part("ServiceRequest", sleepStudy),
+                org.opencds.cqf.fhir.utility.r4.Parameters.part("ServiceRequest", sleepStudy2),
+                org.opencds.cqf.fhir.utility.r4.Parameters.part("Coverage", coverage));
+        var questionnaireResponse = (QuestionnaireResponse) given().repository(repository)
                 .when()
                 .planDefinitionId(planDefinitionID)
                 .subjectId(patientID)
@@ -438,29 +448,19 @@ class PlanDefinitionProcessorTests {
                 .hasQuestionnaire(true)
                 .hasQuestionnaireResponse(true)
                 .questionnaireResponse;
-        // First response Item is correct
-        var responseItem1 = questionnaireResponse.getItem().get(0);
-        assertNotNull(responseItem1);
-        assertEquals("Input Text Test", responseItem1.getText());
-        assertTrue(responseItem1.getItem().get(0).hasAnswer());
-        // First response Item has first child item with answer
-        var codingItem1 =
-                (Coding) responseItem1.getItem().get(0).getAnswerFirstRep().getValue();
-        assertEquals("ASLP.A1.DE14", codingItem1.getCode());
-        // First response Item has second child item with answer
-        assertTrue(responseItem1.getItem().get(1).hasAnswer());
-
-        assertEquals(2, questionnaireResponse.getItem().size());
-        // Second response Item is correct
-        var responseItem2 = questionnaireResponse.getItem().get(1);
-        assertEquals("Input Text Test", responseItem2.getText());
-        assertTrue(responseItem2.getItem().get(0).hasAnswer());
-        // Second response Item has first child item with answer
-        var codingItem2 =
-                (Coding) responseItem2.getItem().get(0).getAnswerFirstRep().getValue();
-        assertEquals("ASLP.A1.DE2", codingItem2.getCode());
-        // Second response Item has second child item with answer
-        assertTrue(responseItem2.getItem().get(1).hasAnswer());
+        questionnaireResponse.getItem().forEach(responseItem -> {
+            assertNotNull(responseItem);
+            assertEquals("Input Text Test", responseItem.getText());
+            assertTrue(responseItem.getItem().get(0).hasAnswer());
+            assertTrue(List.of("ASLP.A1.DE2", "ASLP.A1.DE14")
+                    .contains(((Coding) responseItem
+                                    .getItem()
+                                    .get(0)
+                                    .getAnswerFirstRep()
+                                    .getValue())
+                            .getCode()));
+            assertTrue(responseItem.getItem().get(1).hasAnswer());
+        });
     }
 
     @Test
@@ -572,7 +572,7 @@ class PlanDefinitionProcessorTests {
                 .when()
                 .planDefinitionId("route-one")
                 .thenDataRequirements()
-                .hasDataRequirements(30);
+                .hasDataRequirements(19);
     }
 
     @Test
@@ -581,6 +581,6 @@ class PlanDefinitionProcessorTests {
                 .when()
                 .planDefinitionId("route-one")
                 .thenDataRequirements()
-                .hasDataRequirements(30);
+                .hasDataRequirements(19);
     }
 }

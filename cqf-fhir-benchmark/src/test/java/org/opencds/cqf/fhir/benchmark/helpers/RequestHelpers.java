@@ -66,46 +66,28 @@ public class RequestHelpers {
             var planDefinitionUrl = modelResolver.resolvePath(planDefinition, "url");
             if (planDefinitionUrl == null) {
                 var url = PLANDEFINITION_URL + planDefinition.getIdElement().getIdPart();
-                IBaseDatatype urlType;
-                switch (fhirVersion) {
-                    case DSTU3:
-                        urlType = new org.hl7.fhir.dstu3.model.StringType(url);
-                        break;
-                    case R4:
-                        urlType = new org.hl7.fhir.r4.model.CanonicalType(url);
-                        break;
-                    case R5:
-                        urlType = new org.hl7.fhir.r5.model.CanonicalType(url);
-                        break;
-
-                    default:
-                        urlType = null;
-                        break;
-                }
+                IBaseDatatype urlType =
+                        switch (fhirVersion) {
+                            case DSTU3 -> new org.hl7.fhir.dstu3.model.StringType(url);
+                            case R4 -> new org.hl7.fhir.r4.model.CanonicalType(url);
+                            case R5 -> new org.hl7.fhir.r5.model.CanonicalType(url);
+                            default -> null;
+                        };
                 modelResolver.setValue(planDefinition, "url", urlType);
             }
         } catch (Exception e) {
             // Do nothing
         }
-        IBaseDatatype userLanguage;
-        switch (fhirVersion) {
-            case DSTU3:
-                userLanguage = new org.hl7.fhir.dstu3.model.CodeableConcept(
-                        new org.hl7.fhir.dstu3.model.Coding("test", "test", "test"));
-                break;
-            case R4:
-                userLanguage = new org.hl7.fhir.r4.model.CodeableConcept(
-                        new org.hl7.fhir.r4.model.Coding("test", "test", "test"));
-                break;
-            case R5:
-                userLanguage = new org.hl7.fhir.r5.model.CodeableConcept(
-                        new org.hl7.fhir.r5.model.Coding("test", "test", "test"));
-                break;
-
-            default:
-                userLanguage = null;
-                break;
-        }
+        IBaseDatatype userLanguage =
+                switch (fhirVersion) {
+                    case DSTU3 -> new org.hl7.fhir.dstu3.model.CodeableConcept(
+                            new org.hl7.fhir.dstu3.model.Coding("test", "test", "test"));
+                    case R4 -> new org.hl7.fhir.r4.model.CodeableConcept(
+                            new org.hl7.fhir.r4.model.Coding("test", "test", "test"));
+                    case R5 -> new org.hl7.fhir.r5.model.CodeableConcept(
+                            new org.hl7.fhir.r5.model.Coding("test", "test", "test"));
+                    default -> null;
+                };
         return new org.opencds.cqf.fhir.cr.plandefinition.apply.ApplyRequest(
                 planDefinition,
                 Ids.newId(fhirVersion, Ids.ensureIdType(PATIENT_ID, "Patient")),
@@ -151,7 +133,6 @@ public class RequestHelpers {
         return new PopulateRequest(
                 questionnaire,
                 Ids.newId(fhirVersion, Ids.ensureIdType(PATIENT_ID, "Patient")),
-                null,
                 null,
                 null,
                 null,

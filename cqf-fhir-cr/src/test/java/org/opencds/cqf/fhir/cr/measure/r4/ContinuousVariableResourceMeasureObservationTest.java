@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.Period;
+import org.hl7.fhir.r4.model.MeasureReport;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 
@@ -161,7 +162,7 @@ public class ContinuousVariableResourceMeasureObservationTest {
     @Test
     void continuousVariableResourceMeasureObservationEncounterBasisCount() {
 
-        GIVEN_ENCOUNTER_BASIS
+        final MeasureReport report = GIVEN_ENCOUNTER_BASIS
                 .when()
                 .measureId("ContinuousVariableResourceMeasureObservationEncounterBasisCount")
                 .evaluate()
@@ -180,7 +181,6 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .hasCount(11)
                 .up()
                 .hasScore("11.0")
-                // LUKETODO:  resolve this since Justin answered my question:
                 .stratifierById("stratifier-age")
                 .hasStratumCount(3)
                 .firstStratum()
@@ -189,6 +189,7 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .up()
                 .stratumByPosition(2)
                 .hasValue(Integer.toString(EXPECTED_ENCOUNTER_BASIS_AGE_STRATUM_2))
+                // LUKETODO:  assert counts for each stratrum
                 .hasScore("4.0")
                 .up()
                 .stratumByPosition(3)
@@ -198,6 +199,8 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .up()
                 .up()
                 .report();
+
+        System.out.println("report = " + report);
     }
 
     @Test
@@ -338,7 +341,7 @@ public class ContinuousVariableResourceMeasureObservationTest {
     @Test
     void continuousVariableResourceMeasureObservationEncounterBasisMin() {
 
-        GIVEN_ENCOUNTER_BASIS
+        final MeasureReport report = GIVEN_ENCOUNTER_BASIS
                 .when()
                 .measureId("ContinuousVariableResourceMeasureObservationEncounterBasisMin")
                 .evaluate()

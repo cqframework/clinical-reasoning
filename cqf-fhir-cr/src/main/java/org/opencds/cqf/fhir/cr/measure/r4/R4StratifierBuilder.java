@@ -322,6 +322,10 @@ class R4StratifierBuilder {
             sgpc.setCount(0);
             return;
         }
+
+        // LUKETODO:  this is where we do the intersection, but we need to capture the results instead of just the count
+        // LUKETODO:  we may be missing a Def object, like a StratumDef, and then use it to retain this intersection
+
         // intersect population subjects to stratifier.value subjects
         Set<String> intersection = new HashSet<>(subjectIds);
         intersection.retainAll(popSubjectIds);

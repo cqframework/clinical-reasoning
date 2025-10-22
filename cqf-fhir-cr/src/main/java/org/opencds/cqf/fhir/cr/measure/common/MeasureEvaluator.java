@@ -338,30 +338,23 @@ public class MeasureEvaluator {
                 // only measureObservations that intersect with finalized measure-population results should be retained
                 pruneObservationResources(
                         measurePopulationObservation.getResources(), measurePopulation, measurePopulationObservation);
-                // what about subjects?
-                // LUKETODO:  think about this
                 if (measurePopulation != null) {
                     pruneObservationSubjectResources(
                             measurePopulation.subjectResources, measurePopulationObservation.getSubjectResources());
                 }
             }
         }
-        // measure Observation
-        // source expression result population.id-function-name?
-        // LUKETODO:  think about this
-        // retainAll MeasureObservations found in MeasurePopulation
-        // LUKETODO:  do we need to do a retainAll() call here?
-
     }
+
     /**
      * Removes observation entries from measureObservation if their keys
-     * are not found in the corresponding measurePopulation set.
+     * are not found in the corresponding criteriaReference set.
      */
     @SuppressWarnings("unchecked")
     public void pruneObservationSubjectResources(
-            Map<String, Set<Object>> measurePopulation, Map<String, Set<Object>> measureObservation) {
+            Map<String, Set<Object>> criteriaReference, Map<String, Set<Object>> measureObservation) {
 
-        if (measurePopulation == null || measureObservation == null) {
+        if (criteriaReference == null || measureObservation == null) {
             return;
         }
 
@@ -375,7 +368,7 @@ public class MeasureEvaluator {
             Set<Map<Object, Object>> obsSet = (Set<Map<Object, Object>>) (Set<?>) entry.getValue();
 
             // get valid population values for this subject
-            Set<Object> validPopulation = measurePopulation.get(subjectId);
+            Set<Object> validPopulation = criteriaReference.get(subjectId);
 
             if (validPopulation == null || validPopulation.isEmpty()) {
                 // no population for this subject -> drop the whole subject

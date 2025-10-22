@@ -104,8 +104,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         // Populations
         var populationsWithCriteriaReference = group.getPopulation().stream()
                 .peek(R4MeasureDefBuilder::checkId)
-                // LUKETODO:  does Justin mean just renaming the method?
-                .map(population -> buildPopulationDefWithCriteriaReference(population, criteriaReference))
+                .map(population -> buildPopulationDef(population, criteriaReference))
                 .toList();
 
         final Optional<PopulationDef> optPopulationDefDateOfCompliance =
@@ -140,8 +139,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
     }
 
     @Nonnull
-    private PopulationDef buildPopulationDefWithCriteriaReference(
-            MeasureGroupPopulationComponent population, String criteriaReference) {
+    private PopulationDef buildPopulationDef(MeasureGroupPopulationComponent population, String criteriaReference) {
         return new PopulationDef(
                 population.getId(),
                 conceptToConceptDef(population.getCode()),

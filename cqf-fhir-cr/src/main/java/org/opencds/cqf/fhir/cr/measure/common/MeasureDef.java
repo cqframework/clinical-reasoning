@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
+import jakarta.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -8,14 +9,16 @@ import java.util.StringJoiner;
 public class MeasureDef {
 
     private final String id;
+
+    @Nullable
     private final String url;
+
     private final String version;
     private final List<GroupDef> groups;
     private final List<SdeDef> sdes;
     private final List<String> errors;
 
-    // LUKETODO:  make URL nullable and have an ID-only constructor?
-    public static MeasureDef fromIdAndUrl(String id, String url) {
+    public static MeasureDef fromIdAndUrl(String id, @Nullable String url) {
         return new MeasureDef(id, url, null, List.of(), List.of());
     }
 
@@ -33,6 +36,7 @@ public class MeasureDef {
         return this.id;
     }
 
+    @Nullable
     public String url() {
         return this.url;
     }

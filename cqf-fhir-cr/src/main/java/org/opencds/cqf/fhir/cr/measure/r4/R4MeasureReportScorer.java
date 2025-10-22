@@ -382,6 +382,7 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
         }
     }
 
+    // LUKETODO:  add more context to this comment
     /*
     the existing algo takes the measure-observation population from the group definition and goes through all resources to get the quantities
     MeasurePopulationType.MEASUREOBSERVATION
@@ -422,6 +423,7 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
             return stratumValueAsInt == rawValueFromStratifierAsInt;
         }
 
+        // LUKETODO: consider dates and others
         if (rawValueFromStratifier instanceof Enumeration<?> rawValueFromStratifierAsEnumeration) {
             return stratumValueAsString.equals(rawValueFromStratifierAsEnumeration.asStringValue());
         }

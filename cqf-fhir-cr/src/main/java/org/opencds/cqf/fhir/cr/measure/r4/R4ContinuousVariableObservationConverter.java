@@ -5,7 +5,12 @@ import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Quantity;
 import org.opencds.cqf.fhir.cr.measure.common.ContinuousVariableObservationConverter;
 
-public class R4ContinuousVariableObservationConverter implements ContinuousVariableObservationConverter<Observation> {
+/**
+ * R4 version of {@link ContinuousVariableObservationConverter}, with the singleton pattern
+ * enforced by an enum.
+ */
+public enum R4ContinuousVariableObservationConverter implements ContinuousVariableObservationConverter<Observation> {
+    INSTANCE;
 
     @Override
     public Observation wrapResultAsObservation(String id, String observationName, Object result) {

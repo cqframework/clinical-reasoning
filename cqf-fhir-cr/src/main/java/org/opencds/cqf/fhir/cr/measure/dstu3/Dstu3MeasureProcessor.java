@@ -124,7 +124,11 @@ public class Dstu3MeasureProcessor {
         // populate results from Library $evaluate
         if (!subjects.isEmpty()) {
             var results = measureProcessorUtils.getEvaluationResults(
-                    subjectIds, zonedMeasurementPeriod, context, measureLibraryIdEngineDetails);
+                subjectIds,
+                zonedMeasurementPeriod,
+                context,
+                measureLibraryIdEngineDetails,
+                Dstu3ContinuousVariableObservationConverter.INSTANCE);
 
             // Process Criteria Expression Results
             measureProcessorUtils.processResults(

@@ -16,6 +16,7 @@ import org.hl7.elm.r1.IntervalTypeSpecifier;
 import org.hl7.elm.r1.NamedTypeSpecifier;
 import org.hl7.elm.r1.ParameterDef;
 import org.hl7.elm.r1.VersionedIdentifier;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.EvaluationResultsForMultiLib;
@@ -262,13 +263,16 @@ public class MeasureProcessorUtils {
      * @param zonedMeasurementPeriod offset defined measurement period for evaluation
      * @param context cql engine context
      * @param multiLibraryIdMeasureEngineDetails container for engine, library and measure IDs
+     * @param continuousVariableObservationConverter used for continuous variable scoring FHIR version
+     *                                               specific
      * @return CQL results for Library defined in the Measure resource
      */
-    public CompositeEvaluationResultsPerMeasure getEvaluationResults(
+    public <T extends IBaseResource>CompositeEvaluationResultsPerMeasure getEvaluationResults(
             List<String> subjectIds,
             ZonedDateTime zonedMeasurementPeriod,
             CqlEngine context,
-            MultiLibraryIdMeasureEngineDetails multiLibraryIdMeasureEngineDetails) {
+            MultiLibraryIdMeasureEngineDetails multiLibraryIdMeasureEngineDetails,
+            ContinuousVariableObservationConverter<T> continuousVariableObservationConverter) {
 
         // measure -> subject -> results
         var resultsBuilder = CompositeEvaluationResultsPerMeasure.builder();
@@ -316,7 +320,8 @@ public class MeasureProcessorUtils {
                                     measureDefs,
                                     libraryVersionedIdentifier,
                                     evaluationResult,
-                                    subjectTypePart);
+                                    subjectTypePart,
+                                    continuousVariableObservationConverter);
 
                     resultsBuilder.addResults(measureDefs, subjectId, evaluationResult, measureObservationResults);
 

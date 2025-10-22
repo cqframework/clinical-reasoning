@@ -5,8 +5,14 @@ import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Quantity;
 import org.opencds.cqf.fhir.cr.measure.common.ContinuousVariableObservationConverter;
 
-public class Dstu3ContinuousVariableObservationConverter
+/**
+ * DSTU3 version of {@link ContinuousVariableObservationConverter}, with the singleton pattern
+ * enforced by an enum.
+ */
+public enum Dstu3ContinuousVariableObservationConverter
         implements ContinuousVariableObservationConverter<Observation> {
+
+    INSTANCE;
 
     @Override
     public Observation wrapResultAsObservation(String id, String observationName, Object result) {

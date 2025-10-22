@@ -168,14 +168,12 @@ public class MeasureEvaluator {
         }
 
         // Add Resources from SubjectId
-        int i = 0;
         for (Object resource : evaluatePopulationCriteria(
                 subjectType, matchingResult, evaluationResult, inclusionDef.getEvaluatedResources())) {
             // hashmap instead of set
             inclusionDef.addResource(subjectId, resource);
-
-            i++;
         }
+
         return inclusionDef;
     }
 

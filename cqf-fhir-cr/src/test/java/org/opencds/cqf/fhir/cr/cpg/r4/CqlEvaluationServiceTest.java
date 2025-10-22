@@ -12,6 +12,7 @@ import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 class CqlEvaluationServiceTest {
@@ -49,6 +50,40 @@ class CqlEvaluationServiceTest {
     }
 
     @Test
+    @DisplayName("Test that the content is evaluated when the repository does not contain the source CQL")
+    void libraryEvaluationService_inlineAsthma_contentOnlySource() {
+        var content =
+                """
+        library asthmatest version '1.0.0'
+
+        using FHIR version '4.0.1'
+
+        include FHIRHelpers version '4.0.1'
+
+        codesystem "SNOMED": 'http://snomed.info/sct'
+
+        code "Asthma": '195967001' from "SNOMED"
+
+        context Patient
+
+        define "Asthma Diagnosis":
+          [Condition: "Asthma"]
+
+        define "Has Asthma Diagnosis":
+          exists("Asthma Diagnosis")
+        """;
+        var when = Library.given()
+                .repositoryFor("libraryevalcomplexdeps")
+                .when()
+                .subject("Patient/SimplePatient")
+                .content(content)
+                .evaluateCql();
+        var results = when.then().parameters();
+        assertTrue(results.hasParameter());
+        assertEquals(3, results.getParameter().size());
+    }
+
+    @Test
     void libraryEvaluationService_contentAndExpression() {
         var content =
                 """
@@ -70,7 +105,7 @@ class CqlEvaluationServiceTest {
 
         define "Denominator": "Initial Population"
 
-        define "Numerator": "Denominator"";
+        define "Numerator": "Denominator"
         """;
         var when = Library.given()
                 .repositoryFor("libraryeval")

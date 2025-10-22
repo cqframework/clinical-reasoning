@@ -267,7 +267,7 @@ public class MeasureProcessorUtils {
      *                                               specific
      * @return CQL results for Library defined in the Measure resource
      */
-    public <T extends IBaseResource>CompositeEvaluationResultsPerMeasure getEvaluationResults(
+    public <T extends IBaseResource> CompositeEvaluationResultsPerMeasure getEvaluationResults(
             List<String> subjectIds,
             ZonedDateTime zonedMeasurementPeriod,
             CqlEngine context,

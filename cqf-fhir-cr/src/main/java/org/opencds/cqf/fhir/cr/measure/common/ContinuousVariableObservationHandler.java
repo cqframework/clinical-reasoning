@@ -137,15 +137,14 @@ public class ContinuousVariableObservationHandler {
         final Set<Object> evaluatedResources = new HashSet<>();
 
         for (Object result : resultsIter) {
-            final ObservationEvaluationResult observationResult =
+            final ExpressionResult observationResult =
                     evaluateObservationCriteria(result, observationExpression, groupDef.isBooleanBasis(), context);
 
             var observationId = expressionName + "-" + index;
             // wrap result in Observation resource to avoid duplicate results data loss
             // in set object
-            var observation =
-                continuousVariableObservationConverter.wrapResultAsObservation(
-                    observationId, observationId, observationResult.result());
+            var observation = continuousVariableObservationConverter.wrapResultAsObservation(
+                    observationId, observationId, observationResult.value());
             // add function results to existing EvaluationResult under new expression
             // name
             // need a way to capture input parameter here too, otherwise we have no way
@@ -173,7 +172,7 @@ public class ContinuousVariableObservationHandler {
      * @return cql results for subject requested
      */
     @SuppressWarnings({"deprecation", "removal"})
-    public static ObservationEvaluationResult evaluateObservationCriteria(
+    public static ExpressionResult evaluateObservationCriteria(
             Object resource, String criteriaExpression, boolean isBooleanBasis, CqlEngine context) {
 
         var ed = Libraries.resolveExpressionRef(
@@ -209,7 +208,7 @@ public class ContinuousVariableObservationHandler {
 
         validateObservationResult(resource, result);
 
-        return new ObservationEvaluationResult(result, evaluatedResources);
+        return new ExpressionResult(result, evaluatedResources);
     }
 
     private static Optional<ExpressionResult> tryGetExpressionResult(

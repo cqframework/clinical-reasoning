@@ -9,9 +9,7 @@ import org.opencds.cqf.fhir.cr.measure.common.ContinuousVariableObservationConve
  * DSTU3 version of {@link ContinuousVariableObservationConverter}, with the singleton pattern
  * enforced by an enum.
  */
-public enum Dstu3ContinuousVariableObservationConverter
-        implements ContinuousVariableObservationConverter<Observation> {
-
+public enum Dstu3ContinuousVariableObservationConverter implements ContinuousVariableObservationConverter<Observation> {
     INSTANCE;
 
     @Override

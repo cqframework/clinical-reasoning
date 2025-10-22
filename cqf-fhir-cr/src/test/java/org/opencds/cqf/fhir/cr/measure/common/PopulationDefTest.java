@@ -15,8 +15,8 @@ class PopulationDefTest {
         final PopulationDef popDef1 = new PopulationDef("one", null, null, null);
         final PopulationDef popDef2 = new PopulationDef("two", null, null, null);
 
-        popDef1.addResource("string1");
-        popDef2.addResource("string1");
+        popDef1.addResource("subj1", "string1");
+        popDef2.addResource("subj1", "string1");
 
         popDef1.getResources().retainAll(popDef2.getResources());
         assertEquals(1, popDef1.getResources().size());
@@ -28,8 +28,8 @@ class PopulationDefTest {
         final PopulationDef popDef1 = new PopulationDef("one", null, null, null);
         final PopulationDef popDef2 = new PopulationDef("two", null, null, null);
 
-        popDef1.addResource(123);
-        popDef2.addResource(123);
+        popDef1.addResource("subj1", 123);
+        popDef2.addResource("subj1", 123);
 
         popDef1.getResources().retainAll(popDef2.getResources());
         assertEquals(1, popDef1.getResources().size());
@@ -44,8 +44,8 @@ class PopulationDefTest {
         final Encounter enc1a = (Encounter) new Encounter().setId(new IdType(ResourceType.Encounter.name(), "enc1"));
         final Encounter enc1b = (Encounter) new Encounter().setId(new IdType(ResourceType.Encounter.name(), "enc1"));
 
-        popDef1.addResource(enc1a);
-        popDef2.addResource(enc1b);
+        popDef1.addResource("subj1", enc1a);
+        popDef2.addResource("subj1", enc1b);
 
         popDef1.getResources().retainAll(popDef2.getResources());
 

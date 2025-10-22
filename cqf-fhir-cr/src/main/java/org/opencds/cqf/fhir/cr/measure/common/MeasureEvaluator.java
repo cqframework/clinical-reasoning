@@ -171,15 +171,10 @@ public class MeasureEvaluator {
         int i = 0;
         for (Object resource : evaluatePopulationCriteria(
                 subjectType, matchingResult, evaluationResult, inclusionDef.getEvaluatedResources())) {
-            inclusionDef.addResource(resource);
             // hashmap instead of set
             inclusionDef.addResource(subjectId, resource);
 
             i++;
-        }
-        // If SubjectId Added Resources to Population
-        if (i > 0) {
-            inclusionDef.addSubject(subjectId);
         }
         return inclusionDef;
     }
@@ -213,11 +208,11 @@ public class MeasureEvaluator {
         numerator = evaluatePopulationMembership(subjectType, subjectId, numerator, evaluationResult);
         if (applyScoring) {
             // remove denominator values not in IP
-            denominator.getResources().retainAll(initialPopulation.getResources());
-            denominator.getSubjects().retainAll(initialPopulation.getSubjects());
+            denominator.retainAllResources(initialPopulation.getResources());
+            denominator.retainAllSubjects(initialPopulation.getSubjects());
             // remove numerator values if not in Denominator
-            numerator.getSubjects().retainAll(denominator.getSubjects());
-            numerator.getResources().retainAll(denominator.getResources());
+            numerator.retainAllSubjects(denominator.getSubjects());
+            numerator.retainAllResources(denominator.getResources());
         }
         // Evaluate Exclusions and Exception Populations
         if (denominatorExclusion != null) {
@@ -237,29 +232,29 @@ public class MeasureEvaluator {
             // Remove Subject and Resource Exclusions
             if (denominatorExclusion != null && applyScoring) {
                 // numerator should not include den-exclusions
-                numerator.getSubjects().removeAll(denominatorExclusion.getSubjects());
+                numerator.removeAllSubjects(denominatorExclusion.getSubjects());
                 numerator.removeOverlaps(denominatorExclusion.getSubjectResources());
 
                 // verify exclusion results are found in denominator
-                denominatorExclusion.getResources().retainAll(denominator.getResources());
-                denominatorExclusion.getSubjects().retainAll(denominator.getSubjects());
+                denominatorExclusion.retainAllResources(denominator.getResources());
+                denominatorExclusion.retainAllSubjects(denominator.getSubjects());
                 denominatorExclusion.retainOverlaps(denominator.getSubjectResources());
             }
             if (numeratorExclusion != null && applyScoring) {
                 // verify results are in Numerator
-                numeratorExclusion.getResources().retainAll(numerator.getResources());
-                numeratorExclusion.getSubjects().retainAll(numerator.getSubjects());
+                numeratorExclusion.retainAllResources(numerator.getResources());
+                numeratorExclusion.retainAllSubjects(numerator.getSubjects());
                 numeratorExclusion.retainOverlaps(numerator.getSubjectResources());
             }
             if (denominatorException != null && applyScoring) {
                 // Remove Subjects Exceptions that are present in Numerator
-                denominatorException.getSubjects().removeAll(numerator.getSubjects());
-                denominatorException.getResources().removeAll(numerator.getResources());
+                denominatorException.removeAllSubjects(numerator.getSubjects());
+                denominatorException.removeAllResources(numerator.getResources());
                 denominatorException.removeOverlaps(numerator.getSubjectResources());
 
                 // verify exception results are found in denominator
-                denominatorException.getResources().retainAll(denominator.getResources());
-                denominatorException.getSubjects().retainAll(denominator.getSubjects());
+                denominatorException.retainAllResources(denominator.getResources());
+                denominatorException.retainAllSubjects(denominator.getSubjects());
                 denominatorException.retainOverlaps(denominator.getSubjectResources());
             }
         } else {
@@ -268,29 +263,30 @@ public class MeasureEvaluator {
             // * This is why we only remove resources and not subjects too for `Resource Basis`.
             if (denominatorExclusion != null && applyScoring) {
                 // remove any denominator-exception subjects/resources found in Numerator
-                numerator.getResources().removeAll(denominatorExclusion.getResources());
+                numerator.removeAllResources(denominatorExclusion.getResources());
                 numerator.removeOverlaps(denominatorExclusion.getSubjectResources());
                 // verify exclusion results are found in denominator
-                denominatorExclusion.getResources().retainAll(denominator.getResources());
+                denominatorExclusion.retainAllResources(denominator.getResources());
                 denominatorExclusion.retainOverlaps(denominator.getSubjectResources());
             }
             if (numeratorExclusion != null && applyScoring) {
                 // verify exclusion results are found in numerator results, otherwise remove
-                numeratorExclusion.getResources().retainAll(numerator.getResources());
+                numeratorExclusion.retainAllResources(numerator.getResources());
                 numeratorExclusion.retainOverlaps(numerator.getSubjectResources());
             }
             if (denominatorException != null && applyScoring) {
                 // Remove Resource Exceptions that are present in Numerator
-                denominatorException.getResources().removeAll(numerator.getResources());
+                denominatorException.removeAllResources(numerator.getResources());
                 denominatorException.removeOverlaps(numerator.getSubjectResources());
                 // verify exception results are found in denominator
-                denominatorException.getResources().retainAll(denominator.getResources());
+                denominatorException.retainAllResources(denominator.getResources());
                 denominatorException.retainOverlaps(denominator.getSubjectResources());
             }
         }
         if (reportType.equals(MeasureReportType.INDIVIDUAL) && dateOfCompliance != null) {
             var doc = evaluateDateOfCompliance(dateOfCompliance, evaluationResult);
-            dateOfCompliance.addResource(doc);
+            // LUKETODO:  similarly, we'd have to add the subject as well here
+            dateOfCompliance.addResource(subjectId, doc);
         }
     }
 
@@ -314,8 +310,8 @@ public class MeasureEvaluator {
         measurePopulation = evaluatePopulationMembership(subjectType, subjectId, measurePopulation, evaluationResult);
         if (measurePopulation != null && initialPopulation != null && applyScoring) {
             // verify initial-population are in measure-population
-            measurePopulation.getResources().retainAll(initialPopulation.getResources());
-            measurePopulation.getSubjects().retainAll(initialPopulation.getSubjects());
+            measurePopulation.retainAllResources(initialPopulation.getResources());
+            measurePopulation.retainAllSubjects(initialPopulation.getSubjects());
         }
 
         if (measurePopulationExclusion != null) {
@@ -323,8 +319,8 @@ public class MeasureEvaluator {
                     subjectType, subjectId, groupDef.getSingle(MEASUREPOPULATIONEXCLUSION), evaluationResult);
             if (applyScoring && measurePopulation != null) {
                 // verify exclusions are in measure-population
-                measurePopulationExclusion.getResources().retainAll(measurePopulation.getResources());
-                measurePopulationExclusion.getSubjects().retainAll(measurePopulation.getSubjects());
+                measurePopulationExclusion.retainAllResources(measurePopulation.getResources());
+                measurePopulationExclusion.retainAllSubjects(measurePopulation.getSubjects());
             }
         }
         if (measurePopulationObservation != null) {

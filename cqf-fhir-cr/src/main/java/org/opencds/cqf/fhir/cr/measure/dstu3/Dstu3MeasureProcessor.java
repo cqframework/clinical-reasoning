@@ -169,7 +169,7 @@ public class Dstu3MeasureProcessor {
                     for (Object resource : resourcesForSubject) {
                         final ObservationEvaluationResult observationResult = evaluateObservationCriteria(
                                 resource, measureObservation.expression(), groupDef.isBooleanBasis(), context);
-                        measureObservation.addResource(observationResult.result());
+                        measureObservation.addResource(subjectId, observationResult.result());
                         measureObservation.addResource(subjectId, observationResult.evaluatedResources());
                     }
                 }

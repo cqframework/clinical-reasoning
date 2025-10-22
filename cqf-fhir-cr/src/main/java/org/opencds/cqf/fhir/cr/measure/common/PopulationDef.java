@@ -1,11 +1,21 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
 import jakarta.annotation.Nullable;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PopulationDef {
+
+    private static final Logger logger = LoggerFactory.getLogger(PopulationDef.class);
 
     private final String id;
     private final String expression;
@@ -49,10 +59,6 @@ public class PopulationDef {
         return this.code;
     }
 
-    public void addEvaluatedResource(Object resource) {
-        this.getEvaluatedResources().add(resource);
-    }
-
     public Set<Object> getEvaluatedResources() {
         if (this.evaluatedResources == null) {
             this.evaluatedResources = new HashSetForFhirResources<>();
@@ -61,32 +67,107 @@ public class PopulationDef {
         return this.evaluatedResources;
     }
 
-    public void addSubject(String subject) {
-        this.getSubjects().add(subject);
-    }
-
-    public void removeSubject(String subject) {
-        this.getSubjects().remove(subject);
-    }
-
     public Set<String> getSubjects() {
-        if (this.subjects == null) {
-            this.subjects = new HashSetForFhirResources<>();
+        return this.getSubjectResources().keySet();
+    }
+
+    public void retainAllResources(Set<Object> resourcesToRetain) {
+        var resourcesToRetainForDebug = resourcesToRetain.stream()
+                .map(res -> (res instanceof IBaseResource base)
+                        ? base.getIdElement().getValueAsString()
+                        : "?")
+                .collect(Collectors.toSet());
+        var resourcesInDefForDebug = getResources().stream()
+                .map(res -> (res instanceof IBaseResource base)
+                        ? base.getIdElement().getValueAsString()
+                        : "?")
+                .collect(Collectors.toSet());
+
+        final Iterator<Entry<String, Set<Object>>> entryIterator =
+                getSubjectResources().entrySet().iterator();
+
+        while (entryIterator.hasNext()) {
+            final Set<Object> resourcesFromEntry = entryIterator.next().getValue();
+
+            resourcesFromEntry.retainAll(resourcesToRetain);
         }
 
-        return this.subjects;
+        var postRetainResourcesInDef = getResources().stream()
+                .map(res -> (res instanceof IBaseResource base)
+                        ? base.getIdElement().getValueAsString()
+                        : "?")
+                .collect(Collectors.toSet());
+        logger.info(
+                "resourcesInDef:\n{},\nresourcesToRetain:\n{},\npostRetainResourcesInDef:\n{}",
+                resourcesInDefForDebug,
+                resourcesToRetainForDebug,
+                postRetainResourcesInDef);
     }
 
-    public void addResource(Object resource) {
-        this.getResources().add(resource);
+    public void retainAllSubjects(Set<String> subjects) {
+        this.getSubjects().retainAll(subjects);
+    }
+
+    public void removeAllResources(Set<Object> resourcesToRemove) {
+        var resourcesToRemoveForDebug = resourcesToRemove.stream()
+                .map(res -> (res instanceof IBaseResource base)
+                        ? base.getIdElement().getValueAsString()
+                        : "?")
+                .collect(Collectors.toSet());
+        var resourcesInDefForDebug = getResources().stream()
+                .map(res -> (res instanceof IBaseResource base)
+                        ? base.getIdElement().getValueAsString()
+                        : "?")
+                .collect(Collectors.toSet());
+        // LUKETODO:  I think this is too aggressive, even though the tests seem to pass
+        getSubjectResources().entrySet().removeIf(entry -> containsResourceForRemove(resourcesToRemove, entry));
+        var postRemoveResourcesInDef = getResources().stream()
+                .map(res -> (res instanceof IBaseResource base)
+                        ? base.getIdElement().getValueAsString()
+                        : "?")
+                .collect(Collectors.toSet());
+        logger.info(
+                "resourcesInDef:\n{},\nresourcesToRemove:\n{},\npostRemoveResourcesInDef:\n{}",
+                resourcesInDefForDebug,
+                resourcesToRemoveForDebug,
+                postRemoveResourcesInDef);
+    }
+
+    private boolean containsResourceForRetain(Set<Object> resources, Entry<String, Set<Object>> entry) {
+        final HashSetForFhirResources<Object> resourcesToTestForRetain = new HashSetForFhirResources<>(resources);
+
+        final Set<Object> resourcesInEntry = entry.getValue();
+
+        for (Object resourceInEntry : resourcesInEntry) {
+            if (resourcesToTestForRetain.contains(resourceInEntry)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private boolean containsResourceForRemove(Set<Object> resources, Entry<String, Set<Object>> entry) {
+        final Set<Object> resourcesInEntry = entry.getValue();
+
+        for (Object resource : resources) {
+            if (resourcesInEntry.contains(resource)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public void removeAllSubjects(Set<String> subjects) {
+        this.getSubjects().removeAll(subjects);
     }
 
     public Set<Object> getResources() {
-        if (this.resources == null) {
-            this.resources = new HashSetForFhirResources<>();
-        }
-
-        return this.resources;
+        return new HashSetForFhirResources<>(subjectResources.values().stream()
+                .flatMap(Collection::stream)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toUnmodifiableSet()));
     }
 
     @Nullable

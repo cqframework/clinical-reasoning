@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.cr.measure.common;
 
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import jakarta.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -29,7 +30,7 @@ public class ContinuousVariableObservationHandler {
         // static class with private constructor
     }
 
-    static <T extends IBaseResource> MeasureObservationResults continuousVariableEvaluation(
+    static <T extends IBaseResource> List<EvaluationResult> continuousVariableEvaluation(
             CqlEngine context,
             List<MeasureDef> measureDefs,
             VersionedIdentifier libraryIdentifier,
@@ -46,12 +47,12 @@ public class ContinuousVariableObservationHandler {
 
         if (measureDefsWithMeasureObservations.isEmpty()) {
             // Don't need to do anything if there are no measure observations to process
-            return MeasureObservationResults.EMPTY;
+            return List.of();
         }
 
         final boolean hasLibraryInitialized = LibraryInitHandler.initLibrary(context, libraryIdentifier);
 
-        final List<MeasureObservationResult> finalResults = new ArrayList<>();
+        final List<EvaluationResult> finalResults = new ArrayList<>();
 
         try {
             // one Library may be linked to multiple Measures
@@ -85,14 +86,14 @@ public class ContinuousVariableObservationHandler {
             }
         }
 
-        return new MeasureObservationResults(finalResults);
+        return finalResults;
     }
 
     /**
      * For a given measure observation population, do an ad-hoc function evaluation and
      * accumulate the results that will be subsequently added to the CQL evaluation result.
      */
-    private static <T extends IBaseResource> MeasureObservationResult processMeasureObservation(
+    private static <T extends IBaseResource> EvaluationResult processMeasureObservation(
             CqlEngine context,
             EvaluationResult evaluationResult,
             String subjectTypePart,
@@ -121,7 +122,7 @@ public class ContinuousVariableObservationHandler {
                 tryGetExpressionResult(criteriaExpressionInput, evaluationResult);
 
         if (optExpressionResult.isEmpty()) {
-            return MeasureObservationResult.EMPTY;
+            return new EvaluationResult();
         }
 
         final ExpressionResult expressionResult = optExpressionResult.get();
@@ -157,7 +158,7 @@ public class ContinuousVariableObservationHandler {
             index++;
         }
 
-        return new MeasureObservationResult(expressionName, evaluatedResources, functionResults);
+        return buildEvaluationResult(expressionName, functionResults, evaluatedResources);
     }
 
     /**
@@ -301,5 +302,16 @@ public class ContinuousVariableObservationHandler {
     // reset evaluated resources followed by a context evaluation
     private static void clearEvaluatedResources(CqlEngine context) {
         context.getState().clearEvaluatedResources();
+    }
+
+    @Nonnull
+    private static EvaluationResult buildEvaluationResult(
+            String expressionName, Map<Object, Object> functionResults, Set<Object> evaluatedResources) {
+        final EvaluationResult evaluationResultToReturn = new EvaluationResult();
+
+        evaluationResultToReturn.expressionResults.put(
+                expressionName, new ExpressionResult(functionResults, evaluatedResources));
+
+        return evaluationResultToReturn;
     }
 }

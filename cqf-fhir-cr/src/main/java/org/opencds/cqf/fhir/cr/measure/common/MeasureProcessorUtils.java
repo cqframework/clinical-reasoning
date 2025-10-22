@@ -314,7 +314,7 @@ public class MeasureProcessorUtils {
                     var measureDefs =
                             multiLibraryIdMeasureEngineDetails.getMeasureDefsForLibrary(libraryVersionedIdentifier);
 
-                    final MeasureObservationResults measureObservationResults =
+                    final List<EvaluationResult> measureObservationResults =
                             ContinuousVariableObservationHandler.continuousVariableEvaluation(
                                     context,
                                     measureDefs,

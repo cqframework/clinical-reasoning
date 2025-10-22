@@ -382,15 +382,18 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
         }
     }
 
-    // LUKETODO:  add more context to this comment
     /*
     the existing algo takes the measure-observation population from the group definition and goes through all resources to get the quantities
     MeasurePopulationType.MEASUREOBSERVATION
 
     but we don't want that:  we want to filter only resources that belong to the patients captured by each stratum
     so we want to do some sort of wizardry that involves getting the stratum values, and using those to retrieve the associated resources
+
+    so it's basically a hack to go from StratifierGroupComponent stratum value -> subject -> populationDef.subjectResources.get(subject)
+    to get Set of resources on which to do measure scoring
      */
-    // LUKETODO:  look at MeasureEvaluator and MeasureReportBuilder to see what they do regarding this:
+
+    // TODO:  LD: Integrate this algorithm with a new StratumDef that will be populated in R4StratifierBuilder
     private Set<Object> getResultsForStratum(
             PopulationDef measureObservationPopulationDef,
             StratifierDef stratifierDef,
@@ -423,7 +426,6 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
             return stratumValueAsInt == rawValueFromStratifierAsInt;
         }
 
-        // LUKETODO: consider dates and others
         if (rawValueFromStratifier instanceof Enumeration<?> rawValueFromStratifierAsEnumeration) {
             return stratumValueAsString.equals(rawValueFromStratifierAsEnumeration.asStringValue());
         }

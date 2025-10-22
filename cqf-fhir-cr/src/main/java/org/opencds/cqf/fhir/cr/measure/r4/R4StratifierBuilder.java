@@ -323,8 +323,8 @@ class R4StratifierBuilder {
             return;
         }
 
-        // LUKETODO:  this is where we do the intersection, but we need to capture the results instead of just the count
-        // LUKETODO:  we may be missing a Def object, like a StratumDef, and then use it to retain this intersection
+        // TODO: LD:  introduce a new StratumDef object to hold the results of the intersection, to
+        // be ultimately passed down to the measure scorer, instead of retaining only the count
 
         // intersect population subjects to stratifier.value subjects
         Set<String> intersection = new HashSet<>(subjectIds);

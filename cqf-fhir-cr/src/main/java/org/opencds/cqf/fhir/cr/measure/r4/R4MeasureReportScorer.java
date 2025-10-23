@@ -307,6 +307,7 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
         for (Object resource : resources) {
             if (resource instanceof Map<?, ?> map) {
                 for (Object value : map.values()) {
+                    // LUKETODO:  replace this with Quantity or QuantityHolder
                     if (value instanceof Observation obs && obs.hasValueQuantity()) {
                         quantities.add(obs.getValueQuantity());
                     }

@@ -60,8 +60,12 @@ class CompositeEvaluationResultsPerMeasureTest {
         Map<MeasureDef, Map<String, EvaluationResult>> resultsPerMeasure = composite.getResultsPerMeasure();
         Map<MeasureDef, List<String>> errorsPerMeasure = composite.getErrorsPerMeasure();
 
-        assertThrows(UnsupportedOperationException.class, () -> resultsPerMeasure.put(measureDef1, Map.of("s", er)));
+        final Map<String, EvaluationResult> evalMap = Map.of("s", er);
 
-        assertThrows(UnsupportedOperationException.class, () -> errorsPerMeasure.put(measureDef1, List.of("err")));
+        assertThrows(UnsupportedOperationException.class, () -> resultsPerMeasure.put(measureDef1, evalMap));
+
+        final List<String> evalList = List.of("err");
+
+        assertThrows(UnsupportedOperationException.class, () -> errorsPerMeasure.put(measureDef1, evalList));
     }
 }

@@ -9,6 +9,7 @@ import org.opencds.cqf.fhir.cr.measure.common.ContinuousVariableObservationConve
  * R4 version of {@link ContinuousVariableObservationConverter}, with the singleton pattern
  * enforced by an enum.
  */
+@SuppressWarnings("squid:S6548")
 public enum R4ContinuousVariableObservationConverter implements ContinuousVariableObservationConverter<Observation> {
     INSTANCE;
 

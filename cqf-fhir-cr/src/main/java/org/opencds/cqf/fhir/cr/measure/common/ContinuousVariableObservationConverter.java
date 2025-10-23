@@ -6,6 +6,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
  * Convert continuous variable scoring function-returned resources to Observations and Quantities in
  * a FHIR version specific way.
  */
+@SuppressWarnings("squid:S1135")
 public interface ContinuousVariableObservationConverter<T extends IBaseResource> {
 
     // TODO:  LD:  We need to come up with something other than an Observation to wrap FHIR Quantities

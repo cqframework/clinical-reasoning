@@ -6,6 +6,7 @@ import java.time.Period;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 
+@SuppressWarnings("squid:S2699")
 public class ContinuousVariableResourceMeasureObservationTest {
 
     public static final LocalDate ENCOUNTER_BASIS_MEASUREMENT_PERIOD_START = LocalDate.of(2024, 1, 1);

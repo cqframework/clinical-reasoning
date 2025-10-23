@@ -90,7 +90,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         this.reset();
 
         this.measure = measure;
-        this.report = this.createMeasureReport(measure, measureDef, measureReportType, subjectIds, measurementPeriod);
+        this.report = this.createMeasureReport(measure, measureReportType, subjectIds, measurementPeriod);
 
         buildGroups(measure, measureDef);
         processSdes(measure, measureDef, subjectIds);
@@ -490,11 +490,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
     }
 
     protected MeasureReport createMeasureReport(
-            Measure measure,
-            MeasureDef measureDef,
-            MeasureReportType type,
-            List<String> subjectIds,
-            Interval measurementPeriod) {
+            Measure measure, MeasureReportType type, List<String> subjectIds, Interval measurementPeriod) {
         MeasureReport report = new MeasureReport();
         report.setStatus(MeasureReport.MeasureReportStatus.fromCode("complete"));
         report.setType(org.hl7.fhir.dstu3.model.MeasureReport.MeasureReportType.fromCode(type.toCode()));

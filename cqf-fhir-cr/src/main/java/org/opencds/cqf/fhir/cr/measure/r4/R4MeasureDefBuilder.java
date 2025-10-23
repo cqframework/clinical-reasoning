@@ -102,8 +102,9 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                 getCriteriaReference(measure.getUrl(), group, optMeasureObservationPopulation.orElse(null));
 
         // Populations
+        checkIds(group);
+
         var populationsWithCriteriaReference = group.getPopulation().stream()
-                .peek(R4MeasureDefBuilder::checkId)
                 .map(population -> buildPopulationDef(population, criteriaReference))
                 .toList();
 
@@ -124,6 +125,10 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                 getImprovementNotation(measureImpNotation, groupImpNotation),
                 getPopulationBasisDef(measureBasis, groupBasis),
                 aggregateMethod);
+    }
+
+    private void checkIds(MeasureGroupComponent group) {
+        group.getPopulation().forEach(R4MeasureDefBuilder::checkId);
     }
 
     private List<PopulationDef> mergePopulations(

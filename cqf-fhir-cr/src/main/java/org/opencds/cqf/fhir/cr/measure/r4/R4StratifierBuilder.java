@@ -39,6 +39,8 @@ import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierComponentDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
+import org.opencds.cqf.fhir.cr.measure.common.StratumDef;
+import org.opencds.cqf.fhir.cr.measure.common.StratumPopulationDef;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureReportBuilder.BuilderContext;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureReportBuilder.ValueWrapper;
@@ -260,6 +262,9 @@ class R4StratifierBuilder {
             }
         }
 
+        var stratumDef = new StratumDef(stratum.getValue().getText(), new ArrayList<>());
+        stratifierDef.addStratumDef(stratumDef);
+
         // add stratum populations for stratifier
         // Group.populations
         // initial-population: subject1, subject 2
@@ -273,7 +278,7 @@ class R4StratifierBuilder {
         // ** ** initial-population: subject2
         for (MeasureGroupPopulationComponent mgpc : populations) {
             var stratumPopulation = stratum.addPopulation();
-            buildStratumPopulation(bc, stratifierDef, stratumPopulation, subjectIds, mgpc, groupDef);
+            buildStratumPopulation(bc, stratifierDef, stratumDef, stratumPopulation, subjectIds, mgpc, groupDef);
         }
     }
 
@@ -288,10 +293,14 @@ class R4StratifierBuilder {
     private static void buildStratumPopulation(
             BuilderContext bc,
             StratifierDef stratifierDef,
+            StratumDef stratumDef,
             StratifierGroupPopulationComponent sgpc,
             List<String> subjectIds,
             MeasureGroupPopulationComponent population,
             GroupDef groupDef) {
+
+        logger.info("1234: buildStratumPopulation()");
+
         sgpc.setCode(population.getCode());
         sgpc.setId(population.getId());
 
@@ -309,8 +318,8 @@ class R4StratifierBuilder {
                 .findFirst()
                 .orElse(null);
 
-        // LUKETODO:  get rid of this assert and throw an actual Exception in this case
         if (populationDef == null) {
+            // LUKETODO:  add more details to Exception
             throw new InvalidRequestException("Invalid population definition");
         }
 
@@ -323,8 +332,17 @@ class R4StratifierBuilder {
         // intersect population subjects to stratifier.value subjects
         var subjectIdsCommonToPopulation = Sets.intersection(new HashSet<>(subjectIds), popSubjectIds);
 
+        logger.info(
+                "1234: populationDef: {}, subjectIdsCommonToPopulation = {}",
+                populationDef.id(),
+                subjectIdsCommonToPopulation);
+
+        var stratumPopulationDef = new StratumPopulationDef(populationDef.id(), subjectIdsCommonToPopulation);
+
+        stratumDef.addStratumPopulation(stratumPopulationDef);
+
         if (groupDef.isBooleanBasis()) {
-            buildBooleanBasisStratumPopulation(bc, sgpc, subjectIds, populationDef, subjectIdsCommonToPopulation);
+            buildBooleanBasisStratumPopulation(bc, sgpc, populationDef, subjectIdsCommonToPopulation);
         } else {
             buildResourceBasisStratumPopulation(bc, stratifierDef, sgpc, subjectIds, populationDef, groupDef);
         }
@@ -333,7 +351,6 @@ class R4StratifierBuilder {
     private static void buildBooleanBasisStratumPopulation(
             BuilderContext bc,
             StratifierGroupPopulationComponent sgpc,
-            List<String> subjectIds,
             PopulationDef populationDef,
             SetView<String> subjectIdsCommonToPopulation) {
 

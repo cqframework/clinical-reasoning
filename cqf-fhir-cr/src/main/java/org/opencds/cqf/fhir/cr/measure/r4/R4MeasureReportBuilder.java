@@ -484,6 +484,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                 .sum();
     }
 
+    // LUKETODO:  what's this for?
     protected void buildMeasureObservations(BuilderContext bc, String observationName, Set<Object> resources) {
         for (int i = 0; i < resources.size(); i++) {
             // TODO: Do something with the resource...

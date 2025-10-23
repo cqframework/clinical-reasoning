@@ -20,12 +20,13 @@ public class StratifierDef {
     private final MeasureStratifierType stratifierType;
 
     private final List<StratifierComponentDef> components;
+    private final List<StratumDef> stratum;
 
     @Nullable
     private Map<String, CriteriaResult> results;
 
     public StratifierDef(String id, ConceptDef code, String expression, MeasureStratifierType stratifierType) {
-        this(id, code, expression, stratifierType, Collections.emptyList());
+        this(id, code, expression, stratifierType, Collections.emptyList(), Collections.emptyList());
     }
 
     public StratifierDef(
@@ -33,11 +34,13 @@ public class StratifierDef {
             ConceptDef code,
             String expression,
             MeasureStratifierType stratifierType,
+            List<StratumDef> stratum,
             List<StratifierComponentDef> components) {
         this.id = id;
         this.code = code;
         this.expression = expression;
         this.stratifierType = stratifierType;
+        this.stratum = stratum;
         this.components = components;
     }
 
@@ -51,6 +54,15 @@ public class StratifierDef {
 
     public String id() {
         return this.id;
+    }
+
+    public List<StratumDef> getStratum() {
+        return stratum;
+    }
+
+    // LUKETODO:  try out this pattern
+    public void addStratumDef(StratumDef stratumDef) {
+        stratum.add(stratumDef);
     }
 
     public List<StratifierComponentDef> components() {

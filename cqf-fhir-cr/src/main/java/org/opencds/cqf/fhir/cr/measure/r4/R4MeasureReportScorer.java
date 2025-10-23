@@ -2,9 +2,11 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import com.apicatalog.jsonld.StringUtils;
 import jakarta.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -12,6 +14,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Enumeration;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
@@ -28,6 +31,8 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
+import org.opencds.cqf.fhir.cr.measure.common.StratumDef;
+import org.opencds.cqf.fhir.cr.measure.common.StratumPopulationDef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -333,7 +338,22 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
                 throw new InternalErrorException("Stratifier component " + sgc.getId() + " does not exist.");
             }
 
-            scoreStratum(measureUrl, groupDef, optStratifierDef.get(), measureScoring, sgc);
+            final StratifierDef stratifierDef = optStratifierDef.get();
+
+            final StratumDef stratumDef = stratifierDef.getStratum().stream()
+                    .filter(stratumDefInner -> StringUtils.isNotBlank(stratumDefInner.getText()))
+                    // LUKETODO:  consider refining this logic:
+                    .filter(stratumDefInner ->
+                            stratumDefInner.getText().equals(sgc.getValue().getText()))
+                    .findFirst()
+                    .orElse(null);
+
+            // LUKETODO:  should we always expect these to match up?
+            if (stratumDef == null) {
+                logger.warn("1234: stratumDef is null");
+            }
+
+            scoreStratum(measureUrl, groupDef, optStratifierDef.get(), stratumDef, measureScoring, sgc);
         }
     }
 
@@ -341,9 +361,11 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
             String measureUrl,
             GroupDef groupDef,
             StratifierDef stratifierDef,
+            StratumDef stratumDef,
             MeasureScoring measureScoring,
             StratifierGroupComponent stratum) {
-        final Quantity quantity = getStratumScoreOrNull(measureUrl, groupDef, stratifierDef, measureScoring, stratum);
+        final Quantity quantity =
+                getStratumScoreOrNull(measureUrl, groupDef, stratifierDef, stratumDef, measureScoring, stratum);
 
         if (quantity != null) {
             stratum.setMeasureScore(quantity);
@@ -355,6 +377,7 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
             String measureUrl,
             GroupDef groupDef,
             StratifierDef stratifierDef,
+            StratumDef stratumDef,
             MeasureScoring measureScoring,
             StratifierGroupComponent stratum) {
 
@@ -370,10 +393,22 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
                 return null;
             }
             case CONTINUOUSVARIABLE -> {
+                logger.info("1234: calculateContinuousVariableAggregateQuantity()");
+
+                final StratumPopulationDef stratumPopulationDef;
+                if (stratumDef != null) {
+                    stratumPopulationDef = stratumDef.getStratumPopulations().stream()
+                            .filter(x -> x.getId().startsWith(MeasurePopulationType.MEASUREOBSERVATION.toCode()))
+                            .findFirst()
+                            .orElse(null);
+                } else {
+                    stratumPopulationDef = null;
+                }
                 return calculateContinuousVariableAggregateQuantity(
                         measureUrl,
                         groupDef,
-                        populationDef -> getResultsForStratum(populationDef, stratifierDef, stratum));
+                        populationDef ->
+                                getResultsForStratum(populationDef, stratifierDef, stratumPopulationDef, stratum));
             }
             default -> {
                 return null;
@@ -395,6 +430,7 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
     private Set<Object> getResultsForStratum(
             PopulationDef measureObservationPopulationDef,
             StratifierDef stratifierDef,
+            StratumPopulationDef stratumPopulationDef,
             StratifierGroupComponent stratum) {
 
         final String stratumValue = stratum.getValue().getText();
@@ -404,11 +440,52 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
                 .map(Entry::getKey)
                 .collect(Collectors.toUnmodifiableSet());
 
-        return measureObservationPopulationDef.getSubjectResources().entrySet().stream()
+        final Set<Object> result = measureObservationPopulationDef.getSubjectResources().entrySet().stream()
                 .filter(entry -> subjectsWithStratumValue.contains(entry.getKey()))
                 .map(Entry::getValue)
                 .flatMap(Collection::stream)
                 .collect(Collectors.toUnmodifiableSet());
+
+        final Set<Object> resultNew = measureObservationPopulationDef.getSubjectResources().entrySet().stream()
+                // LUKETODO:  split this the proper way using hapi-fhir classe
+                .filter(entry -> stratumPopulationDef.getSubjects().stream()
+                        .map(subject -> subject.split("Patient/")[1])
+                        .collect(Collectors.toUnmodifiableSet())
+                        .contains(entry.getKey()))
+                .map(Entry::getValue)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toUnmodifiableSet());
+
+        logger.info(
+                "1234: measureObservationPopulationDef: {}, subjectsWithStratumValue: {}, result: {}",
+                measureObservationPopulationDef.id(),
+                subjectsWithStratumValue,
+                print(result));
+
+        return resultNew;
+    }
+
+    private Set<String> print(Set<Object> results) {
+
+        Set<String> result = new HashSet<>();
+        for (Object o : results) {
+            if (o instanceof Map map) {
+                final Set<?> set = map.entrySet();
+
+                for (Object item : set) {
+                    if (item instanceof Entry mapEntry) {
+                        final Object key = mapEntry.getKey();
+                        final Object value = mapEntry.getValue();
+
+                        if (key instanceof IBaseResource resource && value instanceof Quantity quantity) {
+                            result.add(resource.getIdElement().getValueAsString() + ":" + quantity.getValue());
+                        }
+                    }
+                }
+            }
+        }
+
+        return result;
     }
 
     // LUKETODO:: we may need to match more types of stratum here:  The below logic deals with

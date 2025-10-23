@@ -50,6 +50,7 @@ import org.opencds.cqf.fhir.cr.measure.common.SdeDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierComponentDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierUtils;
+import org.opencds.cqf.fhir.cr.measure.common.StratumPopulationDef;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 
 public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
@@ -245,6 +246,9 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
     private StratifierDef buildStratifierDef(MeasureGroupStratifierComponent mgsc) {
         checkId(mgsc);
 
+        // LUKETODO:  how do I fill this?
+        var stratum = new ArrayList<StratumPopulationDef>();
+
         // Components
         var components = new ArrayList<StratifierComponentDef>();
         for (MeasureGroupStratifierComponentComponent scc : mgsc.getComponent()) {
@@ -268,6 +272,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                 conceptToConceptDef(mgsc.getCode()),
                 mgsc.getCriteria().getExpression(),
                 getStratifierType(mgsc),
+                new ArrayList<>(),
                 components);
     }
 

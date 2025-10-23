@@ -445,14 +445,21 @@ public class R4MeasureProcessor {
      * @return version identifier of Library
      */
     protected VersionedIdentifier getLibraryVersionIdentifier(Measure measure) {
-        var url = measure.getLibrary().get(0).asStringValue();
+        var libraryUrlFromMeasure = measure.getLibrary().get(0).asStringValue();
 
-        Bundle b = this.repository.search(Bundle.class, Library.class, Searches.byCanonical(url), null);
-        if (b.getEntry().isEmpty()) {
-            var errorMsg = "Unable to find Library with url: %s".formatted(url);
+        final Bundle bundleWithLibrary =
+                this.repository.search(Bundle.class, Library.class, Searches.byCanonical(libraryUrlFromMeasure), null);
+
+        if (bundleWithLibrary.getEntry().isEmpty()) {
+            var errorMsg = "Unable to find Library with libraryUrlFromMeasure: %s".formatted(libraryUrlFromMeasure);
             throw new ResourceNotFoundException(errorMsg);
         }
-        return VersionedIdentifiers.forUrl(url);
+
+        // new code:
+        R4VersionedLibraryIdentifierUtils.validateLibraryVersionedIdentifierAndUrl(
+                bundleWithLibrary, libraryUrlFromMeasure);
+
+        return VersionedIdentifiers.forUrl(libraryUrlFromMeasure);
     }
 
     /**

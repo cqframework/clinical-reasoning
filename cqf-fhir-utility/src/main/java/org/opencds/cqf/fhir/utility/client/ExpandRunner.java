@@ -85,7 +85,7 @@ public class ExpandRunner implements Runnable {
             expansionAttempt++;
             if (expansionAttempt <= terminologyServerClientSettings.getMaxRetryCount()) {
                 logger.info("Expansion attempt: {} for ValueSet: {}", expansionAttempt, valueSetUrl);
-                var id = Canonicals.getResourceType(valueSetUrl) + "/" + Canonicals.getIdPart(valueSetUrl);
+                var id = Canonicals.getResourceType(valueSetUrl) + "/" + Canonicals.getTail(valueSetUrl);
                 expandedValueSet = fhirClient
                         .operation()
                         .onInstance(id)

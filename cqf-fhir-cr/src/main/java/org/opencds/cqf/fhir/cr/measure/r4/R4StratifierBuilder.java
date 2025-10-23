@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Sets.SetView;
@@ -11,6 +12,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collector;
@@ -19,6 +21,7 @@ import javax.annotation.Nonnull;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Enumeration;
 import org.hl7.fhir.r4.model.Expression;
 import org.hl7.fhir.r4.model.ListResource;
 import org.hl7.fhir.r4.model.Measure.MeasureGroupPopulationComponent;
@@ -40,6 +43,8 @@ import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureReportBuilder.BuilderContext;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureReportBuilder.ValueWrapper;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4ResourceIdUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Convenience class with functionality split out from {@link R4MeasureReportBuilder} to
@@ -47,6 +52,7 @@ import org.opencds.cqf.fhir.cr.measure.r4.utils.R4ResourceIdUtils;
  */
 @SuppressWarnings("squid:S1135")
 class R4StratifierBuilder {
+    private static final Logger logger = LoggerFactory.getLogger(R4StratifierBuilder.class);
 
     static void buildStratifier(
             BuilderContext bc,
@@ -302,9 +308,23 @@ class R4StratifierBuilder {
                         .equals(population.getCode().getCodingFirstRep().getCode()))
                 .findFirst()
                 .orElse(null);
-        assert populationDef != null;
+
+        // LUKETODO:  get rid of this assert and throw an actual Exception in this case
+        if (populationDef == null) {
+            throw new InvalidRequestException("Invalid population definition");
+        }
+
+        var popSubjectIds = populationDef.getSubjects().stream()
+                .map(R4ResourceIdUtils::addPatientQualifier)
+                .collect(Collectors.toUnmodifiableSet());
+
+        // TODO: LD:  introduce a new StratumDef object to hold the results of the intersection, to
+        // be ultimately passed down to the measure scorer, instead of retaining only the count
+        // intersect population subjects to stratifier.value subjects
+        var subjectIdsCommonToPopulation = Sets.intersection(new HashSet<>(subjectIds), popSubjectIds);
+
         if (groupDef.isBooleanBasis()) {
-            buildBooleanBasisStratumPopulation(bc, sgpc, subjectIds, populationDef);
+            buildBooleanBasisStratumPopulation(bc, sgpc, subjectIds, populationDef, subjectIdsCommonToPopulation);
         } else {
             buildResourceBasisStratumPopulation(bc, stratifierDef, sgpc, subjectIds, populationDef, groupDef);
         }
@@ -314,7 +334,9 @@ class R4StratifierBuilder {
             BuilderContext bc,
             StratifierGroupPopulationComponent sgpc,
             List<String> subjectIds,
-            PopulationDef populationDef) {
+            PopulationDef populationDef,
+            SetView<String> subjectIdsCommonToPopulation) {
+
         var popSubjectIds = populationDef.getSubjects().stream()
                 .map(R4ResourceIdUtils::addPatientQualifier)
                 .toList();
@@ -323,22 +345,71 @@ class R4StratifierBuilder {
             return;
         }
 
-        // TODO: LD:  introduce a new StratumDef object to hold the results of the intersection, to
-        // be ultimately passed down to the measure scorer, instead of retaining only the count
-
-        // intersect population subjects to stratifier.value subjects
-        Set<String> intersection = new HashSet<>(subjectIds);
-        intersection.retainAll(popSubjectIds);
-        sgpc.setCount(intersection.size());
+        sgpc.setCount(subjectIdsCommonToPopulation.size());
 
         // subject-list ListResource to match intersection of results
-        if (!intersection.isEmpty()
+        if (!subjectIdsCommonToPopulation.isEmpty()
                 && bc.report().getType() == org.hl7.fhir.r4.model.MeasureReport.MeasureReportType.SUBJECTLIST) {
             ListResource popSubjectList =
-                    R4StratifierBuilder.createIdList(UUID.randomUUID().toString(), intersection);
+                    R4StratifierBuilder.createIdList(UUID.randomUUID().toString(), subjectIdsCommonToPopulation);
             bc.addContained(popSubjectList);
             sgpc.setSubjectResults(new Reference("#" + popSubjectList.getId()));
         }
+    }
+
+    /*
+    the existing algo takes the measure-observation population from the group definition and goes through all resources to get the quantities
+    MeasurePopulationType.MEASUREOBSERVATION
+
+    but we don't want that:  we want to filter only resources that belong to the patients captured by each stratum
+    so we want to do some sort of wizardry that involves getting the stratum values, and using those to retrieve the associated resources
+
+    so it's basically a hack to go from StratifierGroupComponent stratum value -> subject -> populationDef.subjectResources.get(subject)
+    to get Set of resources on which to do measure scoring
+     */
+    // LUKETODO: Integrate this algorithm with a new StratumDef that will be populated in R4StratifierBuilder
+    private Set<Object> getResultsForStratum(
+            PopulationDef measureObservationPopulationDef,
+            StratifierDef stratifierDef,
+            StratifierGroupComponent stratum) {
+
+        final String stratumValue = stratum.getValue().getText();
+
+        final Set<String> subjectsWithStratumValue = stratifierDef.getResults().entrySet().stream()
+                .filter(entry -> doesStratumMatch(stratumValue, entry.getValue().rawValue()))
+                .map(Entry::getKey)
+                .collect(Collectors.toUnmodifiableSet());
+
+        return measureObservationPopulationDef.getSubjectResources().entrySet().stream()
+                .filter(entry -> subjectsWithStratumValue.contains(entry.getKey()))
+                .map(Entry::getValue)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toUnmodifiableSet());
+    }
+
+    // LUKETODO:  we may be able to do away with this
+    // LUKETODO:: we may need to match more types of stratum here:  The below logic deals with
+    // currently anticipated use cases
+    private boolean doesStratumMatch(String stratumValueAsString, Object rawValueFromStratifier) {
+        if (rawValueFromStratifier == null || stratumValueAsString == null) {
+            return false;
+        }
+
+        if (rawValueFromStratifier instanceof Integer rawValueFromStratifierAsInt) {
+            final int stratumValueAsInt = Integer.parseInt(stratumValueAsString);
+
+            return stratumValueAsInt == rawValueFromStratifierAsInt;
+        }
+
+        if (rawValueFromStratifier instanceof Enumeration<?> rawValueFromStratifierAsEnumeration) {
+            return stratumValueAsString.equals(rawValueFromStratifierAsEnumeration.asStringValue());
+        }
+
+        if (rawValueFromStratifier instanceof String rawValueFromStratifierAsString) {
+            return stratumValueAsString.equals(rawValueFromStratifierAsString);
+        }
+
+        return false;
     }
 
     private static void buildResourceBasisStratumPopulation(

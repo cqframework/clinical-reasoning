@@ -322,6 +322,10 @@ class R4StratifierBuilder {
             sgpc.setCount(0);
             return;
         }
+
+        // TODO: LD:  introduce a new StratumDef object to hold the results of the intersection, to
+        // be ultimately passed down to the measure scorer, instead of retaining only the count
+
         // intersect population subjects to stratifier.value subjects
         Set<String> intersection = new HashSet<>(subjectIds);
         intersection.retainAll(popSubjectIds);

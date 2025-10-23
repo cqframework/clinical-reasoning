@@ -183,7 +183,7 @@ class MeasureStratifierTest {
         try {
             evaluate.then();
             fail("should throw a missing Id scenario");
-        } catch (NullPointerException e) {
+        } catch (InvalidRequestException e) {
             assertTrue(e.getMessage().contains("id is required on all Elements of type: Measure.group.stratifier"));
         }
     }

@@ -1,0 +1,17 @@
+{
+  "id": "ContinuousVariableObservationEncounterBasis",
+  "resourceType": "Library",
+  "url": "http://example.com/Library/ContinuousVariableObservationEncounterBasis",
+  "name": "ContinuousVariableObservationEncounterBasis",
+  "status": "active",
+  "type": {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/library-type",
+      "code": "logic-library"
+    } ]
+  },
+  "content": [ {
+    "contentType": "text/cql",
+    "url": "../../cql/ContinuousVariableObservationEncounterBasis.cql"
+  } ]
+}

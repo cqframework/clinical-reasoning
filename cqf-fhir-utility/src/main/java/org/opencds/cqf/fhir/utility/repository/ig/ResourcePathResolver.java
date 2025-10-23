@@ -16,6 +16,7 @@ import java.util.Objects;
 import java.util.function.Predicate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.fhir.utility.repository.ig.IgConventions.CategoryLayout;
+import org.opencds.cqf.fhir.utility.repository.ig.IgConventions.CompartmentIsolation;
 
 /**
  * Resolves filesystem locations for resources according to IG/KALM conventions.
@@ -78,7 +79,7 @@ class ResourcePathResolver {
     Path preferredDirectory(Class<? extends IBaseResource> resourceType, CompartmentAssignment assignment) {
         requireNonNull(resourceType, "resourceType cannot be null");
         requireNonNull(assignment, "assignment cannot be null");
-        validateAssignment(assignment);
+        validateAssignment(resourceType, assignment);
 
         // In the "preferred" case, we remap an 'unknown' assignment to 'shared'
         var effectiveAssignment = assignment.isUnknown() ? CompartmentAssignment.shared() : assignment;
@@ -91,11 +92,9 @@ class ResourcePathResolver {
         requireNonNull(resourceType, "resourceType cannot be null");
         requireNonNull(idPart, "idPart cannot be null");
         requireNonNull(assignment, "assignment cannot be null");
-        validateAssignment(assignment);
+        validateAssignment(resourceType, assignment);
 
-        // In the "preferred" case, we remap an 'unknown' assignment to 'shared'
-        var effectiveAssignment = assignment.isUnknown() ? CompartmentAssignment.shared() : assignment;
-        return preferredDirectory(resourceType, effectiveAssignment).resolve(preferredFilename(resourceType, idPart));
+        return preferredDirectory(resourceType, assignment).resolve(preferredFilename(resourceType, idPart));
     }
 
     private String preferredFilename(Class<? extends IBaseResource> resourceType, String idPart) {
@@ -117,7 +116,7 @@ class ResourcePathResolver {
     List<Path> directories(Class<? extends IBaseResource> resourceType, CompartmentAssignment assignment) {
         requireNonNull(resourceType, "resourceType cannot be null");
         requireNonNull(assignment, "assignment cannot be null");
-        validateAssignment(assignment);
+        validateAssignment(resourceType, assignment);
 
         var category = ResourceCategory.forType(resourceType.getSimpleName());
         var bases = categoryDirectories(category);
@@ -145,13 +144,21 @@ class ResourcePathResolver {
         return List.copyOf(paths);
     }
 
-    private void validateAssignment(CompartmentAssignment assignment) {
+    private void validateAssignment(Class<? extends IBaseResource> resourceType, CompartmentAssignment assignment) {
         if (assignment.isNone() && conventions.compartmentMode() != CompartmentMode.NONE) {
             throw new IllegalArgumentException(
                     "CompartmentAssignment cannot be 'none' when conventions specify compartments");
         } else if (conventions.compartmentMode() == CompartmentMode.NONE && !assignment.isNone()) {
             throw new IllegalArgumentException(
                     "CompartmentAssignment must be 'none' when conventions specify no compartments");
+        }
+
+        var category = ResourceCategory.forType(resourceType.getSimpleName());
+        if (category == ResourceCategory.DATA
+                && (assignment.isShared())
+                && conventions.compartmentIsolation() == CompartmentIsolation.FULL) {
+            throw new IllegalArgumentException(
+                    "Data resources cannot be assigned to a shared compartment when compartment isolation is FULL.");
         }
     }
 
@@ -160,7 +167,7 @@ class ResourcePathResolver {
         requireNonNull(resourceType, "resourceType cannot be null");
         requireNonNull(idPart, "idPart cannot be null");
         requireNonNull(assignment, "assignment cannot be null");
-        validateAssignment(assignment);
+        validateAssignment(resourceType, assignment);
 
         var directories = directories(resourceType, assignment);
         return combine(directories, candidateFilenames(resourceType, idPart));
@@ -246,14 +253,7 @@ class ResourcePathResolver {
         }
 
         if (assignment.isShared()) {
-            // The KALM style category layout has a dedicated shared compartment
-            if (conventions.categoryLayout() == CategoryLayout.DEFINITIONAL_AND_DATA) {
-                return List.of(base.resolve(CompartmentAssignment.SHARED_COMPARTMENT));
-            }
-            // Other layouts just use the base directory as the shared compartment
-            else {
-                return List.of(base);
-            }
+            return List.of(base.resolve(CompartmentAssignment.SHARED_COMPARTMENT));
         }
 
         if (assignment.hasCompartmentId()) {
@@ -270,7 +270,7 @@ class ResourcePathResolver {
 
     private boolean supportsCompartments(Path base) {
         // Swapping backslashes to handle Windows paths
-        var normalized = base.toString().toLowerCase().replace('\\', '/');  
+        var normalized = base.toString().toLowerCase().replace('\\', '/');
         return normalized.contains("tests/data/fhir") || normalized.contains("input/tests");
     }
 

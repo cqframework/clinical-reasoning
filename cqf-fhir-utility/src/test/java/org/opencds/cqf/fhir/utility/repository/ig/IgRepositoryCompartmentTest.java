@@ -82,7 +82,7 @@ class IgRepositoryCompartmentTest {
         assertNotNull(patient);
         var sourcePath = (Path) patient.getUserData(IgRepository.SOURCE_PATH_TAG);
         assertNotNull(sourcePath);
-        assertTrue(sourcePath.toString().contains("patient/123"));
+        assertTrue(sourcePath.toString().contains(Path.of("patient", "123").toString()));
     }
 
     @Test
@@ -219,7 +219,10 @@ class IgRepositoryCompartmentTest {
         assertNotNull(observation);
         var sourcePath = (Path) observation.getUserData(IgRepository.SOURCE_PATH_TAG);
         assertNotNull(sourcePath);
-        assertTrue(sourcePath.toString().contains("input/tests/patient/123/observation/obs-test.json"));
+        assertTrue(sourcePath
+                .toString()
+                .contains(Path.of("input", "tests", "patient", "123", "observation", "obs-test.json")
+                        .toString()));
     }
 
     @Test

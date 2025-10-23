@@ -86,7 +86,7 @@ class IgRepositoryKalmTest {
         assertNotNull(patient);
         var sourcePath = (Path) patient.getUserData(IgRepository.SOURCE_PATH_TAG);
         assertNotNull(sourcePath);
-        assertTrue(sourcePath.toString().contains("patient/123"));
+        assertTrue(sourcePath.toString().contains(Path.of("patient", "123").toString()));
     }
 
     @Test

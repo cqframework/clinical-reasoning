@@ -114,15 +114,6 @@ class IgRepositoryKalmTest {
         assertEquals(1, encounters.getEntry().size());
     }
 
-    @Test
-    void readValueSetNoCompartment() {
-        var id = Ids.newId(ValueSet.class, "456");
-        var vs = repository.read(ValueSet.class, id);
-
-        assertNotNull(vs);
-        assertEquals(vs.getIdPart(), vs.getIdElement().getIdPart());
-    }
-
     // Terminology resources are not in compartments
     @Test
     void readValueSet() {
@@ -282,13 +273,6 @@ class IgRepositoryKalmTest {
 
     @Test
     void searchMedicationWithCompartment() {
-        var sets = repository.search(Bundle.class, Medication.class, Map.of());
-        assertNotNull(sets);
-        assertEquals(1, sets.getEntry().size());
-    }
-
-    @Test
-    void searchMedicationWithoutCompartment() {
         var sets = repository.search(Bundle.class, Medication.class, Map.of());
         assertNotNull(sets);
         assertEquals(1, sets.getEntry().size());

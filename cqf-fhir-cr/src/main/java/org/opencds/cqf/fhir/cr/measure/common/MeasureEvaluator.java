@@ -283,7 +283,6 @@ public class MeasureEvaluator {
         }
         if (reportType.equals(MeasureReportType.INDIVIDUAL) && dateOfCompliance != null) {
             var doc = evaluateDateOfCompliance(dateOfCompliance, evaluationResult);
-            // LUKETODO:  similarly, we'd have to add the subject as well here
             dateOfCompliance.addResource(subjectId, doc);
         }
     }

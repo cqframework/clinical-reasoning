@@ -306,10 +306,6 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
         for (Object resource : resources) {
             if (resource instanceof Map<?, ?> map) {
                 for (Object value : map.values()) {
-                    // LUKETODO:  replace this with Quantity or QuantityHolder
-                    //                    if (value instanceof Observation obs && obs.hasValueQuantity()) {
-                    //                    if (value instanceof QuantityHolder<?> quantityHolder &&
-                    // quantityHolder.hasValueQuantity()) {
                     if (value instanceof Quantity quantity) {
                         quantities.add(quantity);
                     }
@@ -395,8 +391,7 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
     so it's basically a hack to go from StratifierGroupComponent stratum value -> subject -> populationDef.subjectResources.get(subject)
     to get Set of resources on which to do measure scoring
      */
-
-    // TODO:  LD: Integrate this algorithm with a new StratumDef that will be populated in R4StratifierBuilder
+    // LUKETODO: Integrate this algorithm with a new StratumDef that will be populated in R4StratifierBuilder
     private Set<Object> getResultsForStratum(
             PopulationDef measureObservationPopulationDef,
             StratifierDef stratifierDef,
@@ -416,7 +411,7 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
                 .collect(Collectors.toUnmodifiableSet());
     }
 
-    // TODO: LD: we may need to match more types of stratum here:  The below logic deals with
+    // LUKETODO:: we may need to match more types of stratum here:  The below logic deals with
     // currently anticipated use cases
     private boolean doesStratumMatch(String stratumValueAsString, Object rawValueFromStratifier) {
         if (rawValueFromStratifier == null || stratumValueAsString == null) {

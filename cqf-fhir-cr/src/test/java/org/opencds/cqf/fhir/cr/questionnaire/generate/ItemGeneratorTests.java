@@ -1,21 +1,26 @@
 package org.opencds.cqf.fhir.cr.questionnaire.generate;
 
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.opencds.cqf.fhir.cr.questionnaire.TestItemGenerator.given;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.repository.IRepository;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.helpers.RequestHelpers;
 import org.opencds.cqf.fhir.utility.Ids;
 
-@SuppressWarnings("squid:S2699")
+@SuppressWarnings({"squid:S2699", "UnstableApiUsage"})
 @ExtendWith(MockitoExtension.class)
 class ItemGeneratorTests {
     private static final String ROUTE_ONE_PATIENT_PROFILE =
@@ -27,6 +32,47 @@ class ItemGeneratorTests {
 
     @Mock
     LibraryEngine libraryEngine;
+
+    @Mock
+    IRepository repository;
+
+    @Spy
+    @InjectMocks
+    ItemGenerator fixture;
+
+    @Test
+    void testBuildSdcLaunchContextExt() {
+        var dstu3Request = RequestHelpers.newGenerateRequestForVersion(FhirVersionEnum.DSTU3, libraryEngine);
+        var dstu3Ext = (org.hl7.fhir.dstu3.model.Extension)
+                fixture.buildSdcLaunchContextExt(dstu3Request, "patient", "Patient");
+        assertInstanceOf(
+                org.hl7.fhir.dstu3.model.Coding.class,
+                dstu3Ext.getExtensionByUrl("name").getValue());
+        assertInstanceOf(
+                org.hl7.fhir.dstu3.model.CodeType.class,
+                dstu3Ext.getExtensionByUrl("type").getValue());
+
+        var r4Request = RequestHelpers.newGenerateRequestForVersion(FhirVersionEnum.R4, libraryEngine);
+        var r4Ext = (org.hl7.fhir.r4.model.Extension)
+                fixture.buildSdcLaunchContextExt(r4Request, "user", "PractitionerRole");
+        assertNull(r4Ext.getValue());
+        assertInstanceOf(
+                org.hl7.fhir.r4.model.Coding.class,
+                r4Ext.getExtensionByUrl("name").getValue());
+        assertInstanceOf(
+                org.hl7.fhir.r4.model.CodeType.class,
+                r4Ext.getExtensionByUrl("type").getValue());
+
+        var r5Request = RequestHelpers.newGenerateRequestForVersion(FhirVersionEnum.R5, libraryEngine);
+        var r5Ext = (org.hl7.fhir.r5.model.Extension) fixture.buildSdcLaunchContextExt(r5Request, "patient", "Patient");
+        assertNull(r5Ext.getValue());
+        assertInstanceOf(
+                org.hl7.fhir.r5.model.Coding.class,
+                r5Ext.getExtensionByUrl("name").getValue());
+        assertInstanceOf(
+                org.hl7.fhir.r5.model.CodeType.class,
+                r5Ext.getExtensionByUrl("type").getValue());
+    }
 
     @Test
     void testGenerateRequest() {

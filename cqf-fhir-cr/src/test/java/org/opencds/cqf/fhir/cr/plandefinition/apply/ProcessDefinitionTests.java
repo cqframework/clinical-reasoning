@@ -1,9 +1,11 @@
 package org.opencds.cqf.fhir.cr.plandefinition.apply;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.opencds.cqf.fhir.cr.helpers.RequestHelpers.newPDApplyRequestForVersion;
 
@@ -11,9 +13,11 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.repository.IRepository;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Questionnaire;
+import org.hl7.fhir.r4.model.Task;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,6 +27,7 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 
+@SuppressWarnings("UnstableApiUsage")
 @ExtendWith(MockitoExtension.class)
 class ProcessDefinitionTests {
     private static final String ACTIVITYDEFINITION = "http://test.fhir.org/fhir/ActivityDefinition/test";
@@ -123,5 +128,23 @@ class ProcessDefinitionTests {
         var request = newPDApplyRequestForVersion(FhirVersionEnum.R4, libraryEngine, null);
         final CanonicalType canonical = new CanonicalType();
         assertThrows(FHIRException.class, () -> fixture.resolveResourceName(request, canonical));
+    }
+
+    @Test
+    void applyActivityDefinitionHandlesMultipleRequestResources() {
+        var request = newPDApplyRequestForVersion(FhirVersionEnum.R4, libraryEngine, null, null, null);
+        var definition = new CanonicalType(ACTIVITYDEFINITION);
+        var activityDef = new ActivityDefinition().setUrl(ACTIVITYDEFINITION);
+        activityDef.setId("test");
+        var task = new Task();
+        task.setId("test");
+        request.getRequestResources().add(task);
+        var newTask = new Task();
+        newTask.setId("test");
+        doReturn(activityDef).when(fixture).resolveRepository(any());
+        doReturn(newTask).when(applyProcessor).applyActivityDefinition(any());
+        var result = fixture.applyActivityDefinition(request, definition);
+        assertInstanceOf(Task.class, result);
+        assertEquals("test2", result.getIdElement().getIdPart());
     }
 }

@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import java.util.Collections;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -12,10 +13,12 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Endpoint.EndpointStatus;
+import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.hapi.r4.library.LibraryDataRequirementsProvider;
@@ -131,5 +134,46 @@ class LibraryOperationsProviderIT extends BaseCrR4TestServer {
                 null,
                 requestDetails);
         assertInstanceOf(Bundle.class, result);
+    }
+
+    @Test
+    void testDeleteLibrary() {
+        loadBundle("ersd-small-retired-bundle.json");
+
+        ourClient
+                .operation()
+                .onInstance("Library/SpecificationLibrary")
+                .named("$delete")
+                .withNoParameters(Parameters.class)
+                .returnResourceType(Bundle.class)
+                .execute();
+
+        Assertions.assertThrows(ResourceGoneException.class, () -> {
+            ourClient
+                    .read()
+                    .resource(Library.class)
+                    .withId("SpecificationLibrary")
+                    .execute();
+        });
+    }
+
+    @Test
+    void testRetireLibrary() {
+        loadBundle("ersd-active-transaction-bundle-example.json");
+
+        ourClient
+                .operation()
+                .onInstance("Library/SpecificationLibrary")
+                .named("$retire")
+                .withNoParameters(Parameters.class)
+                .returnResourceType(Bundle.class)
+                .execute();
+
+        Library retiredLibrary = ourClient
+                .read()
+                .resource(Library.class)
+                .withId("SpecificationLibrary")
+                .execute();
+        Assertions.assertEquals(retiredLibrary.getStatus().name(), Enumerations.PublicationStatus.RETIRED.name());
     }
 }

@@ -7,6 +7,7 @@ import ca.uhn.fhir.repository.IRepository;
 import java.util.Collections;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
+import org.cqframework.cql.cql2elm.StringLibrarySourceProvider;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Endpoint;
@@ -82,6 +83,11 @@ public class R4CqlExecutionService {
             var engine = Engines.forRepository(repository, evaluationSettings, null);
             var libraryManager = engine.getEnvironment().getLibraryManager();
             var libraryIdentifier = baseCqlExecutionProcessor.resolveLibraryIdentifier(content, null, libraryManager);
+
+            libraryEngine
+                    .getSettings()
+                    .getLibrarySourceProviders()
+                    .add(new StringLibrarySourceProvider(List.of(content)));
 
             return (Parameters) libraryEngine.evaluate(
                     libraryIdentifier,

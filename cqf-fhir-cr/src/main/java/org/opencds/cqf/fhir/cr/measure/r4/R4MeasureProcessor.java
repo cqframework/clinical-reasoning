@@ -27,7 +27,6 @@ import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Parameters;
-import org.hl7.fhir.r4.model.Resource;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.fhir.model.R4FhirModelResolver;
@@ -36,13 +35,9 @@ import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cql.VersionedIdentifiers;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.CompositeEvaluationResultsPerMeasure;
-import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
-import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
-import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorUtils;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
-import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 import org.opencds.cqf.fhir.cr.measure.common.MultiLibraryIdMeasureEngineDetails;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4DateHelper;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
@@ -126,10 +121,6 @@ public class R4MeasureProcessor {
                 this.measureEvaluationOptions.getApplyScoringSetMembership(),
                 new R4PopulationBasisValidator());
 
-        // Populate populationDefs that require MeasureDef results
-        // blocking certain continuous-variable Measures due to need of CQL context
-        continuousVariableObservationCheck(measureDef, measure);
-
         // Build Measure Report with Results
         return new R4MeasureReportBuilder()
                 .build(
@@ -165,11 +156,8 @@ public class R4MeasureProcessor {
         // setup MeasureDef
         var measureDef = new R4MeasureDefBuilder().build(measure);
 
-        // Process Criteria Expression Results
-        final IIdType measureId = measure.getIdElement().toUnqualifiedVersionless();
-        // populate results from Library $evaluate
         final Map<String, EvaluationResult> resultForThisMeasure =
-                compositeEvaluationResultsPerMeasure.processMeasureForSuccessOrFailure(measureId, measureDef);
+                compositeEvaluationResultsPerMeasure.processMeasureForSuccessOrFailure(measureDef);
 
         measureProcessorUtils.processResults(
                 resultForThisMeasure,
@@ -178,8 +166,7 @@ public class R4MeasureProcessor {
                 this.measureEvaluationOptions.getApplyScoringSetMembership(),
                 new R4PopulationBasisValidator());
 
-        var measurementPeriod = postLibraryEvaluationPeriodProcessingAndContinuousVariableObservation(
-                measure, measureDef, periodStart, periodEnd, context);
+        var measurementPeriod = measureProcessorUtils.getMeasurementPeriod(periodStart, periodEnd, context);
 
         // Build Measure Report with Results
         return new R4MeasureReportBuilder()
@@ -189,54 +176,6 @@ public class R4MeasureProcessor {
                         r4EvalTypeToReportType(evaluationType, measure),
                         measurementPeriod,
                         subjectIds);
-    }
-
-    /**
-     * Do post-processing after the libraries have been evaluated, such as: setting the measurement period,
-     * once again, with the view to running continuousVariableObservation() and computing the
-     * interval used in the MeasureReportBuilder.
-     * <p/>
-     * Now that we've pushed and popped the current library stack, we're doing it again a 3rd time,
-     * since this is easier to reason about than leaving duplicate libraries on the stack that
-     * through good fortune before we didn't accidentally evaluate twice.
-     */
-    private Interval postLibraryEvaluationPeriodProcessingAndContinuousVariableObservation(
-            Measure measure,
-            MeasureDef measureDef,
-            @Nullable ZonedDateTime periodStart,
-            @Nullable ZonedDateTime periodEnd,
-            CqlEngine context) {
-
-        var libraryVersionedIdentifiers =
-                getMultiLibraryIdMeasureEngineDetails(List.of(measure)).getLibraryIdentifiers();
-
-        var compiledLibraries = getCompiledLibraries(libraryVersionedIdentifiers, context);
-
-        var libraries =
-                compiledLibraries.stream().map(CompiledLibrary::getLibrary).toList();
-
-        // Add back the libraries to the stack, since we popped them off during CQL
-        context.getState().init(libraries);
-
-        // Measurement Period: operation parameter defined measurement period
-        Interval measurementPeriodParams = buildMeasurementPeriod(periodStart, periodEnd);
-
-        measureProcessorUtils.setMeasurementPeriod(
-                measurementPeriodParams,
-                context,
-                Optional.ofNullable(measure.getUrl()).map(List::of).orElse(List.of("Unknown Measure URL")));
-
-        // DON'T pop the library off the stack yet, because we need it for continuousVariableObservation()
-
-        // Populate populationDefs that require MeasureDef results
-        measureProcessorUtils.continuousVariableObservation(measureDef, context);
-
-        // Now that we've done continuousVariableObservation(), we're safe to pop the libraries off
-        // the stack
-        popAllLibrariesFromCqlEngine(context, libraries);
-
-        // extract measurement Period from CQL to pass to report Builder
-        return measureProcessorUtils.getDefaultMeasurementPeriod(measurementPeriodParams, context);
     }
 
     public CompositeEvaluationResultsPerMeasure evaluateMeasureWithCqlEngine(
@@ -316,7 +255,7 @@ public class R4MeasureProcessor {
 
         var measurementPeriodParams = buildMeasurementPeriod(periodStart, periodEnd);
         var zonedMeasurementPeriod = MeasureProcessorUtils.getZonedTimeZoneForEval(
-                measureProcessorUtils.getDefaultMeasurementPeriod(measurementPeriodParams, context));
+                MeasureProcessorUtils.getDefaultMeasurementPeriod(measurementPeriodParams, context));
 
         // Do this to be backwards compatible with the previous single-library evaluation:
         // Trigger first-pass validation on measure scoring as well as other aspects of the Measures
@@ -335,7 +274,11 @@ public class R4MeasureProcessor {
 
         // populate results from Library $evaluate
         return measureProcessorUtils.getEvaluationResults(
-                subjects, zonedMeasurementPeriod, context, multiLibraryIdMeasureEngineDetails);
+                subjects,
+                zonedMeasurementPeriod,
+                context,
+                multiLibraryIdMeasureEngineDetails,
+                R4ContinuousVariableObservationConverter.INSTANCE);
     }
 
     /**
@@ -387,8 +330,8 @@ public class R4MeasureProcessor {
 
         var libraryIdentifiersToMeasureIds = measures.stream()
                 .collect(ImmutableListMultimap.toImmutableListMultimap(
-                        this::getLibraryVersionIdentifier, // Key function
-                        Resource::getIdElement // Value function
+                        this::getLibraryVersionIdentifier, // key function
+                        measure -> new R4MeasureDefBuilder().build(measure) // value function
                         ));
 
         var libraryEngine = new LibraryEngine(repository, this.measureEvaluationOptions.getEvaluationSettings());
@@ -401,26 +344,6 @@ public class R4MeasureProcessor {
                         new VersionedIdentifier().withId(entry.getKey().getId()), entry.getValue()));
 
         return builder.build();
-    }
-
-    /**  Temporary check for Measures that are being blocked from use by evaluateResults method
-     *
-     * @param measureDef defined measure definition object used to capture criteria expression results
-     * @param measure measure resource used for evaluation
-     */
-    protected void continuousVariableObservationCheck(MeasureDef measureDef, Measure measure) {
-        for (GroupDef groupDef : measureDef.groups()) {
-            // Measure Observation defined?
-            if (groupDef.measureScoring().equals(MeasureScoring.CONTINUOUSVARIABLE)
-                    && groupDef.getSingle(MeasurePopulationType.MEASUREOBSERVATION) != null) {
-                throw new InvalidRequestException(
-                        "Measure Evaluation Mode does not have CQL engine context to support: Measure Scoring Type: %s, Measure Population Type: %s, for Measure: %s"
-                                .formatted(
-                                        MeasureScoring.CONTINUOUSVARIABLE,
-                                        MeasurePopulationType.MEASUREOBSERVATION,
-                                        measure.getUrl()));
-            }
-        }
     }
 
     /**
@@ -444,7 +367,17 @@ public class R4MeasureProcessor {
      * @param measure resource that has desired Library
      * @return version identifier of Library
      */
-    protected VersionedIdentifier getLibraryVersionIdentifier(Measure measure) {
+    private VersionedIdentifier getLibraryVersionIdentifier(Measure measure) {
+
+        if (measure == null) {
+            throw new InvalidRequestException("Measure provided is null");
+        }
+
+        if (!measure.hasLibrary() || measure.getLibrary().isEmpty()) {
+            throw new InvalidRequestException(
+                    "Measure %s does not have a primary library specified".formatted(measure.getUrl()));
+        }
+
         var url = measure.getLibrary().get(0).asStringValue();
 
         Bundle b = this.repository.search(Bundle.class, Library.class, Searches.byCanonical(url), null);

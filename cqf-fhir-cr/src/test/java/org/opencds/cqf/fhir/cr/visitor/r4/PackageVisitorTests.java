@@ -375,7 +375,7 @@ class PackageVisitorTests {
         Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
         ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
-        Map<String, List<String>> includeOptions = new HashMap<String, List<String>>();
+        Map<String, List<String>> includeOptions = new HashMap<>();
         includeOptions.put("artifact", Arrays.asList("http://ersd.aimsplatform.org/fhir/Library/SpecificationLibrary"));
         includeOptions.put(
                 "canonical",
@@ -395,21 +395,27 @@ class PackageVisitorTests {
         includeOptions.put(
                 "terminology",
                 Arrays.asList(
+                        "http://ersd.aimsplatform.org/fhir/Library/SpecificationLibrary",
                         "http://ersd.aimsplatform.org/fhir/ValueSet/dxtc",
                         "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.6",
                         "http://cts.nlm.nih.gov/fhir/ValueSet/123-this-will-be-routine"));
-        includeOptions.put("conformance", Arrays.asList());
-        includeOptions.put("extensions", Arrays.asList());
-        includeOptions.put("profiles", Arrays.asList());
-        includeOptions.put("tests", Arrays.asList());
-        includeOptions.put("examples", Arrays.asList());
+        includeOptions.put(
+                "conformance", Arrays.asList("http://ersd.aimsplatform.org/fhir/Library/SpecificationLibrary"));
+        includeOptions.put(
+                "extensions", Arrays.asList("http://ersd.aimsplatform.org/fhir/Library/SpecificationLibrary"));
+        includeOptions.put("profiles", Arrays.asList("http://ersd.aimsplatform.org/fhir/Library/SpecificationLibrary"));
+        includeOptions.put("tests", Arrays.asList("http://ersd.aimsplatform.org/fhir/Library/SpecificationLibrary"));
+        includeOptions.put("examples", Arrays.asList("http://ersd.aimsplatform.org/fhir/Library/SpecificationLibrary"));
         // FHIR Types
         includeOptions.put(
                 "PlanDefinition",
-                Arrays.asList("http://ersd.aimsplatform.org/fhir/PlanDefinition/us-ecr-specification"));
+                Arrays.asList(
+                        "http://ersd.aimsplatform.org/fhir/Library/SpecificationLibrary",
+                        "http://ersd.aimsplatform.org/fhir/PlanDefinition/us-ecr-specification"));
         includeOptions.put(
                 "ValueSet",
                 Arrays.asList(
+                        "http://ersd.aimsplatform.org/fhir/Library/SpecificationLibrary",
                         "http://ersd.aimsplatform.org/fhir/ValueSet/dxtc",
                         "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.6",
                         "http://cts.nlm.nih.gov/fhir/ValueSet/123-this-will-be-routine"));
@@ -446,7 +452,8 @@ class PackageVisitorTests {
                 "http://ersd.aimsplatform.org/fhir/ValueSet/dxtc",
                 "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.6",
                 "http://cts.nlm.nih.gov/fhir/ValueSet/123-this-will-be-routine",
-                "http://ersd.aimsplatform.org/fhir/PlanDefinition/us-ecr-specification");
+                "http://ersd.aimsplatform.org/fhir/PlanDefinition/us-ecr-specification",
+                "http://ersd.aimsplatform.org/fhir/Library/SpecificationLibrary");
 
         Parameters params = parameters(part("include", "PlanDefinition"), part("include", "ValueSet"));
         Bundle packaged = (Bundle) libraryAdapter.accept(packageVisitor, params);
@@ -533,6 +540,172 @@ class PackageVisitorTests {
         var containsVset = packagedBundle.getEntry().stream().anyMatch(leafFinder);
         // check for ValueSet
         assertTrue(containsVset);
+    }
+
+    @Test
+    void packageOperation_manifest_is_first_with_include_terminology() {
+        Bundle bundle = (Bundle) jsonParser.parseResource(
+                PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
+        repo.transaction(bundle);
+        PackageVisitor packageVisitor = new PackageVisitor(repo);
+        Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
+                .copy();
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+
+        Parameters params = parameters(part("include", "terminology"));
+        Bundle packaged = (Bundle) libraryAdapter.accept(packageVisitor, params);
+
+        assertNotNull(packaged);
+        assertTrue(packaged.hasEntry());
+        // First entry must be the outcome manifest Library
+        assertEquals("Library", packaged.getEntryFirstRep().getResource().fhirType());
+
+        // Everything after the manifest should be terminology-only
+        for (int i = 1; i < packaged.getEntry().size(); i++) {
+            String t = packaged.getEntry().get(i).getResource().fhirType();
+            boolean isTerminology = "ValueSet".equals(t)
+                    || "CodeSystem".equals(t)
+                    || "ConceptMap".equals(t)
+                    || "NamingSystem".equals(t);
+            assertTrue(isTerminology, "Non-terminology entry returned with include=terminology: " + t);
+        }
+    }
+
+    @Test
+    void packageOperation_manifest_is_first_with_include_valueset() {
+        Bundle bundle = (Bundle) jsonParser.parseResource(
+                PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
+        repo.transaction(bundle);
+        PackageVisitor packageVisitor = new PackageVisitor(repo);
+        Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
+                .copy();
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+
+        Parameters params = parameters(part("include", "ValueSet"));
+        Bundle packaged = (Bundle) libraryAdapter.accept(packageVisitor, params);
+
+        assertNotNull(packaged);
+        assertTrue(packaged.hasEntry());
+        // Manifest always first
+        assertEquals("Library", packaged.getEntryFirstRep().getResource().fhirType());
+
+        // Remaining entries should be ValueSets only
+        for (int i = 1; i < packaged.getEntry().size(); i++) {
+            String t = packaged.getEntry().get(i).getResource().fhirType();
+            assertEquals("ValueSet", t, "Non-ValueSet entry returned with include=ValueSet: " + t);
+        }
+    }
+
+    @Test
+    void packageOperation_unknown_include_returns_only_manifest() {
+        Bundle bundle = (Bundle) jsonParser.parseResource(
+                PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
+        repo.transaction(bundle);
+        PackageVisitor packageVisitor = new PackageVisitor(repo);
+        Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
+                .copy();
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+
+        Parameters params = parameters(part("include", "not-a-real-category"));
+        Bundle packaged = (Bundle) libraryAdapter.accept(packageVisitor, params);
+
+        assertNotNull(packaged);
+        assertEquals(1, packaged.getEntry().size());
+        assertEquals("Library", packaged.getEntryFirstRep().getResource().fhirType());
+    }
+
+    @Test
+    void packageOperation_include_tests_returns_only_test_marked_entries() {
+        // Arrange
+        Bundle bundle = (Bundle) jsonParser.parseResource(
+                PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
+        // Mark one non-manifest Library as a test-case via extension that contains 'isTestCase'
+        Library manifest = (Library) bundle.getEntryFirstRep().getResource();
+        Library testLib = null;
+        for (int i = 1; i < bundle.getEntry().size(); i++) {
+            if (bundle.getEntry().get(i).getResource() instanceof Library) {
+                testLib = (Library) bundle.getEntry().get(i).getResource();
+                break;
+            }
+        }
+        assertNotNull(testLib, "Test library not found in fixture bundle");
+        testLib.addExtension("http://example.org/extensions/isTestCase", new org.hl7.fhir.r4.model.BooleanType(true));
+        repo.transaction(bundle);
+        PackageVisitor packageVisitor = new PackageVisitor(repo);
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(manifest.copy());
+
+        // Act
+        Parameters params = parameters(part("include", "tests"));
+        Bundle packaged = (Bundle) libraryAdapter.accept(packageVisitor, params);
+
+        // Assert
+        assertNotNull(packaged);
+        assertTrue(packaged.hasEntry());
+        // Manifest first
+        assertEquals("Library", packaged.getEntryFirstRep().getResource().fhirType());
+        // All subsequent resources must be the test-marked entry/entries
+        for (int i = 1; i < packaged.getEntry().size(); i++) {
+            var r = packaged.getEntry().get(i).getResource();
+            assertTrue(r instanceof Library, "Only test-marked Libraries should be returned for include=tests");
+            var extOk = ((Library) r)
+                    .getExtension().stream()
+                            .anyMatch(x -> x.getUrl().contains("isTestCase")
+                                    && ((org.hl7.fhir.r4.model.BooleanType) x.getValue()).booleanValue());
+            assertTrue(extOk, "Returned entry was not marked as test-case via isTestCase extension");
+        }
+    }
+
+    @Test
+    void packageOperation_include_examples_returns_only_example_marked_entries() {
+        // Arrange
+        Bundle bundle = (Bundle) jsonParser.parseResource(
+                PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
+        // Mark one non-manifest resource as example via extension that contains 'isExample'
+        Library manifest = (Library) bundle.getEntryFirstRep().getResource();
+        // Prefer a ValueSet if present; otherwise mark the next resource
+        org.hl7.fhir.r4.model.DomainResource exampleRes = null;
+        for (int i = 1; i < bundle.getEntry().size(); i++) {
+            if (bundle.getEntry().get(i).getResource() instanceof org.hl7.fhir.r4.model.ValueSet) {
+                exampleRes = (org.hl7.fhir.r4.model.ValueSet)
+                        bundle.getEntry().get(i).getResource();
+                break;
+            }
+        }
+        if (exampleRes == null) {
+            for (int i = 1; i < bundle.getEntry().size(); i++) {
+                if (bundle.getEntry().get(i).getResource() instanceof org.hl7.fhir.r4.model.DomainResource) {
+                    exampleRes = (org.hl7.fhir.r4.model.DomainResource)
+                            bundle.getEntry().get(i).getResource();
+                    break;
+                }
+            }
+        }
+        assertNotNull(exampleRes, "Example resource not found in fixture bundle");
+        exampleRes.addExtension("http://example.org/extensions/isExample", new org.hl7.fhir.r4.model.BooleanType(true));
+        repo.transaction(bundle);
+        PackageVisitor packageVisitor = new PackageVisitor(repo);
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(manifest.copy());
+
+        // Act
+        Parameters params = parameters(part("include", "examples"));
+        Bundle packaged = (Bundle) libraryAdapter.accept(packageVisitor, params);
+
+        // Assert
+        assertNotNull(packaged);
+        assertTrue(packaged.hasEntry());
+        // Manifest first
+        assertEquals("Library", packaged.getEntryFirstRep().getResource().fhirType());
+        // All subsequent resources must carry the isExample=true extension
+        for (int i = 1; i < packaged.getEntry().size(); i++) {
+            var r = packaged.getEntry().get(i).getResource();
+            assertTrue(
+                    r instanceof org.hl7.fhir.r4.model.DomainResource, "Expected DomainResource entries for examples");
+            var extOk = ((org.hl7.fhir.r4.model.DomainResource) r)
+                    .getExtension().stream()
+                            .anyMatch(x -> x.getUrl().contains("isExample")
+                                    && ((org.hl7.fhir.r4.model.BooleanType) x.getValue()).booleanValue());
+            assertTrue(extOk, "Returned entry was not marked as example via isExample extension");
+        }
     }
 
     private IEndpointAdapter createEndpoint(String authoritativeSource) {

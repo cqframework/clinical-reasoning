@@ -1,5 +1,8 @@
 package org.opencds.cqf.fhir.cr.measure.dstu3;
 
+import static org.opencds.cqf.fhir.cr.measure.common.ContinuousVariableObservationHandler.evaluateObservationCriteria;
+import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.MEASUREPOPULATION;
+
 import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.time.ZonedDateTime;
@@ -10,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import org.cqframework.cql.cql2elm.CqlIncludeException;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.hl7.elm.r1.VersionedIdentifier;
@@ -21,15 +25,21 @@ import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
+import org.opencds.cqf.cql.engine.execution.ExpressionResult;
 import org.opencds.cqf.cql.engine.fhir.model.Dstu3FhirModelResolver;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
+import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
+import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorUtils;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 import org.opencds.cqf.fhir.cr.measure.common.MultiLibraryIdMeasureEngineDetails;
+import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.SubjectProvider;
 import org.opencds.cqf.fhir.utility.repository.FederatedRepository;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
@@ -108,28 +118,67 @@ public class Dstu3MeasureProcessor {
                 Optional.ofNullable(measure.getUrl()).map(List::of).orElse(List.of("Unknown Measure URL")));
         // extract measurement Period from CQL to pass to report Builder
         Interval measurementPeriod =
-                measureProcessorUtils.getDefaultMeasurementPeriod(measurementPeriodParams, context);
+                MeasureProcessorUtils.getDefaultMeasurementPeriod(measurementPeriodParams, context);
         // set offset of operation parameter measurement period
         ZonedDateTime zonedMeasurementPeriod = MeasureProcessorUtils.getZonedTimeZoneForEval(measurementPeriod);
         // populate results from Library $evaluate
         if (!subjects.isEmpty()) {
             var results = measureProcessorUtils.getEvaluationResults(
-                    subjectIds, zonedMeasurementPeriod, context, measureLibraryIdEngineDetails);
+                    subjectIds,
+                    zonedMeasurementPeriod,
+                    context,
+                    measureLibraryIdEngineDetails,
+                    Dstu3ContinuousVariableObservationConverter.INSTANCE);
 
             // Process Criteria Expression Results
             measureProcessorUtils.processResults(
-                    results.processMeasureForSuccessOrFailure(measure.getIdElement(), measureDef),
+                    results.processMeasureForSuccessOrFailure(measureDef),
                     measureDef,
                     evalType,
                     measureEvaluationOptions.getApplyScoringSetMembership(),
                     new Dstu3PopulationBasisValidator());
         }
         // Populate populationDefs that require MeasureDef results
-        measureProcessorUtils.continuousVariableObservation(measureDef, context);
+        continuousVariableObservationLegacyLogic(measureDef, context);
 
         // Build Measure Report with Results
         return new Dstu3MeasureReportBuilder()
                 .build(measure, measureDef, evalTypeToReportType(evalType), measurementPeriod, subjects);
+    }
+
+    /**
+     * Measures with defined scoring type of 'continuous-variable' where a defined 'measure-observation' population is used to evaluate results of 'measure-population'.
+     * This method is a downstream calculation given it requires calculated results before it can be called.
+     * Results are then added to associated MeasureDef
+     * @param measureDef measure defined objects that are populated from criteria expression results
+     * @param context cql engine context used to evaluate results
+     */
+    private static void continuousVariableObservationLegacyLogic(MeasureDef measureDef, CqlEngine context) {
+        // Continuous Variable?
+        for (GroupDef groupDef : measureDef.groups()) {
+            // Measure Observation defined?
+            if (groupDef.measureScoring().equals(MeasureScoring.CONTINUOUSVARIABLE)
+                    && groupDef.getSingle(MeasurePopulationType.MEASUREOBSERVATION) != null) {
+
+                PopulationDef measurePopulation = groupDef.getSingle(MEASUREPOPULATION);
+                PopulationDef measureObservation = groupDef.getSingle(MeasurePopulationType.MEASUREOBSERVATION);
+
+                // Inject MeasurePopulation results into Measure Observation Function
+                Map<String, Set<Object>> subjectResources = measurePopulation.getSubjectResources();
+
+                for (Map.Entry<String, Set<Object>> entry : subjectResources.entrySet()) {
+                    String subjectId = entry.getKey();
+                    Set<Object> resourcesForSubject = entry.getValue();
+
+                    for (Object resource : resourcesForSubject) {
+                        final ExpressionResult observationResult = evaluateObservationCriteria(
+                                resource, measureObservation.expression(), groupDef.isBooleanBasis(), context);
+                        measureObservation.addResource(observationResult.value());
+                        measureObservation.addResource(subjectId, observationResult.evaluatedResources());
+                    }
+                }
+            }
+        }
     }
 
     // Ideally this would be done in MeasureProcessorUtils, but it's too much work to change for now
@@ -140,9 +189,10 @@ public class Dstu3MeasureProcessor {
 
         final LibraryEngine libraryEngine = getLibraryEngine(parameters, libraryVersionIdentifier, context);
 
+        var measureDef = new Dstu3MeasureDefBuilder().build(measure);
+
         return MultiLibraryIdMeasureEngineDetails.builder(libraryEngine)
-                .addLibraryIdToMeasureId(
-                        new VersionedIdentifier().withId(libraryVersionIdentifier.getId()), measure.getIdElement())
+                .addLibraryIdToMeasureId(new VersionedIdentifier().withId(libraryVersionIdentifier.getId()), measureDef)
                 .build();
     }
 

@@ -1,0 +1,558 @@
+package org.opencds.cqf.fhir.cr.measure.r4;
+
+import java.time.LocalDate;
+import java.time.Month;
+import java.time.Period;
+import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
+
+public class ContinuousVariableResourceMeasureObservationTest {
+
+    public static final LocalDate ENCOUNTER_BASIS_MEASUREMENT_PERIOD_START = LocalDate.of(2024, 1, 1);
+
+    private static final LocalDate _1940_JAN_01 = LocalDate.of(1940, Month.JANUARY, 1);
+    private static final LocalDate _1950_JAN_01 = LocalDate.of(1950, Month.JANUARY, 1);
+    private static final LocalDate _1960_JAN_01 = LocalDate.of(1960, Month.JANUARY, 1);
+
+    private static final int EXPECTED_ENCOUNTER_BASIS_AGE_STRATUM_1 = computeAge(_1940_JAN_01);
+    private static final int EXPECTED_ENCOUNTER_BASIS_AGE_STRATUM_2 = computeAge(_1950_JAN_01);
+    private static final int EXPECTED_ENCOUNTER_BASIS_AGE_STRATUM_3 = computeAge(_1960_JAN_01);
+
+    private static final Given GIVEN_BOOLEAN_BASIS =
+            Measure.given().repositoryFor("ContinuousVariableObservationBooleanBasis");
+    private static final Given GIVEN_ENCOUNTER_BASIS =
+            Measure.given().repositoryFor("ContinuousVariableObservationEncounterBasis");
+
+    @Test
+    void continuousVariableResourceMeasureObservationBooleanBasisAvg() {
+
+        GIVEN_BOOLEAN_BASIS
+                .when()
+                .measureId("ContinuousVariableResourceMeasureObservationBooleanBasisAvg")
+                .evaluate()
+                .then()
+                .firstGroup()
+                .population("initial-population")
+                // 10 encounters in all
+                .hasCount(10)
+                .up()
+                .population("measure-population")
+                .hasCount(10)
+                .up()
+                .population("measure-population-exclusion")
+                .hasCount(0)
+                .up()
+                .population("measure-observation")
+                // There are 10 patients in all
+                .hasCount(10)
+                .up()
+                .hasScore("73.0")
+                .stratifierById("stratifier-gender")
+                .hasStratumCount(4)
+                .firstStratum()
+                .hasValue("male")
+                .hasScore("81.5")
+                .up()
+                .stratumByPosition(2)
+                .hasValue("unknown")
+                .hasScore("64.0")
+                .up()
+                .stratumByPosition(3)
+                .hasValue("other")
+                .hasScore("77.33333333333333")
+                .up()
+                .stratumByPosition(4)
+                .hasValue("female")
+                .hasScore("67.75")
+                .up()
+                .up()
+                .up()
+                .report();
+    }
+
+    @Test
+    void continuousVariableResourceMeasureObservationEncounterBasisAvg() {
+
+        GIVEN_ENCOUNTER_BASIS
+                .when()
+                .measureId("ContinuousVariableResourceMeasureObservationEncounterBasisAvg")
+                .evaluate()
+                .then()
+                .firstGroup()
+                .population("initial-population")
+                .hasCount(11)
+                .up()
+                .population("measure-population")
+                .hasCount(11)
+                .up()
+                .population("measure-population-exclusion")
+                .hasCount(0)
+                .up()
+                .population("measure-observation")
+                .hasCount(11)
+                .up()
+                .hasScore("230.54545454545453")
+                .stratifierById("stratifier-age")
+                .hasStratumCount(3)
+                .firstStratum()
+                .hasValue(Integer.toString(EXPECTED_ENCOUNTER_BASIS_AGE_STRATUM_1))
+                .hasScore("120.0")
+                .up()
+                .stratumByPosition(2)
+                .hasValue(Integer.toString(EXPECTED_ENCOUNTER_BASIS_AGE_STRATUM_2))
+                .hasScore("480.0")
+                .up()
+                .stratumByPosition(3)
+                .hasValue(Integer.toString(EXPECTED_ENCOUNTER_BASIS_AGE_STRATUM_3))
+                .hasScore("75.2")
+                .up()
+                .up()
+                .up()
+                .report();
+    }
+
+    @Test
+    void continuousVariableResourceMeasureObservationBooleanBasisCount() {
+
+        GIVEN_BOOLEAN_BASIS
+                .when()
+                .measureId("ContinuousVariableResourceMeasureObservationBooleanBasisCount")
+                .evaluate()
+                .then()
+                .firstGroup()
+                .population("initial-population")
+                // 10 encounters in all
+                .hasCount(10)
+                .up()
+                .population("measure-population")
+                .hasCount(10)
+                .up()
+                .population("measure-population-exclusion")
+                .hasCount(0)
+                .up()
+                .population("measure-observation")
+                // There are 10 patients in all
+                .hasCount(10)
+                .up()
+                .hasScore("10.0")
+                .stratifierById("stratifier-gender")
+                .hasStratumCount(4)
+                .firstStratum()
+                .hasValue("male")
+                .hasScore("2.0")
+                .up()
+                .stratumByPosition(2)
+                .hasValue("unknown")
+                .hasScore("1.0")
+                .up()
+                .stratumByPosition(3)
+                .hasValue("other")
+                .hasScore("3.0")
+                .up()
+                .stratumByPosition(4)
+                .hasValue("female")
+                .hasScore("4.0")
+                .up()
+                .up()
+                .up()
+                .report();
+    }
+
+    @Test
+    void continuousVariableResourceMeasureObservationEncounterBasisCount() {
+
+        GIVEN_ENCOUNTER_BASIS
+                .when()
+                .measureId("ContinuousVariableResourceMeasureObservationEncounterBasisCount")
+                .evaluate()
+                .then()
+                .firstGroup()
+                .population("initial-population")
+                .hasCount(11)
+                .up()
+                .population("measure-population")
+                .hasCount(11)
+                .up()
+                .population("measure-population-exclusion")
+                .hasCount(0)
+                .up()
+                .population("measure-observation")
+                .hasCount(11)
+                .up()
+                .hasScore("11.0") // I assume this is the straight-up count of encounters?
+                .stratifierById("stratifier-age")
+                .hasStratumCount(3)
+                .firstStratum()
+                .hasValue(Integer.toString(EXPECTED_ENCOUNTER_BASIS_AGE_STRATUM_1))
+                .hasScore("2.0")
+                .up()
+                .stratumByPosition(2)
+                .hasValue(Integer.toString(EXPECTED_ENCOUNTER_BASIS_AGE_STRATUM_2))
+                .hasScore("4.0")
+                .up()
+                .stratumByPosition(3)
+                .hasValue(Integer.toString(EXPECTED_ENCOUNTER_BASIS_AGE_STRATUM_3))
+                .hasScore("5.0")
+                .up()
+                .up()
+                .up()
+                .report();
+    }
+
+    @Test
+    void continuousVariableResourceMeasureObservationBooleanBasisMedian() {
+
+        GIVEN_BOOLEAN_BASIS
+                .when()
+                .measureId("ContinuousVariableResourceMeasureObservationBooleanBasisMedian")
+                .evaluate()
+                .then()
+                .firstGroup()
+                .population("initial-population")
+                // 10 encounters in all
+                .hasCount(10)
+                .up()
+                .population("measure-population")
+                .hasCount(10)
+                .up()
+                .population("measure-population-exclusion")
+                .hasCount(0)
+                .up()
+                .population("measure-observation")
+                // There are 10 patients in all
+                .hasCount(10)
+                .up()
+                .hasScore("76.5")
+                .stratifierById("stratifier-gender")
+                .hasStratumCount(4)
+                .firstStratum()
+                .hasValue("male")
+                .hasScore("81.5")
+                .up()
+                .stratumByPosition(2)
+                .hasValue("unknown")
+                .hasScore("64.0")
+                .up()
+                .stratumByPosition(3)
+                .hasValue("other")
+                .hasScore("79.0")
+                .up()
+                .stratumByPosition(4)
+                .hasValue("female")
+                .hasScore("66.5")
+                .up()
+                .up()
+                .up()
+                .report();
+    }
+
+    @Test
+    void continuousVariableResourceMeasureObservationEncounterBasisMedian() {
+
+        GIVEN_ENCOUNTER_BASIS
+                .when()
+                .measureId("ContinuousVariableResourceMeasureObservationEncounterBasisMedian")
+                .evaluate()
+                .then()
+                .firstGroup()
+                .population("initial-population")
+                .hasCount(11)
+                .up()
+                .population("measure-population")
+                .hasCount(11)
+                .up()
+                .population("measure-population-exclusion")
+                .hasCount(0)
+                .up()
+                .population("measure-observation")
+                .hasCount(11)
+                .up()
+                .hasScore("120.0")
+                .stratifierById("stratifier-age")
+                .hasStratumCount(3)
+                .firstStratum()
+                .hasValue(Integer.toString(EXPECTED_ENCOUNTER_BASIS_AGE_STRATUM_1))
+                .hasScore("120.0")
+                .up()
+                .stratumByPosition(2)
+                .hasValue(Integer.toString(EXPECTED_ENCOUNTER_BASIS_AGE_STRATUM_2))
+                .hasScore("480.0")
+                .up()
+                .stratumByPosition(3)
+                .hasValue(Integer.toString(EXPECTED_ENCOUNTER_BASIS_AGE_STRATUM_3))
+                .hasScore("90.0")
+                .up()
+                .up()
+                .up()
+                .report();
+    }
+
+    @Test
+    void continuousVariableResourceMeasureObservationBooleanBasisMin() {
+
+        GIVEN_BOOLEAN_BASIS
+                .when()
+                .measureId("ContinuousVariableResourceMeasureObservationBooleanBasisMin")
+                .evaluate()
+                .then()
+                .firstGroup()
+                .population("initial-population")
+                // 10 encounters in all
+                .hasCount(10)
+                .up()
+                .population("measure-population")
+                .hasCount(10)
+                .up()
+                .population("measure-population-exclusion")
+                .hasCount(0)
+                .up()
+                .population("measure-observation")
+                // There are 10 patients in all
+                .hasCount(10)
+                .up()
+                .hasScore("54.0")
+                .stratifierById("stratifier-gender")
+                .hasStratumCount(4)
+                .firstStratum()
+                .hasValue("male")
+                .hasScore("79.0")
+                .up()
+                .stratumByPosition(2)
+                .hasValue("unknown")
+                .hasScore("64.0")
+                .up()
+                .stratumByPosition(3)
+                .hasValue("other")
+                .hasScore("69.0")
+                .up()
+                .stratumByPosition(4)
+                .hasValue("female")
+                .hasScore("54.0")
+                .up()
+                .up()
+                .up()
+                .report();
+    }
+
+    @Test
+    void continuousVariableResourceMeasureObservationEncounterBasisMin() {
+
+        GIVEN_ENCOUNTER_BASIS
+                .when()
+                .measureId("ContinuousVariableResourceMeasureObservationEncounterBasisMin")
+                .evaluate()
+                .then()
+                .firstGroup()
+                .population("initial-population")
+                .hasCount(11)
+                .up()
+                .population("measure-population")
+                .hasCount(11)
+                .up()
+                .population("measure-population-exclusion")
+                .hasCount(0)
+                .up()
+                .population("measure-observation")
+                .hasCount(11)
+                .up()
+                .hasScore("15.0")
+                .stratifierById("stratifier-age")
+                .hasStratumCount(3)
+                .firstStratum()
+                .hasValue(Integer.toString(EXPECTED_ENCOUNTER_BASIS_AGE_STRATUM_1))
+                .hasScore("120.0")
+                .up()
+                .stratumByPosition(2)
+                .hasValue(Integer.toString(EXPECTED_ENCOUNTER_BASIS_AGE_STRATUM_2))
+                .hasScore("120.0")
+                .up()
+                .stratumByPosition(3)
+                .hasValue(Integer.toString(EXPECTED_ENCOUNTER_BASIS_AGE_STRATUM_3))
+                .hasScore("15.0")
+                .up()
+                .up()
+                .up()
+                .report();
+    }
+
+    @Test
+    void continuousVariableResourceMeasureObservationBooleanBasisMax() {
+
+        GIVEN_BOOLEAN_BASIS
+                .when()
+                .measureId("ContinuousVariableResourceMeasureObservationBooleanBasisMax")
+                .evaluate()
+                .then()
+                .firstGroup()
+                .population("initial-population")
+                // 10 encounters in all
+                .hasCount(10)
+                .up()
+                .population("measure-population")
+                .hasCount(10)
+                .up()
+                .population("measure-population-exclusion")
+                .hasCount(0)
+                .up()
+                .population("measure-observation")
+                // There are 10 patients in all
+                .hasCount(10)
+                .up()
+                .hasScore("84.0")
+                .stratifierById("stratifier-gender")
+                .hasStratumCount(4)
+                .firstStratum()
+                .hasValue("male")
+                .hasScore("84.0")
+                .up()
+                .stratumByPosition(2)
+                .hasValue("unknown")
+                .hasScore("64.0")
+                .up()
+                .stratumByPosition(3)
+                .hasValue("other")
+                .hasScore("84.0")
+                .up()
+                .stratumByPosition(4)
+                .hasValue("female")
+                .hasScore("84.0")
+                .up()
+                .up()
+                .up()
+                .report();
+    }
+
+    @Test
+    void continuousVariableResourceMeasureObservationEncounterBasisMax() {
+
+        GIVEN_ENCOUNTER_BASIS
+                .when()
+                .measureId("ContinuousVariableResourceMeasureObservationEncounterBasisMax")
+                .evaluate()
+                .then()
+                .firstGroup()
+                .population("initial-population")
+                .hasCount(11)
+                .up()
+                .population("measure-population")
+                .hasCount(11)
+                .up()
+                .population("measure-population-exclusion")
+                .hasCount(0)
+                .up()
+                .population("measure-observation")
+                .hasCount(11)
+                .up()
+                .hasScore("840.0")
+                .stratifierById("stratifier-age")
+                .hasStratumCount(3)
+                .firstStratum()
+                .hasValue(Integer.toString(EXPECTED_ENCOUNTER_BASIS_AGE_STRATUM_1))
+                .hasScore("120.0")
+                .up()
+                .stratumByPosition(2)
+                .hasValue(Integer.toString(EXPECTED_ENCOUNTER_BASIS_AGE_STRATUM_2))
+                .hasScore("840.0")
+                .up()
+                .stratumByPosition(3)
+                .hasValue(Integer.toString(EXPECTED_ENCOUNTER_BASIS_AGE_STRATUM_3))
+                .hasScore("121.0")
+                .up()
+                .up()
+                .up()
+                .report();
+    }
+
+    @Test
+    void continuousVariableResourceMeasureObservationBooleanBasisSum() {
+
+        GIVEN_BOOLEAN_BASIS
+                .when()
+                .measureId("ContinuousVariableResourceMeasureObservationBooleanBasisSum")
+                .evaluate()
+                .then()
+                .firstGroup()
+                .population("initial-population")
+                // 10 encounters in all
+                .hasCount(10)
+                .up()
+                .population("measure-population")
+                .hasCount(10)
+                .up()
+                .population("measure-population-exclusion")
+                .hasCount(0)
+                .up()
+                .population("measure-observation")
+                // There are 10 patients in all
+                .hasCount(10)
+                .up()
+                .hasScore("730.0")
+                .stratifierById("stratifier-gender")
+                .hasStratumCount(4)
+                .firstStratum()
+                .hasValue("male")
+                .hasScore("163.0")
+                .up()
+                .stratumByPosition(2)
+                .hasValue("unknown")
+                .hasScore("64.0")
+                .up()
+                .stratumByPosition(3)
+                .hasValue("other")
+                .hasScore("232.0")
+                .up()
+                .stratumByPosition(4)
+                .hasValue("female")
+                .hasScore("271.0")
+                .up()
+                .up()
+                .up()
+                .report();
+    }
+
+    @Test
+    void continuousVariableResourceMeasureObservationEncounterBasisSum() {
+
+        GIVEN_ENCOUNTER_BASIS
+                .when()
+                .measureId("ContinuousVariableResourceMeasureObservationEncounterBasisSum")
+                .evaluate()
+                .then()
+                .firstGroup()
+                .population("initial-population")
+                .hasCount(11)
+                .up()
+                .population("measure-population")
+                .hasCount(11)
+                .up()
+                .population("measure-population-exclusion")
+                .hasCount(0)
+                .up()
+                .population("measure-observation")
+                .hasCount(11)
+                .up()
+                .hasScore("2536.0")
+                .stratifierById("stratifier-age")
+                .hasStratumCount(3)
+                .firstStratum()
+                .hasValue(Integer.toString(EXPECTED_ENCOUNTER_BASIS_AGE_STRATUM_1))
+                .hasScore("240.0")
+                .up()
+                .stratumByPosition(2)
+                .hasValue(Integer.toString(EXPECTED_ENCOUNTER_BASIS_AGE_STRATUM_2))
+                .hasScore("1920.0")
+                .up()
+                .stratumByPosition(3)
+                .hasValue(Integer.toString(EXPECTED_ENCOUNTER_BASIS_AGE_STRATUM_3))
+                .hasScore("376.0")
+                .up()
+                .up()
+                .up()
+                .report();
+    }
+
+    private static int computeAge(LocalDate birthDate) {
+        return Period.between(birthDate, ENCOUNTER_BASIS_MEASUREMENT_PERIOD_START)
+                .getYears();
+    }
+}

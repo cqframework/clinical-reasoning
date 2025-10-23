@@ -1,15 +1,19 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
+import jakarta.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-public class PopulationDef {
+public class PopulationDef implements IDef {
 
     private final String id;
     private final String expression;
     private final ConceptDef code;
     private final MeasurePopulationType measurePopulationType;
+
+    @Nullable
+    private final String criteriaReference;
 
     protected Set<Object> evaluatedResources;
     protected Set<Object> resources;
@@ -17,10 +21,20 @@ public class PopulationDef {
     protected Map<String, Set<Object>> subjectResources = new HashMap<>();
 
     public PopulationDef(String id, ConceptDef code, MeasurePopulationType measurePopulationType, String expression) {
+        this(id, code, measurePopulationType, expression, null);
+    }
+
+    public PopulationDef(
+            String id,
+            ConceptDef code,
+            MeasurePopulationType measurePopulationType,
+            String expression,
+            @Nullable String criteriaReference) {
         this.id = id;
         this.code = code;
         this.measurePopulationType = measurePopulationType;
         this.expression = expression;
+        this.criteriaReference = criteriaReference;
     }
 
     public MeasurePopulationType type() {
@@ -73,6 +87,11 @@ public class PopulationDef {
         }
 
         return this.resources;
+    }
+
+    @Nullable
+    public String getCriteriaReference() {
+        return this.criteriaReference;
     }
 
     public String expression() {

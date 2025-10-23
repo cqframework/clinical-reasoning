@@ -5,12 +5,15 @@ import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.TimeZone;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
+import org.opencds.cqf.cql.engine.runtime.Interval;
+import org.opencds.cqf.cql.engine.runtime.Precision;
 
 /**
  * Helper class to resolve measurement period start and end dates. If a timezone
@@ -104,5 +107,16 @@ public class DateHelper {
         // TODO: Seems like we might want set the precision appropriately here?
         var offset = calendar.toInstant().atZone(ZoneId.systemDefault()).toOffsetDateTime();
         return new DateTime(offset);
+    }
+
+    public static Interval buildMeasurementPeriodInterval(ZonedDateTime periodStart, ZonedDateTime periodEnd) {
+        return new Interval(convertToDateTime(periodStart), true, convertToDateTime(periodEnd), true);
+    }
+
+    private static DateTime convertToDateTime(ZonedDateTime zonedDateTime) {
+        final OffsetDateTime offsetDateTime = zonedDateTime.toOffsetDateTime();
+        final DateTime convertedDateTime = new DateTime(offsetDateTime);
+        convertedDateTime.setPrecision(Precision.SECOND);
+        return convertedDateTime;
     }
 }

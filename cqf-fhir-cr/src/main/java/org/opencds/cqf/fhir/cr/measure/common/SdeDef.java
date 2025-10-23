@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-public class SdeDef {
+public class SdeDef implements IDef {
 
     private final String id;
     private final ConceptDef code;

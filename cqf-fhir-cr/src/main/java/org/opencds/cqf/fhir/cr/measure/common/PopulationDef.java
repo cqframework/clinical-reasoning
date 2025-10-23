@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.cr.measure.common;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 public class PopulationDef {
@@ -13,7 +14,6 @@ public class PopulationDef {
 
     protected Set<Object> evaluatedResources;
     protected Set<Object> resources;
-    protected Set<String> subjects;
     protected Map<String, Set<Object>> subjectResources = new HashMap<>();
 
     public PopulationDef(String id, ConceptDef code, MeasurePopulationType measurePopulationType, String expression) {
@@ -56,11 +56,40 @@ public class PopulationDef {
     }
 
     public Set<String> getSubjects() {
-        if (this.subjects == null) {
-            this.subjects = new HashSetForFhirResources<>();
+        return this.getSubjectResources().keySet();
+    }
+
+    public void retainAllResources(Set<Object> resources) {
+        this.getResources().retainAll(resources);
+        // LUKETODO:  redo this entirely so that we act on the subjectResource EntrySet instead
+        //        getSubjectResources().entrySet().removeIf(entry -> ! containsResource(resources, entry));
+    }
+
+    public void retainAllSubjects(Set<String> subjects) {
+        this.getSubjects().retainAll(subjects);
+    }
+
+    public void removeAllResources(Set<Object> resources) {
+        this.getResources().removeAll(resources);
+        // LUKETODO:  redo this entirely so that we act on the subjectResource EntrySet instead
+        //        getSubjectResources().entrySet().removeIf(entry -> containsResource(resources, entry));
+    }
+
+    // LUKETODO: this will help us determine which entry values to keep and which to get rid of:
+    private boolean containsResource(Set<Object> resources, Entry<String, Set<Object>> entry) {
+        final Set<Object> resourcesInEntry = entry.getValue();
+
+        for (Object resource : resources) {
+            if (resourcesInEntry.contains(resource)) {
+                return true;
+            }
         }
 
-        return this.subjects;
+        return false;
+    }
+
+    public void removeAllSubjects(Set<String> subjects) {
+        this.getSubjects().removeAll(subjects);
     }
 
     public void addResource(Object resource) {
@@ -73,6 +102,15 @@ public class PopulationDef {
         }
 
         return this.resources;
+        // here we want to get the resources from the Map, but make sure
+        // we wrap that copy in a HashSetForFhirResources so Set comparison
+        // is what we want
+        //        return new HashSetForFhirResources<>(subjectResources
+        //            .values()
+        //            .stream()
+        //            .flatMap(Collection::stream)
+        //            .filter(Objects::nonNull)
+        //            .collect(Collectors.toUnmodifiableSet()));
     }
 
     public String expression() {

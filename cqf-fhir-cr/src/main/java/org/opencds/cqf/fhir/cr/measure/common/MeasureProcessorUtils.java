@@ -101,6 +101,9 @@ public class MeasureProcessorUtils {
                             measureObservation.getEvaluatedResources(),
                             groupDef.isBooleanBasis(),
                             context);
+                    // LUKETODO:  this is one place where we directly add a resource with a subject ID
+                    // LUKETODO:  this could be tricky, because it could pollute the population of subjectIds
+                    // that we work off
                     measureObservation.addResource(observationResult);
                 }
             }

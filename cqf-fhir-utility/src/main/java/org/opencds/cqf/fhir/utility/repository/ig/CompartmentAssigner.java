@@ -9,6 +9,7 @@ import com.google.common.collect.Multimap;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -17,6 +18,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.utility.Ids;
+import org.opencds.cqf.fhir.utility.repository.ig.IgConventions.CompartmentIsolation;
 
 /**
  * Determines the compartment assignment for a resource based on repository conventions
@@ -29,10 +31,38 @@ class CompartmentAssigner {
 
     private final FhirContext fhirContext;
     private final CompartmentMode compartmentMode;
+    private final CompartmentIsolation compartmentIsolation;
 
-    CompartmentAssigner(FhirContext fhirContext, CompartmentMode compartmentMode) {
+    CompartmentAssigner(
+            FhirContext fhirContext, CompartmentMode compartmentMode, CompartmentIsolation compartmentIsolation) {
         this.fhirContext = Objects.requireNonNull(fhirContext, "fhirContext cannot be null");
         this.compartmentMode = Objects.requireNonNull(compartmentMode, "compartmentMode cannot be null");
+        this.compartmentIsolation = Objects.requireNonNull(compartmentIsolation, "compartmentIsolation cannot be null");
+    }
+
+    CompartmentAssignment fromHeaders(Map<String, String> headers) {
+        if (this.compartmentMode == CompartmentMode.NONE) {
+            return CompartmentAssignment.none();
+        }
+
+        if (headers == null) {
+            return CompartmentAssignment.none();
+        }
+
+        var headerValue = headers.get(IgRepository.FHIR_COMPARTMENT_HEADER);
+        if (headerValue == null || headerValue.isBlank()) {
+            return CompartmentAssignment.none();
+        }
+
+        var segments = headerValue.split("/");
+        if (segments.length != 2) {
+            throw new IllegalArgumentException(
+                    "Invalid compartment header value. Expected format: <CompartmentType>/<CompartmentId>");
+        }
+
+        var compartmentType = segments[0].trim();
+        var compartmentId = segments[1].trim();
+        return CompartmentAssignment.of(compartmentType, compartmentId);
     }
 
     /**
@@ -45,7 +75,7 @@ class CompartmentAssigner {
      * - UNKNOWN: Resource belongs to the current compartment type, but the specific compartment cannot be determined
      * @return The compartment assignment for the resource
      */
-    CompartmentAssignment assign(IBaseResource resource) {
+    CompartmentAssignment fromResource(IBaseResource resource) {
         requireNonNull(resource, "resource cannot be null");
         requireNonNull(resource.getIdElement().getIdPart(), "resource id cannot be null");
 
@@ -73,7 +103,7 @@ class CompartmentAssigner {
      * - UNKNOWN: Resource belongs to the current compartment type, but the specific compartment cannot be determined
      * @return The compartment assignment for the resource
      */
-    CompartmentAssignment assign(String resourceType, IIdType id) {
+    CompartmentAssignment fromId(String resourceType, IIdType id) {
         requireNonNull(resourceType, "resourceType cannot be null");
         requireNonNull(id, "id cannot be null");
 
@@ -94,8 +124,7 @@ class CompartmentAssigner {
         var resourceType = resource.fhirType();
         var searchParams = compartmentMode.compartmentSearchParams(fhirContext, resourceType);
         if (searchParams.isEmpty()) {
-            throw new IllegalStateException(
-                    "Can't resolve a compartment for Resource that doesn't belong to the current compartment type");
+            return CompartmentAssignment.unknown(this.compartmentMode.type());
         }
 
         var terser = fhirContext.newTerser();
@@ -155,7 +184,7 @@ class CompartmentAssigner {
      * - UNKNOWN: Resource belongs to the current compartment type, but the specific compartment cannot be determined
      * @return The compartment assignment for the search
      */
-    public CompartmentAssignment assign(
+    public CompartmentAssignment fromSearchParameters(
             String resourceType, Multimap<String, List<IQueryParameterType>> searchParameters) {
         requireNonNull(resourceType, "resourceType cannot be null");
 
@@ -219,11 +248,15 @@ class CompartmentAssigner {
 
         var resourceCategory = ResourceCategory.forType(resourceType);
         if (resourceCategory != ResourceCategory.DATA) {
-            return CompartmentAssignment.shared();
+            return compartmentIsolation == CompartmentIsolation.FULL
+                    ? CompartmentAssignment.unknown(this.compartmentMode.type())
+                    : CompartmentAssignment.shared();
         }
 
         if (!this.compartmentMode.resourceBelongsToCompartment(fhirContext, resourceType)) {
-            return CompartmentAssignment.shared();
+            return compartmentIsolation == CompartmentIsolation.FULL
+                    ? CompartmentAssignment.unknown(this.compartmentMode.type())
+                    : CompartmentAssignment.shared();
         }
 
         return CompartmentAssignment.unknown(this.compartmentMode.type());

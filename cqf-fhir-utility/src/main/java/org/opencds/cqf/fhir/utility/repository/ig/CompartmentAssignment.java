@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.utility.repository.ig;
 
 import java.util.Objects;
+import java.util.function.Supplier;
 
 /**
  * Represents the compartment directory segments that should be applied when
@@ -46,5 +47,13 @@ record CompartmentAssignment(String compartmentType, String compartmentId) {
 
     boolean isShared() {
         return compartmentType != null && compartmentType.equals(SHARED_COMPARTMENT);
+    }
+
+    CompartmentAssignment or(Supplier<CompartmentAssignment> other) {
+        if (this.isNone()) {
+            return other.get();
+        }
+
+        return this;
     }
 }

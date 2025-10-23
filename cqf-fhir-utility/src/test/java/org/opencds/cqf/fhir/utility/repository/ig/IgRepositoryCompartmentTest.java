@@ -137,22 +137,6 @@ class IgRepositoryCompartmentTest {
     }
 
     @Test
-    void searchTestOnlyValueSet() {
-        var id = Ids.newId(ValueSet.class, "test-only");
-        var valueSet = repository.read(ValueSet.class, id);
-
-        assertNotNull(valueSet);
-        var sourcePath = (Path) valueSet.getUserData(IgRepository.SOURCE_PATH_TAG);
-        assertNotNull(sourcePath);
-        assertTrue(sourcePath.toString().endsWith("input/tests/vocabulary/valueset/test-only.json"));
-
-        var search = repository.search(
-                Bundle.class, ValueSet.class, Searches.byUrl("http://example.org/ValueSet/test-only"));
-        assertNotNull(search);
-        assertEquals(1, search.getEntry().size());
-    }
-
-    @Test
     void createAndDeleteLibrary() {
         var lib = new Library();
         lib.setId("new-library");

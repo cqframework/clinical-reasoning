@@ -123,6 +123,7 @@ public class IgRepository implements IRepository {
     // This fields are used to determine if a resource is external, and to
     // maintain the original encoding of the resource.
     static final String SOURCE_PATH_TAG = "sourcePath"; // Path
+    public static final String FHIR_COMPARTMENT_HEADER = "X-FHIR-Compartment";
 
     private static IParser parserForEncoding(FhirContext fhirContext, EncodingEnum encodingEnum) {
         return switch (encodingEnum) {
@@ -168,7 +169,8 @@ public class IgRepository implements IRepository {
         this.resourceMatcher = Repositories.getResourceMatcher(this.fhirContext);
         this.operationProvider = operationProvider;
         this.pathResolver = new ResourcePathResolver(this.root, this.conventions);
-        this.compartmentAssigner = new CompartmentAssigner(this.fhirContext, this.conventions.compartmentMode());
+        this.compartmentAssigner = new CompartmentAssigner(
+                this.fhirContext, this.conventions.compartmentMode(), this.conventions.compartmentIsolation());
     }
 
     /**
@@ -295,7 +297,7 @@ public class IgRepository implements IRepository {
      * @return Map of resource IDs to resources found in the directories.
      */
     protected <T extends IBaseResource> Map<IIdType, T> readDirectoriesForResource(
-            List<Path> directories, Class<T> resourceClass) {
+            Class<T> resourceClass, List<Path> directories) {
         var resources = new ConcurrentHashMap<IIdType, T>();
         Predicate<Path> resourceFileFilter = this.pathResolver.fileMatcher(resourceClass);
 
@@ -373,7 +375,9 @@ public class IgRepository implements IRepository {
         requireNonNull(resourceType, "resourceType cannot be null");
         requireNonNull(id, "id cannot be null");
 
-        var assignment = this.compartmentAssigner.assign(resourceType.getSimpleName(), id);
+        var assignment = this.compartmentAssigner
+                .fromHeaders(headers)
+                .or(() -> this.compartmentAssigner.fromId(resourceType.getSimpleName(), id));
         var paths = this.pathResolver.candidates(resourceType, id.getIdPart(), assignment);
         var resource = paths.stream()
                 .map(this::cachedReadResource)
@@ -416,7 +420,9 @@ public class IgRepository implements IRepository {
         requireNonNull(resource, "resource cannot be null");
         requireNonNull(resource.getIdElement().getIdPart(), "resource id cannot be null");
 
-        var assignment = this.compartmentAssigner.assign(resource);
+        var assignment =
+                this.compartmentAssigner.fromHeaders(headers).or(() -> this.compartmentAssigner.fromResource(resource));
+
         var path = this.pathResolver.preferredPath(
                 resource.getClass(), resource.getIdElement().getIdPart(), assignment);
         writeResource(resource, path);
@@ -495,7 +501,9 @@ public class IgRepository implements IRepository {
                             .formatted(resource.getIdElement().toUnqualifiedVersionless()));
         }
 
-        var assignment = this.compartmentAssigner.assign(resource);
+        var assignment =
+                this.compartmentAssigner.fromHeaders(headers).or(() -> this.compartmentAssigner.fromResource(resource));
+
         var resourceType = resource.getClass();
         var idPart = resource.getIdElement().getIdPart();
 
@@ -554,7 +562,9 @@ public class IgRepository implements IRepository {
         requireNonNull(resourceType, "resourceType cannot be null");
         requireNonNull(id, "id cannot be null");
 
-        var assignment = this.compartmentAssigner.assign(resourceType.getSimpleName(), id);
+        var assignment = this.compartmentAssigner
+                .fromHeaders(headers)
+                .or(() -> this.compartmentAssigner.fromId(resourceType.getSimpleName(), id));
 
         var paths = this.pathResolver.candidates(resourceType, id.getIdPart(), assignment);
         var deleted = false;
@@ -609,9 +619,13 @@ public class IgRepository implements IRepository {
         requireNonNull(bundleType, "bundleType cannot be null");
         requireNonNull(resourceType, "resourceType cannot be null");
 
-        var assignment = this.compartmentAssigner.assign(resourceType.getSimpleName(), searchParameters);
+        var assignment = this.compartmentAssigner
+                .fromHeaders(headers)
+                .or(() ->
+                        this.compartmentAssigner.fromSearchParameters(resourceType.getSimpleName(), searchParameters));
+
         var directories = this.pathResolver.directories(resourceType, assignment);
-        var resourceIdMap = this.readDirectoriesForResource(directories, resourceType);
+        var resourceIdMap = this.readDirectoriesForResource(resourceType, directories);
 
         var builder = new BundleBuilder(this.fhirContext);
         builder.setType("searchset");

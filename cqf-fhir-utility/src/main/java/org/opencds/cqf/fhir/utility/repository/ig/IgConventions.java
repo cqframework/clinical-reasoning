@@ -23,6 +23,7 @@ public record IgConventions(
         org.opencds.cqf.fhir.utility.repository.ig.IgConventions.FhirTypeLayout typeLayout,
         org.opencds.cqf.fhir.utility.repository.ig.IgConventions.CategoryLayout categoryLayout,
         org.opencds.cqf.fhir.utility.repository.ig.CompartmentMode compartmentMode,
+        org.opencds.cqf.fhir.utility.repository.ig.IgConventions.CompartmentIsolation compartmentIsolation,
         org.opencds.cqf.fhir.utility.repository.ig.IgConventions.FilenameMode filenameMode,
         org.opencds.cqf.fhir.utility.repository.ig.EncodingBehavior encodingBehavior) {
 
@@ -53,16 +54,26 @@ public record IgConventions(
         ID_ONLY
     }
 
+    /**
+     * Whether or not the data resources are fully isolated by compartment.
+     */
+    public enum CompartmentIsolation {
+        FHIR, // Isolate data resources by FHIR compartment definitions
+        FULL // Isolate all data resources
+    }
+
     public static final IgConventions FLAT = new IgConventions(
             FhirTypeLayout.FLAT,
             CategoryLayout.FLAT,
             CompartmentMode.NONE,
+            CompartmentIsolation.FULL,
             FilenameMode.TYPE_AND_ID,
             EncodingBehavior.DEFAULT);
     public static final IgConventions STANDARD = new IgConventions(
             FhirTypeLayout.DIRECTORY_PER_TYPE,
             CategoryLayout.DIRECTORY_PER_CATEGORY,
             CompartmentMode.NONE,
+            CompartmentIsolation.FULL,
             FilenameMode.ID_ONLY,
             EncodingBehavior.DEFAULT);
 
@@ -70,6 +81,7 @@ public record IgConventions(
             FhirTypeLayout.DIRECTORY_PER_TYPE,
             CategoryLayout.DEFINITIONAL_AND_DATA,
             CompartmentMode.PATIENT,
+            CompartmentIsolation.FHIR,
             FilenameMode.ID_ONLY,
             EncodingBehavior.KALM);
 
@@ -207,6 +219,11 @@ public record IgConventions(
                 hasTypeDirectory ? FhirTypeLayout.DIRECTORY_PER_TYPE : FhirTypeLayout.FLAT,
                 hasCategoryDirectory ? CategoryLayout.DIRECTORY_PER_CATEGORY : CategoryLayout.FLAT,
                 compartmentMode,
+                // TODO: Cannot auto-detect this yet, default to FULL
+                // We can check for non-compartment resources in compartment directories to detect FHIR vs FULL
+                // For example, if we find a Medication resource in a Patient compartment directory,
+                // we know it is FULL isolation.
+                CompartmentIsolation.FULL,
                 hasTypeFilename ? FilenameMode.TYPE_AND_ID : FilenameMode.ID_ONLY,
                 EncodingBehavior.DEFAULT);
 
@@ -288,28 +305,8 @@ public record IgConventions(
     }
 
     @Override
-    public boolean equals(Object other) {
-        if (other == null || getClass() != other.getClass()) {
-            return false;
-        }
-        IgConventions that = (IgConventions) other;
-        return typeLayout == that.typeLayout
-                && filenameMode == that.filenameMode
-                && categoryLayout == that.categoryLayout
-                && compartmentMode == that.compartmentMode
-                && (this.encodingBehavior != null
-                        ? encodingBehavior.equals(that.encodingBehavior)
-                        : that.encodingBehavior == null);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(typeLayout, categoryLayout, compartmentMode, filenameMode, encodingBehavior);
-    }
-
-    @Override
     public String toString() {
-        return "IGConventions [typeLayout=%s, categoryLayout=%s compartmentMode=%s, filenameMode=%s]"
-                .formatted(typeLayout, categoryLayout, compartmentMode, filenameMode);
+        return "IGConventions [typeLayout=%s, categoryLayout=%s compartmentMode=%s, compartmentIsolation=%s, filenameMode=%s]"
+                .formatted(typeLayout, categoryLayout, compartmentMode, compartmentIsolation, filenameMode);
     }
 }

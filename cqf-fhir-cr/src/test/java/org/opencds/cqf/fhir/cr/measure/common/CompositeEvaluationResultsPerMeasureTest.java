@@ -24,7 +24,7 @@ class CompositeEvaluationResultsPerMeasureTest {
         er.expressionResults.put("subject-123", null); // non-empty map is all the Builder checks
 
         CompositeEvaluationResultsPerMeasure.Builder builder = CompositeEvaluationResultsPerMeasure.builder();
-        builder.addResult(measureDef1, "subject-123", er, MeasureObservationResults.EMPTY);
+        builder.addResult(measureDef1, "subject-123", er, List.of());
         builder.addError(measureDef1, "oops-1");
         builder.addError(measureDef2, "oops-2");
 
@@ -60,8 +60,12 @@ class CompositeEvaluationResultsPerMeasureTest {
         Map<MeasureDef, Map<String, EvaluationResult>> resultsPerMeasure = composite.getResultsPerMeasure();
         Map<MeasureDef, List<String>> errorsPerMeasure = composite.getErrorsPerMeasure();
 
-        assertThrows(UnsupportedOperationException.class, () -> resultsPerMeasure.put(measureDef1, Map.of("s", er)));
+        final Map<String, EvaluationResult> evalMap = Map.of("s", er);
 
-        assertThrows(UnsupportedOperationException.class, () -> errorsPerMeasure.put(measureDef1, List.of("err")));
+        assertThrows(UnsupportedOperationException.class, () -> resultsPerMeasure.put(measureDef1, evalMap));
+
+        final List<String> evalList = List.of("err");
+
+        assertThrows(UnsupportedOperationException.class, () -> errorsPerMeasure.put(measureDef1, evalList));
     }
 }

@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.cr.measure.common;
 
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import jakarta.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -13,9 +14,7 @@ import java.util.Set;
 import org.hl7.elm.r1.FunctionDef;
 import org.hl7.elm.r1.OperandDef;
 import org.hl7.elm.r1.VersionedIdentifier;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Observation;
-import org.hl7.fhir.r4.model.Quantity;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
@@ -31,12 +30,15 @@ public class ContinuousVariableObservationHandler {
         // static class with private constructor
     }
 
-    static MeasureObservationResults continuousVariableEvaluation(
+    static <T extends IBaseResource> List<EvaluationResult> continuousVariableEvaluation(
             CqlEngine context,
             List<MeasureDef> measureDefs,
             VersionedIdentifier libraryIdentifier,
             EvaluationResult evaluationResult,
-            String subjectTypePart) {
+            String subjectTypePart,
+            // This is a temporary hack to inject FHIR version specific behaviour for
+            // Observations and Quantities for continuous variable observations
+            ContinuousVariableObservationConverter<T> continuousVariableObservationConverter) {
 
         final List<MeasureDef> measureDefsWithMeasureObservations = measureDefs.stream()
                 // if measure contains measure-observation, otherwise short circuit
@@ -45,12 +47,12 @@ public class ContinuousVariableObservationHandler {
 
         if (measureDefsWithMeasureObservations.isEmpty()) {
             // Don't need to do anything if there are no measure observations to process
-            return MeasureObservationResults.EMPTY;
+            return List.of();
         }
 
         final boolean hasLibraryInitialized = LibraryInitHandler.initLibrary(context, libraryIdentifier);
 
-        final List<MeasureObservationResult> finalResults = new ArrayList<>();
+        final List<EvaluationResult> finalResults = new ArrayList<>();
 
         try {
             // one Library may be linked to multiple Measures
@@ -66,7 +68,12 @@ public class ContinuousVariableObservationHandler {
                     for (PopulationDef populationDef : measureObservationPopulations) {
                         // each measureObservation is evaluated
                         var result = processMeasureObservation(
-                                context, evaluationResult, subjectTypePart, groupDef, populationDef);
+                                context,
+                                evaluationResult,
+                                subjectTypePart,
+                                groupDef,
+                                populationDef,
+                                continuousVariableObservationConverter);
 
                         finalResults.add(result);
                     }
@@ -79,19 +86,20 @@ public class ContinuousVariableObservationHandler {
             }
         }
 
-        return new MeasureObservationResults(finalResults);
+        return finalResults;
     }
 
     /**
      * For a given measure observation population, do an ad-hoc function evaluation and
      * accumulate the results that will be subsequently added to the CQL evaluation result.
      */
-    private static MeasureObservationResult processMeasureObservation(
+    private static <T extends IBaseResource> EvaluationResult processMeasureObservation(
             CqlEngine context,
             EvaluationResult evaluationResult,
             String subjectTypePart,
             GroupDef groupDef,
-            PopulationDef populationDef) {
+            PopulationDef populationDef,
+            ContinuousVariableObservationConverter<T> continuousVariableObservationConverter) {
 
         if (populationDef.getCriteriaReference() == null) {
             // We screwed up building the PopulationDef, somehow
@@ -114,7 +122,7 @@ public class ContinuousVariableObservationHandler {
                 tryGetExpressionResult(criteriaExpressionInput, evaluationResult);
 
         if (optExpressionResult.isEmpty()) {
-            return MeasureObservationResult.EMPTY;
+            return new EvaluationResult();
         }
 
         final ExpressionResult expressionResult = optExpressionResult.get();
@@ -130,13 +138,14 @@ public class ContinuousVariableObservationHandler {
         final Set<Object> evaluatedResources = new HashSet<>();
 
         for (Object result : resultsIter) {
-            final ObservationEvaluationResult observationResult =
+            final ExpressionResult observationResult =
                     evaluateObservationCriteria(result, observationExpression, groupDef.isBooleanBasis(), context);
 
             var observationId = expressionName + "-" + index;
             // wrap result in Observation resource to avoid duplicate results data loss
             // in set object
-            var observation = wrapResultAsObservation(observationId, observationId, observationResult.result());
+            var observation = continuousVariableObservationConverter.wrapResultAsObservation(
+                    observationId, observationId, observationResult.value());
             // add function results to existing EvaluationResult under new expression
             // name
             // need a way to capture input parameter here too, otherwise we have no way
@@ -149,7 +158,7 @@ public class ContinuousVariableObservationHandler {
             index++;
         }
 
-        return new MeasureObservationResult(expressionName, evaluatedResources, functionResults);
+        return buildEvaluationResult(expressionName, functionResults, evaluatedResources);
     }
 
     /**
@@ -164,7 +173,7 @@ public class ContinuousVariableObservationHandler {
      * @return cql results for subject requested
      */
     @SuppressWarnings({"deprecation", "removal"})
-    public static ObservationEvaluationResult evaluateObservationCriteria(
+    public static ExpressionResult evaluateObservationCriteria(
             Object resource, String criteriaExpression, boolean isBooleanBasis, CqlEngine context) {
 
         var ed = Libraries.resolveExpressionRef(
@@ -200,7 +209,7 @@ public class ContinuousVariableObservationHandler {
 
         validateObservationResult(resource, result);
 
-        return new ObservationEvaluationResult(result, evaluatedResources);
+        return new ExpressionResult(result, evaluatedResources);
     }
 
     private static Optional<ExpressionResult> tryGetExpressionResult(
@@ -295,38 +304,14 @@ public class ContinuousVariableObservationHandler {
         context.getState().clearEvaluatedResources();
     }
 
-    private static Observation wrapResultAsObservation(String id, String observationName, Object result) {
+    @Nonnull
+    private static EvaluationResult buildEvaluationResult(
+            String expressionName, Map<Object, Object> functionResults, Set<Object> evaluatedResources) {
+        final EvaluationResult evaluationResultToReturn = new EvaluationResult();
 
-        Observation obs = new Observation();
-        obs.setStatus(Observation.ObservationStatus.FINAL);
-        obs.setId(id);
-        CodeableConcept cc = new CodeableConcept();
-        cc.setText(observationName);
-        obs.setValue(convertToQuantity(result));
-        obs.setCode(cc);
+        evaluationResultToReturn.expressionResults.put(
+                expressionName, new ExpressionResult(functionResults, evaluatedResources));
 
-        return obs;
-    }
-
-    private static Quantity convertToQuantity(Object obj) {
-        if (obj == null) return null;
-
-        Quantity q = new Quantity();
-
-        if (obj instanceof Quantity existing) {
-            return existing;
-        } else if (obj instanceof Number number) {
-            q.setValue(number.doubleValue());
-        } else if (obj instanceof String s) {
-            try {
-                q.setValue(Double.parseDouble(s));
-            } catch (NumberFormatException e) {
-                throw new IllegalArgumentException("String is not a valid number: " + s, e);
-            }
-        } else {
-            throw new IllegalArgumentException("Cannot convert object of type " + obj.getClass() + " to Quantity");
-        }
-
-        return q;
+        return evaluationResultToReturn;
     }
 }

@@ -25,6 +25,7 @@ import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
+import org.opencds.cqf.cql.engine.execution.ExpressionResult;
 import org.opencds.cqf.cql.engine.fhir.model.Dstu3FhirModelResolver;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.fhir.cql.Engines;
@@ -38,7 +39,6 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorUtils;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 import org.opencds.cqf.fhir.cr.measure.common.MultiLibraryIdMeasureEngineDetails;
-import org.opencds.cqf.fhir.cr.measure.common.ObservationEvaluationResult;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.SubjectProvider;
 import org.opencds.cqf.fhir.utility.repository.FederatedRepository;
@@ -124,7 +124,11 @@ public class Dstu3MeasureProcessor {
         // populate results from Library $evaluate
         if (!subjects.isEmpty()) {
             var results = measureProcessorUtils.getEvaluationResults(
-                    subjectIds, zonedMeasurementPeriod, context, measureLibraryIdEngineDetails);
+                    subjectIds,
+                    zonedMeasurementPeriod,
+                    context,
+                    measureLibraryIdEngineDetails,
+                    Dstu3ContinuousVariableObservationConverter.INSTANCE);
 
             // Process Criteria Expression Results
             measureProcessorUtils.processResults(
@@ -167,9 +171,9 @@ public class Dstu3MeasureProcessor {
                     Set<Object> resourcesForSubject = entry.getValue();
 
                     for (Object resource : resourcesForSubject) {
-                        final ObservationEvaluationResult observationResult = evaluateObservationCriteria(
+                        final ExpressionResult observationResult = evaluateObservationCriteria(
                                 resource, measureObservation.expression(), groupDef.isBooleanBasis(), context);
-                        measureObservation.addResource(subjectId, observationResult.result());
+                        measureObservation.addResource(observationResult.value());
                         measureObservation.addResource(subjectId, observationResult.evaluatedResources());
                     }
                 }

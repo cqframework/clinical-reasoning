@@ -102,9 +102,10 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                 getCriteriaReference(measure.getUrl(), group, optMeasureObservationPopulation.orElse(null));
 
         // Populations
+        checkIds(group);
+
         var populationsWithCriteriaReference = group.getPopulation().stream()
-                .peek(R4MeasureDefBuilder::checkId)
-                .map(population -> buildPopulationDefWithCriteriaReference(population, criteriaReference))
+                .map(population -> buildPopulationDef(population, criteriaReference))
                 .toList();
 
         final Optional<PopulationDef> optPopulationDefDateOfCompliance =
@@ -126,6 +127,10 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                 aggregateMethod);
     }
 
+    private void checkIds(MeasureGroupComponent group) {
+        group.getPopulation().forEach(R4MeasureDefBuilder::checkId);
+    }
+
     private List<PopulationDef> mergePopulations(
             List<PopulationDef> populationsWithCriteriaReference, @Nullable PopulationDef populationDef) {
 
@@ -139,8 +144,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
     }
 
     @Nonnull
-    private PopulationDef buildPopulationDefWithCriteriaReference(
-            MeasureGroupPopulationComponent population, String criteriaReference) {
+    private PopulationDef buildPopulationDef(MeasureGroupPopulationComponent population, String criteriaReference) {
         return new PopulationDef(
                 population.getId(),
                 conceptToConceptDef(population.getCode()),

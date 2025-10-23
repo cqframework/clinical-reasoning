@@ -86,7 +86,7 @@ public class CompositeEvaluationResultsPerMeasure {
                 List<MeasureDef> measureDefs,
                 String subjectId,
                 EvaluationResult evaluationResult,
-                MeasureObservationResults measureObservationResults) {
+                List<EvaluationResult> measureObservationResults) {
             for (MeasureDef measureDef : measureDefs) {
                 addResult(measureDef, subjectId, evaluationResult, measureObservationResults);
             }
@@ -96,14 +96,14 @@ public class CompositeEvaluationResultsPerMeasure {
                 MeasureDef measureDef,
                 String subjectId,
                 EvaluationResult evaluationResult,
-                MeasureObservationResults measureObservationResults) {
+                List<EvaluationResult> measureObservationResults) {
 
             // if we have no results, we don't need to add anything
             if (evaluationResult == null || evaluationResult.expressionResults.isEmpty()) {
                 return;
             }
 
-            var evaluationResultToUse = measureObservationResults.withNewEvaluationResult(evaluationResult);
+            var evaluationResultToUse = mergeEvaluationResults(evaluationResult, measureObservationResults);
 
             var resultPerMeasure = resultsPerMeasure.computeIfAbsent(measureDef, k -> new HashMap<>());
 
@@ -126,6 +126,21 @@ public class CompositeEvaluationResultsPerMeasure {
             }
 
             errorsPerMeasure.computeIfAbsent(measureDef, k -> new ArrayList<>()).add(error);
+        }
+
+        private EvaluationResult mergeEvaluationResults(
+                EvaluationResult origEvaluationResult, List<EvaluationResult> measureObservationResults) {
+            final EvaluationResult evaluationResult = new EvaluationResult();
+
+            var copyOfExpressionResults = new HashMap<>(origEvaluationResult.expressionResults);
+
+            for (EvaluationResult measureObservationResult : measureObservationResults) {
+                copyOfExpressionResults.putAll(measureObservationResult.expressionResults);
+            }
+
+            evaluationResult.expressionResults.putAll(copyOfExpressionResults);
+
+            return evaluationResult;
         }
     }
 }

@@ -388,7 +388,12 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
 
     but we don't want that:  we want to filter only resources that belong to the patients captured by each stratum
     so we want to do some sort of wizardry that involves getting the stratum values, and using those to retrieve the associated resources
+
+    so it's basically a hack to go from StratifierGroupComponent stratum value -> subject -> populationDef.subjectResources.get(subject)
+    to get Set of resources on which to do measure scoring
      */
+
+    // TODO:  LD: Integrate this algorithm with a new StratumDef that will be populated in R4StratifierBuilder
     private Set<Object> getResultsForStratum(
             PopulationDef measureObservationPopulationDef,
             StratifierDef stratifierDef,

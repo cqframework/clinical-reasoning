@@ -99,6 +99,18 @@ class IgRepositoryKalmTest {
     }
 
     @Test
+    void searchPatientById() {
+        var id = Ids.newId(Patient.class, "123");
+        var b = repository.search(Bundle.class, Patient.class, Searches.byId("123"));
+
+        assertNotNull(b);
+        assertEquals(1, b.getEntry().size());
+        var p = (Patient) b.getEntryFirstRep().getResource();
+        assertNotNull(p);
+        assertEquals(id.getIdPart(), p.getIdElement().getIdPart());
+    }
+
+    @Test
     void searchEncounterNoCompartment() {
         var encounters = repository.search(Bundle.class, Encounter.class, Searches.ALL);
         assertNotNull(encounters);

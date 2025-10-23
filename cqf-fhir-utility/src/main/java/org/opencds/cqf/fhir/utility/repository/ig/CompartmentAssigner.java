@@ -237,7 +237,7 @@ class CompartmentAssigner {
             }
         }
 
-        // Did our best, coudln't determine the assignment.
+        // Did our best, couldn't determine the assignment.
         return CompartmentAssignment.unknown(compartmentMode.type());
     }
 

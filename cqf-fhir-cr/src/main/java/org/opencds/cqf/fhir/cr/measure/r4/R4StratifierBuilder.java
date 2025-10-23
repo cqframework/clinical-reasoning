@@ -93,6 +93,7 @@ class R4StratifierBuilder {
         }
     }
 
+    // LUKETODO:  I think we need to add logic here:
     private static void componentStratifier(
             BuilderContext bc,
             StratifierDef stratifierDef,

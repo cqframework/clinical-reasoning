@@ -19,7 +19,6 @@ import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupPopulationComponent
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupStratifierComponent;
 import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupComponent;
 import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupPopulationComponent;
-import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Quantity;
 import org.opencds.cqf.fhir.cr.measure.common.BaseMeasureReportScorer;
 import org.opencds.cqf.fhir.cr.measure.common.ContinuousVariableObservationAggregateMethod;
@@ -308,8 +307,11 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
             if (resource instanceof Map<?, ?> map) {
                 for (Object value : map.values()) {
                     // LUKETODO:  replace this with Quantity or QuantityHolder
-                    if (value instanceof Observation obs && obs.hasValueQuantity()) {
-                        quantities.add(obs.getValueQuantity());
+                    //                    if (value instanceof Observation obs && obs.hasValueQuantity()) {
+                    //                    if (value instanceof QuantityHolder<?> quantityHolder &&
+                    // quantityHolder.hasValueQuantity()) {
+                    if (value instanceof Quantity quantity) {
+                        quantities.add(quantity);
                     }
                 }
             }

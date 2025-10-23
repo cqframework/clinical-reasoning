@@ -1,7 +1,5 @@
 package org.opencds.cqf.fhir.cr.measure.dstu3;
 
-import org.hl7.fhir.dstu3.model.CodeableConcept;
-import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Quantity;
 import org.opencds.cqf.fhir.cr.measure.common.ContinuousVariableObservationConverter;
 
@@ -10,21 +8,16 @@ import org.opencds.cqf.fhir.cr.measure.common.ContinuousVariableObservationConve
  * enforced by an enum.
  */
 @SuppressWarnings("squid:S6548")
-public enum Dstu3ContinuousVariableObservationConverter implements ContinuousVariableObservationConverter<Observation> {
+public enum Dstu3ContinuousVariableObservationConverter implements ContinuousVariableObservationConverter<Quantity> {
     INSTANCE;
 
     @Override
-    public Observation wrapResultAsObservation(String id, String observationName, Object result) {
+    //    public QuantityHolder<Quantity> wrapResultAsQuantityHolder(String id, Object result) {
+    //        return new QuantityHolder<>(id, convertToQuantity(result));
+    //    }
 
-        Observation obs = new Observation();
-        obs.setStatus(Observation.ObservationStatus.FINAL);
-        obs.setId(id);
-        CodeableConcept cc = new CodeableConcept();
-        cc.setText(observationName);
-        obs.setValue(convertToQuantity(result));
-        obs.setCode(cc);
-
-        return obs;
+    public Quantity wrapResultAsQuantityHolder(String id, Object result) {
+        return convertToQuantity(result);
     }
 
     private static Quantity convertToQuantity(Object obj) {

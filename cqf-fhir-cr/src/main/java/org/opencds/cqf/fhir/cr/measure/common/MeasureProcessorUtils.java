@@ -16,7 +16,7 @@ import org.hl7.elm.r1.IntervalTypeSpecifier;
 import org.hl7.elm.r1.NamedTypeSpecifier;
 import org.hl7.elm.r1.ParameterDef;
 import org.hl7.elm.r1.VersionedIdentifier;
-import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.EvaluationResultsForMultiLib;
@@ -267,7 +267,7 @@ public class MeasureProcessorUtils {
      *                                               specific
      * @return CQL results for Library defined in the Measure resource
      */
-    public <T extends IBaseResource> CompositeEvaluationResultsPerMeasure getEvaluationResults(
+    public <T extends ICompositeType> CompositeEvaluationResultsPerMeasure getEvaluationResults(
             List<String> subjectIds,
             ZonedDateTime zonedMeasurementPeriod,
             CqlEngine context,

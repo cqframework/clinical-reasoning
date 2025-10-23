@@ -158,23 +158,6 @@ class IgRepositoryKalmTest {
     // Organization does not exist within a Patient compartment
     // So should be in a shared folder.
     @Test
-    void createAndDeleteOrganizationWithoutCompartment() {
-        var org = new Organization();
-        org.setId("new-organization");
-        var o = repository.create(org);
-        var created = repository.read(Organization.class, o.getId());
-        assertNotNull(created);
-
-        var loc = tempDir.resolve("tests/data/fhir/shared/organization/new-organization.json");
-        assertTrue(Files.exists(loc));
-
-        repository.delete(Organization.class, created.getIdElement());
-        assertFalse(Files.exists(loc));
-    }
-
-    // Organization does not exist within a Patient compartment
-    // So should be in a shared folder.
-    @Test
     void createAndDeleteOrganizationWithCompartment() {
         var org = new Organization();
         org.setId("new-organization");

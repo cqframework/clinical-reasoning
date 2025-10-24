@@ -246,9 +246,6 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
     private StratifierDef buildStratifierDef(MeasureGroupStratifierComponent mgsc) {
         checkId(mgsc);
 
-        // LUKETODO:  how do I fill this?
-        var stratum = new ArrayList<StratumPopulationDef>();
-
         // Components
         var components = new ArrayList<StratifierComponentDef>();
         for (MeasureGroupStratifierComponentComponent scc : mgsc.getComponent()) {

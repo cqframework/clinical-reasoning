@@ -65,6 +65,11 @@ public class StratifierDef {
         stratum.add(stratumDef);
     }
 
+    // LUKETODO:  try out this pattern
+    public void addAllStratum(List<StratumDef> stratumDefs) {
+        stratum.addAll(stratumDefs);
+    }
+
     public List<StratifierComponentDef> components() {
         return this.components;
     }
@@ -104,30 +109,5 @@ public class StratifierDef {
         } else {
             return Set.of(value);
         }
-    }
-
-    @Nullable
-    public Class<?> getResultType() {
-        if (this.results == null || this.results.isEmpty()) {
-            return null;
-        }
-
-        var resultClasses = results.values().stream()
-                .map(CriteriaResult::rawValue)
-                .map(StratifierUtils::extractClassesFromSingleOrListResult)
-                .flatMap(Collection::stream)
-                .collect(Collectors.toUnmodifiableSet());
-
-        if (resultClasses.size() == 1) {
-            return resultClasses.iterator().next();
-        }
-
-        if (resultClasses.isEmpty()) {
-            return null;
-        }
-
-        throw new InvalidRequestException(
-                "There should be only one result type for this StratifierDef but there was: %s"
-                        .formatted(resultClasses));
     }
 }

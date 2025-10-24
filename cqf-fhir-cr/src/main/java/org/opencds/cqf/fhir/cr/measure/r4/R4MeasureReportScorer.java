@@ -365,7 +365,7 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
             MeasureScoring measureScoring,
             StratifierGroupComponent stratum) {
         final Quantity quantity =
-                getStratumScoreOrNull(measureUrl, groupDef, stratifierDef, stratumDef, measureScoring, stratum);
+                getStratumScoreOrNull(measureUrl, groupDef, stratumDef, measureScoring, stratum);
 
         if (quantity != null) {
             stratum.setMeasureScore(quantity);
@@ -376,7 +376,6 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
     private Quantity getStratumScoreOrNull(
             String measureUrl,
             GroupDef groupDef,
-            StratifierDef stratifierDef,
             StratumDef stratumDef,
             MeasureScoring measureScoring,
             StratifierGroupComponent stratum) {
@@ -408,7 +407,7 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
                         measureUrl,
                         groupDef,
                         populationDef ->
-                                getResultsForStratum(populationDef, stratifierDef, stratumPopulationDef, stratum));
+                                getResultsForStratum(populationDef, stratumPopulationDef));
             }
             default -> {
                 return null;
@@ -429,24 +428,9 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
     // LUKETODO: Integrate this algorithm with a new StratumDef that will be populated in R4StratifierBuilder
     private Set<Object> getResultsForStratum(
             PopulationDef measureObservationPopulationDef,
-            StratifierDef stratifierDef,
-            StratumPopulationDef stratumPopulationDef,
-            StratifierGroupComponent stratum) {
+        StratumPopulationDef stratumPopulationDef) {
 
-        final String stratumValue = stratum.getValue().getText();
-
-        final Set<String> subjectsWithStratumValue = stratifierDef.getResults().entrySet().stream()
-                .filter(entry -> doesStratumMatch(stratumValue, entry.getValue().rawValue()))
-                .map(Entry::getKey)
-                .collect(Collectors.toUnmodifiableSet());
-
-        final Set<Object> result = measureObservationPopulationDef.getSubjectResources().entrySet().stream()
-                .filter(entry -> subjectsWithStratumValue.contains(entry.getKey()))
-                .map(Entry::getValue)
-                .flatMap(Collection::stream)
-                .collect(Collectors.toUnmodifiableSet());
-
-        final Set<Object> resultNew = measureObservationPopulationDef.getSubjectResources().entrySet().stream()
+        return measureObservationPopulationDef.getSubjectResources().entrySet().stream()
                 // LUKETODO:  split this the proper way using hapi-fhir classe
                 .filter(entry -> stratumPopulationDef.getSubjects().stream()
                         .map(subject -> subject.split("Patient/")[1])
@@ -455,61 +439,6 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
                 .map(Entry::getValue)
                 .flatMap(Collection::stream)
                 .collect(Collectors.toUnmodifiableSet());
-
-        logger.info(
-                "1234: measureObservationPopulationDef: {}, subjectsWithStratumValue: {}, result: {}",
-                measureObservationPopulationDef.id(),
-                subjectsWithStratumValue,
-                print(result));
-
-        return resultNew;
-    }
-
-    private Set<String> print(Set<Object> results) {
-
-        Set<String> result = new HashSet<>();
-        for (Object o : results) {
-            if (o instanceof Map map) {
-                final Set<?> set = map.entrySet();
-
-                for (Object item : set) {
-                    if (item instanceof Entry mapEntry) {
-                        final Object key = mapEntry.getKey();
-                        final Object value = mapEntry.getValue();
-
-                        if (key instanceof IBaseResource resource && value instanceof Quantity quantity) {
-                            result.add(resource.getIdElement().getValueAsString() + ":" + quantity.getValue());
-                        }
-                    }
-                }
-            }
-        }
-
-        return result;
-    }
-
-    // LUKETODO:: we may need to match more types of stratum here:  The below logic deals with
-    // currently anticipated use cases
-    private boolean doesStratumMatch(String stratumValueAsString, Object rawValueFromStratifier) {
-        if (rawValueFromStratifier == null || stratumValueAsString == null) {
-            return false;
-        }
-
-        if (rawValueFromStratifier instanceof Integer rawValueFromStratifierAsInt) {
-            final int stratumValueAsInt = Integer.parseInt(stratumValueAsString);
-
-            return stratumValueAsInt == rawValueFromStratifierAsInt;
-        }
-
-        if (rawValueFromStratifier instanceof Enumeration<?> rawValueFromStratifierAsEnumeration) {
-            return stratumValueAsString.equals(rawValueFromStratifierAsEnumeration.asStringValue());
-        }
-
-        if (rawValueFromStratifier instanceof String rawValueFromStratifierAsString) {
-            return stratumValueAsString.equals(rawValueFromStratifierAsString);
-        }
-
-        return false;
     }
 
     private int getCountFromGroupPopulation(

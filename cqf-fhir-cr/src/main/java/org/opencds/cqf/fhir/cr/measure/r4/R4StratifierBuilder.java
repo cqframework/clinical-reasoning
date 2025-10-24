@@ -57,21 +57,33 @@ class R4StratifierBuilder {
     private static final Logger logger = LoggerFactory.getLogger(R4StratifierBuilder.class);
 
     static void buildStratifier(
-            BuilderContext bc,
-            MeasureGroupStratifierComponent measureStratifier,
-            MeasureReportGroupStratifierComponent reportStratifier,
-            StratifierDef stratifierDef,
-            List<MeasureGroupPopulationComponent> populations,
-            GroupDef groupDef) {
+        BuilderContext bc,
+        MeasureGroupStratifierComponent measureStratifier,
+        MeasureReportGroupStratifierComponent reportStratifier,
+        StratifierDef stratifierDef,
+        List<MeasureGroupPopulationComponent> populations,
+        GroupDef groupDef) {
+
         // the top level stratifier 'id' and 'code'
         reportStratifier.setCode(getCodeForReportStratifier(stratifierDef, measureStratifier));
         reportStratifier.setId(measureStratifier.getId());
         // if description is defined, add to MeasureReport
         if (measureStratifier.hasDescription()) {
             reportStratifier.addExtension(
-                    MeasureConstants.EXT_POPULATION_DESCRIPTION_URL,
-                    new StringType(measureStratifier.getDescription()));
+                MeasureConstants.EXT_POPULATION_DESCRIPTION_URL,
+                new StringType(measureStratifier.getDescription()));
         }
+
+        buildStratifier2(bc, measureStratifier, reportStratifier, stratifierDef, populations, groupDef);
+    }
+
+    private static void buildStratifier2(
+            BuilderContext bc,
+            MeasureGroupStratifierComponent measureStratifier,
+            MeasureReportGroupStratifierComponent reportStratifier,
+            StratifierDef stratifierDef,
+            List<MeasureGroupPopulationComponent> populations,
+            GroupDef groupDef) {
 
         if (!stratifierDef.components().isEmpty()) {
 

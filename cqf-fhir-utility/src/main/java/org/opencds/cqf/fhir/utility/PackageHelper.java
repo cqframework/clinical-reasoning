@@ -12,6 +12,7 @@ import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IDomainResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
 
@@ -29,7 +30,7 @@ public class PackageHelper {
      */
     public static IBaseParameters packageParameters(
             FhirVersionEnum fhirVersion, IBaseResource terminologyEndpoint, boolean isPut) {
-        return packageParameters(fhirVersion, null, terminologyEndpoint, isPut);
+        return packageParameters(fhirVersion, null, null, null, null, terminologyEndpoint, isPut);
     }
 
     /**
@@ -41,9 +42,24 @@ public class PackageHelper {
      * @return FHIR Parameters resource
      */
     public static IBaseParameters packageParameters(
-            FhirVersionEnum fhirVersion, List<String> include, IBaseResource terminologyEndpoint, boolean isPut) {
+            FhirVersionEnum fhirVersion,
+            IPrimitiveType<Integer> offset,
+            IPrimitiveType<Integer> count,
+            String bundleType,
+            List<String> include,
+            IBaseResource terminologyEndpoint,
+            boolean isPut) {
         var params = forFhirVersion(fhirVersion)
                 .createParameters((IBaseParameters) newBaseForVersion("Parameters", fhirVersion));
+        if (offset != null) {
+            params.addParameter("offset", offset);
+        }
+        if (count != null) {
+            params.addParameter("count", count);
+        }
+        if (bundleType != null) {
+            params.addParameter("bundleType", bundleType);
+        }
         if (include != null) {
             for (String i : include) {
                 params.addParameter("include", codeTypeForVersion(fhirVersion, i));
@@ -77,15 +93,12 @@ public class PackageHelper {
                     .createKnowledgeArtifactAdapter((IDomainResource) resource);
             if (adapter.hasUrl()) {
                 final var url = adapter.getUrl();
-                if (adapter.hasVersion()) {
-                    BundleHelper.setEntryFullUrl(fhirVersion, entry, url + "|" + adapter.getVersion());
-                    if (!isPut) {
+                BundleHelper.setEntryFullUrl(fhirVersion, entry, url);
+                if (!isPut) {
+                    if (adapter.hasVersion()) {
                         BundleHelper.setRequestIfNoneExist(
                                 fhirVersion, request, "url=%s&version=%s".formatted(url, adapter.getVersion()));
-                    }
-                } else {
-                    BundleHelper.setEntryFullUrl(fhirVersion, entry, url);
-                    if (!isPut) {
+                    } else {
                         BundleHelper.setRequestIfNoneExist(fhirVersion, request, "url=%s".formatted(url));
                     }
                 }

@@ -312,8 +312,8 @@ class PackageVisitorTests {
         Parameters offset4Params = parameters(part("offset", new IntegerType(4)));
         Bundle offset4Bundle = (Bundle) libraryAdapter.accept(packageVisitor, offset4Params);
         assertEquals(offset4Bundle.getEntry().size(), (countZeroBundle.getTotal() - 4));
-        assertSame(BundleType.COLLECTION, offset4Bundle.getType());
-        assertFalse(offset4Bundle.hasTotal());
+        assertSame(BundleType.SEARCHSET, offset4Bundle.getType());
+        assertTrue(offset4Bundle.hasTotal());
         Parameters offsetMaxParams = parameters(part("offset", new IntegerType(countZeroBundle.getTotal())));
         Bundle offsetMaxBundle = (Bundle) libraryAdapter.accept(packageVisitor, offsetMaxParams);
         assertEquals(0, offsetMaxBundle.getEntry().size());
@@ -333,32 +333,28 @@ class PackageVisitorTests {
         Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
         ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+
         Parameters countZeroParams = parameters(part("count", new IntegerType(0)));
         Bundle countZeroBundle = (Bundle) libraryAdapter.accept(packageVisitor, countZeroParams);
         assertSame(BundleType.SEARCHSET, countZeroBundle.getType());
+
         Parameters countSevenParams = parameters(part("count", new IntegerType(7)));
         Bundle countSevenBundle = (Bundle) libraryAdapter.accept(packageVisitor, countSevenParams);
-        assertSame(BundleType.TRANSACTION, countSevenBundle.getType());
-        Parameters countFourParams = parameters(part("count", new IntegerType(4)));
-        Bundle countFourBundle = (Bundle) libraryAdapter.accept(packageVisitor, countFourParams);
-        assertSame(BundleType.COLLECTION, countFourBundle.getType());
-        // these assertions test for Bundle base profile conformance when type = collection
-        assertFalse(countFourBundle.getEntry().stream().anyMatch(entry -> entry.hasRequest()));
-        assertFalse(countFourBundle.hasTotal());
-        Parameters offsetOneParams = parameters(part("offset", new IntegerType(1)));
-        Bundle offsetOneBundle = (Bundle) libraryAdapter.accept(packageVisitor, offsetOneParams);
-        assertSame(BundleType.COLLECTION, offsetOneBundle.getType());
-        // these assertions test for Bundle base profile conformance when type = collection
-        assertFalse(offsetOneBundle.getEntry().stream().anyMatch(entry -> entry.hasRequest()));
-        assertFalse(offsetOneBundle.hasTotal());
+        assertSame(BundleType.SEARCHSET, countSevenBundle.getType());
 
-        Parameters countOneOffsetOneParams =
-                parameters(part("count", new IntegerType(1)), part("offset", new IntegerType(1)));
-        Bundle countOneOffsetOneBundle = (Bundle) libraryAdapter.accept(packageVisitor, countOneOffsetOneParams);
-        assertSame(BundleType.COLLECTION, countOneOffsetOneBundle.getType());
+        Parameters collectionBundleTypeParams = parameters(part("bundleType", "collection"));
+        Bundle collectionBundleType = (Bundle) libraryAdapter.accept(packageVisitor, collectionBundleTypeParams);
+        assertSame(BundleType.COLLECTION, collectionBundleType.getType());
         // these assertions test for Bundle base profile conformance when type = collection
-        assertFalse(countOneOffsetOneBundle.getEntry().stream().anyMatch(entry -> entry.hasRequest()));
-        assertFalse(countOneOffsetOneBundle.hasTotal());
+        assertFalse(collectionBundleType.getEntry().stream().anyMatch(entry -> entry.hasRequest()));
+        assertFalse(collectionBundleType.hasTotal());
+
+        Parameters transactionBundleTypeParams = parameters(part("bundleType", "transaction"));
+        Bundle transactionBundle = (Bundle) libraryAdapter.accept(packageVisitor, transactionBundleTypeParams);
+        assertSame(BundleType.TRANSACTION, transactionBundle.getType());
+        // these assertions test for Bundle base profile conformance when type = collection
+        assertTrue(transactionBundle.getEntry().stream().anyMatch(entry -> entry.hasRequest()));
+        assertFalse(transactionBundle.hasTotal());
     }
 
     @Test

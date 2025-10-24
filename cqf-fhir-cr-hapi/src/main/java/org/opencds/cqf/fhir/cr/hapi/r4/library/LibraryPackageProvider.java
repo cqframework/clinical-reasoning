@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Endpoint;
@@ -42,6 +43,31 @@ public class LibraryPackageProvider {
      * @param canonical the canonical identifier for the Resource (optionally version-specific).
      * @param url canonical URL of the Resource when invoked at the resource type level. This is exclusive with the id and canonical parameters.
      * @param version version of the Resource when invoked at the resource type level. This is exclusive with the id and canonical parameters.
+     * @param offset                        Paging support - where to start if a subset is desired
+     *                                      (default = 0). Offset is number of records (not number
+     *                                      of pages). It is invalid to request a 'transaction'
+     *                                      bundle, via the bundleType parameter, and use paging.
+     *                                      In this case, the implementation will return a paged
+     *                                      searchset with an explanation of why that was done in
+     *                                      the operation outcome.If offset > 0 the resulting bundle
+     *                                      will be of type collection.
+     * @param count                         Paging support - how many resources should be provided
+     *                                      in a partial page view. If count = 0, the client is
+     *                                      asking how large the package is. If count > 0 but less
+     *                                      than the total number of resources, the result will be a
+     *                                      bundle of type collection. It is invalid to request a
+     *                                      'transaction' bundle, via the bundleType parameter, and
+     *                                      use paging. In this case, the implementation will
+     *                                      return a paged searchset with an explanation of why that
+     *                                      was done in the operation outcome.If offset > 0 the
+     *                                      resulting bundle will be of type collection.
+     * @param bundleType                    Determines the type of output Bundle. If not specified,
+     *                                      the output bundle will be a transaction bundle. Allowed
+     *                                      values include 'transaction', and 'collection'.
+     *                                      It is invalid to request a 'transaction' bundle and use
+     *                                      paging. In this case, the implementation should return a
+     *                                      paged searchset with an explanation of why that was done
+     *                                      in the operation outcome.
      * @param include Specifies what contents should only be included in the resulting package.
      * @param terminologyEndpoint the FHIR {@link Endpoint} Endpoint resource or url to use to access terminology (i.e. valuesets, codesystems, naming systems, concept maps, and membership testing) referenced by the Resource. If no terminology endpoint is supplied, the evaluation will attempt to use the server on which the operation is being performed as the terminology server.
      * @param usePut the boolean value to determine if the Bundle returned uses PUT or POST request methods.  Defaults to false.
@@ -54,6 +80,9 @@ public class LibraryPackageProvider {
             @OperationParam(name = "canonical") String canonical,
             @OperationParam(name = "url") String url,
             @OperationParam(name = "version") String version,
+            @OperationParam(name = "offset", typeName = "integer") IPrimitiveType<Integer> offset,
+            @OperationParam(name = "count", typeName = "integer") IPrimitiveType<Integer> count,
+            @OperationParam(name = "bundleType") String bundleType,
             @OperationParam(name = "include") List<CodeType> include,
             @OperationParam(name = "terminologyEndpoint") Parameters.ParametersParameterComponent terminologyEndpoint,
             @OperationParam(name = "usePut") BooleanType usePut,
@@ -63,6 +92,9 @@ public class LibraryPackageProvider {
         var terminologyEndpointParam = getEndpoint(fhirVersion, terminologyEndpoint);
         var params = packageParameters(
                 fhirVersion,
+                offset,
+                count,
+                bundleType,
                 include == null
                         ? null
                         : include.stream()
@@ -82,6 +114,9 @@ public class LibraryPackageProvider {
             @OperationParam(name = "canonical") String canonical,
             @OperationParam(name = "url") String url,
             @OperationParam(name = "version") String version,
+            @OperationParam(name = "offset", typeName = "integer") IPrimitiveType<Integer> offset,
+            @OperationParam(name = "count", typeName = "integer") IPrimitiveType<Integer> count,
+            @OperationParam(name = "bundleType") String bundleType,
             @OperationParam(name = "include") List<CodeType> include,
             @OperationParam(name = "terminologyEndpoint") Parameters.ParametersParameterComponent terminologyEndpoint,
             @OperationParam(name = "usePut") BooleanType usePut,
@@ -92,6 +127,9 @@ public class LibraryPackageProvider {
         var terminologyEndpointParam = getEndpoint(fhirVersion, terminologyEndpoint);
         var params = packageParameters(
                 fhirVersion,
+                offset,
+                count,
+                bundleType,
                 include == null
                         ? null
                         : include.stream()

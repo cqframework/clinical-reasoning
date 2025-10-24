@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.utility.repository.ig;
 
-import jakarta.annotation.Nonnull;
+import static java.util.Objects.requireNonNull;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -21,7 +22,8 @@ import org.slf4j.LoggerFactory;
 public record IgConventions(
         org.opencds.cqf.fhir.utility.repository.ig.IgConventions.FhirTypeLayout typeLayout,
         org.opencds.cqf.fhir.utility.repository.ig.IgConventions.CategoryLayout categoryLayout,
-        org.opencds.cqf.fhir.utility.repository.ig.IgConventions.CompartmentLayout compartmentLayout,
+        org.opencds.cqf.fhir.utility.repository.ig.CompartmentMode compartmentMode,
+        org.opencds.cqf.fhir.utility.repository.ig.IgConventions.CompartmentIsolation compartmentIsolation,
         org.opencds.cqf.fhir.utility.repository.ig.IgConventions.FilenameMode filenameMode,
         org.opencds.cqf.fhir.utility.repository.ig.EncodingBehavior encodingBehavior) {
 
@@ -45,15 +47,6 @@ public record IgConventions(
     }
 
     /**
-     * Whether or not the files are organized by compartment. This is primarily used for tests to
-     * provide isolation between test cases.
-     */
-    public enum CompartmentLayout {
-        DIRECTORY_PER_COMPARTMENT,
-        FLAT
-    }
-
-    /**
      * Whether or not the files are prefixed with the resource type.
      */
     public enum FilenameMode {
@@ -61,23 +54,34 @@ public record IgConventions(
         ID_ONLY
     }
 
+    /**
+     * Whether or not the data resources are fully isolated by compartment.
+     */
+    public enum CompartmentIsolation {
+        FHIR, // Isolate data resources by FHIR compartment definitions
+        FULL // Isolate all data resources
+    }
+
     public static final IgConventions FLAT = new IgConventions(
             FhirTypeLayout.FLAT,
             CategoryLayout.FLAT,
-            CompartmentLayout.FLAT,
+            CompartmentMode.NONE,
+            CompartmentIsolation.FULL,
             FilenameMode.TYPE_AND_ID,
             EncodingBehavior.DEFAULT);
     public static final IgConventions STANDARD = new IgConventions(
             FhirTypeLayout.DIRECTORY_PER_TYPE,
             CategoryLayout.DIRECTORY_PER_CATEGORY,
-            CompartmentLayout.FLAT,
+            CompartmentMode.NONE,
+            CompartmentIsolation.FULL,
             FilenameMode.ID_ONLY,
             EncodingBehavior.DEFAULT);
 
     public static final IgConventions KALM = new IgConventions(
             FhirTypeLayout.DIRECTORY_PER_TYPE,
             CategoryLayout.DEFINITIONAL_AND_DATA,
-            CompartmentLayout.DIRECTORY_PER_COMPARTMENT,
+            CompartmentMode.PATIENT,
+            CompartmentIsolation.FHIR,
             FilenameMode.ID_ONLY,
             EncodingBehavior.KALM);
 
@@ -93,6 +97,7 @@ public record IgConventions(
      *
      * @param path The path to the IG.
      * @return The IG conventions.
+     * @throws IllegalArgumentException if the path is invalid or does not conform to IG conventions.
      */
     public static IgConventions autoDetect(Path path) {
         if (path == null || !Files.exists(path)) {
@@ -139,7 +144,7 @@ public record IgConventions(
 
         var hasCategoryDirectory = !path.equals(categoryPath);
 
-        var hasCompartmentDirectory = false;
+        var compartmentMode = CompartmentMode.NONE;
 
         // Compartments can only exist for test data
         if (hasCategoryDirectory) {
@@ -157,9 +162,8 @@ public record IgConventions(
             // or more directories. If more directories exist, and the directory name is not a
             // FHIR type, then we have a compartment directory.
             if (tests.toFile().exists()) {
-                var potentialCompartments = FHIR_TYPE_NAMES.stream()
-                        .map(tests::resolve)
-                        .filter(x -> x.toFile().exists());
+                var potentialCompartments =
+                        FHIR_TYPE_NAMES.stream().map(tests::resolve).filter(Files::exists);
 
                 // Check if any of the potential compartment directories
                 // have subdirectories that are not FHIR types (e.g. "input/tests/patient/test1).
@@ -170,9 +174,19 @@ public record IgConventions(
                         .findFirst()
                         .orElse(categoryPath);
 
-                hasCompartmentDirectory = !compartment.equals(categoryPath);
+                var hasCompartmentDirectory = !categoryPath.equals(compartment);
                 if (hasCompartmentDirectory) {
                     categoryPath = compartment;
+
+                    // Getting the parent here, because our "compartment" directory is a specific one,
+                    // e.g. tests/patient/123 (not just test/patient).
+                    compartmentMode = CompartmentMode.fromType(
+                            compartment.getParent().getFileName().toString());
+
+                    if (compartmentMode == CompartmentMode.NONE) {
+                        throw new IllegalArgumentException(
+                                "The compartment directory does not match any known compartment type: " + compartment);
+                    }
                 }
             }
         }
@@ -204,7 +218,12 @@ public record IgConventions(
         var config = new IgConventions(
                 hasTypeDirectory ? FhirTypeLayout.DIRECTORY_PER_TYPE : FhirTypeLayout.FLAT,
                 hasCategoryDirectory ? CategoryLayout.DIRECTORY_PER_CATEGORY : CategoryLayout.FLAT,
-                hasCompartmentDirectory ? CompartmentLayout.DIRECTORY_PER_COMPARTMENT : CompartmentLayout.FLAT,
+                compartmentMode,
+                // TODO: Cannot auto-detect this yet, default to FULL
+                // We can check for non-compartment resources in compartment directories to detect FHIR vs FULL
+                // For example, if we find a Medication resource in a Patient compartment directory,
+                // we know it is FULL isolation.
+                CompartmentIsolation.FULL,
                 hasTypeFilename ? FilenameMode.TYPE_AND_ID : FilenameMode.ID_ONLY,
                 EncodingBehavior.DEFAULT);
 
@@ -227,16 +246,16 @@ public record IgConventions(
     }
 
     private static boolean fileNameMatchesType(Path innerFile) {
-        Objects.requireNonNull(innerFile);
+        requireNonNull(innerFile);
         var fileName = innerFile.getFileName().toString();
         return FHIR_TYPE_NAMES.stream().anyMatch(type -> fileName.toLowerCase().startsWith(type));
     }
 
     private static boolean matchesAnyResourceType(Path innerFile) {
+        requireNonNull(innerFile);
         return FHIR_TYPE_NAMES.contains(innerFile.getFileName().toString().toLowerCase());
     }
 
-    @Nonnull
     private static Stream<Path> listFiles(Path innerPath) {
         try {
             return Files.list(innerPath);
@@ -286,29 +305,8 @@ public record IgConventions(
     }
 
     @Override
-    public boolean equals(Object other) {
-        if (other == null || getClass() != other.getClass()) {
-            return false;
-        }
-        IgConventions that = (IgConventions) other;
-        return typeLayout == that.typeLayout
-                && filenameMode == that.filenameMode
-                && categoryLayout == that.categoryLayout
-                && compartmentLayout == that.compartmentLayout
-                && (this.encodingBehavior != null
-                        ? encodingBehavior.equals(that.encodingBehavior)
-                        : that.encodingBehavior == null);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(typeLayout, categoryLayout, compartmentLayout, filenameMode, encodingBehavior);
-    }
-
-    @Override
-    @Nonnull
     public String toString() {
-        return "IGConventions [typeLayout=%s, categoryLayout=%s compartmentLayout=%s, filenameMode=%s]"
-                .formatted(typeLayout, categoryLayout, compartmentLayout, filenameMode);
+        return "IGConventions [typeLayout=%s, categoryLayout=%s compartmentMode=%s, compartmentIsolation=%s, filenameMode=%s]"
+                .formatted(typeLayout, categoryLayout, compartmentMode, compartmentIsolation, filenameMode);
     }
 }

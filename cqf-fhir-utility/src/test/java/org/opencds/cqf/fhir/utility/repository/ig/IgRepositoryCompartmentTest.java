@@ -13,11 +13,10 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Map;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Encounter;
-import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Library;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.BeforeAll;
@@ -78,13 +77,18 @@ class IgRepositoryCompartmentTest {
     @Test
     void readPatientNoCompartment() {
         var id = Ids.newId(Patient.class, "123");
-        assertThrows(ResourceNotFoundException.class, () -> repository.read(Patient.class, id));
+        var patient = repository.read(Patient.class, id);
+
+        assertNotNull(patient);
+        var sourcePath = (Path) patient.getUserData(IgRepository.SOURCE_PATH_TAG);
+        assertNotNull(sourcePath);
+        assertTrue(sourcePath.toString().contains(Path.of("patient", "123").toString()));
     }
 
     @Test
     void readPatient() {
         var id = Ids.newId(Patient.class, "123");
-        var p = repository.read(Patient.class, id, Map.of(IgRepository.FHIR_COMPARTMENT_HEADER, "Patient/123"));
+        var p = repository.read(Patient.class, id);
 
         assertNotNull(p);
         assertEquals(id.getIdPart(), p.getIdElement().getIdPart());
@@ -94,34 +98,23 @@ class IgRepositoryCompartmentTest {
     void searchEncounterNoCompartment() {
         var encounters = repository.search(Bundle.class, Encounter.class, Searches.ALL);
         assertNotNull(encounters);
-        assertEquals(0, encounters.getEntry().size());
+        assertEquals(2, encounters.getEntry().size());
     }
 
     @Test
     void searchEncounter() {
-        var encounters = repository.search(
-                Bundle.class,
-                Encounter.class,
-                Searches.ALL,
-                Map.of(IgRepository.FHIR_COMPARTMENT_HEADER, "Patient/123"));
+        var bySubject = Searches.toFlattenedMap(
+                Searches.builder().withReferenceParam("subject", "Patient/123").build());
+        var encounters = repository.search(Bundle.class, Encounter.class, bySubject);
         assertNotNull(encounters);
         assertEquals(1, encounters.getEntry().size());
-    }
-
-    @Test
-    void readValueSetNoCompartment() {
-        var id = Ids.newId(ValueSet.class, "456");
-        var vs = repository.read(ValueSet.class, id);
-
-        assertNotNull(vs);
-        assertEquals(vs.getIdPart(), vs.getIdElement().getIdPart());
     }
 
     // Terminology resources are not in compartments
     @Test
     void readValueSet() {
         var id = Ids.newId(ValueSet.class, "456");
-        var vs = repository.read(ValueSet.class, id, Map.of(IgRepository.FHIR_COMPARTMENT_HEADER, "Patient/123"));
+        var vs = repository.read(ValueSet.class, id);
 
         assertNotNull(vs);
         assertEquals(vs.getIdPart(), vs.getIdElement().getIdPart());
@@ -153,15 +146,14 @@ class IgRepositoryCompartmentTest {
     void createAndDeletePatient() {
         var p = new Patient();
         p.setId("new-patient");
-        var header = Map.of(IgRepository.FHIR_COMPARTMENT_HEADER, "Patient/new-patient");
-        var o = repository.create(p, header);
-        var created = repository.read(Patient.class, o.getId(), header);
+        var o = repository.create(p);
+        var created = repository.read(Patient.class, o.getId());
         assertNotNull(created);
 
         var loc = tempDir.resolve("input/tests/patient/new-patient/patient/new-patient.json");
         assertTrue(Files.exists(loc));
 
-        repository.delete(Patient.class, created.getIdElement(), header);
+        repository.delete(Patient.class, created.getIdElement());
         assertFalse(Files.exists(loc));
     }
 
@@ -183,13 +175,13 @@ class IgRepositoryCompartmentTest {
     @Test
     void updatePatient() {
         var id = Ids.newId(Patient.class, "123");
-        var p = repository.read(Patient.class, id, Map.of(IgRepository.FHIR_COMPARTMENT_HEADER, "Patient/123"));
+        var p = repository.read(Patient.class, id);
         assertFalse(p.hasActive());
 
         p.setActive(true);
         repository.update(p);
 
-        var updated = repository.read(Patient.class, id, Map.of(IgRepository.FHIR_COMPARTMENT_HEADER, "Patient/123"));
+        var updated = repository.read(Patient.class, id);
         assertTrue(updated.hasActive());
         assertTrue(updated.getActive());
     }
@@ -202,7 +194,10 @@ class IgRepositoryCompartmentTest {
 
     @Test
     void searchNonExistentType() {
-        var results = repository.search(Bundle.class, Encounter.class, Searches.ALL);
+        var unknownSubject = Searches.toFlattenedMap(Searches.builder()
+                .withReferenceParam("subject", "Patient/DoesNotExist")
+                .build());
+        var results = repository.search(Bundle.class, Encounter.class, unknownSubject);
         assertNotNull(results);
         assertEquals(0, results.getEntry().size());
     }
@@ -215,6 +210,22 @@ class IgRepositoryCompartmentTest {
     }
 
     @Test
+    void searchObservationByIdTraversesCompartmentDirectories() {
+        var bundle = repository.search(Bundle.class, Observation.class, Searches.byId("obs-test"));
+        assertNotNull(bundle);
+        assertEquals(1, bundle.getEntry().size());
+
+        var observation = repository.read(Observation.class, Ids.newId(Observation.class, "obs-test"));
+        assertNotNull(observation);
+        var sourcePath = (Path) observation.getUserData(IgRepository.SOURCE_PATH_TAG);
+        assertNotNull(sourcePath);
+        assertTrue(sourcePath
+                .toString()
+                .contains(Path.of("input", "tests", "patient", "123", "observation", "obs-test.json")
+                        .toString()));
+    }
+
+    @Test
     void searchByIdNotFound() {
         var bundle = repository.search(Bundle.class, Library.class, Searches.byId("DoesNotExist"));
         assertNotNull(bundle);
@@ -224,8 +235,8 @@ class IgRepositoryCompartmentTest {
     @Test
     @Order(1) // Do this test first because it puts the filesystem (temporarily) in an invalid state
     void resourceMissingWhenCacheCleared() throws IOException {
-        var id = new IdType("Library", "ToDelete");
-        var lib = new Library().setIdElement(id);
+        var lib = new Library().setId("ToDelete");
+        var id = lib.getIdElement();
         var path = tempDir.resolve("input/resources/library/ToDelete.json");
 
         repository.create(lib);

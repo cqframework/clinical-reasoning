@@ -161,5 +161,6 @@
     "sonarlint.connectedMode.project": {
         "connectionId": "cqframework",
         "projectKey": "cqframework_clinical-reasoning"
-    }
+    },
+    "java.debug.settings.onBuildFailureProceed": true
 }

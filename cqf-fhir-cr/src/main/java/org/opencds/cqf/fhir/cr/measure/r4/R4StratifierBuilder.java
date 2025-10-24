@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Sets.SetView;
@@ -11,6 +12,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collector;
@@ -36,10 +38,14 @@ import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierComponentDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
+import org.opencds.cqf.fhir.cr.measure.common.StratumDef;
+import org.opencds.cqf.fhir.cr.measure.common.StratumPopulationDef;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureReportBuilder.BuilderContext;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureReportBuilder.ValueWrapper;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4ResourceIdUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Convenience class with functionality split out from {@link R4MeasureReportBuilder} to
@@ -47,6 +53,7 @@ import org.opencds.cqf.fhir.cr.measure.r4.utils.R4ResourceIdUtils;
  */
 @SuppressWarnings("squid:S1135")
 class R4StratifierBuilder {
+    private static final Logger logger = LoggerFactory.getLogger(R4StratifierBuilder.class);
 
     static void buildStratifier(
             BuilderContext bc,
@@ -55,6 +62,7 @@ class R4StratifierBuilder {
             StratifierDef stratifierDef,
             List<MeasureGroupPopulationComponent> populations,
             GroupDef groupDef) {
+
         // the top level stratifier 'id' and 'code'
         reportStratifier.setCode(getCodeForReportStratifier(stratifierDef, measureStratifier));
         reportStratifier.setId(measureStratifier.getId());
@@ -64,6 +72,18 @@ class R4StratifierBuilder {
                     MeasureConstants.EXT_POPULATION_DESCRIPTION_URL,
                     new StringType(measureStratifier.getDescription()));
         }
+
+        var stratumDefs = buildMultipleStratum(bc, reportStratifier, stratifierDef, populations, groupDef);
+
+        stratifierDef.addAllStratum(stratumDefs);
+    }
+
+    private static List<StratumDef> buildMultipleStratum(
+            BuilderContext bc,
+            MeasureReportGroupStratifierComponent reportStratifier,
+            StratifierDef stratifierDef,
+            List<MeasureGroupPopulationComponent> populations,
+            GroupDef groupDef) {
 
         if (!stratifierDef.components().isEmpty()) {
 
@@ -83,17 +103,17 @@ class R4StratifierBuilder {
             // Stratifiers should be of the same basis as population
             // Split subjects by result values
             // ex. all Male Patients and all Female Patients
-            componentStratifier(bc, stratifierDef, reportStratifier, populations, groupDef, subjectResultTable);
+            return componentStratifier(bc, stratifierDef, reportStratifier, populations, groupDef, subjectResultTable);
 
         } else {
             // standard Stratifier
             // one criteria expression defined, one set of criteria results
             Map<String, CriteriaResult> subjectValues = stratifierDef.getResults();
-            nonComponentStratifier(bc, stratifierDef, reportStratifier, populations, groupDef, subjectValues);
+            return nonComponentStratifier(bc, stratifierDef, reportStratifier, populations, groupDef, subjectValues);
         }
     }
 
-    private static void componentStratifier(
+    private static List<StratumDef> componentStratifier(
             BuilderContext bc,
             StratifierDef stratifierDef,
             MeasureReportGroupStratifierComponent reportStratifier,
@@ -102,6 +122,8 @@ class R4StratifierBuilder {
             Table<String, ValueWrapper, StratifierComponentDef> subjectCompValues) {
 
         var componentSubjects = groupSubjectsByValueDefSet(subjectCompValues);
+
+        var stratumDefs = new ArrayList<StratumDef>();
 
         componentSubjects.forEach((valueSet, subjects) -> {
             // converts table into component value combinations
@@ -113,11 +135,16 @@ class R4StratifierBuilder {
             // | Stratum-4 | <'F','black'>           | [subject-d, subject-e] |
 
             var reportStratum = reportStratifier.addStratum();
-            buildStratum(bc, stratifierDef, reportStratum, valueSet, subjects, populations, groupDef);
+
+            var stratumDef = buildStratum(bc, stratifierDef, reportStratum, valueSet, subjects, populations, groupDef);
+
+            stratumDefs.add(stratumDef);
         });
+
+        return stratumDefs;
     }
 
-    private static void nonComponentStratifier(
+    private static List<StratumDef> nonComponentStratifier(
             BuilderContext bc,
             StratifierDef stratifierDef,
             MeasureReportGroupStratifierComponent reportStratifier,
@@ -138,13 +165,16 @@ class R4StratifierBuilder {
             // Seems to be irrelevant for criteria based stratifiers
             var patients = List.<String>of();
 
-            buildStratum(bc, stratifierDef, reportStratum, stratValues, patients, populations, groupDef);
-            return;
+            var stratum = buildStratum(bc, stratifierDef, reportStratum, stratValues, patients, populations, groupDef);
+            return List.of(stratum);
         }
 
         Map<ValueWrapper, List<String>> subjectsByValue = subjectValues.keySet().stream()
                 .collect(Collectors.groupingBy(
                         x -> new ValueWrapper(subjectValues.get(x).rawValue())));
+
+        var stratumMultiple = new ArrayList<StratumDef>();
+
         // Stratum 1
         // Value: 'M'--> subjects: subject1
         // Stratum 2
@@ -162,8 +192,11 @@ class R4StratifierBuilder {
             // multiple criteria
             // TODO: build out nonComponent stratum method
             Set<ValueDef> stratValues = Set.of(new ValueDef(stratValue.getKey(), null));
-            buildStratum(bc, stratifierDef, reportStratum, stratValues, patients, populations, groupDef);
+            var stratum = buildStratum(bc, stratifierDef, reportStratum, stratValues, patients, populations, groupDef);
+            stratumMultiple.add(stratum);
         }
+
+        return stratumMultiple;
     }
 
     private static Map<Set<ValueDef>, List<String>> groupSubjectsByValueDefSet(
@@ -208,7 +241,7 @@ class R4StratifierBuilder {
                         })));
     }
 
-    private static void buildStratum(
+    private static StratumDef buildStratum(
             BuilderContext bc,
             StratifierDef stratifierDef,
             StratifierGroupComponent stratum,
@@ -254,6 +287,8 @@ class R4StratifierBuilder {
             }
         }
 
+        var stratumDef = new StratumDef(stratum.getValue().getText(), new ArrayList<>());
+
         // add stratum populations for stratifier
         // Group.populations
         // initial-population: subject1, subject 2
@@ -265,10 +300,17 @@ class R4StratifierBuilder {
         // ** subjects with stratifier value: 'F': subject2
         // ** stratum.population
         // ** ** initial-population: subject2
+        var stratumPopulationDefs = new ArrayList<StratumPopulationDef>();
         for (MeasureGroupPopulationComponent mgpc : populations) {
             var stratumPopulation = stratum.addPopulation();
-            buildStratumPopulation(bc, stratifierDef, stratumPopulation, subjectIds, mgpc, groupDef);
+            var stratumPopulationDef =
+                    buildStratumPopulation(bc, stratifierDef, stratumPopulation, subjectIds, mgpc, groupDef);
+            stratumPopulationDefs.add(stratumPopulationDef);
         }
+
+        stratumDef.addAllPopulations(stratumPopulationDefs);
+
+        return stratumDef;
     }
 
     // This is weird pattern where we have multiple qualifying values within a single stratum,
@@ -279,13 +321,14 @@ class R4StratifierBuilder {
 
     private record ValueDef(ValueWrapper value, StratifierComponentDef def) {}
 
-    private static void buildStratumPopulation(
+    private static StratumPopulationDef buildStratumPopulation(
             BuilderContext bc,
             StratifierDef stratifierDef,
             StratifierGroupPopulationComponent sgpc,
             List<String> subjectIds,
             MeasureGroupPopulationComponent population,
             GroupDef groupDef) {
+
         sgpc.setCode(population.getCode());
         sgpc.setId(population.getId());
 
@@ -302,19 +345,47 @@ class R4StratifierBuilder {
                         .equals(population.getCode().getCodingFirstRep().getCode()))
                 .findFirst()
                 .orElse(null);
-        assert populationDef != null;
+
+        if (populationDef == null) {
+            throw new InvalidRequestException("Invalid population definition for measure: %s since it's missing %s"
+                    .formatted(
+                            bc.getMeasureUrl(),
+                            population.getCode().getCodingFirstRep().getCode()));
+        }
+
+        var popSubjectIds = populationDef.getSubjects().stream()
+                .map(R4ResourceIdUtils::addPatientQualifier)
+                .collect(Collectors.toUnmodifiableSet());
+
+        var qualifiedSubjectIdsCommonToPopulation = Sets.intersection(new HashSet<>(subjectIds), popSubjectIds);
+
+        var unqualifiedSubjectIdsCommonToPopulation = qualifiedSubjectIdsCommonToPopulation.stream()
+                .filter(Objects::nonNull)
+                .map(R4StratifierBuilder::processSubjectId)
+                .collect(Collectors.toUnmodifiableSet());
+
+        var stratumPopulationDef =
+                new StratumPopulationDef(populationDef.id(), unqualifiedSubjectIdsCommonToPopulation);
+
         if (groupDef.isBooleanBasis()) {
-            buildBooleanBasisStratumPopulation(bc, sgpc, subjectIds, populationDef);
+            buildBooleanBasisStratumPopulation(bc, sgpc, populationDef, qualifiedSubjectIdsCommonToPopulation);
         } else {
             buildResourceBasisStratumPopulation(bc, stratifierDef, sgpc, subjectIds, populationDef, groupDef);
         }
+
+        return stratumPopulationDef;
+    }
+
+    private static String processSubjectId(String rawSubjectId) {
+        return R4ResourceIdUtils.stripAnyResourceQualifier(rawSubjectId);
     }
 
     private static void buildBooleanBasisStratumPopulation(
             BuilderContext bc,
             StratifierGroupPopulationComponent sgpc,
-            List<String> subjectIds,
-            PopulationDef populationDef) {
+            PopulationDef populationDef,
+            SetView<String> subjectIdsCommonToPopulation) {
+
         var popSubjectIds = populationDef.getSubjects().stream()
                 .map(R4ResourceIdUtils::addPatientQualifier)
                 .toList();
@@ -323,19 +394,13 @@ class R4StratifierBuilder {
             return;
         }
 
-        // TODO: LD:  introduce a new StratumDef object to hold the results of the intersection, to
-        // be ultimately passed down to the measure scorer, instead of retaining only the count
-
-        // intersect population subjects to stratifier.value subjects
-        Set<String> intersection = new HashSet<>(subjectIds);
-        intersection.retainAll(popSubjectIds);
-        sgpc.setCount(intersection.size());
+        sgpc.setCount(subjectIdsCommonToPopulation.size());
 
         // subject-list ListResource to match intersection of results
-        if (!intersection.isEmpty()
+        if (!subjectIdsCommonToPopulation.isEmpty()
                 && bc.report().getType() == org.hl7.fhir.r4.model.MeasureReport.MeasureReportType.SUBJECTLIST) {
             ListResource popSubjectList =
-                    R4StratifierBuilder.createIdList(UUID.randomUUID().toString(), intersection);
+                    R4StratifierBuilder.createIdList(UUID.randomUUID().toString(), subjectIdsCommonToPopulation);
             bc.addContained(popSubjectList);
             sgpc.setSubjectResults(new Reference("#" + popSubjectList.getId()));
         }

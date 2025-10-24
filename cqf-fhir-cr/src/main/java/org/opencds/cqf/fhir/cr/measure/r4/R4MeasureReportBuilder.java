@@ -89,6 +89,11 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             this.measureReport = measureReport;
         }
 
+        // For error messages:
+        public String getMeasureUrl() {
+            return this.measure.getUrl();
+        }
+
         public Map<String, Resource> contained() {
             return this.contained;
         }
@@ -484,6 +489,9 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                 .sum();
     }
 
+    // This is relevant for individual measure reports, not summary reports, so users could
+    // potentially recalculate measure scores.  However, detailed specifications do not yet
+    // exist, so we may need to enhance this.
     protected void buildMeasureObservations(BuilderContext bc, String observationName, Set<Object> resources) {
         for (int i = 0; i < resources.size(); i++) {
             // TODO: Do something with the resource...

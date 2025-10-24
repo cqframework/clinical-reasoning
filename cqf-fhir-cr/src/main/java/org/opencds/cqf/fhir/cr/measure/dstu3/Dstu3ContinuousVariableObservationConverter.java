@@ -12,7 +12,7 @@ public enum Dstu3ContinuousVariableObservationConverter implements ContinuousVar
     INSTANCE;
 
     @Override
-    public Quantity wrapResultAsQuantityHolder(String id, Object result) {
+    public Quantity wrapResultAsQuantity(String id, Object result) {
         return convertToQuantity(result);
     }
 

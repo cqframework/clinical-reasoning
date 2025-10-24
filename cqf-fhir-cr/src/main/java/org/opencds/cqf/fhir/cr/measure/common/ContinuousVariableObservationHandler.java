@@ -147,7 +147,7 @@ public class ContinuousVariableObservationHandler {
             var observationId = expressionName + "-" + index;
             // wrap result in Observation resource to avoid duplicate results data loss
             // in set object
-            var observation = continuousVariableObservationConverter.wrapResultAsQuantityHolder(
+            var observation = continuousVariableObservationConverter.wrapResultAsQuantity(
                     observationId, observationResult.value());
             // add function results to existing EvaluationResult under new expression
             // name

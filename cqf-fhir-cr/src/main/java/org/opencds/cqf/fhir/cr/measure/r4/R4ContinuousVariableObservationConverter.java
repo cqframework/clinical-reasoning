@@ -12,7 +12,7 @@ public enum R4ContinuousVariableObservationConverter implements ContinuousVariab
     INSTANCE;
 
     @Override
-    public Quantity wrapResultAsQuantityHolder(String id, Object result) {
+    public Quantity wrapResultAsQuantity(String id, Object result) {
         return convertToQuantity(result);
     }
 

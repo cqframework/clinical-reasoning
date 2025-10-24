@@ -26,6 +26,10 @@ public class MeasureEvaluationResultHandler {
 
     private static final String EXCEPTION_FOR_SUBJECT_ID_MESSAGE_TEMPLATE = "Exception for subjectId: %s, Message: %s";
 
+    private MeasureEvaluationResultHandler() {
+        // static class
+    }
+
     /**
      * Method that processes CQL Results into Measure defined fields that reference associated CQL expressions
      * This is meant to be called by CQL CLI.

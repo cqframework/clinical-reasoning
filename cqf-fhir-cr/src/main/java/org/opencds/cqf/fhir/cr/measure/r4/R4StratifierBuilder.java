@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collector;
@@ -356,17 +357,27 @@ class R4StratifierBuilder {
                 .map(R4ResourceIdUtils::addPatientQualifier)
                 .collect(Collectors.toUnmodifiableSet());
 
-        var subjectIdsCommonToPopulation = Sets.intersection(new HashSet<>(subjectIds), popSubjectIds);
+        var qualifiedSubjectIdsCommonToPopulation = Sets.intersection(new HashSet<>(subjectIds), popSubjectIds);
 
-        var stratumPopulationDef = new StratumPopulationDef(populationDef.id(), subjectIdsCommonToPopulation);
+        var unqualifiedSubjectIdsCommonToPopulation = qualifiedSubjectIdsCommonToPopulation.stream()
+                .filter(Objects::nonNull)
+                .map(R4StratifierBuilder::processSubjectId)
+                .collect(Collectors.toUnmodifiableSet());
+
+        var stratumPopulationDef =
+                new StratumPopulationDef(populationDef.id(), unqualifiedSubjectIdsCommonToPopulation);
 
         if (groupDef.isBooleanBasis()) {
-            buildBooleanBasisStratumPopulation(bc, sgpc, populationDef, subjectIdsCommonToPopulation);
+            buildBooleanBasisStratumPopulation(bc, sgpc, populationDef, qualifiedSubjectIdsCommonToPopulation);
         } else {
             buildResourceBasisStratumPopulation(bc, stratifierDef, sgpc, subjectIds, populationDef, groupDef);
         }
 
         return stratumPopulationDef;
+    }
+
+    private static String processSubjectId(String rawSubjectId) {
+        return R4ResourceIdUtils.stripAnyResourceQualifier(rawSubjectId);
     }
 
     private static void buildBooleanBasisStratumPopulation(

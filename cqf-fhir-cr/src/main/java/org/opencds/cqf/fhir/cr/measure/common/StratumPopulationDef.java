@@ -2,7 +2,6 @@ package org.opencds.cqf.fhir.cr.measure.common;
 
 import java.util.Set;
 
-// TODO: LD:  more fields
 /**
  * Equivalent to the FHIR stratum population.
  * <p/>

@@ -346,7 +346,7 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
                 logger.warn("stratumDef is null");
             }
 
-            scoreStratum(measureUrl, groupDef, optStratifierDef.get(), stratumDef, measureScoring, sgc);
+            scoreStratum(measureUrl, groupDef, stratumDef, measureScoring, sgc);
         }
     }
 
@@ -358,7 +358,6 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
     protected void scoreStratum(
             String measureUrl,
             GroupDef groupDef,
-            StratifierDef stratifierDef,
             StratumDef stratumDef,
             MeasureScoring measureScoring,
             StratifierGroupComponent stratum) {
@@ -453,9 +452,6 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
             StratumPopulationDef stratumPopulationDef, Entry<String, Set<Object>> entry) {
 
         return stratumPopulationDef.getSubjects().stream()
-                // LUKETODO:  split this the proper way using hapi-fhir classes
-                // LUKETODO:  test for other resource types as well
-                .map(subject -> subject.split("Patient/")[1])
                 .collect(Collectors.toUnmodifiableSet())
                 .contains(entry.getKey());
     }

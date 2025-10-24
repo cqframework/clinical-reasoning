@@ -10,6 +10,5 @@ import org.hl7.fhir.instance.model.api.ICompositeType;
 public interface ContinuousVariableObservationConverter<T extends ICompositeType> {
 
     // TODO:  LD:  We need to come up with something other than an Observation to wrap FHIR Quantities
-    //    QuantityHolder<T> wrapResultAsQuantityHolder(String id, Object result);
     T wrapResultAsQuantityHolder(String id, Object result);
 }

@@ -191,31 +191,6 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
         return Optional.empty();
     }
 
-    private List<Class<?>> extractClassesFromSingleOrListResult(Object result) {
-        if (result == null) {
-            return Collections.emptyList();
-        }
-
-        if (!(result instanceof Iterable<?> iterable)) {
-            return Collections.singletonList(result.getClass());
-        }
-
-        // Need to this to return List<Class<?>> and get rid of Sonar warnings.
-        final Stream<Class<?>> classStream =
-                getStream(iterable).filter(Objects::nonNull).map(Object::getClass);
-
-        return classStream.toList();
-    }
-
-    private Stream<?> getStream(Iterable<?> iterable) {
-        if (iterable instanceof List<?> list) {
-            return list.stream();
-        }
-
-        // It's entirely possible CQL returns an Iterable that is not a List, so we need to handle that case
-        return StreamSupport.stream(iterable.spliterator(), false);
-    }
-
     private List<String> prettyClassNames(List<Class<?>> classes) {
         return classes.stream().map(Class::getSimpleName).toList();
     }

@@ -413,50 +413,6 @@ public class R4MeasureProcessor {
         return new LibraryEngine(repository, this.measureEvaluationOptions.getEvaluationSettings());
     }
 
-    private List<CompiledLibrary> getCompiledLibraries(List<VersionedIdentifier> ids, CqlEngine context) {
-        try {
-            var resolvedLibraryResults =
-                    context.getEnvironment().getLibraryManager().resolveLibraries(ids);
-
-            var allErrors = resolvedLibraryResults.allErrors();
-            if (resolvedLibraryResults.hasErrors() || ids.size() > allErrors.size()) {
-                return resolvedLibraryResults.allCompiledLibraries();
-            }
-
-            if (ids.size() == 1) {
-                final List<CqlCompilerException> cqlCompilerExceptions =
-                        resolvedLibraryResults.getErrorsFor(ids.get(0));
-
-                if (cqlCompilerExceptions.size() == 1) {
-                    throw new IllegalStateException(
-                            "Unable to load CQL/ELM for library: %s. Verify that the Library resource is available in your environment and has CQL/ELM content embedded."
-                                    .formatted(ids.get(0).getId()),
-                            cqlCompilerExceptions.get(0));
-                } else {
-                    throw new IllegalStateException(
-                            "Unable to load CQL/ELM for library: %s. Verify that the Library resource is available in your environment and has CQL/ELM content embedded. Errors: %s"
-                                    .formatted(
-                                            ids.get(0).getId(),
-                                            cqlCompilerExceptions.stream()
-                                                    .map(CqlCompilerException::getMessage)
-                                                    .reduce((s1, s2) -> s1 + "; " + s2)
-                                                    .orElse("No error messages found.")));
-                }
-            }
-
-            throw new IllegalStateException(
-                    "Unable to load CQL/ELM for libraries: %s Verify that the Library resource is available in your environment and has CQL/ELM content embedded. Errors: %s"
-                            .formatted(ids, allErrors));
-
-        } catch (CqlIncludeException exception) {
-            throw new IllegalStateException(
-                    "Unable to load CQL/ELM for libraries: %s. Verify that the Library resource is available in your environment and has CQL/ELM content embedded."
-                            .formatted(
-                                    ids.stream().map(VersionedIdentifier::getId).toList()),
-                    exception);
-        }
-    }
-
     protected void checkMeasureLibrary(Measure measure) {
         if (!measure.hasLibrary()) {
             throw new InvalidRequestException(
@@ -547,9 +503,5 @@ public class R4MeasureProcessor {
             measurementPeriod = helper.buildMeasurementPeriodInterval(periodStart, periodEnd);
         }
         return measurementPeriod;
-    }
-
-    private void popAllLibrariesFromCqlEngine(CqlEngine context, List<org.hl7.elm.r1.Library> libraries) {
-        libraries.forEach(lib -> context.getState().exitLibrary(true));
     }
 }

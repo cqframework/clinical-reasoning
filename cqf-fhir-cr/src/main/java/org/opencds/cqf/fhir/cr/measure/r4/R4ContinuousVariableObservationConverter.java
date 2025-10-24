@@ -9,12 +9,8 @@ import org.opencds.cqf.fhir.cr.measure.common.ContinuousVariableObservationConve
  */
 @SuppressWarnings("squid:S6548")
 public enum R4ContinuousVariableObservationConverter implements ContinuousVariableObservationConverter<Quantity> {
-    INSTANCE;
 
-    //    @Override
-    //    public QuantityHolder<Quantity> wrapResultAsQuantityHolder(String id, Object result) {
-    //        return new QuantityHolder<>(id, convertToQuantity(result));
-    //    }
+    INSTANCE;
 
     @Override
     public Quantity wrapResultAsQuantityHolder(String id, Object result) {

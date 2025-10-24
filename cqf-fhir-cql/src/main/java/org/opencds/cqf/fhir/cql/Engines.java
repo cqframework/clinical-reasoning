@@ -86,10 +86,13 @@ public class Engines {
         registerModelInfoProviders(settings, modelManager, repository);
         registerNpmSupport(settings, libraryManager, modelManager);
 
-        // Manually registering Using CQL 2.0 namespace for now
+        // Manually registering Using CQL and US CQL Common namespace for now
         libraryManager
                 .getNamespaceManager()
                 .ensureNamespaceRegistered(new NamespaceInfo("hl7.fhir.uv.cql", "http://hl7.org/fhir/uv/cql"));
+        libraryManager
+                .getNamespaceManager()
+                .ensureNamespaceRegistered(new NamespaceInfo("hl7.fhir.us.cql", "http://hl7.org/fhir/us/cql"));
 
         return new Environment(libraryManager, dataProviders, terminologyProvider);
     }

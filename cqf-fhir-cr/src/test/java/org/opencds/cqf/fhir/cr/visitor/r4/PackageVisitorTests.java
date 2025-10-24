@@ -185,11 +185,11 @@ class PackageVisitorTests {
     void packageOperation_expansion_should_fail_paging_with_transaction_bundle_type_request() {
         String expectedError = "It is invalid to use paging when requesting a bundle of type 'transaction'";
         Bundle loadedBundle = (Bundle) jsonParser.parseResource(
-            PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active-intensional-vs.json"));
+                PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active-intensional-vs.json"));
         repo.transaction(loadedBundle);
         PackageVisitor packageVisitor = new PackageVisitor(repo);
         Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
-            .copy();
+                .copy();
         ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         Parameters params = parameters(part("bundleType", "transaction"));
         params.addParameter("count", 1);

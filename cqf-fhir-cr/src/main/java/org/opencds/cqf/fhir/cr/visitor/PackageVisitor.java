@@ -146,6 +146,7 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
         Optional<Boolean> packageOnly = VisitorHelper.getBooleanParameter("packageOnly", packageParameters);
         Optional<Integer> count = VisitorHelper.getIntegerParameter("count", packageParameters);
         Optional<Integer> offset = VisitorHelper.getIntegerParameter("offset", packageParameters);
+        Optional<String> bundleType = VisitorHelper.getStringParameter("bundleType", packageParameters);
         List<String> include = VisitorHelper.getStringListParameter("include", packageParameters)
                 .orElseGet(() -> new ArrayList<>());
         List<String> capability = VisitorHelper.getStringListParameter("capability", packageParameters)
@@ -177,6 +178,18 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
         if (count.isPresent() && count.get() < 0) {
             throw new UnprocessableEntityException("'count' must be non-negative");
         }
+        if (offset.isPresent() && offset.get() < 0) {
+            throw new UnprocessableEntityException("'offset' must be non-negative");
+        }
+        bundleType
+                .filter(bt -> bt.equals("transaction") || bt.equals("collection"))
+                .ifPresent(bt -> {
+                    if (count.isPresent() || offset.isPresent()) {
+                        throw new UnprocessableEntityException(
+                                "It is invalid to use paging when requesting a bundle of type '%s'".formatted(bt));
+                    }
+                });
+
         // In the case of a released (active) root Library we can depend on the relatedArtifacts as a
         // comprehensive manifest
         var versionTuple = new ImmutableTriple<>(artifactVersion, checkArtifactVersion, forceArtifactVersion);
@@ -208,7 +221,7 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
             messages.setId("messages");
             getRootSpecificationLibrary(packagedBundle).addCqfMessagesExtension(messages);
         }
-        setCorrectBundleType(count, offset, packagedBundle);
+        setCorrectBundleType(bundleType, count, offset, packagedBundle);
         pageBundleBasedOnCountAndOffset(count, offset, packagedBundle);
         return packagedBundle;
 
@@ -287,26 +300,36 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
         });
     }
 
-    public static void setCorrectBundleType(Optional<Integer> count, Optional<Integer> offset, IBaseBundle bundle) {
-        // if the bundle is paged then it must be of type = collection and modified to follow bundle.type constraints
-        // if not, set type = transaction
-        // special case of count = 0 -> set type = searchset so we can display bundle.total
-        if (count.isPresent() && count.get() == 0) {
-            BundleHelper.setBundleType(bundle, "searchset");
+    public static void setCorrectBundleType(
+            Optional<String> requestedBundleType,
+            Optional<Integer> count,
+            Optional<Integer> offset,
+            IBaseBundle bundle) {
+        // if paging is used, the bundle type SHALL be searchset, and the resulting bundles SHALL
+        // conform to the paging guidance here: https://hl7.org/fhir/R4/http.html#paging.
+
+        var pagingRequested = count.isPresent() || offset.isPresent();
+
+        // decide bundle type
+        String bundleType = pagingRequested ? "searchset" : requestedBundleType.orElse("transaction");
+        BundleHelper.setBundleType(bundle, bundleType);
+
+        // set total only when paging
+        if (pagingRequested) {
             BundleHelper.setBundleTotal(bundle, BundleHelper.getEntry(bundle).size());
-        } else if ((offset.isPresent() && offset.get() > 0)
-                || (count.isPresent()
-                        && count.get() < BundleHelper.getEntry(bundle).size())) {
-            BundleHelper.setBundleType(bundle, "collection");
-            var removedRequest = BundleHelper.getEntry(bundle).stream()
+        }
+
+        // remove entry.request when paging or when requested bundle type is "collection"
+        boolean removeRequests =
+                pagingRequested || requestedBundleType.map("collection"::equals).orElse(false);
+        if (removeRequests) {
+            var cleanedEntries = BundleHelper.getEntry(bundle).stream()
                     .map(entry -> {
                         BundleHelper.setEntryRequest(bundle.getStructureFhirVersionEnum(), entry, null);
                         return entry;
                     })
                     .collect(Collectors.toList());
-            BundleHelper.setEntry(bundle, removedRequest);
-        } else {
-            BundleHelper.setBundleType(bundle, "transaction");
+            BundleHelper.setEntry(bundle, cleanedEntries);
         }
     }
 

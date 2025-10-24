@@ -23,7 +23,8 @@ class PackageHelperTest {
 
     @Test
     void testR4PackageParametersIncludeOnly() {
-        var actual = packageParameters(FhirVersionEnum.R4, List.of("PlanDefinition", "ValueSet"), null, false);
+        var actual = packageParameters(
+                FhirVersionEnum.R4, null, null, null, List.of("PlanDefinition", "ValueSet"), null, false);
         assertInstanceOf(org.hl7.fhir.r4.model.Parameters.class, actual);
         assertTrue(((org.hl7.fhir.r4.model.Parameters) actual).hasParameter("include"));
         assertEquals(
@@ -37,7 +38,8 @@ class PackageHelperTest {
 
     @Test
     void testR5PackageParametersIncludeOnly() {
-        var actual = packageParameters(FhirVersionEnum.R5, List.of("PlanDefinition", "ValueSet"), null, false);
+        var actual = packageParameters(
+                FhirVersionEnum.R5, null, null, null, List.of("PlanDefinition", "ValueSet"), null, false);
         assertInstanceOf(org.hl7.fhir.r5.model.Parameters.class, actual);
         assertTrue(((org.hl7.fhir.r5.model.Parameters) actual).hasParameter("include"));
         assertEquals(

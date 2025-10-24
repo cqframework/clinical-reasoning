@@ -423,14 +423,13 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
     }
 
     private boolean doesStratumPopDefMatchGroupPopDef(
-            StratumPopulationDef stratumPopulationDef,
-            Entry<String, Set<Object>> entry) {
+            StratumPopulationDef stratumPopulationDef, Entry<String, Set<Object>> entry) {
 
         return stratumPopulationDef.getSubjects().stream()
-            // LUKETODO:  push this up the the stratumPopulationDef building code?
-            .map(subject -> subject.split("Patient/")[1])
-            .collect(Collectors.toUnmodifiableSet())
-            .contains(entry.getKey());
+                // LUKETODO:  push this up the the stratumPopulationDef building code?
+                .map(subject -> subject.split("Patient/")[1])
+                .collect(Collectors.toUnmodifiableSet())
+                .contains(entry.getKey());
     }
 
     private int getCountFromGroupPopulation(

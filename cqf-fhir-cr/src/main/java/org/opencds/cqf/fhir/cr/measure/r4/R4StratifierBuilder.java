@@ -74,19 +74,14 @@ class R4StratifierBuilder {
                     new StringType(measureStratifier.getDescription()));
         }
 
-        var stratumDefs = buildMultipleStratum(
-            bc,
-            reportStratifier,
-            stratifierDef,
-            populations,
-            groupDef);
+        var stratumDefs = buildMultipleStratum(bc, reportStratifier, stratifierDef, populations, groupDef);
 
-//        stratifierDef.addAllStratum(stratumDefs);
+        stratifierDef.addAllStratum(stratumDefs);
     }
 
     private static List<StratumDef> buildMultipleStratum(
             BuilderContext bc,
-        MeasureReportGroupStratifierComponent reportStratifier,
+            MeasureReportGroupStratifierComponent reportStratifier,
             StratifierDef stratifierDef,
             List<MeasureGroupPopulationComponent> populations,
             GroupDef groupDef) {
@@ -140,9 +135,11 @@ class R4StratifierBuilder {
             // | Stratum-3 | <'M','hispanic/latino'> | [subject-c]            |
             // | Stratum-4 | <'F','black'>           | [subject-d, subject-e] |
 
+            // LUKETODO:  should we push this up as well?
             var reportStratum = reportStratifier.addStratum();
-            final StratumDef stratumDef = buildStratum(bc, stratifierDef, reportStratum, valueSet,
-                subjects, populations, groupDef);
+
+            var stratumDef = buildStratum(bc, stratifierDef, reportStratum, valueSet, subjects, populations, groupDef);
+
             stratumDefs.add(stratumDef);
         });
 
@@ -178,7 +175,7 @@ class R4StratifierBuilder {
                 .collect(Collectors.groupingBy(
                         x -> new ValueWrapper(subjectValues.get(x).rawValue())));
 
-        var stratumMultiple =  new ArrayList<StratumDef>();
+        var stratumMultiple = new ArrayList<StratumDef>();
 
         // Stratum 1
         // Value: 'M'--> subjects: subject1
@@ -293,7 +290,6 @@ class R4StratifierBuilder {
         }
 
         var stratumDef = new StratumDef(stratum.getValue().getText(), new ArrayList<>());
-        stratifierDef.addStratumDef(stratumDef);
 
         // add stratum populations for stratifier
         // Group.populations
@@ -306,17 +302,15 @@ class R4StratifierBuilder {
         // ** subjects with stratifier value: 'F': subject2
         // ** stratum.population
         // ** ** initial-population: subject2
+        var stratumPopulationDefs = new ArrayList<StratumPopulationDef>();
         for (MeasureGroupPopulationComponent mgpc : populations) {
             var stratumPopulation = stratum.addPopulation();
-            var stratumPopulationDef = buildStratumPopulation(
-                bc,
-                stratifierDef,
-                stratumDef,
-                stratumPopulation,
-                subjectIds,
-                mgpc,
-                groupDef);
+            var stratumPopulationDef =
+                    buildStratumPopulation(bc, stratifierDef, stratumPopulation, subjectIds, mgpc, groupDef);
+            stratumPopulationDefs.add(stratumPopulationDef);
         }
+
+        stratumDef.addAllPopulations(stratumPopulationDefs);
 
         return stratumDef;
     }
@@ -332,13 +326,10 @@ class R4StratifierBuilder {
     private static StratumPopulationDef buildStratumPopulation(
             BuilderContext bc,
             StratifierDef stratifierDef,
-            StratumDef stratumDef,
             StratifierGroupPopulationComponent sgpc,
             List<String> subjectIds,
             MeasureGroupPopulationComponent population,
             GroupDef groupDef) {
-
-        logger.info("1234: buildStratumPopulation()");
 
         sgpc.setCode(population.getCode());
         sgpc.setId(population.getId());
@@ -366,19 +357,9 @@ class R4StratifierBuilder {
                 .map(R4ResourceIdUtils::addPatientQualifier)
                 .collect(Collectors.toUnmodifiableSet());
 
-        // TODO: LD:  introduce a new StratumDef object to hold the results of the intersection, to
-        // be ultimately passed down to the measure scorer, instead of retaining only the count
-        // intersect population subjects to stratifier.value subjects
         var subjectIdsCommonToPopulation = Sets.intersection(new HashSet<>(subjectIds), popSubjectIds);
 
-        logger.info(
-                "1234: populationDef: {}, subjectIdsCommonToPopulation = {}",
-                populationDef.id(),
-                subjectIdsCommonToPopulation);
-
         var stratumPopulationDef = new StratumPopulationDef(populationDef.id(), subjectIdsCommonToPopulation);
-
-        stratumDef.addStratumPopulation(stratumPopulationDef);
 
         if (groupDef.isBooleanBasis()) {
             buildBooleanBasisStratumPopulation(bc, sgpc, populationDef, subjectIdsCommonToPopulation);

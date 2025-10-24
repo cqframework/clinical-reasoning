@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
+import java.util.ArrayList;
 import java.util.List;
 
 // LUKETODO:  javadoc
@@ -22,5 +23,9 @@ public class StratumDef {
 
     public void addStratumPopulation(StratumPopulationDef stratumPopulationDef) {
         stratumPopulations.add(stratumPopulationDef);
+    }
+
+    public void addAllPopulations(ArrayList<StratumPopulationDef> stratumPopulationDefs) {
+        stratumPopulations.addAll(stratumPopulationDefs);
     }
 }

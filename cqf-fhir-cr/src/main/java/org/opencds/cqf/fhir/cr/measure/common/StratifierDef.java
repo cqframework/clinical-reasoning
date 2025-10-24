@@ -59,12 +59,6 @@ public class StratifierDef {
         return stratum;
     }
 
-    // LUKETODO:  try out this pattern
-    public void addStratumDef(StratumDef stratumDef) {
-        stratum.add(stratumDef);
-    }
-
-    // LUKETODO:  try out this pattern
     public void addAllStratum(List<StratumDef> stratumDefs) {
         stratum.addAll(stratumDefs);
     }

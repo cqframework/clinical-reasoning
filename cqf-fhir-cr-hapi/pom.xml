@@ -49,13 +49,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.opencds.cqf.fhir</groupId>
-            <artifactId>cqf-fhir-jackson</artifactId>
-            <version>${project.version}</version>
-            <type>pom</type>
-        </dependency>
-
-        <dependency>
             <groupId>ca.uhn.hapi.fhir</groupId>
             <artifactId>hapi-fhir-validation</artifactId>
             <version>${hapi.version}</version>
@@ -194,6 +187,7 @@
                                                     <include>org.opencds.cqf.cql:*</include>
                                                     <include>org.opencds.cqf.fhir:*</include>
                                                     <include>info.cqframework:*</include>
+                                                    <include>org.cqframework:*</include>
                                                 </includes>
                                             </requireReleaseDeps>
                                         </rules>

@@ -99,7 +99,8 @@ public class CompositeEvaluationResultsPerMeasure {
                 List<EvaluationResult> measureObservationResults) {
 
             // if we have no results, we don't need to add anything
-            if (evaluationResult == null || evaluationResult.expressionResults.isEmpty()) {
+            if (evaluationResult == null
+                    || evaluationResult.getExpressionResults().isEmpty()) {
                 return;
             }
 

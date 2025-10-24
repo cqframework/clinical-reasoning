@@ -98,7 +98,7 @@ class EnginesTest {
 
         var engine = getEngine(settings);
 
-        assertTrue(engine.getState().getDebugMap().getIsLoggingEnabled());
+        assertTrue(engine.getState().getDebugMap().isLoggingEnabled());
 
         assertDataProviders(engine);
     }
@@ -124,7 +124,7 @@ class EnginesTest {
 
         var engine = getEngine(settings);
 
-        assertTrue(engine.getState().getDebugMap().getIsLoggingEnabled());
+        assertTrue(engine.getState().getDebugMap().isLoggingEnabled());
 
         assertDataProviders(engine);
     }
@@ -154,7 +154,7 @@ class EnginesTest {
         var settings = EvaluationSettings.getDefault();
         settings.getCqlOptions().getCqlEngineOptions().setDebugLoggingEnabled(true);
         var engine = getEngine(settings);
-        assertTrue(engine.getState().getDebugMap().getIsLoggingEnabled());
+        assertTrue(engine.getState().getDebugMap().isLoggingEnabled());
 
         assertDataProviders(engine);
     }

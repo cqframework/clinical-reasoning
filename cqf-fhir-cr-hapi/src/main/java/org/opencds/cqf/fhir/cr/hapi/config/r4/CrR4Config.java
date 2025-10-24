@@ -63,7 +63,8 @@ import org.springframework.context.annotation.Import;
     CrBaseConfig.class,
     ReleaseOperationConfig.class,
     DeleteOperationConfig.class,
-    RetireOperationConfig.class
+    RetireOperationConfig.class,
+    WithdrawOperationConfig.class
 })
 public class CrR4Config {
 

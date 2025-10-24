@@ -1,15 +1,15 @@
 {
-  "id": "ComponentCriteriaStratifierWithIntersection",
+  "id": "ComponentCriteriaStratifierBooleanBasisWithIntersection",
   "resourceType": "Measure",
-  "name": "ComponentCriteriaStratifierWithIntersection",
-  "url": "http://example.com/Measure/ComponentCriteriaStratifierWithIntersection",
+  "name": "ComponentCriteriaStratifierBooleanBasisWithIntersection",
+  "url": "http://example.com/Measure/ComponentCriteriaStratifierBooleanBasisWithIntersection",
   "library": [
     "http://example.com/Library/ComponentCriteriaStratifier"
   ],
   "extension": [
     {
       "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-populationBasis",
-      "valueCode": "date"
+      "valueCode": "boolean"
     }
   ],
   "scoring": {

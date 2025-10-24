@@ -131,13 +131,15 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
         var groupPopulationBasis = groupDef.getPopulationBasis();
 
         if (MeasureStratifierType.CRITERIA == stratifierDef.getStratifierType()) {
-            // LUKETODO:  refine this error handling because we may get an empty expression result, as opposed
+            // LUKETODO:  refine this error handling because we may get an empty expression result, as opposed to a non-empty wrong expression result
             if (resultClasses.stream()
                     .noneMatch(resourceClass -> doesResourceMatchPopulationBasis(resourceClass, groupPopulationBasis))) {
 
                 throw new InvalidRequestException(
                         "criteria-based stratifier is invalid for expression: [%s] due to mismatch between population basis: [%s] and result types: %s for measure URL: %s"
                                 .formatted(expression, groupPopulationBasis.code(), prettyClassNames(resultClasses), url));
+
+                // LUKETODO:  add validation for component criteria stratifiers, which needs the initial population resources as well
             }
 
             // skip validation below since for criteria-based stratifier, the boolean basis test is irrelevant

@@ -1,8 +1,8 @@
 {
-  "id": "ComponentCriteriaStratifierNoIntersection",
+  "id": "ComponentCriteriaStratifierDateBasisWithIntersection",
   "resourceType": "Measure",
-  "name": "ComponentCriteriaStratifierNoIntersection",
-  "url": "http://example.com/Measure/ComponentCriteriaStratifierNoIntersection",
+  "name": "ComponentCriteriaStratifierDateBasisWithIntersection",
+  "url": "http://example.com/Measure/ComponentCriteriaStratifierDateBasisWithIntersection",
   "library": [
     "http://example.com/Library/ComponentCriteriaStratifier"
   ],
@@ -43,9 +43,9 @@
       ],
       "stratifier": [
         {
-          "id": "stratifier-feb1-mar2-feb1-mar2-jan2",
+          "id": "stratifier-feb1-jan2-feb3-jan2",
           "code" : {
-            "text": "Stratifier Feb1 Mar2 + Feb1 Mar2 Jan2"
+            "text": "Stratifier Feb1 Jan2 + Feb3 Jan2"
           },
           "extension": [
             {
@@ -55,23 +55,23 @@
           ],
           "component": [
             {
-              "id": "stratifier-comp-feb1-mar2",
+              "id": "stratifier-comp-feb1-jan2",
               "code" : {
-                "text": "Stratifier Feb1 Mar2"
+                "text": "Stratifier Feb1 Jan2"
               },
               "criteria": {
                 "language": "text/cql.identifier",
-                "expression": "Stratifier Feb1 Mar2"
+                "expression": "Stratifier Feb1 Jan2"
               }
             },
             {
-              "id": "stratifier-comp-feb1-mar2-jan2",
+              "id": "stratifier-comp-feb3-jan2",
               "code" : {
-                "text": "Stratifier Feb1 Mar2 Jan2"
+                "text": "Stratifier Feb3 Jan2"
               },
               "criteria": {
                 "language": "text/cql.identifier",
-                "expression": "Stratifier Feb1 Mar2 Jan2"
+                "expression": "Stratifier Feb3 Jan2"
               }
             }
           ]

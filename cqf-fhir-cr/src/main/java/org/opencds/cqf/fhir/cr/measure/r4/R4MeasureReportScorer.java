@@ -206,7 +206,6 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
     }
 
     protected void scoreContinuousVariable(String measureUrl, MeasureReportGroupComponent mrgc, GroupDef groupDef) {
-        logger.info("1234: scoreContinuousVariable");
         final Quantity aggregateQuantity =
                 calculateContinuousVariableAggregateQuantity(measureUrl, groupDef, PopulationDef::getResources);
 
@@ -388,8 +387,6 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
                 return null;
             }
             case CONTINUOUSVARIABLE -> {
-                logger.info("1234: calculateContinuousVariableAggregateQuantity()");
-
                 final StratumPopulationDef stratumPopulationDef;
                 if (stratumDef != null) {
                     stratumPopulationDef = stratumDef.getStratumPopulations().stream()

@@ -208,11 +208,11 @@ class PackageVisitorTests {
     void packageOperation_should_fail_negative_count_parameter() {
         String expectedError = "'count' must be non-negative";
         Bundle loadedBundle = (Bundle) jsonParser.parseResource(
-            PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active-intensional-vs.json"));
+                PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active-intensional-vs.json"));
         repo.transaction(loadedBundle);
         PackageVisitor packageVisitor = new PackageVisitor(repo);
         Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
-            .copy();
+                .copy();
         ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         Parameters params = parameters(part("bundleType", "transaction"));
         params.addParameter("count", -1);
@@ -231,11 +231,11 @@ class PackageVisitorTests {
     void packageOperation_should_fail_negative_offset_parameter() {
         String expectedError = "'offset' must be non-negative";
         Bundle loadedBundle = (Bundle) jsonParser.parseResource(
-            PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active-intensional-vs.json"));
+                PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active-intensional-vs.json"));
         repo.transaction(loadedBundle);
         PackageVisitor packageVisitor = new PackageVisitor(repo);
         Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
-            .copy();
+                .copy();
         ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         Parameters params = parameters(part("bundleType", "transaction"));
         params.addParameter("offset", -1);

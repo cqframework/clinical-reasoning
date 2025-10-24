@@ -489,7 +489,9 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                 .sum();
     }
 
-    // LUKETODO:  ask Justin about this:  can we convert this to a Quantity?
+    // This is relevant for individual measure reports, not summary reports, so users could
+    // potentially recalculate measure scores.  However, detailed specifications do not yet
+    // exist, so we may need to enhance this.
     protected void buildMeasureObservations(BuilderContext bc, String observationName, Set<Object> resources) {
         for (int i = 0; i < resources.size(); i++) {
             // TODO: Do something with the resource...

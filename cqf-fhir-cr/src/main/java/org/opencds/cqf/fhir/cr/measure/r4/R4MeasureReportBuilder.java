@@ -89,6 +89,11 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             this.measureReport = measureReport;
         }
 
+        // For error messages:
+        public String getMeasureUrl() {
+            return this.measure.getUrl();
+        }
+
         public Map<String, Resource> contained() {
             return this.contained;
         }
@@ -484,7 +489,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                 .sum();
     }
 
-    // LUKETODO:  what's this for?
+    // LUKETODO:  ask Justin about this:  can we convert this to a Quantity?
     protected void buildMeasureObservations(BuilderContext bc, String observationName, Set<Object> resources) {
         for (int i = 0; i < resources.size(); i++) {
             // TODO: Do something with the resource...

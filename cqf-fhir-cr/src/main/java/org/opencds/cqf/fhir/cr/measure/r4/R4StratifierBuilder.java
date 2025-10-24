@@ -12,7 +12,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collector;
@@ -21,7 +20,6 @@ import javax.annotation.Nonnull;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Enumeration;
 import org.hl7.fhir.r4.model.Expression;
 import org.hl7.fhir.r4.model.ListResource;
 import org.hl7.fhir.r4.model.Measure.MeasureGroupPopulationComponent;
@@ -135,7 +133,6 @@ class R4StratifierBuilder {
             // | Stratum-3 | <'M','hispanic/latino'> | [subject-c]            |
             // | Stratum-4 | <'F','black'>           | [subject-d, subject-e] |
 
-            // LUKETODO:  should we push this up as well?
             var reportStratum = reportStratifier.addStratum();
 
             var stratumDef = buildStratum(bc, stratifierDef, reportStratum, valueSet, subjects, populations, groupDef);
@@ -349,8 +346,10 @@ class R4StratifierBuilder {
                 .orElse(null);
 
         if (populationDef == null) {
-            // LUKETODO:  add more details to Exception
-            throw new InvalidRequestException("Invalid population definition");
+            throw new InvalidRequestException("Invalid population definition for measure: %s since it's missing %s"
+                    .formatted(
+                            bc.getMeasureUrl(),
+                            population.getCode().getCodingFirstRep().getCode()));
         }
 
         var popSubjectIds = populationDef.getSubjects().stream()
@@ -394,61 +393,6 @@ class R4StratifierBuilder {
             bc.addContained(popSubjectList);
             sgpc.setSubjectResults(new Reference("#" + popSubjectList.getId()));
         }
-    }
-
-    /*
-    the existing algo takes the measure-observation population from the group definition and goes through all resources to get the quantities
-    MeasurePopulationType.MEASUREOBSERVATION
-
-    but we don't want that:  we want to filter only resources that belong to the patients captured by each stratum
-    so we want to do some sort of wizardry that involves getting the stratum values, and using those to retrieve the associated resources
-
-    so it's basically a hack to go from StratifierGroupComponent stratum value -> subject -> populationDef.subjectResources.get(subject)
-    to get Set of resources on which to do measure scoring
-     */
-    // LUKETODO: Integrate this algorithm with a new StratumDef that will be populated in R4StratifierBuilder
-    private Set<Object> getResultsForStratum(
-            PopulationDef measureObservationPopulationDef,
-            StratifierDef stratifierDef,
-            StratifierGroupComponent stratum) {
-
-        final String stratumValue = stratum.getValue().getText();
-
-        final Set<String> subjectsWithStratumValue = stratifierDef.getResults().entrySet().stream()
-                .filter(entry -> doesStratumMatch(stratumValue, entry.getValue().rawValue()))
-                .map(Entry::getKey)
-                .collect(Collectors.toUnmodifiableSet());
-
-        return measureObservationPopulationDef.getSubjectResources().entrySet().stream()
-                .filter(entry -> subjectsWithStratumValue.contains(entry.getKey()))
-                .map(Entry::getValue)
-                .flatMap(Collection::stream)
-                .collect(Collectors.toUnmodifiableSet());
-    }
-
-    // LUKETODO:  we may be able to do away with this
-    // LUKETODO:: we may need to match more types of stratum here:  The below logic deals with
-    // currently anticipated use cases
-    private boolean doesStratumMatch(String stratumValueAsString, Object rawValueFromStratifier) {
-        if (rawValueFromStratifier == null || stratumValueAsString == null) {
-            return false;
-        }
-
-        if (rawValueFromStratifier instanceof Integer rawValueFromStratifierAsInt) {
-            final int stratumValueAsInt = Integer.parseInt(stratumValueAsString);
-
-            return stratumValueAsInt == rawValueFromStratifierAsInt;
-        }
-
-        if (rawValueFromStratifier instanceof Enumeration<?> rawValueFromStratifierAsEnumeration) {
-            return stratumValueAsString.equals(rawValueFromStratifierAsEnumeration.asStringValue());
-        }
-
-        if (rawValueFromStratifier instanceof String rawValueFromStratifierAsString) {
-            return stratumValueAsString.equals(rawValueFromStratifierAsString);
-        }
-
-        return false;
     }
 
     private static void buildResourceBasisStratumPopulation(

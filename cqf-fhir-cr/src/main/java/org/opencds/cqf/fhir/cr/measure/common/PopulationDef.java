@@ -19,8 +19,6 @@ public class PopulationDef {
     private final String criteriaReference;
 
     protected Set<Object> evaluatedResources;
-    protected Set<Object> resources;
-    protected Set<String> subjects;
     protected Map<String, Set<Object>> subjectResources = new HashMap<>();
 
     public PopulationDef(String id, ConceptDef code, MeasurePopulationType measurePopulationType, String expression) {

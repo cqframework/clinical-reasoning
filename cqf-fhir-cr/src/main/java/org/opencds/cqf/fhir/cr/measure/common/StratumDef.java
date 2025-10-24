@@ -3,8 +3,14 @@ package org.opencds.cqf.fhir.cr.measure.common;
 import java.util.ArrayList;
 import java.util.List;
 
-// LUKETODO:  javadoc
+/**
+ * Equivalent to StratifierDef, but for Stratum.
+ * <p/>
+ * For now, this contains the code text and stratum population defs, in order to help with
+ * continuous variable scoring, but will probably need to be enhanced for more use cases.
+ */
 public class StratumDef {
+    // Equivalent to the FHIR stratum code text
     private final String text;
     private final List<StratumPopulationDef> stratumPopulations;
 
@@ -19,10 +25,6 @@ public class StratumDef {
 
     public List<StratumPopulationDef> getStratumPopulations() {
         return stratumPopulations;
-    }
-
-    public void addStratumPopulation(StratumPopulationDef stratumPopulationDef) {
-        stratumPopulations.add(stratumPopulationDef);
     }
 
     public void addAllPopulations(ArrayList<StratumPopulationDef> stratumPopulationDefs) {

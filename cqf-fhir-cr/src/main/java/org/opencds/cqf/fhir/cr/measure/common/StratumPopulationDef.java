@@ -2,9 +2,13 @@ package org.opencds.cqf.fhir.cr.measure.common;
 
 import java.util.Set;
 
-// LUKETODO:  javadoc
-// LUKETODO:  more fields
-// LUKETODO:  this merges the concept of a Stratum and a Stratum population so we'll have to decouple these
+// TODO: LD:  more fields
+/**
+ * Equivalent to the FHIR stratum population.
+ * <p/>
+ * For now, this contains only an id to help match it to the population def in question and subjects
+ * used to
+ */
 public class StratumPopulationDef {
 
     private final String id;

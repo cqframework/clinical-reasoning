@@ -4,7 +4,6 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.apicatalog.jsonld.StringUtils;
 import jakarta.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -303,19 +302,18 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
     }
 
     private static List<Quantity> collectQuantities(Set<Object> resources) {
-        List<Quantity> quantities = new ArrayList<>();
 
-        for (Object resource : resources) {
-            if (resource instanceof Map<?, ?> map) {
-                for (Object value : map.values()) {
-                    if (value instanceof Quantity quantity) {
-                        quantities.add(quantity);
-                    }
-                }
-            }
-        }
+        var mapValues = resources.stream()
+                .filter(x -> x instanceof Map<?, ?>)
+                .map(x -> (Map<?, ?>) x)
+                .map(Map::values)
+                .flatMap(Collection::stream)
+                .toList();
 
-        return quantities;
+        return mapValues.stream()
+                .filter(Quantity.class::isInstance)
+                .map(Quantity.class::cast)
+                .toList();
     }
 
     protected void scoreStratifier(
@@ -339,19 +337,22 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
 
             final StratumDef stratumDef = stratifierDef.getStratum().stream()
                     .filter(stratumDefInner -> StringUtils.isNotBlank(stratumDefInner.getText()))
-                    // LUKETODO:  consider refining this logic:
-                    .filter(stratumDefInner ->
-                            stratumDefInner.getText().equals(sgc.getValue().getText()))
+                    .filter(stratumDefInner -> doesStratumDefMatchStratum(sgc, stratumDefInner))
                     .findFirst()
                     .orElse(null);
 
-            // LUKETODO:  should we always expect these to match up?
+            // TODO: LD: should we always expect these to match up?
             if (stratumDef == null) {
-                logger.warn("1234: stratumDef is null");
+                logger.warn("stratumDef is null");
             }
 
             scoreStratum(measureUrl, groupDef, optStratifierDef.get(), stratumDef, measureScoring, sgc);
         }
+    }
+
+    // TODO:  LD: consider refining this logic:
+    private boolean doesStratumDefMatchStratum(StratifierGroupComponent sgc, StratumDef stratumDefInner) {
+        return stratumDefInner.getText().equals(sgc.getValue().getText());
     }
 
     protected void scoreStratum(
@@ -393,7 +394,9 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
                 final StratumPopulationDef stratumPopulationDef;
                 if (stratumDef != null) {
                     stratumPopulationDef = stratumDef.getStratumPopulations().stream()
-                            .filter(x -> x.getId().startsWith(MeasurePopulationType.MEASUREOBSERVATION.toCode()))
+                            // Ex:  match "measure-observation-1" with "measure-observation"
+                            .filter(stratumPopDef ->
+                                    stratumPopDef.getId().startsWith(MeasurePopulationType.MEASUREOBSERVATION.toCode()))
                             .findFirst()
                             .orElse(null);
                 } else {
@@ -410,12 +413,36 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
         }
     }
 
-    // LUKETODO:  new javadoc explaining what this does
+    /**
+     * The goal here is to extract the resources references by the population def for the subjects
+     * in the stratum populationDef.
+     * <p/>
+     * So, for example, if the stratum population def has subjects:
+     * <ul>
+     *     <li>patient123</li>
+     *     <li>patient456</li>
+     *     <li>patient567</li>
+     * </ul>
+     * and the population has:
+     * <ul>
+     *     <li>patient000 -> Patient000 -> Quantity(57)</li>
+     *     <li>patient100 -> Patient100 -> Quantity(36)</li>
+     *     <li>patient123 -> Patient123 -> Quantity(57)</li>
+     *     <li>patient456 -> Patient456 -> Quantity(3)</li>
+     *     <li>patient500 -> Patient500 -> Quantity(5)</li>
+     *     <li>patient567 -> Patient567 -> Quantity(57)</li>
+     * </ul>
+     * Then the method returns:
+     * <ul>
+     *     <li>Patient123 -> Quantity(57)</li>
+     *     <li>Patient456 -> Quantity(3)</li>
+     *     <li>Patient567 -> Quantity(57)</li>
+     * </ul>
+     */
     private Set<Object> getResultsForStratum(
             PopulationDef measureObservationPopulationDef, StratumPopulationDef stratumPopulationDef) {
 
         return measureObservationPopulationDef.getSubjectResources().entrySet().stream()
-                // LUKETODO:  split this the proper way using hapi-fhir classe
                 .filter(entry -> doesStratumPopDefMatchGroupPopDef(stratumPopulationDef, entry))
                 .map(Entry::getValue)
                 .flatMap(Collection::stream)
@@ -426,7 +453,8 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
             StratumPopulationDef stratumPopulationDef, Entry<String, Set<Object>> entry) {
 
         return stratumPopulationDef.getSubjects().stream()
-                // LUKETODO:  push this up the the stratumPopulationDef building code?
+                // LUKETODO:  split this the proper way using hapi-fhir classes
+                // LUKETODO:  test for other resource types as well
                 .map(subject -> subject.split("Patient/")[1])
                 .collect(Collectors.toUnmodifiableSet())
                 .contains(entry.getKey());

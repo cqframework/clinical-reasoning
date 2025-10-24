@@ -6,7 +6,6 @@ import com.apicatalog.jsonld.StringUtils;
 import jakarta.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -14,8 +13,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.Enumeration;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupPopulationComponent;
@@ -364,8 +361,7 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
             StratumDef stratumDef,
             MeasureScoring measureScoring,
             StratifierGroupComponent stratum) {
-        final Quantity quantity =
-                getStratumScoreOrNull(measureUrl, groupDef, stratumDef, measureScoring, stratum);
+        final Quantity quantity = getStratumScoreOrNull(measureUrl, groupDef, stratumDef, measureScoring, stratum);
 
         if (quantity != null) {
             stratum.setMeasureScore(quantity);
@@ -406,8 +402,7 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
                 return calculateContinuousVariableAggregateQuantity(
                         measureUrl,
                         groupDef,
-                        populationDef ->
-                                getResultsForStratum(populationDef, stratumPopulationDef));
+                        populationDef -> getResultsForStratum(populationDef, stratumPopulationDef));
             }
             default -> {
                 return null;
@@ -415,30 +410,27 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
         }
     }
 
-    /*
-    the existing algo takes the measure-observation population from the group definition and goes through all resources to get the quantities
-    MeasurePopulationType.MEASUREOBSERVATION
-
-    but we don't want that:  we want to filter only resources that belong to the patients captured by each stratum
-    so we want to do some sort of wizardry that involves getting the stratum values, and using those to retrieve the associated resources
-
-    so it's basically a hack to go from StratifierGroupComponent stratum value -> subject -> populationDef.subjectResources.get(subject)
-    to get Set of resources on which to do measure scoring
-     */
-    // LUKETODO: Integrate this algorithm with a new StratumDef that will be populated in R4StratifierBuilder
+    // LUKETODO:  new javadoc explaining what this does
     private Set<Object> getResultsForStratum(
-            PopulationDef measureObservationPopulationDef,
-        StratumPopulationDef stratumPopulationDef) {
+            PopulationDef measureObservationPopulationDef, StratumPopulationDef stratumPopulationDef) {
 
         return measureObservationPopulationDef.getSubjectResources().entrySet().stream()
                 // LUKETODO:  split this the proper way using hapi-fhir classe
-                .filter(entry -> stratumPopulationDef.getSubjects().stream()
-                        .map(subject -> subject.split("Patient/")[1])
-                        .collect(Collectors.toUnmodifiableSet())
-                        .contains(entry.getKey()))
+                .filter(entry -> doesStratumPopDefMatchGroupPopDef(stratumPopulationDef, entry))
                 .map(Entry::getValue)
                 .flatMap(Collection::stream)
                 .collect(Collectors.toUnmodifiableSet());
+    }
+
+    private boolean doesStratumPopDefMatchGroupPopDef(
+            StratumPopulationDef stratumPopulationDef,
+            Entry<String, Set<Object>> entry) {
+
+        return stratumPopulationDef.getSubjects().stream()
+            // LUKETODO:  push this up the the stratumPopulationDef building code?
+            .map(subject -> subject.split("Patient/")[1])
+            .collect(Collectors.toUnmodifiableSet())
+            .contains(entry.getKey());
     }
 
     private int getCountFromGroupPopulation(

@@ -182,6 +182,29 @@ class PackageVisitorTests {
     }
 
     @Test
+    void packageOperation_expansion_should_fail_paging_with_transaction_bundle_type_request() {
+        String expectedError = "It is invalid to use paging when requesting a bundle of type 'transaction'";
+        Bundle loadedBundle = (Bundle) jsonParser.parseResource(
+            PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active-intensional-vs.json"));
+        repo.transaction(loadedBundle);
+        PackageVisitor packageVisitor = new PackageVisitor(repo);
+        Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
+            .copy();
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        Parameters params = parameters(part("bundleType", "transaction"));
+        params.addParameter("count", 1);
+
+        UnprocessableEntityException exception = null;
+        try {
+            libraryAdapter.accept(packageVisitor, params);
+        } catch (UnprocessableEntityException e) {
+            exception = e;
+        }
+        assertNotNull(exception);
+        assertEquals(exception.getMessage(), expectedError);
+    }
+
+    @Test
     void packageOperation_should_fail_non_matching_capability() {
         Bundle bundle = (Bundle) jsonParser.parseResource(
                 PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-package-capabilities.json"));

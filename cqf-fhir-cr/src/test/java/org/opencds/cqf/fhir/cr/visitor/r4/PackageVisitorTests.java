@@ -182,7 +182,7 @@ class PackageVisitorTests {
     }
 
     @Test
-    void packageOperation_expansion_should_fail_paging_with_transaction_bundle_type_request() {
+    void packageOperation_should_fail_paging_with_transaction_bundle_type_request() {
         String expectedError = "It is invalid to use paging when requesting a bundle of type 'transaction'";
         Bundle loadedBundle = (Bundle) jsonParser.parseResource(
                 PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active-intensional-vs.json"));
@@ -193,6 +193,52 @@ class PackageVisitorTests {
         ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         Parameters params = parameters(part("bundleType", "transaction"));
         params.addParameter("count", 1);
+
+        UnprocessableEntityException exception = null;
+        try {
+            libraryAdapter.accept(packageVisitor, params);
+        } catch (UnprocessableEntityException e) {
+            exception = e;
+        }
+        assertNotNull(exception);
+        assertEquals(exception.getMessage(), expectedError);
+    }
+
+    @Test
+    void packageOperation_should_fail_negative_count_parameter() {
+        String expectedError = "'count' must be non-negative";
+        Bundle loadedBundle = (Bundle) jsonParser.parseResource(
+            PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active-intensional-vs.json"));
+        repo.transaction(loadedBundle);
+        PackageVisitor packageVisitor = new PackageVisitor(repo);
+        Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
+            .copy();
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        Parameters params = parameters(part("bundleType", "transaction"));
+        params.addParameter("count", -1);
+
+        UnprocessableEntityException exception = null;
+        try {
+            libraryAdapter.accept(packageVisitor, params);
+        } catch (UnprocessableEntityException e) {
+            exception = e;
+        }
+        assertNotNull(exception);
+        assertEquals(exception.getMessage(), expectedError);
+    }
+
+    @Test
+    void packageOperation_should_fail_negative_offset_parameter() {
+        String expectedError = "'offset' must be non-negative";
+        Bundle loadedBundle = (Bundle) jsonParser.parseResource(
+            PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active-intensional-vs.json"));
+        repo.transaction(loadedBundle);
+        PackageVisitor packageVisitor = new PackageVisitor(repo);
+        Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
+            .copy();
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        Parameters params = parameters(part("bundleType", "transaction"));
+        params.addParameter("offset", -1);
 
         UnprocessableEntityException exception = null;
         try {

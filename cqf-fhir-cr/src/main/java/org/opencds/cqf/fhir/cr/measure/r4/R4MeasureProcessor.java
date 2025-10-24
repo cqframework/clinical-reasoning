@@ -35,7 +35,9 @@ import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cql.VersionedIdentifiers;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.CompositeEvaluationResultsPerMeasure;
+import org.opencds.cqf.fhir.cr.measure.common.LibraryInitHandler;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationResultHandler;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorUtils;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
 import org.opencds.cqf.fhir.cr.measure.common.MultiLibraryIdMeasureEngineDetails;
@@ -114,7 +116,7 @@ public class R4MeasureProcessor {
         var measureDef = new R4MeasureDefBuilder().build(measure);
 
         // Process Criteria Expression Results
-        measureProcessorUtils.processResults(
+        MeasureEvaluationResultHandler.processResults(
                 results,
                 measureDef,
                 evaluationType,
@@ -159,7 +161,7 @@ public class R4MeasureProcessor {
         final Map<String, EvaluationResult> resultForThisMeasure =
                 compositeEvaluationResultsPerMeasure.processMeasureForSuccessOrFailure(measureDef);
 
-        measureProcessorUtils.processResults(
+        MeasureEvaluationResultHandler.processResults(
                 resultForThisMeasure,
                 measureDef,
                 evaluationType,
@@ -273,7 +275,7 @@ public class R4MeasureProcessor {
                 measurementPeriodParams);
 
         // populate results from Library $evaluate
-        return measureProcessorUtils.getEvaluationResults(
+        return MeasureEvaluationResultHandler.getEvaluationResults(
                 subjects,
                 zonedMeasurementPeriod,
                 context,
@@ -300,30 +302,27 @@ public class R4MeasureProcessor {
             CqlEngine context,
             Interval measurementPeriodParams) {
 
-        var compiledLibraries = getCompiledLibraries(libraryVersionedIdentifiers, context);
+        var compiledLibraries = LibraryInitHandler.initLibraries(context, libraryVersionedIdentifiers);
 
-        var libraries =
-                compiledLibraries.stream().map(CompiledLibrary::getLibrary).toList();
+        try {
+            // if we comment this out MeasureScorerTest and other tests will fail with NPEs
+            setArgParameters(parameters, context, compiledLibraries);
 
-        // We need the libraries on the stack for setMeasurementPeriod(),
-        // specifically for .getMeasurementPeriodParameterDef()
-        context.getState().init(libraries);
-
-        // if we comment this out MeasureScorerTest and other tests will fail with NPEs
-        setArgParameters(parameters, context, compiledLibraries);
-
-        // set measurement Period from CQL if operation parameters are empty
-        measureProcessorUtils.setMeasurementPeriod(
-                measurementPeriodParams,
-                context,
-                measures.stream()
-                        .map(Measure::getUrl)
-                        .map(url -> Optional.ofNullable(url).orElse("Unknown Measure URL"))
-                        .toList());
-
-        // Now pop the libraries off the stack, because we'll be adding them back during
-        // CQL library evaluation
-        popAllLibrariesFromCqlEngine(context, libraries);
+            // set measurement Period from CQL if operation parameters are empty
+            measureProcessorUtils.setMeasurementPeriod(
+                    measurementPeriodParams,
+                    context,
+                    measures.stream()
+                            .map(Measure::getUrl)
+                            .map(url -> Optional.ofNullable(url).orElse("Unknown Measure URL"))
+                            .toList());
+        } finally {
+            // Now pop the libraries off the stack, because we'll be adding them back during
+            // CQL library evaluation
+            // If no libraries were initialized, the List of compiledLibraries will be empty
+            // and this will no-op
+            LibraryInitHandler.popLibraries(context, compiledLibraries);
+        }
     }
 
     private MultiLibraryIdMeasureEngineDetails getMultiLibraryIdMeasureEngineDetails(List<Measure> measures) {

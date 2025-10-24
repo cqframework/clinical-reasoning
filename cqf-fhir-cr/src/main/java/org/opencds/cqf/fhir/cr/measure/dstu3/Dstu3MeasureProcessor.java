@@ -27,6 +27,7 @@ import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationResultHandler;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorUtils;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
 import org.opencds.cqf.fhir.cr.measure.common.MultiLibraryIdMeasureEngineDetails;
@@ -113,7 +114,7 @@ public class Dstu3MeasureProcessor {
         ZonedDateTime zonedMeasurementPeriod = MeasureProcessorUtils.getZonedTimeZoneForEval(measurementPeriod);
         // populate results from Library $evaluate
         if (!subjects.isEmpty()) {
-            var results = measureProcessorUtils.getEvaluationResults(
+            var results = MeasureEvaluationResultHandler.getEvaluationResults(
                     subjectIds,
                     zonedMeasurementPeriod,
                     context,
@@ -121,7 +122,7 @@ public class Dstu3MeasureProcessor {
                     Dstu3ContinuousVariableObservationConverter.INSTANCE);
 
             // Process Criteria Expression Results
-            measureProcessorUtils.processResults(
+            MeasureEvaluationResultHandler.processResults(
                     results.processMeasureForSuccessOrFailure(measureDef),
                     measureDef,
                     evalType,

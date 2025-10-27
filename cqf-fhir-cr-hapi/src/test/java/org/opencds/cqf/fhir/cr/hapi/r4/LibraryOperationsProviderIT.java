@@ -3,9 +3,12 @@ package org.opencds.cqf.fhir.cr.hapi.r4;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeType;
@@ -178,5 +181,107 @@ class LibraryOperationsProviderIT extends BaseCrR4TestServer {
                 .withId("SpecificationLibrary")
                 .execute();
         Assertions.assertEquals(retiredLibrary.getStatus().name(), Enumerations.PublicationStatus.RETIRED.name());
+    }
+
+    @Test
+    void artifact_diff_compare_computable() {
+        loadBundle("ersd-small-active-bundle.json");
+        loadBundle("ersd-small-drafted-bundle.json");
+        Parameters diffParams = new Parameters();
+        diffParams.addParameter("source", "Library/SpecificationLibrary");
+        diffParams.addParameter("target", "Library/DraftSpecificationLibrary");
+        diffParams.addParameter("compareComputable", new BooleanType(true));
+        diffParams.addParameter("compareExecutable", new BooleanType(false));
+        // we don't need a terminology endpoint if compareExecutable == false because no
+        // valuesets need to be expanded
+        Parameters returnedParams = ourClient
+                .operation()
+                .onType(Library.class)
+                .named("$artifact-diff")
+                .withParameters(diffParams)
+                .returnResourceType(Parameters.class)
+                .execute();
+        List<Parameters> nestedChanges = returnedParams.getParameter().stream()
+                .filter(p -> !p.getName().equals("operation"))
+                .map(p -> (Parameters) p.getResource())
+                .filter(p -> p != null)
+                .collect(Collectors.toList());
+        assertEquals(6, nestedChanges.size());
+        Parameters grouperChanges = returnedParams.getParameter().stream()
+                .filter(p -> p.getName().contains("/dxtc"))
+                .map(p -> (Parameters) p.getResource())
+                .findFirst()
+                .get();
+        List<Parameters.ParametersParameterComponent> deleteOperations =
+                getOperationsByType(grouperChanges.getParameter(), "delete");
+        List<Parameters.ParametersParameterComponent> insertOperations =
+                getOperationsByType(grouperChanges.getParameter(), "insert");
+        // delete 2 leafs and extensions
+        assertEquals(5, deleteOperations.size());
+        // there aren't actually 2 operations here
+        assertEquals(2, insertOperations.size());
+        String path1 = insertOperations.get(0).getPart().stream()
+                .filter(p -> p.getName().equals("path"))
+                .map(p -> ((StringType) p.getValue()).getValue())
+                .findFirst()
+                .get();
+        String path2 = insertOperations.get(1).getPart().stream()
+                .filter(p -> p.getName().equals("path"))
+                .map(p -> ((StringType) p.getValue()).getValue())
+                .findFirst()
+                .get();
+        // insert the new leaf; adding a node takes multiple operations if
+        // the thing being added isn't a defined complex FHIR type
+        assertTrue(path1.equals("ValueSet.compose.include"));
+        assertTrue(path2.equals("ValueSet.compose.include[1].valueSet"));
+    }
+
+    @Test
+    void artifact_diff_compare_executable() {
+        loadBundle("ersd-small-active-bundle.json");
+        loadBundle("ersd-small-drafted-bundle.json");
+        var diffParams = new Parameters();
+        diffParams.addParameter("source", "Library/SpecificationLibrary");
+        diffParams.addParameter("target", "Library/DraftSpecificationLibrary");
+        diffParams.addParameter("compareExecutable", new BooleanType(true));
+        diffParams.addParameter("compareComputable", new BooleanType(false));
+        Parameters returnedParams = ourClient
+                .operation()
+                .onType(Library.class)
+                .named("$artifact-diff")
+                .withParameters(diffParams)
+                .returnResourceType(Parameters.class)
+                .execute();
+        List<Parameters> nestedChanges = returnedParams.getParameter().stream()
+                .filter(p -> !p.getName().equals("operation"))
+                .map(p -> (Parameters) p.getResource())
+                .filter(p -> p != null)
+                .collect(Collectors.toList());
+        assertEquals(6, nestedChanges.size());
+        Parameters grouperChanges = returnedParams.getParameter().stream()
+                .filter(p -> p.getName().contains("/dxtc"))
+                .map(p -> (Parameters) p.getResource())
+                .findFirst()
+                .get();
+        List<Parameters.ParametersParameterComponent> deleteOperations =
+                getOperationsByType(grouperChanges.getParameter(), "delete");
+        List<Parameters.ParametersParameterComponent> insertOperations =
+                getOperationsByType(grouperChanges.getParameter(), "insert");
+        // old codes removed
+        assertEquals(33, deleteOperations.size());
+        // new codes added
+        assertEquals(40, insertOperations.size());
+    }
+
+    private List<Parameters.ParametersParameterComponent> getOperationsByType(
+            List<Parameters.ParametersParameterComponent> parameters, String type) {
+        return parameters.stream()
+                .filter(p -> p.getName().equals("operation")
+                        && p.getPart().stream()
+                                .anyMatch(part -> part.getName().equals("type")
+                                        && ((CodeType) part.getValue())
+                                                .getCode()
+                                                .equals(type)))
+                .collect(Collectors.toList());
     }
 }

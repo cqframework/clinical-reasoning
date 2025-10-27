@@ -15,11 +15,14 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.Endpoint;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
+import org.opencds.cqf.fhir.cr.common.ArtifactDiffProcessor;
 import org.opencds.cqf.fhir.cr.common.DataRequirementsProcessor;
 import org.opencds.cqf.fhir.cr.common.DeleteProcessor;
+import org.opencds.cqf.fhir.cr.common.IArtifactDiffProcessor;
 import org.opencds.cqf.fhir.cr.common.IDataRequirementsProcessor;
 import org.opencds.cqf.fhir.cr.common.IDeleteProcessor;
 import org.opencds.cqf.fhir.cr.common.IPackageProcessor;
@@ -46,6 +49,7 @@ public class LibraryProcessor {
     protected IEvaluateProcessor evaluateProcessor;
     protected IDeleteProcessor deleteProcessor;
     protected IRetireProcessor retireProcessor;
+    protected IArtifactDiffProcessor artifactDiffProcessor;
     protected IRepository repository;
     protected EvaluationSettings evaluationSettings;
     protected TerminologyServerClientSettings terminologyServerClientSettings;
@@ -58,7 +62,7 @@ public class LibraryProcessor {
             IRepository repository,
             EvaluationSettings evaluationSettings,
             TerminologyServerClientSettings terminologyServerClientSettings) {
-        this(repository, evaluationSettings, terminologyServerClientSettings, null, null, null, null, null, null);
+        this(repository, evaluationSettings, terminologyServerClientSettings, null, null, null, null, null, null, null);
     }
 
     public LibraryProcessor(
@@ -70,7 +74,8 @@ public class LibraryProcessor {
             IDataRequirementsProcessor dataRequirementsProcessor,
             IEvaluateProcessor evaluateProcessor,
             IDeleteProcessor deleteProcessor,
-            IRetireProcessor retireProcessor) {
+            IRetireProcessor retireProcessor,
+            IArtifactDiffProcessor artifactDiffProcessor) {
         this.repository = requireNonNull(repository, "repository can not be null");
         this.evaluationSettings = requireNonNull(evaluationSettings, "evaluationSettings can not be null");
         this.terminologyServerClientSettings =
@@ -83,6 +88,7 @@ public class LibraryProcessor {
         this.evaluateProcessor = evaluateProcessor;
         this.deleteProcessor = deleteProcessor;
         this.retireProcessor = retireProcessor;
+        this.artifactDiffProcessor = artifactDiffProcessor;
     }
 
     public EvaluationSettings evaluationSettings() {
@@ -240,5 +246,21 @@ public class LibraryProcessor {
             Either3<C, IIdType, R> library, IBaseParameters parameters) {
         var processor = retireProcessor != null ? retireProcessor : new RetireProcessor(repository);
         return processor.retireResource(resolveLibrary(library), parameters);
+    }
+
+    public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseParameters artifactDiff(
+            Either3<C, IIdType, R> sourceLibrary,
+            Either3<C, IIdType, R> targetLibrary,
+            Boolean compareComputable,
+            Boolean compareExecutable,
+            Endpoint terminologyEndpoint) {
+        var processor = artifactDiffProcessor != null ? artifactDiffProcessor : new ArtifactDiffProcessor();
+        return processor.getArtifactDiff(
+                resolveLibrary(sourceLibrary),
+                resolveLibrary(targetLibrary),
+                compareComputable,
+                compareExecutable,
+                null,
+                terminologyEndpoint);
     }
 }

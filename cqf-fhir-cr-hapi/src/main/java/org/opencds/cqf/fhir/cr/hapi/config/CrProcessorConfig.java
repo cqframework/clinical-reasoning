@@ -5,6 +5,7 @@ import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cr.activitydefinition.ActivityDefinitionProcessor;
 import org.opencds.cqf.fhir.cr.graphdefinition.GraphDefinitionProcessor;
 import org.opencds.cqf.fhir.cr.graphdefinition.apply.ApplyRequestBuilder;
+import org.opencds.cqf.fhir.cr.hapi.common.HapiArtifactDiffProcessor;
 import org.opencds.cqf.fhir.cr.hapi.common.IActivityDefinitionProcessorFactory;
 import org.opencds.cqf.fhir.cr.hapi.common.IGraphDefinitionApplyRequestBuilderFactory;
 import org.opencds.cqf.fhir.cr.hapi.common.IGraphDefinitionProcessorFactory;
@@ -64,8 +65,17 @@ public class CrProcessorConfig {
             IRepositoryFactory repositoryFactory,
             EvaluationSettings evaluationSettings,
             TerminologyServerClientSettings terminologyServerClientSettings) {
-        return rd ->
-                new LibraryProcessor(repositoryFactory.create(rd), evaluationSettings, terminologyServerClientSettings);
+        return rd -> new LibraryProcessor(
+                repositoryFactory.create(rd),
+                evaluationSettings,
+                terminologyServerClientSettings,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                new HapiArtifactDiffProcessor(repositoryFactory.create(rd)));
     }
 
     @Bean

@@ -1,15 +1,15 @@
 {
-  "id": "ComponentCriteriaStratifierBooleanBasisWithIntersection",
+  "id": "ComponentCriteriaStratifierDateBasisNoIntersectionScenario2",
   "resourceType": "Measure",
-  "name": "ComponentCriteriaStratifierBooleanBasisWithIntersection",
-  "url": "http://example.com/Measure/ComponentCriteriaStratifierBooleanBasisWithIntersection",
+  "name": "ComponentCriteriaStratifierDateBasisNoIntersectionScenario2",
+  "url": "http://example.com/Measure/ComponentCriteriaStratifierDateBasisNoIntersectionScenario2",
   "library": [
     "http://example.com/Library/ComponentCriteriaStratifier"
   ],
   "extension": [
     {
       "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-populationBasis",
-      "valueCode": "boolean"
+      "valueCode": "date"
     }
   ],
   "scoring": {
@@ -37,15 +37,15 @@
           },
           "criteria": {
             "language": "text/cql-identifier",
-            "expression": "Initial Population Boolean"
+            "expression": "Initial Population Date"
           }
         }
       ],
       "stratifier": [
         {
-          "id": "stratifier-feb1-jan2-feb3-jan2",
+          "id": "stratifier-feb1-mar2-feb1-mar2-jan2",
           "code" : {
-            "text": "Stratifier Feb1 Jan2 + Feb3 Jan2"
+            "text": "Stratifier Feb1 Mar2 + Feb1 Mar2 Jan2"
           },
           "extension": [
             {
@@ -55,23 +55,23 @@
           ],
           "component": [
             {
-              "id": "stratifier-encounter-finished",
+              "id": "stratifier-comp-feb1-mar2",
               "code" : {
-                "text": "Encounter Finished"
+                "text": "Stratifier Feb1 Mar2"
               },
               "criteria": {
                 "language": "text/cql.identifier",
-                "expression": "Stratifier Encounter Finished Boolean"
+                "expression": "Stratifier Feb1 Mar2"
               }
             },
             {
-              "id": "stratifier-encounter-in-progress",
+              "id": "stratifier-comp-feb1-mar2-jan2",
               "code" : {
-                "text": "Encounter In-Progress"
+                "text": "Stratifier Feb1 Mar2 Jan2"
               },
               "criteria": {
                 "language": "text/cql.identifier",
-                "expression": "Stratifier Encounter In-Progress Boolean"
+                "expression": "Stratifier Feb1 Mar2 Jan2"
               }
             }
           ]

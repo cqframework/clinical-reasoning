@@ -1,15 +1,15 @@
 {
-  "id": "ComponentCriteriaStratifierDateBasisNoIntersection",
+  "id": "ComponentCriteriaStratifierEncounterBasisWithIntersectionScenario1",
   "resourceType": "Measure",
-  "name": "ComponentCriteriaStratifierDateBasisNoIntersection",
-  "url": "http://example.com/Measure/ComponentCriteriaStratifierDateBasisNoIntersection",
+  "name": "ComponentCriteriaStratifierEncounterBasisWithIntersectionScenario1",
+  "url": "http://example.com/Measure/ComponentCriteriaStratifierEncounterBasisWithIntersectionScenario1",
   "library": [
     "http://example.com/Library/ComponentCriteriaStratifier"
   ],
   "extension": [
     {
       "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-populationBasis",
-      "valueCode": "date"
+      "valueCode": "Encounter"
     }
   ],
   "scoring": {
@@ -37,15 +37,15 @@
           },
           "criteria": {
             "language": "text/cql-identifier",
-            "expression": "Initial Population Date"
+            "expression": "Initial Population Resource"
           }
         }
       ],
       "stratifier": [
         {
-          "id": "stratifier-feb1-mar2-feb1-mar2-jan2",
+          "id": "stratifier-encounters-arrived-triaged-arrived-in-progress-resource",
           "code" : {
-            "text": "Stratifier Feb1 Mar2 + Feb1 Mar2 Jan2"
+            "text": "Stratifier Encounters Arrived Triaged Arrived In-Progress Resource"
           },
           "extension": [
             {
@@ -55,23 +55,23 @@
           ],
           "component": [
             {
-              "id": "stratifier-comp-feb1-mar2",
+              "id": "stratifier-encounters-arrived-triaged",
               "code" : {
-                "text": "Stratifier Feb1 Mar2"
+                "text": "Encounters Arrived Triaged"
               },
               "criteria": {
                 "language": "text/cql.identifier",
-                "expression": "Stratifier Feb1 Mar2"
+                "expression": "Stratifier Encounters Arrived Triaged Resource"
               }
             },
             {
-              "id": "stratifier-comp-feb1-mar2-jan2",
+              "id": "stratifier-encounter-in-progress",
               "code" : {
-                "text": "Stratifier Feb1 Mar2 Jan2"
+                "text": "Encounters Arrived In-Progress"
               },
               "criteria": {
                 "language": "text/cql.identifier",
-                "expression": "Stratifier Feb1 Mar2 Jan2"
+                "expression": "Stratifier Encounters Arrived In-Progress Resource"
               }
             }
           ]

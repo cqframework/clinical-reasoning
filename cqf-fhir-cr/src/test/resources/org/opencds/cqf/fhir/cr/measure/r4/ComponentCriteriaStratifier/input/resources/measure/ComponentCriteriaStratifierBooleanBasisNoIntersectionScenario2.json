@@ -1,8 +1,8 @@
 {
-  "id": "ComponentCriteriaStratifierBooleanBasisNoIntersection",
+  "id": "ComponentCriteriaStratifierBooleanBasisNoIntersectionScenario2",
   "resourceType": "Measure",
-  "name": "ComponentCriteriaStratifierBooleanBasisNoIntersection",
-  "url": "http://example.com/Measure/ComponentCriteriaStratifierBooleaBasisNoIntersection",
+  "name": "ComponentCriteriaStratifierBooleanBasisNoIntersectionScenario2",
+  "url": "http://example.com/Measure/ComponentCriteriaStratifierBooleaBasisNoIntersectionScenario2",
   "library": [
     "http://example.com/Library/ComponentCriteriaStratifier"
   ],
@@ -43,9 +43,9 @@
       ],
       "stratifier": [
         {
-          "id": "stratifier-feb1-mar2-feb1-mar2-jan2",
+          "id": "stratifier-encounter-finished-in-progress-boolean",
           "code" : {
-            "text": "Stratifier Feb1 Mar2 + Feb1 Mar2 Jan2"
+            "text": "Stratifier Stratifier Encounter Finished In-Progress Boolean"
           },
           "extension": [
             {
@@ -55,23 +55,23 @@
           ],
           "component": [
             {
-              "id": "stratifier-comp-feb1-mar2",
+              "id": "stratifier-encounter-finished-in-progress",
               "code" : {
-                "text": "Stratifier Feb1 Mar2"
+                "text": "Stratifier Stratifier Encounter Finished"
               },
               "criteria": {
                 "language": "text/cql.identifier",
-                "expression": "Stratifier Feb1 Mar2"
+                "expression": "Stratifier Encounter Finished Boolean"
               }
             },
             {
-              "id": "stratifier-comp-feb1-mar2-jan2",
+              "id": "stratifier-encounter-in-progress",
               "code" : {
-                "text": "Stratifier Feb1 Mar2 Jan2"
+                "text": "Encounter In-Progress"
               },
               "criteria": {
                 "language": "text/cql.identifier",
-                "expression": "Stratifier Feb1 Mar2 Jan2"
+                "expression": "Stratifier Encounter In-Progress Boolean"
               }
             }
           ]

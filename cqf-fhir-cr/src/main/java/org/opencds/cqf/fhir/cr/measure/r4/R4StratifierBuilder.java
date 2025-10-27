@@ -460,6 +460,8 @@ class R4StratifierBuilder {
 
         if (MeasureStratifierType.CRITERIA == stratifierDef.getStratifierType()) {
             final Set<Object> resources = populationDef.getResources();
+            // LUKETODO:  for Date scenario1, these are EMPTY:  WHY???
+            // LUKETODO:  for the component criteria scenario, we don't add the results directly to the stratifierDef, but to each of the component defs, which is why this is empty
             final Set<Object> results = stratifierDef.getAllCriteriaResultValues();
 
             if (resources.isEmpty() || results.isEmpty()) {

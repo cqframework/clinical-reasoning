@@ -470,11 +470,6 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             bc.addContained(subjectList);
             reportPopulation.setSubjectResults(new Reference("#" + subjectList.getId()));
         }
-
-        // Population Type behavior
-        if (Objects.requireNonNull(populationDef.type()) == MeasurePopulationType.MEASUREOBSERVATION) {
-            buildMeasureObservations(bc, populationDef.expression(), populationDef.getResources());
-        }
     }
 
     public int countObservations(PopulationDef populationDef) {
@@ -487,18 +482,6 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                 .map(Map.class::cast)
                 .mapToInt(Map::size)
                 .sum();
-    }
-
-    // This is relevant for individual measure reports, not summary reports, so users could
-    // potentially recalculate measure scores.  However, detailed specifications do not yet
-    // exist, so we may need to enhance this.
-    protected void buildMeasureObservations(BuilderContext bc, String observationName, Set<Object> resources) {
-        for (int i = 0; i < resources.size(); i++) {
-            // TODO: Do something with the resource...
-            Observation observation = createMeasureObservation(
-                    bc, "measure-observation-" + observationName + "-" + (i + 1), observationName);
-            bc.addContained(observation);
-        }
     }
 
     static ListResource createList(String id) {

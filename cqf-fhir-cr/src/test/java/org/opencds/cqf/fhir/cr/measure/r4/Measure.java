@@ -870,17 +870,23 @@ public class Measure {
         }
 
         public SelectedPopulation population(String name) {
-            return this.population(g -> g.getPopulation().stream()
+            var population = this.population(g -> g.getPopulation().stream()
                     .filter(x -> x.hasCode()
                             && x.getCode().hasCoding()
                             && x.getCode().getCoding().get(0).getCode().equals(name))
                     .findFirst()
-                    .get());
+                    .orElse(null));
+
+            assertNotNull(population);
+            return population;
         }
 
         public SelectedPopulation population(
                 Selector<MeasureReportGroupPopulationComponent, MeasureReportGroupComponent> populationSelector) {
             var p = populationSelector.select(value());
+            if (p == null) {
+                return null;
+            }
             return new SelectedPopulation(p, this);
         }
 
@@ -987,6 +993,11 @@ public class Measure {
 
             public SelectedPopulation(MeasureReportGroupPopulationComponent value, SelectedGroup parent) {
                 super(value, parent);
+            }
+
+            public SelectedPopulation hasName(String name) {
+                assertEquals(name, value().getCode().getCodingFirstRep().getCode());
+                return this;
             }
 
             public SelectedPopulation hasCount(int count) {
@@ -1182,6 +1193,11 @@ public class Measure {
          */
         public SelectedStratumPopulation hasNoStratumPopulationSubjectResults() {
             assertNull(value().getSubjectResults().getReference());
+            return this;
+        }
+
+        public SelectedStratumPopulation hasName(String name) {
+            assertEquals(name, value().getCode().getCodingFirstRep().getCode());
             return this;
         }
     }

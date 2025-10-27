@@ -126,6 +126,7 @@ public class MeasureEvaluationResultHandler {
                     // standard CQL expression results
                     var evaluationResult = evaluationResultsForMultiLib.getResultFor(libraryVersionedIdentifier);
 
+                    // LUKETODO:  add functionality for warnings versus errors from CQL results and some clear tests
                     var measureDefs =
                             multiLibraryIdMeasureEngineDetails.getMeasureDefsForLibrary(libraryVersionedIdentifier);
 

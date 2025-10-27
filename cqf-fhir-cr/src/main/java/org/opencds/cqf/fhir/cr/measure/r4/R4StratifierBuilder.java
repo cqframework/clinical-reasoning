@@ -293,8 +293,22 @@ class R4StratifierBuilder {
             }
         }
 
-        // LUKETODO:  if this is a criteria
-        //        var stratumDef = new StratumDef(stratum.getValue().getText(), new ArrayList<>());
+        // LUKETODO:  so my SPECIFIC problem is this:  I don't want to rely on the TEXT, or any other
+        // identifier to link between the FHIR stratum/population and the Def stratum,
+        // This is unreliable, because in component stratifier use cases, we don't necessarily have
+        // the text or another ID to link with
+
+        // LUKETODO:  this sucks and I need a better design:
+        /*
+        1. I'm trying to work with a FHIR stratum and a StratumDef, at the same time, as well as
+        stratifier and stratum population
+        2. we're setting both of these things at the same time, and then trying to use one to find the
+        other when doing the scoring
+        3. so it looks like we may need to populate the defs with absolutely everything right off the bat
+        4. we hold the counts in the FHIR measure population:  does that make sense?
+        5. should we consider just doing away with the concept of "R4 scoring" altogether, and just pass
+        the results from the Defs to the FHIR classes at the last minute?
+         */
         var stratumDef = new StratumDef(stratumDefText, new ArrayList<>());
 
         // add stratum populations for stratifier

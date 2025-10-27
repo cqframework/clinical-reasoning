@@ -101,27 +101,19 @@ public class PackageProvider {
      *                                      (default = 0). Offset is number of records (not number
      *                                      of pages). It is invalid to request a 'transaction'
      *                                      bundle, via the bundleType parameter, and use paging.
-     *                                      In this case, the implementation will return a paged
-     *                                      searchset with an explanation of why that was done in
-     *                                      the operation outcome.If offset > 0 the resulting bundle
-     *                                      will be of type collection.
+     *                                      Doing so will result in an error. When requesting
+     *                                      paging, a bundle of type searchset will be returned.
      * @param count                         Paging support - how many resources should be provided
-     *                                      in a partial page view. If count = 0, the client is
-     *                                      asking how large the package is. If count > 0 but less
-     *                                      than the total number of resources, the result will be a
-     *                                      bundle of type collection. It is invalid to request a
+     *                                      in a partial page view. It is invalid to request a
      *                                      'transaction' bundle, via the bundleType parameter, and
-     *                                      use paging. In this case, the implementation will
-     *                                      return a paged searchset with an explanation of why that
-     *                                      was done in the operation outcome.If offset > 0 the
-     *                                      resulting bundle will be of type collection.
+     *                                      use paging. Doing so will result in an error. When
+     *                                      requesting paging, a bundle of type searchset will be
+     *                                      returned.
      * @param bundleType                    Determines the type of output Bundle. If not specified,
      *                                      the output bundle will be a transaction bundle. Allowed
      *                                      values include 'transaction', and 'collection'.
      *                                      It is invalid to request a 'transaction' bundle and use
-     *                                      paging. In this case, the implementation should return a
-     *                                      paged searchset with an explanation of why that was done
-     *                                      in the operation outcome.
+     *                                      paging. Doing so will result in an error.
      * @param include                       Specifies what contents should only be included in the
      *                                      resulting package. The codes indicate which types of
      *                                      resources should be included, but note that the set of

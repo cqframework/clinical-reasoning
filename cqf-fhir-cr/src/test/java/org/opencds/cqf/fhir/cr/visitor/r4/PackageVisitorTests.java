@@ -20,6 +20,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.repository.IRepository;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import jakarta.annotation.Nullable;
@@ -194,10 +195,10 @@ class PackageVisitorTests {
         Parameters params = parameters(part("bundleType", "transaction"));
         params.addParameter("count", 1);
 
-        UnprocessableEntityException exception = null;
+        InvalidRequestException exception = null;
         try {
             libraryAdapter.accept(packageVisitor, params);
-        } catch (UnprocessableEntityException e) {
+        } catch (InvalidRequestException e) {
             exception = e;
         }
         assertNotNull(exception);
@@ -217,10 +218,10 @@ class PackageVisitorTests {
         Parameters params = parameters(part("bundleType", "transaction"));
         params.addParameter("count", -1);
 
-        UnprocessableEntityException exception = null;
+        InvalidRequestException exception = null;
         try {
             libraryAdapter.accept(packageVisitor, params);
-        } catch (UnprocessableEntityException e) {
+        } catch (InvalidRequestException e) {
             exception = e;
         }
         assertNotNull(exception);
@@ -240,10 +241,10 @@ class PackageVisitorTests {
         Parameters params = parameters(part("bundleType", "transaction"));
         params.addParameter("offset", -1);
 
-        UnprocessableEntityException exception = null;
+        InvalidRequestException exception = null;
         try {
             libraryAdapter.accept(packageVisitor, params);
-        } catch (UnprocessableEntityException e) {
+        } catch (InvalidRequestException e) {
             exception = e;
         }
         assertNotNull(exception);

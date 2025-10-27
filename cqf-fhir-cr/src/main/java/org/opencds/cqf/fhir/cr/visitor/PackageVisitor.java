@@ -6,8 +6,8 @@ import static org.opencds.cqf.fhir.utility.Parameters.newParameters;
 import static org.opencds.cqf.fhir.utility.adapter.IAdapterFactory.createAdapterForResource;
 
 import ca.uhn.fhir.repository.IRepository;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -176,16 +176,16 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
             throw new NotImplementedOperationException("This repository is not implementing packageOnly at this time");
         }
         if (count.isPresent() && count.get() < 0) {
-            throw new UnprocessableEntityException("'count' must be non-negative");
+            throw new InvalidRequestException("'count' must be non-negative");
         }
         if (offset.isPresent() && offset.get() < 0) {
-            throw new UnprocessableEntityException("'offset' must be non-negative");
+            throw new InvalidRequestException("'offset' must be non-negative");
         }
         bundleType
                 .filter(bt -> bt.equals("transaction") || bt.equals("collection"))
                 .ifPresent(bt -> {
                     if (count.isPresent() || offset.isPresent()) {
-                        throw new UnprocessableEntityException(
+                        throw new InvalidRequestException(
                                 "It is invalid to use paging when requesting a bundle of type '%s'".formatted(bt));
                     }
                 });
@@ -310,7 +310,9 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
 
         var pagingRequested = count.isPresent() || offset.isPresent();
 
-        // decide bundle type
+        // If paging is requested, set the bundle type to 'searchset'.
+        // Otherwise, use the type requested by the caller ('transaction' or 'collection').
+        // If the caller did not request a type and paging is not enabled, default to 'transaction'.
         String bundleType = pagingRequested ? "searchset" : requestedBundleType.orElse("transaction");
         BundleHelper.setBundleType(bundle, bundleType);
 

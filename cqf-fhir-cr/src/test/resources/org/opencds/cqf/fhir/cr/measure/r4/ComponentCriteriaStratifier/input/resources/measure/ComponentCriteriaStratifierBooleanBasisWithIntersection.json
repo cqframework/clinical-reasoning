@@ -1,0 +1,82 @@
+{
+  "id": "ComponentCriteriaStratifierBooleanBasisWithIntersection",
+  "resourceType": "Measure",
+  "name": "ComponentCriteriaStratifierBooleanBasisWithIntersection",
+  "url": "http://example.com/Measure/ComponentCriteriaStratifierBooleanBasisWithIntersection",
+  "library": [
+    "http://example.com/Library/ComponentCriteriaStratifier"
+  ],
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-populationBasis",
+      "valueCode": "boolean"
+    }
+  ],
+  "scoring": {
+    "coding": [
+      {
+        "system": "http://hl7.org/fhir/measure-scoring",
+        "code": "cohort"
+      }
+    ]
+  },
+  "group": [
+    {
+      "id": "group-1",
+      "population": [
+        {
+          "id": "initial-population",
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code": "initial-population",
+                "display": "Initial Population"
+              }
+            ]
+          },
+          "criteria": {
+            "language": "text/cql-identifier",
+            "expression": "Initial Population Boolean"
+          }
+        }
+      ],
+      "stratifier": [
+        {
+          "id": "stratifier-feb1-jan2-feb3-jan2",
+          "code" : {
+            "text": "Stratifier Feb1 Jan2 + Feb3 Jan2"
+          },
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-population-stratifier-type",
+              "valueCode": "criteria"
+            }
+          ],
+          "component": [
+            {
+              "id": "stratifier-encounter-finished",
+              "code" : {
+                "text": "Encounter Finished"
+              },
+              "criteria": {
+                "language": "text/cql.identifier",
+                "expression": "Stratifier Encounter Finished Boolean"
+              }
+            },
+            {
+              "id": "stratifier-encounter-in-progress",
+              "code" : {
+                "text": "Encounter In-Progress"
+              },
+              "criteria": {
+                "language": "text/cql.identifier",
+                "expression": "Stratifier Encounter In-Progress Boolean"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

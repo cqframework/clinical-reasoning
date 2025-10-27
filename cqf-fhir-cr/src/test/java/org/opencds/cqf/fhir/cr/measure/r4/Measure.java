@@ -898,7 +898,7 @@ public class Measure {
         }
 
         public SelectedStratifier stratifierById(String stratId) {
-            final SelectedStratifier stratifier = this.stratifier(g -> g.getStratifier().stream()
+            var stratifier = this.stratifier(g -> g.getStratifier().stream()
                     .filter(t -> t.getId().equals(stratId))
                     .findFirst()
                     .orElse(null));
@@ -911,6 +911,9 @@ public class Measure {
         public SelectedStratifier stratifier(
                 Selector<MeasureReportGroupStratifierComponent, MeasureReportGroupComponent> stratifierSelector) {
             var s = stratifierSelector.select(value());
+            if (s == null) {
+                return null;
+            }
             return new SelectedStratifier(s, this);
         }
 
@@ -1041,11 +1044,15 @@ public class Measure {
         }
 
         public SelectedStratum stratum(String textValue) {
-            return stratum(s -> s.getStratum().stream()
+            var stratum = stratum(s -> s.getStratum().stream()
                     .filter(x -> x.hasValue() && x.getValue().hasText())
                     .filter(x -> x.getValue().getText().equals(textValue))
                     .findFirst()
                     .orElse(null));
+
+            assertNotNull(stratum);
+
+            return stratum;
         }
 
         public SelectedStratum stratumByComponentValueText(String textValue) {
@@ -1068,6 +1075,9 @@ public class Measure {
                 Selector<MeasureReport.StratifierGroupComponent, MeasureReport.MeasureReportGroupStratifierComponent>
                         stratumSelector) {
             var s = stratumSelector.select(value());
+            if (s == null) {
+                return null;
+            }
             return new SelectedStratum(s, this);
         }
 

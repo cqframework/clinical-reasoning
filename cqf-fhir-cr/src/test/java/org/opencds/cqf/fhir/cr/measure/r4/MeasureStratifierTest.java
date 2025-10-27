@@ -4,8 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportStatus;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
@@ -212,7 +214,7 @@ class MeasureStratifierTest {
      */
     @Test
     void cohortBooleanValueStratComponentStrat() {
-        GIVEN_MEASURE_STRATIFIER_TEST
+        final MeasureReport report = GIVEN_MEASURE_STRATIFIER_TEST
                 .when()
                 .measureId("CohortBooleanStratComponent")
                 .evaluate()
@@ -243,6 +245,11 @@ class MeasureStratifierTest {
                 .up()
                 .up()
                 .report();
+
+        final String json =
+                FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(report);
+
+        System.out.println("json = " + json);
     }
 
     /**

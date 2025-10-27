@@ -113,6 +113,7 @@ class R4StratifierBuilder {
         }
     }
 
+    // LUKETODO:  I think we need to add logic here:
     private static List<StratumDef> componentStratifier(
             BuilderContext bc,
             StratifierDef stratifierDef,
@@ -250,6 +251,7 @@ class R4StratifierBuilder {
             List<MeasureGroupPopulationComponent> populations,
             GroupDef groupDef) {
         boolean isComponent = values.size() > 1;
+        String stratumDefText = null;
         for (ValueDef valuePair : values) {
             ValueWrapper value = valuePair.value;
             var componentDef = valuePair.def;
@@ -270,6 +272,7 @@ class R4StratifierBuilder {
                     // non-component stratifiers only set stratified value, code is set on stratifier object
                     // value being stratified: 'M'
                     stratum.setValue((CodeableConcept) value.getValue());
+                    stratumDefText = stratum.getValue().getText();
                 }
             } else if (isComponent) {
                 // component stratifier example: code: "gender", value: 'M'
@@ -284,10 +287,15 @@ class R4StratifierBuilder {
                 // non-component stratifiers only set stratified value, code is set on stratifier object
                 // value being stratified: 'M'
                 stratum.setValue(expressionResultToCodableConcept(value));
+                stratumDefText = stratum.getValue().getText();
+            } else if (MeasureStratifierType.CRITERIA == stratifierDef.getStratifierType()) {
+                stratumDefText = value.getValueAsString();
             }
         }
 
-        var stratumDef = new StratumDef(stratum.getValue().getText(), new ArrayList<>());
+        // LUKETODO:  if this is a criteria
+        //        var stratumDef = new StratumDef(stratum.getValue().getText(), new ArrayList<>());
+        var stratumDef = new StratumDef(stratumDefText, new ArrayList<>());
 
         // add stratum populations for stratifier
         // Group.populations

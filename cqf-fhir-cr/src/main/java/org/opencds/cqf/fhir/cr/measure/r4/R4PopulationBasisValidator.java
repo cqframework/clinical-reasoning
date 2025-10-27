@@ -17,6 +17,7 @@ import org.hl7.fhir.r4.model.ResourceType;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
+import org.opencds.cqf.fhir.cr.measure.common.CodeDef;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationBasisValidator;
@@ -127,16 +128,22 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
         }
 
         var resultClasses = StratifierUtils.extractClassesFromSingleOrListResult(expressionResult.value());
-        var groupPopulationBasisCode = groupDef.getPopulationBasis().code();
+        var groupPopulationBasis = groupDef.getPopulationBasis();
 
         if (MeasureStratifierType.CRITERIA == stratifierDef.getStratifierType()) {
+            // LUKETODO:  refine this error handling because we may get an empty expression result, as opposed to a
+            // non-empty wrong expression result
             if (resultClasses.stream()
-                    .map(Class::getSimpleName)
-                    .noneMatch(simpleName -> simpleName.equals(groupPopulationBasisCode))) {
+                    .noneMatch(
+                            resourceClass -> doesResourceMatchPopulationBasis(resourceClass, groupPopulationBasis))) {
 
                 throw new InvalidRequestException(
                         "criteria-based stratifier is invalid for expression: [%s] due to mismatch between population basis: [%s] and result types: %s for measure URL: %s"
-                                .formatted(expression, groupPopulationBasisCode, prettyClassNames(resultClasses), url));
+                                .formatted(
+                                        expression, groupPopulationBasis.code(), prettyClassNames(resultClasses), url));
+
+                // LUKETODO:  add validation for component criteria stratifiers, which needs the initial population
+                // resources as well
             }
 
             // skip validation below since for criteria-based stratifier, the boolean basis test is irrelevant
@@ -153,11 +160,16 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
                     "stratifier expression criteria results for expression: [%s] must fall within accepted types for population-basis: [%s] for Measure: [%s] due to mismatch between total result classes: %s and matching result classes: %s"
                             .formatted(
                                     expression,
-                                    groupPopulationBasisCode,
+                                    groupPopulationBasis.code(),
                                     url,
                                     prettyClassNames(resultClasses),
                                     prettyClassNames(resultMatchingClasses)));
         }
+    }
+
+    // LUKETODO:  refine this to deal with all kinds of different basis types
+    private boolean doesResourceMatchPopulationBasis(Class<?> resourceClass, CodeDef groupPopulationBasisCode) {
+        return resourceClass.getSimpleName().equalsIgnoreCase(groupPopulationBasisCode.code());
     }
 
     private Optional<Class<?>> extractResourceType(String groupPopulationBasisCode) {

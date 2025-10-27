@@ -22,6 +22,8 @@ import java.util.Set;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureScoringTypePopulations;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class implements the core Measure evaluation logic that's defined in the
@@ -43,6 +45,9 @@ import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureScoringTypePopulations;
  */
 @SuppressWarnings({"removal", "squid:S1135", "squid:S3776"})
 public class MeasureEvaluator {
+
+    private static final Logger logger = LoggerFactory.getLogger(MeasureEvaluator.class);
+
     private final PopulationBasisValidator populationBasisValidator;
 
     public MeasureEvaluator(PopulationBasisValidator populationBasisValidator) {
@@ -430,6 +435,9 @@ public class MeasureEvaluator {
 
         evaluateStratifiers(subjectId, groupDef.stratifiers(), evaluationResult);
 
+        // LUKETODO:  do we want to validate criteria stratifiers versus scoring?  for example, a ratio scoring seems
+        // incompatible with criteria stratifiers
+
         var scoring = groupDef.measureScoring();
         switch (scoring) {
             case PROPORTION, RATIO:
@@ -465,9 +473,13 @@ public class MeasureEvaluator {
             List<StratifierComponentDef> components, EvaluationResult evaluationResult, String subjectId) {
         for (StratifierComponentDef component : components) {
             var expressionResult = evaluationResult.forExpression(component.expression());
-            Optional.ofNullable(expressionResult.value())
-                    .ifPresent(nonNullValue ->
-                            component.putResult(subjectId, nonNullValue, expressionResult.evaluatedResources()));
+            Optional.ofNullable(expressionResult)
+                    .ifPresentOrElse(
+                            nonNullExpressionResult -> component.putResult(
+                                    subjectId,
+                                    nonNullExpressionResult.value(),
+                                    nonNullExpressionResult.evaluatedResources()),
+                            () -> logger.warn("Could not find CQL expression result for: {}", component.expression()));
         }
     }
 
@@ -478,14 +490,15 @@ public class MeasureEvaluator {
             if (!stratifierDef.components().isEmpty()) {
                 addStratifierComponentResult(stratifierDef.components(), evaluationResult, subjectId);
             } else {
-
                 var expressionResult = evaluationResult.forExpression(stratifierDef.expression());
                 Optional.ofNullable(expressionResult)
-                        .map(ExpressionResult::value)
-                        .ifPresent(nonNullValue -> stratifierDef.putResult(
-                                subjectId, // context of CQL expression ex: Patient based
-                                nonNullValue,
-                                expressionResult.evaluatedResources()));
+                        .ifPresentOrElse(
+                                nonNullExpressionResult -> stratifierDef.putResult(
+                                        subjectId, // context of CQL expression ex: Patient based
+                                        nonNullExpressionResult.value(),
+                                        nonNullExpressionResult.evaluatedResources()),
+                                () -> logger.warn(
+                                        "Could not find CQL expression result for: {}", stratifierDef.expression()));
             }
         }
     }

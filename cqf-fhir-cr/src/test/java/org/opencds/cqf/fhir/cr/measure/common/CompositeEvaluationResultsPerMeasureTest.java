@@ -8,6 +8,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 import java.util.Map;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 
@@ -16,8 +18,10 @@ class CompositeEvaluationResultsPerMeasureTest {
     @Test
     void gettersContainExpectedData() {
         // Arrange
-        var measureDef1 = MeasureDef.fromIdAndUrl("Measure/one", "http://example.com/Measure/one");
-        var measureDef2 = MeasureDef.fromIdAndUrl("Measure/two", "http://example.com/Measure/two");
+        var measureDef1 = MeasureDef.fromIdAndUrl(
+                new IdType(ResourceType.Measure.name(), "measureOne"), "http://example.com/Measure/one");
+        var measureDef2 = MeasureDef.fromIdAndUrl(
+                new IdType(ResourceType.Measure.name(), "measureTwo"), "http://example.com/Measure/two");
 
         // Create a non-empty EvaluationResult without depending on ExpressionResult constructors
         EvaluationResult er = new EvaluationResult();
@@ -48,7 +52,8 @@ class CompositeEvaluationResultsPerMeasureTest {
 
     @Test
     void gettersReturnImmutableViews() {
-        var measureDef1 = MeasureDef.fromIdAndUrl("Measure/immutable", "http://example.com/Measure/immutable");
+        var measureDef1 = MeasureDef.fromIdAndUrl(
+                new IdType(ResourceType.Measure.name(), "measureimmutable"), "http://example.com/Measure/immutable");
 
         EvaluationResult er = new EvaluationResult();
         er.expressionResults.put("s", null);

@@ -44,14 +44,19 @@ import org.opencds.cqf.fhir.cr.common.ArtifactDiffProcessor.DiffCache;
 import org.opencds.cqf.fhir.cr.common.IArtifactDiffProcessor;
 import org.opencds.cqf.fhir.cr.visitor.ExpandHelper;
 import org.opencds.cqf.fhir.utility.Canonicals;
+import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.SearchHelper;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
 import org.opencds.cqf.fhir.utility.client.TerminologyServerClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanWrapperImpl;
 
 public class HapiArtifactDiffProcessor implements IArtifactDiffProcessor {
+
+    private static final Logger logger = LoggerFactory.getLogger(HapiArtifactDiffProcessor.class);
 
     protected final IRepository repository;
 
@@ -135,6 +140,48 @@ public class HapiArtifactDiffProcessor implements IArtifactDiffProcessor {
                 .toList();
         var combinedReferenceList =
                 extractAdditionsAndDeletions(sourceReferences, targetReferences, RelatedArtifact.class);
+        handleSourceMatches(
+                baseDiff,
+                repository,
+                patch,
+                cache,
+                ctx,
+                compareComputable,
+                compareExecutable,
+                terminologyEndpoint,
+                combinedReferenceList);
+        handleInsertions(
+                baseDiff,
+                repository,
+                patch,
+                cache,
+                ctx,
+                compareComputable,
+                compareExecutable,
+                terminologyEndpoint,
+                combinedReferenceList);
+        handleDeletions(
+                baseDiff,
+                repository,
+                patch,
+                cache,
+                ctx,
+                compareComputable,
+                compareExecutable,
+                terminologyEndpoint,
+                combinedReferenceList);
+    }
+
+    private static void handleSourceMatches(
+            Parameters baseDiff,
+            IRepository repository,
+            FhirPatch patch,
+            DiffCache cache,
+            FhirContext ctx,
+            boolean compareComputable,
+            boolean compareExecutable,
+            Endpoint terminologyEndpoint,
+            AdditionsAndDeletions<RelatedArtifact> combinedReferenceList) {
         if (!combinedReferenceList.getSourceMatches().isEmpty()) {
             for (int i = 0; i < combinedReferenceList.getSourceMatches().size(); i++) {
                 var sourceCanonical =
@@ -155,7 +202,6 @@ public class HapiArtifactDiffProcessor implements IArtifactDiffProcessor {
                                     target,
                                     patch,
                                     cache,
-                                    ctx,
                                     compareComputable,
                                     compareExecutable)
                             .ifPresentOrElse(
@@ -190,6 +236,18 @@ public class HapiArtifactDiffProcessor implements IArtifactDiffProcessor {
                 }
             }
         }
+    }
+
+    private static void handleInsertions(
+            Parameters baseDiff,
+            IRepository repository,
+            FhirPatch patch,
+            DiffCache cache,
+            FhirContext ctx,
+            boolean compareComputable,
+            boolean compareExecutable,
+            Endpoint terminologyEndpoint,
+            AdditionsAndDeletions<RelatedArtifact> combinedReferenceList) {
         for (var addition : combinedReferenceList.getInsertions()) {
             if (addition.hasResource()) {
                 boolean diffNotAlreadyComputedAndPresent =
@@ -210,7 +268,6 @@ public class HapiArtifactDiffProcessor implements IArtifactDiffProcessor {
                                     targetResource,
                                     patch,
                                     cache,
-                                    ctx,
                                     compareComputable,
                                     compareExecutable)
                             .ifPresent(diffToAppend -> {
@@ -221,6 +278,18 @@ public class HapiArtifactDiffProcessor implements IArtifactDiffProcessor {
                 }
             }
         }
+    }
+
+    private static void handleDeletions(
+            Parameters baseDiff,
+            IRepository repository,
+            FhirPatch patch,
+            DiffCache cache,
+            FhirContext ctx,
+            boolean compareComputable,
+            boolean compareExecutable,
+            Endpoint terminologyEndpoint,
+            AdditionsAndDeletions<RelatedArtifact> combinedReferenceList) {
         for (var deletion : combinedReferenceList.getDeletions()) {
             if (deletion.hasResource()) {
                 boolean diffNotAlreadyComputedAndPresent =
@@ -241,7 +310,6 @@ public class HapiArtifactDiffProcessor implements IArtifactDiffProcessor {
                                     null,
                                     patch,
                                     cache,
-                                    ctx,
                                     compareComputable,
                                     compareExecutable)
                             .ifPresent(diffToAppend -> {
@@ -270,19 +338,17 @@ public class HapiArtifactDiffProcessor implements IArtifactDiffProcessor {
             } catch (ResourceNotFoundException e) {
                 // ignore
             }
-            if (resource != null) {
-                if (resource instanceof ValueSet valueSet && needsExpandedValueSets) {
-                    try {
-                        tryExpandValueSet(valueSet, context, terminologyEndpoint, repository);
-                    } catch (Exception e) {
-                        throw new UnprocessableEntityException("Could not expand ValueSet: " + e.getMessage());
-                    }
+            if (resource instanceof ValueSet valueSet && needsExpandedValueSets) {
+                try {
+                    tryExpandValueSet(valueSet, context, terminologyEndpoint, repository);
+                } catch (Exception e) {
+                    throw new UnprocessableEntityException("Could not expand ValueSet: " + e.getMessage());
                 }
-                if (isSource) {
-                    cache.addSource(url, resource);
-                } else {
-                    cache.addTarget(url, resource);
-                }
+            }
+            if (resource != null && isSource) {
+                cache.addSource(url, resource);
+            } else if (resource != null) {
+                cache.addTarget(url, resource);
             }
         }
         return resource;
@@ -301,7 +367,12 @@ public class HapiArtifactDiffProcessor implements IArtifactDiffProcessor {
             parametersAdapter.addParameter("url", new UrlType(vset.getUrl()));
             parametersAdapter.addParameter("valueSetVersion", new StringType(vset.getVersion()));
             expandHelper.expandValueSet(
-                    valueSetAdapter, parametersAdapter, endpointAdapter, new ArrayList(), new ArrayList(), new Date());
+                    valueSetAdapter,
+                    parametersAdapter,
+                    endpointAdapter,
+                    new ArrayList<>(),
+                    new ArrayList<>(),
+                    new Date());
         }
     }
 
@@ -332,27 +403,25 @@ public class HapiArtifactDiffProcessor implements IArtifactDiffProcessor {
             MetadataResource target,
             FhirPatch patch,
             DiffCache cache,
-            FhirContext ctx,
             boolean compareComputable,
             boolean compareExecutable) {
         var retval = cache.getDiff(
-                sourceCanonical == null ? "empty" : sourceCanonical,
-                targetCanonical == null ? "empty" : targetCanonical);
+                sourceCanonical == null ? Constants.EMPTY : sourceCanonical,
+                targetCanonical == null ? Constants.EMPTY : targetCanonical);
         if (sourceCanonical == null && target != null) {
             try {
                 var empty = target.getClass()
                         .getDeclaredConstructor((Class<?>[]) null)
                         .newInstance((Object[]) null);
                 retval = (Parameters) patch.diff(empty, target);
-                cache.addDiff("empty", targetCanonical, retval);
+                cache.addDiff(Constants.EMPTY, targetCanonical, retval);
             } catch (NoSuchMethodException
                     | IllegalAccessException
                     | InstantiationException
                     | IllegalArgumentException
                     | InvocationTargetException
                     | SecurityException e) {
-                // TODO: add OperationOutcome to bundle
-                e.printStackTrace();
+                logger.error("Error occurred trying to update diff cache", e);
             }
         } else if (targetCanonical == null && source != null) {
             try {
@@ -360,15 +429,14 @@ public class HapiArtifactDiffProcessor implements IArtifactDiffProcessor {
                         .getDeclaredConstructor((Class<?>[]) null)
                         .newInstance((Object[]) null);
                 retval = (Parameters) patch.diff(source, empty);
-                cache.addDiff(sourceCanonical, "empty", retval);
+                cache.addDiff(sourceCanonical, Constants.EMPTY, retval);
             } catch (InstantiationException
                     | IllegalAccessException
                     | IllegalArgumentException
                     | InvocationTargetException
                     | NoSuchMethodException
                     | SecurityException e) {
-                // TODO: add OperationOutcome to bundle
-                e.printStackTrace();
+                logger.error("Error occurred trying to update diff cache", e);
             }
         } else if (retval == null && source != null && target != null) {
             if (source instanceof Library || source instanceof PlanDefinition) {
@@ -450,23 +518,7 @@ public class HapiArtifactDiffProcessor implements IArtifactDiffProcessor {
         List<T> targetMatches = new ArrayList<>();
         targetCopy.forEach(targetObj -> {
             Optional<T> isInSource = sourceCopy.stream()
-                    .filter(sourceObj -> {
-                        if (sourceObj instanceof RelatedArtifact sourceRA
-                                && targetObj instanceof RelatedArtifact targetRA) {
-                            return relatedArtifactEquals(sourceRA, targetRA);
-                        } else if (sourceObj instanceof ConceptSetComponent sourceCSC
-                                && targetObj instanceof ConceptSetComponent targetCSC) {
-                            return conceptSetEquals(sourceCSC, targetCSC);
-                        } else if (sourceObj instanceof ValueSetExpansionContainsComponent sourceVSECC
-                                && targetObj instanceof ValueSetExpansionContainsComponent targetVSECC) {
-                            return valueSetContainsEquals(sourceVSECC, targetVSECC);
-                        } else if (sourceObj instanceof Extension sourceExt
-                                && targetObj instanceof Extension targetExt) {
-                            return extensionEquals(sourceExt, targetExt);
-                        } else {
-                            return false;
-                        }
-                    })
+                    .filter(sourceObj -> compareSourceAndTarget(targetObj, sourceObj))
                     .findAny();
             if (isInSource.isPresent()) {
                 sourceMatches.add(isInSource.get());
@@ -478,26 +530,29 @@ public class HapiArtifactDiffProcessor implements IArtifactDiffProcessor {
         });
         // check for deletions
         sourceCopy.forEach(sourceObj -> {
-            boolean isInTarget = targetCopy.stream().anyMatch(targetObj -> {
-                if (sourceObj instanceof RelatedArtifact sourceRA && targetObj instanceof RelatedArtifact targetRA) {
-                    return relatedArtifactEquals(sourceRA, targetRA);
-                } else if (sourceObj instanceof ConceptSetComponent sourceCSC
-                        && targetObj instanceof ConceptSetComponent targetCSC) {
-                    return conceptSetEquals(sourceCSC, targetCSC);
-                } else if (sourceObj instanceof ValueSetExpansionContainsComponent sourceVSECC
-                        && targetObj instanceof ValueSetExpansionContainsComponent targetVSECC) {
-                    return valueSetContainsEquals(sourceVSECC, targetVSECC);
-                } else if (sourceObj instanceof Extension sourceExt && targetObj instanceof Extension targetExt) {
-                    return extensionEquals(sourceExt, targetExt);
-                } else {
-                    return false;
-                }
-            });
+            boolean isInTarget =
+                    targetCopy.stream().anyMatch(targetObj -> compareSourceAndTarget(targetObj, sourceObj));
             if (!isInTarget) {
                 deletions.add(sourceObj);
             }
         });
         return new AdditionsAndDeletions<>(sourceMatches, targetMatches, insertions, deletions, t);
+    }
+
+    private static <T> boolean compareSourceAndTarget(T targetObj, T sourceObj) {
+        if (sourceObj instanceof RelatedArtifact sourceRA && targetObj instanceof RelatedArtifact targetRA) {
+            return relatedArtifactEquals(sourceRA, targetRA);
+        } else if (sourceObj instanceof ConceptSetComponent sourceCSC
+                && targetObj instanceof ConceptSetComponent targetCSC) {
+            return conceptSetEquals(sourceCSC, targetCSC);
+        } else if (sourceObj instanceof ValueSetExpansionContainsComponent sourceVSECC
+                && targetObj instanceof ValueSetExpansionContainsComponent targetVSECC) {
+            return valueSetContainsEquals(sourceVSECC, targetVSECC);
+        } else if (sourceObj instanceof Extension sourceExt && targetObj instanceof Extension targetExt) {
+            return extensionEquals(sourceExt, targetExt);
+        } else {
+            return false;
+        }
     }
 
     private static boolean relatedArtifactEquals(RelatedArtifact ref1, RelatedArtifact ref2) {
@@ -535,9 +590,8 @@ public class HapiArtifactDiffProcessor implements IArtifactDiffProcessor {
         if (!source.getValue().getClass().equals(target.getValue().getClass())) {
             return false;
         }
-        if (source.getValue() instanceof IPrimitiveType sourcePrimitive) {
-            return (sourcePrimitive.getValue())
-                    .equals((((IPrimitiveType) target.getValue()).getValue()));
+        if (source.getValue() instanceof IPrimitiveType<?> sourcePrimitive) {
+            return (sourcePrimitive.getValue()).equals((((IPrimitiveType<?>) target.getValue()).getValue()));
         } else if (source.getValue() instanceof CodeableConcept sourceCodableConcept) {
             return sourceCodableConcept
                             .getCodingFirstRep()
@@ -613,8 +667,7 @@ public class HapiArtifactDiffProcessor implements IArtifactDiffProcessor {
             processedExtensions.appendDeleteOperations(
                     extensionDiff, patch, processedExtensions.getTargetMatches().size());
             // fix the path with the right indexes and remove the resourceType
-            fixRelatedArtifactExtensionDiffPaths(
-                    extensionDiff.getParameter(), i);
+            fixRelatedArtifactExtensionDiffPaths(extensionDiff.getParameter(), i);
             updateOperations.getParameter().addAll(extensionDiff.getParameter());
             processedExtensions.reorderArrayElements(
                     processedRelatedArtifacts.getSourceMatches().get(i),
@@ -632,8 +685,7 @@ public class HapiArtifactDiffProcessor implements IArtifactDiffProcessor {
                     .findFirst();
             if (path.isPresent()) {
                 var pathString = ((StringType) path.get().getValue()).getValue();
-                var newIndex = "relatedArtifact[" + relatedArtifactIndex
-                        + "]"; // Replace with your desired string
+                var newIndex = "relatedArtifact[" + relatedArtifactIndex + "]"; // Replace with your desired string
                 var indexedPathString = pathString.replaceAll("relatedArtifact\\[([^\\]]+)\\]", newIndex);
                 path.get().setValue(new StringType(indexedPathString));
             }
@@ -650,11 +702,12 @@ public class HapiArtifactDiffProcessor implements IArtifactDiffProcessor {
     }
 
     private static class AdditionsAndDeletions<T> {
-        private List<T> sourceMatches;
-        private List<T> targetMatches;
-        private List<T> insertions;
-        private List<T> deletions;
-        private Class<T> t;
+
+        private final List<T> sourceMatches;
+        private final List<T> targetMatches;
+        private final List<T> insertions;
+        private final List<T> deletions;
+        private final Class<T> t;
 
         public AdditionsAndDeletions(
                 List<T> sourceMatches, List<T> targetMatches, List<T> additions, List<T> deletions, Class<T> t) {
@@ -691,6 +744,7 @@ public class HapiArtifactDiffProcessor implements IArtifactDiffProcessor {
             prepareForComparison(baseParameters, patch, startIndex, false, this.deletions);
         }
 
+        @SuppressWarnings("unchecked")
         public void reorderArrayElements(MetadataResource sourceResource, MetadataResource targetResource) {
             var sourceAdapter =
                     IAdapterFactory.forFhirVersion(FhirVersionEnum.R4).createKnowledgeArtifactAdapter(sourceResource);
@@ -699,43 +753,46 @@ public class HapiArtifactDiffProcessor implements IArtifactDiffProcessor {
             if (this.t.isAssignableFrom(RelatedArtifact.class)) {
                 var sourceRelatedArtifacts =
                         (List<RelatedArtifact>) Stream.concat(this.sourceMatches.stream(), this.deletions.stream())
-                                .collect(Collectors.toList());
+                                .toList();
                 var targetRelatedArtifacts =
                         (List<RelatedArtifact>) Stream.concat(this.targetMatches.stream(), this.insertions.stream())
-                                .collect(Collectors.toList());
+                                .toList();
                 sourceAdapter.setRelatedArtifact(sourceRelatedArtifacts);
                 targetAdapter.setRelatedArtifact(targetRelatedArtifacts);
             } else if (this.t.isAssignableFrom(ConceptSetComponent.class)
-                    && (sourceResource instanceof ValueSet && targetResource instanceof ValueSet)) {
+                    && (sourceResource instanceof ValueSet sourceValueSet
+                            && targetResource instanceof ValueSet targetValueSet)) {
                 var sourceComposeInclude =
                         (List<ConceptSetComponent>) Stream.concat(this.sourceMatches.stream(), this.deletions.stream())
-                                .collect(Collectors.toList());
+                                .toList();
                 var targetComposeInclude =
                         (List<ConceptSetComponent>) Stream.concat(this.targetMatches.stream(), this.insertions.stream())
-                                .collect(Collectors.toList());
-                ((ValueSet) sourceResource).getCompose().setInclude(sourceComposeInclude);
-                ((ValueSet) targetResource).getCompose().setInclude(targetComposeInclude);
+                                .toList();
+                sourceValueSet.getCompose().setInclude(sourceComposeInclude);
+                targetValueSet.getCompose().setInclude(targetComposeInclude);
             } else if (this.t.isAssignableFrom(ValueSetExpansionContainsComponent.class)
-                    && (sourceResource instanceof ValueSet && targetResource instanceof ValueSet)) {
+                    && (sourceResource instanceof ValueSet sourceValueSet
+                            && targetResource instanceof ValueSet targetValueSet)) {
                 var sourceExpansionContains = (List<ValueSetExpansionContainsComponent>)
                         Stream.concat(this.sourceMatches.stream(), this.deletions.stream())
-                                .collect(Collectors.toList());
+                                .toList();
                 var targetExpansionContains = (List<ValueSetExpansionContainsComponent>)
                         Stream.concat(this.targetMatches.stream(), this.insertions.stream())
-                                .collect(Collectors.toList());
-                ((ValueSet) sourceResource).getExpansion().setContains(sourceExpansionContains);
-                ((ValueSet) targetResource).getExpansion().setContains(targetExpansionContains);
+                                .toList();
+                sourceValueSet.getExpansion().setContains(sourceExpansionContains);
+                targetValueSet.getExpansion().setContains(targetExpansionContains);
             }
         }
 
+        @SuppressWarnings("unchecked")
         public void reorderArrayElements(RelatedArtifact sourceElement, RelatedArtifact targetElement) {
             if (this.t.isAssignableFrom(Extension.class)) {
                 var sourceExtensions =
                         (List<Extension>) Stream.concat(this.sourceMatches.stream(), this.deletions.stream())
-                                .collect(Collectors.toList());
+                                .toList();
                 var targetExtensions =
                         (List<Extension>) Stream.concat(this.targetMatches.stream(), this.insertions.stream())
-                                .collect(Collectors.toList());
+                                .toList();
                 sourceElement.setExtension(sourceExtensions);
                 targetElement.setExtension(targetExtensions);
             }
@@ -747,8 +804,9 @@ public class HapiArtifactDiffProcessor implements IArtifactDiffProcessor {
          * @param startIndex where the start numbering the operations
          * @param insertOrDelete true = insert, false = delete
          * @param resourcesToAdd list of insertions or deletions
-         * @throws UnprocessableEntityException
+         * @throws UnprocessableEntityException if the objects cannot be processed
          */
+        @SuppressWarnings("unchecked")
         private void prepareForComparison(
                 Parameters baseParameters,
                 FhirPatch patch,
@@ -801,9 +859,9 @@ public class HapiArtifactDiffProcessor implements IArtifactDiffProcessor {
                 IBaseResource target,
                 FhirPatch patch,
                 int startIndex) {
-            var insertions = (Parameters) patch.diff(source, target);
-            fixInsertPathIndexes(insertions.getParameter(), startIndex);
-            baseParameters.getParameter().addAll(insertions.getParameter());
+            var inserts = (Parameters) patch.diff(source, target);
+            fixInsertPathIndexes(inserts.getParameter(), startIndex);
+            baseParameters.getParameter().addAll(inserts.getParameter());
         }
 
         private static void appendDeleteOperations(
@@ -812,19 +870,19 @@ public class HapiArtifactDiffProcessor implements IArtifactDiffProcessor {
                 IBaseResource target,
                 FhirPatch patch,
                 int startIndex) {
-            var deletions = (Parameters) patch.diff(source, target);
-            fixDeletePathIndexesAndAddValues(deletions.getParameter(), startIndex, source);
-            baseParameters.getParameter().addAll(deletions.getParameter());
+            var deletes = (Parameters) patch.diff(source, target);
+            fixDeletePathIndexesAndAddValues(deletes.getParameter(), startIndex, source);
+            baseParameters.getParameter().addAll(deletes.getParameter());
         }
 
         private static void fixDeletePathIndexesAndAddValues(
-            List<ParametersParameterComponent> parameters, int newStart, IBaseResource sourceResource) {
+                List<ParametersParameterComponent> parameters, int newStart, IBaseResource sourceResource) {
             for (int i = 0; i < parameters.size(); i++) {
                 ParametersParameterComponent parameter = parameters.get(i);
                 Optional<ParametersParameterComponent> path = parameter.getPart().stream()
-                    .filter(ParametersParameterComponent::hasName)
-                    .filter(part -> part.getName().equals("path"))
-                    .findFirst();
+                        .filter(ParametersParameterComponent::hasName)
+                        .filter(part -> part.getName().equals("path"))
+                        .findFirst();
                 if (path.isPresent()) {
 
                     var pathString = ((StringType) path.get().getValue()).getValue();
@@ -832,36 +890,39 @@ public class HapiArtifactDiffProcessor implements IArtifactDiffProcessor {
                     var noBase = removeBase(e);
                     try {
                         Optional.ofNullable((new BeanWrapperImpl(sourceResource).getPropertyValue(noBase)))
-                            .ifPresent(oldVal -> {
-                                if (oldVal instanceof Type) {
-                                    parameter.addPart().setName("previousValue").setValue((Type) oldVal);
-                                } else if (oldVal instanceof ValueSetExpansionContainsComponent) {
-                                    var exp = (ValueSetExpansionContainsComponent) oldVal;
-                                    parameter.addPart().setName("previousValue").setValue(exp.getCodeElement());
-                                } else if (oldVal instanceof ConceptSetComponent) {
-                                    var cmp = (ConceptSetComponent) oldVal;
-                                    cmp.getConcept().forEach(ref -> {
+                                .ifPresent(oldVal -> {
+                                    if (oldVal instanceof RelatedArtifact oldValRA) {
                                         parameter
-                                            .addPart()
-                                            .setName("previousValue")
-                                            .setValue(ref.getCodeElement());
-                                    });
-                                    cmp.getValueSet().forEach(vs -> {
+                                                .addPart()
+                                                .setName(Constants.PREVIOUS_VALUE)
+                                                .setValue(oldValRA.getResourceElement());
+                                    } else if (oldVal instanceof Type oldValType) {
                                         parameter
-                                            .addPart()
-                                            .setName("previousValue")
-                                            .setValue(vs);
-                                    });
-                                } else if (oldVal instanceof RelatedArtifact ra) {
-                                    parameter.addPart().setName("previousValue").setValue(ra.getResourceElement());
-                                }
-                            });
+                                                .addPart()
+                                                .setName(Constants.PREVIOUS_VALUE)
+                                                .setValue(oldValType);
+                                    } else if (oldVal instanceof ValueSetExpansionContainsComponent oldValVSECC) {
+                                        parameter
+                                                .addPart()
+                                                .setName(Constants.PREVIOUS_VALUE)
+                                                .setValue(oldValVSECC.getCodeElement());
+                                    } else if (oldVal instanceof ConceptSetComponent oldValCSC) {
+                                        oldValCSC.getConcept().forEach(ref -> parameter
+                                                .addPart()
+                                                .setName(Constants.PREVIOUS_VALUE)
+                                                .setValue(ref.getCodeElement()));
+                                        oldValCSC.getValueSet().forEach(vs -> parameter
+                                                .addPart()
+                                                .setName(Constants.PREVIOUS_VALUE)
+                                                .setValue(vs));
+                                    }
+                                });
 
                     } catch (Exception err) {
                         throw new UnprocessableEntityException(
-                            "Error while following changelog path to extract context:" + err.getMessage());
+                                "Error while following changelog path to extract context:" + err.getMessage());
                     }
-                    var newIndex = "[" + String.valueOf(i + newStart) + "]"; // Replace with your desired string
+                    var newIndex = "[" + (i + newStart) + "]"; // Replace with your desired string
                     var result = pathString.replaceAll("\\[([^\\]]+)\\]", newIndex);
                     path.get().setValue(new StringType(result));
                 }
@@ -870,34 +931,37 @@ public class HapiArtifactDiffProcessor implements IArtifactDiffProcessor {
 
         private static String removeBase(EncodeContextPath path) {
             return path.getPath().subList(1, path.getPath().size()).stream()
-                .map(EncodeContextPathElement::toString)
-                .collect(Collectors.joining("."));
+                    .map(EncodeContextPathElement::toString)
+                    .collect(Collectors.joining("."));
         }
 
         private static void fixInsertPathIndexes(List<ParametersParameterComponent> parameters, int newStart) {
             int opCounter = 0;
             for (ParametersParameterComponent parameter : parameters) {
                 Optional<ParametersParameterComponent> index = parameter.getPart().stream()
-                    .filter(part -> part.getName().equals("index"))
-                    .findFirst();
+                        .filter(part -> part.getName().equals("index"))
+                        .findFirst();
                 Optional<ParametersParameterComponent> value = parameter.getPart().stream()
-                    .filter(part -> part.getName().equals("value"))
-                    .findFirst();
+                        .filter(part -> part.getName().equals("value"))
+                        .findFirst();
                 Optional<ParametersParameterComponent> path = parameter.getPart().stream()
-                    .filter(part -> part.getName().equals("path"))
-                    .findFirst();
+                        .filter(part -> part.getName().equals("path"))
+                        .findFirst();
                 if (path.isPresent()) {
                     var pathString = ((StringType) path.get().getValue()).getValue();
                     var e = new EncodeContextPath(pathString);
                     var elementName = e.getLeafElementName();
                     // for contains / include, we want to update the second last index and the
                     if (((elementName.equals("contains")
-                        || elementName.equals("include")
-                        || elementName.equals("relatedArtifact")) && (index.isPresent() && value.isEmpty())) || (elementName.equals("relatedArtifact") && index.isPresent())) {
+                                            || elementName.equals("include")
+                                            || elementName.equals("relatedArtifact"))
+                                    && (index.isPresent() && value.isEmpty()))
+                            || (elementName.equals("relatedArtifact") && index.isPresent())) {
                         index.get().setValue(new IntegerType(opCounter + newStart));
                         opCounter += 1;
                     }
-                    if ((pathString.contains("expansion.contains") || pathString.contains("compose.include")) && value.isPresent()) {
+                    if ((pathString.contains("expansion.contains") || pathString.contains("compose.include"))
+                            && value.isPresent()) {
                         var newIndex = "[" + (opCounter - 1 + newStart) + "]";
                         var result = pathString.replaceAll("\\[([^\\]]+)\\]", newIndex);
                         path.get().setValue(new StringType(result));

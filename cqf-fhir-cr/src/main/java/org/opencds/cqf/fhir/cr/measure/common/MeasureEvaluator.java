@@ -53,7 +53,7 @@ import org.opencds.cqf.fhir.cr.measure.r4.utils.R4ResourceIdUtils;
  * @see <a href=
  *      "http://www.hl7.org/implement/standards/product_brief.cfm?product_id=97">http://www.hl7.org/implement/standards/product_brief.cfm?product_id=97</a>
  */
-@SuppressWarnings({"removal", "squid:S1135", "squid:S3776"})
+@SuppressWarnings({"squid:S1135", "squid:S3776"})
 public class MeasureEvaluator {
     private final PopulationBasisValidator populationBasisValidator;
 
@@ -591,12 +591,11 @@ public class MeasureEvaluator {
             }
         }
 
-        final StratumDef stratumDef = new StratumDef(
+        return new StratumDef(
                 stratumText,
                 populationDefs.stream()
                         .map(popDef -> buildStratumPopulationDef(popDef, subjectIds))
                         .toList());
-        return stratumDef;
     }
 
     private static StratumPopulationDef buildStratumPopulationDef(
@@ -613,9 +612,7 @@ public class MeasureEvaluator {
                 .map(MeasureEvaluator::processSubjectId)
                 .collect(Collectors.toUnmodifiableSet());
 
-        final StratumPopulationDef stratumPopulationDef =
-                new StratumPopulationDef(populationDef.id(), unqualifiedSubjectIdsCommonToPopulation);
-        return stratumPopulationDef;
+        return new StratumPopulationDef(populationDef.id(), unqualifiedSubjectIdsCommonToPopulation);
     }
 
     private static String processSubjectId(String rawSubjectId) {

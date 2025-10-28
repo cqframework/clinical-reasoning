@@ -74,9 +74,7 @@ class R4StratifierBuilder {
 
         // LUKETODO:  cleanup everything
         // LUKETODO:  try to add logic reading the Def results instead of reinventing the algo, if possible
-        var stratumDefs = buildMultipleStratum(bc, reportStratifier, stratifierDef, populations, groupDef);
-
-        //        stratifierDef.addAllStratum(stratumDefs);
+        buildMultipleStratum(bc, reportStratifier, stratifierDef, populations, groupDef);
     }
 
     private static List<StratumDef> buildMultipleStratum(
@@ -137,9 +135,7 @@ class R4StratifierBuilder {
 
             var reportStratum = reportStratifier.addStratum();
 
-            var stratumDef = buildStratum(bc, stratifierDef, reportStratum, valueSet, subjects, populations, groupDef);
-
-            stratumDefs.add(stratumDef);
+            buildStratum(bc, stratifierDef, reportStratum, valueSet, subjects, populations, groupDef);
         });
 
         return stratumDefs;
@@ -166,8 +162,8 @@ class R4StratifierBuilder {
             // Seems to be irrelevant for criteria based stratifiers
             var patients = List.<String>of();
 
-            var stratum = buildStratum(bc, stratifierDef, reportStratum, stratValues, patients, populations, groupDef);
-            return List.of(stratum);
+            buildStratum(bc, stratifierDef, reportStratum, stratValues, patients, populations, groupDef);
+            return List.of();
         }
 
         Map<ValueWrapper, List<String>> subjectsByValue = subjectValues.keySet().stream()
@@ -193,8 +189,7 @@ class R4StratifierBuilder {
             // multiple criteria
             // TODO: build out nonComponent stratum method
             Set<ValueDef> stratValues = Set.of(new ValueDef(stratValue.getKey(), null));
-            var stratum = buildStratum(bc, stratifierDef, reportStratum, stratValues, patients, populations, groupDef);
-            stratumMultiple.add(stratum);
+            buildStratum(bc, stratifierDef, reportStratum, stratValues, patients, populations, groupDef);
         }
 
         return stratumMultiple;
@@ -242,7 +237,7 @@ class R4StratifierBuilder {
                         })));
     }
 
-    private static StratumDef buildStratum(
+    private static void buildStratum(
             BuilderContext bc,
             StratifierDef stratifierDef,
             StratifierGroupComponent stratum,
@@ -288,8 +283,6 @@ class R4StratifierBuilder {
             }
         }
 
-        var stratumDef = new StratumDef(stratum.getValue().getText(), new ArrayList<>());
-
         // add stratum populations for stratifier
         // Group.populations
         // initial-population: subject1, subject 2
@@ -301,17 +294,10 @@ class R4StratifierBuilder {
         // ** subjects with stratifier value: 'F': subject2
         // ** stratum.population
         // ** ** initial-population: subject2
-        var stratumPopulationDefs = new ArrayList<StratumPopulationDef>();
         for (MeasureGroupPopulationComponent mgpc : populations) {
             var stratumPopulation = stratum.addPopulation();
-            var stratumPopulationDef =
-                    buildStratumPopulation(bc, stratifierDef, stratumPopulation, subjectIds, mgpc, groupDef);
-            stratumPopulationDefs.add(stratumPopulationDef);
+            buildStratumPopulation(bc, stratifierDef, stratumPopulation, subjectIds, mgpc, groupDef);
         }
-
-        //        stratumDef.addAllPopulations(stratumPopulationDefs);
-
-        return stratumDef;
     }
 
     // This is weird pattern where we have multiple qualifying values within a single stratum,
@@ -322,7 +308,7 @@ class R4StratifierBuilder {
 
     private record ValueDef(ValueWrapper value, StratifierComponentDef def) {}
 
-    private static StratumPopulationDef buildStratumPopulation(
+    private static void buildStratumPopulation(
             BuilderContext bc,
             StratifierDef stratifierDef,
             StratifierGroupPopulationComponent sgpc,
@@ -360,25 +346,11 @@ class R4StratifierBuilder {
 
         var qualifiedSubjectIdsCommonToPopulation = Sets.intersection(new HashSet<>(subjectIds), popSubjectIds);
 
-        var unqualifiedSubjectIdsCommonToPopulation = qualifiedSubjectIdsCommonToPopulation.stream()
-                .filter(Objects::nonNull)
-                .map(R4StratifierBuilder::processSubjectId)
-                .collect(Collectors.toUnmodifiableSet());
-
-        var stratumPopulationDef =
-                new StratumPopulationDef(populationDef.id(), unqualifiedSubjectIdsCommonToPopulation);
-
         if (groupDef.isBooleanBasis()) {
             buildBooleanBasisStratumPopulation(bc, sgpc, populationDef, qualifiedSubjectIdsCommonToPopulation);
         } else {
             buildResourceBasisStratumPopulation(bc, stratifierDef, sgpc, subjectIds, populationDef, groupDef);
         }
-
-        return stratumPopulationDef;
-    }
-
-    private static String processSubjectId(String rawSubjectId) {
-        return R4ResourceIdUtils.stripAnyResourceQualifier(rawSubjectId);
     }
 
     private static void buildBooleanBasisStratumPopulation(
@@ -523,6 +495,7 @@ class R4StratifierBuilder {
         return null;
     }
 
+    // LUKETODO:  move this to MeasureEvaluator
     @Nonnull
     private static List<CodeableConcept> getCodeForReportStratifier(
             StratifierDef stratifierDef, MeasureGroupStratifierComponent measureStratifier) {

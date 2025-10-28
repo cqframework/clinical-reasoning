@@ -129,13 +129,11 @@ public class ContinuousVariableObservationHandler {
         }
 
         final ExpressionResult expressionResult = optExpressionResult.get();
-        // makes expression results iterable
         final Iterable<?> resultsIter = getResultIterable(evaluationResult, expressionResult, subjectTypePart);
         // make new expression name for uniquely extracting results
         // this will be used in MeasureEvaluator
         var expressionName = criteriaPopulationId + "-" + observationExpression;
 
-        // loop through measure-population results
         final Map<Object, Object> functionResults = new HashMap<>();
         final Set<Object> evaluatedResources = new HashSet<>();
 

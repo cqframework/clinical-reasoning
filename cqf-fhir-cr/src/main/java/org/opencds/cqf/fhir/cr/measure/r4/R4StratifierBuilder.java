@@ -62,7 +62,6 @@ class R4StratifierBuilder {
             StratifierDef stratifierDef,
             List<MeasureGroupPopulationComponent> populations,
             GroupDef groupDef) {
-
         // the top level stratifier 'id' and 'code'
         reportStratifier.setCode(getCodeForReportStratifier(stratifierDef, measureStratifier));
         reportStratifier.setId(measureStratifier.getId());
@@ -73,9 +72,11 @@ class R4StratifierBuilder {
                     new StringType(measureStratifier.getDescription()));
         }
 
+        // LUKETODO:  cleanup everything
+        // LUKETODO:  try to add logic reading the Def results instead of reinventing the algo, if possible
         var stratumDefs = buildMultipleStratum(bc, reportStratifier, stratifierDef, populations, groupDef);
 
-        stratifierDef.addAllStratum(stratumDefs);
+        //        stratifierDef.addAllStratum(stratumDefs);
     }
 
     private static List<StratumDef> buildMultipleStratum(
@@ -308,7 +309,7 @@ class R4StratifierBuilder {
             stratumPopulationDefs.add(stratumPopulationDef);
         }
 
-        stratumDef.addAllPopulations(stratumPopulationDefs);
+        //        stratumDef.addAllPopulations(stratumPopulationDefs);
 
         return stratumDef;
     }

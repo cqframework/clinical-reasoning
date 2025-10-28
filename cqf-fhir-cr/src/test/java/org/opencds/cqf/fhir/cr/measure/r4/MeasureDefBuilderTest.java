@@ -588,7 +588,6 @@ class MeasureDefBuilderTest {
                 new ConceptDef(List.of(new CodeDef("system", "code")), expression),
                 expression,
                 MeasureStratifierType.VALUE,
-                List.of(),
                 IntStream.range(0, componentCount)
                         .mapToObj(num -> buildOutputStratifierComponentDef(expression + num))
                         .toList());

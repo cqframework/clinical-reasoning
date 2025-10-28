@@ -12,16 +12,28 @@ import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.NUMER
 import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.NUMERATOREXCLUSION;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Sets;
+import com.google.common.collect.Table;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
+import org.hl7.fhir.r4.model.CodeableConcept;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
+import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
+import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureReportBuilder.ValueWrapper;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureScoringTypePopulations;
+import org.opencds.cqf.fhir.cr.measure.r4.utils.R4ResourceIdUtils;
 
 /**
  * This class implements the core Measure evaluation logic that's defined in the
@@ -461,8 +473,25 @@ public class MeasureEvaluator {
         }
     }
 
-    protected void addStratifierComponentResult(
+    protected void evaluateStratifiers(
+            String subjectId, List<StratifierDef> stratifierDefs, EvaluationResult evaluationResult) {
+        for (StratifierDef stratifierDef : stratifierDefs) {
+
+            evaluateStratifier(subjectId, evaluationResult, stratifierDef);
+        }
+    }
+
+    private void evaluateStratifier(String subjectId, EvaluationResult evaluationResult, StratifierDef stratifierDef) {
+        if (!stratifierDef.components().isEmpty()) {
+            addStratifierComponentResult(stratifierDef.components(), evaluationResult, subjectId);
+        } else {
+            addStratifierNonComponentResult(subjectId, evaluationResult, stratifierDef);
+        }
+    }
+
+    private void addStratifierComponentResult(
             List<StratifierComponentDef> components, EvaluationResult evaluationResult, String subjectId) {
+
         for (StratifierComponentDef component : components) {
             var expressionResult = evaluationResult.forExpression(component.expression());
             Optional.ofNullable(expressionResult.value())
@@ -471,22 +500,252 @@ public class MeasureEvaluator {
         }
     }
 
-    protected void evaluateStratifiers(
-            String subjectId, List<StratifierDef> stratifierDefs, EvaluationResult evaluationResult) {
-        for (StratifierDef stratifierDef : stratifierDefs) {
+    private void addStratifierNonComponentResult(
+            String subjectId, EvaluationResult evaluationResult, StratifierDef stratifierDef) {
 
-            if (!stratifierDef.components().isEmpty()) {
-                addStratifierComponentResult(stratifierDef.components(), evaluationResult, subjectId);
-            } else {
+        var expressionResult = evaluationResult.forExpression(stratifierDef.expression());
+        Optional.ofNullable(expressionResult)
+                .map(ExpressionResult::value)
+                .ifPresent(nonNullValue -> stratifierDef.putResult(
+                        subjectId, // context of CQL expression ex: Patient based
+                        nonNullValue,
+                        expressionResult.evaluatedResources()));
+    }
 
-                var expressionResult = evaluationResult.forExpression(stratifierDef.expression());
-                Optional.ofNullable(expressionResult)
-                        .map(ExpressionResult::value)
-                        .ifPresent(nonNullValue -> stratifierDef.putResult(
-                                subjectId, // context of CQL expression ex: Patient based
-                                nonNullValue,
-                                expressionResult.evaluatedResources()));
+    // LUKETODO: consider moving this elsewhere?
+    public void postEvaluation(MeasureDef measureDef) {
+
+        for (GroupDef groupDef : measureDef.groups()) {
+            for (StratifierDef stratifierDef : groupDef.stratifiers()) {
+                final List<StratumDef> stratumDefs;
+                if (!stratifierDef.components().isEmpty()) {
+
+                    final Table<String, ValueWrapper, StratifierComponentDef> subjectResultTable =
+                            HashBasedTable.create();
+
+                    // Component Stratifier
+                    // one or more criteria expression defined, one set of criteria results per component specified
+                    // results of component stratifier are an intersection of membership to both component result sets
+
+                    stratifierDef
+                            .components()
+                            .forEach(component -> component.getResults().forEach((subject, result) -> {
+                                ValueWrapper valueWrapper = new ValueWrapper(result.rawValue());
+                                subjectResultTable.put(
+                                        R4ResourceIdUtils.addPatientQualifier(subject), valueWrapper, component);
+                            }));
+
+                    // Stratifiers should be of the same basis as population
+                    // Split subjects by result values
+                    // ex. all Male Patients and all Female Patients
+                    stratumDefs = componentStratumPlural(stratifierDef, groupDef.populations(), subjectResultTable);
+
+                } else {
+                    // standard Stratifier
+                    // one criteria expression defined, one set of criteria results
+
+                    // standard Stratifier
+                    // one criteria expression defined, one set of criteria results
+                    final Map<String, CriteriaResult> subjectValues = stratifierDef.getResults();
+
+                    stratumDefs = nonComponentStratumPlural(stratifierDef, groupDef.populations(), subjectValues);
+                }
+
+                stratifierDef.addAllStratum(stratumDefs);
             }
         }
+    }
+
+    private StratumDef buildStratumDef(
+            StratifierDef stratifierDef,
+            Set<ValueDef> values,
+            List<String> subjectIds,
+            List<PopulationDef> populationDefs) {
+
+        boolean isComponent = values.size() > 1;
+        String stratumText = null;
+
+        for (ValueDef valuePair : values) {
+            ValueWrapper value = valuePair.value;
+            var componentDef = valuePair.def;
+            // Set Stratum value to indicate which value is displaying results
+            // ex. for Gender stratifier, code 'Male'
+            if (value.getValueClass().equals(CodeableConcept.class)) {
+                if (isComponent) {
+                    // component stratifier example: code: "gender", value: 'M'
+                    // value being stratified: 'M'
+                    stratumText = componentDef.code().text();
+                } else {
+                    // non-component stratifiers only set stratified value, code is set on stratifier object
+                    // value being stratified: 'M'
+                    if (value.getValue() instanceof CodeableConcept codeableConcept) {
+                        stratumText = codeableConcept.getText();
+                    }
+                }
+            } else if (isComponent) {
+                stratumText = expressionResultToCodableConcept(value).getText();
+            } else if (MeasureStratifierType.VALUE == stratifierDef.getStratifierType()) {
+                // non-component stratifiers only set stratified value, code is set on stratifier object
+                // value being stratified: 'M'
+                stratumText = expressionResultToCodableConcept(value).getText();
+            }
+        }
+
+        final StratumDef stratumDef = new StratumDef(
+                stratumText,
+                populationDefs.stream()
+                        .map(popDef -> buildStratumPopulationDef(popDef, subjectIds))
+                        .toList());
+        return stratumDef;
+    }
+
+    private static StratumPopulationDef buildStratumPopulationDef(
+            PopulationDef populationDef, List<String> subjectIds) {
+
+        var popSubjectIds = populationDef.getSubjects().stream()
+                .map(R4ResourceIdUtils::addPatientQualifier)
+                .collect(Collectors.toUnmodifiableSet());
+
+        var qualifiedSubjectIdsCommonToPopulation = Sets.intersection(new HashSet<>(subjectIds), popSubjectIds);
+
+        var unqualifiedSubjectIdsCommonToPopulation = qualifiedSubjectIdsCommonToPopulation.stream()
+                .filter(Objects::nonNull)
+                .map(MeasureEvaluator::processSubjectId)
+                .collect(Collectors.toUnmodifiableSet());
+
+        final StratumPopulationDef stratumPopulationDef =
+                new StratumPopulationDef(populationDef.id(), unqualifiedSubjectIdsCommonToPopulation);
+        return stratumPopulationDef;
+    }
+
+    private static String processSubjectId(String rawSubjectId) {
+        return R4ResourceIdUtils.stripAnyResourceQualifier(rawSubjectId);
+    }
+
+    private List<StratumDef> componentStratumPlural(
+            StratifierDef stratifierDef,
+            List<PopulationDef> populationDefs,
+            Table<String, ValueWrapper, StratifierComponentDef> subjectResultTable) {
+
+        var componentSubjects = groupSubjectsByValueDefSet(subjectResultTable);
+
+        var stratumDefs = new ArrayList<StratumDef>();
+
+        componentSubjects.forEach((valueSet, subjects) -> {
+            // converts table into component value combinations
+            // | Stratum   | Set<ValueDef>           | List<Subjects(String)> |
+            // | --------- | ----------------------- | ---------------------- |
+            // | Stratum-1 | <'M','White>            | [subject-a]            |
+            // | Stratum-2 | <'F','hispanic/latino'> | [subject-b]            |
+            // | Stratum-3 | <'M','hispanic/latino'> | [subject-c]            |
+            // | Stratum-4 | <'F','black'>           | [subject-d, subject-e] |
+
+            var stratumDef = buildStratumDef(stratifierDef, valueSet, subjects, populationDefs);
+
+            stratumDefs.add(stratumDef);
+        });
+
+        return stratumDefs;
+    }
+
+    private List<StratumDef> nonComponentStratumPlural(
+            StratifierDef stratifierDef,
+            List<PopulationDef> populationDefs,
+            Map<String, CriteriaResult> subjectValues) {
+        // nonComponent stratifiers will have a single expression that can generate results, instead of grouping
+        // combinations of results
+        // example: 'gender' expression could produce values of 'M', 'F'
+        // subject1: 'gender'--> 'M'
+        // subject2: 'gender'--> 'F'
+        // stratifier criteria results are: 'M', 'F'
+
+        if (MeasureStratifierType.CRITERIA == stratifierDef.getStratifierType()) {
+            // Seems to be irrelevant for criteria based stratifiers
+            var stratValues = Set.<ValueDef>of();
+            // Seems to be irrelevant for criteria based stratifiers
+            var patients = List.<String>of();
+
+            var stratum = buildStratumDef(stratifierDef, stratValues, patients, populationDefs);
+            return List.of(stratum);
+        }
+
+        Map<ValueWrapper, List<String>> subjectsByValue = subjectValues.keySet().stream()
+                .collect(Collectors.groupingBy(
+                        x -> new ValueWrapper(subjectValues.get(x).rawValue())));
+
+        var stratumMultiple = new ArrayList<StratumDef>();
+
+        // Stratum 1
+        // Value: 'M'--> subjects: subject1
+        // Stratum 2
+        // Value: 'F'--> subjects: subject2
+        // loop through each value key
+        for (Map.Entry<ValueWrapper, List<String>> stratValue : subjectsByValue.entrySet()) {
+            // patch Patient values with prefix of ResourceType to match with incoming population subjects for stratum
+            // TODO: should match context of CQL, not only Patient
+            var patientsSubjects = stratValue.getValue().stream()
+                    .map(R4ResourceIdUtils::addPatientQualifier)
+                    .toList();
+            // build the stratum for each unique value
+            // non-component stratifiers will populate a 'null' for componentStratifierDef, since it doesn't have
+            // multiple criteria
+            // TODO: build out nonComponent stratum method
+            Set<ValueDef> stratValues = Set.of(new ValueDef(stratValue.getKey(), null));
+            var stratum = buildStratumDef(stratifierDef, stratValues, patientsSubjects, populationDefs);
+            stratumMultiple.add(stratum);
+        }
+
+        return stratumMultiple;
+    }
+
+    // LUKETODO:
+    private record ValueDef(ValueWrapper value, StratifierComponentDef def) {}
+
+    private static Map<Set<ValueDef>, List<String>> groupSubjectsByValueDefSet(
+            Table<String, ValueWrapper, StratifierComponentDef> table) {
+        // input format
+        // | Subject (String) | CriteriaResult (ValueWrapper) | StratifierComponentDef |
+        // | ---------------- | ----------------------------- | ---------------------- |
+        // | subject-a        | M                             | gender                 |
+        // | subject-b        | F                             | gender                 |
+        // | subject-c        | M                             | gender                 |
+        // | subject-d        | F                             | gender                 |
+        // | subject-e        | F                             | gender                 |
+        // | subject-a        | white                         | race                   |
+        // | subject-b        | hispanic/latino               | race                   |
+        // | subject-c        | hispanic/latino               | race                   |
+        // | subject-d        | black                         | race                   |
+        // | subject-e        | black                         | race                   |
+
+        // Step 1: Build Map<Subject, Set<ValueDef>>
+        final Map<String, Set<ValueDef>> subjectToValueDefs = new HashMap<>();
+
+        for (Table.Cell<String, ValueWrapper, StratifierComponentDef> cell : table.cellSet()) {
+            subjectToValueDefs
+                    .computeIfAbsent(cell.getRowKey(), k -> new HashSet<>())
+                    .add(new ValueDef(cell.getColumnKey(), cell.getValue()));
+        }
+        // output format:
+        // | Set<ValueDef>           | List<Subjects(String)> |
+        // | ----------------------- | ---------------------- |
+        // | <'M','White>            | [subject-a]            |
+        // | <'F','hispanic/latino'> | [subject-b]            |
+        // | <'M','hispanic/latino'> | [subject-c]            |
+        // | <'F','black'>           | [subject-d, subject-e] |
+
+        // Step 2: Invert to Map<Set<ValueDef>, List<Subject>>
+        return subjectToValueDefs.entrySet().stream()
+                .collect(Collectors.groupingBy(
+                        Map.Entry::getValue,
+                        Collector.of(ArrayList::new, (list, e) -> list.add(e.getKey()), (l1, l2) -> {
+                            l1.addAll(l2);
+                            return l1;
+                        })));
+    }
+
+    // This is weird pattern where we have multiple qualifying values within a single stratum,
+    // which was previously unsupported.  So for now, comma-delim the first five values.
+    private static CodeableConcept expressionResultToCodableConcept(ValueWrapper value) {
+        return new CodeableConcept().setText(value.getValueAsString());
     }
 }

@@ -15,7 +15,7 @@ public class StratumDef {
 
     public StratumDef(String text, List<StratumPopulationDef> stratumPopulations) {
         this.text = text;
-        this.stratumPopulations = stratumPopulations;
+        this.stratumPopulations = List.copyOf(stratumPopulations);
     }
 
     public String getText() {
@@ -24,9 +24,5 @@ public class StratumDef {
 
     public List<StratumPopulationDef> getStratumPopulations() {
         return stratumPopulations;
-    }
-
-    public void addAllPopulations(List<StratumPopulationDef> stratumPopulationDefs) {
-        stratumPopulations.addAll(stratumPopulationDefs);
     }
 }

@@ -751,7 +751,8 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
     // This is some hackery because most of these objects don't implement
     // hashCode or equals, meaning it's hard to detect distinct values;
-    protected static class ValueWrapper {
+    // LUKETODO:  where does this belong?
+    public static class ValueWrapper {
         protected Object value;
 
         public ValueWrapper(Object value) {

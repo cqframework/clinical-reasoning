@@ -15,7 +15,7 @@ public class StratumPopulationDef {
 
     public StratumPopulationDef(String id, Set<String> subjects) {
         this.id = id;
-        this.subjects = subjects;
+        this.subjects = Set.copyOf(subjects);
     }
 
     public String getId() {

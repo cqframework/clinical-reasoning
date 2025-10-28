@@ -69,6 +69,8 @@ public class MeasureEvaluationResultHandler {
                 logger.error(error, e);
             }
         }
+
+        evaluator.postEvaluation(measureDef);
     }
 
     /**

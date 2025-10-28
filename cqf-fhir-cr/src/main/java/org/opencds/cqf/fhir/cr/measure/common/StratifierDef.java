@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
 import jakarta.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -19,13 +20,13 @@ public class StratifierDef {
     private final MeasureStratifierType stratifierType;
 
     private final List<StratifierComponentDef> components;
-    private final List<StratumDef> stratum;
+    private final List<StratumDef> stratum = new ArrayList<>();
 
     @Nullable
     private Map<String, CriteriaResult> results;
 
     public StratifierDef(String id, ConceptDef code, String expression, MeasureStratifierType stratifierType) {
-        this(id, code, expression, stratifierType, Collections.emptyList(), Collections.emptyList());
+        this(id, code, expression, stratifierType, Collections.emptyList());
     }
 
     public StratifierDef(
@@ -33,13 +34,11 @@ public class StratifierDef {
             ConceptDef code,
             String expression,
             MeasureStratifierType stratifierType,
-            List<StratumDef> stratum,
             List<StratifierComponentDef> components) {
         this.id = id;
         this.code = code;
         this.expression = expression;
         this.stratifierType = stratifierType;
-        this.stratum = stratum;
         this.components = components;
     }
 

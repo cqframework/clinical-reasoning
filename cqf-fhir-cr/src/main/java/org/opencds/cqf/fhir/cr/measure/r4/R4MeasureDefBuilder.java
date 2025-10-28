@@ -270,7 +270,6 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                 conceptToConceptDef(mgsc.getCode()),
                 mgsc.getCriteria().getExpression(),
                 getStratifierType(mgsc),
-                new ArrayList<>(),
                 components);
     }
 

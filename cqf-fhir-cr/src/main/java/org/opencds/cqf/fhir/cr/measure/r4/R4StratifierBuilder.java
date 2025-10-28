@@ -37,7 +37,6 @@ import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierComponentDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
-import org.opencds.cqf.fhir.cr.measure.common.StratumDef;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureReportBuilder.BuilderContext;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureReportBuilder.ValueWrapper;
@@ -67,7 +66,6 @@ class R4StratifierBuilder {
                     new StringType(measureStratifier.getDescription()));
         }
 
-        // LUKETODO:  cleanup everything
         // LUKETODO:  try to add logic reading the Def results instead of reinventing the algo, if possible
         buildMultipleStratum(bc, reportStratifier, stratifierDef, populations, groupDef);
     }
@@ -107,7 +105,7 @@ class R4StratifierBuilder {
         }
     }
 
-    private static List<StratumDef> componentStratifier(
+    private static void componentStratifier(
             BuilderContext bc,
             StratifierDef stratifierDef,
             MeasureReportGroupStratifierComponent reportStratifier,
@@ -116,8 +114,6 @@ class R4StratifierBuilder {
             Table<String, ValueWrapper, StratifierComponentDef> subjectCompValues) {
 
         var componentSubjects = groupSubjectsByValueDefSet(subjectCompValues);
-
-        var stratumDefs = new ArrayList<StratumDef>();
 
         componentSubjects.forEach((valueSet, subjects) -> {
             // converts table into component value combinations
@@ -132,11 +128,9 @@ class R4StratifierBuilder {
 
             buildStratum(bc, stratifierDef, reportStratum, valueSet, subjects, populations, groupDef);
         });
-
-        return stratumDefs;
     }
 
-    private static List<StratumDef> nonComponentStratifier(
+    private static void nonComponentStratifier(
             BuilderContext bc,
             StratifierDef stratifierDef,
             MeasureReportGroupStratifierComponent reportStratifier,
@@ -158,14 +152,12 @@ class R4StratifierBuilder {
             var patients = List.<String>of();
 
             buildStratum(bc, stratifierDef, reportStratum, stratValues, patients, populations, groupDef);
-            return List.of();
+            return; // short-circuit so we don't process non-criteria logic
         }
 
         Map<ValueWrapper, List<String>> subjectsByValue = subjectValues.keySet().stream()
                 .collect(Collectors.groupingBy(
                         x -> new ValueWrapper(subjectValues.get(x).rawValue())));
-
-        var stratumMultiple = new ArrayList<StratumDef>();
 
         // Stratum 1
         // Value: 'M'--> subjects: subject1
@@ -186,8 +178,6 @@ class R4StratifierBuilder {
             Set<ValueDef> stratValues = Set.of(new ValueDef(stratValue.getKey(), null));
             buildStratum(bc, stratifierDef, reportStratum, stratValues, patients, populations, groupDef);
         }
-
-        return List.of();
     }
 
     private static Map<Set<ValueDef>, List<String>> groupSubjectsByValueDefSet(

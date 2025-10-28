@@ -520,6 +520,8 @@ public class MeasureEvaluator {
                 final List<StratumDef> stratumDefs;
                 if (!stratifierDef.components().isEmpty()) {
 
+                    // LUKETODO:  try adding this to the stratifierdef?
+                    // LUKETODO:  try putting this all in the component method
                     final Table<String, ValueWrapper, StratifierComponentDef> subjectResultTable =
                             HashBasedTable.create();
 
@@ -546,6 +548,7 @@ public class MeasureEvaluator {
 
                     // standard Stratifier
                     // one criteria expression defined, one set of criteria results
+                    // LUKETODO: grab this from the stratifierdef in the non component method
                     final Map<String, CriteriaResult> subjectValues = stratifierDef.getResults();
 
                     stratumDefs = nonComponentStratumPlural(stratifierDef, groupDef.populations(), subjectValues);

@@ -9,6 +9,5 @@ import org.hl7.fhir.instance.model.api.ICompositeType;
 @SuppressWarnings("squid:S1135")
 public interface ContinuousVariableObservationConverter<T extends ICompositeType> {
 
-    // TODO:  LD:  We need to come up with something other than an Observation to wrap FHIR Quantities
-    T wrapResultAsQuantity(String id, Object result);
+    T wrapResultAsQuantity(Object result);
 }

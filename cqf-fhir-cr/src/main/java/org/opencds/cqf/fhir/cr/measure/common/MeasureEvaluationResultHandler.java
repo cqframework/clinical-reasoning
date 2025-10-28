@@ -31,7 +31,7 @@ public class MeasureEvaluationResultHandler {
     }
 
     /**
-     * Method that processes CQL Results into Measure defined fields that reference associated CQL expressions
+     * Method that consumes pre-generated CQL results into Measure defined fields that reference associated CQL expressions
      * This is meant to be called by CQL CLI.
      *
      * @param results criteria expression results

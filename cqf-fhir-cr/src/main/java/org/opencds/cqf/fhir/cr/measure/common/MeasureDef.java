@@ -32,6 +32,7 @@ public class MeasureDef {
         this.errors = new ArrayList<>();
     }
 
+    // LUKETODO:  handle FHIR IDs that are qualified and history versioned/etc
     public String id() {
         return this.id;
     }

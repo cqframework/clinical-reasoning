@@ -3,11 +3,11 @@ package org.opencds.cqf.fhir.cr.hapi.r4;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -224,8 +224,8 @@ class LibraryOperationsProviderIT extends BaseCrR4TestServer {
         List<Parameters> nestedChanges = returnedParams.getParameter().stream()
                 .filter(p -> !p.getName().equals("operation"))
                 .map(p -> (Parameters) p.getResource())
-                .filter(p -> p != null)
-                .collect(Collectors.toList());
+                .filter(Objects::nonNull)
+                .toList();
         assertEquals(6, nestedChanges.size());
         Parameters grouperChanges = returnedParams.getParameter().stream()
                 .filter(p -> p.getName().contains("/dxtc"))
@@ -252,8 +252,8 @@ class LibraryOperationsProviderIT extends BaseCrR4TestServer {
                 .get();
         // insert the new leaf; adding a node takes multiple operations if
         // the thing being added isn't a defined complex FHIR type
-        assertTrue(path1.equals("ValueSet.compose.include"));
-        assertTrue(path2.equals("ValueSet.compose.include[1].valueSet"));
+        assertEquals("ValueSet.compose.include", path1);
+        assertEquals("ValueSet.compose.include[1].valueSet", path2);
     }
 
     @Test
@@ -275,8 +275,8 @@ class LibraryOperationsProviderIT extends BaseCrR4TestServer {
         List<Parameters> nestedChanges = returnedParams.getParameter().stream()
                 .filter(p -> !p.getName().equals("operation"))
                 .map(p -> (Parameters) p.getResource())
-                .filter(p -> p != null)
-                .collect(Collectors.toList());
+                .filter(Objects::nonNull)
+                .toList();
         assertEquals(6, nestedChanges.size());
         Parameters grouperChanges = returnedParams.getParameter().stream()
                 .filter(p -> p.getName().contains("/dxtc"))

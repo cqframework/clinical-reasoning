@@ -12,7 +12,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collector;
@@ -39,13 +38,10 @@ import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierComponentDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumDef;
-import org.opencds.cqf.fhir.cr.measure.common.StratumPopulationDef;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureReportBuilder.BuilderContext;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureReportBuilder.ValueWrapper;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4ResourceIdUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Convenience class with functionality split out from {@link R4MeasureReportBuilder} to
@@ -53,7 +49,6 @@ import org.slf4j.LoggerFactory;
  */
 @SuppressWarnings("squid:S1135")
 class R4StratifierBuilder {
-    private static final Logger logger = LoggerFactory.getLogger(R4StratifierBuilder.class);
 
     static void buildStratifier(
             BuilderContext bc,
@@ -77,7 +72,7 @@ class R4StratifierBuilder {
         buildMultipleStratum(bc, reportStratifier, stratifierDef, populations, groupDef);
     }
 
-    private static List<StratumDef> buildMultipleStratum(
+    private static void buildMultipleStratum(
             BuilderContext bc,
             MeasureReportGroupStratifierComponent reportStratifier,
             StratifierDef stratifierDef,
@@ -102,13 +97,13 @@ class R4StratifierBuilder {
             // Stratifiers should be of the same basis as population
             // Split subjects by result values
             // ex. all Male Patients and all Female Patients
-            return componentStratifier(bc, stratifierDef, reportStratifier, populations, groupDef, subjectResultTable);
+            componentStratifier(bc, stratifierDef, reportStratifier, populations, groupDef, subjectResultTable);
 
         } else {
             // standard Stratifier
             // one criteria expression defined, one set of criteria results
             Map<String, CriteriaResult> subjectValues = stratifierDef.getResults();
-            return nonComponentStratifier(bc, stratifierDef, reportStratifier, populations, groupDef, subjectValues);
+            nonComponentStratifier(bc, stratifierDef, reportStratifier, populations, groupDef, subjectValues);
         }
     }
 
@@ -192,7 +187,7 @@ class R4StratifierBuilder {
             buildStratum(bc, stratifierDef, reportStratum, stratValues, patients, populations, groupDef);
         }
 
-        return stratumMultiple;
+        return List.of();
     }
 
     private static Map<Set<ValueDef>, List<String>> groupSubjectsByValueDefSet(

@@ -41,9 +41,6 @@ public class LibraryArtifactDiffProvider {
         IIdType sourceId = getIdType(FhirVersionEnum.R4, "Library", source);
         IIdType targetId = getIdType(FhirVersionEnum.R4, "Library", target);
 
-        // var params = getArtifactDiffParameters(compareComputable.getValue(), compareExecutable.getValue(),
-        // terminologyEndpoint);
-
         return libraryProcessorFactory
                 .create(requestDetails)
                 .artifactDiff(
@@ -53,22 +50,4 @@ public class LibraryArtifactDiffProvider {
                         compareExecutable.getValue(),
                         terminologyEndpoint);
     }
-
-    /*    private static Parameters getArtifactDiffParameters(
-        Boolean compareComputable,
-        Boolean compareExecutable,
-        Endpoint terminologyEndpoint) {
-        var params = new Parameters();
-        if (compareComputable != null) {
-            params.addParameter("compareComputable", compareComputable);
-        }
-        if (compareExecutable != null) {
-            params.addParameter("compareExecutable", compareExecutable);
-        }
-        if (terminologyEndpoint != null) {
-            params.addParameter().setName("terminologyEndpoint").setResource(terminologyEndpoint);
-        }
-        return params;
-    }*/
-
 }

@@ -37,9 +37,10 @@ import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierComponentDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
+import org.opencds.cqf.fhir.cr.measure.common.StratumValueDef;
+import org.opencds.cqf.fhir.cr.measure.common.StratumValueWrapper;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureReportBuilder.BuilderContext;
-import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureReportBuilder.ValueWrapper;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4ResourceIdUtils;
 
 /**
@@ -79,7 +80,7 @@ class R4StratifierBuilder {
 
         if (!stratifierDef.components().isEmpty()) {
 
-            Table<String, ValueWrapper, StratifierComponentDef> subjectResultTable = HashBasedTable.create();
+            Table<String, StratumValueWrapper, StratifierComponentDef> subjectResultTable = HashBasedTable.create();
 
             // Component Stratifier
             // one or more criteria expression defined, one set of criteria results per component specified
@@ -88,8 +89,9 @@ class R4StratifierBuilder {
             stratifierDef
                     .components()
                     .forEach(component -> component.getResults().forEach((subject, result) -> {
-                        ValueWrapper valueWrapper = new ValueWrapper(result.rawValue());
-                        subjectResultTable.put(R4ResourceIdUtils.addPatientQualifier(subject), valueWrapper, component);
+                        StratumValueWrapper stratumValueWrapper = new StratumValueWrapper(result.rawValue());
+                        subjectResultTable.put(
+                                R4ResourceIdUtils.addPatientQualifier(subject), stratumValueWrapper, component);
                     }));
 
             // Stratifiers should be of the same basis as population
@@ -111,7 +113,7 @@ class R4StratifierBuilder {
             MeasureReportGroupStratifierComponent reportStratifier,
             List<MeasureGroupPopulationComponent> populations,
             GroupDef groupDef,
-            Table<String, ValueWrapper, StratifierComponentDef> subjectCompValues) {
+            Table<String, StratumValueWrapper, StratifierComponentDef> subjectCompValues) {
 
         var componentSubjects = groupSubjectsByValueDefSet(subjectCompValues);
 
@@ -147,7 +149,7 @@ class R4StratifierBuilder {
         if (MeasureStratifierType.CRITERIA == stratifierDef.getStratifierType()) {
             var reportStratum = reportStratifier.addStratum();
             // Seems to be irrelevant for criteria based stratifiers
-            var stratValues = Set.<ValueDef>of();
+            var stratValues = Set.<StratumValueDef>of();
             // Seems to be irrelevant for criteria based stratifiers
             var patients = List.<String>of();
 
@@ -155,16 +157,16 @@ class R4StratifierBuilder {
             return; // short-circuit so we don't process non-criteria logic
         }
 
-        Map<ValueWrapper, List<String>> subjectsByValue = subjectValues.keySet().stream()
+        Map<StratumValueWrapper, List<String>> subjectsByValue = subjectValues.keySet().stream()
                 .collect(Collectors.groupingBy(
-                        x -> new ValueWrapper(subjectValues.get(x).rawValue())));
+                        x -> new StratumValueWrapper(subjectValues.get(x).rawValue())));
 
         // Stratum 1
         // Value: 'M'--> subjects: subject1
         // Stratum 2
         // Value: 'F'--> subjects: subject2
         // loop through each value key
-        for (Map.Entry<ValueWrapper, List<String>> stratValue : subjectsByValue.entrySet()) {
+        for (Map.Entry<StratumValueWrapper, List<String>> stratValue : subjectsByValue.entrySet()) {
             var reportStratum = reportStratifier.addStratum();
             // patch Patient values with prefix of ResourceType to match with incoming population subjects for stratum
             // TODO: should match context of CQL, not only Patient
@@ -175,13 +177,13 @@ class R4StratifierBuilder {
             // non-component stratifiers will populate a 'null' for componentStratifierDef, since it doesn't have
             // multiple criteria
             // TODO: build out nonComponent stratum method
-            Set<ValueDef> stratValues = Set.of(new ValueDef(stratValue.getKey(), null));
+            Set<StratumValueDef> stratValues = Set.of(new StratumValueDef(stratValue.getKey(), null));
             buildStratum(bc, stratifierDef, reportStratum, stratValues, patients, populations, groupDef);
         }
     }
 
-    private static Map<Set<ValueDef>, List<String>> groupSubjectsByValueDefSet(
-            Table<String, ValueWrapper, StratifierComponentDef> table) {
+    private static Map<Set<StratumValueDef>, List<String>> groupSubjectsByValueDefSet(
+            Table<String, StratumValueWrapper, StratifierComponentDef> table) {
         // input format
         // | Subject (String) | CriteriaResult (ValueWrapper) | StratifierComponentDef |
         // | ---------------- | ----------------------------- | ---------------------- |
@@ -197,12 +199,12 @@ class R4StratifierBuilder {
         // | subject-e        | black                         | race                   |
 
         // Step 1: Build Map<Subject, Set<ValueDef>>
-        Map<String, Set<ValueDef>> subjectToValueDefs = new HashMap<>();
+        Map<String, Set<StratumValueDef>> subjectToValueDefs = new HashMap<>();
 
-        for (Table.Cell<String, ValueWrapper, StratifierComponentDef> cell : table.cellSet()) {
+        for (Table.Cell<String, StratumValueWrapper, StratifierComponentDef> cell : table.cellSet()) {
             subjectToValueDefs
                     .computeIfAbsent(cell.getRowKey(), k -> new HashSet<>())
-                    .add(new ValueDef(cell.getColumnKey(), cell.getValue()));
+                    .add(new StratumValueDef(cell.getColumnKey(), cell.getValue()));
         }
         // output format:
         // | Set<ValueDef>           | List<Subjects(String)> |
@@ -226,14 +228,14 @@ class R4StratifierBuilder {
             BuilderContext bc,
             StratifierDef stratifierDef,
             StratifierGroupComponent stratum,
-            Set<ValueDef> values,
+            Set<StratumValueDef> values,
             List<String> subjectIds,
             List<MeasureGroupPopulationComponent> populations,
             GroupDef groupDef) {
         boolean isComponent = values.size() > 1;
-        for (ValueDef valuePair : values) {
-            ValueWrapper value = valuePair.value;
-            var componentDef = valuePair.def;
+        for (StratumValueDef valuePair : values) {
+            StratumValueWrapper value = valuePair.value();
+            var componentDef = valuePair.def();
             // Set Stratum value to indicate which value is displaying results
             // ex. for Gender stratifier, code 'Male'
             if (value.getValueClass().equals(CodeableConcept.class)) {
@@ -287,11 +289,9 @@ class R4StratifierBuilder {
 
     // This is weird pattern where we have multiple qualifying values within a single stratum,
     // which was previously unsupported.  So for now, comma-delim the first five values.
-    private static CodeableConcept expressionResultToCodableConcept(ValueWrapper value) {
+    private static CodeableConcept expressionResultToCodableConcept(StratumValueWrapper value) {
         return new CodeableConcept().setText(value.getValueAsString());
     }
-
-    private record ValueDef(ValueWrapper value, StratifierComponentDef def) {}
 
     private static void buildStratumPopulation(
             BuilderContext bc,

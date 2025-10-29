@@ -518,40 +518,11 @@ public class MeasureEvaluator {
         for (GroupDef groupDef : measureDef.groups()) {
             for (StratifierDef stratifierDef : groupDef.stratifiers()) {
                 final List<StratumDef> stratumDefs;
+
                 if (!stratifierDef.components().isEmpty()) {
-
-                    // LUKETODO:  try adding this to the stratifierdef?
-                    // LUKETODO:  try putting this all in the component method
-                    final Table<String, ValueWrapper, StratifierComponentDef> subjectResultTable =
-                            HashBasedTable.create();
-
-                    // Component Stratifier
-                    // one or more criteria expression defined, one set of criteria results per component specified
-                    // results of component stratifier are an intersection of membership to both component result sets
-
-                    stratifierDef
-                            .components()
-                            .forEach(component -> component.getResults().forEach((subject, result) -> {
-                                ValueWrapper valueWrapper = new ValueWrapper(result.rawValue());
-                                subjectResultTable.put(
-                                        R4ResourceIdUtils.addPatientQualifier(subject), valueWrapper, component);
-                            }));
-
-                    // Stratifiers should be of the same basis as population
-                    // Split subjects by result values
-                    // ex. all Male Patients and all Female Patients
-                    stratumDefs = componentStratumPlural(stratifierDef, groupDef.populations(), subjectResultTable);
-
+                    stratumDefs = componentStratumPlural(stratifierDef, groupDef.populations());
                 } else {
-                    // standard Stratifier
-                    // one criteria expression defined, one set of criteria results
-
-                    // standard Stratifier
-                    // one criteria expression defined, one set of criteria results
-                    // LUKETODO: grab this from the stratifierdef in the non component method
-                    final Map<String, CriteriaResult> subjectValues = stratifierDef.getResults();
-
-                    stratumDefs = nonComponentStratumPlural(stratifierDef, groupDef.populations(), subjectValues);
+                    stratumDefs = nonComponentStratumPlural(stratifierDef, groupDef.populations());
                 }
 
                 stratifierDef.addAllStratum(stratumDefs);
@@ -612,20 +583,36 @@ public class MeasureEvaluator {
 
         var unqualifiedSubjectIdsCommonToPopulation = qualifiedSubjectIdsCommonToPopulation.stream()
                 .filter(Objects::nonNull)
-                .map(MeasureEvaluator::processSubjectId)
+                .map(R4ResourceIdUtils::stripAnyResourceQualifier)
                 .collect(Collectors.toUnmodifiableSet());
 
         return new StratumPopulationDef(populationDef.id(), unqualifiedSubjectIdsCommonToPopulation);
     }
 
-    private static String processSubjectId(String rawSubjectId) {
-        return R4ResourceIdUtils.stripAnyResourceQualifier(rawSubjectId);
-    }
-
     private List<StratumDef> componentStratumPlural(
             StratifierDef stratifierDef,
-            List<PopulationDef> populationDefs,
-            Table<String, ValueWrapper, StratifierComponentDef> subjectResultTable) {
+            List<PopulationDef> populationDefs) {
+
+        // LUKETODO:  try adding this to the stratifierdef?
+        // LUKETODO:  try putting this all in the component method
+        final Table<String, ValueWrapper, StratifierComponentDef> subjectResultTable =
+            HashBasedTable.create();
+
+        // Component Stratifier
+        // one or more criteria expression defined, one set of criteria results per component specified
+        // results of component stratifier are an intersection of membership to both component result sets
+
+        stratifierDef
+            .components()
+            .forEach(component -> component.getResults().forEach((subject, result) -> {
+                ValueWrapper valueWrapper = new ValueWrapper(result.rawValue());
+                subjectResultTable.put(
+                    R4ResourceIdUtils.addPatientQualifier(subject), valueWrapper, component);
+            }));
+
+        // Stratifiers should be of the same basis as population
+        // Split subjects by result values
+        // ex. all Male Patients and all Female Patients
 
         var componentSubjects = groupSubjectsByValueDefSet(subjectResultTable);
 
@@ -650,8 +637,15 @@ public class MeasureEvaluator {
 
     private List<StratumDef> nonComponentStratumPlural(
             StratifierDef stratifierDef,
-            List<PopulationDef> populationDefs,
-            Map<String, CriteriaResult> subjectValues) {
+            List<PopulationDef> populationDefs) {
+        // standard Stratifier
+        // one criteria expression defined, one set of criteria results
+
+        // standard Stratifier
+        // one criteria expression defined, one set of criteria results
+        // LUKETODO: grab this from the stratifierdef in the non component method
+        final Map<String, CriteriaResult> subjectValues = stratifierDef.getResults();
+
         // nonComponent stratifiers will have a single expression that can generate results, instead of grouping
         // combinations of results
         // example: 'gender' expression could produce values of 'M', 'F'

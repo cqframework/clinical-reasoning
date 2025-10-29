@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import org.opencds.cqf.fhir.cr.hapi.common.IImplementationGuideProcessorFactory;
 import org.opencds.cqf.fhir.cr.hapi.common.ILibraryProcessorFactory;
+import org.opencds.cqf.fhir.cr.hapi.config.CrProcessorConfig;
 import org.opencds.cqf.fhir.cr.hapi.config.ProviderLoader;
 import org.opencds.cqf.fhir.cr.hapi.config.ProviderSelector;
 import org.opencds.cqf.fhir.cr.hapi.r4.implementationguide.ImplementationGuideReleaseProvider;
@@ -14,8 +15,10 @@ import org.opencds.cqf.fhir.cr.hapi.r4.library.LibraryReleaseProvider;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
 @Configuration
+@Import(CrProcessorConfig.class)
 public class ReleaseOperationConfig {
     @Bean
     ImplementationGuideReleaseProvider r4ImplementationGuideReleaseProvider(

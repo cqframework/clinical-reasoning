@@ -16,10 +16,11 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
-import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
+import org.opencds.cqf.fhir.cr.CrSettings;
 import org.opencds.cqf.fhir.cr.common.DataRequirementsProcessor;
 import org.opencds.cqf.fhir.cr.common.IDataRequirementsProcessor;
+import org.opencds.cqf.fhir.cr.common.IOperationProcessor;
 import org.opencds.cqf.fhir.cr.common.IPackageProcessor;
 import org.opencds.cqf.fhir.cr.common.PackageProcessor;
 import org.opencds.cqf.fhir.cr.common.ResourceResolver;
@@ -40,7 +41,7 @@ public class QuestionnaireProcessor {
     protected final ResourceResolver questionnaireResolver;
     protected final ResourceResolver structureDefResolver;
     protected final ModelResolver modelResolver;
-    protected final EvaluationSettings evaluationSettings;
+    protected final CrSettings crSettings;
     protected final FhirVersionEnum fhirVersion;
     protected IRepository repository;
     protected IGenerateProcessor generateProcessor;
@@ -49,34 +50,41 @@ public class QuestionnaireProcessor {
     protected IPopulateProcessor populateProcessor;
 
     public QuestionnaireProcessor(IRepository repository) {
-        this(repository, EvaluationSettings.getDefault());
+        this(repository, CrSettings.getDefault());
     }
 
-    public QuestionnaireProcessor(IRepository repository, EvaluationSettings evaluationSettings) {
-        this(repository, evaluationSettings, null, null, null, null);
+    public QuestionnaireProcessor(IRepository repository, CrSettings crSettings) {
+        this(repository, crSettings, null);
     }
 
     public QuestionnaireProcessor(
-            IRepository repository,
-            EvaluationSettings evaluationSettings,
-            IGenerateProcessor generateProcessor,
-            IPackageProcessor packageProcessor,
-            IDataRequirementsProcessor dataRequirementsProcessor,
-            IPopulateProcessor populateProcessor) {
+            IRepository repository, CrSettings crSettings, List<? extends IOperationProcessor> operationProcessors) {
         this.repository = requireNonNull(repository, "repository can not be null");
-        this.evaluationSettings = requireNonNull(evaluationSettings, "evaluationSettings can not be null");
+        this.crSettings = requireNonNull(crSettings, "evaluationSettings can not be null");
         this.questionnaireResolver = new ResourceResolver("Questionnaire", this.repository);
         this.structureDefResolver = new ResourceResolver("StructureDefinition", this.repository);
         fhirVersion = this.repository.fhirContext().getVersion().getVersion();
         modelResolver = FhirModelResolverCache.resolverForVersion(fhirVersion);
-        this.generateProcessor = generateProcessor;
-        this.packageProcessor = packageProcessor;
-        this.dataRequirementsProcessor = dataRequirementsProcessor;
-        this.populateProcessor = populateProcessor;
+        if (operationProcessors != null && !operationProcessors.isEmpty()) {
+            operationProcessors.forEach(p -> {
+                if (p instanceof IPackageProcessor pack) {
+                    packageProcessor = pack;
+                }
+                if (p instanceof IDataRequirementsProcessor dataReq) {
+                    dataRequirementsProcessor = dataReq;
+                }
+                if (p instanceof IGenerateProcessor generate) {
+                    generateProcessor = generate;
+                }
+                if (p instanceof IPopulateProcessor populate) {
+                    populateProcessor = populate;
+                }
+            });
+        }
     }
 
-    public EvaluationSettings getEvaluationSettings() {
-        return evaluationSettings;
+    public CrSettings getSettings() {
+        return crSettings;
     }
 
     public ModelResolver getModelResolver() {
@@ -149,7 +157,9 @@ public class QuestionnaireProcessor {
                 resolveStructureDefinition(profile),
                 supportedOnly,
                 requiredOnly,
-                libraryEngine != null ? libraryEngine : new LibraryEngine(repository, evaluationSettings),
+                libraryEngine != null
+                        ? libraryEngine
+                        : new LibraryEngine(repository, crSettings.getEvaluationSettings()),
                 modelResolver);
         return generateQuestionnaire(request, id);
     }
@@ -175,7 +185,7 @@ public class QuestionnaireProcessor {
     }
 
     public IBaseBundle packageQuestionnaire(IBaseResource questionnaire, IBaseParameters parameters) {
-        var processor = packageProcessor != null ? packageProcessor : new PackageProcessor(repository);
+        var processor = packageProcessor != null ? packageProcessor : new PackageProcessor(repository, crSettings);
         return processor.packageResource(questionnaire, parameters);
     }
 
@@ -204,7 +214,9 @@ public class QuestionnaireProcessor {
                 context,
                 launchContext,
                 data,
-                libraryEngine != null ? libraryEngine : new LibraryEngine(repository, evaluationSettings),
+                libraryEngine != null
+                        ? libraryEngine
+                        : new LibraryEngine(repository, crSettings.getEvaluationSettings()),
                 modelResolver);
     }
 
@@ -247,7 +259,7 @@ public class QuestionnaireProcessor {
                 context,
                 launchContext,
                 data,
-                new LibraryEngine(repository, this.evaluationSettings));
+                new LibraryEngine(repository, crSettings.getEvaluationSettings()));
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource populate(

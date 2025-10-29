@@ -16,12 +16,13 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
-import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
+import org.opencds.cqf.fhir.cr.CrSettings;
 import org.opencds.cqf.fhir.cr.common.DataRequirementsProcessor;
 import org.opencds.cqf.fhir.cr.common.DeleteProcessor;
 import org.opencds.cqf.fhir.cr.common.IDataRequirementsProcessor;
 import org.opencds.cqf.fhir.cr.common.IDeleteProcessor;
+import org.opencds.cqf.fhir.cr.common.IOperationProcessor;
 import org.opencds.cqf.fhir.cr.common.IPackageProcessor;
 import org.opencds.cqf.fhir.cr.common.IReleaseProcessor;
 import org.opencds.cqf.fhir.cr.common.IRetireProcessor;
@@ -33,10 +34,10 @@ import org.opencds.cqf.fhir.cr.library.evaluate.EvaluateProcessor;
 import org.opencds.cqf.fhir.cr.library.evaluate.EvaluateRequest;
 import org.opencds.cqf.fhir.cr.library.evaluate.IEvaluateProcessor;
 import org.opencds.cqf.fhir.utility.Ids;
-import org.opencds.cqf.fhir.utility.client.TerminologyServerClientSettings;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.monad.Either3;
 
+@SuppressWarnings("UnstableApiUsage")
 public class LibraryProcessor {
     protected final ModelResolver modelResolver;
     protected final FhirVersionEnum fhirVersion;
@@ -47,46 +48,45 @@ public class LibraryProcessor {
     protected IDeleteProcessor deleteProcessor;
     protected IRetireProcessor retireProcessor;
     protected IRepository repository;
-    protected EvaluationSettings evaluationSettings;
-    protected TerminologyServerClientSettings terminologyServerClientSettings;
+    protected CrSettings crSettings;
 
     public LibraryProcessor(IRepository repository) {
-        this(repository, EvaluationSettings.getDefault(), TerminologyServerClientSettings.getDefault());
+        this(repository, CrSettings.getDefault());
+    }
+
+    public LibraryProcessor(IRepository repository, CrSettings crSettings) {
+        this(repository, crSettings, null);
     }
 
     public LibraryProcessor(
-            IRepository repository,
-            EvaluationSettings evaluationSettings,
-            TerminologyServerClientSettings terminologyServerClientSettings) {
-        this(repository, evaluationSettings, terminologyServerClientSettings, null, null, null, null, null, null);
-    }
-
-    public LibraryProcessor(
-            IRepository repository,
-            EvaluationSettings evaluationSettings,
-            TerminologyServerClientSettings terminologyServerClientSettings,
-            IPackageProcessor packageProcessor,
-            IReleaseProcessor releaseProcessor,
-            IDataRequirementsProcessor dataRequirementsProcessor,
-            IEvaluateProcessor evaluateProcessor,
-            IDeleteProcessor deleteProcessor,
-            IRetireProcessor retireProcessor) {
+            IRepository repository, CrSettings crSettings, List<? extends IOperationProcessor> operationProcessors) {
         this.repository = requireNonNull(repository, "repository can not be null");
-        this.evaluationSettings = requireNonNull(evaluationSettings, "evaluationSettings can not be null");
-        this.terminologyServerClientSettings =
-                requireNonNull(terminologyServerClientSettings, "terminologyServerClientSettings can not be null");
+        this.crSettings = requireNonNull(crSettings, "crSettings can not be null");
         fhirVersion = this.repository.fhirContext().getVersion().getVersion();
         modelResolver = FhirModelResolverCache.resolverForVersion(fhirVersion);
-        this.packageProcessor = packageProcessor;
-        this.releaseProcessor = releaseProcessor;
-        this.dataRequirementsProcessor = dataRequirementsProcessor;
-        this.evaluateProcessor = evaluateProcessor;
-        this.deleteProcessor = deleteProcessor;
-        this.retireProcessor = retireProcessor;
+        if (operationProcessors != null && !operationProcessors.isEmpty()) {
+            operationProcessors.forEach(p -> {
+                if (p instanceof IPackageProcessor pack) {
+                    packageProcessor = pack;
+                }
+                if (p instanceof IDataRequirementsProcessor dataReq) {
+                    dataRequirementsProcessor = dataReq;
+                }
+                if (p instanceof IEvaluateProcessor evaluate) {
+                    evaluateProcessor = evaluate;
+                }
+                if (p instanceof IDeleteProcessor delete) {
+                    deleteProcessor = delete;
+                }
+                if (p instanceof IRetireProcessor retire) {
+                    retireProcessor = retire;
+                }
+            });
+        }
     }
 
-    public EvaluationSettings evaluationSettings() {
-        return evaluationSettings;
+    public CrSettings settings() {
+        return crSettings;
     }
 
     protected <C extends IPrimitiveType<String>, R extends IBaseResource> R resolveLibrary(
@@ -110,9 +110,7 @@ public class LibraryProcessor {
     }
 
     public IBaseBundle packageLibrary(IBaseResource library, IBaseParameters parameters) {
-        var processor = packageProcessor != null
-                ? packageProcessor
-                : new PackageProcessor(repository, terminologyServerClientSettings);
+        var processor = packageProcessor != null ? packageProcessor : new PackageProcessor(repository, crSettings);
         return processor.packageResource(library, parameters);
     }
 
@@ -134,7 +132,7 @@ public class LibraryProcessor {
     public IBaseBundle releaseLibrary(IBaseResource library, IBaseParameters parameters) {
         var processor = releaseProcessor != null
                 ? releaseProcessor
-                : new ReleaseProcessor(repository, terminologyServerClientSettings);
+                : new ReleaseProcessor(repository, crSettings.getTerminologyServerClientSettings());
         return processor.releaseResource(library, parameters);
     }
 
@@ -146,7 +144,7 @@ public class LibraryProcessor {
     public IBaseResource dataRequirements(IBaseResource library, IBaseParameters parameters) {
         var processor = dataRequirementsProcessor != null
                 ? dataRequirementsProcessor
-                : new DataRequirementsProcessor(repository, evaluationSettings);
+                : new DataRequirementsProcessor(repository, crSettings.getEvaluationSettings());
         return processor.getDataRequirements(library, parameters);
     }
 
@@ -212,7 +210,7 @@ public class LibraryProcessor {
                 parameters,
                 data,
                 prefetchData,
-                new LibraryEngine(repository, this.evaluationSettings));
+                new LibraryEngine(repository, crSettings.getEvaluationSettings()));
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseParameters evaluate(
@@ -225,7 +223,7 @@ public class LibraryProcessor {
             LibraryEngine libraryEngine) {
         var processor = evaluateProcessor != null
                 ? evaluateProcessor
-                : new EvaluateProcessor(this.repository, this.evaluationSettings);
+                : new EvaluateProcessor(repository, crSettings.getEvaluationSettings());
         return processor.evaluate(
                 buildEvaluateRequest(library, subject, expression, parameters, data, prefetchData, libraryEngine));
     }

@@ -13,12 +13,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
-import org.opencds.cqf.fhir.cql.EvaluationSettings;
+import org.opencds.cqf.fhir.cr.CrSettings;
+import org.opencds.cqf.fhir.cr.common.IOperationProcessor;
 import org.opencds.cqf.fhir.cr.questionnaireresponse.extract.IExtractProcessor;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
@@ -51,9 +53,10 @@ public class TestQuestionnaireResponse {
         return new Given();
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     public static class Given {
         private IRepository repository;
-        private IExtractProcessor extractProcessor;
+        private final List<IOperationProcessor> operationProcessors = new ArrayList<>();
 
         public Given repository(IRepository repository) {
             this.repository = repository;
@@ -67,12 +70,12 @@ public class TestQuestionnaireResponse {
         }
 
         public Given extractProcessor(IExtractProcessor extractProcessor) {
-            this.extractProcessor = extractProcessor;
+            operationProcessors.add(extractProcessor);
             return this;
         }
 
         private QuestionnaireResponseProcessor buildProcessor() {
-            return new QuestionnaireResponseProcessor(repository, EvaluationSettings.getDefault(), extractProcessor);
+            return new QuestionnaireResponseProcessor(repository, CrSettings.getDefault(), operationProcessors);
         }
 
         public When when() {

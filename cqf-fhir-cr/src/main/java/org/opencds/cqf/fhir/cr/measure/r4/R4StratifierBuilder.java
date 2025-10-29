@@ -7,11 +7,10 @@ import com.google.common.collect.Sets.SetView;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -32,6 +31,7 @@ import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumDef;
+import org.opencds.cqf.fhir.cr.measure.common.StratumPopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumValueDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumValueWrapper;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
@@ -42,7 +42,7 @@ import org.opencds.cqf.fhir.cr.measure.r4.utils.R4ResourceIdUtils;
  * Convenience class with functionality split out from {@link R4MeasureReportBuilder} to
  * handle stratifiers
  */
-@SuppressWarnings("squid:S1135")
+@SuppressWarnings({"squid:S1135", "squid:S107"})
 class R4StratifierBuilder {
 
     private R4StratifierBuilder() {
@@ -120,6 +120,7 @@ class R4StratifierBuilder {
         // stratifier criteria results are: 'M', 'F'
         if (MeasureStratifierType.CRITERIA == stratifierDef.getStratifierType()) {
             var reportStratum = reportStratifier.addStratum();
+            // Ideally, the stratum def should have these values empty in MeasureEvaluator
             // Seems to be irrelevant for criteria based stratifiers
             var stratValues = Set.<StratumValueDef>of();
             // Seems to be irrelevant for criteria based stratifiers
@@ -226,9 +227,17 @@ class R4StratifierBuilder {
         // ** subjects with stratifier value: 'F': subject2
         // ** stratum.population
         // ** ** initial-population: subject2
-        for (MeasureGroupPopulationComponent mgpc : populations) {
+        for (StratumPopulationDef stratumPopulationDef : stratumDef.getStratumPopulations()) {
+            // This is nasty, and ideally, we ought to be driving this logic entirely off StratumPopulationDef
+            final Optional<MeasureGroupPopulationComponent> optMgpc = populations.stream()
+                    .filter(population -> population.getId().equals(stratumPopulationDef.getId()))
+                    .findFirst();
+            if (optMgpc.isEmpty()) {
+                throw new InternalErrorException("could not find MeasureGroupPopulationComponent");
+            }
             var stratumPopulation = stratum.addPopulation();
-            buildStratumPopulation(bc, stratifierDef, stratumDef, stratumPopulation, subjectIds, mgpc, groupDef);
+            buildStratumPopulation(
+                    bc, stratifierDef, stratumPopulationDef, stratumPopulation, subjectIds, optMgpc.get(), groupDef);
         }
     }
 
@@ -255,7 +264,7 @@ class R4StratifierBuilder {
     private static void buildStratumPopulation(
             BuilderContext bc,
             StratifierDef stratifierDef,
-            StratumDef stratumDef,
+            StratumPopulationDef stratumPopulationDef,
             StratifierGroupPopulationComponent sgpc,
             List<String> subjectIds,
             MeasureGroupPopulationComponent population,
@@ -285,14 +294,10 @@ class R4StratifierBuilder {
                             population.getCode().getCodingFirstRep().getCode()));
         }
 
-        var popSubjectIds = populationDef.getSubjects().stream()
-                .map(R4ResourceIdUtils::addPatientQualifier)
-                .collect(Collectors.toUnmodifiableSet());
-
-        var qualifiedSubjectIdsCommonToPopulation = Sets.intersection(new HashSet<>(subjectIds), popSubjectIds);
+        final Set<String> subjectsQualifiedOrUnqualified = stratumPopulationDef.getSubjectsQualifiedOrUnqualified();
 
         if (groupDef.isBooleanBasis()) {
-            buildBooleanBasisStratumPopulation(bc, sgpc, populationDef, qualifiedSubjectIdsCommonToPopulation);
+            buildBooleanBasisStratumPopulation(bc, sgpc, populationDef, subjectsQualifiedOrUnqualified);
         } else {
             buildResourceBasisStratumPopulation(bc, stratifierDef, sgpc, subjectIds, populationDef, groupDef);
         }
@@ -302,7 +307,7 @@ class R4StratifierBuilder {
             BuilderContext bc,
             StratifierGroupPopulationComponent sgpc,
             PopulationDef populationDef,
-            SetView<String> subjectIdsCommonToPopulation) {
+            Set<String> subjectIdsCommonToPopulation) {
 
         var popSubjectIds = populationDef.getSubjects().stream()
                 .map(R4ResourceIdUtils::addPatientQualifier)

@@ -595,7 +595,7 @@ public class MeasureEvaluator {
     private List<StratumDef> componentStratumPlural(StratifierDef stratifierDef, List<PopulationDef> populationDefs) {
 
         final Table<String, StratumValueWrapper, StratifierComponentDef> subjectResultTable =
-                buildSubjectResultsTable(stratifierDef);
+                buildSubjectResultsTable(stratifierDef.components());
 
         // Stratifiers should be of the same basis as population
         // Split subjects by result values
@@ -620,23 +620,6 @@ public class MeasureEvaluator {
         });
 
         return stratumDefs;
-    }
-
-    private Table<String, StratumValueWrapper, StratifierComponentDef> buildSubjectResultsTable(
-            StratifierDef stratifierDef) {
-
-        final Table<String, StratumValueWrapper, StratifierComponentDef> subjectResultTable = HashBasedTable.create();
-
-        // Component Stratifier
-        // one or more criteria expression defined, one set of criteria results per component specified
-        // results of component stratifier are an intersection of membership to both component result sets
-
-        stratifierDef.components().forEach(component -> component.getResults().forEach((subject, result) -> {
-            StratumValueWrapper stratumValueWrapper = new StratumValueWrapper(result.rawValue());
-            subjectResultTable.put(R4ResourceIdUtils.addPatientQualifier(subject), stratumValueWrapper, component);
-        }));
-
-        return subjectResultTable;
     }
 
     private List<StratumDef> nonComponentStratumPlural(
@@ -692,6 +675,23 @@ public class MeasureEvaluator {
         }
 
         return stratumMultiple;
+    }
+
+    private Table<String, StratumValueWrapper, StratifierComponentDef> buildSubjectResultsTable(
+            List<StratifierComponentDef> componentDefs) {
+
+        final Table<String, StratumValueWrapper, StratifierComponentDef> subjectResultTable = HashBasedTable.create();
+
+        // Component Stratifier
+        // one or more criteria expression defined, one set of criteria results per component specified
+        // results of component stratifier are an intersection of membership to both component result sets
+
+        componentDefs.forEach(componentDef -> componentDef.getResults().forEach((subject, result) -> {
+            StratumValueWrapper stratumValueWrapper = new StratumValueWrapper(result.rawValue());
+            subjectResultTable.put(R4ResourceIdUtils.addPatientQualifier(subject), stratumValueWrapper, componentDef);
+        }));
+
+        return subjectResultTable;
     }
 
     private static Map<Set<StratumValueDef>, List<String>> groupSubjectsByValueDefSet(

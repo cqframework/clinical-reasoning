@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import java.util.StringJoiner;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -50,6 +51,13 @@ public class StratumValueWrapper {
         }
 
         return this.getKey().equals(other.getKey());
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", StratumValueWrapper.class.getSimpleName() + "[", "]")
+                .add("value=" + value)
+                .toString();
     }
 
     public String getKey() {

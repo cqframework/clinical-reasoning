@@ -34,30 +34,29 @@ public class MeasureEvaluationResultHandler {
      * Method that consumes pre-generated CQL results into Measure defined fields that reference associated CQL expressions
      * This is meant to be called by CQL CLI.
      *
-     * @param results criteria expression results
+     * @param evalResultsPerSubject criteria expression evalResultsPerSubject
      * @param measureDef Measure defined objects
      * @param measureEvalType the type of evaluation algorithm to apply to Criteria results
      * @param applyScoring whether Measure Evaluator will apply set membership per measure scoring algorithm
      * @param populationBasisValidator the validator class to use for checking consistency of results
      */
     public static void processResults(
-            Map<String, EvaluationResult> results,
+            Map<String, EvaluationResult> evalResultsPerSubject,
             MeasureDef measureDef,
             @Nonnull MeasureEvalType measureEvalType,
             boolean applyScoring,
             PopulationBasisValidator populationBasisValidator) {
         MeasureEvaluator evaluator = new MeasureEvaluator(populationBasisValidator);
         // Populate MeasureDef using MeasureEvaluator
-        for (Map.Entry<String, EvaluationResult> entry : results.entrySet()) {
+        for (Map.Entry<String, EvaluationResult> entry : evalResultsPerSubject.entrySet()) {
             // subject
             String subjectId = entry.getKey();
             var sub = getSubjectTypeAndId(subjectId);
             var subjectIdPart = sub.getRight();
             var subjectTypePart = sub.getLeft();
-            // cql results
             EvaluationResult evalResult = entry.getValue();
             try {
-                // populate results into MeasureDef
+                // populate CQL results into MeasureDef
                 evaluator.evaluate(
                         measureDef, measureEvalType, subjectTypePart, subjectIdPart, evalResult, applyScoring);
             } catch (Exception e) {

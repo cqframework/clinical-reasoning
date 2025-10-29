@@ -105,7 +105,7 @@ public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
             groups.add(groupDef);
         }
 
-        return new MeasureDef(measure.getId(), measure.getUrl(), measure.getVersion(), groups, sdes);
+        return new MeasureDef(measure.getIdElement(), measure.getUrl(), measure.getVersion(), groups, sdes);
     }
 
     private static MeasureStratifierType getStratifierType(

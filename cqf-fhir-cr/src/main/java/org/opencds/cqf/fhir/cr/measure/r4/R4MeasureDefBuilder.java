@@ -72,7 +72,9 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
             groups.add(groupDef);
         }
 
-        return new MeasureDef(measure.getId(), measure.getUrl(), measure.getVersion(), groups, getSdeDefs(measure));
+        return new MeasureDef(
+                // We don't need either the version of the "Measure" qualifier here
+                measure.getIdElement(), measure.getUrl(), measure.getVersion(), groups, getSdeDefs(measure));
     }
 
     private GroupDef buildGroupDef(

@@ -1,7 +1,7 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -20,6 +20,7 @@ public class StratifierDef {
     private final MeasureStratifierType stratifierType;
 
     private final List<StratifierComponentDef> components;
+    private final List<StratumDef> stratum = new ArrayList<>();
 
     @Nullable
     private Map<String, CriteriaResult> results;
@@ -51,6 +52,14 @@ public class StratifierDef {
 
     public String id() {
         return this.id;
+    }
+
+    public List<StratumDef> getStratum() {
+        return stratum;
+    }
+
+    public void addAllStratum(List<StratumDef> stratumDefs) {
+        stratum.addAll(stratumDefs);
     }
 
     public List<StratifierComponentDef> components() {
@@ -92,30 +101,5 @@ public class StratifierDef {
         } else {
             return Set.of(value);
         }
-    }
-
-    @Nullable
-    public Class<?> getResultType() {
-        if (this.results == null || this.results.isEmpty()) {
-            return null;
-        }
-
-        var resultClasses = results.values().stream()
-                .map(CriteriaResult::rawValue)
-                .map(StratifierUtils::extractClassesFromSingleOrListResult)
-                .flatMap(Collection::stream)
-                .collect(Collectors.toUnmodifiableSet());
-
-        if (resultClasses.size() == 1) {
-            return resultClasses.iterator().next();
-        }
-
-        if (resultClasses.isEmpty()) {
-            return null;
-        }
-
-        throw new InvalidRequestException(
-                "There should be only one result type for this StratifierDef but there was: %s"
-                        .formatted(resultClasses));
     }
 }

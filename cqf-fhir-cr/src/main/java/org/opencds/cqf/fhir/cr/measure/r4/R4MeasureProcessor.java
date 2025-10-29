@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.cqframework.cql.cql2elm.CqlIncludeException;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.hl7.elm.r1.VersionedIdentifier;
@@ -35,7 +34,9 @@ import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cql.VersionedIdentifiers;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.CompositeEvaluationResultsPerMeasure;
+import org.opencds.cqf.fhir.cr.measure.common.LibraryInitHandler;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationResultHandler;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorUtils;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
 import org.opencds.cqf.fhir.cr.measure.common.MultiLibraryIdMeasureEngineDetails;
@@ -114,7 +115,7 @@ public class R4MeasureProcessor {
         var measureDef = new R4MeasureDefBuilder().build(measure);
 
         // Process Criteria Expression Results
-        measureProcessorUtils.processResults(
+        MeasureEvaluationResultHandler.processResults(
                 results,
                 measureDef,
                 evaluationType,
@@ -159,7 +160,7 @@ public class R4MeasureProcessor {
         final Map<String, EvaluationResult> resultForThisMeasure =
                 compositeEvaluationResultsPerMeasure.processMeasureForSuccessOrFailure(measureDef);
 
-        measureProcessorUtils.processResults(
+        MeasureEvaluationResultHandler.processResults(
                 resultForThisMeasure,
                 measureDef,
                 evaluationType,
@@ -273,7 +274,7 @@ public class R4MeasureProcessor {
                 measurementPeriodParams);
 
         // populate results from Library $evaluate
-        return measureProcessorUtils.getEvaluationResults(
+        return MeasureEvaluationResultHandler.getEvaluationResults(
                 subjects,
                 zonedMeasurementPeriod,
                 context,
@@ -300,30 +301,27 @@ public class R4MeasureProcessor {
             CqlEngine context,
             Interval measurementPeriodParams) {
 
-        var compiledLibraries = getCompiledLibraries(libraryVersionedIdentifiers, context);
+        var compiledLibraries = LibraryInitHandler.initLibraries(context, libraryVersionedIdentifiers);
 
-        var libraries =
-                compiledLibraries.stream().map(CompiledLibrary::getLibrary).toList();
+        try {
+            // if we comment this out MeasureScorerTest and other tests will fail with NPEs
+            setArgParameters(parameters, context, compiledLibraries);
 
-        // We need the libraries on the stack for setMeasurementPeriod(),
-        // specifically for .getMeasurementPeriodParameterDef()
-        context.getState().init(libraries);
-
-        // if we comment this out MeasureScorerTest and other tests will fail with NPEs
-        setArgParameters(parameters, context, compiledLibraries);
-
-        // set measurement Period from CQL if operation parameters are empty
-        measureProcessorUtils.setMeasurementPeriod(
-                measurementPeriodParams,
-                context,
-                measures.stream()
-                        .map(Measure::getUrl)
-                        .map(url -> Optional.ofNullable(url).orElse("Unknown Measure URL"))
-                        .toList());
-
-        // Now pop the libraries off the stack, because we'll be adding them back during
-        // CQL library evaluation
-        popAllLibrariesFromCqlEngine(context, libraries);
+            // set measurement Period from CQL if operation parameters are empty
+            measureProcessorUtils.setMeasurementPeriod(
+                    measurementPeriodParams,
+                    context,
+                    measures.stream()
+                            .map(Measure::getUrl)
+                            .map(url -> Optional.ofNullable(url).orElse("Unknown Measure URL"))
+                            .toList());
+        } finally {
+            // Now pop the libraries off the stack, because we'll be adding them back during
+            // CQL library evaluation
+            // If no libraries were initialized, the List of compiledLibraries will be empty
+            // and this will no-op
+            LibraryInitHandler.popLibraries(context, compiledLibraries);
+        }
     }
 
     private MultiLibraryIdMeasureEngineDetails getMultiLibraryIdMeasureEngineDetails(List<Measure> measures) {
@@ -412,50 +410,6 @@ public class R4MeasureProcessor {
         setArgParameters(parameters, context, lib);
 
         return new LibraryEngine(repository, this.measureEvaluationOptions.getEvaluationSettings());
-    }
-
-    private List<CompiledLibrary> getCompiledLibraries(List<VersionedIdentifier> ids, CqlEngine context) {
-        try {
-            var resolvedLibraryResults =
-                    context.getEnvironment().getLibraryManager().resolveLibraries(ids);
-
-            var allErrors = resolvedLibraryResults.allErrors();
-            if (resolvedLibraryResults.hasErrors() || ids.size() > allErrors.size()) {
-                return resolvedLibraryResults.allCompiledLibraries();
-            }
-
-            if (ids.size() == 1) {
-                final List<CqlCompilerException> cqlCompilerExceptions =
-                        resolvedLibraryResults.getErrorsFor(ids.get(0));
-
-                if (cqlCompilerExceptions.size() == 1) {
-                    throw new IllegalStateException(
-                            "Unable to load CQL/ELM for library: %s. Verify that the Library resource is available in your environment and has CQL/ELM content embedded."
-                                    .formatted(ids.get(0).getId()),
-                            cqlCompilerExceptions.get(0));
-                } else {
-                    throw new IllegalStateException(
-                            "Unable to load CQL/ELM for library: %s. Verify that the Library resource is available in your environment and has CQL/ELM content embedded. Errors: %s"
-                                    .formatted(
-                                            ids.get(0).getId(),
-                                            cqlCompilerExceptions.stream()
-                                                    .map(CqlCompilerException::getMessage)
-                                                    .reduce((s1, s2) -> s1 + "; " + s2)
-                                                    .orElse("No error messages found.")));
-                }
-            }
-
-            throw new IllegalStateException(
-                    "Unable to load CQL/ELM for libraries: %s Verify that the Library resource is available in your environment and has CQL/ELM content embedded. Errors: %s"
-                            .formatted(ids, allErrors));
-
-        } catch (CqlIncludeException exception) {
-            throw new IllegalStateException(
-                    "Unable to load CQL/ELM for libraries: %s. Verify that the Library resource is available in your environment and has CQL/ELM content embedded."
-                            .formatted(
-                                    ids.stream().map(VersionedIdentifier::getId).toList()),
-                    exception);
-        }
     }
 
     protected void checkMeasureLibrary(Measure measure) {
@@ -548,9 +502,5 @@ public class R4MeasureProcessor {
             measurementPeriod = helper.buildMeasurementPeriodInterval(periodStart, periodEnd);
         }
         return measurementPeriod;
-    }
-
-    private void popAllLibrariesFromCqlEngine(CqlEngine context, List<org.hl7.elm.r1.Library> libraries) {
-        libraries.forEach(lib -> context.getState().exitLibrary(true));
     }
 }

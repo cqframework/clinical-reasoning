@@ -17,14 +17,18 @@ public class LibraryInitHandler {
     }
 
     public static boolean initLibrary(CqlEngine context, VersionedIdentifier libraryIdentifiers) {
-        return initLibraries(context, List.of(libraryIdentifiers));
+        return !initLibraries(context, List.of(libraryIdentifiers)).isEmpty();
+    }
+
+    public static void popLibraries(CqlEngine context, List<CompiledLibrary> compiledLibraries) {
+        compiledLibraries.forEach(library -> popLibrary(context));
     }
 
     public static void popLibrary(CqlEngine context) {
         context.getState().exitLibrary(true);
     }
 
-    private static boolean initLibraries(CqlEngine context, List<VersionedIdentifier> libraryIdentifiers) {
+    public static List<CompiledLibrary> initLibraries(CqlEngine context, List<VersionedIdentifier> libraryIdentifiers) {
         var compiledLibraries = getCompiledLibraries(libraryIdentifiers, context);
 
         var libraries =
@@ -33,7 +37,7 @@ public class LibraryInitHandler {
         // Add back the libraries to the stack, since we popped them off during CQL
         context.getState().init(libraries);
 
-        return !libraries.isEmpty();
+        return compiledLibraries;
     }
 
     private static List<CompiledLibrary> getCompiledLibraries(List<VersionedIdentifier> ids, CqlEngine context) {

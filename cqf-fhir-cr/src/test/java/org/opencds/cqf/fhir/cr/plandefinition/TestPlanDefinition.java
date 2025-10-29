@@ -42,13 +42,14 @@ import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
+import org.opencds.cqf.fhir.cr.CrSettings;
 import org.opencds.cqf.fhir.cr.TestOperationProvider;
+import org.opencds.cqf.fhir.cr.common.IOperationProcessor;
 import org.opencds.cqf.fhir.cr.helpers.DataRequirementsLibrary;
 import org.opencds.cqf.fhir.cr.helpers.GeneratedPackage;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
-import org.opencds.cqf.fhir.utility.client.TerminologyServerClientSettings;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
@@ -80,9 +81,11 @@ public class TestPlanDefinition {
         return new Given();
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     public static class Given {
         private IRepository repository;
         private EvaluationSettings evaluationSettings;
+        private final List<IOperationProcessor> operationProcessors = new ArrayList<>();
 
         public Given repository(IRepository repository) {
             this.repository = repository;
@@ -115,8 +118,8 @@ public class TestPlanDefinition {
                         .getTerminologySettings()
                         .setValuesetExpansionMode(VALUESET_EXPANSION_MODE.PERFORM_NAIVE_EXPANSION);
             }
-            return new PlanDefinitionProcessor(
-                    repository, evaluationSettings, TerminologyServerClientSettings.getDefault());
+            var crSettings = CrSettings.getDefault().withEvaluationSettings(evaluationSettings);
+            return new PlanDefinitionProcessor(repository, crSettings, null, operationProcessors);
         }
 
         public When when() {
@@ -124,6 +127,7 @@ public class TestPlanDefinition {
         }
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     public static class When {
         private final IRepository repository;
         private final PlanDefinitionProcessor processor;
@@ -317,6 +321,7 @@ public class TestPlanDefinition {
         }
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     public static class GeneratedBundle {
         final IRepository repository;
         final IBaseBundle generatedBundle;
@@ -456,6 +461,7 @@ public class TestPlanDefinition {
         }
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     public static class GeneratedCarePlan {
         final IRepository repository;
         final IBaseResource generatedCarePlan;

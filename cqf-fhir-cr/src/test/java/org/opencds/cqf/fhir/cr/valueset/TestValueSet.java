@@ -5,6 +5,8 @@ import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.repository.IRepository;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -13,11 +15,12 @@ import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
+import org.opencds.cqf.fhir.cr.CrSettings;
 import org.opencds.cqf.fhir.cr.common.IDataRequirementsProcessor;
+import org.opencds.cqf.fhir.cr.common.IOperationProcessor;
 import org.opencds.cqf.fhir.cr.common.IPackageProcessor;
 import org.opencds.cqf.fhir.cr.helpers.DataRequirementsLibrary;
 import org.opencds.cqf.fhir.cr.helpers.GeneratedPackage;
-import org.opencds.cqf.fhir.utility.client.TerminologyServerClientSettings;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
@@ -28,11 +31,11 @@ public class TestValueSet {
         return new Given();
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     public static class Given {
         private IRepository repository;
         private EvaluationSettings evaluationSettings;
-        private IPackageProcessor packageProcessor;
-        private IDataRequirementsProcessor dataRequirementsProcessor;
+        private final List<IOperationProcessor> operationProcessors = new ArrayList<>();
 
         public Given repository(IRepository repository) {
             this.repository = repository;
@@ -51,12 +54,12 @@ public class TestValueSet {
         }
 
         public Given packageProcessor(IPackageProcessor packageProcessor) {
-            this.packageProcessor = packageProcessor;
+            operationProcessors.add(packageProcessor);
             return this;
         }
 
         public Given dataRequirementsProcessor(IDataRequirementsProcessor dataRequirementsProcessor) {
-            this.dataRequirementsProcessor = dataRequirementsProcessor;
+            operationProcessors.add(dataRequirementsProcessor);
             return this;
         }
 
@@ -72,12 +75,8 @@ public class TestValueSet {
                         .getTerminologySettings()
                         .setValuesetExpansionMode(VALUESET_EXPANSION_MODE.PERFORM_NAIVE_EXPANSION);
             }
-            return new ValueSetProcessor(
-                    repository,
-                    evaluationSettings,
-                    TerminologyServerClientSettings.getDefault(),
-                    packageProcessor,
-                    dataRequirementsProcessor);
+            var crSettings = CrSettings.getDefault().withEvaluationSettings(evaluationSettings);
+            return new ValueSetProcessor(repository, crSettings, operationProcessors);
         }
 
         public When when() {
@@ -85,6 +84,7 @@ public class TestValueSet {
         }
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     public static class When {
         private final IRepository repository;
         private final ValueSetProcessor processor;

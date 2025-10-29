@@ -6,15 +6,17 @@ import static org.opencds.cqf.fhir.utility.PackageHelper.packageParameters;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.repository.IRepository;
+import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
-import org.opencds.cqf.fhir.cql.EvaluationSettings;
+import org.opencds.cqf.fhir.cr.CrSettings;
 import org.opencds.cqf.fhir.cr.common.DataRequirementsProcessor;
 import org.opencds.cqf.fhir.cr.common.IDataRequirementsProcessor;
+import org.opencds.cqf.fhir.cr.common.IOperationProcessor;
 import org.opencds.cqf.fhir.cr.common.IPackageProcessor;
 import org.opencds.cqf.fhir.cr.common.PackageProcessor;
 import org.opencds.cqf.fhir.cr.common.ResourceResolver;
@@ -33,42 +35,40 @@ public class GraphDefinitionProcessor {
     protected IPackageProcessor packageProcessor;
     protected IDataRequirementsProcessor dataRequirementsProcessor;
     protected IRepository repository;
-    protected EvaluationSettings evaluationSettings;
+    protected CrSettings crSettings;
     protected TerminologyServerClientSettings terminologyServerClientSettings;
 
     public GraphDefinitionProcessor(IRepository repository) {
-        this(repository, EvaluationSettings.getDefault(), TerminologyServerClientSettings.getDefault());
+        this(repository, CrSettings.getDefault());
+    }
+
+    public GraphDefinitionProcessor(IRepository repository, CrSettings crSettings) {
+        this(repository, crSettings, null);
     }
 
     public GraphDefinitionProcessor(
-            IRepository repository,
-            EvaluationSettings evaluationSettings,
-            TerminologyServerClientSettings terminologyServerClientSettings) {
-        this(repository, evaluationSettings, terminologyServerClientSettings, null, null, null);
-    }
-
-    public GraphDefinitionProcessor(
-            IRepository repository,
-            EvaluationSettings evaluationSettings,
-            TerminologyServerClientSettings terminologyServerClientSettings,
-            IApplyProcessor applyProcessor,
-            IPackageProcessor packageProcessor,
-            IDataRequirementsProcessor dataRequirementsProcessor) {
+            IRepository repository, CrSettings crSettings, List<? extends IOperationProcessor> operationProcessors) {
         this.repository = requireNonNull(repository, "repository can not be null");
-        this.evaluationSettings = requireNonNull(evaluationSettings, "evaluationSettings can not be null");
-        if (packageProcessor == null) {
-            this.terminologyServerClientSettings =
-                    requireNonNull(terminologyServerClientSettings, "terminologyServerClientSettings can not be null");
-        }
+        this.crSettings = requireNonNull(crSettings, "crSettings can not be null");
         fhirVersion = this.repository.fhirContext().getVersion().getVersion();
         modelResolver = FhirModelResolverCache.resolverForVersion(fhirVersion);
-        this.packageProcessor = packageProcessor;
-        this.dataRequirementsProcessor = dataRequirementsProcessor;
-        this.applyProcessor = applyProcessor;
+        if (operationProcessors != null && !operationProcessors.isEmpty()) {
+            operationProcessors.forEach(p -> {
+                if (p instanceof IPackageProcessor pack) {
+                    packageProcessor = pack;
+                }
+                if (p instanceof IDataRequirementsProcessor dataReq) {
+                    dataRequirementsProcessor = dataReq;
+                }
+                if (p instanceof IApplyProcessor apply) {
+                    applyProcessor = apply;
+                }
+            });
+        }
     }
 
-    public EvaluationSettings evaluationSettings() {
-        return evaluationSettings;
+    public CrSettings settings() {
+        return crSettings;
     }
 
     public IApplyProcessor getApplyProcessor() {
@@ -99,9 +99,7 @@ public class GraphDefinitionProcessor {
     }
 
     public IBaseBundle packageGraphDefinition(IBaseResource graphDefinition, IBaseParameters parameters) {
-        var processor = packageProcessor != null
-                ? packageProcessor
-                : new PackageProcessor(repository, terminologyServerClientSettings);
+        var processor = packageProcessor != null ? packageProcessor : new PackageProcessor(repository, crSettings);
         return processor.packageResource(graphDefinition, parameters);
     }
 
@@ -113,7 +111,7 @@ public class GraphDefinitionProcessor {
     public IBaseResource dataRequirements(IBaseResource graphDefinition, IBaseParameters parameters) {
         var processor = dataRequirementsProcessor != null
                 ? dataRequirementsProcessor
-                : new DataRequirementsProcessor(repository, evaluationSettings);
+                : new DataRequirementsProcessor(repository, crSettings.getEvaluationSettings());
         return processor.getDataRequirements(graphDefinition, parameters);
     }
 

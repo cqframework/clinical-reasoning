@@ -4,9 +4,8 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.api.server.IRepositoryFactory;
 import ca.uhn.fhir.rest.server.RestfulServer;
-import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
-import org.opencds.cqf.fhir.cr.hapi.config.CrBaseConfig;
 import org.opencds.cqf.fhir.cr.hapi.config.ProviderLoader;
 import org.opencds.cqf.fhir.cr.hapi.config.ProviderSelector;
 import org.opencds.cqf.fhir.cr.hapi.config.RepositoryConfig;
@@ -19,14 +18,15 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
+@SuppressWarnings("UnstableApiUsage")
 @Configuration
-@Import({RepositoryConfig.class, CrBaseConfig.class})
+@Import(RepositoryConfig.class)
 public class CrDstu3Config {
 
     @Bean
     IMeasureServiceFactory dstu3MeasureServiceFactory(
-            IRepositoryFactory repositoryFactory, MeasureEvaluationOptions pvaluationOptions) {
-        return rd -> new Dstu3MeasureService(repositoryFactory.create(rd), pvaluationOptions);
+            IRepositoryFactory repositoryFactory, MeasureEvaluationOptions evaluationOptions) {
+        return rd -> new Dstu3MeasureService(repositoryFactory.create(rd), evaluationOptions);
     }
 
     @Bean
@@ -39,7 +39,7 @@ public class CrDstu3Config {
             ApplicationContext applicationContext, FhirContext fhirContext, RestfulServer restfulServer) {
 
         var selector = new ProviderSelector(
-                fhirContext, Map.of(FhirVersionEnum.DSTU3, Arrays.asList((MeasureOperationsProvider.class))));
+                fhirContext, Map.of(FhirVersionEnum.DSTU3, List.of((MeasureOperationsProvider.class))));
 
         return new ProviderLoader(restfulServer, applicationContext, selector);
     }

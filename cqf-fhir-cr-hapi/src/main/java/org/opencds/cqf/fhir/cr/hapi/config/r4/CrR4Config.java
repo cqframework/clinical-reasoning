@@ -58,7 +58,12 @@ import org.springframework.context.annotation.Import;
 
 @SuppressWarnings("UnstableApiUsage")
 @Configuration
-@Import({RepositoryConfig.class, ReleaseOperationConfig.class, DeleteOperationConfig.class, RetireOperationConfig.class
+@Import({
+    RepositoryConfig.class,
+    ReleaseOperationConfig.class,
+    DeleteOperationConfig.class,
+    RetireOperationConfig.class,
+    WithdrawOperationConfig.class
 })
 public class CrR4Config {
 

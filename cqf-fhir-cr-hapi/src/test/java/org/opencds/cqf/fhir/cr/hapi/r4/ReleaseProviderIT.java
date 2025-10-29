@@ -41,6 +41,7 @@ public class ReleaseProviderIT extends BaseCrR4TestServer {
     @Test
     void releaseResource_test() {
         loadBundle("ersd-release-bundle.json");
+        readAndLoadResource("artifactAssessment-search-parameter.json");
         var existingVersion = "1.2.3";
         var versionData = "1.2.7";
 
@@ -146,6 +147,7 @@ public class ReleaseProviderIT extends BaseCrR4TestServer {
     @Test
     void releaseResource_force_version() {
         loadBundle("ersd-small-approved-draft-bundle.json");
+        readAndLoadResource("artifactAssessment-search-parameter.json");
         // Existing version should be "1.2.3";
         String newVersionToForce = "1.2.7";
 
@@ -167,6 +169,8 @@ public class ReleaseProviderIT extends BaseCrR4TestServer {
         loadBundle("ersd-small-approved-draft-experimental-bundle.json");
         // SpecificationLibrary2 - root is NOT experimental but HAS experimental children
         loadBundle("ersd-small-approved-draft-non-experimental-with-experimental-comp-bundle.json");
+
+        readAndLoadResource("artifactAssessment-search-parameter.json");
 
         var version = "1.2.3";
         var versionBehavior = "default";

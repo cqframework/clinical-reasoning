@@ -44,6 +44,7 @@ import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
+import org.opencds.cqf.fhir.cr.CrSettings;
 import org.opencds.cqf.fhir.cr.plandefinition.PlanDefinitionProcessor;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
@@ -98,6 +99,7 @@ public class TestPlanDefinition {
         return new Given();
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     public static class Given {
         private IRepository repository;
         private EvaluationSettings evaluationSettings;
@@ -134,7 +136,8 @@ public class TestPlanDefinition {
                         .getTerminologySettings()
                         .setValuesetExpansionMode(VALUESET_EXPANSION_MODE.PERFORM_NAIVE_EXPANSION);
             }
-            return new PlanDefinitionProcessor(repository, evaluationSettings, null);
+            var crSettings = CrSettings.getDefault().withEvaluationSettings(evaluationSettings);
+            return new PlanDefinitionProcessor(repository, crSettings);
         }
 
         public When when() {
@@ -142,6 +145,7 @@ public class TestPlanDefinition {
         }
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     public static class When {
         private final IRepository repository;
         private final PlanDefinitionProcessor processor;
@@ -334,6 +338,7 @@ public class TestPlanDefinition {
         }
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     public static class GeneratedBundle {
         final IRepository repository;
         final IBaseBundle generatedBundleInner;
@@ -465,6 +470,7 @@ public class TestPlanDefinition {
         }
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     public static class GeneratedCarePlan {
         final IRepository repository;
         final IBaseResource generatedCarePlanInner;

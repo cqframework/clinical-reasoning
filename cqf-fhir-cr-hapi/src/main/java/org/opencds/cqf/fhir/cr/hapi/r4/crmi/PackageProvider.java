@@ -99,13 +99,21 @@ public class PackageProvider {
      *                                      the canonicalVersion parameter.
      * @param offset                        Paging support - where to start if a subset is desired
      *                                      (default = 0). Offset is number of records (not number
-     *                                      of pages). If offset > 0 the resulting bundle will be of
-     *                                      type collection.
+     *                                      of pages). It is invalid to request a 'transaction'
+     *                                      bundle, via the bundleType parameter, and use paging.
+     *                                      Doing so will result in an error. When requesting
+     *                                      paging, a bundle of type searchset will be returned.
      * @param count                         Paging support - how many resources should be provided
-     *                                      in a partial page view. If count = 0, the client is
-     *                                      asking how large the package is. If count > 0 but less
-     *                                      than the total number of resources, the result will be a
-     *                                      bundle of type collection.
+     *                                      in a partial page view. It is invalid to request a
+     *                                      'transaction' bundle, via the bundleType parameter, and
+     *                                      use paging. Doing so will result in an error. When
+     *                                      requesting paging, a bundle of type searchset will be
+     *                                      returned.
+     * @param bundleType                    Determines the type of output Bundle. If not specified,
+     *                                      the output bundle will be a transaction bundle. Allowed
+     *                                      values include 'transaction', and 'collection'.
+     *                                      It is invalid to request a 'transaction' bundle and use
+     *                                      paging. Doing so will result in an error.
      * @param include                       Specifies what contents should only be included in the
      *                                      resulting package. The codes indicate which types of
      *                                      resources should be included, but note that the set of
@@ -213,8 +221,9 @@ public class PackageProvider {
             @OperationParam(name = "checkArtifactVersion") List<CanonicalType> checkArtifactVersion,
             @OperationParam(name = "forceArtifactVersion") List<CanonicalType> forceArtifactVersion,
             @OperationParam(name = "manifest") CanonicalType manifest,
-            @OperationParam(name = "offset", typeName = "Integer") IPrimitiveType<Integer> offset,
-            @OperationParam(name = "count", typeName = "Integer") IPrimitiveType<Integer> count,
+            @OperationParam(name = "offset", typeName = "integer") IPrimitiveType<Integer> offset,
+            @OperationParam(name = "count", typeName = "integer") IPrimitiveType<Integer> count,
+            @OperationParam(name = "bundleType") String bundleType,
             // TODO: $package - should include be CodeType?
             @OperationParam(name = "include") List<String> include,
             @OperationParam(name = "packageOnly", typeName = "Boolean") IPrimitiveType<Boolean> packageOnly,
@@ -235,6 +244,7 @@ public class PackageProvider {
                         manifest,
                         offset,
                         count,
+                        bundleType,
                         packageOnly,
                         artifactEndpointConfiguration,
                         terminologyEndpoint);

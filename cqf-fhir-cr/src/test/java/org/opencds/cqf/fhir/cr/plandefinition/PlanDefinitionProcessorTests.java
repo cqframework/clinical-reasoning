@@ -22,14 +22,13 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.junit.jupiter.api.Test;
-import org.opencds.cqf.fhir.cql.EvaluationSettings;
+import org.opencds.cqf.fhir.cr.CrSettings;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.IRequestResolverFactory;
 import org.opencds.cqf.fhir.cr.common.DataRequirementsProcessor;
 import org.opencds.cqf.fhir.cr.common.PackageProcessor;
 import org.opencds.cqf.fhir.cr.plandefinition.apply.ApplyProcessor;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Ids;
-import org.opencds.cqf.fhir.utility.client.TerminologyServerClientSettings;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
@@ -44,7 +43,7 @@ class PlanDefinitionProcessorTests {
         var repository =
                 new IgRepository(fhirContextR4, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r4"));
         var processor = new PlanDefinitionProcessor(repository);
-        assertNotNull(processor.evaluationSettings());
+        assertNotNull(processor.settings());
     }
 
     @Test
@@ -58,14 +57,14 @@ class PlanDefinitionProcessorTests {
         var requestResolverFactory = IRequestResolverFactory.getDefault(FhirVersionEnum.R5);
         var processor = new PlanDefinitionProcessor(
                 repository,
-                EvaluationSettings.getDefault(),
-                TerminologyServerClientSettings.getDefault(),
-                new ApplyProcessor(repository, activityProcessor),
-                packageProcessor,
-                dataRequirementsProcessor,
-                activityProcessor,
-                requestResolverFactory);
-        assertNotNull(processor.evaluationSettings());
+                CrSettings.getDefault(),
+                requestResolverFactory,
+                List.of(
+                        new ApplyProcessor(repository, activityProcessor),
+                        packageProcessor,
+                        dataRequirementsProcessor,
+                        activityProcessor));
+        assertNotNull(processor.settings());
         var result = processor.apply(
                 Eithers.forMiddle3(Ids.newId(repository.fhirContext(), "PlanDefinition", "DischargeInstructionsPlan")),
                 "Patient1",

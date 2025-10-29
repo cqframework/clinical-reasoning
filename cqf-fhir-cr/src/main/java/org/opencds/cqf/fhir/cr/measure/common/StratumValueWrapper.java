@@ -10,8 +10,10 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Resource;
 import org.opencds.cqf.cql.engine.runtime.Code;
 
-// This is some hackery because most of these objects don't implement
-// hashCode or equals, meaning it's hard to detect distinct values;
+/**
+ * This is some hackery because most of these objects don't implement
+ * hashCode or equals, meaning it's hard to detect distinct values;
+ */
 public class StratumValueWrapper {
 
     protected Object value;

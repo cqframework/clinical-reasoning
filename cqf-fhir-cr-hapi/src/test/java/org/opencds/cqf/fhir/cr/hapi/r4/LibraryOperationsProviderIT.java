@@ -188,21 +188,22 @@ class LibraryOperationsProviderIT extends BaseCrR4TestServer {
         loadBundle("ersd-small-approved-draft-bundle.json");
 
         ourClient
-            .operation()
-            .onInstance("Library/SpecificationLibrary")
-            .named("$withdraw")
-            .withNoParameters(Parameters.class)
-            .returnResourceType(Bundle.class)
-            .execute();
+                .operation()
+                .onInstance("Library/SpecificationLibrary")
+                .named("$withdraw")
+                .withNoParameters(Parameters.class)
+                .returnResourceType(Bundle.class)
+                .execute();
 
         Assertions.assertThrows(ResourceGoneException.class, () -> {
             ourClient
-                .read()
-                .resource(Library.class)
-                .withId("SpecificationLibrary")
-                .execute();
+                    .read()
+                    .resource(Library.class)
+                    .withId("SpecificationLibrary")
+                    .execute();
         });
     }
+
     @Test
     void artifact_diff_compare_computable() {
         loadBundle("ersd-small-active-bundle.json");

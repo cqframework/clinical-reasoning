@@ -256,8 +256,7 @@ public class LibraryProcessor {
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseBundle withdrawLibrary(
             Either3<C, IIdType, R> library, IBaseParameters parameters) {
-        var processor =
-            withdrawProcessor != null ? withdrawProcessor : new WithdrawProcessor(repository);
+        var processor = withdrawProcessor != null ? withdrawProcessor : new WithdrawProcessor(repository);
         return processor.withdrawResource(resolveLibrary(library), parameters);
     }
 

@@ -220,6 +220,7 @@ public class Searches {
         public SearchBuilder withAndListParam(String spName, IQueryParameterAnd<?> andListParam) {
             Collection<List<IQueryParameterType>> lists = getValues().get(spName);
             andListParam.getValuesAsQueryTokens().forEach(dateOrListParam -> {
+                @SuppressWarnings("unchecked")
                 List<IQueryParameterType> list = (List<IQueryParameterType>) dateOrListParam.getValuesAsQueryTokens();
                 lists.add((list));
             });
@@ -228,6 +229,7 @@ public class Searches {
         }
 
         public SearchBuilder withOrListParam(String spName, IQueryParameterOr<?> orListParam) {
+            @SuppressWarnings("unchecked")
             List<IQueryParameterType> qpList = (List<IQueryParameterType>) orListParam.getValuesAsQueryTokens();
 
             getValues().get(spName).add(qpList);

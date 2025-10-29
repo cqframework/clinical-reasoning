@@ -511,7 +511,14 @@ public class MeasureEvaluator {
                         expressionResult.evaluatedResources()));
     }
 
-    // LUKETODO: consider moving this elsewhere?
+    /**
+     * Take the accumulated subject-by-subject evaluation results and use it to build StratumDefs
+     * and StratumPopulationDefs
+     *
+     * @param measureDef to mutate post-evaluation with results of initial stratifier
+     *                   subject-by-subject accumulations.
+     *
+     */
     public void postEvaluation(MeasureDef measureDef) {
 
         for (GroupDef groupDef : measureDef.groups()) {
@@ -570,7 +577,7 @@ public class MeasureEvaluator {
                         .map(popDef -> buildStratumPopulationDef(popDef, subjectIds))
                         .toList(),
                 values,
-            subjectIds);
+                subjectIds);
     }
 
     private static StratumPopulationDef buildStratumPopulationDef(
@@ -620,8 +627,6 @@ public class MeasureEvaluator {
         return stratumDefs;
     }
 
-    // LUKETODO:  try adding this to the stratifierdef?
-    // LUKETODO:  try putting this all in the component method
     private Table<String, StratumValueWrapper, StratifierComponentDef> buildSubjectResultsTable(
             StratifierDef stratifierDef) {
 
@@ -646,7 +651,6 @@ public class MeasureEvaluator {
 
         // standard Stratifier
         // one criteria expression defined, one set of criteria results
-        // LUKETODO: grab this from the stratifierdef in the non component method
         final Map<String, CriteriaResult> subjectValues = stratifierDef.getResults();
 
         // nonComponent stratifiers will have a single expression that can generate results, instead of grouping

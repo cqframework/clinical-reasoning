@@ -1,20 +1,16 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Sets.SetView;
-import com.google.common.collect.Table;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -35,7 +31,6 @@ import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 import org.opencds.cqf.fhir.cr.measure.common.CriteriaResult;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
-import org.opencds.cqf.fhir.cr.measure.common.StratifierComponentDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumValueDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumValueWrapper;
@@ -49,6 +44,10 @@ import org.opencds.cqf.fhir.cr.measure.r4.utils.R4ResourceIdUtils;
  */
 @SuppressWarnings("squid:S1135")
 class R4StratifierBuilder {
+
+    private R4StratifierBuilder() {
+        // static class
+    }
 
     static void buildStratifier(
             BuilderContext bc,
@@ -67,7 +66,6 @@ class R4StratifierBuilder {
                     new StringType(measureStratifier.getDescription()));
         }
 
-        // LUKETODO:  try to add logic reading the Def results instead of reinventing the algo, if possible
         buildMultipleStratum(bc, reportStratifier, stratifierDef, populations, groupDef);
     }
 
@@ -79,25 +77,7 @@ class R4StratifierBuilder {
             GroupDef groupDef) {
 
         if (!stratifierDef.components().isEmpty()) {
-
-            Table<String, StratumValueWrapper, StratifierComponentDef> subjectResultTable = HashBasedTable.create();
-
-            // Component Stratifier
-            // one or more criteria expression defined, one set of criteria results per component specified
-            // results of component stratifier are an intersection of membership to both component result sets
-
-            stratifierDef
-                    .components()
-                    .forEach(component -> component.getResults().forEach((subject, result) -> {
-                        StratumValueWrapper stratumValueWrapper = new StratumValueWrapper(result.rawValue());
-                        subjectResultTable.put(
-                                R4ResourceIdUtils.addPatientQualifier(subject), stratumValueWrapper, component);
-                    }));
-
-            // Stratifiers should be of the same basis as population
-            // Split subjects by result values
-            // ex. all Male Patients and all Female Patients
-            componentStratifier(bc, stratifierDef, reportStratifier, populations, groupDef, subjectResultTable);
+            componentStratifier(bc, stratifierDef, reportStratifier, populations, groupDef);
 
         } else {
             // standard Stratifier
@@ -112,23 +92,19 @@ class R4StratifierBuilder {
             StratifierDef stratifierDef,
             MeasureReportGroupStratifierComponent reportStratifier,
             List<MeasureGroupPopulationComponent> populations,
-            GroupDef groupDef,
-            Table<String, StratumValueWrapper, StratifierComponentDef> subjectCompValues) {
+            GroupDef groupDef) {
 
-        var componentSubjects = groupSubjectsByValueDefSet(subjectCompValues);
-
-        componentSubjects.forEach((valueSet, subjects) -> {
-            // converts table into component value combinations
-            // | Stratum   | Set<ValueDef>           | List<Subjects(String)> |
-            // | --------- | ----------------------- | ---------------------- |
-            // | Stratum-1 | <'M','White>            | [subject-a]            |
-            // | Stratum-2 | <'F','hispanic/latino'> | [subject-b]            |
-            // | Stratum-3 | <'M','hispanic/latino'> | [subject-c]            |
-            // | Stratum-4 | <'F','black'>           | [subject-d, subject-e] |
-
+        stratifierDef.getStratum().forEach(stratumDef -> {
             var reportStratum = reportStratifier.addStratum();
 
-            buildStratum(bc, stratifierDef, reportStratum, valueSet, subjects, populations, groupDef);
+            buildStratum(
+                    bc,
+                    stratifierDef,
+                    reportStratum,
+                    stratumDef.getValueDefs(),
+                    stratumDef.getSubjectIds(),
+                    populations,
+                    groupDef);
         });
     }
 
@@ -180,48 +156,6 @@ class R4StratifierBuilder {
             Set<StratumValueDef> stratValues = Set.of(new StratumValueDef(stratValue.getKey(), null));
             buildStratum(bc, stratifierDef, reportStratum, stratValues, patients, populations, groupDef);
         }
-    }
-
-    private static Map<Set<StratumValueDef>, List<String>> groupSubjectsByValueDefSet(
-            Table<String, StratumValueWrapper, StratifierComponentDef> table) {
-        // input format
-        // | Subject (String) | CriteriaResult (ValueWrapper) | StratifierComponentDef |
-        // | ---------------- | ----------------------------- | ---------------------- |
-        // | subject-a        | M                             | gender                 |
-        // | subject-b        | F                             | gender                 |
-        // | subject-c        | M                             | gender                 |
-        // | subject-d        | F                             | gender                 |
-        // | subject-e        | F                             | gender                 |
-        // | subject-a        | white                         | race                   |
-        // | subject-b        | hispanic/latino               | race                   |
-        // | subject-c        | hispanic/latino               | race                   |
-        // | subject-d        | black                         | race                   |
-        // | subject-e        | black                         | race                   |
-
-        // Step 1: Build Map<Subject, Set<ValueDef>>
-        Map<String, Set<StratumValueDef>> subjectToValueDefs = new HashMap<>();
-
-        for (Table.Cell<String, StratumValueWrapper, StratifierComponentDef> cell : table.cellSet()) {
-            subjectToValueDefs
-                    .computeIfAbsent(cell.getRowKey(), k -> new HashSet<>())
-                    .add(new StratumValueDef(cell.getColumnKey(), cell.getValue()));
-        }
-        // output format:
-        // | Set<ValueDef>           | List<Subjects(String)> |
-        // | ----------------------- | ---------------------- |
-        // | <'M','White>            | [subject-a]            |
-        // | <'F','hispanic/latino'> | [subject-b]            |
-        // | <'M','hispanic/latino'> | [subject-c]            |
-        // | <'F','black'>           | [subject-d, subject-e] |
-
-        // Step 2: Invert to Map<Set<ValueDef>, List<Subject>>
-        return subjectToValueDefs.entrySet().stream()
-                .collect(Collectors.groupingBy(
-                        Map.Entry::getValue,
-                        Collector.of(ArrayList::new, (list, e) -> list.add(e.getKey()), (l1, l2) -> {
-                            l1.addAll(l2);
-                            return l1;
-                        })));
     }
 
     private static void buildStratum(
@@ -293,6 +227,8 @@ class R4StratifierBuilder {
         return new CodeableConcept().setText(value.getValueAsString());
     }
 
+    // TODO: LD: take the StratumDef and use it to figure out the subject ID intersection instead of
+    // the provided list of subjectIds
     private static void buildStratumPopulation(
             BuilderContext bc,
             StratifierDef stratifierDef,
@@ -480,7 +416,7 @@ class R4StratifierBuilder {
         return null;
     }
 
-    // LUKETODO:  move this to MeasureEvaluator
+    // TODO: LD:  move this to MeasureEvaluator
     @Nonnull
     private static List<CodeableConcept> getCodeForReportStratifier(
             StratifierDef stratifierDef, MeasureGroupStratifierComponent measureStratifier) {

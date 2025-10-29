@@ -7,7 +7,8 @@ import java.util.Set;
  * Equivalent to StratifierDef, but for Stratum.
  * <p/>
  * For now, this contains the code text and stratum population defs, in order to help with
- * continuous variable scoring, but will probably need to be enhanced for more use cases.
+ * continuous variable scoring, as well as other stratifier use cases, and is meant to be
+ * the source of truth for all data points regarding stratum.
  */
 public class StratumDef {
     // Equivalent to the FHIR stratum code text

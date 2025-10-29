@@ -448,7 +448,7 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
     private boolean doesStratumPopDefMatchGroupPopDef(
             StratumPopulationDef stratumPopulationDef, Entry<String, Set<Object>> entry) {
 
-        return stratumPopulationDef.getSubjects().stream()
+        return stratumPopulationDef.getSubjectsUnqualified().stream()
                 .collect(Collectors.toUnmodifiableSet())
                 .contains(entry.getKey());
     }

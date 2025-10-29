@@ -589,12 +589,7 @@ public class MeasureEvaluator {
 
         var qualifiedSubjectIdsCommonToPopulation = Sets.intersection(new HashSet<>(subjectIds), popSubjectIds);
 
-        var unqualifiedSubjectIdsCommonToPopulation = qualifiedSubjectIdsCommonToPopulation.stream()
-                .filter(Objects::nonNull)
-                .map(R4ResourceIdUtils::stripAnyResourceQualifier)
-                .collect(Collectors.toUnmodifiableSet());
-
-        return new StratumPopulationDef(populationDef.id(), unqualifiedSubjectIdsCommonToPopulation);
+        return new StratumPopulationDef(populationDef.id(), qualifiedSubjectIdsCommonToPopulation);
     }
 
     private List<StratumDef> componentStratumPlural(StratifierDef stratifierDef, List<PopulationDef> populationDefs) {

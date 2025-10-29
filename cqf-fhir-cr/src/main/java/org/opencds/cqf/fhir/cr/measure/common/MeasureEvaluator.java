@@ -569,7 +569,8 @@ public class MeasureEvaluator {
                 populationDefs.stream()
                         .map(popDef -> buildStratumPopulationDef(popDef, subjectIds))
                         .toList(),
-                values);
+                values,
+            subjectIds);
     }
 
     private static StratumPopulationDef buildStratumPopulationDef(

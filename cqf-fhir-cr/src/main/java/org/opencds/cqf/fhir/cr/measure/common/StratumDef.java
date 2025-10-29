@@ -14,12 +14,17 @@ public class StratumDef {
     private final String text;
     private final List<StratumPopulationDef> stratumPopulations;
     private final Set<StratumValueDef> stratumValueDefs;
+    private final List<String> subjectIds;
 
     public StratumDef(
-            String text, List<StratumPopulationDef> stratumPopulations, Set<StratumValueDef> stratumValueDefs) {
+            String text,
+            List<StratumPopulationDef> stratumPopulations,
+            Set<StratumValueDef> stratumValueDefs,
+            List<String> subjectIds) {
         this.text = text;
         this.stratumPopulations = List.copyOf(stratumPopulations);
         this.stratumValueDefs = stratumValueDefs;
+        this.subjectIds = subjectIds;
     }
 
     public String getText() {
@@ -32,5 +37,9 @@ public class StratumDef {
 
     public Set<StratumValueDef> getValueDefs() {
         return stratumValueDefs;
+    }
+
+    public List<String> getSubjectIds() {
+        return subjectIds;
     }
 }

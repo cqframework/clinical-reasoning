@@ -1,0 +1,82 @@
+{
+  "id": "ComponentCriteriaStratifierDateBasisNoIntersectionScenario3",
+  "resourceType": "Measure",
+  "name": "ComponentCriteriaStratifierDateBasisNoIntersectionScenario3",
+  "url": "http://example.com/Measure/ComponentCriteriaStratifierDateBasisNoIntersectionScenario3",
+  "library": [
+    "http://example.com/Library/ComponentCriteriaStratifier"
+  ],
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-populationBasis",
+      "valueCode": "date"
+    }
+  ],
+  "scoring": {
+    "coding": [
+      {
+        "system": "http://hl7.org/fhir/measure-scoring",
+        "code": "cohort"
+      }
+    ]
+  },
+  "group": [
+    {
+      "id": "group-1",
+      "population": [
+        {
+          "id": "initial-population",
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code": "initial-population",
+                "display": "Initial Population"
+              }
+            ]
+          },
+          "criteria": {
+            "language": "text/cql-identifier",
+            "expression": "Initial Population Date"
+          }
+        }
+      ],
+      "stratifier": [
+        {
+          "id": "stratifier-feb1-mar2-feb1-mar2-jan2",
+          "code" : {
+            "text": "Stratifier Feb1 Mar2 + Feb1 Mar2 Jan2"
+          },
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-population-stratifier-type",
+              "valueCode": "criteria"
+            }
+          ],
+          "component": [
+            {
+              "id": "stratifier-comp-feb1-mar2",
+              "code" : {
+                "text": "Stratifier Feb1 Mar2"
+              },
+              "criteria": {
+                "language": "text/cql.identifier",
+                "expression": "Stratifier Feb1 Mar2"
+              }
+            },
+            {
+              "id": "stratifier-comp-feb1-mar2-jan2",
+              "code" : {
+                "text": "Stratifier Feb1 Mar2 Jan2"
+              },
+              "criteria": {
+                "language": "text/cql.identifier",
+                "expression": "Stratifier Feb1 Mar2 Jan2"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

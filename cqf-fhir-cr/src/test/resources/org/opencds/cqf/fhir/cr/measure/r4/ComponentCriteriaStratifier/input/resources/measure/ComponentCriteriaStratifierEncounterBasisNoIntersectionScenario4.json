@@ -1,0 +1,82 @@
+{
+  "id": "ComponentCriteriaStratifierEncounterBasisNoIntersectionScenario4",
+  "resourceType": "Measure",
+  "name": "ComponentCriteriaStratifierEncounterBasisNoIntersectionScenario4",
+  "url": "http://example.com/Measure/ComponentCriteriaStratifierEncounterBasisNoIntersectionScenario4",
+  "library": [
+    "http://example.com/Library/ComponentCriteriaStratifier"
+  ],
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-populationBasis",
+      "valueCode": "Encounter"
+    }
+  ],
+  "scoring": {
+    "coding": [
+      {
+        "system": "http://hl7.org/fhir/measure-scoring",
+        "code": "cohort"
+      }
+    ]
+  },
+  "group": [
+    {
+      "id": "group-1",
+      "population": [
+        {
+          "id": "initial-population",
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code": "initial-population",
+                "display": "Initial Population"
+              }
+            ]
+          },
+          "criteria": {
+            "language": "text/cql-identifier",
+            "expression": "Initial Population Resource"
+          }
+        }
+      ],
+      "stratifier": [
+        {
+          "id": "stratifier-encounter-finished-in-progress-encounter",
+          "code" : {
+            "text": "Stratifier Stratifier Encounter Finished In-Progress Resource"
+          },
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-population-stratifier-type",
+              "valueCode": "criteria"
+            }
+          ],
+          "component": [
+            {
+              "id": "stratifier-encounter-finished",
+              "code" : {
+                "text": "Stratifier Encounter Finished"
+              },
+              "criteria": {
+                "language": "text/cql.identifier",
+                "expression": "Stratifier Encounter Finished Resource"
+              }
+            },
+            {
+              "id": "stratifier-encounter-in-progress",
+              "code" : {
+                "text": "Stratifier Encounter In-Progress"
+              },
+              "criteria": {
+                "language": "text/cql.identifier",
+                "expression": "Stratifier Encounter In-Progress Resource"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

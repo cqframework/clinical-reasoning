@@ -210,6 +210,7 @@ public class ComponentCriteriaStratifierTest {
                 .hasPopulationCount(1)
                 .firstPopulation()
                 .hasName("initial-population")
+            // LUKETODO:  maybe this is correct?  debug to be sure
                 .hasCount(1)
                 .up()
                 .up()
@@ -287,10 +288,15 @@ public class ComponentCriteriaStratifierTest {
     @Test
     void cohortBooleanComponentCriteriaStratNoIntersectionScenario4() {
 
-        final MeasureReport report = GIVEN.when()
-                .measureId("ComponentCriteriaStratifierBooleanBasisNoIntersectionScenario4")
-                .evaluate()
-                .then()
+        final SelectedReport then = GIVEN.when()
+            .measureId("ComponentCriteriaStratifierBooleanBasisNoIntersectionScenario4")
+            .evaluate()
+            .then();
+
+        System.out.println(
+            FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(then.report()));
+
+        then
                 .hasGroupCount(1)
                 .firstGroup()
                 .hasPopulationCount(1)
@@ -309,18 +315,20 @@ public class ComponentCriteriaStratifierTest {
                 .up()
                 .up()
                 .report();
-
-        System.out.println(
-                FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(report));
     }
 
     @Test
     void cohortBooleanComponentCriteriaStratNoIntersectionScenario5() {
 
-        final MeasureReport report = GIVEN.when()
-                .measureId("ComponentCriteriaStratifierBooleanBasisNoIntersectionScenario5")
-                .evaluate()
-                .then()
+        final SelectedReport then = GIVEN.when()
+            .measureId("ComponentCriteriaStratifierBooleanBasisNoIntersectionScenario5")
+            .evaluate()
+            .then();
+
+        System.out.println(
+            FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(then.report()));
+
+        then
                 .hasGroupCount(1)
                 .firstGroup()
                 .hasPopulationCount(1)
@@ -328,7 +336,7 @@ public class ComponentCriteriaStratifierTest {
                 .hasCount(2)
                 .up()
                 .hasStratifierCount(1)
-                .stratifierById("stratifier-encounter-finished-in-progress-boolean")
+                .stratifierById("stratifier-encounters-cancelled-in-progress-finished-triaged-boolean")
                 .firstStratum()
                 .hasPopulationCount(1)
                 .firstPopulation()
@@ -339,18 +347,20 @@ public class ComponentCriteriaStratifierTest {
                 .up()
                 .up()
                 .report();
-
-        System.out.println(
-                FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(report));
     }
 
     @Test
     void cohortEncounterComponentCriteriaStratWithIntersectionScenario1() {
 
-        final MeasureReport report = GIVEN.when()
-                .measureId("ComponentCriteriaStratifierEncounterBasisWithIntersectionScenario1")
-                .evaluate()
-                .then()
+        final SelectedReport then = GIVEN.when()
+            .measureId("ComponentCriteriaStratifierEncounterBasisWithIntersectionScenario1")
+            .evaluate()
+            .then();
+
+        System.out.println(
+            FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(then.report()));
+
+        then
                 .hasGroupCount(1)
                 .firstGroup()
                 .hasPopulationCount(1)
@@ -369,18 +379,20 @@ public class ComponentCriteriaStratifierTest {
                 .up()
                 .up()
                 .report();
-
-        System.out.println(
-                FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(report));
     }
 
     @Test
     void cohortEncounterComponentCriteriaStratNoIntersectionScenario2() {
 
-        final MeasureReport report = GIVEN.when()
-                .measureId("ComponentCriteriaStratifierEncounterBasisNoIntersectionScenario2")
-                .evaluate()
-                .then()
+        final SelectedReport then = GIVEN.when()
+            .measureId("ComponentCriteriaStratifierEncounterBasisNoIntersectionScenario2")
+            .evaluate()
+            .then();
+
+        System.out.println(
+            FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(then.report()));
+
+        then
                 .hasGroupCount(1)
                 .firstGroup()
                 .hasPopulationCount(1)
@@ -399,18 +411,20 @@ public class ComponentCriteriaStratifierTest {
                 .up()
                 .up()
                 .report();
-
-        System.out.println(
-                FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(report));
     }
 
     @Test
     void cohortEncounterComponentCriteriaStratNoIntersectionScenario3() {
 
-        final MeasureReport report = GIVEN.when()
-                .measureId("ComponentCriteriaStratifierEncounterBasisNoIntersectionScenario3")
-                .evaluate()
-                .then()
+        final SelectedReport then = GIVEN.when()
+            .measureId("ComponentCriteriaStratifierEncounterBasisNoIntersectionScenario3")
+            .evaluate()
+            .then();
+
+        System.out.println(
+            FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(then.report()));
+
+        then
                 .hasGroupCount(1)
                 .firstGroup()
                 .hasPopulationCount(1)
@@ -429,18 +443,20 @@ public class ComponentCriteriaStratifierTest {
                 .up()
                 .up()
                 .report();
-
-        System.out.println(
-                FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(report));
     }
 
     @Test
     void cohortEncounterComponentCriteriaStratNoIntersectionScenario4() {
 
-        final MeasureReport report = GIVEN.when()
-                .measureId("ComponentCriteriaStratifierEncounterBasisNoIntersectionScenario4")
-                .evaluate()
-                .then()
+        final SelectedReport then = GIVEN.when()
+            .measureId("ComponentCriteriaStratifierEncounterBasisNoIntersectionScenario4")
+            .evaluate()
+            .then();
+
+        System.out.println(
+            FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(then.report()));
+
+        then
                 .hasGroupCount(1)
                 .firstGroup()
                 .hasPopulationCount(1)
@@ -459,18 +475,20 @@ public class ComponentCriteriaStratifierTest {
                 .up()
                 .up()
                 .report();
-
-        System.out.println(
-                FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(report));
     }
 
     @Test
     void cohortEncounterComponentCriteriaStratNoIntersectionScenario5() {
 
-        final MeasureReport report = GIVEN.when()
-                .measureId("ComponentCriteriaStratifierEncounterBasisNoIntersectionScenario5")
-                .evaluate()
-                .then()
+        final SelectedReport then = GIVEN.when()
+            .measureId("ComponentCriteriaStratifierEncounterBasisNoIntersectionScenario5")
+            .evaluate()
+            .then();
+
+        System.out.println(
+            FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(then.report()));
+
+        then
                 .hasGroupCount(1)
                 .firstGroup()
                 .hasPopulationCount(1)
@@ -489,9 +507,6 @@ public class ComponentCriteriaStratifierTest {
                 .up()
                 .up()
                 .report();
-
-        System.out.println(
-                FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(report));
     }
 
     // LUKETODO:  test that explicitly handles mismatches and asserts error handling:

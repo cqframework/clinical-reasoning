@@ -90,11 +90,17 @@ define "Stratifier Encounters Cancelled Triaged 2 Resource":
 
 // Scenario 5:  No overlap because init-pop, strat1, and strat2 have zero overlap with all
 
-define "Stratifier Encounters Cancelled In-Progress":
+define "Stratifier Encounters Cancelled In-Progress Boolean":
+    exists("Stratifier Encounters Cancelled In-Progress Resource")
+
+define "Stratifier Encounters Finished Triaged Boolean":
+    exists("Stratifier Encounters Finished Triaged Resource")
+
+define "Stratifier Encounters Cancelled In-Progress Resource":
      [Encounter] E
         where E.status.value in { 'cancelled', 'in-progress' }
 
-define "Stratifier Encounters Finished Triaged":
+define "Stratifier Encounters Finished Triaged Resource":
      [Encounter] E
         where E.status.value in { 'finished', 'triaged' }
 

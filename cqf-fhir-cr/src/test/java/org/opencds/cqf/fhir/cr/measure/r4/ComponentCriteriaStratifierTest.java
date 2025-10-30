@@ -88,6 +88,21 @@ public class ComponentCriteriaStratifierTest {
     }
 
     @Test
+    void cohortDateComponentCriteriaStratNoIntersectionScenario3() {
+
+    }
+
+    @Test
+    void cohortDateComponentCriteriaStratNoIntersectionScenario4() {
+
+    }
+
+    @Test
+    void cohortDateComponentCriteriaStratNoIntersectionScenario5() {
+
+    }
+
+    @Test
     void cohortBooleanComponentCriteriaStratWithIntersectionScenario1() {
 
         final MeasureReport report = GIVEN.when()
@@ -144,6 +159,21 @@ public class ComponentCriteriaStratifierTest {
                 .report();
 
         System.out.println(FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(report));
+    }
+
+    @Test
+    void cohortBooleanComponentCriteriaStratNoIntersectionScenario3() {
+
+    }
+
+    @Test
+    void cohortBooleanComponentCriteriaStratNoIntersectionScenario4() {
+
+    }
+
+    @Test
+    void cohortBooleanComponentCriteriaStratNoIntersectionScenario5() {
+
     }
 
     @Test
@@ -204,7 +234,39 @@ public class ComponentCriteriaStratifierTest {
         System.out.println(FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(report));
     }
 
+    @Test
+    void cohortEncounterComponentCriteriaStratNoIntersectionScenario3() {
+
+    }
+
+
+    @Test
+    void cohortEncounterComponentCriteriaStratNoIntersectionScenario4() {
+
+    }
+
+
+    @Test
+    void cohortEncounterComponentCriteriaStratNoIntersectionScenario5() {
+
+    }
+
     // LUKETODO:  test that explicitly handles mismatches and asserts error handling:
 
 //    9. 1 of n Component stratifier criteria expression has non-compliant population basis (population = Resource, Stratifier expression result is "String" or something). Throws error
+
+    @Test
+    void cohortBooleanComponentCriteriaStratPopulationStratExpressionMismatchEncounter() {
+
+    }
+
+    @Test
+    void cohortEncounterComponentCriteriaStratPopulationStratExpressionMismatchDate() {
+
+    }
+
+    @Test
+    void cohortDateComponentCriteriaStratPopulationStratExpressionMismatchBoolean() {
+
+    }
 }

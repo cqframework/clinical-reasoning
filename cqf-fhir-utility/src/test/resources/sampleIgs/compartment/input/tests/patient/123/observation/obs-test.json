@@ -1,0 +1,8 @@
+{
+  "resourceType": "Observation",
+  "id": "obs-test",
+  "status": "final",
+  "subject": {
+    "reference": "Patient/123"
+  }
+}

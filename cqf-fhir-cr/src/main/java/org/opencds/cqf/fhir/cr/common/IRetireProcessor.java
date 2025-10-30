@@ -4,7 +4,7 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-public interface IRetireProcessor {
+public interface IRetireProcessor extends IOperationProcessor {
 
     IBaseBundle retireResource(IBaseResource resource, IBaseParameters parameters);
 }

@@ -9,7 +9,6 @@ import org.opencds.cqf.fhir.cr.hapi.common.IGraphDefinitionApplyRequestBuilderFa
 import org.opencds.cqf.fhir.cr.hapi.common.IGraphDefinitionProcessorFactory;
 import org.opencds.cqf.fhir.cr.hapi.common.IPlanDefinitionProcessorFactory;
 import org.opencds.cqf.fhir.cr.hapi.common.StringTimePeriodHandler;
-import org.opencds.cqf.fhir.cr.hapi.config.CrBaseConfig;
 import org.opencds.cqf.fhir.cr.hapi.config.CrProcessorConfig;
 import org.opencds.cqf.fhir.cr.hapi.config.ProviderLoader;
 import org.opencds.cqf.fhir.cr.hapi.config.ProviderSelector;
@@ -22,7 +21,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 @Configuration
-@Import({CrProcessorConfig.class, CrBaseConfig.class})
+@Import(CrProcessorConfig.class)
 public class ApplyOperationConfig {
     @Bean
     ActivityDefinitionApplyProvider r4ActivityDefinitionApplyProvider(

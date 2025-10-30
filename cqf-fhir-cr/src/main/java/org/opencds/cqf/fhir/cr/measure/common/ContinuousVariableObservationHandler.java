@@ -129,14 +129,11 @@ public class ContinuousVariableObservationHandler {
         }
 
         final ExpressionResult expressionResult = optExpressionResult.get();
-        // makes expression results iterable
         final Iterable<?> resultsIter = getResultIterable(evaluationResult, expressionResult, subjectTypePart);
         // make new expression name for uniquely extracting results
         // this will be used in MeasureEvaluator
         var expressionName = criteriaPopulationId + "-" + observationExpression;
 
-        // loop through measure-population results
-        int index = 0;
         final Map<Object, Object> functionResults = new HashMap<>();
         final Set<Object> evaluatedResources = new HashSet<>();
 
@@ -144,21 +141,15 @@ public class ContinuousVariableObservationHandler {
             final ExpressionResult observationResult =
                     evaluateObservationCriteria(result, observationExpression, groupDef.isBooleanBasis(), context);
 
-            var observationId = expressionName + "-" + index;
-            // wrap result in Observation resource to avoid duplicate results data loss
-            // in set object
-            var observation = continuousVariableObservationConverter.wrapResultAsQuantity(
-                    observationId, observationResult.value());
+            var quantity = continuousVariableObservationConverter.wrapResultAsQuantity(observationResult.value());
             // add function results to existing EvaluationResult under new expression
             // name
             // need a way to capture input parameter here too, otherwise we have no way
             // to connect input objects related to output object
             // key= input parameter to function
             // value= the output Observation resource containing calculated value
-            functionResults.put(result, observation);
+            functionResults.put(result, quantity);
             evaluatedResources.addAll(observationResult.evaluatedResources());
-
-            index++;
         }
 
         return buildEvaluationResult(expressionName, functionResults, evaluatedResources);

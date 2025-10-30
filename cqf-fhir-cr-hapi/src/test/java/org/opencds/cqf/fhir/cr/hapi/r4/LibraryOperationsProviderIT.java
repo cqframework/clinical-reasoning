@@ -78,7 +78,7 @@ class LibraryOperationsProviderIT extends BaseCrR4TestServer {
         loadBundle("org/opencds/cqf/fhir/cr/hapi/r4/Bundle-GenerateQuestionnaireStructures.json");
         var requestDetails = setupRequestDetails();
         var result = libraryPackageProvider.packageLibrary(
-                "Library/ASLPDataElements", null, null, null, null, null, null, requestDetails);
+                "Library/ASLPDataElements", null, null, null, null, null, null, null, null, null, requestDetails);
         assertInstanceOf(Bundle.class, result);
     }
 
@@ -130,6 +130,9 @@ class LibraryOperationsProviderIT extends BaseCrR4TestServer {
                 null,
                 null,
                 null,
+                null,
+                null,
+                null,
                 terminologyEndpointParam,
                 null,
                 requestDetails);
@@ -175,5 +178,26 @@ class LibraryOperationsProviderIT extends BaseCrR4TestServer {
                 .withId("SpecificationLibrary")
                 .execute();
         Assertions.assertEquals(retiredLibrary.getStatus().name(), Enumerations.PublicationStatus.RETIRED.name());
+    }
+
+    @Test
+    void testWithdrawLibrary() {
+        loadBundle("ersd-small-approved-draft-bundle.json");
+
+        ourClient
+                .operation()
+                .onInstance("Library/SpecificationLibrary")
+                .named("$withdraw")
+                .withNoParameters(Parameters.class)
+                .returnResourceType(Bundle.class)
+                .execute();
+
+        Assertions.assertThrows(ResourceGoneException.class, () -> {
+            ourClient
+                    .read()
+                    .resource(Library.class)
+                    .withId("SpecificationLibrary")
+                    .execute();
+        });
     }
 }

@@ -382,6 +382,7 @@ class IgRepositoryPrefixTest {
         }
     }
 
+    @SuppressWarnings("unchecked")
     <T extends IBaseResource> T buildResource(String resourceType, ICreationArgument... modifiers) {
         IBaseResource resource =
                 getFhirContext().getResourceDefinition(resourceType).newInstance();

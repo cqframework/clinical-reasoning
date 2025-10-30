@@ -18,17 +18,14 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Element;
 import org.hl7.fhir.r4.model.Extension;
-import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.ListResource;
 import org.hl7.fhir.r4.model.Measure;
@@ -45,7 +42,6 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
-import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.fhir.cr.measure.common.CodeDef;
 import org.opencds.cqf.fhir.cr.measure.common.ConceptDef;
@@ -59,6 +55,7 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.SdeDef;
+import org.opencds.cqf.fhir.cr.measure.common.StratumValueWrapper;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4DateHelper;
@@ -470,11 +467,6 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             bc.addContained(subjectList);
             reportPopulation.setSubjectResults(new Reference("#" + subjectList.getId()));
         }
-
-        // Population Type behavior
-        if (Objects.requireNonNull(populationDef.type()) == MeasurePopulationType.MEASUREOBSERVATION) {
-            buildMeasureObservations(bc, populationDef.expression(), populationDef.getResources());
-        }
     }
 
     public int countObservations(PopulationDef populationDef) {
@@ -487,16 +479,6 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                 .map(Map.class::cast)
                 .mapToInt(Map::size)
                 .sum();
-    }
-
-    // LUKETODO:  ask Justin about this:  can we convert this to a Quantity?
-    protected void buildMeasureObservations(BuilderContext bc, String observationName, Set<Object> resources) {
-        for (int i = 0; i < resources.size(); i++) {
-            // TODO: Do something with the resource...
-            Observation observation = createMeasureObservation(
-                    bc, "measure-observation-" + observationName + "-" + (i + 1), observationName);
-            bc.addContained(observation);
-        }
     }
 
     static ListResource createList(String id) {
@@ -560,13 +542,13 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
         CodeableConcept concept = conceptDefToConcept(sde.code());
 
-        Map<ValueWrapper, Long> accumulated = sde.getResults().values().stream()
+        Map<StratumValueWrapper, Long> accumulated = sde.getResults().values().stream()
                 .flatMap(x -> Lists.newArrayList(x.iterableValue()).stream())
                 .filter(Objects::nonNull)
-                .map(ValueWrapper::new)
+                .map(StratumValueWrapper::new)
                 .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
 
-        for (Map.Entry<ValueWrapper, Long> accumulator : accumulated.entrySet()) {
+        for (Map.Entry<StratumValueWrapper, Long> accumulator : accumulated.entrySet()) {
 
             Resource obs;
             if (!(accumulator.getKey().getValue() instanceof Resource resource)) {
@@ -762,139 +744,5 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         cc.setText(observationName);
         obs.setCode(cc);
         return obs;
-    }
-
-    // This is some hackery because most of these objects don't implement
-    // hashCode or equals, meaning it's hard to detect distinct values;
-    protected static class ValueWrapper {
-        protected Object value;
-
-        public ValueWrapper(Object value) {
-            this.value = value;
-        }
-
-        @Override
-        public int hashCode() {
-            return this.getKey().hashCode();
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null) return false;
-            if (this.getClass() != o.getClass()) return false;
-
-            ValueWrapper other = (ValueWrapper) o;
-
-            if (other.getValue() == null ^ this.getValue() == null) {
-                return false;
-            }
-
-            if (other.getValue() == null && this.getValue() == null) {
-                return true;
-            }
-
-            return this.getKey().equals(other.getKey());
-        }
-
-        public String getKey() {
-            String key = null;
-            if (value instanceof Coding coding) {
-                // ASSUMPTION: We won't have different systems with the same code
-                // within a given stratifier / sde
-                key = joinValues("coding", coding.getCode());
-            } else if (value instanceof CodeableConcept concept) {
-                key = joinValues("codeable-concept", concept.getCodingFirstRep().getCode());
-            } else if (value instanceof Code c) {
-                key = joinValues("code", c.getCode());
-            } else if (value instanceof Enum<?> e) {
-                key = joinValues("enum", e.toString());
-            } else if (value instanceof IPrimitiveType<?> p) {
-                key = joinValues("primitive", p.getValueAsString());
-            } else if (value instanceof Identifier identifier) {
-                key = identifier.getValue();
-            } else if (value instanceof Resource resource) {
-                key = resource.getIdElement().toVersionless().getValue();
-            } else if (value != null) {
-                key = value.toString();
-            }
-
-            if (key == null) {
-                throw new InvalidRequestException("found a null key for the wrapped value: %s".formatted(value));
-            }
-
-            return key;
-        }
-
-        public String getValueAsString() {
-            return getValueAsString(this.value);
-        }
-
-        public String getDescription() {
-            if (value instanceof Coding coding) {
-                return coding.hasDisplay() ? coding.getDisplay() : coding.getCode();
-            } else if (value instanceof CodeableConcept concept) {
-                return concept.getCodingFirstRep().hasDisplay()
-                        ? concept.getCodingFirstRep().getDisplay()
-                        : concept.getCodingFirstRep().getCode();
-            } else if (value instanceof Code c) {
-                return c.getDisplay() != null ? c.getDisplay() : c.getCode();
-            } else if (value instanceof Enum<?> e) {
-                return e.toString();
-            } else if (value instanceof IPrimitiveType<?> p) {
-                return p.getValueAsString();
-            } else if (value instanceof Identifier identifier) {
-                return identifier.getValue();
-            } else if (value instanceof Resource resource) {
-                return resource.getIdElement().toVersionless().getValue();
-            } else if (value != null) {
-                return value.toString();
-            } else {
-                return null;
-            }
-        }
-
-        public Object getValue() {
-            return this.value;
-        }
-
-        public Class<?> getValueClass() {
-            if (this.value == null) {
-                return String.class;
-            }
-
-            return this.value.getClass();
-        }
-
-        private String joinValues(String... elements) {
-            return String.join("-", elements);
-        }
-
-        private String getValueAsString(Object valueInner) {
-            if (valueInner instanceof Coding coding) {
-                return coding.getCode();
-            } else if (valueInner instanceof CodeableConcept concept) {
-                return concept.getCodingFirstRep().getCode();
-            } else if (valueInner instanceof Code c) {
-                return c.getCode();
-            } else if (valueInner instanceof Enum<?> e) {
-                return e.toString();
-            } else if (valueInner instanceof IPrimitiveType<?> p) {
-                return p.getValueAsString();
-            } else if (valueInner instanceof Identifier identifier) {
-                return identifier.getValue();
-            } else if (valueInner instanceof Resource resource) {
-                return resource.getIdElement().toVersionless().getValue();
-            } else if (valueInner instanceof Iterable<?> iterable) {
-                return StreamSupport.stream(iterable.spliterator(), false)
-                        .map(this::getValueAsString)
-                        .limit(5) // stop a massively long string if we have a huge list
-                        .collect(Collectors.joining(","));
-            } else if (valueInner != null) {
-                return valueInner.toString();
-            } else {
-                return "<null>";
-            }
-        }
     }
 }

@@ -57,11 +57,11 @@
             {
               "id": "stratifier-encounter-cancelled-finished",
               "code" : {
-                "text": "Stratifier Stratifier Encounter Cancelled Finished"
+                "text": "Stratifier Encounters Cancelled Finished"
               },
               "criteria": {
                 "language": "text/cql.identifier",
-                "expression": "Stratifier Encounter Cancelled Finished Boolean"
+                "expression": "Stratifier Encounters Cancelled Finished Boolean"
               }
             },
             {
@@ -71,7 +71,7 @@
               },
               "criteria": {
                 "language": "text/cql.identifier",
-                "expression": "Stratifier Encounter Arrived Planned Boolean"
+                "expression": "Stratifier Encounters Arrived Planned Boolean"
               }
             }
           ]

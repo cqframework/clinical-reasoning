@@ -43,26 +43,48 @@ define "Stratifier Encounters Arrived In-Progress Resource":
 
 // Scenario 2:  No overlap due to intersection only between initial-pop and strat2
 
-define "Stratifier Encounters Planned Triaged":
+define "Stratifier Encounters Planned Triaged Boolean":
+    exists("Stratifier Encounters Planned Triaged Resource")
+
+define "Stratifier Encounters Planned Triaged Resource":
      [Encounter] E
         where E.status.value in { 'planned', 'triaged' }
 
-define "Stratifier Encounters Arrived Cancelled":
+define "Stratifier Encounters Arrived Cancelled Boolean":
+    exists("Stratifier Encounters Arrived Cancelled Resource")
+
+define "Stratifier Encounters Arrived Cancelled Resource":
      [Encounter] E
         where E.status.value in { 'arrived', 'cancelled' }
 
 // Scenario 3:  No overlap despite total intersection between initial-pop and strat2
 
-define "Stratifier Encounters Cancelled Finished":
+define "Stratifier Encounters Cancelled Finished Boolean":
+    exists("Stratifier Encounters Cancelled Finished Resource")
+
+define "Stratifier Encounters Cancelled Finished Resource":
      [Encounter] E
         where E.status.value in { 'cancelled', 'finished' }
 
-define "Stratifier Encounters Arrived Planned":
+define "Stratifier Encounters Arrived Planned Boolean":
+    exists("Stratifier Encounters Arrived Planned Resource")
+
+define "Stratifier Encounters Arrived Planned Resource":
     "Encounters Arrived Planned"
 
 // Scenario 4:  No overlap despite total intersection between strat1 and strat2
 
-define "Stratifier Encounters Cancelled Triaged":
+define "Stratifier Encounters Cancelled Triaged 1 Boolean":
+    exists("Stratifier Encounters Cancelled Triaged 1 Resource")
+
+define "Stratifier Encounters Cancelled Triaged 2 Boolean":
+    exists("Stratifier Encounters Cancelled Triaged 2 Resource")
+
+define "Stratifier Encounters Cancelled Triaged 1 Resource":
+     [Encounter] E
+        where E.status.value in { 'cancelled', 'triaged' }
+
+define "Stratifier Encounters Cancelled Triaged 2 Resource":
      [Encounter] E
         where E.status.value in { 'cancelled', 'triaged' }
 

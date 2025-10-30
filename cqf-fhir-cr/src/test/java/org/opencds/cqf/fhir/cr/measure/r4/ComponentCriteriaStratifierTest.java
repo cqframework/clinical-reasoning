@@ -224,10 +224,15 @@ public class ComponentCriteriaStratifierTest {
     @Test
     void cohortBooleanComponentCriteriaStratNoIntersectionScenario2() {
 
-        final MeasureReport report = GIVEN.when()
-                .measureId("ComponentCriteriaStratifierBooleanBasisNoIntersectionScenario2")
-                .evaluate()
-                .then()
+        final SelectedReport then = GIVEN.when()
+            .measureId("ComponentCriteriaStratifierBooleanBasisNoIntersectionScenario2")
+            .evaluate()
+            .then();
+
+        System.out.println(
+            FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(then.report()));
+
+        then
                 .hasGroupCount(1)
                 .firstGroup()
                 .hasPopulationCount(1)
@@ -235,7 +240,7 @@ public class ComponentCriteriaStratifierTest {
                 .hasCount(2)
                 .up()
                 .hasStratifierCount(1)
-                .stratifierById("stratifier-encounter-finished-in-progress-boolean")
+                .stratifierById("stratifier-encounter-planned-triaged-arrived-cancelled-boolean")
                 .firstStratum()
                 .hasPopulationCount(1)
                 .firstPopulation()
@@ -246,9 +251,6 @@ public class ComponentCriteriaStratifierTest {
                 .up()
                 .up()
                 .report();
-
-        System.out.println(
-                FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(report));
     }
 
     @Test
@@ -296,7 +298,7 @@ public class ComponentCriteriaStratifierTest {
                 .hasCount(2)
                 .up()
                 .hasStratifierCount(1)
-                .stratifierById("stratifier-encounter-finished-in-progress-boolean")
+                .stratifierById("stratifier-encounters-cancelled-triaged-cancelled-triaged-boolean")
                 .firstStratum()
                 .hasPopulationCount(1)
                 .firstPopulation()

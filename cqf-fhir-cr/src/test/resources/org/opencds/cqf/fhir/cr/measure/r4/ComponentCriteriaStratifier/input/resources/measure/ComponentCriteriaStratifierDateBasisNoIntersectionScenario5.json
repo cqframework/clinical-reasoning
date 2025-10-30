@@ -43,9 +43,9 @@
       ],
       "stratifier": [
         {
-          "id": "stratifier-feb1-mar2-feb1-mar2-jan2",
+          "id": "stratifier-jul1-aug1-sep1-oct1",
           "code" : {
-            "text": "Stratifier Feb1 Mar2 + Feb1 Mar2 Jan2"
+            "text": "Stratifier Jul1 Aug1 + Sep1 Oct1"
           },
           "extension": [
             {
@@ -55,23 +55,23 @@
           ],
           "component": [
             {
-              "id": "stratifier-comp-feb1-mar2",
+              "id": "stratifier-comp-jul1-aug1",
               "code" : {
-                "text": "Stratifier Feb1 Mar2"
+                "text": "Stratifier Jul1 Aug1"
               },
               "criteria": {
                 "language": "text/cql.identifier",
-                "expression": "Stratifier Feb1 Mar2"
+                "expression": "Stratifier Jul1 Aug1"
               }
             },
             {
-              "id": "stratifier-comp-feb1-mar2-jan2",
+              "id": "stratifier-comp-sep1-oct1",
               "code" : {
-                "text": "Stratifier Feb1 Mar2 Jan2"
+                "text": "Stratifier Sep1 Oct1"
               },
               "criteria": {
                 "language": "text/cql.identifier",
-                "expression": "Stratifier Feb1 Mar2 Jan2"
+                "expression": "Stratifier Sep1 Oct1"
               }
             }
           ]

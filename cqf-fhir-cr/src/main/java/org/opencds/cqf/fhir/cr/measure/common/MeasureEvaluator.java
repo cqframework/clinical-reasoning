@@ -500,9 +500,15 @@ public class MeasureEvaluator {
 
         for (StratifierComponentDef component : components) {
             var expressionResult = evaluationResult.forExpression(component.expression());
-            Optional.ofNullable(expressionResult.value())
-                    .ifPresent(nonNullValue ->
-                            component.putResult(subjectId, nonNullValue, expressionResult.evaluatedResources()));
+            Optional.ofNullable(expressionResult)
+                    .ifPresentOrElse(
+                            nonNullExpressionResult -> component.putResult(
+                                    subjectId,
+                                    nonNullExpressionResult.value(),
+                                    nonNullExpressionResult.evaluatedResources()),
+                            () -> logger.warn(
+                                    "Could not find CQL expression result for stratifier component expression: {}",
+                                    component.expression()));
         }
     }
 
@@ -511,11 +517,14 @@ public class MeasureEvaluator {
 
         var expressionResult = evaluationResult.forExpression(stratifierDef.expression());
         Optional.ofNullable(expressionResult)
-                .map(ExpressionResult::value)
-                .ifPresent(nonNullValue -> stratifierDef.putResult(
-                        subjectId, // context of CQL expression ex: Patient based
-                        nonNullValue,
-                        expressionResult.evaluatedResources()));
+                .ifPresentOrElse(
+                        nonNullExpressionResult -> stratifierDef.putResult(
+                                subjectId, // context of CQL expression ex: Patient based
+                                nonNullExpressionResult.value(),
+                                nonNullExpressionResult.evaluatedResources()),
+                        () -> logger.warn(
+                                "Could not find CQL expression result for stratifier expression: {}",
+                                stratifierDef.expression()));
     }
 
     /**

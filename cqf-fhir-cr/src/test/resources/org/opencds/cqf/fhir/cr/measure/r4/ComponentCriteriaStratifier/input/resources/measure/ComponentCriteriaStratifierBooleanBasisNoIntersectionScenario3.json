@@ -43,9 +43,9 @@
       ],
       "stratifier": [
         {
-          "id": "stratifier-encounter-finished-in-progress-boolean",
+          "id": "stratifier-encounter-cancelled-finished-arrived-planned-boolean",
           "code" : {
-            "text": "Stratifier Stratifier Encounter Finished In-Progress Boolean"
+            "text": "Stratifier Stratifier Encounter Cancelled Finished Arrived Planned Boolean"
           },
           "extension": [
             {
@@ -55,23 +55,23 @@
           ],
           "component": [
             {
-              "id": "stratifier-encounter-finished-in-progress",
+              "id": "stratifier-encounter-cancelled-finished",
               "code" : {
-                "text": "Stratifier Stratifier Encounter Finished"
+                "text": "Stratifier Stratifier Encounter Cancelled Finished"
               },
               "criteria": {
                 "language": "text/cql.identifier",
-                "expression": "Stratifier Encounter Finished Boolean"
+                "expression": "Stratifier Encounter Cancelled Finished Boolean"
               }
             },
             {
               "id": "stratifier-encounter-in-progress",
               "code" : {
-                "text": "Encounter In-Progress"
+                "text": "Encounter Arrived Planned"
               },
               "criteria": {
                 "language": "text/cql.identifier",
-                "expression": "Stratifier Encounter In-Progress Boolean"
+                "expression": "Stratifier Encounter Arrived Planned Boolean"
               }
             }
           ]

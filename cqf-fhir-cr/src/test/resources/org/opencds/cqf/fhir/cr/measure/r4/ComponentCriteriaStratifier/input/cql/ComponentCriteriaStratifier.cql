@@ -106,7 +106,10 @@ define "Stratifier Jan1 Jan2":
 
 // Scenario 4:  No overlap despite total intersection between strat1 and strat2
 
-define "Stratifier May1 Jun1":
+define "Stratifier May1 Jun1 1":
+  { @2024-05-01, @2024-06-01 }
+
+define "Stratifier May1 Jun1 2":
   { @2024-05-01, @2024-06-01 }
 
 // Scenario 5:  No overlap because init-pop, strat1, and strat2 have zero overlap with all

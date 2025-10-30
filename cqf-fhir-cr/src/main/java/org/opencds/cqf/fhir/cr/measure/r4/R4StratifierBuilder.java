@@ -2,8 +2,6 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Sets.SetView;
 import java.util.ArrayList;
@@ -11,8 +9,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import javax.annotation.Nonnull;
@@ -38,8 +34,6 @@ import org.opencds.cqf.fhir.cr.measure.common.StratumDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumPopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumValueDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumValueWrapper;
-import org.opencds.cqf.fhir.cr.measure.common.StratumDef;
-import org.opencds.cqf.fhir.cr.measure.common.StratumPopulationDef;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureReportBuilder.BuilderContext;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4ResourceIdUtils;
@@ -222,9 +216,9 @@ class R4StratifierBuilder {
                 // non-component stratifiers only set stratified value, code is set on stratifier object
                 // value being stratified: 'M'
                 stratum.setValue(expressionResultToCodableConcept(value));
-//                stratumDefText = stratum.getValue().getText();
+                //                stratumDefText = stratum.getValue().getText();
             } else if (MeasureStratifierType.CRITERIA == stratifierDef.getStratifierType()) {
-//                stratumDefText = value.getValueAsString();
+                //                stratumDefText = value.getValueAsString();
             }
         }
 
@@ -373,7 +367,8 @@ class R4StratifierBuilder {
 
         if (MeasureStratifierType.CRITERIA == stratifierDef.getStratifierType()) {
             final Set<Object> resources = populationDef.getResources();
-            // LUKETODO:  for the component criteria scenario, we don't add the results directly to the stratifierDef, but to each of the component defs, which is why this is empty
+            // LUKETODO:  for the component criteria scenario, we don't add the results directly to the stratifierDef,
+            // but to each of the component defs, which is why this is empty
             final Set<Object> results = stratifierDef.getAllCriteriaResultValues();
 
             if (resources.isEmpty() || results.isEmpty()) {

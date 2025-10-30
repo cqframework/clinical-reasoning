@@ -1,15 +1,16 @@
 package org.opencds.cqf.fhir.cql.cql2elm.content;
 
 import static java.util.Objects.requireNonNull;
+import static kotlinx.io.CoreKt.buffered;
+import static kotlinx.io.JvmCoreKt.asSource;
+import static org.hl7.elm_modelinfo.r1.serializing.XmlModelInfoReaderKt.parseModelInfoXml;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.repository.IRepository;
-import java.io.IOException;
 import java.util.ArrayList;
 import org.hl7.cql.model.ModelIdentifier;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.elm_modelinfo.r1.ModelInfo;
-import org.hl7.elm_modelinfo.r1.serializing.ModelInfoReaderFactory;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.fhir.cql.cql2elm.util.LibraryVersionSelector;
@@ -52,10 +53,9 @@ public class RepositoryFhirModelInfoProvider extends BaseFhirModelInfoProvider {
             return null;
         }
 
-        var xmlReader = ModelInfoReaderFactory.getReader(ModelInfoContentType.XML.mimeType());
         try {
-            return xmlReader.read(is);
-        } catch (IOException e) {
+            return parseModelInfoXml(buffered(asSource(is)));
+        } catch (Exception e) {
             logger.error(
                     "Error encountered while loading model info for {}: {}", modelIdentifier.getId(), e.getMessage());
             return null;

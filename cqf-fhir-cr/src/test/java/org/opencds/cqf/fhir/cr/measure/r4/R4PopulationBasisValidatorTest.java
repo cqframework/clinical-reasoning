@@ -456,7 +456,7 @@ class R4PopulationBasisValidatorTest {
 
     @Nonnull
     private static StratifierDef buildStratifierDef(String expression) {
-        return new StratifierDef(null, null, expression, MeasureStratifierType.VALUE, List.of(), List.of());
+        return new StratifierDef(null, null, expression, MeasureStratifierType.VALUE, List.of());
     }
 
     @Nonnull
@@ -467,6 +467,7 @@ class R4PopulationBasisValidatorTest {
         return evaluationResult;
     }
 
+    // LUKETODO:  what's this for?
     @Nonnull
     private static EvaluationResult buildEvaluationResult(Object expressionResult) {
         final EvaluationResult evaluationResult = new EvaluationResult();

@@ -5,7 +5,6 @@ import static java.util.Objects.requireNonNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -218,7 +217,8 @@ public class CqlFhirParametersConverter {
 
     public List<CqlParameterDefinition> toCqlParameterDefinitions(IBaseParameters parameters) {
         if (parameters == null) {
-            return Collections.emptyList();
+            // This list needs to be mutable
+            return new ArrayList<>();
         }
 
         IParametersAdapter parametersAdapter = this.adapterFactory.createParameters(parameters);

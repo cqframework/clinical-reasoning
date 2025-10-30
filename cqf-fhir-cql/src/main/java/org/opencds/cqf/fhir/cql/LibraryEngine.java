@@ -189,43 +189,32 @@ public class LibraryEngine {
         validateExpression(language, expression);
         List<IBase> results = null;
         IBaseParameters parametersResult;
-        switch (language) {
-            case "text/cql":
-            case "text/cql.expression":
-            case "text/cql-expression":
-            case "text/fhirpath":
-                parametersResult = this.evaluateExpression(
-                        expression,
-                        parameters,
-                        rawParameters,
-                        subjectId,
-                        referencedLibraries,
-                        bundle,
-                        contextParameter,
-                        resourceParameter);
-                // The expression is assumed to be the parameter component name
-                // The expression evaluator creates a library with a single expression defined as "return"
-                results = resolveParameterValues(
-                        ParametersUtil.getNamedParameters(fhirContext, parametersResult, "return"));
-                break;
-            case "text/cql-identifier":
-            case "text/cql.identifier":
-            case "text/cql.name":
-            case "text/cql-name":
-                validateLibrary(libraryToBeEvaluated);
-                parametersResult = this.evaluate(
-                        libraryToBeEvaluated,
-                        subjectId,
-                        parameters,
-                        rawParameters,
-                        bundle,
-                        null,
-                        Collections.singleton(expression));
-                results = resolveParameterValues(
-                        ParametersUtil.getNamedParameters(fhirContext, parametersResult, expression));
-                break;
-            default:
-                logger.warn("An action language other than CQL was found: {}", language);
+        if (libraryToBeEvaluated == null) {
+            parametersResult = this.evaluateExpression(
+                    expression,
+                    parameters,
+                    rawParameters,
+                    subjectId,
+                    referencedLibraries,
+                    bundle,
+                    contextParameter,
+                    resourceParameter);
+            // The expression is assumed to be the parameter component name
+            // The expression evaluator creates a library with a single expression defined as "return"
+            results =
+                    resolveParameterValues(ParametersUtil.getNamedParameters(fhirContext, parametersResult, "return"));
+        } else {
+            validateLibrary(libraryToBeEvaluated);
+            parametersResult = this.evaluate(
+                    libraryToBeEvaluated,
+                    subjectId,
+                    parameters,
+                    rawParameters,
+                    bundle,
+                    null,
+                    Collections.singleton(expression));
+            results = resolveParameterValues(
+                    ParametersUtil.getNamedParameters(fhirContext, parametersResult, expression));
         }
 
         return results;

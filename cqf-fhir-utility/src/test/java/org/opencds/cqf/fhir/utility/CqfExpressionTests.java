@@ -39,8 +39,7 @@ class CqfExpressionTests {
         assertEquals(language, cqfExpression.getLanguage());
         assertEquals(expression, cqfExpression.getExpression());
         assertEquals(referencedLibraries, cqfExpression.getReferencedLibraries());
-        // library url is always null for language type other than text/cql-identifier
-        assertNull(cqfExpression.getLibraryUrl());
+        assertEquals(libraryUrl, cqfExpression.getLibraryUrl());
         assertEquals(altLanguage, cqfExpression.getAltLanguage());
         assertEquals(altExpression, cqfExpression.getAltExpression());
         assertEquals(altLibraryUrl, cqfExpression.getAltLibraryUrl());

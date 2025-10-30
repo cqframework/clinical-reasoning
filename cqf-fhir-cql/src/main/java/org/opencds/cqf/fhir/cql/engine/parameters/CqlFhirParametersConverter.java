@@ -216,9 +216,10 @@ public class CqlFhirParametersConverter {
     }
 
     public List<CqlParameterDefinition> toCqlParameterDefinitions(IBaseParameters parameters) {
+        // This list needs to be mutable so that extra parameter definitions can be added if needed.
+        List<CqlParameterDefinition> cqlParameterDefinitions = new ArrayList<>();
         if (parameters == null) {
-            // This list needs to be mutable
-            return new ArrayList<>();
+            return cqlParameterDefinitions;
         }
 
         IParametersAdapter parametersAdapter = this.adapterFactory.createParameters(parameters);
@@ -227,7 +228,6 @@ public class CqlFhirParametersConverter {
                 .filter(x -> x.getName() != null)
                 .collect(Collectors.groupingBy(IParametersParameterComponentAdapter::getName));
 
-        List<CqlParameterDefinition> cqlParameterDefinitions = new ArrayList<>();
         for (Map.Entry<String, List<IParametersParameterComponentAdapter>> entry : children.entrySet()) {
             // Meta data extension, if present
             Optional<IBaseExtension<?, ?>> ext = entry.getValue().stream()

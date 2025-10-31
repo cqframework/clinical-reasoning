@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.opencds.cqf.fhir.cr.measure.r4.utils.R4ResourceIdUtils;
 
 public class PopulationDef {
 
@@ -60,6 +61,12 @@ public class PopulationDef {
 
     public Set<String> getSubjects() {
         return this.getSubjectResources().keySet();
+    }
+
+    public Set<String> getSubjectsWithPatientQualifier() {
+        return getSubjects().stream()
+                .map(R4ResourceIdUtils::addPatientQualifier)
+                .collect(Collectors.toUnmodifiableSet());
     }
 
     public void retainAllResources(Set<Object> resourcesToRetain) {

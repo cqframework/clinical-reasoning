@@ -97,14 +97,7 @@ class R4StratifierBuilder {
             var reportStratum = reportStratifier.addStratum();
 
             buildStratum(
-                    bc,
-                    stratifierDef,
-                    stratumDef,
-                    reportStratum,
-                    stratumDef.getValueDefs(),
-                    stratumDef.getSubjectIds(),
-                    populations,
-                    groupDef);
+                    bc, stratifierDef, stratumDef, reportStratum, stratumDef.getValueDefs(), populations, groupDef);
         });
     }
 
@@ -135,7 +128,6 @@ class R4StratifierBuilder {
                     getOnlyStratumDef(stratifierDef),
                     reportStratum,
                     stratValues,
-                    patients,
                     populations,
                     groupDef);
             return; // short-circuit so we don't process non-criteria logic
@@ -161,15 +153,7 @@ class R4StratifierBuilder {
 
         var reportStratum = reportStratifier.addStratum();
 
-        buildStratum(
-                bc,
-                stratifierDef,
-                stratumDef,
-                reportStratum,
-                stratumDef.getValueDefs(),
-                stratumDef.getSubjectIds(),
-                populations,
-                groupDef);
+        buildStratum(bc, stratifierDef, stratumDef, reportStratum, stratumDef.getValueDefs(), populations, groupDef);
     }
 
     private static void buildStratum(
@@ -178,7 +162,6 @@ class R4StratifierBuilder {
             StratumDef stratumDef,
             StratifierGroupComponent stratum,
             Set<StratumValueDef> values,
-            List<String> subjectIds,
             List<MeasureGroupPopulationComponent> populations,
             GroupDef groupDef) {
         boolean isComponent = values.size() > 1;
@@ -242,8 +225,7 @@ class R4StratifierBuilder {
                 throw new InternalErrorException("could not find MeasureGroupPopulationComponent");
             }
             var stratumPopulation = stratum.addPopulation();
-            buildStratumPopulation(
-                    bc, stratifierDef, stratumPopulationDef, stratumPopulation, subjectIds, optMgpc.get(), groupDef);
+            buildStratumPopulation(bc, stratumPopulationDef, stratumPopulation, optMgpc.get(), groupDef);
         }
     }
 
@@ -269,10 +251,8 @@ class R4StratifierBuilder {
     // the provided list of subjectIds
     private static void buildStratumPopulation(
             BuilderContext bc,
-            StratifierDef stratifierDef,
             StratumPopulationDef stratumPopulationDef,
             StratifierGroupPopulationComponent sgpc,
-            List<String> subjectIds,
             MeasureGroupPopulationComponent population,
             GroupDef groupDef) {
 
@@ -300,14 +280,10 @@ class R4StratifierBuilder {
                             population.getCode().getCodingFirstRep().getCode()));
         }
 
-        final Set<String> subjectsQualifiedOrUnqualified = stratumPopulationDef.getSubjectsQualifiedOrUnqualified();
-
         if (groupDef.isBooleanBasis()) {
-            buildBooleanBasisStratumPopulation(
-                    bc, sgpc, stratumPopulationDef, populationDef, subjectsQualifiedOrUnqualified);
+            buildBooleanBasisStratumPopulation(bc, sgpc, stratumPopulationDef, populationDef);
         } else {
-            buildResourceBasisStratumPopulation(
-                    bc, stratifierDef, stratumPopulationDef, sgpc, subjectIds, populationDef, groupDef);
+            buildResourceBasisStratumPopulation(bc, stratumPopulationDef, sgpc);
         }
     }
 
@@ -315,43 +291,31 @@ class R4StratifierBuilder {
             BuilderContext bc,
             StratifierGroupPopulationComponent sgpc,
             StratumPopulationDef stratumPopulationDef,
-            PopulationDef populationDef,
-            Set<String> subjectIdsCommonToPopulation) {
+            PopulationDef populationDef) {
 
-        var popSubjectIds = populationDef.getSubjects().stream()
-                .map(R4ResourceIdUtils::addPatientQualifier)
-                .toList();
+        final Set<String> subjectsCommonToPopulation = stratumPopulationDef.getSubjectsQualifiedOrUnqualified();
+
+        var popSubjectIds = populationDef.getSubjectsWithPatientQualifier();
+
         if (popSubjectIds.isEmpty()) {
             sgpc.setCount(0);
             return;
         }
 
-        sgpc.setCount(subjectIdsCommonToPopulation.size());
+        sgpc.setCount(subjectsCommonToPopulation.size());
 
         // subject-list ListResource to match intersection of results
-        if (!subjectIdsCommonToPopulation.isEmpty()
+        if (!subjectsCommonToPopulation.isEmpty()
                 && bc.report().getType() == org.hl7.fhir.r4.model.MeasureReport.MeasureReportType.SUBJECTLIST) {
             ListResource popSubjectList =
-                    R4StratifierBuilder.createIdList(UUID.randomUUID().toString(), subjectIdsCommonToPopulation);
+                    R4StratifierBuilder.createIdList(UUID.randomUUID().toString(), subjectsCommonToPopulation);
             bc.addContained(popSubjectList);
             sgpc.setSubjectResults(new Reference("#" + popSubjectList.getId()));
         }
     }
 
     private static void buildResourceBasisStratumPopulation(
-            BuilderContext bc,
-            StratifierDef stratifierDef,
-            StratumPopulationDef stratumPopulationDef,
-            StratifierGroupPopulationComponent sgpc,
-            List<String> subjectIds,
-            PopulationDef populationDef,
-            GroupDef groupDef) {
-
-        final List<String> resourceIds = getResourceIds(subjectIds, groupDef, populationDef);
-
-        if (! collectionsEqualIgnoringOrder(resourceIds, stratumPopulationDef.getResourceIds())) {
-            throw new IllegalStateException("resource IDs don't match: old: %s, new: %s".formatted(resourceIds, stratumPopulationDef.getResourceIds()));
-        }
+            BuilderContext bc, StratumPopulationDef stratumPopulationDef, StratifierGroupPopulationComponent sgpc) {
 
         // LUKETODO:  this is wrong for our purposes:
         // 1) we are getting non-distinct Date values, one duplicate for each of the 2 dates resolved by the population
@@ -360,6 +324,8 @@ class R4StratifierBuilder {
         // 4) So we need to capture the intersection of resources in the MeasureEvaluator, then count them separately
         // 5) As a first step, move this code to the MeasureEvaluator and ensure all existing tests pass
         sgpc.setCount(stratumPopulationDef.getCount());
+
+        final List<String> resourceIds = stratumPopulationDef.getResourceIds();
 
         // subject-list ListResource to match intersection of results
         if ((!resourceIds.isEmpty())

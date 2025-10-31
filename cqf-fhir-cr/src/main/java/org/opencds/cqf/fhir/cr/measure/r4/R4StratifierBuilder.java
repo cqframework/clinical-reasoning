@@ -2,12 +2,12 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import com.google.common.collect.Sets;
-import com.google.common.collect.Sets.SetView;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -304,20 +304,10 @@ class R4StratifierBuilder {
 
         if (groupDef.isBooleanBasis()) {
             buildBooleanBasisStratumPopulation(
-                bc,
-                sgpc,
-                stratumPopulationDef,
-                populationDef,
-                subjectsQualifiedOrUnqualified);
+                    bc, sgpc, stratumPopulationDef, populationDef, subjectsQualifiedOrUnqualified);
         } else {
             buildResourceBasisStratumPopulation(
-                bc,
-                stratifierDef,
-                stratumPopulationDef,
-                sgpc,
-                subjectIds,
-                populationDef,
-                groupDef);
+                    bc, stratifierDef, stratumPopulationDef, sgpc, subjectIds, populationDef, groupDef);
         }
     }
 
@@ -359,22 +349,21 @@ class R4StratifierBuilder {
 
         final List<String> resourceIds = getResourceIds(subjectIds, groupDef, populationDef);
 
+        if (! collectionsEqualIgnoringOrder(resourceIds, stratumPopulationDef.getResourceIds())) {
+            throw new IllegalStateException("resource IDs don't match: old: %s, new: %s".formatted(resourceIds, stratumPopulationDef.getResourceIds()));
+        }
+
         // LUKETODO:  this is wrong for our purposes:
         // 1) we are getting non-distinct Date values, one duplicate for each of the 2 dates resolved by the population
         // 2) we are doing the computation in the Builder, when we ought to do it in the MeasureEvaluator
         // 3) We're conflating the intersection code with the counting, but this needs to be done separately
         // 4) So we need to capture the intersection of resources in the MeasureEvaluator, then count them separately
         // 5) As a first step, move this code to the MeasureEvaluator and ensure all existing tests pass
-        final int stratumCount = getStratumCountUpper(stratifierDef, populationDef, resourceIds);
-
-        sgpc.setCount(stratumCount);
-
-        if (resourceIds.isEmpty()) {
-            return;
-        }
+        sgpc.setCount(stratumPopulationDef.getCount());
 
         // subject-list ListResource to match intersection of results
-        if (bc.report().getType() == org.hl7.fhir.r4.model.MeasureReport.MeasureReportType.SUBJECTLIST) {
+        if ((!resourceIds.isEmpty())
+                && bc.report().getType() == org.hl7.fhir.r4.model.MeasureReport.MeasureReportType.SUBJECTLIST) {
             ListResource popSubjectList =
                     R4StratifierBuilder.createIdList(UUID.randomUUID().toString(), resourceIds);
             bc.addContained(popSubjectList);
@@ -382,38 +371,40 @@ class R4StratifierBuilder {
         }
     }
 
-    private static int getStratumCountUpper(
-            StratifierDef stratifierDef, PopulationDef populationDef, List<String> resourceIds) {
-
-        if (MeasureStratifierType.CRITERIA == stratifierDef.getStratifierType()) {
-            final Set<Object> resources = populationDef.getResources();
-            // LUKETODO:  for the component criteria scenario, we don't add the results directly to the stratifierDef,
-            // but to each of the component defs, which is why this is empty
-            final Set<Object> results = stratifierDef.getAllCriteriaResultValues();
-
-            if (resources.isEmpty() || results.isEmpty()) {
-                // There's no intersection, so no point in going further.
-                return 0;
-            }
-
-            final Class<?> resourcesClassFirst = resources.iterator().next().getClass();
-            final Class<?> resultClassFirst = results.iterator().next().getClass();
-
-            // Sanity check: isCriteriaBasedStratifier() should have filtered this out
-            if (resourcesClassFirst != resultClassFirst) {
-                // Different classes, so no point in going further.
-                return 0;
-            }
-
-            final SetView<Object> intersection = Sets.intersection(resources, results);
-            return intersection.size();
+    public static <T> boolean collectionsEqualIgnoringOrder(Collection<T> coll1, Collection<T> coll2) {
+        if (coll1 == null || coll2 == null) {
+            return coll1 == coll2;
         }
 
-        if (resourceIds.isEmpty()) {
-            return 0;
+        if (coll1.size() != coll2.size()) {
+            return false;
         }
 
-        return resourceIds.size();
+        Map<T, Integer> frequencies = new HashMap<>();
+
+        // Build frequency map for the first collection
+        for (T item : coll1) {
+            frequencies.put(item, frequencies.getOrDefault(item, 0) + 1);
+        }
+
+        // A simple 'Map.equals()' won't work if coll2 has different elements
+        // that aren't in coll1. We must check coll2 against the map.
+        for (T item : coll2) {
+            Integer count = frequencies.get(item);
+
+            // If the item is not in the map or the count is zero, it's a mismatch
+            if (count == null || count == 0) {
+                return false;
+            }
+
+            // Decrement the count for the item
+            frequencies.put(item, count - 1);
+        }
+
+        // All counts should be zero, but the size check at the beginning
+        // combined with the decrement loop already guarantees this.
+        // If we reached here, the collections are equal.
+        return true;
     }
 
     @Nonnull

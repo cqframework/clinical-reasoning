@@ -1,5 +1,7 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -16,6 +18,8 @@ public class StratumPopulationDef {
     private final Set<String> subjectsQualifiedOrUnqualified;
     // Temporary:  this needs to be captured as number of intersected resources
     private int count = 0;
+    // Temporary:  figure out what to do with this
+    private List<String> resourceIds = new ArrayList<>();
 
     public StratumPopulationDef(String id, Set<String> subjectsQualifiedOrUnqualified) {
         this.id = id;
@@ -53,6 +57,13 @@ public class StratumPopulationDef {
         this.count = count;
     }
 
+    public List<String> getResourceIds() {
+        return resourceIds;
+    }
+
+    public void addAllResourceIds(List<String> resourceIds) {
+        this.resourceIds.addAll(resourceIds);
+    }
 
     // LUKETODO: toString
 }

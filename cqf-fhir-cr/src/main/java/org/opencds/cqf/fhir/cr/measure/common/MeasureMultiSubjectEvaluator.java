@@ -4,13 +4,6 @@ import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Sets.SetView;
 import com.google.common.collect.Table;
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.ResourceType;
-import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
-import org.opencds.cqf.fhir.cr.measure.r4.utils.R4ResourceIdUtils;
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -20,6 +13,13 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
+import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.ResourceType;
+import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
+import org.opencds.cqf.fhir.cr.measure.r4.utils.R4ResourceIdUtils;
 
 // LUKETODO:  javadoc
 public class MeasureMultiSubjectEvaluator {
@@ -40,14 +40,10 @@ public class MeasureMultiSubjectEvaluator {
 
                 if (!stratifierDef.components().isEmpty()) {
                     stratumDefs = componentStratumPlural(
-                        stratifierDef,
-                        groupDef.getPopulationBasis(),
-                        groupDef.populations());
+                            stratifierDef, groupDef.getPopulationBasis(), groupDef.populations());
                 } else {
                     stratumDefs = nonComponentStratumPlural(
-                        stratifierDef,
-                        groupDef.getPopulationBasis(),
-                        groupDef.populations());
+                            stratifierDef, groupDef.getPopulationBasis(), groupDef.populations());
                 }
 
                 stratifierDef.addAllStratum(stratumDefs);
@@ -92,17 +88,17 @@ public class MeasureMultiSubjectEvaluator {
         }
 
         return new StratumDef(
-            stratumText,
-            populationDefs.stream()
-                .map(popDef -> buildStratumPopulationDef(
-                    stratifierDef.getStratifierType(),
-                    stratifierDef.getAllCriteriaResultValues(),
-                    populationBasis,
-                    popDef,
-                    subjectIds))
-                .toList(),
-            values,
-            subjectIds);
+                stratumText,
+                populationDefs.stream()
+                        .map(popDef -> buildStratumPopulationDef(
+                                stratifierDef.getStratifierType(),
+                                stratifierDef.getAllCriteriaResultValues(),
+                                populationBasis,
+                                popDef,
+                                subjectIds))
+                        .toList(),
+                values,
+                subjectIds);
     }
 
     private static StratumPopulationDef buildStratumPopulationDef(
@@ -113,32 +109,30 @@ public class MeasureMultiSubjectEvaluator {
             List<String> subjectIds) {
 
         var popSubjectIds = populationDef.getSubjects().stream()
-            .map(R4ResourceIdUtils::addPatientQualifier)
-            .collect(Collectors.toUnmodifiableSet());
+                .map(R4ResourceIdUtils::addPatientQualifier)
+                .collect(Collectors.toUnmodifiableSet());
 
         var qualifiedSubjectIdsCommonToPopulation = Sets.intersection(new HashSet<>(subjectIds), popSubjectIds);
 
         final StratumPopulationDef stratumPopulationDef =
-            new StratumPopulationDef(
-                populationDef.id(),
-                qualifiedSubjectIdsCommonToPopulation);
+                new StratumPopulationDef(populationDef.id(), qualifiedSubjectIdsCommonToPopulation);
 
-        final int stratumCount = getStratumCountUpper(
-            measureStratifierType,
-            evaluationResultsForStratifier,
-            populationDef,
-            getResourceIds(subjectIds, groupPopulationBasis, populationDef));
+        final List<String> resourceIds = getResourceIds(subjectIds, groupPopulationBasis, populationDef);
+
+        final int stratumCount =
+                getStratumCountUpper(measureStratifierType, evaluationResultsForStratifier, populationDef, resourceIds);
 
         stratumPopulationDef.setCount(stratumCount);
+        stratumPopulationDef.addAllResourceIds(resourceIds);
 
         return stratumPopulationDef;
     }
 
-    private static List<StratumDef> componentStratumPlural(StratifierDef stratifierDef,
-        CodeDef populationBasis, List<PopulationDef> populationDefs) {
+    private static List<StratumDef> componentStratumPlural(
+            StratifierDef stratifierDef, CodeDef populationBasis, List<PopulationDef> populationDefs) {
 
         final Table<String, StratumValueWrapper, StratifierComponentDef> subjectResultTable =
-            buildSubjectResultsTable(stratifierDef.components());
+                buildSubjectResultsTable(stratifierDef.components());
 
         // Stratifiers should be of the same basis as population
         // Split subjects by result values
@@ -157,8 +151,7 @@ public class MeasureMultiSubjectEvaluator {
             // | Stratum-3 | <'M','hispanic/latino'> | [subject-c]            |
             // | Stratum-4 | <'F','black'>           | [subject-d, subject-e] |
 
-            var stratumDef = buildStratumDef(stratifierDef, valueSet, subjects, populationBasis,
-                populationDefs);
+            var stratumDef = buildStratumDef(stratifierDef, valueSet, subjects, populationBasis, populationDefs);
 
             stratumDefs.add(stratumDef);
         });
@@ -167,7 +160,7 @@ public class MeasureMultiSubjectEvaluator {
     }
 
     private static List<StratumDef> nonComponentStratumPlural(
-        StratifierDef stratifierDef, CodeDef populationBasis, List<PopulationDef> populationDefs) {
+            StratifierDef stratifierDef, CodeDef populationBasis, List<PopulationDef> populationDefs) {
         // standard Stratifier
         // one criteria expression defined, one set of criteria results
 
@@ -188,17 +181,16 @@ public class MeasureMultiSubjectEvaluator {
             // Seems to be irrelevant for criteria based stratifiers
             var patients = List.<String>of();
 
-            var stratum = buildStratumDef(stratifierDef, stratValues, patients, populationBasis,
-                populationDefs);
+            var stratum = buildStratumDef(stratifierDef, stratValues, patients, populationBasis, populationDefs);
             return List.of(stratum);
         }
 
         final Map<StratumValueWrapper, List<String>> subjectsByValue = subjectValues.entrySet().stream()
-            .filter(entry -> entry.getValue() != null)
-            .filter(entry -> entry.getValue().rawValue() != null)
-            .collect(Collectors.groupingBy(
-                entry -> new StratumValueWrapper(entry.getValue().rawValue()),
-                Collectors.mapping(Entry::getKey, Collectors.toList())));
+                .filter(entry -> entry.getValue() != null)
+                .filter(entry -> entry.getValue().rawValue() != null)
+                .collect(Collectors.groupingBy(
+                        entry -> new StratumValueWrapper(entry.getValue().rawValue()),
+                        Collectors.mapping(Entry::getKey, Collectors.toList())));
 
         var stratumMultiple = new ArrayList<StratumDef>();
 
@@ -211,19 +203,15 @@ public class MeasureMultiSubjectEvaluator {
             // patch Patient values with prefix of ResourceType to match with incoming population subjects for stratum
             // TODO: should match context of CQL, not only Patient
             var patientsSubjects = stratValue.getValue().stream()
-                .map(R4ResourceIdUtils::addPatientQualifier)
-                .toList();
+                    .map(R4ResourceIdUtils::addPatientQualifier)
+                    .toList();
             // build the stratum for each unique value
             // non-component stratifiers will populate a 'null' for componentStratifierDef, since it doesn't have
             // multiple criteria
             // TODO: build out nonComponent stratum method
             Set<StratumValueDef> stratValues = Set.of(new StratumValueDef(stratValue.getKey(), null));
-            var stratum = buildStratumDef(
-                stratifierDef,
-                stratValues,
-                patientsSubjects,
-                populationBasis,
-                populationDefs);
+            var stratum =
+                    buildStratumDef(stratifierDef, stratValues, patientsSubjects, populationBasis, populationDefs);
             stratumMultiple.add(stratum);
         }
 
@@ -231,7 +219,7 @@ public class MeasureMultiSubjectEvaluator {
     }
 
     private static Table<String, StratumValueWrapper, StratifierComponentDef> buildSubjectResultsTable(
-        List<StratifierComponentDef> componentDefs) {
+            List<StratifierComponentDef> componentDefs) {
 
         final Table<String, StratumValueWrapper, StratifierComponentDef> subjectResultTable = HashBasedTable.create();
 
@@ -248,7 +236,7 @@ public class MeasureMultiSubjectEvaluator {
     }
 
     private static Map<Set<StratumValueDef>, List<String>> groupSubjectsByValueDefSet(
-        Table<String, StratumValueWrapper, StratifierComponentDef> table) {
+            Table<String, StratumValueWrapper, StratifierComponentDef> table) {
         // input format
         // | Subject (String) | CriteriaResult (ValueWrapper) | StratifierComponentDef |
         // | ---------------- | ----------------------------- | ---------------------- |
@@ -268,8 +256,8 @@ public class MeasureMultiSubjectEvaluator {
 
         for (Table.Cell<String, StratumValueWrapper, StratifierComponentDef> cell : table.cellSet()) {
             subjectToValueDefs
-                .computeIfAbsent(cell.getRowKey(), k -> new HashSet<>())
-                .add(new StratumValueDef(cell.getColumnKey(), cell.getValue()));
+                    .computeIfAbsent(cell.getRowKey(), k -> new HashSet<>())
+                    .add(new StratumValueDef(cell.getColumnKey(), cell.getValue()));
         }
         // output format:
         // | Set<ValueDef>           | List<Subjects(String)> |
@@ -281,12 +269,12 @@ public class MeasureMultiSubjectEvaluator {
 
         // Step 2: Invert to Map<Set<ValueDef>, List<Subject>>
         return subjectToValueDefs.entrySet().stream()
-            .collect(Collectors.groupingBy(
-                Map.Entry::getValue,
-                Collector.of(ArrayList::new, (list, e) -> list.add(e.getKey()), (l1, l2) -> {
-                    l1.addAll(l2);
-                    return l1;
-                })));
+                .collect(Collectors.groupingBy(
+                        Map.Entry::getValue,
+                        Collector.of(ArrayList::new, (list, e) -> list.add(e.getKey()), (l1, l2) -> {
+                            l1.addAll(l2);
+                            return l1;
+                        })));
     }
 
     // This is weird pattern where we have multiple qualifying values within a single stratum,
@@ -311,7 +299,8 @@ public class MeasureMultiSubjectEvaluator {
             }
 
             final Class<?> resourcesClassFirst = resources.iterator().next().getClass();
-            final Class<?> resultClassFirst = evaluationResults.iterator().next().getClass();
+            final Class<?> resultClassFirst =
+                    evaluationResults.iterator().next().getClass();
 
             // Sanity check: isCriteriaBasedStratifier() should have filtered this out
             if (resourcesClassFirst != resultClassFirst) {
@@ -332,13 +321,12 @@ public class MeasureMultiSubjectEvaluator {
 
     @Nonnull
     private static List<String> getResourceIds(
-        List<String> subjectIds, CodeDef populationBasis, PopulationDef populationDef) {
+            List<String> subjectIds, CodeDef populationBasis, PopulationDef populationDef) {
         String resourceType;
         try {
             // when this method is checked with a primitive value and not ResourceType it returns an error
             // this try/catch is to prevent the exception thrown from setting the correct value
-            resourceType =
-                ResourceType.fromCode(populationBasis.code()).toString();
+            resourceType = ResourceType.fromCode(populationBasis.code()).toString();
         } catch (FHIRException e) {
             resourceType = null;
         }
@@ -351,15 +339,15 @@ public class MeasureMultiSubjectEvaluator {
             for (String subjectId : subjectIds) {
                 // retrieve criteria results by subject Key
                 var resources =
-                    populationDef.getSubjectResources().get(R4ResourceIdUtils.stripPatientQualifier(subjectId));
+                        populationDef.getSubjectResources().get(R4ResourceIdUtils.stripPatientQualifier(subjectId));
                 if (resources != null) {
                     if (isResourceType) {
                         resourceIds.addAll(resources.stream()
-                            .map(MeasureMultiSubjectEvaluator::getPopulationResourceIds) // get resource id
-                            .toList());
+                                .map(MeasureMultiSubjectEvaluator::getPopulationResourceIds) // get resource id
+                                .toList());
                     } else {
                         resourceIds.addAll(
-                            resources.stream().map(Object::toString).toList());
+                                resources.stream().map(Object::toString).toList());
                     }
                 }
             }

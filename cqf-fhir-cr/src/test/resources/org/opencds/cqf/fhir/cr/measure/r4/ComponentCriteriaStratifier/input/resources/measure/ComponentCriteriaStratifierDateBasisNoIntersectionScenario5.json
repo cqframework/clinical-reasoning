@@ -1,0 +1,82 @@
+{
+  "id": "ComponentCriteriaStratifierDateBasisNoIntersectionScenario5",
+  "resourceType": "Measure",
+  "name": "ComponentCriteriaStratifierDateBasisNoIntersectionScenario5",
+  "url": "http://example.com/Measure/ComponentCriteriaStratifierDateBasisNoIntersectionScenario5",
+  "library": [
+    "http://example.com/Library/ComponentCriteriaStratifier"
+  ],
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-populationBasis",
+      "valueCode": "date"
+    }
+  ],
+  "scoring": {
+    "coding": [
+      {
+        "system": "http://hl7.org/fhir/measure-scoring",
+        "code": "cohort"
+      }
+    ]
+  },
+  "group": [
+    {
+      "id": "group-1",
+      "population": [
+        {
+          "id": "initial-population",
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code": "initial-population",
+                "display": "Initial Population"
+              }
+            ]
+          },
+          "criteria": {
+            "language": "text/cql-identifier",
+            "expression": "Initial Population Date"
+          }
+        }
+      ],
+      "stratifier": [
+        {
+          "id": "stratifier-jul1-aug1-sep1-oct1",
+          "code" : {
+            "text": "Stratifier Jul1 Aug1 + Sep1 Oct1"
+          },
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-population-stratifier-type",
+              "valueCode": "criteria"
+            }
+          ],
+          "component": [
+            {
+              "id": "stratifier-comp-jul1-aug1",
+              "code" : {
+                "text": "Stratifier Jul1 Aug1"
+              },
+              "criteria": {
+                "language": "text/cql.identifier",
+                "expression": "Stratifier Jul1 Aug1"
+              }
+            },
+            {
+              "id": "stratifier-comp-sep1-oct1",
+              "code" : {
+                "text": "Stratifier Sep1 Oct1"
+              },
+              "criteria": {
+                "language": "text/cql.identifier",
+                "expression": "Stratifier Sep1 Oct1"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,569 @@
+package org.opencds.cqf.fhir.cr.measure.r4;
+
+import ca.uhn.fhir.context.FhirContext;
+import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
+import org.opencds.cqf.fhir.cr.measure.r4.Measure.SelectedReport;
+
+public class ComponentCriteriaStratifierTest {
+
+    private static final Given GIVEN = Measure.given().repositoryFor("ComponentCriteriaStratifier");
+
+    /*
+       population=1/1/2024, 1/2/2024
+           Components
+               criteria stratifier 1
+                   raw result: 2/1/2024, 1/2/2024
+               criteria stratifier 2
+                   raw result: 2/3/2024, 1/2/2024
+               stratum population: 1/2/2024
+    */
+    @Test
+    void cohortDateComponentCriteriaStratWithIntersectionScenario1() {
+
+        final SelectedReport then = GIVEN.when()
+                .measureId("ComponentCriteriaStratifierDateBasisWithIntersectionScenario1")
+                .evaluate()
+                .then();
+
+        System.out.println(
+                FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(then.report()));
+
+        then.hasGroupCount(1)
+                .firstGroup()
+                .hasPopulationCount(1)
+                .firstPopulation()
+                .hasName("initial-population")
+                .hasCount(4)
+                .up()
+                .hasStratifierCount(1)
+                .stratifierById("stratifier-feb1-jan2-feb3-jan2")
+                .hasStratumCount(1)
+                .firstStratum()
+                .hasPopulationCount(1)
+                .firstPopulation()
+                .hasName("initial-population")
+                .hasCount(1)
+                .up()
+                .up()
+                .up()
+                .up()
+                .report();
+    }
+
+    /*
+       population=1/1/2024, 1/2/2024
+           Components
+               criteria stratifier 1
+                   raw result: 2/1/2024, 3/2/2024
+               criteria stratifier 2
+                   raw result: 2/3/2024, 3/2/2024, 1/2/2024
+               stratum population: NONE:  lack of intersection between components and population
+    */
+    @Test
+    void cohortDateComponentCriteriaStratNoIntersectionScenario2() {
+
+        final SelectedReport then = GIVEN.when()
+                .measureId("ComponentCriteriaStratifierDateBasisNoIntersectionScenario2")
+                .evaluate()
+                .then();
+
+        System.out.println(
+                FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(then.report()));
+
+        then.hasGroupCount(1)
+                .firstGroup()
+                .hasPopulationCount(1)
+                .firstPopulation()
+                .hasName("initial-population")
+                .hasCount(4)
+                .up()
+                .hasStratifierCount(1)
+                .stratifierById("stratifier-feb1-mar2-feb1-mar2-jan2")
+                .hasStratumCount(1)
+                .firstStratum()
+                .hasPopulationCount(1)
+                .firstPopulation()
+                .hasName("initial-population")
+                .hasCount(0)
+                .up()
+                .up()
+                .up()
+                .up()
+                .report();
+    }
+
+    @Test
+    void cohortDateComponentCriteriaStratNoIntersectionScenario3() {
+
+        final SelectedReport then = GIVEN.when()
+                .measureId("ComponentCriteriaStratifierDateBasisNoIntersectionScenario3")
+                .evaluate()
+                .then();
+
+        System.out.println(
+                FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(then.report()));
+
+        then.hasGroupCount(1)
+                .firstGroup()
+                .hasPopulationCount(1)
+                .firstPopulation()
+                .hasName("initial-population")
+                .hasCount(4)
+                .up()
+                .hasStratifierCount(1)
+                .stratifierById("stratifier-mar1-apr1-jan1-jan2")
+                .hasStratumCount(1)
+                .firstStratum()
+                .hasPopulationCount(1)
+                .firstPopulation()
+                .hasName("initial-population")
+                .hasCount(0)
+                .up()
+                .up()
+                .up()
+                .up()
+                .report();
+    }
+
+    @Test
+    void cohortDateComponentCriteriaStratNoIntersectionScenario4() {
+
+        final SelectedReport then = GIVEN.when()
+                .measureId("ComponentCriteriaStratifierDateBasisNoIntersectionScenario4")
+                .evaluate()
+                .then();
+
+        System.out.println(
+                FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(then.report()));
+
+        then.hasGroupCount(1)
+                .firstGroup()
+                .hasPopulationCount(1)
+                .firstPopulation()
+                .hasName("initial-population")
+                .hasCount(4)
+                .up()
+                .hasStratifierCount(1)
+                .stratifierById("stratifier-may1-jun1-may1-jun1")
+                .hasStratumCount(1)
+                .firstStratum()
+                .hasPopulationCount(1)
+                .firstPopulation()
+                .hasName("initial-population")
+                .hasCount(0)
+                .up()
+                .up()
+                .up()
+                .up()
+                .report();
+    }
+
+    @Test
+    void cohortDateComponentCriteriaStratNoIntersectionScenario5() {
+
+        final SelectedReport then = GIVEN.when()
+                .measureId("ComponentCriteriaStratifierDateBasisNoIntersectionScenario5")
+                .evaluate()
+                .then();
+
+        System.out.println(
+                FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(then.report()));
+
+        then.hasGroupCount(1)
+                .firstGroup()
+                .hasPopulationCount(1)
+                .firstPopulation()
+                .hasName("initial-population")
+                .hasCount(4)
+                .up()
+                .hasStratifierCount(1)
+                .stratifierById("stratifier-jul1-aug1-sep1-oct1")
+                .hasStratumCount(1)
+                .firstStratum()
+                .hasPopulationCount(1)
+                .firstPopulation()
+                .hasName("initial-population")
+                .hasCount(0)
+                .up()
+                .up()
+                .up()
+                .up()
+                .report();
+    }
+
+    @Test
+    void cohortBooleanComponentCriteriaStratWithIntersectionScenario1() {
+
+        final SelectedReport then = GIVEN.when()
+                .measureId("ComponentCriteriaStratifierBooleanBasisWithIntersectionScenario1")
+                .evaluate()
+                .then();
+
+        System.out.println(
+                FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(then.report()));
+
+        then.hasGroupCount(1)
+                .firstGroup()
+                .hasPopulationCount(1)
+                .firstPopulation()
+                .hasName("initial-population")
+                .hasCount(2)
+                .up()
+                .hasStratifierCount(1)
+                .stratifierById("stratifier-encounters-arrived-triaged-arrived-in-progress-boolean")
+                .hasStratumCount(1)
+                .firstStratum()
+                .hasPopulationCount(1)
+                .firstPopulation()
+                .hasName("initial-population")
+                // LUKETODO:  maybe this is correct?  debug to be sure
+                .hasCount(1)
+                .up()
+                .up()
+                .up()
+                .up()
+                .report();
+    }
+
+    @Test
+    void cohortBooleanComponentCriteriaStratNoIntersectionScenario2() {
+
+        final SelectedReport then = GIVEN.when()
+                .measureId("ComponentCriteriaStratifierBooleanBasisNoIntersectionScenario2")
+                .evaluate()
+                .then();
+
+        System.out.println(
+                FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(then.report()));
+
+        then.hasGroupCount(1)
+                .firstGroup()
+                .hasPopulationCount(1)
+                .firstPopulation()
+                .hasCount(2)
+                .up()
+                .hasStratifierCount(1)
+                .stratifierById("stratifier-encounter-planned-triaged-arrived-cancelled-boolean")
+                .hasStratumCount(1)
+                .firstStratum()
+                .hasPopulationCount(1)
+                .firstPopulation()
+                .hasName("initial-population")
+                .hasCount(0)
+                .up()
+                .up()
+                .up()
+                .up()
+                .report();
+    }
+
+    @Test
+    void cohortBooleanComponentCriteriaStratNoIntersectionScenario3() {
+
+        final SelectedReport then = GIVEN.when()
+                .measureId("ComponentCriteriaStratifierBooleanBasisNoIntersectionScenario3")
+                .evaluate()
+                .then();
+
+        System.out.println(
+                FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(then.report()));
+
+        then.hasGroupCount(1)
+                .firstGroup()
+                .hasPopulationCount(1)
+                .firstPopulation()
+                .hasCount(2)
+                .up()
+                .hasStratifierCount(1)
+                .stratifierById("stratifier-encounters-cancelled-finished-arrived-planned-boolean")
+                .hasStratumCount(1)
+                .firstStratum()
+                .hasPopulationCount(1)
+                .firstPopulation()
+                .hasName("initial-population")
+                .hasCount(0)
+                .up()
+                .up()
+                .up()
+                .up()
+                .report();
+    }
+
+    @Test
+    void cohortBooleanComponentCriteriaStratNoIntersectionScenario4() {
+
+        final SelectedReport then = GIVEN.when()
+                .measureId("ComponentCriteriaStratifierBooleanBasisNoIntersectionScenario4")
+                .evaluate()
+                .then();
+
+        System.out.println(
+                FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(then.report()));
+
+        then.hasGroupCount(1)
+                .firstGroup()
+                .hasPopulationCount(1)
+                .firstPopulation()
+                .hasCount(2)
+                .up()
+                .hasStratifierCount(1)
+                .stratifierById("stratifier-encounters-cancelled-triaged-cancelled-triaged-boolean")
+                .hasStratumCount(1)
+                .firstStratum()
+                .hasPopulationCount(1)
+                .firstPopulation()
+                .hasName("initial-population")
+                .hasCount(0)
+                .up()
+                .up()
+                .up()
+                .up()
+                .report();
+    }
+
+    @Test
+    void cohortBooleanComponentCriteriaStratNoIntersectionScenario5() {
+
+        final SelectedReport then = GIVEN.when()
+                .measureId("ComponentCriteriaStratifierBooleanBasisNoIntersectionScenario5")
+                .evaluate()
+                .then();
+
+        System.out.println(
+                FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(then.report()));
+
+        then.hasGroupCount(1)
+                .firstGroup()
+                .hasPopulationCount(1)
+                .firstPopulation()
+                .hasCount(2)
+                .up()
+                .hasStratifierCount(1)
+                .stratifierById("stratifier-encounters-cancelled-in-progress-finished-triaged-boolean")
+                .hasStratumCount(1)
+                .firstStratum()
+                .hasPopulationCount(1)
+                .firstPopulation()
+                .hasName("initial-population")
+                .hasCount(0)
+                .up()
+                .up()
+                .up()
+                .up()
+                .report();
+    }
+
+    @Test
+    void cohortEncounterComponentCriteriaStratWithIntersectionScenario1() {
+
+        final SelectedReport then = GIVEN.when()
+                .measureId("ComponentCriteriaStratifierEncounterBasisWithIntersectionScenario1")
+                .evaluate()
+                .then();
+
+        System.out.println(
+                FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(then.report()));
+
+        then.hasGroupCount(1)
+                .firstGroup()
+                .hasPopulationCount(1)
+                .firstPopulation()
+                .hasCount(4)
+                .up()
+                .hasStratifierCount(1)
+                .stratifierById("stratifier-encounters-arrived-triaged-arrived-in-progress-resource")
+                .hasStratumCount(1)
+                .firstStratum()
+                .hasPopulationCount(1)
+                .firstPopulation()
+                .hasName("initial-population")
+                .hasCount(1)
+                .up()
+                .up()
+                .up()
+                .up()
+                .report();
+    }
+
+    @Test
+    void cohortEncounterComponentCriteriaStratNoIntersectionScenario2() {
+
+        final SelectedReport then = GIVEN.when()
+                .measureId("ComponentCriteriaStratifierEncounterBasisNoIntersectionScenario2")
+                .evaluate()
+                .then();
+
+        System.out.println(
+                FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(then.report()));
+
+        then.hasGroupCount(1)
+                .firstGroup()
+                .hasPopulationCount(1)
+                .firstPopulation()
+                .hasCount(4)
+                .up()
+                .hasStratifierCount(1)
+                .stratifierById("stratifier-encounters-planned-triaged-arrived-cancelled")
+                .hasStratumCount(1)
+                .firstStratum()
+                .hasPopulationCount(1)
+                .firstPopulation()
+                .hasName("initial-population")
+                .hasCount(0)
+                .up()
+                .up()
+                .up()
+                .up()
+                .report();
+    }
+
+    @Test
+    void cohortEncounterComponentCriteriaStratNoIntersectionScenario3() {
+
+        final SelectedReport then = GIVEN.when()
+                .measureId("ComponentCriteriaStratifierEncounterBasisNoIntersectionScenario3")
+                .evaluate()
+                .then();
+
+        System.out.println(
+                FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(then.report()));
+
+        then.hasGroupCount(1)
+                .firstGroup()
+                .hasPopulationCount(1)
+                .firstPopulation()
+                .hasCount(4)
+                .up()
+                .hasStratifierCount(1)
+                .stratifierById("stratifier-encounters-cancelled-finished-arrived-planned")
+                .hasStratumCount(1)
+                .firstStratum()
+                .hasPopulationCount(1)
+                .firstPopulation()
+                .hasName("initial-population")
+                .hasCount(0)
+                .up()
+                .up()
+                .up()
+                .up()
+                .report();
+    }
+
+    @Test
+    void cohortEncounterComponentCriteriaStratNoIntersectionScenario4() {
+
+        final SelectedReport then = GIVEN.when()
+                .measureId("ComponentCriteriaStratifierEncounterBasisNoIntersectionScenario4")
+                .evaluate()
+                .then();
+
+        System.out.println(
+                FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(then.report()));
+
+        then.hasGroupCount(1)
+                .firstGroup()
+                .hasPopulationCount(1)
+                .firstPopulation()
+                .hasCount(4)
+                .up()
+                .hasStratifierCount(1)
+                .stratifierById("stratifier-encounters-cancelled-triaged-cancelled-triaged")
+                .hasStratumCount(1)
+                .firstStratum()
+                .hasPopulationCount(1)
+                .firstPopulation()
+                .hasName("initial-population")
+                .hasCount(0)
+                .up()
+                .up()
+                .up()
+                .up()
+                .report();
+    }
+
+    @Test
+    void cohortEncounterComponentCriteriaStratNoIntersectionScenario5() {
+
+        final SelectedReport then = GIVEN.when()
+                .measureId("ComponentCriteriaStratifierEncounterBasisNoIntersectionScenario5")
+                .evaluate()
+                .then();
+
+        System.out.println(
+                FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(then.report()));
+
+        then.hasGroupCount(1)
+                .firstGroup()
+                .hasPopulationCount(1)
+                .firstPopulation()
+                .hasCount(4)
+                .up()
+                .hasStratifierCount(1)
+                .stratifierById("stratifier-encounters-cancelled-in-progress-finished-triaged")
+                .hasStratumCount(1)
+                .firstStratum()
+                .hasPopulationCount(1)
+                .firstPopulation()
+                .hasName("initial-population")
+                .hasCount(0)
+                .up()
+                .up()
+                .up()
+                .up()
+                .report();
+    }
+
+    // LUKETODO:  test that explicitly handles mismatches and asserts error handling:
+
+    //    9. 1 of n Component stratifier criteria expression has non-compliant population basis (population = Resource,
+    // Stratifier expression result is "String" or something). Throws error
+
+    @Test
+    void cohortBooleanComponentCriteriaStratPopulationStratExpressionMismatchEncounter() {
+
+        final SelectedReport then = GIVEN.when()
+                .measureId("ComponentCriteriaStratifierBooleanBasisMismatchEncounter")
+                .evaluate()
+                .then();
+
+        System.out.println(
+                FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(then.report()));
+
+        then.hasContainedOperationOutcome()
+                .hasContainedOperationOutcomeMsg("Mismatch between population basis and stratifier criteria expression")
+                .report();
+    }
+
+    @Test
+    void cohortEncounterComponentCriteriaStratPopulationStratExpressionMismatchDate() {
+
+        final SelectedReport then = GIVEN.when()
+                .measureId("ComponentCriteriaStratifierEncounterBasisMismatchDate")
+                .evaluate()
+                .then();
+
+        System.out.println(
+                FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(then.report()));
+
+        then.hasContainedOperationOutcome()
+                .hasContainedOperationOutcomeMsg("Mismatch between population basis and stratifier criteria expression")
+                .report();
+    }
+
+    @Test
+    void cohortDateComponentCriteriaStratPopulationStratExpressionMismatchBoolean() {
+
+        final SelectedReport then = GIVEN.when()
+                .measureId("ComponentCriteriaStratifierDateBasisMismatchBoolean")
+                .evaluate()
+                .then();
+
+        System.out.println(
+                FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(then.report()));
+
+        then.hasContainedOperationOutcome()
+                .hasContainedOperationOutcomeMsg("Mismatch between population basis and stratifier criteria expression")
+                .report();
+    }
+}

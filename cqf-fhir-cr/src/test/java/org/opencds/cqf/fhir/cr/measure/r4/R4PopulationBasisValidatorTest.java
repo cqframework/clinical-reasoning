@@ -467,6 +467,7 @@ class R4PopulationBasisValidatorTest {
         return evaluationResult;
     }
 
+    // LUKETODO:  what's this for?
     @Nonnull
     private static EvaluationResult buildEvaluationResult(Object expressionResult) {
         final EvaluationResult evaluationResult = new EvaluationResult();

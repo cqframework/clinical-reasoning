@@ -24,12 +24,18 @@ public class StratumPopulationDef {
         return id;
     }
 
-    // LUKETODO:  javadoc
+    /**
+     * @return The subjectIds as they are, whether they are qualified with a resource
+     * (ex: [Patient/pat1, Patient/pat2] or [pat1, pat2]
+     */
     public Set<String> getSubjectsQualifiedOrUnqualified() {
         return subjectsQualifiedOrUnqualified;
     }
 
-    // LUKETODO:  javadoc
+    /**
+     * @return The subjectIds without a FHIR resource qualifier, whether they previously had a
+     * qualifier or not
+     */
     public Set<String> getSubjectsUnqualified() {
         return subjectsQualifiedOrUnqualified.stream()
                 .filter(Objects::nonNull)

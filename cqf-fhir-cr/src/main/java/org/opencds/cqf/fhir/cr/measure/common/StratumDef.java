@@ -43,4 +43,6 @@ public class StratumDef {
     public List<String> getSubjectIds() {
         return subjectIds;
     }
+
+    // LUKETODO: toString
 }

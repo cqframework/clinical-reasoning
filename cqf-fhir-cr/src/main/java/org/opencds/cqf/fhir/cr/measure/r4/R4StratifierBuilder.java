@@ -303,15 +303,28 @@ class R4StratifierBuilder {
         final Set<String> subjectsQualifiedOrUnqualified = stratumPopulationDef.getSubjectsQualifiedOrUnqualified();
 
         if (groupDef.isBooleanBasis()) {
-            buildBooleanBasisStratumPopulation(bc, sgpc, populationDef, subjectsQualifiedOrUnqualified);
+            buildBooleanBasisStratumPopulation(
+                bc,
+                sgpc,
+                stratumPopulationDef,
+                populationDef,
+                subjectsQualifiedOrUnqualified);
         } else {
-            buildResourceBasisStratumPopulation(bc, stratifierDef, sgpc, subjectIds, populationDef, groupDef);
+            buildResourceBasisStratumPopulation(
+                bc,
+                stratifierDef,
+                stratumPopulationDef,
+                sgpc,
+                subjectIds,
+                populationDef,
+                groupDef);
         }
     }
 
     private static void buildBooleanBasisStratumPopulation(
             BuilderContext bc,
             StratifierGroupPopulationComponent sgpc,
+            StratumPopulationDef stratumPopulationDef,
             PopulationDef populationDef,
             Set<String> subjectIdsCommonToPopulation) {
 
@@ -338,6 +351,7 @@ class R4StratifierBuilder {
     private static void buildResourceBasisStratumPopulation(
             BuilderContext bc,
             StratifierDef stratifierDef,
+            StratumPopulationDef stratumPopulationDef,
             StratifierGroupPopulationComponent sgpc,
             List<String> subjectIds,
             PopulationDef populationDef,
@@ -345,6 +359,12 @@ class R4StratifierBuilder {
 
         final List<String> resourceIds = getResourceIds(subjectIds, groupDef, populationDef);
 
+        // LUKETODO:  this is wrong for our purposes:
+        // 1) we are getting non-distinct Date values, one duplicate for each of the 2 dates resolved by the population
+        // 2) we are doing the computation in the Builder, when we ought to do it in the MeasureEvaluator
+        // 3) We're conflating the intersection code with the counting, but this needs to be done separately
+        // 4) So we need to capture the intersection of resources in the MeasureEvaluator, then count them separately
+        // 5) As a first step, move this code to the MeasureEvaluator and ensure all existing tests pass
         final int stratumCount = getStratumCountUpper(stratifierDef, populationDef, resourceIds);
 
         sgpc.setCount(stratumCount);

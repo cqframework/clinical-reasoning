@@ -69,7 +69,7 @@ public class MeasureEvaluationResultHandler {
             }
         }
 
-        evaluator.postEvaluation(measureDef);
+        MeasureMultiSubjectEvaluator.postEvaluationMultiSubject(measureDef);
     }
 
     /**

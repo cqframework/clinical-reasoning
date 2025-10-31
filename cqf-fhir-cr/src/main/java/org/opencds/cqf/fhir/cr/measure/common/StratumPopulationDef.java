@@ -14,6 +14,8 @@ public class StratumPopulationDef {
 
     private final String id;
     private final Set<String> subjectsQualifiedOrUnqualified;
+    // Temporary:  this needs to be captured as number of intersected resources
+    private int count = 0;
 
     public StratumPopulationDef(String id, Set<String> subjectsQualifiedOrUnqualified) {
         this.id = id;
@@ -42,4 +44,15 @@ public class StratumPopulationDef {
                 .map(R4ResourceIdUtils::stripAnyResourceQualifier)
                 .collect(Collectors.toUnmodifiableSet());
     }
+
+    public int getCount() {
+        return count;
+    }
+
+    public void setCount(int count) {
+        this.count = count;
+    }
+
+
+    // LUKETODO: toString
 }

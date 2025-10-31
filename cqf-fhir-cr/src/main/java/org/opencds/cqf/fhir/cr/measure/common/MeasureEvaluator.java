@@ -514,17 +514,20 @@ public class MeasureEvaluator {
     }
 
     private void addStratifierNonComponentResult(
-        String subjectId, EvaluationResult evaluationResult, StratifierDef stratifierDef) {
+            String subjectId, EvaluationResult evaluationResult, StratifierDef stratifierDef) {
 
         var expressionResult = evaluationResult.forExpression(stratifierDef.expression());
         if (expressionResult != null) {
-            logger.info("expressionResult: stratifierDef.expression(): {}, value: {}, evaluatedResources: {}", stratifierDef.expression(), expressionResult.value(), expressionResult.evaluatedResources());
+            logger.info(
+                    "expressionResult: stratifierDef.expression(): {}, value: {}, evaluatedResources: {}",
+                    stratifierDef.expression(),
+                    expressionResult.value(),
+                    expressionResult.evaluatedResources());
         }
 
         if (expressionResult == null) {
             logger.warn(
-                "Could not find CQL expression result for stratifier expression: {}",
-                stratifierDef.expression());
+                    "Could not find CQL expression result for stratifier expression: {}", stratifierDef.expression());
 
             return;
         }
@@ -532,17 +535,12 @@ public class MeasureEvaluator {
         final Object expressionResultValue = expressionResult.value();
 
         if (expressionResultValue == null) {
-            logger.warn(
-                "CQL expression result is null for stratifier expression: {}",
-                stratifierDef.expression());
+            logger.warn("CQL expression result is null for stratifier expression: {}", stratifierDef.expression());
 
             return;
         }
 
-        stratifierDef.putResult(
-            subjectId,
-            expressionResultValue,
-            expressionResult.evaluatedResources());
+        stratifierDef.putResult(subjectId, expressionResultValue, expressionResult.evaluatedResources());
     }
 
     /**
@@ -682,14 +680,12 @@ public class MeasureEvaluator {
             return List.of(stratum);
         }
 
-        final Map<StratumValueWrapper, List<String>> subjectsByValue = subjectValues.entrySet()
-            .stream()
-            .filter(entry -> entry.getValue() != null)
-            .filter(entry -> entry.getValue().rawValue() != null)
-            .collect(
-                Collectors.groupingBy(
-                    entry -> new StratumValueWrapper(entry.getValue().rawValue()),
-                    Collectors.mapping(Entry::getKey, Collectors.toList())));
+        final Map<StratumValueWrapper, List<String>> subjectsByValue = subjectValues.entrySet().stream()
+                .filter(entry -> entry.getValue() != null)
+                .filter(entry -> entry.getValue().rawValue() != null)
+                .collect(Collectors.groupingBy(
+                        entry -> new StratumValueWrapper(entry.getValue().rawValue()),
+                        Collectors.mapping(Entry::getKey, Collectors.toList())));
 
         var stratumMultiple = new ArrayList<StratumDef>();
 

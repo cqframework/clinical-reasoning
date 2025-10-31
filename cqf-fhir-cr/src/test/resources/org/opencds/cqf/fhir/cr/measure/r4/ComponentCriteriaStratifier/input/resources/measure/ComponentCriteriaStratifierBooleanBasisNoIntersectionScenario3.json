@@ -43,7 +43,7 @@
       ],
       "stratifier": [
         {
-          "id": "stratifier-encounter-cancelled-finished-arrived-planned-boolean",
+          "id": "stratifier-encounters-cancelled-finished-arrived-planned-boolean",
           "code" : {
             "text": "Stratifier Stratifier Encounter Cancelled Finished Arrived Planned Boolean"
           },

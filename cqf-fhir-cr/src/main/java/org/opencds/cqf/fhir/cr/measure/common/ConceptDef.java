@@ -1,20 +1,10 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
+import jakarta.annotation.Nonnull;
 import java.util.List;
+import java.util.StringJoiner;
 
-public class ConceptDef {
-
-    private final List<CodeDef> codes;
-    private final String text;
-
-    public ConceptDef(List<CodeDef> codes, String text) {
-        this.codes = codes;
-        this.text = text;
-    }
-
-    public List<CodeDef> codes() {
-        return this.codes;
-    }
+public record ConceptDef(List<CodeDef> codes, String text) {
 
     public boolean isEmpty() {
         return this.codes.isEmpty();
@@ -28,7 +18,12 @@ public class ConceptDef {
         return this.codes.get(0);
     }
 
-    public String text() {
-        return this.text;
+    @Override
+    @Nonnull
+    public String toString() {
+        return new StringJoiner(", ", ConceptDef.class.getSimpleName() + "[", "]")
+                .add("codes=" + codes)
+                .add("text='" + text + "'")
+                .toString();
     }
 }

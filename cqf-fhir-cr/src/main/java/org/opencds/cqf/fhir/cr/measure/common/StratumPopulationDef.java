@@ -20,18 +20,21 @@ public class StratumPopulationDef {
     // Temporary:  figure out what to do with this
     private final List<String> resourceIds;
     private final MeasureStratifierType measureStratifierType;
+    private final String resourceType;
 
     public StratumPopulationDef(
             String id,
             Set<String> subjectsQualifiedOrUnqualified,
             Set<Object> populationDefEvaluationResultIntersection,
             List<String> resourceIds,
-            MeasureStratifierType measureStratifierType) {
+            MeasureStratifierType measureStratifierType,
+            String resourceType) {
         this.id = id;
         this.subjectsQualifiedOrUnqualified = Set.copyOf(subjectsQualifiedOrUnqualified);
         this.populationDefEvaluationResultIntersection = populationDefEvaluationResultIntersection;
         this.resourceIds = resourceIds;
         this.measureStratifierType = measureStratifierType;
+        this.resourceType = resourceType;
     }
 
     public String getId() {

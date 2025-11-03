@@ -477,7 +477,7 @@ public class MeasureEvaluator {
     }
 
     private void evaluateStratifier(String subjectId, EvaluationResult evaluationResult, StratifierDef stratifierDef) {
-        if (!stratifierDef.components().isEmpty()) {
+        if (stratifierDef.isComponentStratifier()) {
             addStratifierComponentResult(stratifierDef.components(), evaluationResult, subjectId);
         } else {
             addStratifierNonComponentResult(subjectId, evaluationResult, stratifierDef);

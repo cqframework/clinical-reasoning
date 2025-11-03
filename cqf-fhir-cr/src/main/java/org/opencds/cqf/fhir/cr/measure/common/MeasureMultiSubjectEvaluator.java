@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
@@ -13,15 +14,21 @@ import java.util.Set;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4ResourceIdUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 // LUKETODO:  javadoc
 public class MeasureMultiSubjectEvaluator {
+
+    private static final Logger logger = LoggerFactory.getLogger(MeasureMultiSubjectEvaluator.class);
 
     /**
      * Take the accumulated subject-by-subject evaluation results and use it to build StratumDefs
@@ -91,7 +98,7 @@ public class MeasureMultiSubjectEvaluator {
                 populationDefs.stream()
                         .map(popDef -> buildStratumPopulationDef(
                                 stratifierDef.getStratifierType(),
-                                stratifierDef.getAllCriteriaResultValues(),
+                                stratifierDef.getResultsForComponentOrNonComponent(),
                                 populationBasis,
                                 popDef,
                                 subjectIds))
@@ -116,14 +123,19 @@ public class MeasureMultiSubjectEvaluator {
         final Set<Object> populationDefEvaluationResultIntersection =
                 getPopulationDefEvaluationResultIntersection(evaluationResultsForStratifier, populationDef);
 
-        final List<String> resourceIds = getResourceIds(subjectIds, groupPopulationBasis, populationDef);
+        final String resourceType = getResourceType(groupPopulationBasis);
+
+        final List<String> resourceIds = getResourceIds(resourceType, subjectIds, populationDef);
+
+        logger.info("1234: resourceIds: {}", resourceIds);
 
         return new StratumPopulationDef(
                 populationDef.id(),
                 qualifiedSubjectIdsCommonToPopulation,
                 populationDefEvaluationResultIntersection,
                 resourceIds,
-                measureStratifierType);
+                measureStratifierType,
+                resourceType);
     }
 
     private static List<StratumDef> componentStratumPlural(
@@ -304,22 +316,32 @@ public class MeasureMultiSubjectEvaluator {
         return Sets.intersection(resources, evaluationResults);
     }
 
-    @Nonnull
-    private static List<String> getResourceIds(
-            List<String> subjectIds, CodeDef populationBasis, PopulationDef populationDef) {
-        String resourceType;
+    @Nullable
+    private static String getResourceType(CodeDef populationBasis) {
         try {
             // when this method is checked with a primitive value and not ResourceType it returns an error
             // this try/catch is to prevent the exception thrown from setting the correct value
-            resourceType = ResourceType.fromCode(populationBasis.code()).toString();
+            return ResourceType.fromCode(populationBasis.code()).toString();
         } catch (FHIRException e) {
-            resourceType = null;
+            return null;
         }
+    }
+
+    // LUKETODO:  now that we have Quantities instead of Observations, this is sort of broken
+    // since Quantities don't have version-agnostic ID representations
+    @Nonnull
+    private static List<String> getResourceIds(
+            String resourceType, List<String> subjectIds, PopulationDef populationDef) {
 
         // only ResourceType fhirType should return true here
         boolean isResourceType = resourceType != null;
         List<String> resourceIds = new ArrayList<>();
-        assert populationDef != null;
+
+        if (populationDef == null) {
+            // LUKETODO:  enhance this message?
+            throw new InternalErrorException("Population definition has not been set");
+        }
+
         if (populationDef.getSubjectResources() != null) {
             for (String subjectId : subjectIds) {
                 // retrieve criteria results by subject Key
@@ -341,9 +363,15 @@ public class MeasureMultiSubjectEvaluator {
     }
 
     // LUKETODO:  so we need to count the number of resources here, which would be ID-less quantities
+    // LUKETODO:  we get a null ID here because we get a Map.Entry here, which fails the checks here:
+    // Map.Entry<Encounter, Quantity>
     private static String getPopulationResourceIds(Object resourceObject) {
         if (resourceObject instanceof IBaseResource resource) {
             return resource.getIdElement().toVersionless().getValueAsString();
+        }
+        // If this is not a resource, then included the type
+        if (resourceObject instanceof IBase baseType) {
+            return baseType.fhirType();
         }
         return null;
     }

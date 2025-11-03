@@ -42,6 +42,10 @@ public class StratifierDef {
         this.components = components;
     }
 
+    public boolean isComponentStratifier() {
+        return !components.isEmpty();
+    }
+
     public String expression() {
         return this.expression;
     }
@@ -78,17 +82,35 @@ public class StratifierDef {
         return this.results;
     }
 
+    public MeasureStratifierType getStratifierType() {
+        return stratifierType;
+    }
+
+    // LUKETODO:  this does NOT the component stratifier case:
+    public Set<Object> getResultsForComponentOrNonComponent() {
+        if (isComponentStratifier()) {
+            return getComponentResults();
+        }
+        return getNonComponentResults();
+    }
+
+    // LUKETODO:  code reuse
+    private Set<Object> getComponentResults() {
+        return components().stream()
+                .map(StratifierComponentDef::getResults)
+                .map(Map::values)
+                .flatMap(Collection::stream)
+                .map(CriteriaResult::rawValue)
+                .collect(Collectors.toUnmodifiableSet());
+    }
+
     // Ensure we handle FHIR resource identity properly
-    public Set<Object> getAllCriteriaResultValues() {
+    private Set<Object> getNonComponentResults() {
         return new HashSetForFhirResources<>(this.getResults().values().stream()
                 .map(CriteriaResult::rawValue)
                 .map(this::toSet)
                 .flatMap(Collection::stream)
                 .collect(Collectors.toUnmodifiableSet()));
-    }
-
-    public MeasureStratifierType getStratifierType() {
-        return stratifierType;
     }
 
     private Set<Object> toSet(Object value) {

@@ -280,11 +280,22 @@ class R4StratifierBuilder {
         }
     }
 
+    // LUKETODO:  this is wrong for our purposes:
+    // 1) we are getting non-distinct Date values, one duplicate for each of the 2 dates resolved by the population
+    // 2) we are doing the computation in the Builder, when we ought to do it in the MeasureEvaluator
+    // 3) We're conflating the intersection code with the counting, but this needs to be done separately
+    // 4) So we need to capture the intersection of resources in the MeasureEvaluator, then count them separately
+    // 5) As a first step, move this code to the MeasureEvaluator and ensure all existing tests pass
+
     private static void buildBooleanBasisStratumPopulation(
             BuilderContext bc,
             StratifierGroupPopulationComponent sgpc,
             StratumPopulationDef stratumPopulationDef,
             PopulationDef populationDef) {
+
+        logger.info(
+                "1234: boolean basis intersection: {}",
+                stratumPopulationDef.getPopulationDefEvaluationResultIntersection());
 
         final Set<String> subjectsCommonToPopulation = stratumPopulationDef.getSubjectsQualifiedOrUnqualified();
 
@@ -310,17 +321,14 @@ class R4StratifierBuilder {
     private static void buildResourceBasisStratumPopulation(
             BuilderContext bc, StratumPopulationDef stratumPopulationDef, StratifierGroupPopulationComponent sgpc) {
 
-        // LUKETODO:  this is wrong for our purposes:
-        // 1) we are getting non-distinct Date values, one duplicate for each of the 2 dates resolved by the population
-        // 2) we are doing the computation in the Builder, when we ought to do it in the MeasureEvaluator
-        // 3) We're conflating the intersection code with the counting, but this needs to be done separately
-        // 4) So we need to capture the intersection of resources in the MeasureEvaluator, then count them separately
-        // 5) As a first step, move this code to the MeasureEvaluator and ensure all existing tests pass
+        logger.info(
+                "1234: resource basis intersection: {}",
+                stratumPopulationDef.getPopulationDefEvaluationResultIntersection());
+
         sgpc.setCount(stratumPopulationDef.getCount());
 
         final List<String> resourceIds = stratumPopulationDef.getResourceIds();
 
-        // LUKETODO:  do we need to enhance this?
         // subject-list ListResource to match intersection of results
         if ((!resourceIds.isEmpty())
                 && bc.report().getType() == org.hl7.fhir.r4.model.MeasureReport.MeasureReportType.SUBJECTLIST) {

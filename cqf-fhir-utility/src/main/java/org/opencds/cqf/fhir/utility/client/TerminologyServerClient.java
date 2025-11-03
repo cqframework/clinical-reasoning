@@ -140,8 +140,7 @@ public class TerminologyServerClient {
                 .execute());
     }
 
-    public java.util.Optional<IDomainResource> getLatestValueSetResource(
-            IEndpointAdapter endpoint, String url) {
+    public java.util.Optional<IDomainResource> getLatestValueSetResource(IEndpointAdapter endpoint, String url) {
         var urlParams = Searches.byCanonical(url);
         return IKnowledgeArtifactAdapter.findLatestVersion(initializeClientWithAuth(endpoint)
                 .search()

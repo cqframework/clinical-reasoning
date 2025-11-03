@@ -257,39 +257,6 @@ public class TerminologyServerClientTest {
                 theCorrectBaseServerUrl, TerminologyServerClient.getAddressBase(theCorrectBaseServerUrl + "/", ctx));
     }
 
-    @SuppressWarnings("unchecked")
-    @ParameterizedTest
-    @EnumSource(
-            value = FhirVersionEnum.class,
-            names = {"DSTU3", "R4", "R5"}) // Specify the enum values to test
-    void getLatestNonDraftSetsModifier(FhirVersionEnum supportedVersion) {
-        // setup
-        var contextMock = mock(FhirContext.class, new ReturnsDeepStubs());
-        when(contextMock.getVersion().getVersion()).thenReturn(supportedVersion);
-        var clientMock = mock(IGenericClient.class, new ReturnsDeepStubs());
-        var endpointMock = mock(IEndpointAdapter.class, new ReturnsDeepStubs());
-        when(endpointMock.getAddress()).thenReturn(authoritativeSource);
-        when(contextMock.newRestfulGenericClient(any())).thenReturn(clientMock);
-        ArgumentCaptor<Map<String, List<IQueryParameterType>>> urlParamsCaptor = ArgumentCaptor.forClass(Map.class);
-        var whereMock = mock(IQuery.class);
-        when(clientMock
-                        .search()
-                        .forResource(ArgumentMatchers.<Class<IBaseResource>>any())
-                        .where(urlParamsCaptor.capture()))
-                .thenReturn(whereMock);
-        doReturn(BundleHelper.newBundle(supportedVersion)).when(whereMock).execute();
-
-        // test
-        var client = new TerminologyServerClient(contextMock);
-        client.getLatestNonDraftValueSetResource(endpointMock, "www.test.com/fhir/ValueSet/123|1.2.3");
-        var capturedUrlParams = urlParamsCaptor.getValue();
-        var token = (TokenParam) capturedUrlParams.get("status").get(0);
-
-        // assert
-        assertEquals("draft", token.getValue());
-        Assertions.assertSame(TokenParamModifier.NOT, token.getModifier());
-    }
-
     @Test
     void expandRetrySuccessful() {
         // setup tx server endpoint

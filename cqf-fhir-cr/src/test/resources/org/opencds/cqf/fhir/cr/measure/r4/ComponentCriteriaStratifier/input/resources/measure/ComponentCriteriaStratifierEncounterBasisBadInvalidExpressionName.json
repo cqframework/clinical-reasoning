@@ -1,8 +1,8 @@
 {
-  "id": "ComponentCriteriaStratifierEncounterBasisNoIntersectionScenario2",
+  "id": "ComponentCriteriaStratifierEncounterBasisInvalidExpressionName",
   "resourceType": "Measure",
-  "name": "ComponentCriteriaStratifierEncounterBasisNoIntersectionScenario2",
-  "url": "http://example.com/Measure/ComponentCriteriaStratifierEncounterBasisNoIntersectionScenario2",
+  "name": "ComponentCriteriaStratifierEncounterBasisInvalidExpressionName",
+  "url": "http://example.com/Measure/ComponentCriteriaStratifierEncounterBasisInvalidExpressionName",
   "library": [
     "http://example.com/Library/ComponentCriteriaStratifier"
   ],
@@ -65,13 +65,13 @@
               }
             },
             {
-              "id": "stratifier-encounters-arrived-cancelled",
+              "id": "stratifier-invalid-expression-name",
               "code" : {
-                "text": "Stratifier Encounters Arrived Cancelled"
+                "text": "Invalid Expression Name"
               },
               "criteria": {
                 "language": "text/cql.identifier",
-                "expression": "Stratifier Encounters Arrived Cancelled Resource"
+                "expression": "Invalid Expression Name"
               }
             }
           ]

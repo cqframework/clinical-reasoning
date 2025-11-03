@@ -71,7 +71,7 @@
               },
               "criteria": {
                 "language": "text/cql.identifier",
-                "expression": "Stratifier  May1 Jun1 1 2"
+                "expression": "Stratifier May1 Jun1 2"
               }
             }
           ]

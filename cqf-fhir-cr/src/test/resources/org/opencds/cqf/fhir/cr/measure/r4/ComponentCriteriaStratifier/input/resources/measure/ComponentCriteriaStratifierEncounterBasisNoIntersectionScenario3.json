@@ -71,7 +71,7 @@
               },
               "criteria": {
                 "language": "text/cql.identifier",
-                "expression": "Stratifier Encounter Arrived Planned Resource"
+                "expression": "Stratifier Encounters Arrived Planned Resource"
               }
             }
           ]

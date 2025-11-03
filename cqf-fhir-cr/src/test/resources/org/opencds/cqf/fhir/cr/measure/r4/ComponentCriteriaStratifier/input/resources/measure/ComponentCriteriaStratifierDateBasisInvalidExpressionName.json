@@ -1,15 +1,15 @@
 {
-  "id": "ComponentCriteriaStratifierEncounterBasisNoIntersectionScenario2",
+  "id": "ComponentCriteriaStratifierDateBasisInvalidExpressionName",
   "resourceType": "Measure",
-  "name": "ComponentCriteriaStratifierEncounterBasisNoIntersectionScenario2",
-  "url": "http://example.com/Measure/ComponentCriteriaStratifierEncounterBasisNoIntersectionScenario2",
+  "name": "ComponentCriteriaStratifierDateBasisInvalidExpressionName",
+  "url": "http://example.com/Measure/ComponentCriteriaStratifierDateBasisInvalidExpressionName",
   "library": [
     "http://example.com/Library/ComponentCriteriaStratifier"
   ],
   "extension": [
     {
       "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-populationBasis",
-      "valueCode": "Encounter"
+      "valueCode": "date"
     }
   ],
   "scoring": {
@@ -37,15 +37,15 @@
           },
           "criteria": {
             "language": "text/cql-identifier",
-            "expression": "Initial Population Resource"
+            "expression": "Initial Population Date"
           }
         }
       ],
       "stratifier": [
         {
-          "id": "stratifier-encounters-planned-triaged-arrived-cancelled",
+          "id": "stratifier-feb1-mar2-feb1-mar2-jan2",
           "code" : {
-            "text": "Stratifier Encounters Planned Triaged Arrived Cancelled Resource"
+            "text": "Stratifier Feb1 Mar2 + Feb1 Mar2 Jan2"
           },
           "extension": [
             {
@@ -55,23 +55,23 @@
           ],
           "component": [
             {
-              "id": "stratifier-encounters-planned-triaged",
+              "id": "stratifier-comp-feb1-mar2",
               "code" : {
-                "text": "Stratifier Encounters Planned Triaged"
+                "text": "Stratifier Feb1 Mar2"
               },
               "criteria": {
                 "language": "text/cql.identifier",
-                "expression": "Stratifier Encounters Planned Triaged Resource"
+                "expression": "Stratifier Feb1 Mar2"
               }
             },
             {
-              "id": "stratifier-encounters-arrived-cancelled",
+              "id": "stratifier-invalid-expression-name",
               "code" : {
-                "text": "Stratifier Encounters Arrived Cancelled"
+                "text": "Invalid Expression Name"
               },
               "criteria": {
                 "language": "text/cql.identifier",
-                "expression": "Stratifier Encounters Arrived Cancelled Resource"
+                "expression": "Invalid Expression Name"
               }
             }
           ]

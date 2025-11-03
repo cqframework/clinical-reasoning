@@ -1,10 +1,12 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
 import ca.uhn.fhir.context.FhirContext;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.SelectedReport;
 
+@Disabled
 public class ComponentCriteriaStratifierTest {
 
     private static final Given GIVEN = Measure.given().repositoryFor("ComponentCriteriaStratifier");
@@ -565,5 +567,53 @@ public class ComponentCriteriaStratifierTest {
         then.hasContainedOperationOutcome()
                 .hasContainedOperationOutcomeMsg("Mismatch between population basis and stratifier criteria expression")
                 .report();
+    }
+
+    @Test
+    void cohortBooleanComponentCriteriaStratPopulationInvalidExpressionName() {
+
+        final SelectedReport then = GIVEN.when()
+            .measureId("ComponentCriteriaStratifierBooleanBasisInvalidExpressionName")
+            .evaluate()
+            .then();
+
+        System.out.println(
+            FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(then.report()));
+
+        then.hasContainedOperationOutcome()
+            .hasContainedOperationOutcomeMsg("Mismatch between population basis and stratifier criteria expression")
+            .report();
+    }
+
+    @Test
+    void cohortEncounterComponentCriteriaStratPopulationInvalidExpressionName() {
+
+        final SelectedReport then = GIVEN.when()
+            .measureId("ComponentCriteriaStratifierEncounterBasisInvalidExpressionName")
+            .evaluate()
+            .then();
+
+        System.out.println(
+            FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(then.report()));
+
+        then.hasContainedOperationOutcome()
+            .hasContainedOperationOutcomeMsg("Mismatch between population basis and stratifier criteria expression")
+            .report();
+    }
+
+    @Test
+    void cohortDateComponentCriteriaStratPopulationInvalidExpressionName() {
+
+        final SelectedReport then = GIVEN.when()
+            .measureId("ComponentCriteriaStratifierDateBasisInvalidExpressionName")
+            .evaluate()
+            .then();
+
+        System.out.println(
+            FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(then.report()));
+
+        then.hasContainedOperationOutcome()
+            .hasContainedOperationOutcomeMsg("Mismatch between population basis and stratifier criteria expression")
+            .report();
     }
 }

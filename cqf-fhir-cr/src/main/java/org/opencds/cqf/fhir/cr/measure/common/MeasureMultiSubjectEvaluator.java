@@ -114,16 +114,22 @@ public class MeasureMultiSubjectEvaluator {
 
         var qualifiedSubjectIdsCommonToPopulation = Sets.intersection(new HashSet<>(subjectIds), popSubjectIds);
 
-        final StratumPopulationDef stratumPopulationDef =
-                new StratumPopulationDef(populationDef.id(), qualifiedSubjectIdsCommonToPopulation);
+        final Set<Object> populationDefEvaluationResultIntersection =
+                getPopulationDefEvaluationResultIntersection(evaluationResultsForStratifier, populationDef);
 
         final List<String> resourceIds = getResourceIds(subjectIds, groupPopulationBasis, populationDef);
+
+        final StratumPopulationDef stratumPopulationDef = new StratumPopulationDef(
+                populationDef.id(),
+                qualifiedSubjectIdsCommonToPopulation,
+                populationDefEvaluationResultIntersection,
+                resourceIds,
+                measureStratifierType);
 
         final int stratumCount =
                 getStratumCountUpper(measureStratifierType, evaluationResultsForStratifier, populationDef, resourceIds);
 
-        stratumPopulationDef.setCount(stratumCount);
-        stratumPopulationDef.addAllResourceIds(resourceIds);
+        //        stratumPopulationDef.setCount(stratumCount);
 
         return stratumPopulationDef;
     }
@@ -312,11 +318,30 @@ public class MeasureMultiSubjectEvaluator {
             return intersection.size();
         }
 
-        if (resourceIds.isEmpty()) {
-            return 0;
+        return resourceIds.size();
+    }
+
+    private static Set<Object> getPopulationDefEvaluationResultIntersection(
+            Set<Object> evaluationResults, PopulationDef populationDef) {
+
+        final Set<Object> resources = populationDef.getResources();
+        // LUKETODO:  for the component criteria scenario, we don't add the results directly to the stratifierDef,
+        // but to each of the component defs, which is why this is empty
+        if (resources.isEmpty() || evaluationResults.isEmpty()) {
+            // There's no intersection, so no point in going further.
+            return Set.of();
         }
 
-        return resourceIds.size();
+        final Class<?> resourcesClassFirst = resources.iterator().next().getClass();
+        final Class<?> resultClassFirst = evaluationResults.iterator().next().getClass();
+
+        // Sanity check: isCriteriaBasedStratifier() should have filtered this out
+        if (resourcesClassFirst != resultClassFirst) {
+            // Different classes, so no point in going further.
+            return Set.of();
+        }
+
+        return Sets.intersection(resources, evaluationResults);
     }
 
     @Nonnull
@@ -355,6 +380,7 @@ public class MeasureMultiSubjectEvaluator {
         return resourceIds;
     }
 
+    // LUKETODO:  so we need to count the number of resources here, which would be ID-less quantities
     private static String getPopulationResourceIds(Object resourceObject) {
         if (resourceObject instanceof IBaseResource resource) {
             return resource.getIdElement().toVersionless().getValueAsString();

@@ -1,10 +1,10 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4ResourceIdUtils;
 
 /**
@@ -16,14 +16,24 @@ public class StratumPopulationDef {
 
     private final String id;
     private final Set<String> subjectsQualifiedOrUnqualified;
+    private final Set<Object> populationDefEvaluationResultIntersection;
     // Temporary:  this needs to be captured as number of intersected resources
     private int count = 0;
     // Temporary:  figure out what to do with this
-    private List<String> resourceIds = new ArrayList<>();
+    private final List<String> resourceIds;
+    private final MeasureStratifierType measureStratifierType;
 
-    public StratumPopulationDef(String id, Set<String> subjectsQualifiedOrUnqualified) {
+    public StratumPopulationDef(
+            String id,
+            Set<String> subjectsQualifiedOrUnqualified,
+            Set<Object> populationDefEvaluationResultIntersection,
+            List<String> resourceIds,
+            MeasureStratifierType measureStratifierType) {
         this.id = id;
         this.subjectsQualifiedOrUnqualified = Set.copyOf(subjectsQualifiedOrUnqualified);
+        this.populationDefEvaluationResultIntersection = populationDefEvaluationResultIntersection;
+        this.resourceIds = resourceIds;
+        this.measureStratifierType = measureStratifierType;
     }
 
     public String getId() {
@@ -49,8 +59,17 @@ public class StratumPopulationDef {
                 .collect(Collectors.toUnmodifiableSet());
     }
 
+    public Set<Object> getPopulationDefEvaluationResultIntersection() {
+        return populationDefEvaluationResultIntersection;
+    }
+
+    // LUKETODO:  javadoc
     public int getCount() {
-        return count;
+        if (MeasureStratifierType.CRITERIA == measureStratifierType) {
+            return populationDefEvaluationResultIntersection.size();
+        }
+
+        return resourceIds.size();
     }
 
     public void setCount(int count) {
@@ -59,10 +78,6 @@ public class StratumPopulationDef {
 
     public List<String> getResourceIds() {
         return resourceIds;
-    }
-
-    public void addAllResourceIds(List<String> resourceIds) {
-        this.resourceIds.addAll(resourceIds);
     }
 
     // LUKETODO: toString

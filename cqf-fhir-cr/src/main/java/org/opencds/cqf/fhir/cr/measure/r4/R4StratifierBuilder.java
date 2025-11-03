@@ -2,18 +2,13 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import javax.annotation.Nonnull;
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Expression;
 import org.hl7.fhir.r4.model.ListResource;
@@ -24,7 +19,6 @@ import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupComponent;
 import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupComponentComponent;
 import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupPopulationComponent;
 import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
@@ -36,7 +30,6 @@ import org.opencds.cqf.fhir.cr.measure.common.StratumValueDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumValueWrapper;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureReportBuilder.BuilderContext;
-import org.opencds.cqf.fhir.cr.measure.r4.utils.R4ResourceIdUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -327,6 +320,7 @@ class R4StratifierBuilder {
 
         final List<String> resourceIds = stratumPopulationDef.getResourceIds();
 
+        // LUKETODO:  do we need to enhance this?
         // subject-list ListResource to match intersection of results
         if ((!resourceIds.isEmpty())
                 && bc.report().getType() == org.hl7.fhir.r4.model.MeasureReport.MeasureReportType.SUBJECTLIST) {
@@ -335,79 +329,6 @@ class R4StratifierBuilder {
             bc.addContained(popSubjectList);
             sgpc.setSubjectResults(new Reference("#" + popSubjectList.getId()));
         }
-    }
-
-    public static <T> boolean collectionsEqualIgnoringOrder(Collection<T> coll1, Collection<T> coll2) {
-        if (coll1 == null || coll2 == null) {
-            return coll1 == coll2;
-        }
-
-        if (coll1.size() != coll2.size()) {
-            return false;
-        }
-
-        Map<T, Integer> frequencies = new HashMap<>();
-
-        // Build frequency map for the first collection
-        for (T item : coll1) {
-            frequencies.put(item, frequencies.getOrDefault(item, 0) + 1);
-        }
-
-        // A simple 'Map.equals()' won't work if coll2 has different elements
-        // that aren't in coll1. We must check coll2 against the map.
-        for (T item : coll2) {
-            Integer count = frequencies.get(item);
-
-            // If the item is not in the map or the count is zero, it's a mismatch
-            if (count == null || count == 0) {
-                return false;
-            }
-
-            // Decrement the count for the item
-            frequencies.put(item, count - 1);
-        }
-
-        // All counts should be zero, but the size check at the beginning
-        // combined with the decrement loop already guarantees this.
-        // If we reached here, the collections are equal.
-        return true;
-    }
-
-    @Nonnull
-    private static List<String> getResourceIds(
-            List<String> subjectIds, GroupDef groupDef, PopulationDef populationDef) {
-        String resourceType;
-        try {
-            // when this method is checked with a primitive value and not ResourceType it returns an error
-            // this try/catch is to prevent the exception thrown from setting the correct value
-            resourceType =
-                    ResourceType.fromCode(groupDef.getPopulationBasis().code()).toString();
-        } catch (FHIRException e) {
-            resourceType = null;
-        }
-
-        // only ResourceType fhirType should return true here
-        boolean isResourceType = resourceType != null;
-        List<String> resourceIds = new ArrayList<>();
-        assert populationDef != null;
-        if (populationDef.getSubjectResources() != null) {
-            for (String subjectId : subjectIds) {
-                // retrieve criteria results by subject Key
-                var resources =
-                        populationDef.getSubjectResources().get(R4ResourceIdUtils.stripPatientQualifier(subjectId));
-                if (resources != null) {
-                    if (isResourceType) {
-                        resourceIds.addAll(resources.stream()
-                                .map(R4StratifierBuilder::getPopulationResourceIds) // get resource id
-                                .toList());
-                    } else {
-                        resourceIds.addAll(
-                                resources.stream().map(Object::toString).toList());
-                    }
-                }
-            }
-        }
-        return resourceIds;
     }
 
     protected static ListResource createIdList(String id, Collection<String> ids) {
@@ -423,14 +344,7 @@ class R4StratifierBuilder {
         return referenceList;
     }
 
-    protected static String getPopulationResourceIds(Object resourceObject) {
-        if (resourceObject instanceof IBaseResource resource) {
-            return resource.getIdElement().toVersionless().getValueAsString();
-        }
-        return null;
-    }
-
-    // TODO: LD:  move this to MeasureEvaluator
+    // LUKETODO:  move this to MeasureEvaluator
     @Nonnull
     private static List<CodeableConcept> getCodeForReportStratifier(
             StratifierDef stratifierDef, MeasureGroupStratifierComponent measureStratifier) {

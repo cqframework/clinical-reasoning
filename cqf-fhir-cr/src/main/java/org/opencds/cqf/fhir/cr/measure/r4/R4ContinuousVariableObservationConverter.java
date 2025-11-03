@@ -1,6 +1,8 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
+import java.util.UUID;
 import org.hl7.fhir.r4.model.Quantity;
+import org.hl7.fhir.r4.model.StringType;
 import org.opencds.cqf.fhir.cr.measure.common.ContinuousVariableObservationConverter;
 
 /**
@@ -19,15 +21,21 @@ public enum R4ContinuousVariableObservationConverter implements ContinuousVariab
     private static Quantity convertToQuantity(Object obj) {
         if (obj == null) return null;
 
-        Quantity q = new Quantity();
+        // Ensure we have an ID of some kind
+        final Quantity quantity =
+                (Quantity) new Quantity().setId(UUID.randomUUID().toString());
 
         if (obj instanceof Quantity existing) {
+            if (existing.getIdElement() == null) {
+                // Ensure we have an ID of some kind
+                existing.setIdElement(new StringType(UUID.randomUUID().toString()));
+            }
             return existing;
         } else if (obj instanceof Number number) {
-            q.setValue(number.doubleValue());
+            quantity.setValue(number.doubleValue());
         } else if (obj instanceof String s) {
             try {
-                q.setValue(Double.parseDouble(s));
+                quantity.setValue(Double.parseDouble(s));
             } catch (NumberFormatException e) {
                 throw new IllegalArgumentException("String is not a valid number: " + s, e);
             }
@@ -35,6 +43,6 @@ public enum R4ContinuousVariableObservationConverter implements ContinuousVariab
             throw new IllegalArgumentException("Cannot convert object of type " + obj.getClass() + " to Quantity");
         }
 
-        return q;
+        return quantity;
     }
 }

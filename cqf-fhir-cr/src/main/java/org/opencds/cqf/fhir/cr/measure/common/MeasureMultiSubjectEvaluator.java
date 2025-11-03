@@ -2,7 +2,6 @@ package org.opencds.cqf.fhir.cr.measure.common;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Sets;
-import com.google.common.collect.Sets.SetView;
 import com.google.common.collect.Table;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -119,19 +118,12 @@ public class MeasureMultiSubjectEvaluator {
 
         final List<String> resourceIds = getResourceIds(subjectIds, groupPopulationBasis, populationDef);
 
-        final StratumPopulationDef stratumPopulationDef = new StratumPopulationDef(
+        return new StratumPopulationDef(
                 populationDef.id(),
                 qualifiedSubjectIdsCommonToPopulation,
                 populationDefEvaluationResultIntersection,
                 resourceIds,
                 measureStratifierType);
-
-        final int stratumCount =
-                getStratumCountUpper(measureStratifierType, evaluationResultsForStratifier, populationDef, resourceIds);
-
-        //        stratumPopulationDef.setCount(stratumCount);
-
-        return stratumPopulationDef;
     }
 
     private static List<StratumDef> componentStratumPlural(
@@ -287,38 +279,6 @@ public class MeasureMultiSubjectEvaluator {
     // which was previously unsupported.  So for now, comma-delim the first five values.
     private static CodeableConcept expressionResultToCodableConcept(StratumValueWrapper value) {
         return new CodeableConcept().setText(value.getValueAsString());
-    }
-
-    private static int getStratumCountUpper(
-            MeasureStratifierType measureStratifierType,
-            Set<Object> evaluationResults,
-            PopulationDef populationDef,
-            List<String> resourceIds) {
-
-        if (MeasureStratifierType.CRITERIA == measureStratifierType) {
-            final Set<Object> resources = populationDef.getResources();
-            // LUKETODO:  for the component criteria scenario, we don't add the results directly to the stratifierDef,
-            // but to each of the component defs, which is why this is empty
-            if (resources.isEmpty() || evaluationResults.isEmpty()) {
-                // There's no intersection, so no point in going further.
-                return 0;
-            }
-
-            final Class<?> resourcesClassFirst = resources.iterator().next().getClass();
-            final Class<?> resultClassFirst =
-                    evaluationResults.iterator().next().getClass();
-
-            // Sanity check: isCriteriaBasedStratifier() should have filtered this out
-            if (resourcesClassFirst != resultClassFirst) {
-                // Different classes, so no point in going further.
-                return 0;
-            }
-
-            final SetView<Object> intersection = Sets.intersection(resources, evaluationResults);
-            return intersection.size();
-        }
-
-        return resourceIds.size();
     }
 
     private static Set<Object> getPopulationDefEvaluationResultIntersection(

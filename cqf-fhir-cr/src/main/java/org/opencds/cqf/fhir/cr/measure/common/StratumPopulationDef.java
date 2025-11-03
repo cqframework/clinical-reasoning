@@ -17,8 +17,6 @@ public class StratumPopulationDef {
     private final String id;
     private final Set<String> subjectsQualifiedOrUnqualified;
     private final Set<Object> populationDefEvaluationResultIntersection;
-    // Temporary:  this needs to be captured as number of intersected resources
-    private int count = 0;
     // Temporary:  figure out what to do with this
     private final List<String> resourceIds;
     private final MeasureStratifierType measureStratifierType;
@@ -70,10 +68,6 @@ public class StratumPopulationDef {
         }
 
         return resourceIds.size();
-    }
-
-    public void setCount(int count) {
-        this.count = count;
     }
 
     public List<String> getResourceIds() {

@@ -52,7 +52,7 @@ public class PopulationDef {
 
     public Set<Object> getEvaluatedResources() {
         if (this.evaluatedResources == null) {
-            this.evaluatedResources = new HashSetForFhirResources<>();
+            this.evaluatedResources = new HashSetForFhirResourcesAndCqlTypes<>();
         }
 
         return this.evaluatedResources;
@@ -79,7 +79,7 @@ public class PopulationDef {
     }
 
     public Set<Object> getResources() {
-        return new HashSetForFhirResources<>(subjectResources.values().stream()
+        return new HashSetForFhirResourcesAndCqlTypes<>(subjectResources.values().stream()
                 .flatMap(Collection::stream)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toUnmodifiableSet()));
@@ -102,7 +102,7 @@ public class PopulationDef {
     // Add an element to Set<Object> under a key (Creates a new set if key is missing)
     public void addResource(String key, Object value) {
         subjectResources
-                .computeIfAbsent(key, k -> new HashSetForFhirResources<>())
+                .computeIfAbsent(key, k -> new HashSetForFhirResourcesAndCqlTypes<>())
                 .add(value);
     }
 

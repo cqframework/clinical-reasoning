@@ -14,14 +14,14 @@ import org.junit.jupiter.api.Test;
 import org.opencds.cqf.cql.engine.runtime.Date;
 import org.opencds.cqf.cql.engine.runtime.Precision;
 
-class HashSetForFhirResourcesTest {
+class HashSetForFhirResourcesAndCqlTypesTest {
 
     public static final String PATIENT_ID_1 = "patient-1";
     public static final String PATIENT_ID_2 = "patient-2";
 
     @Test
     void addFhirResourceWithSameIdIsNotAddedTwice() {
-        var set = new HashSetForFhirResources<Patient>();
+        var set = new HashSetForFhirResourcesAndCqlTypes<Patient>();
         var patient1 = new Patient();
         patient1.setId(PATIENT_ID_1);
         var patient2 = new Patient();
@@ -34,7 +34,7 @@ class HashSetForFhirResourcesTest {
 
     @Test
     void addNonFhirObjectBehavesLikeHashSet() {
-        var set = new HashSetForFhirResources<String>();
+        var set = new HashSetForFhirResourcesAndCqlTypes<String>();
         assertTrue(set.add("foo"));
         assertFalse(set.add("foo"));
         assertEquals(1, set.size());
@@ -42,7 +42,7 @@ class HashSetForFhirResourcesTest {
 
     @Test
     void removeFhirResourceByIdRemovesCorrectResource() {
-        var set = new HashSetForFhirResources<Patient>();
+        var set = new HashSetForFhirResourcesAndCqlTypes<Patient>();
         var patient1 = createPatientWithId(PATIENT_ID_1);
         var patient2 = createPatientWithId(PATIENT_ID_2);
         set.add(patient1);
@@ -58,7 +58,7 @@ class HashSetForFhirResourcesTest {
 
     @Test
     void removeCqlDateRemovesCorrectCqlDate() {
-        var set = new HashSetForFhirResources<Date>();
+        var set = new HashSetForFhirResourcesAndCqlTypes<Date>();
         var date1 = new Date(LocalDate.of(2024, Month.JANUARY, 1));
         var date2 = new Date(LocalDate.of(2025, Month.JANUARY, 1));
         set.add(date1);
@@ -74,7 +74,7 @@ class HashSetForFhirResourcesTest {
 
     @Test
     void retainAllKeepsOnlyMatchingFhirResourcesById() {
-        var set = new HashSetForFhirResources<Patient>();
+        var set = new HashSetForFhirResourcesAndCqlTypes<Patient>();
         var patient1 = createPatientWithId(PATIENT_ID_1);
         var patient2 = createPatientWithId(PATIENT_ID_2);
         set.add(patient1);
@@ -90,7 +90,7 @@ class HashSetForFhirResourcesTest {
 
     @Test
     void retainAllKeepsOnlyMatchingCqlDate() {
-        var set = new HashSetForFhirResources<Date>();
+        var set = new HashSetForFhirResourcesAndCqlTypes<Date>();
         var date1 = new Date(LocalDate.of(2024, Month.JANUARY, 1));
         var date2 = new Date(LocalDate.of(2025, Month.JANUARY, 1));
         set.add(date1);
@@ -106,7 +106,7 @@ class HashSetForFhirResourcesTest {
 
     @Test
     void retainAllKeepsOnlyMatchingCqlDateWithMatchingPrecision() {
-        var set = new HashSetForFhirResources<Date>();
+        var set = new HashSetForFhirResourcesAndCqlTypes<Date>();
         var date1 = new Date(LocalDate.of(2024, Month.JANUARY, 1), Precision.DAY);
         var date2 = new Date(LocalDate.of(2025, Month.JANUARY, 1), Precision.DAY);
         set.add(date1);
@@ -122,7 +122,7 @@ class HashSetForFhirResourcesTest {
 
     @Test
     void retainAllKeepsOnlyMatchingCqlDateWithPrecisionMismatch() {
-        var set = new HashSetForFhirResources<Date>();
+        var set = new HashSetForFhirResourcesAndCqlTypes<Date>();
         var date1 = new Date(LocalDate.of(2024, Month.JANUARY, 1), Precision.DAY);
         var date2 = new Date(LocalDate.of(2025, Month.JANUARY, 1), Precision.HOUR);
         set.add(date1);
@@ -139,7 +139,7 @@ class HashSetForFhirResourcesTest {
 
     @Test
     void removeAllRemovesMatchingFhirResourcesById() {
-        var set = new HashSetForFhirResources<Patient>();
+        var set = new HashSetForFhirResourcesAndCqlTypes<Patient>();
         var patient1 = createPatientWithId(PATIENT_ID_1);
         var patient2 = createPatientWithId(PATIENT_ID_2);
         set.add(patient1);
@@ -155,7 +155,7 @@ class HashSetForFhirResourcesTest {
 
     @Test
     void removeAllRemovesMatchingCqlDate() {
-        var set = new HashSetForFhirResources<Date>();
+        var set = new HashSetForFhirResourcesAndCqlTypes<Date>();
         var date1 = new Date(LocalDate.of(2024, Month.JANUARY, 1));
         var date2 = new Date(LocalDate.of(2025, Month.JANUARY, 1));
         set.add(date1);
@@ -171,7 +171,7 @@ class HashSetForFhirResourcesTest {
 
     @Test
     void removeAllRemovesMatchingCqlDateWithPrecision() {
-        var set = new HashSetForFhirResources<Date>();
+        var set = new HashSetForFhirResourcesAndCqlTypes<Date>();
         var date1 = new Date(LocalDate.of(2024, Month.JANUARY, 1), Precision.DAY);
         var date2 = new Date(LocalDate.of(2025, Month.JANUARY, 1), Precision.DAY);
         set.add(date1);
@@ -187,7 +187,7 @@ class HashSetForFhirResourcesTest {
 
     @Test
     void removeAllRemovesMatchingCqlDateMismatchPrecision() {
-        var set = new HashSetForFhirResources<Date>();
+        var set = new HashSetForFhirResourcesAndCqlTypes<Date>();
         var date1 = new Date(LocalDate.of(2024, Month.JANUARY, 1), Precision.DAY);
         var date2 = new Date(LocalDate.of(2025, Month.JANUARY, 1), Precision.DAY);
         set.add(date1);
@@ -204,7 +204,7 @@ class HashSetForFhirResourcesTest {
 
     @Test
     void addAllAddsOnlyNonDuplicateFhirResourcesById() {
-        var set = new HashSetForFhirResources<Patient>();
+        var set = new HashSetForFhirResourcesAndCqlTypes<Patient>();
         var patient1 = createPatientWithId(PATIENT_ID_1);
         var patient2 = createPatientWithId(PATIENT_ID_2);
         set.add(patient1);
@@ -220,7 +220,7 @@ class HashSetForFhirResourcesTest {
 
     @Test
     void addAllAddsNoDuplicateCqlDates() {
-        var set = new HashSetForFhirResources<Date>();
+        var set = new HashSetForFhirResourcesAndCqlTypes<Date>();
         var date1 = new Date(LocalDate.of(2024, Month.JANUARY, 1));
         var date2 = new Date(LocalDate.of(2025, Month.JANUARY, 1));
         set.add(date1);
@@ -238,7 +238,7 @@ class HashSetForFhirResourcesTest {
 
     @Test
     void addDifferentFhirResourceTypesWithSameIdAreBothAdded() {
-        var set = new HashSetForFhirResources<IBaseResource>();
+        var set = new HashSetForFhirResourcesAndCqlTypes<IBaseResource>();
         var patient = createPatientWithId("shared-id");
         var observation = createObservationWithId("shared-id");
 
@@ -249,7 +249,7 @@ class HashSetForFhirResourcesTest {
 
     @Test
     void addFhirResourceWithNullIdTwiceAddsOnlyOne() {
-        var set = new HashSetForFhirResources<Patient>();
+        var set = new HashSetForFhirResourcesAndCqlTypes<Patient>();
         var patient1 = new Patient();
         var patient2 = new Patient();
 
@@ -260,7 +260,7 @@ class HashSetForFhirResourcesTest {
 
     @Test
     void containsWithNullArgumentReturnsFalse() {
-        assertFalse(new HashSetForFhirResources<Patient>().contains(null));
+        assertFalse(new HashSetForFhirResourcesAndCqlTypes<Patient>().contains(null));
     }
 
     private static Patient createPatientWithId(String id) {

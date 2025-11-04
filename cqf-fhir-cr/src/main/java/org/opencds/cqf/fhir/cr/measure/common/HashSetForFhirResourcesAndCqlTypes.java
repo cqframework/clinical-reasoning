@@ -9,21 +9,23 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.engine.runtime.CqlType;
 
 /**
- * A HashSet implementation that uses FHIR resource identity rules when comparing resources.
+ * A HashSet implementation that uses FHIR resource identity rules when comparing resources or
+ * Cql.equal.
  * This means that two resources with the same resource type and logical ID are considered
  * equal, even if they are different object instances.
  * <p/>
- * This class exists strictly to compensate for the fact that FHIR resource classes do not implement
- * equals() and hashCode().
+ * This class exists strictly to compensate for the fact that FHIR resource classes and CQL types
+ * do not implement equals() and hashCode().
  * @param <T> the type of elements in this set, which may or may not be a {@link IBaseResource}
+ *           or a {@link CqlType}
  */
-public class HashSetForFhirResources<T> extends HashSet<T> {
+public class HashSetForFhirResourcesAndCqlTypes<T> extends HashSet<T> {
 
-    public HashSetForFhirResources() {
+    public HashSetForFhirResourcesAndCqlTypes() {
         super();
     }
 
-    public HashSetForFhirResources(Collection<T> collection) {
+    public HashSetForFhirResourcesAndCqlTypes(Collection<T> collection) {
         super(collection);
     }
 
@@ -127,7 +129,7 @@ public class HashSetForFhirResources<T> extends HashSet<T> {
 
         // Both Collections are HashSetForFhirResources, so we can use the default implementation,
         // which calls HashSetForFhirResources.contains().
-        if (otherCollection instanceof HashSetForFhirResources) {
+        if (otherCollection instanceof HashSetForFhirResourcesAndCqlTypes) {
             return super.retainAll(otherCollection);
         }
 
@@ -149,7 +151,7 @@ public class HashSetForFhirResources<T> extends HashSet<T> {
         final CqlType otherCqlType = castToCqlTypeIfApplicable(obj);
 
         // prevent infinite recursion
-        if (otherResource != null || otherCqlType != null || collection instanceof HashSetForFhirResources) {
+        if (otherResource != null || otherCqlType != null || collection instanceof HashSetForFhirResourcesAndCqlTypes) {
             return containsInner(collection, obj);
         }
 

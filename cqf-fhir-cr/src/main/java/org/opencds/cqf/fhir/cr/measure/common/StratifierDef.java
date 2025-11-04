@@ -67,7 +67,8 @@ public class StratifierDef {
     }
 
     public void putResult(String subject, Object value, Set<Object> evaluatedResources) {
-        this.getResults().put(subject, new CriteriaResult(value, new HashSetForFhirResources<>(evaluatedResources)));
+        this.getResults()
+                .put(subject, new CriteriaResult(value, new HashSetForFhirResourcesAndCqlTypes<>(evaluatedResources)));
     }
 
     public Map<String, CriteriaResult> getResults() {
@@ -80,7 +81,7 @@ public class StratifierDef {
 
     // Ensure we handle FHIR resource identity properly
     public Set<Object> getAllCriteriaResultValues() {
-        return new HashSetForFhirResources<>(this.getResults().values().stream()
+        return new HashSetForFhirResourcesAndCqlTypes<>(this.getResults().values().stream()
                 .map(CriteriaResult::rawValue)
                 .map(this::toSet)
                 .flatMap(Collection::stream)

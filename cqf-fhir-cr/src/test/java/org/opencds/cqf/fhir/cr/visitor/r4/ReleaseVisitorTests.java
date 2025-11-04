@@ -1,9 +1,9 @@
 package org.opencds.cqf.fhir.cr.visitor.r4;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -35,7 +35,6 @@ import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Endpoint;
-import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.ImplementationGuide;
@@ -539,7 +538,7 @@ class ReleaseVisitorTests {
         var endpoint = createEndpoint(authoritativeSource);
 
         var clientMock = mock(TerminologyServerClient.class, new ReturnsDeepStubs());
-        when(clientMock.getLatestNonDraftValueSetResource(any(), any())).thenReturn(Optional.of(latestVSet));
+        when(clientMock.getLatestValueSetResource(any(), any())).thenReturn(Optional.of(latestVSet));
         var releaseVisitor = new ReleaseVisitor(repo, clientMock);
         var libraryAdapter = new AdapterFactory().createLibrary(library);
         var params = parameters(
@@ -817,11 +816,10 @@ class ReleaseVisitorTests {
                 .filter(ra -> ra.getResource().contains("2.16.840.1.113762.1.4.1146.77"))
                 .findFirst();
         assertTrue(maybeRetiredLeafRA.isPresent());
-        assertEquals(
+        assertNotEquals(
                 retiredLeaf.getUrl() + "|" + retiredLeaf.getVersion(),
                 maybeRetiredLeafRA.get().getResource());
-        assertSame(PublicationStatus.RETIRED, retiredLeaf.getStatus());
-        assertEquals("3.2.0", Canonicals.getVersion(maybeRetiredLeafRA.get().getResource()));
+        assertEquals("3.2.3", Canonicals.getVersion(maybeRetiredLeafRA.get().getResource()));
     }
 
     @Test

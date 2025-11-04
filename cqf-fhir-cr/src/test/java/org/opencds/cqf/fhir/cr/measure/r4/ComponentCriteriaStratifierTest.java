@@ -378,7 +378,7 @@ public class ComponentCriteriaStratifierTest {
                 .hasPopulationCount(1)
                 .firstPopulation()
                 .hasName("initial-population")
-                .hasCount(1)
+                .hasCount(2)
                 .up()
                 .up()
                 .up()

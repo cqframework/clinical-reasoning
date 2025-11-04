@@ -140,11 +140,8 @@ public class TerminologyServerClient {
                 .execute());
     }
 
-    public java.util.Optional<IDomainResource> getLatestNonDraftValueSetResource(
-            IEndpointAdapter endpoint, String url) {
+    public java.util.Optional<IDomainResource> getLatestValueSetResource(IEndpointAdapter endpoint, String url) {
         var urlParams = Searches.byCanonical(url);
-        var statusParam = Searches.exceptStatus("draft");
-        urlParams.putAll(statusParam);
         return IKnowledgeArtifactAdapter.findLatestVersion(initializeClientWithAuth(endpoint)
                 .search()
                 .forResource(getValueSetClass())

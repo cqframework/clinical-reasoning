@@ -3525,7 +3525,6 @@
 				"resourceType": "ValueSet",
 				"id": "aslp-a1-de17",
 				"url": "http://example.org/sdh/dtr/aslp/ValueSet/aslp-a1-de17",
-        "version": "1.0.0",
 				"name": "DiagnosisofObstructiveSleepApneaCodes",
 				"title": "Diagnosis of Obstructive Sleep Apnea Codes",
 				"status": "draft",

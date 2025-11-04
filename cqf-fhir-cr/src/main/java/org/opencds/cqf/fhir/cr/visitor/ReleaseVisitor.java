@@ -351,7 +351,13 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
                     if (maybeAdapter.isPresent()) {
                         dependencyAdapter = maybeAdapter.get();
                         alreadyUpdatedDependencies.put(dependencyAdapter.getUrl(), dependencyAdapter.get());
-                        var url = Canonicals.getUrl(dependencyAdapter.getUrl()) + "|" + dependencyAdapter.getVersion();
+                        var url = Canonicals.getUrl(dependencyAdapter.getUrl());
+                        // TODO: previously we were assuming a version exists - likely because we were only considering
+                        // non-draft resources. This will likely need work once requireVersionSpecificReferences is
+                        // supported...
+                        if (dependencyAdapter.hasVersion()) {
+                            url += "|" + dependencyAdapter.getVersion();
+                        }
                         var existingArtifactsForUrl =
                                 SearchHelper.searchRepositoryByCanonicalWithPaging(repository, url);
                         if (BundleHelper.getEntry(existingArtifactsForUrl).isEmpty()) {

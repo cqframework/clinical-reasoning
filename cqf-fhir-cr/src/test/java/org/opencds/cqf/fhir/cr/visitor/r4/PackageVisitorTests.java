@@ -133,8 +133,8 @@ class PackageVisitorTests {
 
     @ParameterizedTest
     @CsvSource({
-        ",some-api-key,Cannot expand ValueSet without VSAC Username.",
-        "someUsername,,Cannot expand ValueSet without VSAC API Key.",
+        ",some-api-key,Found a vsacUsername extension with no value",
+        "someUsername,,Found a apiKey extension with no value",
     })
     void packageOperation_should_fail(@Nullable String username, String apiKey, String expectedError) {
         Bundle loadedBundle = (Bundle) jsonParser.parseResource(

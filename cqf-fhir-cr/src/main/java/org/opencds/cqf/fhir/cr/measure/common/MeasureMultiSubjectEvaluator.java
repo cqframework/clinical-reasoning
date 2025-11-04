@@ -3,8 +3,10 @@ package org.opencds.cqf.fhir.cr.measure.common;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Sets;
+import com.google.common.collect.Sets.SetView;
 import com.google.common.collect.Table;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -13,6 +15,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -44,7 +47,7 @@ public class MeasureMultiSubjectEvaluator {
             for (StratifierDef stratifierDef : groupDef.stratifiers()) {
                 final List<StratumDef> stratumDefs;
 
-                if (!stratifierDef.components().isEmpty()) {
+                if (stratifierDef.isComponentStratifier()) {
                     stratumDefs = componentStratumPlural(
                             stratifierDef, groupDef.getPopulationBasis(), groupDef.populations());
                 } else {
@@ -98,7 +101,8 @@ public class MeasureMultiSubjectEvaluator {
                 populationDefs.stream()
                         .map(popDef -> buildStratumPopulationDef(
                                 stratifierDef.getStratifierType(),
-                                stratifierDef.getResultsForComponentOrNonComponent(),
+                                stratifierDef.components(),
+                                stratifierDef.getResults(),
                                 populationBasis,
                                 popDef,
                                 subjectIds))
@@ -109,7 +113,8 @@ public class MeasureMultiSubjectEvaluator {
 
     private static StratumPopulationDef buildStratumPopulationDef(
             MeasureStratifierType measureStratifierType,
-            Set<Object> evaluationResultsForStratifier,
+            List<StratifierComponentDef> stratifierComponents,
+            Map<String, CriteriaResult> nonStratifierComponentResults,
             CodeDef groupPopulationBasis,
             PopulationDef populationDef,
             List<String> subjectIds) {
@@ -120,22 +125,20 @@ public class MeasureMultiSubjectEvaluator {
 
         var qualifiedSubjectIdsCommonToPopulation = Sets.intersection(new HashSet<>(subjectIds), popSubjectIds);
 
-        final Set<Object> populationDefEvaluationResultIntersection =
-                getPopulationDefEvaluationResultIntersection(evaluationResultsForStratifier, populationDef);
+        final Set<Object> populationDefEvaluationResultIntersection = getPopulationDefEvaluationResultIntersection(
+                stratifierComponents, nonStratifierComponentResults, populationDef);
 
         final String resourceType = getResourceType(groupPopulationBasis);
 
-        final List<String> resourceIds = getResourceIds(resourceType, subjectIds, populationDef);
-
-        logger.info("1234: resourceIds: {}", resourceIds);
+        final List<String> resourceIdsForSubjectList =
+                getResourceIdsForSubjectList(resourceType, subjectIds, populationDef);
 
         return new StratumPopulationDef(
                 populationDef.id(),
                 qualifiedSubjectIdsCommonToPopulation,
                 populationDefEvaluationResultIntersection,
-                resourceIds,
-                measureStratifierType,
-                resourceType);
+                resourceIdsForSubjectList,
+                measureStratifierType);
     }
 
     private static List<StratumDef> componentStratumPlural(
@@ -152,6 +155,21 @@ public class MeasureMultiSubjectEvaluator {
 
         var stratumDefs = new ArrayList<StratumDef>();
 
+        // LUKETODO:  for the two component criteria stratifiers how many stratum are we supposed to get for each?
+
+        /*
+        initial-pop:  2024-01-01, 2024-01-02
+
+        ## 1
+
+          strat1:  2024-01-02, 2024-02-01
+          strat2:  2024-01-02, 2024-02-03
+
+          stratum pop: 2024-01-02
+         */
+
+        // LUKETODO:  in the non-criteria component case, we have a single stratifier that gives us 2 stratum, one for
+        // each gender and age combo
         componentSubjects.forEach((valueSet, subjects) -> {
             // converts table into component value combinations
             // | Stratum   | Set<ValueDef>           | List<Subjects(String)> |
@@ -186,6 +204,7 @@ public class MeasureMultiSubjectEvaluator {
         // stratifier criteria results are: 'M', 'F'
 
         if (MeasureStratifierType.CRITERIA == stratifierDef.getStratifierType()) {
+            // LUKETODO:  try to compute these dynamically
             // Seems to be irrelevant for criteria based stratifiers
             var stratValues = Set.<StratumValueDef>of();
             // Seems to be irrelevant for criteria based stratifiers
@@ -293,44 +312,129 @@ public class MeasureMultiSubjectEvaluator {
         return new CodeableConcept().setText(value.getValueAsString());
     }
 
+    // LUKETODO:  I think we need to split the logic between component and non component stratifiers,
+    // since the results profiles are drastically different
+    // LUKETODO:  I need to consider boolean, Encounter, and date bases
+
     private static Set<Object> getPopulationDefEvaluationResultIntersection(
-            Set<Object> evaluationResults, PopulationDef populationDef) {
+            List<StratifierComponentDef> stratifierComponents,
+            Map<String, CriteriaResult> nonStratifierComponentResults,
+            PopulationDef populationDef) {
+
+        /*
+         * non-component
+         * 2024-01-01, 2024-01-02
+         * population
+         * 2024-01-01, 2024-02-02
+         */
+
+        /*
+         * population
+         * 2024-01-01, 2024-02-02
+         *
+         * component1
+         * 2024-01-01, 2024-01-02
+         * component2
+         * 2024-01-01, 2024-03-01
+         */
 
         final Set<Object> resources = populationDef.getResources();
-        // LUKETODO:  for the component criteria scenario, we don't add the results directly to the stratifierDef,
-        // but to each of the component defs, which is why this is empty
-        if (resources.isEmpty() || evaluationResults.isEmpty()) {
-            // There's no intersection, so no point in going further.
+
+        if (resources.isEmpty()) {
             return Set.of();
         }
 
         final Class<?> resourcesClassFirst = resources.iterator().next().getClass();
-        final Class<?> resultClassFirst = evaluationResults.iterator().next().getClass();
 
-        // Sanity check: isCriteriaBasedStratifier() should have filtered this out
-        if (resourcesClassFirst != resultClassFirst) {
-            // Different classes, so no point in going further.
+        if (!stratifierComponents.isEmpty()) {
+            final Set<Object> allIntersections = new HashSetForFhirResources<>();
+
+            for (String subjectId : populationDef.getSubjects()) {
+
+                for (StratifierComponentDef stratifierComponent : stratifierComponents) {
+                    final Map<String, CriteriaResult> results = stratifierComponent.getResults();
+
+                    final CriteriaResult criteriaResult = results.get(subjectId);
+                    logger.info("criteriaResult: {}", criteriaResult);
+                }
+
+                // LUKETODO:  why do we have some componentDefs that are empty?  how should we handle it if
+                // evaluationResults are empty in this case?
+                final Set<Set<Object>> resultsPerComponent = stratifierComponents.stream()
+                        .map(StratifierComponentDef::getResults)
+                        .map(resultMap -> resultMap.get(subjectId))
+                        .map(CriteriaResult::rawValue)
+                        .map(MeasureMultiSubjectEvaluator::toSet)
+                        .collect(Collectors.toUnmodifiableSet());
+
+                // LUKETODO:  flip condition
+                if (resources.isEmpty() || resultsPerComponent.isEmpty()) {
+                    // There's no intersection, so no point in going further.
+                    continue;
+                }
+
+                // LUKETODO:  for the date case, we run into the object identity problem
+                final Set<Object> intersection = new HashSetForFhirResources<>(resources);
+                for (Set<Object> resultForComponent : resultsPerComponent) {
+                    intersection.retainAll(resultForComponent);
+                }
+
+                allIntersections.addAll(intersection);
+            }
+
+            return allIntersections;
+        } else {
+            // LUKETODO:  this is the criteria case
+            final Set<Object> evaluationResults = nonStratifierComponentResults.values().stream()
+                    .map(CriteriaResult::rawValue)
+                    .map(MeasureMultiSubjectEvaluator::toSet)
+                    .flatMap(Collection::stream)
+                    .collect(Collectors.toUnmodifiableSet());
+
+            // LUKETODO:  for the component criteria scenario, we don't add the results directly to the stratifierDef,
+            // but to each of the component defs, which is why this is empty
+            if (resources.isEmpty() || evaluationResults.isEmpty()) {
+                // There's no intersection, so no point in going further.
+                return Set.of();
+            }
+
+            final Class<?> resultClassFirst =
+                    evaluationResults.iterator().next().getClass();
+
+            // LUKETODO:  this fails because we have evaluationResults which are List<List<Date>>
+            // Sanity check: isCriteriaBasedStratifier() should have filtered this out
+            if (resourcesClassFirst != resultClassFirst) {
+                // Different classes, so no point in going further.
+                return Set.of();
+            }
+
+            // LUKETODO:  should we make sure this works with Dates?
+            final SetView<Object> intersection =
+                    Sets.intersection(resources, new HashSetForFhirResources<>(evaluationResults));
+            logger.info("1234: non-component intersection: {}", intersection);
+            return intersection;
+        }
+    }
+
+    // LUKETODO:  utils?
+    private static Set<Object> toSet(Object value) {
+        if (value == null) {
             return Set.of();
         }
 
-        return Sets.intersection(resources, evaluationResults);
-    }
-
-    @Nullable
-    private static String getResourceType(CodeDef populationBasis) {
-        try {
-            // when this method is checked with a primitive value and not ResourceType it returns an error
-            // this try/catch is to prevent the exception thrown from setting the correct value
-            return ResourceType.fromCode(populationBasis.code()).toString();
-        } catch (FHIRException e) {
-            return null;
+        if (value instanceof Iterable<?> iterable) {
+            return StreamSupport.stream(iterable.spliterator(), false).collect(Collectors.toUnmodifiableSet());
+        } else {
+            return Set.of(value);
         }
     }
+
+    // LUKETODO: deprecate SUBJECTLIST
 
     // LUKETODO:  now that we have Quantities instead of Observations, this is sort of broken
     // since Quantities don't have version-agnostic ID representations
     @Nonnull
-    private static List<String> getResourceIds(
+    private static List<String> getResourceIdsForSubjectList(
             String resourceType, List<String> subjectIds, PopulationDef populationDef) {
 
         // only ResourceType fhirType should return true here
@@ -350,7 +454,9 @@ public class MeasureMultiSubjectEvaluator {
                 if (resources != null) {
                     if (isResourceType) {
                         resourceIds.addAll(resources.stream()
-                                .map(MeasureMultiSubjectEvaluator::getPopulationResourceIds) // get resource id
+                                .map(
+                                        MeasureMultiSubjectEvaluator
+                                                ::getPopulationResourceIdForSubjectList) // get resource id
                                 .toList());
                     } else {
                         resourceIds.addAll(
@@ -365,7 +471,7 @@ public class MeasureMultiSubjectEvaluator {
     // LUKETODO:  so we need to count the number of resources here, which would be ID-less quantities
     // LUKETODO:  we get a null ID here because we get a Map.Entry here, which fails the checks here:
     // Map.Entry<Encounter, Quantity>
-    private static String getPopulationResourceIds(Object resourceObject) {
+    private static String getPopulationResourceIdForSubjectList(Object resourceObject) {
         if (resourceObject instanceof IBaseResource resource) {
             return resource.getIdElement().toVersionless().getValueAsString();
         }
@@ -373,6 +479,23 @@ public class MeasureMultiSubjectEvaluator {
         if (resourceObject instanceof IBase baseType) {
             return baseType.fhirType();
         }
+        // This is the continuous variable observation use case:
+        if (resourceObject instanceof Map<?, ?> map) {
+
+            // Arbitrary use of the first map key as the "resourceId"
+            return getPopulationResourceIdForSubjectList(map.keySet().iterator().next());
+        }
         return null;
+    }
+
+    @Nullable
+    private static String getResourceType(CodeDef populationBasis) {
+        try {
+            // when this method is checked with a primitive value and not ResourceType it returns an error
+            // this try/catch is to prevent the exception thrown from setting the correct value
+            return ResourceType.fromCode(populationBasis.code()).toString();
+        } catch (FHIRException e) {
+            return null;
+        }
     }
 }

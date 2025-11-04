@@ -1,12 +1,10 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
 import ca.uhn.fhir.context.FhirContext;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.SelectedReport;
 
-@Disabled
 public class ComponentCriteriaStratifierTest {
 
     private static final Given GIVEN = Measure.given().repositoryFor("ComponentCriteriaStratifier");

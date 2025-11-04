@@ -18,23 +18,20 @@ public class StratumPopulationDef {
     private final Set<String> subjectsQualifiedOrUnqualified;
     private final Set<Object> populationDefEvaluationResultIntersection;
     // Temporary:  figure out what to do with this
-    private final List<String> resourceIds;
+    private final List<String> resourceIdsForSubjectList;
     private final MeasureStratifierType measureStratifierType;
-    private final String resourceType;
 
     public StratumPopulationDef(
             String id,
             Set<String> subjectsQualifiedOrUnqualified,
             Set<Object> populationDefEvaluationResultIntersection,
-            List<String> resourceIds,
-            MeasureStratifierType measureStratifierType,
-            String resourceType) {
+            List<String> resourceIdsForSubjectList,
+            MeasureStratifierType measureStratifierType) {
         this.id = id;
         this.subjectsQualifiedOrUnqualified = Set.copyOf(subjectsQualifiedOrUnqualified);
         this.populationDefEvaluationResultIntersection = populationDefEvaluationResultIntersection;
-        this.resourceIds = resourceIds;
+        this.resourceIdsForSubjectList = resourceIdsForSubjectList;
         this.measureStratifierType = measureStratifierType;
-        this.resourceType = resourceType;
     }
 
     public String getId() {
@@ -70,11 +67,11 @@ public class StratumPopulationDef {
             return populationDefEvaluationResultIntersection.size();
         }
 
-        return resourceIds.size();
+        return resourceIdsForSubjectList.size();
     }
 
-    public List<String> getResourceIds() {
-        return resourceIds;
+    public List<String> getResourceIdsForSubjectList() {
+        return resourceIdsForSubjectList;
     }
 
     // LUKETODO: toString

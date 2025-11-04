@@ -105,7 +105,7 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
     private void validateStratifierPopulationBasisType(
             String url, GroupDef groupDef, StratifierDef stratifierDef, EvaluationResult evaluationResult) {
 
-        if (!stratifierDef.components().isEmpty()) {
+        if (stratifierDef.isComponentStratifier()) {
             for (var component : stratifierDef.components()) {
                 validateExpressionResultType(groupDef, stratifierDef, component.expression(), evaluationResult, url);
             }

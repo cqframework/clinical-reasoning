@@ -2,14 +2,11 @@ package org.opencds.cqf.fhir.cr.measure.common;
 
 import jakarta.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 
 public class StratifierDef {
@@ -84,44 +81,5 @@ public class StratifierDef {
 
     public MeasureStratifierType getStratifierType() {
         return stratifierType;
-    }
-
-    // LUKETODO:  this does NOT the component stratifier case:
-    public Set<Object> getResultsForComponentOrNonComponent() {
-        if (isComponentStratifier()) {
-            return getComponentResults();
-        }
-        return getNonComponentResults();
-    }
-
-    // LUKETODO:  code reuse
-    private Set<Object> getComponentResults() {
-        return components().stream()
-                .map(StratifierComponentDef::getResults)
-                .map(Map::values)
-                .flatMap(Collection::stream)
-                .map(CriteriaResult::rawValue)
-                .collect(Collectors.toUnmodifiableSet());
-    }
-
-    // Ensure we handle FHIR resource identity properly
-    private Set<Object> getNonComponentResults() {
-        return new HashSetForFhirResources<>(this.getResults().values().stream()
-                .map(CriteriaResult::rawValue)
-                .map(this::toSet)
-                .flatMap(Collection::stream)
-                .collect(Collectors.toUnmodifiableSet()));
-    }
-
-    private Set<Object> toSet(Object value) {
-        if (value == null) {
-            return Set.of();
-        }
-
-        if (value instanceof Iterable<?> iterable) {
-            return StreamSupport.stream(iterable.spliterator(), false).collect(Collectors.toUnmodifiableSet());
-        } else {
-            return Set.of(value);
-        }
     }
 }

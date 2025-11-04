@@ -72,7 +72,7 @@ class R4StratifierBuilder {
             List<MeasureGroupPopulationComponent> populations,
             GroupDef groupDef) {
 
-        if (!stratifierDef.components().isEmpty()) {
+        if (stratifierDef.isComponentStratifier()) {
             componentStratifier(bc, stratifierDef, reportStratifier, populations, groupDef);
         } else {
             nonComponentStratifier(bc, stratifierDef, reportStratifier, populations, groupDef);
@@ -107,24 +107,6 @@ class R4StratifierBuilder {
         // subject1: 'gender'--> 'M'
         // subject2: 'gender'--> 'F'
         // stratifier criteria results are: 'M', 'F'
-        if (MeasureStratifierType.CRITERIA == stratifierDef.getStratifierType()) {
-            var reportStratum = reportStratifier.addStratum();
-            // Ideally, the stratum def should have these values empty in MeasureEvaluator
-            // Seems to be irrelevant for criteria based stratifiers
-            var stratValues = Set.<StratumValueDef>of();
-            // Seems to be irrelevant for criteria based stratifiers
-            var patients = List.<String>of();
-
-            buildStratum(
-                    bc,
-                    stratifierDef,
-                    getOnlyStratumDef(stratifierDef),
-                    reportStratum,
-                    stratValues,
-                    populations,
-                    groupDef);
-            return; // short-circuit so we don't process non-criteria logic
-        }
 
         // Stratum 1
         // Value: 'M'--> subjects: subject1
@@ -327,13 +309,13 @@ class R4StratifierBuilder {
 
         sgpc.setCount(stratumPopulationDef.getCount());
 
-        final List<String> resourceIds = stratumPopulationDef.getResourceIds();
+        final List<String> resourceIdsForSubjectList = stratumPopulationDef.getResourceIdsForSubjectList();
 
         // subject-list ListResource to match intersection of results
-        if ((!resourceIds.isEmpty())
+        if ((!resourceIdsForSubjectList.isEmpty())
                 && bc.report().getType() == org.hl7.fhir.r4.model.MeasureReport.MeasureReportType.SUBJECTLIST) {
             ListResource popSubjectList =
-                    R4StratifierBuilder.createIdList(UUID.randomUUID().toString(), resourceIds);
+                    R4StratifierBuilder.createIdList(UUID.randomUUID().toString(), resourceIdsForSubjectList);
             bc.addContained(popSubjectList);
             sgpc.setSubjectResults(new Reference("#" + popSubjectList.getId()));
         }

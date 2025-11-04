@@ -105,22 +105,33 @@ public class TerminologyServerClient {
     }
 
     public IGenericClient initializeClientWithAuth(IEndpointAdapter endpoint) {
-        var username = endpoint.getExtensionsByUrl(Constants.VSAC_USERNAME).stream()
-                .findFirst()
-                .map(ext -> ext.getValue().toString())
-                .orElseThrow(() -> new UnprocessableEntityException("Cannot expand ValueSet without VSAC Username."));
-        var apiKey = endpoint.getExtensionsByUrl(Constants.APIKEY).stream()
-                .findFirst()
-                .map(ext -> ext.getValue().toString())
-                .orElseThrow(() -> new UnprocessableEntityException("Cannot expand ValueSet without VSAC API Key."));
-
         var fhirClient = fhirContext.newRestfulGenericClient(getAddressBase(endpoint.getAddress()));
+
+        if (endpoint.hasHeaders()) {
+            Clients.registerHeaders(fhirClient, endpoint.getHeaders());
+        }
+
         fhirClient
                 .getFhirContext()
                 .getRestfulClientFactory()
                 .setSocketTimeout(terminologyServerClientSettings.getSocketTimeout() * 1000);
 
-        Clients.registerAdditionalRequestHeadersAuth(fhirClient, username, apiKey);
+        // This smacks of reinventing the wheel... Should be passed in with the Endpoint resource (Endpoint.header
+        // element)... e.g. Basic {username:password (base64 encoded)}
+        if (endpoint.hasExtension(Constants.VSAC_USERNAME) && endpoint.hasExtension(Constants.APIKEY)) {
+            var username = endpoint.getExtensionsByUrl(Constants.VSAC_USERNAME).stream()
+                    .findFirst()
+                    .map(ext -> ext.getValue().toString())
+                    .orElseThrow(() -> new UnprocessableEntityException(
+                            String.format("Found a %s extension with no value", Constants.VSAC_USERNAME)));
+            var apiKey = endpoint.getExtensionsByUrl(Constants.APIKEY).stream()
+                    .findFirst()
+                    .map(ext -> ext.getValue().toString())
+                    .orElseThrow(() -> new UnprocessableEntityException(
+                            String.format("Found a %s extension with no value", Constants.APIKEY)));
+            Clients.registerAdditionalRequestHeadersAuth(fhirClient, username, apiKey);
+        }
+
         return fhirClient;
     }
 

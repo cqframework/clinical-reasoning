@@ -97,7 +97,7 @@ public class ExpandRunner implements Runnable {
                 var expandedValueSetAdapter = (IValueSetAdapter) createAdapterForResource(expandedValueSet);
 
                 if (expandedValueSetAdapter.getExpansionTotal()
-                                > expandedValueSetAdapter.getExpansionContains().size()) {
+                        > expandedValueSetAdapter.getExpansionContains().size()) {
                     var paramsWithOffset = (IParametersAdapter) createAdapterForResource(
                             createAdapterForResource(parameters).copy());
                     var offset = terminologyServerClientSettings.getExpansionsPerPage();

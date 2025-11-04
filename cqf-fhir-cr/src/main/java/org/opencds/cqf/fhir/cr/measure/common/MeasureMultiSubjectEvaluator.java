@@ -47,7 +47,22 @@ public class MeasureMultiSubjectEvaluator {
             for (StratifierDef stratifierDef : groupDef.stratifiers()) {
                 final List<StratumDef> stratumDefs;
 
-                if (stratifierDef.isComponentStratifier()) {
+                if (stratifierDef.isCriteriaStratifier()) {
+                    // LUKETODO:  try to compute these dynamically
+                    // Seems to be irrelevant for criteria based stratifiers
+                    var stratValues = Set.<StratumValueDef>of();
+                    // Seems to be irrelevant for criteria based stratifiers
+                    var patients = List.<String>of();
+
+                    var stratumDef = buildStratumDef(
+                            stratifierDef,
+                            stratValues,
+                            patients,
+                            groupDef.getPopulationBasis(),
+                            groupDef.populations());
+
+                    stratumDefs = List.of(stratumDef);
+                } else if (stratifierDef.isComponentStratifier()) {
                     stratumDefs = componentStratumPlural(
                             stratifierDef, groupDef.getPopulationBasis(), groupDef.populations());
                 } else {
@@ -144,19 +159,6 @@ public class MeasureMultiSubjectEvaluator {
     private static List<StratumDef> componentStratumPlural(
             StratifierDef stratifierDef, CodeDef populationBasis, List<PopulationDef> populationDefs) {
 
-        // LUKETODO:  let's see what this does:
-        if (MeasureStratifierType.CRITERIA == stratifierDef.getStratifierType()) {
-            // LUKETODO:  try to compute these dynamically
-            // Seems to be irrelevant for criteria based stratifiers
-            var stratValues = Set.<StratumValueDef>of();
-            // Seems to be irrelevant for criteria based stratifiers
-            var patients = List.<String>of();
-
-            var stratum = buildStratumDef(stratifierDef, stratValues, patients, populationBasis, populationDefs);
-
-            return List.of(stratum);
-        }
-
         final Table<String, StratumValueWrapper, StratifierComponentDef> subjectResultTable =
                 buildSubjectResultsTable(stratifierDef.components());
 
@@ -215,17 +217,6 @@ public class MeasureMultiSubjectEvaluator {
         // subject1: 'gender'--> 'M'
         // subject2: 'gender'--> 'F'
         // stratifier criteria results are: 'M', 'F'
-
-        if (MeasureStratifierType.CRITERIA == stratifierDef.getStratifierType()) {
-            // LUKETODO:  try to compute these dynamically
-            // Seems to be irrelevant for criteria based stratifiers
-            var stratValues = Set.<StratumValueDef>of();
-            // Seems to be irrelevant for criteria based stratifiers
-            var patients = List.<String>of();
-
-            var stratum = buildStratumDef(stratifierDef, stratValues, patients, populationBasis, populationDefs);
-            return List.of(stratum);
-        }
 
         final Map<StratumValueWrapper, List<String>> subjectsByValue = subjectValues.entrySet().stream()
                 .filter(entry -> entry.getValue() != null)

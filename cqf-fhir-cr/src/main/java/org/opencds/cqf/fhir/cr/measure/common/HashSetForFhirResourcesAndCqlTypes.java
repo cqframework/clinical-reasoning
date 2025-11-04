@@ -19,6 +19,7 @@ import org.opencds.cqf.cql.engine.runtime.CqlType;
  * @param <T> the type of elements in this set, which may or may not be a {@link IBaseResource}
  *           or a {@link CqlType}
  */
+@SuppressWarnings("squid:S3776")
 public class HashSetForFhirResourcesAndCqlTypes<T> extends HashSet<T> {
 
     public HashSetForFhirResourcesAndCqlTypes() {

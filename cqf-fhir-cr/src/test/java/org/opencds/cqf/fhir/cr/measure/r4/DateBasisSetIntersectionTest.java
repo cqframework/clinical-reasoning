@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 
+@SuppressWarnings({"squid:S125", "java:S2699"})
 class DateBasisSetIntersectionTest {
     private static final Given GIVEN = Measure.given().repositoryFor("DateBasisSetIntersection");
 

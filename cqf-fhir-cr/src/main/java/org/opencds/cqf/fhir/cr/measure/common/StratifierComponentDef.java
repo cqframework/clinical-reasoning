@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cr.measure.common;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.StringJoiner;
 
 public class StratifierComponentDef {
     private final String id;
@@ -39,5 +40,15 @@ public class StratifierComponentDef {
         }
 
         return this.results;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", StratifierComponentDef.class.getSimpleName() + "[", "]")
+                .add("id='" + id + "'")
+                .add("code=" + code)
+                .add("expression='" + expression + "'")
+                .add("results=" + results)
+                .toString();
     }
 }

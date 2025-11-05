@@ -2,14 +2,11 @@ package org.opencds.cqf.fhir.cr.measure.common;
 
 import jakarta.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 
 public class StratifierDef {
@@ -40,6 +37,14 @@ public class StratifierDef {
         this.expression = expression;
         this.stratifierType = stratifierType;
         this.components = components;
+    }
+
+    public boolean isComponentStratifier() {
+        return !components.isEmpty();
+    }
+
+    public boolean isCriteriaStratifier() {
+        return MeasureStratifierType.CRITERIA == this.stratifierType;
     }
 
     public String expression() {
@@ -79,28 +84,7 @@ public class StratifierDef {
         return this.results;
     }
 
-    // Ensure we handle FHIR resource identity properly
-    public Set<Object> getAllCriteriaResultValues() {
-        return new HashSetForFhirResourcesAndCqlTypes<>(this.getResults().values().stream()
-                .map(CriteriaResult::rawValue)
-                .map(this::toSet)
-                .flatMap(Collection::stream)
-                .collect(Collectors.toUnmodifiableSet()));
-    }
-
     public MeasureStratifierType getStratifierType() {
         return stratifierType;
-    }
-
-    private Set<Object> toSet(Object value) {
-        if (value == null) {
-            return Set.of();
-        }
-
-        if (value instanceof Iterable<?> iterable) {
-            return StreamSupport.stream(iterable.spliterator(), false).collect(Collectors.toUnmodifiableSet());
-        } else {
-            return Set.of(value);
-        }
     }
 }

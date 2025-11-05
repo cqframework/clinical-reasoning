@@ -1,8 +1,8 @@
 {
-  "id": "CriteriaBasedStratifiersComplex",
+  "id": "CriteriaBasedStratifiersEncounterBasisComplex",
   "resourceType": "Measure",
-  "name": "CriteriaBasedStratifiersComplex",
-  "url": "http://example.com/Measure/CriteriaBasedStratifiersComplex",
+  "name": "CriteriaBasedStratifiersEncounterBasisComplex",
+  "url": "http://example.com/Measure/CriteriaBasedStratifiersEncounterBasisComplex",
   "library": [
     "http://example.com/Library/CriteriaBasedStratifiersComplex"
   ],
@@ -37,7 +37,7 @@
           },
           "criteria": {
             "language": "text/cql-identifier",
-            "expression": "Initial Population"
+            "expression": "Initial Population Resource"
           }
         },
         {
@@ -53,7 +53,7 @@
           },
           "criteria": {
             "language": "text/cql-identifier",
-            "expression": "Denominator"
+            "expression": "Denominator Resource"
           }
         },
         {
@@ -69,7 +69,7 @@
           },
           "criteria": {
             "language": "text/cql-identifier",
-            "expression": "Numerator"
+            "expression": "Numerator Resource"
           }
         }
       ],
@@ -78,7 +78,7 @@
           "id": "stratifier-1",
           "criteria": {
             "language": "text/cql.identifier",
-            "expression": "Encounters in Period"
+            "expression": "Encounters in Period Resource"
           },
           "extension": [
             {

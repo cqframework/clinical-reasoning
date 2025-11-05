@@ -1,0 +1,594 @@
+package org.opencds.cqf.fhir.cr.measure.common;
+
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Sets;
+import com.google.common.collect.Sets.SetView;
+import com.google.common.collect.Table;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.ResourceType;
+import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
+import org.opencds.cqf.fhir.cr.measure.r4.utils.R4ResourceIdUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+// LUKETODO:  javadoc
+public class MeasureMultiSubjectEvaluator {
+
+    private static final Logger logger = LoggerFactory.getLogger(MeasureMultiSubjectEvaluator.class);
+
+    /**
+     * Take the accumulated subject-by-subject evaluation results and use it to build StratumDefs
+     * and StratumPopulationDefs
+     *
+     * @param measureDef to mutate post-evaluation with results of initial stratifier
+     *                   subject-by-subject accumulations.
+     *
+     */
+    public static void postEvaluationMultiSubject(MeasureDef measureDef) {
+
+        for (GroupDef groupDef : measureDef.groups()) {
+            for (StratifierDef stratifierDef : groupDef.stratifiers()) {
+                final List<StratumDef> stratumDefs;
+
+                if (stratifierDef.isCriteriaStratifier()) {
+                    final var stratumDef = buildCriteriaStratumDef(groupDef, stratifierDef);
+
+                    stratumDefs = List.of(stratumDef);
+                } else if (stratifierDef.isComponentStratifier()) {
+                    stratumDefs = componentStratumPlural(
+                            stratifierDef, groupDef.getPopulationBasis(), groupDef.populations());
+                } else {
+                    stratumDefs = nonComponentStratumPlural(
+                            stratifierDef, groupDef.getPopulationBasis(), groupDef.populations());
+                }
+
+                stratifierDef.addAllStratum(stratumDefs);
+            }
+        }
+    }
+
+    @Nonnull
+    private static StratumDef buildCriteriaStratumDef(GroupDef groupDef, StratifierDef stratifierDef) {
+
+        // LUKETODO:  try to compute these dynamically
+        // Seems to be irrelevant for criteria based stratifiers
+        var stratValues = Set.<StratumValueDef>of();
+
+        final Map<String, CriteriaResult> stratifierResults = stratifierDef.getResults();
+        final Map<String, CriteriaResult> resultsBySubjectWhereResultIsTrue;
+
+        final Set<String> subjectIdsFromStratResults;
+        if (groupDef.isBooleanBasis()) {
+            if (stratifierDef.isComponentStratifier()) {
+                // LUKETODO:  this is insufficient:  we're extracting all subjects for which the component evaluated to true, but we're not looking at the actual underlying resources
+                // to see if they conform, so we probably need to extract all the underlying resources and then do an intersection among them
+
+                resultsBySubjectWhereResultIsTrue = stratifierDef
+                    .components()
+                    .stream()
+                    .map(StratifierComponentDef::getResults)
+                    .map(Map::entrySet)
+                    .flatMap(Collection::stream)
+                    .filter(resultEntry ->
+                        Boolean.TRUE == resultEntry.getValue().rawValue())
+                    .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+
+                // LUKETODO:  so are we looking for intersections among the resources here?
+                // LUKETODO:  what if we simply pass down the these entries and let the downstream code try to find the intersectin?
+//                for (Entry<String, CriteriaResult> stringCriteriaResultEntry : resultsBySubjectWhereResultIsTrue) {
+//                    final Set<Object> evaluatedResources = stringCriteriaResultEntry.getValue()
+//                        .evaluatedResources();
+//
+//                    logger.info("1234: TRUE: subject: {}, evaluatedResources: {}", stringCriteriaResultEntry.getKey(), evaluatedResources.stream().filter(IBaseResource.class::isInstance).map(IBaseResource.class::cast).map(IBaseResource::getIdElement).map(
+//                        IIdType::getValueAsString).collect(Collectors.toList()));
+//                }
+
+                subjectIdsFromStratResults = stratifierDef.components().stream()
+                        .map(StratifierComponentDef::getResults)
+                        .map(Map::entrySet)
+                        .flatMap(Collection::stream)
+                        .filter(resultEntry ->
+                                Boolean.TRUE == resultEntry.getValue().rawValue())
+                        .map(Entry::getKey)
+                        .collect(Collectors.toUnmodifiableSet());
+            } else {
+                resultsBySubjectWhereResultIsTrue = Collections.emptyMap();
+                // extract only those subjects that are true, if this is a boolean basis
+                subjectIdsFromStratResults = stratifierResults.entrySet().stream()
+                        .filter(entry -> Boolean.TRUE == entry.getValue().rawValue())
+                        .map(Entry::getKey)
+                        .collect(Collectors.toUnmodifiableSet());
+            }
+        } else {
+            // otherwise, extract all subjects?
+            subjectIdsFromStratResults = stratifierResults.keySet();
+            resultsBySubjectWhereResultIsTrue = Map.of();
+        }
+
+        return buildStratumDef(
+                stratifierDef,
+                stratValues,
+                subjectIdsFromStratResults,
+                resultsBySubjectWhereResultIsTrue,
+                groupDef.getPopulationBasis(),
+                groupDef.populations());
+    }
+
+    private static StratumDef buildStratumDef(
+            StratifierDef stratifierDef,
+            Set<StratumValueDef> values,
+            Collection<String> subjectIds,
+            Map<String, CriteriaResult> resultsBySubjectWhereResultIsTrue,
+            CodeDef populationBasis,
+            List<PopulationDef> populationDefs) {
+
+        boolean isComponent = values.size() > 1;
+        String stratumText = null;
+
+        for (StratumValueDef valuePair : values) {
+            StratumValueWrapper value = valuePair.value();
+            var componentDef = valuePair.def();
+            // Set Stratum value to indicate which value is displaying results
+            // ex. for Gender stratifier, code 'Male'
+            if (value.getValueClass().equals(CodeableConcept.class)) {
+                if (isComponent) {
+                    // component stratifier example: code: "gender", value: 'M'
+                    // value being stratified: 'M'
+                    stratumText = componentDef.code().text();
+                } else {
+                    // non-component stratifiers only set stratified value, code is set on stratifier object
+                    // value being stratified: 'M'
+                    if (value.getValue() instanceof CodeableConcept codeableConcept) {
+                        stratumText = codeableConcept.getText();
+                    }
+                }
+            } else if (isComponent) {
+                stratumText = expressionResultToCodableConcept(value).getText();
+            } else if (MeasureStratifierType.VALUE == stratifierDef.getStratifierType()) {
+                // non-component stratifiers only set stratified value, code is set on stratifier object
+                // value being stratified: 'M'
+                stratumText = expressionResultToCodableConcept(value).getText();
+            }
+        }
+
+        return new StratumDef(
+                stratumText,
+                populationDefs.stream()
+                        .map(popDef -> buildStratumPopulationDef(
+                                stratifierDef.getStratifierType(),
+                                stratifierDef.components(),
+                                stratifierDef.getResults(),
+                                resultsBySubjectWhereResultIsTrue,
+                                populationBasis,
+                                popDef,
+                                subjectIds))
+                        .toList(),
+                values,
+                subjectIds);
+    }
+
+    private static StratumPopulationDef buildStratumPopulationDef(
+            MeasureStratifierType measureStratifierType,
+            List<StratifierComponentDef> stratifierComponents,
+            // LUKETODO:  maybe try to merge these?
+            Map<String, CriteriaResult> nonStratifierComponentResults,
+            Map<String, CriteriaResult> resultsBySubjectWhereResultIsTrue,
+            CodeDef groupPopulationBasis,
+            PopulationDef populationDef,
+            Collection<String> subjectIds) {
+
+        var popSubjectIds = populationDef.getSubjects().stream()
+                .map(R4ResourceIdUtils::addPatientQualifier)
+                .collect(Collectors.toUnmodifiableSet());
+
+        var qualifiedSubjectIdsCommonToPopulation = getSubjectIdsIntersectionPopAndStratum(subjectIds, popSubjectIds);
+
+        final Set<Object> populationDefEvaluationResultIntersection = getPopulationDefEvaluationResultIntersection(
+                stratifierComponents, nonStratifierComponentResults, resultsBySubjectWhereResultIsTrue, populationDef);
+
+        final String resourceType = getResourceType(groupPopulationBasis);
+
+        final List<String> resourceIdsForSubjectList =
+                getResourceIdsForSubjectList(resourceType, subjectIds, populationDef);
+
+        return new StratumPopulationDef(
+                populationDef.id(),
+                qualifiedSubjectIdsCommonToPopulation,
+                populationDefEvaluationResultIntersection,
+                resourceIdsForSubjectList,
+                measureStratifierType);
+    }
+
+    @Nonnull
+    private static Set<String> getSubjectIdsIntersectionPopAndStratum(
+            Collection<String> stratumSubjectIds, Set<String> popSubjectIds) {
+
+        if (stratumSubjectIds.isEmpty() || popSubjectIds.isEmpty()) {
+            return Set.of();
+        }
+
+        final boolean stratumSubjectsAreQualified = ResourceIdUtils.hasResourceQualifier(
+                stratumSubjectIds.iterator().next());
+
+        final boolean popSubjectsAreQualified =
+                ResourceIdUtils.hasResourceQualifier(popSubjectIds.iterator().next());
+
+        // If both are either qualified or unqualified, do a straight-up comparison
+        if ((stratumSubjectsAreQualified && popSubjectsAreQualified)
+                || (!stratumSubjectsAreQualified && !popSubjectsAreQualified)) {
+            return Sets.intersection(Set.copyOf(stratumSubjectIds), popSubjectIds);
+        }
+
+        // Or else, strip the identifiers from both
+        return Sets.intersection(
+                ResourceIdUtils.stripAnyResourceQualifiersAsSet(stratumSubjectIds),
+                ResourceIdUtils.stripAnyResourceQualifiersAsSet(popSubjectIds));
+    }
+
+    private static List<StratumDef> componentStratumPlural(
+            StratifierDef stratifierDef, CodeDef populationBasis, List<PopulationDef> populationDefs) {
+
+        final Table<String, StratumValueWrapper, StratifierComponentDef> subjectResultTable =
+                buildSubjectResultsTable(stratifierDef.components());
+
+        // Stratifiers should be of the same basis as population
+        // Split subjects by result values
+        // ex. all Male Patients and all Female Patients
+
+        var componentSubjects = groupSubjectsByValueDefSet(subjectResultTable);
+
+        var stratumDefs = new ArrayList<StratumDef>();
+
+        // LUKETODO:  for the two component criteria stratifiers how many stratum are we supposed to get for each?
+
+        /*
+        initial-pop:  2024-01-01, 2024-01-02
+
+        ## 1
+
+          strat1:  2024-01-02, 2024-02-01
+          strat2:  2024-01-02, 2024-02-03
+
+          stratum pop: 2024-01-02
+         */
+
+        // LUKETODO:  in the non-criteria component case, we have a single stratifier that gives us 2 stratum, one for
+        // each gender and age combo
+        componentSubjects.forEach((valueSet, subjects) -> {
+            // converts table into component value combinations
+            // | Stratum   | Set<ValueDef>           | List<Subjects(String)> |
+            // | --------- | ----------------------- | ---------------------- |
+            // | Stratum-1 | <'M','White>            | [subject-a]            |
+            // | Stratum-2 | <'F','hispanic/latino'> | [subject-b]            |
+            // | Stratum-3 | <'M','hispanic/latino'> | [subject-c]            |
+            // | Stratum-4 | <'F','black'>           | [subject-d, subject-e] |
+
+            var stratumDef = buildStratumDef(stratifierDef, valueSet, subjects, Map.of(), populationBasis, populationDefs);
+
+            stratumDefs.add(stratumDef);
+        });
+
+        return stratumDefs;
+    }
+
+    private static List<StratumDef> nonComponentStratumPlural(
+            StratifierDef stratifierDef, CodeDef populationBasis, List<PopulationDef> populationDefs) {
+        // standard Stratifier
+        // one criteria expression defined, one set of criteria results
+
+        // standard Stratifier
+        // one criteria expression defined, one set of criteria results
+        final Map<String, CriteriaResult> subjectValues = stratifierDef.getResults();
+
+        // nonComponent stratifiers will have a single expression that can generate results, instead of grouping
+        // combinations of results
+        // example: 'gender' expression could produce values of 'M', 'F'
+        // subject1: 'gender'--> 'M'
+        // subject2: 'gender'--> 'F'
+        // stratifier criteria results are: 'M', 'F'
+
+        final Map<StratumValueWrapper, List<String>> subjectsByValue = subjectValues.entrySet().stream()
+                .filter(entry -> entry.getValue() != null)
+                .filter(entry -> entry.getValue().rawValue() != null)
+                .collect(Collectors.groupingBy(
+                        entry -> new StratumValueWrapper(entry.getValue().rawValue()),
+                        Collectors.mapping(Entry::getKey, Collectors.toList())));
+
+        var stratumMultiple = new ArrayList<StratumDef>();
+
+        // Stratum 1
+        // Value: 'M'--> subjects: subject1
+        // Stratum 2
+        // Value: 'F'--> subjects: subject2
+        // loop through each value key
+        for (Map.Entry<StratumValueWrapper, List<String>> stratValue : subjectsByValue.entrySet()) {
+            // patch Patient values with prefix of ResourceType to match with incoming population subjects for stratum
+            // TODO: should match context of CQL, not only Patient
+            var patientsSubjects = stratValue.getValue().stream()
+                    .map(R4ResourceIdUtils::addPatientQualifier)
+                    .toList();
+            // build the stratum for each unique value
+            // non-component stratifiers will populate a 'null' for componentStratifierDef, since it doesn't have
+            // multiple criteria
+            // TODO: build out nonComponent stratum method
+            Set<StratumValueDef> stratValues = Set.of(new StratumValueDef(stratValue.getKey(), null));
+            var stratum =
+                    buildStratumDef(stratifierDef, stratValues, patientsSubjects, Map.of(), populationBasis, populationDefs);
+            stratumMultiple.add(stratum);
+        }
+
+        return stratumMultiple;
+    }
+
+    private static Table<String, StratumValueWrapper, StratifierComponentDef> buildSubjectResultsTable(
+            List<StratifierComponentDef> componentDefs) {
+
+        final Table<String, StratumValueWrapper, StratifierComponentDef> subjectResultTable = HashBasedTable.create();
+
+        // Component Stratifier
+        // one or more criteria expression defined, one set of criteria results per component specified
+        // results of component stratifier are an intersection of membership to both component result sets
+
+        componentDefs.forEach(componentDef -> componentDef.getResults().forEach((subject, result) -> {
+            StratumValueWrapper stratumValueWrapper = new StratumValueWrapper(result.rawValue());
+            subjectResultTable.put(R4ResourceIdUtils.addPatientQualifier(subject), stratumValueWrapper, componentDef);
+        }));
+
+        return subjectResultTable;
+    }
+
+    private static Map<Set<StratumValueDef>, List<String>> groupSubjectsByValueDefSet(
+            Table<String, StratumValueWrapper, StratifierComponentDef> table) {
+        // input format
+        // | Subject (String) | CriteriaResult (ValueWrapper) | StratifierComponentDef |
+        // | ---------------- | ----------------------------- | ---------------------- |
+        // | subject-a        | M                             | gender                 |
+        // | subject-b        | F                             | gender                 |
+        // | subject-c        | M                             | gender                 |
+        // | subject-d        | F                             | gender                 |
+        // | subject-e        | F                             | gender                 |
+        // | subject-a        | white                         | race                   |
+        // | subject-b        | hispanic/latino               | race                   |
+        // | subject-c        | hispanic/latino               | race                   |
+        // | subject-d        | black                         | race                   |
+        // | subject-e        | black                         | race                   |
+
+        // Step 1: Build Map<Subject, Set<ValueDef>>
+        final Map<String, Set<StratumValueDef>> subjectToValueDefs = new HashMap<>();
+
+        for (Table.Cell<String, StratumValueWrapper, StratifierComponentDef> cell : table.cellSet()) {
+            subjectToValueDefs
+                    .computeIfAbsent(cell.getRowKey(), k -> new HashSet<>())
+                    .add(new StratumValueDef(cell.getColumnKey(), cell.getValue()));
+        }
+        // output format:
+        // | Set<ValueDef>           | List<Subjects(String)> |
+        // | ----------------------- | ---------------------- |
+        // | <'M','White>            | [subject-a]            |
+        // | <'F','hispanic/latino'> | [subject-b]            |
+        // | <'M','hispanic/latino'> | [subject-c]            |
+        // | <'F','black'>           | [subject-d, subject-e] |
+
+        // Step 2: Invert to Map<Set<ValueDef>, List<Subject>>
+        return subjectToValueDefs.entrySet().stream()
+                .collect(Collectors.groupingBy(
+                        Map.Entry::getValue,
+                        Collector.of(ArrayList::new, (list, e) -> list.add(e.getKey()), (l1, l2) -> {
+                            l1.addAll(l2);
+                            return l1;
+                        })));
+    }
+
+    // This is weird pattern where we have multiple qualifying values within a single stratum,
+    // which was previously unsupported.  So for now, comma-delim the first five values.
+    private static CodeableConcept expressionResultToCodableConcept(StratumValueWrapper value) {
+        return new CodeableConcept().setText(value.getValueAsString());
+    }
+
+    // LUKETODO:  I think we need to split the logic between component and non component stratifiers,
+    // since the results profiles are drastically different
+    // LUKETODO:  I need to consider boolean, Encounter, and date bases
+
+    private static Set<Object> getPopulationDefEvaluationResultIntersection(
+            List<StratifierComponentDef> stratifierComponents,
+            Map<String, CriteriaResult> nonStratifierComponentResults,
+            Map<String, CriteriaResult> resultsBySubjectWhereResultIsTrue,
+            PopulationDef populationDef) {
+
+        /*
+         * non-component
+         * 2024-01-01, 2024-01-02
+         * population
+         * 2024-01-01, 2024-02-02
+         */
+
+        /*
+         * population
+         * 2024-01-01, 2024-02-02
+         *
+         * component1
+         * 2024-01-01, 2024-01-02
+         * component2
+         * 2024-01-01, 2024-03-01
+         */
+
+        final Set<Object> resources = populationDef.getResources();
+
+        if (resources.isEmpty()) {
+            return Set.of();
+        }
+
+        final Class<?> resourcesClassFirst = resources.iterator().next().getClass();
+
+        if (!stratifierComponents.isEmpty()) {
+            final Set<Object> allIntersections = new HashSetForFhirResourcesAndCqlTypes<>();
+
+            for (String subjectId : populationDef.getSubjects()) {
+
+                // LUKETODO:  why do we have some componentDefs that are empty?  how should we handle it if
+                // evaluationResults are empty in this case?
+                final Set<Set<Object>> resultsPerComponent = stratifierComponents.stream()
+                        .map(StratifierComponentDef::getResults)
+                        .map(resultMap -> resultMap.get(subjectId))
+                        .map(CriteriaResult::rawValue)
+                        .map(MeasureMultiSubjectEvaluator::toSet)
+                        .collect(Collectors.toUnmodifiableSet());
+
+                // LUKETODO:  flip condition
+                if (resources.isEmpty() || resultsPerComponent.isEmpty()) {
+                    // There's no intersection, so no point in going further.
+                    continue;
+                }
+
+                // LUKETODO:  do we need this?
+                //                final Class<?> resultClassFirst =
+                //                    resultsPerComponent.iterator().next().getClass();
+                //
+                //                if (resourcesClassFirst != resultClassFirst) {
+                //                    // Different classes, so no point in going further.
+                //                    continue;
+                //                }
+                //
+                // LUKETODO:  for the date case, we run into the object identity problem
+                final Set<Object> intersection = new HashSetForFhirResourcesAndCqlTypes<>(resources);
+                for (Set<Object> resultForComponent : resultsPerComponent) {
+                    intersection.retainAll(resultForComponent); // 2024-01-01 2024-03-01  next  2024-04-01
+                }
+
+                allIntersections.addAll(intersection);
+            }
+
+            return allIntersections;
+        } else {
+            // LUKETODO:  this is the criteria case
+            final Set<Object> evaluationResults = nonStratifierComponentResults.values().stream()
+                    .map(CriteriaResult::rawValue)
+                    .map(MeasureMultiSubjectEvaluator::toSet)
+                    .flatMap(Collection::stream)
+                    .collect(Collectors.toUnmodifiableSet());
+
+            // LUKETODO:  for the component criteria scenario, we don't add the results directly to the stratifierDef,
+            // but to each of the component defs, which is why this is empty
+            if (resources.isEmpty() || evaluationResults.isEmpty()) {
+                // There's no intersection, so no point in going further.
+                return Set.of();
+            }
+
+            final Class<?> resultClassFirst =
+                    evaluationResults.iterator().next().getClass();
+
+            // LUKETODO:  this test fails for boolean criteria non-component stratifiers since there's a mismatch
+            if (resourcesClassFirst != resultClassFirst) {
+                // Different classes, so no point in going further.
+                return Set.of();
+            }
+
+            // LUKETODO:  should we make sure this works with Dates?
+            final SetView<Object> intersection =
+                    Sets.intersection(resources, new HashSetForFhirResourcesAndCqlTypes<>(evaluationResults));
+            logger.info("1234: non-component intersection: {}", intersection);
+            return intersection;
+        }
+    }
+
+    // LUKETODO:  utils?
+    private static Set<Object> toSet(Object value) {
+        if (value == null) {
+            return Set.of();
+        }
+
+        if (value instanceof Iterable<?> iterable) {
+            return StreamSupport.stream(iterable.spliterator(), false).collect(Collectors.toUnmodifiableSet());
+        } else {
+            return Set.of(value);
+        }
+    }
+
+    // LUKETODO: deprecate SUBJECTLIST
+
+    // LUKETODO:  now that we have Quantities instead of Observations, this is sort of broken
+    // since Quantities don't have version-agnostic ID representations
+    @Nonnull
+    private static List<String> getResourceIdsForSubjectList(
+            String resourceType, Collection<String> subjectIds, PopulationDef populationDef) {
+
+        // only ResourceType fhirType should return true here
+        boolean isResourceType = resourceType != null;
+        List<String> resourceIds = new ArrayList<>();
+
+        if (populationDef == null) {
+            // LUKETODO:  enhance this message?
+            throw new InternalErrorException("Population definition has not been set");
+        }
+
+        if (populationDef.getSubjectResources() != null) {
+            for (String subjectId : subjectIds) {
+                // retrieve criteria results by subject Key
+                var resources =
+                        populationDef.getSubjectResources().get(R4ResourceIdUtils.stripPatientQualifier(subjectId));
+                if (resources != null) {
+                    if (isResourceType) {
+                        resourceIds.addAll(resources.stream()
+                                .map(
+                                        MeasureMultiSubjectEvaluator
+                                                ::getPopulationResourceIdForSubjectList) // get resource id
+                                .toList());
+                    } else {
+                        resourceIds.addAll(
+                                resources.stream().map(Object::toString).toList());
+                    }
+                }
+            }
+        }
+        return resourceIds;
+    }
+
+    // LUKETODO:  so we need to count the number of resources here, which would be ID-less quantities
+    // LUKETODO:  we get a null ID here because we get a Map.Entry here, which fails the checks here:
+    // Map.Entry<Encounter, Quantity>
+    private static String getPopulationResourceIdForSubjectList(Object resourceObject) {
+        if (resourceObject instanceof IBaseResource resource) {
+            return resource.getIdElement().toVersionless().getValueAsString();
+        }
+        // If this is not a resource, then included the type
+        if (resourceObject instanceof IBase baseType) {
+            return baseType.fhirType();
+        }
+        // This is the continuous variable observation use case:
+        if (resourceObject instanceof Map<?, ?> map) {
+
+            // Arbitrary use of the first map key as the "resourceId"
+            return getPopulationResourceIdForSubjectList(map.keySet().iterator().next());
+        }
+        return null;
+    }
+
+    @Nullable
+    private static String getResourceType(CodeDef populationBasis) {
+        try {
+            // when this method is checked with a primitive value and not ResourceType it returns an error
+            // this try/catch is to prevent the exception thrown from setting the correct value
+            return ResourceType.fromCode(populationBasis.code()).toString();
+        } catch (FHIRException e) {
+            return null;
+        }
+    }
+}

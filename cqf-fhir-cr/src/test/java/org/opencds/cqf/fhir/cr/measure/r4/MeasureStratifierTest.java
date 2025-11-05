@@ -4,8 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportStatus;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
@@ -212,7 +214,7 @@ class MeasureStratifierTest {
      */
     @Test
     void cohortBooleanValueStratComponentStrat() {
-        GIVEN_MEASURE_STRATIFIER_TEST
+        final MeasureReport report = GIVEN_MEASURE_STRATIFIER_TEST
                 .when()
                 .measureId("CohortBooleanStratComponent")
                 .evaluate()
@@ -243,6 +245,11 @@ class MeasureStratifierTest {
                 .up()
                 .up()
                 .report();
+
+        final String json =
+                FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(report);
+
+        System.out.println("json = " + json);
     }
 
     /**
@@ -519,43 +526,5 @@ class MeasureStratifierTest {
                 .hasPopulationCount(1)
                 .firstPopulation()
                 .hasCount(3);
-    }
-
-    @Test
-    void ratioResourceCriteriaStratComplexSetsDifferentForInitialDenominatorAndNumerator() {
-        GIVEN_CRITERIA_BASED_STRAT_COMPLEX
-                .when()
-                .measureId("CriteriaBasedStratifiersComplex")
-                .evaluate()
-                .then()
-                .hasGroupCount(1)
-                .firstGroup()
-                .hasPopulationCount(3)
-                .population("initial-population")
-                .hasCount(11)
-                .up()
-                .population("denominator")
-                .hasCount(8)
-                .up()
-                .population("numerator")
-                // due to apply scoring, we keep only those numerator encounters that are also in the denominator
-                .hasCount(5)
-                .up()
-                .hasMeasureScore(true)
-                .hasScore("0.625")
-                .hasStratifierCount(1)
-                .firstStratifier()
-                .hasCodeText("Encounters in Period")
-                .hasStratumCount(1)
-                .firstStratum()
-                .hasPopulationCount(3)
-                .population("initial-population")
-                .hasCount(3)
-                .up()
-                .population("denominator")
-                .hasCount(2)
-                .up()
-                .population("numerator")
-                .hasCount(1);
     }
 }

@@ -84,6 +84,9 @@ import org.slf4j.LoggerFactory;
  * <p> (v3.18.0 and below) Previous calculation of measure score from MeasureReport only interpreted Numerator, Denominator membership since exclusions and exceptions were already applied. Now exclusions and exceptions are present in Denominator and Numerator populations, the measure scorer calculation has to take into account additional population membership to determine Final-Numerator and Final-Denominator values</p>
  */
 @SuppressWarnings("squid:S1135")
+// LUKETODO:  we does this have to be an R4 class at all?   why can't we base this entirely off defs?
+// LUKETODO:  as a migration path, why can't we push up logic gradually to the BaseMeasureReportScorer, moving away from
+// FHIR-version specific logic
 public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport> {
 
     private static final Logger logger = LoggerFactory.getLogger(R4MeasureReportScorer.class);
@@ -176,6 +179,9 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
 
         switch (measureScoring) {
             case PROPORTION, RATIO:
+                // LUKETODO:  here, we're taking the counts from the R4 populations, but why do we have to store them
+                // there?
+                // why can't we put the counts in the population defs?
                 var score = calcProportionScore(
                         getCountFromGroupPopulation(mrgc.getPopulation(), NUMERATOR)
                                 - getCountFromGroupPopulation(mrgc.getPopulation(), NUMERATOR_EXCLUSION),

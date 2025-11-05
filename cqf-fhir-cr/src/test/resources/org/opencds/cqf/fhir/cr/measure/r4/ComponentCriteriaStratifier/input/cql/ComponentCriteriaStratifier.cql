@@ -108,6 +108,13 @@ define "Stratifier Encounters Finished Triaged Resource":
 // Date
 //
 
+/*
+Date(2024-01-01) >>>> hashcode 12345   IgRepository
+Date(2024-01-01) >>>> hashcode 67890
+
+equals()  >>> false
+ */
+
 // Scenario 1:  Overlap on 2024-01-02
 
 define "Stratifier Feb1 Jan2":

@@ -12,6 +12,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
@@ -23,6 +24,7 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.ResourceType;
+import org.opencds.cqf.cql.engine.runtime.CqlType;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4ResourceIdUtils;
 import org.slf4j.Logger;
@@ -355,13 +357,6 @@ public class MeasureMultiSubjectEvaluator {
 
             for (String subjectId : populationDef.getSubjects()) {
 
-                for (StratifierComponentDef stratifierComponent : stratifierComponents) {
-                    final Map<String, CriteriaResult> results = stratifierComponent.getResults();
-
-                    final CriteriaResult criteriaResult = results.get(subjectId);
-                    logger.info("criteriaResult: {}", criteriaResult);
-                }
-
                 // LUKETODO:  why do we have some componentDefs that are empty?  how should we handle it if
                 // evaluationResults are empty in this case?
                 final Set<Set<Object>> resultsPerComponent = stratifierComponents.stream()
@@ -377,10 +372,19 @@ public class MeasureMultiSubjectEvaluator {
                     continue;
                 }
 
+                // LUKETODO:  do we need this?
+                //                final Class<?> resultClassFirst =
+                //                    resultsPerComponent.iterator().next().getClass();
+                //
+                //                if (resourcesClassFirst != resultClassFirst) {
+                //                    // Different classes, so no point in going further.
+                //                    continue;
+                //                }
+                //
                 // LUKETODO:  for the date case, we run into the object identity problem
                 final Set<Object> intersection = new HashSetForFhirResources<>(resources);
                 for (Set<Object> resultForComponent : resultsPerComponent) {
-                    intersection.retainAll(resultForComponent);
+                    intersection.retainAll(resultForComponent); // 2024-01-01 2024-03-01  next  2024-04-01
                 }
 
                 allIntersections.addAll(intersection);
@@ -405,8 +409,7 @@ public class MeasureMultiSubjectEvaluator {
             final Class<?> resultClassFirst =
                     evaluationResults.iterator().next().getClass();
 
-            // LUKETODO:  this fails because we have evaluationResults which are List<List<Date>>
-            // Sanity check: isCriteriaBasedStratifier() should have filtered this out
+            // LUKETODO:  this test fails for boolean criteria non-component stratifiers since there's a mismatch
             if (resourcesClassFirst != resultClassFirst) {
                 // Different classes, so no point in going further.
                 return Set.of();
@@ -417,6 +420,32 @@ public class MeasureMultiSubjectEvaluator {
                     Sets.intersection(resources, new HashSetForFhirResources<>(evaluationResults));
             logger.info("1234: non-component intersection: {}", intersection);
             return intersection;
+        }
+    }
+
+    // LUKETODO:  two options:
+    // 1) write a bespoke CQL type wrapper class that will compute equals() and hashCode() for
+    // each of roughly 12 CqlType implementing classes
+    // 2) Fix these classes within CQL itself to have equals() and hashCode()
+    private static class CqlTypeWrapper {
+        private final CqlType cqlType;
+
+        public CqlTypeWrapper(CqlType cqlType) {
+            this.cqlType = cqlType;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            CqlTypeWrapper that = (CqlTypeWrapper) o;
+            return cqlType.equals(that.cqlType);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hashCode(cqlType);
         }
     }
 

@@ -5,9 +5,92 @@ import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.SelectedReport;
 
-public class ComponentCriteriaStratifierTest {
+public class CriteriaStratifierTest {
 
-    private static final Given GIVEN = Measure.given().repositoryFor("ComponentCriteriaStratifier");
+    private static final Given GIVEN_COMPONENT_CRITERIA_STRATIFIER =
+            Measure.given().repositoryFor("ComponentCriteriaStratifier");
+    private static final Given GIVEN_VALUE_CRITERIA_STRATIFIER_BOOLEAN_BASIS =
+            Measure.given().repositoryFor("CriteriaBasedStratifiersBooleanBasisComplex");
+    private static final Given GIVEN_VALUE_CRITERIA_STRATIFIER_ENCOUNTER_BASIS =
+            Measure.given().repositoryFor("CriteriaBasedStratifiersEncounterBasisComplex");
+
+    // LUKETODO:  I need to rejig this to have a 1-1 mapping of encounters to patients, with expectations
+    // about which encounters, and thus, which patients, make the cut
+    @Test
+    void ratioResourceValueCriteriaStratComplexBooleanBasisSetsDifferentForInitialDenominatorAndNumerator() {
+        GIVEN_VALUE_CRITERIA_STRATIFIER_BOOLEAN_BASIS
+                .when()
+                .measureId("CriteriaBasedStratifiersBooleanBasisComplex")
+                .evaluate()
+                .then()
+                .hasGroupCount(1)
+                .firstGroup()
+                .hasPopulationCount(3)
+                .population("initial-population")
+                .hasCount(11)
+                .up()
+                .population("denominator")
+                .hasCount(8)
+                .up()
+                .population("numerator")
+                // due to apply scoring, we keep only those numerator encounters that are also in the denominator
+                .hasCount(5)
+                .up()
+                .hasMeasureScore(true)
+                .hasScore("0.625")
+                .hasStratifierCount(1)
+                .firstStratifier()
+                .hasCodeText("Encounters in Period Boolean")
+                .hasStratumCount(1)
+                .firstStratum()
+                .hasPopulationCount(3)
+                .population("initial-population")
+                .hasCount(3)
+                .up()
+                .population("denominator")
+                .hasCount(2)
+                .up()
+                .population("numerator")
+                .hasCount(1);
+    }
+
+    @Test
+    void ratioResourceValueCriteriaStratComplexEncounterBasisSetsDifferentForInitialDenominatorAndNumerator() {
+        GIVEN_VALUE_CRITERIA_STRATIFIER_ENCOUNTER_BASIS
+                .when()
+                .measureId("CriteriaBasedStratifiersEncounterBasisComplex")
+                .evaluate()
+                .then()
+                .hasGroupCount(1)
+                .firstGroup()
+                .hasPopulationCount(3)
+                .population("initial-population")
+                .hasCount(11)
+                .up()
+                .population("denominator")
+                .hasCount(8)
+                .up()
+                .population("numerator")
+                // due to apply scoring, we keep only those numerator encounters that are also in the denominator
+                .hasCount(5)
+                .up()
+                .hasMeasureScore(true)
+                .hasScore("0.625")
+                .hasStratifierCount(1)
+                .firstStratifier()
+                .hasCodeText("Encounters in Period Resource")
+                .hasStratumCount(1)
+                .firstStratum()
+                .hasPopulationCount(3)
+                .population("initial-population")
+                .hasCount(3)
+                .up()
+                .population("denominator")
+                .hasCount(2)
+                .up()
+                .population("numerator")
+                .hasCount(1);
+    }
 
     /*
        population=1/1/2024, 1/2/2024
@@ -21,7 +104,8 @@ public class ComponentCriteriaStratifierTest {
     @Test
     void cohortDateComponentCriteriaStratWithIntersectionScenario1() {
 
-        final SelectedReport then = GIVEN.when()
+        final SelectedReport then = GIVEN_COMPONENT_CRITERIA_STRATIFIER
+                .when()
                 .measureId("ComponentCriteriaStratifierDateBasisWithIntersectionScenario1")
                 .evaluate()
                 .then();
@@ -63,7 +147,8 @@ public class ComponentCriteriaStratifierTest {
     @Test
     void cohortDateComponentCriteriaStratNoIntersectionScenario2() {
 
-        final SelectedReport then = GIVEN.when()
+        final SelectedReport then = GIVEN_COMPONENT_CRITERIA_STRATIFIER
+                .when()
                 .measureId("ComponentCriteriaStratifierDateBasisNoIntersectionScenario2")
                 .evaluate()
                 .then();
@@ -96,7 +181,8 @@ public class ComponentCriteriaStratifierTest {
     @Test
     void cohortDateComponentCriteriaStratNoIntersectionScenario3() {
 
-        final SelectedReport then = GIVEN.when()
+        final SelectedReport then = GIVEN_COMPONENT_CRITERIA_STRATIFIER
+                .when()
                 .measureId("ComponentCriteriaStratifierDateBasisNoIntersectionScenario3")
                 .evaluate()
                 .then();
@@ -129,7 +215,8 @@ public class ComponentCriteriaStratifierTest {
     @Test
     void cohortDateComponentCriteriaStratNoIntersectionScenario4() {
 
-        final SelectedReport then = GIVEN.when()
+        final SelectedReport then = GIVEN_COMPONENT_CRITERIA_STRATIFIER
+                .when()
                 .measureId("ComponentCriteriaStratifierDateBasisNoIntersectionScenario4")
                 .evaluate()
                 .then();
@@ -162,7 +249,8 @@ public class ComponentCriteriaStratifierTest {
     @Test
     void cohortDateComponentCriteriaStratNoIntersectionScenario5() {
 
-        final SelectedReport then = GIVEN.when()
+        final SelectedReport then = GIVEN_COMPONENT_CRITERIA_STRATIFIER
+                .when()
                 .measureId("ComponentCriteriaStratifierDateBasisNoIntersectionScenario5")
                 .evaluate()
                 .then();
@@ -195,7 +283,8 @@ public class ComponentCriteriaStratifierTest {
     @Test
     void cohortBooleanComponentCriteriaStratWithIntersectionScenario1() {
 
-        final SelectedReport then = GIVEN.when()
+        final SelectedReport then = GIVEN_COMPONENT_CRITERIA_STRATIFIER
+                .when()
                 .measureId("ComponentCriteriaStratifierBooleanBasisWithIntersectionScenario1")
                 .evaluate()
                 .then();
@@ -229,7 +318,8 @@ public class ComponentCriteriaStratifierTest {
     @Test
     void cohortBooleanComponentCriteriaStratNoIntersectionScenario2() {
 
-        final SelectedReport then = GIVEN.when()
+        final SelectedReport then = GIVEN_COMPONENT_CRITERIA_STRATIFIER
+                .when()
                 .measureId("ComponentCriteriaStratifierBooleanBasisNoIntersectionScenario2")
                 .evaluate()
                 .then();
@@ -261,7 +351,8 @@ public class ComponentCriteriaStratifierTest {
     @Test
     void cohortBooleanComponentCriteriaStratNoIntersectionScenario3() {
 
-        final SelectedReport then = GIVEN.when()
+        final SelectedReport then = GIVEN_COMPONENT_CRITERIA_STRATIFIER
+                .when()
                 .measureId("ComponentCriteriaStratifierBooleanBasisNoIntersectionScenario3")
                 .evaluate()
                 .then();
@@ -293,7 +384,8 @@ public class ComponentCriteriaStratifierTest {
     @Test
     void cohortBooleanComponentCriteriaStratNoIntersectionScenario4() {
 
-        final SelectedReport then = GIVEN.when()
+        final SelectedReport then = GIVEN_COMPONENT_CRITERIA_STRATIFIER
+                .when()
                 .measureId("ComponentCriteriaStratifierBooleanBasisNoIntersectionScenario4")
                 .evaluate()
                 .then();
@@ -325,7 +417,8 @@ public class ComponentCriteriaStratifierTest {
     @Test
     void cohortBooleanComponentCriteriaStratNoIntersectionScenario5() {
 
-        final SelectedReport then = GIVEN.when()
+        final SelectedReport then = GIVEN_COMPONENT_CRITERIA_STRATIFIER
+                .when()
                 .measureId("ComponentCriteriaStratifierBooleanBasisNoIntersectionScenario5")
                 .evaluate()
                 .then();
@@ -357,7 +450,8 @@ public class ComponentCriteriaStratifierTest {
     @Test
     void cohortEncounterComponentCriteriaStratWithIntersectionScenario1() {
 
-        final SelectedReport then = GIVEN.when()
+        final SelectedReport then = GIVEN_COMPONENT_CRITERIA_STRATIFIER
+                .when()
                 .measureId("ComponentCriteriaStratifierEncounterBasisWithIntersectionScenario1")
                 .evaluate()
                 .then();
@@ -389,7 +483,8 @@ public class ComponentCriteriaStratifierTest {
     @Test
     void cohortEncounterComponentCriteriaStratNoIntersectionScenario2() {
 
-        final SelectedReport then = GIVEN.when()
+        final SelectedReport then = GIVEN_COMPONENT_CRITERIA_STRATIFIER
+                .when()
                 .measureId("ComponentCriteriaStratifierEncounterBasisNoIntersectionScenario2")
                 .evaluate()
                 .then();
@@ -421,7 +516,8 @@ public class ComponentCriteriaStratifierTest {
     @Test
     void cohortEncounterComponentCriteriaStratNoIntersectionScenario3() {
 
-        final SelectedReport then = GIVEN.when()
+        final SelectedReport then = GIVEN_COMPONENT_CRITERIA_STRATIFIER
+                .when()
                 .measureId("ComponentCriteriaStratifierEncounterBasisNoIntersectionScenario3")
                 .evaluate()
                 .then();
@@ -453,7 +549,8 @@ public class ComponentCriteriaStratifierTest {
     @Test
     void cohortEncounterComponentCriteriaStratNoIntersectionScenario4() {
 
-        final SelectedReport then = GIVEN.when()
+        final SelectedReport then = GIVEN_COMPONENT_CRITERIA_STRATIFIER
+                .when()
                 .measureId("ComponentCriteriaStratifierEncounterBasisNoIntersectionScenario4")
                 .evaluate()
                 .then();
@@ -485,7 +582,8 @@ public class ComponentCriteriaStratifierTest {
     @Test
     void cohortEncounterComponentCriteriaStratNoIntersectionScenario5() {
 
-        final SelectedReport then = GIVEN.when()
+        final SelectedReport then = GIVEN_COMPONENT_CRITERIA_STRATIFIER
+                .when()
                 .measureId("ComponentCriteriaStratifierEncounterBasisNoIntersectionScenario5")
                 .evaluate()
                 .then();
@@ -522,7 +620,8 @@ public class ComponentCriteriaStratifierTest {
     @Test
     void cohortBooleanComponentCriteriaStratPopulationStratExpressionMismatchEncounter() {
 
-        final SelectedReport then = GIVEN.when()
+        final SelectedReport then = GIVEN_COMPONENT_CRITERIA_STRATIFIER
+                .when()
                 .measureId("ComponentCriteriaStratifierBooleanBasisMismatchEncounter")
                 .evaluate()
                 .then();
@@ -538,7 +637,8 @@ public class ComponentCriteriaStratifierTest {
     @Test
     void cohortEncounterComponentCriteriaStratPopulationStratExpressionMismatchDate() {
 
-        final SelectedReport then = GIVEN.when()
+        final SelectedReport then = GIVEN_COMPONENT_CRITERIA_STRATIFIER
+                .when()
                 .measureId("ComponentCriteriaStratifierEncounterBasisMismatchDate")
                 .evaluate()
                 .then();
@@ -554,7 +654,8 @@ public class ComponentCriteriaStratifierTest {
     @Test
     void cohortDateComponentCriteriaStratPopulationStratExpressionMismatchBoolean() {
 
-        final SelectedReport then = GIVEN.when()
+        final SelectedReport then = GIVEN_COMPONENT_CRITERIA_STRATIFIER
+                .when()
                 .measureId("ComponentCriteriaStratifierDateBasisMismatchBoolean")
                 .evaluate()
                 .then();
@@ -570,7 +671,8 @@ public class ComponentCriteriaStratifierTest {
     @Test
     void cohortBooleanComponentCriteriaStratPopulationInvalidExpressionName() {
 
-        final SelectedReport then = GIVEN.when()
+        final SelectedReport then = GIVEN_COMPONENT_CRITERIA_STRATIFIER
+                .when()
                 .measureId("ComponentCriteriaStratifierBooleanBasisInvalidExpressionName")
                 .evaluate()
                 .then();
@@ -586,7 +688,8 @@ public class ComponentCriteriaStratifierTest {
     @Test
     void cohortEncounterComponentCriteriaStratPopulationInvalidExpressionName() {
 
-        final SelectedReport then = GIVEN.when()
+        final SelectedReport then = GIVEN_COMPONENT_CRITERIA_STRATIFIER
+                .when()
                 .measureId("ComponentCriteriaStratifierEncounterBasisInvalidExpressionName")
                 .evaluate()
                 .then();
@@ -602,7 +705,8 @@ public class ComponentCriteriaStratifierTest {
     @Test
     void cohortDateComponentCriteriaStratPopulationInvalidExpressionName() {
 
-        final SelectedReport then = GIVEN.when()
+        final SelectedReport then = GIVEN_COMPONENT_CRITERIA_STRATIFIER
+                .when()
                 .measureId("ComponentCriteriaStratifierDateBasisInvalidExpressionName")
                 .evaluate()
                 .then();

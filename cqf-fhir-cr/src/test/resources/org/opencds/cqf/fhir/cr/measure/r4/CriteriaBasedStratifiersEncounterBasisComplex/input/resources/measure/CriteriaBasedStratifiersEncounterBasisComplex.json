@@ -1,0 +1,93 @@
+{
+  "id": "CriteriaBasedStratifiersEncounterBasisComplex",
+  "resourceType": "Measure",
+  "name": "CriteriaBasedStratifiersEncounterBasisComplex",
+  "url": "http://example.com/Measure/CriteriaBasedStratifiersEncounterBasisComplex",
+  "library": [
+    "http://example.com/Library/CriteriaBasedStratifiersComplex"
+  ],
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-populationBasis",
+      "valueCode": "Encounter"
+    }
+  ],
+  "scoring": {
+    "coding": [
+      {
+        "system": "http://hl7.org/fhir/measure-scoring",
+        "code": "ratio"
+      }
+    ]
+  },
+  "group": [
+    {
+      "id": "group-1",
+      "population": [
+        {
+          "id": "initial-population",
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code": "initial-population",
+                "display": "Initial Population"
+              }
+            ]
+          },
+          "criteria": {
+            "language": "text/cql-identifier",
+            "expression": "Initial Population Resource"
+          }
+        },
+        {
+          "id": "denominator",
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code": "denominator",
+                "display": "Denominator"
+              }
+            ]
+          },
+          "criteria": {
+            "language": "text/cql-identifier",
+            "expression": "Denominator Resource"
+          }
+        },
+        {
+          "id": "numerator",
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code": "numerator",
+                "display": "Numerator"
+              }
+            ]
+          },
+          "criteria": {
+            "language": "text/cql-identifier",
+            "expression": "Numerator Resource"
+          }
+        }
+      ],
+      "stratifier": [
+        {
+          "id": "stratifier-1",
+          "criteria": {
+            "language": "text/cql.identifier",
+            "expression": "Encounters in Period Resource"
+          },
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-population-stratifier-type",
+              "valueCode": "criteria"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

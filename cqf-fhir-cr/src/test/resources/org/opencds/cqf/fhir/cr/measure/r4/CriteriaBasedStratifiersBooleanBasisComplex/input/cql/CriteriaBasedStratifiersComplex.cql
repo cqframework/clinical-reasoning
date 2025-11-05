@@ -8,13 +8,22 @@ parameter "Measurement Period" Interval<DateTime> default Interval[@2024-01-01T0
 
 context Patient
 
-define "Initial Population":
+define "Initial Population Boolean":
+    exists "Initial Population Resource"
+
+define "Initial Population Resource":
     "All Encounters"
 
-define "Denominator":
+define "Denominator Boolean":
+    exists "Denominator Resource"
+
+define "Denominator Resource":
     "Not Triaged Encounters"
 
-define "Numerator":
+define "Numerator Boolean":
+    exists "Numerator Resource"
+
+define "Numerator Resource":
     "Not Finished Encounters"
 
 define "Not Triaged Encounters":
@@ -29,6 +38,9 @@ define "All Encounters":
     [Encounter] E
         where E.status.value in { 'planned', 'triaged', 'finished', 'in-progress' }
 
-define "Encounters in Period":
+define "Encounters in Period Boolean":
+    exists "Encounters in Period Resource"
+
+define "Encounters in Period Resource":
      [Encounter] E
        where E.period during "Measurement Period"

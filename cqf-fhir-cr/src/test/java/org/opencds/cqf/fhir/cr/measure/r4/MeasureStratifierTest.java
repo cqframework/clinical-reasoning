@@ -527,42 +527,4 @@ class MeasureStratifierTest {
                 .firstPopulation()
                 .hasCount(3);
     }
-
-    @Test
-    void ratioResourceCriteriaStratComplexSetsDifferentForInitialDenominatorAndNumerator() {
-        GIVEN_CRITERIA_BASED_STRAT_COMPLEX
-                .when()
-                .measureId("CriteriaBasedStratifiersComplex")
-                .evaluate()
-                .then()
-                .hasGroupCount(1)
-                .firstGroup()
-                .hasPopulationCount(3)
-                .population("initial-population")
-                .hasCount(11)
-                .up()
-                .population("denominator")
-                .hasCount(8)
-                .up()
-                .population("numerator")
-                // due to apply scoring, we keep only those numerator encounters that are also in the denominator
-                .hasCount(5)
-                .up()
-                .hasMeasureScore(true)
-                .hasScore("0.625")
-                .hasStratifierCount(1)
-                .firstStratifier()
-                .hasCodeText("Encounters in Period")
-                .hasStratumCount(1)
-                .firstStratum()
-                .hasPopulationCount(3)
-                .population("initial-population")
-                .hasCount(3)
-                .up()
-                .population("denominator")
-                .hasCount(2)
-                .up()
-                .population("numerator")
-                .hasCount(1);
-    }
 }

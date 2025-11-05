@@ -5,6 +5,8 @@ import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Sets.SetView;
 import com.google.common.collect.Table;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -12,19 +14,15 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.ResourceType;
-import org.opencds.cqf.cql.engine.runtime.CqlType;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4ResourceIdUtils;
 import org.slf4j.Logger;
@@ -50,18 +48,7 @@ public class MeasureMultiSubjectEvaluator {
                 final List<StratumDef> stratumDefs;
 
                 if (stratifierDef.isCriteriaStratifier()) {
-                    // LUKETODO:  try to compute these dynamically
-                    // Seems to be irrelevant for criteria based stratifiers
-                    var stratValues = Set.<StratumValueDef>of();
-                    // Seems to be irrelevant for criteria based stratifiers
-                    var patients = List.<String>of();
-
-                    var stratumDef = buildStratumDef(
-                            stratifierDef,
-                            stratValues,
-                            patients,
-                            groupDef.getPopulationBasis(),
-                            groupDef.populations());
+                    final var stratumDef = buildCriteriaStratumDef(groupDef, stratifierDef);
 
                     stratumDefs = List.of(stratumDef);
                 } else if (stratifierDef.isComponentStratifier()) {
@@ -77,10 +64,41 @@ public class MeasureMultiSubjectEvaluator {
         }
     }
 
+    @Nonnull
+    private static StratumDef buildCriteriaStratumDef(GroupDef groupDef, StratifierDef stratifierDef) {
+
+        // LUKETODO:  try to compute these dynamically
+        // Seems to be irrelevant for criteria based stratifiers
+        var stratValues = Set.<StratumValueDef>of();
+
+        final Map<String, CriteriaResult> stratifierResults = stratifierDef.getResults();
+
+        final Set<String> subjectIdsFromStratResults;
+        if (groupDef.isBooleanBasis()) {
+            // extract only those subjects that are true, if this is a boolean basis
+            subjectIdsFromStratResults = stratifierDef.getResults().entrySet().stream()
+                    .filter(entry -> Boolean.TRUE == entry.getValue().rawValue())
+                    .map(Entry::getKey)
+                    .collect(Collectors.toUnmodifiableSet());
+            ;
+            //            subjectIdsFromStratResults = Sets.newHashSet();
+        } else {
+            // otherwise, extract all subjects?
+            subjectIdsFromStratResults = stratifierResults.keySet();
+        }
+
+        return buildStratumDef(
+                stratifierDef,
+                stratValues,
+                subjectIdsFromStratResults,
+                groupDef.getPopulationBasis(),
+                groupDef.populations());
+    }
+
     private static StratumDef buildStratumDef(
             StratifierDef stratifierDef,
             Set<StratumValueDef> values,
-            List<String> subjectIds,
+            Collection<String> subjectIds,
             CodeDef populationBasis,
             List<PopulationDef> populationDefs) {
 
@@ -134,13 +152,14 @@ public class MeasureMultiSubjectEvaluator {
             Map<String, CriteriaResult> nonStratifierComponentResults,
             CodeDef groupPopulationBasis,
             PopulationDef populationDef,
-            List<String> subjectIds) {
+            Collection<String> subjectIds) {
 
         var popSubjectIds = populationDef.getSubjects().stream()
                 .map(R4ResourceIdUtils::addPatientQualifier)
                 .collect(Collectors.toUnmodifiableSet());
 
-        var qualifiedSubjectIdsCommonToPopulation = Sets.intersection(new HashSet<>(subjectIds), popSubjectIds);
+        // LUKETODO:  for CRITERIA, we get an empty intersection because we pass an empty list of subject IDs
+        var qualifiedSubjectIdsCommonToPopulation = getSubjectIdsIntersectionPopAndStratum(subjectIds, popSubjectIds);
 
         final Set<Object> populationDefEvaluationResultIntersection = getPopulationDefEvaluationResultIntersection(
                 stratifierComponents, nonStratifierComponentResults, populationDef);
@@ -156,6 +175,32 @@ public class MeasureMultiSubjectEvaluator {
                 populationDefEvaluationResultIntersection,
                 resourceIdsForSubjectList,
                 measureStratifierType);
+    }
+
+    @Nonnull
+    private static Set<String> getSubjectIdsIntersectionPopAndStratum(
+            Collection<String> stratumSubjectIds, Set<String> popSubjectIds) {
+
+        if (stratumSubjectIds.isEmpty() || popSubjectIds.isEmpty()) {
+            return Set.of();
+        }
+
+        final boolean stratumSubjectsAreQualified = ResourceIdUtils.hasResourceQualifier(
+                stratumSubjectIds.iterator().next());
+
+        final boolean popSubjectsAreQualified =
+                ResourceIdUtils.hasResourceQualifier(popSubjectIds.iterator().next());
+
+        // If both are either qualified or unqualified, do a straight-up comparison
+        if ((stratumSubjectsAreQualified && popSubjectsAreQualified)
+                || (!stratumSubjectsAreQualified && !popSubjectsAreQualified)) {
+            return Sets.intersection(Set.copyOf(stratumSubjectIds), popSubjectIds);
+        }
+
+        // Or else, strip the identifiers from both
+        return Sets.intersection(
+                ResourceIdUtils.stripAnyResourceQualifiersAsSet(stratumSubjectIds),
+                ResourceIdUtils.stripAnyResourceQualifiersAsSet(popSubjectIds));
     }
 
     private static List<StratumDef> componentStratumPlural(
@@ -423,32 +468,6 @@ public class MeasureMultiSubjectEvaluator {
         }
     }
 
-    // LUKETODO:  two options:
-    // 1) write a bespoke CQL type wrapper class that will compute equals() and hashCode() for
-    // each of roughly 12 CqlType implementing classes
-    // 2) Fix these classes within CQL itself to have equals() and hashCode()
-    private static class CqlTypeWrapper {
-        private final CqlType cqlType;
-
-        public CqlTypeWrapper(CqlType cqlType) {
-            this.cqlType = cqlType;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (o == null || getClass() != o.getClass()) {
-                return false;
-            }
-            CqlTypeWrapper that = (CqlTypeWrapper) o;
-            return cqlType.equals(that.cqlType);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hashCode(cqlType);
-        }
-    }
-
     // LUKETODO:  utils?
     private static Set<Object> toSet(Object value) {
         if (value == null) {
@@ -468,7 +487,7 @@ public class MeasureMultiSubjectEvaluator {
     // since Quantities don't have version-agnostic ID representations
     @Nonnull
     private static List<String> getResourceIdsForSubjectList(
-            String resourceType, List<String> subjectIds, PopulationDef populationDef) {
+            String resourceType, Collection<String> subjectIds, PopulationDef populationDef) {
 
         // only ResourceType fhirType should return true here
         boolean isResourceType = resourceType != null;

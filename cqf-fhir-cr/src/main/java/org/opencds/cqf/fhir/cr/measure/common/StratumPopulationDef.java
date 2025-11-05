@@ -1,11 +1,8 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
-import org.opencds.cqf.fhir.cr.measure.r4.utils.R4ResourceIdUtils;
 
 /**
  * Equivalent to the FHIR stratum population.
@@ -51,10 +48,7 @@ public class StratumPopulationDef {
      * qualifier or not
      */
     public Set<String> getSubjectsUnqualified() {
-        return subjectsQualifiedOrUnqualified.stream()
-                .filter(Objects::nonNull)
-                .map(R4ResourceIdUtils::stripAnyResourceQualifier)
-                .collect(Collectors.toUnmodifiableSet());
+        return ResourceIdUtils.stripAnyResourceQualifiersAsSet(subjectsQualifiedOrUnqualified);
     }
 
     public Set<Object> getPopulationDefEvaluationResultIntersection() {

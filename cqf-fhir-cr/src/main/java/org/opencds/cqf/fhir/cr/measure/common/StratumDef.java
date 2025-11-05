@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -15,13 +16,13 @@ public class StratumDef {
     private final String text;
     private final List<StratumPopulationDef> stratumPopulations;
     private final Set<StratumValueDef> stratumValueDefs;
-    private final List<String> subjectIds;
+    private final Collection<String> subjectIds;
 
     public StratumDef(
             String text,
             List<StratumPopulationDef> stratumPopulations,
             Set<StratumValueDef> stratumValueDefs,
-            List<String> subjectIds) {
+            Collection<String> subjectIds) {
         this.text = text;
         this.stratumPopulations = List.copyOf(stratumPopulations);
         this.stratumValueDefs = stratumValueDefs;
@@ -40,7 +41,7 @@ public class StratumDef {
         return stratumValueDefs;
     }
 
-    public List<String> getSubjectIds() {
+    public Collection<String> getSubjectIds() {
         return subjectIds;
     }
 

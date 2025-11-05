@@ -298,6 +298,10 @@ public class CriteriaStratifierTest {
                     .report();
         }
 
+        // LUKETODO:  while this test is technically correct, it doesn't capture any sort of exclusion
+        // logic like the Encounter basis test.   We need a tighter pairing of encounters and
+        // patients so the counts will differ between initial population and the stratum initial
+        // population
         @Test
         void cohortBooleanComponentCriteriaStratWithIntersectionScenario1() {
 
@@ -326,8 +330,7 @@ public class CriteriaStratifierTest {
                     .hasPopulationCount(1)
                     .firstPopulation()
                     .hasName("initial-population")
-                    // LUKETODO:  maybe this is correct?  debug to be sure
-                    .hasCount(1)
+                    .hasCount(2)
                     .up()
                     .up()
                     .up()

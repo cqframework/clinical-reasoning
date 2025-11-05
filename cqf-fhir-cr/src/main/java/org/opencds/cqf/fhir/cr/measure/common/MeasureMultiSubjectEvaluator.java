@@ -75,13 +75,22 @@ public class MeasureMultiSubjectEvaluator {
 
         final Set<String> subjectIdsFromStratResults;
         if (groupDef.isBooleanBasis()) {
-            // extract only those subjects that are true, if this is a boolean basis
-            subjectIdsFromStratResults = stratifierDef.getResults().entrySet().stream()
-                    .filter(entry -> Boolean.TRUE == entry.getValue().rawValue())
-                    .map(Entry::getKey)
-                    .collect(Collectors.toUnmodifiableSet());
-            ;
-            //            subjectIdsFromStratResults = Sets.newHashSet();
+            if (stratifierDef.isComponentStratifier()) {
+                subjectIdsFromStratResults = stratifierDef.components().stream()
+                        .map(StratifierComponentDef::getResults)
+                        .map(Map::entrySet)
+                        .flatMap(Collection::stream)
+                        .filter(resultEntry ->
+                                Boolean.TRUE == resultEntry.getValue().rawValue())
+                        .map(Entry::getKey)
+                        .collect(Collectors.toUnmodifiableSet());
+            } else {
+                // extract only those subjects that are true, if this is a boolean basis
+                subjectIdsFromStratResults = stratifierResults.entrySet().stream()
+                        .filter(entry -> Boolean.TRUE == entry.getValue().rawValue())
+                        .map(Entry::getKey)
+                        .collect(Collectors.toUnmodifiableSet());
+            }
         } else {
             // otherwise, extract all subjects?
             subjectIdsFromStratResults = stratifierResults.keySet();

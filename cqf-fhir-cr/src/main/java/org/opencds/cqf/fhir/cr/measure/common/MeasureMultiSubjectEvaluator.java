@@ -407,7 +407,7 @@ public class MeasureMultiSubjectEvaluator {
         final Class<?> resourcesClassFirst = resources.iterator().next().getClass();
 
         if (!stratifierComponents.isEmpty()) {
-            final Set<Object> allIntersections = new HashSetForFhirResources<>();
+            final Set<Object> allIntersections = new HashSetForFhirResourcesAndCqlTypes<>();
 
             for (String subjectId : populationDef.getSubjects()) {
 
@@ -436,7 +436,7 @@ public class MeasureMultiSubjectEvaluator {
                 //                }
                 //
                 // LUKETODO:  for the date case, we run into the object identity problem
-                final Set<Object> intersection = new HashSetForFhirResources<>(resources);
+                final Set<Object> intersection = new HashSetForFhirResourcesAndCqlTypes<>(resources);
                 for (Set<Object> resultForComponent : resultsPerComponent) {
                     intersection.retainAll(resultForComponent); // 2024-01-01 2024-03-01  next  2024-04-01
                 }
@@ -471,7 +471,7 @@ public class MeasureMultiSubjectEvaluator {
 
             // LUKETODO:  should we make sure this works with Dates?
             final SetView<Object> intersection =
-                    Sets.intersection(resources, new HashSetForFhirResources<>(evaluationResults));
+                    Sets.intersection(resources, new HashSetForFhirResourcesAndCqlTypes<>(evaluationResults));
             logger.info("1234: non-component intersection: {}", intersection);
             return intersection;
         }

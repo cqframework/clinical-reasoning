@@ -22,6 +22,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.stubbing.Answer;
+import org.opencds.cqf.fhir.cr.measure.common.HashSetForFhirResourcesAndCqlTypes;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.TestDataGenerator;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
@@ -30,7 +31,7 @@ import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
  * database queries, and returning new instances of resources each time, rather than the same
  * instance in memory. * It effectively copies tests that were failing when swapping the behaviour,
  * and running them under these conditions.  In other words, these tests prove the changes to use
- * {@link org.opencds.cqf.fhir.cr.measure.common.HashSetForFhirResources} actually work.
+ * {@link HashSetForFhirResourcesAndCqlTypes} actually work.
  */
 @SuppressWarnings({"java:S2699"})
 class MeasureEvaluationApplyScoringTests {

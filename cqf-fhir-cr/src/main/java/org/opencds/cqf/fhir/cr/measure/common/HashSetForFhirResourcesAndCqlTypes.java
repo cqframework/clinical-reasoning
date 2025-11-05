@@ -6,23 +6,27 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Objects;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.opencds.cqf.cql.engine.runtime.CqlType;
 
 /**
- * A HashSet implementation that uses FHIR resource identity rules when comparing resources.
+ * A HashSet implementation that uses FHIR resource identity rules when comparing resources or
+ * Cql.equal.
  * This means that two resources with the same resource type and logical ID are considered
  * equal, even if they are different object instances.
  * <p/>
- * This class exists strictly to compensate for the fact that FHIR resource classes do not implement
- * equals() and hashCode().
+ * This class exists strictly to compensate for the fact that FHIR resource classes and CQL types
+ * do not implement equals() and hashCode().
  * @param <T> the type of elements in this set, which may or may not be a {@link IBaseResource}
+ *           or a {@link CqlType}
  */
-public class HashSetForFhirResources<T> extends HashSet<T> {
+@SuppressWarnings("squid:S3776")
+public class HashSetForFhirResourcesAndCqlTypes<T> extends HashSet<T> {
 
-    public HashSetForFhirResources() {
+    public HashSetForFhirResourcesAndCqlTypes() {
         super();
     }
 
-    public HashSetForFhirResources(Collection<T> collection) {
+    public HashSetForFhirResourcesAndCqlTypes(Collection<T> collection) {
         super(collection);
     }
 
@@ -60,6 +64,16 @@ public class HashSetForFhirResources<T> extends HashSet<T> {
             }
         }
 
+        final CqlType newElementCqlType = castToCqlTypeIfApplicable(newElement);
+
+        if (newElementCqlType != null) {
+            if (this.contains(newElementCqlType)) {
+                return false;
+            } else {
+                return super.add(newElement);
+            }
+        }
+
         return super.add(newElement);
     }
 
@@ -79,12 +93,25 @@ public class HashSetForFhirResources<T> extends HashSet<T> {
 
         if (removalCandidateResource != null) {
             for (T next : this) {
-                if (next instanceof IBaseResource nextResource && areEqual(nextResource, removalCandidateResource)) {
+                if (next instanceof IBaseResource nextResource
+                        && areEqualResources(nextResource, removalCandidateResource)) {
                     return super.remove(nextResource);
                 }
             }
             return false;
         }
+
+        final CqlType removalCandidateCqlType = castToCqlTypeIfApplicable(removalCandidate);
+
+        if (removalCandidateCqlType != null) {
+            for (T next : this) {
+                if (next instanceof CqlType nextCqlType && areEqualCqlTypes(nextCqlType, removalCandidateCqlType)) {
+                    return super.remove(nextCqlType);
+                }
+            }
+            return false;
+        }
+
         return super.remove(removalCandidate);
     }
 
@@ -103,7 +130,7 @@ public class HashSetForFhirResources<T> extends HashSet<T> {
 
         // Both Collections are HashSetForFhirResources, so we can use the default implementation,
         // which calls HashSetForFhirResources.contains().
-        if (otherCollection instanceof HashSetForFhirResources) {
+        if (otherCollection instanceof HashSetForFhirResourcesAndCqlTypes) {
             return super.retainAll(otherCollection);
         }
 
@@ -122,9 +149,10 @@ public class HashSetForFhirResources<T> extends HashSet<T> {
 
     private static boolean contains(Collection<?> collection, Object obj) {
         final IBaseResource otherResource = castToResourceIfApplicable(obj);
+        final CqlType otherCqlType = castToCqlTypeIfApplicable(obj);
 
         // prevent infinite recursion
-        if (otherResource != null || collection instanceof HashSetForFhirResources) {
+        if (otherResource != null || otherCqlType != null || collection instanceof HashSetForFhirResourcesAndCqlTypes) {
             return containsInner(collection, obj);
         }
 
@@ -134,7 +162,11 @@ public class HashSetForFhirResources<T> extends HashSet<T> {
     private static boolean containsInner(Collection<?> collection, Object obj) {
         for (Object item : collection) {
             if (obj instanceof IBaseResource objResource && item instanceof IBaseResource itemResource) {
-                if (areEqual(objResource, itemResource)) {
+                if (areEqualResources(objResource, itemResource)) {
+                    return true;
+                }
+            } else if (obj instanceof CqlType objCqlType && item instanceof CqlType itemCqlType) {
+                if (areEqualCqlTypes(objCqlType, itemCqlType)) {
                     return true;
                 }
             } else {
@@ -154,7 +186,14 @@ public class HashSetForFhirResources<T> extends HashSet<T> {
         return null;
     }
 
-    private static boolean areEqual(IBaseResource resource1, IBaseResource resource2) {
+    private static CqlType castToCqlTypeIfApplicable(Object obj) {
+        if (obj instanceof CqlType cqlDate) {
+            return cqlDate;
+        }
+        return null;
+    }
+
+    private static boolean areEqualResources(IBaseResource resource1, IBaseResource resource2) {
         if (resource1 == resource2) {
             return true;
         }
@@ -170,5 +209,19 @@ public class HashSetForFhirResources<T> extends HashSet<T> {
         }
 
         return Objects.equals(resource1.getIdElement(), resource2.getIdElement());
+    }
+
+    private static boolean areEqualCqlTypes(CqlType cqlDate1, CqlType cqlDate2) {
+        if (cqlDate1 == cqlDate2) {
+            return true;
+        }
+
+        if (cqlDate1 == null || cqlDate2 == null) {
+            return false;
+        }
+
+        // We're relying on all CqlTypes to implement equal() properly
+        // Not this is equal(), not Object.equals()
+        return cqlDate1.equal(cqlDate2);
     }
 }

@@ -216,6 +216,8 @@ public class MeasureEvaluator {
         denominator = evaluatePopulationMembership(subjectType, subjectId, denominator, evaluationResult);
         numerator = evaluatePopulationMembership(subjectType, subjectId, numerator, evaluationResult);
         if (applyScoring) {
+            // LUKETODO:  we need to pass in the subject and do this per subject only in retainAll/removeAll/etc
+            // LUKETODO:  if we remove all eval results for a given subject, then remove that subject from consideration in any getSubjects() method on the population
             // remove denominator values not in IP
             denominator.retainAllResources(initialPopulation.getResources());
             denominator.retainAllSubjects(initialPopulation.getSubjects());

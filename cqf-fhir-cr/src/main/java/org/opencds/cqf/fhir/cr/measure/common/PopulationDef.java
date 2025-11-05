@@ -3,7 +3,9 @@ package org.opencds.cqf.fhir.cr.measure.common;
 import jakarta.annotation.Nullable;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -62,27 +64,39 @@ public class PopulationDef {
         return this.getSubjectResources().keySet();
     }
 
+    // LUKETODO:  add a subject ID to filter out the resources instead of doing this for all
     public void retainAllResources(Set<Object> resourcesToRetain) {
         getSubjectResources().forEach((key, value) -> value.retainAll(resourcesToRetain));
     }
 
+    // LUKETODO:  add a subject ID to filter out the resources instead of doing this for all
     public void retainAllSubjects(Set<String> subjects) {
         this.getSubjects().retainAll(subjects);
     }
 
+    // LUKETODO:  add a subject ID to filter out the resources instead of doing this for all
     public void removeAllResources(Set<Object> resourcesToRemove) {
         getSubjectResources().forEach((key, value) -> value.removeAll(resourcesToRemove));
     }
 
+    // LUKETODO:  add a subject ID to filter out the resources instead of doing this for all
     public void removeAllSubjects(Set<String> subjects) {
         this.getSubjects().removeAll(subjects);
     }
 
+    // LUKETODO:  is there any use case for this method at all, or should we remove it?
     public Set<Object> getResources() {
         return new HashSetForFhirResourcesAndCqlTypes<>(subjectResources.values().stream()
                 .flatMap(Collection::stream)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toUnmodifiableSet()));
+    }
+
+    public List<Object> getResourcesList() {
+        return subjectResources.values().stream()
+                .flatMap(Collection::stream)
+                .filter(Objects::nonNull)
+                .toList();
     }
 
     @Nullable

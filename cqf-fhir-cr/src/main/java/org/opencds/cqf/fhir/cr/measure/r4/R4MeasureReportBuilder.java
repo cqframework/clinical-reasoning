@@ -432,7 +432,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                 reportPopulation.setCount(countObservations(populationDef));
             } else {
                 // standard behavior
-                reportPopulation.setCount(populationDef.getResources().size());
+                reportPopulation.setCount(populationDef.getResourcesList().size());
             }
         }
 

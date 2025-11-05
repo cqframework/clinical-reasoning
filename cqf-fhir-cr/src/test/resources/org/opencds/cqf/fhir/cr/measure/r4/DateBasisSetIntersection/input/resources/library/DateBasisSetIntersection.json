@@ -1,0 +1,18 @@
+{
+  "resourceType": "Library",
+  "id": "DateBasisSetIntersection",
+  "url": "http://example.com/Library/DateBasisSetIntersection",
+  "name": "DateBasisSetIntersection",
+  "status": "active",
+  "type": {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/library-type",
+      "code": "logic-library"
+    } ]
+  },
+  "content": [ {
+    "contentType": "text/cql",
+    "url": "../../cql/DateBasisSetIntersection.cql"
+    }
+  ]
+}

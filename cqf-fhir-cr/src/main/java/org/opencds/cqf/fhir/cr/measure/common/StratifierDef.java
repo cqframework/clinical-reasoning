@@ -72,7 +72,8 @@ public class StratifierDef {
     }
 
     public void putResult(String subject, Object value, Set<Object> evaluatedResources) {
-        this.getResults().put(subject, new CriteriaResult(value, new HashSetForFhirResources<>(evaluatedResources)));
+        this.getResults()
+                .put(subject, new CriteriaResult(value, new HashSetForFhirResourcesAndCqlTypes<>(evaluatedResources)));
     }
 
     public Map<String, CriteriaResult> getResults() {

@@ -1,8 +1,8 @@
 {
   "resourceType": "Library",
-  "id": "ComponentCriteriaStratifier",
-  "url": "http://example.com/Library/ComponentCriteriaStratifier",
-  "name": "ComponentCriteriaStratifier",
+  "id": "ComponentCriteriaStratifierBooleanBasis",
+  "url": "http://example.com/Library/ComponentCriteriaStratifierBooleanBasis",
+  "name": "ComponentCriteriaStratifierBooleanBasis",
   "status": "active",
   "type": {
     "coding": [ {
@@ -12,7 +12,7 @@
   },
   "content": [ {
     "contentType": "text/cql",
-    "url": "../../cql/ComponentCriteriaStratifier.cql"
+    "url": "../../cql/ComponentCriteriaStratifierBooleanBasis.cql"
   }
   ]
 }

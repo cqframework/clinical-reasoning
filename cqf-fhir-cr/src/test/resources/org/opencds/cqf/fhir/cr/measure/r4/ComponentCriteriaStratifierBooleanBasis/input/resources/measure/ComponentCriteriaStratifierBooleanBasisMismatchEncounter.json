@@ -4,7 +4,7 @@
   "name": "ComponentCriteriaStratifierBooleanBasisMismatchEncounter",
   "url": "http://example.com/Measure/ComponentCriteriaStratifierBooleanBasisMismatchEncounter",
   "library": [
-    "http://example.com/Library/ComponentCriteriaStratifier"
+    "http://example.com/Library/ComponentCriteriaStratifierBooleanBasis"
   ],
   "extension": [
     {

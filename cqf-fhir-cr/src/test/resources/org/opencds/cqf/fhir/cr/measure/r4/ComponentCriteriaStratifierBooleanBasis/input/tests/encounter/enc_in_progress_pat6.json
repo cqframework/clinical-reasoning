@@ -1,9 +1,9 @@
 {
   "resourceType": "Encounter",
-  "id": "enc_in_progress_pat1_1",
+  "id": "enc_in_progress_pat6",
   "status": "in-progress",
   "subject": {
-    "reference": "Patient/patient1"
+    "reference": "Patient/patient6"
   },
   "period": {
     "start": "2024-01-01T00:00:00-05:00",

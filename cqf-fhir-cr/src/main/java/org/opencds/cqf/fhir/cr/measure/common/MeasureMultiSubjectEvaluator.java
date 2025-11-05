@@ -9,6 +9,7 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -72,10 +73,34 @@ public class MeasureMultiSubjectEvaluator {
         var stratValues = Set.<StratumValueDef>of();
 
         final Map<String, CriteriaResult> stratifierResults = stratifierDef.getResults();
+        final Map<String, CriteriaResult> resultsBySubjectWhereResultIsTrue;
 
         final Set<String> subjectIdsFromStratResults;
         if (groupDef.isBooleanBasis()) {
             if (stratifierDef.isComponentStratifier()) {
+                // LUKETODO:  this is insufficient:  we're extracting all subjects for which the component evaluated to true, but we're not looking at the actual underlying resources
+                // to see if they conform, so we probably need to extract all the underlying resources and then do an intersection among them
+
+                resultsBySubjectWhereResultIsTrue = stratifierDef
+                    .components()
+                    .stream()
+                    .map(StratifierComponentDef::getResults)
+                    .map(Map::entrySet)
+                    .flatMap(Collection::stream)
+                    .filter(resultEntry ->
+                        Boolean.TRUE == resultEntry.getValue().rawValue())
+                    .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+
+                // LUKETODO:  so are we looking for intersections among the resources here?
+                // LUKETODO:  what if we simply pass down the these entries and let the downstream code try to find the intersectin?
+//                for (Entry<String, CriteriaResult> stringCriteriaResultEntry : resultsBySubjectWhereResultIsTrue) {
+//                    final Set<Object> evaluatedResources = stringCriteriaResultEntry.getValue()
+//                        .evaluatedResources();
+//
+//                    logger.info("1234: TRUE: subject: {}, evaluatedResources: {}", stringCriteriaResultEntry.getKey(), evaluatedResources.stream().filter(IBaseResource.class::isInstance).map(IBaseResource.class::cast).map(IBaseResource::getIdElement).map(
+//                        IIdType::getValueAsString).collect(Collectors.toList()));
+//                }
+
                 subjectIdsFromStratResults = stratifierDef.components().stream()
                         .map(StratifierComponentDef::getResults)
                         .map(Map::entrySet)
@@ -85,6 +110,7 @@ public class MeasureMultiSubjectEvaluator {
                         .map(Entry::getKey)
                         .collect(Collectors.toUnmodifiableSet());
             } else {
+                resultsBySubjectWhereResultIsTrue = Collections.emptyMap();
                 // extract only those subjects that are true, if this is a boolean basis
                 subjectIdsFromStratResults = stratifierResults.entrySet().stream()
                         .filter(entry -> Boolean.TRUE == entry.getValue().rawValue())
@@ -94,12 +120,14 @@ public class MeasureMultiSubjectEvaluator {
         } else {
             // otherwise, extract all subjects?
             subjectIdsFromStratResults = stratifierResults.keySet();
+            resultsBySubjectWhereResultIsTrue = Map.of();
         }
 
         return buildStratumDef(
                 stratifierDef,
                 stratValues,
                 subjectIdsFromStratResults,
+                resultsBySubjectWhereResultIsTrue,
                 groupDef.getPopulationBasis(),
                 groupDef.populations());
     }
@@ -108,6 +136,7 @@ public class MeasureMultiSubjectEvaluator {
             StratifierDef stratifierDef,
             Set<StratumValueDef> values,
             Collection<String> subjectIds,
+            Map<String, CriteriaResult> resultsBySubjectWhereResultIsTrue,
             CodeDef populationBasis,
             List<PopulationDef> populationDefs) {
 
@@ -147,6 +176,7 @@ public class MeasureMultiSubjectEvaluator {
                                 stratifierDef.getStratifierType(),
                                 stratifierDef.components(),
                                 stratifierDef.getResults(),
+                                resultsBySubjectWhereResultIsTrue,
                                 populationBasis,
                                 popDef,
                                 subjectIds))
@@ -158,7 +188,9 @@ public class MeasureMultiSubjectEvaluator {
     private static StratumPopulationDef buildStratumPopulationDef(
             MeasureStratifierType measureStratifierType,
             List<StratifierComponentDef> stratifierComponents,
+            // LUKETODO:  maybe try to merge these?
             Map<String, CriteriaResult> nonStratifierComponentResults,
+            Map<String, CriteriaResult> resultsBySubjectWhereResultIsTrue,
             CodeDef groupPopulationBasis,
             PopulationDef populationDef,
             Collection<String> subjectIds) {
@@ -167,11 +199,10 @@ public class MeasureMultiSubjectEvaluator {
                 .map(R4ResourceIdUtils::addPatientQualifier)
                 .collect(Collectors.toUnmodifiableSet());
 
-        // LUKETODO:  for CRITERIA, we get an empty intersection because we pass an empty list of subject IDs
         var qualifiedSubjectIdsCommonToPopulation = getSubjectIdsIntersectionPopAndStratum(subjectIds, popSubjectIds);
 
         final Set<Object> populationDefEvaluationResultIntersection = getPopulationDefEvaluationResultIntersection(
-                stratifierComponents, nonStratifierComponentResults, populationDef);
+                stratifierComponents, nonStratifierComponentResults, resultsBySubjectWhereResultIsTrue, populationDef);
 
         final String resourceType = getResourceType(groupPopulationBasis);
 
@@ -250,7 +281,7 @@ public class MeasureMultiSubjectEvaluator {
             // | Stratum-3 | <'M','hispanic/latino'> | [subject-c]            |
             // | Stratum-4 | <'F','black'>           | [subject-d, subject-e] |
 
-            var stratumDef = buildStratumDef(stratifierDef, valueSet, subjects, populationBasis, populationDefs);
+            var stratumDef = buildStratumDef(stratifierDef, valueSet, subjects, Map.of(), populationBasis, populationDefs);
 
             stratumDefs.add(stratumDef);
         });
@@ -300,7 +331,7 @@ public class MeasureMultiSubjectEvaluator {
             // TODO: build out nonComponent stratum method
             Set<StratumValueDef> stratValues = Set.of(new StratumValueDef(stratValue.getKey(), null));
             var stratum =
-                    buildStratumDef(stratifierDef, stratValues, patientsSubjects, populationBasis, populationDefs);
+                    buildStratumDef(stratifierDef, stratValues, patientsSubjects, Map.of(), populationBasis, populationDefs);
             stratumMultiple.add(stratum);
         }
 
@@ -379,6 +410,7 @@ public class MeasureMultiSubjectEvaluator {
     private static Set<Object> getPopulationDefEvaluationResultIntersection(
             List<StratifierComponentDef> stratifierComponents,
             Map<String, CriteriaResult> nonStratifierComponentResults,
+            Map<String, CriteriaResult> resultsBySubjectWhereResultIsTrue,
             PopulationDef populationDef) {
 
         /*

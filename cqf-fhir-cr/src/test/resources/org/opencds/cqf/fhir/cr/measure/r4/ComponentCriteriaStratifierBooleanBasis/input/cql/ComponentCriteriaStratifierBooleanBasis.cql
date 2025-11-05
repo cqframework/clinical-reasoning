@@ -1,4 +1,4 @@
-library ComponentCriteriaStratifier
+library ComponentCriteriaStratifierBooleanBasis
 
 using FHIR version '4.0.1'
 
@@ -13,9 +13,6 @@ define "Initial Population Boolean":
 
 define "Initial Population Resource":
   "Encounters Arrived Planned"
-
-define "Initial Population Date":
-  { @2024-01-01, @2024-01-02 }
 
 define "Encounters Arrived Planned":
      [Encounter] E
@@ -103,54 +100,3 @@ define "Stratifier Encounters Cancelled In-Progress Resource":
 define "Stratifier Encounters Finished Triaged Resource":
      [Encounter] E
         where E.status.value in { 'finished', 'triaged' }
-
-//
-// Date
-//
-
-/*
-Date(2024-01-01) >>>> hashcode 12345   IgRepository
-Date(2024-01-01) >>>> hashcode 67890
-
-equals()  >>> false
- */
-
-// Scenario 1:  Overlap on 2024-01-02
-
-define "Stratifier Feb1 Jan2":
-  { @2024-02-01, @2024-01-02 }
-
-define "Stratifier Feb3 Jan2":
-  { @2024-02-03, @2024-01-02 }
-
-// Scenario 2:  No overlap due to intersection only between initial-pop and strat2
-
-define "Stratifier Feb1 Mar2":
-  { @2024-02-01, @2024-03-02 }
-
-define "Stratifier Feb1 Mar2 Jan2":
-  { @2024-02-03, @2024-03-02, @2024-01-02 }
-
-// Scenario 3:  No overlap despite total intersection between initial-pop and strat2
-
-define "Stratifier Mar1 Apr1":
-  { @2024-03-01, @2024-04-01 }
-
-define "Stratifier Jan1 Jan2":
-  { @2024-01-01, @2024-02-01 }
-
-// Scenario 4:  No overlap despite total intersection between strat1 and strat2
-
-define "Stratifier May1 Jun1 1":
-  { @2024-05-01, @2024-06-01 }
-
-define "Stratifier May1 Jun1 2":
-  { @2024-05-01, @2024-06-01 }
-
-// Scenario 5:  No overlap because init-pop, strat1, and strat2 have zero overlap with all
-
-define "Stratifier Jul1 Aug1":
-  { @2024-07-01, @2024-08-01 }
-
-define "Stratifier Sep1 Oct1":
-  { @2024-09-01, @2024-10-01 }

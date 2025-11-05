@@ -1,9 +1,9 @@
 {
   "resourceType": "Encounter",
-  "id": "enc_finished_pat1_1",
-  "status": "finished",
+  "id": "enc_triaged_pat11",
+  "status": "triaged",
   "subject": {
-    "reference": "Patient/patient1"
+    "reference": "Patient/patient11"
   },
   "period": {
     "start": "2024-01-01T00:00:00-05:00",

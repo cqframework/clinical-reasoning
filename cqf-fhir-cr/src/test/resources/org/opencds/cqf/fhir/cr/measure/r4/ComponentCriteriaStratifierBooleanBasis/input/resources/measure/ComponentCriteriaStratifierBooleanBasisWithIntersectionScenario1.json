@@ -4,7 +4,7 @@
   "name": "ComponentCriteriaStratifierBooleanBasisWithIntersectionScenario1",
   "url": "http://example.com/Measure/ComponentCriteriaStratifierBooleanBasisWithIntersectionScenario1",
   "library": [
-    "http://example.com/Library/ComponentCriteriaStratifier"
+    "http://example.com/Library/ComponentCriteriaStratifierBooleanBasis"
   ],
   "extension": [
     {

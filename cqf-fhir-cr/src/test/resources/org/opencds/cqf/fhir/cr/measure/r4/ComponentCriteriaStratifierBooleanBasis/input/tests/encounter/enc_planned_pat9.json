@@ -1,9 +1,9 @@
 {
   "resourceType": "Encounter",
-  "id": "enc_planned_pat2_1",
+  "id": "enc_planned_pat9",
   "status": "planned",
   "subject": {
-    "reference": "Patient/patient2"
+    "reference": "Patient/patient9"
   },
   "period": {
     "start": "2024-01-01T00:00:00-05:00",

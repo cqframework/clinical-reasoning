@@ -11,7 +11,6 @@ import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.MEASU
 import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.NUMERATOR;
 import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.NUMERATOREXCLUSION;
 
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
@@ -70,40 +69,19 @@ public class MeasureEvaluator {
         Objects.requireNonNull(measureDef, "measureDef is a required argument");
         Objects.requireNonNull(subjectId, "subjectIds is a required argument");
 
-        switch (measureEvalType) {
-            case PATIENT, SUBJECT:
-                return this.evaluateSubject(
-                        measureDef,
-                        subjectType,
-                        subjectId,
-                        MeasureReportType.INDIVIDUAL,
-                        evaluationResult,
-                        applyScoring);
-            case SUBJECTLIST:
-                return this.evaluateSubject(
-                        measureDef,
-                        subjectType,
-                        subjectId,
-                        MeasureReportType.SUBJECTLIST,
-                        evaluationResult,
-                        applyScoring);
-            case PATIENTLIST:
-                // DSTU3 Only
-                return this.evaluateSubject(
-                        measureDef,
-                        subjectType,
-                        subjectId,
-                        MeasureReportType.PATIENTLIST,
-                        evaluationResult,
-                        applyScoring);
-            case POPULATION:
-                return this.evaluateSubject(
-                        measureDef, subjectType, subjectId, MeasureReportType.SUMMARY, evaluationResult, applyScoring);
-            default:
-                // never hit because this value is set upstream
-                throw new InvalidRequestException("Unsupported Measure Evaluation type: %s for MeasureDef: %s"
-                        .formatted(measureEvalType.getDisplay(), measureDef.url()));
-        }
+        // never hit because this value is set upstream
+        return switch (measureEvalType) {
+            case PATIENT, SUBJECT -> this.evaluateSubject(
+                    measureDef, subjectType, subjectId, MeasureReportType.INDIVIDUAL, evaluationResult, applyScoring);
+            case SUBJECTLIST -> this.evaluateSubject(
+                    measureDef, subjectType, subjectId, MeasureReportType.SUBJECTLIST, evaluationResult, applyScoring);
+            case PATIENTLIST ->
+            // DSTU3 Only
+            this.evaluateSubject(
+                    measureDef, subjectType, subjectId, MeasureReportType.PATIENTLIST, evaluationResult, applyScoring);
+            case POPULATION -> this.evaluateSubject(
+                    measureDef, subjectType, subjectId, MeasureReportType.SUMMARY, evaluationResult, applyScoring);
+        };
     }
 
     protected MeasureDef evaluateSubject(
@@ -250,13 +228,11 @@ public class MeasureEvaluator {
                 // verify exclusion results are found in denominator
                 denominatorExclusion.retainAllResources(subjectId, denominator);
                 denominatorExclusion.retainAllSubjects(denominator);
-                denominatorExclusion.retainOverlaps(subjectId, denominator);
             }
             if (numeratorExclusion != null && applyScoring) {
                 // verify results are in Numerator
                 numeratorExclusion.retainAllResources(subjectId, numerator);
                 numeratorExclusion.retainAllSubjects(numerator);
-                numeratorExclusion.retainOverlaps(subjectId, numerator);
             }
             if (denominatorException != null && applyScoring) {
                 // Remove Subjects Exceptions that are present in Numerator
@@ -267,7 +243,6 @@ public class MeasureEvaluator {
                 // verify exception results are found in denominator
                 denominatorException.retainAllResources(subjectId, denominator);
                 denominatorException.retainAllSubjects(denominator);
-                denominatorException.retainOverlaps(subjectId, denominator);
             }
         } else {
             // Remove Only Resource Exclusions
@@ -279,12 +254,10 @@ public class MeasureEvaluator {
                 numerator.removeOverlaps(subjectId, denominatorExclusion);
                 // verify exclusion results are found in denominator
                 denominatorExclusion.retainAllResources(subjectId, denominator);
-                denominatorExclusion.retainOverlaps(subjectId, denominator);
             }
             if (numeratorExclusion != null && applyScoring) {
                 // verify exclusion results are found in numerator results, otherwise remove
                 numeratorExclusion.retainAllResources(subjectId, numerator);
-                numeratorExclusion.retainOverlaps(subjectId, numerator);
             }
             if (denominatorException != null && applyScoring) {
                 // Remove Resource Exceptions that are present in Numerator
@@ -292,7 +265,6 @@ public class MeasureEvaluator {
                 denominatorException.removeOverlaps(subjectId, numerator);
                 // verify exception results are found in denominator
                 denominatorException.retainAllResources(subjectId, denominator);
-                denominatorException.retainOverlaps(subjectId, denominator);
             }
         }
         if (reportType.equals(MeasureReportType.INDIVIDUAL) && dateOfCompliance != null) {

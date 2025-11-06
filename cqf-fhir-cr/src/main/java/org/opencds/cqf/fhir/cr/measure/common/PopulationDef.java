@@ -156,32 +156,4 @@ public class PopulationDef {
             }
         }
     }
-
-    public void retainOverlaps(String subjectId, PopulationDef otherPopulationDef) {
-        var iterator = subjectResources.entrySet().iterator();
-        var overlaps = otherPopulationDef.getSubjectResources();
-        while (iterator.hasNext()) {
-            Map.Entry<String, Set<Object>> entry = iterator.next();
-            String key = entry.getKey();
-            // LUKETODO:  why does this make the test fail?
-            //            if (key.equals(subjectId)) {
-            //                continue;
-            //            }
-            Set<Object> values = entry.getValue();
-
-            if (overlaps.containsKey(key)) {
-                // Retain only values also present in filterMap
-                values.retainAll(overlaps.get(key));
-            } else {
-                // If the key doesn't exist in filterMap, remove the entire entry
-                iterator.remove();
-                continue;
-            }
-
-            // If no values remain, remove the key
-            if (values.isEmpty()) {
-                iterator.remove();
-            }
-        }
-    }
 }

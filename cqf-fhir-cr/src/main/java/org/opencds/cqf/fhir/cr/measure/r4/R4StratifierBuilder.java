@@ -28,6 +28,7 @@ import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
+import org.opencds.cqf.fhir.cr.measure.common.HashSetForFhirResourcesAndCqlTypes;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumDef;
@@ -360,7 +361,7 @@ class R4StratifierBuilder {
             StratifierDef stratifierDef, PopulationDef populationDef, List<String> resourceIds) {
 
         if (MeasureStratifierType.CRITERIA == stratifierDef.getStratifierType()) {
-            final Set<Object> resources = populationDef.getResources();
+            final List<Object> resources = populationDef.getResourcesDuplicatesAcrossSubjects();
             final Set<Object> results = stratifierDef.getAllCriteriaResultValues();
 
             if (resources.isEmpty() || results.isEmpty()) {
@@ -377,7 +378,11 @@ class R4StratifierBuilder {
                 return 0;
             }
 
-            final SetView<Object> intersection = Sets.intersection(resources, results);
+            // When we refactor criteria stratifiers we need to rethink this logic to see if
+            // it's accurate, since duplicates among types such as dates among subjects will
+            // be eliminated here
+            final SetView<Object> intersection =
+                    Sets.intersection(new HashSetForFhirResourcesAndCqlTypes<>(resources), results);
             return intersection.size();
         }
 

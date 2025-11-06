@@ -354,9 +354,12 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             if (bc.measureReport.getType().equals(MeasureReport.MeasureReportType.INDIVIDUAL)) {
                 var docPopDef = getReportPopulation(groupDef, DATEOFCOMPLIANCE);
                 if (docPopDef != null
-                        && docPopDef.getResourcesList() != null
-                        && !docPopDef.getResourcesList().isEmpty()) {
-                    var docValue = docPopDef.getResourcesList().iterator().next();
+                        && docPopDef.getResourcesDuplicatesAcrossSubjects() != null
+                        && !docPopDef.getResourcesDuplicatesAcrossSubjects().isEmpty()) {
+                    var docValue = docPopDef
+                            .getResourcesDuplicatesAcrossSubjects()
+                            .iterator()
+                            .next();
                     if (docValue != null) {
                         assert docValue instanceof Interval;
                         Interval docInterval = (Interval) docValue;
@@ -432,7 +435,8 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                 reportPopulation.setCount(countObservations(populationDef));
             } else {
                 // standard behavior
-                reportPopulation.setCount(populationDef.getResourcesList().size());
+                reportPopulation.setCount(
+                        populationDef.getResourcesDuplicatesAcrossSubjects().size());
             }
         }
 
@@ -452,7 +456,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                     .map(R4ResourceIdUtils::addPatientQualifier)
                     .collect(Collectors.toSet());
         } else {
-            populationSet = populationDef.getResourcesList().stream()
+            populationSet = populationDef.getResourcesDuplicatesAcrossSubjects().stream()
                     .filter(Resource.class::isInstance)
                     .map(this::getPopulationResourceIds)
                     .collect(Collectors.toSet());
@@ -470,11 +474,11 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
     }
 
     public int countObservations(PopulationDef populationDef) {
-        if (populationDef == null || populationDef.getResourcesList() == null) {
+        if (populationDef == null || populationDef.getResourcesDuplicatesAcrossSubjects() == null) {
             return 0;
         }
 
-        return populationDef.getResourcesList().stream()
+        return populationDef.getResourcesDuplicatesAcrossSubjects().stream()
                 .filter(Map.class::isInstance)
                 .map(Map.class::cast)
                 .mapToInt(Map::size)

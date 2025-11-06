@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,15 +82,11 @@ public class PopulationDef {
         this.getSubjects().removeAll(otherPopulationDef.getSubjects());
     }
 
-    // LUKETODO:  is there any use case for this method at all, or should we remove it?
-    public Set<Object> getResources() {
-        return new HashSetForFhirResourcesAndCqlTypes<>(subjectResources.values().stream()
-                .flatMap(Collection::stream)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toUnmodifiableSet()));
-    }
-
-    public List<Object> getResourcesList() {
+    /**
+     * Used if we want to count all resources that may be duplicated across subjects, for example,
+     * for Date values that will be identical across subjects, but we want to count the duplicates.
+     */
+    public List<Object> getResourcesDuplicatesAcrossSubjects() {
         return subjectResources.values().stream()
                 .flatMap(Collection::stream)
                 .filter(Objects::nonNull)

@@ -15,6 +15,7 @@ import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -310,7 +311,7 @@ public class MeasureEvaluator {
                 // only measureObservations that intersect with finalized measure-population results should be retained
                 pruneObservationResources(
                         subjectId,
-                        measurePopulationObservation.getResources(),
+                        measurePopulationObservation.getResourcesDuplicatesAcrossSubjects(),
                         measurePopulation,
                         measurePopulationObservation);
                 // what about subjects?
@@ -374,7 +375,7 @@ public class MeasureEvaluator {
 
     protected void pruneObservationResources(
             String subjectId,
-            Set<Object> resources,
+            Collection<Object> resources,
             PopulationDef measurePopulation,
             PopulationDef measurePopulationObservation) {
         for (Object resource : resources) {

@@ -287,7 +287,8 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         reportPopulation.setId(measurePopulation.getId());
 
         if (!measureDef.groups().isEmpty() && !measureDef.groups().get(0).isBooleanBasis()) {
-            reportPopulation.setCount(populationDef.getResourcesList().size());
+            reportPopulation.setCount(
+                    populationDef.getResourcesDuplicatesAcrossSubjects().size());
         } else {
             reportPopulation.setCount(populationDef.getSubjects().size());
         }
@@ -323,14 +324,15 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         // Population Type behavior
         switch (populationDef.type()) {
             case MEASUREOBSERVATION:
-                buildMeasureObservations(populationDef.expression(), populationDef.getResources());
+                buildMeasureObservations(
+                        populationDef.expression(), populationDef.getResourcesDuplicatesAcrossSubjects());
                 break;
             default:
                 break;
         }
     }
 
-    protected void buildMeasureObservations(String observationName, Set<Object> resources) {
+    protected void buildMeasureObservations(String observationName, Collection<Object> resources) {
         for (int i = 0; i < resources.size(); i++) {
             // TODO: Do something with the resource...
             Observation observation =

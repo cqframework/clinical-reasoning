@@ -206,8 +206,8 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
     }
 
     protected void scoreContinuousVariable(String measureUrl, MeasureReportGroupComponent mrgc, GroupDef groupDef) {
-        final Quantity aggregateQuantity =
-                calculateContinuousVariableAggregateQuantity(measureUrl, groupDef, PopulationDef::getResourcesList);
+        final Quantity aggregateQuantity = calculateContinuousVariableAggregateQuantity(
+                measureUrl, groupDef, PopulationDef::getResourcesDuplicatesAcrossSubjects);
 
         mrgc.setMeasureScore(aggregateQuantity);
     }

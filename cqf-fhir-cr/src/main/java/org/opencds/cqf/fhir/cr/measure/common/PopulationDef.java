@@ -72,7 +72,7 @@ public class PopulationDef {
     }
 
     public void removeAllResources(String subjectId, PopulationDef otherPopulationDef) {
-        getSubjectResources().forEach((key, value) -> value.removeAll(otherPopulationDef.getResources()));
+        getResourcesForSubject(subjectId).removeAll(otherPopulationDef.getResources());
     }
 
     public void removeAllSubjects(PopulationDef otherPopulationDef) {
@@ -108,6 +108,10 @@ public class PopulationDef {
         return subjectResources;
     }
 
+    public Set<Object> getResourcesForSubject(String subjectId) {
+        return subjectResources.computeIfAbsent(subjectId, input -> new HashSetForFhirResourcesAndCqlTypes<>());
+    }
+
     // Add an element to Set<Object> under a key (Creates a new set if key is missing)
     public void addResource(String key, Object value) {
         subjectResources
@@ -116,11 +120,16 @@ public class PopulationDef {
     }
 
     public void removeOverlaps(String subjectId, PopulationDef otherPopulationDef) {
+
         var iterator = subjectResources.entrySet().iterator();
         var overlaps = otherPopulationDef.getSubjectResources();
         while (iterator.hasNext()) {
             Map.Entry<String, Set<Object>> entry = iterator.next();
             String key = entry.getKey();
+            // LUKETODO:  optimize this pattern:
+            if (key.equals(subjectId)) {
+                continue;
+            }
             Set<Object> valuesInA = entry.getValue();
 
             if (overlaps.containsKey(key)) {
@@ -139,6 +148,10 @@ public class PopulationDef {
         while (iterator.hasNext()) {
             Map.Entry<String, Set<Object>> entry = iterator.next();
             String key = entry.getKey();
+            // LUKETODO:  why does this make the test fail?
+            //            if (key.equals(subjectId)) {
+            //                continue;
+            //            }
             Set<Object> values = entry.getValue();
 
             if (overlaps.containsKey(key)) {

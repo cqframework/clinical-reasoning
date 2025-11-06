@@ -3,11 +3,11 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.collect.Sets;
-import com.google.common.collect.Sets.SetView;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -27,8 +27,8 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
+import org.opencds.cqf.fhir.cr.measure.common.CriteriaResult;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
-import org.opencds.cqf.fhir.cr.measure.common.HashSetForFhirResourcesAndCqlTypes;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumDef;
@@ -357,33 +357,93 @@ class R4StratifierBuilder {
         }
     }
 
+    // population: subject1: org1, subject2: org2
+    // strat1: subject1: org1
+    // strat1: subject2: nothing
+
+    // result:  subject 1: org1    count: 1
+
+    // population: subject1: org1, subject2: org2
+    // strat1: subject1: org1
+    // strat1: subject2: nothing
+    // strat1: subject3: org1
+
+    // result:  subject1 org1:  subject3 org1   count:  1
+
+    // population: subject1: org1, subject2: org2
+    // strat1: subject1: org1
+    // strat1: subject2: org2
+
+    // result:  subject1 org1:  subject2 org2   count:  2
+
+    // population: subject1: org1, subject2: org2
+    // strat1: subject1: org3
+    // strat1: subject2: org3
+
+    // result:  nothing   : count: 0
+
+    // population: subject1: org1, subject2: org2
+    // strat1: subject1: org3
+    // strat1: subject2: org4
+
+    // result:  nothing   : count: 0
+
     private static int getStratumCountUpper(
             StratifierDef stratifierDef, PopulationDef populationDef, List<String> resourceIds) {
 
         if (MeasureStratifierType.CRITERIA == stratifierDef.getStratifierType()) {
-            final List<Object> resources = populationDef.getResourcesDuplicatesAcrossSubjects();
-            final Set<Object> results = stratifierDef.getAllCriteriaResultValues();
+            final Map<String, Set<Object>> populationResultsBySubject = populationDef.getSubjectResources();
+            final Map<String, CriteriaResult> stratifierResultsBySubject = stratifierDef.getResults();
 
-            if (resources.isEmpty() || results.isEmpty()) {
-                // There's no intersection, so no point in going further.
-                return 0;
+            final List<Object> allPopulationStratumIntersectingResources = new ArrayList<>();
+
+            /*
+            *population*:
+
+            patient2
+                Encounter/enc_in_progress_pat2_1
+                Encounter/enc_triaged_pat2_1
+                Encounter/enc_planned_pat2_1
+                Encounter/enc_in_progress_pat2_2
+                Encounter/enc_finished_pat2_1
+
+             patient1
+                Encounter/enc_triaged_pat1_1
+                Encounter/enc_planned_pat1_1
+                Encounter/enc_in_progress_pat1_1
+                Encounter/enc_finished_pat1_1
+
+            *stratifier*:
+              patient2
+                  Encounter/enc_in_progress_pat2_2
+                  Encounter/enc_in_progress_pat2_1
+
+              patient1
+                  Encounter/enc_in_progress_pat1_1
+
+              patient2:  intersection:   enc_in_progress_pat2_2, enc_in_progress_pat2_1
+              patient1:  intersection:   enc_in_progress_pat1_1
+
+              result:
+
+              enc_in_progress_pat2_2, enc_in_progress_pat2_1, enc_in_progress_pat1_1
+
+              count: 3
+
+            */
+
+            // For each subject, we intersect between the population and stratifier results
+            for (String subject : stratifierResultsBySubject.keySet()) {
+                final Set<Object> populationResultsPerSubject = populationResultsBySubject.get(subject);
+                final Set<Object> stratifierResultsPerSubject =
+                        stratifierResultsBySubject.get(subject).setValue();
+
+                allPopulationStratumIntersectingResources.addAll(
+                        Sets.intersection(populationResultsPerSubject, stratifierResultsPerSubject));
             }
 
-            final Class<?> resourcesClassFirst = resources.iterator().next().getClass();
-            final Class<?> resultClassFirst = results.iterator().next().getClass();
-
-            // Sanity check: isCriteriaBasedStratifier() should have filtered this out
-            if (resourcesClassFirst != resultClassFirst) {
-                // Different classes, so no point in going further.
-                return 0;
-            }
-
-            // When we refactor criteria stratifiers we need to rethink this logic to see if
-            // it's accurate, since duplicates among types such as dates among subjects will
-            // be eliminated here
-            final SetView<Object> intersection =
-                    Sets.intersection(new HashSetForFhirResourcesAndCqlTypes<>(resources), results);
-            return intersection.size();
+            // We add up all the results of the intersections here:
+            return allPopulationStratumIntersectingResources.size();
         }
 
         if (resourceIds.isEmpty()) {

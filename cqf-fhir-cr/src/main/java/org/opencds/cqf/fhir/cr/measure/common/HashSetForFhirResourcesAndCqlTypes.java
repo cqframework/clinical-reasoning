@@ -30,6 +30,18 @@ public class HashSetForFhirResourcesAndCqlTypes<T> extends HashSet<T> {
         super(collection);
     }
 
+    public HashSetForFhirResourcesAndCqlTypes(Iterable<T> iterable) {
+        super();
+        for (T value : iterable) {
+            this.add(value);
+        }
+    }
+
+    public HashSetForFhirResourcesAndCqlTypes(T singleValue) {
+        super();
+        this.add(singleValue);
+    }
+
     /**
      * This logic is triggered by retainAll() and removeAll(), whose behaviour we're trying
      * to modify to use FHIR resource identity rules.

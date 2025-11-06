@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -64,24 +63,20 @@ public class PopulationDef {
         return this.getSubjectResources().keySet();
     }
 
-    // LUKETODO:  add a subject ID to filter out the resources instead of doing this for all
-    public void retainAllResources(Set<Object> resourcesToRetain) {
-        getSubjectResources().forEach((key, value) -> value.retainAll(resourcesToRetain));
+    public void retainAllResources(String subjectId, PopulationDef otherPopulationDef) {
+        getSubjectResources().forEach((key, value) -> value.retainAll(otherPopulationDef.getResources()));
     }
 
-    // LUKETODO:  add a subject ID to filter out the resources instead of doing this for all
-    public void retainAllSubjects(Set<String> subjects) {
-        this.getSubjects().retainAll(subjects);
+    public void retainAllSubjects(PopulationDef otherPopulationDef) {
+        this.getSubjects().retainAll(otherPopulationDef.getSubjects());
     }
 
-    // LUKETODO:  add a subject ID to filter out the resources instead of doing this for all
-    public void removeAllResources(Set<Object> resourcesToRemove) {
-        getSubjectResources().forEach((key, value) -> value.removeAll(resourcesToRemove));
+    public void removeAllResources(String subjectId, PopulationDef otherPopulationDef) {
+        getSubjectResources().forEach((key, value) -> value.removeAll(otherPopulationDef.getResources()));
     }
 
-    // LUKETODO:  add a subject ID to filter out the resources instead of doing this for all
-    public void removeAllSubjects(Set<String> subjects) {
-        this.getSubjects().removeAll(subjects);
+    public void removeAllSubjects(PopulationDef otherPopulationDef) {
+        this.getSubjects().removeAll(otherPopulationDef.getSubjects());
     }
 
     // LUKETODO:  is there any use case for this method at all, or should we remove it?
@@ -120,15 +115,16 @@ public class PopulationDef {
                 .add(value);
     }
 
-    public void removeOverlaps(Map<String, Set<Object>> overlap) {
+    public void removeOverlaps(String subjectId, PopulationDef otherPopulationDef) {
         var iterator = subjectResources.entrySet().iterator();
+        var overlaps = otherPopulationDef.getSubjectResources();
         while (iterator.hasNext()) {
             Map.Entry<String, Set<Object>> entry = iterator.next();
             String key = entry.getKey();
             Set<Object> valuesInA = entry.getValue();
 
-            if (overlap.containsKey(key)) {
-                valuesInA.removeAll(overlap.get(key)); // Remove overlapping elements
+            if (overlaps.containsKey(key)) {
+                valuesInA.removeAll(overlaps.get(key)); // Remove overlapping elements
             }
 
             if (valuesInA.isEmpty()) {
@@ -137,16 +133,17 @@ public class PopulationDef {
         }
     }
 
-    public void retainOverlaps(Map<String, Set<Object>> filterMap) {
+    public void retainOverlaps(String subjectId, PopulationDef otherPopulationDef) {
         var iterator = subjectResources.entrySet().iterator();
+        var overlaps = otherPopulationDef.getSubjectResources();
         while (iterator.hasNext()) {
             Map.Entry<String, Set<Object>> entry = iterator.next();
             String key = entry.getKey();
             Set<Object> values = entry.getValue();
 
-            if (filterMap.containsKey(key)) {
+            if (overlaps.containsKey(key)) {
                 // Retain only values also present in filterMap
-                values.retainAll(filterMap.get(key));
+                values.retainAll(overlaps.get(key));
             } else {
                 // If the key doesn't exist in filterMap, remove the entire entry
                 iterator.remove();

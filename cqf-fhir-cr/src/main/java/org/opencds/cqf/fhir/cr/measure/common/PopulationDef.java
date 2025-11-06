@@ -8,8 +8,14 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PopulationDef {
+
+    private static final Logger logger = LoggerFactory.getLogger(PopulationDef.class);
 
     private final String id;
     private final String expression;
@@ -64,7 +70,7 @@ public class PopulationDef {
     }
 
     public void retainAllResources(String subjectId, PopulationDef otherPopulationDef) {
-        getSubjectResources().forEach((key, value) -> value.retainAll(otherPopulationDef.getResources()));
+        getResourcesForSubject(subjectId).retainAll(otherPopulationDef.getResourcesForSubject(subjectId));
     }
 
     public void retainAllSubjects(PopulationDef otherPopulationDef) {
@@ -72,7 +78,16 @@ public class PopulationDef {
     }
 
     public void removeAllResources(String subjectId, PopulationDef otherPopulationDef) {
-        getResourcesForSubject(subjectId).removeAll(otherPopulationDef.getResources());
+        getResourcesForSubject(subjectId).removeAll(otherPopulationDef.getResourcesForSubject(subjectId));
+    }
+
+    private static List<String> printResourceIds(Collection<Object> resources) {
+        return resources.stream()
+                .filter(IBaseResource.class::isInstance)
+                .map(IBaseResource.class::cast)
+                .map(IBaseResource::getIdElement)
+                .map(IIdType::getIdPart)
+                .toList();
     }
 
     public void removeAllSubjects(PopulationDef otherPopulationDef) {
@@ -109,7 +124,7 @@ public class PopulationDef {
     }
 
     public Set<Object> getResourcesForSubject(String subjectId) {
-        return subjectResources.computeIfAbsent(subjectId, input -> new HashSetForFhirResourcesAndCqlTypes<>());
+        return subjectResources.getOrDefault(subjectId, new HashSetForFhirResourcesAndCqlTypes<>());
     }
 
     // Add an element to Set<Object> under a key (Creates a new set if key is missing)

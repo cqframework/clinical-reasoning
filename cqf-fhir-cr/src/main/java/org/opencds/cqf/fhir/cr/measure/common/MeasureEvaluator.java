@@ -69,7 +69,6 @@ public class MeasureEvaluator {
         Objects.requireNonNull(measureDef, "measureDef is a required argument");
         Objects.requireNonNull(subjectId, "subjectIds is a required argument");
 
-        // never hit because this value is set upstream
         return switch (measureEvalType) {
             case PATIENT, SUBJECT -> this.evaluateSubject(
                     measureDef, subjectType, subjectId, MeasureReportType.INDIVIDUAL, evaluationResult, applyScoring);
@@ -223,7 +222,6 @@ public class MeasureEvaluator {
             if (denominatorExclusion != null && applyScoring) {
                 // numerator should not include den-exclusions
                 numerator.removeAllSubjects(denominatorExclusion);
-                numerator.removeOverlaps(subjectId, denominatorExclusion);
 
                 // verify exclusion results are found in denominator
                 denominatorExclusion.retainAllResources(subjectId, denominator);
@@ -238,7 +236,6 @@ public class MeasureEvaluator {
                 // Remove Subjects Exceptions that are present in Numerator
                 denominatorException.removeAllSubjects(numerator);
                 denominatorException.removeAllResources(subjectId, numerator);
-                denominatorException.removeOverlaps(subjectId, numerator);
 
                 // verify exception results are found in denominator
                 denominatorException.retainAllResources(subjectId, denominator);
@@ -251,7 +248,6 @@ public class MeasureEvaluator {
             if (denominatorExclusion != null && applyScoring) {
                 // remove any denominator-exception subjects/resources found in Numerator
                 numerator.removeAllResources(subjectId, denominatorExclusion);
-                numerator.removeOverlaps(subjectId, denominatorExclusion);
                 // verify exclusion results are found in denominator
                 denominatorExclusion.retainAllResources(subjectId, denominator);
             }
@@ -262,7 +258,6 @@ public class MeasureEvaluator {
             if (denominatorException != null && applyScoring) {
                 // Remove Resource Exceptions that are present in Numerator
                 denominatorException.removeAllResources(subjectId, numerator);
-                denominatorException.removeOverlaps(subjectId, numerator);
                 // verify exception results are found in denominator
                 denominatorException.retainAllResources(subjectId, denominator);
             }

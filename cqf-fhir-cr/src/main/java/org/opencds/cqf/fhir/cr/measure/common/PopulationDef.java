@@ -8,8 +8,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,15 +79,6 @@ public class PopulationDef {
         getResourcesForSubject(subjectId).removeAll(otherPopulationDef.getResourcesForSubject(subjectId));
     }
 
-    private static List<String> printResourceIds(Collection<Object> resources) {
-        return resources.stream()
-                .filter(IBaseResource.class::isInstance)
-                .map(IBaseResource.class::cast)
-                .map(IBaseResource::getIdElement)
-                .map(IIdType::getIdPart)
-                .toList();
-    }
-
     public void removeAllSubjects(PopulationDef otherPopulationDef) {
         this.getSubjects().removeAll(otherPopulationDef.getSubjects());
     }
@@ -132,28 +121,5 @@ public class PopulationDef {
         subjectResources
                 .computeIfAbsent(key, k -> new HashSetForFhirResourcesAndCqlTypes<>())
                 .add(value);
-    }
-
-    public void removeOverlaps(String subjectId, PopulationDef otherPopulationDef) {
-
-        var iterator = subjectResources.entrySet().iterator();
-        var overlaps = otherPopulationDef.getSubjectResources();
-        while (iterator.hasNext()) {
-            Map.Entry<String, Set<Object>> entry = iterator.next();
-            String key = entry.getKey();
-            // LUKETODO:  optimize this pattern:
-            if (key.equals(subjectId)) {
-                continue;
-            }
-            Set<Object> valuesInA = entry.getValue();
-
-            if (overlaps.containsKey(key)) {
-                valuesInA.removeAll(overlaps.get(key)); // Remove overlapping elements
-            }
-
-            if (valuesInA.isEmpty()) {
-                iterator.remove(); // Safely remove key if Set is empty
-            }
-        }
     }
 }

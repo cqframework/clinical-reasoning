@@ -188,6 +188,15 @@ public class MeasureEvaluator {
         return inclusionDef;
     }
 
+    protected PopulationDef getPopulationDefByCriteriaRef(GroupDef groupDef, MeasurePopulationType populationType, PopulationDef inclusionDef) {
+        return groupDef.get(populationType).stream()
+            .filter(x-> {
+                assert x.getCriteriaReference() != null;
+                return x.getCriteriaReference().equals(inclusionDef.id());
+            })
+            .findFirst().orElse(null);
+    }
+
     protected void evaluateProportion(
             GroupDef groupDef,
             String subjectType,
@@ -206,6 +215,9 @@ public class MeasureEvaluator {
         PopulationDef denominatorException = groupDef.getSingle(DENOMINATOREXCEPTION);
         PopulationDef numeratorExclusion = groupDef.getSingle(NUMERATOREXCLUSION);
         PopulationDef dateOfCompliance = groupDef.getSingle(DATEOFCOMPLIANCE);
+        // Ratio Continuous Variable ONLY
+        PopulationDef observation_Num = getPopulationDefByCriteriaRef(groupDef, MEASUREOBSERVATION, numerator);
+        PopulationDef observation_Den = getPopulationDefByCriteriaRef(groupDef, MEASUREOBSERVATION, denominator);
 
         // Retrieve intersection of populations and results
         // add resources
@@ -295,6 +307,19 @@ public class MeasureEvaluator {
         if (reportType.equals(MeasureReportType.INDIVIDUAL) && dateOfCompliance != null) {
             var doc = evaluateDateOfCompliance(dateOfCompliance, evaluationResult);
             dateOfCompliance.addResource(subjectId, doc);
+        }
+        // Ratio Cont Variable Scoring
+        if (observation_Num != null && observation_Den != null) {
+            // Num alignment
+            pruneObservationResources(
+                numerator.getResources(), numerator, observation_Num);
+            pruneObservationSubjectResources(
+                numerator.subjectResources, observation_Num.getSubjectResources());
+            // Den alignment
+            pruneObservationResources(
+                denominator.getResources(), denominator, observation_Den);
+            pruneObservationSubjectResources(
+                denominator.subjectResources, observation_Den.getSubjectResources());
         }
     }
 

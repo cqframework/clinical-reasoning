@@ -32,7 +32,7 @@ public class CriteriaResult {
         }
     }
 
-    public Set<Object> setValue() {
+    public Set<Object> valueAsSet() {
         if (this.rawValue() instanceof Iterable) {
             return buildSet(unsafeCast(this.rawValue()));
         } else if (this.rawValue() == null) {

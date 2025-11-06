@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -392,7 +393,6 @@ class R4StratifierBuilder {
             StratifierDef stratifierDef, PopulationDef populationDef, List<String> resourceIds) {
 
         if (MeasureStratifierType.CRITERIA == stratifierDef.getStratifierType()) {
-            final Map<String, Set<Object>> populationResultsBySubject = populationDef.getSubjectResources();
             final Map<String, CriteriaResult> stratifierResultsBySubject = stratifierDef.getResults();
 
             final List<Object> allPopulationStratumIntersectingResources = new ArrayList<>();
@@ -433,10 +433,11 @@ class R4StratifierBuilder {
             */
 
             // For each subject, we intersect between the population and stratifier results
-            for (String subject : stratifierResultsBySubject.keySet()) {
-                final Set<Object> populationResultsPerSubject = populationResultsBySubject.get(subject);
+            for (Entry<String, CriteriaResult> stratifierEntryBySubject : stratifierResultsBySubject.entrySet()) {
                 final Set<Object> stratifierResultsPerSubject =
-                        stratifierResultsBySubject.get(subject).setValue();
+                        stratifierEntryBySubject.getValue().valueAsSet();
+                final Set<Object> populationResultsPerSubject =
+                        populationDef.getResourcesForSubject(stratifierEntryBySubject.getKey());
 
                 allPopulationStratumIntersectingResources.addAll(
                         Sets.intersection(populationResultsPerSubject, stratifierResultsPerSubject));

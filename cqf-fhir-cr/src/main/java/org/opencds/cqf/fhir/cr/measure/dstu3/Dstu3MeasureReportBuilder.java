@@ -287,8 +287,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         reportPopulation.setId(measurePopulation.getId());
 
         if (!measureDef.groups().isEmpty() && !measureDef.groups().get(0).isBooleanBasis()) {
-            reportPopulation.setCount(
-                    populationDef.getResourcesDuplicatesAcrossSubjects().size());
+            reportPopulation.setCount(populationDef.getAllSubjectResources().size());
         } else {
             reportPopulation.setCount(populationDef.getSubjects().size());
         }
@@ -324,8 +323,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         // Population Type behavior
         switch (populationDef.type()) {
             case MEASUREOBSERVATION:
-                buildMeasureObservations(
-                        populationDef.expression(), populationDef.getResourcesDuplicatesAcrossSubjects());
+                buildMeasureObservations(populationDef.expression(), populationDef.getAllSubjectResources());
                 break;
             default:
                 break;

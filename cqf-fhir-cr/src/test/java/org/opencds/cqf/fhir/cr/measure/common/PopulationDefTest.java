@@ -23,8 +23,8 @@ class PopulationDefTest {
         popDef2.addResource("subj1", "string1");
 
         popDef1.retainAllResources("subj1", popDef2);
-        assertEquals(1, popDef1.getResourcesDuplicatesAcrossSubjects().size());
-        assertTrue(popDef1.getResourcesDuplicatesAcrossSubjects().contains("string1"));
+        assertEquals(1, popDef1.getAllSubjectResources().size());
+        assertTrue(popDef1.getAllSubjectResources().contains("string1"));
     }
 
     @Test
@@ -36,8 +36,8 @@ class PopulationDefTest {
         popDef2.addResource("subj1", 123);
 
         popDef1.retainAllResources("subj1", popDef2);
-        assertEquals(1, popDef1.getResourcesDuplicatesAcrossSubjects().size());
-        assertTrue(popDef1.getResourcesDuplicatesAcrossSubjects().contains(123));
+        assertEquals(1, popDef1.getAllSubjectResources().size());
+        assertTrue(popDef1.getAllSubjectResources().contains(123));
     }
 
     @Test
@@ -53,7 +53,7 @@ class PopulationDefTest {
 
         popDef1.retainAllResources("subj1", popDef2);
 
-        assertEquals(1, popDef1.getResourcesDuplicatesAcrossSubjects().size());
+        assertEquals(1, popDef1.getAllSubjectResources().size());
 
         assertTrue(getResourcesDistinctAcrossAllSubjects(popDef1).contains(enc1a));
         assertTrue(getResourcesDistinctAcrossAllSubjects(popDef1).contains(enc1b));

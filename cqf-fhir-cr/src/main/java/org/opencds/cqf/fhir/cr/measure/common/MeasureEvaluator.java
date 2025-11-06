@@ -22,6 +22,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -310,7 +311,7 @@ public class MeasureEvaluator {
                 // only measureObservations that intersect with finalized measure-population results should be retained
                 pruneObservationResources(
                         subjectId,
-                        measurePopulationObservation.getResourcesDuplicatesAcrossSubjects(),
+                        measurePopulationObservation.getResourcesForSubject(subjectId),
                         measurePopulation,
                         measurePopulationObservation);
                 // what about subjects?
@@ -379,16 +380,16 @@ public class MeasureEvaluator {
             PopulationDef measurePopulationObservation) {
         for (Object resource : resources) {
             if (resource instanceof Map<?, ?> map) {
-                for (var entry : map.entrySet()) {
+                for (Entry<?, ?> entry : map.entrySet()) {
                     var measurePopResult = entry.getKey();
-                    if (measurePopulation != null
-                            && !measurePopulation
+                    if (measurePopulation != null) {
+                        final Set<Object> resourcesForSubject = measurePopulation.getResourcesForSubject(subjectId);
+                        if (!resourcesForSubject.contains(measurePopResult)) {
+                            // remove observation results not found in measure population
+                            measurePopulationObservation
                                     .getResourcesForSubject(subjectId)
-                                    .contains(measurePopResult)) {
-                        // remove observation results not found in measure population
-                        measurePopulationObservation
-                                .getResourcesForSubject(subjectId)
-                                .remove(resource);
+                                    .remove(resource);
+                        }
                     }
                 }
             }

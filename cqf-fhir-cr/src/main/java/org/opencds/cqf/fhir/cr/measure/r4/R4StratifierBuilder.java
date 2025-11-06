@@ -230,7 +230,7 @@ class R4StratifierBuilder {
         for (StratumPopulationDef stratumPopulationDef : stratumDef.getStratumPopulations()) {
             // This is nasty, and ideally, we ought to be driving this logic entirely off StratumPopulationDef
             final Optional<MeasureGroupPopulationComponent> optMgpc = populations.stream()
-                    .filter(population -> population.getId().equals(stratumPopulationDef.getId()))
+                    .filter(population -> population.getId().equals(stratumPopulationDef.id()))
                     .findFirst();
             if (optMgpc.isEmpty()) {
                 throw new InternalErrorException("could not find MeasureGroupPopulationComponent");
@@ -294,7 +294,7 @@ class R4StratifierBuilder {
                             population.getCode().getCodingFirstRep().getCode()));
         }
 
-        final Set<String> subjectsQualifiedOrUnqualified = stratumPopulationDef.getSubjectsQualifiedOrUnqualified();
+        final Set<String> subjectsQualifiedOrUnqualified = stratumPopulationDef.subjectsQualifiedOrUnqualified();
 
         if (groupDef.isBooleanBasis()) {
             buildBooleanBasisStratumPopulation(bc, sgpc, populationDef, subjectsQualifiedOrUnqualified);

@@ -18,9 +18,9 @@ class PopulationDefTest {
         popDef1.addResource("subj1", "string1");
         popDef2.addResource("subj1", "string1");
 
-        popDef1.getResources().retainAll(popDef2.getResources());
-        assertEquals(1, popDef1.getResources().size());
-        assertTrue(popDef1.getResources().contains("string1"));
+        popDef1.retainAllResources("subj1", popDef2);
+        assertEquals(1, popDef1.getResourcesList().size());
+        assertTrue(popDef1.getResourcesList().contains("string1"));
     }
 
     @Test
@@ -31,9 +31,9 @@ class PopulationDefTest {
         popDef1.addResource("subj1", 123);
         popDef2.addResource("subj1", 123);
 
-        popDef1.getResources().retainAll(popDef2.getResources());
-        assertEquals(1, popDef1.getResources().size());
-        assertTrue(popDef1.getResources().contains(123));
+        popDef1.retainAllResources("subj1", popDef2);
+        assertEquals(1, popDef1.getResourcesList().size());
+        assertTrue(popDef1.getResourcesList().contains(123));
     }
 
     @Test
@@ -47,10 +47,11 @@ class PopulationDefTest {
         popDef1.addResource("subj1", enc1a);
         popDef2.addResource("subj1", enc1b);
 
-        popDef1.getResources().retainAll(popDef2.getResources());
+        popDef1.retainAllResources("subj1", popDef2);
 
-        assertEquals(1, popDef1.getResources().size());
+        assertEquals(1, popDef1.getResourcesList().size());
 
+        // LUKETODO:  figure out how to redo these assertions
         assertTrue(popDef1.getResources().contains(enc1a));
         assertTrue(popDef1.getResources().contains(enc1b));
     }

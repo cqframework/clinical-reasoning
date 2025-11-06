@@ -287,7 +287,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         reportPopulation.setId(measurePopulation.getId());
 
         if (!measureDef.groups().isEmpty() && !measureDef.groups().get(0).isBooleanBasis()) {
-            reportPopulation.setCount(populationDef.getResources().size());
+            reportPopulation.setCount(populationDef.getResourcesList().size());
         } else {
             reportPopulation.setCount(populationDef.getSubjects().size());
         }

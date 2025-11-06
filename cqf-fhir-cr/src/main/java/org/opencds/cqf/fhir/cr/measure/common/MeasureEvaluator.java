@@ -193,8 +193,6 @@ public class MeasureEvaluator {
         denominator = evaluatePopulationMembership(subjectType, subjectId, denominator, evaluationResult);
         numerator = evaluatePopulationMembership(subjectType, subjectId, numerator, evaluationResult);
         if (applyScoring) {
-            // LUKETODO:  we need to pass in the subject and do this per subject only in retainAll/removeAll/etc
-            // LUKETODO:  if we remove all eval results for a given subject, then remove that subject from consideration
             // in any getSubjects() method on the population
             // remove denominator values not in IP
             denominator.retainAllResources(subjectId, initialPopulation);
@@ -311,7 +309,10 @@ public class MeasureEvaluator {
             if (applyScoring) {
                 // only measureObservations that intersect with finalized measure-population results should be retained
                 pruneObservationResources(
-                        measurePopulationObservation.getResources(), measurePopulation, measurePopulationObservation);
+                        subjectId,
+                        measurePopulationObservation.getResources(),
+                        measurePopulation,
+                        measurePopulationObservation);
                 // what about subjects?
                 if (measurePopulation != null) {
                     pruneObservationSubjectResources(
@@ -372,15 +373,22 @@ public class MeasureEvaluator {
     }
 
     protected void pruneObservationResources(
-            Set<Object> resources, PopulationDef measurePopulation, PopulationDef measurePopulationObservation) {
+            String subjectId,
+            Set<Object> resources,
+            PopulationDef measurePopulation,
+            PopulationDef measurePopulationObservation) {
         for (Object resource : resources) {
             if (resource instanceof Map<?, ?> map) {
                 for (var entry : map.entrySet()) {
                     var measurePopResult = entry.getKey();
                     if (measurePopulation != null
-                            && !measurePopulation.getResources().contains(measurePopResult)) {
+                            && !measurePopulation
+                                    .getResourcesForSubject(subjectId)
+                                    .contains(measurePopResult)) {
                         // remove observation results not found in measure population
-                        measurePopulationObservation.getResources().remove(resource);
+                        measurePopulationObservation
+                                .getResourcesForSubject(subjectId)
+                                .remove(resource);
                     }
                 }
             }

@@ -10,26 +10,24 @@ import org.opencds.cqf.fhir.cr.measure.r4.utils.R4ResourceIdUtils;
  * <p/>
  * This is meant to be the source of truth for all data points regarding stratum populations.
  */
-public class StratumPopulationDef {
-
-    private final String id;
-    private final Set<String> subjectsQualifiedOrUnqualified;
+public record StratumPopulationDef(String id, Set<String> subjectsQualifiedOrUnqualified) {
 
     public StratumPopulationDef(String id, Set<String> subjectsQualifiedOrUnqualified) {
         this.id = id;
         this.subjectsQualifiedOrUnqualified = Set.copyOf(subjectsQualifiedOrUnqualified);
     }
 
-    public String getId() {
-        return id;
-    }
-
-    // LUKETODO:  javadoc
-    public Set<String> getSubjectsQualifiedOrUnqualified() {
+    /**
+     * @return subjects either with or without the resource qualifier (ex Patient/123 or 123)
+     */
+    @Override
+    public Set<String> subjectsQualifiedOrUnqualified() {
         return subjectsQualifiedOrUnqualified;
     }
 
-    // LUKETODO:  javadoc
+    /**
+     * @return subjects always without the resource qualifier (ex 123 for Patient/123)
+     */
     public Set<String> getSubjectsUnqualified() {
         return subjectsQualifiedOrUnqualified.stream()
                 .filter(Objects::nonNull)

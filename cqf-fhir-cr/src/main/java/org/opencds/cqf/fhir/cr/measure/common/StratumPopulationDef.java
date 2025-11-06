@@ -14,15 +14,8 @@ public record StratumPopulationDef(String id, Set<String> subjectsQualifiedOrUnq
 
     public StratumPopulationDef(String id, Set<String> subjectsQualifiedOrUnqualified) {
         this.id = id;
+        // subjects either with or without the resource qualifier (ex Patient/123 or 123)
         this.subjectsQualifiedOrUnqualified = Set.copyOf(subjectsQualifiedOrUnqualified);
-    }
-
-    /**
-     * @return subjects either with or without the resource qualifier (ex Patient/123 or 123)
-     */
-    @Override
-    public Set<String> subjectsQualifiedOrUnqualified() {
-        return subjectsQualifiedOrUnqualified;
     }
 
     /**

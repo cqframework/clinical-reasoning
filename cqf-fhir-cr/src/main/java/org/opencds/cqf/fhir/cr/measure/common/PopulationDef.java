@@ -7,12 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class PopulationDef {
-
-    private static final Logger logger = LoggerFactory.getLogger(PopulationDef.class);
 
     private final String id;
     private final String expression;

@@ -194,7 +194,6 @@ public class MeasureEvaluator {
         denominator = evaluatePopulationMembership(subjectType, subjectId, denominator, evaluationResult);
         numerator = evaluatePopulationMembership(subjectType, subjectId, numerator, evaluationResult);
         if (applyScoring) {
-            // in any getSubjects() method on the population
             // remove denominator values not in IP
             denominator.retainAllResources(subjectId, initialPopulation);
             denominator.retainAllSubjects(initialPopulation);

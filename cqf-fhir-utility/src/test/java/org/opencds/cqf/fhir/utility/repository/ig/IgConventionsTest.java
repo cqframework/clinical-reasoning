@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.opencds.cqf.fhir.test.Resources;
 import org.opencds.cqf.fhir.utility.repository.ig.IgConventions.CategoryLayout;
-import org.opencds.cqf.fhir.utility.repository.ig.IgConventions.CompartmentLayout;
 import org.opencds.cqf.fhir.utility.repository.ig.IgConventions.FhirTypeLayout;
 import org.opencds.cqf.fhir.utility.repository.ig.IgConventions.FilenameMode;
 
@@ -49,7 +48,7 @@ class IgConventionsTest {
         var config = IgConventions.autoDetect(tempDir.resolve("directoryPerType/prefixed"));
         assertEquals(FilenameMode.TYPE_AND_ID, config.filenameMode());
         assertEquals(CategoryLayout.DIRECTORY_PER_CATEGORY, config.categoryLayout());
-        assertEquals(CompartmentLayout.FLAT, config.compartmentLayout());
+        assertEquals(CompartmentMode.NONE, config.compartmentMode());
         assertEquals(FhirTypeLayout.DIRECTORY_PER_TYPE, config.typeLayout());
     }
 
@@ -63,7 +62,7 @@ class IgConventionsTest {
         var config = IgConventions.autoDetect(tempDir.resolve("flatNoTypeNames"));
         assertEquals(FilenameMode.ID_ONLY, config.filenameMode());
         assertEquals(CategoryLayout.FLAT, config.categoryLayout());
-        assertEquals(CompartmentLayout.FLAT, config.compartmentLayout());
+        assertEquals(CompartmentMode.NONE, config.compartmentMode());
         assertEquals(FhirTypeLayout.FLAT, config.typeLayout());
     }
 
@@ -92,7 +91,7 @@ class IgConventionsTest {
         var config = IgConventions.autoDetect(tempDir.resolve("compartment"));
         assertEquals(FilenameMode.ID_ONLY, config.filenameMode());
         assertEquals(CategoryLayout.DIRECTORY_PER_CATEGORY, config.categoryLayout());
-        assertEquals(CompartmentLayout.DIRECTORY_PER_COMPARTMENT, config.compartmentLayout());
+        assertEquals(CompartmentMode.PATIENT, config.compartmentMode());
         assertEquals(FhirTypeLayout.DIRECTORY_PER_TYPE, config.typeLayout());
     }
 

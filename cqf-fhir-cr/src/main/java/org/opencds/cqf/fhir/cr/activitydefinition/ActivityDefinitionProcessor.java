@@ -7,6 +7,7 @@ import static org.opencds.cqf.fhir.utility.repository.Repositories.proxy;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.repository.IRepository;
+import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
@@ -15,49 +16,57 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
-import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.ExtensionResolver;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
+import org.opencds.cqf.fhir.cr.CrSettings;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.ApplyProcessor;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.ApplyRequest;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.IApplyProcessor;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.IRequestResolverFactory;
+import org.opencds.cqf.fhir.cr.common.IOperationProcessor;
 import org.opencds.cqf.fhir.cr.common.ResourceResolver;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.monad.Either3;
 import org.opencds.cqf.fhir.utility.repository.operations.IActivityDefinitionProcessor;
 
+@SuppressWarnings("UnstableApiUsage")
 public class ActivityDefinitionProcessor implements IActivityDefinitionProcessor {
     protected final ModelResolver modelResolver;
-    protected final EvaluationSettings evaluationSettings;
     protected final FhirVersionEnum fhirVersion;
     protected final ResourceResolver resourceResolver;
     protected IApplyProcessor applyProcessor;
     protected IRequestResolverFactory requestResolverFactory;
     protected IRepository repository;
+    protected CrSettings crSettings;
     protected ExtensionResolver extensionResolver;
 
     public ActivityDefinitionProcessor(IRepository repository) {
-        this(repository, EvaluationSettings.getDefault());
+        this(repository, CrSettings.getDefault());
     }
 
-    public ActivityDefinitionProcessor(IRepository repository, EvaluationSettings evaluationSettings) {
-        this(repository, evaluationSettings, null, null);
+    public ActivityDefinitionProcessor(IRepository repository, CrSettings crSettings) {
+        this(repository, crSettings, null, null);
     }
 
     public ActivityDefinitionProcessor(
             IRepository repository,
-            EvaluationSettings evaluationSettings,
-            IApplyProcessor applyProcessor,
-            IRequestResolverFactory requestResolverFactory) {
+            CrSettings crSettings,
+            IRequestResolverFactory requestResolverFactory,
+            List<? extends IOperationProcessor> operationProcessors) {
         this.repository = requireNonNull(repository, "repository can not be null");
-        this.evaluationSettings = requireNonNull(evaluationSettings, "evaluationSettings can not be null");
+        this.crSettings = requireNonNull(crSettings, "crSettings can not be null");
         this.resourceResolver = new ResourceResolver("ActivityDefinition", this.repository);
         fhirVersion = repository.fhirContext().getVersion().getVersion();
         modelResolver = FhirModelResolverCache.resolverForVersion(fhirVersion);
         this.requestResolverFactory = requestResolverFactory;
-        this.applyProcessor = applyProcessor;
+        if (operationProcessors != null && !operationProcessors.isEmpty()) {
+            operationProcessors.forEach(p -> {
+                if (p instanceof IApplyProcessor apply) {
+                    applyProcessor = apply;
+                }
+            });
+        }
     }
 
     @Override
@@ -159,7 +168,7 @@ public class ActivityDefinitionProcessor implements IActivityDefinitionProcessor
                 settingContext,
                 parameters,
                 data,
-                new LibraryEngine(repository, evaluationSettings));
+                new LibraryEngine(repository, crSettings.getEvaluationSettings()));
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource apply(

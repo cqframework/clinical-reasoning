@@ -109,8 +109,11 @@ public class CqfExpression {
 
     private String resolveLibrary(String lang, String url, String expr) {
         // If the expression is FHIRPath or a raw CQL expression a wrapper Library will be created
-        if (List.of("text/cql", "text/cql.expression", "text/cql-expression", "text/fhirpath")
+        if (List.of("text/cql.expression", "text/cql-expression", "text/fhirpath")
                 .contains(lang)) {
+            return null;
+        }
+        if (expr.contains(".") && lang.equals("text/cql") && StringUtils.isBlank(libraryUrl)) {
             return null;
         }
         // If the expression has a reference use it

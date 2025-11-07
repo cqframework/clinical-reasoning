@@ -32,7 +32,26 @@ public class CriteriaResult {
         }
     }
 
+    public Set<Object> valueAsSet() {
+        if (this.rawValue() instanceof Iterable) {
+            return buildSet(unsafeCast(this.rawValue()));
+        } else if (this.rawValue() == null) {
+            return new HashSetForFhirResourcesAndCqlTypes<>();
+        } else {
+            return new HashSetForFhirResourcesAndCqlTypes<>(this.rawValue());
+        }
+    }
+
     public Set<Object> evaluatedResources() {
         return this.evaluatedResources;
+    }
+
+    private Set<Object> buildSet(Iterable<Object> iterable) {
+        return new HashSetForFhirResourcesAndCqlTypes<>(iterable);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> T unsafeCast(Object object) {
+        return (T) object;
     }
 }

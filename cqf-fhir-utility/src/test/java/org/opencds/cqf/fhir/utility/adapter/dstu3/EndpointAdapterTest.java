@@ -1,8 +1,11 @@
 package org.opencds.cqf.fhir.utility.adapter.dstu3;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.List;
 import org.hl7.fhir.dstu3.model.Endpoint;
 import org.hl7.fhir.dstu3.model.PlanDefinition;
 import org.junit.jupiter.api.Test;
@@ -26,5 +29,18 @@ class EndpointAdapterTest {
         var newAddress = "456 Test Street";
         adapter.setAddress(newAddress);
         assertEquals(newAddress, endpoint.getAddress());
+    }
+
+    @Test
+    void adapter_has_get_set_headers() {
+        var endpoint = new Endpoint();
+        var adapter = (EndpointAdapter) adapterFactory.createResource(endpoint);
+        assertFalse(adapter.hasHeaders());
+        var newHeader = "Basic: 123";
+        adapter.addHeader(newHeader);
+        assertTrue(adapter.hasHeaders());
+        assertEquals(newHeader, adapter.getHeaders().get(0));
+        adapter.setHeaders(List.of());
+        assertFalse(adapter.hasHeaders());
     }
 }

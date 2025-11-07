@@ -2,8 +2,8 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import com.apicatalog.jsonld.StringUtils;
 import jakarta.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -12,14 +12,12 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import org.hl7.fhir.r4.model.Enumeration;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupPopulationComponent;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupStratifierComponent;
 import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupComponent;
 import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupPopulationComponent;
-import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Quantity;
 import org.opencds.cqf.fhir.cr.measure.common.BaseMeasureReportScorer;
 import org.opencds.cqf.fhir.cr.measure.common.ContinuousVariableObservationAggregateMethod;
@@ -29,6 +27,8 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
+import org.opencds.cqf.fhir.cr.measure.common.StratumDef;
+import org.opencds.cqf.fhir.cr.measure.common.StratumPopulationDef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -206,16 +206,15 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
     }
 
     protected void scoreContinuousVariable(String measureUrl, MeasureReportGroupComponent mrgc, GroupDef groupDef) {
-        logger.info("1234: scoreContinuousVariable");
-        final Quantity aggregateQuantity =
-                calculateContinuousVariableAggregateQuantity(measureUrl, groupDef, PopulationDef::getResources);
+        final Quantity aggregateQuantity = calculateContinuousVariableAggregateQuantity(
+                measureUrl, groupDef, PopulationDef::getAllSubjectResources);
 
         mrgc.setMeasureScore(aggregateQuantity);
     }
 
     @Nullable
     private static Quantity calculateContinuousVariableAggregateQuantity(
-            String measureUrl, GroupDef groupDef, Function<PopulationDef, Set<Object>> popDefToResources) {
+            String measureUrl, GroupDef groupDef, Function<PopulationDef, Collection<Object>> popDefToResources) {
 
         var popDef = groupDef.getSingle(MeasurePopulationType.MEASUREOBSERVATION);
         if (popDef == null) {
@@ -232,7 +231,7 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
 
     @Nullable
     private static Quantity calculateContinuousVariableAggregateQuantity(
-            ContinuousVariableObservationAggregateMethod aggregateMethod, Set<Object> qualifyingResources) {
+            ContinuousVariableObservationAggregateMethod aggregateMethod, Collection<Object> qualifyingResources) {
         var observationQuantity = collectQuantities(qualifyingResources);
         return aggregate(observationQuantity, aggregateMethod);
     }
@@ -301,20 +300,19 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
         return new Quantity().setValue(result).setUnit(unit).setSystem(system).setCode(code);
     }
 
-    private static List<Quantity> collectQuantities(Set<Object> resources) {
-        List<Quantity> quantities = new ArrayList<>();
+    private static List<Quantity> collectQuantities(Collection<Object> resources) {
 
-        for (Object resource : resources) {
-            if (resource instanceof Map<?, ?> map) {
-                for (Object value : map.values()) {
-                    if (value instanceof Observation obs && obs.hasValueQuantity()) {
-                        quantities.add(obs.getValueQuantity());
-                    }
-                }
-            }
-        }
+        var mapValues = resources.stream()
+                .filter(x -> x instanceof Map<?, ?>)
+                .map(x -> (Map<?, ?>) x)
+                .map(Map::values)
+                .flatMap(Collection::stream)
+                .toList();
 
-        return quantities;
+        return mapValues.stream()
+                .filter(Quantity.class::isInstance)
+                .map(Quantity.class::cast)
+                .toList();
     }
 
     protected void scoreStratifier(
@@ -334,17 +332,35 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
                 throw new InternalErrorException("Stratifier component " + sgc.getId() + " does not exist.");
             }
 
-            scoreStratum(measureUrl, groupDef, optStratifierDef.get(), measureScoring, sgc);
+            final StratifierDef stratifierDef = optStratifierDef.get();
+
+            final StratumDef stratumDef = stratifierDef.getStratum().stream()
+                    .filter(stratumDefInner -> StringUtils.isNotBlank(stratumDefInner.getText()))
+                    .filter(stratumDefInner -> doesStratumDefMatchStratum(sgc, stratumDefInner))
+                    .findFirst()
+                    .orElse(null);
+
+            // TODO: LD: should we always expect these to match up?
+            if (stratumDef == null) {
+                logger.warn("stratumDef is null");
+            }
+
+            scoreStratum(measureUrl, groupDef, stratumDef, measureScoring, sgc);
         }
+    }
+
+    // TODO:  LD: consider refining this logic:
+    private boolean doesStratumDefMatchStratum(StratifierGroupComponent sgc, StratumDef stratumDefInner) {
+        return stratumDefInner.getText().equals(sgc.getValue().getText());
     }
 
     protected void scoreStratum(
             String measureUrl,
             GroupDef groupDef,
-            StratifierDef stratifierDef,
+            StratumDef stratumDef,
             MeasureScoring measureScoring,
             StratifierGroupComponent stratum) {
-        final Quantity quantity = getStratumScoreOrNull(measureUrl, groupDef, stratifierDef, measureScoring, stratum);
+        final Quantity quantity = getStratumScoreOrNull(measureUrl, groupDef, stratumDef, measureScoring, stratum);
 
         if (quantity != null) {
             stratum.setMeasureScore(quantity);
@@ -355,7 +371,7 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
     private Quantity getStratumScoreOrNull(
             String measureUrl,
             GroupDef groupDef,
-            StratifierDef stratifierDef,
+            StratumDef stratumDef,
             MeasureScoring measureScoring,
             StratifierGroupComponent stratum) {
 
@@ -371,10 +387,21 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
                 return null;
             }
             case CONTINUOUSVARIABLE -> {
+                final StratumPopulationDef stratumPopulationDef;
+                if (stratumDef != null) {
+                    stratumPopulationDef = stratumDef.getStratumPopulations().stream()
+                            // Ex:  match "measure-observation-1" with "measure-observation"
+                            .filter(stratumPopDef ->
+                                    stratumPopDef.id().startsWith(MeasurePopulationType.MEASUREOBSERVATION.toCode()))
+                            .findFirst()
+                            .orElse(null);
+                } else {
+                    stratumPopulationDef = null;
+                }
                 return calculateContinuousVariableAggregateQuantity(
                         measureUrl,
                         groupDef,
-                        populationDef -> getResultsForStratum(populationDef, stratifierDef, stratum));
+                        populationDef -> getResultsForStratum(populationDef, stratumPopulationDef));
             }
             default -> {
                 return null;
@@ -382,59 +409,48 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
         }
     }
 
-    /*
-    the existing algo takes the measure-observation population from the group definition and goes through all resources to get the quantities
-    MeasurePopulationType.MEASUREOBSERVATION
-
-    but we don't want that:  we want to filter only resources that belong to the patients captured by each stratum
-    so we want to do some sort of wizardry that involves getting the stratum values, and using those to retrieve the associated resources
-
-    so it's basically a hack to go from StratifierGroupComponent stratum value -> subject -> populationDef.subjectResources.get(subject)
-    to get Set of resources on which to do measure scoring
+    /**
+     * The goal here is to extract the resources references by the population def for the subjects
+     * in the stratum populationDef.
+     * <p/>
+     * So, for example, if the stratum population def has subjects:
+     * <ul>
+     *     <li>patient123</li>
+     *     <li>patient456</li>
+     *     <li>patient567</li>
+     * </ul>
+     * and the population has:
+     * <ul>
+     *     <li>patient000 -> Patient000 -> Quantity(57)</li>
+     *     <li>patient100 -> Patient100 -> Quantity(36)</li>
+     *     <li>patient123 -> Patient123 -> Quantity(57)</li>
+     *     <li>patient456 -> Patient456 -> Quantity(3)</li>
+     *     <li>patient500 -> Patient500 -> Quantity(5)</li>
+     *     <li>patient567 -> Patient567 -> Quantity(57)</li>
+     * </ul>
+     * Then the method returns:
+     * <ul>
+     *     <li>Patient123 -> Quantity(57)</li>
+     *     <li>Patient456 -> Quantity(3)</li>
+     *     <li>Patient567 -> Quantity(57)</li>
+     * </ul>
      */
-
-    // TODO:  LD: Integrate this algorithm with a new StratumDef that will be populated in R4StratifierBuilder
     private Set<Object> getResultsForStratum(
-            PopulationDef measureObservationPopulationDef,
-            StratifierDef stratifierDef,
-            StratifierGroupComponent stratum) {
-
-        final String stratumValue = stratum.getValue().getText();
-
-        final Set<String> subjectsWithStratumValue = stratifierDef.getResults().entrySet().stream()
-                .filter(entry -> doesStratumMatch(stratumValue, entry.getValue().rawValue()))
-                .map(Entry::getKey)
-                .collect(Collectors.toUnmodifiableSet());
+            PopulationDef measureObservationPopulationDef, StratumPopulationDef stratumPopulationDef) {
 
         return measureObservationPopulationDef.getSubjectResources().entrySet().stream()
-                .filter(entry -> subjectsWithStratumValue.contains(entry.getKey()))
+                .filter(entry -> doesStratumPopDefMatchGroupPopDef(stratumPopulationDef, entry))
                 .map(Entry::getValue)
                 .flatMap(Collection::stream)
                 .collect(Collectors.toUnmodifiableSet());
     }
 
-    // TODO: LD: we may need to match more types of stratum here:  The below logic deals with
-    // currently anticipated use cases
-    private boolean doesStratumMatch(String stratumValueAsString, Object rawValueFromStratifier) {
-        if (rawValueFromStratifier == null || stratumValueAsString == null) {
-            return false;
-        }
+    private boolean doesStratumPopDefMatchGroupPopDef(
+            StratumPopulationDef stratumPopulationDef, Entry<String, Set<Object>> entry) {
 
-        if (rawValueFromStratifier instanceof Integer rawValueFromStratifierAsInt) {
-            final int stratumValueAsInt = Integer.parseInt(stratumValueAsString);
-
-            return stratumValueAsInt == rawValueFromStratifierAsInt;
-        }
-
-        if (rawValueFromStratifier instanceof Enumeration<?> rawValueFromStratifierAsEnumeration) {
-            return stratumValueAsString.equals(rawValueFromStratifierAsEnumeration.asStringValue());
-        }
-
-        if (rawValueFromStratifier instanceof String rawValueFromStratifierAsString) {
-            return stratumValueAsString.equals(rawValueFromStratifierAsString);
-        }
-
-        return false;
+        return stratumPopulationDef.getSubjectsUnqualified().stream()
+                .collect(Collectors.toUnmodifiableSet())
+                .contains(entry.getKey());
     }
 
     private int getCountFromGroupPopulation(

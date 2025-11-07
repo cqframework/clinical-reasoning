@@ -3,6 +3,10 @@ package org.opencds.cqf.fhir.cr.measure.common;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.Collection;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.ResourceType;
@@ -15,12 +19,12 @@ class PopulationDefTest {
         final PopulationDef popDef1 = new PopulationDef("one", null, null, null);
         final PopulationDef popDef2 = new PopulationDef("two", null, null, null);
 
-        popDef1.addResource("string1");
-        popDef2.addResource("string1");
+        popDef1.addResource("subj1", "string1");
+        popDef2.addResource("subj1", "string1");
 
-        popDef1.getResources().retainAll(popDef2.getResources());
-        assertEquals(1, popDef1.getResources().size());
-        assertTrue(popDef1.getResources().contains("string1"));
+        popDef1.retainAllResources("subj1", popDef2);
+        assertEquals(1, popDef1.getAllSubjectResources().size());
+        assertTrue(popDef1.getAllSubjectResources().contains("string1"));
     }
 
     @Test
@@ -28,12 +32,12 @@ class PopulationDefTest {
         final PopulationDef popDef1 = new PopulationDef("one", null, null, null);
         final PopulationDef popDef2 = new PopulationDef("two", null, null, null);
 
-        popDef1.addResource(123);
-        popDef2.addResource(123);
+        popDef1.addResource("subj1", 123);
+        popDef2.addResource("subj1", 123);
 
-        popDef1.getResources().retainAll(popDef2.getResources());
-        assertEquals(1, popDef1.getResources().size());
-        assertTrue(popDef1.getResources().contains(123));
+        popDef1.retainAllResources("subj1", popDef2);
+        assertEquals(1, popDef1.getAllSubjectResources().size());
+        assertTrue(popDef1.getAllSubjectResources().contains(123));
     }
 
     @Test
@@ -44,14 +48,21 @@ class PopulationDefTest {
         final Encounter enc1a = (Encounter) new Encounter().setId(new IdType(ResourceType.Encounter.name(), "enc1"));
         final Encounter enc1b = (Encounter) new Encounter().setId(new IdType(ResourceType.Encounter.name(), "enc1"));
 
-        popDef1.addResource(enc1a);
-        popDef2.addResource(enc1b);
+        popDef1.addResource("subj1", enc1a);
+        popDef2.addResource("subj1", enc1b);
 
-        popDef1.getResources().retainAll(popDef2.getResources());
+        popDef1.retainAllResources("subj1", popDef2);
 
-        assertEquals(1, popDef1.getResources().size());
+        assertEquals(1, popDef1.getAllSubjectResources().size());
 
-        assertTrue(popDef1.getResources().contains(enc1a));
-        assertTrue(popDef1.getResources().contains(enc1b));
+        assertTrue(getResourcesDistinctAcrossAllSubjects(popDef1).contains(enc1a));
+        assertTrue(getResourcesDistinctAcrossAllSubjects(popDef1).contains(enc1b));
+    }
+
+    private Set<Object> getResourcesDistinctAcrossAllSubjects(PopulationDef popDef) {
+        return new HashSetForFhirResourcesAndCqlTypes<>(popDef.getSubjectResources().values().stream()
+                .flatMap(Collection::stream)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toUnmodifiableSet()));
     }
 }

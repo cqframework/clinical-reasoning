@@ -179,4 +179,25 @@ class LibraryOperationsProviderIT extends BaseCrR4TestServer {
                 .execute();
         Assertions.assertEquals(retiredLibrary.getStatus().name(), Enumerations.PublicationStatus.RETIRED.name());
     }
+
+    @Test
+    void testWithdrawLibrary() {
+        loadBundle("ersd-small-approved-draft-bundle.json");
+
+        ourClient
+                .operation()
+                .onInstance("Library/SpecificationLibrary")
+                .named("$withdraw")
+                .withNoParameters(Parameters.class)
+                .returnResourceType(Bundle.class)
+                .execute();
+
+        Assertions.assertThrows(ResourceGoneException.class, () -> {
+            ourClient
+                    .read()
+                    .resource(Library.class)
+                    .withId("SpecificationLibrary")
+                    .execute();
+        });
+    }
 }

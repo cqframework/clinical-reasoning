@@ -14,23 +14,26 @@ import java.util.Set;
 import org.hl7.elm.r1.FunctionDef;
 import org.hl7.elm.r1.OperandDef;
 import org.hl7.elm.r1.VersionedIdentifier;
-import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
 import org.opencds.cqf.cql.engine.execution.Libraries;
 import org.opencds.cqf.cql.engine.execution.Variable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Capture all logic for measure evaluation for continuous variable scoring.
  */
 public class ContinuousVariableObservationHandler {
+    private static final Logger logger = LoggerFactory.getLogger(ContinuousVariableObservationHandler.class);
 
     private ContinuousVariableObservationHandler() {
         // static class with private constructor
     }
 
-    static <T extends IBaseResource> List<EvaluationResult> continuousVariableEvaluation(
+    static <T extends ICompositeType> List<EvaluationResult> continuousVariableEvaluation(
             CqlEngine context,
             List<MeasureDef> measureDefs,
             VersionedIdentifier libraryIdentifier,
@@ -93,7 +96,7 @@ public class ContinuousVariableObservationHandler {
      * For a given measure observation population, do an ad-hoc function evaluation and
      * accumulate the results that will be subsequently added to the CQL evaluation result.
      */
-    private static <T extends IBaseResource> EvaluationResult processMeasureObservation(
+    private static <T extends ICompositeType> EvaluationResult processMeasureObservation(
             CqlEngine context,
             EvaluationResult evaluationResult,
             String subjectTypePart,
@@ -126,14 +129,11 @@ public class ContinuousVariableObservationHandler {
         }
 
         final ExpressionResult expressionResult = optExpressionResult.get();
-        // makes expression results iterable
         final Iterable<?> resultsIter = getResultIterable(evaluationResult, expressionResult, subjectTypePart);
         // make new expression name for uniquely extracting results
         // this will be used in MeasureEvaluator
         var expressionName = criteriaPopulationId + "-" + observationExpression;
 
-        // loop through measure-population results
-        int index = 0;
         final Map<Object, Object> functionResults = new HashMap<>();
         final Set<Object> evaluatedResources = new HashSet<>();
 
@@ -141,21 +141,15 @@ public class ContinuousVariableObservationHandler {
             final ExpressionResult observationResult =
                     evaluateObservationCriteria(result, observationExpression, groupDef.isBooleanBasis(), context);
 
-            var observationId = expressionName + "-" + index;
-            // wrap result in Observation resource to avoid duplicate results data loss
-            // in set object
-            var observation = continuousVariableObservationConverter.wrapResultAsObservation(
-                    observationId, observationId, observationResult.value());
+            var quantity = continuousVariableObservationConverter.wrapResultAsQuantity(observationResult.value());
             // add function results to existing EvaluationResult under new expression
             // name
             // need a way to capture input parameter here too, otherwise we have no way
             // to connect input objects related to output object
             // key= input parameter to function
             // value= the output Observation resource containing calculated value
-            functionResults.put(result, observation);
+            functionResults.put(result, quantity);
             evaluatedResources.addAll(observationResult.evaluatedResources());
-
-            index++;
         }
 
         return buildEvaluationResult(expressionName, functionResults, evaluatedResources);
@@ -307,6 +301,7 @@ public class ContinuousVariableObservationHandler {
     @Nonnull
     private static EvaluationResult buildEvaluationResult(
             String expressionName, Map<Object, Object> functionResults, Set<Object> evaluatedResources) {
+
         final EvaluationResult evaluationResultToReturn = new EvaluationResult();
 
         evaluationResultToReturn.expressionResults.put(

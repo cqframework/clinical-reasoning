@@ -5,58 +5,56 @@ import static org.opencds.cqf.fhir.utility.PackageHelper.packageParameters;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.repository.IRepository;
+import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
-import org.opencds.cqf.fhir.cql.EvaluationSettings;
-import org.opencds.cqf.fhir.cr.common.IDataRequirementsProcessor;
+import org.opencds.cqf.fhir.cr.CrSettings;
+import org.opencds.cqf.fhir.cr.common.IOperationProcessor;
 import org.opencds.cqf.fhir.cr.common.IPackageProcessor;
 import org.opencds.cqf.fhir.cr.common.IReleaseProcessor;
 import org.opencds.cqf.fhir.cr.common.PackageProcessor;
 import org.opencds.cqf.fhir.cr.common.ReleaseProcessor;
 import org.opencds.cqf.fhir.cr.common.ResourceResolver;
-import org.opencds.cqf.fhir.cr.library.evaluate.IEvaluateProcessor;
-import org.opencds.cqf.fhir.utility.client.TerminologyServerClientSettings;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.monad.Either3;
 
+@SuppressWarnings("UnstableApiUsage")
 public class ImplementationGuideProcessor {
     protected final ModelResolver modelResolver;
     protected final FhirVersionEnum fhirVersion;
     protected IPackageProcessor packageProcessor;
     protected IReleaseProcessor releaseProcessor;
     protected IRepository repository;
-    protected TerminologyServerClientSettings terminologyServerClientSettings;
+    protected CrSettings crSettings;
 
     public ImplementationGuideProcessor(IRepository repository) {
-        this(repository, EvaluationSettings.getDefault(), TerminologyServerClientSettings.getDefault());
+        this(repository, CrSettings.getDefault());
+    }
+
+    public ImplementationGuideProcessor(IRepository repository, CrSettings crSettings) {
+        this(repository, crSettings, null);
     }
 
     public ImplementationGuideProcessor(
-            IRepository repository,
-            EvaluationSettings evaluationSettings,
-            TerminologyServerClientSettings terminologyServerClientSettings) {
-        this(repository, evaluationSettings, terminologyServerClientSettings, null, null, null, null);
-    }
-
-    public ImplementationGuideProcessor(
-            IRepository repository,
-            EvaluationSettings evaluationSettings,
-            TerminologyServerClientSettings terminologyServerClientSettings,
-            IPackageProcessor packageProcessor,
-            IReleaseProcessor releaseProcessor,
-            IDataRequirementsProcessor dataRequirementsProcessor,
-            IEvaluateProcessor evaluateProcessor) {
+            IRepository repository, CrSettings crSettings, List<? extends IOperationProcessor> operationProcessors) {
         this.repository = requireNonNull(repository, "repository can not be null");
-        this.terminologyServerClientSettings =
-                requireNonNull(terminologyServerClientSettings, "terminologyServerClientSettings can not be null");
+        this.crSettings = requireNonNull(crSettings, "crSettings can not be null");
         fhirVersion = this.repository.fhirContext().getVersion().getVersion();
         modelResolver = FhirModelResolverCache.resolverForVersion(fhirVersion);
-        this.packageProcessor = packageProcessor;
-        this.releaseProcessor = releaseProcessor;
+        if (operationProcessors != null && !operationProcessors.isEmpty()) {
+            operationProcessors.forEach(p -> {
+                if (p instanceof IPackageProcessor pack) {
+                    packageProcessor = pack;
+                }
+                if (p instanceof IReleaseProcessor release) {
+                    releaseProcessor = release;
+                }
+            });
+        }
     }
 
     protected <C extends IPrimitiveType<String>, R extends IBaseResource> R resolveImplementationGuide(
@@ -80,9 +78,7 @@ public class ImplementationGuideProcessor {
     }
 
     public IBaseBundle packageImplementationGuide(IBaseResource implementationGuide, IBaseParameters parameters) {
-        var processor = packageProcessor != null
-                ? packageProcessor
-                : new PackageProcessor(repository, terminologyServerClientSettings);
+        var processor = packageProcessor != null ? packageProcessor : new PackageProcessor(repository, crSettings);
         return processor.packageResource(implementationGuide, parameters);
     }
 
@@ -94,7 +90,7 @@ public class ImplementationGuideProcessor {
     public IBaseBundle releaseImplementationGuide(IBaseResource implementationGuide, IBaseParameters parameters) {
         var processor = releaseProcessor != null
                 ? releaseProcessor
-                : new ReleaseProcessor(repository, terminologyServerClientSettings);
+                : new ReleaseProcessor(repository, crSettings.getTerminologyServerClientSettings());
         return processor.releaseResource(implementationGuide, parameters);
     }
 }

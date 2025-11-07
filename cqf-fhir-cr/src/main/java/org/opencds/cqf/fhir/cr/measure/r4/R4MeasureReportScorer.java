@@ -206,15 +206,15 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
     }
 
     protected void scoreContinuousVariable(String measureUrl, MeasureReportGroupComponent mrgc, GroupDef groupDef) {
-        final Quantity aggregateQuantity =
-                calculateContinuousVariableAggregateQuantity(measureUrl, groupDef, PopulationDef::getResources);
+        final Quantity aggregateQuantity = calculateContinuousVariableAggregateQuantity(
+                measureUrl, groupDef, PopulationDef::getAllSubjectResources);
 
         mrgc.setMeasureScore(aggregateQuantity);
     }
 
     @Nullable
     private static Quantity calculateContinuousVariableAggregateQuantity(
-            String measureUrl, GroupDef groupDef, Function<PopulationDef, Set<Object>> popDefToResources) {
+            String measureUrl, GroupDef groupDef, Function<PopulationDef, Collection<Object>> popDefToResources) {
 
         var popDef = groupDef.getSingle(MeasurePopulationType.MEASUREOBSERVATION);
         if (popDef == null) {
@@ -231,7 +231,7 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
 
     @Nullable
     private static Quantity calculateContinuousVariableAggregateQuantity(
-            ContinuousVariableObservationAggregateMethod aggregateMethod, Set<Object> qualifyingResources) {
+            ContinuousVariableObservationAggregateMethod aggregateMethod, Collection<Object> qualifyingResources) {
         var observationQuantity = collectQuantities(qualifyingResources);
         return aggregate(observationQuantity, aggregateMethod);
     }
@@ -300,7 +300,7 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
         return new Quantity().setValue(result).setUnit(unit).setSystem(system).setCode(code);
     }
 
-    private static List<Quantity> collectQuantities(Set<Object> resources) {
+    private static List<Quantity> collectQuantities(Collection<Object> resources) {
 
         var mapValues = resources.stream()
                 .filter(x -> x instanceof Map<?, ?>)
@@ -392,7 +392,7 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
                     stratumPopulationDef = stratumDef.getStratumPopulations().stream()
                             // Ex:  match "measure-observation-1" with "measure-observation"
                             .filter(stratumPopDef ->
-                                    stratumPopDef.getId().startsWith(MeasurePopulationType.MEASUREOBSERVATION.toCode()))
+                                    stratumPopDef.id().startsWith(MeasurePopulationType.MEASUREOBSERVATION.toCode()))
                             .findFirst()
                             .orElse(null);
                 } else {

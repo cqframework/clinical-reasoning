@@ -84,7 +84,7 @@ class PackageVisitorTests {
     private final IParser jsonParser = fhirContext.newJsonParser();
     private IRepository repo;
     protected static final String CRMI_INTENDED_USAGE_CONTEXT_URL =
-        "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-intendedUsageContext";
+            "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-intendedUsageContext";
 
     @BeforeEach
     void setup() {
@@ -819,10 +819,12 @@ class PackageVisitorTests {
 
         IDependencyInfo dep = mock(IDependencyInfo.class);
         when(dep.getReference()).thenReturn(vs.getUrl());
-        // IDependencyInfo.getExtension() is expected to return list of IBaseExtension; Extension implements IBaseExtension
+        // IDependencyInfo.getExtension() is expected to return list of IBaseExtension; Extension implements
+        // IBaseExtension
         when(dep.getExtension()).thenReturn(List.of((IBaseExtension<?, ?>) ext));
 
-        org.opencds.cqf.fhir.cr.visitor.r4.PackageVisitor.applyManifestUsageContextsToValueSets(List.of(adapter), List.of(dep));
+        org.opencds.cqf.fhir.cr.visitor.r4.PackageVisitor.applyManifestUsageContextsToValueSets(
+                List.of(adapter), List.of(dep));
 
         assertNotNull(vs.getUseContext());
         assertEquals(1, vs.getUseContext().size());
@@ -856,7 +858,8 @@ class PackageVisitorTests {
         when(dep.getReference()).thenReturn(vs.getUrl());
         when(dep.getExtension()).thenReturn(List.of((IBaseExtension<?, ?>) ext));
 
-        org.opencds.cqf.fhir.cr.visitor.r4.PackageVisitor.applyManifestUsageContextsToValueSets(List.of(adapter), List.of(dep));
+        org.opencds.cqf.fhir.cr.visitor.r4.PackageVisitor.applyManifestUsageContextsToValueSets(
+                List.of(adapter), List.of(dep));
 
         assertEquals(1, vs.getUseContext().size());
         assertTrue(vs.getUseContext().get(0).equalsDeep(pre));
@@ -880,8 +883,10 @@ class PackageVisitorTests {
         when(dep.getReference()).thenReturn(vs.getUrl());
         when(dep.getExtension()).thenReturn(List.of((IBaseExtension<?, ?>) ext));
 
-        assertThrows(InvalidRequestException.class, () ->
-            org.opencds.cqf.fhir.cr.visitor.r4.PackageVisitor.applyManifestUsageContextsToValueSets(List.of(adapter), List.of(dep)));
+        assertThrows(
+                InvalidRequestException.class,
+                () -> org.opencds.cqf.fhir.cr.visitor.r4.PackageVisitor.applyManifestUsageContextsToValueSets(
+                        List.of(adapter), List.of(dep)));
     }
 
     @Test
@@ -907,7 +912,8 @@ class PackageVisitorTests {
         when(dep.getReference()).thenReturn(vs.getUrl() + "|" + vs.getVersion());
         when(dep.getExtension()).thenReturn(List.of((IBaseExtension<?, ?>) ext));
 
-        org.opencds.cqf.fhir.cr.visitor.r4.PackageVisitor.applyManifestUsageContextsToValueSets(List.of(adapter), List.of(dep));
+        org.opencds.cqf.fhir.cr.visitor.r4.PackageVisitor.applyManifestUsageContextsToValueSets(
+                List.of(adapter), List.of(dep));
 
         assertEquals(1, vs.getUseContext().size());
         assertTrue(vs.getUseContext().get(0).equalsDeep(uc));
@@ -934,7 +940,8 @@ class PackageVisitorTests {
         when(dep.getReference()).thenReturn("http://other.example/ValueSet/other");
         when(dep.getExtension()).thenReturn(List.of((IBaseExtension<?, ?>) ext));
 
-        org.opencds.cqf.fhir.cr.visitor.r4.PackageVisitor.applyManifestUsageContextsToValueSets(List.of(adapter), List.of(dep));
+        org.opencds.cqf.fhir.cr.visitor.r4.PackageVisitor.applyManifestUsageContextsToValueSets(
+                List.of(adapter), List.of(dep));
 
         assertTrue(vs.getUseContext().isEmpty());
     }

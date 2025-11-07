@@ -8,12 +8,9 @@ import static org.opencds.cqf.fhir.utility.adapter.IAdapter.newPeriod;
 import static org.opencds.cqf.fhir.utility.adapter.IAdapter.newStringType;
 import static org.opencds.cqf.fhir.utility.adapter.IAdapter.newUriType;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.util.FhirTerser;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;

@@ -377,9 +377,9 @@ public class R4ImportBundleProducer {
         isOwnedExtension.setValue(new BooleanType(true));
         var extensions = new ArrayList<Extension>();
         extensions.addAll(
-                processUsageContextMapForLibrary(conditions, TransformProperties.crmiIntendedUsageContextExtUrl));
+                processUsageContextMapForLibrary(conditions, TransformProperties.CRMI_INTENDED_USAGE_CONTEXT_EXT_URL));
         extensions.addAll(
-                processUsageContextMapForLibrary(priorities, TransformProperties.crmiIntendedUsageContextExtUrl));
+                processUsageContextMapForLibrary(priorities, TransformProperties.CRMI_INTENDED_USAGE_CONTEXT_EXT_URL));
         extensions.add(isOwnedExtension);
         relatedArtifact.setExtension(extensions);
         return relatedArtifact;
@@ -392,9 +392,9 @@ public class R4ImportBundleProducer {
         relatedArtifact.setResource(leafUrl);
         var extensions = new ArrayList<Extension>();
         extensions.addAll(
-                processUsageContextMapForLibrary(conditions, TransformProperties.crmiIntendedUsageContextExtUrl));
+                processUsageContextMapForLibrary(conditions, TransformProperties.CRMI_INTENDED_USAGE_CONTEXT_EXT_URL));
         extensions.addAll(
-                processUsageContextMapForLibrary(priorities, TransformProperties.crmiIntendedUsageContextExtUrl));
+                processUsageContextMapForLibrary(priorities, TransformProperties.CRMI_INTENDED_USAGE_CONTEXT_EXT_URL));
         relatedArtifact.setExtension(extensions);
         return relatedArtifact;
     }

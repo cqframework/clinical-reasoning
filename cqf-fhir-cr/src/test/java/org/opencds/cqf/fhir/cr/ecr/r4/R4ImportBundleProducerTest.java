@@ -348,7 +348,7 @@ class R4ImportBundleProducerTest {
             if (Canonicals.getResourceType(ra.getResource()).equals("ValueSet")) {
                 // Get all crmi-intendedUsageContext extensions
                 var intendedUsageContextExtensions =
-                        ra.getExtensionsByUrl(TransformProperties.crmiIntendedUsageContextExtUrl);
+                        ra.getExtensionsByUrl(TransformProperties.CRMI_INTENDED_USAGE_CONTEXT_EXT_URL);
 
                 // Filter those where the valueUsageContext has code = "priority"
                 var priorityExtensions = intendedUsageContextExtensions.stream()

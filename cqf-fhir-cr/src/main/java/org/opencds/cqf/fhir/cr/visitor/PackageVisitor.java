@@ -5,6 +5,7 @@ import static org.opencds.cqf.fhir.cr.visitor.VisitorHelper.processCanonicals;
 import static org.opencds.cqf.fhir.utility.Parameters.newParameters;
 import static org.opencds.cqf.fhir.utility.adapter.IAdapterFactory.createAdapterForResource;
 
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
@@ -15,6 +16,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
@@ -29,9 +31,11 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.utility.BundleHelper;
+import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.PackageHelper;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
+import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
@@ -49,6 +53,8 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
     private static final String CONFORMANCE_TYPE = "conformance";
     private static final String KNOWLEDGE_ARTIFACT_TYPE = "knowledge";
     private static final String TERMINOLOGY_TYPE = "terminology";
+    private static final String CRMI_INTENDED_USAGE_CONTEXT_URL =
+            "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-intendedUsageContext";
     protected final TerminologyServerClient terminologyServerClient;
     protected final ExpandHelper expandHelper;
 
@@ -217,6 +223,8 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
             BundleHelper.setEntry(packagedBundle, included);
         }
         handleValueSets(packagedBundle, terminologyEndpoint);
+        applyManifestUsageContextsToValueSets(adapter, packagedBundle);
+
         if (messages != null) {
             messages.setId("messages");
             getRootSpecificationLibrary(packagedBundle).addCqfMessagesExtension(messages);
@@ -298,6 +306,31 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
                 }
             }
         });
+    }
+
+    protected void applyManifestUsageContextsToValueSets(IKnowledgeArtifactAdapter manifest, IBaseBundle bundle) {
+        // Build list of ValueSet adapters from bundle
+        List<IKnowledgeArtifactAdapter> valueSetResources = BundleHelper.getEntryResources(bundle).stream()
+                .filter(r -> r.fhirType().equals("ValueSet"))
+                .map(r -> (IKnowledgeArtifactAdapter) IAdapterFactory.forFhirVersion(r.getStructureFhirVersionEnum())
+                        .createResource(r))
+                .toList();
+
+        // Filter manifest dependencies to ValueSets only
+        List<IDependencyInfo> dependencies = manifest.getDependencies().stream()
+                .filter(d -> Objects.equals(Canonicals.getResourceType(d.getReference()), "ValueSet"))
+                .toList();
+
+        if (this.fhirVersion().equals(FhirVersionEnum.DSTU3)) {
+            org.opencds.cqf.fhir.cr.visitor.dstu3.PackageVisitor.applyManifestUsageContextsToValueSets(
+                    valueSetResources, dependencies);
+        } else if (this.fhirVersion().equals(FhirVersionEnum.R4)) {
+            org.opencds.cqf.fhir.cr.visitor.r4.PackageVisitor.applyManifestUsageContextsToValueSets(
+                    valueSetResources, dependencies);
+        } else if (this.fhirVersion().equals(FhirVersionEnum.R5)) {
+            org.opencds.cqf.fhir.cr.visitor.r5.PackageVisitor.applyManifestUsageContextsToValueSets(
+                    valueSetResources, dependencies);
+        }
     }
 
     public static void setCorrectBundleType(

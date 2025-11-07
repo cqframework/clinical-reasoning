@@ -53,8 +53,7 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
     private static final String CONFORMANCE_TYPE = "conformance";
     private static final String KNOWLEDGE_ARTIFACT_TYPE = "knowledge";
     private static final String TERMINOLOGY_TYPE = "terminology";
-    private static final String CRMI_INTENDED_USAGE_CONTEXT_URL =
-            "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-intendedUsageContext";
+    private static final String VALUESET_FHIR_TYPE = "ValueSet";
     protected final TerminologyServerClient terminologyServerClient;
     protected final ExpandHelper expandHelper;
 
@@ -256,7 +255,7 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
                 createAdapterForResource(expansionParams).copy());
 
         var valueSets = BundleHelper.getEntryResources(packagedBundle).stream()
-                .filter(r -> r.fhirType().equals("ValueSet"))
+                .filter(r -> r.fhirType().equals(VALUESET_FHIR_TYPE))
                 .map(v -> (IValueSetAdapter) createAdapterForResource(v))
                 .collect(Collectors.toList());
         var expansionCache = getExpansionCache();
@@ -311,14 +310,14 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
     protected void applyManifestUsageContextsToValueSets(IKnowledgeArtifactAdapter manifest, IBaseBundle bundle) {
         // Build list of ValueSet adapters from bundle
         List<IKnowledgeArtifactAdapter> valueSetResources = BundleHelper.getEntryResources(bundle).stream()
-                .filter(r -> r.fhirType().equals("ValueSet"))
+                .filter(r -> r.fhirType().equals(VALUESET_FHIR_TYPE))
                 .map(r -> (IKnowledgeArtifactAdapter) IAdapterFactory.forFhirVersion(r.getStructureFhirVersionEnum())
                         .createResource(r))
                 .toList();
 
         // Filter manifest dependencies to ValueSets only
         List<IDependencyInfo> dependencies = manifest.getDependencies().stream()
-                .filter(d -> Objects.equals(Canonicals.getResourceType(d.getReference()), "ValueSet"))
+                .filter(d -> Objects.equals(Canonicals.getResourceType(d.getReference()), VALUESET_FHIR_TYPE))
                 .toList();
 
         if (this.fhirVersion().equals(FhirVersionEnum.DSTU3)) {

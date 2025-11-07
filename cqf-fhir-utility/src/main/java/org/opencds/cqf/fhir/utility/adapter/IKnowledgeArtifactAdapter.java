@@ -175,59 +175,6 @@ public interface IKnowledgeArtifactAdapter extends IResourceAdapter {
 
     <T extends ICompositeType> List<T> getUseContext();
 
-    /**
-     * Append a UsageContext to the resource's useContext list.
-     */
-    default <T extends ICompositeType> void addUsageContext(T usageContext, FhirContext fhirContext) {
-        Objects.requireNonNull(fhirContext, "FhirContext is required to read existing values");
-        try {
-            // get the existing useContext values
-            FhirTerser terser = fhirContext.newTerser();
-
-            // Get all populated child elements of type IBase under the resource
-            @SuppressWarnings("unchecked")
-            List<IBase> allChildren = terser.getAllPopulatedChildElementsOfType(get(), IBase.class);
-
-            List<T> existing = new ArrayList<>();
-
-            if (allChildren != null) {
-                for (IBase child : allChildren) {
-                    if (child == null) continue;
-                    // We are looking specifically for UsageContext structures under the "useContext" element.
-                    // The child.fhirType() for usage contexts is usually "UsageContext".
-                    try {
-                        String typeName = child.fhirType();
-                        if ("UsageContext".equals(typeName)) {
-                            // child should be assignable to ICompositeType
-                            @SuppressWarnings("unchecked")
-                            T asT = (T) child;
-                            existing.add(asT);
-                        }
-                    } catch (Exception ex) {
-                        // defensive: skip elements that don't expose fhirType or are not what we expect
-                    }
-                }
-            }
-
-            // combine existing + new (prevent exact object duplicates)
-            boolean alreadyExists = false;
-            for (T e : existing) {
-                if (e == usageContext || e.equals(usageContext)) {
-                    alreadyExists = true;
-                    break;
-                }
-            }
-            if (!alreadyExists) {
-                List<T> updated = new ArrayList<>(existing);
-                updated.add(usageContext);
-
-                getModelResolver().setValue(get(), "useContext", updated);
-            }
-        } catch (Exception e) {
-            logger.debug("Field 'useContext' does not exist on Resource type {}", get().fhirType());
-        }
-    }
-
     String getStatus();
 
     void setStatus(String status);

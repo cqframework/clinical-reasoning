@@ -10,7 +10,7 @@ import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
 public class PackageVisitor {
     private PackageVisitor() {}
 
-    private static final String CRMI_INTENDED_USAGE_CONTEXT_URL =
+    protected static final String CRMI_INTENDED_USAGE_CONTEXT_URL =
             "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-intendedUsageContext";
 
     public static void applyManifestUsageContextsToValueSets(

@@ -20,6 +20,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.repository.IRepository;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.Arrays;
@@ -31,11 +32,16 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r5.model.Bundle.BundleType;
 import org.hl7.fhir.r5.model.CanonicalType;
+import org.hl7.fhir.r5.model.CodeableConcept;
+import org.hl7.fhir.r5.model.Coding;
+import org.hl7.fhir.r5.model.DataType;
 import org.hl7.fhir.r5.model.Endpoint;
+import org.hl7.fhir.r5.model.Extension;
 import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.IntegerType;
 import org.hl7.fhir.r5.model.Library;
@@ -43,6 +49,7 @@ import org.hl7.fhir.r5.model.MetadataResource;
 import org.hl7.fhir.r5.model.Parameters;
 import org.hl7.fhir.r5.model.ResourceType;
 import org.hl7.fhir.r5.model.StringType;
+import org.hl7.fhir.r5.model.UsageContext;
 import org.hl7.fhir.r5.model.ValueSet;
 import org.hl7.fhir.r5.model.ValueSet.ValueSetExpansionComponent;
 import org.junit.jupiter.api.BeforeEach;
@@ -56,7 +63,9 @@ import org.opencds.cqf.fhir.cr.visitor.IValueSetExpansionCache;
 import org.opencds.cqf.fhir.cr.visitor.PackageVisitor;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
+import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
@@ -70,6 +79,8 @@ class PackageVisitorTests {
     private final FhirContext fhirContext = FhirContext.forR5Cached();
     private final IParser jsonParser = fhirContext.newJsonParser();
     private IRepository repo;
+    protected static final String CRMI_INTENDED_USAGE_CONTEXT_URL =
+        "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-intendedUsageContext";
 
     @BeforeEach
     void setup() {
@@ -562,5 +573,149 @@ class PackageVisitorTests {
         endpoint.addExtension(new org.hl7.fhir.r5.model.Extension(
                 Constants.APIKEY, new org.hl7.fhir.r5.model.StringType("password")));
         return endpoint;
+    }
+
+    @Test
+    void addsUsageContextWhenExtensionPresent() {
+        // arrange
+        IKnowledgeArtifactAdapter adapter = mock(IKnowledgeArtifactAdapter.class);
+        ValueSet vs = new ValueSet();
+        vs.setUrl("http://example.org/ValueSet/foo");
+        when(adapter.get()).thenReturn(vs);
+        when(adapter.getUrl()).thenReturn(vs.getUrl());
+        when(adapter.hasVersion()).thenReturn(false);
+
+        // create a UsageContext to include in extension
+        UsageContext uc = new UsageContext();
+        Coding code = new Coding();
+        code.setCode("focus");
+        uc.setCode(code);
+        CodeableConcept val = new CodeableConcept();
+        val.addCoding(new Coding().setSystem("http://example").setCode("Condition1"));
+        uc.setValue(val);
+
+        // create extension carrying a UsageContext
+        Extension ext = new Extension(CRMI_INTENDED_USAGE_CONTEXT_URL, (DataType) uc);
+
+        IDependencyInfo dep = mock(IDependencyInfo.class);
+        when(dep.getReference()).thenReturn(vs.getUrl());
+        // IDependencyInfo.getExtension() is expected to return list of IBaseExtension; Extension implements IBaseExtension
+        when(dep.getExtension()).thenReturn(List.of((IBaseExtension<?, ?>) ext));
+
+        org.opencds.cqf.fhir.cr.visitor.r5.PackageVisitor.applyManifestUsageContextsToValueSets(List.of(adapter), List.of(dep));
+
+        assertNotNull(vs.getUseContext());
+        assertEquals(1, vs.getUseContext().size());
+        UsageContext added = vs.getUseContext().get(0);
+        assertTrue(added.equalsDeep(uc));
+    }
+
+    @Test
+    void doesNotAddDuplicateUsageContext() {
+        // arrange
+        IKnowledgeArtifactAdapter adapter = mock(IKnowledgeArtifactAdapter.class);
+        ValueSet vs = new ValueSet();
+        vs.setUrl("http://example.org/ValueSet/bar");
+        when(adapter.get()).thenReturn(vs);
+        when(adapter.getUrl()).thenReturn(vs.getUrl());
+        when(adapter.hasVersion()).thenReturn(false);
+
+        // pre-populate ValueSet with a UsageContext
+        UsageContext pre = new UsageContext();
+        pre.setCode(new Coding().setCode("priority"));
+        pre.setValue(new CodeableConcept().addCoding(new Coding().setCode("routine")));
+        vs.addUseContext(pre);
+
+        // create an equivalent incoming UsageContext and extension
+        UsageContext incoming = new UsageContext();
+        incoming.setCode(new Coding().setCode("priority"));
+        incoming.setValue(new CodeableConcept().addCoding(new Coding().setCode("routine")));
+        Extension ext = new Extension(CRMI_INTENDED_USAGE_CONTEXT_URL, (DataType) incoming);
+
+        IDependencyInfo dep = mock(IDependencyInfo.class);
+        when(dep.getReference()).thenReturn(vs.getUrl());
+        when(dep.getExtension()).thenReturn(List.of((IBaseExtension<?, ?>) ext));
+
+        org.opencds.cqf.fhir.cr.visitor.r5.PackageVisitor.applyManifestUsageContextsToValueSets(List.of(adapter), List.of(dep));
+
+        assertEquals(1, vs.getUseContext().size());
+        assertTrue(vs.getUseContext().get(0).equalsDeep(pre));
+    }
+
+    @Test
+    void throwsWhenExtensionValueNotUsageContext() {
+        // arrange
+        IKnowledgeArtifactAdapter adapter = mock(IKnowledgeArtifactAdapter.class);
+        ValueSet vs = new ValueSet();
+        vs.setUrl("http://example.org/ValueSet/bad");
+        when(adapter.get()).thenReturn(vs);
+        when(adapter.getUrl()).thenReturn(vs.getUrl());
+        when(adapter.hasVersion()).thenReturn(false);
+
+        // extension whose value is NOT a UsageContext (e.g., CodeableConcept)
+        CodeableConcept cc = new CodeableConcept().setText("not-a-uc");
+        Extension ext = new Extension(CRMI_INTENDED_USAGE_CONTEXT_URL, (DataType) cc);
+
+        IDependencyInfo dep = mock(IDependencyInfo.class);
+        when(dep.getReference()).thenReturn(vs.getUrl());
+        when(dep.getExtension()).thenReturn(List.of((IBaseExtension<?, ?>) ext));
+
+        assertThrows(InvalidRequestException.class, () ->
+            org.opencds.cqf.fhir.cr.visitor.r5.PackageVisitor.applyManifestUsageContextsToValueSets(List.of(adapter), List.of(dep)));
+    }
+
+    @Test
+    void handlesVersionedCanonicalMatching() {
+        // arrange
+        IKnowledgeArtifactAdapter adapter = mock(IKnowledgeArtifactAdapter.class);
+        ValueSet vs = new ValueSet();
+        vs.setUrl("http://example.org/ValueSet/versioned");
+        vs.setVersion("1.2.3");
+        when(adapter.get()).thenReturn(vs);
+        when(adapter.getUrl()).thenReturn(vs.getUrl());
+        when(adapter.hasVersion()).thenReturn(true);
+        when(adapter.getVersion()).thenReturn("1.2.3");
+
+        UsageContext uc = new UsageContext();
+        uc.setCode(new Coding().setCode("priority"));
+        uc.setValue(new CodeableConcept().addCoding(new Coding().setCode("routine")));
+
+        Extension ext = new Extension(CRMI_INTENDED_USAGE_CONTEXT_URL, (DataType) uc);
+
+        IDependencyInfo dep = mock(IDependencyInfo.class);
+        // dependency reference must match url|version
+        when(dep.getReference()).thenReturn(vs.getUrl() + "|" + vs.getVersion());
+        when(dep.getExtension()).thenReturn(List.of((IBaseExtension<?, ?>) ext));
+
+        org.opencds.cqf.fhir.cr.visitor.r5.PackageVisitor.applyManifestUsageContextsToValueSets(List.of(adapter), List.of(dep));
+
+        assertEquals(1, vs.getUseContext().size());
+        assertTrue(vs.getUseContext().get(0).equalsDeep(uc));
+    }
+
+    @Test
+    void ignoresDependencyNotReferencingValueSet() {
+        // arrange
+        IKnowledgeArtifactAdapter adapter = mock(IKnowledgeArtifactAdapter.class);
+        ValueSet vs = new ValueSet();
+        vs.setUrl("http://example.org/ValueSet/ignore");
+        when(adapter.get()).thenReturn(vs);
+        when(adapter.getUrl()).thenReturn(vs.getUrl());
+        when(adapter.hasVersion()).thenReturn(false);
+
+        UsageContext uc = new UsageContext();
+        uc.setCode(new Coding().setCode("focus"));
+        uc.setValue(new CodeableConcept().addCoding(new Coding().setCode("X")));
+
+        Extension ext = new Extension(CRMI_INTENDED_USAGE_CONTEXT_URL, (DataType) uc);
+
+        IDependencyInfo dep = mock(IDependencyInfo.class);
+        // different reference purposely
+        when(dep.getReference()).thenReturn("http://other.example/ValueSet/other");
+        when(dep.getExtension()).thenReturn(List.of((IBaseExtension<?, ?>) ext));
+
+        org.opencds.cqf.fhir.cr.visitor.r5.PackageVisitor.applyManifestUsageContextsToValueSets(List.of(adapter), List.of(dep));
+
+        assertTrue(vs.getUseContext().isEmpty());
     }
 }

@@ -181,9 +181,7 @@ public class ItemProcessor {
                 results = new ArrayList<>();
             }
         } else {
-            results = item.getInitial().stream()
-                    .map(i -> request.resolvePath(i, "value", IBase.class))
-                    .toList();
+            results = item.getInitial().stream().map(IBase.class::cast).toList();
         }
         return results;
     }

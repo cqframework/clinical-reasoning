@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Questionnaire;
@@ -265,5 +266,32 @@ class ItemProcessorTests {
         var actual = itemProcessor.processContextItem(populateRequest, adapter);
         assertEquals(1, actual.size());
         assertTrue(actual.get(0).getAnswer().isEmpty());
+    }
+
+    @Test
+    void testGetInitialValueReturnsBooleanType() {
+        var questionnaire = new Questionnaire();
+        doReturn(FhirContext.forR4Cached()).when(repository).fhirContext();
+        var populateRequest = newPopulateRequestForVersion(FhirVersionEnum.R4, libraryEngine, questionnaire);
+        var nestedItem = new QuestionnaireItemComponent().setLinkId("1.1").setType(QuestionnaireItemType.BOOLEAN);
+        nestedItem.addInitial().setValue(new BooleanType(false));
+        nestedItem
+                .addExtension()
+                .setUrl("https://forms.smiledigitalhealth.com/docs/extensions/item-callback")
+                .setValue(new StringType("View supporting evidence"));
+        var questionnaireItem = new QuestionnaireItemComponent()
+                .setLinkId("1")
+                .setType(QuestionnaireItemType.GROUP)
+                .addItem(nestedItem);
+        var adapter = (IQuestionnaireItemComponentAdapter)
+                IAdapterFactory.createAdapterForBase(populateRequest.getFhirVersion(), questionnaireItem);
+        doReturn(null).when(expressionProcessor).getItemInitialExpression(eq(populateRequest), any());
+        var actual = itemProcessor.processItem(populateRequest, adapter);
+        assertNotNull(actual);
+        var nestedActual = (IQuestionnaireResponseItemComponentAdapter)
+                actual.get(0).getItem().get(0);
+        assertNotNull(nestedActual);
+        assertTrue(nestedActual.hasAnswer());
+        assertFalse(((BooleanType) nestedActual.getAnswer().get(0).getValue()).booleanValue());
     }
 }

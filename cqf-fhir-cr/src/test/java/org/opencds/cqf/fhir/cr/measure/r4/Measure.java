@@ -29,6 +29,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -1025,6 +1026,16 @@ public class Measure {
             assertTrue(value().getStratum().size() >= position && position > 0);
 
             return new SelectedStratum(value().getStratum().get(position - 1), this);
+        }
+
+        public SelectedStratum stratumByText(String stratumText) {
+            final Optional<StratifierGroupComponent> optMatchingStratum = value().getStratum().stream()
+                    .filter(stratum -> stratumText.equals(stratum.getValue().getText()))
+                    .findFirst();
+
+            assertTrue(optMatchingStratum.isPresent(), "Could not find stratum with text: %s".formatted(stratumText));
+
+            return new SelectedStratum(optMatchingStratum.get(), this);
         }
 
         public SelectedStratifier hasStratum(String textValue) {

@@ -15,7 +15,6 @@ import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -309,11 +308,7 @@ public class MeasureEvaluator {
                     subjectType, subjectId, groupDef.getSingle(MEASUREOBSERVATION), evaluationResult, expressionName);
             if (applyScoring) {
                 // only measureObservations that intersect with finalized measure-population results should be retained
-                pruneObservationResources(
-                        subjectId,
-                        measurePopulationObservation.getResourcesForSubject(subjectId),
-                        measurePopulation,
-                        measurePopulationObservation);
+                pruneObservationResources(subjectId, measurePopulation, measurePopulationObservation);
                 // what about subjects?
                 if (measurePopulation != null) {
                     pruneObservationSubjectResources(
@@ -375,20 +370,22 @@ public class MeasureEvaluator {
 
     protected void pruneObservationResources(
             String subjectId,
-            Collection<Object> resources,
-            PopulationDef measurePopulation,
-            PopulationDef measurePopulationObservation) {
-        for (Object resource : resources) {
-            if (resource instanceof Map<?, ?> map) {
-                for (Entry<?, ?> entry : map.entrySet()) {
-                    var measurePopResult = entry.getKey();
-                    if (measurePopulation != null) {
-                        final Set<Object> resourcesForSubject = measurePopulation.getResourcesForSubject(subjectId);
-                        if (!resourcesForSubject.contains(measurePopResult)) {
+            //        MeasurePopulationType.MEASUREPOPULATION
+            PopulationDef measurePopulationDef,
+            //        MeasurePopulationType.MEASUREOBSERVATION
+            PopulationDef measureObservationDef) {
+        for (Object populationResource : measureObservationDef.getResourcesForSubject(subjectId)) {
+            if (populationResource instanceof Map<?, ?> measureObservationResourceAsMap) {
+                for (Entry<?, ?> measureObservationResourceMapEntry : measureObservationResourceAsMap.entrySet()) {
+                    final Object measureObservationSubjectResourceMapKey = measureObservationResourceMapEntry.getKey();
+                    if (measurePopulationDef != null) {
+                        final Set<Object> measurePopulationResourcesForSubject =
+                                measurePopulationDef.getResourcesForSubject(subjectId);
+                        if (!measurePopulationResourcesForSubject.contains(measureObservationSubjectResourceMapKey)) {
                             // remove observation results not found in measure population
-                            measurePopulationObservation
+                            measureObservationDef
                                     .getResourcesForSubject(subjectId)
-                                    .remove(resource);
+                                    .remove(populationResource);
                         }
                     }
                 }

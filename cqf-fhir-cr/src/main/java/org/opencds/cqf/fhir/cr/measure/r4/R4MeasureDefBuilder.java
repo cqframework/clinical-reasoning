@@ -49,7 +49,6 @@ import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.SdeDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierComponentDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
-import org.opencds.cqf.fhir.cr.measure.common.StratifierUtils;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 
 public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
@@ -114,8 +113,9 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                 buildPopulationDefForDateOfCompliance(measure.getUrl(), group, populationsWithCriteriaReference);
 
         // Stratifiers
-        var stratifiers =
-                group.getStratifier().stream().map(this::buildStratifierDef).toList();
+        var stratifiers = group.getStratifier().stream()
+                .map(mgsc -> buildStratifierDef(measure.getUrl(), mgsc))
+                .toList();
 
         return new GroupDef(
                 group.getId(),
@@ -244,7 +244,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
     }
 
     @Nonnull
-    private StratifierDef buildStratifierDef(MeasureGroupStratifierComponent mgsc) {
+    private StratifierDef buildStratifierDef(String measureUrl, MeasureGroupStratifierComponent mgsc) {
         checkId(mgsc);
 
         // Components
@@ -269,7 +269,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                 mgsc.getId(),
                 conceptToConceptDef(mgsc.getCode()),
                 mgsc.getCriteria().getExpression(),
-                getStratifierType(mgsc),
+                getStratifierType(measureUrl, mgsc),
                 components);
     }
 
@@ -290,15 +290,104 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         return sdes;
     }
 
+    /*
+        Must be defined on the field "criteria", and cannot be defined under stratifier.component.
+    Criteria Stratifier must be of the same basis as group.populations to allow proper intersection of results
+    No Component criteria stratifier capability, this can be done with one expression, given there is no combination of values visible on final reports
+    "stratifier": [
+            {
+              "id": "stratifier-criteria-based",
+              "criteria": {
+                "language": "text/cql.identifier",
+                "expression": "Age"
+              }
+            }
+          ]
+        }]
+         */
+
+    /*
+        value Stratifier Definition
+    Must be defined on Stratifier.component
+    Value based stratifiers must define at minimum 1 criteria, but can be up to N different criteria values
+    "stratifier": [
+            {
+              "id": "stratifier-1",
+              "code" : {
+                "text": "Gender and Age"
+              },
+              "component": [
+                {
+                  "id": "stratifier-comp-1",
+                  "code" : {
+                    "text": "Gender"
+                  },
+                  "criteria": {
+                    "language": "text/cql.identifier",
+                    "expression": "Gender Stratification"
+                  }
+                },
+                {
+                  "id": "stratifier-comp-2",
+                  "code" : {
+                    "text": "Age"
+                  },
+                  "criteria": {
+                    "language": "text/cql.identifier",
+                    "expression": "Age"
+                  }
+                }
+              ]
+            }
+          ]
+        }]
+         */
+
+    /*
+    Acceptance Criteria
+        * value based stratifiers defined in Stratifier.criteria will throw error for invalid definition >>>>>>>   what does that mean????
+        * criteria based stratifiers defined in Stratifier.component will throw error for invalid definition   >>>>> what does that mean????
+        * previous ext used to define 'criteria' stratifier will be deprecated >>>> what do we mean by deprecated?  can't we just delete this altogether?  if not, how to enforce the deprecation?
+        * Any current tests or resources that define 'value' based stratifiers outside stratifier.component need to be updated
+     */
+
+    // LUKETODO: CRITERIA requirements
+    // 1. Check if stratifier criteria exists
+    // 2. Check if the expression conforms to the group population basis:  (how can we do this upfront?)
+    // 3. There are NO COMPONENTS
+
+    // LUKETODO: VALUE requirements
+    // 1. Check if there's at least one component
+    // 2. Check that there's at least one criteria, but there can be multiple
+    // LUKETODO:  try to make this as FHIR version-agnostic as possible
+
     private static MeasureStratifierType getStratifierType(
-            MeasureGroupStratifierComponent measureGroupStratifierComponent) {
+            String measureUrl, MeasureGroupStratifierComponent measureGroupStratifierComponent) {
         if (measureGroupStratifierComponent == null) {
             return MeasureStratifierType.VALUE;
         }
 
-        final List<Extension> stratifierExtensions = measureGroupStratifierComponent.getExtension();
+        final boolean hasCriteria = measureGroupStratifierComponent.hasCriteria();
 
-        return StratifierUtils.getStratifierType(stratifierExtensions);
+        final boolean hasAnyComponentCriteria = measureGroupStratifierComponent.getComponent().stream()
+                .anyMatch(MeasureGroupStratifierComponentComponent::hasCriteria);
+
+        if (hasCriteria && hasAnyComponentCriteria) {
+            throw new InvalidRequestException(
+                    "Stratifier Cannot have both criteria: %s and any component criteria: %s for measure: %s"
+                            .formatted(hasCriteria, hasAnyComponentCriteria, measureUrl));
+        }
+
+        if (!hasCriteria && !hasAnyComponentCriteria) {
+            throw new InvalidRequestException(
+                    "Stratifier cannot have neither criteria nor component for measure: %s".formatted(measureUrl));
+        }
+
+        if (hasCriteria) {
+            return MeasureStratifierType.CRITERIA;
+        }
+
+        return MeasureStratifierType.VALUE;
     }
 
     private static void triggerFirstPassValidation(Measure measure) {

@@ -1137,6 +1137,13 @@ public class Measure {
         public SelectedStratumPopulation population(
                 Selector<MeasureReport.StratifierGroupPopulationComponent, MeasureReport.StratifierGroupComponent>
                         populationSelector) {
+            if (populationSelector == null) {
+                return null;
+            }
+            if (value() == null) {
+                return null;
+            }
+
             var p = populationSelector.select(value());
             if (p == null) {
                 return null;

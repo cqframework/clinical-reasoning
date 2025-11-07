@@ -74,11 +74,22 @@
       ],
       "stratifier": [
         {
-          "id": "stratifier-2",
-          "criteria": {
-            "language": "text/cql.identifier",
-            "expression": "Encounter Status"
-          }
+          "id": "stratifier-1",
+          "code" : {
+            "text": "Encounter Status"
+          },
+          "component": [
+            {
+              "id": "stratifier-1-comp-1",
+              "code" : {
+                "text": "Encounter Status"
+              },
+              "criteria": {
+                "language": "text/cql.identifier",
+                "expression": "Encounter Status"
+              }
+            }
+          ]
         }
       ]
     }],

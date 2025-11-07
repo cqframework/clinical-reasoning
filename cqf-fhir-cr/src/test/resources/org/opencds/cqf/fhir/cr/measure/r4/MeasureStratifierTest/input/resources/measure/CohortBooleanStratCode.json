@@ -44,31 +44,55 @@
         {
           "id": "stratifier-1",
           "code": {
-            "coding": [ {
-              "system": "http://loinc.org",
-              "code": "72143-1",
-              "display": "Sex [HL7.v3]"
-            } ],
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "72143-1",
+                "display": "Sex [HL7.v3]"
+              }
+            ],
             "text": "stratifier-sex"
           },
-          "criteria": {
-            "language": "text/cql.identifier",
-            "expression": "Gender Stratification"
-          }
+          "component": [
+            {
+              "id": "stratifier-1-comp-1",
+              "code": {
+                "coding": [
+                  {
+                    "system": "http://loinc.org",
+                    "code": "72143-1",
+                    "display": "Sex [HL7.v3]"
+                  }
+                ],
+                "text": "stratifier-sex"
+              },
+              "criteria": {
+                "language": "text/cql.identifier",
+                "expression": "Gender Stratification"
+              }
+            }
+          ]
         }
       ]
-    }],
-  "supplementalData": [ {
-    "id": "sde-patient-sex",
-    "usage": [ {
-      "coding": [ {
-        "system": "http://terminology.hl7.org/CodeSystem/measure-data-usage",
-        "code": "supplemental-data"
-      } ]
-    } ],
-    "criteria": {
-      "language": "text/cql.identifier",
-      "expression": "SDE Sex"
     }
-  } ]
+  ],
+  "supplementalData": [
+    {
+      "id": "sde-patient-sex",
+      "usage": [
+        {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/measure-data-usage",
+              "code": "supplemental-data"
+            }
+          ]
+        }
+      ],
+      "criteria": {
+        "language": "text/cql.identifier",
+        "expression": "SDE Sex"
+      }
+    }
+  ]
 }

@@ -304,8 +304,9 @@ public class ContinuousVariableObservationHandler {
 
         final EvaluationResult evaluationResultToReturn = new EvaluationResult();
 
-        evaluationResultToReturn.getExpressionResults().put(
-                expressionName, new ExpressionResult(functionResults, evaluatedResources));
+        evaluationResultToReturn
+                .getExpressionResults()
+                .put(expressionName, new ExpressionResult(functionResults, evaluatedResources));
 
         return evaluationResultToReturn;
     }

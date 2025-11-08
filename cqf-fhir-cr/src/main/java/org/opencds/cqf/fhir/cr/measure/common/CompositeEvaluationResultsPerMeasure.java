@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 
 /**
@@ -21,17 +20,17 @@ import org.opencds.cqf.cql.engine.execution.EvaluationResult;
  */
 public class CompositeEvaluationResultsPerMeasure {
     // The same measure may have successful results AND errors, so account for both
-    private final Map<IIdType, Map<String, EvaluationResult>> resultsPerMeasure;
+    private final Map<MeasureDef, Map<String, EvaluationResult>> resultsPerMeasure;
     // We may get several errors for a given measure
-    private final Map<IIdType, List<String>> errorsPerMeasure;
+    private final Map<MeasureDef, List<String>> errorsPerMeasure;
 
     private CompositeEvaluationResultsPerMeasure(Builder builder) {
 
-        var resultsBuilder = ImmutableMap.<IIdType, Map<String, EvaluationResult>>builder();
+        var resultsBuilder = ImmutableMap.<MeasureDef, Map<String, EvaluationResult>>builder();
         builder.resultsPerMeasure.forEach((key, value) -> resultsBuilder.put(key, ImmutableMap.copyOf(value)));
         resultsPerMeasure = resultsBuilder.build();
 
-        var errorsBuilder = ImmutableMap.<IIdType, List<String>>builder();
+        var errorsBuilder = ImmutableMap.<MeasureDef, List<String>>builder();
         builder.errorsPerMeasure.forEach((key, value) -> errorsBuilder.put(key, List.copyOf(value)));
         errorsPerMeasure = errorsBuilder.build();
     }
@@ -39,22 +38,17 @@ public class CompositeEvaluationResultsPerMeasure {
     /**
      * Retrieves results and populates errors for a given measure.
      * This method uses direct map lookups for efficient data retrieval.
-     * measureDef will occasionally be prepended with the version, which means we need to parse it into an IIdType which
-     * is too much work, so pass in the measureId directly
      *
-     * @param measureId the ID of the measure to process
      * @param measureDef the MeasureDef to populate with errors
      *
      * @return a map of evaluation results per subject, or an empty map if none exist
      */
-    public Map<String, EvaluationResult> processMeasureForSuccessOrFailure(IIdType measureId, MeasureDef measureDef) {
-        var unqualifiedMeasureId = measureId.toUnqualifiedVersionless();
-
-        errorsPerMeasure.getOrDefault(unqualifiedMeasureId, List.of()).forEach(measureDef::addError);
+    public Map<String, EvaluationResult> processMeasureForSuccessOrFailure(MeasureDef measureDef) {
+        errorsPerMeasure.getOrDefault(measureDef, List.of()).forEach(measureDef::addError);
 
         // We are explicitly maintaining the logic of accepting the lack of any sort of results,
         // either errors or successes, and returning an empty map.
-        return resultsPerMeasure.getOrDefault(unqualifiedMeasureId, Map.of());
+        return resultsPerMeasure.getOrDefault(measureDef, Map.of());
     }
 
     /**
@@ -63,7 +57,7 @@ public class CompositeEvaluationResultsPerMeasure {
      * and associated EvaluationResult produced from CQL expression evaluation
      * @return {@code Map<IIdType, Map<String, EvaluationResult>>}
      */
-    public Map<IIdType, Map<String, EvaluationResult>> getResultsPerMeasure() {
+    public Map<MeasureDef, Map<String, EvaluationResult>> getResultsPerMeasure() {
         return this.resultsPerMeasure;
     }
 
@@ -72,7 +66,7 @@ public class CompositeEvaluationResultsPerMeasure {
      * When an error is produced while evaluating, we capture the errors generated in this object, which can be rendered per Measure evaluated.
      * @return {@code Map<IIdType, List<String>>}
      */
-    public Map<IIdType, List<String>> getErrorsPerMeasure() {
+    public Map<MeasureDef, List<String>> getErrorsPerMeasure() {
         return this.errorsPerMeasure;
     }
 
@@ -81,50 +75,73 @@ public class CompositeEvaluationResultsPerMeasure {
     }
 
     public static class Builder {
-        private final Map<IIdType, Map<String, EvaluationResult>> resultsPerMeasure = new HashMap<>();
-        private final Map<IIdType, List<String>> errorsPerMeasure = new HashMap<>();
+        private final Map<MeasureDef, Map<String, EvaluationResult>> resultsPerMeasure = new HashMap<>();
+        private final Map<MeasureDef, List<String>> errorsPerMeasure = new HashMap<>();
 
         public CompositeEvaluationResultsPerMeasure build() {
             return new CompositeEvaluationResultsPerMeasure(this);
         }
 
-        public void addResults(List<IIdType> measureIds, String subjectId, EvaluationResult evaluationResult) {
-            for (IIdType measureId : measureIds) {
-                addResult(measureId, subjectId, evaluationResult);
+        public void addResults(
+                List<MeasureDef> measureDefs,
+                String subjectId,
+                EvaluationResult evaluationResult,
+                List<EvaluationResult> measureObservationResults) {
+            for (MeasureDef measureDef : measureDefs) {
+                addResult(measureDef, subjectId, evaluationResult, measureObservationResults);
             }
         }
 
-        public void addResult(IIdType measureId, String subjectId, EvaluationResult evaluationResult) {
+        public void addResult(
+                MeasureDef measureDef,
+                String subjectId,
+                EvaluationResult evaluationResult,
+                List<EvaluationResult> measureObservationResults) {
+
             // if we have no results, we don't need to add anything
             if (evaluationResult == null
                     || evaluationResult.getExpressionResults().isEmpty()) {
                 return;
             }
 
-            var resultPerMeasure =
-                    resultsPerMeasure.computeIfAbsent(measureId.toUnqualifiedVersionless(), k -> new HashMap<>());
+            var evaluationResultToUse = mergeEvaluationResults(evaluationResult, measureObservationResults);
 
-            resultPerMeasure.put(subjectId, evaluationResult);
+            var resultPerMeasure = resultsPerMeasure.computeIfAbsent(measureDef, k -> new HashMap<>());
+
+            resultPerMeasure.put(subjectId, evaluationResultToUse);
         }
 
-        public void addErrors(List<? extends IIdType> measureIds, String error) {
+        public void addErrors(List<MeasureDef> measureDefs, String error) {
             if (error == null || error.isEmpty()) {
                 return;
             }
 
-            for (IIdType measureId : measureIds) {
-                addError(measureId, error);
+            for (MeasureDef measureDef : measureDefs) {
+                addError(measureDef, error);
             }
         }
 
-        public void addError(IIdType measureId, String error) {
+        public void addError(MeasureDef measureDef, String error) {
             if (error == null || error.isBlank()) {
                 return;
             }
 
-            errorsPerMeasure
-                    .computeIfAbsent(measureId.toUnqualifiedVersionless(), k -> new ArrayList<>())
-                    .add(error);
+            errorsPerMeasure.computeIfAbsent(measureDef, k -> new ArrayList<>()).add(error);
+        }
+
+        private EvaluationResult mergeEvaluationResults(
+                EvaluationResult origEvaluationResult, List<EvaluationResult> measureObservationResults) {
+            final EvaluationResult evaluationResult = new EvaluationResult();
+
+            var copyOfExpressionResults = new HashMap<>(origEvaluationResult.getExpressionResults());
+
+            for (EvaluationResult measureObservationResult : measureObservationResults) {
+                copyOfExpressionResults.putAll(measureObservationResult.getExpressionResults());
+            }
+
+            evaluationResult.getExpressionResults().putAll(copyOfExpressionResults);
+
+            return evaluationResult;
         }
     }
 }

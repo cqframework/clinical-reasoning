@@ -4,7 +4,7 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-public interface IDeleteProcessor {
+public interface IDeleteProcessor extends IOperationProcessor {
 
     IBaseBundle deleteResource(IBaseResource resource, IBaseParameters parameters);
 }

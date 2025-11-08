@@ -14,7 +14,7 @@ import org.opencds.cqf.fhir.cr.common.PackageProcessor;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
-@SuppressWarnings("squid:S2699")
+@SuppressWarnings({"squid:S2699", "UnstableApiUsage"})
 class ValueSetProcessorTests {
     private final FhirContext fhirContextDstu3 = FhirContext.forDstu3Cached();
     private final FhirContext fhirContextR4 = FhirContext.forR4Cached();

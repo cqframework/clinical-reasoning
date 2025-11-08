@@ -20,6 +20,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.repository.IRepository;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import jakarta.annotation.Nullable;
@@ -132,8 +133,8 @@ class PackageVisitorTests {
 
     @ParameterizedTest
     @CsvSource({
-        ",some-api-key,Cannot expand ValueSet without VSAC Username.",
-        "someUsername,,Cannot expand ValueSet without VSAC API Key.",
+        ",some-api-key,Found a vsacUsername extension with no value",
+        "someUsername,,Found a apiKey extension with no value",
     })
     void packageOperation_should_fail(@Nullable String username, String apiKey, String expectedError) {
         Bundle loadedBundle = (Bundle) jsonParser.parseResource(
@@ -179,6 +180,75 @@ class PackageVisitorTests {
         libraryAdapter.accept(packageVisitor, params);
 
         assertTrue(libraryAdapter.hasExtension(ILibraryAdapter.CQF_MESSAGES_EXT_URL));
+    }
+
+    @Test
+    void packageOperation_should_fail_paging_with_transaction_bundle_type_request() {
+        String expectedError = "It is invalid to use paging when requesting a bundle of type 'transaction'";
+        Bundle loadedBundle = (Bundle) jsonParser.parseResource(
+                PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active-intensional-vs.json"));
+        repo.transaction(loadedBundle);
+        PackageVisitor packageVisitor = new PackageVisitor(repo);
+        Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
+                .copy();
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        Parameters params = parameters(part("bundleType", "transaction"));
+        params.addParameter("count", 1);
+
+        InvalidRequestException exception = null;
+        try {
+            libraryAdapter.accept(packageVisitor, params);
+        } catch (InvalidRequestException e) {
+            exception = e;
+        }
+        assertNotNull(exception);
+        assertEquals(exception.getMessage(), expectedError);
+    }
+
+    @Test
+    void packageOperation_should_fail_negative_count_parameter() {
+        String expectedError = "'count' must be non-negative";
+        Bundle loadedBundle = (Bundle) jsonParser.parseResource(
+                PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active-intensional-vs.json"));
+        repo.transaction(loadedBundle);
+        PackageVisitor packageVisitor = new PackageVisitor(repo);
+        Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
+                .copy();
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        Parameters params = parameters(part("bundleType", "transaction"));
+        params.addParameter("count", -1);
+
+        InvalidRequestException exception = null;
+        try {
+            libraryAdapter.accept(packageVisitor, params);
+        } catch (InvalidRequestException e) {
+            exception = e;
+        }
+        assertNotNull(exception);
+        assertEquals(exception.getMessage(), expectedError);
+    }
+
+    @Test
+    void packageOperation_should_fail_negative_offset_parameter() {
+        String expectedError = "'offset' must be non-negative";
+        Bundle loadedBundle = (Bundle) jsonParser.parseResource(
+                PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active-intensional-vs.json"));
+        repo.transaction(loadedBundle);
+        PackageVisitor packageVisitor = new PackageVisitor(repo);
+        Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
+                .copy();
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        Parameters params = parameters(part("bundleType", "transaction"));
+        params.addParameter("offset", -1);
+
+        InvalidRequestException exception = null;
+        try {
+            libraryAdapter.accept(packageVisitor, params);
+        } catch (InvalidRequestException e) {
+            exception = e;
+        }
+        assertNotNull(exception);
+        assertEquals(exception.getMessage(), expectedError);
     }
 
     @Test
@@ -298,8 +368,8 @@ class PackageVisitorTests {
         Parameters offset4Params = parameters(part("offset", new IntegerType(4)));
         Bundle offset4Bundle = (Bundle) libraryAdapter.accept(packageVisitor, offset4Params);
         assertEquals((countZeroBundle.getTotal() - 4), offset4Bundle.getEntry().size());
-        assertSame(BundleType.COLLECTION, offset4Bundle.getType());
-        assertFalse(offset4Bundle.hasTotal());
+        assertSame(BundleType.SEARCHSET, offset4Bundle.getType());
+        assertTrue(offset4Bundle.hasTotal());
         Parameters offsetMaxParams = parameters(part("offset", new IntegerType(countZeroBundle.getTotal())));
         Bundle offsetMaxBundle = (Bundle) libraryAdapter.accept(packageVisitor, offsetMaxParams);
         assertEquals(0, offsetMaxBundle.getEntry().size());
@@ -315,36 +385,32 @@ class PackageVisitorTests {
         Bundle bundle = (Bundle) jsonParser.parseResource(
                 PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
         repo.transaction(bundle);
-        PackageVisitor packageVisitor = new PackageVisitor(repo);
+        var packageVisitor = new PackageVisitor(repo);
         Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
         ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+
         Parameters countZeroParams = parameters(part("count", new IntegerType(0)));
         Bundle countZeroBundle = (Bundle) libraryAdapter.accept(packageVisitor, countZeroParams);
         assertSame(BundleType.SEARCHSET, countZeroBundle.getType());
+
         Parameters countSevenParams = parameters(part("count", new IntegerType(7)));
         Bundle countSevenBundle = (Bundle) libraryAdapter.accept(packageVisitor, countSevenParams);
-        assertSame(BundleType.TRANSACTION, countSevenBundle.getType());
-        Parameters countFourParams = parameters(part("count", new IntegerType(4)));
-        Bundle countFourBundle = (Bundle) libraryAdapter.accept(packageVisitor, countFourParams);
-        assertSame(BundleType.COLLECTION, countFourBundle.getType());
-        // these assertions test for Bundle base profile conformance when type = collection
-        assertFalse(countFourBundle.getEntry().stream().anyMatch(entry -> entry.hasRequest()));
-        assertFalse(countFourBundle.hasTotal());
-        Parameters offsetOneParams = parameters(part("offset", new IntegerType(1)));
-        Bundle offsetOneBundle = (Bundle) libraryAdapter.accept(packageVisitor, offsetOneParams);
-        assertSame(BundleType.COLLECTION, offsetOneBundle.getType());
-        // these assertions test for Bundle base profile conformance when type = collection
-        assertFalse(offsetOneBundle.getEntry().stream().anyMatch(entry -> entry.hasRequest()));
-        assertFalse(offsetOneBundle.hasTotal());
+        assertSame(BundleType.SEARCHSET, countSevenBundle.getType());
 
-        Parameters countOneOffsetOneParams =
-                parameters(part("count", new IntegerType(1)), part("offset", new IntegerType(1)));
-        Bundle countOneOffsetOneBundle = (Bundle) libraryAdapter.accept(packageVisitor, countOneOffsetOneParams);
-        assertSame(BundleType.COLLECTION, countOneOffsetOneBundle.getType());
+        Parameters collectionBundleTypeParams = parameters(part("bundleType", "collection"));
+        Bundle collectionBundleType = (Bundle) libraryAdapter.accept(packageVisitor, collectionBundleTypeParams);
+        assertSame(BundleType.COLLECTION, collectionBundleType.getType());
         // these assertions test for Bundle base profile conformance when type = collection
-        assertFalse(countOneOffsetOneBundle.getEntry().stream().anyMatch(entry -> entry.hasRequest()));
-        assertFalse(countOneOffsetOneBundle.hasTotal());
+        assertFalse(collectionBundleType.getEntry().stream().anyMatch(entry -> entry.hasRequest()));
+        assertFalse(collectionBundleType.hasTotal());
+
+        Parameters transactionBundleTypeParams = parameters(part("bundleType", "transaction"));
+        Bundle transactionBundle = (Bundle) libraryAdapter.accept(packageVisitor, transactionBundleTypeParams);
+        assertSame(BundleType.TRANSACTION, transactionBundle.getType());
+        // these assertions test for Bundle base profile conformance when type = collection
+        assertTrue(transactionBundle.getEntry().stream().anyMatch(entry -> entry.hasRequest()));
+        assertFalse(transactionBundle.hasTotal());
     }
 
     @Test

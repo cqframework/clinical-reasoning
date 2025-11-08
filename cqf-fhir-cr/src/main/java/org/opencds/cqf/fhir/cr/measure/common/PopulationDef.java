@@ -1,7 +1,11 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
+import jakarta.annotation.Nullable;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 public class PopulationDef {
@@ -11,16 +15,27 @@ public class PopulationDef {
     private final ConceptDef code;
     private final MeasurePopulationType measurePopulationType;
 
+    @Nullable
+    private final String criteriaReference;
+
     protected Set<Object> evaluatedResources;
-    protected Set<Object> resources;
-    protected Set<String> subjects;
     protected Map<String, Set<Object>> subjectResources = new HashMap<>();
 
     public PopulationDef(String id, ConceptDef code, MeasurePopulationType measurePopulationType, String expression) {
+        this(id, code, measurePopulationType, expression, null);
+    }
+
+    public PopulationDef(
+            String id,
+            ConceptDef code,
+            MeasurePopulationType measurePopulationType,
+            String expression,
+            @Nullable String criteriaReference) {
         this.id = id;
         this.code = code;
         this.measurePopulationType = measurePopulationType;
         this.expression = expression;
+        this.criteriaReference = criteriaReference;
     }
 
     public MeasurePopulationType type() {
@@ -35,44 +50,58 @@ public class PopulationDef {
         return this.code;
     }
 
-    public void addEvaluatedResource(Object resource) {
-        this.getEvaluatedResources().add(resource);
-    }
-
     public Set<Object> getEvaluatedResources() {
         if (this.evaluatedResources == null) {
-            this.evaluatedResources = new HashSetForFhirResources<>();
+            this.evaluatedResources = new HashSetForFhirResourcesAndCqlTypes<>();
         }
 
         return this.evaluatedResources;
     }
 
-    public void addSubject(String subject) {
-        this.getSubjects().add(subject);
-    }
-
-    public void removeSubject(String subject) {
-        this.getSubjects().remove(subject);
-    }
-
     public Set<String> getSubjects() {
-        if (this.subjects == null) {
-            this.subjects = new HashSetForFhirResources<>();
-        }
-
-        return this.subjects;
+        return this.getSubjectResources().keySet();
     }
 
-    public void addResource(Object resource) {
-        this.getResources().add(resource);
+    public void retainAllResources(String subjectId, PopulationDef otherPopulationDef) {
+        getResourcesForSubject(subjectId).retainAll(otherPopulationDef.getResourcesForSubject(subjectId));
     }
 
-    public Set<Object> getResources() {
-        if (this.resources == null) {
-            this.resources = new HashSetForFhirResources<>();
-        }
+    public void retainAllSubjects(PopulationDef otherPopulationDef) {
+        this.getSubjects().retainAll(otherPopulationDef.getSubjects());
+    }
 
-        return this.resources;
+    public void removeAllResources(String subjectId, PopulationDef otherPopulationDef) {
+        getResourcesForSubject(subjectId).removeAll(otherPopulationDef.getResourcesForSubject(subjectId));
+    }
+
+    public void removeAllSubjects(PopulationDef otherPopulationDef) {
+        this.getSubjects().removeAll(otherPopulationDef.getSubjects());
+    }
+
+    /**
+     * Used if we want to count all resources that may be duplicated across subjects, for example,
+     * for Date values that will be identical across subjects, but we want to count the duplicates.
+     * <p/>
+     * example:
+     * population:
+     * <Subject1,<Organization/1>>
+     * <Subject2,<Organization/1>>
+     * Population Count for Population Basis Organization = 2, even though the resulting resource object is the same
+     * <Subject1,<1/1/2024>>
+     * <Subject2,<1/1/2024>>
+     * Population Count for Population Basis date = 2, even though the resulting resource object is the same
+     *
+     */
+    public List<Object> getAllSubjectResources() {
+        return subjectResources.values().stream()
+                .flatMap(Collection::stream)
+                .filter(Objects::nonNull)
+                .toList();
+    }
+
+    @Nullable
+    public String getCriteriaReference() {
+        return this.criteriaReference;
     }
 
     public String expression() {
@@ -84,50 +113,14 @@ public class PopulationDef {
         return subjectResources;
     }
 
+    public Set<Object> getResourcesForSubject(String subjectId) {
+        return subjectResources.getOrDefault(subjectId, new HashSetForFhirResourcesAndCqlTypes<>());
+    }
+
     // Add an element to Set<Object> under a key (Creates a new set if key is missing)
     public void addResource(String key, Object value) {
         subjectResources
-                .computeIfAbsent(key, k -> new HashSetForFhirResources<>())
+                .computeIfAbsent(key, k -> new HashSetForFhirResourcesAndCqlTypes<>())
                 .add(value);
-    }
-
-    public void removeOverlaps(Map<String, Set<Object>> overlap) {
-        var iterator = subjectResources.entrySet().iterator();
-        while (iterator.hasNext()) {
-            Map.Entry<String, Set<Object>> entry = iterator.next();
-            String key = entry.getKey();
-            Set<Object> valuesInA = entry.getValue();
-
-            if (overlap.containsKey(key)) {
-                valuesInA.removeAll(overlap.get(key)); // Remove overlapping elements
-            }
-
-            if (valuesInA.isEmpty()) {
-                iterator.remove(); // Safely remove key if Set is empty
-            }
-        }
-    }
-
-    public void retainOverlaps(Map<String, Set<Object>> filterMap) {
-        var iterator = subjectResources.entrySet().iterator();
-        while (iterator.hasNext()) {
-            Map.Entry<String, Set<Object>> entry = iterator.next();
-            String key = entry.getKey();
-            Set<Object> values = entry.getValue();
-
-            if (filterMap.containsKey(key)) {
-                // Retain only values also present in filterMap
-                values.retainAll(filterMap.get(key));
-            } else {
-                // If the key doesn't exist in filterMap, remove the entire entry
-                iterator.remove();
-                continue;
-            }
-
-            // If no values remain, remove the key
-            if (values.isEmpty()) {
-                iterator.remove();
-            }
-        }
     }
 }

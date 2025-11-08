@@ -22,6 +22,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.stubbing.Answer;
+import org.opencds.cqf.fhir.cr.measure.common.HashSetForFhirResourcesAndCqlTypes;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.TestDataGenerator;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
@@ -30,19 +31,19 @@ import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
  * database queries, and returning new instances of resources each time, rather than the same
  * instance in memory. * It effectively copies tests that were failing when swapping the behaviour,
  * and running them under these conditions.  In other words, these tests prove the changes to use
- * {@link org.opencds.cqf.fhir.cr.measure.common.HashSetForFhirResources} actually work.
+ * {@link HashSetForFhirResourcesAndCqlTypes} actually work.
  */
 @SuppressWarnings({"java:S2699"})
 class MeasureEvaluationApplyScoringTests {
 
     // These are "IG"'s used in other tests:
-    private static final String IG_NAME_SINGLE_MEASURE = "MeasureTest";
-    private static final String IG_NAME_MULTI_MEASURE = "MinimalMeasureEvaluation";
+    private static final String IG_NAME_MEASURE_TEST = "MeasureTest";
+    private static final String IG_NAME_MINIMAL_MEASURE_EVALUATION = "MinimalMeasureEvaluation";
 
-    private static final Measure.Given GIVEN_1 = getGivenWithMockedRepositorySingleMeasure();
-    private static final TestDataGenerator testDataGenerator = new TestDataGenerator(GIVEN_1.getRepository());
+    private static final Measure.Given GIVEN_SINGLE = getGivenWithMockedRepositorySingleMeasure();
+    private static final TestDataGenerator testDataGenerator = new TestDataGenerator(GIVEN_SINGLE.getRepository());
 
-    private static final MultiMeasure.Given GIVEN_2 = getGivenWithMockedRepositoryMultiMeasure();
+    private static final MultiMeasure.Given GIVEN_MULTI = getGivenWithMockedRepositoryMinimalMeasure();
 
     @BeforeAll
     static void init() {
@@ -55,7 +56,8 @@ class MeasureEvaluationApplyScoringTests {
     @Test
     void proportionResourceWithReportTypeParameterPatientGroup() {
         // Patients in Group
-        GIVEN_1.when()
+        GIVEN_SINGLE
+                .when()
                 .measureId("ProportionResourceAllPopulations")
                 .reportType("population")
                 .subject("Group/group-patients-1")
@@ -94,7 +96,8 @@ class MeasureEvaluationApplyScoringTests {
     @Test
     void proportionResourceWithReportTypeParameterPractitionerGroup() {
         // Patients with generalPractitioner.reference matching member of group
-        GIVEN_1.when()
+        GIVEN_SINGLE
+                .when()
                 .measureId("ProportionResourceAllPopulations")
                 .reportType("population")
                 .subject("Group/group-practitioners-1")
@@ -133,7 +136,8 @@ class MeasureEvaluationApplyScoringTests {
     @Test
     void proportionResourceWithReportTypeParameterPractitioner() {
         // Patients with generalPractitioner.reference matching member of group
-        GIVEN_1.when()
+        GIVEN_SINGLE
+                .when()
                 .measureId("ProportionResourceAllPopulations")
                 .reportType("population")
                 .subject("Practitioner/practitioner-1")
@@ -172,7 +176,8 @@ class MeasureEvaluationApplyScoringTests {
     @Test
     void proportionResourceWithNoReportType() {
         // this should default to 'Summary' for empty subject
-        GIVEN_1.when()
+        GIVEN_SINGLE
+                .when()
                 .measureId("ProportionResourceAllPopulations")
                 .evaluate()
                 .then()
@@ -209,7 +214,8 @@ class MeasureEvaluationApplyScoringTests {
     @Test
     void proportionResourceWithReportTypeParameterEmptySubject() {
         // All subjects
-        GIVEN_1.when()
+        GIVEN_SINGLE
+                .when()
                 .measureId("ProportionResourceAllPopulations")
                 .reportType("population")
                 .evaluate()
@@ -246,7 +252,8 @@ class MeasureEvaluationApplyScoringTests {
 
     @Test
     void MultiMeasure_EightMeasures_AllSubjects_MeasureUrl() {
-        var when = GIVEN_2.when()
+        var when = GIVEN_MULTI
+                .when()
                 .measureUrl("http://example.com/Measure/MinimalProportionNoBasisSingleGroup")
                 .measureUrl("http://example.com/Measure/MinimalProportionBooleanBasisSingleGroup")
                 .measureUrl("http://example.com/Measure/MinimalRatioBooleanBasisSingleGroup")
@@ -382,9 +389,29 @@ class MeasureEvaluationApplyScoringTests {
                 .hasCount(10);
     }
 
+    // This test is for a Measure that references CQL with an invalid "MeasureObservation" function that returns an
+    // Encounter instead of String, Integer or Double
+    @Test
+    void ContinuousVariableResourceMeasureObservationFunctionReturnsEncounterINVALID() {
+        GIVEN_MULTI
+                .when()
+                .measureId("MinimalContinuousVariableResourceBasisSingleGroupINVALID")
+                .periodStart("2024-01-01")
+                .periodEnd("2024-12-31")
+                .reportType("population")
+                .evaluate()
+                .then()
+                .hasMeasureReportCount(1)
+                .getFirstMeasureReport()
+                .hasContainedOperationOutcome()
+                .hasContainedOperationOutcomeMsg(
+                        "continuous variable observation CQL \"MeasureObservation\" function result must be of type String, Integer or Double but was: Encounter");
+    }
+
     @Test
     void MultiMeasure_EightMeasures_AllSubjects_MeasureId() {
-        var when = GIVEN_2.when()
+        var when = GIVEN_MULTI
+                .when()
                 .measureId("MinimalProportionNoBasisSingleGroup")
                 .measureId("MinimalProportionBooleanBasisSingleGroup")
                 .measureId("MinimalRatioBooleanBasisSingleGroup")
@@ -524,7 +551,7 @@ class MeasureEvaluationApplyScoringTests {
 
     // Use this if you want database-like behaviour of retrieving different objects per query
     private static Measure.Given getGivenWithMockedRepositorySingleMeasure() {
-        var origGiven = Measure.given().repositoryFor(IG_NAME_SINGLE_MEASURE);
+        var origGiven = Measure.given().repositoryFor(IG_NAME_MEASURE_TEST);
 
         var spiedRepository = spy(origGiven.getRepository());
 
@@ -534,8 +561,8 @@ class MeasureEvaluationApplyScoringTests {
     }
 
     // Use this if you want database-like behaviour of retrieving different objects per query
-    private static MultiMeasure.Given getGivenWithMockedRepositoryMultiMeasure() {
-        var origGiven = MultiMeasure.given().repositoryFor(IG_NAME_MULTI_MEASURE);
+    private static MultiMeasure.Given getGivenWithMockedRepositoryMinimalMeasure() {
+        var origGiven = MultiMeasure.given().repositoryFor(IG_NAME_MINIMAL_MEASURE_EVALUATION);
 
         var spiedRepository = spy(origGiven.getRepository());
 

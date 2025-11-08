@@ -26,6 +26,7 @@ import org.hl7.fhir.r4.model.Measure.MeasureSupplementalDataComponent;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.cql.engine.runtime.Date;
 import org.opencds.cqf.cql.engine.runtime.Interval;
@@ -215,7 +216,7 @@ class R4MeasureReportBuilderTest {
             boolean isKeyResource,
             Collection<Object> evaluatedResources) {
         return new MeasureDef(
-                id,
+                new IdType(ResourceType.Measure.name(), id),
                 url,
                 null,
                 IntStream.range(0, numGroups)
@@ -252,7 +253,8 @@ class R4MeasureReportBuilderTest {
                 MeasureScoring.PROPORTION,
                 false,
                 null,
-                new CodeDef(MeasureConstants.POPULATION_BASIS_URL, "boolean"));
+                new CodeDef(MeasureConstants.POPULATION_BASIS_URL, "boolean"),
+                null);
     }
 
     private static PopulationDef buildPopulationRef(Collection<Object> resources) {
@@ -260,10 +262,11 @@ class R4MeasureReportBuilderTest {
                 null,
                 new ConceptDef(List.of(new CodeDef("system", MeasurePopulationType.DATEOFCOMPLIANCE.toCode())), null),
                 MeasurePopulationType.DATEOFCOMPLIANCE,
+                null,
                 null);
 
         if (resources != null) {
-            resources.forEach(populationDef::addResource);
+            resources.forEach(res -> populationDef.addResource("subj", res));
         }
 
         return populationDef;

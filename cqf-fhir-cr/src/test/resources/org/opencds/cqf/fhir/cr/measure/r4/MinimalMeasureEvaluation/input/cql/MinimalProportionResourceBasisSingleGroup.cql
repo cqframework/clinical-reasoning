@@ -34,9 +34,8 @@ define "Numerator":
             such that "CalendarAgeInYearsAt"(FHIRHelpers.ToDate(BirthDate.birthDate), start of InpatientEncounter.period) > 2
                 where "LengthInDays"(FHIRHelpers.ToInterval(InpatientEncounter.period)) < 10
 
-define function "MeasureObservation"(Encounter Encounter):
-    Encounter e
-        where (difference in days between start of e.period and end of e.period)>0
+define function "MeasureObservation"(encounter Encounter):
+    duration in minutes of encounter.period
 
 define "Measure Population Exclusions":
     "Denominator Exclusion"

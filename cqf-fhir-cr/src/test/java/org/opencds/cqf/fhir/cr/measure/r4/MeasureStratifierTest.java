@@ -634,6 +634,81 @@ class MeasureStratifierTest {
         }
     }
 
+    // LUKETODO:  add a value-based stratifier that mismatches with measure basis and see what happens (ex: boolean basis but string-based value)
+
     // LUKETODO:  add a measure with the criteria extension to prove that the extension changes nothing
 
+    @Test
+    void measureWithCriteriaExtensionDoesNothingDifferentThanRatioResourceCriteriaStratComplexSetsDifferentForInitialDenominatorAndNumerator() {
+
+        final SelectedReport then = GIVEN_CRITERIA_BASED_STRAT_COMPLEX
+            .when()
+            .measureId("CriteriaBasedStratifiersComplexWithExtension")
+            .evaluate()
+            .then();
+
+        System.out.println(
+            FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(then.report()));
+
+        then.hasGroupCount(1)
+            .firstGroup()
+            .hasPopulationCount(3)
+            .population("initial-population")
+            .hasCount(11)
+            .up()
+            .population("denominator")
+            .hasCount(8)
+            .up()
+            .population("numerator")
+            // due to apply scoring, we keep only those numerator encounters that are also in the denominator
+            .hasCount(5)
+            .up()
+            .hasMeasureScore(true)
+            .hasScore("0.625")
+            .hasStratifierCount(1)
+            .firstStratifier()
+            .hasCodeText("Encounters in Period")
+            .hasStratumCount(1)
+            .firstStratum()
+            .hasPopulationCount(3)
+            .population("initial-population")
+            .hasCount(3)
+            .up()
+            .population("denominator")
+            .hasCount(2)
+            .up()
+            .population("numerator")
+            .hasCount(1);
+    }
+
+    @Test
+    void measureWithCriteriaExtensionDoesNothingDifferentThanCohortBooleanValueStratHasCodeIndResult() {
+        var mCC = new CodeableConcept().setText("M");
+
+        final SelectedReport then = GIVEN_MEASURE_STRATIFIER_TEST
+            .when()
+            .measureId("CohortBooleanStratCodeWithExtension")
+            .subject("Patient/patient-9")
+            .evaluate()
+            .then();
+
+        System.out.println(
+            FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(then.report()));
+
+        then.firstGroup()
+            .firstStratifier()
+            // This is a value stratifier, which does not pull in the measure populations and
+            // does not use the CQL expression for the code text
+            .hasCodeText("stratifier-sex")
+            .hasStratumCount(1)
+            .stratum(mCC)
+            .firstPopulation()
+            .hasCount(1)
+            .up()
+            .up()
+            .up()
+            .up()
+            .report();
+
+    }
 }

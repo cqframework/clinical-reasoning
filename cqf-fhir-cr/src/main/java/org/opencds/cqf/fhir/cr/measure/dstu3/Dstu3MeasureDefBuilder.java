@@ -88,7 +88,8 @@ public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                         null, // No code on stratifier
                         // in dstu3
                         mgsc.getCriteria(),
-                        getStratifierType(mgsc));
+                        // There's no such thing as a stratifier component in DSTU3, so hard-code to VALUE
+                        MeasureStratifierType.VALUE);
 
                 stratifiers.add(stratifierDef);
             }
@@ -107,7 +108,6 @@ public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         return new MeasureDef(measure.getIdElement(), measure.getUrl(), measure.getVersion(), groups, sdes);
     }
 
-    // LUKETODO:  there's no such thing as a stratifier component in DSTU3 so what do we do here?
     private static MeasureStratifierType getStratifierType(
             MeasureGroupStratifierComponent measureGroupStratifierComponent) {
 

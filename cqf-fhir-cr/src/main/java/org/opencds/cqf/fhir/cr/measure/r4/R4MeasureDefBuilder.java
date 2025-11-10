@@ -264,6 +264,30 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
             components.add(scd);
         }
 
+        // LUKETODO:  test this?
+        /*
+    "stratifier": [ {
+      "id": "stratifier-ethnicity",
+      "code": {
+        "coding": [ {
+          "system": "http://loinc.org",
+          "code": "54133-4",
+          "display": "Ethnicity"
+        } ],
+        "text": "stratifier-ethnicity"
+      },
+      "description": "Ethnicity (CDC Value Set)",
+      "criteria": {
+        "language": "text/cql",
+        "expression": "SDE Ethnicity"
+      },
+      "component": [
+        {
+          "id": "stratifier-ethnicity-comp-one"
+        }
+      ]
+    }, {
+         */
         if (!components.isEmpty() && mgsc.getCriteria().getExpression() != null) {
             throw new InvalidRequestException(
                     "Measure stratifier: %s, has both component and stratifier criteria expression defined. Only one should be specified"

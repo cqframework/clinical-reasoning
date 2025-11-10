@@ -45,9 +45,6 @@ class ApplyScoringSetMembershipTest {
      * Result should omit score because it can't be calculated
      * This also validates that exclusion criteria is not removed from denominator or numerator
      */
-    // LUKETODO:  why do we get this now:  criteria-based stratifier is invalid for expression: [boolean strat not
-    // finished] due to mismatch between population basis: [Period] and result types: [Boolean] for measure URL:
-    // http://example.com/Measure/ProportionDatePopulationBasis
     @Test
     void datePopulation() {
 

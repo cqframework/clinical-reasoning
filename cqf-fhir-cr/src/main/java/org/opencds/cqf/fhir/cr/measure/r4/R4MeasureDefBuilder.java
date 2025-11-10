@@ -50,8 +50,13 @@ import org.opencds.cqf.fhir.cr.measure.common.SdeDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierComponentDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
+
+    private static final Logger logger = LoggerFactory.getLogger(R4MeasureDefBuilder.class);
+
     @Override
     public MeasureDef build(Measure measure) {
         checkId(measure);
@@ -371,6 +376,8 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
 
         final boolean hasAnyComponentCriteria = measureGroupStratifierComponent.getComponent().stream()
                 .anyMatch(MeasureGroupStratifierComponentComponent::hasCriteria);
+
+        logger.info("1234: hasCriteria: {}, hasAnyComponentCriteria: {}", hasCriteria, hasAnyComponentCriteria);
 
         if (hasCriteria && hasAnyComponentCriteria) {
             throw new InvalidRequestException(

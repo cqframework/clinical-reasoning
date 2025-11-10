@@ -30,7 +30,6 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.SdeDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
-import org.opencds.cqf.fhir.cr.measure.common.StratifierUtils;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 
 public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
@@ -108,15 +107,11 @@ public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         return new MeasureDef(measure.getIdElement(), measure.getUrl(), measure.getVersion(), groups, sdes);
     }
 
+    // LUKETODO:  there's no such thing as a stratifier component in DSTU3 so what do we do here?
     private static MeasureStratifierType getStratifierType(
             MeasureGroupStratifierComponent measureGroupStratifierComponent) {
-        if (measureGroupStratifierComponent == null) {
-            return MeasureStratifierType.VALUE;
-        }
 
-        final List<Extension> stratifierExtensions = measureGroupStratifierComponent.getExtension();
-
-        return StratifierUtils.getStratifierType(stratifierExtensions);
+        return MeasureStratifierType.VALUE;
     }
 
     private PopulationDef checkPopulationForCode(

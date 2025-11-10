@@ -18,27 +18,6 @@ public class StratifierUtils {
         // Static utility class
     }
 
-    // LUKETODO:  do we even need this anymore?
-    public static MeasureStratifierType getStratifierType(List<? extends IBaseExtension<?, ?>> stratifierExtensions) {
-        if (CollectionUtils.isEmpty(stratifierExtensions)) {
-            return MeasureStratifierType.VALUE;
-        }
-
-        // LUKETODO:  redo this logic
-        //        if (stratifierExtensions.stream()
-        //                .filter(ext -> MeasureConstants.EXT_STRATIFIER_TYPE.equals(ext.getUrl()))
-        //                .map(IBaseExtension::getValue)
-        //                .filter(Objects::nonNull)
-        //                .filter(CodeType.class::isInstance)
-        //                .map(CodeType.class::cast)
-        //                .map(PrimitiveType::asStringValue)
-        //                .anyMatch(MeasureStratifierType.CRITERIA.getTextValue()::equals)) {
-        //            return MeasureStratifierType.CRITERIA;
-        //        }
-
-        return MeasureStratifierType.VALUE;
-    }
-
     public static List<Class<?>> extractClassesFromSingleOrListResult(Object result) {
         if (result == null) {
             return Collections.emptyList();

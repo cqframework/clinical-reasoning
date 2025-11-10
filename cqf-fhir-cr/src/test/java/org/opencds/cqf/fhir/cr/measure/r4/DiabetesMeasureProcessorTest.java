@@ -8,6 +8,12 @@ import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 @SuppressWarnings("squid:S2699")
 class DiabetesMeasureProcessorTest {
 
+    // LUKETODO:  should we fix the measures or the tests?
+    // this looks like it could be production-like data so I'm not sure, and can't tell from the
+    // commit history
+    // The current error is that the new code thinks these are criteria-based stratifiers, and they're
+    // now failing validation
+
     protected static Given given = Measure.given().repositoryFor("DiabetesHemoglobinA1cHbA1cPoorControl9FHIR");
 
     @Test

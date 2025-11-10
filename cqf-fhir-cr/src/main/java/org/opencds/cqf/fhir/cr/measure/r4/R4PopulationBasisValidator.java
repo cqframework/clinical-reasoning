@@ -129,7 +129,6 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
         var resultClasses = StratifierUtils.extractClassesFromSingleOrListResult(expressionResult.value());
         var groupPopulationBasisCode = groupDef.getPopulationBasis().code();
 
-        // LUKETODO: what to do about this?
         if (MeasureStratifierType.CRITERIA == stratifierDef.getStratifierType()) {
             if (resultClasses.stream()
                     .map(Class::getSimpleName)

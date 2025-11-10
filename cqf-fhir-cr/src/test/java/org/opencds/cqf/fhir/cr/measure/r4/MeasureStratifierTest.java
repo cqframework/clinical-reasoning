@@ -98,7 +98,6 @@ class MeasureStratifierTest {
                 .report();
     }
 
-    // LUKETODO:  this conforms to the new definition for criteria
     /**
      * Boolean Basis Measure with Stratifier defined by value expression that results in CodeableConcept value of 'true' or 'false' for the Measure population.
      */
@@ -271,7 +270,6 @@ class MeasureStratifierTest {
                 .report();
     }
 
-    // LUKETODO:  this conforms to the new definition for criteria stratifier
     /**
      * Ratio Measure with Resource Basis where Stratifier defined by expression that results in two different ages.
      * Given that Population results are "Encounter" resources, intersection of results is based on subject

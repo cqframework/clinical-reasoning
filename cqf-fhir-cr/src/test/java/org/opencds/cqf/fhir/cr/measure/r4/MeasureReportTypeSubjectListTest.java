@@ -143,9 +143,6 @@ class MeasureReportTypeSubjectListTest {
      * All contained lists have matching number of item entries as population count
      * Results are correct resourceType
      */
-    // LUKETODO:  why do we get this now?  criteria-based stratifier is invalid for expression: [Gender Stratification]
-    // due to mismatch between population basis: [boolean] and result types: [Code] for measure URL:
-    // http://example.com/Measure/RatioBooleanStratValue
     @Test
     void ratioBooleanValueStrat() {
 

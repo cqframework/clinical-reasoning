@@ -24,11 +24,6 @@ public class ContinuousVariableResourceMeasureObservationTest {
     private static final Given GIVEN_ENCOUNTER_BASIS =
             Measure.given().repositoryFor("ContinuousVariableObservationEncounterBasis");
 
-    // LUKETODO:  why are these tests now failing?
-    //    criteria-based stratifier is invalid for expression: [Gender] due to mismatch between population basis:
-    // [boolean] and result types: [Enumeration] for measure URL:
-    // http://example.com/Measure/ContinuousVariableResourceMeasureObservationBooleanBasisAvg
-
     @Test
     void continuousVariableResourceMeasureObservationBooleanBasisAvg() {
 

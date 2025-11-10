@@ -4,13 +4,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportStatus;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
-import org.opencds.cqf.fhir.cr.measure.r4.Measure.SelectedReport;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.When;
 
 /**
@@ -34,17 +32,13 @@ class MeasureStratifierTest {
     void cohortBooleanValueStratHasCodeIndResult() {
         var mCC = new CodeableConcept().setText("M");
 
-        final SelectedReport then = GIVEN_MEASURE_STRATIFIER_TEST
+        GIVEN_MEASURE_STRATIFIER_TEST
                 .when()
                 .measureId("CohortBooleanStratCode")
                 .subject("Patient/patient-9")
                 .evaluate()
-                .then();
-
-        System.out.println(
-                FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(then.report()));
-
-        then.firstGroup()
+                .then()
+                .firstGroup()
                 .firstStratifier()
                 // This is a value stratifier, which does not pull in the measure populations and
                 // does not use the CQL expression for the code text
@@ -68,16 +62,12 @@ class MeasureStratifierTest {
         var mCC = new CodeableConcept().setText("M");
         var fCC = new CodeableConcept().setText("F");
 
-        final SelectedReport then = GIVEN_MEASURE_STRATIFIER_TEST
+        GIVEN_MEASURE_STRATIFIER_TEST
                 .when()
                 .measureId("CohortBooleanStratCode")
                 .evaluate()
-                .then();
-
-        System.out.println(
-                FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(then.report()));
-
-        then.firstGroup()
+                .then()
+                .firstGroup()
                 .firstStratifier()
                 // This is a value stratifier, which does not pull in the measure populations and
                 // does not use the CQL expression for the code text
@@ -106,16 +96,12 @@ class MeasureStratifierTest {
         var isUnfinished = new CodeableConcept().setText("true");
         var notUnfinished = new CodeableConcept().setText("false");
 
-        final SelectedReport then = GIVEN_MEASURE_STRATIFIER_TEST
+        GIVEN_MEASURE_STRATIFIER_TEST
                 .when()
                 .measureId("CohortBooleanStratValue")
                 .evaluate()
-                .then();
-
-        System.out.println(
-                FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(then.report()));
-
-        then.firstGroup()
+                .then()
+                .firstGroup()
                 .firstStratifier()
                 .hasCodeText("boolean strat not finished")
                 .hasStratumCount(2)
@@ -146,16 +132,12 @@ class MeasureStratifierTest {
         var mCC = new CodeableConcept().setText("M");
         var fCC = new CodeableConcept().setText("F");
 
-        final SelectedReport then = GIVEN_MEASURE_STRATIFIER_TEST
+        GIVEN_MEASURE_STRATIFIER_TEST
                 .when()
                 .measureId("CohortBooleanStratMulti")
                 .evaluate()
-                .then();
-
-        System.out.println(
-                FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(then.report()));
-
-        then.firstGroup()
+                .then()
+                .firstGroup()
                 .stratifierById("stratifier-1")
                 // This is a value stratifier, which does not pull in the measure populations and
                 // does not use the CQL expression for the code text
@@ -229,16 +211,12 @@ class MeasureStratifierTest {
      */
     @Test
     void cohortBooleanValueStratComponentStrat() {
-        final SelectedReport then = GIVEN_MEASURE_STRATIFIER_TEST
+        GIVEN_MEASURE_STRATIFIER_TEST
                 .when()
                 .measureId("CohortBooleanStratComponent")
                 .evaluate()
-                .then();
-
-        System.out.println(
-                FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(then.report()));
-
-        then.hasStatus(MeasureReportStatus.COMPLETE)
+                .then()
+                .hasStatus(MeasureReportStatus.COMPLETE)
                 .group("group-1")
                 .stratifierById("stratifier-1")
                 // This is a value stratifier, which does not pull in the measure populations and
@@ -274,17 +252,13 @@ class MeasureStratifierTest {
     @Test
     void ratioResourceValueStratAge() {
 
-        final SelectedReport then = GIVEN_MEASURE_STRATIFIER_TEST
+        GIVEN_MEASURE_STRATIFIER_TEST
                 .when()
                 .measureId("RatioResourceStratValue")
                 .evaluate()
                 .reportType("subject-list")
-                .then();
-
-        System.out.println(
-                FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(then.report()));
-
-        then.subjectResultsValidation()
+                .then()
+                .subjectResultsValidation()
                 .firstGroup()
                 .stratifierById("stratifier-2")
                 // This is a value stratifier, which does not pull in the measure populations and
@@ -321,16 +295,12 @@ class MeasureStratifierTest {
      */
     @Test
     void ratioResourceValueStratDifferentTypeStratNotCriteriaBasedWeirdScenario() {
-        final SelectedReport then = GIVEN_MEASURE_STRATIFIER_TEST
+        GIVEN_MEASURE_STRATIFIER_TEST
                 .when()
                 .measureId("RatioResourceStratDifferentType")
                 .evaluate()
-                .then();
-
-        System.out.println(
-                FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(then.report()));
-
-        then.hasGroupCount(1)
+                .then()
+                .hasGroupCount(1)
                 .firstGroup()
                 .hasPopulationCount(3)
                 .population("initial-population")
@@ -439,16 +409,12 @@ class MeasureStratifierTest {
     @Test
     void ratioBooleanValueStratGender() {
 
-        final SelectedReport then = GIVEN_MEASURE_STRATIFIER_TEST
+        GIVEN_MEASURE_STRATIFIER_TEST
                 .when()
                 .measureId("RatioBooleanStratValue")
                 .evaluate()
-                .then();
-
-        System.out.println(
-                FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(then.report()));
-
-        then.firstGroup()
+                .then()
+                .firstGroup()
                 .population("initial-population")
                 .hasCount(10)
                 .up()
@@ -467,6 +433,32 @@ class MeasureStratifierTest {
                 .up()
                 .report();
     }
+
+
+    // LUKETODO:  test this
+        /*
+        "stratifier": [ {
+          "id": "stratifier-ethnicity",
+          "code": {
+            "coding": [ {
+              "system": "http://loinc.org",
+              "code": "54133-4",
+              "display": "Ethnicity"
+            } ],
+            "text": "stratifier-ethnicity"
+          },
+          "description": "Ethnicity (CDC Value Set)",
+          "criteria": {
+            "language": "text/cql",
+            "expression": "SDE Ethnicity"
+          },
+          "component": [
+            {
+              "id": "stratifier-ethnicity-comp-one"
+            }
+          ]
+        }, {
+             */
 
     /**
      * Cannot define a Stratifier with both component criteria and expression criteria
@@ -493,17 +485,13 @@ class MeasureStratifierTest {
 
     @Test
     void cohortBooleanCriteriaStratSinglePatientSingleEncounter() {
-        final SelectedReport then = GIVEN_CRITERIA_BASED_STRAT_SIMPLE
+        GIVEN_CRITERIA_BASED_STRAT_SIMPLE
                 .when()
                 .measureId("CriteriaBasedStratifiersSimple")
                 .subject("Patient/patient1")
                 .evaluate()
-                .then();
-
-        System.out.println(
-                FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(then.report()));
-
-        then.firstGroup()
+                .then()
+                .firstGroup()
                 .population("initial-population")
                 .hasCount(4)
                 .up()
@@ -519,17 +507,13 @@ class MeasureStratifierTest {
 
     @Test
     void cohortResourceCriteriaStratSingleBadExpressionForValueInvalid() {
-        final SelectedReport then = GIVEN_CRITERIA_BASED_STRAT_SIMPLE
+        GIVEN_CRITERIA_BASED_STRAT_SIMPLE
                 .when()
                 .measureId("CriteriaBasedStratifiersSimpleBad")
                 .subject("Patient/patient1")
                 .evaluate()
-                .then();
-
-        System.out.println(
-                FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(then.report()));
-
-        then.hasContainedOperationOutcome()
+                .then()
+                .hasContainedOperationOutcome()
                 .hasContainedOperationOutcomeMsg(
                         "criteria-based stratifier is invalid for expression: [bad criteria stratifier] due to mismatch between population basis: [Encounter] and result types: [Boolean] for measure URL: http://example.com/Measure/CriteriaBasedStratifiersSimpleBad");
     }
@@ -542,16 +526,12 @@ class MeasureStratifierTest {
      */
     @Test
     void cohortResourceCriteriaStratAllPatientsTwoEncounters() {
-        final SelectedReport then = GIVEN_CRITERIA_BASED_STRAT_SIMPLE
+        GIVEN_CRITERIA_BASED_STRAT_SIMPLE
                 .when()
                 .measureId("CriteriaBasedStratifiersSimple")
                 .evaluate()
-                .then();
-
-        System.out.println(
-                FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(then.report()));
-
-        then.firstGroup()
+                .then()
+                .firstGroup()
                 .population("initial-population")
                 .hasCount(9)
                 .up()
@@ -567,16 +547,12 @@ class MeasureStratifierTest {
 
     @Test
     void ratioResourceCriteriaStratComplexSetsDifferentForInitialDenominatorAndNumerator() {
-        final SelectedReport then = GIVEN_CRITERIA_BASED_STRAT_COMPLEX
+        GIVEN_CRITERIA_BASED_STRAT_COMPLEX
                 .when()
                 .measureId("CriteriaBasedStratifiersComplex")
                 .evaluate()
-                .then();
-
-        System.out.println(
-                FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(then.report()));
-
-        then.hasGroupCount(1)
+                .then()
+                .hasGroupCount(1)
                 .firstGroup()
                 .hasPopulationCount(3)
                 .population("initial-population")
@@ -631,19 +607,14 @@ class MeasureStratifierTest {
     // LUKETODO:  add a measure with the criteria extension to prove that the extension changes nothing
 
     @Test
-    void
-            measureWithCriteriaExtensionDoesNothingDifferentThanRatioResourceCriteriaStratComplexSetsDifferentForInitialDenominatorAndNumerator() {
+    void measureWithCriteriaExtensionRatioResourceCriteriaStratComplexSetsDifferentForInitialDenominatorAndNumerator() {
 
-        final SelectedReport then = GIVEN_CRITERIA_BASED_STRAT_COMPLEX
+        GIVEN_CRITERIA_BASED_STRAT_COMPLEX
                 .when()
                 .measureId("CriteriaBasedStratifiersComplexWithExtension")
                 .evaluate()
-                .then();
-
-        System.out.println(
-                FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(then.report()));
-
-        then.hasGroupCount(1)
+                .then()
+                .hasGroupCount(1)
                 .firstGroup()
                 .hasPopulationCount(3)
                 .population("initial-population")
@@ -675,20 +646,16 @@ class MeasureStratifierTest {
     }
 
     @Test
-    void measureWithCriteriaExtensionDoesNothingDifferentThanCohortBooleanValueStratHasCodeIndResult() {
+    void measureWithCriteriaExtensionDifferentThanCohortBooleanValueStratHasCodeIndResult() {
         var mCC = new CodeableConcept().setText("M");
 
-        final SelectedReport then = GIVEN_MEASURE_STRATIFIER_TEST
+        GIVEN_MEASURE_STRATIFIER_TEST
                 .when()
                 .measureId("CohortBooleanStratCodeWithExtension")
                 .subject("Patient/patient-9")
                 .evaluate()
-                .then();
-
-        System.out.println(
-                FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(then.report()));
-
-        then.firstGroup()
+                .then()
+                .firstGroup()
                 .firstStratifier()
                 // This is a value stratifier, which does not pull in the measure populations and
                 // does not use the CQL expression for the code text

@@ -601,6 +601,7 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .stratifierById("stratifier-gender")
                 .hasStratumCount(4)
                 .stratumByText("male")
+                .hasValue("male")
                 .hasScore("79.0")
                 .hasPopulationCount(4)
                 .population("initial-population")

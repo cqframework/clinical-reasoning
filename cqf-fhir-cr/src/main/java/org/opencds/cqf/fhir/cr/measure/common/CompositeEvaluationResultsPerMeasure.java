@@ -99,7 +99,8 @@ public class CompositeEvaluationResultsPerMeasure {
                 List<EvaluationResult> measureObservationResults) {
 
             // if we have no results, we don't need to add anything
-            if (evaluationResult == null || evaluationResult.expressionResults.isEmpty()) {
+            if (evaluationResult == null
+                    || evaluationResult.getExpressionResults().isEmpty()) {
                 return;
             }
 
@@ -132,13 +133,13 @@ public class CompositeEvaluationResultsPerMeasure {
                 EvaluationResult origEvaluationResult, List<EvaluationResult> measureObservationResults) {
             final EvaluationResult evaluationResult = new EvaluationResult();
 
-            var copyOfExpressionResults = new HashMap<>(origEvaluationResult.expressionResults);
+            var copyOfExpressionResults = new HashMap<>(origEvaluationResult.getExpressionResults());
 
             for (EvaluationResult measureObservationResult : measureObservationResults) {
-                copyOfExpressionResults.putAll(measureObservationResult.expressionResults);
+                copyOfExpressionResults.putAll(measureObservationResult.getExpressionResults());
             }
 
-            evaluationResult.expressionResults.putAll(copyOfExpressionResults);
+            evaluationResult.getExpressionResults().putAll(copyOfExpressionResults);
 
             return evaluationResult;
         }

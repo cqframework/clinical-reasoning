@@ -217,13 +217,13 @@ public class ContinuousVariableObservationHandler {
             return Optional.empty();
         }
 
-        final Map<String, ExpressionResult> expressionResults = evaluationResult.expressionResults;
+        final Map<String, ExpressionResult> expressionResults = evaluationResult.getExpressionResults();
 
         if (!expressionResults.containsKey(expressionName)) {
             throw new InvalidRequestException("Could not find expression result for expression: " + expressionName);
         }
 
-        return Optional.of(evaluationResult.expressionResults.get(expressionName));
+        return Optional.of(evaluationResult.getExpressionResults().get(expressionName));
     }
 
     private static Iterable<?> getResultIterable(
@@ -304,8 +304,9 @@ public class ContinuousVariableObservationHandler {
 
         final EvaluationResult evaluationResultToReturn = new EvaluationResult();
 
-        evaluationResultToReturn.expressionResults.put(
-                expressionName, new ExpressionResult(functionResults, evaluatedResources));
+        evaluationResultToReturn
+                .getExpressionResults()
+                .put(expressionName, new ExpressionResult(functionResults, evaluatedResources));
 
         return evaluationResultToReturn;
     }

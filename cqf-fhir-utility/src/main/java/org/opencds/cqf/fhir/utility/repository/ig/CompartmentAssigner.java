@@ -26,8 +26,10 @@ import org.opencds.cqf.fhir.utility.repository.ig.IgConventions.CompartmentIsola
  */
 class CompartmentAssigner {
 
+    // Search parameters that likely reference compartments,
+    // in order of priority to use to determine compartment membership
     private static final List<String> COMPARTMENT_REFERENCE_PRIORITY =
-            List.of("subject", "patient", "beneficiary", "member", "individual", "encounter", "episodeofcare");
+            List.of("patient", "subject", "beneficiary", "member", "individual", "encounter", "episodeofcare");
 
     private final FhirContext fhirContext;
     private final CompartmentMode compartmentMode;
@@ -193,19 +195,19 @@ class CompartmentAssigner {
             return assignment;
         }
 
-        // Try to assign based on id
-        // TODO: This can fail when there are multiple ids being searched.
-        // (e.g. _id=123,456,789)
-        // A future version of this class might return mutliple potential
-        // Assignments, each of which can be searched.
+        // Try to assign based on id search parameter
         if (compartmentMode.type().equalsIgnoreCase(resourceType)) {
-            var idString = searchParameters.get("_id").stream()
+            var ids = searchParameters.get("_id").stream()
                     .flatMap(List::stream)
-                    .findFirst()
                     .map(x -> x.getValueAsQueryToken(fhirContext))
-                    .orElse(null);
+                    .toList();
 
-            var ensured = Ids.ensureIdType(idString, resourceType);
+            // If no _id or multiple _id parameters, cannot determine assignment
+            if (ids.isEmpty() || ids.size() > 1) {
+                return CompartmentAssignment.unknown(compartmentMode.type());
+            }
+
+            var ensured = Ids.ensureIdType(ids.get(0), resourceType);
             var id = Ids.newId(fhirContext, ensured);
             return CompartmentAssignment.of(compartmentMode.type(), id.getIdPart());
         }

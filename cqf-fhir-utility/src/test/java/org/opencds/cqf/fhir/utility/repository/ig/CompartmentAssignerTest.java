@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import com.google.common.collect.ArrayListMultimap;
 import java.util.List;
 import org.hl7.fhir.r4.model.Coverage;
@@ -107,6 +108,54 @@ class CompartmentAssignerTest {
         params.put("subject", List.of(new ReferenceParam("")));
 
         var assignment = assigner.fromSearchParameters("Observation", params);
+
+        assertTrue(assignment.isUnknown());
+    }
+
+    @Test
+    void searchDoesNotMatchWithUnknownParam() {
+        var assigner =
+                new CompartmentAssigner(FhirContext.forR4Cached(), CompartmentMode.PATIENT, CompartmentIsolation.FHIR);
+        var params = ArrayListMultimap.<String, List<IQueryParameterType>>create();
+        params.put("some-other-param", List.of(new ReferenceParam("123")));
+
+        var assignment = assigner.fromSearchParameters("Patient", params);
+
+        assertTrue(assignment.isUnknown());
+    }
+
+    @Test
+    void idSearchDoesNotMatchWithoutIdParam() {
+        var assigner =
+                new CompartmentAssigner(FhirContext.forR4Cached(), CompartmentMode.PATIENT, CompartmentIsolation.FHIR);
+        var params = ArrayListMultimap.<String, List<IQueryParameterType>>create();
+        params.put("_id", List.of());
+
+        var assignment = assigner.fromSearchParameters("Patient", params);
+
+        assertTrue(assignment.isUnknown());
+    }
+
+    @Test
+    void idSearchMatchesWithIdParam() {
+        var assigner =
+                new CompartmentAssigner(FhirContext.forR4Cached(), CompartmentMode.PATIENT, CompartmentIsolation.FHIR);
+        var params = ArrayListMultimap.<String, List<IQueryParameterType>>create();
+        params.put("_id", List.of(new TokenParam("123")));
+
+        var assignment = assigner.fromSearchParameters("Patient", params);
+
+        assertEquals("patient", assignment.compartmentType());
+        assertEquals("123", assignment.compartmentId());
+    }
+
+    @Test
+    void idSearchDoesNotMatchWithMultipleIdParams() {
+        var assigner =
+                new CompartmentAssigner(FhirContext.forR4Cached(), CompartmentMode.PATIENT, CompartmentIsolation.FHIR);
+        var params = ArrayListMultimap.<String, List<IQueryParameterType>>create();
+        params.put("_id", List.of(new TokenParam("123"), new TokenParam("456")));
+        var assignment = assigner.fromSearchParameters("Patient", params);
 
         assertTrue(assignment.isUnknown());
     }

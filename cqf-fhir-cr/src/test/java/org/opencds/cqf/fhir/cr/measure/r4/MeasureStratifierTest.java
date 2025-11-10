@@ -117,10 +117,7 @@ class MeasureStratifierTest {
 
         then.firstGroup()
                 .firstStratifier()
-                // This is a value stratifier, which does not pull in the measure populations and
-                // does not use the CQL expression for the code text
-                // LUKETODO:
-                //                .hasCodeText(null)
+                .hasCodeText("boolean strat not finished")
                 .hasStratumCount(2)
                 .stratum(isUnfinished)
                 .firstPopulation()
@@ -162,8 +159,7 @@ class MeasureStratifierTest {
                 .stratifierById("stratifier-1")
                 // This is a value stratifier, which does not pull in the measure populations and
                 // does not use the CQL expression for the code text
-                // LUKETODO:
-                //                .hasCodeText(null)
+                .hasCodeText("boolean strat not finished")
                 .hasStratumCount(2)
                 .stratum(isUnfinished)
                 .firstPopulation()
@@ -293,9 +289,7 @@ class MeasureStratifierTest {
                 .stratifierById("stratifier-2")
                 // This is a value stratifier, which does not pull in the measure populations and
                 // does not use the CQL expression for the code text
-                // LUKETODO: fix comment
-                // LUKETODO: fix assertion?
-                //                .hasCodeText(null)
+                .hasCodeText("Age")
                 .stratum("35")
                 .population("denominator")
                 .hasCount(6)
@@ -352,12 +346,9 @@ class MeasureStratifierTest {
                 .hasScore("0.18181818181818182")
                 .hasStratifierCount(1)
                 .firstStratifier()
-                // This is NOT a criteria-based stratifier, both because the stratifier extension
-                // does not specify it as so and because the basis and returned resources don't
-                // match.  Its code text is not set to the expression name.  However, due to the
-                // bizarre way that it's defined, it does pull in the other measure populations.
-                // LUKETODO:
-                //                .hasCodeText(null)
+                // This stratifier explicitly does not contain a code on either the stratifier
+                // or the component, so the code is null here:
+                .hasCodeText(null)
                 .hasStratumCount(6)
                 .stratum("triaged")
                 .hasPopulationCount(3)
@@ -464,8 +455,7 @@ class MeasureStratifierTest {
                 .firstStratifier()
                 // This is a value stratifier, because the expression it uses is based on age
                 // and not on a resource, and does not set the code text.
-                // LUKETODO:
-                //                .hasCodeText(null)
+                .hasCodeText("Gender Stratification")
                 .hasStratumCount(2)
                 .stratum("M")
                 .hasScore("0.2") // make sure stratum are scored
@@ -477,6 +467,7 @@ class MeasureStratifierTest {
                 .up()
                 .report();
     }
+
     /**
      * Cannot define a Stratifier with both component criteria and expression criteria
      * You can only define one or the other
@@ -634,51 +625,53 @@ class MeasureStratifierTest {
         }
     }
 
-    // LUKETODO:  add a value-based stratifier that mismatches with measure basis and see what happens (ex: boolean basis but string-based value)
+    // LUKETODO:  add a value-based stratifier that mismatches with measure basis and see what happens (ex: boolean
+    // basis but string-based value)
 
     // LUKETODO:  add a measure with the criteria extension to prove that the extension changes nothing
 
     @Test
-    void measureWithCriteriaExtensionDoesNothingDifferentThanRatioResourceCriteriaStratComplexSetsDifferentForInitialDenominatorAndNumerator() {
+    void
+            measureWithCriteriaExtensionDoesNothingDifferentThanRatioResourceCriteriaStratComplexSetsDifferentForInitialDenominatorAndNumerator() {
 
         final SelectedReport then = GIVEN_CRITERIA_BASED_STRAT_COMPLEX
-            .when()
-            .measureId("CriteriaBasedStratifiersComplexWithExtension")
-            .evaluate()
-            .then();
+                .when()
+                .measureId("CriteriaBasedStratifiersComplexWithExtension")
+                .evaluate()
+                .then();
 
         System.out.println(
-            FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(then.report()));
+                FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(then.report()));
 
         then.hasGroupCount(1)
-            .firstGroup()
-            .hasPopulationCount(3)
-            .population("initial-population")
-            .hasCount(11)
-            .up()
-            .population("denominator")
-            .hasCount(8)
-            .up()
-            .population("numerator")
-            // due to apply scoring, we keep only those numerator encounters that are also in the denominator
-            .hasCount(5)
-            .up()
-            .hasMeasureScore(true)
-            .hasScore("0.625")
-            .hasStratifierCount(1)
-            .firstStratifier()
-            .hasCodeText("Encounters in Period")
-            .hasStratumCount(1)
-            .firstStratum()
-            .hasPopulationCount(3)
-            .population("initial-population")
-            .hasCount(3)
-            .up()
-            .population("denominator")
-            .hasCount(2)
-            .up()
-            .population("numerator")
-            .hasCount(1);
+                .firstGroup()
+                .hasPopulationCount(3)
+                .population("initial-population")
+                .hasCount(11)
+                .up()
+                .population("denominator")
+                .hasCount(8)
+                .up()
+                .population("numerator")
+                // due to apply scoring, we keep only those numerator encounters that are also in the denominator
+                .hasCount(5)
+                .up()
+                .hasMeasureScore(true)
+                .hasScore("0.625")
+                .hasStratifierCount(1)
+                .firstStratifier()
+                .hasCodeText("Encounters in Period")
+                .hasStratumCount(1)
+                .firstStratum()
+                .hasPopulationCount(3)
+                .population("initial-population")
+                .hasCount(3)
+                .up()
+                .population("denominator")
+                .hasCount(2)
+                .up()
+                .population("numerator")
+                .hasCount(1);
     }
 
     @Test
@@ -686,29 +679,28 @@ class MeasureStratifierTest {
         var mCC = new CodeableConcept().setText("M");
 
         final SelectedReport then = GIVEN_MEASURE_STRATIFIER_TEST
-            .when()
-            .measureId("CohortBooleanStratCodeWithExtension")
-            .subject("Patient/patient-9")
-            .evaluate()
-            .then();
+                .when()
+                .measureId("CohortBooleanStratCodeWithExtension")
+                .subject("Patient/patient-9")
+                .evaluate()
+                .then();
 
         System.out.println(
-            FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(then.report()));
+                FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true).encodeResourceToString(then.report()));
 
         then.firstGroup()
-            .firstStratifier()
-            // This is a value stratifier, which does not pull in the measure populations and
-            // does not use the CQL expression for the code text
-            .hasCodeText("stratifier-sex")
-            .hasStratumCount(1)
-            .stratum(mCC)
-            .firstPopulation()
-            .hasCount(1)
-            .up()
-            .up()
-            .up()
-            .up()
-            .report();
-
+                .firstStratifier()
+                // This is a value stratifier, which does not pull in the measure populations and
+                // does not use the CQL expression for the code text
+                .hasCodeText("stratifier-sex")
+                .hasStratumCount(1)
+                .stratum(mCC)
+                .firstPopulation()
+                .hasCount(1)
+                .up()
+                .up()
+                .up()
+                .up()
+                .report();
     }
 }

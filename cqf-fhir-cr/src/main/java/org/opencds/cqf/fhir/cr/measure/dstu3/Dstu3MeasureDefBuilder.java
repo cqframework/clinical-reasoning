@@ -12,7 +12,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Element;
-import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.Measure;
 import org.hl7.fhir.dstu3.model.Measure.MeasureGroupComponent;
 import org.hl7.fhir.dstu3.model.Measure.MeasureGroupPopulationComponent;

@@ -5,9 +5,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
-import org.apache.commons.collections4.CollectionUtils;
-import org.hl7.fhir.instance.model.api.IBaseExtension;
-import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 
 /**
  * Various FHIR version-agnostic utilities for working with Stratifiers.

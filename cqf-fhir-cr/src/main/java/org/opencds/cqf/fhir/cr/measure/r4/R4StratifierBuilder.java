@@ -186,7 +186,6 @@ class R4StratifierBuilder {
             var componentDef = valuePair.def();
             // Set Stratum value to indicate which value is displaying results
             // ex. for Gender stratifier, code 'Male'
-            // LUKETODO: this entire if block might need to change
             if (value.getValueClass().equals(CodeableConcept.class)) {
                 if (isComponent) {
                     StratifierGroupComponentComponent sgcc = new StratifierGroupComponentComponent();

@@ -1,10 +1,10 @@
 package org.opencds.cqf.fhir.utility.repository;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.repository.IRepository;
@@ -34,7 +34,7 @@ public class InMemoryRepositoryOperationsTest {
     }
 
     @Test
-    public void simpleExample() {
+    void simpleExample() {
         var repo = new InMemoryFhirRepository(FhirContext.forR4Cached());
         repo.registerOperation(Example.class, r -> new Example());
 
@@ -72,7 +72,7 @@ public class InMemoryRepositoryOperationsTest {
     }
 
     @Test
-    public void operationNotFound() {
+    void operationNotFound() {
         var repo = new InMemoryFhirRepository(FhirContext.forR4Cached());
         repo.registerOperation(Example.class, r -> new Example());
 
@@ -82,7 +82,7 @@ public class InMemoryRepositoryOperationsTest {
     }
 
     @Test
-    public void recursiveExampleWithConfig() {
+    void recursiveExampleWithConfig() {
         var repo = new InMemoryFhirRepository(FhirContext.forR4Cached());
         repo.registerOperation(Recursive.class, r -> new Recursive(r, "test config"));
         var result = repo.invoke("example", null, Parameters.class);
@@ -125,7 +125,7 @@ public class InMemoryRepositoryOperationsTest {
     }
 
     @Test
-    public void serverScopeOperations() {
+    void serverScopeOperations() {
         var repo = new InMemoryFhirRepository(FhirContext.forR4Cached());
         repo.registerOperation(ServerScopeOperations.class, r -> new ServerScopeOperations());
 
@@ -170,7 +170,7 @@ public class InMemoryRepositoryOperationsTest {
     }
 
     @Test
-    public void typeScopeOperations() {
+    void typeScopeOperations() {
         var repo = new InMemoryFhirRepository(FhirContext.forR4Cached());
         repo.registerOperation(TypeScopeOperations.class, r -> new TypeScopeOperations());
 
@@ -217,7 +217,7 @@ public class InMemoryRepositoryOperationsTest {
     }
 
     @Test
-    public void instanceScopeOperations() {
+    void instanceScopeOperations() {
         var repo = new InMemoryFhirRepository(FhirContext.forR4Cached());
         repo.registerOperation(InstanceScopeOperations.class, r -> new InstanceScopeOperations());
 

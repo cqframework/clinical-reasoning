@@ -1,11 +1,11 @@
 package org.opencds.cqf.fhir.utility.operation;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -21,10 +21,10 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.utility.operation.ParameterBinder.Type;
 
-public class ParameterBinderTest {
+class ParameterBinderTest {
 
     // These are simply a bunch of example method signatures to test the MethodBinder class
     class ExampleParameters {
@@ -89,7 +89,7 @@ public class ParameterBinderTest {
     }
 
     @Test
-    public void resourceParameter() {
+    void resourceParameter() {
         var binder = firstParameterBinderOf("resource");
         assertEquals(Type.OPERATION, binder.type());
         assertEquals("resource", binder.name());
@@ -139,7 +139,7 @@ public class ParameterBinderTest {
     }
 
     @Test
-    public void encounter() {
+    void encounter() {
         var binder = firstParameterBinderOf("encounter");
         assertEquals(Type.OPERATION, binder.type());
         assertEquals("encounter", binder.name());
@@ -159,7 +159,7 @@ public class ParameterBinderTest {
     }
 
     @Test
-    public void resourceRequired() {
+    void resourceRequired() {
         var binder = firstParameterBinderOf("resourceRequired");
         assertEquals(Type.OPERATION, binder.type());
         assertEquals("resource", binder.name());
@@ -188,7 +188,7 @@ public class ParameterBinderTest {
     }
 
     @Test
-    public void stringParameter() {
+    void stringParameter() {
         var binder = firstParameterBinderOf("string");
         assertEquals(Type.OPERATION, binder.type());
         assertEquals("string", binder.name());
@@ -244,7 +244,7 @@ public class ParameterBinderTest {
     }
 
     @Test
-    public void listOfResources() {
+    void listOfResources() {
         var binder = firstParameterBinderOf("listOfResources");
         assertEquals(Type.OPERATION, binder.type());
         assertEquals("resources", binder.name());
@@ -268,7 +268,7 @@ public class ParameterBinderTest {
     }
 
     @Test
-    public void listOfResourcesWithMax() {
+    void listOfResourcesWithMax() {
         var binder = firstParameterBinderOf("listOfResourcesWithMax");
         assertEquals(Type.OPERATION, binder.type());
         assertEquals("resources", binder.name());
@@ -283,7 +283,7 @@ public class ParameterBinderTest {
     }
 
     @Test
-    public void listOfResourcesWithMin() {
+    void listOfResourcesWithMin() {
         var binder = firstParameterBinderOf("listOfResourcesWithMin");
         assertEquals(Type.OPERATION, binder.type());
         assertEquals("resources", binder.name());
@@ -297,7 +297,7 @@ public class ParameterBinderTest {
     }
 
     @Test
-    public void stringRequired() {
+    void stringRequired() {
         var binder = firstParameterBinderOf("stringRequired");
         assertEquals(Type.OPERATION, binder.type());
         assertEquals("string", binder.name());
@@ -326,7 +326,7 @@ public class ParameterBinderTest {
     }
 
     @Test
-    public void listOfStrings() {
+    void listOfStrings() {
         var binder = firstParameterBinderOf("listOfStrings");
         assertEquals(Type.OPERATION, binder.type());
         assertEquals("strings", binder.name());
@@ -350,7 +350,7 @@ public class ParameterBinderTest {
     }
 
     @Test
-    public void listOfStringsWithMax() {
+    void listOfStringsWithMax() {
         var binder = firstParameterBinderOf("listOfStringsWithMax");
         assertEquals(Type.OPERATION, binder.type());
         assertEquals("strings", binder.name());
@@ -365,7 +365,7 @@ public class ParameterBinderTest {
     }
 
     @Test
-    public void listOfStringsWithMin() {
+    void listOfStringsWithMin() {
         var binder = firstParameterBinderOf("listOfStringsWithMin");
         assertEquals(Type.OPERATION, binder.type());
         assertEquals("strings", binder.name());

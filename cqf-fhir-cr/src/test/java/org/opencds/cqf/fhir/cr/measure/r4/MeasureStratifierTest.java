@@ -434,31 +434,21 @@ class MeasureStratifierTest {
                 .report();
     }
 
+    @Test
+    void invalidStratifierTopLevelCriteriaEmptyComponent() {
 
-    // LUKETODO:  test this
-        /*
-        "stratifier": [ {
-          "id": "stratifier-ethnicity",
-          "code": {
-            "coding": [ {
-              "system": "http://loinc.org",
-              "code": "54133-4",
-              "display": "Ethnicity"
-            } ],
-            "text": "stratifier-ethnicity"
-          },
-          "description": "Ethnicity (CDC Value Set)",
-          "criteria": {
-            "language": "text/cql",
-            "expression": "SDE Ethnicity"
-          },
-          "component": [
-            {
-              "id": "stratifier-ethnicity-comp-one"
-            }
-          ]
-        }, {
-             */
+        try {
+            GIVEN_MEASURE_STRATIFIER_TEST
+                    .when()
+                    .measureId("InvalidStratifierTopLevelCriteriaEmptyComponent")
+                    .evaluate()
+                    .then();
+        } catch (InvalidRequestException exception) {
+            assertEquals(
+                    exception.getMessage(),
+                    "Measure: http://example.com/Measure/InvalidStratifierTopLevelCriteriaEmptyComponent with stratifier: stratifier-ethnicity, has both components and stratifier criteria expressions defined. Only one should be specified");
+        }
+    }
 
     /**
      * Cannot define a Stratifier with both component criteria and expression criteria
@@ -603,8 +593,6 @@ class MeasureStratifierTest {
 
     // LUKETODO:  add a value-based stratifier that mismatches with measure basis and see what happens (ex: boolean
     // basis but string-based value)
-
-    // LUKETODO:  add a measure with the criteria extension to prove that the extension changes nothing
 
     @Test
     void measureWithCriteriaExtensionRatioResourceCriteriaStratComplexSetsDifferentForInitialDenominatorAndNumerator() {

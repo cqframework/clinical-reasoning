@@ -266,8 +266,8 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
 
         if (!components.isEmpty() && mgsc.getCriteria().getExpression() != null) {
             throw new InvalidRequestException(
-                    "Measure stratifier: %s, has both component and stratifier criteria expression defined. Only one should be specified"
-                            .formatted(mgsc.getId()));
+                    "Measure: %s with stratifier: %s, has both components and stratifier criteria expressions defined. Only one should be specified"
+                            .formatted(measureUrl, mgsc.getId()));
         }
 
         return new StratifierDef(

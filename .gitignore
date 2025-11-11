@@ -1,33 +1,84 @@
-target
-test-output
-bin/
-htmlReport/
+# Gradle build output
+/build/
+*/build/
 
-.classpath
-.project
-.settings
-.flattened-pom.xml
-.factorypath
-.DS_Store
-.cursorignore
-.m2
+# Gradle caches and local configuration
+.gradle/
+!gradle/wrapper/gradle-wrapper.jar
+!gradle/wrapper/gradle-wrapper.properties
 
-pom.xml.versionsBackup
+# Kotlin/Java compiled output
+/out/
+classes/
+*.class
 
-*.log*
-Snap.*
-core.*
-dump.*
-heapdump.*
-javacore.*
-jitdump.*
-.attach_*
-
-.idea
+# IntelliJ IDEA / Android Studio
+.idea/
+!.idea/runConfigurations/
 *.iml
+*.ipr
+*.iws
+.idea_modules/
+out/
 
-.apt_generated
 
-*DS_Store
+# macOS
+.DS_Store
 
-.worktrees
+# Windows
+Thumbs.db
+
+# Logs
+*.log
+
+# Environment / system files
+*.swp
+*.swo
+
+# Dependency locking / analysis (optional to ignore)
+# Uncomment if you don't use Gradle dependency locking
+# gradle.lockfile
+# **/gradle.lockfile
+
+# Kotlin Multiplatform specifics
+# (native build artifacts, caches, generated sources)
+.kotlinc/
+.kpm/
+.kmp/
+.kotlin/
+konan/
+buildSrc/.gradle/
+buildSrc/build/
+
+# Android (if you have Android targets)
+*.apk
+*.ap_
+*.aab
+*.dex
+*.class
+*.apk.idsig
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Generated documentation / reports
+docs/
+reports/
+coverage/
+jacoco/
+
+### Maven ###
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+.flattened-pom.xml
+dependency-reduced-pom.xml
+
+### Git ###
+.worktrees/
+
+
+

@@ -7,7 +7,6 @@ This is a table of current artifacts in this project, and short description of w
 
 | Artifact | Description |
 |-------|------|
-|`cqf-fhir-api` | FHIR platform services, FHIR repository APIs. The set of interfaces a platform needs to implement to use this project are contained here. |
 | `cqf-fhir-bom` | Maven "Bill of Materials" for this repository, simplifying dependency management in downstream projects. |
 | `cqf-fhir-utility` | Utilities to assist in the creation of FHIR clinical reasoning operations. Implementations of the above APIs for REST and in-memory use cases also live here, and act as a reference for how to implement the above APIs. |
 | `cqf-fhir-test`| Utilities to assist writing unit tests for clinical reasoning operations. |

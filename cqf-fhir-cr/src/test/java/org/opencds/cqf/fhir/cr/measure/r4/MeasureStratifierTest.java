@@ -467,11 +467,10 @@ class MeasureStratifierTest {
                     .report();
             fail("should throw an exception");
         } catch (InvalidRequestException exception) {
-            assertTrue(
-                    exception
-                            .getMessage()
-                            .contains(
-                                    "Measure stratifier: stratifier-1, has both component and stratifier criteria expression defined. Only one should be specified"));
+            var exceptionMessage = exception.getMessage();
+            assertEquals(
+                    "Measure: http://example.com/Measure/CohortBooleanStratComponentInvalid with stratifier: stratifier-1, has both components and stratifier criteria expressions defined. Only one should be specified",
+                    exceptionMessage);
         }
     }
 
@@ -585,11 +584,10 @@ class MeasureStratifierTest {
                     .evaluate()
                     .then();
         } catch (InvalidRequestException exception) {
-            assertTrue(
-                    exception
-                            .getMessage()
-                            .contains(
-                                    "Measure stratifier: stratifier-1, has both component and stratifier criteria expression defined. Only one should be specified"));
+            var exceptionMessage = exception.getMessage();
+            assertEquals(
+                    "Measure: http://example.com/Measure/InvalidStratifierCriteriaAndComponentCriteria with stratifier: stratifier-1, has both components and stratifier criteria expressions defined. Only one should be specified",
+                    exceptionMessage);
         }
     }
 

@@ -8,7 +8,7 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
 
-public class ParametersTest {
+class ParametersTest {
 
     @Test
     void removeWithOnePart() {

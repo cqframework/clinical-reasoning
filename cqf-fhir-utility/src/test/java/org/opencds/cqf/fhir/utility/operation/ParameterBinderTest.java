@@ -24,7 +24,7 @@ import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.utility.operation.ParameterBinder.Type;
 
-public class ParameterBinderTest {
+class ParameterBinderTest {
 
     // These are simply a bunch of example method signatures to test the MethodBinder class
     class ExampleParameters {

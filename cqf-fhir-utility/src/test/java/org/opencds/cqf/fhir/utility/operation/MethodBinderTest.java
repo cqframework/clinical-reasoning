@@ -20,7 +20,7 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
 
-public class MethodBinderTest {
+class MethodBinderTest {
 
     // These are simply a bunch of example method signatures to test the MethodBinder class
     class ExampleMethods {

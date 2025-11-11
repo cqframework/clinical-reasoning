@@ -489,7 +489,7 @@
                     <version>3.1.0</version>
                     <executions>
                         <execution>
-                            <id>enforce-no-snapshots</id>
+                            <id>enforce-release-rules</id>
                             <goals>
                                 <goal>enforce</goal>
                             </goals>
@@ -501,6 +501,13 @@
                                     <requireReleaseDeps>
                                         <message>No Snapshot Dependencies Allowed!</message>
                                     </requireReleaseDeps>
+                                    <bannedDependencies>
+                                        <excludes>
+                                            <exclude>junit:junit</exclude>
+                                            <exclude>org.junit.vintage:*</exclude>
+                                        </excludes>
+                                        <searchTransitive>true</searchTransitive>
+                                    </bannedDependencies>
                                 </rules>
                                 <fail>true</fail>
                             </configuration>

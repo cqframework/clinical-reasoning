@@ -132,6 +132,12 @@
                 <groupId>org.cqframework</groupId>
                 <artifactId>engine-fhir</artifactId>
                 <version>${cql.version}</version>
+                <exclusions>
+                  <exclusion>
+                    <groupId>junit</groupId>
+                    <artifactId>junit</artifactId>
+                  </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.cqframework</groupId>
@@ -142,6 +148,12 @@
                 <groupId>org.cqframework</groupId>
                 <artifactId>elm-fhir</artifactId>
                 <version>${cql.version}</version>
+                <exclusions>
+                  <exclusion>
+                    <groupId>junit</groupId>
+                    <artifactId>junit</artifactId>
+                  </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.cqframework</groupId>

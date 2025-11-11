@@ -14,8 +14,6 @@ This is a table of current artifacts in this project, and short description of w
 | `cqf-fhir-cql` | Core project for FHIR / CQL interop |
 | `cqf-fhir-cr` | FHIR clinical reasoning operation implementations, such as `Measure/$evaluate-measure` and `PlanDefinition/$apply` |
 | `cqf-fhir-cr-cli` | CLI tool for running FHIR clinical reasoning operations |
-| `cqf-fhir-jaxb` | Aggregator project for JAXB dependencies |
-| `cqf-fhir-jackson` | Aggregator project for Jackson dependencies |
 
 ## Contributing
 

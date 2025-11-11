@@ -32,7 +32,7 @@ class ElmCacheResourceChangeListenerTest {
     private DaoRegistry myDaoRegistry;
 
     @Mock
-    private IFhirResourceDao<?> myLibraryDao;
+    private IFhirResourceDao<Library> myLibraryDao;
 
     @Mock
     private Map<VersionedIdentifier, CompiledLibrary> myGlobalLibraryCache;

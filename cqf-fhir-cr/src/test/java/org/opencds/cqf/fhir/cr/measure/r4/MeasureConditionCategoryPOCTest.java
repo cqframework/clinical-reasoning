@@ -14,7 +14,7 @@ public class MeasureConditionCategoryPOCTest {
      * The example here captures a contained Encounter that suspects an issue.
      */
     @Test
-    public void measure_eval_non_retrieve_resource() {
+    void measure_eval_non_retrieve_resource() {
         given.when()
                 .measureId("ConditionCategoryPOC")
                 .periodStart("2022-01-01")

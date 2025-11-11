@@ -591,8 +591,17 @@ class MeasureStratifierTest {
         }
     }
 
-    // LUKETODO:  add a value-based stratifier that mismatches with measure basis and see what happens (ex: boolean
-    // basis but string-based value)
+    @Test
+    void cohortBooleanValueStratExpressionNonBoolean() {
+        GIVEN_MEASURE_STRATIFIER_TEST
+                .when()
+                .measureId("CohortBooleanStratValueNonBoolean")
+                .evaluate()
+                .then()
+                .hasContainedOperationOutcome()
+                .hasContainedOperationOutcomeMsg(
+                        "Exception for subjectId: Patient/patient-8, Message: stratifier expression criteria results for expression: [Encounters in Period] must fall within accepted types for population-basis: [boolean] for Measure: [http://example.com/Measure/CohortBooleanStratValueNonBoolean] due to mismatch between total eval result classes: [Encounter] and matching result classes: []");
+    }
 
     @Test
     void measureWithCriteriaExtensionRatioResourceCriteriaStratComplexSetsDifferentForInitialDenominatorAndNumerator() {

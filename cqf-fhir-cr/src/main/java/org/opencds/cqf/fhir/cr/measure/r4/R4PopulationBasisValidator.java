@@ -150,7 +150,7 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
 
         if (resultMatchingClasses.size() != resultClasses.size()) {
             throw new InvalidRequestException(
-                    "stratifier expression criteria results for expression: [%s] must fall within accepted types for population-basis: [%s] for Measure: [%s] due to mismatch between total result classes: %s and matching result classes: %s"
+                    "stratifier expression criteria results for expression: [%s] must fall within accepted types for population-basis: [%s] for Measure: [%s] due to mismatch between total eval result classes: %s and matching result classes: %s"
                             .formatted(
                                     expression,
                                     groupPopulationBasisCode,

@@ -444,9 +444,11 @@ class MeasureStratifierTest {
                     .evaluate()
                     .then();
         } catch (InvalidRequestException exception) {
+            var exceptionMessage = exception.getMessage();
+
             assertEquals(
-                    exception.getMessage(),
-                    "Measure: http://example.com/Measure/InvalidStratifierTopLevelCriteriaEmptyComponent with stratifier: stratifier-ethnicity, has both components and stratifier criteria expressions defined. Only one should be specified");
+                    "Measure: http://example.com/Measure/InvalidStratifierTopLevelCriteriaEmptyComponent with stratifier: stratifier-ethnicity, has both components and stratifier criteria expressions defined. Only one should be specified",
+                    exceptionMessage);
         }
     }
 

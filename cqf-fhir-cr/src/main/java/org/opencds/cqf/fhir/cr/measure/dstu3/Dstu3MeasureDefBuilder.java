@@ -6,7 +6,6 @@ import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.IM
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
@@ -105,27 +104,6 @@ public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         }
 
         return new MeasureDef(measure.getIdElement(), measure.getUrl(), measure.getVersion(), groups, sdes);
-    }
-
-    private static MeasureStratifierType getStratifierType(
-            MeasureGroupStratifierComponent measureGroupStratifierComponent) {
-
-        return MeasureStratifierType.VALUE;
-    }
-
-    private PopulationDef checkPopulationForCode(
-            List<PopulationDef> populations, MeasurePopulationType measurePopType) {
-        return populations.stream()
-                .filter(e -> e.code().first().code().equals(measurePopType.toCode()))
-                .findAny()
-                .orElse(null);
-    }
-
-    private ConceptDef totalConceptDefCreator(MeasurePopulationType measurePopulationType) {
-        return new ConceptDef(
-                Collections.singletonList(
-                        new CodeDef(measurePopulationType.getSystem(), measurePopulationType.toCode())),
-                null);
     }
 
     private ConceptDef conceptToConceptDef(CodeableConcept codeable) {

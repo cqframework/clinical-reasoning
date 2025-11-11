@@ -75,7 +75,6 @@
     </repositories>
 
     <modules>
-        <module>cqf-fhir-api</module>
         <module>cqf-fhir-utility</module>
         <module>cqf-fhir-test</module>
         <module>cqf-fhir-cql</module>

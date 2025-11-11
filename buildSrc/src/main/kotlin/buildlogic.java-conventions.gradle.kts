@@ -17,7 +17,7 @@ repositories {
 dependencies {
     // platforms
     implementation(platform("ca.uhn.hapi.fhir:hapi-fhir-bom:8.4.0"))
-    testImplementation(platform("org.junit:junit-bom:5.14.1"))
+    testImplementation(platform("org.junit:junit-bom:6.0.1"))
 
     compileOnly("jakarta.annotation:jakarta.annotation-api:2.1.1")
 
@@ -29,8 +29,6 @@ dependencies {
 
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-    testRuntimeOnly("org.slf4j:slf4j-simple:2.0.4")
-
 }
 
 java {

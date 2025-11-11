@@ -24,7 +24,7 @@
         <slf4j.version>2.0.4</slf4j.version>
         <cql.version>4.0.0</cql.version>
         <jmh.version>1.36</jmh.version>
-        <spring.version>6.1.20</spring.version>
+        <spring.version>6.2.12</spring.version>
         <hapi.version>8.4.0</hapi.version>
         <picocli.version>4.6.1</picocli.version>
         <guava.version>33.2.1-jre</guava.version>
@@ -75,7 +75,6 @@
     </repositories>
 
     <modules>
-        <module>cqf-fhir-api</module>
         <module>cqf-fhir-utility</module>
         <module>cqf-fhir-test</module>
         <module>cqf-fhir-cql</module>
@@ -132,6 +131,12 @@
                 <groupId>org.cqframework</groupId>
                 <artifactId>engine-fhir</artifactId>
                 <version>${cql.version}</version>
+                <exclusions>
+                  <exclusion>
+                    <groupId>junit</groupId>
+                    <artifactId>junit</artifactId>
+                  </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.cqframework</groupId>
@@ -142,6 +147,12 @@
                 <groupId>org.cqframework</groupId>
                 <artifactId>elm-fhir</artifactId>
                 <version>${cql.version}</version>
+                <exclusions>
+                  <exclusion>
+                    <groupId>junit</groupId>
+                    <artifactId>junit</artifactId>
+                  </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.cqframework</groupId>
@@ -489,7 +500,7 @@
                     <version>3.1.0</version>
                     <executions>
                         <execution>
-                            <id>enforce-no-snapshots</id>
+                            <id>enforce-release-rules</id>
                             <goals>
                                 <goal>enforce</goal>
                             </goals>
@@ -501,6 +512,13 @@
                                     <requireReleaseDeps>
                                         <message>No Snapshot Dependencies Allowed!</message>
                                     </requireReleaseDeps>
+                                    <bannedDependencies>
+                                        <excludes>
+                                            <exclude>junit:junit</exclude>
+                                            <exclude>org.junit.vintage:*</exclude>
+                                        </excludes>
+                                        <searchTransitive>true</searchTransitive>
+                                    </bannedDependencies>
                                 </rules>
                                 <fail>true</fail>
                             </configuration>

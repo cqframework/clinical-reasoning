@@ -27,7 +27,7 @@ jobs:
       - uses: actions/setup-java@v4
         with:
             distribution: 'temurin'
-            java-version: '21.0.1'
+            java-version: '21'
             cache: 'maven'
       - name: Compile
         run: ./mvnw --batch-mode --no-transfer-progress --update-snapshots -T 4 package -DskipTests=true

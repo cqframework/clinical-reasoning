@@ -5,7 +5,6 @@ import static org.opencds.cqf.fhir.cr.visitor.VisitorHelper.processCanonicals;
 import static org.opencds.cqf.fhir.utility.Parameters.newParameters;
 import static org.opencds.cqf.fhir.utility.adapter.IAdapterFactory.createAdapterForResource;
 
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
@@ -54,11 +53,14 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
     private static final String KNOWLEDGE_ARTIFACT_TYPE = "knowledge";
     private static final String TERMINOLOGY_TYPE = "terminology";
     private static final String VALUESET_FHIR_TYPE = "ValueSet";
+    private static final String CRMI_INTENDED_USAGE_CONTEXT_URL =
+            "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-intendedUsageContext";
     protected final TerminologyServerClient terminologyServerClient;
     protected final ExpandHelper expandHelper;
 
     protected Map<String, List<?>> resourceTypes = new HashMap<>();
     private IBaseOperationOutcome messages;
+    private final IAdapterFactory adapterFactory;
 
     public PackageVisitor(IRepository repository) {
         this(repository, (TerminologyServerClient) null, null);
@@ -72,6 +74,7 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
         super(repository);
         this.terminologyServerClient = new TerminologyServerClient(fhirContext(), terminologyServerClientSettings);
         this.expandHelper = new ExpandHelper(this.repository, terminologyServerClient);
+        this.adapterFactory = IAdapterFactory.forFhirContext(repository.fhirContext());
         setupResourceTypes();
     }
 
@@ -82,6 +85,7 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
         super(repository, cache);
         this.terminologyServerClient = new TerminologyServerClient(fhirContext(), terminologyServerClientSettings);
         this.expandHelper = new ExpandHelper(this.repository, terminologyServerClient);
+        this.adapterFactory = IAdapterFactory.forFhirContext(repository.fhirContext());
         setupResourceTypes();
     }
 
@@ -93,6 +97,7 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
             terminologyServerClient = client;
         }
         expandHelper = new ExpandHelper(this.repository, terminologyServerClient);
+        this.adapterFactory = IAdapterFactory.forFhirContext(repository.fhirContext());
         setupResourceTypes();
     }
 
@@ -309,10 +314,9 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
 
     protected void applyManifestUsageContextsToValueSets(IKnowledgeArtifactAdapter manifest, IBaseBundle bundle) {
         // Build list of ValueSet adapters from bundle
-        List<IKnowledgeArtifactAdapter> valueSetResources = BundleHelper.getEntryResources(bundle).stream()
+        List<IValueSetAdapter> valueSetResources = BundleHelper.getEntryResources(bundle).stream()
                 .filter(r -> r.fhirType().equals(VALUESET_FHIR_TYPE))
-                .map(r -> (IKnowledgeArtifactAdapter) IAdapterFactory.forFhirVersion(r.getStructureFhirVersionEnum())
-                        .createResource(r))
+                .map(adapterFactory::createValueSet)
                 .toList();
 
         // Filter manifest dependencies to ValueSets only
@@ -320,15 +324,37 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
                 .filter(d -> Objects.equals(Canonicals.getResourceType(d.getReference()), VALUESET_FHIR_TYPE))
                 .toList();
 
-        if (this.fhirVersion().equals(FhirVersionEnum.DSTU3)) {
-            org.opencds.cqf.fhir.cr.visitor.dstu3.PackageVisitor.applyManifestUsageContextsToValueSets(
-                    valueSetResources, dependencies);
-        } else if (this.fhirVersion().equals(FhirVersionEnum.R4)) {
-            org.opencds.cqf.fhir.cr.visitor.r4.PackageVisitor.applyManifestUsageContextsToValueSets(
-                    valueSetResources, dependencies);
-        } else if (this.fhirVersion().equals(FhirVersionEnum.R5)) {
-            org.opencds.cqf.fhir.cr.visitor.r5.PackageVisitor.applyManifestUsageContextsToValueSets(
-                    valueSetResources, dependencies);
+        for (IValueSetAdapter valueSetAdapter : valueSetResources) {
+            // Build canonical string for matching (url + optional version)
+            String canonical = valueSetAdapter.getUrl();
+            if (valueSetAdapter.hasVersion()) {
+                canonical += "|" + valueSetAdapter.getVersion();
+            }
+
+            // Find dependencies that reference this ValueSet
+            String finalCanonical = canonical;
+            dependencies.stream()
+                    .filter(dep -> finalCanonical.equals(dep.getReference()))
+                    .forEach(dep ->
+                            // Look for crmi-intendedUsageContext extensions
+                            dep.getExtension().stream()
+                                    .filter(ext -> CRMI_INTENDED_USAGE_CONTEXT_URL.equals(ext.getUrl()))
+                                    .forEach(ext -> {
+                                        var proposedUsageContextAdapter =
+                                                adapterFactory.createUsageContext(ext.getValue());
+
+                                        boolean alreadyExists = false;
+                                        for (var uc : valueSetAdapter.getUseContext()) {
+                                            var uc1 = adapterFactory.createUsageContext(uc);
+                                            if (uc1.equalsDeep(proposedUsageContextAdapter.get())) {
+                                                alreadyExists = true;
+                                            }
+                                        }
+
+                                        if (!alreadyExists) {
+                                            valueSetAdapter.addUseContext(proposedUsageContextAdapter);
+                                        }
+                                    }));
         }
     }
 

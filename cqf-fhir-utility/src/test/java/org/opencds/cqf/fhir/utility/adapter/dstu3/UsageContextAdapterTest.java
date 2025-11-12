@@ -7,16 +7,17 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import org.hl7.fhir.instance.model.api.IBase;
+
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.UsageContext;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.utility.adapter.ICodeableConceptAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ICodingAdapter;
 
 public class UsageContextAdapterTest {
-@Test
+    @Test
     void constructorThrowsWhenNotUsageContext() {
         // Arrange: pass a CodeableConcept (not a UsageContext)
         CodeableConcept cc = new CodeableConcept();

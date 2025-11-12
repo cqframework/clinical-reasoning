@@ -457,7 +457,7 @@ public class MeasureEvaluator {
     }
 
     private void evaluateStratifier(String subjectId, EvaluationResult evaluationResult, StratifierDef stratifierDef) {
-        if (!stratifierDef.components().isEmpty()) {
+        if (stratifierDef.isComponentStratifier()) {
             addStratifierComponentResult(stratifierDef.components(), evaluationResult, subjectId);
         } else {
             addStratifierNonComponentResult(subjectId, evaluationResult, stratifierDef);
@@ -501,7 +501,7 @@ public class MeasureEvaluator {
             for (StratifierDef stratifierDef : groupDef.stratifiers()) {
                 final List<StratumDef> stratumDefs;
 
-                if (!stratifierDef.components().isEmpty()) {
+                if (stratifierDef.isComponentStratifier()) {
                     stratumDefs = componentStratumPlural(stratifierDef, groupDef.populations());
                 } else {
                     stratumDefs = nonComponentStratumPlural(stratifierDef, groupDef.populations());
@@ -614,7 +614,7 @@ public class MeasureEvaluator {
         // subject2: 'gender'--> 'F'
         // stratifier criteria results are: 'M', 'F'
 
-        if (MeasureStratifierType.CRITERIA == stratifierDef.getStratifierType()) {
+        if (stratifierDef.isCriteriaStratifier()) {
             // Seems to be irrelevant for criteria based stratifiers
             var stratValues = Set.<StratumValueDef>of();
             // Seems to be irrelevant for criteria based stratifiers

@@ -15,7 +15,7 @@ public class UsageContextAdapter extends BaseAdapter implements IUsageContextAda
     private final UsageContext usageContext;
 
     public UsageContextAdapter(IBase usageContext) {
-        super(FhirVersionEnum.R4, usageContext);
+        super(FhirVersionEnum.DSTU3, usageContext);
         if (!(usageContext instanceof UsageContext)) {
             throw new IllegalArgumentException("object passed as coding argument is not a UsageContext data type");
         }
@@ -62,7 +62,7 @@ public class UsageContextAdapter extends BaseAdapter implements IUsageContextAda
     }
 
     @Override
-    public boolean equalsDeep(IBase obj) {
+    public boolean equalsDeep(IUsageContextAdapter obj) {
         if (!(obj instanceof UsageContextAdapter usageContextAdapter)) return false;
         return get().equalsDeep(usageContextAdapter.get());
     }

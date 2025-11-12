@@ -346,7 +346,7 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
                                         boolean alreadyExists = false;
                                         for (var uc : valueSetAdapter.getUseContext()) {
                                             var uc1 = adapterFactory.createUsageContext(uc);
-                                            if (uc1.equalsDeep(proposedUsageContextAdapter.get())) {
+                                            if (uc1.equalsDeep(proposedUsageContextAdapter)) {
                                                 alreadyExists = true;
                                             }
                                         }

@@ -9,15 +9,13 @@ import org.opencds.cqf.fhir.utility.adapter.BaseAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ICodeableConceptAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ICodingAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IUsageContextAdapter;
-import org.opencds.cqf.fhir.utility.adapter.r4.CodeableConceptAdapter;
-import org.opencds.cqf.fhir.utility.adapter.r4.CodingAdapter;
 
 public class UsageContextAdapter extends BaseAdapter implements IUsageContextAdapter {
 
     private final UsageContext usageContext;
 
     public UsageContextAdapter(IBase usageContext) {
-        super(FhirVersionEnum.R4, usageContext);
+        super(FhirVersionEnum.R5, usageContext);
         if (!(usageContext instanceof UsageContext)) {
             throw new IllegalArgumentException("object passed as coding argument is not a UsageContext data type");
         }
@@ -64,7 +62,7 @@ public class UsageContextAdapter extends BaseAdapter implements IUsageContextAda
     }
 
     @Override
-    public boolean equalsDeep(IBase obj) {
+    public boolean equalsDeep(IUsageContextAdapter obj) {
         if (!(obj instanceof UsageContextAdapter usageContextAdapter)) return false;
         return get().equalsDeep(usageContextAdapter.get());
     }

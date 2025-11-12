@@ -62,7 +62,7 @@ public class UsageContextAdapter extends BaseAdapter implements IUsageContextAda
     }
 
     @Override
-    public boolean equalsDeep(IBase obj) {
+    public boolean equalsDeep(IUsageContextAdapter obj) {
         if (!(obj instanceof UsageContextAdapter usageContextAdapter)) return false;
         return get().equalsDeep(usageContextAdapter.get());
     }

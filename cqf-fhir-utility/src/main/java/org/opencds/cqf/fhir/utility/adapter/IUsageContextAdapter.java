@@ -15,5 +15,5 @@ public interface IUsageContextAdapter extends IAdapter<IBase> {
 
     ICodeableConceptAdapter getValueCodeableConcept();
 
-    boolean equalsDeep(IBase other);
+    boolean equalsDeep(IUsageContextAdapter other);
 }

@@ -33,7 +33,7 @@ class CodeCacheResourceChangeListenerTest {
     private DaoRegistry myDaoRegistry;
 
     @Mock
-    private IFhirResourceDao<?> myValueSetDao;
+    private IFhirResourceDao<ValueSet> myValueSetDao;
 
     @Mock
     private Map<String, List<Code>> myGlobalValueSetCache;
@@ -95,8 +95,8 @@ class CodeCacheResourceChangeListenerTest {
 
         ValueSet valueSet = new ValueSet().setUrl("acme.org/myValueset");
 
-        when(myValueSetDao.read(eq(myValueSetId.toUnqualifiedVersionless()), any()))
-                .thenReturn(valueSet);
+        var stub = when(myValueSetDao.read(eq(myValueSetId.toUnqualifiedVersionless()), any()));
+        stub.thenReturn(valueSet);
         when(myGlobalValueSetCache.keySet()).thenReturn(Set.of("http://some.other.valueset.url"));
 
         myListener.handleChange(resourceChangeEvent);

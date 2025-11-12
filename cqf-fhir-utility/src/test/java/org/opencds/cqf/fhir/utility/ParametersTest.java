@@ -1,17 +1,17 @@
 package org.opencds.cqf.fhir.utility;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class ParametersTest {
+class ParametersTest {
 
     @Test
-    public void removeWithOnePart() {
+    void removeWithOnePart() {
         var parameters = new Parameters();
         var ppc = parameters.addParameter().setName("one");
         ppc.addPart().setValue(new StringType("valueOne"));
@@ -22,7 +22,7 @@ public class ParametersTest {
     }
 
     @Test
-    public void removeWithTwoParts() {
+    void removeWithTwoParts() {
         var parameters = new Parameters();
         var ppc = parameters.addParameter().setName("one");
         ppc.addPart().setValue(new StringType("valueOne"));
@@ -34,7 +34,7 @@ public class ParametersTest {
     }
 
     @Test
-    public void nonexistentNameDoesNotModify() {
+    void nonexistentNameDoesNotModify() {
         var parameters = new Parameters();
         var ppc = parameters.addParameter().setName("two");
         ppc.addPart().setValue(new StringType("value"));
@@ -45,7 +45,7 @@ public class ParametersTest {
     }
 
     @Test
-    public void removeWithValue() {
+    void removeWithValue() {
         var parameters = new Parameters();
         var ppc = parameters.addParameter().setName("one");
         ppc.setValue(new StringType("value"));
@@ -56,7 +56,7 @@ public class ParametersTest {
     }
 
     @Test
-    public void removeWithResource() {
+    void removeWithResource() {
         var parameters = new Parameters();
         var ppc = parameters.addParameter().setName("one");
         ppc.setResource(new Encounter().setId("123"));

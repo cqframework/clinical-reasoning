@@ -82,7 +82,8 @@ public class CqlCommand implements Callable<Integer> {
         return arguments.parameters.context.stream().map(c -> {
             var engine = Engines.forRepository(repository, evaluationSettings);
             if (arguments.content.cqlPath != null) {
-                var provider = new DefaultLibrarySourceProvider(Path.of(arguments.content.cqlPath));
+                var provider = new DefaultLibrarySourceProvider(new kotlinx.io.files.Path(
+                        Path.of(arguments.content.cqlPath).toFile()));
                 engine.getEnvironment()
                         .getLibraryManager()
                         .getLibrarySourceLoader()

@@ -50,12 +50,8 @@ import org.opencds.cqf.fhir.cr.measure.common.SdeDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierComponentDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
-
-    private static final Logger logger = LoggerFactory.getLogger(R4MeasureDefBuilder.class);
 
     @Override
     public MeasureDef build(Measure measure) {

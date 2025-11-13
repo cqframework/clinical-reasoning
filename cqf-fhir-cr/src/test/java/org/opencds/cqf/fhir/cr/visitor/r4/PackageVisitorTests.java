@@ -33,7 +33,6 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
-import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
@@ -817,8 +816,9 @@ class PackageVisitorTests {
 
         @SuppressWarnings("unchecked")
         var staticBundleHelper = org.mockito.Mockito.mockStatic(org.opencds.cqf.fhir.utility.BundleHelper.class);
-        staticBundleHelper.when(() -> org.opencds.cqf.fhir.utility.BundleHelper.getEntryResources(bundleMock))
-            .thenReturn(List.of(entryResource));
+        staticBundleHelper
+                .when(() -> org.opencds.cqf.fhir.utility.BundleHelper.getEntryResources(bundleMock))
+                .thenReturn(List.of(entryResource));
 
         // Create IValueSetAdapter that will be returned by adapterFactory.createValueSet(...)
         IValueSetAdapter vsAdapterMock = mock(IValueSetAdapter.class);
@@ -853,8 +853,11 @@ class PackageVisitorTests {
         when(existingAdapter.equalsDeep(proposedAdapter)).thenReturn(false);
         when(adapterFactoryMock.createValueSet(any())).thenReturn(vsAdapterMock);
 
-        var method = visitor.getClass().getDeclaredMethod("applyManifestUsageContextsToValueSets",
-            org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter.class, IBaseBundle.class);
+        var method = visitor.getClass()
+                .getDeclaredMethod(
+                        "applyManifestUsageContextsToValueSets",
+                        org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter.class,
+                        IBaseBundle.class);
         method.setAccessible(true);
         method.invoke(visitor, manifestMock, bundleMock);
 
@@ -877,8 +880,9 @@ class PackageVisitorTests {
         // mock static BundleHelper to return the resource
         @SuppressWarnings("unchecked")
         var staticBundleHelper = org.mockito.Mockito.mockStatic(org.opencds.cqf.fhir.utility.BundleHelper.class);
-        staticBundleHelper.when(() -> org.opencds.cqf.fhir.utility.BundleHelper.getEntryResources(bundleMock))
-            .thenReturn(List.of(entryResource));
+        staticBundleHelper
+                .when(() -> org.opencds.cqf.fhir.utility.BundleHelper.getEntryResources(bundleMock))
+                .thenReturn(List.of(entryResource));
 
         // Create IValueSetAdapter that will be returned by adapterFactory.createValueSet(...)
         IValueSetAdapter vsAdapterMock = mock(IValueSetAdapter.class);
@@ -913,11 +917,16 @@ class PackageVisitorTests {
         when(existingAdapter.equalsDeep(proposedAdapter)).thenReturn(true);
 
         doAnswer(invocation -> {
-            throw new AssertionError("addUseContext should not be called when existing equals proposed");
-        }).when(vsAdapterMock).addUseContext(any());
+                    throw new AssertionError("addUseContext should not be called when existing equals proposed");
+                })
+                .when(vsAdapterMock)
+                .addUseContext(any());
 
-        var method = visitor.getClass().getDeclaredMethod("applyManifestUsageContextsToValueSets",
-            org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter.class, IBaseBundle.class);
+        var method = visitor.getClass()
+                .getDeclaredMethod(
+                        "applyManifestUsageContextsToValueSets",
+                        org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter.class,
+                        IBaseBundle.class);
         method.setAccessible(true);
         method.invoke(visitor, manifestMock, bundleMock);
 

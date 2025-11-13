@@ -3,9 +3,11 @@ package org.opencds.cqf.fhir.cr.hapi.cdshooks.discovery;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.opencds.cqf.fhir.utility.Constants.CRMI_EFFECTIVE_DATA_REQUIREMENTS;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.ClasspathUtil;
 import java.util.Arrays;
 import java.util.List;
@@ -26,6 +28,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+@SuppressWarnings("UnstableApiUsage")
 class CrDiscoveryServiceR4Test extends BaseCdsCrDiscoveryServiceTest {
 
     private static final IdType PLAN_DEF_ID_TYPE = new IdType(PLAN_DEF_ID);
@@ -227,6 +230,41 @@ class CrDiscoveryServiceR4Test extends BaseCdsCrDiscoveryServiceTest {
         var library = new Library();
         var invalidResourceTypeResponse = fixture.resolveService(library);
         assertNull(invalidResourceTypeResponse);
+    }
+
+    @Test
+    void testDiscoveryServiceWithEffectiveDataRequirementsFailsIfNotFound() {
+        var planDefinition = new PlanDefinition();
+        planDefinition.addExtension(CRMI_EFFECTIVE_DATA_REQUIREMENTS, new CanonicalType("#moduledefinition-example"));
+        planDefinition.setId("ModuleDefinitionTest");
+        planDefinition.setUrl("http://test.com/fhir/PlanDefinition/ModuleDefinitionTest");
+        repository.update(planDefinition);
+        var planDefAdapter = adapterFactory.createPlanDefinition(planDefinition);
+        var fixture = new CrDiscoveryService(planDefinition.getIdElement(), repository);
+        assertThrows(UnprocessableEntityException.class, () -> fixture.getPrefetchUrlList(planDefAdapter));
+    }
+
+    @Test
+    void testDiscoveryServiceWithContainedEffectiveDataRequirements() {
+        var planDefinition = new PlanDefinition();
+        planDefinition.addExtension(CRMI_EFFECTIVE_DATA_REQUIREMENTS, new CanonicalType("#moduledefinition-example"));
+        planDefinition.setId("ModuleDefinitionTest");
+        planDefinition.setUrl("http://test.com/fhir/PlanDefinition/ModuleDefinitionTest");
+        var library = ClasspathUtil.loadResource(
+                fhirContext, Library.class, "org/opencds/cqf/fhir/cr/hapi/cdshooks/ModuleDefinitionExample.json");
+        planDefinition.addContained(library);
+        repository.update(planDefinition);
+        var planDefAdapter = adapterFactory.createPlanDefinition(planDefinition);
+        var fixture = new CrDiscoveryService(planDefinition.getIdElement(), repository);
+        var actual = fixture.getPrefetchUrlList(planDefAdapter);
+        assertNotNull(actual);
+        var expected = new PrefetchUrlList();
+        expected.addAll(
+                List.of(
+                        "Patient?_id={{context.patientId}}",
+                        "Encounter?status=finished&subject=Patient/{{context.patientId}}&type:in=http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.117.1.7.1.292",
+                        "Coverage?policy-holder=Patient/{{context.patientId}}&type:in=http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.114222.4.11.3591"));
+        assertEquals(expected, actual);
     }
 
     @Test

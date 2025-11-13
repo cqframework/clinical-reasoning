@@ -6,6 +6,7 @@ import static org.opencds.cqf.fhir.utility.Constants.CRMI_EFFECTIVE_DATA_REQUIRE
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.repository.IRepository;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceJson;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +23,7 @@ import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IPlanDefinitionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
 
-@SuppressWarnings("squid:S1135")
+@SuppressWarnings({"squid:S1135", "UnstableApiUsage"})
 public class CrDiscoveryService implements ICrDiscoveryService {
 
     protected static final String PATIENT_ID_CONTEXT = "{{context.patientId}}";
@@ -81,7 +82,18 @@ public class CrDiscoveryService implements ICrDiscoveryService {
                     fhirVersion(), planDefinition.getLibrary().get(0));
         }
         if (canonical != null) {
-            return adapterFactory.createLibrary(SearchHelper.searchRepositoryByCanonical(repository, canonical));
+            IBaseResource library;
+            if (canonical.getValueAsString().startsWith("#")) {
+                var containedId = canonical.getValueAsString().replace("#", "");
+                library = planDefinition.getContained().stream()
+                        .filter(c -> containedId.equals(c.getIdElement().getIdPart()))
+                        .findFirst()
+                        .orElseThrow(() -> new UnprocessableEntityException(
+                                "Unable to find contained resource #%s".formatted(containedId)));
+            } else {
+                library = SearchHelper.searchRepositoryByCanonical(repository, canonical);
+            }
+            return adapterFactory.createLibrary(library);
         }
         return null;
     }

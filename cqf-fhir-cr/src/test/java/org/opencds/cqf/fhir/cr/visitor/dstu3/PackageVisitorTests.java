@@ -64,6 +64,7 @@ import org.opencds.cqf.fhir.utility.adapter.dstu3.AdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.dstu3.LibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.dstu3.ValueSetAdapter;
 import org.opencds.cqf.fhir.utility.client.TerminologyServerClient;
+import org.opencds.cqf.fhir.utility.client.TerminologyServerClientSettings;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
 class PackageVisitorTests {
@@ -81,7 +82,18 @@ class PackageVisitorTests {
         Bundle loadedBundle = (Bundle) jsonParser.parseResource(
                 PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-example-naive.json"));
         repo.transaction(loadedBundle);
-        var packageVisitor = new PackageVisitor(repo);
+
+        var settings = TerminologyServerClientSettings.getDefault()
+                .setMaxRetryCount(5)
+                .setRetryIntervalMillis(500)
+                .setTimeoutSeconds(10)
+                .setSocketTimeout(45)
+                .setCrmiVersion("2.0.0")
+                .setExpansionsPerPage(500)
+                .setMaxExpansionPages(500);
+        var settingsCopy = new TerminologyServerClientSettings(settings);
+
+        var packageVisitor = new PackageVisitor(repo, settingsCopy, null);
         Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
         ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);

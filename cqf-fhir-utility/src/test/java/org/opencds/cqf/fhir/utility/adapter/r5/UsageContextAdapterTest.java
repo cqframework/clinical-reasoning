@@ -16,7 +16,6 @@ import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.ICodeableConceptAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ICodingAdapter;
-import org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory;
 
 class UsageContextAdapterTest {
     private final IAdapterFactory adapterFactory = new AdapterFactory();

@@ -13,17 +13,21 @@ import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.UsageContext;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.ICodeableConceptAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ICodingAdapter;
+import org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory;
 
-public class UsageContextAdapterTest {
+class UsageContextAdapterTest {
+    private final IAdapterFactory adapterFactory = new AdapterFactory();
+
     @Test
     void constructorThrowsWhenNotUsageContext() {
         // Arrange: pass a CodeableConcept (not a UsageContext)
         CodeableConcept cc = new CodeableConcept();
 
         // Act & Assert
-        assertThrows(IllegalArgumentException.class, () -> new UsageContextAdapter((IBase) cc));
+        assertThrows(IllegalArgumentException.class, () -> adapterFactory.createUsageContext(cc));
     }
 
     @Test

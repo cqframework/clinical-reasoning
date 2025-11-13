@@ -3,7 +3,6 @@ plugins {
 }
 
 dependencies {
-    api(project(":cqf-fhir-api"))
     api(project(":cqf-fhir-utility"))
     api(libs.org.cqframework.cql.to.elm)
     api(libs.org.cqframework.ucum)

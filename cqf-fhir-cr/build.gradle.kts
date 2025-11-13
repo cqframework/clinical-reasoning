@@ -3,7 +3,6 @@ plugins {
 }
 
 dependencies {
-    api(project(":cqf-fhir-api"))
     api(project(":cqf-fhir-cql"))
     api(project(":cqf-fhir-utility"))
     testImplementation(project(":cqf-fhir-test"))

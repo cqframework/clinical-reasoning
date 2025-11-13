@@ -140,7 +140,7 @@
     ],
     "java.configuration.updateBuildConfiguration": "automatic",
     "java.dependency.packagePresentation": "hierarchical",
-    "java.jdt.ls.vmargs": "-Xmx32G -XX:+UseG1GC -XX:+UseStringDeduplication",
+    "java.jdt.ls.vmargs": "-Xmx64G -XX:+UseG1GC -XX:+UseStringDeduplication",
     "java.compile.nullAnalysis.mode": "automatic",
     "json.schemaDownload.enable": true,
     "[markdown]": {

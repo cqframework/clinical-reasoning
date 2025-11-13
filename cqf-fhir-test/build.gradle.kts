@@ -3,7 +3,6 @@ plugins {
 }
 
 dependencies {
-    api(project(":cqf-fhir-api"))
     api(libs.ca.uhn.hapi.fhir.hapi.fhir.caching.caffeine)
     testImplementation(libs.org.skyscreamer.jsonassert)
 }

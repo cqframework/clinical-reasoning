@@ -3,7 +3,6 @@ plugins {
 }
 
 dependencies {
-    api(project(":cqf-fhir-api"))
     api(project(":cqf-fhir-utility"))
     api(project(":cqf-fhir-cql"))
     api(libs.info.picocli.picocli)

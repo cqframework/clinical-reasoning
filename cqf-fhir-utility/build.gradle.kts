@@ -22,6 +22,7 @@ dependencies {
     testImplementation(libs.org.mockito.mockito.junit.jupiter)
     testImplementation(project(":cqf-fhir-test"))
     testImplementation(libs.com.github.valfirst.slf4j.test)
+    implementation(kotlin("stdlib-jdk8"))
 }
 
 description = "FHIR Clinical Reasoning (Utilities)"

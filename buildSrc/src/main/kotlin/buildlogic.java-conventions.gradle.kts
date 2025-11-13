@@ -1,4 +1,5 @@
 plugins {
+    kotlin("jvm")
     id("com.diffplug.spotless")
     `java-library`
     `maven-publish`
@@ -6,10 +7,7 @@ plugins {
 
 repositories {
     mavenLocal()
-    maven {
-        url = uri("https://repo.maven.apache.org/maven2/")
-    }
-
+    mavenCentral()
     maven {
         url = uri("https://central.sonatype.com/repository/maven-snapshots/")
     }
@@ -20,9 +18,12 @@ dependencies {
     implementation(platform("ca.uhn.hapi.fhir:hapi-fhir-bom:8.4.0"))
     testImplementation(platform("org.junit:junit-bom:6.0.1"))
 
+    // @Nonnull, @Nullable compiler analysis
     compileOnly("jakarta.annotation:jakarta.annotation-api:2.1.1")
 
+    // Common dependencies across all projects
     api("org.slf4j:slf4j-api:2.0.4")
+    implementation(kotlin("stdlib-jdk8"))
 
     testImplementation("org.hamcrest:hamcrest-all:1.3")
     testImplementation("org.mockito:mockito-core:5.5.0")
@@ -38,6 +39,10 @@ java {
     }
 }
 
+kotlin {
+    jvmToolchain(17)
+}
+
 group = "org.opencds.cqf.fhir"
 version = "4.0.0-SNAPSHOT"
 
@@ -47,7 +52,7 @@ publishing {
     }
 }
 
-tasks.withType<JavaCompile>() {
+tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"
 }
 
@@ -64,5 +69,11 @@ spotless {
     java {
         targetExclude("**/generated/**")
         palantirJavaFormat("2.38.0")
+    }
+
+    kotlin {
+        target("**/*.kt")
+        targetExclude("**/generated/**", "**/generated-sources/**")
+        ktfmt().kotlinlangStyle()
     }
 }

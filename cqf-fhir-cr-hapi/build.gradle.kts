@@ -3,10 +3,10 @@ plugins {
 }
 
 dependencies {
-    api(libs.ca.uhn.hapi.fhir.hapi.fhir.validation)
-    api(libs.ca.uhn.hapi.fhir.hapi.fhir.converter)
     api(project(":cqf-fhir-cr"))
     api(project(":cqf-fhir-utility"))
+    api(libs.ca.uhn.hapi.fhir.hapi.fhir.validation)
+    api(libs.ca.uhn.hapi.fhir.hapi.fhir.converter)
     api(libs.ca.uhn.hapi.fhir.hapi.fhir.jpaserver.base)
     api(libs.ca.uhn.hapi.fhir.hapi.fhir.storage)
     api("jakarta.annotation:jakarta.annotation-api:2.1.1")

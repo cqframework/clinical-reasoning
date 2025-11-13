@@ -1,5 +1,6 @@
 plugins {
     id("buildlogic.java-conventions")
+    id("buildlogic.publish-conventions")
 }
 
 dependencies {
@@ -12,9 +13,7 @@ dependencies {
     api(libs.org.cqframework.engine.fhir)
     api(libs.org.cqframework.cqf.fhir)
     api(libs.org.cqframework.cqf.fhir.npm)
-    testImplementation(libs.org.mockito.mockito.junit.jupiter)
     testImplementation(project(":cqf-fhir-test"))
-    testImplementation(libs.com.github.valfirst.slf4j.test)
 }
 
 description = "FHIR Clinical Reasoning (CQL)"

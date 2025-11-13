@@ -1,5 +1,6 @@
 plugins {
     id("buildlogic.java-conventions")
+    id("buildlogic.publish-conventions")
 }
 
 dependencies {
@@ -10,6 +11,7 @@ dependencies {
     api(libs.org.cqframework.elm.fhir)
     api(libs.ca.uhn.hapi.fhir.hapi.fhir.base)
     api(libs.ca.uhn.hapi.fhir.hapi.fhir.client)
+    api(libs.ca.uhn.hapi.fhir.hapi.fhir.structures.dstu2.v1)
     api(libs.ca.uhn.hapi.fhir.hapi.fhir.structures.dstu3)
     api(libs.ca.uhn.hapi.fhir.hapi.fhir.structures.r4)
     api(libs.ca.uhn.hapi.fhir.hapi.fhir.structures.r4b)
@@ -19,10 +21,7 @@ dependencies {
     api(libs.ca.uhn.hapi.fhir.hapi.fhir.validation.resources.r4)
     api(libs.ca.uhn.hapi.fhir.hapi.fhir.validation.resources.r4b)
     api(libs.ca.uhn.hapi.fhir.hapi.fhir.validation.resources.r5)
-    testImplementation(libs.org.mockito.mockito.junit.jupiter)
     testImplementation(project(":cqf-fhir-test"))
-    testImplementation(libs.com.github.valfirst.slf4j.test)
-    implementation(kotlin("stdlib-jdk8"))
 }
 
 description = "FHIR Clinical Reasoning (Utilities)"

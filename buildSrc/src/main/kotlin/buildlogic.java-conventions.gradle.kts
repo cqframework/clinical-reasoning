@@ -1,8 +1,9 @@
 plugins {
     kotlin("jvm")
     id("com.diffplug.spotless")
-    `java-library`
-    `maven-publish`
+    id("jacoco")
+    id("org.jetbrains.dokka")
+    id("io.gitlab.arturbosch.detekt")
 }
 
 repositories {
@@ -24,13 +25,6 @@ dependencies {
     // Common dependencies across all projects
     api("org.slf4j:slf4j-api:2.0.4")
     implementation(kotlin("stdlib-jdk8"))
-
-    testImplementation("org.hamcrest:hamcrest-all:1.3")
-    testImplementation("org.mockito:mockito-core:5.5.0")
-    testImplementation("nl.jqno.equalsverifier:equalsverifier:3.15.6")
-
-    testImplementation("org.junit.jupiter:junit-jupiter")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 java {
@@ -44,25 +38,41 @@ kotlin {
 }
 
 group = "org.opencds.cqf.fhir"
-version = "4.0.0-SNAPSHOT"
+version = project.property("project.version")!!
+description = "FHIR Clinical Reasoning Implementations"
 
-publishing {
-    publications.create<MavenPublication>("maven") {
-        from(components["java"])
-    }
-}
 
 tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"
 }
 
-tasks.test {
-    maxHeapSize = "4g"
-    useJUnitPlatform()
+tasks.withType<Javadoc>() {
+    options {
+        val standardOptions = this as StandardJavadocDocletOptions
+        standardOptions.addStringOption("Xdoclint:none", "-quiet")
+        standardOptions.addBooleanOption("html5", true)
+        encoding = "UTF-8"
+    }
 }
 
-tasks.withType<Javadoc>() {
-    options.encoding = "UTF-8"
+tasks.register<Jar>("dokkaHtmlJar") {
+    dependsOn(tasks.dokkaHtml)
+    from(tasks.dokkaHtml.flatMap { it.outputDirectory })
+    archiveClassifier.set("html-docs")
+}
+
+jacoco {
+    toolVersion = "0.8.11"
+}
+
+tasks.test {
+    maxHeapSize = "4G"
+    configure<JacocoTaskExtension> {
+        excludes = listOf("org/hl7/fhir/**", "ca/uhn/fhir/**", "org/cqframework/**")
+    }
+
+    useJUnitPlatform()
+    finalizedBy(tasks.jacocoTestReport) // report is always generated after tests run
 }
 
 spotless {
@@ -77,3 +87,8 @@ spotless {
         ktfmt().kotlinlangStyle()
     }
 }
+
+detekt {
+    buildUponDefaultConfig = true
+}
+

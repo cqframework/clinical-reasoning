@@ -4,11 +4,17 @@ plugins {
 }
 
 dependencies {
-    api(libs.org.cqframework.engine)
-    api(libs.org.cqframework.engine.fhir)
+    // CQL
     api(libs.org.cqframework.cql.to.elm)
     api(libs.org.cqframework.ucum)
     api(libs.org.cqframework.elm.fhir)
+    api(libs.org.cqframework.quick)
+    api(libs.org.cqframework.engine)
+    api(libs.org.cqframework.engine.fhir)
+    api(libs.org.cqframework.cqf.fhir)
+    api(libs.org.cqframework.cqf.fhir.npm)
+
+    // HAPI
     api(libs.ca.uhn.hapi.fhir.hapi.fhir.base)
     api(libs.ca.uhn.hapi.fhir.hapi.fhir.client)
     api(libs.ca.uhn.hapi.fhir.hapi.fhir.structures.dstu2.v1)

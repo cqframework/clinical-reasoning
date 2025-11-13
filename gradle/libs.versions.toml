@@ -6,10 +6,7 @@ spring = "6.2.12"
 slf4j = "2.0.4"
 picocli = "4.6.1"
 valfirst-slf4j-test = "3.0.1"
-apache-commons = "1.26.0"
-commons-codec = "1.20.0"
 jmh = "1.36"
-reflections = "0.10.2"
 jsonassert = "1.5.1"
 mockito = "5.5.0"
 
@@ -46,16 +43,10 @@ org-cqframework-engine-fhir = { module = "org.cqframework:engine-fhir", version.
 org-cqframework-quick = { module = "org.cqframework:quick", version.ref = "cql" }
 org-cqframework-ucum = { module = "org.cqframework:ucum", version.ref = "cql" }
 
-commons-codec-commons-codec = { module = "commons-codec:commons-codec", version.ref = "commons-codec" }
-org-apache-commons-commons-compress = { module = "org.apache.commons:commons-compress", version.ref = "apache-commons" }
-
 info-picocli-picocli = { module = "info.picocli:picocli", version.ref = "picocli" }
 
-org-reflections-reflections = { module = "org.reflections:reflections", version.ref = "reflections" }
 
 org-springframework-security-spring-security-core = { module = "org.springframework.security:spring-security-core", version.ref = "spring-security" }
-org-springframework-spring-context = { module = "org.springframework:spring-context", version.ref = "spring" }
-org-springframework-spring-test = { module = "org.springframework:spring-test", version.ref = "spring" }
 
 # test libraries
 org-mockito-mockito-junit-jupiter = { module = "org.mockito:mockito-junit-jupiter", version.ref = "mockito" }

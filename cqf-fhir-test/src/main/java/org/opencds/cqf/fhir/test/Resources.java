@@ -31,7 +31,7 @@ public class Resources {
      * @return the on-disk path for the class resources
      */
     public static String getResourcePath(Class<?> clazz) {
-       return Path.of(getResourceUri(clazz)).toString();
+        return Path.of(getResourceUri(clazz)).toString();
     }
 
     /**
@@ -42,8 +42,7 @@ public class Resources {
     public static URI getResourceUri(Class<?> clazz) {
         try {
             return getResourcePath(clazz, "/");
-        }
-        catch (URISyntaxException e) {
+        } catch (URISyntaxException e) {
             return null;
         }
     }
@@ -58,20 +57,19 @@ public class Resources {
         var resourceUrl = clazz.getResource(sourcePackage);
         if (resourceUrl == null) {
             var msg = "Unable to determine resource url for class %s and sourcePackage %s"
-                .formatted(clazz.getSimpleName(), sourcePackage);
+                    .formatted(clazz.getSimpleName(), sourcePackage);
             throw new IllegalArgumentException(msg);
         }
         var uri = resourceUrl.toURI();
         // Handle some gradle-specific shenanigans, which is that under dev gradle splits
         // the classes and resources into separate directories: build/classes and build/resources
         var trace = String.join(
-            ",",
-            Arrays.stream(
-                Thread.currentThread().getStackTrace())
-                .map(StackTraceElement::toString).toList());
-        boolean runningInGradle =
-            trace.contains("org.gradle") ||
-                System.getProperty("java.class.path", "").contains("gradle");
+                ",",
+                Arrays.stream(Thread.currentThread().getStackTrace())
+                        .map(StackTraceElement::toString)
+                        .toList());
+        boolean runningInGradle = trace.contains("org.gradle")
+                || System.getProperty("java.class.path", "").contains("gradle");
         if (runningInGradle) {
             var path = uri.getPath();
 
@@ -79,18 +77,18 @@ public class Resources {
             final var buildResourcesPath = "build/resources";
 
             // switch back to resources root, rather than classes root.
-            if(uri.getPath().contains(buildClassesPath)) {
+            if (uri.getPath().contains(buildClassesPath)) {
                 path = path.replace(buildClassesPath, buildResourcesPath);
             }
 
             // build/resources/main/ or build/resources/test or other source set
-            var nextSlashAfterSourceSet = path.indexOf("/", path.indexOf(buildResourcesPath) + buildResourcesPath.length() + 1);
+            var nextSlashAfterSourceSet =
+                    path.indexOf("/", path.indexOf(buildResourcesPath) + buildResourcesPath.length() + 1);
 
             var clazzPackage = clazz.getPackageName().replace(".", "/");
             if (sourcePackage.isEmpty() && path.contains(buildResourcesPath)) {
                 path = path.substring(0, nextSlashAfterSourceSet + 1) + clazzPackage + "/";
             }
-
 
             // "/" returns the resource root under maven and java
             // in gradle it returns the package-qualified root
@@ -99,14 +97,13 @@ public class Resources {
             }
 
             uri = new URI(
-                uri.getScheme(),
-                uri.getUserInfo(),
-                uri.getHost(),
-                uri.getPort(),
-                path,
-                uri.getQuery(),
-                uri.getFragment()
-            );
+                    uri.getScheme(),
+                    uri.getUserInfo(),
+                    uri.getHost(),
+                    uri.getPort(),
+                    path,
+                    uri.getQuery(),
+                    uri.getFragment());
         }
 
         return uri;
@@ -179,23 +176,23 @@ public class Resources {
     record PathReference(Path path, FileSystem fs) implements AutoCloseable {
 
         public void close() throws IOException {
-                if (this.fs != null) {
-                    this.fs.close();
-                }
-            }
-
-            public static PathReference getPath(final URI resPath) throws IOException {
-                try {
-                    // first try getting a path via existing file systems
-                    return new PathReference(Path.of(resPath), null);
-                } catch (final FileSystemNotFoundException e) {
-                    /*
-                     * not directly on file system, so then it's somewhere else (e.g.: JAR)
-                     */
-                    final Map<String, ?> env = Collections.emptyMap();
-                    final FileSystem fs = FileSystems.newFileSystem(resPath, env);
-                    return new PathReference(fs.provider().getPath(resPath), fs);
-                }
+            if (this.fs != null) {
+                this.fs.close();
             }
         }
+
+        public static PathReference getPath(final URI resPath) throws IOException {
+            try {
+                // first try getting a path via existing file systems
+                return new PathReference(Path.of(resPath), null);
+            } catch (final FileSystemNotFoundException e) {
+                /*
+                 * not directly on file system, so then it's somewhere else (e.g.: JAR)
+                 */
+                final Map<String, ?> env = Collections.emptyMap();
+                final FileSystem fs = FileSystems.newFileSystem(resPath, env);
+                return new PathReference(fs.provider().getPath(resPath), fs);
+            }
+        }
+    }
 }

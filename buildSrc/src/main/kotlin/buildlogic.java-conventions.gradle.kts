@@ -1,4 +1,5 @@
 plugins {
+    id("com.diffplug.spotless")
     `java-library`
     `maven-publish`
 }
@@ -57,4 +58,11 @@ tasks.test {
 
 tasks.withType<Javadoc>() {
     options.encoding = "UTF-8"
+}
+
+spotless {
+    java {
+        targetExclude("**/generated/**")
+        palantirJavaFormat()
+    }
 }

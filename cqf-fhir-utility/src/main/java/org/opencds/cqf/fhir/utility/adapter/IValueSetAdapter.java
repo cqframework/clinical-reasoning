@@ -7,6 +7,8 @@ import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
  * This interface exposes common functionality across all FHIR ValueSet versions.
  */
 public interface IValueSetAdapter extends IKnowledgeArtifactAdapter {
+    IValueSetAdapter addUseContext(IUsageContextAdapter usageContext);
+
     <T extends IBaseBackboneElement> void setExpansion(T expansion);
 
     <T extends IBaseBackboneElement> T getExpansion();

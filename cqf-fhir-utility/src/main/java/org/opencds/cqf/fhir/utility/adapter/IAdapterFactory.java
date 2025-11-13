@@ -222,6 +222,14 @@ public interface IAdapterFactory {
             IBase questionnaireResponseItemAnswer);
 
     /**
+     * Creates an adapter that exposes common UsageContext operations across multiple versions of FHIR
+     *
+     * @param usageContext a FHIR UsageContext object
+     * @return an adapter exposing common api calls
+     */
+    IUsageContextAdapter createUsageContext(IBase usageContext);
+
+    /**
      * Creates an adapter that exposes common ValueSet operations across multiple versions of FHIR
      *
      * @param valueSet a FHIR ValueSet object

@@ -1,7 +1,7 @@
 {
-  "id": "CohortBooleanStratCode",
+  "id": "CohortBooleanStratCodeWithExtension",
   "resourceType": "Measure",
-  "url": "http://example.com/Measure/CohortBooleanStratCode",
+  "url": "http://example.com/Measure/CohortBooleanStratCodeWithExtension",
   "library": [
     "http://example.com/Library/LibrarySimple"
   ],
@@ -53,6 +53,12 @@
             ],
             "text": "stratifier-sex"
           },
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-population-stratifier-type",
+              "valueCode": "criteria"
+            }
+          ],
           "component": [
             {
               "id": "stratifier-1-comp-1",

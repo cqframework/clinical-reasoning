@@ -78,7 +78,7 @@ class R4StratifierBuilder {
             List<MeasureGroupPopulationComponent> populations,
             GroupDef groupDef) {
 
-        if (!stratifierDef.components().isEmpty()) {
+        if (stratifierDef.isComponentStratifier()) {
             componentStratifier(bc, stratifierDef, reportStratifier, populations, groupDef);
         } else {
             nonComponentStratifier(bc, stratifierDef, reportStratifier, populations, groupDef);
@@ -120,7 +120,7 @@ class R4StratifierBuilder {
         // subject1: 'gender'--> 'M'
         // subject2: 'gender'--> 'F'
         // stratifier criteria results are: 'M', 'F'
-        if (MeasureStratifierType.CRITERIA == stratifierDef.getStratifierType()) {
+        if (stratifierDef.isCriteriaStratifier()) {
             var reportStratum = reportStratifier.addStratum();
             // Ideally, the stratum def should have these values empty in MeasureEvaluator
             // Seems to be irrelevant for criteria based stratifiers
@@ -392,7 +392,7 @@ class R4StratifierBuilder {
     private static int getStratumCountUpper(
             StratifierDef stratifierDef, PopulationDef populationDef, List<String> resourceIds) {
 
-        if (MeasureStratifierType.CRITERIA == stratifierDef.getStratifierType()) {
+        if (stratifierDef.isCriteriaStratifier()) {
             final Map<String, CriteriaResult> stratifierResultsBySubject = stratifierDef.getResults();
 
             final List<Object> allPopulationStratumIntersectingResources = new ArrayList<>();
@@ -518,7 +518,7 @@ class R4StratifierBuilder {
 
         final Expression criteria = measureStratifier.getCriteria();
 
-        if (MeasureStratifierType.CRITERIA == stratifierDef.getStratifierType()
+        if (stratifierDef.isCriteriaStratifier()
                 && criteria != null
                 && criteria.hasLanguage()
                 && "text/cql.identifier".equals(criteria.getLanguage())) {

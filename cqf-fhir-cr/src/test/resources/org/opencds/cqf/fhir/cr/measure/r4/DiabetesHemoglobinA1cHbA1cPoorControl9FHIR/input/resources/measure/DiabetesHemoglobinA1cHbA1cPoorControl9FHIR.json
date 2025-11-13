@@ -133,10 +133,15 @@
         "text": "stratifier-ethnicity"
       },
       "description": "Ethnicity (CDC Value Set)",
-      "criteria": {
-        "language": "text/cql",
-        "expression": "SDE Ethnicity"
-      }
+      "component": [
+        {
+          "id": "stratifier-ethnicity-comp-one",
+          "criteria": {
+            "language": "text/cql",
+            "expression": "SDE Ethnicity"
+          }
+        }
+      ]
     }, {
      "id": "stratifier-payer",
       "code": {
@@ -148,10 +153,15 @@
         "text": "stratifier-payer"
       },
       "description": "Payer",
-      "criteria": {
-        "language": "text/cql",
-        "expression": "SDE Payer"
-      }
+      "component": [
+        {
+          "id": "stratifier-payer-comp-one",
+          "criteria": {
+            "language": "text/cql",
+            "expression": "SDE Payer"
+          }
+        }
+      ]
     }, {
       "id": "stratifier-race",
       "code": {
@@ -163,10 +173,15 @@
         "text": "stratifier-race"
       },
       "description": "Race (CDC Value Set)",
-      "criteria": {
-        "language": "text/cql",
-        "expression": "SDE Race"
-      }
+      "component": [
+        {
+          "id": "stratifier-race-comp-one",
+          "criteria": {
+            "language": "text/cql",
+            "expression": "SDE Race"
+          }
+        }
+      ]
     }, {
       "id": "stratifier-sex",
       "code": {
@@ -178,10 +193,15 @@
         "text": "stratifier-sex"
       },
       "description": "Administrative sex",
-      "criteria": {
-        "language": "text/cql",
-        "expression": "SDE Sex"
-      }
+      "component": [
+        {
+          "id": "stratifier-sex-comp-one",
+          "criteria": {
+            "language": "text/cql",
+            "expression": "SDE Sex"
+          }
+        }
+      ]
     }, {
      "id": "stratifier-age-group",
       "code": {
@@ -193,10 +213,15 @@
         "text": "stratifier-age-group"
       },
       "description": "Age Group",
-      "criteria": {
-        "language": "text/cql",
-        "expression": "SDE Age Group"
-      }
+      "component": [
+        {
+          "id": "stratifier-age-group-comp-one",
+          "criteria": {
+            "language": "text/cql",
+            "expression": "SDE Age Group"
+          }
+        }
+      ]
     }, {
       "id": "stratifier-food-insecurity-risk-status",
       "code": {
@@ -208,10 +233,15 @@
         "text": "stratifier-food-insecurity-risk-status"
       },
       "description": "Food insecurity risk status",
-      "criteria": {
-        "language": "text/cql",
-        "expression": "SDE Food Insecurity Risk Status"
-      }
+      "component": [
+        {
+          "id": "stratifier-food-insecurity-risk-status-comp-one",
+          "criteria": {
+            "language": "text/cql",
+            "expression": "SDE Food Insecurity Risk Status"
+          }
+        }
+      ]
     } ]
   } ],
   "supplementalData": [ {

@@ -49,10 +49,10 @@ import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.SdeDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierComponentDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
-import org.opencds.cqf.fhir.cr.measure.common.StratifierUtils;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 
 public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
+
     @Override
     public MeasureDef build(Measure measure) {
         checkId(measure);
@@ -114,8 +114,9 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                 buildPopulationDefForDateOfCompliance(measure.getUrl(), group, populationsWithCriteriaReference);
 
         // Stratifiers
-        var stratifiers =
-                group.getStratifier().stream().map(this::buildStratifierDef).toList();
+        var stratifiers = group.getStratifier().stream()
+                .map(mgsc -> buildStratifierDef(measure.getUrl(), mgsc))
+                .toList();
 
         return new GroupDef(
                 group.getId(),
@@ -244,7 +245,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
     }
 
     @Nonnull
-    private StratifierDef buildStratifierDef(MeasureGroupStratifierComponent mgsc) {
+    private StratifierDef buildStratifierDef(String measureUrl, MeasureGroupStratifierComponent mgsc) {
         checkId(mgsc);
 
         // Components
@@ -261,15 +262,15 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
 
         if (!components.isEmpty() && mgsc.getCriteria().getExpression() != null) {
             throw new InvalidRequestException(
-                    "Measure stratifier: %s, has both component and stratifier criteria expression defined. Only one should be specified"
-                            .formatted(mgsc.getId()));
+                    "Measure: %s with stratifier: %s, has both components and stratifier criteria expressions defined. Only one should be specified"
+                            .formatted(measureUrl, mgsc.getId()));
         }
 
         return new StratifierDef(
                 mgsc.getId(),
                 conceptToConceptDef(mgsc.getCode()),
                 mgsc.getCriteria().getExpression(),
-                getStratifierType(mgsc),
+                getStratifierType(measureUrl, mgsc),
                 components);
     }
 
@@ -291,14 +292,32 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
     }
 
     private static MeasureStratifierType getStratifierType(
-            MeasureGroupStratifierComponent measureGroupStratifierComponent) {
+            String measureUrl, MeasureGroupStratifierComponent measureGroupStratifierComponent) {
         if (measureGroupStratifierComponent == null) {
             return MeasureStratifierType.VALUE;
         }
 
-        final List<Extension> stratifierExtensions = measureGroupStratifierComponent.getExtension();
+        final boolean hasCriteria = measureGroupStratifierComponent.hasCriteria();
 
-        return StratifierUtils.getStratifierType(stratifierExtensions);
+        final boolean hasAnyComponentCriteria = measureGroupStratifierComponent.getComponent().stream()
+                .anyMatch(MeasureGroupStratifierComponentComponent::hasCriteria);
+
+        if (hasCriteria && hasAnyComponentCriteria) {
+            throw new InvalidRequestException(
+                    "Stratifier Cannot have both criteria: %s and any component criteria: %s for measure: %s"
+                            .formatted(hasCriteria, hasAnyComponentCriteria, measureUrl));
+        }
+
+        if (!hasCriteria && !hasAnyComponentCriteria) {
+            throw new InvalidRequestException(
+                    "Stratifier cannot have neither criteria nor component for measure: %s".formatted(measureUrl));
+        }
+
+        if (hasCriteria) {
+            return MeasureStratifierType.CRITERIA;
+        }
+
+        return MeasureStratifierType.VALUE;
     }
 
     private static void triggerFirstPassValidation(Measure measure) {

@@ -1,8 +1,8 @@
 {
-  "id": "CriteriaBasedStratifiersSimpleBad",
+  "id": "InvalidStratifierCriteriaAndComponentCriteria",
   "resourceType": "Measure",
-  "name": "CriteriaBasedStratifiersSimpleBad",
-  "url": "http://example.com/Measure/CriteriaBasedStratifiersSimpleBad",
+  "name": "InvalidStratifierCriteriaAndComponentCriteria",
+  "url": "http://example.com/Measure/InvalidStratifierCriteriaAndComponentCriteria",
   "library": [
     "http://example.com/Library/CriteriaBasedStratifiersSimple"
   ],
@@ -43,12 +43,35 @@
       ],
       "stratifier": [
         {
-          "id": "stratifier-bad",
+          "id": "stratifier-1",
           "criteria": {
             "language": "text/cql.identifier",
-            "expression": "bad criteria stratifier"
-          }
+            "expression": "Age"
+          },
+          "component": [
+            {
+              "id": "stratifier-comp-1",
+              "code": {
+                "text": "Gender"
+              },
+              "criteria": {
+                "language": "text/cql.identifier",
+                "expression": "Gender Stratification"
+              }
+            },
+            {
+              "id": "stratifier-comp-2",
+              "code": {
+                "text": "Age"
+              },
+              "criteria": {
+                "language": "text/cql.identifier",
+                "expression": "Age"
+              }
+            }
+          ]
         }
       ]
-    }]
+    }
+  ]
 }

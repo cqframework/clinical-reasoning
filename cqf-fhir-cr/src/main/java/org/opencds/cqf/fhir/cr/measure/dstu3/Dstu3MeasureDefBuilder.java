@@ -6,13 +6,11 @@ import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.IM
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Element;
-import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.Measure;
 import org.hl7.fhir.dstu3.model.Measure.MeasureGroupComponent;
 import org.hl7.fhir.dstu3.model.Measure.MeasureGroupPopulationComponent;
@@ -30,7 +28,6 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.SdeDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
-import org.opencds.cqf.fhir.cr.measure.common.StratifierUtils;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 
 public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
@@ -89,7 +86,8 @@ public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                         null, // No code on stratifier
                         // in dstu3
                         mgsc.getCriteria(),
-                        getStratifierType(mgsc));
+                        // There's no such thing as a stratifier component in DSTU3, so hard-code to VALUE
+                        MeasureStratifierType.VALUE);
 
                 stratifiers.add(stratifierDef);
             }
@@ -106,32 +104,6 @@ public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         }
 
         return new MeasureDef(measure.getIdElement(), measure.getUrl(), measure.getVersion(), groups, sdes);
-    }
-
-    private static MeasureStratifierType getStratifierType(
-            MeasureGroupStratifierComponent measureGroupStratifierComponent) {
-        if (measureGroupStratifierComponent == null) {
-            return MeasureStratifierType.VALUE;
-        }
-
-        final List<Extension> stratifierExtensions = measureGroupStratifierComponent.getExtension();
-
-        return StratifierUtils.getStratifierType(stratifierExtensions);
-    }
-
-    private PopulationDef checkPopulationForCode(
-            List<PopulationDef> populations, MeasurePopulationType measurePopType) {
-        return populations.stream()
-                .filter(e -> e.code().first().code().equals(measurePopType.toCode()))
-                .findAny()
-                .orElse(null);
-    }
-
-    private ConceptDef totalConceptDefCreator(MeasurePopulationType measurePopulationType) {
-        return new ConceptDef(
-                Collections.singletonList(
-                        new CodeDef(measurePopulationType.getSystem(), measurePopulationType.toCode())),
-                null);
     }
 
     private ConceptDef conceptToConceptDef(CodeableConcept codeable) {

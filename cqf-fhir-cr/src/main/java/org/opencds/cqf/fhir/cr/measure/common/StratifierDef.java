@@ -42,6 +42,14 @@ public class StratifierDef {
         this.components = components;
     }
 
+    public boolean isComponentStratifier() {
+        return !components.isEmpty();
+    }
+
+    public boolean isCriteriaStratifier() {
+        return MeasureStratifierType.CRITERIA == this.stratifierType;
+    }
+
     public String expression() {
         return this.expression;
     }

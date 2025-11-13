@@ -231,7 +231,7 @@ class CrDiscoveryServiceR4Test extends BaseCdsCrDiscoveryServiceTest {
     }
 
     @Test
-    void testDiscoveryServiceWithEffectiveDataRequirements() {
+    void testDiscoveryServiceWithContainedEffectiveDataRequirements() {
         var planDefinition = new PlanDefinition();
         planDefinition.addExtension(CRMI_EFFECTIVE_DATA_REQUIREMENTS, new CanonicalType("#moduledefinition-example"));
         planDefinition.setId("ModuleDefinitionTest");
@@ -240,6 +240,34 @@ class CrDiscoveryServiceR4Test extends BaseCdsCrDiscoveryServiceTest {
                 fhirContext, Library.class, "org/opencds/cqf/fhir/cr/hapi/cdshooks/ModuleDefinitionExample.json");
         planDefinition.addContained(library);
         repository.update(planDefinition);
+        var planDefAdapter = adapterFactory.createPlanDefinition(planDefinition);
+        var fixture = new CrDiscoveryService(planDefinition.getIdElement(), repository);
+        var actual = fixture.getPrefetchUrlList(planDefAdapter);
+        assertNotNull(actual);
+        var expected = new PrefetchUrlList();
+        expected.addAll(
+                List.of(
+                        "Patient?_id={{context.patientId}}",
+                        "Encounter?status=finished&subject=Patient/{{context.patientId}}&type:in=http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.117.1.7.1.292",
+                        "Coverage?policy-holder=Patient/{{context.patientId}}&type:in=http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.114222.4.11.3591"));
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void testDiscoveryServiceWithEffectiveDataRequirements() {
+        var planDefinition = new PlanDefinition();
+        planDefinition.addExtension(
+                CRMI_EFFECTIVE_DATA_REQUIREMENTS,
+                new CanonicalType("http://hl7.org/fhir/uv/crmi/Library/moduledefinition-example"));
+        planDefinition.addExtension(CRMI_EFFECTIVE_DATA_REQUIREMENTS, new CanonicalType("#moduledefinition-example"));
+        planDefinition.setId("ModuleDefinitionTest");
+        planDefinition.setUrl("http://test.com/fhir/PlanDefinition/ModuleDefinitionTest");
+        var library = ClasspathUtil.loadResource(
+                fhirContext, Library.class, "org/opencds/cqf/fhir/cr/hapi/cdshooks/ModuleDefinitionExample.json");
+        planDefinition.addContained(library);
+        repository.update(planDefinition);
+        repository.update(ClasspathUtil.loadResource(
+                fhirContext, Library.class, "org/opencds/cqf/fhir/cr/hapi/cdshooks/ModuleDefinitionExample.json"));
         var planDefAdapter = adapterFactory.createPlanDefinition(planDefinition);
         var fixture = new CrDiscoveryService(planDefinition.getIdElement(), repository);
         var actual = fixture.getPrefetchUrlList(planDefAdapter);

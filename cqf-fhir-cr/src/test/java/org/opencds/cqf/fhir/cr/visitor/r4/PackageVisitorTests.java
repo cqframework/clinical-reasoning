@@ -842,7 +842,7 @@ class PackageVisitorTests {
         UsageContext proposedUc = new UsageContext();
         proposedUc.setCode(new Coding().setCode("priority"));
         proposedUc.setValue(new CodeableConcept().addCoding(new Coding().setCode("routine")));
-        Extension ext = new Extension(CRMI_INTENDED_USAGE_CONTEXT_URL, (org.hl7.fhir.r4.model.Type) proposedUc);
+        Extension ext = new Extension(CRMI_INTENDED_USAGE_CONTEXT_URL, proposedUc);
         when(dependency.getExtension()).thenReturn(List.of(ext));
 
         var existingAdapter = mock(org.opencds.cqf.fhir.utility.adapter.IUsageContextAdapter.class);
@@ -906,7 +906,7 @@ class PackageVisitorTests {
         UsageContext proposedUc = new UsageContext();
         proposedUc.setCode(new Coding().setCode("priority"));
         proposedUc.setValue(new CodeableConcept().addCoding(new Coding().setCode("routine")));
-        Extension ext = new Extension(CRMI_INTENDED_USAGE_CONTEXT_URL, (org.hl7.fhir.r4.model.Type) proposedUc);
+        Extension ext = new Extension(CRMI_INTENDED_USAGE_CONTEXT_URL, proposedUc);
         when(dependency.getExtension()).thenReturn(List.of(ext));
 
         var existingAdapter = mock(org.opencds.cqf.fhir.utility.adapter.IUsageContextAdapter.class);

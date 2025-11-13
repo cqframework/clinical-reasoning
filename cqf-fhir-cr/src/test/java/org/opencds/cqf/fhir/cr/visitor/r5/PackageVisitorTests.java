@@ -31,11 +31,15 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r5.model.Bundle.BundleType;
 import org.hl7.fhir.r5.model.CanonicalType;
+import org.hl7.fhir.r5.model.CodeableConcept;
+import org.hl7.fhir.r5.model.Coding;
 import org.hl7.fhir.r5.model.Endpoint;
+import org.hl7.fhir.r5.model.Extension;
 import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.IntegerType;
 import org.hl7.fhir.r5.model.Library;
@@ -43,6 +47,7 @@ import org.hl7.fhir.r5.model.MetadataResource;
 import org.hl7.fhir.r5.model.Parameters;
 import org.hl7.fhir.r5.model.ResourceType;
 import org.hl7.fhir.r5.model.StringType;
+import org.hl7.fhir.r5.model.UsageContext;
 import org.hl7.fhir.r5.model.ValueSet;
 import org.hl7.fhir.r5.model.ValueSet.ValueSetExpansionComponent;
 import org.junit.jupiter.api.BeforeEach;
@@ -575,5 +580,137 @@ class PackageVisitorTests {
         endpoint.addExtension(new org.hl7.fhir.r5.model.Extension(
                 Constants.APIKEY, new org.hl7.fhir.r5.model.StringType("password")));
         return endpoint;
+    }
+
+    @Test
+    void adds_proposed_usage_context_when_non_equal_to_existing() throws Exception {
+        PackageVisitor visitor = new PackageVisitor(repo);
+        var adapterFactoryMock = mock(AdapterFactory.class);
+        var afField = visitor.getClass().getDeclaredField("adapterFactory");
+        afField.setAccessible(true);
+        afField.set(visitor, adapterFactoryMock);
+
+        IBaseBundle bundleMock = mock(Bundle.class);
+        ValueSet entryResource = new ValueSet();
+
+        @SuppressWarnings("unchecked")
+        var staticBundleHelper = org.mockito.Mockito.mockStatic(org.opencds.cqf.fhir.utility.BundleHelper.class);
+        staticBundleHelper
+                .when(() -> org.opencds.cqf.fhir.utility.BundleHelper.getEntryResources(bundleMock))
+                .thenReturn(List.of(entryResource));
+
+        // Create IValueSetAdapter that will be returned by adapterFactory.createValueSet(...)
+        IValueSetAdapter vsAdapterMock = mock(IValueSetAdapter.class);
+        when(adapterFactoryMock.createValueSet(entryResource)).thenReturn(vsAdapterMock);
+        when(vsAdapterMock.getUrl()).thenReturn("http://example.org/ValueSet/foo");
+        when(vsAdapterMock.hasVersion()).thenReturn(false);
+
+        // existing UseContext on the ValueSet (model object)
+        UsageContext existingUc = new UsageContext();
+        existingUc.setCode(new Coding().setCode("focus"));
+        existingUc.setValue(new CodeableConcept().addCoding(new Coding().setCode("C1")));
+        when(vsAdapterMock.getUseContext()).thenReturn(List.of(existingUc));
+
+        // manifest and dependency wiring
+        var manifestMock = mock(org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter.class);
+        var dependency = mock(org.opencds.cqf.fhir.utility.adapter.IDependencyInfo.class);
+        when(manifestMock.getDependencies()).thenReturn(List.of(dependency));
+        when(dependency.getReference()).thenReturn("http://example.org/ValueSet/foo");
+
+        // proposed UsageContext in extension
+        UsageContext proposedUc = new UsageContext();
+        proposedUc.setCode(new Coding().setCode("priority"));
+        proposedUc.setValue(new CodeableConcept().addCoding(new Coding().setCode("routine")));
+        Extension ext = new Extension(CRMI_INTENDED_USAGE_CONTEXT_URL, proposedUc);
+        when(dependency.getExtension()).thenReturn(List.of(ext));
+
+        var existingAdapter = mock(org.opencds.cqf.fhir.utility.adapter.IUsageContextAdapter.class);
+        var proposedAdapter = mock(org.opencds.cqf.fhir.utility.adapter.IUsageContextAdapter.class);
+        when(adapterFactoryMock.createUsageContext(existingUc)).thenReturn(existingAdapter);
+        when(adapterFactoryMock.createUsageContext(ext.getValue())).thenReturn(proposedAdapter);
+
+        when(existingAdapter.equalsDeep(proposedAdapter)).thenReturn(false);
+        when(adapterFactoryMock.createValueSet(any())).thenReturn(vsAdapterMock);
+
+        var method = visitor.getClass()
+                .getDeclaredMethod(
+                        "applyManifestUsageContextsToValueSets",
+                        org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter.class,
+                        IBaseBundle.class);
+        method.setAccessible(true);
+        method.invoke(visitor, manifestMock, bundleMock);
+
+        verify(vsAdapterMock, times(1)).addUseContext(proposedAdapter);
+
+        staticBundleHelper.close();
+    }
+
+    @Test
+    void skips_adding_when_existing_equals_proposed() throws Exception {
+        PackageVisitor visitor = new PackageVisitor(repo);
+        var adapterFactoryMock = mock(AdapterFactory.class);
+        var afField = visitor.getClass().getDeclaredField("adapterFactory");
+        afField.setAccessible(true);
+        afField.set(visitor, adapterFactoryMock);
+
+        IBaseBundle bundleMock = mock(Bundle.class);
+        ValueSet entryResource = new ValueSet();
+
+        // mock static BundleHelper to return the resource
+        @SuppressWarnings("unchecked")
+        var staticBundleHelper = org.mockito.Mockito.mockStatic(org.opencds.cqf.fhir.utility.BundleHelper.class);
+        staticBundleHelper
+                .when(() -> org.opencds.cqf.fhir.utility.BundleHelper.getEntryResources(bundleMock))
+                .thenReturn(List.of(entryResource));
+
+        // Create IValueSetAdapter that will be returned by adapterFactory.createValueSet(...)
+        IValueSetAdapter vsAdapterMock = mock(IValueSetAdapter.class);
+        when(adapterFactoryMock.createValueSet(entryResource)).thenReturn(vsAdapterMock);
+        when(vsAdapterMock.getUrl()).thenReturn("http://example.org/ValueSet/foo");
+        when(vsAdapterMock.hasVersion()).thenReturn(false);
+
+        // existing UseContext on the ValueSet (model object)
+        UsageContext existingUc = new UsageContext();
+        existingUc.setCode(new Coding().setCode("priority"));
+        existingUc.setValue(new CodeableConcept().addCoding(new Coding().setCode("routine")));
+        when(vsAdapterMock.getUseContext()).thenReturn(List.of(existingUc));
+
+        // manifest and dependency wiring
+        var manifestMock = mock(org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter.class);
+        var dependency = mock(org.opencds.cqf.fhir.utility.adapter.IDependencyInfo.class);
+        when(manifestMock.getDependencies()).thenReturn(List.of(dependency));
+        when(dependency.getReference()).thenReturn("http://example.org/ValueSet/foo");
+
+        // proposed UsageContext in extension (same as existing)
+        UsageContext proposedUc = new UsageContext();
+        proposedUc.setCode(new Coding().setCode("priority"));
+        proposedUc.setValue(new CodeableConcept().addCoding(new Coding().setCode("routine")));
+        Extension ext = new Extension(CRMI_INTENDED_USAGE_CONTEXT_URL, proposedUc);
+        when(dependency.getExtension()).thenReturn(List.of(ext));
+
+        var existingAdapter = mock(org.opencds.cqf.fhir.utility.adapter.IUsageContextAdapter.class);
+        var proposedAdapter = mock(org.opencds.cqf.fhir.utility.adapter.IUsageContextAdapter.class);
+        when(adapterFactoryMock.createUsageContext(existingUc)).thenReturn(existingAdapter);
+        when(adapterFactoryMock.createUsageContext(ext.getValue())).thenReturn(proposedAdapter);
+
+        when(existingAdapter.equalsDeep(proposedAdapter)).thenReturn(true);
+
+        doAnswer(invocation -> {
+                    throw new AssertionError("addUseContext should not be called when existing equals proposed");
+                })
+                .when(vsAdapterMock)
+                .addUseContext(any());
+
+        var method = visitor.getClass()
+                .getDeclaredMethod(
+                        "applyManifestUsageContextsToValueSets",
+                        org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter.class,
+                        IBaseBundle.class);
+        method.setAccessible(true);
+        method.invoke(visitor, manifestMock, bundleMock);
+
+        verify(vsAdapterMock, times(0)).addUseContext(any());
+
+        staticBundleHelper.close();
     }
 }

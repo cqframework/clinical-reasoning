@@ -259,12 +259,8 @@ class CrDiscoveryServiceR4Test extends BaseCdsCrDiscoveryServiceTest {
         planDefinition.addExtension(
                 CRMI_EFFECTIVE_DATA_REQUIREMENTS,
                 new CanonicalType("http://hl7.org/fhir/uv/crmi/Library/moduledefinition-example"));
-        planDefinition.addExtension(CRMI_EFFECTIVE_DATA_REQUIREMENTS, new CanonicalType("#moduledefinition-example"));
         planDefinition.setId("ModuleDefinitionTest");
         planDefinition.setUrl("http://test.com/fhir/PlanDefinition/ModuleDefinitionTest");
-        var library = ClasspathUtil.loadResource(
-                fhirContext, Library.class, "org/opencds/cqf/fhir/cr/hapi/cdshooks/ModuleDefinitionExample.json");
-        planDefinition.addContained(library);
         repository.update(planDefinition);
         repository.update(ClasspathUtil.loadResource(
                 fhirContext, Library.class, "org/opencds/cqf/fhir/cr/hapi/cdshooks/ModuleDefinitionExample.json"));

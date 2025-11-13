@@ -83,7 +83,7 @@ public class CrDiscoveryService implements ICrDiscoveryService {
         }
         if (canonical != null) {
             IBaseResource library;
-            if (canonical.getValueAsString().contains("#")) {
+            if (canonical.getValueAsString().startsWith("#")) {
                 var containedId = canonical.getValueAsString().replace("#", "");
                 library = planDefinition.getContained().stream()
                         .filter(c -> containedId.equals(c.getIdElement().getIdPart()))

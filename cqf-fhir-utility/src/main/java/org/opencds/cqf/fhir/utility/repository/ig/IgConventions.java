@@ -126,8 +126,7 @@ public record IgConventions(
         if (!Files.exists(inputPath)) {
             throw new IllegalArgumentException(
                     "The provided path does not contain an 'input' or 'src' directory: " + path);
-        }
-        else {
+        } else {
             path = inputPath;
         }
 

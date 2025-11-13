@@ -63,6 +63,6 @@ tasks.withType<Javadoc>() {
 spotless {
     java {
         targetExclude("**/generated/**")
-        palantirJavaFormat()
+        palantirJavaFormat("2.38.0")
     }
 }

@@ -41,7 +41,7 @@ public class Resources {
      */
     public static URI getResourceUri(Class<?> clazz) {
         try {
-            return getResourcePath(clazz, "");
+            return getResourcePath(clazz, "/");
         }
         catch (URISyntaxException e) {
             return null;
@@ -55,11 +55,7 @@ public class Resources {
      * @return the on-disk path for the class resources of the sourcePackage
      */
     public static URI getResourcePath(Class<?> clazz, String sourcePackage) throws URISyntaxException {
-        var clazzPackage = clazz.getPackageName();
-        var targetPackage = sourcePackage == null || sourcePackage.isEmpty() ?
-            "/" + clazzPackage.replace(".", "/") :
-            sourcePackage;
-        var resourceUrl = clazz.getResource(targetPackage);
+        var resourceUrl = clazz.getResource(sourcePackage);
         if (resourceUrl == null) {
             var msg = "Unable to determine resource url for class %s and sourcePackage %s"
                 .formatted(clazz.getSimpleName(), sourcePackage);
@@ -76,16 +72,38 @@ public class Resources {
         boolean runningInGradle =
             trace.contains("org.gradle") ||
                 System.getProperty("java.class.path", "").contains("gradle");
+        if (runningInGradle) {
+            var path = uri.getPath();
 
-        if (runningInGradle && uri.getPath().contains("build/classes/java")) {
-            var newPath = uri.getPath()
-                .replace("build/classes/java", "build/resources");
+            final var buildClassesPath = "build/classes/java";
+            final var buildResourcesPath = "build/resources";
+
+            // switch back to resources root, rather than classes root.
+            if(uri.getPath().contains(buildClassesPath)) {
+                path = path.replace(buildClassesPath, buildResourcesPath);
+            }
+
+            // build/resources/main/ or build/resources/test or other source set
+            var nextSlashAfterSourceSet = path.indexOf("/", path.indexOf(buildResourcesPath) + buildResourcesPath.length() + 1);
+
+            var clazzPackage = clazz.getPackageName().replace(".", "/");
+            if (sourcePackage.isEmpty() && path.contains(buildResourcesPath)) {
+                path = path.substring(0, nextSlashAfterSourceSet + 1) + clazzPackage + "/";
+            }
+
+
+            // "/" returns the resource root under maven and java
+            // in gradle it returns the package-qualified root
+            if (sourcePackage.equals("/") && path.contains(buildResourcesPath)) {
+                path = path.substring(0, nextSlashAfterSourceSet + 1);
+            }
+
             uri = new URI(
                 uri.getScheme(),
                 uri.getUserInfo(),
                 uri.getHost(),
                 uri.getPort(),
-                newPath,
+                path,
                 uri.getQuery(),
                 uri.getFragment()
             );

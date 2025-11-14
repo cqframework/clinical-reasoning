@@ -4,7 +4,6 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import java.util.List;
-import java.util.Optional;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CanonicalType;
@@ -99,13 +98,21 @@ public class R4PackageService {
      *                                      the canonicalVersion parameter.
      * @param offset                        Paging support - where to start if a subset is desired
      *                                      (default = 0). Offset is number of records (not number
-     *                                      of pages). If offset > 0 the resulting bundle will be of
-     *                                      type collection.
+     *                                      of pages). It is invalid to request a 'transaction'
+     *                                      bundle, via the bundleType parameter, and use paging.
+     *                                      Doing so will result in an error. When requesting
+     *                                      paging, a bundle of type searchset will be returned.
      * @param count                         Paging support - how many resources should be provided
-     *                                      in a partial page view. If count = 0, the client is
-     *                                      asking how large the package is. If count > 0 but less
-     *                                      than the total number of resources, the result will be a
-     *                                      bundle of type collection.
+     *                                      in a partial page view. It is invalid to request a
+     *                                      'transaction' bundle, via the bundleType parameter, and
+     *                                      use paging. Doing so will result in an error. When
+     *                                      requesting paging, a bundle of type searchset will be
+     *                                      returned.
+     * @param bundleType                    Determines the type of output Bundle. If not specified,
+     *                                      the output bundle will be a transaction bundle. Allowed
+     *                                      values include 'transaction', and 'collection'.
+     *                                      It is invalid to request a 'transaction' bundle and use
+     *                                      paging. Doing so will result in an error.
      * @param include                       Specifies what contents should only be included in the
      *                                      resulting package. The codes indicate which types of
      *                                      resources should be included, but note that the set of
@@ -212,6 +219,7 @@ public class R4PackageService {
             CanonicalType manifest,
             IPrimitiveType<Integer> offset,
             IPrimitiveType<Integer> count,
+            String bundleType,
             IPrimitiveType<Boolean> packageOnly,
             Parameters.ParametersParameterComponent artifactEndpointConfiguration,
             Endpoint terminologyEndpoint) {
@@ -247,6 +255,16 @@ public class R4PackageService {
         if (include != null) {
             include.forEach(i -> params.addParameter("include", i));
         }
+        if (offset != null) {
+            params.addParameter("offset", offset.getValue());
+        }
+        if (count != null) {
+            params.addParameter("count", count.getValue());
+        }
+        if (bundleType != null) {
+            params.addParameter("bundleType", bundleType);
+        }
+
         var adapter = adapterFactory.createKnowledgeArtifactAdapter(resource);
         //        TODO: Wire up caching
         //        PackageVisitor visitor;
@@ -268,13 +286,6 @@ public class R4PackageService {
                 })
                 .findFirst()
                 .ifPresent(m -> KnowledgeArtifactProcessor.handleValueSetReferenceExtensions(m, retVal.getEntry()));
-        // we don't forward these `count` or `offset` parameters to `clinical-reasoning` so that we can handle
-        // VSM-specific operations here using the entire packaged bundle
-        // then we use the logic from the PackageVisitor to page the bundle
-        var maybeCount = Optional.ofNullable(count).map(IPrimitiveType::getValue);
-        var maybeOffset = Optional.ofNullable(offset).map(IPrimitiveType::getValue);
-        PackageVisitor.setCorrectBundleType(maybeCount, maybeOffset, retVal);
-        PackageVisitor.pageBundleBasedOnCountAndOffset(maybeCount, maybeOffset, retVal);
         return retVal;
     }
 }

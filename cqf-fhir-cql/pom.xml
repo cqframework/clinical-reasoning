@@ -5,26 +5,21 @@
 
   <groupId>org.opencds.cqf.fhir</groupId>
   <artifactId>cqf-fhir-cql</artifactId>
-  <version>3.28.0-SNAPSHOT</version>
+  <version>4.0.0-SNAPSHOT</version>
   <name>FHIR Clinical Reasoning (CQL)</name>
   <description>Tools, utilities, code gen to support CQL in FHIR Clinical Reasoning operations</description>
 
   <parent>
     <groupId>org.opencds.cqf.fhir</groupId>
     <artifactId>cqf-fhir</artifactId>
-    <version>3.28.0-SNAPSHOT</version>
+    <version>4.0.0-SNAPSHOT</version>
   </parent>
 
   <dependencies>
     <dependency>
       <groupId>org.opencds.cqf.fhir</groupId>
-      <artifactId>cqf-fhir-api</artifactId>
-      <version>3.28.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opencds.cqf.fhir</groupId>
       <artifactId>cqf-fhir-utility</artifactId>
-      <version>3.28.0-SNAPSHOT</version>
+      <version>4.0.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
@@ -32,44 +27,41 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>info.cqframework</groupId>
+      <groupId>org.cqframework</groupId>
       <artifactId>cql-to-elm</artifactId>
     </dependency>
-      <dependency>
-          <groupId>info.cqframework</groupId>
-          <artifactId>elm-fhir</artifactId>
-      </dependency>
     <dependency>
-      <groupId>info.cqframework</groupId>
+      <groupId>org.cqframework</groupId>
+      <artifactId>ucum</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.cqframework</groupId>
+      <artifactId>elm-fhir</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.cqframework</groupId>
       <artifactId>quick</artifactId>
     </dependency>
     <dependency>
-      <groupId>info.cqframework</groupId>
+      <groupId>org.cqframework</groupId>
       <artifactId>engine</artifactId>
     </dependency>
     <dependency>
-      <groupId>info.cqframework</groupId>
+      <groupId>org.cqframework</groupId>
       <artifactId>engine-fhir</artifactId>
     </dependency>
     <dependency>
-      <groupId>info.cqframework</groupId>
+      <groupId>org.cqframework</groupId>
       <artifactId>cqf-fhir</artifactId>
     </dependency>
     <dependency>
-      <groupId>info.cqframework</groupId>
+      <groupId>org.cqframework</groupId>
       <artifactId>cqf-fhir-npm</artifactId>
     </dependency>
     <dependency>
       <groupId>org.opencds.cqf.fhir</groupId>
       <artifactId>cqf-fhir-test</artifactId>
-      <version>3.28.0-SNAPSHOT</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.opencds.cqf.fhir</groupId>
-      <artifactId>cqf-fhir-jackson</artifactId>
-      <version>3.28.0-SNAPSHOT</version>
-      <type>pom</type>
+      <version>4.0.0-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
     <dependency>

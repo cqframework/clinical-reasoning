@@ -5,13 +5,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.opencds.cqf.fhir.utility.Parameters.newPart;
+import static org.opencds.cqf.fhir.utility.Parameters.newStringPart;
 
+import java.util.Arrays;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Library;
-import org.hl7.fhir.r4.model.Parameters;
-import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.hapi.r4.questionnaire.QuestionnaireDataRequirementsProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.questionnaire.QuestionnairePackageProvider;
@@ -34,20 +36,39 @@ class QuestionnaireOperationsProviderIT extends BaseCrR4TestServer {
         loadBundle("org/opencds/cqf/fhir/cr/hapi/r4/Bundle-QuestionnairePackage.json");
         loadBundle("org/opencds/cqf/fhir/cr/hapi/r4/Bundle-PatientData.json");
         var requestDetails = setupRequestDetails();
+        var fhirContextR4 = requestDetails.getFhirContext();
         var subject = "positive";
-        var parameters = new Parameters()
-                .addParameter("Service Request Id", "SleepStudy")
-                .addParameter("Service Request Id", "SleepStudy2");
+        var context = Arrays.asList(
+                (ParametersParameterComponent) newPart(
+                        fhirContextR4,
+                        "context",
+                        newStringPart(fhirContextR4, "name", "patient"),
+                        newPart(fhirContextR4, "Reference", "content", "Patient/%s".formatted(subject))),
+                (ParametersParameterComponent) newPart(
+                        fhirContextR4,
+                        "context",
+                        newStringPart(fhirContextR4, "name", "ServiceRequest"),
+                        newPart(fhirContextR4, "Reference", "content", "ServiceRequest/SleepStudy")),
+                (ParametersParameterComponent) newPart(
+                        fhirContextR4,
+                        "context",
+                        newStringPart(fhirContextR4, "name", "ServiceRequest"),
+                        newPart(fhirContextR4, "Reference", "content", "ServiceRequest/SleepStudy2")),
+                (ParametersParameterComponent) newPart(
+                        fhirContextR4,
+                        "context",
+                        newStringPart(fhirContextR4, "name", "Coverage"),
+                        newPart(fhirContextR4, "Reference", "content", "Coverage/Coverage-positive")));
         var result = questionnairePopulateProvider.populate(
                 new IdType("Questionnaire", "ASLPA1"),
                 null,
                 null,
                 null,
                 null,
-                new Reference("Patient/" + subject),
+                null,
+                context,
                 null,
                 null,
-                parameters,
                 null,
                 null,
                 null,

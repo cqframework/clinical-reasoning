@@ -14,8 +14,9 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
-import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
+import org.opencds.cqf.fhir.cr.CrSettings;
+import org.opencds.cqf.fhir.cr.common.IOperationProcessor;
 import org.opencds.cqf.fhir.cr.common.ResourceResolver;
 import org.opencds.cqf.fhir.cr.questionnaireresponse.extract.ExtractProcessor;
 import org.opencds.cqf.fhir.cr.questionnaireresponse.extract.ExtractRequest;
@@ -33,28 +34,34 @@ public class QuestionnaireResponseProcessor {
     protected final ResourceResolver questionnaireResponseResolver;
     protected final ResourceResolver questionnaireResolver;
     protected final ModelResolver modelResolver;
-    protected final EvaluationSettings evaluationSettings;
     protected final FhirVersionEnum fhirVersion;
     protected IRepository repository;
+    protected CrSettings crSettings;
     protected IExtractProcessor extractProcessor;
 
     public QuestionnaireResponseProcessor(IRepository repository) {
-        this(repository, EvaluationSettings.getDefault());
+        this(repository, CrSettings.getDefault());
     }
 
-    public QuestionnaireResponseProcessor(IRepository repository, EvaluationSettings evaluationSettings) {
-        this(repository, evaluationSettings, null);
+    public QuestionnaireResponseProcessor(IRepository repository, CrSettings crSettings) {
+        this(repository, crSettings, null);
     }
 
     public QuestionnaireResponseProcessor(
-            IRepository repository, EvaluationSettings evaluationSettings, IExtractProcessor extractProcessor) {
+            IRepository repository, CrSettings crSettings, List<? extends IOperationProcessor> operationProcessors) {
         this.repository = requireNonNull(repository, "repository can not be null");
-        this.evaluationSettings = requireNonNull(evaluationSettings, "evaluationSettings can not be null");
+        this.crSettings = requireNonNull(crSettings, "crSettings can not be null");
         this.questionnaireResponseResolver = new ResourceResolver("QuestionnaireResponse", this.repository);
         this.questionnaireResolver = new ResourceResolver(QUESTIONNAIRE, this.repository);
         this.fhirVersion = this.repository.fhirContext().getVersion().getVersion();
         modelResolver = FhirModelResolverCache.resolverForVersion(fhirVersion);
-        this.extractProcessor = extractProcessor;
+        if (operationProcessors != null && !operationProcessors.isEmpty()) {
+            operationProcessors.forEach(p -> {
+                if (p instanceof IExtractProcessor extract) {
+                    extractProcessor = extract;
+                }
+            });
+        }
     }
 
     public FhirContext fhirContext() {
@@ -138,7 +145,7 @@ public class QuestionnaireResponseProcessor {
                 questionnaireId,
                 parameters,
                 data,
-                new LibraryEngine(repository, evaluationSettings));
+                new LibraryEngine(repository, crSettings.getEvaluationSettings()));
     }
 
     public <R extends IBaseResource> IBaseBundle extract(

@@ -90,7 +90,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         this.reset();
 
         this.measure = measure;
-        this.report = this.createMeasureReport(measure, measureDef, measureReportType, subjectIds, measurementPeriod);
+        this.report = this.createMeasureReport(measure, measureReportType, subjectIds, measurementPeriod);
 
         buildGroups(measure, measureDef);
         processSdes(measure, measureDef, subjectIds);
@@ -287,7 +287,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         reportPopulation.setId(measurePopulation.getId());
 
         if (!measureDef.groups().isEmpty() && !measureDef.groups().get(0).isBooleanBasis()) {
-            reportPopulation.setCount(populationDef.getResources().size());
+            reportPopulation.setCount(populationDef.getAllSubjectResources().size());
         } else {
             reportPopulation.setCount(populationDef.getSubjects().size());
         }
@@ -323,14 +323,14 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         // Population Type behavior
         switch (populationDef.type()) {
             case MEASUREOBSERVATION:
-                buildMeasureObservations(populationDef.expression(), populationDef.getResources());
+                buildMeasureObservations(populationDef.expression(), populationDef.getAllSubjectResources());
                 break;
             default:
                 break;
         }
     }
 
-    protected void buildMeasureObservations(String observationName, Set<Object> resources) {
+    protected void buildMeasureObservations(String observationName, Collection<Object> resources) {
         for (int i = 0; i < resources.size(); i++) {
             // TODO: Do something with the resource...
             Observation observation =
@@ -490,11 +490,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
     }
 
     protected MeasureReport createMeasureReport(
-            Measure measure,
-            MeasureDef measureDef,
-            MeasureReportType type,
-            List<String> subjectIds,
-            Interval measurementPeriod) {
+            Measure measure, MeasureReportType type, List<String> subjectIds, Interval measurementPeriod) {
         MeasureReport report = new MeasureReport();
         report.setStatus(MeasureReport.MeasureReportStatus.fromCode("complete"));
         report.setType(org.hl7.fhir.dstu3.model.MeasureReport.MeasureReportType.fromCode(type.toCode()));
@@ -505,8 +501,6 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
 
         if (measurementPeriod != null) {
             report.setPeriod(getPeriod(measurementPeriod));
-        } else if (measureDef.getDefaultMeasurementPeriod() != null) {
-            report.setPeriod(getPeriod(measureDef.getDefaultMeasurementPeriod()));
         }
 
         report.setMeasure(new Reference(measure.getId()));

@@ -1,5 +1,7 @@
 package org.opencds.cqf.fhir.cql;
 
+import static kotlinx.io.CoreKt.buffered;
+import static kotlinx.io.JvmCoreKt.asSource;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -10,11 +12,11 @@ import static org.opencds.cqf.fhir.utility.r4.Parameters.part;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.repository.IRepository;
 import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Map;
+import kotlinx.io.Source;
 import org.cqframework.cql.cql2elm.LibraryContentType;
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.hl7.elm.r1.VersionedIdentifier;
@@ -140,23 +142,21 @@ class LibraryEngineTests {
         var libraryResourceProvider = new ArrayList<LibrarySourceProvider>();
         libraryResourceProvider.add(new LibrarySourceProvider() {
             @Override
-            public InputStream getLibrarySource(VersionedIdentifier libraryIdentifier) {
+            public Source getLibrarySource(VersionedIdentifier libraryIdentifier) {
                 return null;
             }
 
             @Override
-            public InputStream getLibraryContent(VersionedIdentifier libraryIdentifier, LibraryContentType type) {
+            public Source getLibraryContent(VersionedIdentifier libraryIdentifier, LibraryContentType type) {
                 if ("MyLibrary".equals(libraryIdentifier.getId()))
-                    return new ByteArrayInputStream(libraryCql.getBytes(StandardCharsets.UTF_8));
-                else return LibrarySourceProvider.super.getLibraryContent(libraryIdentifier, type);
+                    return buffered(asSource(new ByteArrayInputStream(libraryCql.getBytes(StandardCharsets.UTF_8))));
+                else return LibrarySourceProvider.DefaultImpls.getLibraryContent(this, libraryIdentifier, type);
             }
         });
         var evaluationSettings = EvaluationSettings.getDefault().withLibrarySourceProviders(libraryResourceProvider);
 
         libraryEngine = new LibraryEngine(repository, evaluationSettings);
-        repository.create(
-                new Patient().addName(new HumanName().addGiven("me")).setId("Patient/Patient1"),
-                Map.of(IgRepository.FHIR_COMPARTMENT_HEADER, "Patient/Patient1"));
+        repository.create(new Patient().addName(new HumanName().addGiven("me")).setId("Patient/Patient1"));
         var patientId = "Patient/Patient1";
         var expression = new CqfExpression(
                 "text/cql", "MyLibrary.MyNameReturner", Map.of("MyLibrary", "http://fhir.test/Library/MyLibrary"));

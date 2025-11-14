@@ -21,12 +21,14 @@ import org.hl7.fhir.r4.model.GraphDefinition.CompartmentCodeEnumFactory;
 import org.hl7.fhir.r4.model.Procedure;
 import org.hl7.fhir.r4.model.Range;
 import org.hl7.fhir.r4.model.Reference;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
 import org.opencds.cqf.cql.engine.runtime.Code;
+import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 import org.opencds.cqf.fhir.cr.measure.common.CodeDef;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
@@ -352,55 +354,71 @@ class R4PopulationBasisValidatorTest {
         testSubject.validateStratifiers(MEASURE_DEF, groupDef, evaluationResult);
     }
 
-    private static Stream<Arguments> validateStratifierBasisTypeErrorPathParams() {
-        return Stream.of(
-                Arguments.of(
-                        buildGroupDef(
-                                Basis.BOOLEAN,
-                                buildPopulationDefs(INITIALPOPULATION, DENOMINATOR, NUMERATOR),
-                                buildStratifierDefs(
-                                        EXPRESSION_INITIALPOPULATION, EXPRESSION_DENOMINATOR, EXPRESSION_NUMERATOR)),
-                        buildEvaluationResult(Map.of(
-                                EXPRESSION_INITIALPOPULATION,
-                                ENCOUNTER,
-                                EXPRESSION_DENOMINATOR,
-                                ENCOUNTER,
-                                EXPRESSION_NUMERATOR,
-                                ENCOUNTER)),
-                        "stratifier expression criteria results for expression: [InitialPopulation] must fall within accepted types for population-basis: [boolean] for Measure: [fakeMeasureUrl] due to mismatch between total result classes: [Encounter] and matching result classes: []"),
-                Arguments.of(
-                        buildGroupDef(
-                                Basis.BOOLEAN,
-                                buildPopulationDefs(INITIALPOPULATION, DENOMINATOR, NUMERATOR),
-                                buildStratifierDefs(
-                                        EXPRESSION_INITIALPOPULATION, EXPRESSION_DENOMINATOR, EXPRESSION_NUMERATOR)),
-                        buildEvaluationResult(Map.of(
-                                EXPRESSION_INITIALPOPULATION,
-                                List.of(ENCOUNTER, ENCOUNTER, ENCOUNTER),
-                                EXPRESSION_DENOMINATOR,
-                                List.of(ENCOUNTER, ENCOUNTER, ENCOUNTER),
-                                EXPRESSION_NUMERATOR,
-                                List.of(ENCOUNTER, ENCOUNTER, ENCOUNTER))),
-                        "stratifier expression criteria results for expression: [InitialPopulation] must fall within accepted types for population-basis: [boolean] for Measure: [fakeMeasureUrl] due to mismatch between total result classes: [Encounter, Encounter, Encounter] and matching result classes: []"),
-                Arguments.of(
-                        buildGroupDef(
-                                Basis.BOOLEAN,
-                                buildPopulationDefs(INITIALPOPULATION, DENOMINATOR, NUMERATOR),
-                                buildStratifierDefs(
-                                        EXPRESSION_INITIALPOPULATION, EXPRESSION_DENOMINATOR, EXPRESSION_NUMERATOR)),
-                        buildEvaluationResult(Map.of(
-                                EXPRESSION_INITIALPOPULATION,
-                                List.of(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE),
-                                EXPRESSION_DENOMINATOR,
-                                List.of(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE),
-                                EXPRESSION_NUMERATOR,
-                                List.of(Boolean.TRUE, Boolean.TRUE, ENCOUNTER))),
-                        "stratifier expression criteria results for expression: [Numerator] must fall within accepted types for population-basis: [boolean] for Measure: [fakeMeasureUrl] due to mismatch between total result classes: [Boolean, Boolean, Encounter] and matching result classes: [Boolean, Boolean]"));
+    @Test
+    void mismatchBooleanBasisSingleEncounterResult() {
+        var expectedGroupDef = buildGroupDef(
+                Basis.BOOLEAN,
+                buildPopulationDefs(INITIALPOPULATION, DENOMINATOR, NUMERATOR),
+                buildStratifierDefs(EXPRESSION_INITIALPOPULATION, EXPRESSION_DENOMINATOR, EXPRESSION_NUMERATOR));
+
+        var expectedEvaluationResult = buildEvaluationResult(Map.of(
+                EXPRESSION_INITIALPOPULATION,
+                ENCOUNTER,
+                EXPRESSION_DENOMINATOR,
+                ENCOUNTER,
+                EXPRESSION_NUMERATOR,
+                ENCOUNTER));
+
+        var expectedExceptionMessage =
+                "stratifier expression criteria results for expression: [InitialPopulation] must fall within accepted types for population-basis: [boolean] for Measure: [fakeMeasureUrl] due to mismatch between total eval result classes: [Encounter] and matching result classes: []";
+
+        validateStratifierBasisTypeErrorPath(expectedGroupDef, expectedEvaluationResult, expectedExceptionMessage);
     }
 
-    @ParameterizedTest
-    @MethodSource("validateStratifierBasisTypeErrorPathParams")
-    void validateStratifierBasisTypeErrorPath(
+    @Test
+    void mismatchBooleanBasisMultipleEncounterResults() {
+
+        var expectedGroupDef = buildGroupDef(
+                Basis.BOOLEAN,
+                buildPopulationDefs(INITIALPOPULATION, DENOMINATOR, NUMERATOR),
+                buildStratifierDefs(EXPRESSION_INITIALPOPULATION, EXPRESSION_DENOMINATOR, EXPRESSION_NUMERATOR));
+
+        var expectedEvaluationResult = buildEvaluationResult(Map.of(
+                EXPRESSION_INITIALPOPULATION,
+                List.of(ENCOUNTER, ENCOUNTER, ENCOUNTER),
+                EXPRESSION_DENOMINATOR,
+                List.of(ENCOUNTER, ENCOUNTER, ENCOUNTER),
+                EXPRESSION_NUMERATOR,
+                List.of(ENCOUNTER, ENCOUNTER, ENCOUNTER)));
+
+        var expectedExceptionMessage =
+                "stratifier expression criteria results for expression: [InitialPopulation] must fall within accepted types for population-basis: [boolean] for Measure: [fakeMeasureUrl] due to mismatch between total eval result classes: [Encounter, Encounter, Encounter] and matching result classes: []";
+
+        validateStratifierBasisTypeErrorPath(expectedGroupDef, expectedEvaluationResult, expectedExceptionMessage);
+    }
+
+    @Test
+    void mismatchBooleanBasisMixedMultipleBooleanAndEncounterResults() {
+        var expectedGroupDef = buildGroupDef(
+                Basis.BOOLEAN,
+                buildPopulationDefs(INITIALPOPULATION, DENOMINATOR, NUMERATOR),
+                buildStratifierDefs(EXPRESSION_INITIALPOPULATION, EXPRESSION_DENOMINATOR, EXPRESSION_NUMERATOR));
+
+        var expectedEvaluationResult = buildEvaluationResult(Map.of(
+                EXPRESSION_INITIALPOPULATION,
+                List.of(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE),
+                EXPRESSION_DENOMINATOR,
+                List.of(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE),
+                EXPRESSION_NUMERATOR,
+                List.of(Boolean.TRUE, Boolean.TRUE, ENCOUNTER)));
+
+        var expectedExceptionMessage =
+                "stratifier expression criteria results for expression: [Numerator] must fall within accepted types for population-basis: [boolean] for Measure: [fakeMeasureUrl] due to mismatch between total eval result classes: [Boolean, Boolean, Encounter] and matching result classes: [Boolean, Boolean]";
+
+        validateStratifierBasisTypeErrorPath(expectedGroupDef, expectedEvaluationResult, expectedExceptionMessage);
+    }
+
+    private void validateStratifierBasisTypeErrorPath(
             GroupDef groupDef, EvaluationResult evaluationResult, String expectedExceptionMessage) {
         try {
             testSubject.validateStratifiers(MEASURE_DEF, groupDef, evaluationResult);
@@ -414,7 +432,15 @@ class R4PopulationBasisValidatorTest {
     private static GroupDef buildGroupDef(
             Basis basis, List<PopulationDef> populationDefs, List<StratifierDef> stratifierDefs) {
         return new GroupDef(
-                null, null, stratifierDefs, populationDefs, MeasureScoring.PROPORTION, false, null, basis.codeDef);
+                null,
+                null,
+                stratifierDefs,
+                populationDefs,
+                MeasureScoring.PROPORTION,
+                false,
+                null,
+                basis.codeDef,
+                null);
     }
 
     @Nonnull
@@ -430,7 +456,8 @@ class R4PopulationBasisValidatorTest {
                 measurePopulationType.toCode(),
                 null,
                 measurePopulationType,
-                resolveExpressionFor(measurePopulationType));
+                resolveExpressionFor(measurePopulationType),
+                null);
     }
 
     private static String resolveExpressionFor(MeasurePopulationType theMeasurePopulationType) {
@@ -446,25 +473,29 @@ class R4PopulationBasisValidatorTest {
 
     @Nonnull
     private static StratifierDef buildStratifierDef(String expression) {
-        return new StratifierDef(null, null, expression, List.of());
+        return new StratifierDef(null, null, expression, MeasureStratifierType.VALUE, List.of());
     }
 
     @Nonnull
     private static EvaluationResult buildEvaluationResult(Map<String, Object> expressionResultMap) {
         final EvaluationResult evaluationResult = new EvaluationResult();
-        expressionResultMap.forEach(
-                (key, value) -> evaluationResult.expressionResults.put(key, new ExpressionResult(value, Set.of())));
+        expressionResultMap.forEach((key, value) ->
+                evaluationResult.getExpressionResults().put(key, new ExpressionResult(value, Set.of())));
         return evaluationResult;
     }
 
     @Nonnull
     private static EvaluationResult buildEvaluationResult(Object expressionResult) {
         final EvaluationResult evaluationResult = new EvaluationResult();
-        evaluationResult.expressionResults.put(
-                EXPRESSION_INITIALPOPULATION, new ExpressionResult(expressionResult, Set.of()));
-        evaluationResult.expressionResults.put(
-                EXPRESSION_DENOMINATOR, new ExpressionResult(expressionResult, Set.of()));
-        evaluationResult.expressionResults.put(EXPRESSION_NUMERATOR, new ExpressionResult(expressionResult, Set.of()));
+        evaluationResult
+                .getExpressionResults()
+                .put(EXPRESSION_INITIALPOPULATION, new ExpressionResult(expressionResult, Set.of()));
+        evaluationResult
+                .getExpressionResults()
+                .put(EXPRESSION_DENOMINATOR, new ExpressionResult(expressionResult, Set.of()));
+        evaluationResult
+                .getExpressionResults()
+                .put(EXPRESSION_NUMERATOR, new ExpressionResult(expressionResult, Set.of()));
         return evaluationResult;
     }
 }

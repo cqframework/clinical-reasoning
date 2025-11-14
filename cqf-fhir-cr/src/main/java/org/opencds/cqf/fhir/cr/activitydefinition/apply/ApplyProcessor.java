@@ -11,6 +11,7 @@ import org.opencds.cqf.fhir.utility.Ids;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@SuppressWarnings("UnstableApiUsage")
 public class ApplyProcessor implements IApplyProcessor {
     private static final Logger logger = LoggerFactory.getLogger(ApplyProcessor.class);
     protected static final List<String> EXCLUDED_EXTENSION_LIST =

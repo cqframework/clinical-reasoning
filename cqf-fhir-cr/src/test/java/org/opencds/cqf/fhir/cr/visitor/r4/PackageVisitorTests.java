@@ -1,10 +1,10 @@
 package org.opencds.cqf.fhir.cr.visitor.r4;
 
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isNull;
@@ -20,10 +20,12 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.repository.IRepository;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import jakarta.annotation.Nullable;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,18 +33,24 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.CanonicalType;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Endpoint;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.MetadataResource;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.UsageContext;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionComponent;
 import org.junit.jupiter.api.BeforeEach;
@@ -66,12 +74,15 @@ import org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.r4.LibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.r4.ValueSetAdapter;
 import org.opencds.cqf.fhir.utility.client.TerminologyServerClient;
+import org.opencds.cqf.fhir.utility.client.TerminologyServerClientSettings;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
 class PackageVisitorTests {
     private final FhirContext fhirContext = FhirContext.forR4Cached();
     private final IParser jsonParser = fhirContext.newJsonParser();
     private IRepository repo;
+    protected static final String CRMI_INTENDED_USAGE_CONTEXT_URL =
+            "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-intendedUsageContext";
 
     @BeforeEach
     void setup() {
@@ -83,7 +94,17 @@ class PackageVisitorTests {
         Bundle loadedBundle = (Bundle) jsonParser.parseResource(
                 PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-example-naive.json"));
         repo.transaction(loadedBundle);
-        PackageVisitor packageVisitor = new PackageVisitor(repo);
+        var settings = TerminologyServerClientSettings.getDefault()
+                .setMaxRetryCount(5)
+                .setRetryIntervalMillis(500)
+                .setTimeoutSeconds(10)
+                .setSocketTimeout(45)
+                .setCrmiVersion("2.0.0")
+                .setExpansionsPerPage(500)
+                .setMaxExpansionPages(500);
+        var settingsCopy = new TerminologyServerClientSettings(settings);
+
+        var packageVisitor = new PackageVisitor(repo, settingsCopy, null);
         Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
         ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
@@ -130,8 +151,8 @@ class PackageVisitorTests {
 
     @ParameterizedTest
     @CsvSource({
-        ",some-api-key,Cannot expand ValueSet without VSAC Username.",
-        "someUsername,,Cannot expand ValueSet without VSAC API Key.",
+        ",some-api-key,Found a vsacUsername extension with no value",
+        "someUsername,,Found a apiKey extension with no value",
     })
     void packageOperation_should_fail(@Nullable String username, String apiKey, String expectedError) {
         Bundle loadedBundle = (Bundle) jsonParser.parseResource(
@@ -147,11 +168,13 @@ class PackageVisitorTests {
         terminologyEndpoint.setAddress("test.com");
         Parameters params = parameters(part("terminologyEndpoint", terminologyEndpoint));
 
-        var exception = assertThrows(UnprocessableEntityException.class, () -> {
-            libraryAdapter.accept(packageVisitor, params);
-        });
+        libraryAdapter.accept(packageVisitor, params);
 
-        assertTrue(exception.getMessage().contains(expectedError));
+        assertTrue(libraryAdapter.hasExtension(ILibraryAdapter.CQF_MESSAGES_EXT_URL));
+        assertTrue(libraryAdapter.hasContained());
+        assertTrue(libraryAdapter.getContained().stream().allMatch(c -> c instanceof OperationOutcome));
+        var oo = (OperationOutcome) libraryAdapter.getContained().get(0);
+        assertEquals(oo.getIssueFirstRep().getDiagnostics(), expectedError);
     }
 
     @Test
@@ -172,11 +195,78 @@ class PackageVisitorTests {
         terminologyEndpoint.setAddress("test.com");
         Parameters params = parameters(part("terminologyEndpoint", terminologyEndpoint));
 
-        var exception = assertThrows(UnprocessableEntityException.class, () -> {
-            libraryAdapter.accept(packageVisitor, params);
-        });
+        libraryAdapter.accept(packageVisitor, params);
 
-        assertTrue(exception.getMessage().contains(expectedError));
+        assertTrue(libraryAdapter.hasExtension(ILibraryAdapter.CQF_MESSAGES_EXT_URL));
+    }
+
+    @Test
+    void packageOperation_should_fail_paging_with_transaction_bundle_type_request() {
+        String expectedError = "It is invalid to use paging when requesting a bundle of type 'transaction'";
+        Bundle loadedBundle = (Bundle) jsonParser.parseResource(
+                PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active-intensional-vs.json"));
+        repo.transaction(loadedBundle);
+        PackageVisitor packageVisitor = new PackageVisitor(repo);
+        Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
+                .copy();
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        Parameters params = parameters(part("bundleType", "transaction"));
+        params.addParameter("count", 1);
+
+        InvalidRequestException exception = null;
+        try {
+            libraryAdapter.accept(packageVisitor, params);
+        } catch (InvalidRequestException e) {
+            exception = e;
+        }
+        assertNotNull(exception);
+        assertEquals(exception.getMessage(), expectedError);
+    }
+
+    @Test
+    void packageOperation_should_fail_negative_count_parameter() {
+        String expectedError = "'count' must be non-negative";
+        Bundle loadedBundle = (Bundle) jsonParser.parseResource(
+                PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active-intensional-vs.json"));
+        repo.transaction(loadedBundle);
+        PackageVisitor packageVisitor = new PackageVisitor(repo);
+        Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
+                .copy();
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        Parameters params = parameters(part("bundleType", "transaction"));
+        params.addParameter("count", -1);
+
+        InvalidRequestException exception = null;
+        try {
+            libraryAdapter.accept(packageVisitor, params);
+        } catch (InvalidRequestException e) {
+            exception = e;
+        }
+        assertNotNull(exception);
+        assertEquals(exception.getMessage(), expectedError);
+    }
+
+    @Test
+    void packageOperation_should_fail_negative_offset_parameter() {
+        String expectedError = "'offset' must be non-negative";
+        Bundle loadedBundle = (Bundle) jsonParser.parseResource(
+                PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active-intensional-vs.json"));
+        repo.transaction(loadedBundle);
+        PackageVisitor packageVisitor = new PackageVisitor(repo);
+        Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
+                .copy();
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        Parameters params = parameters(part("bundleType", "transaction"));
+        params.addParameter("offset", -1);
+
+        InvalidRequestException exception = null;
+        try {
+            libraryAdapter.accept(packageVisitor, params);
+        } catch (InvalidRequestException e) {
+            exception = e;
+        }
+        assertNotNull(exception);
+        assertEquals(exception.getMessage(), expectedError);
     }
 
     @Test
@@ -296,8 +386,8 @@ class PackageVisitorTests {
         Parameters offset4Params = parameters(part("offset", new IntegerType(4)));
         Bundle offset4Bundle = (Bundle) libraryAdapter.accept(packageVisitor, offset4Params);
         assertEquals((countZeroBundle.getTotal() - 4), offset4Bundle.getEntry().size());
-        assertSame(BundleType.COLLECTION, offset4Bundle.getType());
-        assertFalse(offset4Bundle.hasTotal());
+        assertSame(BundleType.SEARCHSET, offset4Bundle.getType());
+        assertTrue(offset4Bundle.hasTotal());
         Parameters offsetMaxParams = parameters(part("offset", new IntegerType(countZeroBundle.getTotal())));
         Bundle offsetMaxBundle = (Bundle) libraryAdapter.accept(packageVisitor, offsetMaxParams);
         assertEquals(0, offsetMaxBundle.getEntry().size());
@@ -313,36 +403,32 @@ class PackageVisitorTests {
         Bundle bundle = (Bundle) jsonParser.parseResource(
                 PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
         repo.transaction(bundle);
-        PackageVisitor packageVisitor = new PackageVisitor(repo);
+        var packageVisitor = new PackageVisitor(repo);
         Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
         ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+
         Parameters countZeroParams = parameters(part("count", new IntegerType(0)));
         Bundle countZeroBundle = (Bundle) libraryAdapter.accept(packageVisitor, countZeroParams);
         assertSame(BundleType.SEARCHSET, countZeroBundle.getType());
+
         Parameters countSevenParams = parameters(part("count", new IntegerType(7)));
         Bundle countSevenBundle = (Bundle) libraryAdapter.accept(packageVisitor, countSevenParams);
-        assertSame(BundleType.TRANSACTION, countSevenBundle.getType());
-        Parameters countFourParams = parameters(part("count", new IntegerType(4)));
-        Bundle countFourBundle = (Bundle) libraryAdapter.accept(packageVisitor, countFourParams);
-        assertSame(BundleType.COLLECTION, countFourBundle.getType());
-        // these assertions test for Bundle base profile conformance when type = collection
-        assertFalse(countFourBundle.getEntry().stream().anyMatch(entry -> entry.hasRequest()));
-        assertFalse(countFourBundle.hasTotal());
-        Parameters offsetOneParams = parameters(part("offset", new IntegerType(1)));
-        Bundle offsetOneBundle = (Bundle) libraryAdapter.accept(packageVisitor, offsetOneParams);
-        assertSame(BundleType.COLLECTION, offsetOneBundle.getType());
-        // these assertions test for Bundle base profile conformance when type = collection
-        assertFalse(offsetOneBundle.getEntry().stream().anyMatch(entry -> entry.hasRequest()));
-        assertFalse(offsetOneBundle.hasTotal());
+        assertSame(BundleType.SEARCHSET, countSevenBundle.getType());
 
-        Parameters countOneOffsetOneParams =
-                parameters(part("count", new IntegerType(1)), part("offset", new IntegerType(1)));
-        Bundle countOneOffsetOneBundle = (Bundle) libraryAdapter.accept(packageVisitor, countOneOffsetOneParams);
-        assertSame(BundleType.COLLECTION, countOneOffsetOneBundle.getType());
+        Parameters collectionBundleTypeParams = parameters(part("bundleType", "collection"));
+        Bundle collectionBundleType = (Bundle) libraryAdapter.accept(packageVisitor, collectionBundleTypeParams);
+        assertSame(BundleType.COLLECTION, collectionBundleType.getType());
         // these assertions test for Bundle base profile conformance when type = collection
-        assertFalse(countOneOffsetOneBundle.getEntry().stream().anyMatch(entry -> entry.hasRequest()));
-        assertFalse(countOneOffsetOneBundle.hasTotal());
+        assertFalse(collectionBundleType.getEntry().stream().anyMatch(entry -> entry.hasRequest()));
+        assertFalse(collectionBundleType.hasTotal());
+
+        Parameters transactionBundleTypeParams = parameters(part("bundleType", "transaction"));
+        Bundle transactionBundle = (Bundle) libraryAdapter.accept(packageVisitor, transactionBundleTypeParams);
+        assertSame(BundleType.TRANSACTION, transactionBundle.getType());
+        // these assertions test for Bundle base profile conformance when type = collection
+        assertTrue(transactionBundle.getEntry().stream().anyMatch(entry -> entry.hasRequest()));
+        assertFalse(transactionBundle.hasTotal());
     }
 
     @Test
@@ -373,7 +459,7 @@ class PackageVisitorTests {
         Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
         ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
-        Map<String, List<String>> includeOptions = new HashMap<String, List<String>>();
+        Map<String, List<String>> includeOptions = new HashMap<>();
         includeOptions.put("artifact", Arrays.asList("http://ersd.aimsplatform.org/fhir/Library/SpecificationLibrary"));
         includeOptions.put(
                 "canonical",
@@ -393,14 +479,30 @@ class PackageVisitorTests {
         includeOptions.put(
                 "terminology",
                 Arrays.asList(
+                        "http://ersd.aimsplatform.org/fhir/Library/SpecificationLibrary",
                         "http://ersd.aimsplatform.org/fhir/ValueSet/dxtc",
                         "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.6",
                         "http://cts.nlm.nih.gov/fhir/ValueSet/123-this-will-be-routine"));
-        includeOptions.put("conformance", Arrays.asList());
-        includeOptions.put("extensions", Arrays.asList());
-        includeOptions.put("profiles", Arrays.asList());
-        includeOptions.put("tests", Arrays.asList());
-        includeOptions.put("examples", Arrays.asList());
+        includeOptions.put(
+                "conformance", Arrays.asList("http://ersd.aimsplatform.org/fhir/Library/SpecificationLibrary"));
+        includeOptions.put(
+                "extensions", Arrays.asList("http://ersd.aimsplatform.org/fhir/Library/SpecificationLibrary"));
+        includeOptions.put("profiles", Arrays.asList("http://ersd.aimsplatform.org/fhir/Library/SpecificationLibrary"));
+        includeOptions.put("tests", Arrays.asList("http://ersd.aimsplatform.org/fhir/Library/SpecificationLibrary"));
+        includeOptions.put("examples", Arrays.asList("http://ersd.aimsplatform.org/fhir/Library/SpecificationLibrary"));
+        // FHIR Types
+        includeOptions.put(
+                "PlanDefinition",
+                Arrays.asList(
+                        "http://ersd.aimsplatform.org/fhir/Library/SpecificationLibrary",
+                        "http://ersd.aimsplatform.org/fhir/PlanDefinition/us-ecr-specification"));
+        includeOptions.put(
+                "ValueSet",
+                Arrays.asList(
+                        "http://ersd.aimsplatform.org/fhir/Library/SpecificationLibrary",
+                        "http://ersd.aimsplatform.org/fhir/ValueSet/dxtc",
+                        "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.6",
+                        "http://cts.nlm.nih.gov/fhir/ValueSet/123-this-will-be-routine"));
         for (Entry<String, List<String>> includedTypeURLs : includeOptions.entrySet()) {
             Parameters params = parameters(part("include", includedTypeURLs.getKey()));
             Bundle packaged = (Bundle) libraryAdapter.accept(packageVisitor, params);
@@ -418,6 +520,33 @@ class PackageVisitorTests {
                 assertTrue(expectedResourceReturned);
             }
         }
+    }
+
+    @Test
+    void packageOperation_include_get_resources_by_fhir_type_only() {
+        Bundle bundle = (Bundle) jsonParser.parseResource(
+                PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
+        repo.transaction(bundle);
+        PackageVisitor packageVisitor = new PackageVisitor(repo);
+        Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
+                .copy();
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+
+        List<String> expectedUrls = Arrays.asList(
+                "http://ersd.aimsplatform.org/fhir/ValueSet/dxtc",
+                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.6",
+                "http://cts.nlm.nih.gov/fhir/ValueSet/123-this-will-be-routine",
+                "http://ersd.aimsplatform.org/fhir/PlanDefinition/us-ecr-specification",
+                "http://ersd.aimsplatform.org/fhir/Library/SpecificationLibrary");
+
+        Parameters params = parameters(part("include", "PlanDefinition"), part("include", "ValueSet"));
+        Bundle packaged = (Bundle) libraryAdapter.accept(packageVisitor, params);
+        List<String> actualUrls = packaged.getEntry().stream()
+                .map(entry -> ((MetadataResource) entry.getResource()).getUrl())
+                .sorted()
+                .toList();
+        Collections.sort(expectedUrls);
+        assertEquals(actualUrls, expectedUrls);
     }
 
     @Test
@@ -497,6 +626,172 @@ class PackageVisitorTests {
         assertTrue(containsVset);
     }
 
+    @Test
+    void packageOperation_manifest_is_first_with_include_terminology() {
+        Bundle bundle = (Bundle) jsonParser.parseResource(
+                PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
+        repo.transaction(bundle);
+        PackageVisitor packageVisitor = new PackageVisitor(repo);
+        Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
+                .copy();
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+
+        Parameters params = parameters(part("include", "terminology"));
+        Bundle packaged = (Bundle) libraryAdapter.accept(packageVisitor, params);
+
+        assertNotNull(packaged);
+        assertTrue(packaged.hasEntry());
+        // First entry must be the outcome manifest Library
+        assertEquals("Library", packaged.getEntryFirstRep().getResource().fhirType());
+
+        // Everything after the manifest should be terminology-only
+        for (int i = 1; i < packaged.getEntry().size(); i++) {
+            String t = packaged.getEntry().get(i).getResource().fhirType();
+            boolean isTerminology = "ValueSet".equals(t)
+                    || "CodeSystem".equals(t)
+                    || "ConceptMap".equals(t)
+                    || "NamingSystem".equals(t);
+            assertTrue(isTerminology, "Non-terminology entry returned with include=terminology: " + t);
+        }
+    }
+
+    @Test
+    void packageOperation_manifest_is_first_with_include_valueset() {
+        Bundle bundle = (Bundle) jsonParser.parseResource(
+                PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
+        repo.transaction(bundle);
+        PackageVisitor packageVisitor = new PackageVisitor(repo);
+        Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
+                .copy();
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+
+        Parameters params = parameters(part("include", "ValueSet"));
+        Bundle packaged = (Bundle) libraryAdapter.accept(packageVisitor, params);
+
+        assertNotNull(packaged);
+        assertTrue(packaged.hasEntry());
+        // Manifest always first
+        assertEquals("Library", packaged.getEntryFirstRep().getResource().fhirType());
+
+        // Remaining entries should be ValueSets only
+        for (int i = 1; i < packaged.getEntry().size(); i++) {
+            String t = packaged.getEntry().get(i).getResource().fhirType();
+            assertEquals("ValueSet", t, "Non-ValueSet entry returned with include=ValueSet: " + t);
+        }
+    }
+
+    @Test
+    void packageOperation_unknown_include_returns_only_manifest() {
+        Bundle bundle = (Bundle) jsonParser.parseResource(
+                PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
+        repo.transaction(bundle);
+        PackageVisitor packageVisitor = new PackageVisitor(repo);
+        Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
+                .copy();
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+
+        Parameters params = parameters(part("include", "not-a-real-category"));
+        Bundle packaged = (Bundle) libraryAdapter.accept(packageVisitor, params);
+
+        assertNotNull(packaged);
+        assertEquals(1, packaged.getEntry().size());
+        assertEquals("Library", packaged.getEntryFirstRep().getResource().fhirType());
+    }
+
+    @Test
+    void packageOperation_include_tests_returns_only_test_marked_entries() {
+        // Arrange
+        Bundle bundle = (Bundle) jsonParser.parseResource(
+                PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
+        // Mark one non-manifest Library as a test-case via extension that contains 'isTestCase'
+        Library manifest = (Library) bundle.getEntryFirstRep().getResource();
+        Library testLib = null;
+        for (int i = 1; i < bundle.getEntry().size(); i++) {
+            if (bundle.getEntry().get(i).getResource() instanceof Library) {
+                testLib = (Library) bundle.getEntry().get(i).getResource();
+                break;
+            }
+        }
+        assertNotNull(testLib, "Test library not found in fixture bundle");
+        testLib.addExtension("http://example.org/extensions/isTestCase", new org.hl7.fhir.r4.model.BooleanType(true));
+        repo.transaction(bundle);
+        PackageVisitor packageVisitor = new PackageVisitor(repo);
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(manifest.copy());
+
+        // Act
+        Parameters params = parameters(part("include", "tests"));
+        Bundle packaged = (Bundle) libraryAdapter.accept(packageVisitor, params);
+
+        // Assert
+        assertNotNull(packaged);
+        assertTrue(packaged.hasEntry());
+        // Manifest first
+        assertEquals("Library", packaged.getEntryFirstRep().getResource().fhirType());
+        // All subsequent resources must be the test-marked entry/entries
+        for (int i = 1; i < packaged.getEntry().size(); i++) {
+            var r = packaged.getEntry().get(i).getResource();
+            assertTrue(r instanceof Library, "Only test-marked Libraries should be returned for include=tests");
+            var extOk = ((Library) r)
+                    .getExtension().stream()
+                            .anyMatch(x -> x.getUrl().contains("isTestCase")
+                                    && ((org.hl7.fhir.r4.model.BooleanType) x.getValue()).booleanValue());
+            assertTrue(extOk, "Returned entry was not marked as test-case via isTestCase extension");
+        }
+    }
+
+    @Test
+    void packageOperation_include_examples_returns_only_example_marked_entries() {
+        // Arrange
+        Bundle bundle = (Bundle) jsonParser.parseResource(
+                PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
+        // Mark one non-manifest resource as example via extension that contains 'isExample'
+        Library manifest = (Library) bundle.getEntryFirstRep().getResource();
+        // Prefer a ValueSet if present; otherwise mark the next resource
+        org.hl7.fhir.r4.model.DomainResource exampleRes = null;
+        for (int i = 1; i < bundle.getEntry().size(); i++) {
+            if (bundle.getEntry().get(i).getResource() instanceof org.hl7.fhir.r4.model.ValueSet) {
+                exampleRes = (org.hl7.fhir.r4.model.ValueSet)
+                        bundle.getEntry().get(i).getResource();
+                break;
+            }
+        }
+        if (exampleRes == null) {
+            for (int i = 1; i < bundle.getEntry().size(); i++) {
+                if (bundle.getEntry().get(i).getResource() instanceof org.hl7.fhir.r4.model.DomainResource) {
+                    exampleRes = (org.hl7.fhir.r4.model.DomainResource)
+                            bundle.getEntry().get(i).getResource();
+                    break;
+                }
+            }
+        }
+        assertNotNull(exampleRes, "Example resource not found in fixture bundle");
+        exampleRes.addExtension("http://example.org/extensions/isExample", new org.hl7.fhir.r4.model.BooleanType(true));
+        repo.transaction(bundle);
+        PackageVisitor packageVisitor = new PackageVisitor(repo);
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(manifest.copy());
+
+        // Act
+        Parameters params = parameters(part("include", "examples"));
+        Bundle packaged = (Bundle) libraryAdapter.accept(packageVisitor, params);
+
+        // Assert
+        assertNotNull(packaged);
+        assertTrue(packaged.hasEntry());
+        // Manifest first
+        assertEquals("Library", packaged.getEntryFirstRep().getResource().fhirType());
+        // All subsequent resources must carry the isExample=true extension
+        for (int i = 1; i < packaged.getEntry().size(); i++) {
+            var r = packaged.getEntry().get(i).getResource();
+            assertTrue(
+                    r instanceof org.hl7.fhir.r4.model.DomainResource, "Expected DomainResource entries for examples");
+            var extOk = ((org.hl7.fhir.r4.model.DomainResource) r)
+                    .getExtension().stream()
+                            .anyMatch(x -> x.getUrl().contains("isExample")
+                                    && ((org.hl7.fhir.r4.model.BooleanType) x.getValue()).booleanValue());
+            assertTrue(extOk, "Returned entry was not marked as example via isExample extension");
+        }
+    }
+
     private IEndpointAdapter createEndpoint(String authoritativeSource) {
         var factory = IAdapterFactory.forFhirVersion(FhirVersionEnum.R4);
         var endpoint = factory.createEndpoint(new org.hl7.fhir.r4.model.Endpoint());
@@ -506,5 +801,137 @@ class PackageVisitorTests {
         endpoint.addExtension(new org.hl7.fhir.r4.model.Extension(
                 Constants.APIKEY, new org.hl7.fhir.r4.model.StringType("password")));
         return endpoint;
+    }
+
+    @Test
+    void adds_proposed_usage_context_when_non_equal_to_existing() throws Exception {
+        PackageVisitor visitor = new PackageVisitor(repo);
+        var adapterFactoryMock = mock(AdapterFactory.class);
+        var afField = visitor.getClass().getDeclaredField("adapterFactory");
+        afField.setAccessible(true);
+        afField.set(visitor, adapterFactoryMock);
+
+        IBaseBundle bundleMock = mock(Bundle.class);
+        ValueSet entryResource = new ValueSet();
+
+        @SuppressWarnings("unchecked")
+        var staticBundleHelper = org.mockito.Mockito.mockStatic(org.opencds.cqf.fhir.utility.BundleHelper.class);
+        staticBundleHelper
+                .when(() -> org.opencds.cqf.fhir.utility.BundleHelper.getEntryResources(bundleMock))
+                .thenReturn(List.of(entryResource));
+
+        // Create IValueSetAdapter that will be returned by adapterFactory.createValueSet(...)
+        IValueSetAdapter vsAdapterMock = mock(IValueSetAdapter.class);
+        when(adapterFactoryMock.createValueSet(entryResource)).thenReturn(vsAdapterMock);
+        when(vsAdapterMock.getUrl()).thenReturn("http://example.org/ValueSet/foo");
+        when(vsAdapterMock.hasVersion()).thenReturn(false);
+
+        // existing UseContext on the ValueSet (model object)
+        UsageContext existingUc = new UsageContext();
+        existingUc.setCode(new Coding().setCode("focus"));
+        existingUc.setValue(new CodeableConcept().addCoding(new Coding().setCode("C1")));
+        when(vsAdapterMock.getUseContext()).thenReturn(List.of(existingUc));
+
+        // manifest and dependency wiring
+        var manifestMock = mock(org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter.class);
+        var dependency = mock(org.opencds.cqf.fhir.utility.adapter.IDependencyInfo.class);
+        when(manifestMock.getDependencies()).thenReturn(List.of(dependency));
+        when(dependency.getReference()).thenReturn("http://example.org/ValueSet/foo");
+
+        // proposed UsageContext in extension
+        UsageContext proposedUc = new UsageContext();
+        proposedUc.setCode(new Coding().setCode("priority"));
+        proposedUc.setValue(new CodeableConcept().addCoding(new Coding().setCode("routine")));
+        Extension ext = new Extension(CRMI_INTENDED_USAGE_CONTEXT_URL, proposedUc);
+        when(dependency.getExtension()).thenReturn(List.of(ext));
+
+        var existingAdapter = mock(org.opencds.cqf.fhir.utility.adapter.IUsageContextAdapter.class);
+        var proposedAdapter = mock(org.opencds.cqf.fhir.utility.adapter.IUsageContextAdapter.class);
+        when(adapterFactoryMock.createUsageContext(existingUc)).thenReturn(existingAdapter);
+        when(adapterFactoryMock.createUsageContext(ext.getValue())).thenReturn(proposedAdapter);
+
+        when(existingAdapter.equalsDeep(proposedAdapter)).thenReturn(false);
+        when(adapterFactoryMock.createValueSet(any())).thenReturn(vsAdapterMock);
+
+        var method = visitor.getClass()
+                .getDeclaredMethod(
+                        "applyManifestUsageContextsToValueSets",
+                        org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter.class,
+                        IBaseBundle.class);
+        method.setAccessible(true);
+        method.invoke(visitor, manifestMock, bundleMock);
+
+        verify(vsAdapterMock, times(1)).addUseContext(proposedAdapter);
+
+        staticBundleHelper.close();
+    }
+
+    @Test
+    void skips_adding_when_existing_equals_proposed() throws Exception {
+        PackageVisitor visitor = new PackageVisitor(repo);
+        var adapterFactoryMock = mock(AdapterFactory.class);
+        var afField = visitor.getClass().getDeclaredField("adapterFactory");
+        afField.setAccessible(true);
+        afField.set(visitor, adapterFactoryMock);
+
+        IBaseBundle bundleMock = mock(Bundle.class);
+        ValueSet entryResource = new ValueSet();
+
+        // mock static BundleHelper to return the resource
+        @SuppressWarnings("unchecked")
+        var staticBundleHelper = org.mockito.Mockito.mockStatic(org.opencds.cqf.fhir.utility.BundleHelper.class);
+        staticBundleHelper
+                .when(() -> org.opencds.cqf.fhir.utility.BundleHelper.getEntryResources(bundleMock))
+                .thenReturn(List.of(entryResource));
+
+        // Create IValueSetAdapter that will be returned by adapterFactory.createValueSet(...)
+        IValueSetAdapter vsAdapterMock = mock(IValueSetAdapter.class);
+        when(adapterFactoryMock.createValueSet(entryResource)).thenReturn(vsAdapterMock);
+        when(vsAdapterMock.getUrl()).thenReturn("http://example.org/ValueSet/foo");
+        when(vsAdapterMock.hasVersion()).thenReturn(false);
+
+        // existing UseContext on the ValueSet (model object)
+        UsageContext existingUc = new UsageContext();
+        existingUc.setCode(new Coding().setCode("priority"));
+        existingUc.setValue(new CodeableConcept().addCoding(new Coding().setCode("routine")));
+        when(vsAdapterMock.getUseContext()).thenReturn(List.of(existingUc));
+
+        // manifest and dependency wiring
+        var manifestMock = mock(org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter.class);
+        var dependency = mock(org.opencds.cqf.fhir.utility.adapter.IDependencyInfo.class);
+        when(manifestMock.getDependencies()).thenReturn(List.of(dependency));
+        when(dependency.getReference()).thenReturn("http://example.org/ValueSet/foo");
+
+        // proposed UsageContext in extension (same as existing)
+        UsageContext proposedUc = new UsageContext();
+        proposedUc.setCode(new Coding().setCode("priority"));
+        proposedUc.setValue(new CodeableConcept().addCoding(new Coding().setCode("routine")));
+        Extension ext = new Extension(CRMI_INTENDED_USAGE_CONTEXT_URL, proposedUc);
+        when(dependency.getExtension()).thenReturn(List.of(ext));
+
+        var existingAdapter = mock(org.opencds.cqf.fhir.utility.adapter.IUsageContextAdapter.class);
+        var proposedAdapter = mock(org.opencds.cqf.fhir.utility.adapter.IUsageContextAdapter.class);
+        when(adapterFactoryMock.createUsageContext(existingUc)).thenReturn(existingAdapter);
+        when(adapterFactoryMock.createUsageContext(ext.getValue())).thenReturn(proposedAdapter);
+
+        when(existingAdapter.equalsDeep(proposedAdapter)).thenReturn(true);
+
+        doAnswer(invocation -> {
+                    throw new AssertionError("addUseContext should not be called when existing equals proposed");
+                })
+                .when(vsAdapterMock)
+                .addUseContext(any());
+
+        var method = visitor.getClass()
+                .getDeclaredMethod(
+                        "applyManifestUsageContextsToValueSets",
+                        org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter.class,
+                        IBaseBundle.class);
+        method.setAccessible(true);
+        method.invoke(visitor, manifestMock, bundleMock);
+
+        verify(vsAdapterMock, times(0)).addUseContext(any());
+
+        staticBundleHelper.close();
     }
 }

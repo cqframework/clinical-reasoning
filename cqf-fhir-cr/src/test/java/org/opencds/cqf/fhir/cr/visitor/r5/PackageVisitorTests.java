@@ -1,10 +1,10 @@
 package org.opencds.cqf.fhir.cr.visitor.r5;
 
-import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isNull;
@@ -23,6 +23,7 @@ import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,11 +31,15 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r5.model.Bundle.BundleType;
 import org.hl7.fhir.r5.model.CanonicalType;
+import org.hl7.fhir.r5.model.CodeableConcept;
+import org.hl7.fhir.r5.model.Coding;
 import org.hl7.fhir.r5.model.Endpoint;
+import org.hl7.fhir.r5.model.Extension;
 import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.IntegerType;
 import org.hl7.fhir.r5.model.Library;
@@ -42,6 +47,7 @@ import org.hl7.fhir.r5.model.MetadataResource;
 import org.hl7.fhir.r5.model.Parameters;
 import org.hl7.fhir.r5.model.ResourceType;
 import org.hl7.fhir.r5.model.StringType;
+import org.hl7.fhir.r5.model.UsageContext;
 import org.hl7.fhir.r5.model.ValueSet;
 import org.hl7.fhir.r5.model.ValueSet.ValueSetExpansionComponent;
 import org.junit.jupiter.api.BeforeEach;
@@ -63,12 +69,15 @@ import org.opencds.cqf.fhir.utility.adapter.r5.AdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.r5.LibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.r5.ValueSetAdapter;
 import org.opencds.cqf.fhir.utility.client.TerminologyServerClient;
+import org.opencds.cqf.fhir.utility.client.TerminologyServerClientSettings;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
 class PackageVisitorTests {
     private final FhirContext fhirContext = FhirContext.forR5Cached();
     private final IParser jsonParser = fhirContext.newJsonParser();
     private IRepository repo;
+    protected static final String CRMI_INTENDED_USAGE_CONTEXT_URL =
+            "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-intendedUsageContext";
 
     @BeforeEach
     void setup() {
@@ -80,7 +89,17 @@ class PackageVisitorTests {
         Bundle loadedBundle = (Bundle) jsonParser.parseResource(
                 PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-example-naive.json"));
         repo.transaction(loadedBundle);
-        PackageVisitor packageVisitor = new PackageVisitor(repo);
+        var settings = TerminologyServerClientSettings.getDefault()
+                .setMaxRetryCount(5)
+                .setRetryIntervalMillis(500)
+                .setTimeoutSeconds(10)
+                .setSocketTimeout(45)
+                .setCrmiVersion("2.0.0")
+                .setExpansionsPerPage(500)
+                .setMaxExpansionPages(500);
+        var settingsCopy = new TerminologyServerClientSettings(settings);
+
+        var packageVisitor = new PackageVisitor(repo, settingsCopy, null);
         Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
         ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
@@ -312,8 +331,8 @@ class PackageVisitorTests {
         Parameters offset4Params = parameters(part("offset", new IntegerType(4)));
         Bundle offset4Bundle = (Bundle) libraryAdapter.accept(packageVisitor, offset4Params);
         assertEquals(offset4Bundle.getEntry().size(), (countZeroBundle.getTotal() - 4));
-        assertSame(BundleType.COLLECTION, offset4Bundle.getType());
-        assertFalse(offset4Bundle.hasTotal());
+        assertSame(BundleType.SEARCHSET, offset4Bundle.getType());
+        assertTrue(offset4Bundle.hasTotal());
         Parameters offsetMaxParams = parameters(part("offset", new IntegerType(countZeroBundle.getTotal())));
         Bundle offsetMaxBundle = (Bundle) libraryAdapter.accept(packageVisitor, offsetMaxParams);
         assertEquals(0, offsetMaxBundle.getEntry().size());
@@ -329,36 +348,32 @@ class PackageVisitorTests {
         Bundle bundle = (Bundle) jsonParser.parseResource(
                 PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
         repo.transaction(bundle);
-        PackageVisitor packageVisitor = new PackageVisitor(repo);
+        var packageVisitor = new PackageVisitor(repo);
         Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
                 .copy();
         ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+
         Parameters countZeroParams = parameters(part("count", new IntegerType(0)));
         Bundle countZeroBundle = (Bundle) libraryAdapter.accept(packageVisitor, countZeroParams);
         assertSame(BundleType.SEARCHSET, countZeroBundle.getType());
+
         Parameters countSevenParams = parameters(part("count", new IntegerType(7)));
         Bundle countSevenBundle = (Bundle) libraryAdapter.accept(packageVisitor, countSevenParams);
-        assertSame(BundleType.TRANSACTION, countSevenBundle.getType());
-        Parameters countFourParams = parameters(part("count", new IntegerType(4)));
-        Bundle countFourBundle = (Bundle) libraryAdapter.accept(packageVisitor, countFourParams);
-        assertSame(BundleType.COLLECTION, countFourBundle.getType());
-        // these assertions test for Bundle base profile conformance when type = collection
-        assertFalse(countFourBundle.getEntry().stream().anyMatch(entry -> entry.hasRequest()));
-        assertFalse(countFourBundle.hasTotal());
-        Parameters offsetOneParams = parameters(part("offset", new IntegerType(1)));
-        Bundle offsetOneBundle = (Bundle) libraryAdapter.accept(packageVisitor, offsetOneParams);
-        assertSame(BundleType.COLLECTION, offsetOneBundle.getType());
-        // these assertions test for Bundle base profile conformance when type = collection
-        assertFalse(offsetOneBundle.getEntry().stream().anyMatch(entry -> entry.hasRequest()));
-        assertFalse(offsetOneBundle.hasTotal());
+        assertSame(BundleType.SEARCHSET, countSevenBundle.getType());
 
-        Parameters countOneOffsetOneParams =
-                parameters(part("count", new IntegerType(1)), part("offset", new IntegerType(1)));
-        Bundle countOneOffsetOneBundle = (Bundle) libraryAdapter.accept(packageVisitor, countOneOffsetOneParams);
-        assertSame(BundleType.COLLECTION, countOneOffsetOneBundle.getType());
+        Parameters collectionBundleTypeParams = parameters(part("bundleType", "collection"));
+        Bundle collectionBundleType = (Bundle) libraryAdapter.accept(packageVisitor, collectionBundleTypeParams);
+        assertSame(BundleType.COLLECTION, collectionBundleType.getType());
         // these assertions test for Bundle base profile conformance when type = collection
-        assertFalse(countOneOffsetOneBundle.getEntry().stream().anyMatch(entry -> entry.hasRequest()));
-        assertFalse(countOneOffsetOneBundle.hasTotal());
+        assertFalse(collectionBundleType.getEntry().stream().anyMatch(entry -> entry.hasRequest()));
+        assertFalse(collectionBundleType.hasTotal());
+
+        Parameters transactionBundleTypeParams = parameters(part("bundleType", "transaction"));
+        Bundle transactionBundle = (Bundle) libraryAdapter.accept(packageVisitor, transactionBundleTypeParams);
+        assertSame(BundleType.TRANSACTION, transactionBundle.getType());
+        // these assertions test for Bundle base profile conformance when type = collection
+        assertTrue(transactionBundle.getEntry().stream().anyMatch(entry -> entry.hasRequest()));
+        assertFalse(transactionBundle.hasTotal());
     }
 
     @Test
@@ -409,14 +424,30 @@ class PackageVisitorTests {
         includeOptions.put(
                 "terminology",
                 Arrays.asList(
+                        "http://ersd.aimsplatform.org/fhir/Library/SpecificationLibrary",
                         "http://ersd.aimsplatform.org/fhir/ValueSet/dxtc",
                         "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.6",
                         "http://cts.nlm.nih.gov/fhir/ValueSet/123-this-will-be-routine"));
-        includeOptions.put("conformance", Arrays.asList());
-        includeOptions.put("extensions", Arrays.asList());
-        includeOptions.put("profiles", Arrays.asList());
-        includeOptions.put("tests", Arrays.asList());
-        includeOptions.put("examples", Arrays.asList());
+        includeOptions.put(
+                "conformance", Arrays.asList("http://ersd.aimsplatform.org/fhir/Library/SpecificationLibrary"));
+        includeOptions.put(
+                "extensions", Arrays.asList("http://ersd.aimsplatform.org/fhir/Library/SpecificationLibrary"));
+        includeOptions.put("profiles", Arrays.asList("http://ersd.aimsplatform.org/fhir/Library/SpecificationLibrary"));
+        includeOptions.put("tests", Arrays.asList("http://ersd.aimsplatform.org/fhir/Library/SpecificationLibrary"));
+        includeOptions.put("examples", Arrays.asList("http://ersd.aimsplatform.org/fhir/Library/SpecificationLibrary"));
+        // FHIR Types
+        includeOptions.put(
+                "PlanDefinition",
+                Arrays.asList(
+                        "http://ersd.aimsplatform.org/fhir/Library/SpecificationLibrary",
+                        "http://ersd.aimsplatform.org/fhir/PlanDefinition/us-ecr-specification"));
+        includeOptions.put(
+                "ValueSet",
+                Arrays.asList(
+                        "http://ersd.aimsplatform.org/fhir/Library/SpecificationLibrary",
+                        "http://ersd.aimsplatform.org/fhir/ValueSet/dxtc",
+                        "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.6",
+                        "http://cts.nlm.nih.gov/fhir/ValueSet/123-this-will-be-routine"));
         for (Entry<String, List<String>> includedTypeURLs : includeOptions.entrySet()) {
             Parameters params = parameters(part("include", includedTypeURLs.getKey()));
             Bundle packaged = (Bundle) libraryAdapter.accept(packageVisitor, params);
@@ -434,6 +465,33 @@ class PackageVisitorTests {
                 assertTrue(expectedResourceReturned);
             }
         }
+    }
+
+    @Test
+    void packageOperation_include_get_resources_by_fhir_type_only() {
+        Bundle bundle = (Bundle) jsonParser.parseResource(
+                PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
+        repo.transaction(bundle);
+        var packageVisitor = new PackageVisitor(repo);
+        Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
+                .copy();
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+
+        List<String> expectedUrls = Arrays.asList(
+                "http://ersd.aimsplatform.org/fhir/ValueSet/dxtc",
+                "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.6",
+                "http://cts.nlm.nih.gov/fhir/ValueSet/123-this-will-be-routine",
+                "http://ersd.aimsplatform.org/fhir/PlanDefinition/us-ecr-specification",
+                "http://ersd.aimsplatform.org/fhir/Library/SpecificationLibrary");
+
+        Parameters params = parameters(part("include", "PlanDefinition"), part("include", "ValueSet"));
+        Bundle packaged = (Bundle) libraryAdapter.accept(packageVisitor, params);
+        List<String> actualUrls = packaged.getEntry().stream()
+                .map(entry -> ((MetadataResource) entry.getResource()).getUrl())
+                .sorted()
+                .toList();
+        Collections.sort(expectedUrls);
+        assertEquals(actualUrls, expectedUrls);
     }
 
     @Test
@@ -522,5 +580,137 @@ class PackageVisitorTests {
         endpoint.addExtension(new org.hl7.fhir.r5.model.Extension(
                 Constants.APIKEY, new org.hl7.fhir.r5.model.StringType("password")));
         return endpoint;
+    }
+
+    @Test
+    void adds_proposed_usage_context_when_non_equal_to_existing() throws Exception {
+        PackageVisitor visitor = new PackageVisitor(repo);
+        var adapterFactoryMock = mock(AdapterFactory.class);
+        var afField = visitor.getClass().getDeclaredField("adapterFactory");
+        afField.setAccessible(true);
+        afField.set(visitor, adapterFactoryMock);
+
+        IBaseBundle bundleMock = mock(Bundle.class);
+        ValueSet entryResource = new ValueSet();
+
+        @SuppressWarnings("unchecked")
+        var staticBundleHelper = org.mockito.Mockito.mockStatic(org.opencds.cqf.fhir.utility.BundleHelper.class);
+        staticBundleHelper
+                .when(() -> org.opencds.cqf.fhir.utility.BundleHelper.getEntryResources(bundleMock))
+                .thenReturn(List.of(entryResource));
+
+        // Create IValueSetAdapter that will be returned by adapterFactory.createValueSet(...)
+        IValueSetAdapter vsAdapterMock = mock(IValueSetAdapter.class);
+        when(adapterFactoryMock.createValueSet(entryResource)).thenReturn(vsAdapterMock);
+        when(vsAdapterMock.getUrl()).thenReturn("http://example.org/ValueSet/foo");
+        when(vsAdapterMock.hasVersion()).thenReturn(false);
+
+        // existing UseContext on the ValueSet (model object)
+        UsageContext existingUc = new UsageContext();
+        existingUc.setCode(new Coding().setCode("focus"));
+        existingUc.setValue(new CodeableConcept().addCoding(new Coding().setCode("C1")));
+        when(vsAdapterMock.getUseContext()).thenReturn(List.of(existingUc));
+
+        // manifest and dependency wiring
+        var manifestMock = mock(org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter.class);
+        var dependency = mock(org.opencds.cqf.fhir.utility.adapter.IDependencyInfo.class);
+        when(manifestMock.getDependencies()).thenReturn(List.of(dependency));
+        when(dependency.getReference()).thenReturn("http://example.org/ValueSet/foo");
+
+        // proposed UsageContext in extension
+        UsageContext proposedUc = new UsageContext();
+        proposedUc.setCode(new Coding().setCode("priority"));
+        proposedUc.setValue(new CodeableConcept().addCoding(new Coding().setCode("routine")));
+        Extension ext = new Extension(CRMI_INTENDED_USAGE_CONTEXT_URL, proposedUc);
+        when(dependency.getExtension()).thenReturn(List.of(ext));
+
+        var existingAdapter = mock(org.opencds.cqf.fhir.utility.adapter.IUsageContextAdapter.class);
+        var proposedAdapter = mock(org.opencds.cqf.fhir.utility.adapter.IUsageContextAdapter.class);
+        when(adapterFactoryMock.createUsageContext(existingUc)).thenReturn(existingAdapter);
+        when(adapterFactoryMock.createUsageContext(ext.getValue())).thenReturn(proposedAdapter);
+
+        when(existingAdapter.equalsDeep(proposedAdapter)).thenReturn(false);
+        when(adapterFactoryMock.createValueSet(any())).thenReturn(vsAdapterMock);
+
+        var method = visitor.getClass()
+                .getDeclaredMethod(
+                        "applyManifestUsageContextsToValueSets",
+                        org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter.class,
+                        IBaseBundle.class);
+        method.setAccessible(true);
+        method.invoke(visitor, manifestMock, bundleMock);
+
+        verify(vsAdapterMock, times(1)).addUseContext(proposedAdapter);
+
+        staticBundleHelper.close();
+    }
+
+    @Test
+    void skips_adding_when_existing_equals_proposed() throws Exception {
+        PackageVisitor visitor = new PackageVisitor(repo);
+        var adapterFactoryMock = mock(AdapterFactory.class);
+        var afField = visitor.getClass().getDeclaredField("adapterFactory");
+        afField.setAccessible(true);
+        afField.set(visitor, adapterFactoryMock);
+
+        IBaseBundle bundleMock = mock(Bundle.class);
+        ValueSet entryResource = new ValueSet();
+
+        // mock static BundleHelper to return the resource
+        @SuppressWarnings("unchecked")
+        var staticBundleHelper = org.mockito.Mockito.mockStatic(org.opencds.cqf.fhir.utility.BundleHelper.class);
+        staticBundleHelper
+                .when(() -> org.opencds.cqf.fhir.utility.BundleHelper.getEntryResources(bundleMock))
+                .thenReturn(List.of(entryResource));
+
+        // Create IValueSetAdapter that will be returned by adapterFactory.createValueSet(...)
+        IValueSetAdapter vsAdapterMock = mock(IValueSetAdapter.class);
+        when(adapterFactoryMock.createValueSet(entryResource)).thenReturn(vsAdapterMock);
+        when(vsAdapterMock.getUrl()).thenReturn("http://example.org/ValueSet/foo");
+        when(vsAdapterMock.hasVersion()).thenReturn(false);
+
+        // existing UseContext on the ValueSet (model object)
+        UsageContext existingUc = new UsageContext();
+        existingUc.setCode(new Coding().setCode("priority"));
+        existingUc.setValue(new CodeableConcept().addCoding(new Coding().setCode("routine")));
+        when(vsAdapterMock.getUseContext()).thenReturn(List.of(existingUc));
+
+        // manifest and dependency wiring
+        var manifestMock = mock(org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter.class);
+        var dependency = mock(org.opencds.cqf.fhir.utility.adapter.IDependencyInfo.class);
+        when(manifestMock.getDependencies()).thenReturn(List.of(dependency));
+        when(dependency.getReference()).thenReturn("http://example.org/ValueSet/foo");
+
+        // proposed UsageContext in extension (same as existing)
+        UsageContext proposedUc = new UsageContext();
+        proposedUc.setCode(new Coding().setCode("priority"));
+        proposedUc.setValue(new CodeableConcept().addCoding(new Coding().setCode("routine")));
+        Extension ext = new Extension(CRMI_INTENDED_USAGE_CONTEXT_URL, proposedUc);
+        when(dependency.getExtension()).thenReturn(List.of(ext));
+
+        var existingAdapter = mock(org.opencds.cqf.fhir.utility.adapter.IUsageContextAdapter.class);
+        var proposedAdapter = mock(org.opencds.cqf.fhir.utility.adapter.IUsageContextAdapter.class);
+        when(adapterFactoryMock.createUsageContext(existingUc)).thenReturn(existingAdapter);
+        when(adapterFactoryMock.createUsageContext(ext.getValue())).thenReturn(proposedAdapter);
+
+        when(existingAdapter.equalsDeep(proposedAdapter)).thenReturn(true);
+
+        doAnswer(invocation -> {
+                    throw new AssertionError("addUseContext should not be called when existing equals proposed");
+                })
+                .when(vsAdapterMock)
+                .addUseContext(any());
+
+        var method = visitor.getClass()
+                .getDeclaredMethod(
+                        "applyManifestUsageContextsToValueSets",
+                        org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter.class,
+                        IBaseBundle.class);
+        method.setAccessible(true);
+        method.invoke(visitor, manifestMock, bundleMock);
+
+        verify(vsAdapterMock, times(0)).addUseContext(any());
+
+        staticBundleHelper.close();
     }
 }

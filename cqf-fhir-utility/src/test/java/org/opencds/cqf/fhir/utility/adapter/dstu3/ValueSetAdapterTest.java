@@ -14,15 +14,21 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
+import org.hl7.fhir.dstu3.model.CodeableConcept;
+import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus;
+import org.hl7.fhir.dstu3.model.IntegerType;
 import org.hl7.fhir.dstu3.model.Library;
 import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.RelatedArtifact;
+import org.hl7.fhir.dstu3.model.UsageContext;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.dstu3.model.ValueSet.ValueSetComposeComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionContainsComponent;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.utility.adapter.IUsageContextAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
 import org.opencds.cqf.fhir.utility.adapter.TestVisitor;
 
@@ -208,6 +214,10 @@ class ValueSetAdapterTest {
         var contains = new ValueSet.ValueSetExpansionContainsComponent().setCode("test");
         var expansion = new ValueSet.ValueSetExpansionComponent().addContains(contains);
         expansion.setId("test-expansion-page-1");
+        expansion
+                .addParameter()
+                .setName("count")
+                .setValue(new IntegerType(expansion.getContains().size()));
         var valueSet = new ValueSet().setExpansion(expansion);
         var adapter = (IValueSetAdapter) adapterFactory.createKnowledgeArtifactAdapter(valueSet);
 
@@ -221,5 +231,87 @@ class ValueSetAdapterTest {
         adapter.appendExpansionContains(additionalExpansionAdapter.getExpansionContains());
 
         assertEquals(2, adapter.getExpansionContains().size());
+        assertEquals(
+                2,
+                ((IntegerType) ((ValueSetExpansionComponent) adapter.getExpansion())
+                                .getParameter()
+                                .get(0)
+                                .getValue())
+                        .getValue()
+                        .intValue());
+    }
+
+    @Test
+    void nullUsageContextIsNoOp() {
+        var vs = new ValueSet();
+        var valueSetAdapter = new ValueSetAdapter(vs);
+        valueSetAdapter.addUseContext(null);
+
+        assertTrue(vs.getUseContext().isEmpty(), "No usage contexts should be present");
+    }
+
+    @Test
+    void emptyExistingUseContexts_addsIncoming() {
+        var vs = new ValueSet();
+        var valueSetAdapter = new ValueSetAdapter(vs);
+
+        UsageContext incoming = new UsageContext();
+        incoming.setCode(new Coding().setCode("focus"));
+        incoming.setValue(
+                new CodeableConcept().addCoding(new Coding().setSystem("s").setCode("c")));
+
+        IUsageContextAdapter incomingAdapter = new UsageContextAdapter((IBase) incoming);
+
+        valueSetAdapter.addUseContext(incomingAdapter);
+
+        assertEquals(1, vs.getUseContext().size(), "incoming UsageContext should be added");
+        assertTrue(vs.getUseContext().get(0).equalsDeep(incoming), "added UsageContext should equal incoming");
+    }
+
+    @Test
+    void duplicateExisting_doesNotAdd() {
+        var vs = new ValueSet();
+        var valueSetAdapter = new ValueSetAdapter(vs);
+
+        UsageContext pre = new UsageContext();
+        pre.setCode(new Coding().setCode("priority"));
+        pre.setValue(new CodeableConcept().addCoding(new Coding().setSystem("s").setCode("routine")));
+        vs.addUseContext(pre);
+
+        UsageContext incoming = new UsageContext();
+        incoming.setCode(new Coding().setCode("priority"));
+        incoming.setValue(
+                new CodeableConcept().addCoding(new Coding().setSystem("s").setCode("routine")));
+
+        IUsageContextAdapter incomingAdapter = new UsageContextAdapter((IBase) incoming);
+
+        valueSetAdapter.addUseContext(incomingAdapter);
+
+        assertEquals(1, vs.getUseContext().size(), "duplicate should not have been added");
+        assertTrue(vs.getUseContext().get(0).equalsDeep(pre));
+    }
+
+    @Test
+    void nonDuplicateExisting_addsIncoming() {
+        var vs = new ValueSet();
+        var valueSetAdapter = new ValueSetAdapter(vs);
+
+        UsageContext pre = new UsageContext();
+        pre.setCode(new Coding().setCode("priority"));
+        pre.setValue(new CodeableConcept().addCoding(new Coding().setSystem("s").setCode("routine")));
+        vs.addUseContext(pre);
+
+        UsageContext incoming = new UsageContext();
+        incoming.setCode(new Coding().setCode("focus"));
+        incoming.setValue(
+                new CodeableConcept().addCoding(new Coding().setSystem("s").setCode("c1")));
+
+        IUsageContextAdapter incomingAdapter = new UsageContextAdapter((IBase) incoming);
+
+        valueSetAdapter.addUseContext(incomingAdapter);
+
+        assertEquals(2, vs.getUseContext().size(), "incoming non-duplicate should be added");
+        assertTrue(vs.getUseContext().get(0).equalsDeep(pre));
+        assertTrue(vs.getUseContext().get(1).equalsDeep(incoming));
     }
 }

@@ -16,8 +16,9 @@ import org.opencds.cqf.fhir.cr.measure.r4.MultiMeasure.Given;
 
 class R4MeasureProcessorTest {
     private static final Given GIVEN_REPO = MultiMeasure.given().repositoryFor("MinimalMeasureEvaluation");
-    private static final IdType MINIMAL_COHORT_BOOLEAN_BASIS_SINGLE_GROUP =
-            new IdType(ResourceType.Measure.name(), "MinimalCohortBooleanBasisSingleGroup");
+    private static final MeasureDef MINIMAL_COHORT_BOOLEAN_BASIS_SINGLE_GROUP = MeasureDef.fromIdAndUrl(
+            new IdType(ResourceType.Measure.name(), "MinimalCohortBooleanBasisSingleGroup"),
+            "http://example.com/Measure/MinimalCohortBooleanBasisSingleGroup");
     private static final String SUBJECT_ID = "Patient/female-1914";
 
     // This test could probably be improved with better data and more assertions, but it's to
@@ -32,23 +33,21 @@ class R4MeasureProcessorTest {
 
         var results = r4MeasureProcessor.evaluateMultiMeasureIdsWithCqlEngine(
                 List.of(SUBJECT_ID),
-                List.of(MINIMAL_COHORT_BOOLEAN_BASIS_SINGLE_GROUP),
+                List.of(new IdType(MINIMAL_COHORT_BOOLEAN_BASIS_SINGLE_GROUP.id())),
                 null,
                 null,
                 new Parameters(),
                 cqlEngine);
 
         assertNotNull(results);
-        var measureDef = new MeasureDef("", "", "", List.of(), List.of());
-        var evaluationResults =
-                results.processMeasureForSuccessOrFailure(MINIMAL_COHORT_BOOLEAN_BASIS_SINGLE_GROUP, measureDef);
+        var evaluationResults = results.processMeasureForSuccessOrFailure(MINIMAL_COHORT_BOOLEAN_BASIS_SINGLE_GROUP);
 
         assertNotNull(evaluationResults);
 
         var evaluationResult = evaluationResults.get(SUBJECT_ID);
         assertNotNull(evaluationResult);
 
-        var expressionResults = evaluationResult.expressionResults;
+        var expressionResults = evaluationResult.getExpressionResults();
         assertNotNull(expressionResults);
 
         var expressionResult = expressionResults.get("Initial Population");

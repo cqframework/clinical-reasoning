@@ -30,7 +30,9 @@ import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
+import org.opencds.cqf.fhir.cr.CrSettings;
 import org.opencds.cqf.fhir.cr.common.IDataRequirementsProcessor;
+import org.opencds.cqf.fhir.cr.common.IOperationProcessor;
 import org.opencds.cqf.fhir.cr.common.IPackageProcessor;
 import org.opencds.cqf.fhir.cr.helpers.DataRequirementsLibrary;
 import org.opencds.cqf.fhir.cr.helpers.GeneratedPackage;
@@ -63,10 +65,7 @@ public class TestQuestionnaire {
     public static class Given {
         private IRepository repository;
         private EvaluationSettings evaluationSettings;
-        private IGenerateProcessor generateProcessor;
-        private IPackageProcessor packageProcessor;
-        private IDataRequirementsProcessor dataRequirementsProcessor;
-        private IPopulateProcessor populateProcessor;
+        private final List<IOperationProcessor> operationProcessors = new ArrayList<>();
 
         public Given repository(IRepository repository) {
             this.repository = repository;
@@ -85,22 +84,22 @@ public class TestQuestionnaire {
         }
 
         public Given generateProcessor(IGenerateProcessor generateProcessor) {
-            this.generateProcessor = generateProcessor;
+            operationProcessors.add(generateProcessor);
             return this;
         }
 
         public Given packageProcessor(IPackageProcessor packageProcessor) {
-            this.packageProcessor = packageProcessor;
+            operationProcessors.add(packageProcessor);
             return this;
         }
 
         public Given dataRequirementsProcessor(IDataRequirementsProcessor dataRequirementsProcessor) {
-            this.dataRequirementsProcessor = dataRequirementsProcessor;
+            operationProcessors.add(dataRequirementsProcessor);
             return this;
         }
 
         public Given populateProcessor(IPopulateProcessor populateProcessor) {
-            this.populateProcessor = populateProcessor;
+            operationProcessors.add(populateProcessor);
             return this;
         }
 
@@ -116,13 +115,8 @@ public class TestQuestionnaire {
                         .getTerminologySettings()
                         .setValuesetExpansionMode(VALUESET_EXPANSION_MODE.PERFORM_NAIVE_EXPANSION);
             }
-            return new QuestionnaireProcessor(
-                    repository,
-                    evaluationSettings,
-                    generateProcessor,
-                    packageProcessor,
-                    dataRequirementsProcessor,
-                    populateProcessor);
+            var crSettings = CrSettings.getDefault().withEvaluationSettings(evaluationSettings);
+            return new QuestionnaireProcessor(repository, crSettings, operationProcessors);
         }
 
         public When when() {
@@ -158,12 +152,12 @@ public class TestQuestionnaire {
         private PopulateRequest buildRequest() {
             return new PopulateRequest(
                     processor.resolveQuestionnaire(Eithers.for3(questionnaireUrl, questionnaireId, questionnaire)),
-                    Ids.newId(fhirContext(), "Patient", subjectId),
+                    subjectId == null ? null : Ids.newId(fhirContext(), "Patient", subjectId),
                     context,
                     launchContext,
-                    parameters,
+                    // parameters,
                     data,
-                    new LibraryEngine(repository, processor.evaluationSettings),
+                    new LibraryEngine(repository, processor.crSettings.getEvaluationSettings()),
                     processor.modelResolver);
         }
 
@@ -228,7 +222,7 @@ public class TestQuestionnaire {
                     subjectId,
                     context,
                     launchContext,
-                    parameters,
+                    // parameters,
                     data,
                     useServerData,
                     (IBaseResource) null,
@@ -260,7 +254,7 @@ public class TestQuestionnaire {
                     processor.resolveStructureDefinition(Eithers.for3(null, profileId, null)),
                     false,
                     true,
-                    new LibraryEngine(repository, processor.evaluationSettings),
+                    new LibraryEngine(repository, processor.crSettings.getEvaluationSettings()),
                     processor.modelResolver);
             return new GeneratedQuestionnaire(repository, request, processor.generateQuestionnaire(request, null));
         }
@@ -319,6 +313,15 @@ public class TestQuestionnaire {
         public GeneratedQuestionnaire hasItems(int expectedItemCount) {
             assertEquals(expectedItemCount, items.size());
 
+            return this;
+        }
+
+        public GeneratedQuestionnaire hasExtension(String url) {
+            return hasExtensions(url, 1);
+        }
+
+        public GeneratedQuestionnaire hasExtensions(String url, int count) {
+            assertEquals(count, questionnaire.getExtensionsByUrl(url).size());
             return this;
         }
 

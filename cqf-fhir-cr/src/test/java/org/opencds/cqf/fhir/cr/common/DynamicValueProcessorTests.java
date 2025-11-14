@@ -49,7 +49,7 @@ class DynamicValueProcessorTests {
     void testNullExpressionResult() {
         var cqfExpression = new CqfExpression().setExpression("NullTest");
         var request = RequestHelpers.newPDApplyRequestForVersion(
-                FhirVersionEnum.R4, libraryEngine, null, inputParameterResolver);
+                FhirVersionEnum.R4, libraryEngine, null, null, inputParameterResolver);
         var dynamicValue = new org.hl7.fhir.r4.model.ActivityDefinition.ActivityDefinitionDynamicValueComponent()
                 .setPath("action.extension")
                 .setExpression(new org.hl7.fhir.r4.model.Expression()
@@ -75,7 +75,7 @@ class DynamicValueProcessorTests {
         // works in dstu3, throws in other versions
         var cqfExpression = new CqfExpression();
         var requestDstu3 = RequestHelpers.newPDApplyRequestForVersion(
-                FhirVersionEnum.DSTU3, libraryEngine, null, inputParameterResolver);
+                FhirVersionEnum.DSTU3, libraryEngine, null, null, inputParameterResolver);
         var dvDstu3 = new org.hl7.fhir.dstu3.model.ActivityDefinition.ActivityDefinitionDynamicValueComponent()
                 .setPath("action.extension")
                 .setExpression("priority")
@@ -90,7 +90,7 @@ class DynamicValueProcessorTests {
         fixture.resolveDynamicValue(requestDstu3, dvDstu3, null, null, raDstu3);
 
         var requestR4 = RequestHelpers.newPDApplyRequestForVersion(
-                FhirVersionEnum.R4, libraryEngine, null, inputParameterResolver);
+                FhirVersionEnum.R4, libraryEngine, null, null, inputParameterResolver);
         var dvR4 = new org.hl7.fhir.r4.model.ActivityDefinition.ActivityDefinitionDynamicValueComponent()
                 .setPath("action.extension")
                 .setExpression(new org.hl7.fhir.r4.model.Expression()

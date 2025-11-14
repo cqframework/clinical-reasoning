@@ -5,7 +5,6 @@ import static java.util.Objects.requireNonNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -108,19 +107,10 @@ public class CqlFhirParametersConverter {
 
         IParametersAdapter pa = this.adapterFactory.createParameters(params);
 
-        for (Map.Entry<String, ExpressionResult> entry : evaluationResult.expressionResults.entrySet()) {
+        for (Map.Entry<String, ExpressionResult> entry :
+                evaluationResult.getExpressionResults().entrySet()) {
             String name = entry.getKey();
             Object value = entry.getValue().value();
-
-            if (value == null) {
-                // Null value, add a single empty value with an extension indicating the reason
-                var dataAbsentValue = emptyBooleanWithExtension(
-                        fhirContext,
-                        DATA_ABSENT_REASON_EXT_URL,
-                        codeType(fhirContext, DATA_ABSENT_REASON_UNKNOWN_CODE));
-                addPart(pa, name, dataAbsentValue);
-                continue;
-            }
 
             if (value instanceof Iterable<?> iterable) {
                 if (!iterable.iterator().hasNext()) {
@@ -151,7 +141,8 @@ public class CqlFhirParametersConverter {
     @SuppressWarnings("unchecked")
     protected void addPart(IParametersAdapter pa, String name, Object value) {
         if (value == null) {
-            return;
+            value = emptyBooleanWithExtension(
+                    fhirContext, DATA_ABSENT_REASON_EXT_URL, codeType(fhirContext, DATA_ABSENT_REASON_UNKNOWN_CODE));
         }
 
         if (value instanceof Iterable) {
@@ -226,8 +217,10 @@ public class CqlFhirParametersConverter {
     }
 
     public List<CqlParameterDefinition> toCqlParameterDefinitions(IBaseParameters parameters) {
+        // This list needs to be mutable so that extra parameter definitions can be added if needed.
+        List<CqlParameterDefinition> cqlParameterDefinitions = new ArrayList<>();
         if (parameters == null) {
-            return Collections.emptyList();
+            return cqlParameterDefinitions;
         }
 
         IParametersAdapter parametersAdapter = this.adapterFactory.createParameters(parameters);
@@ -236,7 +229,6 @@ public class CqlFhirParametersConverter {
                 .filter(x -> x.getName() != null)
                 .collect(Collectors.groupingBy(IParametersParameterComponentAdapter::getName));
 
-        List<CqlParameterDefinition> cqlParameterDefinitions = new ArrayList<>();
         for (Map.Entry<String, List<IParametersParameterComponentAdapter>> entry : children.entrySet()) {
             // Meta data extension, if present
             Optional<IBaseExtension<?, ?>> ext = entry.getValue().stream()

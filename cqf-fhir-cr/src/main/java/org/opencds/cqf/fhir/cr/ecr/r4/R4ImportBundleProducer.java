@@ -121,8 +121,8 @@ public class R4ImportBundleProducer {
                 switch (resource.getResourceType()) {
                     case ValueSet:
                         var valueSet = (ValueSet) resource;
-                        List<CodeableConcept> conditionsList = new ArrayList<>();
-                        List<CodeableConcept> priorityList = new ArrayList<>();
+                        List<UsageContext> conditionsList = new ArrayList<>();
+                        List<UsageContext> priorityList = new ArrayList<>();
                         valueSet.setIdentifier(fixIdentifiers(valueSet.getIdentifier()));
                         var valueSetCanonicalUrl = adapterFactory
                                 .createKnowledgeArtifactAdapter(valueSet)
@@ -260,33 +260,63 @@ public class R4ImportBundleProducer {
 
     static void extractPrioritiesAndConditions(
             List<UsageContext> contexts,
-            List<CodeableConcept> priorityList,
-            List<CodeableConcept> conditionsList,
+            List<UsageContext> priorityList,
+            List<UsageContext> conditionsList,
             String valueSetCanonicalUrl) {
-        contexts.forEach(context -> {
-            if (context.hasCode()) {
-                var code = context.getCode().getCode();
-                if (code.equals("focus")) {
-                    conditionsList.add(context.getValueCodeableConcept());
-                } else if (code.equals("priority")) {
-                    if (!priorityList.isEmpty()) {
-                        priorityList.forEach(p -> {
-                            if (p.getCodingFirstRep().hasCode()
-                                    && !p.getCodingFirstRep()
-                                            .getCode()
-                                            .equals(context.getValueCodeableConcept()
-                                                    .getCodingFirstRep()
-                                                    .getCode())) {
-                                throw new UnprocessableEntityException("ValueSet with URL " + valueSetCanonicalUrl
-                                        + " has conflicting priority codes");
-                            }
-                        });
-                    } else {
-                        priorityList.add(context.getValueCodeableConcept());
-                    }
+
+        if (contexts == null || contexts.isEmpty()) return;
+
+        for (UsageContext context : contexts) {
+            var isValidUsageContext = isValidUsageContext(context);
+            if (!isValidUsageContext) continue;
+
+            switch (context.getCode().getCode()) {
+                case "focus" -> conditionsList.add(context);
+                case "priority" -> handlePriorityContext(context, priorityList, valueSetCanonicalUrl);
+                default -> {
+                    /* ignore other usage contexts */
                 }
             }
-        });
+        }
+    }
+
+    private static boolean isValidUsageContext(UsageContext context) {
+        return context != null
+                && context.hasCode()
+                && context.hasValueCodeableConcept()
+                && context.getValueCodeableConcept().hasCoding();
+    }
+
+    private static void handlePriorityContext(
+            UsageContext newContext, List<UsageContext> existingPriorities, String valueSetCanonicalUrl) {
+
+        String newCode = getFirstCodingCode(newContext.getValueCodeableConcept());
+        if (newCode == null) return;
+
+        // Check for conflicting codes
+        for (UsageContext existing : existingPriorities) {
+            String existingCode = getFirstCodingCode(existing.getValueCodeableConcept());
+            if (existingCode != null && !existingCode.equals(newCode)) {
+                throw new UnprocessableEntityException(
+                        "ValueSet with URL " + valueSetCanonicalUrl + " has conflicting priority codes");
+            }
+        }
+
+        // Only add if not already present
+        boolean alreadyExists = existingPriorities.stream()
+                .anyMatch(existing -> newCode.equals(getFirstCodingCode(existing.getValueCodeableConcept())));
+        if (!alreadyExists) {
+            existingPriorities.add(newContext);
+        }
+    }
+
+    private static String getFirstCodingCode(CodeableConcept concept) {
+        if (concept == null
+                || !concept.hasCoding()
+                || !concept.getCodingFirstRep().hasCode()) {
+            return null;
+        }
+        return concept.getCodingFirstRep().getCode();
     }
 
     private static boolean doesResourceExist(String url, String version, Class resourceType, IRepository repository) {
@@ -338,7 +368,7 @@ public class R4ImportBundleProducer {
     }
 
     private static RelatedArtifact relatedArtifactFromGrouperUrl(
-            String grouperUrl, List<CodeableConcept> conditions, List<CodeableConcept> priorities) {
+            String grouperUrl, List<UsageContext> conditions, List<UsageContext> priorities) {
         var relatedArtifact = new RelatedArtifact();
         relatedArtifact.setType(RelatedArtifact.RelatedArtifactType.COMPOSEDOF);
         relatedArtifact.setResource(grouperUrl);
@@ -346,21 +376,25 @@ public class R4ImportBundleProducer {
         isOwnedExtension.setUrl(TransformProperties.crmiIsOwned);
         isOwnedExtension.setValue(new BooleanType(true));
         var extensions = new ArrayList<Extension>();
-        extensions.addAll(processCodeableConceptMapForLibrary(conditions, TransformProperties.vsmCondition));
-        extensions.addAll(processCodeableConceptMapForLibrary(priorities, TransformProperties.vsmPriority));
+        extensions.addAll(
+                processUsageContextMapForLibrary(conditions, TransformProperties.CRMI_INTENDED_USAGE_CONTEXT_EXT_URL));
+        extensions.addAll(
+                processUsageContextMapForLibrary(priorities, TransformProperties.CRMI_INTENDED_USAGE_CONTEXT_EXT_URL));
         extensions.add(isOwnedExtension);
         relatedArtifact.setExtension(extensions);
         return relatedArtifact;
     }
 
     private static RelatedArtifact relatedArtifactFromLeafUrl(
-            String leafUrl, List<CodeableConcept> conditions, List<CodeableConcept> priorities) {
+            String leafUrl, List<UsageContext> conditions, List<UsageContext> priorities) {
         var relatedArtifact = new RelatedArtifact();
         relatedArtifact.setType(RelatedArtifact.RelatedArtifactType.DEPENDSON);
         relatedArtifact.setResource(leafUrl);
         var extensions = new ArrayList<Extension>();
-        extensions.addAll(processCodeableConceptMapForLibrary(conditions, TransformProperties.vsmCondition));
-        extensions.addAll(processCodeableConceptMapForLibrary(priorities, TransformProperties.vsmPriority));
+        extensions.addAll(
+                processUsageContextMapForLibrary(conditions, TransformProperties.CRMI_INTENDED_USAGE_CONTEXT_EXT_URL));
+        extensions.addAll(
+                processUsageContextMapForLibrary(priorities, TransformProperties.CRMI_INTENDED_USAGE_CONTEXT_EXT_URL));
         relatedArtifact.setExtension(extensions);
         return relatedArtifact;
     }
@@ -424,12 +458,12 @@ public class R4ImportBundleProducer {
         return t -> seen.add(keyExtractor.apply(t));
     }
 
-    static List<Extension> processCodeableConceptMapForLibrary(List<CodeableConcept> v, String extensionUrl) {
+    static List<Extension> processUsageContextMapForLibrary(List<UsageContext> v, String extensionUrl) {
         var extensions = new ArrayList<Extension>();
-        v.forEach(codeableConcept -> {
+        v.forEach(usageContext -> {
             var extension = new Extension();
             extension.setUrl(extensionUrl);
-            extension.setValue(codeableConcept);
+            extension.setValue(usageContext);
             extensions.add(extension);
         });
         return extensions;

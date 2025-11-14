@@ -21,35 +21,27 @@ import static org.mockito.Mockito.when;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.IUntypedQuery;
-import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Endpoint;
+import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentCaptor;
-import org.mockito.ArgumentMatchers;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
-import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter;
@@ -256,39 +248,6 @@ public class TerminologyServerClientTest {
                 theCorrectBaseServerUrl, TerminologyServerClient.getAddressBase(theCorrectBaseServerUrl + "/", ctx));
     }
 
-    @SuppressWarnings("unchecked")
-    @ParameterizedTest
-    @EnumSource(
-            value = FhirVersionEnum.class,
-            names = {"DSTU3", "R4", "R5"}) // Specify the enum values to test
-    void getLatestNonDraftSetsModifier(FhirVersionEnum supportedVersion) {
-        // setup
-        var contextMock = mock(FhirContext.class, new ReturnsDeepStubs());
-        when(contextMock.getVersion().getVersion()).thenReturn(supportedVersion);
-        var clientMock = mock(IGenericClient.class, new ReturnsDeepStubs());
-        var endpointMock = mock(IEndpointAdapter.class, new ReturnsDeepStubs());
-        when(endpointMock.getAddress()).thenReturn(authoritativeSource);
-        when(contextMock.newRestfulGenericClient(any())).thenReturn(clientMock);
-        ArgumentCaptor<Map<String, List<IQueryParameterType>>> urlParamsCaptor = ArgumentCaptor.forClass(Map.class);
-        var whereMock = mock(IQuery.class);
-        when(clientMock
-                        .search()
-                        .forResource(ArgumentMatchers.<Class<IBaseResource>>any())
-                        .where(urlParamsCaptor.capture()))
-                .thenReturn(whereMock);
-        doReturn(BundleHelper.newBundle(supportedVersion)).when(whereMock).execute();
-
-        // test
-        var client = new TerminologyServerClient(contextMock);
-        client.getLatestNonDraftValueSetResource(endpointMock, "www.test.com/fhir/ValueSet/123|1.2.3");
-        var capturedUrlParams = urlParamsCaptor.getValue();
-        var token = (TokenParam) capturedUrlParams.get("status").get(0);
-
-        // assert
-        assertEquals("draft", token.getValue());
-        Assertions.assertSame(TokenParamModifier.NOT, token.getModifier());
-    }
-
     @Test
     void expandRetrySuccessful() {
         // setup tx server endpoint
@@ -390,6 +349,7 @@ public class TerminologyServerClientTest {
         verify(fhirClient, atLeast(2)).operation();
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     void getValueSetResource_found() {
         var txServerClient = spy(new TerminologyServerClient(fhirContextR4));
@@ -467,6 +427,7 @@ public class TerminologyServerClientTest {
         assertEquals(org.hl7.fhir.r4.model.CodeSystem.class, returnedClass);
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     void getCodeSystemResource_found() {
         var txServerClient = spy(new TerminologyServerClient(fhirContextR4));
@@ -541,16 +502,19 @@ public class TerminologyServerClientTest {
         leaf.setUrl(url);
         leaf.getExpansion().setTotal(3);
         leaf.getExpansion().addContains().setSystem("system1").setCode("code1");
+        leaf.getExpansion().addParameter().setName("count").setValue(new IntegerType(1));
 
         var leafPage2 = new ValueSet();
         leafPage2.setUrl(url);
         leafPage2.getExpansion().setTotal(3);
         leafPage2.getExpansion().addContains().setSystem("system2").setCode("code2");
+        leafPage2.getExpansion().addParameter().setName("count").setValue(new IntegerType(1));
 
         var leafPage3 = new ValueSet();
         leafPage3.setUrl(url);
         leafPage3.getExpansion().setTotal(3);
         leafPage3.getExpansion().addContains().setSystem("system2").setCode("code3");
+        leafPage3.getExpansion().addParameter().setName("count").setValue(new IntegerType(1));
 
         var fhirClient = mock(IGenericClient.class, new ReturnsDeepStubs());
         when(fhirClient.getFhirContext().getVersion().getVersion()).thenReturn(FhirVersionEnum.R4);

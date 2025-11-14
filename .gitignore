@@ -10,6 +10,7 @@ htmlReport/
 .factorypath
 .DS_Store
 .cursorignore
+.m2
 
 pom.xml.versionsBackup
 
@@ -28,3 +29,5 @@ jitdump.*
 .apt_generated
 
 *DS_Store
+
+.worktrees

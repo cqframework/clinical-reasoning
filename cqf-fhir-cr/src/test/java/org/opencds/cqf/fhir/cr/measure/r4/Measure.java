@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -27,6 +28,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -70,7 +73,7 @@ public class Measure {
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     @FunctionalInterface
-    interface Validator<T> {
+    public interface Validator<T> {
         void validate(T value);
     }
 
@@ -293,6 +296,11 @@ public class Measure {
             return this.value();
         }
 
+        public SelectedReport hasGroupCount(int count) {
+            assertEquals(count, report().getGroup().size());
+            return this;
+        }
+
         public SelectedGroup firstGroup() {
             return this.group(MeasureReport::getGroupFirstRep);
         }
@@ -301,7 +309,7 @@ public class Measure {
             return this.group(x -> x.getGroup().stream()
                     .filter(g -> g.getId().equals(id))
                     .findFirst()
-                    .get());
+                    .orElse(null));
         }
 
         public SelectedGroup group(Selector<MeasureReportGroupComponent, MeasureReport> groupSelector) {
@@ -318,7 +326,7 @@ public class Measure {
             return this.reference(x -> x.getEvaluatedResource().stream()
                     .filter(y -> y.getReference().equals(name))
                     .findFirst()
-                    .get());
+                    .orElse(null));
         }
 
         public SelectedReport hasEvaluatedResourceCount(int count) {
@@ -582,10 +590,10 @@ public class Measure {
 
         /**
          * This method is a top level validation that all subjectResult lists accurately represent population counts
-         *
+         * <p/>
          * This gets all contained Lists and checks for a matching reference on a report population
          * It then checks that each population.count matches the size of the List (ex population.count=10, subjectResult list has 10 items)
-         * @return
+         * @return report containing more chained methods
          */
         public SelectedReport subjectResultsValidation() {
             List<String> contained = getContainedIdsPerResourceType(ResourceType.List);
@@ -746,7 +754,7 @@ public class Measure {
         }
     }
 
-    static class SelectedExtension extends Selected<Extension, SelectedReport> {
+    public static class SelectedExtension extends Selected<Extension, SelectedReport> {
 
         public SelectedExtension(Extension value, SelectedReport parent) {
             super(value, parent);
@@ -768,7 +776,7 @@ public class Measure {
         }
     }
 
-    static class SelectedContained extends Selected<Resource, SelectedReport> {
+    public static class SelectedContained extends Selected<Resource, SelectedReport> {
 
         public SelectedContained(Resource value, SelectedReport parent) {
             super(value, parent);
@@ -811,6 +819,11 @@ public class Measure {
             super(value, parent);
         }
 
+        public SelectedGroup hasPopulationCount(int count) {
+            assertEquals(count, this.value().getPopulation().size());
+            return this;
+        }
+
         public SelectedGroup hasScore(String score) {
             MeasureValidationUtils.validateGroupScore(this.value(), score);
             return this;
@@ -848,12 +861,12 @@ public class Measure {
                     .get(0)
                     .getValue()
                     .isEmpty());
-            assertTrue(
+            assertInstanceOf(
+                    Period.class,
                     this.value()
-                                    .getExtensionsByUrl(CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL)
-                                    .get(0)
-                                    .getValue()
-                            instanceof Period);
+                            .getExtensionsByUrl(CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL)
+                            .get(0)
+                            .getValue());
             return this;
         }
 
@@ -886,10 +899,14 @@ public class Measure {
         }
 
         public SelectedStratifier stratifierById(String stratId) {
-            return this.stratifier(g -> g.getStratifier().stream()
+            final SelectedStratifier stratifier = this.stratifier(g -> g.getStratifier().stream()
                     .filter(t -> t.getId().equals(stratId))
                     .findFirst()
-                    .get());
+                    .orElse(null));
+
+            assertNotNull(stratifier);
+
+            return stratifier;
         }
 
         public SelectedStratifier stratifier(
@@ -898,7 +915,7 @@ public class Measure {
             return new SelectedStratifier(s, this);
         }
 
-        static class SelectedReference extends Selected<Reference, SelectedReport> {
+        public static class SelectedReference extends Selected<Reference, SelectedReport> {
 
             public SelectedReference(Reference value, SelectedReport parent) {
                 super(value, parent);
@@ -963,7 +980,7 @@ public class Measure {
             }
         }
 
-        static class SelectedPopulation
+        public static class SelectedPopulation
                 extends Selected<MeasureReport.MeasureReportGroupPopulationComponent, SelectedGroup> {
 
             public SelectedPopulation(MeasureReportGroupPopulationComponent value, SelectedGroup parent) {
@@ -988,7 +1005,7 @@ public class Measure {
         }
     }
 
-    static class SelectedStratifier
+    public static class SelectedStratifier
             extends Selected<MeasureReport.MeasureReportGroupStratifierComponent, SelectedGroup> {
 
         public SelectedStratifier(MeasureReportGroupStratifierComponent value, SelectedGroup parent) {
@@ -999,8 +1016,31 @@ public class Measure {
             return stratum(MeasureReport.MeasureReportGroupStratifierComponent::getStratumFirstRep);
         }
 
-        public SelectedStratifier stratumCount(int stratumCount) {
+        public SelectedStratifier hasStratumCount(int stratumCount) {
             assertEquals(stratumCount, value().getStratum().size());
+            return this;
+        }
+
+        // Position is the numerical position starting at 1 for the first
+        public SelectedStratum stratumByPosition(int position) {
+            assertTrue(value().getStratum().size() >= position && position > 0);
+
+            return new SelectedStratum(value().getStratum().get(position - 1), this);
+        }
+
+        public SelectedStratum stratumByText(String stratumText) {
+            final Optional<StratifierGroupComponent> optMatchingStratum = value().getStratum().stream()
+                    .filter(stratum -> stratumText.equals(stratum.getValue().getText()))
+                    .findFirst();
+
+            assertTrue(optMatchingStratum.isPresent(), "Could not find stratum with text: %s".formatted(stratumText));
+
+            return new SelectedStratum(optMatchingStratum.get(), this);
+        }
+
+        public SelectedStratifier hasStratum(String textValue) {
+            final SelectedStratum stratum = stratum(textValue);
+            assertNotNull(stratum.value());
             return this;
         }
 
@@ -1008,7 +1048,7 @@ public class Measure {
             return stratum(s -> s.getStratum().stream()
                     .filter(x -> x.hasValue() && x.getValue().equalsDeep(value))
                     .findFirst()
-                    .get());
+                    .orElse(null));
         }
 
         public SelectedStratum stratum(String textValue) {
@@ -1024,7 +1064,7 @@ public class Measure {
                     .filter(x -> x.getComponent().stream()
                             .anyMatch(t -> t.getValue().getText().equals(textValue)))
                     .findFirst()
-                    .get());
+                    .orElse(null));
         }
 
         public SelectedStratum stratumByComponentCodeText(String textValue) {
@@ -1032,7 +1072,7 @@ public class Measure {
                     .filter(x -> x.getComponent().stream()
                             .anyMatch(t -> t.getCode().getText().equals(textValue)))
                     .findFirst()
-                    .get());
+                    .orElse(null));
         }
 
         public SelectedStratum stratum(
@@ -1041,9 +1081,25 @@ public class Measure {
             var s = stratumSelector.select(value());
             return new SelectedStratum(s, this);
         }
+
+        public SelectedStratifier hasCodeText(String stratifierCodeText) {
+            var firstCodeText = value().getCode().stream()
+                    .map(CodeableConcept::getText)
+                    .filter(Objects::nonNull)
+                    .findFirst()
+                    .orElse(null);
+
+            assertEquals(
+                    stratifierCodeText,
+                    firstCodeText,
+                    "Stratifier does not have expected code: %s but instead has: %s"
+                            .formatted(stratifierCodeText, firstCodeText));
+
+            return this;
+        }
     }
 
-    static class SelectedStratum extends Selected<MeasureReport.StratifierGroupComponent, SelectedStratifier> {
+    public static class SelectedStratum extends Selected<MeasureReport.StratifierGroupComponent, SelectedStratifier> {
 
         public SelectedStratum(MeasureReport.StratifierGroupComponent value, SelectedStratifier parent) {
             super(value, parent);
@@ -1059,28 +1115,55 @@ public class Measure {
             return this;
         }
 
+        public SelectedStratum hasPopulationCount(int count) {
+            final StratifierGroupComponent value = this.value();
+            final List<StratifierGroupPopulationComponent> population = value.getPopulation();
+            assertEquals(count, population.size());
+            return this;
+        }
+
         public SelectedStratumPopulation firstPopulation() {
             return population(MeasureReport.StratifierGroupComponent::getPopulationFirstRep);
         }
 
+        public SelectedStratum hasValue(String textValue) {
+            assertTrue(value().hasValue() && value().getValue().hasText());
+            assertEquals(textValue, value().getValue().getText());
+            return this;
+        }
+
         public SelectedStratumPopulation population(String name) {
-            return population(s -> s.getPopulation().stream()
+            var population = population(s -> s.getPopulation().stream()
                     .filter(x -> x.hasCode()
                             && x.getCode().hasCoding()
                             && x.getCode().getCoding().get(0).getCode().equals(name))
                     .findFirst()
-                    .get());
+                    .orElse(null));
+
+            assertNotNull(population);
+
+            return population;
         }
 
         public SelectedStratumPopulation population(
                 Selector<MeasureReport.StratifierGroupPopulationComponent, MeasureReport.StratifierGroupComponent>
                         populationSelector) {
+            if (populationSelector == null) {
+                return null;
+            }
+            if (value() == null) {
+                return null;
+            }
+
             var p = populationSelector.select(value());
+            if (p == null) {
+                return null;
+            }
             return new SelectedStratumPopulation(p, this);
         }
     }
 
-    static class SelectedStratumPopulation
+    public static class SelectedStratumPopulation
             extends Selected<MeasureReport.StratifierGroupPopulationComponent, SelectedStratum> {
 
         public SelectedStratumPopulation(

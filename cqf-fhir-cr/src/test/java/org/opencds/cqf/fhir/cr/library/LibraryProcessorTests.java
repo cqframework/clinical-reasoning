@@ -10,6 +10,7 @@ import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.nio.file.Path;
+import java.util.List;
 import org.hl7.fhir.r4.model.Library;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,13 +18,16 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
+import org.opencds.cqf.fhir.cr.CrSettings;
 import org.opencds.cqf.fhir.cr.common.DataRequirementsProcessor;
+import org.opencds.cqf.fhir.cr.common.DeleteProcessor;
 import org.opencds.cqf.fhir.cr.common.PackageProcessor;
 import org.opencds.cqf.fhir.cr.common.ReleaseProcessor;
+import org.opencds.cqf.fhir.cr.common.RetireProcessor;
+import org.opencds.cqf.fhir.cr.common.WithdrawProcessor;
 import org.opencds.cqf.fhir.cr.helpers.RequestHelpers;
 import org.opencds.cqf.fhir.cr.library.evaluate.EvaluateProcessor;
 import org.opencds.cqf.fhir.utility.Ids;
-import org.opencds.cqf.fhir.utility.client.TerminologyServerClientSettings;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
@@ -42,7 +46,7 @@ class LibraryProcessorTests {
         var repository =
                 new IgRepository(fhirContextR4, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r4"));
         var processor = new LibraryProcessor(repository);
-        assertNotNull(processor.evaluationSettings());
+        assertNotNull(processor.settings());
     }
 
     @Test
@@ -58,19 +62,18 @@ class LibraryProcessorTests {
     void processor() {
         var repository =
                 new IgRepository(fhirContextR5, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r5"));
-        var packageProcessor = new PackageProcessor(repository);
-        var releaseProcessor = new ReleaseProcessor(repository);
-        var dataRequirementsProcessor = new DataRequirementsProcessor(repository);
-        var evaluateProcessor = new EvaluateProcessor(repository, EvaluationSettings.getDefault());
         var processor = new LibraryProcessor(
                 repository,
-                EvaluationSettings.getDefault(),
-                TerminologyServerClientSettings.getDefault(),
-                packageProcessor,
-                releaseProcessor,
-                dataRequirementsProcessor,
-                evaluateProcessor);
-        assertNotNull(processor.evaluationSettings());
+                CrSettings.getDefault(),
+                List.of(
+                        new PackageProcessor(repository),
+                        new ReleaseProcessor(repository),
+                        new DataRequirementsProcessor(repository),
+                        new EvaluateProcessor(repository, EvaluationSettings.getDefault()),
+                        new DeleteProcessor(repository),
+                        new RetireProcessor(repository),
+                        new WithdrawProcessor(repository)));
+        assertNotNull(processor.settings());
         var result = processor.resolveLibrary(Eithers.forMiddle3(
                 Ids.newId(repository.fhirContext(), "Library", "OutpatientPriorAuthorizationPrepopulation")));
         assertNotNull(result);
@@ -126,7 +129,7 @@ class LibraryProcessorTests {
                 .when()
                 .libraryId("OutpatientPriorAuthorizationPrepopulation")
                 .thenDataRequirements()
-                .hasDataRequirements(30);
+                .hasDataRequirements(19);
     }
 
     @Test
@@ -135,7 +138,7 @@ class LibraryProcessorTests {
                 .when()
                 .libraryId("OutpatientPriorAuthorizationPrepopulation")
                 .thenDataRequirements()
-                .hasDataRequirements(30);
+                .hasDataRequirements(19);
     }
 
     @Test

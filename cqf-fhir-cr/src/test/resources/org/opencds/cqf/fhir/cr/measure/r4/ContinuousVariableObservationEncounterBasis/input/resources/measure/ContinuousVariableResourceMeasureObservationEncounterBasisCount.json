@@ -1,0 +1,124 @@
+{
+  "id": "ContinuousVariableResourceMeasureObservationEncounterBasisCount",
+  "resourceType": "Measure",
+  "url": "http://example.com/Measure/ContinuousVariableResourceMeasureObservationEncounterBasisCount",
+  "name": "ContinuousVariableResourceMeasureObservationEncounterBasisCount",
+  "library": [
+    "http://example.com/Library/ContinuousVariableObservationEncounterBasis"
+  ],
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-populationBasis",
+      "valueCode": "Encounter"
+    }
+  ],
+  "scoring": {
+    "coding": [
+      {
+        "system": "http://hl7.org/fhir/measure-scoring",
+        "code": "continuous-variable"
+      }
+    ]
+  },
+  "group": [
+    {
+      "id": "group-1",
+      "population": [
+        {
+          "id": "initial-population",
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code": "initial-population",
+                "display": "Initial Population"
+              }
+            ]
+          },
+          "criteria": {
+            "language": "text/cql-identifier",
+            "expression": "Initial Population Resource"
+          }
+        },
+        {
+          "id": "measure-population",
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code": "measure-population",
+                "display": "Measure Population"
+              }
+            ]
+          },
+          "criteria": {
+            "language": "text/cql-identifier",
+            "expression": "Measure Population Resource"
+          }
+        },
+        {
+          "id": "measure-population-exclusion",
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code": "measure-population-exclusion",
+                "display": "Measure Population Exclusion"
+              }
+            ]
+          },
+          "criteria": {
+            "language": "text/cql-identifier",
+            "expression": "Measure Population Exclusion Resource"
+          }
+        },
+        {
+          "id": "measure-observation-1",
+          "extension" : [
+            {
+              "url" : "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-criteriaReference",
+              "valueString" : "measure-population"
+            },
+            {
+              "url" : "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-aggregateMethod",
+              "valueCode" : "count"
+            }
+          ],
+          "code" : {
+            "coding" : [
+              {
+                "system" : "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code" : "measure-observation",
+                "display" : "Measure Observation"
+              }
+            ]
+          },
+          "criteria" : {
+            "language" : "text/cql-identifier",
+            "expression" : "MeasureObservation"
+          }
+        }
+      ],
+      "stratifier": [
+        {
+          "id": "stratifier-age",
+          "code": {
+            "text": "Age"
+          },
+          "component": [
+            {
+              "id": "stratifier-gender-comp-1",
+              "code": {
+                "text": "Age"
+              },
+              "criteria": {
+                "language": "text/cql.identifier",
+                "expression": "Age"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

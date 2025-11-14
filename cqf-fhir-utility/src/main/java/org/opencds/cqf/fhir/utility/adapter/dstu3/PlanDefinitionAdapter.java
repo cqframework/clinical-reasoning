@@ -16,6 +16,7 @@ import org.hl7.fhir.dstu3.model.RelatedArtifact;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.TriggerDefinition;
 import org.hl7.fhir.dstu3.model.UriType;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
@@ -171,6 +172,16 @@ class PlanDefinitionAdapter extends KnowledgeArtifactAdapter implements IPlanDef
     @Override
     public List<String> getLibrary() {
         return get().getLibrary().stream().map(Reference::getReference).collect(Collectors.toList());
+    }
+
+    @Override
+    public boolean hasGoal() {
+        return get().hasGoal();
+    }
+
+    @Override
+    public List<IBaseBackboneElement> getGoal() {
+        return get().getGoal().stream().map(IBaseBackboneElement.class::cast).toList();
     }
 
     @Override

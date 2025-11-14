@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.opencds.cqf.fhir</groupId>
         <artifactId>cqf-fhir</artifactId>
-        <version>3.28.0-SNAPSHOT</version>
+        <version>4.0.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>cqf-fhir-cr-hapi</artifactId>
@@ -14,7 +14,7 @@
     <description>Implementations of clinical reasoning hapi-fhir operations</description>
 
     <properties>
-        <spring-security-core.version>5.7.14</spring-security-core.version>
+        <spring-security-core.version>6.3.9</spring-security-core.version>
     </properties>
 
     <dependencyManagement>
@@ -48,13 +48,6 @@
     </dependencyManagement>
 
     <dependencies>
-        <dependency>
-            <groupId>org.opencds.cqf.fhir</groupId>
-            <artifactId>cqf-fhir-jackson</artifactId>
-            <version>${project.version}</version>
-            <type>pom</type>
-        </dependency>
-
         <dependency>
             <groupId>ca.uhn.hapi.fhir</groupId>
             <artifactId>hapi-fhir-validation</artifactId>
@@ -110,6 +103,10 @@
                 <exclusion>
                     <groupId>com.sun.activation</groupId>
                     <artifactId>jakarta.activation</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>junit</groupId>
+                    <artifactId>junit</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -194,6 +191,7 @@
                                                     <include>org.opencds.cqf.cql:*</include>
                                                     <include>org.opencds.cqf.fhir:*</include>
                                                     <include>info.cqframework:*</include>
+                                                    <include>org.cqframework:*</include>
                                                 </includes>
                                             </requireReleaseDeps>
                                         </rules>

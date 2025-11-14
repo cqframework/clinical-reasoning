@@ -5,10 +5,15 @@ import java.util.stream.Collectors;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 
 public interface IResourceAdapter extends IAdapter<IBaseResource> {
 
     IBaseResource get();
+
+    default IIdType getId() {
+        return get().getIdElement();
+    }
 
     IBase setProperty(String name, IBase value) throws FHIRException;
 
@@ -49,5 +54,11 @@ public interface IResourceAdapter extends IAdapter<IBaseResource> {
 
     default Boolean hasContained(IBaseResource base) {
         return !getContained(base).isEmpty();
+    }
+
+    default void addContained(IBaseResource base) {
+        var res = resolvePathList(get(), "contained", IBaseResource.class);
+        res.add(base);
+        getModelResolver().setValue(get(), "contained", res);
     }
 }

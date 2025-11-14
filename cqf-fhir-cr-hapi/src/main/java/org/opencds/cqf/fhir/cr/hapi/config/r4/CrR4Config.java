@@ -14,7 +14,6 @@ import org.opencds.cqf.fhir.cr.crmi.R4PackageService;
 import org.opencds.cqf.fhir.cr.crmi.R4ReleaseService;
 import org.opencds.cqf.fhir.cr.ecr.r4.R4ERSDTransformService;
 import org.opencds.cqf.fhir.cr.hapi.common.StringTimePeriodHandler;
-import org.opencds.cqf.fhir.cr.hapi.config.CrBaseConfig;
 import org.opencds.cqf.fhir.cr.hapi.config.ProviderLoader;
 import org.opencds.cqf.fhir.cr.hapi.config.ProviderSelector;
 import org.opencds.cqf.fhir.cr.hapi.config.RepositoryConfig;
@@ -57,8 +56,15 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
+@SuppressWarnings("UnstableApiUsage")
 @Configuration
-@Import({RepositoryConfig.class, CrBaseConfig.class, ReleaseOperationConfig.class})
+@Import({
+    RepositoryConfig.class,
+    ReleaseOperationConfig.class,
+    DeleteOperationConfig.class,
+    RetireOperationConfig.class,
+    WithdrawOperationConfig.class
+})
 public class CrR4Config {
 
     @Bean

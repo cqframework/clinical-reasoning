@@ -1,11 +1,11 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 
 @SuppressWarnings("squid:S2699")
-public class MeasureConditionCategoryPOCTest {
+class MeasureConditionCategoryPOCTest {
     protected static Given given = Measure.given().repositoryFor("ConditionCategoryPoc");
 
     /**
@@ -14,7 +14,7 @@ public class MeasureConditionCategoryPOCTest {
      * The example here captures a contained Encounter that suspects an issue.
      */
     @Test
-    public void measure_eval_non_retrieve_resource() {
+    void measure_eval_non_retrieve_resource() {
         given.when()
                 .measureId("ConditionCategoryPOC")
                 .periodStart("2022-01-01")

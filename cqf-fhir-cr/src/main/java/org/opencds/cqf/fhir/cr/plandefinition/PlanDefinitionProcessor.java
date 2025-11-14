@@ -18,11 +18,12 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
-import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
+import org.opencds.cqf.fhir.cr.CrSettings;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.IRequestResolverFactory;
 import org.opencds.cqf.fhir.cr.common.DataRequirementsProcessor;
 import org.opencds.cqf.fhir.cr.common.IDataRequirementsProcessor;
+import org.opencds.cqf.fhir.cr.common.IOperationProcessor;
 import org.opencds.cqf.fhir.cr.common.IPackageProcessor;
 import org.opencds.cqf.fhir.cr.common.PackageProcessor;
 import org.opencds.cqf.fhir.cr.common.ResourceResolver;
@@ -32,7 +33,6 @@ import org.opencds.cqf.fhir.cr.plandefinition.apply.IApplyProcessor;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.Resources;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
-import org.opencds.cqf.fhir.utility.client.TerminologyServerClientSettings;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.monad.Either3;
 
@@ -46,46 +46,46 @@ public class PlanDefinitionProcessor {
     protected org.opencds.cqf.fhir.cr.activitydefinition.apply.IApplyProcessor activityProcessor;
     protected IRequestResolverFactory requestResolverFactory;
     protected IRepository repository;
-    protected EvaluationSettings evaluationSettings;
-    protected TerminologyServerClientSettings terminologyServerClientSettings;
+    protected CrSettings crSettings;
 
     public PlanDefinitionProcessor(IRepository repository) {
-        this(repository, EvaluationSettings.getDefault(), TerminologyServerClientSettings.getDefault());
+        this(repository, CrSettings.getDefault());
+    }
+
+    public PlanDefinitionProcessor(IRepository repository, CrSettings crSettings) {
+        this(repository, crSettings, null, null);
     }
 
     public PlanDefinitionProcessor(
             IRepository repository,
-            EvaluationSettings evaluationSettings,
-            TerminologyServerClientSettings terminologyServerClientSettings) {
-        this(repository, evaluationSettings, terminologyServerClientSettings, null, null, null, null, null);
-    }
-
-    public PlanDefinitionProcessor(
-            IRepository repository,
-            EvaluationSettings evaluationSettings,
-            TerminologyServerClientSettings terminologyServerClientSettings,
-            IApplyProcessor applyProcessor,
-            IPackageProcessor packageProcessor,
-            IDataRequirementsProcessor dataRequirementsProcessor,
-            org.opencds.cqf.fhir.cr.activitydefinition.apply.IApplyProcessor activityProcessor,
-            IRequestResolverFactory requestResolverFactory) {
+            CrSettings crSettings,
+            IRequestResolverFactory requestResolverFactory,
+            List<? extends IOperationProcessor> operationProcessors) {
         this.repository = requireNonNull(repository, "repository can not be null");
-        this.evaluationSettings = requireNonNull(evaluationSettings, "evaluationSettings can not be null");
-        if (packageProcessor == null) {
-            this.terminologyServerClientSettings =
-                    requireNonNull(terminologyServerClientSettings, "terminologyServerClientSettings can not be null");
-        }
+        this.crSettings = requireNonNull(crSettings, "crSettings can not be null");
+        this.requestResolverFactory = requestResolverFactory;
         fhirVersion = this.repository.fhirContext().getVersion().getVersion();
         modelResolver = FhirModelResolverCache.resolverForVersion(fhirVersion);
-        this.packageProcessor = packageProcessor;
-        this.dataRequirementsProcessor = dataRequirementsProcessor;
-        this.requestResolverFactory = requestResolverFactory;
-        this.activityProcessor = activityProcessor;
-        this.applyProcessor = applyProcessor;
+        if (operationProcessors != null && !operationProcessors.isEmpty()) {
+            operationProcessors.forEach(p -> {
+                if (p instanceof IPackageProcessor pack) {
+                    packageProcessor = pack;
+                }
+                if (p instanceof IDataRequirementsProcessor dataReq) {
+                    dataRequirementsProcessor = dataReq;
+                }
+                if (p instanceof IApplyProcessor apply) {
+                    applyProcessor = apply;
+                }
+                if (p instanceof org.opencds.cqf.fhir.cr.activitydefinition.apply.IApplyProcessor activity) {
+                    activityProcessor = activity;
+                }
+            });
+        }
     }
 
-    public EvaluationSettings evaluationSettings() {
-        return evaluationSettings;
+    public CrSettings settings() {
+        return crSettings;
     }
 
     protected void initApplyProcessor() {
@@ -96,9 +96,7 @@ public class PlanDefinitionProcessor {
                             ? requestResolverFactory
                             : IRequestResolverFactory.getDefault(fhirVersion));
         }
-        applyProcessor = applyProcessor != null
-                ? applyProcessor
-                : new ApplyProcessor(repository, modelResolver, activityProcessor);
+        applyProcessor = applyProcessor != null ? applyProcessor : new ApplyProcessor(repository, activityProcessor);
     }
 
     protected <C extends IPrimitiveType<String>, R extends IBaseResource> R resolvePlanDefinition(
@@ -122,9 +120,7 @@ public class PlanDefinitionProcessor {
     }
 
     public IBaseBundle packagePlanDefinition(IBaseResource planDefinition, IBaseParameters parameters) {
-        var processor = packageProcessor != null
-                ? packageProcessor
-                : new PackageProcessor(repository, terminologyServerClientSettings);
+        var processor = packageProcessor != null ? packageProcessor : new PackageProcessor(repository, crSettings);
         return processor.packageResource(planDefinition, parameters);
     }
 
@@ -136,7 +132,7 @@ public class PlanDefinitionProcessor {
     public IBaseResource dataRequirements(IBaseResource planDefinition, IBaseParameters parameters) {
         var processor = dataRequirementsProcessor != null
                 ? dataRequirementsProcessor
-                : new DataRequirementsProcessor(repository, evaluationSettings);
+                : new DataRequirementsProcessor(repository, crSettings.getEvaluationSettings());
         return processor.getDataRequirements(planDefinition, parameters);
     }
 
@@ -202,7 +198,7 @@ public class PlanDefinitionProcessor {
                 null,
                 null,
                 null,
-                new LibraryEngine(repository, evaluationSettings));
+                new LibraryEngine(repository, crSettings.getEvaluationSettings()));
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource apply(
@@ -276,7 +272,7 @@ public class PlanDefinitionProcessor {
                 parameters,
                 data,
                 prefetchData,
-                new LibraryEngine(repository, this.evaluationSettings));
+                new LibraryEngine(repository, crSettings.getEvaluationSettings()));
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource apply(
@@ -404,7 +400,7 @@ public class PlanDefinitionProcessor {
                 parameters,
                 data,
                 prefetchData,
-                new LibraryEngine(repository, this.evaluationSettings));
+                new LibraryEngine(repository, crSettings.getEvaluationSettings()));
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseParameters applyR5(

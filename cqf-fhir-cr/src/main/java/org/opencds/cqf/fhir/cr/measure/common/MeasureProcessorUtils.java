@@ -1,30 +1,17 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
-import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.MEASUREPOPULATION;
-
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
-import org.apache.commons.lang3.tuple.Pair;
-import org.hl7.elm.r1.FunctionDef;
 import org.hl7.elm.r1.IntervalTypeSpecifier;
 import org.hl7.elm.r1.NamedTypeSpecifier;
 import org.hl7.elm.r1.ParameterDef;
-import org.hl7.elm.r1.VersionedIdentifier;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
-import org.opencds.cqf.cql.engine.execution.EvaluationResult;
-import org.opencds.cqf.cql.engine.execution.EvaluationResultsForMultiLib;
-import org.opencds.cqf.cql.engine.execution.Libraries;
-import org.opencds.cqf.cql.engine.execution.Variable;
 import org.opencds.cqf.cql.engine.runtime.Date;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.engine.runtime.Interval;
@@ -35,77 +22,6 @@ import org.slf4j.LoggerFactory;
 
 public class MeasureProcessorUtils {
     private static final Logger logger = LoggerFactory.getLogger(MeasureProcessorUtils.class);
-    private static final String EXCEPTION_FOR_SUBJECT_ID_MESSAGE_TEMPLATE = "Exception for subjectId: %s, Message: %s";
-
-    /**
-     * Method that processes CQL Results into Measure defined fields that reference associated CQL expressions
-     * @param results criteria expression results
-     * @param measureDef Measure defined objects
-     * @param measureEvalType the type of evaluation algorithm to apply to Criteria results
-     * @param applyScoring whether Measure Evaluator will apply set membership per measure scoring algorithm
-     * @param populationBasisValidator the validator class to use for checking consistency of results
-     */
-    public void processResults(
-            Map<String, EvaluationResult> results,
-            MeasureDef measureDef,
-            @Nonnull MeasureEvalType measureEvalType,
-            boolean applyScoring,
-            PopulationBasisValidator populationBasisValidator) {
-        MeasureEvaluator evaluator = new MeasureEvaluator(populationBasisValidator);
-        // Populate MeasureDef using MeasureEvaluator
-        for (Map.Entry<String, EvaluationResult> entry : results.entrySet()) {
-            // subject
-            String subjectId = entry.getKey();
-            var sub = getSubjectTypeAndId(subjectId);
-            var subjectIdPart = sub.getRight();
-            var subjectTypePart = sub.getLeft();
-            // cql results
-            EvaluationResult evalResult = entry.getValue();
-            try {
-                // populate results into MeasureDef
-                evaluator.evaluate(
-                        measureDef, measureEvalType, subjectTypePart, subjectIdPart, evalResult, applyScoring);
-            } catch (Exception e) {
-                // Catch Exceptions from evaluation per subject, but allow rest of subjects to be processed (if
-                // applicable)
-                var error = EXCEPTION_FOR_SUBJECT_ID_MESSAGE_TEMPLATE.formatted(subjectId, e.getMessage());
-                // Capture error for MeasureReportBuilder
-                measureDef.addError(error);
-                logger.error(error, e);
-            }
-        }
-    }
-
-    /**
-     * Measures with defined scoring type of 'continuous-variable' where a defined 'measure-observation' population is used to evaluate results of 'measure-population'.
-     * This method is a downstream calculation given it requires calculated results before it can be called.
-     * Results are then added to associated MeasureDef
-     * @param measureDef measure defined objects that are populated from criteria expression results
-     * @param context cql engine context used to evaluate results
-     */
-    public void continuousVariableObservation(MeasureDef measureDef, CqlEngine context) {
-        // Continuous Variable?
-        for (GroupDef groupDef : measureDef.groups()) {
-            // Measure Observation defined?
-            if (groupDef.measureScoring().equals(MeasureScoring.CONTINUOUSVARIABLE)
-                    && groupDef.getSingle(MeasurePopulationType.MEASUREOBSERVATION) != null) {
-
-                PopulationDef measurePopulation = groupDef.getSingle(MEASUREPOPULATION);
-                PopulationDef measureObservation = groupDef.getSingle(MeasurePopulationType.MEASUREOBSERVATION);
-
-                // Inject MeasurePopulation results into Measure Observation Function
-                for (Object resource : measurePopulation.getResources()) {
-                    Object observationResult = evaluateObservationCriteria(
-                            resource,
-                            measureObservation.expression(),
-                            measureObservation.getEvaluatedResources(),
-                            groupDef.isBooleanBasis(),
-                            context);
-                    measureObservation.addResource(observationResult);
-                }
-            }
-        }
-    }
 
     /**
      * method used to convert measurement period Interval object into ZonedDateTime
@@ -200,13 +116,27 @@ public class MeasureProcessorUtils {
         context.getState().setParameter(null, MeasureConstants.MEASUREMENT_PERIOD_PARAMETER_NAME, convertedPeriod);
     }
 
+    public Interval getMeasurementPeriod(
+            @Nullable ZonedDateTime periodStart, @Nullable ZonedDateTime periodEnd, CqlEngine context) {
+
+        return getDefaultMeasurementPeriod(buildMeasurementPeriod(periodStart, periodEnd), context);
+    }
+
+    private Interval buildMeasurementPeriod(ZonedDateTime periodStart, ZonedDateTime periodEnd) {
+        if (periodStart == null && periodEnd == null) {
+            return null;
+        }
+        // Operation parameter defined measurementPeriod
+        return DateHelper.buildMeasurementPeriodInterval(periodStart, periodEnd);
+    }
+
     /**
      * Get Cql MeasurementPeriod if parameters are empty
      * @param measurementPeriod Interval from operation parameters
      * @param context cql context to extract default values
      * @return operation parameters if populated, otherwise default CQL interval
      */
-    public Interval getDefaultMeasurementPeriod(Interval measurementPeriod, CqlEngine context) {
+    public static Interval getDefaultMeasurementPeriod(Interval measurementPeriod, CqlEngine context) {
         if (measurementPeriod == null) {
             return (Interval)
                     context.getState().getParameters().get(MeasureConstants.MEASUREMENT_PERIOD_PARAMETER_NAME);
@@ -276,171 +206,6 @@ public class MeasureProcessorUtils {
     public Date truncateDateTime(DateTime dateTime) {
         OffsetDateTime odt = dateTime.getDateTime();
         return new Date(odt.getYear(), odt.getMonthValue(), odt.getDayOfMonth());
-    }
-
-    /**
-     * method used to extract evaluated resources touched by CQL criteria expressions
-     * @param outEvaluatedResources set object used to capture resources touched
-     * @param context cql engine context
-     */
-    public void captureEvaluatedResources(Set<Object> outEvaluatedResources, CqlEngine context) {
-        if (outEvaluatedResources != null && context.getState().getEvaluatedResources() != null) {
-            outEvaluatedResources.addAll(context.getState().getEvaluatedResources());
-        }
-        clearEvaluatedResources(context);
-    }
-
-    // reset evaluated resources followed by a context evaluation
-    private void clearEvaluatedResources(CqlEngine context) {
-        context.getState().clearEvaluatedResources();
-    }
-
-    /**
-     * method used to evaluate cql expression defined for 'continuous variable' scoring type measures that have 'measure observation' to calculate
-     * This method is called as a second round of processing given it uses 'measure population' results as input data for function
-     * @param resource object that stores results of cql
-     * @param criteriaExpression expression name to call
-     * @param outEvaluatedResources set to store evaluated resources touched
-     * @param isBooleanBasis the type of result created from expression
-     * @param context cql engine context used to evaluate expression
-     * @return cql results for subject requested
-     */
-    @SuppressWarnings({"deprecation", "removal"})
-    public Object evaluateObservationCriteria(
-            Object resource,
-            String criteriaExpression,
-            Set<Object> outEvaluatedResources,
-            boolean isBooleanBasis,
-            CqlEngine context) {
-
-        var ed = Libraries.resolveExpressionRef(
-                criteriaExpression, context.getState().getCurrentLibrary());
-
-        if (!(ed instanceof FunctionDef functionDef)) {
-            throw new InvalidRequestException(
-                    "Measure observation %s does not reference a function definition".formatted(criteriaExpression));
-        }
-
-        Object result;
-        context.getState().pushActivationFrame(functionDef, functionDef.getContext());
-        try {
-            if (!isBooleanBasis) {
-                // subject based observations don't have a parameter to pass in
-                context.getState()
-                        .push(new Variable(functionDef.getOperand().get(0).getName()).withValue(resource));
-            }
-            result = context.getEvaluationVisitor().visitExpression(ed.getExpression(), context.getState());
-        } finally {
-            context.getState().popActivationFrame();
-        }
-
-        captureEvaluatedResources(outEvaluatedResources, context);
-
-        return result;
-    }
-
-    /**
-     * method used to execute generate CQL results via Library $evaluate
-     *
-     * @param subjectIds subjects to generate results for
-     * @param zonedMeasurementPeriod offset defined measurement period for evaluation
-     * @param context cql engine context
-     * @param multiLibraryIdMeasureEngineDetails container for engine, library and measure IDs
-     * @return CQL results for Library defined in the Measure resource
-     */
-    public CompositeEvaluationResultsPerMeasure getEvaluationResults(
-            List<String> subjectIds,
-            ZonedDateTime zonedMeasurementPeriod,
-            CqlEngine context,
-            MultiLibraryIdMeasureEngineDetails multiLibraryIdMeasureEngineDetails) {
-
-        // measure -> subject -> results
-        var resultsBuilder = CompositeEvaluationResultsPerMeasure.builder();
-
-        // Library $evaluate each subject
-        // The goal here is to do each measure/library evaluation within the context of a single subject.
-        // This means that we will not switch between subject contexts while evaluating measures.
-        // Once we've switched to a different subject context, the previous expression cache is dropped.
-        for (String subjectId : subjectIds) {
-            if (subjectId == null) {
-                throw new InternalErrorException("SubjectId is required in order to calculate.");
-            }
-            Pair<String, String> subjectInfo = this.getSubjectTypeAndId(subjectId);
-            String subjectTypePart = subjectInfo.getLeft();
-            String subjectIdPart = subjectInfo.getRight();
-            context.getState().setContextValue(subjectTypePart, subjectIdPart);
-            try {
-                var libraryIdentifiers = multiLibraryIdMeasureEngineDetails.getLibraryIdentifiers();
-
-                var evaluationResultsForMultiLib = multiLibraryIdMeasureEngineDetails
-                        .getLibraryEngine()
-                        .getEvaluationResult(
-                                libraryIdentifiers,
-                                subjectId,
-                                null,
-                                null,
-                                null,
-                                null,
-                                null,
-                                zonedMeasurementPeriod,
-                                context);
-
-                for (var libraryVersionedIdentifier : libraryIdentifiers) {
-                    validateEvaluationResultExistsForIdentifier(
-                            libraryVersionedIdentifier, evaluationResultsForMultiLib);
-
-                    var evaluationResult = evaluationResultsForMultiLib.getResultFor(libraryVersionedIdentifier);
-
-                    var measureIds =
-                            multiLibraryIdMeasureEngineDetails.getMeasureIdsForLibrary(libraryVersionedIdentifier);
-
-                    resultsBuilder.addResults(measureIds, subjectId, evaluationResult);
-
-                    Optional.ofNullable(evaluationResultsForMultiLib.getExceptionFor(libraryVersionedIdentifier))
-                            .ifPresent(exception -> {
-                                var error = EXCEPTION_FOR_SUBJECT_ID_MESSAGE_TEMPLATE.formatted(
-                                        subjectId, exception.getMessage());
-                                resultsBuilder.addErrors(measureIds, error);
-                                logger.error(error, exception);
-                            });
-                }
-
-            } catch (Exception e) {
-                // If there's any error we didn't anticipate, catch it here:
-                var error = EXCEPTION_FOR_SUBJECT_ID_MESSAGE_TEMPLATE.formatted(subjectId, e.getMessage());
-                var measureIds = multiLibraryIdMeasureEngineDetails.getAllMeasureIds();
-
-                resultsBuilder.addErrors(measureIds, error);
-                logger.error(error, e);
-            }
-        }
-
-        return resultsBuilder.build();
-    }
-
-    private void validateEvaluationResultExistsForIdentifier(
-            VersionedIdentifier versionedIdentifierFromQuery,
-            EvaluationResultsForMultiLib evaluationResultsForMultiLib) {
-
-        var containsResults = evaluationResultsForMultiLib.containsResultsFor(versionedIdentifierFromQuery);
-        var containsExceptions = evaluationResultsForMultiLib.containsExceptionsFor(versionedIdentifierFromQuery);
-
-        if (!containsResults && !containsExceptions) {
-            throw new InternalErrorException(
-                    "Evaluation result in versionless search not found for identifier with ID: %s"
-                            .formatted(versionedIdentifierFromQuery.getId()));
-        }
-    }
-
-    public Pair<String, String> getSubjectTypeAndId(String subjectId) {
-        if (subjectId.contains("/")) {
-            String[] subjectIdParts = subjectId.split("/");
-            return Pair.of(subjectIdParts[0], subjectIdParts[1]);
-        } else {
-            throw new InvalidRequestException(
-                    "Unable to determine Subject type for id: %s. SubjectIds must be in the format {subjectType}/{subjectId} (e.g. Patient/123)"
-                            .formatted(subjectId));
-        }
     }
 
     public MeasureEvalType getEvalType(MeasureEvalType evalType, String reportType, List<String> subjectIds) {

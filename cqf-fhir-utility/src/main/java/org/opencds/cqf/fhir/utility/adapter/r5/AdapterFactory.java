@@ -14,6 +14,7 @@ import org.hl7.fhir.r5.model.Measure;
 import org.hl7.fhir.r5.model.MetadataResource;
 import org.hl7.fhir.r5.model.Parameters;
 import org.hl7.fhir.r5.model.PlanDefinition;
+import org.hl7.fhir.r5.model.PlanDefinition.PlanDefinitionActionComponent;
 import org.hl7.fhir.r5.model.Questionnaire;
 import org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.r5.model.QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent;
@@ -36,6 +37,7 @@ import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IParametersParameterComponentAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IPlanDefinitionActionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IPlanDefinitionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireItemComponentAdapter;
@@ -46,6 +48,7 @@ import org.opencds.cqf.fhir.utility.adapter.IRequestActionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IResourceAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IStructureDefinitionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ITupleAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IUsageContextAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
 
 public class AdapterFactory implements IAdapterFactory {
@@ -71,6 +74,8 @@ public class AdapterFactory implements IAdapterFactory {
             return createQuestionnaireResponseItem(responseItem);
         } else if (element instanceof QuestionnaireResponseItemAnswerComponent answer) {
             return createQuestionnaireResponseItemAnswer(answer);
+        } else if (element instanceof PlanDefinitionActionComponent action) {
+            return createPlanDefinitionAction(action);
         } else if (element instanceof RequestOrchestrationActionComponent requestAction) {
             return createRequestAction(requestAction);
         } else {
@@ -162,6 +167,11 @@ public class AdapterFactory implements IAdapterFactory {
     }
 
     @Override
+    public IPlanDefinitionActionAdapter createPlanDefinitionAction(IBase action) {
+        return new PlanDefinitionActionAdapter(action);
+    }
+
+    @Override
     public IRequestActionAdapter createRequestAction(IBase action) {
         return new RequestActionAdapter(action);
     }
@@ -199,6 +209,11 @@ public class AdapterFactory implements IAdapterFactory {
     @Override
     public IQuestionnaireResponseItemAnswerComponentAdapter createQuestionnaireResponseItemAnswer(IBase answer) {
         return new QuestionnaireResponseItemAnswerComponentAdapter(answer);
+    }
+
+    @Override
+    public IUsageContextAdapter createUsageContext(IBase usageContext) {
+        return new UsageContextAdapter(usageContext);
     }
 
     @Override

@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ListMultimap;
 import java.util.List;
 import org.hl7.elm.r1.VersionedIdentifier;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 
 /**
@@ -13,11 +12,11 @@ import org.opencds.cqf.fhir.cql.LibraryEngine;
  */
 public class MultiLibraryIdMeasureEngineDetails {
     private final LibraryEngine libraryEngine;
-    private final ListMultimap<VersionedIdentifier, IIdType> libraryIdToMeasureIds;
+    private final ListMultimap<VersionedIdentifier, MeasureDef> libraryIdToMeasureDef;
 
     private MultiLibraryIdMeasureEngineDetails(Builder builder) {
         this.libraryEngine = builder.libraryEngine;
-        this.libraryIdToMeasureIds = builder.libraryIdToMeasureIdsBuilder.build();
+        this.libraryIdToMeasureDef = builder.libraryIdToMeasureDefBuilder.build();
     }
 
     public LibraryEngine getLibraryEngine() {
@@ -26,32 +25,32 @@ public class MultiLibraryIdMeasureEngineDetails {
 
     public List<VersionedIdentifier> getLibraryIdentifiers() {
         // Assuming we want the first library identifier
-        return List.copyOf(libraryIdToMeasureIds.keySet());
+        return List.copyOf(libraryIdToMeasureDef.keySet());
     }
 
-    public List<IIdType> getMeasureIdsForLibrary(VersionedIdentifier libraryId) {
-        return libraryIdToMeasureIds.get(libraryId);
+    public List<MeasureDef> getMeasureDefsForLibrary(VersionedIdentifier libraryId) {
+        return libraryIdToMeasureDef.get(libraryId);
     }
 
     public static Builder builder(LibraryEngine engine) {
         return new Builder(engine);
     }
 
-    public List<IIdType> getAllMeasureIds() {
-        return List.copyOf(libraryIdToMeasureIds.values());
+    public List<MeasureDef> getAllMeasureDefs() {
+        return List.copyOf(libraryIdToMeasureDef.values());
     }
 
     public static class Builder {
         private final LibraryEngine libraryEngine;
-        private final ImmutableListMultimap.Builder<VersionedIdentifier, IIdType> libraryIdToMeasureIdsBuilder =
+        private final ImmutableListMultimap.Builder<VersionedIdentifier, MeasureDef> libraryIdToMeasureDefBuilder =
                 ImmutableListMultimap.builder();
 
         public Builder(LibraryEngine libraryEngine) {
             this.libraryEngine = libraryEngine;
         }
 
-        public Builder addLibraryIdToMeasureId(VersionedIdentifier libraryId, IIdType measureId) {
-            libraryIdToMeasureIdsBuilder.put(libraryId, measureId);
+        public Builder addLibraryIdToMeasureId(VersionedIdentifier libraryId, MeasureDef measureDef) {
+            libraryIdToMeasureDefBuilder.put(libraryId, measureDef);
             return this;
         }
 

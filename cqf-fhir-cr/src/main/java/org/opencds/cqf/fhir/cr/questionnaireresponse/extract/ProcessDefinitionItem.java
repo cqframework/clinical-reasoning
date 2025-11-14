@@ -30,8 +30,10 @@ import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.cr.common.ExpressionProcessor;
+import org.opencds.cqf.fhir.cr.common.ICqlOperationRequest;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.CqfExpression;
+import org.opencds.cqf.fhir.utility.FhirPathCache;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.adapter.IElementDefinitionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IItemComponentAdapter;
@@ -40,7 +42,7 @@ import org.opencds.cqf.fhir.utility.adapter.IStructureDefinitionAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+@SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "UnstableApiUsage"})
 public class ProcessDefinitionItem {
     protected static final String ID_PATH = "id";
     protected static final String DEFINITION_PATH = "definition";
@@ -64,7 +66,6 @@ public class ProcessDefinitionItem {
                 ? "Questionnaire.root"
                 : item.getResponseItem().getLinkId();
         var definitionProfile = getDefinitionProfile(request, item);
-        var valueExtensions = getValueExtensions(request, item);
         var definition = getDefinition(item);
         var profileUrl = definitionProfile.right == null ? definition : definitionProfile.right;
         var profile = getProfile(request, profileUrl);
@@ -74,7 +75,7 @@ public class ProcessDefinitionItem {
         var resource = isCreatedResource
                 ? (IBaseResource) newBaseForVersion(resourceType, request.getFhirVersion())
                 : extractResource;
-        processResource(request, resource, profile, isCreatedResource, item, valueExtensions);
+        processResource(request, resource, profile, isCreatedResource, item);
         return resource;
     }
 
@@ -162,8 +163,7 @@ public class ProcessDefinitionItem {
             IBaseResource resource,
             Optional<IStructureDefinitionAdapter> profile,
             boolean isCreatedResource,
-            ItemPair item,
-            List<IBaseExtension<?, ?>> valueExtensions) {
+            ItemPair item) {
         var resourceDefinition = request.getFhirContext().getElementDefinition(resource.getClass());
         if (isCreatedResource) {
             var id = request.getExtractId();
@@ -177,7 +177,8 @@ public class ProcessDefinitionItem {
             resource.setId((IIdType) Ids.newId(request.getFhirVersion(), id));
             resolveMeta(resource, profile);
         }
-        valueExtensions.forEach(valueExt -> processValueExtension(request, resource, profile, valueExt));
+        getValueExtensions(request, item)
+                .forEach(valueExt -> processValueExtension(request, resource, profile, valueExt));
         List<? extends IItemComponentAdapter> responseItems;
         List<? extends IItemComponentAdapter> questionnaireItems;
         if (item.getResponseItem() != null && !item.getResponseItem().hasItem()) {
@@ -238,8 +239,7 @@ public class ProcessDefinitionItem {
             var definition = ((IPrimitiveType<String>) definitionExt.getValue()).getValueAsString();
             var value = fixedValueExt != null
                     ? fixedValueExt.getValue()
-                    : expressionProcessor.getExpressionResult(
-                            request, CqfExpression.of(expressionExt, request.getReferencedLibraries()));
+                    : getExpressionResult(request, CqfExpression.of(expressionExt, request.getReferencedLibraries()));
             if (value != null) {
                 var path = getPathAdapter(request, profile, definition);
                 request.getModelResolver().setValue(resource, path.left, value);
@@ -247,7 +247,20 @@ public class ProcessDefinitionItem {
         }
     }
 
-    private ImmutablePair<String, IStructureDefinitionAdapter> getPathAdapter(
+    protected List<IBase> getExpressionResult(ICqlOperationRequest request, CqfExpression expression) {
+        // Constructing a CQL Library for each fhirpath expression is extremely inefficient
+        // Using the HAPI FHIRPath engine instead
+        // This assumes the expressions are simple and do not need any extra variables defined
+        if (expression.getLanguage().equals("text/fhirpath")) {
+            var fhirPath =
+                    FhirPathCache.cachedForContext(request.getRepository().fhirContext());
+            return fhirPath.evaluate(request.getContextVariable(), expression.getExpression(), IBase.class);
+        } else {
+            return expressionProcessor.getExpressionResult(request, expression);
+        }
+    }
+
+    protected ImmutablePair<String, IStructureDefinitionAdapter> getPathAdapter(
             ExtractRequest request, Optional<IStructureDefinitionAdapter> profile, String definition) {
         var split = definition.split("#");
         var canonical = split[0];
@@ -367,7 +380,11 @@ public class ProcessDefinitionItem {
                     resourceDefinition,
                     profile,
                     element,
-                    new ImmutablePair<>(children, itemPair.getItem().getItem()),
+                    new ImmutablePair<>(
+                            children,
+                            itemPair.getItem() == null
+                                    ? null
+                                    : itemPair.getItem().getItem()),
                     repeats,
                     path);
             request.getModelResolver().setValue(parent, prop, List.of(element));

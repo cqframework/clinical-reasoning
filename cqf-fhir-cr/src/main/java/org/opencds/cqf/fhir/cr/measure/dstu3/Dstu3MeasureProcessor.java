@@ -27,6 +27,7 @@ import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationResultHandler;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorUtils;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
 import org.opencds.cqf.fhir.cr.measure.common.MultiLibraryIdMeasureEngineDetails;
@@ -108,24 +109,26 @@ public class Dstu3MeasureProcessor {
                 Optional.ofNullable(measure.getUrl()).map(List::of).orElse(List.of("Unknown Measure URL")));
         // extract measurement Period from CQL to pass to report Builder
         Interval measurementPeriod =
-                measureProcessorUtils.getDefaultMeasurementPeriod(measurementPeriodParams, context);
+                MeasureProcessorUtils.getDefaultMeasurementPeriod(measurementPeriodParams, context);
         // set offset of operation parameter measurement period
         ZonedDateTime zonedMeasurementPeriod = MeasureProcessorUtils.getZonedTimeZoneForEval(measurementPeriod);
         // populate results from Library $evaluate
         if (!subjects.isEmpty()) {
-            var results = measureProcessorUtils.getEvaluationResults(
-                    subjectIds, zonedMeasurementPeriod, context, measureLibraryIdEngineDetails);
+            var results = MeasureEvaluationResultHandler.getEvaluationResults(
+                    subjectIds,
+                    zonedMeasurementPeriod,
+                    context,
+                    measureLibraryIdEngineDetails,
+                    Dstu3ContinuousVariableObservationConverter.INSTANCE);
 
             // Process Criteria Expression Results
-            measureProcessorUtils.processResults(
-                    results.processMeasureForSuccessOrFailure(measure.getIdElement(), measureDef),
+            MeasureEvaluationResultHandler.processResults(
+                    results.processMeasureForSuccessOrFailure(measureDef),
                     measureDef,
                     evalType,
                     measureEvaluationOptions.getApplyScoringSetMembership(),
                     new Dstu3PopulationBasisValidator());
         }
-        // Populate populationDefs that require MeasureDef results
-        measureProcessorUtils.continuousVariableObservation(measureDef, context);
 
         // Build Measure Report with Results
         return new Dstu3MeasureReportBuilder()
@@ -140,9 +143,10 @@ public class Dstu3MeasureProcessor {
 
         final LibraryEngine libraryEngine = getLibraryEngine(parameters, libraryVersionIdentifier, context);
 
+        var measureDef = new Dstu3MeasureDefBuilder().build(measure);
+
         return MultiLibraryIdMeasureEngineDetails.builder(libraryEngine)
-                .addLibraryIdToMeasureId(
-                        new VersionedIdentifier().withId(libraryVersionIdentifier.getId()), measure.getIdElement())
+                .addLibraryIdToMeasureId(new VersionedIdentifier().withId(libraryVersionIdentifier.getId()), measureDef)
                 .build();
     }
 

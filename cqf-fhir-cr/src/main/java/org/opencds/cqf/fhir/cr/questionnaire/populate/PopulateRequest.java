@@ -49,7 +49,6 @@ public class PopulateRequest implements IQuestionnaireRequest {
             IIdType subjectId,
             List<? extends IBaseBackboneElement> context,
             IBaseExtension<?, ?> launchContext,
-            IBaseParameters parameters,
             IBaseBundle data,
             LibraryEngine libraryEngine,
             ModelResolver modelResolver) {
@@ -72,22 +71,13 @@ public class PopulateRequest implements IQuestionnaireRequest {
         if (launchContext != null) {
             launchContexts.add(launchContext);
         }
-        if (parameters == null) {
-            parameters = (IBaseParameters) Resources.newBaseForVersion("Parameters", fhirVersion);
-        }
+        var parameters = (IBaseParameters) Resources.newBaseForVersion("Parameters", fhirVersion);
         getAdapterFactory().createParameters(parameters).addParameter("%questionnaire", questionnaireAdapter.get());
         questionnaireResponseAdapter = createQuestionnaireResponse();
         contextVariable = questionnaireResponseAdapter.get();
         referencedLibraries = questionnaireAdapter.getReferencedLibraries();
         inputParameterResolver = IInputParameterResolver.createResolver(
-                libraryEngine.getRepository(),
-                this.subjectId,
-                null,
-                null,
-                parameters,
-                this.data,
-                this.context,
-                launchContexts);
+                libraryEngine.getRepository(), null, null, null, parameters, this.data, this.context, launchContexts);
     }
 
     @SuppressWarnings("unchecked")

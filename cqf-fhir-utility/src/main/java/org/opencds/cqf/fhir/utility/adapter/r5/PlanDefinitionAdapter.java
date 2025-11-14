@@ -8,11 +8,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r5.model.CanonicalType;
+import org.hl7.fhir.r5.model.DataRequirement.DataRequirementCodeFilterComponent;
+import org.hl7.fhir.r5.model.Expression;
 import org.hl7.fhir.r5.model.Extension;
 import org.hl7.fhir.r5.model.PlanDefinition;
+import org.hl7.fhir.r5.model.PlanDefinition.PlanDefinitionActionConditionComponent;
+import org.hl7.fhir.r5.model.PlanDefinition.PlanDefinitionActionDynamicValueComponent;
+import org.hl7.fhir.r5.model.PlanDefinition.PlanDefinitionActionInputComponent;
+import org.hl7.fhir.r5.model.PlanDefinition.PlanDefinitionActionOutputComponent;
 import org.hl7.fhir.r5.model.PrimitiveType;
 import org.hl7.fhir.r5.model.RelatedArtifact;
 import org.opencds.cqf.fhir.utility.Canonicals;
@@ -109,15 +116,15 @@ public class PlanDefinitionAdapter extends KnowledgeArtifactAdapter implements I
                             referenceSource, profile.getValue(), profile.getExtension(), profile::setValue)));
             // trigger[].dataRequirement[].codeFilter[].valueSet
             eventData.getCodeFilter().stream()
-                    .filter(cf -> cf.hasValueSet())
+                    .filter(DataRequirementCodeFilterComponent::hasValueSet)
                     .forEach(cf -> references.add(
                             new DependencyInfo(referenceSource, cf.getValueSet(), cf.getExtension(), cf::setValueSet)));
         });
         // condition[].expression.reference
         action.getCondition().stream()
-                .filter(c -> c.hasExpression())
-                .map(c -> c.getExpression())
-                .filter(e -> e.hasReference())
+                .filter(PlanDefinitionActionConditionComponent::hasExpression)
+                .map(PlanDefinitionActionConditionComponent::getExpression)
+                .filter(Expression::hasReference)
                 .forEach(expression -> references.add(new DependencyInfo(
                         referenceSource,
                         expression.getReference(),
@@ -125,17 +132,17 @@ public class PlanDefinitionAdapter extends KnowledgeArtifactAdapter implements I
                         expression::setReference)));
         // dynamicValue[].expression.reference
         action.getDynamicValue().stream()
-                .filter(dv -> dv.hasExpression())
-                .map(dv -> dv.getExpression())
-                .filter(e -> e.hasReference())
+                .filter(PlanDefinitionActionDynamicValueComponent::hasExpression)
+                .map(PlanDefinitionActionDynamicValueComponent::getExpression)
+                .filter(Expression::hasReference)
                 .forEach(expression -> references.add(new DependencyInfo(
                         referenceSource,
                         expression.getReference(),
                         expression.getExtension(),
                         expression::setReference)));
         Stream.concat(
-                        action.getInput().stream().map(i -> i.getRequirement()),
-                        action.getOutput().stream().map(o -> o.getRequirement()))
+                        action.getInput().stream().map(PlanDefinitionActionInputComponent::getRequirement),
+                        action.getOutput().stream().map(PlanDefinitionActionOutputComponent::getRequirement))
                 .forEach(inputOrOutput -> {
                     // ..input[].profile[]
                     // ..output[].profile[]
@@ -146,7 +153,7 @@ public class PlanDefinitionAdapter extends KnowledgeArtifactAdapter implements I
                     // input[].codeFilter[].valueSet
                     // output[].codeFilter[].valueSet
                     inputOrOutput.getCodeFilter().stream()
-                            .filter(cf -> cf.hasValueSet())
+                            .filter(DataRequirementCodeFilterComponent::hasValueSet)
                             .forEach(cf -> references.add(new DependencyInfo(
                                     referenceSource, cf.getValueSet(), cf.getExtension(), cf::setValueSet)));
                 });
@@ -180,6 +187,16 @@ public class PlanDefinitionAdapter extends KnowledgeArtifactAdapter implements I
     @Override
     public List<String> getLibrary() {
         return get().getLibrary().stream().map(PrimitiveType::asStringValue).collect(Collectors.toList());
+    }
+
+    @Override
+    public boolean hasGoal() {
+        return get().hasGoal();
+    }
+
+    @Override
+    public List<IBaseBackboneElement> getGoal() {
+        return get().getGoal().stream().map(IBaseBackboneElement.class::cast).toList();
     }
 
     @Override

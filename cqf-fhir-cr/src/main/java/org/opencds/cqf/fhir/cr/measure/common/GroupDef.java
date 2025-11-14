@@ -18,7 +18,6 @@ public class GroupDef {
     private final CodeDef populationBasis;
     private final CodeDef improvementNotation;
     private final Map<MeasurePopulationType, List<PopulationDef>> populationIndex;
-    private final ContinuousVariableObservationAggregateMethod aggregateMethod;
 
     public GroupDef(
             String id,
@@ -29,28 +28,6 @@ public class GroupDef {
             boolean isGroupImprovementNotation,
             CodeDef improvementNotation,
             CodeDef populationBasis) {
-        this(
-                id,
-                code,
-                stratifiers,
-                populations,
-                measureScoring,
-                isGroupImprovementNotation,
-                improvementNotation,
-                populationBasis,
-                null);
-    }
-
-    public GroupDef(
-            String id,
-            ConceptDef code,
-            List<StratifierDef> stratifiers,
-            List<PopulationDef> populations,
-            MeasureScoring measureScoring,
-            boolean isGroupImprovementNotation,
-            CodeDef improvementNotation,
-            CodeDef populationBasis,
-            @Nullable ContinuousVariableObservationAggregateMethod aggregateMethod) {
         //
         this.id = id;
         this.code = code;
@@ -61,7 +38,6 @@ public class GroupDef {
         this.isGroupImpNotation = isGroupImprovementNotation;
         this.improvementNotation = improvementNotation;
         this.populationBasis = populationBasis;
-        this.aggregateMethod = aggregateMethod;
     }
 
     public String id() {
@@ -128,9 +104,5 @@ public class GroupDef {
 
     public CodeDef getImprovementNotation() {
         return this.improvementNotation;
-    }
-
-    public ContinuousVariableObservationAggregateMethod getAggregateMethod() {
-        return this.aggregateMethod;
     }
 }

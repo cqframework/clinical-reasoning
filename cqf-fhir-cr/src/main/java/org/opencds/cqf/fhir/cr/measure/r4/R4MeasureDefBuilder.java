@@ -96,9 +96,6 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                 .filter(this::isMeasureObservation)
                 .findFirst();
 
-        // aggregateMethod is used to capture continuous-variable method of aggregating MeasureObservation
-        final ContinuousVariableObservationAggregateMethod aggregateMethod =
-                getAggregateMethod(measure.getUrl(), optMeasureObservationPopulation.orElse(null));
 
         // Populations
         checkIds(group);
@@ -123,8 +120,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                 getScoringDef(measure, measureScoring, groupScoring),
                 hasGroupImpNotation,
                 getImprovementNotation(measureImpNotation, groupImpNotation),
-                getPopulationBasisDef(measureBasis, groupBasis),
-                aggregateMethod);
+                getPopulationBasisDef(measureBasis, groupBasis));
     }
 
     private void checkIds(MeasureGroupComponent group) {
@@ -147,13 +143,16 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
     private PopulationDef buildPopulationDef(MeasureGroupPopulationComponent population, MeasureGroupComponent group,String measureUrl) {
         MeasurePopulationType popType = MeasurePopulationType.fromCode(
             population.getCode().getCodingFirstRep().getCode());
+        // criteriaReference & aggregateMethod are for MeasureObservation populations only
         String criteriaReference = getCriteriaReference(group,population,popType,measureUrl);
+        ContinuousVariableObservationAggregateMethod aggregateMethod = getAggregateMethod(measureUrl, population);
         return new PopulationDef(
                 population.getId(),
                 conceptToConceptDef(population.getCode()),
                 popType,
                 population.getCriteria().getExpression(),
-                criteriaReference);
+                criteriaReference,
+                aggregateMethod);
     }
 
     private Optional<PopulationDef> buildPopulationDefForDateOfCompliance(
@@ -215,6 +214,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
             return null;
         }
 
+        assert population != null;
         var populationCriteriaExt = population.getExtensionByUrl(EXT_CQFM_CRITERIA_REFERENCE);
         if (populationCriteriaExt != null) {
             // required for measure-observation populations

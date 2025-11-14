@@ -42,10 +42,10 @@ class MeasureScoringTypeRatioContVariableTest {
     }
 
     @Test
-    void ratioBooleanPopulation() {
+    void ratioContinuousVariableResourceBasis() {
 
         given.when()
-                .measureId("RatioContVarResource")
+                .measureId("RatioContVarResourceSum")
                 .evaluate()
                 .then()
                 .firstGroup()
@@ -53,7 +53,7 @@ class MeasureScoringTypeRatioContVariableTest {
                 .hasCount(11)
                 .up()
                 .population("denominator")
-                .hasCount(11)
+                .hasCount(11)//final Denominator = 9 (11-2)
                 .up()
                 .population("denominator-exclusion")
                 .hasCount(2)
@@ -62,15 +62,15 @@ class MeasureScoringTypeRatioContVariableTest {
                 .hasCount(0)
                 .up()
                 .population("numerator")
-                .hasCount(2)
+                .hasCount(2)// final Numerator = 2
                 .up()
                 .populationId("observation-den")
-                .hasCount(2)
+                .hasCount(9)// we remove exclusions in these counts so users can see final Observation count used
                 .up()
                 .populationId("observation-num")
-                .hasCount(2)
+                .hasCount(2)// we remove exclusions in these counts so users can see final Observation count used
                 .up()
-                .hasScore("1.0")
+                .hasScore("0.2222222222222222")
                 .up()
                 .report();
     }

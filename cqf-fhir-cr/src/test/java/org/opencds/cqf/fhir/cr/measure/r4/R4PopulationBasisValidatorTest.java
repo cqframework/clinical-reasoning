@@ -439,8 +439,7 @@ class R4PopulationBasisValidatorTest {
                 MeasureScoring.PROPORTION,
                 false,
                 null,
-                basis.codeDef,
-                null);
+                basis.codeDef);
     }
 
     @Nonnull
@@ -457,6 +456,7 @@ class R4PopulationBasisValidatorTest {
                 null,
                 measurePopulationType,
                 resolveExpressionFor(measurePopulationType),
+                null,
                 null);
     }
 

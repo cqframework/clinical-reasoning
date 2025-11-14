@@ -1,5 +1,5 @@
 {
-  "id": "RatioContVarResource",
+  "id": "RatioContVarResourceSum",
   "resourceType": "Measure",
   "url": "http://example.com/Measure/RatioContVarResource",
   "library": [

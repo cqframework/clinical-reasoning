@@ -1,9 +1,13 @@
+import com.vanniktech.maven.publish.JavaLibrary
+import com.vanniktech.maven.publish.JavadocJar
+
 plugins {
     kotlin("jvm")
     id("com.diffplug.spotless")
     id("jacoco")
     id("org.jetbrains.dokka")
     id("io.gitlab.arturbosch.detekt")
+    id("buildlogic.publish-conventions")
 }
 
 repositories {
@@ -14,10 +18,15 @@ repositories {
     }
 }
 
+val hapiVersion = project.property("hapi.version")!!.toString()
+val cqlVersion = project.property("cql.version")!!.toString()
+val junitVersion = project.property("junit.version")!!.toString()
+
 dependencies {
     // platforms
-    implementation(platform("ca.uhn.hapi.fhir:hapi-fhir-bom:8.4.0"))
-    testImplementation(platform("org.junit:junit-bom:6.0.1"))
+    implementation(platform("ca.uhn.hapi.fhir:hapi-fhir-bom:${hapiVersion}"))
+    implementation(platform("org.cqframework:cql-bom:${cqlVersion}"))
+    testImplementation(platform("org.junit:junit-bom:$junitVersion"))
 
     // @Nonnull, @Nullable compiler analysis
     compileOnly("jakarta.annotation:jakarta.annotation-api:2.1.1")
@@ -46,7 +55,7 @@ tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"
 }
 
-tasks.withType<Javadoc>() {
+tasks.withType<Javadoc> {
     options {
         val standardOptions = this as StandardJavadocDocletOptions
         standardOptions.addStringOption("Xdoclint:none", "-quiet")
@@ -61,12 +70,16 @@ tasks.register<Jar>("dokkaHtmlJar") {
     archiveClassifier.set("html-docs")
 }
 
+mavenPublishing {
+    configure(JavaLibrary(JavadocJar.Javadoc(), true))
+}
+
 jacoco {
     toolVersion = "0.8.11"
 }
 
 tasks.test {
-    maxHeapSize = "4G"
+    maxHeapSize = "8G"
     configure<JacocoTaskExtension> {
         excludes = listOf("org/hl7/fhir/**", "ca/uhn/fhir/**", "org/cqframework/**")
     }

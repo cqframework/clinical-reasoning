@@ -24,9 +24,11 @@ dependencies {
     api(project(":cqf-fhir-utility"))
     api(project(":cqf-fhir-cql"))
     api(project(":cqf-fhir-cr"))
-    api(libs.info.picocli.picocli)
-    api(libs.org.slf4j.slf4j.simple)
-    runtimeOnly(libs.ca.uhn.hapi.fhir.hapi.fhir.caching.caffeine)
+
+    api("info.picocli:picocli:4.7.4")
+    api("org.slf4j:slf4j-simple:2.0.4")
+
+    runtimeOnly("ca.uhn.hapi.fhir:hapi-fhir-caching-caffeine")
     testImplementation(project(":cqf-fhir-test"))
 }
 

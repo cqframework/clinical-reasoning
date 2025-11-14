@@ -22,7 +22,6 @@ A few things:
    - Repo for releases for the modules: https://central.sonatype.com/repository/maven-releases/org/opencds/cqf/fhir
  */
 mavenPublishing {
-    configure(JavaLibrary(JavadocJar.Javadoc(), true))
     publishToMavenCentral(true)
     if (!version.toString().endsWith("SNAPSHOT")) {
         signAllPublications()

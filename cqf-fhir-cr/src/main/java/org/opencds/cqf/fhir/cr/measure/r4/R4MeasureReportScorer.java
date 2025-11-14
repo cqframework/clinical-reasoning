@@ -167,6 +167,10 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
         return checkMissingScoringType(measureDef, groupScoringType);
     }
 
+    protected boolean hasMeasureObservation(GroupDef groupDef){
+        return groupDef.get(MeasurePopulationType.MEASUREOBSERVATION) != null;
+    }
+
     protected void scoreGroup(
             String measureUrl,
             MeasureScoring measureScoring,
@@ -176,12 +180,19 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
 
         switch (measureScoring) {
             case PROPORTION, RATIO:
-                var score = calcProportionScore(
+                if(measureScoring.equals(MeasureScoring.RATIO) && hasMeasureObservation(groupDef)) {
+                    var score =
+                } else {
+                    var score = calcProportionScore(
                         getCountFromGroupPopulation(mrgc.getPopulation(), NUMERATOR)
-                                - getCountFromGroupPopulation(mrgc.getPopulation(), NUMERATOR_EXCLUSION),
+                            - getCountFromGroupPopulation(mrgc.getPopulation(),
+                            NUMERATOR_EXCLUSION),
                         getCountFromGroupPopulation(mrgc.getPopulation(), DENOMINATOR)
-                                - getCountFromGroupPopulation(mrgc.getPopulation(), DENOMINATOR_EXCLUSION)
-                                - getCountFromGroupPopulation(mrgc.getPopulation(), DENOMINATOR_EXCEPTION));
+                            - getCountFromGroupPopulation(mrgc.getPopulation(),
+                            DENOMINATOR_EXCLUSION)
+                            - getCountFromGroupPopulation(mrgc.getPopulation(),
+                            DENOMINATOR_EXCEPTION));
+                }
                 // When applySetMembership=false, this value can receive strange values
                 // This should prevent scoring in certain scenarios like <0
                 if (score != null && score >= 0) {
@@ -203,6 +214,10 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
         for (MeasureReportGroupStratifierComponent stratifierComponent : mrgc.getStratifier()) {
             scoreStratifier(measureUrl, groupDef, measureScoring, stratifierComponent);
         }
+    }
+
+    protected void scoreRatioContVariable(String measureUrl, MeasureReportGroupComponent mrgc, GroupDef groupDef){
+        final Quantity aggregateNumQuantity = calculateContinuousVariableAggregateQuantity(measureUrl, groupDef)
     }
 
     protected void scoreContinuousVariable(String measureUrl, MeasureReportGroupComponent mrgc, GroupDef groupDef) {

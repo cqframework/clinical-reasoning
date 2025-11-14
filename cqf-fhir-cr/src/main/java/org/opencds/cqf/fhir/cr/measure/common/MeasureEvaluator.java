@@ -311,11 +311,22 @@ public class MeasureEvaluator {
         // Ratio Cont Variable Scoring
         if (observation_Num != null && observation_Den != null) {
             // Num alignment
+            var expressionNameNum = observation_Num.getCriteriaReference() + "-"
+                + observation_Num.expression();
+            // assumes only one population
+            evaluatePopulationMembership(
+                subjectType, subjectId, observation_Num, evaluationResult, expressionNameNum);
+
             pruneObservationResources(
                 numerator.getResources(), numerator, observation_Num);
             pruneObservationSubjectResources(
                 numerator.subjectResources, observation_Num.getSubjectResources());
             // Den alignment
+            var expressionNameDen = observation_Den.getCriteriaReference() + "-"
+                + observation_Den.expression();
+            // assumes only one population
+            evaluatePopulationMembership(
+                subjectType, subjectId, observation_Den, evaluationResult, expressionNameDen);
             pruneObservationResources(
                 denominator.getResources(), denominator, observation_Den);
             pruneObservationSubjectResources(

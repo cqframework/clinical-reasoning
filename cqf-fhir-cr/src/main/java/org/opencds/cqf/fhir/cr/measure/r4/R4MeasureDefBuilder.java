@@ -100,14 +100,11 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         final ContinuousVariableObservationAggregateMethod aggregateMethod =
                 getAggregateMethod(measure.getUrl(), optMeasureObservationPopulation.orElse(null));
 
-        final String criteriaReference =
-                getCriteriaReference(measure.getUrl(), group, optMeasureObservationPopulation.orElse(null));
-
         // Populations
         checkIds(group);
 
         var populationsWithCriteriaReference = group.getPopulation().stream()
-                .map(population -> buildPopulationDef(population, criteriaReference))
+                .map(t -> buildPopulationDef(t, group, measure.getUrl()))
                 .toList();
 
         final Optional<PopulationDef> optPopulationDefDateOfCompliance =
@@ -146,12 +143,14 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
     }
 
     @Nonnull
-    private PopulationDef buildPopulationDef(MeasureGroupPopulationComponent population, String criteriaReference) {
+    private PopulationDef buildPopulationDef(MeasureGroupPopulationComponent population, MeasureGroupComponent group,String measureUrl) {
+        MeasurePopulationType popType = MeasurePopulationType.fromCode(
+            population.getCode().getCodingFirstRep().getCode());
+        String criteriaReference = getCriteriaReference(group,population,popType,measureUrl);
         return new PopulationDef(
                 population.getId(),
                 conceptToConceptDef(population.getCode()),
-                MeasurePopulationType.fromCode(
-                        population.getCode().getCodingFirstRep().getCode()),
+                popType,
                 population.getCriteria().getExpression(),
                 criteriaReference);
     }
@@ -206,15 +205,16 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
 
     @Nullable
     private String getCriteriaReference(
-            String measureUrl,
             MeasureGroupComponent group,
-            @Nullable MeasureGroupPopulationComponent measureObservationPopulation) {
+            @Nullable MeasureGroupPopulationComponent population,
+            MeasurePopulationType measurePopulationType,
+            String measureUrl) {
 
-        if (measureObservationPopulation == null) {
+        if (!measurePopulationType.equals(MeasurePopulationType.MEASUREOBSERVATION)) {
             return null;
         }
 
-        var populationCriteriaExt = measureObservationPopulation.getExtensionByUrl(EXT_CQFM_CRITERIA_REFERENCE);
+        var populationCriteriaExt = population.getExtensionByUrl(EXT_CQFM_CRITERIA_REFERENCE);
         if (populationCriteriaExt != null) {
             // required for measure-observation populations
             // the underlying expression is a cql function

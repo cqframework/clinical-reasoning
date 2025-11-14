@@ -3,10 +3,10 @@ package org.opencds.cqf.fhir.cr.measure.common;
 import jakarta.annotation.Nullable;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class PopulationDef {
 
@@ -62,27 +62,41 @@ public class PopulationDef {
         return this.getSubjectResources().keySet();
     }
 
-    public void retainAllResources(Set<Object> resourcesToRetain) {
-        getSubjectResources().forEach((key, value) -> value.retainAll(resourcesToRetain));
+    public void retainAllResources(String subjectId, PopulationDef otherPopulationDef) {
+        getResourcesForSubject(subjectId).retainAll(otherPopulationDef.getResourcesForSubject(subjectId));
     }
 
-    public void retainAllSubjects(Set<String> subjects) {
-        this.getSubjects().retainAll(subjects);
+    public void retainAllSubjects(PopulationDef otherPopulationDef) {
+        this.getSubjects().retainAll(otherPopulationDef.getSubjects());
     }
 
-    public void removeAllResources(Set<Object> resourcesToRemove) {
-        getSubjectResources().forEach((key, value) -> value.removeAll(resourcesToRemove));
+    public void removeAllResources(String subjectId, PopulationDef otherPopulationDef) {
+        getResourcesForSubject(subjectId).removeAll(otherPopulationDef.getResourcesForSubject(subjectId));
     }
 
-    public void removeAllSubjects(Set<String> subjects) {
-        this.getSubjects().removeAll(subjects);
+    public void removeAllSubjects(PopulationDef otherPopulationDef) {
+        this.getSubjects().removeAll(otherPopulationDef.getSubjects());
     }
 
-    public Set<Object> getResources() {
-        return new HashSetForFhirResourcesAndCqlTypes<>(subjectResources.values().stream()
+    /**
+     * Used if we want to count all resources that may be duplicated across subjects, for example,
+     * for Date values that will be identical across subjects, but we want to count the duplicates.
+     * <p/>
+     * example:
+     * population:
+     * <Subject1,<Organization/1>>
+     * <Subject2,<Organization/1>>
+     * Population Count for Population Basis Organization = 2, even though the resulting resource object is the same
+     * <Subject1,<1/1/2024>>
+     * <Subject2,<1/1/2024>>
+     * Population Count for Population Basis date = 2, even though the resulting resource object is the same
+     *
+     */
+    public List<Object> getAllSubjectResources() {
+        return subjectResources.values().stream()
                 .flatMap(Collection::stream)
                 .filter(Objects::nonNull)
-                .collect(Collectors.toUnmodifiableSet()));
+                .toList();
     }
 
     @Nullable
@@ -99,50 +113,14 @@ public class PopulationDef {
         return subjectResources;
     }
 
+    public Set<Object> getResourcesForSubject(String subjectId) {
+        return subjectResources.getOrDefault(subjectId, new HashSetForFhirResourcesAndCqlTypes<>());
+    }
+
     // Add an element to Set<Object> under a key (Creates a new set if key is missing)
     public void addResource(String key, Object value) {
         subjectResources
                 .computeIfAbsent(key, k -> new HashSetForFhirResourcesAndCqlTypes<>())
                 .add(value);
-    }
-
-    public void removeOverlaps(Map<String, Set<Object>> overlap) {
-        var iterator = subjectResources.entrySet().iterator();
-        while (iterator.hasNext()) {
-            Map.Entry<String, Set<Object>> entry = iterator.next();
-            String key = entry.getKey();
-            Set<Object> valuesInA = entry.getValue();
-
-            if (overlap.containsKey(key)) {
-                valuesInA.removeAll(overlap.get(key)); // Remove overlapping elements
-            }
-
-            if (valuesInA.isEmpty()) {
-                iterator.remove(); // Safely remove key if Set is empty
-            }
-        }
-    }
-
-    public void retainOverlaps(Map<String, Set<Object>> filterMap) {
-        var iterator = subjectResources.entrySet().iterator();
-        while (iterator.hasNext()) {
-            Map.Entry<String, Set<Object>> entry = iterator.next();
-            String key = entry.getKey();
-            Set<Object> values = entry.getValue();
-
-            if (filterMap.containsKey(key)) {
-                // Retain only values also present in filterMap
-                values.retainAll(filterMap.get(key));
-            } else {
-                // If the key doesn't exist in filterMap, remove the entire entry
-                iterator.remove();
-                continue;
-            }
-
-            // If no values remain, remove the key
-            if (values.isEmpty()) {
-                iterator.remove();
-            }
-        }
     }
 }

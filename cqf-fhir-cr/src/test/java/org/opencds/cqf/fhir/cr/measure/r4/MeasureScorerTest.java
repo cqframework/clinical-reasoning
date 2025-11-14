@@ -218,7 +218,7 @@ class MeasureScorerTest {
         MeasureReport report = when.then().report();
         assertNotNull(report);
         assertEquals(1, report.getGroup().size());
-        assertEquals(4, report.getGroupFirstRep().getPopulation().get(0).getCount());
+        assertEquals(16, report.getGroupFirstRep().getPopulation().get(0).getCount());
     }
 
     @Test

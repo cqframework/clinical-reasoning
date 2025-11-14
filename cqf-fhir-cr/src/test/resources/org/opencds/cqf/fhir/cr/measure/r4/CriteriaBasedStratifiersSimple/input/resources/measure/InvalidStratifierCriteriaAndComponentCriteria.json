@@ -1,0 +1,77 @@
+{
+  "id": "InvalidStratifierCriteriaAndComponentCriteria",
+  "resourceType": "Measure",
+  "name": "InvalidStratifierCriteriaAndComponentCriteria",
+  "url": "http://example.com/Measure/InvalidStratifierCriteriaAndComponentCriteria",
+  "library": [
+    "http://example.com/Library/CriteriaBasedStratifiersSimple"
+  ],
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-populationBasis",
+      "valueCode": "Encounter"
+    }
+  ],
+  "scoring": {
+    "coding": [
+      {
+        "system": "http://hl7.org/fhir/measure-scoring",
+        "code": "cohort"
+      }
+    ]
+  },
+  "group": [
+    {
+      "id": "group-1",
+      "population": [
+        {
+          "id": "initial-population",
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code": "initial-population",
+                "display": "Initial Population"
+              }
+            ]
+          },
+          "criteria": {
+            "language": "text/cql-identifier",
+            "expression": "initial population"
+          }
+        }
+      ],
+      "stratifier": [
+        {
+          "id": "stratifier-1",
+          "criteria": {
+            "language": "text/cql.identifier",
+            "expression": "Age"
+          },
+          "component": [
+            {
+              "id": "stratifier-comp-1",
+              "code": {
+                "text": "Gender"
+              },
+              "criteria": {
+                "language": "text/cql.identifier",
+                "expression": "Gender Stratification"
+              }
+            },
+            {
+              "id": "stratifier-comp-2",
+              "code": {
+                "text": "Age"
+              },
+              "criteria": {
+                "language": "text/cql.identifier",
+                "expression": "Age"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

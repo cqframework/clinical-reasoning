@@ -3,11 +3,12 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.collect.Sets;
-import com.google.common.collect.Sets.SetView;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -27,6 +28,7 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
+import org.opencds.cqf.fhir.cr.measure.common.CriteriaResult;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
@@ -76,7 +78,7 @@ class R4StratifierBuilder {
             List<MeasureGroupPopulationComponent> populations,
             GroupDef groupDef) {
 
-        if (!stratifierDef.components().isEmpty()) {
+        if (stratifierDef.isComponentStratifier()) {
             componentStratifier(bc, stratifierDef, reportStratifier, populations, groupDef);
         } else {
             nonComponentStratifier(bc, stratifierDef, reportStratifier, populations, groupDef);
@@ -118,7 +120,7 @@ class R4StratifierBuilder {
         // subject1: 'gender'--> 'M'
         // subject2: 'gender'--> 'F'
         // stratifier criteria results are: 'M', 'F'
-        if (MeasureStratifierType.CRITERIA == stratifierDef.getStratifierType()) {
+        if (stratifierDef.isCriteriaStratifier()) {
             var reportStratum = reportStratifier.addStratum();
             // Ideally, the stratum def should have these values empty in MeasureEvaluator
             // Seems to be irrelevant for criteria based stratifiers
@@ -230,7 +232,7 @@ class R4StratifierBuilder {
         for (StratumPopulationDef stratumPopulationDef : stratumDef.getStratumPopulations()) {
             // This is nasty, and ideally, we ought to be driving this logic entirely off StratumPopulationDef
             final Optional<MeasureGroupPopulationComponent> optMgpc = populations.stream()
-                    .filter(population -> population.getId().equals(stratumPopulationDef.getId()))
+                    .filter(population -> population.getId().equals(stratumPopulationDef.id()))
                     .findFirst();
             if (optMgpc.isEmpty()) {
                 throw new InternalErrorException("could not find MeasureGroupPopulationComponent");
@@ -294,7 +296,7 @@ class R4StratifierBuilder {
                             population.getCode().getCodingFirstRep().getCode()));
         }
 
-        final Set<String> subjectsQualifiedOrUnqualified = stratumPopulationDef.getSubjectsQualifiedOrUnqualified();
+        final Set<String> subjectsQualifiedOrUnqualified = stratumPopulationDef.subjectsQualifiedOrUnqualified();
 
         if (groupDef.isBooleanBasis()) {
             buildBooleanBasisStratumPopulation(bc, sgpc, populationDef, subjectsQualifiedOrUnqualified);
@@ -356,29 +358,93 @@ class R4StratifierBuilder {
         }
     }
 
+    // population: subject1: org1, subject2: org2
+    // strat1: subject1: org1
+    // strat1: subject2: nothing
+
+    // result:  subject 1: org1    count: 1
+
+    // population: subject1: org1, subject2: org2
+    // strat1: subject1: org1
+    // strat1: subject2: nothing
+    // strat1: subject3: org1
+
+    // result:  subject1 org1:  subject3 org1   count:  1
+
+    // population: subject1: org1, subject2: org2
+    // strat1: subject1: org1
+    // strat1: subject2: org2
+
+    // result:  subject1 org1:  subject2 org2   count:  2
+
+    // population: subject1: org1, subject2: org2
+    // strat1: subject1: org3
+    // strat1: subject2: org3
+
+    // result:  nothing   : count: 0
+
+    // population: subject1: org1, subject2: org2
+    // strat1: subject1: org3
+    // strat1: subject2: org4
+
+    // result:  nothing   : count: 0
+
     private static int getStratumCountUpper(
             StratifierDef stratifierDef, PopulationDef populationDef, List<String> resourceIds) {
 
-        if (MeasureStratifierType.CRITERIA == stratifierDef.getStratifierType()) {
-            final Set<Object> resources = populationDef.getResources();
-            final Set<Object> results = stratifierDef.getAllCriteriaResultValues();
+        if (stratifierDef.isCriteriaStratifier()) {
+            final Map<String, CriteriaResult> stratifierResultsBySubject = stratifierDef.getResults();
 
-            if (resources.isEmpty() || results.isEmpty()) {
-                // There's no intersection, so no point in going further.
-                return 0;
+            final List<Object> allPopulationStratumIntersectingResources = new ArrayList<>();
+
+            /*
+            *population*:
+
+            patient2
+                Encounter/enc_in_progress_pat2_1
+                Encounter/enc_triaged_pat2_1
+                Encounter/enc_planned_pat2_1
+                Encounter/enc_in_progress_pat2_2
+                Encounter/enc_finished_pat2_1
+
+             patient1
+                Encounter/enc_triaged_pat1_1
+                Encounter/enc_planned_pat1_1
+                Encounter/enc_in_progress_pat1_1
+                Encounter/enc_finished_pat1_1
+
+            *stratifier*:
+              patient2
+                  Encounter/enc_in_progress_pat2_2
+                  Encounter/enc_in_progress_pat2_1
+
+              patient1
+                  Encounter/enc_in_progress_pat1_1
+
+              patient2:  intersection:   enc_in_progress_pat2_2, enc_in_progress_pat2_1
+              patient1:  intersection:   enc_in_progress_pat1_1
+
+              result:
+
+              enc_in_progress_pat2_2, enc_in_progress_pat2_1, enc_in_progress_pat1_1
+
+              count: 3
+
+            */
+
+            // For each subject, we intersect between the population and stratifier results
+            for (Entry<String, CriteriaResult> stratifierEntryBySubject : stratifierResultsBySubject.entrySet()) {
+                final Set<Object> stratifierResultsPerSubject =
+                        stratifierEntryBySubject.getValue().valueAsSet();
+                final Set<Object> populationResultsPerSubject =
+                        populationDef.getResourcesForSubject(stratifierEntryBySubject.getKey());
+
+                allPopulationStratumIntersectingResources.addAll(
+                        Sets.intersection(populationResultsPerSubject, stratifierResultsPerSubject));
             }
 
-            final Class<?> resourcesClassFirst = resources.iterator().next().getClass();
-            final Class<?> resultClassFirst = results.iterator().next().getClass();
-
-            // Sanity check: isCriteriaBasedStratifier() should have filtered this out
-            if (resourcesClassFirst != resultClassFirst) {
-                // Different classes, so no point in going further.
-                return 0;
-            }
-
-            final SetView<Object> intersection = Sets.intersection(resources, results);
-            return intersection.size();
+            // We add up all the results of the intersections here:
+            return allPopulationStratumIntersectingResources.size();
         }
 
         if (resourceIds.isEmpty()) {
@@ -452,7 +518,7 @@ class R4StratifierBuilder {
 
         final Expression criteria = measureStratifier.getCriteria();
 
-        if (MeasureStratifierType.CRITERIA == stratifierDef.getStratifierType()
+        if (stratifierDef.isCriteriaStratifier()
                 && criteria != null
                 && criteria.hasLanguage()
                 && "text/cql.identifier".equals(criteria.getLanguage())) {

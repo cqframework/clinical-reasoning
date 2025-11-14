@@ -3,6 +3,8 @@ package org.opencds.cqf.fhir.cr.ecr.r4;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -25,6 +27,7 @@ import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.MetadataResource;
 import org.hl7.fhir.r4.model.PlanDefinition;
@@ -159,13 +162,23 @@ class R4ImportBundleProducerTest {
         assertEquals(1, pds.size());
         assertTrue(pds.get(0).hasExtension("http://hl7.org/fhir/StructureDefinition/artifact-isOwned"));
 
-        CodeableConcept conditionCodeableConcept =
-                (CodeableConcept) ra.get(0).getExtension().get(0).getValue();
-        assertEquals(conditionCodeableConcept.getText(), "Infection caused by Acanthamoeba (disorder)");
+        // Updated assertions for UsageContext
+        UsageContext conditionUsageContext =
+                (UsageContext) ra.get(0).getExtension().get(0).getValue();
+        assertEquals("focus", conditionUsageContext.getCode().getCode());
+        assertEquals(
+                "Infection caused by Acanthamoeba (disorder)",
+                conditionUsageContext.getValueCodeableConcept().getText());
 
-        CodeableConcept priorityCodeableConcept =
-                (CodeableConcept) ra.get(0).getExtension().get(1).getValue();
-        assertEquals(priorityCodeableConcept.getCoding().get(0).getCode(), "routine");
+        UsageContext priorityUsageContext =
+                (UsageContext) ra.get(0).getExtension().get(1).getValue();
+        assertEquals("priority", priorityUsageContext.getCode().getCode());
+        assertEquals(
+                "routine",
+                priorityUsageContext
+                        .getValueCodeableConcept()
+                        .getCodingFirstRep()
+                        .getCode());
 
         // Extract targeted ValueSet to check for post-import conformance
         Optional<Bundle.BundleEntryComponent> postImportBundleEntry = transactionBundleEntry.stream()
@@ -260,18 +273,18 @@ class R4ImportBundleProducerTest {
 
     @Test
     void testExtractPrioritiesAndConditionsPopulatesLists() {
-        // focus usage context → goes to conditions
+        // focus usage context goes to conditions
         UsageContext context1 = new UsageContext();
         context1.setCode(new Coding().setCode("focus"));
-        context1.setValue(new CodeableConcept().setText("Condition1"));
+        context1.setValue(new CodeableConcept().setText("Condition1").addCoding(new Coding().setCode("condition1")));
 
-        // priority usage context → goes to priorities
+        // priority usage context goes to priorities
         UsageContext context2 = new UsageContext();
         context2.setCode(new Coding().setCode("priority"));
         context2.setValue(new CodeableConcept().addCoding(new Coding().setCode("routine")));
 
-        List<CodeableConcept> priorities = new ArrayList<>();
-        List<CodeableConcept> conditions = new ArrayList<>();
+        List<UsageContext> priorities = new ArrayList<>();
+        List<UsageContext> conditions = new ArrayList<>();
 
         // Execute
         R4ImportBundleProducer.extractPrioritiesAndConditions(
@@ -279,9 +292,11 @@ class R4ImportBundleProducerTest {
 
         // Verify
         assertEquals(1, priorities.size());
-        assertEquals("routine", priorities.get(0).getCodingFirstRep().getCode());
+        assertEquals(
+                "routine",
+                priorities.get(0).getValueCodeableConcept().getCodingFirstRep().getCode());
         assertEquals(1, conditions.size());
-        assertEquals("Condition1", conditions.get(0).getText());
+        assertEquals("Condition1", conditions.get(0).getValueCodeableConcept().getText());
     }
 
     @Test
@@ -294,8 +309,8 @@ class R4ImportBundleProducerTest {
         context2.setCode(new Coding().setCode("priority"));
         context2.setValue(new CodeableConcept().addCoding(new Coding().setCode("routine")));
 
-        List<CodeableConcept> priorities = new ArrayList<>();
-        List<CodeableConcept> conditions = new ArrayList<>();
+        List<UsageContext> priorities = new ArrayList<>();
+        List<UsageContext> conditions = new ArrayList<>();
 
         assertThrows(
                 UnprocessableEntityException.class,
@@ -327,17 +342,38 @@ class R4ImportBundleProducerTest {
                 .map(r -> (Library) r);
         assertTrue(library.isPresent());
 
-        var atLeastOneRelatedArtifactIsAValueSetWithPriority = false;
+        boolean foundPriorityExtension = false;
+
         for (final var ra : library.get().getRelatedArtifact()) {
-            if (Canonicals.getResourceType(ra.getResource()).equals("ValueSet")
-                    && ra.hasExtension(TransformProperties.vsmPriority)) {
-                atLeastOneRelatedArtifactIsAValueSetWithPriority = true;
-                assertEquals(
-                        1,
-                        ra.getExtensionsByUrl(TransformProperties.vsmPriority).size());
+            if (Canonicals.getResourceType(ra.getResource()).equals("ValueSet")) {
+                // Get all crmi-intendedUsageContext extensions
+                var intendedUsageContextExtensions =
+                        ra.getExtensionsByUrl(TransformProperties.CRMI_INTENDED_USAGE_CONTEXT_EXT_URL);
+
+                // Filter those where the valueUsageContext has code = "priority"
+                var priorityExtensions = intendedUsageContextExtensions.stream()
+                        .filter(ext -> {
+                            if (ext.getValue() instanceof UsageContext uc
+                                    && uc.hasCode()
+                                    && "priority".equalsIgnoreCase(uc.getCode().getCode())) {
+                                return true;
+                            }
+                            return false;
+                        })
+                        .toList();
+
+                if (!priorityExtensions.isEmpty()) {
+                    foundPriorityExtension = true;
+                    // Assert there is only one with code = priority
+                    assertEquals(
+                            1,
+                            priorityExtensions.size(),
+                            "Expected exactly one crmi-intendedUsageContext extension with code 'priority'");
+                }
             }
         }
-        assertTrue(atLeastOneRelatedArtifactIsAValueSetWithPriority);
+
+        assertTrue(foundPriorityExtension, "No crmi-intendedUsageContext extension with code 'priority' was found.");
     }
 
     @Test
@@ -365,13 +401,67 @@ class R4ImportBundleProducerTest {
     }
 
     @Test
-    void testProcessCodeableConceptMapForLibraryCreatesExtensions() {
-        var cc = new CodeableConcept().setText("test");
-        var extensions =
-                R4ImportBundleProducer.processCodeableConceptMapForLibrary(List.of(cc), "http://example.org/ext");
+    void testSingleUsageContext() {
+        UsageContext uc = new UsageContext()
+                .setCode(new Coding().setSystem("system").setCode("code"))
+                .setValue(new CodeableConcept().setText("test"));
+
+        List<Extension> extensions =
+                R4ImportBundleProducer.processUsageContextMapForLibrary(List.of(uc), "http://example.org/ext");
+
         assertEquals(1, extensions.size());
         assertEquals("http://example.org/ext", extensions.get(0).getUrl());
-        assertEquals("test", ((CodeableConcept) extensions.get(0).getValue()).getText());
+        assertSame(uc, extensions.get(0).getValue());
+    }
+
+    @Test
+    void testMultipleUsageContexts() {
+        UsageContext uc1 = new UsageContext()
+                .setCode(new Coding().setSystem("s1").setCode("c1"))
+                .setValue(new CodeableConcept().setText("first"));
+        UsageContext uc2 = new UsageContext()
+                .setCode(new Coding().setSystem("s2").setCode("c2"))
+                .setValue(new CodeableConcept().setText("second"));
+
+        List<Extension> extensions =
+                R4ImportBundleProducer.processUsageContextMapForLibrary(List.of(uc1, uc2), "http://example.org/ext");
+
+        assertEquals(2, extensions.size());
+        assertSame(uc1, extensions.get(0).getValue());
+        assertSame(uc2, extensions.get(1).getValue());
+    }
+
+    @Test
+    void testEmptyUsageContextList() {
+        List<Extension> extensions =
+                R4ImportBundleProducer.processUsageContextMapForLibrary(List.of(), "http://example.org/ext");
+
+        assertTrue(extensions.isEmpty());
+    }
+
+    @Test
+    void testDifferentExtensionUrl() {
+        UsageContext uc = new UsageContext()
+                .setCode(new Coding().setSystem("s").setCode("c"))
+                .setValue(new CodeableConcept().setText("text"));
+
+        List<Extension> extensions = R4ImportBundleProducer.processUsageContextMapForLibrary(
+                List.of(uc), "http://example.com/different-url");
+
+        assertEquals(1, extensions.size());
+        assertEquals("http://example.com/different-url", extensions.get(0).getUrl());
+        assertSame(uc, extensions.get(0).getValue());
+    }
+
+    @Test
+    void testUsageContextWithNullValue() {
+        UsageContext uc = new UsageContext().setCode(new Coding().setSystem("s").setCode("c"));
+        List<Extension> extensions =
+                R4ImportBundleProducer.processUsageContextMapForLibrary(List.of(uc), "http://example.org/ext");
+
+        assertEquals(1, extensions.size());
+        assertSame(uc, extensions.get(0).getValue());
+        assertNull(((UsageContext) extensions.get(0).getValue()).getValue());
     }
 
     @Test

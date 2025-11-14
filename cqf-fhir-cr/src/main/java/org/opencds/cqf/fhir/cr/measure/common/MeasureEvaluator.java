@@ -11,7 +11,6 @@ import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.MEASU
 import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.NUMERATOR;
 import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.NUMERATOREXCLUSION;
 
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
@@ -22,6 +21,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -70,40 +70,18 @@ public class MeasureEvaluator {
         Objects.requireNonNull(measureDef, "measureDef is a required argument");
         Objects.requireNonNull(subjectId, "subjectIds is a required argument");
 
-        switch (measureEvalType) {
-            case PATIENT, SUBJECT:
-                return this.evaluateSubject(
-                        measureDef,
-                        subjectType,
-                        subjectId,
-                        MeasureReportType.INDIVIDUAL,
-                        evaluationResult,
-                        applyScoring);
-            case SUBJECTLIST:
-                return this.evaluateSubject(
-                        measureDef,
-                        subjectType,
-                        subjectId,
-                        MeasureReportType.SUBJECTLIST,
-                        evaluationResult,
-                        applyScoring);
-            case PATIENTLIST:
-                // DSTU3 Only
-                return this.evaluateSubject(
-                        measureDef,
-                        subjectType,
-                        subjectId,
-                        MeasureReportType.PATIENTLIST,
-                        evaluationResult,
-                        applyScoring);
-            case POPULATION:
-                return this.evaluateSubject(
-                        measureDef, subjectType, subjectId, MeasureReportType.SUMMARY, evaluationResult, applyScoring);
-            default:
-                // never hit because this value is set upstream
-                throw new InvalidRequestException("Unsupported Measure Evaluation type: %s for MeasureDef: %s"
-                        .formatted(measureEvalType.getDisplay(), measureDef.url()));
-        }
+        return switch (measureEvalType) {
+            case PATIENT, SUBJECT -> this.evaluateSubject(
+                    measureDef, subjectType, subjectId, MeasureReportType.INDIVIDUAL, evaluationResult, applyScoring);
+            case SUBJECTLIST -> this.evaluateSubject(
+                    measureDef, subjectType, subjectId, MeasureReportType.SUBJECTLIST, evaluationResult, applyScoring);
+            case PATIENTLIST ->
+            // DSTU3 Only
+            this.evaluateSubject(
+                    measureDef, subjectType, subjectId, MeasureReportType.PATIENTLIST, evaluationResult, applyScoring);
+            case POPULATION -> this.evaluateSubject(
+                    measureDef, subjectType, subjectId, MeasureReportType.SUMMARY, evaluationResult, applyScoring);
+        };
     }
 
     protected MeasureDef evaluateSubject(
@@ -229,11 +207,11 @@ public class MeasureEvaluator {
         numerator = evaluatePopulationMembership(subjectType, subjectId, numerator, evaluationResult);
         if (applyScoring) {
             // remove denominator values not in IP
-            denominator.retainAllResources(initialPopulation.getResources());
-            denominator.retainAllSubjects(initialPopulation.getSubjects());
+            denominator.retainAllResources(subjectId, initialPopulation);
+            denominator.retainAllSubjects(initialPopulation);
             // remove numerator values if not in Denominator
-            numerator.retainAllSubjects(denominator.getSubjects());
-            numerator.retainAllResources(denominator.getResources());
+            numerator.retainAllSubjects(denominator);
+            numerator.retainAllResources(subjectId, denominator);
         }
         // Evaluate Exclusions and Exception Populations
         if (denominatorExclusion != null) {
@@ -253,30 +231,25 @@ public class MeasureEvaluator {
             // Remove Subject and Resource Exclusions
             if (denominatorExclusion != null && applyScoring) {
                 // numerator should not include den-exclusions
-                numerator.removeAllSubjects(denominatorExclusion.getSubjects());
-                numerator.removeOverlaps(denominatorExclusion.getSubjectResources());
+                numerator.removeAllSubjects(denominatorExclusion);
 
                 // verify exclusion results are found in denominator
-                denominatorExclusion.retainAllResources(denominator.getResources());
-                denominatorExclusion.retainAllSubjects(denominator.getSubjects());
-                denominatorExclusion.retainOverlaps(denominator.getSubjectResources());
+                denominatorExclusion.retainAllResources(subjectId, denominator);
+                denominatorExclusion.retainAllSubjects(denominator);
             }
             if (numeratorExclusion != null && applyScoring) {
                 // verify results are in Numerator
-                numeratorExclusion.retainAllResources(numerator.getResources());
-                numeratorExclusion.retainAllSubjects(numerator.getSubjects());
-                numeratorExclusion.retainOverlaps(numerator.getSubjectResources());
+                numeratorExclusion.retainAllResources(subjectId, numerator);
+                numeratorExclusion.retainAllSubjects(numerator);
             }
             if (denominatorException != null && applyScoring) {
                 // Remove Subjects Exceptions that are present in Numerator
-                denominatorException.removeAllSubjects(numerator.getSubjects());
-                denominatorException.removeAllResources(numerator.getResources());
-                denominatorException.removeOverlaps(numerator.getSubjectResources());
+                denominatorException.removeAllSubjects(numerator);
+                denominatorException.removeAllResources(subjectId, numerator);
 
                 // verify exception results are found in denominator
-                denominatorException.retainAllResources(denominator.getResources());
-                denominatorException.retainAllSubjects(denominator.getSubjects());
-                denominatorException.retainOverlaps(denominator.getSubjectResources());
+                denominatorException.retainAllResources(subjectId, denominator);
+                denominatorException.retainAllSubjects(denominator);
             }
         } else {
             // Remove Only Resource Exclusions
@@ -284,24 +257,19 @@ public class MeasureEvaluator {
             // * This is why we only remove resources and not subjects too for `Resource Basis`.
             if (denominatorExclusion != null && applyScoring) {
                 // remove any denominator-exception subjects/resources found in Numerator
-                numerator.removeAllResources(denominatorExclusion.getResources());
-                numerator.removeOverlaps(denominatorExclusion.getSubjectResources());
+                numerator.removeAllResources(subjectId, denominatorExclusion);
                 // verify exclusion results are found in denominator
-                denominatorExclusion.retainAllResources(denominator.getResources());
-                denominatorExclusion.retainOverlaps(denominator.getSubjectResources());
+                denominatorExclusion.retainAllResources(subjectId, denominator);
             }
             if (numeratorExclusion != null && applyScoring) {
                 // verify exclusion results are found in numerator results, otherwise remove
-                numeratorExclusion.retainAllResources(numerator.getResources());
-                numeratorExclusion.retainOverlaps(numerator.getSubjectResources());
+                numeratorExclusion.retainAllResources(subjectId, numerator);
             }
             if (denominatorException != null && applyScoring) {
                 // Remove Resource Exceptions that are present in Numerator
-                denominatorException.removeAllResources(numerator.getResources());
-                denominatorException.removeOverlaps(numerator.getSubjectResources());
+                denominatorException.removeAllResources(subjectId, numerator);
                 // verify exception results are found in denominator
-                denominatorException.retainAllResources(denominator.getResources());
-                denominatorException.retainOverlaps(denominator.getSubjectResources());
+                denominatorException.retainAllResources(subjectId, denominator);
             }
         }
         if (reportType.equals(MeasureReportType.INDIVIDUAL) && dateOfCompliance != null) {
@@ -354,8 +322,8 @@ public class MeasureEvaluator {
         measurePopulation = evaluatePopulationMembership(subjectType, subjectId, measurePopulation, evaluationResult);
         if (measurePopulation != null && initialPopulation != null && applyScoring) {
             // verify initial-population are in measure-population
-            measurePopulation.retainAllResources(initialPopulation.getResources());
-            measurePopulation.retainAllSubjects(initialPopulation.getSubjects());
+            measurePopulation.retainAllResources(subjectId, initialPopulation);
+            measurePopulation.retainAllSubjects(initialPopulation);
         }
 
         if (measurePopulationExclusion != null) {
@@ -363,8 +331,8 @@ public class MeasureEvaluator {
                     subjectType, subjectId, groupDef.getSingle(MEASUREPOPULATIONEXCLUSION), evaluationResult);
             if (applyScoring && measurePopulation != null) {
                 // verify exclusions are in measure-population
-                measurePopulationExclusion.retainAllResources(measurePopulation.getResources());
-                measurePopulationExclusion.retainAllSubjects(measurePopulation.getSubjects());
+                measurePopulationExclusion.retainAllResources(subjectId, measurePopulation);
+                measurePopulationExclusion.retainAllSubjects(measurePopulation);
             }
         }
         if (measurePopulationObservation != null) {
@@ -376,8 +344,7 @@ public class MeasureEvaluator {
                     subjectType, subjectId, groupDef.getSingle(MEASUREOBSERVATION), evaluationResult, expressionName);
             if (applyScoring) {
                 // only measureObservations that intersect with finalized measure-population results should be retained
-                pruneObservationResources(
-                        measurePopulationObservation.getResources(), measurePopulation, measurePopulationObservation);
+                pruneObservationResources(subjectId, measurePopulation, measurePopulationObservation);
                 // what about subjects?
                 if (measurePopulation != null) {
                     pruneObservationSubjectResources(
@@ -438,15 +405,24 @@ public class MeasureEvaluator {
     }
 
     protected void pruneObservationResources(
-            Set<Object> resources, PopulationDef measurePopulation, PopulationDef measurePopulationObservation) {
-        for (Object resource : resources) {
-            if (resource instanceof Map<?, ?> map) {
-                for (var entry : map.entrySet()) {
-                    var measurePopResult = entry.getKey();
-                    if (measurePopulation != null
-                            && !measurePopulation.getResources().contains(measurePopResult)) {
-                        // remove observation results not found in measure population
-                        measurePopulationObservation.getResources().remove(resource);
+            String subjectId,
+            //        MeasurePopulationType.MEASUREPOPULATION
+            PopulationDef measurePopulationDef,
+            //        MeasurePopulationType.MEASUREOBSERVATION
+            PopulationDef measureObservationDef) {
+        for (Object populationResource : measureObservationDef.getResourcesForSubject(subjectId)) {
+            if (populationResource instanceof Map<?, ?> measureObservationResourceAsMap) {
+                for (Entry<?, ?> measureObservationResourceMapEntry : measureObservationResourceAsMap.entrySet()) {
+                    final Object measureObservationSubjectResourceMapKey = measureObservationResourceMapEntry.getKey();
+                    if (measurePopulationDef != null) {
+                        final Set<Object> measurePopulationResourcesForSubject =
+                                measurePopulationDef.getResourcesForSubject(subjectId);
+                        if (!measurePopulationResourcesForSubject.contains(measureObservationSubjectResourceMapKey)) {
+                            // remove observation results not found in measure population
+                            measureObservationDef
+                                    .getResourcesForSubject(subjectId)
+                                    .remove(populationResource);
+                        }
                     }
                 }
             }
@@ -517,7 +493,7 @@ public class MeasureEvaluator {
     }
 
     private void evaluateStratifier(String subjectId, EvaluationResult evaluationResult, StratifierDef stratifierDef) {
-        if (!stratifierDef.components().isEmpty()) {
+        if (stratifierDef.isComponentStratifier()) {
             addStratifierComponentResult(stratifierDef.components(), evaluationResult, subjectId);
         } else {
             addStratifierNonComponentResult(subjectId, evaluationResult, stratifierDef);
@@ -561,7 +537,7 @@ public class MeasureEvaluator {
             for (StratifierDef stratifierDef : groupDef.stratifiers()) {
                 final List<StratumDef> stratumDefs;
 
-                if (!stratifierDef.components().isEmpty()) {
+                if (stratifierDef.isComponentStratifier()) {
                     stratumDefs = componentStratumPlural(stratifierDef, groupDef.populations());
                 } else {
                     stratumDefs = nonComponentStratumPlural(stratifierDef, groupDef.populations());
@@ -674,7 +650,7 @@ public class MeasureEvaluator {
         // subject2: 'gender'--> 'F'
         // stratifier criteria results are: 'M', 'F'
 
-        if (MeasureStratifierType.CRITERIA == stratifierDef.getStratifierType()) {
+        if (stratifierDef.isCriteriaStratifier()) {
             // Seems to be irrelevant for criteria based stratifiers
             var stratValues = Set.<StratumValueDef>of();
             // Seems to be irrelevant for criteria based stratifiers

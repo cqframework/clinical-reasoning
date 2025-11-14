@@ -293,7 +293,7 @@ public class IgRepository implements IRepository {
      *
      * @param <T>                     The type of the FHIR resource.
      * @param resourceClass           The class representing the FHIR resource type.
-     * @param igRepositoryCompartment The compartment context for directory resolution.
+     * @param directories             The list of directories to scan for resources.
      * @return Map of resource IDs to resources found in the directories.
      */
     protected <T extends IBaseResource> Map<IIdType, T> readDirectoriesForResource(

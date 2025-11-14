@@ -15,6 +15,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
@@ -29,9 +30,11 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.utility.BundleHelper;
+import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.PackageHelper;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
+import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
@@ -49,11 +52,15 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
     private static final String CONFORMANCE_TYPE = "conformance";
     private static final String KNOWLEDGE_ARTIFACT_TYPE = "knowledge";
     private static final String TERMINOLOGY_TYPE = "terminology";
+    private static final String VALUESET_FHIR_TYPE = "ValueSet";
+    private static final String CRMI_INTENDED_USAGE_CONTEXT_URL =
+            "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-intendedUsageContext";
     protected final TerminologyServerClient terminologyServerClient;
     protected final ExpandHelper expandHelper;
 
     protected Map<String, List<?>> resourceTypes = new HashMap<>();
     private IBaseOperationOutcome messages;
+    private final IAdapterFactory adapterFactory;
 
     public PackageVisitor(IRepository repository) {
         this(repository, (TerminologyServerClient) null, null);
@@ -67,6 +74,7 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
         super(repository);
         this.terminologyServerClient = new TerminologyServerClient(fhirContext(), terminologyServerClientSettings);
         this.expandHelper = new ExpandHelper(this.repository, terminologyServerClient);
+        this.adapterFactory = IAdapterFactory.forFhirContext(repository.fhirContext());
         setupResourceTypes();
     }
 
@@ -77,6 +85,7 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
         super(repository, cache);
         this.terminologyServerClient = new TerminologyServerClient(fhirContext(), terminologyServerClientSettings);
         this.expandHelper = new ExpandHelper(this.repository, terminologyServerClient);
+        this.adapterFactory = IAdapterFactory.forFhirContext(repository.fhirContext());
         setupResourceTypes();
     }
 
@@ -88,6 +97,7 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
             terminologyServerClient = client;
         }
         expandHelper = new ExpandHelper(this.repository, terminologyServerClient);
+        this.adapterFactory = IAdapterFactory.forFhirContext(repository.fhirContext());
         setupResourceTypes();
     }
 
@@ -217,6 +227,8 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
             BundleHelper.setEntry(packagedBundle, included);
         }
         handleValueSets(packagedBundle, terminologyEndpoint);
+        applyManifestUsageContextsToValueSets(adapter, packagedBundle);
+
         if (messages != null) {
             messages.setId("messages");
             getRootSpecificationLibrary(packagedBundle).addCqfMessagesExtension(messages);
@@ -248,7 +260,7 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
                 createAdapterForResource(expansionParams).copy());
 
         var valueSets = BundleHelper.getEntryResources(packagedBundle).stream()
-                .filter(r -> r.fhirType().equals("ValueSet"))
+                .filter(r -> r.fhirType().equals(VALUESET_FHIR_TYPE))
                 .map(v -> (IValueSetAdapter) createAdapterForResource(v))
                 .collect(Collectors.toList());
         var expansionCache = getExpansionCache();
@@ -298,6 +310,52 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
                 }
             }
         });
+    }
+
+    protected void applyManifestUsageContextsToValueSets(IKnowledgeArtifactAdapter manifest, IBaseBundle bundle) {
+        // Build list of ValueSet adapters from bundle
+        List<IValueSetAdapter> valueSetResources = BundleHelper.getEntryResources(bundle).stream()
+                .filter(r -> r.fhirType().equals(VALUESET_FHIR_TYPE))
+                .map(adapterFactory::createValueSet)
+                .toList();
+
+        // Filter manifest dependencies to ValueSets only
+        List<IDependencyInfo> dependencies = manifest.getDependencies().stream()
+                .filter(d -> Objects.equals(Canonicals.getResourceType(d.getReference()), VALUESET_FHIR_TYPE))
+                .toList();
+
+        for (IValueSetAdapter valueSetAdapter : valueSetResources) {
+            // Build canonical string for matching (url + optional version)
+            String canonical = valueSetAdapter.getUrl();
+            if (valueSetAdapter.hasVersion()) {
+                canonical += "|" + valueSetAdapter.getVersion();
+            }
+
+            // Find dependencies that reference this ValueSet
+            String finalCanonical = canonical;
+            dependencies.stream()
+                    .filter(dep -> finalCanonical.equals(dep.getReference()))
+                    .forEach(dep ->
+                            // Look for crmi-intendedUsageContext extensions
+                            dep.getExtension().stream()
+                                    .filter(ext -> CRMI_INTENDED_USAGE_CONTEXT_URL.equals(ext.getUrl()))
+                                    .forEach(ext -> {
+                                        var proposedUsageContextAdapter =
+                                                adapterFactory.createUsageContext(ext.getValue());
+
+                                        boolean alreadyExists = false;
+                                        for (var uc : valueSetAdapter.getUseContext()) {
+                                            var uc1 = adapterFactory.createUsageContext(uc);
+                                            if (uc1.equalsDeep(proposedUsageContextAdapter)) {
+                                                alreadyExists = true;
+                                            }
+                                        }
+
+                                        if (!alreadyExists) {
+                                            valueSetAdapter.addUseContext(proposedUsageContextAdapter);
+                                        }
+                                    }));
+        }
     }
 
     public static void setCorrectBundleType(

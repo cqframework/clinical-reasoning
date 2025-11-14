@@ -16,7 +16,6 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.runtime.Code;
-import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationBasisValidator;
@@ -104,7 +103,7 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
     private void validateStratifierPopulationBasisType(
             String url, GroupDef groupDef, StratifierDef stratifierDef, EvaluationResult evaluationResult) {
 
-        if (!stratifierDef.components().isEmpty()) {
+        if (stratifierDef.isComponentStratifier()) {
             for (var component : stratifierDef.components()) {
                 validateExpressionResultType(groupDef, stratifierDef, component.expression(), evaluationResult, url);
             }
@@ -129,7 +128,7 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
         var resultClasses = StratifierUtils.extractClassesFromSingleOrListResult(expressionResult.value());
         var groupPopulationBasisCode = groupDef.getPopulationBasis().code();
 
-        if (MeasureStratifierType.CRITERIA == stratifierDef.getStratifierType()) {
+        if (stratifierDef.isCriteriaStratifier()) {
             if (resultClasses.stream()
                     .map(Class::getSimpleName)
                     .noneMatch(simpleName -> simpleName.equals(groupPopulationBasisCode))) {
@@ -150,7 +149,7 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
 
         if (resultMatchingClasses.size() != resultClasses.size()) {
             throw new InvalidRequestException(
-                    "stratifier expression criteria results for expression: [%s] must fall within accepted types for population-basis: [%s] for Measure: [%s] due to mismatch between total result classes: %s and matching result classes: %s"
+                    "stratifier expression criteria results for expression: [%s] must fall within accepted types for population-basis: [%s] for Measure: [%s] due to mismatch between total eval result classes: %s and matching result classes: %s"
                             .formatted(
                                     expression,
                                     groupPopulationBasisCode,

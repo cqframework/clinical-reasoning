@@ -47,13 +47,7 @@
           "criteria": {
             "language": "text/cql.identifier",
             "expression": "bad criteria stratifier"
-          },
-          "extension": [
-            {
-              "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-population-stratifier-type",
-              "valueCode": "criteria"
-            }
-          ]
+          }
         }
       ]
     }]

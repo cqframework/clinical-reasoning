@@ -22,9 +22,9 @@
 
         <junit.version>5.10.2</junit.version>
         <slf4j.version>2.0.4</slf4j.version>
-        <cql.version>3.29.0</cql.version>
+        <cql.version>4.0.0</cql.version>
         <jmh.version>1.36</jmh.version>
-        <spring.version>6.1.20</spring.version>
+        <spring.version>6.2.12</spring.version>
         <hapi.version>8.4.0</hapi.version>
         <picocli.version>4.6.1</picocli.version>
         <guava.version>33.2.1-jre</guava.version>
@@ -75,14 +75,11 @@
     </repositories>
 
     <modules>
-        <module>cqf-fhir-api</module>
         <module>cqf-fhir-utility</module>
         <module>cqf-fhir-test</module>
         <module>cqf-fhir-cql</module>
         <module>cqf-fhir-cr</module>
         <module>cqf-fhir-cr-cli</module>
-        <module>cqf-fhir-jackson</module>
-        <module>cqf-fhir-jaxb</module>
         <module>cqf-fhir-bom</module>
         <!-- Replaces hapi-fhir-storage-cr -->
         <module>cqf-fhir-cr-hapi</module>
@@ -116,81 +113,56 @@
 
             <!-- CQL dependencies -->
             <dependency>
-                <groupId>info.cqframework</groupId>
+                <groupId>org.cqframework</groupId>
                 <artifactId>engine</artifactId>
                 <version>${cql.version}</version>
             </dependency>
             <dependency>
-                <groupId>info.cqframework</groupId>
+                <groupId>org.cqframework</groupId>
                 <artifactId>cql-to-elm</artifactId>
                 <version>${cql.version}</version>
             </dependency>
             <dependency>
-                <groupId>info.cqframework</groupId>
-                <artifactId>elm</artifactId>
+                <groupId>org.cqframework</groupId>
+                <artifactId>ucum</artifactId>
                 <version>${cql.version}</version>
             </dependency>
             <dependency>
-                <groupId>info.cqframework</groupId>
-                <artifactId>model</artifactId>
-                <version>${cql.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>info.cqframework</groupId>
-                <artifactId>model-jackson</artifactId>
-                <version>${cql.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>info.cqframework</groupId>
-                <artifactId>elm-jackson</artifactId>
-                <version>${cql.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>info.cqframework</groupId>
-                <artifactId>model-jaxb</artifactId>
-                <version>${cql.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>info.cqframework</groupId>
-                <artifactId>elm-jaxb</artifactId>
-                <version>${cql.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>info.cqframework</groupId>
+                <groupId>org.cqframework</groupId>
                 <artifactId>engine-fhir</artifactId>
                 <version>${cql.version}</version>
+                <exclusions>
+                  <exclusion>
+                    <groupId>junit</groupId>
+                    <artifactId>junit</artifactId>
+                  </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
-                <groupId>info.cqframework</groupId>
+                <groupId>org.cqframework</groupId>
                 <artifactId>quick</artifactId>
                 <version>${cql.version}</version>
             </dependency>
             <dependency>
-                <groupId>info.cqframework</groupId>
-                <artifactId>fhir-r4</artifactId>
-                <version>${cql.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>info.cqframework</groupId>
+                <groupId>org.cqframework</groupId>
                 <artifactId>elm-fhir</artifactId>
                 <version>${cql.version}</version>
+                <exclusions>
+                  <exclusion>
+                    <groupId>junit</groupId>
+                    <artifactId>junit</artifactId>
+                  </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
-                <groupId>info.cqframework</groupId>
+                <groupId>org.cqframework</groupId>
                 <artifactId>cqf-fhir</artifactId>
                 <version>${cql.version}</version>
             </dependency>
             <dependency>
-                <groupId>info.cqframework</groupId>
+                <groupId>org.cqframework</groupId>
                 <artifactId>cqf-fhir-npm</artifactId>
                 <version>${cql.version}</version>
-            </dependency>
-
-            <!-- Engine JAXB -->
-            <dependency>
-                <groupId>org.eclipse.persistence</groupId>
-                <artifactId>org.eclipse.persistence.moxy</artifactId>
-                <version>2.7.13</version>
             </dependency>
 
             <!-- Guava-->
@@ -528,7 +500,7 @@
                     <version>3.1.0</version>
                     <executions>
                         <execution>
-                            <id>enforce-no-snapshots</id>
+                            <id>enforce-release-rules</id>
                             <goals>
                                 <goal>enforce</goal>
                             </goals>
@@ -540,6 +512,13 @@
                                     <requireReleaseDeps>
                                         <message>No Snapshot Dependencies Allowed!</message>
                                     </requireReleaseDeps>
+                                    <bannedDependencies>
+                                        <excludes>
+                                            <exclude>junit:junit</exclude>
+                                            <exclude>org.junit.vintage:*</exclude>
+                                        </excludes>
+                                        <searchTransitive>true</searchTransitive>
+                                    </bannedDependencies>
                                 </rules>
                                 <fail>true</fail>
                             </configuration>

@@ -54,16 +54,20 @@ class ApplyScoringSetMembershipTest {
                 .then()
                 .firstGroup()
                 .population("initial-population")
-                .hasCount(1)
+                // Same interval for all 10 generated patients, should be a count of 10
+                .hasCount(10)
                 .up()
                 .population("denominator")
-                .hasCount(1)
+                // Same interval for all 10 generated patients, should be a count of 10
+                .hasCount(10)
                 .up()
                 .population("denominator-exclusion")
-                .hasCount(1)
+                // Same interval for all 10 generated patients, should be a count of 10
+                .hasCount(10)
                 .up()
                 .population("numerator")
-                .hasCount(1)
+                // Same interval for all 10 generated patients, should be a count of 10
+                .hasCount(10)
                 .up()
                 .hasMeasureScore(false)
                 .up()
@@ -85,13 +89,16 @@ class ApplyScoringSetMembershipTest {
                 .then()
                 .firstGroup()
                 .population("initial-population")
-                .hasCount(1)
+                // Same interval for all 10 generated patients, should be a count of 10
+                .hasCount(10)
                 .up()
                 .population("denominator")
-                .hasCount(1)
+                // Same interval for all 10 generated patients, should be a count of 10
+                .hasCount(10)
                 .up()
                 .population("numerator")
-                .hasCount(1)
+                // Same interval for all 10 generated patients, should be a count of 10
+                .hasCount(10)
                 .up()
                 .hasMeasureScore(true)
                 .hasScore("1.0")

@@ -47,7 +47,7 @@ class R4MeasureProcessorTest {
         var evaluationResult = evaluationResults.get(SUBJECT_ID);
         assertNotNull(evaluationResult);
 
-        var expressionResults = evaluationResult.expressionResults;
+        var expressionResults = evaluationResult.getExpressionResults();
         assertNotNull(expressionResults);
 
         var expressionResult = expressionResults.get("Initial Population");

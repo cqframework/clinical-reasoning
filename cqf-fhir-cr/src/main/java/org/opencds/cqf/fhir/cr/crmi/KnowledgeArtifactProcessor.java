@@ -143,7 +143,7 @@ public class KnowledgeArtifactProcessor {
     }
 
     /**
-     * Removes any existing UsageContexts corresponding the VSM specific extensions
+     * Removes any existing UsageContexts corresponding to the VSM-specific extensions
      * @param usageContexts the list of usage contexts to modify
      */
     public static List<UsageContext> removeExistingReferenceExtensionData(List<UsageContext> usageContexts) {

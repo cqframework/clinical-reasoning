@@ -59,12 +59,7 @@ import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 @SuppressWarnings("squid:S2699")
 class MeasureScoringTypeRatioContVariableTest {
 
-    private static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/measure/r4";
-    private static final IRepository repository = new IgRepository(
-            FhirContext.forR4Cached(),
-            Path.of(getResourcePath(MeasureScoringTypeRatioContVariableTest.class) + "/" + CLASS_PATH + "/"
-                    + "MeasureTest"));
-    private final Given given = Measure.given().repository(repository);
+    private static final Given given = Measure.given().repositoryFor("MeasureTest");
 
     /**
      * Test 1:

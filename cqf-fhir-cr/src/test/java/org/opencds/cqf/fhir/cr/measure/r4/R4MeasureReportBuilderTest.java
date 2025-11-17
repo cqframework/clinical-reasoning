@@ -253,8 +253,7 @@ class R4MeasureReportBuilderTest {
                 MeasureScoring.PROPORTION,
                 false,
                 null,
-                new CodeDef(MeasureConstants.POPULATION_BASIS_URL, "boolean")
-                );
+                new CodeDef(MeasureConstants.POPULATION_BASIS_URL, "boolean"));
     }
 
     private static PopulationDef buildPopulationRef(Collection<Object> resources) {

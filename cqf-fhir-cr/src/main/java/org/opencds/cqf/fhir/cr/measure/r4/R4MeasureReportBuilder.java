@@ -328,14 +328,14 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         addExtensionImprovementNotation(reportGroup, groupDef);
 
         for (int i = 0; i < measureGroup.getPopulation().size(); i++) {
-            //Report Population Component
+            // Report Population Component
             var measurePop = measureGroup.getPopulation().get(i);
             PopulationDef defPop = null;
             for (int x = 0; x < groupDef.populations().size(); x++) {
                 var groupDefPop = groupDef.populations().get(x);
                 // Groups can have more than one of the same PopulationType, we need a Unique value to bind on
                 if (groupDefPop.id().equals(measurePop.getId())) {
-                    //set definition to build
+                    // set definition to build
                     defPop = groupDefPop;
                     break;
                 }

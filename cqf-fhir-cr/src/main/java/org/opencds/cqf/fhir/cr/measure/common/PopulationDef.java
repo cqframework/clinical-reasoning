@@ -17,6 +17,7 @@ public class PopulationDef {
 
     @Nullable
     private final String criteriaReference;
+
     @Nullable
     private final ContinuousVariableObservationAggregateMethod aggregateMethod;
 
@@ -127,6 +128,7 @@ public class PopulationDef {
                 .computeIfAbsent(key, k -> new HashSetForFhirResourcesAndCqlTypes<>())
                 .add(value);
     }
+
     @Nullable
     public ContinuousVariableObservationAggregateMethod getAggregateMethod() {
         return this.aggregateMethod;

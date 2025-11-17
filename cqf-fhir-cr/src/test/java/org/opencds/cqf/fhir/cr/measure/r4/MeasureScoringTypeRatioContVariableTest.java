@@ -1,14 +1,14 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
+import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.repository.IRepository;
+import java.nio.file.Path;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportStatus;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
-import java.nio.file.Path;
-
-import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 /**
  * Summary of generated Patients and their Encounter durations.
@@ -62,7 +62,8 @@ class MeasureScoringTypeRatioContVariableTest {
     private static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/measure/r4";
     private static final IRepository repository = new IgRepository(
             FhirContext.forR4Cached(),
-            Path.of(getResourcePath(MeasureScoringTypeRatioContVariableTest.class) + "/" + CLASS_PATH + "/" + "MeasureTest"));
+            Path.of(getResourcePath(MeasureScoringTypeRatioContVariableTest.class) + "/" + CLASS_PATH + "/"
+                    + "MeasureTest"));
     private final Given given = Measure.given().repository(repository);
 
     /**
@@ -83,7 +84,7 @@ class MeasureScoringTypeRatioContVariableTest {
                 .hasCount(11)
                 .up()
                 .population("denominator")
-                .hasCount(11)//final Denominator = 9 (11-2)
+                .hasCount(11) // final Denominator = 9 (11-2)
                 .up()
                 .population("denominator-exclusion")
                 .hasCount(2)
@@ -92,13 +93,13 @@ class MeasureScoringTypeRatioContVariableTest {
                 .hasCount(0)
                 .up()
                 .population("numerator")
-                .hasCount(2)// final Numerator = 2
+                .hasCount(2) // final Numerator = 2
                 .up()
                 .populationId("observation-den")
-                .hasCount(9)// we remove exclusions in these counts so users can see final Observation count used
+                .hasCount(9) // we remove exclusions in these counts so users can see final Observation count used
                 .up()
                 .populationId("observation-num")
-                .hasCount(2)// we remove exclusions in these counts so users can see final Observation count used
+                .hasCount(2) // we remove exclusions in these counts so users can see final Observation count used
                 .up()
                 .hasScore("0.2222222222222222")
                 .up()
@@ -115,34 +116,34 @@ class MeasureScoringTypeRatioContVariableTest {
     void ratioContinuousVariableResourceBasisCount() {
 
         given.when()
-            .measureId("RatioContVarResourceCount")
-            .evaluate()
-            .then()
-            .firstGroup()
-            .population("initial-population")
-            .hasCount(11)
-            .up()
-            .population("denominator")
-            .hasCount(11)//final Denominator = 9 (11-2)
-            .up()
-            .population("denominator-exclusion")
-            .hasCount(2)
-            .up()
-            .population("numerator-exclusion")
-            .hasCount(0)
-            .up()
-            .population("numerator")
-            .hasCount(2)// final Numerator = 2
-            .up()
-            .populationId("observation-den")
-            .hasCount(9)// we remove exclusions in these counts so users can see final Observation count used
-            .up()
-            .populationId("observation-num")
-            .hasCount(2)// we remove exclusions in these counts so users can see final Observation count used
-            .up()
-            .hasScore("0.2222222222222222") // 2/9
-            .up()
-            .report();
+                .measureId("RatioContVarResourceCount")
+                .evaluate()
+                .then()
+                .firstGroup()
+                .population("initial-population")
+                .hasCount(11)
+                .up()
+                .population("denominator")
+                .hasCount(11) // final Denominator = 9 (11-2)
+                .up()
+                .population("denominator-exclusion")
+                .hasCount(2)
+                .up()
+                .population("numerator-exclusion")
+                .hasCount(0)
+                .up()
+                .population("numerator")
+                .hasCount(2) // final Numerator = 2
+                .up()
+                .populationId("observation-den")
+                .hasCount(9) // we remove exclusions in these counts so users can see final Observation count used
+                .up()
+                .populationId("observation-num")
+                .hasCount(2) // we remove exclusions in these counts so users can see final Observation count used
+                .up()
+                .hasScore("0.2222222222222222") // 2/9
+                .up()
+                .report();
     }
 
     /**
@@ -155,34 +156,34 @@ class MeasureScoringTypeRatioContVariableTest {
     void ratioContinuousVariableResourceBasisAvg() {
 
         given.when()
-            .measureId("RatioContVarResourceAvg")
-            .evaluate()
-            .then()
-            .firstGroup()
-            .population("initial-population")
-            .hasCount(11)
-            .up()
-            .population("denominator")
-            .hasCount(11)//final Denominator = 9 (11-2)
-            .up()
-            .population("denominator-exclusion")
-            .hasCount(2)
-            .up()
-            .population("numerator-exclusion")
-            .hasCount(0)
-            .up()
-            .population("numerator")
-            .hasCount(2)// final Numerator = 2
-            .up()
-            .populationId("observation-den")
-            .hasCount(9)// we remove exclusions in these counts so users can see final Observation count used
-            .up()
-            .populationId("observation-num")
-            .hasCount(2)// we remove exclusions in these counts so users can see final Observation count used
-            .up()
-            .hasScore("1.0") // 120/120
-            .up()
-            .report();
+                .measureId("RatioContVarResourceAvg")
+                .evaluate()
+                .then()
+                .firstGroup()
+                .population("initial-population")
+                .hasCount(11)
+                .up()
+                .population("denominator")
+                .hasCount(11) // final Denominator = 9 (11-2)
+                .up()
+                .population("denominator-exclusion")
+                .hasCount(2)
+                .up()
+                .population("numerator-exclusion")
+                .hasCount(0)
+                .up()
+                .population("numerator")
+                .hasCount(2) // final Numerator = 2
+                .up()
+                .populationId("observation-den")
+                .hasCount(9) // we remove exclusions in these counts so users can see final Observation count used
+                .up()
+                .populationId("observation-num")
+                .hasCount(2) // we remove exclusions in these counts so users can see final Observation count used
+                .up()
+                .hasScore("1.0") // 120/120
+                .up()
+                .report();
     }
 
     /**
@@ -195,34 +196,34 @@ class MeasureScoringTypeRatioContVariableTest {
     void ratioContinuousVariableResourceBasisMin() {
 
         given.when()
-            .measureId("RatioContVarResourceMin")
-            .evaluate()
-            .then()
-            .firstGroup()
-            .population("initial-population")
-            .hasCount(11)
-            .up()
-            .population("denominator")
-            .hasCount(11)//final Denominator = 9 (11-2)
-            .up()
-            .population("denominator-exclusion")
-            .hasCount(2)
-            .up()
-            .population("numerator-exclusion")
-            .hasCount(0)
-            .up()
-            .population("numerator")
-            .hasCount(2)// final Numerator = 2
-            .up()
-            .populationId("observation-den")
-            .hasCount(9)// we remove exclusions in these counts so users can see final Observation count used
-            .up()
-            .populationId("observation-num")
-            .hasCount(2)// we remove exclusions in these counts so users can see final Observation count used
-            .up()
-            .hasScore("1.0") //30/30
-            .up()
-            .report();
+                .measureId("RatioContVarResourceMin")
+                .evaluate()
+                .then()
+                .firstGroup()
+                .population("initial-population")
+                .hasCount(11)
+                .up()
+                .population("denominator")
+                .hasCount(11) // final Denominator = 9 (11-2)
+                .up()
+                .population("denominator-exclusion")
+                .hasCount(2)
+                .up()
+                .population("numerator-exclusion")
+                .hasCount(0)
+                .up()
+                .population("numerator")
+                .hasCount(2) // final Numerator = 2
+                .up()
+                .populationId("observation-den")
+                .hasCount(9) // we remove exclusions in these counts so users can see final Observation count used
+                .up()
+                .populationId("observation-num")
+                .hasCount(2) // we remove exclusions in these counts so users can see final Observation count used
+                .up()
+                .hasScore("1.0") // 30/30
+                .up()
+                .report();
     }
     /**
      * Test 5:
@@ -234,34 +235,34 @@ class MeasureScoringTypeRatioContVariableTest {
     void ratioContinuousVariableResourceBasisMax() {
 
         given.when()
-            .measureId("RatioContVarResourceMax")
-            .evaluate()
-            .then()
-            .firstGroup()
-            .population("initial-population")
-            .hasCount(11)
-            .up()
-            .population("denominator")
-            .hasCount(11)//final Denominator = 9 (11-2)
-            .up()
-            .population("denominator-exclusion")
-            .hasCount(2)
-            .up()
-            .population("numerator-exclusion")
-            .hasCount(0)
-            .up()
-            .population("numerator")
-            .hasCount(2)// final Numerator = 2
-            .up()
-            .populationId("observation-den")
-            .hasCount(9)// we remove exclusions in these counts so users can see final Observation count used
-            .up()
-            .populationId("observation-num")
-            .hasCount(2)// we remove exclusions in these counts so users can see final Observation count used
-            .up()
-            .hasScore("1.0")//180/180
-            .up()
-            .report();
+                .measureId("RatioContVarResourceMax")
+                .evaluate()
+                .then()
+                .firstGroup()
+                .population("initial-population")
+                .hasCount(11)
+                .up()
+                .population("denominator")
+                .hasCount(11) // final Denominator = 9 (11-2)
+                .up()
+                .population("denominator-exclusion")
+                .hasCount(2)
+                .up()
+                .population("numerator-exclusion")
+                .hasCount(0)
+                .up()
+                .population("numerator")
+                .hasCount(2) // final Numerator = 2
+                .up()
+                .populationId("observation-den")
+                .hasCount(9) // we remove exclusions in these counts so users can see final Observation count used
+                .up()
+                .populationId("observation-num")
+                .hasCount(2) // we remove exclusions in these counts so users can see final Observation count used
+                .up()
+                .hasScore("1.0") // 180/180
+                .up()
+                .report();
     }
     /**
      * Test 6:
@@ -273,34 +274,34 @@ class MeasureScoringTypeRatioContVariableTest {
     void ratioContinuousVariableResourceBasisMedian() {
 
         given.when()
-            .measureId("RatioContVarResourceMedian")
-            .evaluate()
-            .then()
-            .firstGroup()
-            .population("initial-population")
-            .hasCount(11)
-            .up()
-            .population("denominator")
-            .hasCount(11)//final Denominator = 9 (11-2)
-            .up()
-            .population("denominator-exclusion")
-            .hasCount(2)
-            .up()
-            .population("numerator-exclusion")
-            .hasCount(0)
-            .up()
-            .population("numerator")
-            .hasCount(2)// final Numerator = 2
-            .up()
-            .populationId("observation-den")
-            .hasCount(9)// we remove exclusions in these counts so users can see final Observation count used
-            .up()
-            .populationId("observation-num")
-            .hasCount(2)// we remove exclusions in these counts so users can see final Observation count used
-            .up()
-            .hasScore("1.0")// 120/120
-            .up()
-            .report();
+                .measureId("RatioContVarResourceMedian")
+                .evaluate()
+                .then()
+                .firstGroup()
+                .population("initial-population")
+                .hasCount(11)
+                .up()
+                .population("denominator")
+                .hasCount(11) // final Denominator = 9 (11-2)
+                .up()
+                .population("denominator-exclusion")
+                .hasCount(2)
+                .up()
+                .population("numerator-exclusion")
+                .hasCount(0)
+                .up()
+                .population("numerator")
+                .hasCount(2) // final Numerator = 2
+                .up()
+                .populationId("observation-den")
+                .hasCount(9) // we remove exclusions in these counts so users can see final Observation count used
+                .up()
+                .populationId("observation-num")
+                .hasCount(2) // we remove exclusions in these counts so users can see final Observation count used
+                .up()
+                .hasScore("1.0") // 120/120
+                .up()
+                .report();
     }
     /**
      * Test 7:
@@ -312,34 +313,34 @@ class MeasureScoringTypeRatioContVariableTest {
     void ratioContinuousVariableBooleanBasisSum() {
 
         given.when()
-            .measureId("RatioContVarBooleanSum")
-            .evaluate()
-            .then()
-            .firstGroup()
-            .population("initial-population")
-            .hasCount(10)
-            .up()
-            .population("denominator")
-            .hasCount(10)//final Denominator = 8 (10-2)
-            .up()
-            .population("denominator-exclusion")
-            .hasCount(2)
-            .up()
-            .population("numerator-exclusion")
-            .hasCount(0)
-            .up()
-            .population("numerator")
-            .hasCount(2)// final Numerator = 2
-            .up()
-            .populationId("observation-den")
-            .hasCount(8)// we remove exclusions in these counts so users can see final Observation count used
-            .up()
-            .populationId("observation-num")
-            .hasCount(2)// we remove exclusions in these counts so users can see final Observation count used
-            .up()
-            .hasScore("0.25") // 36,39=75, 36,39,36,39,36,39,36,39=300 ===>.25
-            .up()
-            .report();
+                .measureId("RatioContVarBooleanSum")
+                .evaluate()
+                .then()
+                .firstGroup()
+                .population("initial-population")
+                .hasCount(10)
+                .up()
+                .population("denominator")
+                .hasCount(10) // final Denominator = 8 (10-2)
+                .up()
+                .population("denominator-exclusion")
+                .hasCount(2)
+                .up()
+                .population("numerator-exclusion")
+                .hasCount(0)
+                .up()
+                .population("numerator")
+                .hasCount(2) // final Numerator = 2
+                .up()
+                .populationId("observation-den")
+                .hasCount(8) // we remove exclusions in these counts so users can see final Observation count used
+                .up()
+                .populationId("observation-num")
+                .hasCount(2) // we remove exclusions in these counts so users can see final Observation count used
+                .up()
+                .hasScore("0.25") // 36,39=75, 36,39,36,39,36,39,36,39=300 ===>.25
+                .up()
+                .report();
     }
     /**
      * Test 8:
@@ -352,34 +353,35 @@ class MeasureScoringTypeRatioContVariableTest {
     void ratioContinuousVariableResourceBasisMix() {
 
         given.when()
-            .measureId("RatioContVarResourceMix")
-            .evaluate()
-            .then()
-            .firstGroup()
-            .population("initial-population")
-            .hasCount(11)
-            .up()
-            .population("denominator")
-            .hasCount(11)//final Denominator = 9 (11-2)
-            .up()
-            .population("denominator-exclusion")
-            .hasCount(2)
-            .up()
-            .population("numerator-exclusion")
-            .hasCount(0)
-            .up()
-            .population("numerator")
-            .hasCount(2)// final Numerator = 2
-            .up()
-            .populationId("observation-den")
-            .hasCount(9)// we remove exclusions in these counts so users can see final Observation count used
-            .up()
-            .populationId("observation-num")
-            .hasCount(2)// we remove exclusions in these counts so users can see final Observation count used
-            .up()
-            .hasScore("0.0892857143") // avg/sum  avg(30, 120)= 75, sum(30, 180,120,120,120,120,120,120,120)=840, 75/840
-            .up()
-            .report();
+                .measureId("RatioContVarResourceMix")
+                .evaluate()
+                .then()
+                .firstGroup()
+                .population("initial-population")
+                .hasCount(11)
+                .up()
+                .population("denominator")
+                .hasCount(11) // final Denominator = 9 (11-2)
+                .up()
+                .population("denominator-exclusion")
+                .hasCount(2)
+                .up()
+                .population("numerator-exclusion")
+                .hasCount(0)
+                .up()
+                .population("numerator")
+                .hasCount(2) // final Numerator = 2
+                .up()
+                .populationId("observation-den")
+                .hasCount(9) // we remove exclusions in these counts so users can see final Observation count used
+                .up()
+                .populationId("observation-num")
+                .hasCount(2) // we remove exclusions in these counts so users can see final Observation count used
+                .up()
+                .hasScore("0.0892857143") // avg/sum  avg(30, 120)= 75, sum(30, 180,120,120,120,120,120,120,120)=840,
+                // 75/840
+                .up()
+                .report();
     }
     /**
      * Test 9:
@@ -391,14 +393,15 @@ class MeasureScoringTypeRatioContVariableTest {
     void ratioContinuousVariableMixBasisSum() {
 
         given.when()
-            .measureId("RatioContVarMixBasisSum")
-            .evaluate()
-            .then()
-            .hasStatus(MeasureReportStatus.ERROR)
-            .hasContainedOperationOutcomeMsg("Measure observation criteria expression: MeasureObservationBoolean is missing a function parameter matching the population-basis")
-            .firstGroup()
-            .hasMeasureScore(false)
-            .up()
-            .report();
+                .measureId("RatioContVarMixBasisSum")
+                .evaluate()
+                .then()
+                .hasStatus(MeasureReportStatus.ERROR)
+                .hasContainedOperationOutcomeMsg(
+                        "Measure observation criteria expression: MeasureObservationBoolean is missing a function parameter matching the population-basis")
+                .firstGroup()
+                .hasMeasureScore(false)
+                .up()
+                .report();
     }
 }

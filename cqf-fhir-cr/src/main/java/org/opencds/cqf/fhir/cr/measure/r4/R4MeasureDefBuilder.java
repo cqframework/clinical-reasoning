@@ -96,7 +96,6 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                 .filter(this::isMeasureObservation)
                 .findFirst();
 
-
         // Populations
         checkIds(group);
 
@@ -140,11 +139,12 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
     }
 
     @Nonnull
-    private PopulationDef buildPopulationDef(MeasureGroupPopulationComponent population, MeasureGroupComponent group,String measureUrl) {
+    private PopulationDef buildPopulationDef(
+            MeasureGroupPopulationComponent population, MeasureGroupComponent group, String measureUrl) {
         MeasurePopulationType popType = MeasurePopulationType.fromCode(
-            population.getCode().getCodingFirstRep().getCode());
+                population.getCode().getCodingFirstRep().getCode());
         // criteriaReference & aggregateMethod are for MeasureObservation populations only
-        String criteriaReference = getCriteriaReference(group,population,popType,measureUrl);
+        String criteriaReference = getCriteriaReference(group, population, popType, measureUrl);
         ContinuousVariableObservationAggregateMethod aggregateMethod = getAggregateMethod(measureUrl, population);
         return new PopulationDef(
                 population.getId(),

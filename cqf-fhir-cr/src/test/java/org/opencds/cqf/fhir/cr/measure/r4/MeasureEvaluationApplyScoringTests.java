@@ -13,12 +13,9 @@ import java.util.function.Predicate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportStatus;
-import org.hl7.fhir.r4.model.Period;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.stubbing.Answer;
@@ -42,8 +39,6 @@ class MeasureEvaluationApplyScoringTests {
     private static final Measure.Given GIVEN_SINGLE = getGivenWithMockedRepositorySingleMeasure();
 
     private static final MultiMeasure.Given GIVEN_MULTI = getGivenWithMockedRepositoryMinimalMeasure();
-
-
 
     @Test
     void proportionResourceWithReportTypeParameterPatientGroup() {

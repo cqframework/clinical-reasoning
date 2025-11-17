@@ -881,9 +881,9 @@ public class Measure {
 
         public SelectedPopulation populationId(String populationId) {
             return this.population(g -> g.getPopulation().stream()
-                .filter(x -> x.getId().equals(populationId))
-                .findFirst()
-                .get());
+                    .filter(x -> x.getId().equals(populationId))
+                    .findFirst()
+                    .get());
         }
 
         public SelectedPopulation population(

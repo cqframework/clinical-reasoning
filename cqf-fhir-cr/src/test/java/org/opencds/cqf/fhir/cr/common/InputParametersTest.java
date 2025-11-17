@@ -14,7 +14,6 @@ import com.google.common.collect.Multimap;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
@@ -117,27 +116,27 @@ class InputParametersTest {
                 null,
                 null,
                 Arrays.asList(
-                        adapterFactoryR4.createParametersParameter((IBaseBackboneElement) newPart(
+                        adapterFactoryR4.createParametersParameter(newPart(
                                 fhirContextR4,
                                 "context",
                                 newStringPart(fhirContextR4, "name", "patient"),
                                 newPart(fhirContextR4, "Reference", "content", patient.getId()))),
-                        adapterFactoryR4.createParametersParameter((IBaseBackboneElement) newPart(
+                        adapterFactoryR4.createParametersParameter(newPart(
                                 fhirContextR4,
                                 "context",
                                 newStringPart(fhirContextR4, "name", "encounter"),
                                 newPart(fhirContextR4, "Reference", "content", encounter.getId()))),
-                        adapterFactoryR4.createParametersParameter((IBaseBackboneElement) newPart(
+                        adapterFactoryR4.createParametersParameter(newPart(
                                 fhirContextR4,
                                 "context",
                                 newStringPart(fhirContextR4, "name", "location"),
                                 newPart(fhirContextR4, "Reference", "content", location.getId()))),
-                        adapterFactoryR4.createParametersParameter((IBaseBackboneElement) newPart(
+                        adapterFactoryR4.createParametersParameter(newPart(
                                 fhirContextR4,
                                 "context",
                                 newStringPart(fhirContextR4, "name", "user"),
                                 newPart(fhirContextR4, "Reference", "content", practitioner.getId()))),
-                        adapterFactoryR4.createParametersParameter((IBaseBackboneElement) newPart(
+                        adapterFactoryR4.createParametersParameter(newPart(
                                 fhirContextR4,
                                 "context",
                                 newStringPart(fhirContextR4, "name", "study"),
@@ -206,7 +205,7 @@ class InputParametersTest {
     }
 
     @Test
-    void testUserLaunchContextAsPatientReferenceR4() {
+    void testUserLaunchContextAsPatientR4() {
         var user = new Patient();
         user.setIdElement(Ids.newId(fhirContextR4, "Patient", patientId));
         doReturn(fhirContextR4).when(repository).fhirContext();
@@ -218,7 +217,7 @@ class InputParametersTest {
                 null,
                 null,
                 null,
-                List.of(adapterFactoryR4.createParametersParameter((IBaseBackboneElement) newPart(
+                List.of(adapterFactoryR4.createParametersParameter(newPart(
                         fhirContextR4,
                         "context",
                         newStringPart(fhirContextR4, "name", "user"),
@@ -238,7 +237,7 @@ class InputParametersTest {
     }
 
     @Test
-    void testUserLaunchContextAsPatientR4() {
+    void testUserLaunchContextAsPatientResourceR4() {
         var user = new Patient();
         user.setIdElement(Ids.newId(fhirContextR4, "Patient", patientId));
         doReturn(fhirContextR4).when(repository).fhirContext();
@@ -278,7 +277,7 @@ class InputParametersTest {
                 null,
                 null,
                 null,
-                List.of(adapterFactoryR4.createParametersParameter((IBaseBackboneElement) newPart(
+                List.of(adapterFactoryR4.createParametersParameter(newPart(
                         fhirContextR4,
                         "context",
                         newStringPart(fhirContextR4, "name", "user"),
@@ -310,7 +309,7 @@ class InputParametersTest {
                 null,
                 null,
                 null,
-                List.of(adapterFactoryR4.createParametersParameter((IBaseBackboneElement) newPart(
+                List.of(adapterFactoryR4.createParametersParameter(newPart(
                         fhirContextR4,
                         "context",
                         newStringPart(fhirContextR4, "name", "user"),
@@ -360,27 +359,27 @@ class InputParametersTest {
                 null,
                 null,
                 List.of(
-                        adapterFactoryR5.createParametersParameter((IBaseBackboneElement) newPart(
+                        adapterFactoryR5.createParametersParameter(newPart(
                                 fhirContextR5,
                                 "context",
                                 newStringPart(fhirContextR5, "name", "patient"),
                                 newPart(fhirContextR5, "Reference", "content", patient.getId()))),
-                        adapterFactoryR5.createParametersParameter((IBaseBackboneElement) newPart(
+                        adapterFactoryR5.createParametersParameter(newPart(
                                 fhirContextR5,
                                 "context",
                                 newStringPart(fhirContextR5, "name", "encounter"),
                                 newPart(fhirContextR5, "Reference", "content", encounter.getId()))),
-                        adapterFactoryR5.createParametersParameter((IBaseBackboneElement) newPart(
+                        adapterFactoryR5.createParametersParameter(newPart(
                                 fhirContextR5,
                                 "context",
                                 newStringPart(fhirContextR5, "name", "location"),
                                 newPart(fhirContextR5, "Reference", "content", location.getId()))),
-                        adapterFactoryR5.createParametersParameter((IBaseBackboneElement) newPart(
+                        adapterFactoryR5.createParametersParameter(newPart(
                                 fhirContextR5,
                                 "context",
                                 newStringPart(fhirContextR5, "name", "user"),
                                 newPart(fhirContextR5, "Reference", "content", practitioner.getId()))),
-                        adapterFactoryR5.createParametersParameter((IBaseBackboneElement) newPart(
+                        adapterFactoryR5.createParametersParameter(newPart(
                                 fhirContextR5,
                                 "context",
                                 newStringPart(fhirContextR5, "name", "study"),
@@ -461,7 +460,7 @@ class InputParametersTest {
                 null,
                 null,
                 null,
-                List.of(adapterFactoryR5.createParametersParameter((IBaseBackboneElement) newPart(
+                List.of(adapterFactoryR5.createParametersParameter(newPart(
                         fhirContextR5,
                         "context",
                         newStringPart(fhirContextR5, "name", "user"),
@@ -496,7 +495,7 @@ class InputParametersTest {
                 null,
                 null,
                 null,
-                List.of(adapterFactoryR5.createParametersParameter((IBaseBackboneElement) newPart(
+                List.of(adapterFactoryR5.createParametersParameter(newPart(
                         fhirContextR5,
                         "context",
                         newStringPart(fhirContextR5, "name", "user"),
@@ -531,7 +530,7 @@ class InputParametersTest {
                 null,
                 null,
                 null,
-                List.of(adapterFactoryR5.createParametersParameter((IBaseBackboneElement) newPart(
+                List.of(adapterFactoryR5.createParametersParameter(newPart(
                         fhirContextR5,
                         "context",
                         newStringPart(fhirContextR5, "name", "user"),

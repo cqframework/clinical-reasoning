@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.utility.adapter.r5;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
@@ -62,6 +63,7 @@ class ParametersParameterComponentAdapter extends BaseAdapter implements IParame
         return this.getParametersParameterComponent().getPart().stream()
                 .filter(p -> p.getName().equals(name))
                 .map(p -> p.hasResource() ? p.getResource() : p.getValue())
+                .filter(Objects::nonNull)
                 .map(IBase.class::cast)
                 .toList();
     }

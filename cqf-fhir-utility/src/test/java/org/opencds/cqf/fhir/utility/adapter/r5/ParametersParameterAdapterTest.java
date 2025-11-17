@@ -15,6 +15,7 @@ import org.hl7.fhir.r5.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r5.model.Patient;
 import org.hl7.fhir.r5.model.PlanDefinition.PlanDefinitionActionComponent;
 import org.hl7.fhir.r5.model.Quantity;
+import org.hl7.fhir.r5.model.Reference;
 import org.hl7.fhir.r5.model.StringType;
 import org.hl7.fhir.r5.model.Tuple;
 import org.junit.jupiter.api.Test;
@@ -54,18 +55,24 @@ class ParametersParameterAdapterTest {
     @Test
     void testGet_SetPart() {
         var parameter = new ParametersParameterComponent();
-        var referencePart = parameter.addPart().setName("name").setValue(new StringType("value"));
+        var stringPart = parameter.addPart().setName("name").setValue(new StringType("patient"));
+        var reference = new Reference("value");
+        var referencePart = parameter.addPart().setName("content").setValue(reference);
         var patient = new Patient().addName(new HumanName().addGiven("test").setFamily("test"));
         patient.setId("patient1");
         var resourcePart = parameter.addPart().setName("content").setResource(patient);
         var adapter = adapterFactory.createParametersParameter(parameter);
         assertTrue(adapter.hasPart());
-        assertEquals(referencePart, adapter.getPart().get(0).get());
-        assertEquals("value", adapter.getPartValues("name").get(0).toString());
-        assertEquals(resourcePart, adapter.getPart().get(1).get());
-        assertEquals(patient, adapter.getPartValues("content").get(0));
+        assertEquals(stringPart, adapter.getPart().get(0).get());
+        assertEquals("patient", adapter.getPartValues("name").get(0).toString());
+        assertEquals(referencePart, adapter.getPart().get(1).get());
+        assertEquals(resourcePart, adapter.getPart().get(2).get());
+        var contentValue = adapter.getPartValues("content");
+        assertEquals(2, contentValue.size());
+        assertTrue(contentValue.contains(patient));
+        assertTrue(contentValue.contains(reference));
         adapter.addPart();
-        assertEquals(3, adapter.getPart().size());
+        assertEquals(4, adapter.getPart().size());
         adapter.setPart(null);
         assertFalse(adapter.hasPart());
         adapter.setPart(

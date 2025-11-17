@@ -95,6 +95,11 @@ define "SDE Sex":
 define function "MeasureObservation"(encounter Encounter):
     duration in minutes of encounter.period
 
+// Cont Variable
+// boolean basis age in years to end of measurementPeriod
+
+define function "MeasureObservationBoolean"():
+         AgeInYearsAt(end of "Measurement Period")
 // component stratifier
 
 define "Gender Stratification":

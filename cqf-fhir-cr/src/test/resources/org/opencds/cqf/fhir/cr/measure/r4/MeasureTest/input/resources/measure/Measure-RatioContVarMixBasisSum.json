@@ -1,7 +1,7 @@
 {
-  "id": "RatioContVarResourceSum",
+  "id": "RatioContVarMixBasisSum",
   "resourceType": "Measure",
-  "url": "http://example.com/Measure/RatioContVarResourceSum",
+  "url": "http://example.com/Measure/RatioContVarMixBasisSum",
   "library": [
     "http://example.com/Library/LibrarySimple"
   ],
@@ -121,7 +121,7 @@
           },
           "criteria": {
             "language": "text/cql.identifier",
-            "expression": "MeasureObservation"
+            "expression": "MeasureObservationBoolean"
           }
         },
         {

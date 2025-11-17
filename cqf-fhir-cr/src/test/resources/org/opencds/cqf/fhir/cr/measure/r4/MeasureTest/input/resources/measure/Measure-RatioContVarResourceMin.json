@@ -1,7 +1,7 @@
 {
-  "id": "RatioContVarResourceSum",
+  "id": "RatioContVarResourceMin",
   "resourceType": "Measure",
-  "url": "http://example.com/Measure/RatioContVarResourceSum",
+  "url": "http://example.com/Measure/RatioContVarResourceMin",
   "library": [
     "http://example.com/Library/LibrarySimple"
   ],
@@ -107,7 +107,7 @@
           "id": "observation-num",
           "extension": [ {
             "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-aggregateMethod",
-            "valueCode": "sum"
+            "valueCode": "min"
           }, {
             "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-criteriaReference",
             "valueString": "numerator"
@@ -128,7 +128,7 @@
           "id": "observation-den",
           "extension": [ {
             "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-aggregateMethod",
-            "valueCode": "sum"
+            "valueCode": "min"
           }, {
             "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-criteriaReference",
             "valueString": "denominator"

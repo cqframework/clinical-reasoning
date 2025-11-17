@@ -1,7 +1,7 @@
 {
-  "id": "RatioContVarResourceSum",
+  "id": "RatioContVarResourceMix",
   "resourceType": "Measure",
-  "url": "http://example.com/Measure/RatioContVarResourceSum",
+  "url": "http://example.com/Measure/RatioContVarResourceMix",
   "library": [
     "http://example.com/Library/LibrarySimple"
   ],
@@ -107,7 +107,7 @@
           "id": "observation-num",
           "extension": [ {
             "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-aggregateMethod",
-            "valueCode": "sum"
+            "valueCode": "avg"
           }, {
             "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-criteriaReference",
             "valueString": "numerator"

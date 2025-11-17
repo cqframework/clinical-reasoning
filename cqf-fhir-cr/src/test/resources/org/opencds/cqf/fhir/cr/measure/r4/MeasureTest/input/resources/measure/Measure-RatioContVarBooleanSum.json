@@ -1,14 +1,14 @@
 {
-  "id": "RatioContVarResourceSum",
+  "id": "RatioContVarBooleanSum",
   "resourceType": "Measure",
-  "url": "http://example.com/Measure/RatioContVarResourceSum",
+  "url": "http://example.com/Measure/RatioContVarBooleanSum",
   "library": [
     "http://example.com/Library/LibrarySimple"
   ],
   "extension": [
     {
       "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-populationBasis",
-      "valueCode": "Encounter"
+      "valueCode": "boolean"
     }
   ],
   "scoring": {
@@ -36,7 +36,7 @@
           },
           "criteria": {
             "language": "text/cql-identifier",
-            "expression": "Initial Population Resource"
+            "expression": "Initial Population Boolean"
           }
         },
         {
@@ -52,7 +52,7 @@
           },
           "criteria": {
             "language": "text/cql-identifier",
-            "expression": "Denominator Resource"
+            "expression": "Denominator Boolean"
           }
         },
         {
@@ -68,7 +68,7 @@
           },
           "criteria": {
             "language": "text/cql-identifier",
-            "expression": "Denominator Exclusion Resource"
+            "expression": "Denominator Exclusion Boolean"
           }
         },
         {
@@ -84,7 +84,7 @@
           },
           "criteria": {
             "language": "text/cql-identifier",
-            "expression": "Numerator Exclusion Resource"
+            "expression": "Numerator Exclusion Boolean"
           }
         },
         {
@@ -100,7 +100,7 @@
           },
           "criteria": {
             "language": "text/cql-identifier",
-            "expression": "Numerator Resource"
+            "expression": "Numerator Boolean"
           }
         },
         {
@@ -121,7 +121,7 @@
           },
           "criteria": {
             "language": "text/cql.identifier",
-            "expression": "MeasureObservation"
+            "expression": "MeasureObservationBoolean"
           }
         },
         {
@@ -142,7 +142,7 @@
           },
           "criteria": {
             "language": "text/cql.identifier",
-            "expression": "MeasureObservation"
+            "expression": "MeasureObservationBoolean"
           }
         }
       ]

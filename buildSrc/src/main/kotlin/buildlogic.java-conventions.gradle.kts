@@ -74,6 +74,15 @@ mavenPublishing {
     configure(JavaLibrary(JavadocJar.Javadoc(), true))
 }
 
+tasks.test {
+    useJUnitPlatform()
+    maxHeapSize = "8G"
+    configure<JacocoTaskExtension> {
+        includes = listOf("org/opencds/cqf/**")
+    }
+    finalizedBy(tasks.jacocoTestReport) // report is always generated after tests run
+}
+
 tasks.jacocoTestReport {
     dependsOn(tasks.test)
     reports {
@@ -85,11 +94,6 @@ jacoco {
     toolVersion = "0.8.13"
 }
 
-tasks.test {
-    useJUnitPlatform()
-    maxHeapSize = "8G"
-    finalizedBy(tasks.jacocoTestReport) // report is always generated after tests run
-}
 
 spotless {
     java {

@@ -1,13 +1,7 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
-import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.repository.IRepository;
-import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
-import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 /**
  * the purpose of this test is to validate the output and required fields for evaluating a Measure with population basis that is neither resourceType or boolean
@@ -21,11 +15,7 @@ class ApplyScoringSetMembershipTest {
     // resource based
     // boolean based
     // group scoring def
-    private static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/measure/r4";
-    private static final IRepository repository = new IgRepository(
-            FhirContext.forR4Cached(),
-            Path.of(getResourcePath(ApplyScoringSetMembershipTest.class) + "/" + CLASS_PATH + "/" + "MeasureTest"));
-    private final Given given = Measure.given(false).repository(repository);
+    private static final Given given = Measure.given().repositoryFor("MeasureTest");
 
     /**
      * scoring set membership set to false,

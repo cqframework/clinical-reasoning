@@ -2,15 +2,10 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.repository.IRepository;
-import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.When;
-import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 /**
  * This test is to verify and confirm that unsupported reportType value is appropriately handled
@@ -18,11 +13,7 @@ import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
  */
 @SuppressWarnings("squid:S2699")
 class MeasureReportTypeInvalidTest {
-    private static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/measure/r4";
-    private static final IRepository repository = new IgRepository(
-            FhirContext.forR4Cached(),
-            Path.of(getResourcePath(MeasureReportTypeInvalidTest.class) + "/" + CLASS_PATH + "/" + "MeasureTest"));
-    private final Given given = Measure.given().repository(repository);
+    private static final Given given = Measure.given().repositoryFor("MeasureTest");
 
     @Test
     void invalidReportTypeValue() {

@@ -1,16 +1,11 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import java.nio.file.Path;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportStatus;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
-import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 @SuppressWarnings({"squid:S2699", "squid:S1135"})
 class MeasureImprovementNotationTest {
@@ -21,11 +16,7 @@ class MeasureImprovementNotationTest {
     // decrease
     // invalid value
     // multi-group
-    private static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/measure/r4";
-    private static final IRepository repository = new IgRepository(
-            FhirContext.forR4Cached(),
-            Path.of(getResourcePath(MeasureImprovementNotationTest.class) + "/" + CLASS_PATH + "/" + "MeasureTest"));
-    private final Given given = Measure.given().repository(repository);
+    private static final Given given = Measure.given().repositoryFor("MeasureTest");
 
     @Test
     void proportionBooleanImprovementNotationNone() {

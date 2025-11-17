@@ -237,40 +237,62 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
     }
 
     protected Double scoreRatioContVariable(String measureUrl, GroupDef groupDef, List<PopulationDef> populationDefs) {
-        String NumeratorPopId =
-                groupDef.get(MeasurePopulationType.NUMERATOR).get(0).id();
-        String DenominatorPopId =
-                groupDef.get(MeasurePopulationType.DENOMINATOR).get(0).id();
-        PopulationDef numPopDef = populationDefs.stream()
-                .filter(x -> {
-                    assert x.getCriteriaReference() != null;
-                    return x.getCriteriaReference().equals(NumeratorPopId);
-                })
-                .findFirst()
-                .orElse(null);
-        PopulationDef denPopDef = populationDefs.stream()
-                .filter(x -> {
-                    assert x.getCriteriaReference() != null;
-                    return x.getCriteriaReference().equals(DenominatorPopId);
-                })
-                .findFirst()
-                .orElse(null);
-        final Quantity aggregateNumQuantity = calculateContinuousVariableAggregateQuantity(
+
+        // Defensive checks
+        if (groupDef == null || populationDefs == null || populationDefs.isEmpty()) {
+            return null;
+        }
+
+        PopulationDef numPopDef = findPopulationDef(groupDef, populationDefs, MeasurePopulationType.NUMERATOR);
+        PopulationDef denPopDef = findPopulationDef(groupDef, populationDefs, MeasurePopulationType.DENOMINATOR);
+
+        if (numPopDef == null || denPopDef == null) {
+            return null;
+        }
+
+        Quantity aggregateNumQuantity = calculateContinuousVariableAggregateQuantity(
                 measureUrl, groupDef, numPopDef, PopulationDef::getAllSubjectResources);
-        final Quantity aggregateDenQuantity = calculateContinuousVariableAggregateQuantity(
+        Quantity aggregateDenQuantity = calculateContinuousVariableAggregateQuantity(
                 measureUrl, groupDef, denPopDef, PopulationDef::getAllSubjectResources);
 
-        if (aggregateDenQuantity == null
-                || aggregateDenQuantity.getValue().doubleValue() == 0.0
-                || aggregateNumQuantity == null) {
+        if (aggregateNumQuantity == null || aggregateDenQuantity == null) {
             return null;
-        } else if (aggregateNumQuantity.getValue().doubleValue() == 0.0
-                && (aggregateDenQuantity.getValue().doubleValue() > 0.0)) {
-            return 0.0;
-        } else {
-            return aggregateNumQuantity.getValue().doubleValue()
-                    / aggregateDenQuantity.getValue().doubleValue();
         }
+
+        Double num = toDouble(aggregateNumQuantity.getValue());
+        Double den = toDouble(aggregateDenQuantity.getValue());
+
+        if (den == null || den == 0.0) {
+            return null;
+        }
+
+        if (num == null || num == 0.0) {
+            // Explicitly handle numerator zero with positive denominator
+            return den > 0.0 ? 0.0 : null;
+        }
+
+        return num / den;
+    }
+
+    private PopulationDef findPopulationDef(
+            GroupDef groupDef, List<PopulationDef> populationDefs, MeasurePopulationType type) {
+        // get(0) is what your original code did; if that ever changes to multiple entries,
+        // you’ll want to revisit this.
+        var groupPops = groupDef.get(type);
+        if (groupPops == null || groupPops.isEmpty() || groupPops.get(0).id() == null) {
+            return null;
+        }
+
+        String criteriaId = groupPops.get(0).id();
+
+        return populationDefs.stream()
+                .filter(p -> criteriaId.equals(p.getCriteriaReference()))
+                .findFirst()
+                .orElse(null);
+    }
+
+    private Double toDouble(Number value) {
+        return value == null ? null : value.doubleValue();
     }
 
     @Nullable

@@ -40,6 +40,8 @@ jobs:
         run: ./gradlew compileJava compileTestJava -x spotlessCheck
       - name: Tests and additional checks
         run: ./gradlew build sonar -x spotlessCheck
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       - name: Publish test report
         uses: mikepenz/action-junit-report@v4
         if: (success() || failure()) && matrix.os == 'ubuntu-latest'

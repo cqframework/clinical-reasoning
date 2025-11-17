@@ -10,7 +10,7 @@ class ResourceDirectoryResolver {
 
     public static Path getResourceDirectory() {
         // Check for the Maven `target/test-classes` directory first
-        File mavenResourceDir = new File("target/test-classes");
+        File mavenResourceDir = new File("build/resources/test");
         if (mavenResourceDir.exists()) {
             return mavenResourceDir.toPath();
         }

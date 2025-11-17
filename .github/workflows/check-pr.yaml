@@ -30,7 +30,7 @@ jobs:
             java-version: '21'
             cache: 'gradle'
       - name: Compile
-        run: ./gradlew javaCompile javaTestCompile
+        run: ./gradlew compileJava compileJavaTest
       - name: Tests and additional checks
         run: ./gradlew check
       - name: Publish test report

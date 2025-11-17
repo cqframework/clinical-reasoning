@@ -186,7 +186,7 @@ public class ContinuousVariableObservationHandler {
                 final List<OperandDef> operands = functionDef.getOperand();
 
                 if (operands.isEmpty()) {
-                    throw new InternalErrorException("Measure observation %s does not reference a boolean basis");
+                    throw new InternalErrorException("Measure observation criteria expression: %s is missing a function parameter matching the population-basis".formatted(criteriaExpression));
                 }
 
                 final Variable variableToPush = new Variable(operands.get(0).getName()).withValue(resource);

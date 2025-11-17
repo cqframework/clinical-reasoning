@@ -39,7 +39,7 @@ jobs:
       - name: Compile
         run: ./gradlew compileJava compileTestJava
       - name: Tests and additional checks
-        run: ./gradlew build sonar --info
+        run: ./gradlew build sonar
       - name: Publish test report
         uses: mikepenz/action-junit-report@v4
         if: (success() || failure()) && matrix.os == 'ubuntu-latest'

@@ -74,23 +74,24 @@ mavenPublishing {
     configure(JavaLibrary(JavadocJar.Javadoc(), true))
 }
 
-jacocoTestReport {
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
     reports {
-        xml.enabled true
+        xml.required = true
     }
 }
 
 jacoco {
-    toolVersion = "0.8.11"
+    toolVersion = "0.8.13"
 }
 
 tasks.test {
+    useJUnitPlatform()
     maxHeapSize = "8G"
     configure<JacocoTaskExtension> {
         excludes = listOf("org/hl7/fhir/**", "ca/uhn/fhir/**", "org/cqframework/**")
     }
 
-    useJUnitPlatform()
     finalizedBy(tasks.jacocoTestReport) // report is always generated after tests run
 }
 

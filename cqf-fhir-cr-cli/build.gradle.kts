@@ -20,6 +20,8 @@ mavenPublishing {
    }
 }
 
+val hapiVersion = project.property("hapi.version")!!.toString()
+
 dependencies {
     api(project(":cqf-fhir-utility"))
     api(project(":cqf-fhir-cql"))
@@ -28,7 +30,8 @@ dependencies {
     api("info.picocli:picocli:4.7.4")
     api("org.slf4j:slf4j-simple:2.0.4")
 
-    runtimeOnly("ca.uhn.hapi.fhir:hapi-fhir-caching-caffeine")
+    // Missing from hapi-bom, hence the need for a version here
+    api("ca.uhn.hapi.fhir:hapi-fhir-caching-caffeine:${hapiVersion}")
     testImplementation(project(":cqf-fhir-test"))
 }
 

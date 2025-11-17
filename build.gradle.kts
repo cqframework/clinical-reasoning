@@ -4,8 +4,7 @@ plugins {
 
 sonar {
     properties {
-        property("sonar.projectKey", "clinical-reasoning")
+        property("sonar.projectKey", "cqframework_clinical-reasoning")
         property("sonar.organization", "cqframework")
-        property("sonar.host.url", "https://sonarcloud.io")
     }
 }

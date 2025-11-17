@@ -17,21 +17,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/cache@v4
+      - name: Cache FHIR packages
+        uses: actions/cache@v4
         with:
-            path: ~/.fhir
-            key: ${{ runner.os }}-fhir-${{ hashFiles('**/*.*') }}
-            restore-keys: |
-              ${{ runner.os }}-fhir-
+          path: ~/.fhir
+          key: ${{ runner.os }}-fhir-${{ hashFiles('**/*.*') }}
+          restore-keys: |
+            ${{ runner.os }}-fhir-
+      - name: Cache SonarQube packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
       - uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
-          java-version: '21'
-          cache: 'gradle'
-          server-id: central
-          server-url: https://repo1.maven.org/maven2
-          server-username: MAVEN_USERNAME
-          server-password: MAVEN_PASSWORD
+            distribution: 'temurin'
+            java-version: '21'
+            cache: 'gradle'
       - name: Publish snapshot
         run: ./gradlew publish
         env:
@@ -43,10 +46,6 @@ jobs:
         with:
           report_paths: "**/build/test-results/test/TEST-*.xml"
           job_name: "Build"
-      - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v4
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
       - uses: actions/setup-python@v5
         with:
           python-version: 3.x

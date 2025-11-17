@@ -74,6 +74,12 @@ mavenPublishing {
     configure(JavaLibrary(JavadocJar.Javadoc(), true))
 }
 
+jacocoTestReport {
+    reports {
+        xml.enabled true
+    }
+}
+
 jacoco {
     toolVersion = "0.8.11"
 }

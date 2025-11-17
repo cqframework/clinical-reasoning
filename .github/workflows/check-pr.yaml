@@ -18,12 +18,19 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/cache@v4
+      - name: Cache FHIR packages
+        uses: actions/cache@v4
         with:
           path: ~/.fhir
           key: ${{ runner.os }}-fhir-${{ hashFiles('**/*.*') }}
           restore-keys: |
             ${{ runner.os }}-fhir-
+      - name: Cache SonarQube packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
       - uses: actions/setup-java@v4
         with:
             distribution: 'temurin'
@@ -32,15 +39,10 @@ jobs:
       - name: Compile
         run: ./gradlew compileJava compileTestJava
       - name: Tests and additional checks
-        run: ./gradlew check
+        run: ./gradlew build sonar --info
       - name: Publish test report
         uses: mikepenz/action-junit-report@v4
         if: (success() || failure()) && matrix.os == 'ubuntu-latest'
         with:
           report_paths: "**/build/test-results/test/TEST-*.xml"
           job_name: "Check PR"
-      - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v4
-        if: matrix.os == 'ubuntu-latest'
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

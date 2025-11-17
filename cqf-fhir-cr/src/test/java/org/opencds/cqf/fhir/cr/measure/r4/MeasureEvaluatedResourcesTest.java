@@ -13,7 +13,6 @@ import org.hl7.fhir.r4.model.Period;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
-import org.opencds.cqf.fhir.cr.measure.r4.utils.TestDataGenerator;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 /**
@@ -31,17 +30,8 @@ class MeasureEvaluatedResourcesTest {
             FhirContext.forR4Cached(),
             Path.of(getResourcePath(MeasureEvaluatedResourcesTest.class) + "/" + CLASS_PATH + "/" + "MeasureTest"));
     private final Given given = Measure.given().repository(repository);
-    private static final TestDataGenerator testDataGenerator = new TestDataGenerator(repository);
 
     private static final Measure.Given GIVEN_REPO = Measure.given().repositoryFor("MinimalMeasureEvaluation");
-
-    @BeforeAll
-    static void init() {
-        Period period = new Period();
-        period.setStartElement(new DateTimeType("2024-01-01T01:00:00Z"));
-        period.setEndElement(new DateTimeType("2024-01-01T03:00:00Z"));
-        testDataGenerator.makePatient(null, null, period);
-    }
 
     /**
      * Individual Measure Report

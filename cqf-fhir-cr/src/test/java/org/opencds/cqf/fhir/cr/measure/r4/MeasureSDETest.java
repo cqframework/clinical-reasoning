@@ -15,7 +15,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.When;
-import org.opencds.cqf.fhir.cr.measure.r4.utils.TestDataGenerator;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 @SuppressWarnings("squid:S2699")
@@ -25,15 +24,7 @@ class MeasureSDETest {
             FhirContext.forR4Cached(),
             Path.of(getResourcePath(MeasureSDETest.class) + "/" + CLASS_PATH + "/" + "MeasureTest"));
     private final Given given = Measure.given().repository(repository);
-    private static final TestDataGenerator testDataGenerator = new TestDataGenerator(repository);
 
-    @BeforeAll
-    static void init() {
-        Period period = new Period();
-        period.setStartElement(new DateTimeType("2024-01-01T01:00:00Z"));
-        period.setEndElement(new DateTimeType("2024-01-01T03:00:00Z"));
-        testDataGenerator.makePatient(null, null, period);
-    }
     /**
      * Individual MeasureReport
      * Single Value SDE

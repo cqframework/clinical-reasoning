@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.stubbing.Answer;
 import org.opencds.cqf.fhir.cr.measure.common.HashSetForFhirResourcesAndCqlTypes;
-import org.opencds.cqf.fhir.cr.measure.r4.utils.TestDataGenerator;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 /**
@@ -41,17 +40,10 @@ class MeasureEvaluationApplyScoringTests {
     private static final String IG_NAME_MINIMAL_MEASURE_EVALUATION = "MinimalMeasureEvaluation";
 
     private static final Measure.Given GIVEN_SINGLE = getGivenWithMockedRepositorySingleMeasure();
-    private static final TestDataGenerator testDataGenerator = new TestDataGenerator(GIVEN_SINGLE.getRepository());
 
     private static final MultiMeasure.Given GIVEN_MULTI = getGivenWithMockedRepositoryMinimalMeasure();
 
-    @BeforeAll
-    static void init() {
-        Period period = new Period();
-        period.setStartElement(new DateTimeType("2024-01-01T01:00:00Z"));
-        period.setEndElement(new DateTimeType("2024-01-01T03:00:00Z"));
-        testDataGenerator.makePatient("practitioner-1", "organization-1", period);
-    }
+
 
     @Test
     void proportionResourceWithReportTypeParameterPatientGroup() {

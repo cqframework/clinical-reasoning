@@ -15,6 +15,7 @@ import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.PrimitiveType;
+import org.hl7.fhir.r4.model.UsageContext;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionComponent;
@@ -22,6 +23,7 @@ import org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionContainsComponent;
 import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
+import org.opencds.cqf.fhir.utility.adapter.IUsageContextAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IValueSetConceptSetAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IValueSetExpansionContainsAdapter;
@@ -84,6 +86,34 @@ public class ValueSetAdapter extends KnowledgeArtifactAdapter implements IValueS
                     }
                 });
         return references;
+    }
+
+    @Override
+    public IValueSetAdapter addUseContext(IUsageContextAdapter usageContext) {
+        if (usageContext == null) return this;
+
+        // underlying ValueSet from this adapter
+        ValueSet vs = get();
+        if (vs == null) return this;
+
+        Object underlying = usageContext.get();
+        if (!(underlying instanceof UsageContext)) return this;
+        UsageContext incoming = (UsageContext) underlying;
+
+        List<UsageContext> existingUseContexts = vs.getUseContext();
+        if (existingUseContexts == null || existingUseContexts.isEmpty()) {
+            vs.addUseContext(incoming);
+            return this;
+        }
+
+        boolean alreadyExists =
+                existingUseContexts.stream().anyMatch(existing -> existing != null && existing.equalsDeep(incoming));
+
+        if (!alreadyExists) {
+            vs.addUseContext(incoming);
+        }
+
+        return this;
     }
 
     @Override

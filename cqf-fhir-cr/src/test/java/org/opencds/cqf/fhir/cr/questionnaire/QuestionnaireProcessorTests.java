@@ -20,7 +20,10 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -147,7 +150,7 @@ class QuestionnaireProcessorTests {
     }
 
     @Test
-    void populateWithLaunchContextResolvesParametersR4() {
+    void populateWithLaunchContextResolvesReferenceParametersR4() {
         given().repository(repositoryR4)
                 .when()
                 .questionnaireId(Ids.newId(
@@ -164,6 +167,32 @@ class QuestionnaireProcessorTests {
                                 "context",
                                 newStringPart(fhirContextR4, "name", "patient"),
                                 newPart(fhirContextR4, "Reference", "content", "Patient/OPA-Patient1"))))
+                .thenPopulate(true)
+                .hasItems(14)
+                .hasNoErrors()
+                .itemHasAnswer("family-name")
+                .itemHasAnswer("provider-name");
+    }
+
+    @Test
+    void populateWithLaunchContextResolvesResourceParametersR4() {
+        var patient = repositoryR4.read(Patient.class, new IdType("Patient", "OPA-Patient1"));
+        var practitioner = repositoryR4.read(Practitioner.class, new IdType("Practitioner", "OPA-AttendingPhysician1"));
+        given().repository(repositoryR4)
+                .when()
+                .questionnaireId(Ids.newId(
+                        fhirContextR4, "Questionnaire", "questionnaire-sdc-test-fhirpath-prepop-initialexpression"))
+                .context(Arrays.asList(
+                        (IBaseBackboneElement) newPart(
+                                fhirContextR4,
+                                "context",
+                                newStringPart(fhirContextR4, "name", "user"),
+                                newPart(fhirContextR4, "content", practitioner)),
+                        (IBaseBackboneElement) newPart(
+                                fhirContextR4,
+                                "context",
+                                newStringPart(fhirContextR4, "name", "patient"),
+                                newPart(fhirContextR4, "content", patient))))
                 .thenPopulate(true)
                 .hasItems(14)
                 .hasNoErrors()

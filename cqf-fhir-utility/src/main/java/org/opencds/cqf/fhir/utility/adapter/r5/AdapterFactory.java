@@ -48,6 +48,7 @@ import org.opencds.cqf.fhir.utility.adapter.IRequestActionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IResourceAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IStructureDefinitionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ITupleAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IUsageContextAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
 
 public class AdapterFactory implements IAdapterFactory {
@@ -208,6 +209,11 @@ public class AdapterFactory implements IAdapterFactory {
     @Override
     public IQuestionnaireResponseItemAnswerComponentAdapter createQuestionnaireResponseItemAnswer(IBase answer) {
         return new QuestionnaireResponseItemAnswerComponentAdapter(answer);
+    }
+
+    @Override
+    public IUsageContextAdapter createUsageContext(IBase usageContext) {
+        return new UsageContextAdapter(usageContext);
     }
 
     @Override

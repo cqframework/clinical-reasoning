@@ -87,6 +87,7 @@ class MeasureStratifierTest {
                 .up()
                 .report();
     }
+
     /**
      * Boolean Basis Measure with Stratifier defined by value expression that results in CodeableConcept value of 'true' or 'false' for the Measure population.
      */
@@ -102,9 +103,7 @@ class MeasureStratifierTest {
                 .then()
                 .firstGroup()
                 .firstStratifier()
-                // This is a value stratifier, which does not pull in the measure populations and
-                // does not use the CQL expression for the code text
-                .hasCodeText(null)
+                .hasCodeText("boolean strat not finished")
                 .hasStratumCount(2)
                 .stratum(isUnfinished)
                 .firstPopulation()
@@ -142,7 +141,7 @@ class MeasureStratifierTest {
                 .stratifierById("stratifier-1")
                 // This is a value stratifier, which does not pull in the measure populations and
                 // does not use the CQL expression for the code text
-                .hasCodeText(null)
+                .hasCodeText("boolean strat not finished")
                 .hasStratumCount(2)
                 .stratum(isUnfinished)
                 .firstPopulation()
@@ -264,7 +263,7 @@ class MeasureStratifierTest {
                 .stratifierById("stratifier-2")
                 // This is a value stratifier, which does not pull in the measure populations and
                 // does not use the CQL expression for the code text
-                .hasCodeText(null)
+                .hasCodeText("Age")
                 .stratum("35")
                 .population("denominator")
                 .hasCount(6)
@@ -317,10 +316,8 @@ class MeasureStratifierTest {
                 .hasScore("0.18181818181818182")
                 .hasStratifierCount(1)
                 .firstStratifier()
-                // This is NOT a criteria-based stratifier, both because the stratifier extension
-                // does not specify it as so and because the basis and returned resources don't
-                // match.  Its code text is not set to the expression name.  However, due to the
-                // bizarre way that it's defined, it does pull in the other measure populations.
+                // This stratifier explicitly does not contain a code on either the stratifier
+                // or the component, so the code is null here:
                 .hasCodeText(null)
                 .hasStratumCount(6)
                 .stratum("triaged")
@@ -424,7 +421,7 @@ class MeasureStratifierTest {
                 .firstStratifier()
                 // This is a value stratifier, because the expression it uses is based on age
                 // and not on a resource, and does not set the code text.
-                .hasCodeText(null)
+                .hasCodeText("Gender Stratification")
                 .hasStratumCount(2)
                 .stratum("M")
                 .hasScore("0.2") // make sure stratum are scored
@@ -436,6 +433,25 @@ class MeasureStratifierTest {
                 .up()
                 .report();
     }
+
+    @Test
+    void invalidStratifierTopLevelCriteriaEmptyComponent() {
+
+        try {
+            GIVEN_MEASURE_STRATIFIER_TEST
+                    .when()
+                    .measureId("InvalidStratifierTopLevelCriteriaEmptyComponent")
+                    .evaluate()
+                    .then();
+        } catch (InvalidRequestException exception) {
+            var exceptionMessage = exception.getMessage();
+
+            assertEquals(
+                    "Measure: http://example.com/Measure/InvalidStratifierTopLevelCriteriaEmptyComponent with stratifier: stratifier-ethnicity, has both components and stratifier criteria expressions defined. Only one should be specified",
+                    exceptionMessage);
+        }
+    }
+
     /**
      * Cannot define a Stratifier with both component criteria and expression criteria
      * You can only define one or the other
@@ -451,11 +467,10 @@ class MeasureStratifierTest {
                     .report();
             fail("should throw an exception");
         } catch (InvalidRequestException exception) {
-            assertTrue(
-                    exception
-                            .getMessage()
-                            .contains(
-                                    "Measure stratifier: stratifier-1, has both component and stratifier criteria expression defined. Only one should be specified"));
+            var exceptionMessage = exception.getMessage();
+            assertEquals(
+                    "Measure: http://example.com/Measure/CohortBooleanStratComponentInvalid with stratifier: stratifier-1, has both components and stratifier criteria expressions defined. Only one should be specified",
+                    exceptionMessage);
         }
     }
 
@@ -557,5 +572,99 @@ class MeasureStratifierTest {
                 .up()
                 .population("numerator")
                 .hasCount(1);
+    }
+
+    @Test
+    void invalidStratifierCriteriaAndComponentCriteria() {
+
+        try {
+            GIVEN_CRITERIA_BASED_STRAT_SIMPLE
+                    .when()
+                    .measureId("InvalidStratifierCriteriaAndComponentCriteria")
+                    .evaluate()
+                    .then();
+        } catch (InvalidRequestException exception) {
+            var exceptionMessage = exception.getMessage();
+            assertEquals(
+                    "Measure: http://example.com/Measure/InvalidStratifierCriteriaAndComponentCriteria with stratifier: stratifier-1, has both components and stratifier criteria expressions defined. Only one should be specified",
+                    exceptionMessage);
+        }
+    }
+
+    @Test
+    void cohortBooleanValueStratExpressionNonBoolean() {
+        GIVEN_MEASURE_STRATIFIER_TEST
+                .when()
+                .measureId("CohortBooleanStratValueNonBoolean")
+                .evaluate()
+                .then()
+                .hasContainedOperationOutcome()
+                .hasContainedOperationOutcomeMsg(
+                        "Exception for subjectId: Patient/patient-8, Message: stratifier expression criteria results for expression: [Encounters in Period] must fall within accepted types for population-basis: [boolean] for Measure: [http://example.com/Measure/CohortBooleanStratValueNonBoolean] due to mismatch between total eval result classes: [Encounter] and matching result classes: []");
+    }
+
+    @Test
+    void measureWithCriteriaExtensionRatioResourceCriteriaStratComplexSetsDifferentForInitialDenominatorAndNumerator() {
+
+        GIVEN_CRITERIA_BASED_STRAT_COMPLEX
+                .when()
+                .measureId("CriteriaBasedStratifiersComplexWithExtension")
+                .evaluate()
+                .then()
+                .hasGroupCount(1)
+                .firstGroup()
+                .hasPopulationCount(3)
+                .population("initial-population")
+                .hasCount(11)
+                .up()
+                .population("denominator")
+                .hasCount(8)
+                .up()
+                .population("numerator")
+                // due to apply scoring, we keep only those numerator encounters that are also in the denominator
+                .hasCount(5)
+                .up()
+                .hasMeasureScore(true)
+                .hasScore("0.625")
+                .hasStratifierCount(1)
+                .firstStratifier()
+                .hasCodeText("Encounters in Period")
+                .hasStratumCount(1)
+                .firstStratum()
+                .hasPopulationCount(3)
+                .population("initial-population")
+                .hasCount(3)
+                .up()
+                .population("denominator")
+                .hasCount(2)
+                .up()
+                .population("numerator")
+                .hasCount(1);
+    }
+
+    @Test
+    void measureWithCriteriaExtensionDifferentThanCohortBooleanValueStratHasCodeIndResult() {
+        var mCC = new CodeableConcept().setText("M");
+
+        GIVEN_MEASURE_STRATIFIER_TEST
+                .when()
+                .measureId("CohortBooleanStratCodeWithExtension")
+                .subject("Patient/patient-9")
+                .evaluate()
+                .then()
+                .firstGroup()
+                .firstStratifier()
+                // This is a value stratifier, which does not pull in the measure populations and
+                // does not use the CQL expression for the code text
+                .hasCodeText("stratifier-sex")
+                .hasStratumCount(1)
+                .stratum(mCC)
+                .firstPopulation()
+                .hasCount(1)
+                .up()
+                .up()
+                .up()
+                .up()
+                .report();
     }
 }

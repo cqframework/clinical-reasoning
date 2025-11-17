@@ -16,7 +16,7 @@ public interface IParametersParameterComponentAdapter extends IAdapter<IBase> {
 
     List<IParametersParameterComponentAdapter> getPart();
 
-    List<IBaseDatatype> getPartValues(String name);
+    List<IBase> getPartValues(String name);
 
     void setPart(List<IBaseBackboneElement> parametersParameterComponents);
 

@@ -25,7 +25,12 @@ class MultiMeasureServiceTest {
                 .reportType("population")
                 .evaluate();
 
-        when.then().hasMeasureReportCount(2).report();
+        when.then()
+                // This is a population/summary report so we should have a single bundle containing
+                // all MeasureReports
+                .hasBundleCount(1)
+                .hasMeasureReportCount(2)
+                .report();
     }
 
     @Test
@@ -45,6 +50,9 @@ class MultiMeasureServiceTest {
                 .evaluate();
 
         when.then()
+                // This is a population/summary report so we should have a single bundle containing
+                // all MeasureReports
+                .hasBundleCount(1)
                 .hasMeasureReportCount(7)
                 .measureReport("http://example.com/Measure/MinimalProportionNoBasisSingleGroup")
                 .hasReportType("Summary")
@@ -186,6 +194,9 @@ class MultiMeasureServiceTest {
                 .evaluate();
 
         when.then()
+                // This is a population/summary report so we should have a single bundle containing
+                // all MeasureReports
+                .hasBundleCount(1)
                 .hasMeasureReportCount(7)
                 .measureReport("http://example.com/Measure/MinimalProportionNoBasisSingleGroup")
                 .hasReportType("Summary")
@@ -325,6 +336,9 @@ class MultiMeasureServiceTest {
                 .evaluate();
 
         when.then()
+                // This is a subject/individual report so we should have one bundle per subject
+                // so 10 bundles
+                .hasBundleCount(10)
                 .hasMeasureReportCount(70)
                 .hasMeasureReportCountPerUrl(10, "http://example.com/Measure/MinimalProportionNoBasisSingleGroup")
                 .hasMeasureReportCountPerUrl(10, "http://example.com/Measure/MinimalProportionBooleanBasisSingleGroup")
@@ -364,6 +378,9 @@ class MultiMeasureServiceTest {
                 .evaluate();
 
         when.then()
+                // This is a subject/individual report so we should have one bundle per subject
+                // the group resolves to 8 individual patient subjects, so 8 bundles
+                .hasBundleCount(8)
                 .hasMeasureReportCount(56)
                 .hasMeasureReportCountPerUrl(8, "http://example.com/Measure/MinimalProportionNoBasisSingleGroup")
                 .hasMeasureReportCountPerUrl(8, "http://example.com/Measure/MinimalProportionBooleanBasisSingleGroup")
@@ -395,6 +412,10 @@ class MultiMeasureServiceTest {
                 .evaluate();
 
         when.then()
+                // This is a subject/individual report so we should have one bundle per subject
+                // so the group references a single practitioner which references a single patient,
+                // so 1 bundle
+                .hasBundleCount(1)
                 .hasMeasureReportCount(7)
                 .hasMeasureReportCountPerUrl(1, "http://example.com/Measure/MinimalProportionNoBasisSingleGroup")
                 .hasMeasureReportCountPerUrl(1, "http://example.com/Measure/MinimalProportionBooleanBasisSingleGroup")
@@ -426,6 +447,9 @@ class MultiMeasureServiceTest {
                 .evaluate();
 
         when.then()
+                // This is a subject/individual report so we should have one bundle per subject
+                // this practitioner resolves to only one patients, so 1 bundle
+                .hasBundleCount(1)
                 .hasMeasureReportCount(7)
                 .hasMeasureReportCountPerUrl(1, "http://example.com/Measure/MinimalProportionNoBasisSingleGroup")
                 .hasMeasureReportCountPerUrl(1, "http://example.com/Measure/MinimalProportionBooleanBasisSingleGroup")
@@ -457,6 +481,9 @@ class MultiMeasureServiceTest {
                 .evaluate();
 
         when.then()
+                // This is a subject/individual report so we should have one bundle per subject
+                // but we passed only one subject, so only one bundle
+                .hasBundleCount(1)
                 .hasMeasureReportCount(7)
                 .measureReport("http://example.com/Measure/MinimalProportionNoBasisSingleGroup")
                 .hasReportType("Individual")
@@ -615,6 +642,9 @@ class MultiMeasureServiceTest {
                 .evaluate();
 
         when.then()
+                // This is a subject-list report so we should have one bundle per subject
+                // but we have only one subject, so 1 bundle
+                .hasBundleCount(1)
                 .hasMeasureReportCount(7)
                 .measureReport("http://example.com/Measure/MinimalProportionNoBasisSingleGroup")
                 .hasReportType("Subject List")
@@ -776,6 +806,9 @@ class MultiMeasureServiceTest {
                 .evaluate();
 
         when.then()
+                // This is a population report so we should have one bundle per subject
+                // so 1 bundle?
+                .hasBundleCount(1)
                 .hasMeasureReportCount(1)
                 .measureReport("http://example.com/Measure/MinimalProportionNoBasisSingleGroup")
                 .hasReportType("Summary")
@@ -813,6 +846,9 @@ class MultiMeasureServiceTest {
                 .evaluate();
 
         when.then()
+                // This is a population/summary report so we should have one bundle per subject
+                // so 1 bundle
+                .hasBundleCount(1)
                 .hasMeasureReportCount(1)
                 .measureReport("http://example.com/Measure/MinimalProportionNoBasisSingleGroup")
                 .hasReportType("Summary")
@@ -833,6 +869,9 @@ class MultiMeasureServiceTest {
                 .evaluate();
 
         when.then()
+                // This is a population/summary report so we should have one bundle per subject
+                // so 1 bundle
+                .hasBundleCount(1)
                 .hasMeasureReportCount(1)
                 .measureReport("http://example.com/Measure/MinimalProportionNoBasisSingleGroup")
                 .hasReportType("Summary")
@@ -853,6 +892,9 @@ class MultiMeasureServiceTest {
                 .evaluate();
 
         when.then()
+                // This is a population/summary report so we should have one bundle per subject
+                // so 1 bundle
+                .hasBundleCount(1)
                 .hasMeasureReportCount(1)
                 .measureReport("http://example.com/Measure/MinimalProportionNoBasisSingleGroup")
                 .hasReportType("Summary")
@@ -879,6 +921,9 @@ class MultiMeasureServiceTest {
                 .evaluate();
 
         when.then()
+                // This is a population/summary report so we should have one bundle per subject
+                // so 1 bundle
+                .hasBundleCount(1)
                 .hasMeasureReportCount(1)
                 .measureReport("http://example.com/Measure/MinimalProportionNoBasisSingleGroup")
                 .hasReportType("Summary")
@@ -914,6 +959,9 @@ class MultiMeasureServiceTest {
                 .evaluate();
 
         when.then()
+                // This is a population/summary report so we should have one bundle per subject
+                // so 1 bundle
+                .hasBundleCount(1)
                 .hasMeasureReportCount(1)
                 .measureReport("http://example.com/Measure/MinimalProportionNoBasisSingleGroup")
                 .hasReportType("Summary")
@@ -951,6 +999,9 @@ class MultiMeasureServiceTest {
                 .evaluate();
 
         when.then()
+                // This is a population/summary report so we should have one bundle per subject
+                // so 1 bundle
+                .hasBundleCount(1)
                 .hasMeasureReportCount(1)
                 .measureReport("http://example.com/Measure/MinimalProportionNoBasisSingleGroup")
                 .hasReportType("Summary")

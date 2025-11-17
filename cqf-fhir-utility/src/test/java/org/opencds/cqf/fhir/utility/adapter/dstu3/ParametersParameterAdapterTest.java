@@ -10,11 +10,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.List;
 import org.hl7.fhir.dstu3.model.BooleanType;
+import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.IntegerType;
 import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.PlanDefinition.PlanDefinitionActionComponent;
 import org.hl7.fhir.dstu3.model.Quantity;
+import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.junit.jupiter.api.Test;
 
@@ -53,13 +55,24 @@ class ParametersParameterAdapterTest {
     @Test
     void testGet_SetPart() {
         var parameter = new ParametersParameterComponent();
-        var part = parameter.addPart().setName("name").setValue(new StringType("value"));
+        var stringPart = parameter.addPart().setName("name").setValue(new StringType("patient"));
+        var reference = new Reference("value");
+        var referencePart = parameter.addPart().setName("content").setValue(reference);
+        var patient = new Patient().addName(new HumanName().addGiven("test").setFamily("test"));
+        patient.setId("patient1");
+        var resourcePart = parameter.addPart().setName("content").setResource(patient);
         var adapter = adapterFactory.createParametersParameter(parameter);
         assertTrue(adapter.hasPart());
-        assertEquals(part, adapter.getPart().get(0).get());
-        assertEquals("value", adapter.getPartValues("name").get(0).toString());
+        assertEquals(stringPart, adapter.getPart().get(0).get());
+        assertEquals("patient", adapter.getPartValues("name").get(0).toString());
+        assertEquals(referencePart, adapter.getPart().get(1).get());
+        assertEquals(resourcePart, adapter.getPart().get(2).get());
+        var contentValue = adapter.getPartValues("content");
+        assertEquals(2, contentValue.size());
+        assertTrue(contentValue.contains(patient));
+        assertTrue(contentValue.contains(reference));
         adapter.addPart();
-        assertEquals(2, adapter.getPart().size());
+        assertEquals(4, adapter.getPart().size());
         adapter.setPart(null);
         assertFalse(adapter.hasPart());
         adapter.setPart(

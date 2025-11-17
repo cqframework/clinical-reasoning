@@ -78,7 +78,10 @@ release.properties
 dependency-reduced-pom.xml
 
 ### Git ###
-.worktrees/
+.worktrees
 
+# asdf-vm specific files
+.tool-versions
 
-
+# mise-vm specific files
+mise.toml

@@ -91,17 +91,39 @@
       "stratifier": [
         {
           "id": "stratifier-1",
-          "criteria": {
-            "language": "text/cql.identifier",
-            "expression": "boolean strat not finished"
-          }
+          "code": {
+            "text": "boolean strat not finished"
+          },
+          "component": [
+            {
+              "id": "stratifier-1-comp-1",
+              "code": {
+                "text": "boolean strat not finished"
+              },
+              "criteria": {
+                "language": "text/cql.identifier",
+                "expression": "boolean strat not finished"
+              }
+            }
+          ]
         },
         {
           "id": "stratifier-2",
-          "criteria": {
-            "language": "text/cql.identifier",
-            "expression": "Gender Stratification"
-          }
+          "code": {
+            "text": "Gender Stratification"
+          },
+          "component": [
+            {
+              "id": "stratifier-2-comp-1",
+              "code": {
+                "text": "Gender Stratification"
+              },
+              "criteria": {
+                "language": "text/cql.identifier",
+                "expression": "Gender Stratification"
+              }
+            }
+          ]
         }
       ]
     }

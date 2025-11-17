@@ -75,10 +75,21 @@
       "stratifier": [
         {
           "id": "stratifier-2",
-          "criteria": {
-            "language": "text/cql.identifier",
-            "expression": "Age"
-          }
+          "code": {
+            "text": "Age"
+          },
+          "component" : [
+            {
+              "id": "strat-1-comp-1",
+              "code": {
+                "text": "Age"
+              },
+              "criteria": {
+                "language": "text/cql.identifier",
+                "expression": "Age"
+              }
+            }
+          ]
         }
       ]
     }],

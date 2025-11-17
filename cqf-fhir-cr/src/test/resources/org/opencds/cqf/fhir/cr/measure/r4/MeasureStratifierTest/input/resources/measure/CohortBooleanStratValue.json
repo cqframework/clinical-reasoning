@@ -43,10 +43,18 @@
       "stratifier": [
         {
           "id": "stratifier-1",
-          "criteria": {
-            "language": "text/cql.identifier",
-            "expression": "boolean strat not finished"
-          }
+          "code" : {
+            "text": "boolean strat not finished"
+          },
+          "component": [
+            {
+              "id": "stratifier-1-comp-1",
+              "criteria": {
+                "language": "text/cql.identifier",
+                "expression": "boolean strat not finished"
+              }
+            }
+          ]
         }
       ]
     }],

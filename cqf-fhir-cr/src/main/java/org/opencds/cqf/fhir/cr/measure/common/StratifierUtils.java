@@ -5,12 +5,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
-import org.apache.commons.collections4.CollectionUtils;
-import org.hl7.fhir.instance.model.api.IBaseExtension;
-import org.hl7.fhir.r4.model.CodeType;
-import org.hl7.fhir.r4.model.PrimitiveType;
-import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
-import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 
 /**
  * Various FHIR version-agnostic utilities for working with Stratifiers.
@@ -19,25 +13,6 @@ public class StratifierUtils {
 
     private StratifierUtils() {
         // Static utility class
-    }
-
-    public static MeasureStratifierType getStratifierType(List<? extends IBaseExtension<?, ?>> stratifierExtensions) {
-        if (CollectionUtils.isEmpty(stratifierExtensions)) {
-            return MeasureStratifierType.VALUE;
-        }
-
-        if (stratifierExtensions.stream()
-                .filter(ext -> MeasureConstants.EXT_STRATIFIER_TYPE.equals(ext.getUrl()))
-                .map(IBaseExtension::getValue)
-                .filter(Objects::nonNull)
-                .filter(CodeType.class::isInstance)
-                .map(CodeType.class::cast)
-                .map(PrimitiveType::asStringValue)
-                .anyMatch(MeasureStratifierType.CRITERIA.getTextValue()::equals)) {
-            return MeasureStratifierType.CRITERIA;
-        }
-
-        return MeasureStratifierType.VALUE;
     }
 
     public static List<Class<?>> extractClassesFromSingleOrListResult(Object result) {

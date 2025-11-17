@@ -6,12 +6,9 @@ import java.time.LocalDate;
 import java.time.Month;
 import java.time.ZoneId;
 import java.util.Date;
-import ca.uhn.fhir.context.FhirContext;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportStatus;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.MultiMeasure.Given;
-import org.opencds.cqf.fhir.cr.measure.r4.MultiMeasure.SelectedReport;
 
 @SuppressWarnings({"java:S2699"})
 class MultiMeasureServiceTest {
@@ -29,10 +26,11 @@ class MultiMeasureServiceTest {
                 .evaluate();
 
         when.then()
-            // This is a population/summary report so we should have a single bundle containing
-            // all MeasureReports
-            .hasBundleCount(1)
-            .hasMeasureReportCount(2).report();
+                // This is a population/summary report so we should have a single bundle containing
+                // all MeasureReports
+                .hasBundleCount(1)
+                .hasMeasureReportCount(2)
+                .report();
     }
 
     @Test

@@ -276,15 +276,14 @@ class MultiMeasure {
             return this.value();
         }
 
-
         public MultiMeasure.SelectedReport hasBundleCount(int count) {
             assertEquals(
-                count,
-                report().getParameter().stream()
-                    .map(ParametersParameterComponent::getResource)
-                    .filter(Bundle.class::isInstance)
-                    .toList()
-                    .size());
+                    count,
+                    report().getParameter().stream()
+                            .map(ParametersParameterComponent::getResource)
+                            .filter(Bundle.class::isInstance)
+                            .toList()
+                            .size());
             return this;
         }
 

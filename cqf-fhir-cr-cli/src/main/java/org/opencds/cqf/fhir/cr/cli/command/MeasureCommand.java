@@ -52,28 +52,28 @@ public class MeasureCommand implements Callable<Integer> {
         var fhirContext = FhirContext.forCached(FhirVersionEnum.valueOf(args.cql.fhir.fhirVersion));
         var parser = fhirContext.newJsonParser();
         results.forEach(r -> {
-            var json = parser.encodeResourceToString(r.measureReport);
-            if (args.reportPath != null) {
-                writeJsonToFile(json, r.subjectId, Path.of(args.reportPath));
-            } else {
-                System.out.println(json);
-            }
+            try {
+                var json = parser.encodeResourceToString(r.measureReport);
+                if (args.reportPath != null) {
+                    writeJsonToFile(json, r.subjectId, Path.of(args.reportPath));
+                } else {
+                    System.out.println(json);
+                }
 
-            if (args.cql.outputPath != null) {
-                try {
+                if (args.cql.outputPath != null) {
                     var path = Path.of(args.cql.outputPath, r.subjectId + ".txt");
                     Files.createDirectories(path.getParent());
-                    OutputStream out = Files.newOutputStream(
+                    try (OutputStream out = Files.newOutputStream(
                             path,
                             StandardOpenOption.CREATE,
                             StandardOpenOption.TRUNCATE_EXISTING,
-                            StandardOpenOption.WRITE);
-                    Utilities.writeResult(r.result, out);
-                    out.close();
-                    log.info("Cql for patient {} written to: {}", r.subjectId, path);
-                } catch (IOException e) {
-                    log.error("Failed to write cql for {}", r.subjectId, e);
+                            StandardOpenOption.WRITE)) {
+                        Utilities.writeResult(r.result, out);
+                        log.info("Cql for patient {} written to: {}", r.subjectId, path);
+                    }
                 }
+            } catch (IOException e) {
+                log.error("Failed to process report for patient {}", r.subjectId, e);
             }
         });
 
@@ -140,25 +140,19 @@ public class MeasureCommand implements Callable<Integer> {
         return new R4MeasureProcessor(repository, evaluationOptions, new MeasureProcessorUtils());
     }
 
-    private void writeJsonToFile(String json, String patientId, Path path) {
+    private void writeJsonToFile(String json, String patientId, Path path) throws IOException {
         Path outputPath = path.resolve(patientId + ".json");
+        // Ensure parent directories exist
+        Files.createDirectories(outputPath.getParent());
 
-        try {
-            // Ensure parent directories exist
-            Files.createDirectories(outputPath.getParent());
-
-            // Write JSON to file
-            try (OutputStream out = Files.newOutputStream(
-                    outputPath,
-                    StandardOpenOption.CREATE,
-                    StandardOpenOption.TRUNCATE_EXISTING,
-                    StandardOpenOption.WRITE)) {
-                out.write(json.getBytes());
-                log.info("report for patient {} written to: {}", patientId, outputPath);
-            }
-
-        } catch (IOException e) {
-            log.error("Failed to write JSON for patient {}", patientId, e);
+        // Write JSON to file
+        try (OutputStream out = Files.newOutputStream(
+                outputPath,
+                StandardOpenOption.CREATE,
+                StandardOpenOption.TRUNCATE_EXISTING,
+                StandardOpenOption.WRITE)) {
+            out.write(json.getBytes());
+            log.info("report for patient {} written to: {}", patientId, outputPath);
         }
     }
 }

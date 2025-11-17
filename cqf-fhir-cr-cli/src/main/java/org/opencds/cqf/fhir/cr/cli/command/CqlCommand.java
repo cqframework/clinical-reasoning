@@ -3,7 +3,6 @@ package org.opencds.cqf.fhir.cr.cli.command;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
@@ -32,22 +31,16 @@ public class CqlCommand implements Callable<Integer> {
 
         if (args.outputPath != null) {
             Files.createDirectories(Path.of(args.outputPath));
+            try (var os = Files.newOutputStream(
+                    Path.of(args.outputPath),
+                    StandardOpenOption.TRUNCATE_EXISTING,
+                    StandardOpenOption.WRITE,
+                    StandardOpenOption.CREATE)) {
+                results.forEach(r -> Utilities.writeResult(r.result(), os));
+            }
+        } else {
+            results.forEach(r -> Utilities.writeResult(r.result(), System.out));
         }
-
-        OutputStream os = args.outputPath == null
-                ? System.out
-                : Files.newOutputStream(
-                        Path.of(args.outputPath),
-                        StandardOpenOption.TRUNCATE_EXISTING,
-                        StandardOpenOption.WRITE,
-                        StandardOpenOption.CREATE);
-
-        results.forEach(r -> Utilities.writeResult(r.result(), os));
-
-        if (os != System.out) {
-            os.close();
-        }
-
         return 0;
     }
 

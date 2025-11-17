@@ -155,6 +155,24 @@ class CliTest {
     }
 
     @Test
+    void r4WithOutputPath() {
+        var outputPath = Path.of(testResultsPath, "TestFHIR");
+        String[] args = new String[] {
+            "cql",
+            "-source=" + testResourcePath + "/r4/input/cql",
+            "-name=TestFHIR",
+            "-data=" + testResourcePath + "/r4",
+            "-c=Patient",
+            "-cv=example",
+            "--output-path=" + outputPath.toString()
+        };
+
+        Main.run(args);
+
+        assertTrue(outputPath.toFile().isDirectory());
+    }
+
+    @Test
     void r4WithHelpers() {
         String[] args = new String[] {
             "cql",

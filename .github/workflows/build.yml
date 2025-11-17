@@ -13,7 +13,7 @@ concurrency:
     cancel-in-progress: true
 
 jobs:
-  maven:
+  gradle:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

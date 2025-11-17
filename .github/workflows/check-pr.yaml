@@ -11,7 +11,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  maven:
+  gradle:
     strategy:
         matrix:
           os: [ubuntu-latest, windows-latest]

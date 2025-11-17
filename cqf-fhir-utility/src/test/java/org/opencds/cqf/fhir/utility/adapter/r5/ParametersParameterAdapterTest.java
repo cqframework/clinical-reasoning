@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.List;
 import org.hl7.fhir.r5.model.BooleanType;
+import org.hl7.fhir.r5.model.HumanName;
 import org.hl7.fhir.r5.model.IntegerType;
 import org.hl7.fhir.r5.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r5.model.Patient;
@@ -53,13 +54,18 @@ class ParametersParameterAdapterTest {
     @Test
     void testGet_SetPart() {
         var parameter = new ParametersParameterComponent();
-        var part = parameter.addPart().setName("name").setValue(new StringType("value"));
+        var referencePart = parameter.addPart().setName("name").setValue(new StringType("value"));
+        var patient = new Patient().addName(new HumanName().addGiven("test").setFamily("test"));
+        patient.setId("patient1");
+        var resourcePart = parameter.addPart().setName("content").setResource(patient);
         var adapter = adapterFactory.createParametersParameter(parameter);
         assertTrue(adapter.hasPart());
-        assertEquals(part, adapter.getPart().get(0).get());
+        assertEquals(referencePart, adapter.getPart().get(0).get());
         assertEquals("value", adapter.getPartValues("name").get(0).toString());
+        assertEquals(resourcePart, adapter.getPart().get(1).get());
+        assertEquals(patient, adapter.getPartValues("content").get(0));
         adapter.addPart();
-        assertEquals(2, adapter.getPart().size());
+        assertEquals(3, adapter.getPart().size());
         adapter.setPart(null);
         assertFalse(adapter.hasPart());
         adapter.setPart(

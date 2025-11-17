@@ -206,7 +206,7 @@ class InputParametersTest {
     }
 
     @Test
-    void testUserLaunchContextAsPatientR4() {
+    void testUserLaunchContextAsPatientReferenceR4() {
         var user = new Patient();
         user.setIdElement(Ids.newId(fhirContextR4, "Patient", patientId));
         doReturn(fhirContextR4).when(repository).fhirContext();
@@ -235,6 +235,34 @@ class InputParametersTest {
         assertEquals(user, actual.getParameter().get(1).getResource());
         assertEquals("User", actual.getParameter().get(2).getName());
         assertEquals(user, actual.getParameter().get(2).getResource());
+    }
+
+    @Test
+    void testUserLaunchContextAsPatientR4() {
+        var user = new Patient();
+        user.setIdElement(Ids.newId(fhirContextR4, "Patient", patientId));
+        doReturn(fhirContextR4).when(repository).fhirContext();
+        var resolver = IInputParameterResolver.createResolver(
+                repository,
+                null,
+                null,
+                null,
+                null,
+                null,
+                List.of(adapterFactoryR4.createParametersParameter(newPart(
+                        fhirContextR4,
+                        "context",
+                        newStringPart(fhirContextR4, "name", "user"),
+                        newPart(fhirContextR4, "content", user)))),
+                List.of((IBaseExtension<?, ?>) new Extension(Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT)
+                        .setExtension(Arrays.asList(
+                                new Extension("name", new Coding().setCode("user")),
+                                new Extension("type", new CodeType("Patient"))))));
+        var actual = (Parameters) resolver.getParameters();
+        assertEquals("%user", actual.getParameter().get(0).getName());
+        assertEquals(user, actual.getParameter().get(0).getResource());
+        assertEquals("User", actual.getParameter().get(1).getName());
+        assertEquals(user, actual.getParameter().get(1).getResource());
     }
 
     @Test

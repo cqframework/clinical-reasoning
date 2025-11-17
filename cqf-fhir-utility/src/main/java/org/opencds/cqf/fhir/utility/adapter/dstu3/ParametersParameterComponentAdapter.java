@@ -56,11 +56,12 @@ class ParametersParameterComponentAdapter extends BaseAdapter implements IParame
     }
 
     @Override
-    public List<IBaseDatatype> getPartValues(String name) {
+    public List<IBase> getPartValues(String name) {
         return this.parametersParameterComponent.getPart().stream()
                 .filter(p -> p.getName().equals(name))
-                .map(ParametersParameterComponent::getValue)
-                .collect(Collectors.toList());
+                .map(p -> p.hasResource() ? p.getResource() : p.getValue())
+                .map(IBase.class::cast)
+                .toList();
     }
 
     @Override

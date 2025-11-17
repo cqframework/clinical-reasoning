@@ -90,7 +90,8 @@ class MeasureScoringTypeRatioContVariableTest {
                 .populationId("observation-num")
                 .hasCount(2) // we remove exclusions in these counts so users can see final Observation count used
                 .up()
-                .hasScore("0.2222222222222222")
+                .hasScore(
+                        "0.14285714285714285") // 150/1050  sum(30,120) /sum(30, 180, 120, 120, 120, 120, 120, 120, 120)
                 .up()
                 .report();
     }
@@ -170,7 +171,7 @@ class MeasureScoringTypeRatioContVariableTest {
                 .populationId("observation-num")
                 .hasCount(2) // we remove exclusions in these counts so users can see final Observation count used
                 .up()
-                .hasScore("1.0") // 120/120
+                .hasScore("0.6428571428571428") // 75/116.6666 avg(30,120)=75,avg(180,30,120,120,120,120,120,120,120)
                 .up()
                 .report();
     }
@@ -249,7 +250,7 @@ class MeasureScoringTypeRatioContVariableTest {
                 .populationId("observation-num")
                 .hasCount(2) // we remove exclusions in these counts so users can see final Observation count used
                 .up()
-                .hasScore("1.0") // 180/180
+                .hasScore("0.6666666666666666") // 120/180
                 .up()
                 .report();
     }
@@ -266,6 +267,7 @@ class MeasureScoringTypeRatioContVariableTest {
                 .measureId("RatioContVarResourceMedian")
                 .evaluate()
                 .then()
+                .hasStatus(MeasureReportStatus.COMPLETE)
                 .firstGroup()
                 .population("initial-population")
                 .hasCount(11)
@@ -288,7 +290,7 @@ class MeasureScoringTypeRatioContVariableTest {
                 .populationId("observation-num")
                 .hasCount(2) // we remove exclusions in these counts so users can see final Observation count used
                 .up()
-                .hasScore("1.0") // 120/120
+                .hasScore("0.625") // 75/120 Median(30,120)=75
                 .up()
                 .report();
     }
@@ -367,8 +369,8 @@ class MeasureScoringTypeRatioContVariableTest {
                 .populationId("observation-num")
                 .hasCount(2) // we remove exclusions in these counts so users can see final Observation count used
                 .up()
-                .hasScore("0.0892857143") // avg/sum  avg(30, 120)= 75, sum(30, 180,120,120,120,120,120,120,120)=840,
-                // 75/840
+                .hasScore("0.07142857142857142") // 75/1050 avg/sum  avg(30, 120)= 75, sum(30,
+                // 180,120,120,120,120,120,120,120)=1050,
                 .up()
                 .report();
     }

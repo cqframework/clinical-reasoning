@@ -196,8 +196,8 @@ public class MeasureEvaluator {
         PopulationDef numeratorExclusion = groupDef.getSingle(NUMERATOREXCLUSION);
         PopulationDef dateOfCompliance = groupDef.getSingle(DATEOFCOMPLIANCE);
         // Ratio Continuous Variable ONLY
-        PopulationDef observation_Num = getPopulationDefByCriteriaRef(groupDef, MEASUREOBSERVATION, numerator);
-        PopulationDef observation_Den = getPopulationDefByCriteriaRef(groupDef, MEASUREOBSERVATION, denominator);
+        PopulationDef observationNum = getPopulationDefByCriteriaRef(groupDef, MEASUREOBSERVATION, numerator);
+        PopulationDef observationDen = getPopulationDefByCriteriaRef(groupDef, MEASUREOBSERVATION, denominator);
 
         // Retrieve intersection of populations and results
         // add resources
@@ -279,36 +279,40 @@ public class MeasureEvaluator {
             dateOfCompliance.addResource(subjectId, doc);
         }
         // Ratio Cont Variable Scoring
-        if (observation_Num != null && observation_Den != null) {
+        if (observationNum != null && observationDen != null) {
             // Num alignment
-            var expressionNameNum = observation_Num.getCriteriaReference() + "-" + observation_Num.expression();
+            var expressionNameNum = getCriteriaExpressionName(observationNum);
             // populate Measure observation function results
-            evaluatePopulationMembership(subjectType, subjectId, observation_Num, evaluationResult, expressionNameNum);
+            evaluatePopulationMembership(subjectType, subjectId, observationNum, evaluationResult, expressionNameNum);
             // Align to Numerator
-            retainObservationResourcesInPopulation(subjectId, numerator, observation_Num);
+            retainObservationResourcesInPopulation(subjectId, numerator, observationNum);
             retainObservationSubjectResourcesInPopulation(
-                    numerator.subjectResources, observation_Num.getSubjectResources());
+                    numerator.subjectResources, observationNum.getSubjectResources());
             // remove Numerator Exclusions
             if (numeratorExclusion != null) {
                 removeObservationSubjectResourcesInPopulation(
-                        numeratorExclusion.subjectResources, observation_Num.subjectResources);
-                removeObservationResourcesInPopulation(subjectId, numeratorExclusion, observation_Num);
+                        numeratorExclusion.subjectResources, observationNum.subjectResources);
+                removeObservationResourcesInPopulation(subjectId, numeratorExclusion, observationNum);
             }
             // Den alignment
-            var expressionNameDen = observation_Den.getCriteriaReference() + "-" + observation_Den.expression();
+            var expressionNameDen = getCriteriaExpressionName(observationDen);
             // populate Measure observation function results
-            evaluatePopulationMembership(subjectType, subjectId, observation_Den, evaluationResult, expressionNameDen);
+            evaluatePopulationMembership(subjectType, subjectId, observationDen, evaluationResult, expressionNameDen);
             // align to Denominator Results
-            retainObservationResourcesInPopulation(subjectId, denominator, observation_Den);
+            retainObservationResourcesInPopulation(subjectId, denominator, observationDen);
             retainObservationSubjectResourcesInPopulation(
-                    denominator.subjectResources, observation_Den.getSubjectResources());
+                    denominator.subjectResources, observationDen.getSubjectResources());
             // remove Denominator Exclusions
             if (denominatorExclusion != null) {
                 removeObservationSubjectResourcesInPopulation(
-                        denominatorExclusion.subjectResources, observation_Den.subjectResources);
-                removeObservationResourcesInPopulation(subjectId, denominatorExclusion, observation_Den);
+                        denominatorExclusion.subjectResources, observationDen.subjectResources);
+                removeObservationResourcesInPopulation(subjectId, denominatorExclusion, observationDen);
             }
         }
+    }
+
+    protected String getCriteriaExpressionName(PopulationDef populationDef) {
+        return populationDef.getCriteriaReference() + "-" + populationDef.expression();
     }
 
     protected void evaluateContinuousVariable(
@@ -351,20 +355,18 @@ public class MeasureEvaluator {
             // assumes only one population
             evaluatePopulationMembership(
                     subjectType, subjectId, groupDef.getSingle(MEASUREOBSERVATION), evaluationResult, expressionName);
-            if (applyScoring) {
+            if (applyScoring && measurePopulation != null) {
                 // only measureObservations that intersect with measureObservation should be retained
-                if (measurePopulation != null) {
-                    retainObservationResourcesInPopulation(subjectId, measurePopulation, measurePopulationObservation);
-                    retainObservationSubjectResourcesInPopulation(
-                            measurePopulation.subjectResources, measurePopulationObservation.getSubjectResources());
-                    // measure observations also need to make sure they remove measure-population-exclusions
-                    if (measurePopulationExclusion != null) {
-                        removeObservationResourcesInPopulation(
-                                subjectId, measurePopulationExclusion, measurePopulationObservation);
-                        removeObservationSubjectResourcesInPopulation(
-                                measurePopulationExclusion.subjectResources,
-                                measurePopulationObservation.getSubjectResources());
-                    }
+                retainObservationResourcesInPopulation(subjectId, measurePopulation, measurePopulationObservation);
+                retainObservationSubjectResourcesInPopulation(
+                        measurePopulation.subjectResources, measurePopulationObservation.getSubjectResources());
+                // measure observations also need to make sure they remove measure-population-exclusions
+                if (measurePopulationExclusion != null) {
+                    removeObservationResourcesInPopulation(
+                            subjectId, measurePopulationExclusion, measurePopulationObservation);
+                    removeObservationSubjectResourcesInPopulation(
+                            measurePopulationExclusion.subjectResources,
+                            measurePopulationObservation.getSubjectResources());
                 }
             }
         }

@@ -92,10 +92,6 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         var groupImpNotation = getGroupImpNotation(measure, group);
         var hasGroupImpNotation = groupImpNotation != null;
 
-        final Optional<MeasureGroupPopulationComponent> optMeasureObservationPopulation = group.getPopulation().stream()
-                .filter(this::isMeasureObservation)
-                .findFirst();
-
         // Populations
         checkIds(group);
 

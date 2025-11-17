@@ -182,7 +182,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
 
         var aggMethodExt = measureObservationPopulation.getExtensionByUrl(EXT_CQFM_AGGREGATE_METHOD_URL);
         if (aggMethodExt != null) {
-            // this method is only required if scoringType = continuous-variable
+            // this method is only required if scoringType = continuous-variable or Ratio Continuous variable
             var aggregateMethodString = aggMethodExt.getValue().toString();
 
             var aggregateMethod = ContinuousVariableObservationAggregateMethod.fromString(aggregateMethodString);
@@ -228,16 +228,6 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         }
 
         return null;
-    }
-
-    private boolean isMeasureObservation(MeasureGroupPopulationComponent pop) {
-
-        checkId(pop);
-
-        MeasurePopulationType populationType =
-                MeasurePopulationType.fromCode(pop.getCode().getCodingFirstRep().getCode());
-
-        return populationType != null && populationType.equals(MeasurePopulationType.MEASUREOBSERVATION);
     }
 
     @Nonnull

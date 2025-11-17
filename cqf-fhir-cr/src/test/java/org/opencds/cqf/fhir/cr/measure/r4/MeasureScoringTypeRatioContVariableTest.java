@@ -1,5 +1,7 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportStatus;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
@@ -394,5 +396,125 @@ class MeasureScoringTypeRatioContVariableTest {
                 .hasMeasureScore(false)
                 .up()
                 .report();
+    }
+
+    /**
+     * Test 10:
+     * Den=0 scenario
+     * aggregateMethod Numerator: Sum
+     * aggregateMethod Denominator: Sum
+     */
+    @Test
+    void ratioContinuousVariableNoDenominator() {
+        given.when()
+                .measureId("RatioContVarResourceSum")
+                .subject("Patient/patient-7")
+                .evaluate()
+                .then()
+                .firstGroup()
+                .population("initial-population")
+                .hasCount(1)
+                .up()
+                .population("denominator")
+                .hasCount(1) // final Denominator = 9 (11-2)
+                .up()
+                .population("denominator-exclusion")
+                .hasCount(1)
+                .up()
+                .population("numerator-exclusion")
+                .hasCount(0)
+                .up()
+                .population("numerator")
+                .hasCount(0) // final Numerator = 2
+                .up()
+                .populationId("observation-den")
+                .hasCount(0) // we remove exclusions in these counts so users can see final Observation count used
+                .up()
+                .populationId("observation-num")
+                .hasCount(0) // we remove exclusions in these counts so users can see final Observation count used
+                .up()
+                .hasMeasureScore(false)
+                .up()
+                .report();
+    }
+    /**
+     * Test 11:
+     * Den>0, Num=0 scenario
+     * aggregateMethod Numerator: Sum
+     * aggregateMethod Denominator: Sum
+     */
+    @Test
+    void ratioContinuousVariableNoNumerator() {
+        given.when()
+                .measureId("RatioContVarResourceSum2")
+                .subject("Patient/patient-9")
+                .evaluate()
+                .then()
+                .firstGroup()
+                .population("initial-population")
+                .hasCount(2)
+                .up()
+                .population("denominator")
+                .hasCount(2) // final Denominator = 9 (11-2)
+                .up()
+                .population("denominator-exclusion")
+                .hasCount(0)
+                .up()
+                .population("numerator-exclusion")
+                .hasCount(1)
+                .up()
+                .population("numerator")
+                .hasCount(1) // final Numerator = 2
+                .up()
+                .populationId("observation-den")
+                .hasCount(2) // we remove exclusions in these counts so users can see final Observation count used
+                .up()
+                .populationId("observation-num")
+                .hasCount(0) // we remove exclusions in these counts so users can see final Observation count used
+                .up()
+                .hasMeasureScore(false)
+                .up()
+                .report();
+    }
+    /**
+     * Test 12:
+     * no den defined
+     * aggregateMethod Numerator: Sum
+     * aggregateMethod Denominator: NA
+     */
+    @Test
+    void ratioContinuousVariableNoDenDef() {
+        given.when()
+                .measureId("RatioContVarResourceSumError")
+                .subject("Patient/patient-9")
+                .evaluate()
+                .then()
+                .hasStatus(MeasureReportStatus.ERROR)
+                .hasContainedOperationOutcomeMsg(
+                        "Ratio Continuous Variable requires 2 Measure Observations defined, you have: 1")
+                .firstGroup()
+                .hasMeasureScore(false)
+                .up()
+                .report();
+    }
+
+    /**
+     * Test 12:
+     * bad den defined
+     * aggregateMethod Numerator: Sum
+     * aggregateMethod Denominator: NA
+     */
+    @Test
+    void ratioContinuousVariableBadDenDef() {
+        try {
+            given.when()
+                    .measureId("RatioContVarResourceSumError2")
+                    .subject("Patient/patient-9")
+                    .evaluate()
+                    .then()
+                    .report();
+        } catch (Exception ex) {
+            assertTrue(ex.getMessage().contains("no matching criteria reference was found for extension"));
+        }
     }
 }

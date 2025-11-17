@@ -11,6 +11,7 @@ import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.MEASU
 import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.NUMERATOR;
 import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.NUMERATOREXCLUSION;
 
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
@@ -166,6 +167,15 @@ public class MeasureEvaluator {
         return inclusionDef;
     }
 
+    /**
+     * This method will identify the PopulationDef MeasureObservation linked to the InclusionDef population by PopulationDef.id
+     * If this method returns null, it is because MeasureObservation is not defined, or was incorrectly defined.
+     * One example is MeasureObservation with criteriaDef value, that does not link to the correct PopulationDef (Numerator or Denominator)
+     * @param groupDef the MeasureDef GroupDef object
+     * @param populationType MeasurePopulationType like MeasureObservation
+     * @param inclusionDef The PopulationDef linked to the criteriaReference
+     * @return
+     */
     protected PopulationDef getPopulationDefByCriteriaRef(
             GroupDef groupDef, MeasurePopulationType populationType, PopulationDef inclusionDef) {
         return groupDef.get(populationType).stream()
@@ -175,6 +185,23 @@ public class MeasureEvaluator {
                 })
                 .findFirst()
                 .orElse(null);
+    }
+
+    /**
+     * Check that Ratio Continous Variable Measure has require definitions to proceed
+     * @param groupDef GroupDef object of MEasureDef
+     * @param observationNum The PopulationDef for MeasureObservation Numerator
+     * @param observationDen The PopulationDef for MeasureObservation Denominator
+     */
+    protected void validateRatioContinuousVariable(
+            GroupDef groupDef, PopulationDef observationNum, PopulationDef observationDen) {
+        // must have 2 MeasureObservations defined
+        if (!groupDef.get(MEASUREOBSERVATION).isEmpty()
+                && groupDef.get(MEASUREOBSERVATION).size() != 2) {
+            throw new InvalidRequestException(
+                    "Ratio Continuous Variable requires 2 Measure Observations defined, you have: %s"
+                            .formatted(groupDef.get(MEASUREOBSERVATION).size()));
+        }
     }
 
     protected void evaluateProportion(
@@ -196,9 +223,10 @@ public class MeasureEvaluator {
         PopulationDef numeratorExclusion = groupDef.getSingle(NUMERATOREXCLUSION);
         PopulationDef dateOfCompliance = groupDef.getSingle(DATEOFCOMPLIANCE);
         // Ratio Continuous Variable ONLY
+
         PopulationDef observationNum = getPopulationDefByCriteriaRef(groupDef, MEASUREOBSERVATION, numerator);
         PopulationDef observationDen = getPopulationDefByCriteriaRef(groupDef, MEASUREOBSERVATION, denominator);
-
+        validateRatioContinuousVariable(groupDef, observationNum, observationDen);
         // Retrieve intersection of populations and results
         // add resources
         // add subject

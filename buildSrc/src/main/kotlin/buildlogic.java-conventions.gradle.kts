@@ -88,10 +88,6 @@ jacoco {
 tasks.test {
     useJUnitPlatform()
     maxHeapSize = "8G"
-    configure<JacocoTaskExtension> {
-        excludes = listOf("org/hl7/fhir/**", "ca/uhn/fhir/**", "org/cqframework/**")
-    }
-
     finalizedBy(tasks.jacocoTestReport) // report is always generated after tests run
 }
 

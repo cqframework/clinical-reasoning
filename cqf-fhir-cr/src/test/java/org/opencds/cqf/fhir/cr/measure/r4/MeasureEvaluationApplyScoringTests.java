@@ -373,7 +373,7 @@ class MeasureEvaluationApplyScoringTests {
                 .hasCount(2)
                 .up()
                 .population("measure-observation")
-                .hasCount(10);
+                .hasCount(8); // exclusions removed from count
     }
 
     // This test is for a Measure that references CQL with an invalid "MeasureObservation" function that returns an
@@ -527,7 +527,7 @@ class MeasureEvaluationApplyScoringTests {
                 .hasCount(2)
                 .up()
                 .population("measure-observation")
-                .hasCount(10)
+                .hasCount(8) // exclusions removed
                 .up()
                 .up()
                 .hasMeasureReportStatus(MeasureReportStatus.ERROR)

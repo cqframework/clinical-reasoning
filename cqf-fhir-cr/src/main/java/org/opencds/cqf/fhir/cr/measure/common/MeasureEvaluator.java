@@ -258,7 +258,7 @@ public class MeasureEvaluator {
             // * Multiple resources can be from one subject and represented in multiple populations
             // * This is why we only remove resources and not subjects too for `Resource Basis`.
             if (denominatorExclusion != null && applyScoring) {
-                // remove any denominator-exception subjects/resources found in Numerator
+                // remove any denominator-exclusion subjects/resources found in Numerator
                 numerator.removeAllResources(subjectId, denominatorExclusion);
                 // verify exclusion results are found in denominator
                 denominatorExclusion.retainAllResources(subjectId, denominator);

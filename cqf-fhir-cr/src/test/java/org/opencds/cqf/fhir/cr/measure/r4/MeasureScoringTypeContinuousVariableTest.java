@@ -16,7 +16,7 @@ class MeasureScoringTypeContinuousVariableTest {
     // resource based
     // boolean based
     // group scoring def
-    private static final Given GIVEN = Measure.given().repositoryFor("MeasureScoringTypeContinuousVariable");
+    private static final Given GIVEN = Measure.given().repositoryFor("MeasureTest");
 
     @Test
     void continuousVariableBooleanPopulation() {

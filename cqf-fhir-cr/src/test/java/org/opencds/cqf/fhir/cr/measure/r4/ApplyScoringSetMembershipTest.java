@@ -45,7 +45,7 @@ class ApplyScoringSetMembershipTest {
                 .up()
                 .population("numerator")
                 // Same interval for all 10 generated patients, should be a count of 10
-                .hasCount(10)
+                .hasCount(0) // numerator will not display subjects in denominator exclusion
                 .up()
                 .hasMeasureScore(false)
                 .up()

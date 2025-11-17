@@ -160,7 +160,7 @@ class MultiMeasureServiceTest {
                 .hasCount(2)
                 .up()
                 .population("measure-observation")
-                .hasCount(10)
+                .hasCount(8) // this is due to measurePopulation-Exclusion removed
                 .up()
                 .up()
                 .hasMeasureReportStatus(MeasureReportStatus.ERROR)
@@ -305,7 +305,7 @@ class MultiMeasureServiceTest {
                 .hasCount(2)
                 .up()
                 .population("measure-observation")
-                .hasCount(10);
+                .hasCount(8); // removed exclusions
     }
 
     @Test

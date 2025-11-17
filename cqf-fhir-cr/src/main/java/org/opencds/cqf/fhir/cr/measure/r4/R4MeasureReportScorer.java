@@ -168,11 +168,16 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
     }
 
     protected boolean hasMeasureObservation(GroupDef groupDef) {
-        return groupDef.get(MeasurePopulationType.MEASUREOBSERVATION) != null;
+        return !groupDef.get(MeasurePopulationType.MEASUREOBSERVATION).isEmpty();
     }
 
     protected PopulationDef getFirstMeasureObservation(GroupDef groupDef) {
-        return getMeasureObservations(groupDef).get(0);
+        var measureObservations = getMeasureObservations(groupDef);
+        if (measureObservations != null && !measureObservations.isEmpty()) {
+            return getMeasureObservations(groupDef).get(0);
+        } else {
+            return null;
+        }
     }
 
     protected List<PopulationDef> getMeasureObservations(GroupDef groupDef) {

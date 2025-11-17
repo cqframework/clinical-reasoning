@@ -114,7 +114,4 @@ class ParametersParameterAdapterTest {
         var part2Value = tuple.listChildrenByName("part2").get(0);
         assertEquals(booleanType, part2Value);
     }
-
-    @Test
-    void test2() {}
 }

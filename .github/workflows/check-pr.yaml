@@ -36,10 +36,17 @@ jobs:
             distribution: 'temurin'
             java-version: '21'
             cache: 'gradle'
+      # Skip spotlessCheck since it is checked in a separate workflow
       - name: Compile
         run: ./gradlew compileJava compileTestJava -x spotlessCheck
+      # Linux does full check including SonarQube, Windows only runs tests
       - name: Tests and additional checks
-        run: ./gradlew build sonar -x spotlessCheck
+        run: |
+          if [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
+            ./gradlew check sonar -x spotlessCheck
+          else
+            ./gradlew test -x spotlessCheck
+          fi
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       - name: Publish test report

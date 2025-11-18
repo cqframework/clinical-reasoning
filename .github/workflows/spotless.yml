@@ -26,4 +26,4 @@ jobs:
           message-failure: |
             **This Pull Request has failed the formatting check**
 
-            Please run `gradlew spotlessApply` to fix the formatting issues.
+            Please run `./gradlew spotlessApply` to fix the formatting issues.

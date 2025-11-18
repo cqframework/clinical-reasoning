@@ -40,11 +40,14 @@ jobs:
       - name: Compile
         run: ./gradlew compileJava compileTestJava -x spotlessCheck
       # Linux does full check including SonarQube, Windows only runs tests
-      - name: Tests and additional checks
-        run: ./gradlew $BUILD_COMMAND
+      - name: Tests and additional checks (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: ./gradlew check sonar -x spotlessCheck
         env:
-          BUILD_COMMAND: ${{ matrix.os == 'ubuntu-latest' && 'check sonar -x spotlessCheck' || 'test -x spotlessCheck' }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      - name: Tests and additional checks (Windows)
+        if: matrix.os == 'windows-latest'
+        run: ./gradlew test -x spotlessCheck
       - name: Publish test report
         uses: mikepenz/action-junit-report@v4
         if: (success() || failure()) && matrix.os == 'ubuntu-latest'

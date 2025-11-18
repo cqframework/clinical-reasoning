@@ -45,7 +45,7 @@ jobs:
         run: ./gradlew check sonar -x spotlessCheck
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      - name: Tests and additional checks (Windows)
+      - name: Tests only (Windows)
         if: matrix.os == 'windows-latest'
         run: ./gradlew test -x spotlessCheck
       - name: Publish test report

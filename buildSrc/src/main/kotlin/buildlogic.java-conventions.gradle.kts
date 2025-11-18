@@ -76,6 +76,9 @@ mavenPublishing {
 
 tasks.test {
     useJUnitPlatform()
+    testLogging {
+        exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+    }
     maxHeapSize = "8G"
     configure<JacocoTaskExtension> {
         includes = listOf("org/opencds/cqf/**")

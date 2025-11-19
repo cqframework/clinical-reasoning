@@ -28,6 +28,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
@@ -174,9 +175,10 @@ public class MeasureEvaluator {
      * @param groupDef the MeasureDef GroupDef object
      * @param populationType MeasurePopulationType like MeasureObservation
      * @param inclusionDef The PopulationDef linked to the criteriaReference
-     * @return
+     * @return populationDef
      */
-    protected PopulationDef getPopulationDefByCriteriaRef(
+    @Nullable
+    private PopulationDef getPopulationDefByCriteriaRef(
             GroupDef groupDef, MeasurePopulationType populationType, PopulationDef inclusionDef) {
         return groupDef.get(populationType).stream()
                 .filter(x -> {

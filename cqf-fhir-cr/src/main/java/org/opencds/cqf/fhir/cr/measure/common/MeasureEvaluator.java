@@ -180,7 +180,9 @@ public class MeasureEvaluator {
             GroupDef groupDef, MeasurePopulationType populationType, PopulationDef inclusionDef) {
         return groupDef.get(populationType).stream()
                 .filter(x -> {
-                    assert x.getCriteriaReference() != null;
+                    if(x.getCriteriaReference() == null){
+                        throw new InvalidRequestException("Criteria reference is null on PopulationDef");
+                    }
                     return x.getCriteriaReference().equals(inclusionDef.id());
                 })
                 .findFirst()

@@ -167,6 +167,7 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
         return checkMissingScoringType(measureDef, groupScoringType);
     }
 
+    @Nullable
     protected PopulationDef getFirstMeasureObservation(GroupDef groupDef) {
         var measureObservations = getMeasureObservations(groupDef);
         if (!measureObservations.isEmpty()) {
@@ -233,6 +234,7 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
         }
     }
 
+    @Nullable
     protected Double scoreRatioContVariable(String measureUrl, GroupDef groupDef, List<PopulationDef> populationDefs) {
 
         // Defensive checks
@@ -540,6 +542,7 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
      * @param populationDef the measureObservation population related to the stratumPopulationDef to extract
      * @return
      */
+    @Nullable
     private StratumPopulationDef getStratumPopDefFromPopDef(StratumDef stratumDef, PopulationDef populationDef) {
         return stratumDef.getStratumPopulations().stream()
                 .filter(t -> t.id().equals(populationDef.id()))
@@ -547,6 +550,7 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
                 .orElse(null);
     }
 
+    @Nullable
     protected Double scoreRatioContVariableStratum(
             String measureUrl,
             GroupDef groupDef,

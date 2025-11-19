@@ -56,7 +56,12 @@ public class GroupDef {
     }
 
     public boolean hasPopulationType(MeasurePopulationType populationType) {
-        return this.populationIndex.containsKey(populationType);
+        var populationDefType = this.populations.stream()
+                .map(PopulationDef::type)
+                .filter(x -> x.equals(populationType))
+                .findFirst()
+                .orElse(null);
+        return populationDefType != null && populationDefType.equals(populationType);
     }
 
     public PopulationDef getSingle(MeasurePopulationType type) {

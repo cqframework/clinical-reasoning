@@ -11,6 +11,7 @@ import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.MEASU
 import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.NUMERATOR;
 import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.NUMERATOREXCLUSION;
 
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Sets;
@@ -29,6 +30,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
+import org.apache.commons.collections4.CollectionUtils;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
@@ -492,8 +494,19 @@ public class MeasureEvaluator {
             Map.Entry<String, Set<Object>> entry = it.next();
             String subjectId = entry.getKey();
 
-            // Cast subject's observation set to the expected type
-            Set<Map<Object, Object>> obsSet = (Set<Map<Object, Object>>) (Set<?>) entry.getValue();
+            final Set<?> entryValue = entry.getValue();
+
+            if (CollectionUtils.isEmpty(entryValue)) {
+                continue;
+            }
+
+            final Object firstEntryValue = entryValue.iterator().next();
+
+            if (!(firstEntryValue instanceof Map<?, ?>)) {
+                throw new InternalErrorException("Expected a Map<?,?> but was not: %s".formatted(firstEntryValue));
+            }
+
+            Set<Map<Object, Object>> obsSet = (Set<Map<Object, Object>>) entryValue;
 
             // population values for this subject
             Set<Object> populationValues = measurePopulation.get(subjectId);

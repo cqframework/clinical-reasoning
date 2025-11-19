@@ -1152,6 +1152,17 @@ public class Measure {
             return population;
         }
 
+        public SelectedStratumPopulation populationId(String name) {
+            var population = population(s -> s.getPopulation().stream()
+                    .filter(x -> x.getId().equals(name))
+                    .findFirst()
+                    .orElse(null));
+
+            assertNotNull(population);
+
+            return population;
+        }
+
         public SelectedStratumPopulation population(
                 Selector<MeasureReport.StratifierGroupPopulationComponent, MeasureReport.StratifierGroupComponent>
                         populationSelector) {

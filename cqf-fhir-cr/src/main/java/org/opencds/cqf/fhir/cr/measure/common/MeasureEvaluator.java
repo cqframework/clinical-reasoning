@@ -188,13 +188,10 @@ public class MeasureEvaluator {
     }
 
     /**
-     * Check that Ratio Continous Variable Measure has require definitions to proceed
-     * @param groupDef GroupDef object of MEasureDef
-     * @param observationNum The PopulationDef for MeasureObservation Numerator
-     * @param observationDen The PopulationDef for MeasureObservation Denominator
+     * Check that Ratio Continuous Variable Measure has required definitions to proceed
+     * @param groupDef GroupDef object of MeasureDef
      */
-    protected void validateRatioContinuousVariable(
-            GroupDef groupDef, PopulationDef observationNum, PopulationDef observationDen) {
+    protected void validateRatioContinuousVariable(GroupDef groupDef) {
         // must have 2 MeasureObservations defined
         if (!groupDef.get(MEASUREOBSERVATION).isEmpty()
                 && groupDef.get(MEASUREOBSERVATION).size() != 2) {
@@ -226,7 +223,7 @@ public class MeasureEvaluator {
 
         PopulationDef observationNum = getPopulationDefByCriteriaRef(groupDef, MEASUREOBSERVATION, numerator);
         PopulationDef observationDen = getPopulationDefByCriteriaRef(groupDef, MEASUREOBSERVATION, denominator);
-        validateRatioContinuousVariable(groupDef, observationNum, observationDen);
+        validateRatioContinuousVariable(groupDef);
         // Retrieve intersection of populations and results
         // add resources
         // add subject
@@ -731,11 +728,11 @@ public class MeasureEvaluator {
 
     private static StratumPopulationDef buildStratumPopulationDef(
             PopulationDef populationDef, List<String> subjectIds) {
-
+        // population subjectIds
         var popSubjectIds = populationDef.getSubjects().stream()
                 .map(R4ResourceIdUtils::addPatientQualifier)
                 .collect(Collectors.toUnmodifiableSet());
-
+        // intersect stratum subjectIds and population subjectIds
         var qualifiedSubjectIdsCommonToPopulation = Sets.intersection(new HashSet<>(subjectIds), popSubjectIds);
 
         return new StratumPopulationDef(populationDef.id(), qualifiedSubjectIdsCommonToPopulation);

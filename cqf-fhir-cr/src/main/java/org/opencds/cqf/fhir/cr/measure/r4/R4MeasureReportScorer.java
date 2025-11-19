@@ -471,10 +471,41 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
 
         switch (measureScoring) {
             case PROPORTION, RATIO -> {
-                var score = calcProportionScore(
-                        getCountFromStratifierPopulation(stratum.getPopulation(), NUMERATOR),
-                        getCountFromStratifierPopulation(stratum.getPopulation(), DENOMINATOR));
+                Double score;
+                // Ratio Continuous Variable Scoring
+                if (measureScoring.equals(MeasureScoring.RATIO) && hasMeasureObservation(groupDef)) {
+                    // new
+                    final StratumPopulationDef stratumPopulationDefNum;
+                    final StratumPopulationDef stratumPopulationDefDen;
+                    PopulationDef numPopDef = null;
+                    PopulationDef denPopDef = null;
+                    if (stratumDef != null) {
+                        var populationDefs = getMeasureObservations(groupDef);
+                        // get Measure Observation for Numerator and Denominator
+                        numPopDef = findPopulationDef(groupDef, populationDefs, MeasurePopulationType.NUMERATOR);
+                        denPopDef = findPopulationDef(groupDef, populationDefs, MeasurePopulationType.DENOMINATOR);
+                        // assign Num & Den stratum Populations
+                        stratumPopulationDefDen = getStratumPopDefFromPopDef(stratumDef, denPopDef);
+                        stratumPopulationDefNum = getStratumPopDefFromPopDef(stratumDef, numPopDef);
 
+                    } else {
+                        stratumPopulationDefNum = null;
+                        stratumPopulationDefDen = null;
+                    }
+
+                    score = scoreRatioContVariableStratum(
+                            measureUrl,
+                            groupDef,
+                            stratumPopulationDefNum,
+                            stratumPopulationDefDen,
+                            numPopDef,
+                            denPopDef);
+                } else {
+                    // Standard Proportion & Ratio Scoring
+                    score = calcProportionScore(
+                            getCountFromStratifierPopulation(stratum.getPopulation(), NUMERATOR),
+                            getCountFromStratifierPopulation(stratum.getPopulation(), DENOMINATOR));
+                }
                 if (score != null) {
                     return new Quantity(score);
                 }
@@ -502,6 +533,59 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
                 return null;
             }
         }
+    }
+
+    /**
+     * Extract StratumPopulationDef from populationDef
+     * @param stratumDef the Stratum definition object that contains the population to target
+     * @param populationDef the measureObservation population related to the stratumPopulationDef to extract
+     * @return
+     */
+    private StratumPopulationDef getStratumPopDefFromPopDef(StratumDef stratumDef, PopulationDef populationDef) {
+        return stratumDef.getStratumPopulations().stream()
+                .filter(t -> t.id().equals(populationDef.id()))
+                .findFirst()
+                .orElse(null);
+    }
+
+    protected Double scoreRatioContVariableStratum(
+            String measureUrl,
+            GroupDef groupDef,
+            StratumPopulationDef measureObsNumStratum,
+            StratumPopulationDef measureObsDenStratum,
+            PopulationDef numPopDef,
+            PopulationDef denPopDef) {
+
+        Quantity aggregateNumQuantity = calculateContinuousVariableAggregateQuantity(
+                measureUrl,
+                groupDef,
+                numPopDef,
+                populationDef -> getResultsForStratum(populationDef, measureObsNumStratum));
+        calculateContinuousVariableAggregateQuantity(
+                measureUrl, groupDef, numPopDef, PopulationDef::getAllSubjectResources);
+        Quantity aggregateDenQuantity = calculateContinuousVariableAggregateQuantity(
+                measureUrl,
+                groupDef,
+                denPopDef,
+                populationDef -> getResultsForStratum(populationDef, measureObsDenStratum));
+
+        if (aggregateNumQuantity == null || aggregateDenQuantity == null) {
+            return null;
+        }
+
+        Double num = toDouble(aggregateNumQuantity.getValue());
+        Double den = toDouble(aggregateDenQuantity.getValue());
+
+        if (den == null || den == 0.0) {
+            return null;
+        }
+
+        if (num == null || num == 0.0) {
+            // Explicitly handle numerator zero with positive denominator
+            return den > 0.0 ? 0.0 : null;
+        }
+
+        return num / den;
     }
 
     /**

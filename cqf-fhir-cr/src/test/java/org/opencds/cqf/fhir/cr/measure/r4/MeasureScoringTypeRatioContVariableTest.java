@@ -517,4 +517,96 @@ class MeasureScoringTypeRatioContVariableTest {
             assertTrue(ex.getMessage().contains("no matching criteria reference was found for extension"));
         }
     }
+
+    /**
+     * Test 13:
+     * test RCV Stratifier Scoring
+     * aggregateMethod Numerator: Sum
+     * aggregateMethod Denominator: Sum
+     */
+    @Test
+    void ratioContinuousVariableStratifier() {
+        given.when()
+                .measureId("RatioContVarResourceSumValueStrat")
+                .evaluate()
+                .then()
+                .firstGroup()
+                .population("initial-population")
+                .hasCount(11)
+                .up()
+                .population("denominator")
+                .hasCount(11) // final Denominator = 9 (11-2)
+                .up()
+                .population("denominator-exclusion")
+                .hasCount(2)
+                .up()
+                .population("numerator-exclusion")
+                .hasCount(2)
+                .up()
+                .population("numerator")
+                .hasCount(9) // final Numerator = 9
+                .up()
+                .populationId("observation-den")
+                .hasCount(9) // we remove exclusions in these counts so users can see final Observation count used
+                .up()
+                .populationId("observation-num")
+                .hasCount(7) // we remove exclusions in these counts so users can see final Observation count used
+                .up()
+                .hasScore(
+                        "0.7714285714285715") // 810/1050  sum(30,180,120,120,120,120,120) /sum(30, 180, 120, 120, 120,
+                // 120, 120, 120, 120)
+                .firstStratifier()
+                .hasStratumCount(2)
+                .stratum("M")
+                .hasScore("0.7894736842105263") // 450/570 Sum(180,30,120,120)/sum(180,30,120,120,120)
+                .population("initial-population")
+                .hasCount(6)
+                .up()
+                .population("denominator")
+                .hasCount(6) // final Denominator = 9 (11-2)
+                .up()
+                .population("denominator-exclusion")
+                .hasCount(1)
+                .up()
+                .population("numerator-exclusion")
+                .hasCount(1)
+                .up()
+                .population("numerator")
+                .hasCount(5) // final Numerator = 2
+                .up()
+                .populationId("observation-den")
+                .hasCount(5) // we remove exclusions in these counts so users can see final Observation count used
+                .up()
+                .populationId("observation-num")
+                .hasCount(4)
+                .up()
+                .up()
+                .stratum("F")
+                .hasScore("0.75") // sum(120,120,120)/sum(120,120,120,120)
+                .population("initial-population")
+                .hasCount(5)
+                .up()
+                .population("denominator")
+                .hasCount(5) // final Denominator = 4 (5-1)
+                .up()
+                .population("denominator-exclusion")
+                .hasCount(1)
+                .up()
+                .population("numerator-exclusion")
+                .hasCount(1)
+                .up()
+                .population("numerator")
+                .hasCount(4) // final Numerator = 3
+                .up()
+                .populationId("observation-den")
+                .hasCount(4) // we remove exclusions in these counts so users can see final Observation count used
+                .up()
+                .populationId("observation-num")
+                .hasCount(3)
+                .up()
+                .up()
+                .up()
+                .up()
+                .report();
+    }
 }

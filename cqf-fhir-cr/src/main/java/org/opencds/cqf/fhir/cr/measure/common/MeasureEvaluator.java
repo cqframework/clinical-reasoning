@@ -15,6 +15,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
+import jakarta.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -28,7 +29,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
-import jakarta.annotation.Nullable;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
@@ -182,7 +182,7 @@ public class MeasureEvaluator {
             GroupDef groupDef, MeasurePopulationType populationType, PopulationDef inclusionDef) {
         return groupDef.get(populationType).stream()
                 .filter(x -> {
-                    if(x.getCriteriaReference() == null){
+                    if (x.getCriteriaReference() == null) {
                         throw new InvalidRequestException("Criteria reference is null on PopulationDef");
                     }
                     return x.getCriteriaReference().equals(inclusionDef.id());
@@ -549,20 +549,41 @@ public class MeasureEvaluator {
         }
 
         // Work on a copy to avoid concurrent modification issues while removing
-        Set<Object> observationResources =
-                new java.util.HashSet<>(measureObservationDef.getResourcesForSubject(subjectId));
+        HashSetForFhirResourcesAndCqlTypes<Object> observationResources =
+                new HashSetForFhirResourcesAndCqlTypes<>(measureObservationDef.getResourcesForSubject(subjectId));
 
         for (Object populationResource : observationResources) {
-            if (populationResource instanceof Map<?, ?> measureObservationResourceAsMap) {
-                for (Map.Entry<?, ?> measureObservationResourceMapEntry : measureObservationResourceAsMap.entrySet()) {
-                    final Object measureObservationSubjectResourceMapKey = measureObservationResourceMapEntry.getKey();
 
-                    // If this key is present in the population resources, remove the observation
-                    if (measurePopulationResourcesForSubject.contains(measureObservationSubjectResourceMapKey)) {
-                        measureObservationDef.getResourcesForSubject(subjectId).remove(populationResource);
-                        break; // break inner loop; resource already removed
-                    }
-                }
+            if (!(populationResource instanceof Map<?, ?> measureObservationResourceAsMap)) {
+                continue;
+            }
+
+            // process this single populationResource
+            processSingleResource(
+                    populationResource,
+                    measureObservationResourceAsMap,
+                    measurePopulationResourcesForSubject,
+                    measureObservationDef,
+                    subjectId);
+        }
+    }
+
+    private void processSingleResource(
+            Object populationResource,
+            Map<?, ?> measureObservationResourceAsMap,
+            Set<Object> measurePopulationResourcesForSubject,
+            PopulationDef measureObservationDef,
+            String subjectId) {
+
+        for (Map.Entry<?, ?> entry : measureObservationResourceAsMap.entrySet()) {
+            Object key = entry.getKey();
+
+            // If the key is present in the population resources → remove this item
+            if (measurePopulationResourcesForSubject.contains(key)) {
+                measureObservationDef.getResourcesForSubject(subjectId).remove(populationResource);
+
+                // short-circuits this resource entirely
+                return;
             }
         }
     }

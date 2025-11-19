@@ -55,6 +55,10 @@ public class GroupDef {
         return this.populations;
     }
 
+    public boolean hasPopulationType(MeasurePopulationType populationType) {
+        return this.populationIndex.containsKey(populationType);
+    }
+
     public PopulationDef getSingle(MeasurePopulationType type) {
         if (!populationIndex.containsKey(type)) {
             return null;

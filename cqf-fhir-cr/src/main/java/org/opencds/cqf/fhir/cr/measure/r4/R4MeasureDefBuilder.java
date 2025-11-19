@@ -210,7 +210,9 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
             return null;
         }
 
-        assert population != null;
+        if (population == null) {
+            throw new InvalidRequestException("group.population is null");
+        }
         var populationCriteriaExt = population.getExtensionByUrl(EXT_CQFM_CRITERIA_REFERENCE);
         if (populationCriteriaExt != null) {
             // required for measure-observation populations

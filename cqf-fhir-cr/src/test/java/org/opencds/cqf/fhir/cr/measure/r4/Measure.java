@@ -880,10 +880,14 @@ public class Measure {
         }
 
         public SelectedPopulation populationId(String populationId) {
-            return this.population(g -> g.getPopulation().stream()
+            SelectedPopulation population = this.population(g -> g.getPopulation().stream()
                     .filter(x -> x.getId().equals(populationId))
                     .findFirst()
-                    .get());
+                    .orElse(null));
+
+            assertNotNull(population, "Population not found: " + populationId);
+
+            return population;
         }
 
         public SelectedPopulation population(

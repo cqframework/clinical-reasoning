@@ -167,13 +167,9 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
         return checkMissingScoringType(measureDef, groupScoringType);
     }
 
-    protected boolean hasMeasureObservation(GroupDef groupDef) {
-        return !groupDef.get(MeasurePopulationType.MEASUREOBSERVATION).isEmpty();
-    }
-
     protected PopulationDef getFirstMeasureObservation(GroupDef groupDef) {
         var measureObservations = getMeasureObservations(groupDef);
-        if (measureObservations != null && !measureObservations.isEmpty()) {
+        if (!measureObservations.isEmpty()) {
             return getMeasureObservations(groupDef).get(0);
         } else {
             return null;
@@ -209,7 +205,8 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
             case PROPORTION, RATIO:
                 Double score;
                 // Ratio Continuous Variable Scoring
-                if (measureScoring.equals(MeasureScoring.RATIO) && hasMeasureObservation(groupDef)) {
+                if (measureScoring.equals(MeasureScoring.RATIO)
+                        && groupDef.hasPopulationType(MeasurePopulationType.MEASUREOBSERVATION)) {
                     score = scoreRatioContVariable(measureUrl, groupDef, getMeasureObservations(groupDef));
                 } else {
                     // Standard Proportion & Ratio Scoring
@@ -274,6 +271,7 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
         return num / den;
     }
 
+    @Nullable
     private PopulationDef findPopulationDef(
             GroupDef groupDef, List<PopulationDef> populationDefs, MeasurePopulationType type) {
         // get(0) is what your original code did; if that ever changes to multiple entries,
@@ -291,11 +289,11 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
                 .orElse(null);
     }
 
+    @Nullable
     private Double toDouble(Number value) {
         return value == null ? null : value.doubleValue();
     }
 
-    @Nullable
     protected void scoreContinuousVariable(
             String measureUrl, MeasureReportGroupComponent mrgc, GroupDef groupDef, PopulationDef populationDef) {
         final Quantity aggregateQuantity = calculateContinuousVariableAggregateQuantity(
@@ -473,7 +471,8 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
             case PROPORTION, RATIO -> {
                 Double score;
                 // Ratio Continuous Variable Scoring
-                if (measureScoring.equals(MeasureScoring.RATIO) && hasMeasureObservation(groupDef)) {
+                if (measureScoring.equals(MeasureScoring.RATIO)
+                        && groupDef.hasPopulationType(MeasurePopulationType.MEASUREOBSERVATION)) {
                     // new
                     final StratumPopulationDef stratumPopulationDefNum;
                     final StratumPopulationDef stratumPopulationDefDen;

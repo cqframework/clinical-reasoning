@@ -525,7 +525,7 @@ class MeasureScoringTypeRatioContVariableTest {
      * aggregateMethod Denominator: Sum
      */
     @Test
-    void ratioContinuousVariableStratifier() {
+    void ratioContinuousVariableStratifierResource() {
         given.when()
                 .measureId("RatioContVarResourceSumValueStrat")
                 .evaluate()
@@ -603,6 +603,96 @@ class MeasureScoringTypeRatioContVariableTest {
                 .up()
                 .populationId("observation-num")
                 .hasCount(3)
+                .up()
+                .up()
+                .up()
+                .up()
+                .report();
+    }
+
+    /**
+     * Test 13:
+     * test RCV Stratifier Scoring with Boolean basis
+     * aggregateMethod Numerator: Sum
+     * aggregateMethod Denominator: Sum
+     */
+    @Test
+    void ratioContinuousVariableStratifierBoolean() {
+        given.when()
+                .measureId("RatioContVarBooleanSumValueStrat")
+                .evaluate()
+                .then()
+                .firstGroup()
+                .population("initial-population")
+                .hasCount(10)
+                .up()
+                .population("denominator")
+                .hasCount(10) // final Denominator = 9 (11-2)
+                .up()
+                .population("denominator-exclusion")
+                .hasCount(2)
+                .up()
+                .population("numerator-exclusion")
+                .hasCount(0)
+                .up()
+                .population("numerator")
+                .hasCount(2) // final Numerator = 9
+                .up()
+                .populationId("observation-den")
+                .hasCount(8) // we remove exclusions in these counts so users can see final Observation count used
+                .up()
+                .populationId("observation-num")
+                .hasCount(2) // we remove exclusions in these counts so users can see final Observation count used
+                .up()
+                .hasScore("0.25") // 75 / 300  sum(36,39) /sum(39,36,39,36,39,36,39,36)
+                .firstStratifier()
+                .hasStratumCount(2)
+                .stratum("M")
+                .hasScore("0.25") //  Sum(36)/sum(36,36,36,36)
+                .population("initial-population")
+                .hasCount(5)
+                .up()
+                .population("denominator")
+                .hasCount(5) // final Denominator = 9 (11-2)
+                .up()
+                .population("denominator-exclusion")
+                .hasCount(1)
+                .up()
+                .population("numerator-exclusion")
+                .hasCount(0)
+                .up()
+                .population("numerator")
+                .hasCount(1) // final Numerator = 2
+                .up()
+                .populationId("observation-den")
+                .hasCount(4) // we remove exclusions in these counts so users can see final Observation count used
+                .up()
+                .populationId("observation-num")
+                .hasCount(1)
+                .up()
+                .up()
+                .stratum("F")
+                .hasScore("0.25") // sum(39)/sum(39,39,39,39)
+                .population("initial-population")
+                .hasCount(5)
+                .up()
+                .population("denominator")
+                .hasCount(5) // final Denominator = 4 (5-1)
+                .up()
+                .population("denominator-exclusion")
+                .hasCount(1)
+                .up()
+                .population("numerator-exclusion")
+                .hasCount(0)
+                .up()
+                .population("numerator")
+                .hasCount(1) // final Numerator = 3
+                .up()
+                .populationId("observation-den")
+                .hasCount(4) // we remove exclusions in these counts so users can see final Observation count used
+                .up()
+                .populationId("observation-num")
+                .hasCount(1)
                 .up()
                 .up()
                 .up()

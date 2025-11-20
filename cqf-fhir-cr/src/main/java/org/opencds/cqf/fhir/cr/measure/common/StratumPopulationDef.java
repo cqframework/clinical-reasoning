@@ -1,30 +1,41 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
-import java.util.Objects;
+import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
-import org.opencds.cqf.fhir.cr.measure.r4.utils.R4ResourceIdUtils;
+import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 
 /**
  * Equivalent to the FHIR stratum population.
  * <p/>
  * This is meant to be the source of truth for all data points regarding stratum populations.
  */
-public record StratumPopulationDef(String id, Set<String> subjectsQualifiedOrUnqualified) {
-
-    public StratumPopulationDef(String id, Set<String> subjectsQualifiedOrUnqualified) {
-        this.id = id;
-        // subjects either with or without the resource qualifier (ex Patient/123 or 123)
-        this.subjectsQualifiedOrUnqualified = Set.copyOf(subjectsQualifiedOrUnqualified);
-    }
+public record StratumPopulationDef(
+        String id,
+        /*
+         * The subjectIds as they are, whether they are qualified with a resource
+         * (ex: [Patient/pat1, Patient/pat2] or [pat1, pat2]
+         */
+        Set<String> subjectsQualifiedOrUnqualified,
+        Set<Object> populationDefEvaluationResultIntersection,
+        List<String> resourceIdsForSubjectList,
+        MeasureStratifierType measureStratifierType) {
 
     /**
-     * @return subjects always without the resource qualifier (ex 123 for Patient/123)
+     * @return The subjectIds without a FHIR resource qualifier, whether they previously had a
+     * qualifier or not
      */
     public Set<String> getSubjectsUnqualified() {
-        return subjectsQualifiedOrUnqualified.stream()
-                .filter(Objects::nonNull)
-                .map(R4ResourceIdUtils::stripAnyResourceQualifier)
-                .collect(Collectors.toUnmodifiableSet());
+        return ResourceIdUtils.stripAnyResourceQualifiersAsSet(subjectsQualifiedOrUnqualified);
     }
+
+    // LUKETODO:  javadoc
+    public int getCount() {
+        if (MeasureStratifierType.CRITERIA == measureStratifierType) {
+            return populationDefEvaluationResultIntersection.size();
+        }
+
+        return resourceIdsForSubjectList.size();
+    }
+
+    // LUKETODO: toString
 }

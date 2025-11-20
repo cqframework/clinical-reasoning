@@ -100,7 +100,7 @@ public class MeasureMultiSubjectEvaluator {
         // intersect stratum subjectIds and population subjectIds
         var qualifiedSubjectIdsCommonToPopulation = Sets.intersection(new HashSet<>(subjectIds), popSubjectIds);
 
-        return new StratumPopulationDef(populationDef.id(), qualifiedSubjectIdsCommonToPopulation);
+        return new StratumPopulationDef(populationDef.id(), qualifiedSubjectIdsCommonToPopulation, null, null, null);
     }
 
     private static List<StratumDef> componentStratumPlural(

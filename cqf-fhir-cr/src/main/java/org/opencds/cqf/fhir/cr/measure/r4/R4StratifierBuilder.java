@@ -103,7 +103,7 @@ class R4StratifierBuilder {
                     stratumDef,
                     reportStratum,
                     stratumDef.getValueDefs(),
-                    stratumDef.getSubjectIds(),
+                    stratumDef.subjectIds(),
                     populations,
                     groupDef);
         });
@@ -168,7 +168,7 @@ class R4StratifierBuilder {
                 stratumDef,
                 reportStratum,
                 stratumDef.getValueDefs(),
-                stratumDef.getSubjectIds(),
+                stratumDef.subjectIds(),
                 populations,
                 groupDef);
     }
@@ -179,7 +179,7 @@ class R4StratifierBuilder {
             StratumDef stratumDef,
             StratifierGroupComponent stratum,
             Set<StratumValueDef> values,
-            List<String> subjectIds,
+            Collection<String> subjectIds,
             List<MeasureGroupPopulationComponent> populations,
             GroupDef groupDef) {
         boolean isComponent = values.size() > 1;
@@ -231,7 +231,7 @@ class R4StratifierBuilder {
         // ** subjects with stratifier value: 'F': subject2
         // ** stratum.population
         // ** ** initial-population: subject2
-        for (StratumPopulationDef stratumPopulationDef : stratumDef.getStratumPopulations()) {
+        for (StratumPopulationDef stratumPopulationDef : stratumDef.stratumPopulations()) {
             // This is nasty, and ideally, we ought to be driving this logic entirely off StratumPopulationDef
             final Optional<MeasureGroupPopulationComponent> optMgpc = populations.stream()
                     .filter(population -> population.getId().equals(stratumPopulationDef.id()))
@@ -270,7 +270,7 @@ class R4StratifierBuilder {
             StratifierDef stratifierDef,
             StratumPopulationDef stratumPopulationDef,
             StratifierGroupPopulationComponent sgpc,
-            List<String> subjectIds,
+            Collection<String> subjectIds,
             MeasureGroupPopulationComponent population,
             GroupDef groupDef) {
 
@@ -333,7 +333,7 @@ class R4StratifierBuilder {
             BuilderContext bc,
             StratifierDef stratifierDef,
             StratifierGroupPopulationComponent sgpc,
-            List<String> subjectIds,
+            Collection<String> subjectIds,
             PopulationDef populationDef,
             GroupDef groupDef) {
 
@@ -454,7 +454,7 @@ class R4StratifierBuilder {
 
     @Nonnull
     private static List<String> getResourceIds(
-            List<String> subjectIds, GroupDef groupDef, PopulationDef populationDef) {
+            Collection<String> subjectIds, GroupDef groupDef, PopulationDef populationDef) {
         String resourceType;
         try {
             // when this method is checked with a primitive value and not ResourceType it returns an error

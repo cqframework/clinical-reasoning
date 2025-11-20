@@ -429,7 +429,7 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
             final StratifierDef stratifierDef = optStratifierDef.get();
 
             final StratumDef stratumDef = stratifierDef.getStratum().stream()
-                    .filter(stratumDefInner -> StringUtils.isNotBlank(stratumDefInner.getText()))
+                    .filter(stratumDefInner -> StringUtils.isNotBlank(stratumDefInner.text()))
                     .filter(stratumDefInner -> doesStratumDefMatchStratum(sgc, stratumDefInner))
                     .findFirst()
                     .orElse(null);
@@ -445,7 +445,7 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
 
     // TODO:  LD: consider refining this logic:
     private boolean doesStratumDefMatchStratum(StratifierGroupComponent sgc, StratumDef stratumDefInner) {
-        return stratumDefInner.getText().equals(sgc.getValue().getText());
+        return stratumDefInner.text().equals(sgc.getValue().getText());
     }
 
     protected void scoreStratum(
@@ -515,7 +515,7 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
             case CONTINUOUSVARIABLE -> {
                 final StratumPopulationDef stratumPopulationDef;
                 if (stratumDef != null) {
-                    stratumPopulationDef = stratumDef.getStratumPopulations().stream()
+                    stratumPopulationDef = stratumDef.stratumPopulations().stream()
                             // Ex:  match "measure-observation-1" with "measure-observation"
                             .filter(stratumPopDef ->
                                     stratumPopDef.id().startsWith(MeasurePopulationType.MEASUREOBSERVATION.toCode()))
@@ -544,7 +544,7 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
      */
     @Nullable
     private StratumPopulationDef getStratumPopDefFromPopDef(StratumDef stratumDef, PopulationDef populationDef) {
-        return stratumDef.getStratumPopulations().stream()
+        return stratumDef.stratumPopulations().stream()
                 .filter(t -> t.id().equals(populationDef.id()))
                 .findFirst()
                 .orElse(null);

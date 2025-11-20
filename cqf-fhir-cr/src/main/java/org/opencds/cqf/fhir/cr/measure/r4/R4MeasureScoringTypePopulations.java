@@ -80,6 +80,7 @@ public class R4MeasureScoringTypePopulations {
         DENOMINATOREXCLUSION(MeasurePopulationType.DENOMINATOREXCLUSION),
         NUMERATOREXCLUSION(MeasurePopulationType.NUMERATOREXCLUSION),
         NUMERATOR(MeasurePopulationType.NUMERATOR),
+        MEASUREOBSERVATION(MeasurePopulationType.MEASUREOBSERVATION),
         DATEOFCOMPLIANCE(MeasurePopulationType.DATEOFCOMPLIANCE);
 
         private final MeasurePopulationType measurePopulationType;

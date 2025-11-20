@@ -253,8 +253,7 @@ class R4MeasureReportBuilderTest {
                 MeasureScoring.PROPORTION,
                 false,
                 null,
-                new CodeDef(MeasureConstants.POPULATION_BASIS_URL, "boolean"),
-                null);
+                new CodeDef(MeasureConstants.POPULATION_BASIS_URL, "boolean"));
     }
 
     private static PopulationDef buildPopulationRef(Collection<Object> resources) {
@@ -262,6 +261,7 @@ class R4MeasureReportBuilderTest {
                 null,
                 new ConceptDef(List.of(new CodeDef("system", MeasurePopulationType.DATEOFCOMPLIANCE.toCode())), null),
                 MeasurePopulationType.DATEOFCOMPLIANCE,
+                null,
                 null,
                 null);
 

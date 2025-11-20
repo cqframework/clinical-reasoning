@@ -1,0 +1,14 @@
+{
+  "resourceType": "Patient",
+  "id": "patient-4",
+  "gender": "female",
+  "birthDate": "1985-06-16",
+  "generalPractitioner": [
+    {
+      "reference": "Practitioner/practitioner-1"
+    }
+  ],
+  "managingOrganization": {
+    "reference": "Organization/organization-1"
+  }
+}

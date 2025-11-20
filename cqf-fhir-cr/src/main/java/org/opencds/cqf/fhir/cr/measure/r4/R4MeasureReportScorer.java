@@ -167,6 +167,34 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
         return checkMissingScoringType(measureDef, groupScoringType);
     }
 
+    @Nullable
+    protected PopulationDef getFirstMeasureObservation(GroupDef groupDef) {
+        var measureObservations = getMeasureObservations(groupDef);
+        if (!measureObservations.isEmpty()) {
+            return getMeasureObservations(groupDef).get(0);
+        } else {
+            return null;
+        }
+    }
+
+    protected List<PopulationDef> getMeasureObservations(GroupDef groupDef) {
+        return groupDef.populations().stream()
+                .filter(t -> t.type().equals(MeasurePopulationType.MEASUREOBSERVATION))
+                .toList();
+    }
+
+    protected void scoreGroup(Double score, boolean isIncreaseImprovementNotation, MeasureReportGroupComponent mrgc) {
+        // When applySetMembership=false, this value can receive strange values
+        // This should prevent scoring in certain scenarios like <0
+        if (score != null && score >= 0) {
+            if (isIncreaseImprovementNotation) {
+                mrgc.setMeasureScore(new Quantity(score));
+            } else {
+                mrgc.setMeasureScore(new Quantity(1 - score));
+            }
+        }
+    }
+
     protected void scoreGroup(
             String measureUrl,
             MeasureScoring measureScoring,
@@ -176,25 +204,26 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
 
         switch (measureScoring) {
             case PROPORTION, RATIO:
-                var score = calcProportionScore(
-                        getCountFromGroupPopulation(mrgc.getPopulation(), NUMERATOR)
-                                - getCountFromGroupPopulation(mrgc.getPopulation(), NUMERATOR_EXCLUSION),
-                        getCountFromGroupPopulation(mrgc.getPopulation(), DENOMINATOR)
-                                - getCountFromGroupPopulation(mrgc.getPopulation(), DENOMINATOR_EXCLUSION)
-                                - getCountFromGroupPopulation(mrgc.getPopulation(), DENOMINATOR_EXCEPTION));
-                // When applySetMembership=false, this value can receive strange values
-                // This should prevent scoring in certain scenarios like <0
-                if (score != null && score >= 0) {
-                    if (isIncreaseImprovementNotation) {
-                        mrgc.setMeasureScore(new Quantity(score));
-                    } else {
-                        mrgc.setMeasureScore(new Quantity(1 - score));
-                    }
+                Double score;
+                // Ratio Continuous Variable Scoring
+                if (measureScoring.equals(MeasureScoring.RATIO)
+                        && groupDef.hasPopulationType(MeasurePopulationType.MEASUREOBSERVATION)) {
+                    score = scoreRatioContVariable(measureUrl, groupDef, getMeasureObservations(groupDef));
+                } else {
+                    // Standard Proportion & Ratio Scoring
+                    score = calcProportionScore(
+                            getCountFromGroupPopulation(mrgc.getPopulation(), NUMERATOR)
+                                    - getCountFromGroupPopulation(mrgc.getPopulation(), NUMERATOR_EXCLUSION),
+                            getCountFromGroupPopulation(mrgc.getPopulation(), DENOMINATOR)
+                                    - getCountFromGroupPopulation(mrgc.getPopulation(), DENOMINATOR_EXCLUSION)
+                                    - getCountFromGroupPopulation(mrgc.getPopulation(), DENOMINATOR_EXCEPTION));
                 }
+                scoreGroup(score, isIncreaseImprovementNotation, mrgc);
                 break;
 
             case CONTINUOUSVARIABLE:
-                scoreContinuousVariable(measureUrl, mrgc, groupDef);
+                // increase notation cannot be applied to ContVariable
+                scoreContinuousVariable(measureUrl, mrgc, groupDef, getFirstMeasureObservation(groupDef));
                 break;
             default:
                 break;
@@ -205,19 +234,84 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
         }
     }
 
-    protected void scoreContinuousVariable(String measureUrl, MeasureReportGroupComponent mrgc, GroupDef groupDef) {
+    @Nullable
+    protected Double scoreRatioContVariable(String measureUrl, GroupDef groupDef, List<PopulationDef> populationDefs) {
+
+        // Defensive checks
+        if (groupDef == null || populationDefs == null || populationDefs.isEmpty()) {
+            return null;
+        }
+
+        PopulationDef numPopDef = findPopulationDef(groupDef, populationDefs, MeasurePopulationType.NUMERATOR);
+        PopulationDef denPopDef = findPopulationDef(groupDef, populationDefs, MeasurePopulationType.DENOMINATOR);
+
+        if (numPopDef == null || denPopDef == null) {
+            return null;
+        }
+
+        Quantity aggregateNumQuantity = calculateContinuousVariableAggregateQuantity(
+                measureUrl, groupDef, numPopDef, PopulationDef::getAllSubjectResources);
+        Quantity aggregateDenQuantity = calculateContinuousVariableAggregateQuantity(
+                measureUrl, groupDef, denPopDef, PopulationDef::getAllSubjectResources);
+
+        if (aggregateNumQuantity == null || aggregateDenQuantity == null) {
+            return null;
+        }
+
+        Double num = toDouble(aggregateNumQuantity.getValue());
+        Double den = toDouble(aggregateDenQuantity.getValue());
+
+        if (den == null || den == 0.0) {
+            return null;
+        }
+
+        if (num == null || num == 0.0) {
+            // Explicitly handle numerator zero with positive denominator
+            return den > 0.0 ? 0.0 : null;
+        }
+
+        return num / den;
+    }
+
+    @Nullable
+    private PopulationDef findPopulationDef(
+            GroupDef groupDef, List<PopulationDef> populationDefs, MeasurePopulationType type) {
+        // get(0) is what your original code did; if that ever changes to multiple entries,
+        // you’ll want to revisit this.
+        var groupPops = groupDef.get(type);
+        if (groupPops == null || groupPops.isEmpty() || groupPops.get(0).id() == null) {
+            return null;
+        }
+
+        String criteriaId = groupPops.get(0).id();
+
+        return populationDefs.stream()
+                .filter(p -> criteriaId.equals(p.getCriteriaReference()))
+                .findFirst()
+                .orElse(null);
+    }
+
+    @Nullable
+    private Double toDouble(Number value) {
+        return value == null ? null : value.doubleValue();
+    }
+
+    protected void scoreContinuousVariable(
+            String measureUrl, MeasureReportGroupComponent mrgc, GroupDef groupDef, PopulationDef populationDef) {
         final Quantity aggregateQuantity = calculateContinuousVariableAggregateQuantity(
-                measureUrl, groupDef, PopulationDef::getAllSubjectResources);
+                measureUrl, groupDef, populationDef, PopulationDef::getAllSubjectResources);
 
         mrgc.setMeasureScore(aggregateQuantity);
     }
 
     @Nullable
     private static Quantity calculateContinuousVariableAggregateQuantity(
-            String measureUrl, GroupDef groupDef, Function<PopulationDef, Collection<Object>> popDefToResources) {
+            String measureUrl,
+            GroupDef groupDef,
+            PopulationDef populationDef,
+            Function<PopulationDef, Collection<Object>> popDefToResources) {
 
-        var popDef = groupDef.getSingle(MeasurePopulationType.MEASUREOBSERVATION);
-        if (popDef == null) {
+        if (populationDef == null) {
             // In the case where we're missing a measure population definition, we don't want to
             // throw an Exception, but we want the existing error handling to include this
             // error in the MeasureReport output.
@@ -226,7 +320,7 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
         }
 
         return calculateContinuousVariableAggregateQuantity(
-                groupDef.getAggregateMethod(), popDefToResources.apply(popDef));
+                populationDef.getAggregateMethod(), popDefToResources.apply(populationDef));
     }
 
     @Nullable
@@ -377,10 +471,42 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
 
         switch (measureScoring) {
             case PROPORTION, RATIO -> {
-                var score = calcProportionScore(
-                        getCountFromStratifierPopulation(stratum.getPopulation(), NUMERATOR),
-                        getCountFromStratifierPopulation(stratum.getPopulation(), DENOMINATOR));
+                Double score;
+                // Ratio Continuous Variable Scoring
+                if (measureScoring.equals(MeasureScoring.RATIO)
+                        && groupDef.hasPopulationType(MeasurePopulationType.MEASUREOBSERVATION)) {
+                    // new
+                    final StratumPopulationDef stratumPopulationDefNum;
+                    final StratumPopulationDef stratumPopulationDefDen;
+                    PopulationDef numPopDef = null;
+                    PopulationDef denPopDef = null;
+                    if (stratumDef != null) {
+                        var populationDefs = getMeasureObservations(groupDef);
+                        // get Measure Observation for Numerator and Denominator
+                        numPopDef = findPopulationDef(groupDef, populationDefs, MeasurePopulationType.NUMERATOR);
+                        denPopDef = findPopulationDef(groupDef, populationDefs, MeasurePopulationType.DENOMINATOR);
+                        // assign Num & Den stratum Populations
+                        stratumPopulationDefDen = getStratumPopDefFromPopDef(stratumDef, denPopDef);
+                        stratumPopulationDefNum = getStratumPopDefFromPopDef(stratumDef, numPopDef);
 
+                    } else {
+                        stratumPopulationDefNum = null;
+                        stratumPopulationDefDen = null;
+                    }
+
+                    score = scoreRatioContVariableStratum(
+                            measureUrl,
+                            groupDef,
+                            stratumPopulationDefNum,
+                            stratumPopulationDefDen,
+                            numPopDef,
+                            denPopDef);
+                } else {
+                    // Standard Proportion & Ratio Scoring
+                    score = calcProportionScore(
+                            getCountFromStratifierPopulation(stratum.getPopulation(), NUMERATOR),
+                            getCountFromStratifierPopulation(stratum.getPopulation(), DENOMINATOR));
+                }
                 if (score != null) {
                     return new Quantity(score);
                 }
@@ -401,12 +527,68 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
                 return calculateContinuousVariableAggregateQuantity(
                         measureUrl,
                         groupDef,
+                        getFirstMeasureObservation(groupDef),
                         populationDef -> getResultsForStratum(populationDef, stratumPopulationDef));
             }
             default -> {
                 return null;
             }
         }
+    }
+
+    /**
+     * Extract StratumPopulationDef from populationDef
+     * @param stratumDef the Stratum definition object that contains the population to target
+     * @param populationDef the measureObservation population related to the stratumPopulationDef to extract
+     * @return
+     */
+    @Nullable
+    private StratumPopulationDef getStratumPopDefFromPopDef(StratumDef stratumDef, PopulationDef populationDef) {
+        return stratumDef.getStratumPopulations().stream()
+                .filter(t -> t.id().equals(populationDef.id()))
+                .findFirst()
+                .orElse(null);
+    }
+
+    @Nullable
+    protected Double scoreRatioContVariableStratum(
+            String measureUrl,
+            GroupDef groupDef,
+            StratumPopulationDef measureObsNumStratum,
+            StratumPopulationDef measureObsDenStratum,
+            PopulationDef numPopDef,
+            PopulationDef denPopDef) {
+
+        Quantity aggregateNumQuantity = calculateContinuousVariableAggregateQuantity(
+                measureUrl,
+                groupDef,
+                numPopDef,
+                populationDef -> getResultsForStratum(populationDef, measureObsNumStratum));
+        calculateContinuousVariableAggregateQuantity(
+                measureUrl, groupDef, numPopDef, PopulationDef::getAllSubjectResources);
+        Quantity aggregateDenQuantity = calculateContinuousVariableAggregateQuantity(
+                measureUrl,
+                groupDef,
+                denPopDef,
+                populationDef -> getResultsForStratum(populationDef, measureObsDenStratum));
+
+        if (aggregateNumQuantity == null || aggregateDenQuantity == null) {
+            return null;
+        }
+
+        Double num = toDouble(aggregateNumQuantity.getValue());
+        Double den = toDouble(aggregateDenQuantity.getValue());
+
+        if (den == null || den == 0.0) {
+            return null;
+        }
+
+        if (num == null || num == 0.0) {
+            // Explicitly handle numerator zero with positive denominator
+            return den > 0.0 ? 0.0 : null;
+        }
+
+        return num / den;
     }
 
     /**

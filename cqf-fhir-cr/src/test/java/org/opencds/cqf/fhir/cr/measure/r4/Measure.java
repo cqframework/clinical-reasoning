@@ -879,6 +879,17 @@ public class Measure {
                     .get());
         }
 
+        public SelectedPopulation populationId(String populationId) {
+            SelectedPopulation population = this.population(g -> g.getPopulation().stream()
+                    .filter(x -> x.getId().equals(populationId))
+                    .findFirst()
+                    .orElse(null));
+
+            assertNotNull(population, "Population not found: " + populationId);
+
+            return population;
+        }
+
         public SelectedPopulation population(
                 Selector<MeasureReportGroupPopulationComponent, MeasureReportGroupComponent> populationSelector) {
             var p = populationSelector.select(value());
@@ -1137,6 +1148,17 @@ public class Measure {
                     .filter(x -> x.hasCode()
                             && x.getCode().hasCoding()
                             && x.getCode().getCoding().get(0).getCode().equals(name))
+                    .findFirst()
+                    .orElse(null));
+
+            assertNotNull(population);
+
+            return population;
+        }
+
+        public SelectedStratumPopulation populationId(String name) {
+            var population = population(s -> s.getPopulation().stream()
+                    .filter(x -> x.getId().equals(name))
                     .findFirst()
                     .orElse(null));
 

@@ -1,12 +1,8 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
-import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportStatus;
-import org.hl7.fhir.r4.model.Period;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
-import org.opencds.cqf.fhir.cr.measure.r4.utils.TestDataGenerator;
 
 /**
  * the purpose of this test is to validate the output and required fields for evaluating MeasureScoring type Continuous-Variable
@@ -20,16 +16,7 @@ class MeasureScoringTypeContinuousVariableTest {
     // resource based
     // boolean based
     // group scoring def
-    private static final Given GIVEN = Measure.given().repositoryFor("MeasureScoringTypeContinuousVariable");
-    private static final TestDataGenerator testDataGenerator = new TestDataGenerator(GIVEN.getRepository());
-
-    @BeforeAll
-    static void init() {
-        Period period = new Period();
-        period.setStartElement(new DateTimeType("2024-01-01T01:00:00Z"));
-        period.setEndElement(new DateTimeType("2024-01-01T03:00:00Z"));
-        testDataGenerator.makePatient(null, null, period);
-    }
+    private static final Given GIVEN = Measure.given().repositoryFor("MeasureTest");
 
     @Test
     void continuousVariableBooleanPopulation() {

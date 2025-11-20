@@ -13,17 +13,13 @@ import java.util.function.Predicate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportStatus;
-import org.hl7.fhir.r4.model.Period;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.stubbing.Answer;
 import org.opencds.cqf.fhir.cr.measure.common.HashSetForFhirResourcesAndCqlTypes;
-import org.opencds.cqf.fhir.cr.measure.r4.utils.TestDataGenerator;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 /**
@@ -41,17 +37,8 @@ class MeasureEvaluationApplyScoringTests {
     private static final String IG_NAME_MINIMAL_MEASURE_EVALUATION = "MinimalMeasureEvaluation";
 
     private static final Measure.Given GIVEN_SINGLE = getGivenWithMockedRepositorySingleMeasure();
-    private static final TestDataGenerator testDataGenerator = new TestDataGenerator(GIVEN_SINGLE.getRepository());
 
     private static final MultiMeasure.Given GIVEN_MULTI = getGivenWithMockedRepositoryMinimalMeasure();
-
-    @BeforeAll
-    static void init() {
-        Period period = new Period();
-        period.setStartElement(new DateTimeType("2024-01-01T01:00:00Z"));
-        period.setEndElement(new DateTimeType("2024-01-01T03:00:00Z"));
-        testDataGenerator.makePatient("practitioner-1", "organization-1", period);
-    }
 
     @Test
     void proportionResourceWithReportTypeParameterPatientGroup() {
@@ -386,7 +373,7 @@ class MeasureEvaluationApplyScoringTests {
                 .hasCount(2)
                 .up()
                 .population("measure-observation")
-                .hasCount(10);
+                .hasCount(8); // exclusions removed from count
     }
 
     // This test is for a Measure that references CQL with an invalid "MeasureObservation" function that returns an
@@ -540,7 +527,7 @@ class MeasureEvaluationApplyScoringTests {
                 .hasCount(2)
                 .up()
                 .population("measure-observation")
-                .hasCount(10)
+                .hasCount(8) // exclusions removed
                 .up()
                 .up()
                 .hasMeasureReportStatus(MeasureReportStatus.ERROR)

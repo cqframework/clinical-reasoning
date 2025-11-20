@@ -92,22 +92,11 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         var groupImpNotation = getGroupImpNotation(measure, group);
         var hasGroupImpNotation = groupImpNotation != null;
 
-        final Optional<MeasureGroupPopulationComponent> optMeasureObservationPopulation = group.getPopulation().stream()
-                .filter(this::isMeasureObservation)
-                .findFirst();
-
-        // aggregateMethod is used to capture continuous-variable method of aggregating MeasureObservation
-        final ContinuousVariableObservationAggregateMethod aggregateMethod =
-                getAggregateMethod(measure.getUrl(), optMeasureObservationPopulation.orElse(null));
-
-        final String criteriaReference =
-                getCriteriaReference(measure.getUrl(), group, optMeasureObservationPopulation.orElse(null));
-
         // Populations
         checkIds(group);
 
         var populationsWithCriteriaReference = group.getPopulation().stream()
-                .map(population -> buildPopulationDef(population, criteriaReference))
+                .map(t -> buildPopulationDef(t, group, measure.getUrl()))
                 .toList();
 
         final Optional<PopulationDef> optPopulationDefDateOfCompliance =
@@ -126,8 +115,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                 getScoringDef(measure, measureScoring, groupScoring),
                 hasGroupImpNotation,
                 getImprovementNotation(measureImpNotation, groupImpNotation),
-                getPopulationBasisDef(measureBasis, groupBasis),
-                aggregateMethod);
+                getPopulationBasisDef(measureBasis, groupBasis));
     }
 
     private void checkIds(MeasureGroupComponent group) {
@@ -147,14 +135,20 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
     }
 
     @Nonnull
-    private PopulationDef buildPopulationDef(MeasureGroupPopulationComponent population, String criteriaReference) {
+    private PopulationDef buildPopulationDef(
+            MeasureGroupPopulationComponent population, MeasureGroupComponent group, String measureUrl) {
+        MeasurePopulationType popType = MeasurePopulationType.fromCode(
+                population.getCode().getCodingFirstRep().getCode());
+        // criteriaReference & aggregateMethod are for MeasureObservation populations only
+        String criteriaReference = getCriteriaReference(group, population, popType, measureUrl);
+        ContinuousVariableObservationAggregateMethod aggregateMethod = getAggregateMethod(measureUrl, population);
         return new PopulationDef(
                 population.getId(),
                 conceptToConceptDef(population.getCode()),
-                MeasurePopulationType.fromCode(
-                        population.getCode().getCodingFirstRep().getCode()),
+                popType,
                 population.getCriteria().getExpression(),
-                criteriaReference);
+                criteriaReference,
+                aggregateMethod);
     }
 
     private Optional<PopulationDef> buildPopulationDefForDateOfCompliance(
@@ -188,7 +182,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
 
         var aggMethodExt = measureObservationPopulation.getExtensionByUrl(EXT_CQFM_AGGREGATE_METHOD_URL);
         if (aggMethodExt != null) {
-            // this method is only required if scoringType = continuous-variable
+            // this method is only required if scoringType = continuous-variable or Ratio Continuous variable
             var aggregateMethodString = aggMethodExt.getValue().toString();
 
             var aggregateMethod = ContinuousVariableObservationAggregateMethod.fromString(aggregateMethodString);
@@ -207,15 +201,19 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
 
     @Nullable
     private String getCriteriaReference(
-            String measureUrl,
             MeasureGroupComponent group,
-            @Nullable MeasureGroupPopulationComponent measureObservationPopulation) {
+            @Nullable MeasureGroupPopulationComponent population,
+            MeasurePopulationType measurePopulationType,
+            String measureUrl) {
 
-        if (measureObservationPopulation == null) {
+        if (!measurePopulationType.equals(MeasurePopulationType.MEASUREOBSERVATION)) {
             return null;
         }
 
-        var populationCriteriaExt = measureObservationPopulation.getExtensionByUrl(EXT_CQFM_CRITERIA_REFERENCE);
+        if (population == null) {
+            throw new InvalidRequestException("group.population is null");
+        }
+        var populationCriteriaExt = population.getExtensionByUrl(EXT_CQFM_CRITERIA_REFERENCE);
         if (populationCriteriaExt != null) {
             // required for measure-observation populations
             // the underlying expression is a cql function
@@ -232,16 +230,6 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         }
 
         return null;
-    }
-
-    private boolean isMeasureObservation(MeasureGroupPopulationComponent pop) {
-
-        checkId(pop);
-
-        MeasurePopulationType populationType =
-                MeasurePopulationType.fromCode(pop.getCode().getCodingFirstRep().getCode());
-
-        return populationType != null && populationType.equals(MeasurePopulationType.MEASUREOBSERVATION);
     }
 
     @Nonnull

@@ -1,20 +1,10 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
-import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.repository.IRepository;
-import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.ZoneId;
-import org.hl7.fhir.r4.model.DateTimeType;
-import org.hl7.fhir.r4.model.Period;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
-import org.opencds.cqf.fhir.cr.measure.r4.utils.TestDataGenerator;
-import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 /**
  * When Measure Evaluation produces a Measure Report of type 'Individual', a evaluatedResources field
@@ -26,22 +16,9 @@ import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
  */
 @SuppressWarnings("squid:S2699")
 class MeasureEvaluatedResourcesTest {
-    private static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/measure/r4";
-    private static final IRepository repository = new IgRepository(
-            FhirContext.forR4Cached(),
-            Path.of(getResourcePath(MeasureEvaluatedResourcesTest.class) + "/" + CLASS_PATH + "/" + "MeasureTest"));
-    private final Given given = Measure.given().repository(repository);
-    private static final TestDataGenerator testDataGenerator = new TestDataGenerator(repository);
+    private static final Given given = Measure.given().repositoryFor("MeasureTest");
 
     private static final Measure.Given GIVEN_REPO = Measure.given().repositoryFor("MinimalMeasureEvaluation");
-
-    @BeforeAll
-    static void init() {
-        Period period = new Period();
-        period.setStartElement(new DateTimeType("2024-01-01T01:00:00Z"));
-        period.setEndElement(new DateTimeType("2024-01-01T03:00:00Z"));
-        testDataGenerator.makePatient(null, null, period);
-    }
 
     /**
      * Individual Measure Report

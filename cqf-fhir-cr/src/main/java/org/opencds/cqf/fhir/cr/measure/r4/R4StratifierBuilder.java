@@ -12,6 +12,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -30,6 +31,7 @@ import org.hl7.fhir.r4.model.StringType;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 import org.opencds.cqf.fhir.cr.measure.common.CriteriaResult;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
+import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumDef;
@@ -281,11 +283,7 @@ class R4StratifierBuilder {
         }
 
         var populationDef = groupDef.populations().stream()
-                .filter(t -> t.code()
-                        .codes()
-                        .get(0)
-                        .code()
-                        .equals(population.getCode().getCodingFirstRep().getCode()))
+                .filter(t -> t.id().equals(population.getId()))
                 .findFirst()
                 .orElse(null);
 
@@ -473,9 +471,17 @@ class R4StratifierBuilder {
         assert populationDef != null;
         if (populationDef.getSubjectResources() != null) {
             for (String subjectId : subjectIds) {
-                // retrieve criteria results by subject Key
-                var resources =
-                        populationDef.getSubjectResources().get(R4ResourceIdUtils.stripPatientQualifier(subjectId));
+                Set<Object> resources;
+                if (!populationDef.type().equals(MeasurePopulationType.MEASUREOBSERVATION)) {
+                    // retrieve criteria results by subject Key
+                    resources =
+                            populationDef.getSubjectResources().get(R4ResourceIdUtils.stripPatientQualifier(subjectId));
+                } else {
+                    // MeasureObservation will store subjectResources as <subjectId,Set<Map<Object,Object>>
+                    // We need the Key from the Set<Map<Key,Value>>
+                    // This can be any FHIRType: Resource, date, integer, string....etc
+                    resources = extractResourceIds(populationDef, subjectId);
+                }
                 if (resources != null) {
                     if (isResourceType) {
                         resourceIds.addAll(resources.stream()
@@ -489,6 +495,31 @@ class R4StratifierBuilder {
             }
         }
         return resourceIds;
+    }
+
+    /**
+     * Extracts unique FHIR identifiers as Strings from a PopulationDef.
+     * Works for Resource, Reference, IdType, PrimitiveType, String, Number, etc.
+     */
+    public static Set<Object> extractResourceIds(PopulationDef populationDef, String subjectId) {
+        if (populationDef == null || populationDef.getSubjectResources() == null) {
+            return Set.of();
+        }
+        String[] parts = subjectId.split("/");
+
+        String resourceType = parts[0]; // "Patient"
+        String id = parts[1]; // "81230987"
+
+        var filtered = populationDef.getSubjectResources().entrySet().stream()
+                .filter(entry -> entry.getKey().equals(id)) // <--- filter on key
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+        return filtered.values().stream()
+                .flatMap(Set::stream)
+                .filter(Map.class::isInstance) // Keep only Map<?,?>
+                .map(m -> (Map<?, ?>) m) // Cast
+                .flatMap(m -> m.keySet().stream()) // capture Key only, not Qty
+                .collect(Collectors.toSet());
     }
 
     protected static ListResource createIdList(String id, Collection<String> ids) {

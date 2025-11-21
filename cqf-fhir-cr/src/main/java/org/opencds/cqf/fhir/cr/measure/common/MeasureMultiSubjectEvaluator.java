@@ -3,15 +3,21 @@ package org.opencds.cqf.fhir.cr.measure.common;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
+import jakarta.annotation.Nonnull;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
+import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4ResourceIdUtils;
 import org.slf4j.Logger;
@@ -37,9 +43,9 @@ public class MeasureMultiSubjectEvaluator {
                 final List<StratumDef> stratumDefs;
 
                 if (stratifierDef.isComponentStratifier()) {
-                    stratumDefs = componentStratumPlural(stratifierDef, groupDef.populations());
+                    stratumDefs = componentStratumPlural(stratifierDef, groupDef.populations(), groupDef);
                 } else {
-                    stratumDefs = nonComponentStratumPlural(stratifierDef, groupDef.populations());
+                    stratumDefs = nonComponentStratumPlural(stratifierDef, groupDef.populations(), groupDef);
                 }
 
                 stratifierDef.addAllStratum(stratumDefs);
@@ -51,7 +57,8 @@ public class MeasureMultiSubjectEvaluator {
             StratifierDef stratifierDef,
             Set<StratumValueDef> values,
             List<String> subjectIds,
-            List<PopulationDef> populationDefs) {
+            List<PopulationDef> populationDefs,
+            GroupDef groupDef) {
 
         boolean isComponent = values.size() > 1;
         String stratumText = null;
@@ -85,14 +92,19 @@ public class MeasureMultiSubjectEvaluator {
         return new StratumDef(
                 stratumText,
                 populationDefs.stream()
-                        .map(popDef -> buildStratumPopulationDef(popDef, subjectIds))
+                        .map(popDef -> buildStratumPopulationDef(
+                                stratifierDef, popDef, subjectIds, groupDef))
                         .toList(),
                 values,
                 subjectIds);
     }
 
+    // Enhanced by Claude Sonnet 4.5 to calculate and populate all StratumPopulationDef fields
     private static StratumPopulationDef buildStratumPopulationDef(
-            PopulationDef populationDef, List<String> subjectIds) {
+            StratifierDef stratifierDef,
+            PopulationDef populationDef,
+            List<String> subjectIds,
+            GroupDef groupDef) {
         // population subjectIds
         var popSubjectIds = populationDef.getSubjects().stream()
                 .map(R4ResourceIdUtils::addPatientQualifier)
@@ -100,11 +112,35 @@ public class MeasureMultiSubjectEvaluator {
         // intersect stratum subjectIds and population subjectIds
         var qualifiedSubjectIdsCommonToPopulation = Sets.intersection(new HashSet<>(subjectIds), popSubjectIds);
 
-        return new StratumPopulationDef(populationDef.id(), qualifiedSubjectIdsCommonToPopulation, null, null, null);
+        // Calculate intersection and resource IDs based on stratifier type and basis
+        Set<Object> populationDefEvaluationResultIntersection = null;
+        List<String> resourceIdsForSubjectList = null;
+
+        // For criteria stratifiers, always calculate the intersection regardless of basis
+        if (stratifierDef.isCriteriaStratifier()) {
+            populationDefEvaluationResultIntersection =
+                    calculateCriteriaStratifierIntersection(stratifierDef, populationDef);
+        }
+
+        if (groupDef.isBooleanBasis()) {
+            // For boolean basis, we don't need resource IDs
+            resourceIdsForSubjectList = List.of();
+        } else {
+            // For resource basis stratifiers, get resource IDs
+            resourceIdsForSubjectList = getResourceIds(qualifiedSubjectIdsCommonToPopulation, groupDef, populationDef);
+        }
+
+        return new StratumPopulationDef(
+                populationDef.id(),
+                qualifiedSubjectIdsCommonToPopulation,
+                populationDefEvaluationResultIntersection,
+                resourceIdsForSubjectList,
+                stratifierDef.getStratifierType(),
+                groupDef.isBooleanBasis());
     }
 
     private static List<StratumDef> componentStratumPlural(
-            StratifierDef stratifierDef, List<PopulationDef> populationDefs) {
+            StratifierDef stratifierDef, List<PopulationDef> populationDefs, GroupDef groupDef) {
 
         final Table<String, StratumValueWrapper, StratifierComponentDef> subjectResultTable =
                 buildSubjectResultsTable(stratifierDef.components());
@@ -126,7 +162,7 @@ public class MeasureMultiSubjectEvaluator {
             // | Stratum-3 | <'M','hispanic/latino'> | [subject-c]            |
             // | Stratum-4 | <'F','black'>           | [subject-d, subject-e] |
 
-            var stratumDef = buildStratumDef(stratifierDef, valueSet, subjects, populationDefs);
+            var stratumDef = buildStratumDef(stratifierDef, valueSet, subjects, populationDefs, groupDef);
 
             stratumDefs.add(stratumDef);
         });
@@ -135,7 +171,7 @@ public class MeasureMultiSubjectEvaluator {
     }
 
     private static List<StratumDef> nonComponentStratumPlural(
-            StratifierDef stratifierDef, List<PopulationDef> populationDefs) {
+            StratifierDef stratifierDef, List<PopulationDef> populationDefs, GroupDef groupDef) {
         // standard Stratifier
         // one criteria expression defined, one set of criteria results
 
@@ -156,7 +192,7 @@ public class MeasureMultiSubjectEvaluator {
             // Seems to be irrelevant for criteria based stratifiers
             var patients = List.<String>of();
 
-            var stratum = buildStratumDef(stratifierDef, stratValues, patients, populationDefs);
+            var stratum = buildStratumDef(stratifierDef, stratValues, patients, populationDefs, groupDef);
             return List.of(stratum);
         }
 
@@ -182,7 +218,7 @@ public class MeasureMultiSubjectEvaluator {
             // multiple criteria
             // TODO: build out nonComponent stratum method
             Set<StratumValueDef> stratValues = Set.of(new StratumValueDef(stratValue.getKey(), null));
-            var stratum = buildStratumDef(stratifierDef, stratValues, patientsSubjects, populationDefs);
+            var stratum = buildStratumDef(stratifierDef, stratValues, patientsSubjects, populationDefs, groupDef);
             stratumMultiple.add(stratum);
         }
 
@@ -252,5 +288,119 @@ public class MeasureMultiSubjectEvaluator {
     // which was previously unsupported.  So for now, comma-delim the first five values.
     private static CodeableConcept expressionResultToCodableConcept(StratumValueWrapper value) {
         return new CodeableConcept().setText(value.getValueAsString());
+    }
+
+    /**
+     * Calculate the intersection between stratifier results and population results for criteria-based stratifiers.
+     * Moved from R4StratifierBuilder.getStratumCountUpper by Claude Sonnet 4.5.
+     */
+    // Moved from R4StratifierBuilder by Claude Sonnet 4.5
+    private static Set<Object> calculateCriteriaStratifierIntersection(
+            StratifierDef stratifierDef, PopulationDef populationDef) {
+
+        final Map<String, CriteriaResult> stratifierResultsBySubject = stratifierDef.getResults();
+        final List<Object> allPopulationStratumIntersectingResources = new ArrayList<>();
+
+        // For each subject, we intersect between the population and stratifier results
+        for (Entry<String, CriteriaResult> stratifierEntryBySubject : stratifierResultsBySubject.entrySet()) {
+            final Set<Object> stratifierResultsPerSubject =
+                    stratifierEntryBySubject.getValue().valueAsSet();
+            final Set<Object> populationResultsPerSubject =
+                    populationDef.getResourcesForSubject(stratifierEntryBySubject.getKey());
+
+            allPopulationStratumIntersectingResources.addAll(
+                    Sets.intersection(populationResultsPerSubject, stratifierResultsPerSubject));
+        }
+
+        return new HashSetForFhirResourcesAndCqlTypes<>(allPopulationStratumIntersectingResources);
+    }
+
+    /**
+     * Extract resource IDs from the population and subject IDs.
+     * Moved from R4StratifierBuilder.getResourceIds by Claude Sonnet 4.5.
+     */
+    // Moved from R4StratifierBuilder by Claude Sonnet 4.5
+    @Nonnull
+    private static List<String> getResourceIds(
+            Collection<String> subjectIds, GroupDef groupDef, PopulationDef populationDef) {
+        String resourceType;
+        try {
+            // when this method is checked with a primitive value and not ResourceType it returns an error
+            // this try/catch is to prevent the exception thrown from setting the correct value
+            resourceType =
+                    ResourceType.fromCode(groupDef.getPopulationBasis().code()).toString();
+        } catch (FHIRException e) {
+            resourceType = null;
+        }
+
+        // only ResourceType fhirType should return true here
+        boolean isResourceType = resourceType != null;
+        List<String> resourceIds = new ArrayList<>();
+        if (populationDef.getSubjectResources() != null) {
+            for (String subjectId : subjectIds) {
+                Set<Object> resources;
+                if (!populationDef.type().equals(MeasurePopulationType.MEASUREOBSERVATION)) {
+                    // retrieve criteria results by subject Key
+                    resources = populationDef
+                            .getSubjectResources()
+                            .get(ResourceIdUtils.stripAnyResourceQualifier(subjectId));
+                } else {
+                    // MeasureObservation will store subjectResources as <subjectId,Set<Map<Object,Object>>
+                    // We need the Key from the Set<Map<Key,Value>>
+                    // This can be any FHIRType: Resource, date, integer, string....etc
+                    resources = extractResourceIds(populationDef, subjectId);
+                }
+                if (resources != null) {
+                    if (isResourceType) {
+                        resourceIds.addAll(resources.stream()
+                                .map(MeasureMultiSubjectEvaluator::getPopulationResourceIds) // get resource id
+                                .toList());
+                    } else {
+                        resourceIds.addAll(
+                                resources.stream().map(Object::toString).toList());
+                    }
+                }
+            }
+        }
+        return resourceIds;
+    }
+
+    /**
+     * Extracts unique FHIR identifiers as Strings from a PopulationDef.
+     * Works for Resource, Reference, IdType, PrimitiveType, String, Number, etc.
+     * Moved from R4StratifierBuilder.extractResourceIds by Claude Sonnet 4.5.
+     */
+    // Moved from R4StratifierBuilder by Claude Sonnet 4.5
+    private static Set<Object> extractResourceIds(PopulationDef populationDef, String subjectId) {
+        if (populationDef == null || populationDef.getSubjectResources() == null) {
+            return Set.of();
+        }
+        String[] parts = subjectId.split("/");
+
+        String resourceType = parts[0]; // "Patient"
+        String id = parts[1]; // "81230987"
+
+        var filtered = populationDef.getSubjectResources().entrySet().stream()
+                .filter(entry -> entry.getKey().equals(id)) // <--- filter on key
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+        return filtered.values().stream()
+                .flatMap(Set::stream)
+                .filter(Map.class::isInstance) // Keep only Map<?,?>
+                .map(m -> (Map<?, ?>) m) // Cast
+                .flatMap(m -> m.keySet().stream()) // capture Key only, not Qty
+                .collect(Collectors.toSet());
+    }
+
+    /**
+     * Get resource ID from a resource object.
+     * Moved from R4StratifierBuilder.getPopulationResourceIds by Claude Sonnet 4.5.
+     */
+    // Moved from R4StratifierBuilder by Claude Sonnet 4.5
+    private static String getPopulationResourceIds(Object resourceObject) {
+        if (resourceObject instanceof IBaseResource resource) {
+            return resource.getIdElement().toVersionless().getValueAsString();
+        }
+        return null;
     }
 }

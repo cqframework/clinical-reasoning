@@ -1,7 +1,7 @@
 package org.opencds.cqf.fhir.cr.measure.r4.utils;
 
+import jakarta.annotation.Nonnull;
 import java.util.regex.Pattern;
-import javax.annotation.Nonnull;
 import org.hl7.fhir.r4.model.ResourceType;
 
 /**

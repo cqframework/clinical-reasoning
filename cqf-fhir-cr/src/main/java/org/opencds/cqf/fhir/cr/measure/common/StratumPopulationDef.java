@@ -18,7 +18,8 @@ public record StratumPopulationDef(
         Set<String> subjectsQualifiedOrUnqualified,
         Set<Object> populationDefEvaluationResultIntersection,
         List<String> resourceIdsForSubjectList,
-        MeasureStratifierType measureStratifierType) {
+        MeasureStratifierType measureStratifierType,
+        boolean isBooleanBasis) {
 
     /**
      * @return The subjectIds without a FHIR resource qualifier, whether they previously had a
@@ -28,13 +29,22 @@ public record StratumPopulationDef(
         return ResourceIdUtils.stripAnyResourceQualifiersAsSet(subjectsQualifiedOrUnqualified);
     }
 
-    // LUKETODO:  javadoc
+    // Enhanced by Claude Sonnet 4.5 to properly handle count calculation for all stratifier types
     public int getCount() {
+        // For criteria stratifiers, use the intersection count
         if (MeasureStratifierType.CRITERIA == measureStratifierType) {
-            return populationDefEvaluationResultIntersection.size();
+            return populationDefEvaluationResultIntersection != null
+                    ? populationDefEvaluationResultIntersection.size()
+                    : 0;
         }
 
-        return resourceIdsForSubjectList.size();
+        // For boolean basis (non-criteria), count is based on subjects
+        if (isBooleanBasis) {
+            return subjectsQualifiedOrUnqualified.size();
+        }
+
+        // For resource basis (non-criteria), count is based on resources
+        return resourceIdsForSubjectList != null ? resourceIdsForSubjectList.size() : 0;
     }
 
     // LUKETODO: toString

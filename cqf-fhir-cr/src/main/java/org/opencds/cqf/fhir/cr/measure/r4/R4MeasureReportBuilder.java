@@ -145,14 +145,6 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         }
     }
 
-    private PopulationDef getReportPopulation(GroupDef reportGroup, MeasurePopulationType measurePopType) {
-        var populations = reportGroup.populations();
-        return populations.stream()
-                .filter(e -> e.code().first().code().equals(measurePopType.toCode()))
-                .findAny()
-                .orElse(null);
-    }
-
     private void buildGroup(
             R4MeasureReportBuilderContext bc,
             MeasureGroupComponent measureGroup,
@@ -160,11 +152,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             GroupDef groupDef) {
 
         var groupDefSizeDiff = 0;
-        if (groupDef.populations().stream()
-                        .filter(x -> x.type().equals(MeasurePopulationType.DATEOFCOMPLIANCE))
-                        .findFirst()
-                        .orElse(null)
-                != null) {
+        if (groupDef.hasPopulationType(MeasurePopulationType.DATEOFCOMPLIANCE)) {
             // dateOfNonCompliance is another population not calculated
             groupDefSizeDiff = 1;
         }
@@ -190,16 +178,8 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         for (int i = 0; i < measureGroup.getPopulation().size(); i++) {
             // Report Population Component
             var measurePop = measureGroup.getPopulation().get(i);
-            PopulationDef defPop = null;
-            for (int x = 0; x < groupDef.populations().size(); x++) {
-                var groupDefPop = groupDef.populations().get(x);
-                // Groups can have more than one of the same PopulationType, we need a Unique value to bind on
-                if (groupDefPop.id().equals(measurePop.getId())) {
-                    // set definition to build
-                    defPop = groupDefPop;
-                    break;
-                }
-            }
+            // Groups can have more than one of the same PopulationType, we need a Unique value to bind on
+            PopulationDef defPop = groupDef.findPopulationById(measurePop.getId());
             var reportPop = reportGroup.addPopulation();
             buildPopulation(bc, measurePop, reportPop, defPop, groupDef);
         }
@@ -211,7 +191,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
             // add extension to group for
             if (bc.report().getType().equals(MeasureReport.MeasureReportType.INDIVIDUAL)) {
-                var docPopDef = getReportPopulation(groupDef, DATEOFCOMPLIANCE);
+                var docPopDef = groupDef.findPopulationByType(DATEOFCOMPLIANCE);
                 if (docPopDef != null
                         && docPopDef.getAllSubjectResources() != null
                         && !docPopDef.getAllSubjectResources().isEmpty()) {
@@ -289,7 +269,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             if (populationDef.type().equals(MeasurePopulationType.MEASUREOBSERVATION)) {
                 // resources has nested maps containing correct qty of resources
                 // Ratio Cont-Variable Measures have two MeasureObservations
-                reportPopulation.setCount(countObservations(populationDef));
+                reportPopulation.setCount(populationDef.countObservations());
             } else {
                 // standard behavior
                 reportPopulation.setCount(populationDef.getAllSubjectResources().size());
@@ -327,18 +307,6 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             bc.addContained(subjectList);
             reportPopulation.setSubjectResults(new Reference("#" + subjectList.getId()));
         }
-    }
-
-    private int countObservations(PopulationDef populationDef) {
-        if (populationDef == null || populationDef.getAllSubjectResources() == null) {
-            return 0;
-        }
-
-        return populationDef.getAllSubjectResources().stream()
-                .filter(Map.class::isInstance)
-                .map(Map.class::cast)
-                .mapToInt(Map::size)
-                .sum();
     }
 
     static ListResource createList(String id) {

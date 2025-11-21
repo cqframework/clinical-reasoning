@@ -89,7 +89,7 @@ class R4StratifierBuilder {
                     stratifierDef,
                     stratumDef,
                     reportStratum,
-                    stratumDef.getValueDefs(),
+                    stratumDef.valueDefs(),
                     stratumDef.subjectIds(),
                     populations,
                     groupDef);
@@ -154,7 +154,7 @@ class R4StratifierBuilder {
                 stratifierDef,
                 stratumDef,
                 reportStratum,
-                stratumDef.getValueDefs(),
+                stratumDef.valueDefs(),
                 stratumDef.subjectIds(),
                 populations,
                 groupDef);

@@ -16,21 +16,17 @@ import java.util.Set;
 public record StratumDef(
         String text,
         List<StratumPopulationDef> stratumPopulations,
-        Set<StratumValueDef> stratumValueDefs,
+        Set<StratumValueDef> valueDefs,
         Collection<String> subjectIds) {
 
     public StratumDef(
             String text,
             List<StratumPopulationDef> stratumPopulations,
-            Set<StratumValueDef> stratumValueDefs,
+            Set<StratumValueDef> valueDefs,
             Collection<String> subjectIds) {
         this.text = text;
         this.stratumPopulations = List.copyOf(stratumPopulations);
-        this.stratumValueDefs = stratumValueDefs;
+        this.valueDefs = valueDefs;
         this.subjectIds = subjectIds;
-    }
-
-    public Set<StratumValueDef> getValueDefs() {
-        return stratumValueDefs;
     }
 }

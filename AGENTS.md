@@ -159,8 +159,8 @@ This project supports multiple FHIR versions (DSTU3, R4, R5) through the adapter
 ## Dependencies
 
 Key dependencies (versions in parent pom.xml properties):
-- HAPI FHIR: ${hapi.version} (currently 8.4.0)
-- CQL Engine: ${cql.version} (currently 4.1.0-SNAPSHOT)
+- HAPI FHIR: ${hapi.version} (currently 8.6.0)
+- CQL Engine: ${cql.version} (currently 4.1.0)
 - Spring: ${spring.version} (currently 6.2.12)
 - JUnit: ${junit.version} (currently 5.10.2)
 - Guava: ${guava.version} (currently 33.2.1-jre)

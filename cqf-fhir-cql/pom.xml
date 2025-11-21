@@ -28,7 +28,7 @@
     </dependency>
     <dependency>
       <groupId>org.cqframework</groupId>
-      <artifactId>cql-to-elm</artifactId>
+      <artifactId>cql-to-elm-jvm</artifactId>
     </dependency>
     <dependency>
       <groupId>org.cqframework</groupId>

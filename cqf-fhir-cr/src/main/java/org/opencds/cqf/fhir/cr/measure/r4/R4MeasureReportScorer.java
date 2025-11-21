@@ -7,11 +7,8 @@ import jakarta.annotation.Nullable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupPopulationComponent;
@@ -88,12 +85,6 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
 
     private static final Logger logger = LoggerFactory.getLogger(R4MeasureReportScorer.class);
 
-    private static final String NUMERATOR = "numerator";
-    private static final String DENOMINATOR = "denominator";
-    private static final String DENOMINATOR_EXCLUSION = "denominator-exclusion";
-    private static final String DENOMINATOR_EXCEPTION = "denominator-exception";
-    private static final String NUMERATOR_EXCLUSION = "numerator-exclusion";
-
     @Override
     public void score(String measureUrl, MeasureDef measureDef, MeasureReport measureReport) {
         // Measure Def Check
@@ -127,23 +118,6 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
                 .orElse(null);
     }
 
-    protected MeasureScoring checkMissingScoringType(MeasureDef measureDef, MeasureScoring measureScoring) {
-        if (measureScoring == null) {
-            throw new InvalidRequestException(
-                    "Measure does not have a scoring methodology defined. Add a \"scoring\" property to the measure definition or the group definition for MeasureDef: "
-                            + measureDef.url());
-        }
-        return measureScoring;
-    }
-
-    protected void groupHasValidId(MeasureDef measureDef, String id) {
-        if (id == null || id.isEmpty()) {
-            throw new InvalidRequestException(
-                    "Measure resources with more than one group component require a unique group.id() defined to score appropriately for MeasureDef: "
-                            + measureDef.url());
-        }
-    }
-
     protected MeasureScoring getGroupMeasureScoring(MeasureReportGroupComponent mrgc, MeasureDef measureDef) {
         MeasureScoring groupScoringType = null;
         // if not multi-rate, get first groupDef scoringType
@@ -165,22 +139,6 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
             }
         }
         return checkMissingScoringType(measureDef, groupScoringType);
-    }
-
-    @Nullable
-    protected PopulationDef getFirstMeasureObservation(GroupDef groupDef) {
-        var measureObservations = getMeasureObservations(groupDef);
-        if (!measureObservations.isEmpty()) {
-            return getMeasureObservations(groupDef).get(0);
-        } else {
-            return null;
-        }
-    }
-
-    protected List<PopulationDef> getMeasureObservations(GroupDef groupDef) {
-        return groupDef.populations().stream()
-                .filter(t -> t.type().equals(MeasurePopulationType.MEASUREOBSERVATION))
-                .toList();
     }
 
     protected void scoreGroup(Double score, boolean isIncreaseImprovementNotation, MeasureReportGroupComponent mrgc) {
@@ -271,29 +229,6 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
         }
 
         return num / den;
-    }
-
-    @Nullable
-    private PopulationDef findPopulationDef(
-            GroupDef groupDef, List<PopulationDef> populationDefs, MeasurePopulationType type) {
-        // get(0) is what your original code did; if that ever changes to multiple entries,
-        // you’ll want to revisit this.
-        var groupPops = groupDef.get(type);
-        if (groupPops == null || groupPops.isEmpty() || groupPops.get(0).id() == null) {
-            return null;
-        }
-
-        String criteriaId = groupPops.get(0).id();
-
-        return populationDefs.stream()
-                .filter(p -> criteriaId.equals(p.getCriteriaReference()))
-                .findFirst()
-                .orElse(null);
-    }
-
-    @Nullable
-    private Double toDouble(Number value) {
-        return value == null ? null : value.doubleValue();
     }
 
     protected void scoreContinuousVariable(
@@ -536,20 +471,6 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
         }
     }
 
-    /**
-     * Extract StratumPopulationDef from populationDef
-     * @param stratumDef the Stratum definition object that contains the population to target
-     * @param populationDef the measureObservation population related to the stratumPopulationDef to extract
-     * @return
-     */
-    @Nullable
-    private StratumPopulationDef getStratumPopDefFromPopDef(StratumDef stratumDef, PopulationDef populationDef) {
-        return stratumDef.stratumPopulations().stream()
-                .filter(t -> t.id().equals(populationDef.id()))
-                .findFirst()
-                .orElse(null);
-    }
-
     @Nullable
     protected Double scoreRatioContVariableStratum(
             String measureUrl,
@@ -589,50 +510,6 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
         }
 
         return num / den;
-    }
-
-    /**
-     * The goal here is to extract the resources references by the population def for the subjects
-     * in the stratum populationDef.
-     * <p/>
-     * So, for example, if the stratum population def has subjects:
-     * <ul>
-     *     <li>patient123</li>
-     *     <li>patient456</li>
-     *     <li>patient567</li>
-     * </ul>
-     * and the population has:
-     * <ul>
-     *     <li>patient000 -> Patient000 -> Quantity(57)</li>
-     *     <li>patient100 -> Patient100 -> Quantity(36)</li>
-     *     <li>patient123 -> Patient123 -> Quantity(57)</li>
-     *     <li>patient456 -> Patient456 -> Quantity(3)</li>
-     *     <li>patient500 -> Patient500 -> Quantity(5)</li>
-     *     <li>patient567 -> Patient567 -> Quantity(57)</li>
-     * </ul>
-     * Then the method returns:
-     * <ul>
-     *     <li>Patient123 -> Quantity(57)</li>
-     *     <li>Patient456 -> Quantity(3)</li>
-     *     <li>Patient567 -> Quantity(57)</li>
-     * </ul>
-     */
-    private Set<Object> getResultsForStratum(
-            PopulationDef measureObservationPopulationDef, StratumPopulationDef stratumPopulationDef) {
-
-        return measureObservationPopulationDef.getSubjectResources().entrySet().stream()
-                .filter(entry -> doesStratumPopDefMatchGroupPopDef(stratumPopulationDef, entry))
-                .map(Entry::getValue)
-                .flatMap(Collection::stream)
-                .collect(Collectors.toUnmodifiableSet());
-    }
-
-    private boolean doesStratumPopDefMatchGroupPopDef(
-            StratumPopulationDef stratumPopulationDef, Entry<String, Set<Object>> entry) {
-
-        return stratumPopulationDef.getSubjectsUnqualified().stream()
-                .collect(Collectors.toUnmodifiableSet())
-                .contains(entry.getKey());
     }
 
     private int getCountFromGroupPopulation(

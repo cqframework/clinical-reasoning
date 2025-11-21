@@ -4,7 +4,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -59,14 +58,10 @@ public interface ResourceLoader {
 
     @SuppressWarnings("java:S112")
     default String stringFromResource(String location) {
-        InputStream is = null;
-        try {
-            File f = new File(location);
-            if (f.isFile()) {
-                is = new FileInputStream(location);
-            } else {
-                is = getRelativeClass().getResourceAsStream(location);
-            }
+
+        File f = new File(location);
+        try (var is =
+                f.exists() ? new FileInputStream(location) : getRelativeClass().getResourceAsStream(location)) {
             return IOUtils.toString(is, StandardCharsets.UTF_8);
         } catch (Exception e) {
             throw new RuntimeException("Error loading resource from %s".formatted(location), e);

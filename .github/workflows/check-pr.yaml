@@ -11,36 +11,46 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  maven:
+  gradle:
     strategy:
         matrix:
           os: [ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/cache@v4
+      - name: Cache FHIR packages
+        uses: actions/cache@v4
         with:
           path: ~/.fhir
           key: ${{ runner.os }}-fhir-${{ hashFiles('**/*.*') }}
           restore-keys: |
             ${{ runner.os }}-fhir-
+      - name: Cache SonarQube packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
       - uses: actions/setup-java@v4
         with:
             distribution: 'temurin'
             java-version: '21'
-            cache: 'maven'
+            cache: 'gradle'
+      # Skip spotlessCheck since it is checked in a separate workflow
       - name: Compile
-        run: ./mvnw --batch-mode --no-transfer-progress --update-snapshots -T 4 package -DskipTests=true
-      - name: Tests and additional checks
-        run: ./mvnw --batch-mode --no-transfer-progress -T 4 verify -Ppackage
+        run: ./gradlew compileJava compileTestJava -x spotlessCheck
+      # Linux does full check including SonarQube, Windows only runs tests
+      - name: Tests and additional checks (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: ./gradlew check sonar -x spotlessCheck
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      - name: Tests only (Windows)
+        if: matrix.os == 'windows-latest'
+        run: ./gradlew test -x spotlessCheck
       - name: Publish test report
         uses: mikepenz/action-junit-report@v4
         if: (success() || failure()) && matrix.os == 'ubuntu-latest'
         with:
-          report_paths: "**/target/surefire-reports/TEST-*.xml"
+          report_paths: "**/build/test-results/test/TEST-*.xml"
           job_name: "Check PR"
-      - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v4
-        if: matrix.os == 'ubuntu-latest'
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

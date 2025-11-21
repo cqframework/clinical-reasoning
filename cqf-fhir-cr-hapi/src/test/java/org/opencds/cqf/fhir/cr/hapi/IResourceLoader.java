@@ -126,7 +126,14 @@ public interface IResourceLoader extends IDaoRegistryUser {
                 org.springframework.core.io.Resource resource = resourceLoader.getResource(theLocation);
                 is = resource.getInputStream();
             }
-            return IOUtils.toString(is, StandardCharsets.UTF_8);
+            try {
+                return IOUtils.toString(is, StandardCharsets.UTF_8);
+            } catch (Exception e) {
+                if (is != null) {
+                    is.close();
+                }
+                throw e;
+            }
         } catch (Exception e) {
             throw new RuntimeException("Error loading resource from %s".formatted(theLocation), e);
         }

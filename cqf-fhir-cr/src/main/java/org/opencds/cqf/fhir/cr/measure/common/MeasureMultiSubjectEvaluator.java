@@ -289,6 +289,39 @@ public class MeasureMultiSubjectEvaluator {
     /**
      * Calculate the intersection between stratifier results and population results for criteria-based stratifiers.
      * Moved from R4StratifierBuilder.getStratumCountUpper by Claude Sonnet 4.5.
+     *
+     * Example:
+     * *population*:
+     *
+     * patient2
+     *     Encounter/enc_in_progress_pat2_1
+     *     Encounter/enc_triaged_pat2_1
+     *     Encounter/enc_planned_pat2_1
+     *     Encounter/enc_in_progress_pat2_2
+     *     Encounter/enc_finished_pat2_1
+     *
+     *  patient1
+     *     Encounter/enc_triaged_pat1_1
+     *     Encounter/enc_planned_pat1_1
+     *     Encounter/enc_in_progress_pat1_1
+     *     Encounter/enc_finished_pat1_1
+     *
+     * *stratifier*:
+     *   patient2
+     *       Encounter/enc_in_progress_pat2_2
+     *       Encounter/enc_in_progress_pat2_1
+     *
+     *   patient1
+     *       Encounter/enc_in_progress_pat1_1
+     *
+     *   patient2:  intersection:   enc_in_progress_pat2_2, enc_in_progress_pat2_1
+     *   patient1:  intersection:   enc_in_progress_pat1_1
+     *
+     *   result:
+     *
+     *   enc_in_progress_pat2_2, enc_in_progress_pat2_1, enc_in_progress_pat1_1
+     *
+     *   count: 3
      */
     // Moved from R4StratifierBuilder by Claude Sonnet 4.5
     private static Set<Object> calculateCriteriaStratifierIntersection(
@@ -308,6 +341,7 @@ public class MeasureMultiSubjectEvaluator {
                     Sets.intersection(populationResultsPerSubject, stratifierResultsPerSubject));
         }
 
+        // We add up all the results of the intersections here:
         return new HashSetForFhirResourcesAndCqlTypes<>(allPopulationStratumIntersectingResources);
     }
 

@@ -5,20 +5,13 @@ import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.CQFM_CAR
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.CQFM_SCORING_EXT_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_CQFM_AGGREGATE_METHOD_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_CQFM_CRITERIA_REFERENCE;
-import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.FHIR_ALL_TYPES_SYSTEM_URL;
-import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.IMPROVEMENT_NOTATION_SYSTEM_DECREASE;
-import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.IMPROVEMENT_NOTATION_SYSTEM_INCREASE;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_EXTENSION;
-import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.SDE_USAGE_CODE;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableList.Builder;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import org.apache.commons.collections4.CollectionUtils;
@@ -112,7 +105,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                 conceptToConceptDef(group.getCode()),
                 stratifiers,
                 mergePopulations(populationsWithCriteriaReference, optPopulationDefDateOfCompliance.orElse(null)),
-                getScoringDef(measure, measureScoring, groupScoring),
+                getScoringDef(measure.getUrl(), measureScoring, groupScoring),
                 hasGroupImpNotation,
                 getImprovementNotation(measureImpNotation, groupImpNotation),
                 getPopulationBasisDef(measureBasis, groupBasis));
@@ -120,18 +113,6 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
 
     private void checkIds(MeasureGroupComponent group) {
         group.getPopulation().forEach(R4MeasureDefBuilder::checkId);
-    }
-
-    private List<PopulationDef> mergePopulations(
-            List<PopulationDef> populationsWithCriteriaReference, @Nullable PopulationDef populationDef) {
-
-        final Builder<PopulationDef> immutableListBuilder = ImmutableList.builder();
-
-        immutableListBuilder.addAll(populationsWithCriteriaReference);
-
-        Optional.ofNullable(populationDef).ifPresent(immutableListBuilder::add);
-
-        return immutableListBuilder.build();
     }
 
     @Nonnull
@@ -317,25 +298,14 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
             checkId(s);
             checkSDEUsage(measure, s);
         }
+
+        // Create instance to call instance methods
+        var builder = new R4MeasureDefBuilder();
+
         // scoring
-        getMeasureScoring(measure);
+        builder.getMeasureScoring(measure);
 
-        validateMeasureImprovementNotation(measure);
-    }
-
-    private PopulationDef checkPopulationForCode(
-            List<PopulationDef> populations, MeasurePopulationType measurePopType) {
-        return populations.stream()
-                .filter(e -> e.code().first().code().equals(measurePopType.toCode()))
-                .findAny()
-                .orElse(null);
-    }
-
-    private ConceptDef totalConceptDefCreator(MeasurePopulationType measurePopulationType) {
-        return new ConceptDef(
-                Collections.singletonList(
-                        new CodeDef(measurePopulationType.getSystem(), measurePopulationType.toCode())),
-                null);
+        builder.validateMeasureImprovementNotation(measure);
     }
 
     private static void checkSDEUsage(
@@ -378,36 +348,9 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         }
     }
 
-    private static MeasureScoring getMeasureScoring(Measure measure, @Nullable String scoringCode) {
-        if (scoringCode != null) {
-            var code = MeasureScoring.fromCode(scoringCode);
-            if (code == null) {
-                throw new InvalidRequestException(
-                        "Measure Scoring code: %s, is not a valid Measure Scoring Type for measure: %s."
-                                .formatted(scoringCode, measure.getUrl()));
-            } else {
-                return code;
-            }
-        }
-        return null;
-    }
-
-    private static MeasureScoring getMeasureScoring(Measure measure) {
+    private MeasureScoring getMeasureScoring(Measure measure) {
         var scoringCode = measure.getScoring().getCodingFirstRep().getCode();
-        return getMeasureScoring(measure, scoringCode);
-    }
-
-    private static void validateImprovementNotationCode(Measure measure, CodeDef improvementNotation) {
-        var code = improvementNotation.code();
-        var system = improvementNotation.system();
-        boolean hasValidSystem = system.equals(MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM);
-        boolean hasValidCode =
-                IMPROVEMENT_NOTATION_SYSTEM_INCREASE.equals(code) || IMPROVEMENT_NOTATION_SYSTEM_DECREASE.equals(code);
-        if (!hasValidCode || !hasValidSystem) {
-            throw new InvalidRequestException(
-                    "ImprovementNotation Coding has invalid System: %s, code: %s, combination for Measure: %s"
-                            .formatted(system, code, measure.getUrl()));
-        }
+        return getMeasureScoring(measure.getUrl(), scoringCode);
     }
 
     public CodeDef getMeasureBasis(Measure measure) {
@@ -433,19 +376,19 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
             var codeDef = new CodeDef(
                     improvementNotationValue.getCodingFirstRep().getSystem(),
                     improvementNotationValue.getCodingFirstRep().getCode());
-            validateImprovementNotationCode(measure, codeDef);
+            validateImprovementNotationCode(measure.getUrl(), codeDef);
             return codeDef;
         }
         return null;
     }
 
-    private static void validateMeasureImprovementNotation(Measure measure) {
+    private void validateMeasureImprovementNotation(Measure measure) {
         if (measure.hasImprovementNotation()) {
             var improvementNotationValue = measure.getImprovementNotation();
             var codeDef = new CodeDef(
                     improvementNotationValue.getCodingFirstRep().getSystem(),
                     improvementNotationValue.getCodingFirstRep().getCode());
-            validateImprovementNotationCode(measure, codeDef);
+            validateImprovementNotationCode(measure.getUrl(), codeDef);
         }
     }
 
@@ -457,7 +400,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                 var codeDef = new CodeDef(
                         coding.getCodingFirstRep().getSystem(),
                         coding.getCodingFirstRep().getCode());
-                validateImprovementNotationCode(measure, codeDef);
+                validateImprovementNotationCode(measure.getUrl(), codeDef);
                 return codeDef;
             }
         }
@@ -470,7 +413,8 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
             var extVal = ext.getValue();
             assert extVal instanceof CodeableConcept;
             CodeableConcept coding = (CodeableConcept) extVal;
-            return getMeasureScoring(measure, coding.getCodingFirstRep().getCode());
+            return getMeasureScoring(
+                    measure.getUrl(), coding.getCodingFirstRep().getCode());
         }
         return null;
     }
@@ -482,39 +426,5 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
             return makeCodeDefFromExtension(ext);
         }
         return null;
-    }
-
-    private MeasureScoring getScoringDef(Measure measure, MeasureScoring measureScoring, MeasureScoring groupScoring) {
-        if (groupScoring == null && measureScoring == null) {
-            throw new InvalidRequestException(
-                    "MeasureScoring must be specified on Group or Measure for Measure: " + measure.getUrl());
-        }
-        if (groupScoring != null) {
-            return groupScoring;
-        }
-        return measureScoring;
-    }
-
-    private CodeDef getPopulationBasisDef(@Nullable CodeDef measureBasis, @Nullable CodeDef groupBasis) {
-        if (measureBasis == null && groupBasis == null) {
-            // default basis, if not defined
-            return new CodeDef(FHIR_ALL_TYPES_SYSTEM_URL, "boolean");
-        }
-        return defaultCodeDef(groupBasis, measureBasis);
-    }
-
-    private CodeDef getImprovementNotation(@Nullable CodeDef measureImpNotation, @Nullable CodeDef groupImpNotation) {
-        if (measureImpNotation == null && groupImpNotation == null) {
-            // default Improvement Notation, if not defined
-            return new CodeDef(MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM, IMPROVEMENT_NOTATION_SYSTEM_INCREASE);
-        }
-        return defaultCodeDef(groupImpNotation, measureImpNotation);
-    }
-
-    private CodeDef defaultCodeDef(@Nullable CodeDef code, @Nullable CodeDef codeDefault) {
-        if (code != null) {
-            return code;
-        }
-        return codeDefault;
     }
 }

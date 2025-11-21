@@ -81,6 +81,22 @@ public class GroupDef {
         return this.populationIndex.computeIfAbsent(type, x -> Collections.emptyList());
     }
 
+    // Extracted from R4MeasureReportBuilder.getReportPopulation() by Claude Sonnet 4.5
+    public PopulationDef findPopulationByType(MeasurePopulationType type) {
+        return this.populations.stream()
+                .filter(e -> e.code().first().code().equals(type.toCode()))
+                .findAny()
+                .orElse(null);
+    }
+
+    // Extracted from R4MeasureReportBuilder.buildGroup() loop by Claude Sonnet 4.5
+    public PopulationDef findPopulationById(String id) {
+        return this.populations.stream()
+                .filter(p -> p.id().equals(id))
+                .findFirst()
+                .orElse(null);
+    }
+
     private Map<MeasurePopulationType, List<PopulationDef>> index(List<PopulationDef> populations) {
         return populations.stream().collect(Collectors.groupingBy(PopulationDef::type));
     }

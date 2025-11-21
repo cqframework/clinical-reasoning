@@ -104,6 +104,19 @@ public class PopulationDef {
                 .toList();
     }
 
+    // Extracted from R4MeasureReportBuilder.countObservations() by Claude Sonnet 4.5
+    public int countObservations() {
+        if (this.getAllSubjectResources() == null) {
+            return 0;
+        }
+
+        return this.getAllSubjectResources().stream()
+                .filter(Map.class::isInstance)
+                .map(Map.class::cast)
+                .mapToInt(Map::size)
+                .sum();
+    }
+
     @Nullable
     public String getCriteriaReference() {
         return this.criteriaReference;

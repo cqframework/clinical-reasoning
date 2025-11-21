@@ -9,6 +9,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.*;
 import org.opencds.cqf.fhir.cr.crmi.TransformProperties;
 import org.opencds.cqf.fhir.cr.ecr.FhirResourceExistsException;
@@ -319,7 +320,8 @@ public class R4ImportBundleProducer {
         return concept.getCodingFirstRep().getCode();
     }
 
-    private static boolean doesResourceExist(String url, String version, Class resourceType, IRepository repository) {
+    private static boolean doesResourceExist(
+            String url, String version, Class<? extends IBaseResource> resourceType, IRepository repository) {
         try {
             var searchParams = version == null ? Searches.byUrl(url) : Searches.byUrlAndVersion(url, version);
             var searchResult = repository.search(Bundle.class, resourceType, searchParams);

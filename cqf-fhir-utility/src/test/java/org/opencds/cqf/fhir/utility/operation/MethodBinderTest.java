@@ -266,7 +266,11 @@ class MethodBinderTest {
             }
         }
 
-        var method = ConflictingAnnotation.class.getDeclaredMethods()[0];
+        Method method = Arrays.stream(ConflictingAnnotation.class.getDeclaredMethods())
+                .filter(m -> m.getName().equals("function"))
+                .findFirst()
+                .orElseThrow();
+
         var e = assertThrows(IllegalArgumentException.class, () -> new MethodBinder(method));
         assertTrue(e.getMessage().contains("one of"));
     }

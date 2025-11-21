@@ -15,6 +15,7 @@ import org.opencds.cqf.fhir.cr.hapi.common.IPlanDefinitionProcessorFactory;
 import org.opencds.cqf.fhir.cr.hapi.common.IQuestionnaireProcessorFactory;
 import org.opencds.cqf.fhir.cr.hapi.common.IQuestionnaireResponseProcessorFactory;
 import org.opencds.cqf.fhir.cr.hapi.common.IValueSetProcessorFactory;
+import org.opencds.cqf.fhir.cr.hapi.common.NpmRepositoryFactory;
 import org.opencds.cqf.fhir.cr.implementationguide.ImplementationGuideProcessor;
 import org.opencds.cqf.fhir.cr.library.LibraryProcessor;
 import org.opencds.cqf.fhir.cr.plandefinition.PlanDefinitionProcessor;
@@ -36,6 +37,11 @@ public class CrProcessorConfig {
     }
 
     @Bean
+    NpmRepositoryFactory npmRepositoryFactory() {
+        return new NpmRepositoryFactory();
+    }
+
+    @Bean
     IImplementationGuideProcessorFactory implementationGuideProcessorFactory(IRepositoryFactory repositoryFactory) {
         return rd -> new ImplementationGuideProcessor(repositoryFactory.create(rd));
     }
@@ -49,7 +55,14 @@ public class CrProcessorConfig {
     @Bean
     IQuestionnaireProcessorFactory questionnaireProcessorFactory(
             IRepositoryFactory repositoryFactory, CrSettings crSettings) {
-        return rd -> new QuestionnaireProcessor(repositoryFactory.create(rd), crSettings);
+
+        return rd -> QuestionnaireProcessor.builder(repositoryFactory.create(rd))
+                .setCrSettings(crSettings)
+                .setINpmRepository(npmRepositoryFactory().getNpmRepository())
+                .build();
+
+//        return rd -> new QuestionnaireProcessor(repositoryFactory.create(rd),
+//            npmRepositoryFactory().getNpmRepository(), crSettings, null);
     }
 
     @Bean

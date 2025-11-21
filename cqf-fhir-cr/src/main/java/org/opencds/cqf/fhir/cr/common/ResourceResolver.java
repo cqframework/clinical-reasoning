@@ -19,7 +19,7 @@ public class ResourceResolver {
     final String invalidResourceType = "The resource passed in was not a valid instance of %s.class";
     final String resourceType;
     final IRepository repository;
-    final Class<? extends IBaseResource> clazz;
+    protected final Class<? extends IBaseResource> clazz;
     final Class<? extends IBaseBundle> bundleClazz;
 
     @SuppressWarnings("unchecked")

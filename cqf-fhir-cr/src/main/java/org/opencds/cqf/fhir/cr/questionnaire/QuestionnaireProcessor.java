@@ -20,6 +20,7 @@ import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.CrSettings;
 import org.opencds.cqf.fhir.cr.common.DataRequirementsProcessor;
 import org.opencds.cqf.fhir.cr.common.IDataRequirementsProcessor;
+import org.opencds.cqf.fhir.cr.common.INpmRepository;
 import org.opencds.cqf.fhir.cr.common.IOperationProcessor;
 import org.opencds.cqf.fhir.cr.common.IPackageProcessor;
 import org.opencds.cqf.fhir.cr.common.PackageProcessor;
@@ -30,6 +31,7 @@ import org.opencds.cqf.fhir.cr.questionnaire.generate.IGenerateProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.populate.IPopulateProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.populate.PopulateProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.populate.PopulateRequest;
+import org.opencds.cqf.fhir.cr.questionnaire.populate.ResourceResolverWithNpmBacking;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.monad.Either3;
@@ -48,6 +50,50 @@ public class QuestionnaireProcessor {
     protected IPackageProcessor packageProcessor;
     protected IDataRequirementsProcessor dataRequirementsProcessor;
     protected IPopulateProcessor populateProcessor;
+    protected INpmRepository npmRepository;
+
+    public static class Builder {
+        private final IRepository repository;
+
+        private CrSettings crSettings = CrSettings.getDefault();
+
+        private INpmRepository npmRepository;
+
+        private List<? extends IOperationProcessor> operationProcessors;
+
+        Builder(IRepository repository) {
+            this.repository = repository;
+        }
+
+        public Builder setCrSettings(CrSettings crSettings) {
+            this.crSettings = crSettings;
+            return this;
+        }
+
+        public Builder setINpmRepository(INpmRepository npmRepository) {
+            this.npmRepository = npmRepository;
+            return this;
+        }
+
+        public Builder setIOperationProcessors(
+            List<? extends IOperationProcessor> operationProcessors) {
+            this.operationProcessors = operationProcessors;
+            return this;
+        }
+
+        public QuestionnaireProcessor build() {
+            return new QuestionnaireProcessor(
+                repository,
+                npmRepository,
+                crSettings,
+                operationProcessors
+            );
+        }
+    }
+
+    public static QuestionnaireProcessor.Builder builder(IRepository repository) {
+        return new Builder(repository);
+    }
 
     public QuestionnaireProcessor(IRepository repository) {
         this(repository, CrSettings.getDefault());
@@ -57,13 +103,19 @@ public class QuestionnaireProcessor {
         this(repository, crSettings, null);
     }
 
+    public QuestionnaireProcessor(IRepository repository, CrSettings crSettings, List<? extends IOperationProcessor> opProcessors) {
+        this(repository, null, crSettings, opProcessors);
+    }
+
     public QuestionnaireProcessor(
-            IRepository repository, CrSettings crSettings, List<? extends IOperationProcessor> operationProcessors) {
+            IRepository repository,
+            INpmRepository npmRepository,
+            CrSettings crSettings,
+            List<? extends IOperationProcessor> operationProcessors) {
         this.repository = requireNonNull(repository, "repository can not be null");
         this.crSettings = requireNonNull(crSettings, "evaluationSettings can not be null");
-        this.questionnaireResolver = new ResourceResolver("Questionnaire", this.repository);
-        this.structureDefResolver = new ResourceResolver("StructureDefinition", this.repository);
         fhirVersion = this.repository.fhirContext().getVersion().getVersion();
+        this.npmRepository = npmRepository;
         modelResolver = FhirModelResolverCache.resolverForVersion(fhirVersion);
         if (operationProcessors != null && !operationProcessors.isEmpty()) {
             operationProcessors.forEach(p -> {
@@ -81,6 +133,13 @@ public class QuestionnaireProcessor {
                 }
             });
         }
+
+        this.questionnaireResolver = new ResourceResolverWithNpmBacking(
+            "Questionnaire", repository, npmRepository
+        );
+        this.structureDefResolver = new ResourceResolverWithNpmBacking(
+            "StructureDefinition", repository, npmRepository
+        );
     }
 
     public CrSettings getSettings() {
@@ -142,6 +201,12 @@ public class QuestionnaireProcessor {
         return generateQuestionnaire(profile, supportedOnly, requiredOnly, id);
     }
 
+    private IRepository createProxyRepoForNpmResourceLookup() {
+//        return proxy(new ComboProxyRepo(repository.fhirContext(), npmRepository, repository),
+//            null, null);
+        return repository;
+    }
+
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource generateQuestionnaire(
             Either3<C, IIdType, R> profile, boolean supportedOnly, boolean requiredOnly, String id) {
         return generateQuestionnaire(profile, supportedOnly, requiredOnly, id, null);
@@ -159,7 +224,7 @@ public class QuestionnaireProcessor {
                 requiredOnly,
                 libraryEngine != null
                         ? libraryEngine
-                        : new LibraryEngine(repository, crSettings.getEvaluationSettings()),
+                        : new LibraryEngine(createProxyRepoForNpmResourceLookup(), crSettings.getEvaluationSettings()),
                 modelResolver);
         return generateQuestionnaire(request, id);
     }
@@ -216,7 +281,7 @@ public class QuestionnaireProcessor {
                 data,
                 libraryEngine != null
                         ? libraryEngine
-                        : new LibraryEngine(repository, crSettings.getEvaluationSettings()),
+                        : new LibraryEngine(createProxyRepoForNpmResourceLookup(), crSettings.getEvaluationSettings()),
                 modelResolver);
     }
 
@@ -259,7 +324,7 @@ public class QuestionnaireProcessor {
                 context,
                 launchContext,
                 data,
-                new LibraryEngine(repository, crSettings.getEvaluationSettings()));
+                new LibraryEngine(createProxyRepoForNpmResourceLookup(), crSettings.getEvaluationSettings()));
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource populate(
@@ -269,6 +334,7 @@ public class QuestionnaireProcessor {
             IBaseExtension<?, ?> launchContext,
             IBaseBundle data,
             LibraryEngine libraryEngine) {
+        // TODO - edit here
         return populate(resolveQuestionnaire(questionnaire), subjectId, context, launchContext, data, libraryEngine);
     }
 

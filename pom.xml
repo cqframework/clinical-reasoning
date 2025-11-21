@@ -6,7 +6,7 @@
 
     <groupId>org.opencds.cqf.fhir</groupId>
     <artifactId>cqf-fhir</artifactId>
-    <version>4.0.0-SNAPSHOT</version>
+    <version>4.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>FHIR Clinical Reasoning</name>
     <description>FHIR Clinical Reasoning Implementations</description>
@@ -25,7 +25,7 @@
         <cql.version>4.0.0</cql.version>
         <jmh.version>1.36</jmh.version>
         <spring.version>6.2.12</spring.version>
-        <hapi.version>8.4.0</hapi.version>
+        <hapi.version>8.6.0</hapi.version>
         <picocli.version>4.6.1</picocli.version>
         <guava.version>33.2.1-jre</guava.version>
         <error-prone.version>2.35.1</error-prone.version>
@@ -109,6 +109,13 @@
                 <groupId>org.fhir</groupId>
                 <artifactId>ucum</artifactId>
                 <version>1.0.9</version>
+            </dependency>
+
+            <!-- force kotlin to be single version -->
+            <dependency>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <artifactId>kotlin-stdlib</artifactId>
+                <version>2.0.0</version>
             </dependency>
 
             <!-- CQL dependencies -->

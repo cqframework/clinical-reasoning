@@ -2,7 +2,6 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 
 import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.DATEOFCOMPLIANCE;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL;
-import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_CRITERIA_REFERENCE_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_SDE_REFERENCE_URL;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -10,7 +9,6 @@ import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -24,7 +22,6 @@ import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DomainResource;
-import org.hl7.fhir.r4.model.Element;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.ListResource;
@@ -36,8 +33,6 @@ import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupPopulationComponent;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportStatus;
 import org.hl7.fhir.r4.model.Observation;
-import org.hl7.fhir.r4.model.OperationOutcome;
-import org.hl7.fhir.r4.model.OperationOutcome.IssueType;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ResourceType;
@@ -71,141 +66,6 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         this.measureReportScorer = new R4MeasureReportScorer();
     }
 
-    protected static class BuilderContext {
-        private final Measure measure;
-        private final MeasureDef measureDef;
-        private final MeasureReport measureReport;
-
-        private final HashMap<String, Reference> evaluatedResourceReferences = new HashMap<>();
-        private final HashMap<String, Reference> supplementalDataReferences = new HashMap<>();
-        private final Map<String, Resource> contained = new HashMap<>();
-
-        public BuilderContext(Measure measure, MeasureDef measureDef, MeasureReport measureReport) {
-            this.measure = measure;
-            this.measureDef = measureDef;
-            this.measureReport = measureReport;
-        }
-
-        // For error messages:
-        public String getMeasureUrl() {
-            return this.measure.getUrl();
-        }
-
-        public Map<String, Resource> contained() {
-            return this.contained;
-        }
-
-        public void addContained(Resource r) {
-            this.contained.putIfAbsent(this.getId(r), r);
-        }
-
-        public Measure measure() {
-            return this.measure;
-        }
-
-        public MeasureReport report() {
-            return this.measureReport;
-        }
-
-        public MeasureDef measureDef() {
-            return this.measureDef;
-        }
-
-        public Map<String, Reference> evaluatedResourceReferences() {
-            return this.evaluatedResourceReferences;
-        }
-
-        public Map<String, Reference> supplementalDataReferences() {
-            return this.supplementalDataReferences;
-        }
-
-        public Reference addSupplementalDataReference(String id) {
-            validateReference(id);
-            return this.supplementalDataReferences().computeIfAbsent(id, x -> new Reference(id));
-        }
-
-        public Reference addEvaluatedResourceReference(String id) {
-            validateReference(id);
-            return this.evaluatedResourceReferences().computeIfAbsent(id, x -> new Reference(id));
-        }
-
-        public boolean hasEvaluatedResource(String id) {
-            validateReference(id);
-            return this.evaluatedResourceReferences().containsKey(id);
-        }
-
-        public void addCriteriaExtensionToReference(Reference reference, String criteriaId) {
-            if (criteriaId == null) throw new AssertionError("CriteriaId is required for extension references");
-            var ext = new Extension(EXT_CRITERIA_REFERENCE_URL, new StringType(criteriaId));
-            addExtensionIfNotExists(reference, ext);
-        }
-
-        public void addCriteriaExtensionToSupplementalData(Resource resource, String criteriaId) {
-            var id = getId(resource);
-
-            // This is not an evaluated resource, so add it to the contained resources
-            if (!hasEvaluatedResource(id)) {
-                this.addContained(resource);
-                id = "#" + resource.getIdElement().getIdPart();
-            }
-            var ref = addSupplementalDataReference(id);
-            addCriteriaExtensionToReference(ref, criteriaId);
-        }
-
-        public void addCriteriaExtensionToEvaluatedResource(Resource resource, String criteriaId) {
-            var id = getId(resource);
-            var ref = addEvaluatedResourceReference(id);
-            addCriteriaExtensionToReference(ref, criteriaId);
-        }
-
-        private String getId(Resource resource) {
-            return resource.fhirType() + "/" + resource.getIdElement().getIdPart();
-        }
-
-        private void addExtensionIfNotExists(Element element, Extension ext) {
-            for (var e : element.getExtension()) {
-                if (e.getUrl().equals(ext.getUrl()) && e.getValue().equalsShallow(ext.getValue())) {
-                    return;
-                }
-            }
-
-            element.addExtension(ext);
-        }
-
-        private void validateReference(String reference) {
-            // Can't be null
-            if (reference == null) {
-                throw new NullPointerException("validated reference is null");
-            }
-
-            // If it's a contained reference, must be just the Guid and nothing else
-            if (reference.startsWith("#") && reference.contains("/")) {
-                throw new InvalidRequestException("Invalid contained reference: " + reference);
-            }
-
-            // If it's a full reference, it must be type/id and that's it
-            if (!reference.startsWith("#") && reference.split("/").length != 2) {
-                throw new InvalidRequestException("Invalid full reference: " + reference);
-            }
-        }
-
-        public void addOperationOutcomes() {
-            var errorMsgs = this.measureDef.errors();
-            for (var error : errorMsgs) {
-                addContained(createOperationOutcome(error));
-            }
-        }
-
-        private OperationOutcome createOperationOutcome(String errorMsg) {
-            OperationOutcome op = new OperationOutcome();
-            op.addIssue()
-                    .setSeverity(OperationOutcome.IssueSeverity.ERROR)
-                    .setCode(IssueType.EXCEPTION)
-                    .setDiagnostics(errorMsg);
-            return op;
-        }
-    }
-
     @Override
     public MeasureReport build(
             Measure measure,
@@ -216,7 +76,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
         var report = this.createMeasureReport(measure, measureDef, measureReportType, subjectIds, measurementPeriod);
 
-        var bc = new BuilderContext(measure, measureDef, report);
+        var bc = new R4MeasureReportBuilderContext(measure, measureDef, report);
 
         // buildGroups must be run first to set up the builder context to be able to use
         // the evaluatedResource references for SDE processing
@@ -237,7 +97,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         return bc.report();
     }
 
-    private void setReportStatus(BuilderContext bc) {
+    private void setReportStatus(R4MeasureReportBuilderContext bc) {
         if (bc.report().hasContained()
                 && bc.report().getContained().stream()
                         .anyMatch(t -> t.getResourceType().equals(ResourceType.OperationOutcome))) {
@@ -246,7 +106,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         }
     }
 
-    protected void addSupplementalData(BuilderContext bc) {
+    private void addSupplementalData(R4MeasureReportBuilderContext bc) {
         var report = bc.report();
 
         for (Reference r : bc.supplementalDataReferences().values()) {
@@ -254,7 +114,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         }
     }
 
-    protected void addEvaluatedResource(BuilderContext bc) {
+    private void addEvaluatedResource(R4MeasureReportBuilderContext bc) {
         var report = bc.report();
         // Only add evaluated resources to individual reports
         if (report.getType() == org.hl7.fhir.r4.model.MeasureReport.MeasureReportType.INDIVIDUAL) {
@@ -264,7 +124,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         }
     }
 
-    protected void buildGroups(BuilderContext bc) {
+    private void buildGroups(R4MeasureReportBuilderContext bc) {
         var measure = bc.measure();
         var measureDef = bc.measureDef();
         var report = bc.report();
@@ -293,8 +153,8 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                 .orElse(null);
     }
 
-    protected void buildGroup(
-            BuilderContext bc,
+    private void buildGroup(
+            R4MeasureReportBuilderContext bc,
             MeasureGroupComponent measureGroup,
             MeasureReportGroupComponent reportGroup,
             GroupDef groupDef) {
@@ -350,7 +210,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                 || groupDef.measureScoring().equals(MeasureScoring.CONTINUOUSVARIABLE)) {
 
             // add extension to group for
-            if (bc.measureReport.getType().equals(MeasureReport.MeasureReportType.INDIVIDUAL)) {
+            if (bc.report().getType().equals(MeasureReport.MeasureReportType.INDIVIDUAL)) {
                 var docPopDef = getReportPopulation(groupDef, DATEOFCOMPLIANCE);
                 if (docPopDef != null
                         && docPopDef.getAllSubjectResources() != null
@@ -378,14 +238,14 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         }
     }
 
-    protected void addMeasureDescription(MeasureReportGroupComponent reportGroup, MeasureGroupComponent measureGroup) {
+    private void addMeasureDescription(MeasureReportGroupComponent reportGroup, MeasureGroupComponent measureGroup) {
         if (measureGroup.hasDescription()) {
             reportGroup.addExtension(
                     MeasureConstants.EXT_POPULATION_DESCRIPTION_URL, new StringType(measureGroup.getDescription()));
         }
     }
 
-    protected void addExtensionImprovementNotation(MeasureReportGroupComponent reportGroup, GroupDef groupDef) {
+    private void addExtensionImprovementNotation(MeasureReportGroupComponent reportGroup, GroupDef groupDef) {
         // if already set on Measure, don't set on groups too
         if (groupDef.isGroupImprovementNotation()) {
             if (groupDef.isIncreaseImprovementNotation()) {
@@ -406,7 +266,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         }
     }
 
-    protected String getPopulationResourceIds(Object resourceObject) {
+    private String getPopulationResourceIds(Object resourceObject) {
         if (resourceObject instanceof IBaseResource resource) {
             return resource.getIdElement().toVersionless().getValueAsString();
         }
@@ -414,7 +274,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
     }
 
     private void buildPopulation(
-            BuilderContext bc,
+            R4MeasureReportBuilderContext bc,
             MeasureGroupPopulationComponent measurePopulation,
             MeasureReportGroupPopulationComponent reportPopulation,
             PopulationDef populationDef,
@@ -469,7 +329,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         }
     }
 
-    public int countObservations(PopulationDef populationDef) {
+    private int countObservations(PopulationDef populationDef) {
         if (populationDef == null || populationDef.getAllSubjectResources() == null) {
             return 0;
         }
@@ -485,11 +345,11 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         return (ListResource) new ListResource().setId(id);
     }
 
-    protected ListResource createIdList(String id, Collection<String> ids) {
+    private ListResource createIdList(String id, Collection<String> ids) {
         return this.createReferenceList(id, ids.stream().map(Reference::new).collect(Collectors.toList()));
     }
 
-    protected ListResource createReferenceList(String id, Collection<Reference> references) {
+    private ListResource createReferenceList(String id, Collection<Reference> references) {
         ListResource referenceList = createList(id);
         for (Reference reference : references) {
             referenceList.addEntry().setItem(reference);
@@ -498,8 +358,8 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         return referenceList;
     }
 
-    protected void addEvaluatedResourceReferences(
-            BuilderContext bc, String criteriaId, Set<Object> evaluatedResources) {
+    private void addEvaluatedResourceReferences(
+            R4MeasureReportBuilderContext bc, String criteriaId, Set<Object> evaluatedResources) {
         if (evaluatedResources == null || evaluatedResources.isEmpty()) {
             return;
         }
@@ -527,7 +387,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
     // Case 5: population - resource types
     // add sde reference with criteria reference extension for each resource
     // if not an evaluated resource, add to contained
-    protected void buildSDE(BuilderContext bc, SdeDef sde) {
+    private void buildSDE(R4MeasureReportBuilderContext bc, SdeDef sde) {
         var report = bc.report();
 
         // No SDEs were calculated, do nothing
@@ -571,7 +431,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         }
     }
 
-    protected void buildSDEs(BuilderContext bc) {
+    private void buildSDEs(R4MeasureReportBuilderContext bc) {
         var measure = bc.measure();
         var measureDef = bc.measureDef();
         // ASSUMPTION: Measure SDEs are in the same order as MeasureDef SDEs
@@ -600,7 +460,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         return cd;
     }
 
-    protected MeasureReport createMeasureReport(
+    private MeasureReport createMeasureReport(
             Measure measure,
             MeasureDef measureDef,
             MeasureReportType type,
@@ -635,7 +495,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         return report;
     }
 
-    protected Extension createMeasureInfoExtension(MeasureInfo measureInfo) {
+    private Extension createMeasureInfoExtension(MeasureInfo measureInfo) {
 
         Extension extExtMeasure =
                 new Extension().setUrl(MeasureInfo.MEASURE).setValue(new CanonicalType(measureInfo.getMeasure()));
@@ -681,8 +541,8 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         return measureUsageConcept;
     }
 
-    protected DomainResource createPopulationObservation(
-            BuilderContext bc,
+    private DomainResource createPopulationObservation(
+            R4MeasureReportBuilderContext bc,
             String id,
             String populationId,
             Coding valueCoding,
@@ -705,8 +565,12 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         return obs;
     }
 
-    protected DomainResource createPatientObservation(
-            BuilderContext bc, String id, String populationId, Coding valueCoding, CodeableConcept originalConcept) {
+    private DomainResource createPatientObservation(
+            R4MeasureReportBuilderContext bc,
+            String id,
+            String populationId,
+            Coding valueCoding,
+            CodeableConcept originalConcept) {
 
         Observation obs = createObservation(bc, id, populationId);
 
@@ -718,7 +582,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         return obs;
     }
 
-    protected Observation createObservation(BuilderContext bc, String id, String populationId) {
+    private Observation createObservation(R4MeasureReportBuilderContext bc, String id, String populationId) {
         var measure = bc.measure();
         MeasureInfo measureInfo = new MeasureInfo()
                 .withMeasure(
@@ -738,7 +602,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         return obs;
     }
 
-    protected Observation createMeasureObservation(BuilderContext bc, String id, String observationName) {
+    private Observation createMeasureObservation(R4MeasureReportBuilderContext bc, String id, String observationName) {
         Observation obs = this.createObservation(bc, id, observationName);
         CodeableConcept cc = new CodeableConcept();
         cc.setText(observationName);

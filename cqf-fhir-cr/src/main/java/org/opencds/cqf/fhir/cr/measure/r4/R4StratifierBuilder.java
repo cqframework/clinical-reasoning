@@ -28,7 +28,6 @@ import org.opencds.cqf.fhir.cr.measure.common.StratumPopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumValueDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumValueWrapper;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
-import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureReportBuilder.BuilderContext;
 
 /**
  * Convenience class with functionality split out from {@link R4MeasureReportBuilder} to
@@ -42,7 +41,7 @@ class R4StratifierBuilder {
     }
 
     static void buildStratifier(
-            BuilderContext bc,
+            R4MeasureReportBuilderContext bc,
             MeasureGroupStratifierComponent measureStratifier,
             MeasureReportGroupStratifierComponent reportStratifier,
             StratifierDef stratifierDef,
@@ -62,7 +61,7 @@ class R4StratifierBuilder {
     }
 
     private static void buildMultipleStratum(
-            BuilderContext bc,
+            R4MeasureReportBuilderContext bc,
             MeasureReportGroupStratifierComponent reportStratifier,
             StratifierDef stratifierDef,
             List<MeasureGroupPopulationComponent> populations,
@@ -76,7 +75,7 @@ class R4StratifierBuilder {
     }
 
     private static void componentStratifier(
-            BuilderContext bc,
+            R4MeasureReportBuilderContext bc,
             StratifierDef stratifierDef,
             MeasureReportGroupStratifierComponent reportStratifier,
             List<MeasureGroupPopulationComponent> populations,
@@ -98,7 +97,7 @@ class R4StratifierBuilder {
     }
 
     private static void nonComponentStratifier(
-            BuilderContext bc,
+            R4MeasureReportBuilderContext bc,
             StratifierDef stratifierDef,
             MeasureReportGroupStratifierComponent reportStratifier,
             List<MeasureGroupPopulationComponent> populations,
@@ -141,7 +140,7 @@ class R4StratifierBuilder {
     }
 
     private static void buildStratumOuter(
-            BuilderContext bc,
+            R4MeasureReportBuilderContext bc,
             StratifierDef stratifierDef,
             StratumDef stratumDef,
             MeasureReportGroupStratifierComponent reportStratifier,
@@ -162,7 +161,7 @@ class R4StratifierBuilder {
     }
 
     private static void buildStratum(
-            BuilderContext bc,
+            R4MeasureReportBuilderContext bc,
             StratifierDef stratifierDef,
             StratumDef stratumDef,
             StratifierGroupComponent stratum,
@@ -255,7 +254,7 @@ class R4StratifierBuilder {
     // the provided list of subjectIds
     // Simplified by Claude Sonnet 4.5 to use calculated values from StratumPopulationDef
     private static void buildStratumPopulation(
-            BuilderContext bc,
+            R4MeasureReportBuilderContext bc,
             StratifierDef stratifierDef,
             StratumPopulationDef stratumPopulationDef,
             StratifierGroupPopulationComponent sgpc,
@@ -291,14 +290,13 @@ class R4StratifierBuilder {
         if (groupDef.isBooleanBasis()) {
             buildBooleanBasisStratumPopulation(bc, sgpc, subjectsQualifiedOrUnqualified);
         } else {
-            buildResourceBasisStratumPopulation(
-                    bc, sgpc, stratumPopulationDef.resourceIdsForSubjectList());
+            buildResourceBasisStratumPopulation(bc, sgpc, stratumPopulationDef.resourceIdsForSubjectList());
         }
     }
 
     // Simplified by Claude Sonnet 4.5 to use pre-calculated counts from StratumPopulationDef
     private static void buildBooleanBasisStratumPopulation(
-            BuilderContext bc,
+            R4MeasureReportBuilderContext bc,
             StratifierGroupPopulationComponent sgpc,
             Set<String> subjectIdsCommonToPopulation) {
 
@@ -314,9 +312,7 @@ class R4StratifierBuilder {
 
     // Simplified by Claude Sonnet 4.5 to use pre-calculated resource IDs from StratumPopulationDef
     private static void buildResourceBasisStratumPopulation(
-            BuilderContext bc,
-            StratifierGroupPopulationComponent sgpc,
-            List<String> resourceIds) {
+            R4MeasureReportBuilderContext bc, StratifierGroupPopulationComponent sgpc, List<String> resourceIds) {
 
         if (resourceIds.isEmpty()) {
             return;
@@ -330,7 +326,6 @@ class R4StratifierBuilder {
             sgpc.setSubjectResults(new Reference("#" + popSubjectList.getId()));
         }
     }
-
 
     protected static ListResource createIdList(String id, Collection<String> ids) {
         return createReferenceList(id, ids.stream().map(Reference::new).toList());

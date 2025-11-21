@@ -92,8 +92,7 @@ public class MeasureMultiSubjectEvaluator {
         return new StratumDef(
                 stratumText,
                 populationDefs.stream()
-                        .map(popDef -> buildStratumPopulationDef(
-                                stratifierDef, popDef, subjectIds, groupDef))
+                        .map(popDef -> buildStratumPopulationDef(stratifierDef, popDef, subjectIds, groupDef))
                         .toList(),
                 values,
                 subjectIds);
@@ -101,10 +100,7 @@ public class MeasureMultiSubjectEvaluator {
 
     // Enhanced by Claude Sonnet 4.5 to calculate and populate all StratumPopulationDef fields
     private static StratumPopulationDef buildStratumPopulationDef(
-            StratifierDef stratifierDef,
-            PopulationDef populationDef,
-            List<String> subjectIds,
-            GroupDef groupDef) {
+            StratifierDef stratifierDef, PopulationDef populationDef, List<String> subjectIds, GroupDef groupDef) {
         // population subjectIds
         var popSubjectIds = populationDef.getSubjects().stream()
                 .map(R4ResourceIdUtils::addPatientQualifier)

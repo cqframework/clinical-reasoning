@@ -5,7 +5,9 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-// LUKETODO: javadoc
+/**
+ * Utility class for handling FHIR resource ID formatting, including detection and removal of resource type qualifiers.
+ */
 public class ResourceIdUtils {
 
     private static final Pattern PATTERN_SLASH = Pattern.compile("/");

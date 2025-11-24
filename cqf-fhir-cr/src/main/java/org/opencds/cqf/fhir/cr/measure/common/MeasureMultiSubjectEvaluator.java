@@ -23,7 +23,9 @@ import org.opencds.cqf.fhir.cr.measure.r4.utils.R4ResourceIdUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-// LUKETODO:  javadoc
+/**
+ * Aggregates individual subject evaluation results into stratum definitions for measure reporting across multiple subjects.
+ */
 public class MeasureMultiSubjectEvaluator {
 
     private static final Logger logger = LoggerFactory.getLogger(MeasureMultiSubjectEvaluator.class);

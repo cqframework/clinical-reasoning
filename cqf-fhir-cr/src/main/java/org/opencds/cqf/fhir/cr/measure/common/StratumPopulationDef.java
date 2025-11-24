@@ -1,8 +1,8 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
+import jakarta.annotation.Nonnull;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
@@ -52,26 +52,27 @@ public record StratumPopulationDef(
         return resourceIdsForSubjectList.size();
     }
 
+    @Nonnull
     @Override
     public String toString() {
         return "StratumPopulationDef{"
                 + "id='" + id + '\''
                 + ", measureStratifierType=" + measureStratifierType
                 + ", populationBasis=" + populationBasis.code()
-                + ", subjectsQualifiedOrUnqualified=" + limitCollection(subjectsQualifiedOrUnqualified, 5)
-                + ", resourceIdsForSubjectList=" + limitCollection(resourceIdsForSubjectList, 5)
+                + ", subjectsQualifiedOrUnqualified=" + limitCollection(subjectsQualifiedOrUnqualified)
+                + ", resourceIdsForSubjectList=" + limitCollection(resourceIdsForSubjectList)
                 + ", populationDefEvaluationResultIntersection=" + formatEvaluationResults()
                 + '}';
     }
 
-    private static <T> String limitCollection(Iterable<T> collection, int limit) {
+    private static <T> String limitCollection(Iterable<T> collection) {
         if (collection == null) {
             return "null";
         }
         var iterator = collection.iterator();
         var items = new java.util.ArrayList<T>();
         int count = 0;
-        while (iterator.hasNext() && count < limit) {
+        while (iterator.hasNext() && count < 5) {
             items.add(iterator.next());
             count++;
         }
@@ -98,7 +99,7 @@ public record StratumPopulationDef(
                         return obj.toString();
                     }
                 })
-                .collect(Collectors.toList());
+                .toList();
 
         String result = limited.toString();
         if (populationDefEvaluationResultIntersection.size() > 5) {

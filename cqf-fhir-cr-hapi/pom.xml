@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.opencds.cqf.fhir</groupId>
         <artifactId>cqf-fhir</artifactId>
-        <version>4.0.1-SNAPSHOT</version>
+        <version>4.1.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>cqf-fhir-cr-hapi</artifactId>
@@ -190,6 +190,7 @@
                                                     <include>org.opencds.cqf:*</include>
                                                     <include>org.opencds.cqf.cql:*</include>
                                                     <include>org.opencds.cqf.fhir:*</include>
+                                                    <include>info.cqframework:*</include>
                                                     <include>org.cqframework:*</include>
                                                 </includes>
                                             </requireReleaseDeps>

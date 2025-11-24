@@ -147,6 +147,14 @@ public class MeasureEvaluationResultHandler {
                                 resultsBuilder.addErrors(measureDefs, error);
                                 logger.error(error, exception);
                             });
+
+                    Optional.ofNullable(evaluationResultsForMultiLib.getWarningFor(libraryVersionedIdentifier))
+                            .ifPresent(exception -> {
+                                var warning = EXCEPTION_FOR_SUBJECT_ID_MESSAGE_TEMPLATE.formatted(
+                                        subjectId, exception.getMessage());
+                                resultsBuilder.addWarnings(measureDefs, warning);
+                                logger.error(warning, exception);
+                            });
                 }
 
             } catch (Exception e) {

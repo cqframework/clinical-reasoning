@@ -22,6 +22,8 @@ class CompositeEvaluationResultsPerMeasureTest {
                 new IdType(ResourceType.Measure.name(), "measureOne"), "http://example.com/Measure/one");
         var measureDef2 = MeasureDef.fromIdAndUrl(
                 new IdType(ResourceType.Measure.name(), "measureTwo"), "http://example.com/Measure/two");
+        var measureDef3 = MeasureDef.fromIdAndUrl(
+                new IdType(ResourceType.Measure.name(), "measureThree"), "http://example.com/Measure/three");
 
         // Create a non-empty EvaluationResult without depending on ExpressionResult constructors
         EvaluationResult er = new EvaluationResult();
@@ -30,13 +32,18 @@ class CompositeEvaluationResultsPerMeasureTest {
         CompositeEvaluationResultsPerMeasure.Builder builder = CompositeEvaluationResultsPerMeasure.builder();
         builder.addResult(measureDef1, "subject-123", er, List.of());
         builder.addError(measureDef1, "oops-1");
-        builder.addError(measureDef2, "oops-2");
+        builder.addErrors(List.of(measureDef2, measureDef3), "oops-2");
+        builder.addError(measureDef3, "oops-3");
+        builder.addWarnings(List.of(measureDef1, measureDef2), "warn-1");
+        builder.addWarning(measureDef2, "warn-2");
+        builder.addWarning(measureDef3, "warn-3");
 
         CompositeEvaluationResultsPerMeasure composite = builder.build();
 
         // Act
         Map<MeasureDef, Map<String, EvaluationResult>> resultsPerMeasure = composite.getResultsPerMeasure();
         Map<MeasureDef, List<String>> errorsPerMeasure = composite.getErrorsPerMeasure();
+        Map<MeasureDef, List<String>> warningsPerMeasure = composite.getWarningsPerMeasure();
 
         // Assert: results present for m1, none for m2
         assertTrue(resultsPerMeasure.containsKey(measureDef1));
@@ -48,6 +55,11 @@ class CompositeEvaluationResultsPerMeasureTest {
         // Assert: errors present for both measures
         assertEquals(List.of("oops-1"), errorsPerMeasure.get(measureDef1));
         assertEquals(List.of("oops-2"), errorsPerMeasure.get(measureDef2));
+        assertEquals(List.of("oops-2", "oops-3"), errorsPerMeasure.get(measureDef3));
+
+        assertEquals(List.of("warn-1"), warningsPerMeasure.get(measureDef1));
+        assertEquals(List.of("warn-1", "warn-2"), warningsPerMeasure.get(measureDef2));
+        assertEquals(List.of("warn-3"), warningsPerMeasure.get(measureDef3));
     }
 
     @Test

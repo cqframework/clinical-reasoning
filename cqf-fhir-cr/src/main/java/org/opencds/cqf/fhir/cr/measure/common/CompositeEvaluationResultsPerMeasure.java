@@ -23,6 +23,8 @@ public class CompositeEvaluationResultsPerMeasure {
     private final Map<MeasureDef, Map<String, EvaluationResult>> resultsPerMeasure;
     // We may get several errors for a given measure
     private final Map<MeasureDef, List<String>> errorsPerMeasure;
+    // We may get several warnings for a given measure
+    private final Map<MeasureDef, List<String>> warningsPerMeasure;
 
     private CompositeEvaluationResultsPerMeasure(Builder builder) {
 
@@ -33,6 +35,10 @@ public class CompositeEvaluationResultsPerMeasure {
         var errorsBuilder = ImmutableMap.<MeasureDef, List<String>>builder();
         builder.errorsPerMeasure.forEach((key, value) -> errorsBuilder.put(key, List.copyOf(value)));
         errorsPerMeasure = errorsBuilder.build();
+
+        var warningsBuilder = ImmutableMap.<MeasureDef, List<String>>builder();
+        builder.warningsPerMeasure.forEach((key, value) -> warningsBuilder.put(key, List.copyOf(value)));
+        warningsPerMeasure = warningsBuilder.build();
     }
 
     /**
@@ -70,6 +76,15 @@ public class CompositeEvaluationResultsPerMeasure {
         return this.errorsPerMeasure;
     }
 
+    /**
+     * Expose method to allow retrieval of captured warnings or infos produced from evaluated cql per Measure.
+     * When a warning or info is produced while evaluating, we capture the errors generated in this object, which can be rendered per Measure evaluated.
+     * @return {@code Map<IIdType, List<String>>}
+     */
+    public Map<MeasureDef, List<String>> getWarningsPerMeasure() {
+        return this.warningsPerMeasure;
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -77,6 +92,7 @@ public class CompositeEvaluationResultsPerMeasure {
     public static class Builder {
         private final Map<MeasureDef, Map<String, EvaluationResult>> resultsPerMeasure = new HashMap<>();
         private final Map<MeasureDef, List<String>> errorsPerMeasure = new HashMap<>();
+        private final Map<MeasureDef, List<String>> warningsPerMeasure = new HashMap<>();
 
         public CompositeEvaluationResultsPerMeasure build() {
             return new CompositeEvaluationResultsPerMeasure(this);
@@ -127,6 +143,26 @@ public class CompositeEvaluationResultsPerMeasure {
             }
 
             errorsPerMeasure.computeIfAbsent(measureDef, k -> new ArrayList<>()).add(error);
+        }
+
+        public void addWarnings(List<MeasureDef> measureDefs, String error) {
+            if (error == null || error.isEmpty()) {
+                return;
+            }
+
+            for (MeasureDef measureDef : measureDefs) {
+                addWarning(measureDef, error);
+            }
+        }
+
+        public void addWarning(MeasureDef measureDef, String error) {
+            if (error == null || error.isBlank()) {
+                return;
+            }
+
+            warningsPerMeasure
+                    .computeIfAbsent(measureDef, k -> new ArrayList<>())
+                    .add(error);
         }
 
         private EvaluationResult mergeEvaluationResults(

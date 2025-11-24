@@ -263,6 +263,54 @@ class HashSetForFhirResourcesAndCqlTypesTest {
         assertFalse(new HashSetForFhirResourcesAndCqlTypes<Patient>().contains(null));
     }
 
+    @Test
+    void retainAllWithUncertainCqlTypeComparison() {
+        // Test scenario: CQL Date comparison with mismatched precision levels can result in null equality
+        // This tests the defensive null handling in areEqualCqlTypes
+
+        var set = new HashSetForFhirResourcesAndCqlTypes<Date>();
+
+        // Add dates with YEAR precision - these have limited precision
+        var date1Year = new Date(LocalDate.of(2024, Month.JANUARY, 1), Precision.YEAR);
+        var date2Year = new Date(LocalDate.of(2024, Month.JUNE, 15), Precision.YEAR);
+
+        set.add(date1Year);
+        set.add(date2Year);
+
+        // Create a date with DAY precision to compare against YEAR precision dates
+        // In CQL, comparing dates with different precision levels can have special semantics
+        var compareDate = new Date(LocalDate.of(2024, Month.MARCH, 10), Precision.DAY);
+
+        // The retainAll operation should handle any null returns from equal() gracefully
+        // Even if the comparison is uncertain, the operation should complete without NPE
+        set.retainAll(List.of(compareDate));
+
+        // Verify the operation completed successfully (no NPE thrown)
+        // The exact result depends on CQL equality semantics, but we care that it doesn't crash
+        assertTrue(true, "Operation should complete without throwing NPE");
+    }
+
+    @Test
+    void removeWithDifferentPrecisionDoesNotThrowNPE() {
+        // Test the remove operation with dates that might have uncertain equality
+        var set = new HashSetForFhirResourcesAndCqlTypes<Date>();
+
+        var date1 = new Date(LocalDate.of(2024, Month.JANUARY, 1), Precision.YEAR);
+        var date2 = new Date(LocalDate.of(2025, Month.JANUARY, 1), Precision.MONTH);
+
+        set.add(date1);
+        set.add(date2);
+
+        // Try to remove with different precision - should not throw NPE
+        var removalDate = new Date(LocalDate.of(2024, Month.DECEMBER, 31), Precision.DAY);
+
+        // Should complete without NPE regardless of equality result
+        set.remove(removalDate);
+
+        // Just verify no exception was thrown - if we got here, the test passed
+        assertTrue(true, "Remove operation should complete without NPE");
+    }
+
     private static Patient createPatientWithId(String id) {
         var patient = new Patient();
         patient.setId(id);

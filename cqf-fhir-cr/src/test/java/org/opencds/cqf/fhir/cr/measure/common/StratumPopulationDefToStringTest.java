@@ -26,12 +26,7 @@ class StratumPopulationDefToStringTest {
 
         // When
         StratumPopulationDef stratumDef = new StratumPopulationDef(
-                "stratum-1",
-                subjects,
-                intersection,
-                resourceIds,
-                MeasureStratifierType.CRITERIA,
-                populationBasis);
+                "stratum-1", subjects, intersection, resourceIds, MeasureStratifierType.CRITERIA, populationBasis);
         String result = stratumDef.toString();
 
         // Then: Should contain id, measureStratifierType, and populationBasis
@@ -58,12 +53,7 @@ class StratumPopulationDefToStringTest {
 
         // When
         StratumPopulationDef stratumDef = new StratumPopulationDef(
-                "stratum-value-1",
-                subjects,
-                intersection,
-                resourceIds,
-                MeasureStratifierType.VALUE,
-                populationBasis);
+                "stratum-value-1", subjects, intersection, resourceIds, MeasureStratifierType.VALUE, populationBasis);
         String result = stratumDef.toString();
 
         // Then
@@ -96,7 +86,12 @@ class StratumPopulationDefToStringTest {
 
         // When
         StratumPopulationDef stratumDef = new StratumPopulationDef(
-                "stratum-patients", subjects, patientResources, resourceIds, MeasureStratifierType.CRITERIA, populationBasis);
+                "stratum-patients",
+                subjects,
+                patientResources,
+                resourceIds,
+                MeasureStratifierType.CRITERIA,
+                populationBasis);
         String result = stratumDef.toString();
 
         // Then: Should show IBaseResource formatted as ID strings
@@ -126,7 +121,12 @@ class StratumPopulationDefToStringTest {
 
         // When
         StratumPopulationDef stratumDef = new StratumPopulationDef(
-                "stratum-quantities", subjects, quantities, resourceIds, MeasureStratifierType.CRITERIA, populationBasis);
+                "stratum-quantities",
+                subjects,
+                quantities,
+                resourceIds,
+                MeasureStratifierType.CRITERIA,
+                populationBasis);
         String result = stratumDef.toString();
 
         // Then: Should show IBase formatted as fhirType()
@@ -193,8 +193,7 @@ class StratumPopulationDefToStringTest {
         }
 
         Set<String> subjects = Set.of("Patient/1", "Patient/2", "Patient/3", "Patient/4", "Patient/5", "Patient/6");
-        List<String> resourceIds =
-                List.of("res1", "res2", "res3", "res4", "res5", "res6", "res7", "res8", "res9");
+        List<String> resourceIds = List.of("res1", "res2", "res3", "res4", "res5", "res6", "res7", "res8", "res9");
         CodeDef populationBasis = new CodeDef(null, null, "Encounter", null);
 
         // When
@@ -213,8 +212,7 @@ class StratumPopulationDefToStringTest {
                 result.contains("subjectsQualifiedOrUnqualified=") && result.contains("...]"),
                 "Should truncate subjects");
         assertTrue(
-                result.contains("resourceIdsForSubjectList=") && result.contains("...]"),
-                "Should truncate resources");
+                result.contains("resourceIdsForSubjectList=") && result.contains("...]"), "Should truncate resources");
     }
 
     @Test
@@ -243,8 +241,7 @@ class StratumPopulationDefToStringTest {
         String result = stratumDef.toString();
 
         // Then: Should NOT contain ellipsis since we have exactly 5
-        String subjectsSection =
-                result.substring(result.indexOf("subjectsQualifiedOrUnqualified="));
+        String subjectsSection = result.substring(result.indexOf("subjectsQualifiedOrUnqualified="));
         String resourcesSection = result.substring(result.indexOf("resourceIdsForSubjectList="));
         String intersectionSection = result.substring(result.indexOf("populationDefEvaluationResultIntersection="));
 

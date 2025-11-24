@@ -199,7 +199,7 @@ class CompartmentAssigner {
         if (compartmentMode.type().equalsIgnoreCase(resourceType)) {
             var ids = searchParameters.get("_id").stream()
                     .flatMap(List::stream)
-                    .map(x -> x.getValueAsQueryToken(fhirContext))
+                    .map(x -> x.getValueAsQueryToken())
                     .toList();
 
             // If no _id or multiple _id parameters, cannot determine assignment
@@ -348,7 +348,7 @@ class CompartmentAssigner {
 
         var compartmentType = compartmentMode.type();
         for (var queryValue : values) {
-            var token = queryValue.getValueAsQueryToken(fhirContext);
+            var token = queryValue.getValueAsQueryToken();
             var id = idFromToken(targetIfUnspecified, token);
             if (id != null && compartmentType.equalsIgnoreCase(id.getResourceType())) {
                 return CompartmentAssignment.of(compartmentType, id.getIdPart());

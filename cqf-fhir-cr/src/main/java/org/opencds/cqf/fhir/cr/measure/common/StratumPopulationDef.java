@@ -33,9 +33,7 @@ public record StratumPopulationDef(
     public int getCount() {
         // For criteria stratifiers, use the intersection count
         if (MeasureStratifierType.CRITERIA == measureStratifierType) {
-            return populationDefEvaluationResultIntersection != null
-                    ? populationDefEvaluationResultIntersection.size()
-                    : 0;
+            return populationDefEvaluationResultIntersection.size();
         }
 
         // For boolean basis (non-criteria), count is based on subjects
@@ -44,7 +42,7 @@ public record StratumPopulationDef(
         }
 
         // For resource basis (non-criteria), count is based on resources
-        return resourceIdsForSubjectList != null ? resourceIdsForSubjectList.size() : 0;
+        return resourceIdsForSubjectList.size();
     }
 
     // LUKETODO: toString

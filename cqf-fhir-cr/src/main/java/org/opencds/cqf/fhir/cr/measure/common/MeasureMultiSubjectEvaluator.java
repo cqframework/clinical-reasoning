@@ -111,13 +111,15 @@ public class MeasureMultiSubjectEvaluator {
         var qualifiedSubjectIdsCommonToPopulation = Sets.intersection(new HashSet<>(subjectIds), popSubjectIds);
 
         // Calculate intersection and resource IDs based on stratifier type and basis
-        Set<Object> populationDefEvaluationResultIntersection = null;
-        List<String> resourceIdsForSubjectList = null;
+        Set<Object> populationDefEvaluationResultIntersection;
+        List<String> resourceIdsForSubjectList;
 
         // For criteria stratifiers, always calculate the intersection regardless of basis
         if (stratifierDef.isCriteriaStratifier()) {
             populationDefEvaluationResultIntersection =
                     calculateCriteriaStratifierIntersection(stratifierDef, populationDef);
+        } else {
+            populationDefEvaluationResultIntersection = Set.of();
         }
 
         if (groupDef.isBooleanBasis()) {

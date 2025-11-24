@@ -2,6 +2,9 @@ package org.opencds.cqf.fhir.cr.measure.common;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 
 /**
@@ -49,5 +52,58 @@ public record StratumPopulationDef(
         return resourceIdsForSubjectList.size();
     }
 
-    // LUKETODO: toString
+    @Override
+    public String toString() {
+        return "StratumPopulationDef{"
+                + "id='" + id + '\''
+                + ", measureStratifierType=" + measureStratifierType
+                + ", populationBasis=" + populationBasis.code()
+                + ", subjectsQualifiedOrUnqualified=" + limitCollection(subjectsQualifiedOrUnqualified, 5)
+                + ", resourceIdsForSubjectList=" + limitCollection(resourceIdsForSubjectList, 5)
+                + ", populationDefEvaluationResultIntersection=" + formatEvaluationResults()
+                + '}';
+    }
+
+    private static <T> String limitCollection(Iterable<T> collection, int limit) {
+        if (collection == null) {
+            return "null";
+        }
+        var iterator = collection.iterator();
+        var items = new java.util.ArrayList<T>();
+        int count = 0;
+        while (iterator.hasNext() && count < limit) {
+            items.add(iterator.next());
+            count++;
+        }
+        String result = items.toString();
+        if (iterator.hasNext()) {
+            result = result.substring(0, result.length() - 1) + ", ...]";
+        }
+        return result;
+    }
+
+    private String formatEvaluationResults() {
+        if (populationDefEvaluationResultIntersection == null) {
+            return "null";
+        }
+
+        var limited = populationDefEvaluationResultIntersection.stream()
+                .limit(5)
+                .map(obj -> {
+                    if (obj instanceof IBaseResource resource) {
+                        return resource.getIdElement().getValueAsString();
+                    } else if (obj instanceof IBase base) {
+                        return base.fhirType();
+                    } else {
+                        return obj.toString();
+                    }
+                })
+                .collect(Collectors.toList());
+
+        String result = limited.toString();
+        if (populationDefEvaluationResultIntersection.size() > 5) {
+            result = result.substring(0, result.length() - 1) + ", ...]";
+        }
+        return result;
+    }
 }

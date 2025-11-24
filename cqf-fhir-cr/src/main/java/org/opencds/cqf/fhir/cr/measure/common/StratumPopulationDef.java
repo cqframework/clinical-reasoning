@@ -19,7 +19,7 @@ public record StratumPopulationDef(
         Set<Object> populationDefEvaluationResultIntersection,
         List<String> resourceIdsForSubjectList,
         MeasureStratifierType measureStratifierType,
-        boolean isBooleanBasis) {
+        CodeDef populationBasis) {
 
     /**
      * @return The subjectIds without a FHIR resource qualifier, whether they previously had a
@@ -27,6 +27,10 @@ public record StratumPopulationDef(
      */
     public Set<String> getSubjectsUnqualified() {
         return ResourceIdUtils.stripAnyResourceQualifiersAsSet(subjectsQualifiedOrUnqualified);
+    }
+
+    public boolean isBooleanBasis() {
+        return populationBasis.code().equals("boolean");
     }
 
     // Enhanced by Claude Sonnet 4.5 to properly handle count calculation for all stratifier types
@@ -37,7 +41,7 @@ public record StratumPopulationDef(
         }
 
         // For boolean basis (non-criteria), count is based on subjects
-        if (isBooleanBasis) {
+        if (isBooleanBasis()) {
             return subjectsQualifiedOrUnqualified.size();
         }
 

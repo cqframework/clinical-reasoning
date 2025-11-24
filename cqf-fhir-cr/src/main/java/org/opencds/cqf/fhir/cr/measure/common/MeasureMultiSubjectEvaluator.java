@@ -136,7 +136,7 @@ public class MeasureMultiSubjectEvaluator {
                 populationDefEvaluationResultIntersection,
                 resourceIdsForSubjectList,
                 stratifierDef.getStratifierType(),
-                groupDef.isBooleanBasis());
+                groupDef.getPopulationBasis());
     }
 
     private static List<StratumDef> componentStratumPlural(

@@ -16,9 +16,7 @@ import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.ResourceType;
-import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,37 +59,43 @@ public class MeasureMultiSubjectEvaluator {
             List<PopulationDef> populationDefs,
             GroupDef groupDef) {
 
-        boolean isComponent = values.size() > 1;
-        String stratumText = null;
-
-        for (StratumValueDef valuePair : values) {
-            StratumValueWrapper value = valuePair.value();
-            var componentDef = valuePair.def();
-            // Set Stratum value to indicate which value is displaying results
-            // ex. for Gender stratifier, code 'Male'
-            if (value.getValueClass().equals(CodeableConcept.class)) {
-                if (isComponent) {
-                    // component stratifier example: code: "gender", value: 'M'
-                    // value being stratified: 'M'
-                    stratumText = componentDef.code().text();
-                } else {
-                    // non-component stratifiers only set stratified value, code is set on stratifier object
-                    // value being stratified: 'M'
-                    if (value.getValue() instanceof CodeableConcept codeableConcept) {
-                        stratumText = codeableConcept.getText();
-                    }
-                }
-            } else if (isComponent) {
-                stratumText = expressionResultToCodableConcept(value).getText();
-            } else if (MeasureStratifierType.VALUE == stratifierDef.getStratifierType()) {
-                // non-component stratifiers only set stratified value, code is set on stratifier object
-                // value being stratified: 'M'
-                stratumText = expressionResultToCodableConcept(value).getText();
-            }
-        }
+        // LUKETODO:  delete this:
+        //        boolean isComponent = values.size() > 1;
+        //        String stratumText = null;
+        //
+        //        for (StratumValueDef valuePair : values) {
+        //            StratumValueWrapper value = valuePair.value();
+        //            var componentDef = valuePair.def();
+        //            // Set Stratum value to indicate which value is displaying results
+        //            // ex. for Gender stratifier, code 'Male'
+        //            if (value.getValueClass().equals(CodeableConcept.class)) {
+        //                if (isComponent) {
+        //                    // component stratifier example: code: "gender", value: 'M'
+        //                    // value being stratified: 'M'
+        //                    stratumText = componentDef.code().text();
+        //                } else {
+        //                    // non-component stratifiers only set stratified value, code is set on stratifier object
+        //                    // value being stratified: 'M'
+        //                    if (value.getValue() instanceof CodeableConcept codeableConcept) {
+        //                        stratumText = codeableConcept.getText();
+        //                    }
+        //                }
+        //            } else if (isComponent) {
+        //                stratumText = expressionResultToCodableConcept(value).getText();
+        //            } else if (MeasureStratifierType.VALUE == stratifierDef.getStratifierType()) {
+        //                // non-component stratifiers only set stratified value, code is set on stratifier object
+        //                // value being stratified: 'M'
+        //                stratumText = expressionResultToCodableConcept(value).getText();
+        //            }
+        //        }
+        //
+        //        // This is weird pattern where we have multiple qualifying values within a single stratum,
+        //        // which was previously unsupported.  So for now, comma-delim the first five values.
+        //        private static CodeableConcept expressionResultToCodableConcept(StratumValueWrapper value) {
+        //            return new CodeableConcept().setText(value.getValueAsString());
+        //        }
 
         return new StratumDef(
-                stratumText,
                 populationDefs.stream()
                         .map(popDef -> buildStratumPopulationDef(stratifierDef, popDef, subjectIds, groupDef))
                         .toList(),
@@ -281,12 +285,6 @@ public class MeasureMultiSubjectEvaluator {
                             l1.addAll(l2);
                             return l1;
                         })));
-    }
-
-    // This is weird pattern where we have multiple qualifying values within a single stratum,
-    // which was previously unsupported.  So for now, comma-delim the first five values.
-    private static CodeableConcept expressionResultToCodableConcept(StratumValueWrapper value) {
-        return new CodeableConcept().setText(value.getValueAsString());
     }
 
     /**

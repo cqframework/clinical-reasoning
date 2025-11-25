@@ -2,13 +2,14 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import com.apicatalog.jsonld.StringUtils;
 import jakarta.annotation.Nullable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
+import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupPopulationComponent;
@@ -16,6 +17,7 @@ import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupStratifierComponent
 import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupComponent;
 import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupPopulationComponent;
 import org.hl7.fhir.r4.model.Quantity;
+import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 import org.opencds.cqf.fhir.cr.measure.common.BaseMeasureReportScorer;
 import org.opencds.cqf.fhir.cr.measure.common.ContinuousVariableObservationAggregateMethod;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
@@ -26,6 +28,8 @@ import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumPopulationDef;
+import org.opencds.cqf.fhir.cr.measure.common.StratumValueDef;
+import org.opencds.cqf.fhir.cr.measure.common.StratumValueWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -364,8 +368,7 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
             final StratifierDef stratifierDef = optStratifierDef.get();
 
             final StratumDef stratumDef = stratifierDef.getStratum().stream()
-                    .filter(stratumDefInner -> StringUtils.isNotBlank(stratumDefInner.text()))
-                    .filter(stratumDefInner -> doesStratumDefMatchStratum(sgc, stratumDefInner))
+                    .filter(stratumDefInner -> doesStratumDefMatchStratum(sgc, stratifierDef, stratumDefInner))
                     .findFirst()
                     .orElse(null);
 
@@ -379,8 +382,51 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
     }
 
     // TODO:  LD: consider refining this logic:
-    private boolean doesStratumDefMatchStratum(StratifierGroupComponent sgc, StratumDef stratumDefInner) {
-        return stratumDefInner.text().equals(sgc.getValue().getText());
+    private boolean doesStratumDefMatchStratum(
+            StratifierGroupComponent sgc, StratifierDef stratifierDef, StratumDef stratumDefInner) {
+        return Objects.equals(
+                getStratumDefTextForR4(stratifierDef, stratumDefInner),
+                sgc.getValue().getText());
+    }
+
+    private static String getStratumDefTextForR4(StratifierDef stratifierDef, StratumDef stratumDef) {
+        // LUKETODO:  is this necessary?
+        boolean isComponent = stratumDef.valueDefs().size() > 1;
+        String stratumText = null;
+
+        for (StratumValueDef valuePair : stratumDef.valueDefs()) {
+            var value = valuePair.value();
+            var componentDef = valuePair.def();
+            // Set Stratum value to indicate which value is displaying results
+            // ex. for Gender stratifier, code 'Male'
+            if (value.getValueClass().equals(CodeableConcept.class)) {
+                if (isComponent) {
+                    // component stratifier example: code: "gender", value: 'M'
+                    // value being stratified: 'M'
+                    stratumText = componentDef.code().text();
+                } else {
+                    // non-component stratifiers only set stratified value, code is set on stratifier object
+                    // value being stratified: 'M'
+                    if (value.getValue() instanceof CodeableConcept codeableConcept) {
+                        stratumText = codeableConcept.getText();
+                    }
+                }
+            } else if (isComponent) {
+                stratumText = expressionResultToCodableConcept(value).getText();
+            } else if (MeasureStratifierType.VALUE == stratifierDef.getStratifierType()) {
+                // non-component stratifiers only set stratified value, code is set on stratifier object
+                // value being stratified: 'M'
+                stratumText = expressionResultToCodableConcept(value).getText();
+            }
+        }
+
+        return stratumText;
+    }
+
+    // This is weird pattern where we have multiple qualifying values within a single stratum,
+    // which was previously unsupported.  So for now, comma-delim the first five values.
+    private static CodeableConcept expressionResultToCodableConcept(StratumValueWrapper value) {
+        return new CodeableConcept().setText(value.getValueAsString());
     }
 
     protected void scoreStratum(

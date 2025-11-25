@@ -32,9 +32,9 @@ class CompositeEvaluationResultsPerMeasureTest {
         CompositeEvaluationResultsPerMeasure.Builder builder = CompositeEvaluationResultsPerMeasure.builder();
         builder.addResult(measureDef1, "subject-123", er, List.of());
         builder.addError(measureDef1, "oops-1");
-        builder.addErrors(List.of(measureDef2, measureDef3), "oops-2");
+        builder.addError(List.of(measureDef2, measureDef3), "oops-2");
         builder.addError(measureDef3, "oops-3");
-        builder.addWarnings(List.of(measureDef1, measureDef2), "warn-1");
+        builder.addWarning(List.of(measureDef1, measureDef2), "warn-1");
         builder.addWarning(measureDef2, "warn-2");
         builder.addWarning(measureDef3, "warn-3");
 

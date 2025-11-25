@@ -144,7 +144,7 @@ public class MeasureEvaluationResultHandler {
                             .ifPresent(exception -> {
                                 var error = EXCEPTION_FOR_SUBJECT_ID_MESSAGE_TEMPLATE.formatted(
                                         subjectId, exception.getMessage());
-                                resultsBuilder.addErrors(measureDefs, error);
+                                resultsBuilder.addError(measureDefs, error);
                                 logger.error(error, exception);
                             });
 
@@ -152,7 +152,7 @@ public class MeasureEvaluationResultHandler {
                             .ifPresent(exception -> {
                                 var warning = EXCEPTION_FOR_SUBJECT_ID_MESSAGE_TEMPLATE.formatted(
                                         subjectId, exception.getMessage());
-                                resultsBuilder.addWarnings(measureDefs, warning);
+                                resultsBuilder.addWarning(measureDefs, warning);
                                 logger.error(warning, exception);
                             });
                 }
@@ -162,7 +162,7 @@ public class MeasureEvaluationResultHandler {
                 var error = EXCEPTION_FOR_SUBJECT_ID_MESSAGE_TEMPLATE.formatted(subjectId, e.getMessage());
                 var measureDefs = multiLibraryIdMeasureEngineDetails.getAllMeasureDefs();
 
-                resultsBuilder.addErrors(measureDefs, error);
+                resultsBuilder.addError(measureDefs, error);
                 logger.error(error, e);
             }
         }

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.lang3.StringUtils;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 
 /**
@@ -127,8 +128,8 @@ public class CompositeEvaluationResultsPerMeasure {
             resultPerMeasure.put(subjectId, evaluationResultToUse);
         }
 
-        public void addErrors(List<MeasureDef> measureDefs, String error) {
-            if (error == null || error.isEmpty()) {
+        public void addError(List<MeasureDef> measureDefs, String error) {
+            if (StringUtils.isBlank(error)) {
                 return;
             }
 
@@ -145,24 +146,24 @@ public class CompositeEvaluationResultsPerMeasure {
             errorsPerMeasure.computeIfAbsent(measureDef, k -> new ArrayList<>()).add(error);
         }
 
-        public void addWarnings(List<MeasureDef> measureDefs, String error) {
-            if (error == null || error.isEmpty()) {
+        public void addWarning(List<MeasureDef> measureDefs, String warning) {
+            if (StringUtils.isBlank(warning)) {
                 return;
             }
 
             for (MeasureDef measureDef : measureDefs) {
-                addWarning(measureDef, error);
+                addWarning(measureDef, warning);
             }
         }
 
-        public void addWarning(MeasureDef measureDef, String error) {
-            if (error == null || error.isBlank()) {
+        public void addWarning(MeasureDef measureDef, String warning) {
+            if (StringUtils.isBlank(warning)) {
                 return;
             }
 
             warningsPerMeasure
                     .computeIfAbsent(measureDef, k -> new ArrayList<>())
-                    .add(error);
+                    .add(warning);
         }
 
         private EvaluationResult mergeEvaluationResults(

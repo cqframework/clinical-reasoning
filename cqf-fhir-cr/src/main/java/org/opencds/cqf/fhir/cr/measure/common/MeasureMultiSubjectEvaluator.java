@@ -268,7 +268,6 @@ public class MeasureMultiSubjectEvaluator {
 
     /**
      * Calculate the intersection between stratifier results and population results for criteria-based stratifiers.
-     * Moved from R4StratifierBuilder.getStratumCountUpper by Claude Sonnet 4.5.
      *
      * Example:
      * *population*:
@@ -327,7 +326,6 @@ public class MeasureMultiSubjectEvaluator {
 
     /**
      * Extract resource IDs from the population and subject IDs.
-     * Moved from R4StratifierBuilder.getResourceIds by Claude Sonnet 4.5.
      */
     // Moved from R4StratifierBuilder by Claude Sonnet 4.5
     @Nonnull
@@ -370,7 +368,6 @@ public class MeasureMultiSubjectEvaluator {
     /**
      * Extracts unique FHIR identifiers as Strings from a PopulationDef.
      * Works for Resource, Reference, IdType, PrimitiveType, String, Number, etc.
-     * Moved from R4StratifierBuilder.extractResourceIds by Claude Sonnet 4.5.
      */
     // Moved from R4StratifierBuilder by Claude Sonnet 4.5
     private static Set<Object> extractResourceIds(PopulationDef populationDef, String subjectId) {
@@ -396,7 +393,6 @@ public class MeasureMultiSubjectEvaluator {
 
     /**
      * Get resource ID from a resource object.
-     * Moved from R4StratifierBuilder.getPopulationResourceIds by Claude Sonnet 4.5.
      */
     // Moved from R4StratifierBuilder by Claude Sonnet 4.5
     private static String getPopulationResourceIds(Object resourceObject) {

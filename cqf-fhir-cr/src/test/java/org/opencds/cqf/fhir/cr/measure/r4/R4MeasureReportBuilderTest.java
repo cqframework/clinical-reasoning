@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -167,7 +168,7 @@ class R4MeasureReportBuilderTest {
         try {
             r4MeasureReportBuilder.build(measure, measureDef, MeasureReportType.INDIVIDUAL, null, subjectIds);
             fail("expected failure");
-        } catch (InvalidRequestException exception) {
+        } catch (InternalErrorException exception) {
             assertEquals(
                     "The Measure has a different number of groups defined than the MeasureDef for Measure: http://something.com/measure1",
                     exception.getMessage());
@@ -184,7 +185,7 @@ class R4MeasureReportBuilderTest {
         try {
             r4MeasureReportBuilder.build(measure, measureDef, MeasureReportType.INDIVIDUAL, null, subjectIds);
             fail("expected failure");
-        } catch (InvalidRequestException exception) {
+        } catch (InternalErrorException exception) {
             assertEquals(
                     "The Measure has a different number of groups defined than the MeasureDef for Measure: http://something.com/measure1",
                     exception.getMessage());

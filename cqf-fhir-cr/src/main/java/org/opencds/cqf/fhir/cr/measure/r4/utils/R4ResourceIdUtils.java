@@ -15,11 +15,6 @@ public class R4ResourceIdUtils {
     }
 
     @Nonnull
-    public static String addPatientQualifier(String t) {
-        return ResourceType.Patient.toString().concat("/").concat(t);
-    }
-
-    @Nonnull
     public static String stripPatientQualifier(String subjectId) {
         return stripSpecificResourceQualifier(subjectId, ResourceType.Patient);
     }

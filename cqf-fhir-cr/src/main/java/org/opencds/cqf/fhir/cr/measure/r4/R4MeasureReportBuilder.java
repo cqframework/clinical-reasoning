@@ -4,6 +4,7 @@ import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.DATEO
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_SDE_REFERENCE_URL;
 
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
@@ -49,12 +50,12 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureReportScorer;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
+import org.opencds.cqf.fhir.cr.measure.common.ResourceIdUtils;
 import org.opencds.cqf.fhir.cr.measure.common.SdeDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumValueWrapper;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4DateHelper;
-import org.opencds.cqf.fhir.cr.measure.r4.utils.R4ResourceIdUtils;
 
 public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, MeasureReport, DomainResource> {
 
@@ -130,7 +131,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         var report = bc.report();
 
         if (measure.getGroup().size() != measureDef.groups().size()) {
-            throw new InvalidRequestException(
+            throw new InternalErrorException(
                     "The Measure has a different number of groups defined than the MeasureDef for Measure: "
                             + measure.getUrl());
         }
@@ -289,7 +290,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         Set<String> populationSet;
         if (groupDef.isBooleanBasis()) {
             populationSet = populationDef.getSubjects().stream()
-                    .map(R4ResourceIdUtils::addPatientQualifier)
+                    .map(ResourceIdUtils::addPatientQualifier)
                     .collect(Collectors.toSet());
         } else {
             populationSet = populationDef.getAllSubjectResources().stream()

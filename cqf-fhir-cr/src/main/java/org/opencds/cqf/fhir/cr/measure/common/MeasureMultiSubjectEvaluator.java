@@ -19,7 +19,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
-import org.opencds.cqf.fhir.cr.measure.r4.utils.R4ResourceIdUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -105,7 +104,7 @@ public class MeasureMultiSubjectEvaluator {
             StratifierDef stratifierDef, PopulationDef populationDef, List<String> subjectIds, GroupDef groupDef) {
         // population subjectIds
         var popSubjectIds = populationDef.getSubjects().stream()
-                .map(R4ResourceIdUtils::addPatientQualifier)
+                .map(ResourceIdUtils::addPatientQualifier)
                 .collect(Collectors.toUnmodifiableSet());
         // intersect stratum subjectIds and population subjectIds
         var qualifiedSubjectIdsCommonToPopulation = Sets.intersection(new HashSet<>(subjectIds), popSubjectIds);
@@ -211,7 +210,7 @@ public class MeasureMultiSubjectEvaluator {
             // patch Patient values with prefix of ResourceType to match with incoming population subjects for stratum
             // TODO: should match context of CQL, not only Patient
             var patientsSubjects = stratValue.getValue().stream()
-                    .map(R4ResourceIdUtils::addPatientQualifier)
+                    .map(ResourceIdUtils::addPatientQualifier)
                     .toList();
             // build the stratum for each unique value
             // non-component stratifiers will populate a 'null' for componentStratifierDef, since it doesn't have
@@ -236,7 +235,7 @@ public class MeasureMultiSubjectEvaluator {
 
         componentDefs.forEach(componentDef -> componentDef.getResults().forEach((subject, result) -> {
             StratumValueWrapper stratumValueWrapper = new StratumValueWrapper(result.rawValue());
-            subjectResultTable.put(R4ResourceIdUtils.addPatientQualifier(subject), stratumValueWrapper, componentDef);
+            subjectResultTable.put(ResourceIdUtils.addPatientQualifier(subject), stratumValueWrapper, componentDef);
         }));
 
         return subjectResultTable;

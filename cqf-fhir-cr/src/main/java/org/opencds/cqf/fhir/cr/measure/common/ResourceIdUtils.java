@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
+import jakarta.annotation.Nonnull;
 import java.util.Collection;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -18,6 +19,11 @@ public class ResourceIdUtils {
 
     public static boolean hasResourceQualifier(String resourceId) {
         return PATTERN_SLASH.matcher(resourceId).find();
+    }
+
+    @Nonnull
+    public static String addPatientQualifier(String t) {
+        return "Patient".concat("/").concat(t);
     }
 
     public static Set<String> stripAnyResourceQualifiersAsSet(Collection<String> subjectIds) {

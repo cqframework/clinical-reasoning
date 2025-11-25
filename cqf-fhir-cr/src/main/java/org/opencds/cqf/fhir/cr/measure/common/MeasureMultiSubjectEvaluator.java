@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
+import ca.uhn.fhir.context.FhirContext;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
@@ -14,9 +15,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
-import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.ResourceType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,20 +30,22 @@ public class MeasureMultiSubjectEvaluator {
      * Take the accumulated subject-by-subject evaluation results and use it to build StratumDefs
      * and StratumPopulationDefs
      *
-     * @param measureDef to mutate post-evaluation with results of initial stratifier
-     *                   subject-by-subject accumulations.
+     * @param fhirContext  FHIR context for FHIR version used
+     * @param measureDef  to mutate post-evaluation with results of initial stratifier
+     *                    subject-by-subject accumulations.
      *
      */
-    public static void postEvaluationMultiSubject(MeasureDef measureDef) {
+    public static void postEvaluationMultiSubject(FhirContext fhirContext, MeasureDef measureDef) {
 
         for (GroupDef groupDef : measureDef.groups()) {
             for (StratifierDef stratifierDef : groupDef.stratifiers()) {
                 final List<StratumDef> stratumDefs;
 
                 if (stratifierDef.isComponentStratifier()) {
-                    stratumDefs = componentStratumPlural(stratifierDef, groupDef.populations(), groupDef);
+                    stratumDefs = componentStratumPlural(fhirContext, stratifierDef, groupDef.populations(), groupDef);
                 } else {
-                    stratumDefs = nonComponentStratumPlural(stratifierDef, groupDef.populations(), groupDef);
+                    stratumDefs =
+                            nonComponentStratumPlural(fhirContext, stratifierDef, groupDef.populations(), groupDef);
                 }
 
                 stratifierDef.addAllStratum(stratumDefs);
@@ -53,51 +54,17 @@ public class MeasureMultiSubjectEvaluator {
     }
 
     private static StratumDef buildStratumDef(
+            FhirContext fhirContext,
             StratifierDef stratifierDef,
             Set<StratumValueDef> values,
             List<String> subjectIds,
             List<PopulationDef> populationDefs,
             GroupDef groupDef) {
 
-        // LUKETODO:  delete this:
-        //        boolean isComponent = values.size() > 1;
-        //        String stratumText = null;
-        //
-        //        for (StratumValueDef valuePair : values) {
-        //            StratumValueWrapper value = valuePair.value();
-        //            var componentDef = valuePair.def();
-        //            // Set Stratum value to indicate which value is displaying results
-        //            // ex. for Gender stratifier, code 'Male'
-        //            if (value.getValueClass().equals(CodeableConcept.class)) {
-        //                if (isComponent) {
-        //                    // component stratifier example: code: "gender", value: 'M'
-        //                    // value being stratified: 'M'
-        //                    stratumText = componentDef.code().text();
-        //                } else {
-        //                    // non-component stratifiers only set stratified value, code is set on stratifier object
-        //                    // value being stratified: 'M'
-        //                    if (value.getValue() instanceof CodeableConcept codeableConcept) {
-        //                        stratumText = codeableConcept.getText();
-        //                    }
-        //                }
-        //            } else if (isComponent) {
-        //                stratumText = expressionResultToCodableConcept(value).getText();
-        //            } else if (MeasureStratifierType.VALUE == stratifierDef.getStratifierType()) {
-        //                // non-component stratifiers only set stratified value, code is set on stratifier object
-        //                // value being stratified: 'M'
-        //                stratumText = expressionResultToCodableConcept(value).getText();
-        //            }
-        //        }
-        //
-        //        // This is weird pattern where we have multiple qualifying values within a single stratum,
-        //        // which was previously unsupported.  So for now, comma-delim the first five values.
-        //        private static CodeableConcept expressionResultToCodableConcept(StratumValueWrapper value) {
-        //            return new CodeableConcept().setText(value.getValueAsString());
-        //        }
-
         return new StratumDef(
                 populationDefs.stream()
-                        .map(popDef -> buildStratumPopulationDef(stratifierDef, popDef, subjectIds, groupDef))
+                        .map(popDef ->
+                                buildStratumPopulationDef(fhirContext, stratifierDef, popDef, subjectIds, groupDef))
                         .toList(),
                 values,
                 subjectIds);
@@ -105,10 +72,14 @@ public class MeasureMultiSubjectEvaluator {
 
     // Enhanced by Claude Sonnet 4.5 to calculate and populate all StratumPopulationDef fields
     private static StratumPopulationDef buildStratumPopulationDef(
-            StratifierDef stratifierDef, PopulationDef populationDef, List<String> subjectIds, GroupDef groupDef) {
+            FhirContext fhirContext,
+            StratifierDef stratifierDef,
+            PopulationDef populationDef,
+            List<String> subjectIds,
+            GroupDef groupDef) {
         // population subjectIds
         var popSubjectIds = populationDef.getSubjects().stream()
-                .map(ResourceIdUtils::addPatientQualifier)
+                .map(FhirResourceUtils::addPatientQualifier)
                 .collect(Collectors.toUnmodifiableSet());
         // intersect stratum subjectIds and population subjectIds
         var qualifiedSubjectIdsCommonToPopulation = Sets.intersection(new HashSet<>(subjectIds), popSubjectIds);
@@ -130,7 +101,8 @@ public class MeasureMultiSubjectEvaluator {
             resourceIdsForSubjectList = List.of();
         } else {
             // For resource basis stratifiers, get resource IDs
-            resourceIdsForSubjectList = getResourceIds(qualifiedSubjectIdsCommonToPopulation, groupDef, populationDef);
+            resourceIdsForSubjectList =
+                    getResourceIds(fhirContext, qualifiedSubjectIdsCommonToPopulation, groupDef, populationDef);
         }
 
         return new StratumPopulationDef(
@@ -143,7 +115,10 @@ public class MeasureMultiSubjectEvaluator {
     }
 
     private static List<StratumDef> componentStratumPlural(
-            StratifierDef stratifierDef, List<PopulationDef> populationDefs, GroupDef groupDef) {
+            FhirContext fhirContext,
+            StratifierDef stratifierDef,
+            List<PopulationDef> populationDefs,
+            GroupDef groupDef) {
 
         final Table<String, StratumValueWrapper, StratifierComponentDef> subjectResultTable =
                 buildSubjectResultsTable(stratifierDef.components());
@@ -165,7 +140,7 @@ public class MeasureMultiSubjectEvaluator {
             // | Stratum-3 | <'M','hispanic/latino'> | [subject-c]            |
             // | Stratum-4 | <'F','black'>           | [subject-d, subject-e] |
 
-            var stratumDef = buildStratumDef(stratifierDef, valueSet, subjects, populationDefs, groupDef);
+            var stratumDef = buildStratumDef(fhirContext, stratifierDef, valueSet, subjects, populationDefs, groupDef);
 
             stratumDefs.add(stratumDef);
         });
@@ -174,7 +149,10 @@ public class MeasureMultiSubjectEvaluator {
     }
 
     private static List<StratumDef> nonComponentStratumPlural(
-            StratifierDef stratifierDef, List<PopulationDef> populationDefs, GroupDef groupDef) {
+            FhirContext fhirContext,
+            StratifierDef stratifierDef,
+            List<PopulationDef> populationDefs,
+            GroupDef groupDef) {
         // standard Stratifier
         // one criteria expression defined, one set of criteria results
 
@@ -195,7 +173,7 @@ public class MeasureMultiSubjectEvaluator {
             // Seems to be irrelevant for criteria based stratifiers
             var patients = List.<String>of();
 
-            var stratum = buildStratumDef(stratifierDef, stratValues, patients, populationDefs, groupDef);
+            var stratum = buildStratumDef(fhirContext, stratifierDef, stratValues, patients, populationDefs, groupDef);
             return List.of(stratum);
         }
 
@@ -214,14 +192,15 @@ public class MeasureMultiSubjectEvaluator {
             // patch Patient values with prefix of ResourceType to match with incoming population subjects for stratum
             // TODO: should match context of CQL, not only Patient
             var patientsSubjects = stratValue.getValue().stream()
-                    .map(ResourceIdUtils::addPatientQualifier)
+                    .map(FhirResourceUtils::addPatientQualifier)
                     .toList();
             // build the stratum for each unique value
             // non-component stratifiers will populate a 'null' for componentStratifierDef, since it doesn't have
             // multiple criteria
             // TODO: build out nonComponent stratum method
             Set<StratumValueDef> stratValues = Set.of(new StratumValueDef(stratValue.getKey(), null));
-            var stratum = buildStratumDef(stratifierDef, stratValues, patientsSubjects, populationDefs, groupDef);
+            var stratum = buildStratumDef(
+                    fhirContext, stratifierDef, stratValues, patientsSubjects, populationDefs, groupDef);
             stratumMultiple.add(stratum);
         }
 
@@ -239,7 +218,7 @@ public class MeasureMultiSubjectEvaluator {
 
         componentDefs.forEach(componentDef -> componentDef.getResults().forEach((subject, result) -> {
             StratumValueWrapper stratumValueWrapper = new StratumValueWrapper(result.rawValue());
-            subjectResultTable.put(ResourceIdUtils.addPatientQualifier(subject), stratumValueWrapper, componentDef);
+            subjectResultTable.put(FhirResourceUtils.addPatientQualifier(subject), stratumValueWrapper, componentDef);
         }));
 
         return subjectResultTable;
@@ -353,16 +332,8 @@ public class MeasureMultiSubjectEvaluator {
     // Moved from R4StratifierBuilder by Claude Sonnet 4.5
     @Nonnull
     private static List<String> getResourceIds(
-            Collection<String> subjectIds, GroupDef groupDef, PopulationDef populationDef) {
-        String resourceType;
-        try {
-            // when this method is checked with a primitive value and not ResourceType it returns an error
-            // this try/catch is to prevent the exception thrown from setting the correct value
-            resourceType =
-                    ResourceType.fromCode(groupDef.getPopulationBasis().code()).toString();
-        } catch (FHIRException e) {
-            resourceType = null;
-        }
+            FhirContext fhirContext, Collection<String> subjectIds, GroupDef groupDef, PopulationDef populationDef) {
+        final String resourceType = FhirResourceUtils.determineFhirResourceTypeOrNull(fhirContext, groupDef);
 
         // only ResourceType fhirType should return true here
         boolean isResourceType = resourceType != null;
@@ -374,7 +345,7 @@ public class MeasureMultiSubjectEvaluator {
                     // retrieve criteria results by subject Key
                     resources = populationDef
                             .getSubjectResources()
-                            .get(ResourceIdUtils.stripAnyResourceQualifier(subjectId));
+                            .get(FhirResourceUtils.stripAnyResourceQualifier(subjectId));
                 } else {
                     // MeasureObservation will store subjectResources as <subjectId,Set<Map<Object,Object>>
                     // We need the Key from the Set<Map<Key,Value>>

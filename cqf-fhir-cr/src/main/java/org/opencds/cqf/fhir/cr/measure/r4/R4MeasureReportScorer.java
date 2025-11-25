@@ -390,8 +390,6 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
     }
 
     private static String getStratumDefTextForR4(StratifierDef stratifierDef, StratumDef stratumDef) {
-        // LUKETODO:  is this necessary?
-        boolean isComponent = stratumDef.valueDefs().size() > 1;
         String stratumText = null;
 
         for (StratumValueDef valuePair : stratumDef.valueDefs()) {
@@ -400,7 +398,7 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
             // Set Stratum value to indicate which value is displaying results
             // ex. for Gender stratifier, code 'Male'
             if (value.getValueClass().equals(CodeableConcept.class)) {
-                if (isComponent) {
+                if (stratumDef.isComponent()) {
                     // component stratifier example: code: "gender", value: 'M'
                     // value being stratified: 'M'
                     stratumText = componentDef.code().text();
@@ -411,7 +409,7 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
                         stratumText = codeableConcept.getText();
                     }
                 }
-            } else if (isComponent) {
+            } else if (stratumDef.isComponent()) {
                 stratumText = expressionResultToCodableConcept(value).getText();
             } else if (MeasureStratifierType.VALUE == stratifierDef.getStratifierType()) {
                 // non-component stratifiers only set stratified value, code is set on stratifier object

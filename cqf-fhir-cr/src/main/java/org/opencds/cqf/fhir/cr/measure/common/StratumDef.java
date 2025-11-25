@@ -22,4 +22,8 @@ public record StratumDef(
         this.valueDefs = valueDefs;
         this.subjectIds = subjectIds;
     }
+
+    public boolean isComponent() {
+        return valueDefs.size() > 1;
+    }
 }

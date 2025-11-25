@@ -29,7 +29,7 @@ public record StratumPopulationDef(
      * qualifier or not
      */
     public Set<String> getSubjectsUnqualified() {
-        return ResourceIdUtils.stripAnyResourceQualifiersAsSet(subjectsQualifiedOrUnqualified);
+        return FhirResourceUtils.stripAnyResourceQualifiersAsSet(subjectsQualifiedOrUnqualified);
     }
 
     public boolean isBooleanBasis() {

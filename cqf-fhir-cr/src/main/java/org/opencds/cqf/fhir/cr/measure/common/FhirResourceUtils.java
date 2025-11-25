@@ -1,19 +1,23 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.DataFormatException;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import java.util.Collection;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Utility class for handling FHIR resource ID formatting, including detection and removal of resource type qualifiers.
  */
-public class ResourceIdUtils {
+public class FhirResourceUtils {
 
     private static final Pattern PATTERN_SLASH = Pattern.compile("/");
 
-    private ResourceIdUtils() {
+    private FhirResourceUtils() {
         // Static utility class
     }
 
@@ -28,7 +32,7 @@ public class ResourceIdUtils {
 
     public static Set<String> stripAnyResourceQualifiersAsSet(Collection<String> subjectIds) {
         return subjectIds.stream()
-                .map(ResourceIdUtils::stripAnyResourceQualifier)
+                .map(FhirResourceUtils::stripAnyResourceQualifier)
                 .collect(Collectors.toUnmodifiableSet());
     }
 
@@ -45,5 +49,23 @@ public class ResourceIdUtils {
         }
 
         return split[0];
+    }
+
+    @Nullable
+    public static String determineFhirResourceTypeOrNull(FhirContext fhirContext, GroupDef groupDef) {
+        final String populationBasis = groupDef.getPopulationBasis().code();
+
+        if (StringUtils.isBlank(populationBasis)) {
+            return null;
+        }
+
+        try {
+            // This will throw a DataFormatException if the resource name is invalid
+            // for the current FHIR version.
+            return fhirContext.getResourceDefinition(populationBasis).toString();
+        } catch (DataFormatException exception) {
+            // Ignore:  this is not a FHIR resource
+            return null;
+        }
     }
 }

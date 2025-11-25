@@ -18,7 +18,9 @@ public class ArtifactDiffProcessor implements IArtifactDiffProcessor {
 
     private static final Logger logger = LoggerFactory.getLogger(ArtifactDiffProcessor.class);
 
-    public ArtifactDiffProcessor() {}
+    public ArtifactDiffProcessor() {
+        /* Empty as we will not perform artifact diff outside HAPI context */
+    }
 
     @Override
     public IBaseParameters getArtifactDiff(
@@ -79,8 +81,8 @@ public class ArtifactDiffProcessor implements IArtifactDiffProcessor {
         }
 
         public class DiffCacheResource {
-            public MetadataResource resource;
-            public boolean isSource;
+            public final MetadataResource resource;
+            public final boolean isSource;
 
             DiffCacheResource(MetadataResource resource, boolean isSource) {
                 this.resource = resource;

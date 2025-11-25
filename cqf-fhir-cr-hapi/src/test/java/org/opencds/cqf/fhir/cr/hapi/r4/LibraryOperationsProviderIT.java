@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeType;
@@ -212,6 +211,6 @@ class LibraryOperationsProviderIT extends BaseCrR4TestServer {
                                         && ((CodeType) part.getValue())
                                                 .getCode()
                                                 .equals(type)))
-                .collect(Collectors.toList());
+                .toList();
     }
 }

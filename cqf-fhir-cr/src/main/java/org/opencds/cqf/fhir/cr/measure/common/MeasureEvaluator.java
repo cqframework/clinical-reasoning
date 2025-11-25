@@ -20,12 +20,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import org.apache.commons.collections4.CollectionUtils;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureScoringTypePopulations;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class implements the core Measure evaluation logic that's defined in the
@@ -47,6 +48,8 @@ import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureScoringTypePopulations;
  */
 @SuppressWarnings({"squid:S1135", "squid:S3776"})
 public class MeasureEvaluator {
+    private static final Logger logger = LoggerFactory.getLogger(MeasureEvaluator.class);
+
     private final PopulationBasisValidator populationBasisValidator;
 
     public MeasureEvaluator(PopulationBasisValidator populationBasisValidator) {
@@ -661,26 +664,47 @@ public class MeasureEvaluator {
         }
     }
 
-    private void addStratifierComponentResult(
+    /**
+     * Modified by Claude: Changed visibility from private to package-private for testability.
+     * Replaced Optional.ofNullable() pattern with explicit null checks and added logger.warn()
+     * for better observability when stratifier component expressions return null.
+     */
+    void addStratifierComponentResult(
             List<StratifierComponentDef> components, EvaluationResult evaluationResult, String subjectId) {
 
         for (StratifierComponentDef component : components) {
             var expressionResult = evaluationResult.forExpression(component.expression());
-            Optional.ofNullable(expressionResult.value())
-                    .ifPresent(nonNullValue ->
-                            component.putResult(subjectId, nonNullValue, expressionResult.evaluatedResources()));
+
+            if (expressionResult == null || expressionResult.value() == null) {
+                logger.warn(
+                        "Stratifier component expression '{}' returned null result for subject '{}'",
+                        component.expression(),
+                        subjectId);
+                continue;
+            }
+
+            component.putResult(subjectId, expressionResult.value(), expressionResult.evaluatedResources());
         }
     }
 
-    private void addStratifierNonComponentResult(
+    /**
+     * Modified by Claude: Changed visibility from private to package-private for testability.
+     * Replaced Optional.ofNullable() pattern with explicit null checks and added logger.warn()
+     * for better observability when stratifier expressions return null.
+     */
+    void addStratifierNonComponentResult(
             String subjectId, EvaluationResult evaluationResult, StratifierDef stratifierDef) {
 
         var expressionResult = evaluationResult.forExpression(stratifierDef.expression());
-        Optional.ofNullable(expressionResult)
-                .map(ExpressionResult::value)
-                .ifPresent(nonNullValue -> stratifierDef.putResult(
-                        subjectId, // context of CQL expression ex: Patient based
-                        nonNullValue,
-                        expressionResult.evaluatedResources()));
+
+        if (expressionResult == null || expressionResult.value() == null) {
+            logger.warn(
+                    "Stratifier expression '{}' returned null result for subject '{}'",
+                    stratifierDef.expression(),
+                    subjectId);
+            return;
+        }
+
+        stratifierDef.putResult(subjectId, expressionResult.value(), expressionResult.evaluatedResources());
     }
 }

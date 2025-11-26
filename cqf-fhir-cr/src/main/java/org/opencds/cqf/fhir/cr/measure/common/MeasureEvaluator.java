@@ -801,7 +801,7 @@ public class MeasureEvaluator {
         if (popDef == null) {
             return 0;
         }
-        return popDef.getCountForScoring(groupDef.isBooleanBasis());
+        return popDef.getCountForScoring();
     }
 
     /**

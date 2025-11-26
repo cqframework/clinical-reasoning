@@ -269,10 +269,15 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
         return aggregate(observationQuantity, aggregateMethod);
     }
 
-    // Refactored by Claude Sonnet 4.5 - R4-specific wrapper that uses base class aggregation
+    // Refactored by Claude Sonnet 4.5 - self-contained R4-specific aggregation
     private Quantity aggregate(List<Quantity> quantities, ContinuousVariableObservationAggregateMethod method) {
         if (quantities == null || quantities.isEmpty()) {
             return null;
+        }
+
+        if (ContinuousVariableObservationAggregateMethod.N_A == method) {
+            throw new InvalidRequestException(
+                    "Aggregate method must be provided for continuous variable scoring, but is NO-OP.");
         }
 
         // Assume all quantities share the same unit/system/code
@@ -285,8 +290,34 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
         List<Double> values =
                 quantities.stream().map(q -> q.getValue().doubleValue()).toList();
 
-        // Use base class for version-agnostic aggregation
-        Double result = aggregateDoubles(values, method);
+        // Perform aggregation directly
+        Double result =
+                switch (method) {
+                    case SUM -> values.stream().mapToDouble(Double::doubleValue).sum();
+                    case MAX -> values.stream()
+                            .mapToDouble(Double::doubleValue)
+                            .max()
+                            .orElse(Double.NaN);
+                    case MIN -> values.stream()
+                            .mapToDouble(Double::doubleValue)
+                            .min()
+                            .orElse(Double.NaN);
+                    case AVG -> values.stream()
+                            .mapToDouble(Double::doubleValue)
+                            .average()
+                            .orElse(Double.NaN);
+                    case COUNT -> (double) values.size();
+                    case MEDIAN -> {
+                        List<Double> sorted = values.stream().sorted().toList();
+                        int n = sorted.size();
+                        if (n % 2 == 1) {
+                            yield sorted.get(n / 2);
+                        } else {
+                            yield (sorted.get(n / 2 - 1) + sorted.get(n / 2)) / 2.0;
+                        }
+                    }
+                    default -> throw new IllegalArgumentException("Unsupported aggregation method: " + method);
+                };
 
         if (result == null) {
             return null;

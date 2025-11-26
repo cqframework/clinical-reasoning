@@ -11,13 +11,16 @@ import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 
 class PopulationDefTest {
 
     @Test
     void setHandlingStrings() {
-        final PopulationDef popDef1 = new PopulationDef("one", null, null, null);
-        final PopulationDef popDef2 = new PopulationDef("two", null, null, null);
+        final PopulationDef popDef1 = new PopulationDef(
+                "one", null, null, null, new CodeDef(MeasureConstants.POPULATION_BASIS_URL, "boolean"));
+        final PopulationDef popDef2 = new PopulationDef(
+                "two", null, null, null, new CodeDef(MeasureConstants.POPULATION_BASIS_URL, "boolean"));
 
         popDef1.addResource("subj1", "string1");
         popDef2.addResource("subj1", "string1");
@@ -29,8 +32,10 @@ class PopulationDefTest {
 
     @Test
     void setHandlingIntegers() {
-        final PopulationDef popDef1 = new PopulationDef("one", null, null, null);
-        final PopulationDef popDef2 = new PopulationDef("two", null, null, null);
+        final PopulationDef popDef1 = new PopulationDef(
+                "one", null, null, null, new CodeDef(MeasureConstants.POPULATION_BASIS_URL, "boolean"));
+        final PopulationDef popDef2 = new PopulationDef(
+                "two", null, null, null, new CodeDef(MeasureConstants.POPULATION_BASIS_URL, "boolean"));
 
         popDef1.addResource("subj1", 123);
         popDef2.addResource("subj1", 123);
@@ -42,8 +47,10 @@ class PopulationDefTest {
 
     @Test
     void setHandlingEncounters() {
-        final PopulationDef popDef1 = new PopulationDef("one", null, null, null);
-        final PopulationDef popDef2 = new PopulationDef("two", null, null, null);
+        final PopulationDef popDef1 = new PopulationDef(
+                "one", null, null, null, new CodeDef(MeasureConstants.POPULATION_BASIS_URL, "boolean"));
+        final PopulationDef popDef2 = new PopulationDef(
+                "two", null, null, null, new CodeDef(MeasureConstants.POPULATION_BASIS_URL, "boolean"));
 
         final Encounter enc1a = (Encounter) new Encounter().setId(new IdType(ResourceType.Encounter.name(), "enc1"));
         final Encounter enc1b = (Encounter) new Encounter().setId(new IdType(ResourceType.Encounter.name(), "enc1"));

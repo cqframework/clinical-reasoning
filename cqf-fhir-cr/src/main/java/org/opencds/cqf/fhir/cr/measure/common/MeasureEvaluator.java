@@ -91,6 +91,7 @@ public class MeasureEvaluator {
         for (GroupDef groupDef : measureDef.groups()) {
             evaluateGroup(measureDef, groupDef, subjectType, subjectId, reportType, evaluationResult, applyScoring);
         }
+
         return measureDef;
     }
 

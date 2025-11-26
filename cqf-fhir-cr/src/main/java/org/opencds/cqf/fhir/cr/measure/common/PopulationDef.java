@@ -140,6 +140,17 @@ public class PopulationDef {
         return this.populationBasis;
     }
 
+    /**
+     * Checks if this population uses boolean basis.
+     * Convenience method to avoid verbose populationBasis.code().equals("boolean") checks.
+     * Added by Claude Sonnet 4.5.
+     *
+     * @return true if population basis is boolean, false otherwise
+     */
+    public boolean isBooleanBasis() {
+        return populationBasis.code().equals("boolean");
+    }
+
     // Getter method
     public Map<String, Set<Object>> getSubjectResources() {
         return subjectResources;
@@ -171,7 +182,7 @@ public class PopulationDef {
      * @return the count to use for scoring
      */
     public int getCountForScoring() {
-        if (populationBasis.code().equals("boolean")) {
+        if (isBooleanBasis()) {
             return getSubjects().size();
         } else if (type().equals(MeasurePopulationType.MEASUREOBSERVATION)) {
             return countObservations();

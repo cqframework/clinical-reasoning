@@ -320,9 +320,6 @@ public class LibraryEngine {
         var versionlessIdentifiers = ids.stream()
                 .map(id -> new VersionedIdentifier().withId(id.getId()))
                 .toList();
-//        System.out.println("XXXXXXX");
-//        System.out.println("Kotlin version: ${KotlinVersion.CURRENT}");
-//        System.out.println("Kotlin stdlib location: ${kotlin.jvm.internal.Intrinsics::class.java.protectionDomain.codeSource.location}");
         return engineToUse.evaluate(
                 versionlessIdentifiers,
                 expressions,

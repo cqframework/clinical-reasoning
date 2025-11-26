@@ -146,4 +146,24 @@ public class PopulationDef {
     public ContinuousVariableObservationAggregateMethod getAggregateMethod() {
         return this.aggregateMethod;
     }
+
+    // Added by Claude Sonnet 4.5 - unified count retrieval for scoring
+    /**
+     * Returns the count for this population based on the population basis.
+     * For boolean basis, returns the number of subjects.
+     * For measure observations, returns the count of observations.
+     * For resource basis, returns the count of all subject resources.
+     *
+     * @param isBooleanBasis whether the measure has boolean basis
+     * @return the count to use for scoring
+     */
+    public int getCountForScoring(boolean isBooleanBasis) {
+        if (isBooleanBasis) {
+            return getSubjects().size();
+        } else if (type().equals(MeasurePopulationType.MEASUREOBSERVATION)) {
+            return countObservations();
+        } else {
+            return getAllSubjectResources().size();
+        }
+    }
 }

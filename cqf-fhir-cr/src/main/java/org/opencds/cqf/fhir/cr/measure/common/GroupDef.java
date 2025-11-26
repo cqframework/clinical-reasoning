@@ -18,6 +18,10 @@ public class GroupDef {
     private final CodeDef improvementNotation;
     private final Map<MeasurePopulationType, List<PopulationDef>> populationIndex;
 
+    // Added by Claude Sonnet 4.5 - score storage for version-agnostic measure scoring
+    private Double measureScore;
+    private boolean measureScoreSet = false;
+
     public GroupDef(
             String id,
             ConceptDef code,
@@ -128,5 +132,19 @@ public class GroupDef {
 
     public CodeDef getImprovementNotation() {
         return this.improvementNotation;
+    }
+
+    // Added by Claude Sonnet 4.5 - score storage methods for version-agnostic measure scoring
+    public void setMeasureScore(Double score) {
+        this.measureScore = score;
+        this.measureScoreSet = true;
+    }
+
+    public Double getMeasureScore() {
+        return this.measureScore;
+    }
+
+    public boolean hasMeasureScore() {
+        return this.measureScoreSet;
     }
 }

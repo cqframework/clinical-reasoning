@@ -10,9 +10,18 @@ import java.util.Set;
  * For now, this contains the code text and stratum population defs, in order to help with
  * continuous variable scoring, as well as other stratifier use cases, and is meant to be the source
  * of truth for all data points regarding stratum.
+ * <p/>
+ * Converted from record to class by Claude Sonnet 4.5 to support mutable score storage
  */
-public record StratumDef(
-        List<StratumPopulationDef> stratumPopulations, Set<StratumValueDef> valueDefs, Collection<String> subjectIds) {
+public class StratumDef {
+
+    private final List<StratumPopulationDef> stratumPopulations;
+    private final Set<StratumValueDef> valueDefs;
+    private final Collection<String> subjectIds;
+
+    // Added by Claude Sonnet 4.5 - score storage for version-agnostic measure scoring
+    private Double measureScore;
+    private boolean measureScoreSet = false;
 
     public StratumDef(
             List<StratumPopulationDef> stratumPopulations,
@@ -23,7 +32,33 @@ public record StratumDef(
         this.subjectIds = subjectIds;
     }
 
+    public List<StratumPopulationDef> stratumPopulations() {
+        return stratumPopulations;
+    }
+
+    public Set<StratumValueDef> valueDefs() {
+        return valueDefs;
+    }
+
+    public Collection<String> subjectIds() {
+        return subjectIds;
+    }
+
     public boolean isComponent() {
         return valueDefs.size() > 1;
+    }
+
+    // Added by Claude Sonnet 4.5 - score storage methods for version-agnostic measure scoring
+    public void setMeasureScore(Double score) {
+        this.measureScore = score;
+        this.measureScoreSet = true;
+    }
+
+    public Double getMeasureScore() {
+        return this.measureScore;
+    }
+
+    public boolean hasMeasureScore() {
+        return this.measureScoreSet;
     }
 }

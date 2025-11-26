@@ -244,7 +244,7 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
     }
 
     @Nullable
-    private static Quantity calculateContinuousVariableAggregateQuantity(
+    private Quantity calculateContinuousVariableAggregateQuantity(
             String measureUrl,
             GroupDef groupDef,
             PopulationDef populationDef,
@@ -263,73 +263,36 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
     }
 
     @Nullable
-    private static Quantity calculateContinuousVariableAggregateQuantity(
+    private Quantity calculateContinuousVariableAggregateQuantity(
             ContinuousVariableObservationAggregateMethod aggregateMethod, Collection<Object> qualifyingResources) {
         var observationQuantity = collectQuantities(qualifyingResources);
         return aggregate(observationQuantity, aggregateMethod);
     }
 
-    private static Quantity aggregate(List<Quantity> quantities, ContinuousVariableObservationAggregateMethod method) {
+    // Refactored by Claude Sonnet 4.5 - R4-specific wrapper that uses base class aggregation
+    private Quantity aggregate(List<Quantity> quantities, ContinuousVariableObservationAggregateMethod method) {
         if (quantities == null || quantities.isEmpty()) {
             return null;
         }
 
-        if (ContinuousVariableObservationAggregateMethod.N_A == method) {
-            throw new InvalidRequestException(
-                    "Aggregate method must be provided for continuous variable scoring, but is NO-OP.");
-        }
-
-        // assume all quantities share the same unit/system/code
+        // Assume all quantities share the same unit/system/code
         Quantity base = quantities.get(0);
         String unit = base.getUnit();
         String system = base.getSystem();
         String code = base.getCode();
 
-        double result;
+        // Extract doubles from R4 Quantity objects
+        List<Double> values =
+                quantities.stream().map(q -> q.getValue().doubleValue()).toList();
 
-        switch (method) {
-            case SUM:
-                result = quantities.stream()
-                        .mapToDouble(q -> q.getValue().doubleValue())
-                        .sum();
-                break;
-            case MAX:
-                result = quantities.stream()
-                        .mapToDouble(q -> q.getValue().doubleValue())
-                        .max()
-                        .orElse(Double.NaN);
-                break;
-            case MIN:
-                result = quantities.stream()
-                        .mapToDouble(q -> q.getValue().doubleValue())
-                        .min()
-                        .orElse(Double.NaN);
-                break;
-            case AVG:
-                result = quantities.stream()
-                        .mapToDouble(q -> q.getValue().doubleValue())
-                        .average()
-                        .orElse(Double.NaN);
-                break;
-            case COUNT:
-                result = quantities.size();
-                break;
-            case MEDIAN:
-                List<Double> sorted = quantities.stream()
-                        .map(q -> q.getValue().doubleValue())
-                        .sorted()
-                        .toList();
-                int n = sorted.size();
-                if (n % 2 == 1) {
-                    result = sorted.get(n / 2);
-                } else {
-                    result = (sorted.get(n / 2 - 1) + sorted.get(n / 2)) / 2.0;
-                }
-                break;
-            default:
-                throw new IllegalArgumentException("Unsupported aggregation method: " + method);
+        // Use base class for version-agnostic aggregation
+        Double result = aggregateDoubles(values, method);
+
+        if (result == null) {
+            return null;
         }
 
+        // Wrap result back into R4 Quantity
         return new Quantity().setValue(result).setUnit(unit).setSystem(system).setCode(code);
     }
 

@@ -29,11 +29,11 @@ class ResponseEncoderMethodResolveIndicatorTest {
         fixture = new CdsResponseEncoderService(repository);
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{index} => testCase={0}")
     @MethodSource("provideResolveIndicatorTestCases")
-    void testResolveIndicator_routineCode(ProvideResolveIndicatorTestCasesParams params) {
-        CdsServiceIndicatorEnum result = fixture.resolveIndicator(params.indicator());
-        assertEquals(params.expectedIndicator(), result);
+    void testResolveIndicator_routineCode(ProvideResolveIndicatorTestCasesParams testCase) {
+        CdsServiceIndicatorEnum result = fixture.resolveIndicator(testCase.indicator());
+        assertEquals(testCase.expectedIndicator(), result);
     }
 
     @Test

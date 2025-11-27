@@ -69,21 +69,21 @@ class R4MeasureServiceUtilsTest {
                 new GetReporterParams(GROUP, Eithers.forRight(EXCEPTION_ILLEGAL_REPORTER)));
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{index} => testCase={0}")
     @MethodSource("getReporterParams")
-    void getReporter(GetReporterParams params) {
+    void getReporter(GetReporterParams testCase) {
 
-        if (params.theExpectedReporterOrError().isRight()) {
+        if (testCase.theExpectedReporterOrError().isRight()) {
             final Exception expectedException =
-                    params.theExpectedReporterOrError().rightOrThrow();
+                    testCase.theExpectedReporterOrError().rightOrThrow();
             assertThrows(
                     expectedException.getClass(),
-                    () -> testSubject.getReporter(params.theReporter()),
+                    () -> testSubject.getReporter(testCase.theReporter()),
                     expectedException.getMessage());
-        } else if (params.theExpectedReporterOrError().isLeft()) {
-            final Optional<Reference> optReporter = testSubject.getReporter(params.theReporter());
+        } else if (testCase.theExpectedReporterOrError().isLeft()) {
+            final Optional<Reference> optReporter = testSubject.getReporter(testCase.theReporter());
             assertEquals(
-                    params.theExpectedReporterOrError().leftOrThrow().map(Reference::getReference),
+                    testCase.theExpectedReporterOrError().leftOrThrow().map(Reference::getReference),
                     optReporter.map(Reference::getReference));
         } else {
             fail("Expecting an Either with only a left or a right but it has neither.");
@@ -137,12 +137,12 @@ class R4MeasureServiceUtilsTest {
                         MeasureEvalType.POPULATION));
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{index} => testCase={0}")
     @MethodSource("getMeasureEvalTypeHappyPathParams")
-    void getMeasureEvalTypeHappyPath(GetMeasureEvalTypeHappyPathParams params) {
+    void getMeasureEvalTypeHappyPath(GetMeasureEvalTypeHappyPathParams testCase) {
         assertThat(
-                testSubject.getMeasureEvalType(params.reportType(), params.subjectIds()),
-                equalTo(params.expectedMeasureEvalType()));
+                testSubject.getMeasureEvalType(testCase.reportType(), testCase.subjectIds()),
+                equalTo(testCase.expectedMeasureEvalType()));
     }
 
     private record GetMeasureEvalTypeSingleSubjectHappyPathParams(
@@ -167,12 +167,12 @@ class R4MeasureServiceUtilsTest {
                         MeasureEvalType.POPULATION.toCode(), PATIENT_PAT_1, MeasureEvalType.POPULATION));
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{index} => testCase={0}")
     @MethodSource("getMeasureEvalTypeSingleSubjectHappyPathParams")
-    void getMeasureEvalTypeSingleSubjectHappyPath(GetMeasureEvalTypeSingleSubjectHappyPathParams params) {
+    void getMeasureEvalTypeSingleSubjectHappyPath(GetMeasureEvalTypeSingleSubjectHappyPathParams testCase) {
         assertThat(
-                testSubject.getMeasureEvalType(params.reportType(), params.subjectId()),
-                equalTo(params.expectedMeasureEvalType()));
+                testSubject.getMeasureEvalType(testCase.reportType(), testCase.subjectId()),
+                equalTo(testCase.expectedMeasureEvalType()));
     }
 
     private record GetMeasureEvalTypeErrorsParams(
@@ -214,15 +214,15 @@ class R4MeasureServiceUtilsTest {
                         new Exception("ReportType: patient-list, is not an accepted R4 EvalType value.")));
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{index} => testCase={0}")
     @MethodSource("getMeasureEvalTypeErrorsParams")
-    void getMeasureEvalTypeErrors(GetMeasureEvalTypeErrorsParams params) {
+    void getMeasureEvalTypeErrors(GetMeasureEvalTypeErrorsParams testCase) {
         var actualException = assertThrows(
-                Exception.class, () -> testSubject.getMeasureEvalType(params.reportType(), params.subjectIds()));
+                Exception.class, () -> testSubject.getMeasureEvalType(testCase.reportType(), testCase.subjectIds()));
 
         assertThat(
                 actualException.getMessage(),
-                containsString(params.expectedException().getMessage()));
+                containsString(testCase.expectedException().getMessage()));
     }
 
     private record ProductLineParams(@Nullable String productLine, @Nullable Extension expectedExtension) {}
@@ -234,25 +234,26 @@ class R4MeasureServiceUtilsTest {
                 new ProductLineParams(null, null));
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{index} => testCase={0}")
     @MethodSource("productLineParams")
-    void productLine(ProductLineParams params) {
+    void productLine(ProductLineParams testCase) {
         var measureReportWithProductLine =
-                testSubject.addProductLineExtension(new MeasureReport(), params.productLine());
+                testSubject.addProductLineExtension(new MeasureReport(), testCase.productLine());
 
         var actualExtension = measureReportWithProductLine.getExtensionByUrl(
                 MeasureReportConstants.MEASUREREPORT_PRODUCT_LINE_EXT_URL);
 
-        if (params.expectedExtension() == null) {
+        if (testCase.expectedExtension() == null) {
             assertNull(actualExtension);
             return;
         }
 
-        assertThat(actualExtension.getUrl(), equalTo(params.expectedExtension().getUrl()));
+        assertThat(
+                actualExtension.getUrl(), equalTo(testCase.expectedExtension().getUrl()));
 
         assertThat(
                 actualExtension.getValue().primitiveValue(),
-                equalTo(params.expectedExtension().getValue().primitiveValue()));
+                equalTo(testCase.expectedExtension().getValue().primitiveValue()));
     }
 
     private static Extension buildExtensionForProductLine(String productLine) {

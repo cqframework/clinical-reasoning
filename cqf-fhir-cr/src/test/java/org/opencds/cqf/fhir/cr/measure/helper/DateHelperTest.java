@@ -40,18 +40,18 @@ class DateHelperTest {
                         ZoneOffset.UTC));
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{index} => testCase={0}")
     @MethodSource("resolveRequestDateWithTimeParams")
-    void resolveRequestDateWithTime(ResolveRequestDateWithTimeParams params) {
-        var resolvedDateStart = DateHelper.resolveRequestDate(params.date(), true);
+    void resolveRequestDateWithTime(ResolveRequestDateWithTimeParams testCase) {
+        var resolvedDateStart = DateHelper.resolveRequestDate(testCase.date(), true);
         assertNotNull(resolvedDateStart);
-        final DateTime expectedDateStart = getDateTimeForZoneId(params.expectedStartTime(), params.zoneId());
+        final DateTime expectedDateStart = getDateTimeForZoneId(testCase.expectedStartTime(), testCase.zoneId());
         assertDateTimesEqual(expectedDateStart, resolvedDateStart);
 
-        var resolvedDateEnd = DateHelper.resolveRequestDate(params.date(), false);
+        var resolvedDateEnd = DateHelper.resolveRequestDate(testCase.date(), false);
         assertNotNull(resolvedDateEnd);
         assertEquals(resolvedDateStart, resolvedDateEnd);
-        final DateTime expectedDateEnd = getDateTimeForZoneId(params.expectedEndTime(), params.zoneId());
+        final DateTime expectedDateEnd = getDateTimeForZoneId(testCase.expectedEndTime(), testCase.zoneId());
         assertDateTimesEqual(expectedDateEnd, resolvedDateEnd);
     }
 

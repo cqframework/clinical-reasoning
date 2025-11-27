@@ -102,16 +102,16 @@ class R4DateHelperTest {
                         Precision.SECOND));
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{index} => testCase={0}")
     @MethodSource("zonedDateTimesParams")
-    void zonedDateTimes(ZonedDateTimesParams params) {
-        final Interval interval =
-                new R4DateHelper().buildMeasurementPeriodInterval(params.theZonedDateTime(), params.theZonedDateTime());
+    void zonedDateTimes(ZonedDateTimesParams testCase) {
+        final Interval interval = new R4DateHelper()
+                .buildMeasurementPeriodInterval(testCase.theZonedDateTime(), testCase.theZonedDateTime());
         final Object start = interval.getStart();
         final Object end = interval.getEnd();
         assertInstanceOf(DateTime.class, start);
         assertInstanceOf(DateTime.class, end);
-        assertEquals(params.theExpectedPrecision(), ((DateTime) start).getPrecision());
-        assertEquals(params.theExpectedPrecision(), ((DateTime) end).getPrecision());
+        assertEquals(testCase.theExpectedPrecision(), ((DateTime) start).getPrecision());
+        assertEquals(testCase.theExpectedPrecision(), ((DateTime) end).getPrecision());
     }
 }

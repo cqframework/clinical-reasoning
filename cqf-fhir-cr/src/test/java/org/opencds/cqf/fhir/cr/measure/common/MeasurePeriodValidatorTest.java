@@ -54,27 +54,27 @@ class MeasurePeriodValidatorTest {
                                 "Invalid Period - the ending boundary: 2024-09-01T00:00Z must be greater than or equal to the starting boundary: 2024-10-01T00:00Z")));
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{index} => testCase={0}")
     @MethodSource("validatePeriodStartAndEndParams")
-    void validatePeriodStartAndEnd(ValidatePeriodStartAndEndParams params) {
+    void validatePeriodStartAndEnd(ValidatePeriodStartAndEndParams testCase) {
         try {
-            testSubject.validatePeriodStartAndEnd(params.periodStart(), params.periodEnd());
-            if (params.expectedException() != null) {
+            testSubject.validatePeriodStartAndEnd(testCase.periodStart(), testCase.periodEnd());
+            if (testCase.expectedException() != null) {
                 fail("Expected the following exception: %s but the method did not throw one"
-                        .formatted(params.expectedException()));
+                        .formatted(testCase.expectedException()));
             }
         } catch (Exception actualException) {
-            if (params.expectedException() == null) {
+            if (testCase.expectedException() == null) {
                 fail("Expected no Exception, but the following was thrown: " + actualException);
                 return;
             }
 
             assertThat(
                     actualException.getClass(),
-                    equalTo(params.expectedException().getClass()));
+                    equalTo(testCase.expectedException().getClass()));
             assertThat(
                     actualException.getMessage(),
-                    equalTo(params.expectedException().getMessage()));
+                    equalTo(testCase.expectedException().getMessage()));
         }
     }
 }

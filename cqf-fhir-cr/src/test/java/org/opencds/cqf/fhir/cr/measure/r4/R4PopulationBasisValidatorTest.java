@@ -156,10 +156,10 @@ class R4PopulationBasisValidatorTest {
                                 List.of(PROCEDURE, PROCEDURE, PROCEDURE)))));
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{index} => testCase={0}")
     @MethodSource("validateGroupBasisTypeHappyPathParams")
-    void validateGroupBasisTypeHappyPath(ValidateGroupBasisTypeHappyPathParams params) {
-        testSubject.validateGroupPopulations(MEASURE_DEF, params.groupDef(), params.evaluationResult());
+    void validateGroupBasisTypeHappyPath(ValidateGroupBasisTypeHappyPathParams testCase) {
+        testSubject.validateGroupPopulations(MEASURE_DEF, testCase.groupDef(), testCase.evaluationResult());
     }
 
     private record ValidateGroupBasisTypeErrorPathParams(
@@ -267,14 +267,14 @@ class R4PopulationBasisValidatorTest {
                         "group expression criteria results for expression: [Numerator] and scoring: [PROPORTION] must fall within accepted types for population basis: [Encounter] for Measure: [fakeMeasureUrl] due to mismatch between total result classes: [Encounter, Procedure, Encounter] and matching result classes: [Encounter, Encounter]"));
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{index} => testCase={0}")
     @MethodSource("validateGroupBasisTypeErrorPathParams")
-    void validateGroupBasisTypeErrorPath(ValidateGroupBasisTypeErrorPathParams params) {
+    void validateGroupBasisTypeErrorPath(ValidateGroupBasisTypeErrorPathParams testCase) {
         try {
-            testSubject.validateGroupPopulations(MEASURE_DEF, params.groupDef(), params.evaluationResult());
+            testSubject.validateGroupPopulations(MEASURE_DEF, testCase.groupDef(), testCase.evaluationResult());
             fail("Expected this test to fail");
         } catch (InvalidRequestException exception) {
-            assertEquals(params.expectedExceptionMessage(), exception.getMessage());
+            assertEquals(testCase.expectedExceptionMessage(), exception.getMessage());
         }
     }
 
@@ -354,10 +354,10 @@ class R4PopulationBasisValidatorTest {
                                 List.of(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE)))));
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{index} => testCase={0}")
     @MethodSource("validateStratifierBasisTypeHappyPathParams")
-    void validateStratifierBasisTypeHappyPath(ValidateStratifierBasisTypeHappyPathParams params) {
-        testSubject.validateStratifiers(MEASURE_DEF, params.groupDef(), params.evaluationResult());
+    void validateStratifierBasisTypeHappyPath(ValidateStratifierBasisTypeHappyPathParams testCase) {
+        testSubject.validateStratifiers(MEASURE_DEF, testCase.groupDef(), testCase.evaluationResult());
     }
 
     @Test

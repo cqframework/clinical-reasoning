@@ -125,15 +125,15 @@ class CrDiscoveryServiceDstu3Test extends BaseCdsCrDiscoveryServiceTest {
                         List.of(PREFETCH_URL_ENCOUNTER_WITH_PATH_AND_CODE)));
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{index} => testCase={0}")
     @MethodSource("createRequestUrlParams")
-    void createRequestUrl(CreateRequestUrlParams params) {
-        var adapter = params.dataRequirement() == null
+    void createRequestUrl(CreateRequestUrlParams testCase) {
+        var adapter = testCase.dataRequirement() == null
                 ? null
-                : adapterFactory.createDataRequirement(params.dataRequirement());
+                : adapterFactory.createDataRequirement(testCase.dataRequirement());
         final List<String> requestUrls = testSubject.createRequestUrl(adapter);
 
-        assertEquals(params.expectedUrls(), requestUrls);
+        assertEquals(testCase.expectedUrls(), requestUrls);
     }
 
     private static Stream<GetPrefetchUrlListParams> getPrefetchUrlListParams() {
@@ -193,14 +193,15 @@ class CrDiscoveryServiceDstu3Test extends BaseCdsCrDiscoveryServiceTest {
                         getPrefetchUrlList(PREFETCH_URL_PATIENT_WITH_PATH_AND_CODE)));
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{index} => testCase={0}")
     @MethodSource("getPrefetchUrlListParams")
-    void getPrefetchUrlList(GetPrefetchUrlListParams params) {
-        var adapter =
-                params.planDefinition() == null ? null : adapterFactory.createPlanDefinition(params.planDefinition());
+    void getPrefetchUrlList(GetPrefetchUrlListParams testCase) {
+        var adapter = testCase.planDefinition() == null
+                ? null
+                : adapterFactory.createPlanDefinition(testCase.planDefinition());
         final PrefetchUrlList prefetchUrlList = testSubject.getPrefetchUrlList(adapter);
 
-        assertEquals(params.expectedPrefetchUrlList(), prefetchUrlList);
+        assertEquals(testCase.expectedPrefetchUrlList(), prefetchUrlList);
     }
 
     private static PrefetchUrlList getPrefetchUrlList(String... urls) {

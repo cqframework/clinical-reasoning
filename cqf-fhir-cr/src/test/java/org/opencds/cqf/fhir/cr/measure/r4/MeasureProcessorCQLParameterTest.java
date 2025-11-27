@@ -33,9 +33,9 @@ class MeasureProcessorCQLParameterTest {
                         Parameters.parameters(Parameters.part("encounterParam", "SimpleCqlParamsEncounter1")), 1));
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{index} => testCase={0}")
     @MethodSource("simpleParametersParams")
-    void simpleParameters(SimpleParametersParams params) {
+    void simpleParameters(SimpleParametersParams testCase) {
         var when = Measure.given()
                 .repositoryFor("CqlParameters")
                 .when()
@@ -44,7 +44,7 @@ class MeasureProcessorCQLParameterTest {
                 .periodStart("2018-01-01")
                 .periodEnd("2030-12-31")
                 .reportType("subject")
-                .parameters(params.parameters())
+                .parameters(testCase.parameters())
                 .evaluate();
 
         var report = when.then().report();
@@ -54,7 +54,7 @@ class MeasureProcessorCQLParameterTest {
         var group = report.getGroupFirstRep();
 
         group.getPopulation().forEach(population -> {
-            assertPopulation(params.expectedMeasureCount(), population);
+            assertPopulation(testCase.expectedMeasureCount(), population);
         });
     }
 

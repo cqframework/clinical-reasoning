@@ -314,24 +314,24 @@ class StringTimePeriodHandlerTest {
                         _2024_09_26_12_00_00.atZone(TIMEZONE_AMERICA_DENVER)));
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{index} => testCase={0}")
     @MethodSource("getStartZonedDateTime_happyPath_params")
-    void getStartZonedDateTime_happyPath(GetStartZonedDateTimeHappyPathParams params) {
+    void getStartZonedDateTime_happyPath(GetStartZonedDateTimeHappyPathParams testCase) {
 
-        final ZonedDateTime actualResult =
-                myTestSubject.getStartZonedDateTime(params.theInputPeriodStart(), getRequestDetails(params.timezone()));
+        final ZonedDateTime actualResult = myTestSubject.getStartZonedDateTime(
+                testCase.theInputPeriodStart(), getRequestDetails(testCase.timezone()));
 
-        assertThat(actualResult).isEqualTo(params.expectedResult());
+        assertThat(actualResult).isEqualTo(testCase.expectedResult());
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{index} => testCase={0}")
     @MethodSource("getEndZonedDateTime_happyPath_params")
-    void getEndZonedDateTime_happyPath(GetEndZonedDateTimeHappyPathParams params) {
+    void getEndZonedDateTime_happyPath(GetEndZonedDateTimeHappyPathParams testCase) {
 
         final ZonedDateTime actualResult =
-                myTestSubject.getEndZonedDateTime(params.theInputPeriodEnd(), getRequestDetails(params.timezone()));
+                myTestSubject.getEndZonedDateTime(testCase.theInputPeriodEnd(), getRequestDetails(testCase.timezone()));
 
-        assertThat(actualResult).isEqualTo(params.expectedResult());
+        assertThat(actualResult).isEqualTo(testCase.expectedResult());
     }
 
     private static Stream<ErrorParams> errorParams() {
@@ -406,22 +406,22 @@ class StringTimePeriodHandlerTest {
                                 "Unsupported Date/Time format for input: 2024-09-25T12:00:00-06:00")));
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{index} => testCase={0}")
     @MethodSource("errorParams")
-    void getStartZonedDateTime_errorPaths(ErrorParams params) {
+    void getStartZonedDateTime_errorPaths(ErrorParams testCase) {
         assertThatThrownBy(() -> myTestSubject.getStartZonedDateTime(
-                        params.theInputPeriod(), getRequestDetails(params.timezone())))
-                .hasMessage(params.expectedResult().getMessage())
-                .isInstanceOf(params.expectedResult().getClass());
+                        testCase.theInputPeriod(), getRequestDetails(testCase.timezone())))
+                .hasMessage(testCase.expectedResult().getMessage())
+                .isInstanceOf(testCase.expectedResult().getClass());
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{index} => testCase={0}")
     @MethodSource("errorParams")
-    void getEndZonedDateTime_errorPaths(ErrorParams params) {
+    void getEndZonedDateTime_errorPaths(ErrorParams testCase) {
         assertThatThrownBy(() -> myTestSubject.getEndZonedDateTime(
-                        params.theInputPeriod(), getRequestDetails(params.timezone())))
-                .hasMessage(params.expectedResult().getMessage())
-                .isInstanceOf(params.expectedResult().getClass());
+                        testCase.theInputPeriod(), getRequestDetails(testCase.timezone())))
+                .hasMessage(testCase.expectedResult().getMessage())
+                .isInstanceOf(testCase.expectedResult().getClass());
     }
 
     private static Stream<SerializeDeserializeRoundTripParams> serializeDeserializeRoundTripParams() {
@@ -444,16 +444,16 @@ class StringTimePeriodHandlerTest {
                         _2022_08_31_23_59_59.atZone(TIMEZONE_AMERICA_DENVER), "2022-08-31T23:59:59-06:00"));
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{index} => testCase={0}")
     @MethodSource("serializeDeserializeRoundTripParams")
-    void serializeDeserializeRoundTrip(SerializeDeserializeRoundTripParams params) {
-        final String actualResult = myTestSubject.serialize(params.theInputDateTime());
+    void serializeDeserializeRoundTrip(SerializeDeserializeRoundTripParams testCase) {
+        final String actualResult = myTestSubject.serialize(testCase.theInputDateTime());
 
-        assertThat(actualResult).isEqualTo(params.expectedResult());
+        assertThat(actualResult).isEqualTo(testCase.expectedResult());
 
         final ZonedDateTime deSerialized = myTestSubject.deSerialize(actualResult);
 
-        assertThat(deSerialized).isEqualTo(params.theInputDateTime());
+        assertThat(deSerialized).isEqualTo(testCase.theInputDateTime());
     }
 
     private static Stream<DeSerializeRoundTripParams> deSerializeRoundTripParams() {
@@ -474,16 +474,16 @@ class StringTimePeriodHandlerTest {
                         "2022-08-31T23:59:59-06:00", _2022_08_31_23_59_59.atZone(TIMEZONE_AMERICA_DENVER)));
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{index} => testCase={0}")
     @MethodSource("deSerializeRoundTripParams")
-    void deSerializeRoundTrip(DeSerializeRoundTripParams params) {
-        final ZonedDateTime actualResult = myTestSubject.deSerialize(params.theInputString());
+    void deSerializeRoundTrip(DeSerializeRoundTripParams testCase) {
+        final ZonedDateTime actualResult = myTestSubject.deSerialize(testCase.theInputString());
 
-        assertThat(actualResult).isEqualTo(params.expectedResult());
+        assertThat(actualResult).isEqualTo(testCase.expectedResult());
 
         final String serialized = myTestSubject.serialize(actualResult);
 
-        assertThat(serialized).isEqualTo(params.theInputString());
+        assertThat(serialized).isEqualTo(testCase.theInputString());
     }
 
     private static RequestDetails getRequestDetails(@Nullable String timezone) {

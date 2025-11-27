@@ -230,14 +230,15 @@ class R4RepositorySubjectProviderTest {
                         resourcifyList(ResourceType.Patient, PAT_ID_1, PAT_ID_2)));
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{index} => testCase={0}")
     @MethodSource("getSubjectsParams")
-    void getSubjects(GetSubjectsParams params) {
-        final List<String> actualSubjects = params.testSubject()
-                .getSubjects(repository, params.subjectIds())
+    void getSubjects(GetSubjectsParams testCase) {
+        final List<String> actualSubjects = testCase.testSubject()
+                .getSubjects(repository, testCase.subjectIds())
                 .toList();
 
-        assertThat(actualSubjects, containsInAnyOrder(params.expectedSubjects().toArray()));
+        assertThat(
+                actualSubjects, containsInAnyOrder(testCase.expectedSubjects().toArray()));
     }
 
     private static Reference referencifiy(ResourceType resourceType, String rawId) {

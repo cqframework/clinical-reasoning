@@ -39,11 +39,11 @@ class IgRepositoryBadDataTest {
         repository = new IgRepository(FhirContext.forR4Cached(), tempDir);
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{index} => testCase={0}")
     @MethodSource("invalidContentTestData")
-    void readInvalidContentThrowsException(InvalidContentTestDataParams params) {
-        var e = assertThrows(ResourceNotFoundException.class, () -> repository.read(Patient.class, params.id()));
-        assertTrue(e.getMessage().contains(params.errorMessage()));
+    void readInvalidContentThrowsException(InvalidContentTestDataParams testCase) {
+        var e = assertThrows(ResourceNotFoundException.class, () -> repository.read(Patient.class, testCase.id()));
+        assertTrue(e.getMessage().contains(testCase.errorMessage()));
     }
 
     @Test

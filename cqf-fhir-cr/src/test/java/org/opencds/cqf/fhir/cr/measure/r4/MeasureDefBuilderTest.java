@@ -355,20 +355,20 @@ class MeasureDefBuilderTest {
                         null, "ratio", "proportion", MeasureScoring.RATIO, MeasureScoring.PROPORTION));
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{index} => testCase={0}")
     @MethodSource("scoringMeasureScoringAndGroupParams")
-    void scoringMeasureScoringAndGroup(ScoringMeasureScoringAndGroupParams params) {
+    void scoringMeasureScoringAndGroup(ScoringMeasureScoringAndGroupParams testCase) {
         var def = measureDefBuilder(
                 null,
-                params.group1Scoring(),
+                testCase.group1Scoring(),
                 null,
                 null,
                 null,
-                params.group2Scoring(),
+                testCase.group2Scoring(),
                 null,
                 null,
                 "boolean",
-                params.measureScoring(),
+                testCase.measureScoring(),
                 decrease);
 
         validateMeasureDef(
@@ -377,13 +377,13 @@ class MeasureDefBuilderTest {
                 "boolean",
                 false,
                 "decrease",
-                params.expectedGroup1MeasureScoring(),
+                testCase.expectedGroup1MeasureScoring(),
                 null,
                 true,
                 "boolean",
                 false,
                 "decrease",
-                params.expectedGroup2MeasureScoring(),
+                testCase.expectedGroup2MeasureScoring(),
                 null);
     }
 
@@ -523,18 +523,18 @@ class MeasureDefBuilderTest {
                         buildOutputStratifiers("Denominator")));
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{index} => testCase={0}")
     @MethodSource("basicStratifiersParams")
-    void basicStratifiers(BasicStratifiersParams params) {
+    void basicStratifiers(BasicStratifiersParams testCase) {
         var def = measureDefBuilder(
                 null,
                 "ratio",
                 null,
-                params.inputStratifiersGroup1(),
+                testCase.inputStratifiersGroup1(),
                 null,
                 "proportion",
                 null,
-                params.inputStratifiersGroup2(),
+                testCase.inputStratifiersGroup2(),
                 "boolean",
                 null,
                 null);
@@ -546,13 +546,13 @@ class MeasureDefBuilderTest {
                 false,
                 "increase",
                 MeasureScoring.RATIO,
-                params.outputStratifiersGroup1(),
+                testCase.outputStratifiersGroup1(),
                 true,
                 "boolean",
                 false,
                 "increase",
                 MeasureScoring.PROPORTION,
-                params.outputStratifiersGroup2());
+                testCase.outputStratifiersGroup2());
     }
 
     private static List<MeasureGroupStratifierComponent> buildInputStratifiers(String... expressions) {

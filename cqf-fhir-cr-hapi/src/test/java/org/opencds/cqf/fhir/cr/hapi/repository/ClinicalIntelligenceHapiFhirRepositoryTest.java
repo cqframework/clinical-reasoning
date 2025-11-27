@@ -143,12 +143,12 @@ class ClinicalIntelligenceHapiFhirRepositoryTest {
         triggerTestCase(50, 100, null, 100, 50);
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{index} => testCase={0}")
     @MethodSource("bundleProviders")
-    void testSanitizeBundleProvider(BundleProvidersParams params) {
+    void testSanitizeBundleProvider(BundleProvidersParams testCase) {
         var testSubject = getTestSubject(DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE, null, 0);
 
-        IBundleProvider result = testSubject.sanitizeBundleProvider(params.bundleProvider());
+        IBundleProvider result = testSubject.sanitizeBundleProvider(testCase.bundleProvider());
         assertNotNull(result);
     }
 
@@ -201,17 +201,17 @@ class ClinicalIntelligenceHapiFhirRepositoryTest {
         assertEquals(BundleTypeEnum.SEARCHSET, bundleType, "Default bundle type should be SEARCHSET");
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{index} => testCase={0}")
     @EnumSource(BundleTypeEnum.class)
-    void testExtractBundleTypeFromRequestParameters_withExplicitValue(BundleTypeEnum bundleType) {
+    void testExtractBundleTypeFromRequestParameters_withExplicitValue(BundleTypeEnum testCase) {
         var testSubject = getTestSubject(DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE, null, 0);
 
-        String typeStr = bundleType.getCode().toLowerCase();
+        String typeStr = testCase.getCode().toLowerCase();
         Map<String, String[]> parameters = createRequestParametersWithBundleType(typeStr);
         BundleTypeEnum extractedBundleType = testSubject.extractBundleTypeFromRequestParameters(parameters);
 
         assertNotNull(extractedBundleType);
-        assertEquals(bundleType, extractedBundleType, "Bundle type should match explicitly provided value");
+        assertEquals(testCase, extractedBundleType, "Bundle type should match explicitly provided value");
     }
 
     @Test

@@ -18,12 +18,13 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.opencds.cqf.fhir.test.Resources;
 import org.opencds.cqf.fhir.utility.search.Searches;
 
 class IgRepositoryBadDataTest {
+
+    private record InvalidContentTestDataParams(IIdType id, String errorMessage) {}
 
     private static IRepository repository;
 
@@ -40,9 +41,9 @@ class IgRepositoryBadDataTest {
 
     @ParameterizedTest
     @MethodSource("invalidContentTestData")
-    void readInvalidContentThrowsException(IIdType id, String errorMessage) {
-        var e = assertThrows(ResourceNotFoundException.class, () -> repository.read(Patient.class, id));
-        assertTrue(e.getMessage().contains(errorMessage));
+    void readInvalidContentThrowsException(InvalidContentTestDataParams params) {
+        var e = assertThrows(ResourceNotFoundException.class, () -> repository.read(Patient.class, params.id()));
+        assertTrue(e.getMessage().contains(params.errorMessage()));
     }
 
     @Test
@@ -58,13 +59,17 @@ class IgRepositoryBadDataTest {
                 ResourceNotFoundException.class, () -> repository.search(Bundle.class, Patient.class, Searches.ALL));
     }
 
-    private static Stream<Arguments> invalidContentTestData() {
+    private static Stream<InvalidContentTestDataParams> invalidContentTestData() {
         return Stream.of(
-                Arguments.of(new IdType("Patient/InvalidContent"), "Found empty or invalid content"),
-                Arguments.of(new IdType("Patient/MissingId"), "Found resource without an id"),
-                Arguments.of(new IdType("Patient/NoContent"), "Found empty or invalid content"),
-                Arguments.of(new IdType("Patient/WrongId"), "Found resource with an id DoesntMatchFilename"),
-                Arguments.of(new IdType("Patient/WrongResourceType"), "Found resource with type Encounter"),
-                Arguments.of(new IdType("Patient/WrongVersion").withVersion("1"), "Found resource with version 2"));
+                new InvalidContentTestDataParams(
+                        new IdType("Patient/InvalidContent"), "Found empty or invalid content"),
+                new InvalidContentTestDataParams(new IdType("Patient/MissingId"), "Found resource without an id"),
+                new InvalidContentTestDataParams(new IdType("Patient/NoContent"), "Found empty or invalid content"),
+                new InvalidContentTestDataParams(
+                        new IdType("Patient/WrongId"), "Found resource with an id DoesntMatchFilename"),
+                new InvalidContentTestDataParams(
+                        new IdType("Patient/WrongResourceType"), "Found resource with type Encounter"),
+                new InvalidContentTestDataParams(
+                        new IdType("Patient/WrongVersion").withVersion("1"), "Found resource with version 2"));
     }
 }

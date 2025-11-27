@@ -21,7 +21,6 @@ import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -56,70 +55,83 @@ class R4MeasureServiceUtilsTest {
         testSubject = new R4MeasureServiceUtils(repository);
     }
 
-    private static Stream<Arguments> getReporterParams() {
+    private record GetReporterParams(
+            @Nullable String theReporter, Either<Optional<Reference>, Exception> theExpectedReporterOrError) {}
+
+    private static Stream<GetReporterParams> getReporterParams() {
         return Stream.of(
-                Arguments.of(null, EITHER_EMPTY_RESULT),
-                Arguments.of(PRACTITIONER, buildEitherLeft(PRACTITIONER)),
-                Arguments.of(PRACTITIONER_ROLE, buildEitherLeft(PRACTITIONER_ROLE)),
-                Arguments.of(ORGANIZATION, buildEitherLeft(ORGANIZATION)),
-                Arguments.of(LOCATION, buildEitherLeft(LOCATION)),
-                Arguments.of(PATIENT, EITHER_ILLEGAL_ARGUMENT_EXCEPTION),
-                Arguments.of(GROUP, EITHER_ILLEGAL_ARGUMENT_EXCEPTION));
+                new GetReporterParams(null, EITHER_EMPTY_RESULT),
+                new GetReporterParams(PRACTITIONER, buildEitherLeft(PRACTITIONER)),
+                new GetReporterParams(PRACTITIONER_ROLE, buildEitherLeft(PRACTITIONER_ROLE)),
+                new GetReporterParams(ORGANIZATION, buildEitherLeft(ORGANIZATION)),
+                new GetReporterParams(LOCATION, buildEitherLeft(LOCATION)),
+                new GetReporterParams(PATIENT, Eithers.forRight(EXCEPTION_ILLEGAL_REPORTER)),
+                new GetReporterParams(GROUP, Eithers.forRight(EXCEPTION_ILLEGAL_REPORTER)));
     }
 
     @ParameterizedTest
     @MethodSource("getReporterParams")
-    void getReporter(@Nullable String theReporter, Either<Optional<Reference>, Exception> theExpectedReporterOrError) {
+    void getReporter(GetReporterParams params) {
 
-        if (theExpectedReporterOrError.isRight()) {
-            final Exception expectedException = theExpectedReporterOrError.rightOrThrow();
+        if (params.theExpectedReporterOrError().isRight()) {
+            final Exception expectedException =
+                    params.theExpectedReporterOrError().rightOrThrow();
             assertThrows(
                     expectedException.getClass(),
-                    () -> testSubject.getReporter(theReporter),
+                    () -> testSubject.getReporter(params.theReporter()),
                     expectedException.getMessage());
-        } else if (theExpectedReporterOrError.isLeft()) {
-            final Optional<Reference> optReporter = testSubject.getReporter(theReporter);
+        } else if (params.theExpectedReporterOrError().isLeft()) {
+            final Optional<Reference> optReporter = testSubject.getReporter(params.theReporter());
             assertEquals(
-                    theExpectedReporterOrError.leftOrThrow().map(Reference::getReference),
+                    params.theExpectedReporterOrError().leftOrThrow().map(Reference::getReference),
                     optReporter.map(Reference::getReference));
         } else {
             fail("Expecting an Either with only a left or a right but it has neither.");
         }
     }
 
-    private static Stream<Arguments> getMeasureEvalTypeHappyPathParams() {
+    private record GetMeasureEvalTypeHappyPathParams(
+            @Nullable String reportType, @Nullable List<String> subjectIds, MeasureEvalType expectedMeasureEvalType) {}
+
+    private static Stream<GetMeasureEvalTypeHappyPathParams> getMeasureEvalTypeHappyPathParams() {
         return Stream.of(
-                Arguments.of(null, null, MeasureEvalType.POPULATION),
-                Arguments.of(R4MeasureEvalType.SUBJECT.toCode(), null, MeasureEvalType.SUBJECT),
-                Arguments.of(R4MeasureEvalType.SUBJECTLIST.toCode(), null, MeasureEvalType.SUBJECTLIST),
-                Arguments.of(R4MeasureEvalType.POPULATION.toCode(), null, MeasureEvalType.POPULATION),
-                Arguments.of(null, Collections.emptyList(), MeasureEvalType.POPULATION),
-                Arguments.of(R4MeasureEvalType.SUBJECT.toCode(), Collections.emptyList(), MeasureEvalType.SUBJECT),
-                Arguments.of(
+                new GetMeasureEvalTypeHappyPathParams(null, null, MeasureEvalType.POPULATION),
+                new GetMeasureEvalTypeHappyPathParams(
+                        R4MeasureEvalType.SUBJECT.toCode(), null, MeasureEvalType.SUBJECT),
+                new GetMeasureEvalTypeHappyPathParams(
+                        R4MeasureEvalType.SUBJECTLIST.toCode(), null, MeasureEvalType.SUBJECTLIST),
+                new GetMeasureEvalTypeHappyPathParams(
+                        R4MeasureEvalType.POPULATION.toCode(), null, MeasureEvalType.POPULATION),
+                new GetMeasureEvalTypeHappyPathParams(null, Collections.emptyList(), MeasureEvalType.POPULATION),
+                new GetMeasureEvalTypeHappyPathParams(
+                        R4MeasureEvalType.SUBJECT.toCode(), Collections.emptyList(), MeasureEvalType.SUBJECT),
+                new GetMeasureEvalTypeHappyPathParams(
                         R4MeasureEvalType.SUBJECTLIST.toCode(), Collections.emptyList(), MeasureEvalType.SUBJECTLIST),
-                Arguments.of(
+                new GetMeasureEvalTypeHappyPathParams(
                         R4MeasureEvalType.POPULATION.toCode(), Collections.emptyList(), MeasureEvalType.POPULATION),
-                Arguments.of(null, Collections.singletonList(null), MeasureEvalType.POPULATION),
-                Arguments.of(
+                new GetMeasureEvalTypeHappyPathParams(
+                        null, Collections.singletonList(null), MeasureEvalType.POPULATION),
+                new GetMeasureEvalTypeHappyPathParams(
                         R4MeasureEvalType.SUBJECT.toCode(), Collections.singletonList(null), MeasureEvalType.SUBJECT),
-                Arguments.of(
+                new GetMeasureEvalTypeHappyPathParams(
                         R4MeasureEvalType.SUBJECTLIST.toCode(),
                         Collections.singletonList(null),
                         MeasureEvalType.SUBJECTLIST),
-                Arguments.of(
+                new GetMeasureEvalTypeHappyPathParams(
                         R4MeasureEvalType.POPULATION.toCode(),
                         Collections.singletonList(null),
                         MeasureEvalType.POPULATION),
-                Arguments.of(null, Collections.singletonList(PATIENT_PAT_1), MeasureEvalType.SUBJECT),
-                Arguments.of(
+                new GetMeasureEvalTypeHappyPathParams(
+                        null, Collections.singletonList(PATIENT_PAT_1), MeasureEvalType.SUBJECT),
+                new GetMeasureEvalTypeHappyPathParams(
                         R4MeasureEvalType.SUBJECT.toCode(),
                         Collections.singletonList(PATIENT_PAT_1),
                         MeasureEvalType.SUBJECT),
-                Arguments.of(
+                new GetMeasureEvalTypeHappyPathParams(
                         R4MeasureEvalType.SUBJECTLIST.toCode(),
                         Collections.singletonList(PATIENT_PAT_1),
                         MeasureEvalType.SUBJECTLIST),
-                Arguments.of(
+                new GetMeasureEvalTypeHappyPathParams(
                         R4MeasureEvalType.POPULATION.toCode(),
                         Collections.singletonList(PATIENT_PAT_1),
                         MeasureEvalType.POPULATION));
@@ -127,61 +139,76 @@ class R4MeasureServiceUtilsTest {
 
     @ParameterizedTest
     @MethodSource("getMeasureEvalTypeHappyPathParams")
-    void getMeasureEvalTypeHappyPath(
-            @Nullable String reportType, @Nullable List<String> subjectIds, MeasureEvalType expectedMeasureEvalType) {
-        assertThat(testSubject.getMeasureEvalType(reportType, subjectIds), equalTo(expectedMeasureEvalType));
+    void getMeasureEvalTypeHappyPath(GetMeasureEvalTypeHappyPathParams params) {
+        assertThat(
+                testSubject.getMeasureEvalType(params.reportType(), params.subjectIds()),
+                equalTo(params.expectedMeasureEvalType()));
     }
 
-    private static Stream<Arguments> getMeasureEvalTypeSingleSubjectHappyPathParams() {
+    private record GetMeasureEvalTypeSingleSubjectHappyPathParams(
+            @Nullable String reportType, @Nullable String subjectId, MeasureEvalType expectedMeasureEvalType) {}
+
+    private static Stream<GetMeasureEvalTypeSingleSubjectHappyPathParams>
+            getMeasureEvalTypeSingleSubjectHappyPathParams() {
         return Stream.of(
-                Arguments.of(null, null, MeasureEvalType.POPULATION),
-                Arguments.of(R4MeasureEvalType.SUBJECT.toCode(), null, MeasureEvalType.SUBJECT),
-                Arguments.of(R4MeasureEvalType.SUBJECTLIST.toCode(), null, MeasureEvalType.SUBJECTLIST),
-                Arguments.of(R4MeasureEvalType.POPULATION.toCode(), null, MeasureEvalType.POPULATION),
-                Arguments.of(null, PATIENT_PAT_1, MeasureEvalType.SUBJECT),
-                Arguments.of(MeasureEvalType.SUBJECT.toCode(), PATIENT_PAT_1, MeasureEvalType.SUBJECT),
-                Arguments.of(MeasureEvalType.SUBJECTLIST.toCode(), PATIENT_PAT_1, MeasureEvalType.SUBJECTLIST),
-                Arguments.of(MeasureEvalType.POPULATION.toCode(), PATIENT_PAT_1, MeasureEvalType.POPULATION));
+                new GetMeasureEvalTypeSingleSubjectHappyPathParams(null, null, MeasureEvalType.POPULATION),
+                new GetMeasureEvalTypeSingleSubjectHappyPathParams(
+                        R4MeasureEvalType.SUBJECT.toCode(), null, MeasureEvalType.SUBJECT),
+                new GetMeasureEvalTypeSingleSubjectHappyPathParams(
+                        R4MeasureEvalType.SUBJECTLIST.toCode(), null, MeasureEvalType.SUBJECTLIST),
+                new GetMeasureEvalTypeSingleSubjectHappyPathParams(
+                        R4MeasureEvalType.POPULATION.toCode(), null, MeasureEvalType.POPULATION),
+                new GetMeasureEvalTypeSingleSubjectHappyPathParams(null, PATIENT_PAT_1, MeasureEvalType.SUBJECT),
+                new GetMeasureEvalTypeSingleSubjectHappyPathParams(
+                        MeasureEvalType.SUBJECT.toCode(), PATIENT_PAT_1, MeasureEvalType.SUBJECT),
+                new GetMeasureEvalTypeSingleSubjectHappyPathParams(
+                        MeasureEvalType.SUBJECTLIST.toCode(), PATIENT_PAT_1, MeasureEvalType.SUBJECTLIST),
+                new GetMeasureEvalTypeSingleSubjectHappyPathParams(
+                        MeasureEvalType.POPULATION.toCode(), PATIENT_PAT_1, MeasureEvalType.POPULATION));
     }
 
     @ParameterizedTest
     @MethodSource("getMeasureEvalTypeSingleSubjectHappyPathParams")
-    void getMeasureEvalTypeSingleSubjectHappyPath(
-            @Nullable String reportType, @Nullable String subjectId, MeasureEvalType expectedMeasureEvalType) {
-        assertThat(testSubject.getMeasureEvalType(reportType, subjectId), equalTo(expectedMeasureEvalType));
+    void getMeasureEvalTypeSingleSubjectHappyPath(GetMeasureEvalTypeSingleSubjectHappyPathParams params) {
+        assertThat(
+                testSubject.getMeasureEvalType(params.reportType(), params.subjectId()),
+                equalTo(params.expectedMeasureEvalType()));
     }
 
-    private static Stream<Arguments> getMeasureEvalTypeErrorsParams() {
+    private record GetMeasureEvalTypeErrorsParams(
+            @Nullable String reportType, @Nullable List<String> subjectIds, Exception expectedException) {}
+
+    private static Stream<GetMeasureEvalTypeErrorsParams> getMeasureEvalTypeErrorsParams() {
         return Stream.of(
-                Arguments.of(
+                new GetMeasureEvalTypeErrorsParams(
                         MeasureEvalType.PATIENT.toCode(),
                         null,
                         new Exception("ReportType: patient, is not an accepted R4 EvalType value.")),
-                Arguments.of(
+                new GetMeasureEvalTypeErrorsParams(
                         MeasureEvalType.PATIENTLIST.toCode(),
                         null,
                         new Exception("ReportType: patient-list, is not an accepted R4 EvalType value.")),
-                Arguments.of(
+                new GetMeasureEvalTypeErrorsParams(
                         MeasureEvalType.PATIENT.toCode(),
                         Collections.emptyList(),
                         new Exception("ReportType: patient, is not an accepted R4 EvalType value.")),
-                Arguments.of(
+                new GetMeasureEvalTypeErrorsParams(
                         MeasureEvalType.PATIENTLIST.toCode(),
                         Collections.emptyList(),
                         new Exception("ReportType: patient-list, is not an accepted R4 EvalType value.")),
-                Arguments.of(
+                new GetMeasureEvalTypeErrorsParams(
                         MeasureEvalType.PATIENT.toCode(),
                         Collections.singletonList(null),
                         new Exception("ReportType: patient, is not an accepted R4 EvalType value.")),
-                Arguments.of(
+                new GetMeasureEvalTypeErrorsParams(
                         MeasureEvalType.PATIENTLIST.toCode(),
                         Collections.singletonList(null),
                         new Exception("ReportType: patient-list, is not an accepted R4 EvalType value.")),
-                Arguments.of(
+                new GetMeasureEvalTypeErrorsParams(
                         MeasureEvalType.PATIENT.toCode(),
                         Collections.singletonList(PATIENT_PAT_1),
                         new Exception("ReportType: patient, is not an accepted R4 EvalType value.")),
-                Arguments.of(
+                new GetMeasureEvalTypeErrorsParams(
                         MeasureEvalType.PATIENTLIST.toCode(),
                         Collections.singletonList(PATIENT_PAT_1),
                         new Exception("ReportType: patient-list, is not an accepted R4 EvalType value.")));
@@ -189,39 +216,43 @@ class R4MeasureServiceUtilsTest {
 
     @ParameterizedTest
     @MethodSource("getMeasureEvalTypeErrorsParams")
-    void getMeasureEvalTypeErrors(
-            @Nullable String reportType, @Nullable List<String> subjectIds, Exception expectedException) {
-        var actualException =
-                assertThrows(Exception.class, () -> testSubject.getMeasureEvalType(reportType, subjectIds));
+    void getMeasureEvalTypeErrors(GetMeasureEvalTypeErrorsParams params) {
+        var actualException = assertThrows(
+                Exception.class, () -> testSubject.getMeasureEvalType(params.reportType(), params.subjectIds()));
 
-        assertThat(actualException.getMessage(), containsString(expectedException.getMessage()));
+        assertThat(
+                actualException.getMessage(),
+                containsString(params.expectedException().getMessage()));
     }
 
-    private static Stream<Arguments> productLineParams() {
+    private record ProductLineParams(@Nullable String productLine, @Nullable Extension expectedExtension) {}
+
+    private static Stream<ProductLineParams> productLineParams() {
         return Stream.of(
-                Arguments.of("Medicare", buildExtensionForProductLine("Medicare")),
-                Arguments.of("Medicaid", buildExtensionForProductLine("Medicaid")),
-                Arguments.of(null, null));
+                new ProductLineParams("Medicare", buildExtensionForProductLine("Medicare")),
+                new ProductLineParams("Medicaid", buildExtensionForProductLine("Medicaid")),
+                new ProductLineParams(null, null));
     }
 
     @ParameterizedTest
     @MethodSource("productLineParams")
-    void productLine(@Nullable String productLine, @Nullable Extension expectedExtension) {
-        var measureReportWithProductLine = testSubject.addProductLineExtension(new MeasureReport(), productLine);
+    void productLine(ProductLineParams params) {
+        var measureReportWithProductLine =
+                testSubject.addProductLineExtension(new MeasureReport(), params.productLine());
 
         var actualExtension = measureReportWithProductLine.getExtensionByUrl(
                 MeasureReportConstants.MEASUREREPORT_PRODUCT_LINE_EXT_URL);
 
-        if (expectedExtension == null) {
+        if (params.expectedExtension() == null) {
             assertNull(actualExtension);
             return;
         }
 
-        assertThat(actualExtension.getUrl(), equalTo(expectedExtension.getUrl()));
+        assertThat(actualExtension.getUrl(), equalTo(params.expectedExtension().getUrl()));
 
         assertThat(
                 actualExtension.getValue().primitiveValue(),
-                equalTo(expectedExtension.getValue().primitiveValue()));
+                equalTo(params.expectedExtension().getValue().primitiveValue()));
     }
 
     private static Extension buildExtensionForProductLine(String productLine) {

@@ -18,10 +18,22 @@ import java.time.ZonedDateTime;
 import java.util.Optional;
 import java.util.stream.Stream;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 class StringTimePeriodHandlerTest {
+
+    record GetStartZonedDateTimeHappyPathParams(
+            @Nullable String timezone, @Nullable String theInputPeriodStart, @Nullable ZonedDateTime expectedResult) {}
+
+    record GetEndZonedDateTimeHappyPathParams(
+            @Nullable String timezone, @Nullable String theInputPeriodEnd, @Nullable ZonedDateTime expectedResult) {}
+
+    record ErrorParams(
+            @Nullable String timezone, @Nullable String theInputPeriod, InvalidRequestException expectedResult) {}
+
+    record SerializeDeserializeRoundTripParams(ZonedDateTime theInputDateTime, String expectedResult) {}
+
+    record DeSerializeRoundTripParams(String theInputString, ZonedDateTime expectedResult) {}
 
     private static final String ZONE_ID_Z = "Z";
     private static final String TIMEZONE_UTC = ZoneOffset.UTC.getId();
@@ -75,193 +87,228 @@ class StringTimePeriodHandlerTest {
 
     private final StringTimePeriodHandler myTestSubject = new StringTimePeriodHandler(ZoneOffset.UTC);
 
-    private static Stream<Arguments> getStartZonedDateTime_happyPath_params() {
+    private static Stream<GetStartZonedDateTimeHappyPathParams> getStartZonedDateTime_happyPath_params() {
         return Stream.of(
-                Arguments.of(null, null, null),
-                Arguments.of(ZONE_ID_Z, null, null),
-                Arguments.of(TIMEZONE_UTC, null, null),
-                Arguments.of(TIMEZONE_AMERICA_ST_JOHNS_ID, null, null),
-                Arguments.of(TIMEZONE_AMERICA_TORONTO_ID, null, null),
-                Arguments.of(TIMEZONE_AMERICA_DENVER_ID, null, null),
-                Arguments.of(null, "2020", _2020_01_01_00_00_00.atZone(ZoneOffset.UTC)),
-                Arguments.of(ZONE_ID_Z, "2020", _2020_01_01_00_00_00.atZone(ZoneOffset.UTC)),
-                Arguments.of(TIMEZONE_UTC, "2020", _2020_01_01_00_00_00.atZone(ZoneOffset.UTC)),
-                Arguments.of(
+                new GetStartZonedDateTimeHappyPathParams(null, null, null),
+                new GetStartZonedDateTimeHappyPathParams(ZONE_ID_Z, null, null),
+                new GetStartZonedDateTimeHappyPathParams(TIMEZONE_UTC, null, null),
+                new GetStartZonedDateTimeHappyPathParams(TIMEZONE_AMERICA_ST_JOHNS_ID, null, null),
+                new GetStartZonedDateTimeHappyPathParams(TIMEZONE_AMERICA_TORONTO_ID, null, null),
+                new GetStartZonedDateTimeHappyPathParams(TIMEZONE_AMERICA_DENVER_ID, null, null),
+                new GetStartZonedDateTimeHappyPathParams(null, "2020", _2020_01_01_00_00_00.atZone(ZoneOffset.UTC)),
+                new GetStartZonedDateTimeHappyPathParams(
+                        ZONE_ID_Z, "2020", _2020_01_01_00_00_00.atZone(ZoneOffset.UTC)),
+                new GetStartZonedDateTimeHappyPathParams(
+                        TIMEZONE_UTC, "2020", _2020_01_01_00_00_00.atZone(ZoneOffset.UTC)),
+                new GetStartZonedDateTimeHappyPathParams(
                         TIMEZONE_AMERICA_ST_JOHNS_ID, "2020", _2020_01_01_00_00_00.atZone(TIMEZONE_AMERICA_ST_JOHNS)),
-                Arguments.of(
+                new GetStartZonedDateTimeHappyPathParams(
                         TIMEZONE_AMERICA_TORONTO_ID, "2020", _2020_01_01_00_00_00.atZone(TIMEZONE_AMERICA_TORONTO)),
-                Arguments.of(TIMEZONE_AMERICA_DENVER_ID, "2020", _2020_01_01_00_00_00.atZone(TIMEZONE_AMERICA_DENVER)),
-                Arguments.of(null, "2022-02", _2022_02_01_00_00_00.atZone(ZoneOffset.UTC)),
-                Arguments.of(ZONE_ID_Z, "2022-02", _2022_02_01_00_00_00.atZone(ZoneOffset.UTC)),
-                Arguments.of(TIMEZONE_UTC, "2022-02", _2022_02_01_00_00_00.atZone(ZoneOffset.UTC)),
-                Arguments.of(
+                new GetStartZonedDateTimeHappyPathParams(
+                        TIMEZONE_AMERICA_DENVER_ID, "2020", _2020_01_01_00_00_00.atZone(TIMEZONE_AMERICA_DENVER)),
+                new GetStartZonedDateTimeHappyPathParams(null, "2022-02", _2022_02_01_00_00_00.atZone(ZoneOffset.UTC)),
+                new GetStartZonedDateTimeHappyPathParams(
+                        ZONE_ID_Z, "2022-02", _2022_02_01_00_00_00.atZone(ZoneOffset.UTC)),
+                new GetStartZonedDateTimeHappyPathParams(
+                        TIMEZONE_UTC, "2022-02", _2022_02_01_00_00_00.atZone(ZoneOffset.UTC)),
+                new GetStartZonedDateTimeHappyPathParams(
                         TIMEZONE_AMERICA_ST_JOHNS_ID,
                         "2022-02",
                         _2022_02_01_00_00_00.atZone(TIMEZONE_AMERICA_ST_JOHNS)),
-                Arguments.of(
+                new GetStartZonedDateTimeHappyPathParams(
                         TIMEZONE_AMERICA_TORONTO_ID, "2022-02", _2022_02_01_00_00_00.atZone(TIMEZONE_AMERICA_TORONTO)),
-                Arguments.of(
+                new GetStartZonedDateTimeHappyPathParams(
                         TIMEZONE_AMERICA_DENVER_ID, "2022-02", _2022_02_01_00_00_00.atZone(TIMEZONE_AMERICA_DENVER)),
-                Arguments.of(null, "2024-02-25", _2024_02_25_00_00_00.atZone(ZoneOffset.UTC)),
-                Arguments.of(ZONE_ID_Z, "2024-02-25", _2024_02_25_00_00_00.atZone(ZoneOffset.UTC)),
-                Arguments.of(TIMEZONE_UTC, "2024-02-25", _2024_02_25_00_00_00.atZone(ZoneOffset.UTC)),
-                Arguments.of(
+                new GetStartZonedDateTimeHappyPathParams(
+                        null, "2024-02-25", _2024_02_25_00_00_00.atZone(ZoneOffset.UTC)),
+                new GetStartZonedDateTimeHappyPathParams(
+                        ZONE_ID_Z, "2024-02-25", _2024_02_25_00_00_00.atZone(ZoneOffset.UTC)),
+                new GetStartZonedDateTimeHappyPathParams(
+                        TIMEZONE_UTC, "2024-02-25", _2024_02_25_00_00_00.atZone(ZoneOffset.UTC)),
+                new GetStartZonedDateTimeHappyPathParams(
                         TIMEZONE_AMERICA_ST_JOHNS_ID,
                         "2024-02-25",
                         _2024_02_25_00_00_00.atZone(TIMEZONE_AMERICA_ST_JOHNS)),
-                Arguments.of(
+                new GetStartZonedDateTimeHappyPathParams(
                         TIMEZONE_AMERICA_TORONTO_ID,
                         "2024-02-25",
                         _2024_02_25_00_00_00.atZone(TIMEZONE_AMERICA_TORONTO)),
-                Arguments.of(
+                new GetStartZonedDateTimeHappyPathParams(
                         TIMEZONE_AMERICA_DENVER_ID, "2024-02-25", _2024_02_25_00_00_00.atZone(TIMEZONE_AMERICA_DENVER)),
-                Arguments.of(null, "2024-09-25", _2024_09_25_00_00_00.atZone(ZoneOffset.UTC)),
-                Arguments.of(ZONE_ID_Z, "2024-09-25", _2024_09_25_00_00_00.atZone(ZoneOffset.UTC)),
-                Arguments.of(TIMEZONE_UTC, "2024-09-25", _2024_09_25_00_00_00.atZone(ZoneOffset.UTC)),
-                Arguments.of(
+                new GetStartZonedDateTimeHappyPathParams(
+                        null, "2024-09-25", _2024_09_25_00_00_00.atZone(ZoneOffset.UTC)),
+                new GetStartZonedDateTimeHappyPathParams(
+                        ZONE_ID_Z, "2024-09-25", _2024_09_25_00_00_00.atZone(ZoneOffset.UTC)),
+                new GetStartZonedDateTimeHappyPathParams(
+                        TIMEZONE_UTC, "2024-09-25", _2024_09_25_00_00_00.atZone(ZoneOffset.UTC)),
+                new GetStartZonedDateTimeHappyPathParams(
                         TIMEZONE_AMERICA_ST_JOHNS_ID,
                         "2024-09-25",
                         _2024_09_25_00_00_00.atZone(TIMEZONE_AMERICA_ST_JOHNS)),
-                Arguments.of(
+                new GetStartZonedDateTimeHappyPathParams(
                         TIMEZONE_AMERICA_TORONTO_ID,
                         "2024-09-25",
                         _2024_09_25_00_00_00.atZone(TIMEZONE_AMERICA_TORONTO)),
-                Arguments.of(
+                new GetStartZonedDateTimeHappyPathParams(
                         TIMEZONE_AMERICA_DENVER_ID, "2024-09-25", _2024_09_25_00_00_00.atZone(TIMEZONE_AMERICA_DENVER)),
-                Arguments.of(null, "2024-01-01T12:00:00", _2024_01_01_12_00_00.atZone(ZoneOffset.UTC)),
-                Arguments.of(ZONE_ID_Z, "2024-01-01T12:00:00", _2024_01_01_12_00_00.atZone(ZoneOffset.UTC)),
-                Arguments.of(TIMEZONE_UTC, "2024-01-01T12:00:00", _2024_01_01_12_00_00.atZone(ZoneOffset.UTC)),
-                Arguments.of(
+                new GetStartZonedDateTimeHappyPathParams(
+                        null, "2024-01-01T12:00:00", _2024_01_01_12_00_00.atZone(ZoneOffset.UTC)),
+                new GetStartZonedDateTimeHappyPathParams(
+                        ZONE_ID_Z, "2024-01-01T12:00:00", _2024_01_01_12_00_00.atZone(ZoneOffset.UTC)),
+                new GetStartZonedDateTimeHappyPathParams(
+                        TIMEZONE_UTC, "2024-01-01T12:00:00", _2024_01_01_12_00_00.atZone(ZoneOffset.UTC)),
+                new GetStartZonedDateTimeHappyPathParams(
                         TIMEZONE_AMERICA_ST_JOHNS_ID,
                         "2024-01-01T12:00:00",
                         _2024_01_01_12_00_00.atZone(TIMEZONE_AMERICA_ST_JOHNS)),
-                Arguments.of(
+                new GetStartZonedDateTimeHappyPathParams(
                         TIMEZONE_AMERICA_TORONTO_ID,
                         "2024-01-01T12:00:00",
                         _2024_01_01_12_00_00.atZone(TIMEZONE_AMERICA_TORONTO)),
-                Arguments.of(
+                new GetStartZonedDateTimeHappyPathParams(
                         TIMEZONE_AMERICA_DENVER_ID,
                         "2024-01-01T12:00:00",
                         _2024_01_01_12_00_00.atZone(TIMEZONE_AMERICA_DENVER)),
-                Arguments.of(null, "2024-09-25T12:00:00", _2024_09_25_12_00_00.atZone(ZoneOffset.UTC)),
-                Arguments.of(ZONE_ID_Z, "2024-09-25T12:00:00", _2024_09_25_12_00_00.atZone(ZoneOffset.UTC)),
-                Arguments.of(TIMEZONE_UTC, "2024-09-25T12:00:00", _2024_09_25_12_00_00.atZone(ZoneOffset.UTC)),
-                Arguments.of(
+                new GetStartZonedDateTimeHappyPathParams(
+                        null, "2024-09-25T12:00:00", _2024_09_25_12_00_00.atZone(ZoneOffset.UTC)),
+                new GetStartZonedDateTimeHappyPathParams(
+                        ZONE_ID_Z, "2024-09-25T12:00:00", _2024_09_25_12_00_00.atZone(ZoneOffset.UTC)),
+                new GetStartZonedDateTimeHappyPathParams(
+                        TIMEZONE_UTC, "2024-09-25T12:00:00", _2024_09_25_12_00_00.atZone(ZoneOffset.UTC)),
+                new GetStartZonedDateTimeHappyPathParams(
                         TIMEZONE_AMERICA_ST_JOHNS_ID,
                         "2024-09-25T12:00:00",
                         _2024_09_25_12_00_00.atZone(TIMEZONE_AMERICA_ST_JOHNS)),
-                Arguments.of(
+                new GetStartZonedDateTimeHappyPathParams(
                         TIMEZONE_AMERICA_TORONTO_ID,
                         "2024-09-25T12:00:00",
                         _2024_09_25_12_00_00.atZone(TIMEZONE_AMERICA_TORONTO)),
-                Arguments.of(
+                new GetStartZonedDateTimeHappyPathParams(
                         TIMEZONE_AMERICA_DENVER_ID,
                         "2024-09-25T12:00:00",
                         _2024_09_25_12_00_00.atZone(TIMEZONE_AMERICA_DENVER)));
     }
 
-    private static Stream<Arguments> getEndZonedDateTime_happyPath_params() {
+    private static Stream<GetEndZonedDateTimeHappyPathParams> getEndZonedDateTime_happyPath_params() {
         return Stream.of(
-                Arguments.of(null, null, null),
-                Arguments.of(ZONE_ID_Z, null, null),
-                Arguments.of(TIMEZONE_UTC, null, null),
-                Arguments.of(TIMEZONE_AMERICA_ST_JOHNS_ID, null, null),
-                Arguments.of(TIMEZONE_AMERICA_TORONTO_ID, null, null),
-                Arguments.of(TIMEZONE_AMERICA_DENVER_ID, null, null),
-                Arguments.of(null, "2021", _2021_12_31_23_59_59.atZone(ZoneOffset.UTC)),
-                Arguments.of(ZONE_ID_Z, "2021", _2021_12_31_23_59_59.atZone(ZoneOffset.UTC)),
-                Arguments.of(TIMEZONE_UTC, "2021", _2021_12_31_23_59_59.atZone(ZoneOffset.UTC)),
-                Arguments.of(
+                new GetEndZonedDateTimeHappyPathParams(null, null, null),
+                new GetEndZonedDateTimeHappyPathParams(ZONE_ID_Z, null, null),
+                new GetEndZonedDateTimeHappyPathParams(TIMEZONE_UTC, null, null),
+                new GetEndZonedDateTimeHappyPathParams(TIMEZONE_AMERICA_ST_JOHNS_ID, null, null),
+                new GetEndZonedDateTimeHappyPathParams(TIMEZONE_AMERICA_TORONTO_ID, null, null),
+                new GetEndZonedDateTimeHappyPathParams(TIMEZONE_AMERICA_DENVER_ID, null, null),
+                new GetEndZonedDateTimeHappyPathParams(null, "2021", _2021_12_31_23_59_59.atZone(ZoneOffset.UTC)),
+                new GetEndZonedDateTimeHappyPathParams(ZONE_ID_Z, "2021", _2021_12_31_23_59_59.atZone(ZoneOffset.UTC)),
+                new GetEndZonedDateTimeHappyPathParams(
+                        TIMEZONE_UTC, "2021", _2021_12_31_23_59_59.atZone(ZoneOffset.UTC)),
+                new GetEndZonedDateTimeHappyPathParams(
                         TIMEZONE_AMERICA_ST_JOHNS_ID, "2021", _2021_12_31_23_59_59.atZone(TIMEZONE_AMERICA_ST_JOHNS)),
-                Arguments.of(
+                new GetEndZonedDateTimeHappyPathParams(
                         TIMEZONE_AMERICA_TORONTO_ID, "2021", _2021_12_31_23_59_59.atZone(TIMEZONE_AMERICA_TORONTO)),
-                Arguments.of(TIMEZONE_AMERICA_DENVER_ID, "2021", _2021_12_31_23_59_59.atZone(TIMEZONE_AMERICA_DENVER)),
-                Arguments.of(null, "2022-08", _2022_08_31_23_59_59.atZone(ZoneOffset.UTC)),
-                Arguments.of(ZONE_ID_Z, "2022-08", _2022_08_31_23_59_59.atZone(ZoneOffset.UTC)),
-                Arguments.of(TIMEZONE_UTC, "2022-08", _2022_08_31_23_59_59.atZone(ZoneOffset.UTC)),
-                Arguments.of(
+                new GetEndZonedDateTimeHappyPathParams(
+                        TIMEZONE_AMERICA_DENVER_ID, "2021", _2021_12_31_23_59_59.atZone(TIMEZONE_AMERICA_DENVER)),
+                new GetEndZonedDateTimeHappyPathParams(null, "2022-08", _2022_08_31_23_59_59.atZone(ZoneOffset.UTC)),
+                new GetEndZonedDateTimeHappyPathParams(
+                        ZONE_ID_Z, "2022-08", _2022_08_31_23_59_59.atZone(ZoneOffset.UTC)),
+                new GetEndZonedDateTimeHappyPathParams(
+                        TIMEZONE_UTC, "2022-08", _2022_08_31_23_59_59.atZone(ZoneOffset.UTC)),
+                new GetEndZonedDateTimeHappyPathParams(
                         TIMEZONE_AMERICA_ST_JOHNS_ID,
                         "2022-08",
                         _2022_08_31_23_59_59.atZone(TIMEZONE_AMERICA_ST_JOHNS)),
-                Arguments.of(
+                new GetEndZonedDateTimeHappyPathParams(
                         TIMEZONE_AMERICA_TORONTO_ID, "2022-08", _2022_08_31_23_59_59.atZone(TIMEZONE_AMERICA_TORONTO)),
-                Arguments.of(
+                new GetEndZonedDateTimeHappyPathParams(
                         TIMEZONE_AMERICA_DENVER_ID, "2022-08", _2022_08_31_23_59_59.atZone(TIMEZONE_AMERICA_DENVER)),
-                Arguments.of(null, "2022-02", _2022_02_28_23_59_59.atZone(ZoneOffset.UTC)),
-                Arguments.of(ZONE_ID_Z, "2022-02", _2022_02_28_23_59_59.atZone(ZoneOffset.UTC)),
-                Arguments.of(TIMEZONE_UTC, "2022-02", _2022_02_28_23_59_59.atZone(ZoneOffset.UTC)),
-                Arguments.of(
+                new GetEndZonedDateTimeHappyPathParams(null, "2022-02", _2022_02_28_23_59_59.atZone(ZoneOffset.UTC)),
+                new GetEndZonedDateTimeHappyPathParams(
+                        ZONE_ID_Z, "2022-02", _2022_02_28_23_59_59.atZone(ZoneOffset.UTC)),
+                new GetEndZonedDateTimeHappyPathParams(
+                        TIMEZONE_UTC, "2022-02", _2022_02_28_23_59_59.atZone(ZoneOffset.UTC)),
+                new GetEndZonedDateTimeHappyPathParams(
                         TIMEZONE_AMERICA_ST_JOHNS_ID,
                         "2022-02",
                         _2022_02_28_23_59_59.atZone(TIMEZONE_AMERICA_ST_JOHNS)),
-                Arguments.of(
+                new GetEndZonedDateTimeHappyPathParams(
                         TIMEZONE_AMERICA_TORONTO_ID, "2022-02", _2022_02_28_23_59_59.atZone(TIMEZONE_AMERICA_TORONTO)),
-                Arguments.of(
+                new GetEndZonedDateTimeHappyPathParams(
                         TIMEZONE_AMERICA_DENVER_ID, "2022-02", _2022_02_28_23_59_59.atZone(TIMEZONE_AMERICA_DENVER)),
-                Arguments.of(null, "2024-02", _2024_02_29_23_59_59.atZone(ZoneOffset.UTC)),
-                Arguments.of(ZONE_ID_Z, "2024-02", _2024_02_29_23_59_59.atZone(ZoneOffset.UTC)),
-                Arguments.of(TIMEZONE_UTC, "2024-02", _2024_02_29_23_59_59.atZone(ZoneOffset.UTC)),
-                Arguments.of(
+                new GetEndZonedDateTimeHappyPathParams(null, "2024-02", _2024_02_29_23_59_59.atZone(ZoneOffset.UTC)),
+                new GetEndZonedDateTimeHappyPathParams(
+                        ZONE_ID_Z, "2024-02", _2024_02_29_23_59_59.atZone(ZoneOffset.UTC)),
+                new GetEndZonedDateTimeHappyPathParams(
+                        TIMEZONE_UTC, "2024-02", _2024_02_29_23_59_59.atZone(ZoneOffset.UTC)),
+                new GetEndZonedDateTimeHappyPathParams(
                         TIMEZONE_AMERICA_ST_JOHNS_ID,
                         "2024-02",
                         _2024_02_29_23_59_59.atZone(TIMEZONE_AMERICA_ST_JOHNS)),
-                Arguments.of(
+                new GetEndZonedDateTimeHappyPathParams(
                         TIMEZONE_AMERICA_TORONTO_ID, "2024-02", _2024_02_29_23_59_59.atZone(TIMEZONE_AMERICA_TORONTO)),
-                Arguments.of(
+                new GetEndZonedDateTimeHappyPathParams(
                         TIMEZONE_AMERICA_DENVER_ID, "2024-02", _2024_02_29_23_59_59.atZone(TIMEZONE_AMERICA_DENVER)),
-                Arguments.of(null, "2024-02-26", _2024_02_26_23_59_59.atZone(ZoneOffset.UTC)),
-                Arguments.of(ZONE_ID_Z, "2024-02-26", _2024_02_26_23_59_59.atZone(ZoneOffset.UTC)),
-                Arguments.of(TIMEZONE_UTC, "2024-02-26", _2024_02_26_23_59_59.atZone(ZoneOffset.UTC)),
-                Arguments.of(
+                new GetEndZonedDateTimeHappyPathParams(null, "2024-02-26", _2024_02_26_23_59_59.atZone(ZoneOffset.UTC)),
+                new GetEndZonedDateTimeHappyPathParams(
+                        ZONE_ID_Z, "2024-02-26", _2024_02_26_23_59_59.atZone(ZoneOffset.UTC)),
+                new GetEndZonedDateTimeHappyPathParams(
+                        TIMEZONE_UTC, "2024-02-26", _2024_02_26_23_59_59.atZone(ZoneOffset.UTC)),
+                new GetEndZonedDateTimeHappyPathParams(
                         TIMEZONE_AMERICA_ST_JOHNS_ID,
                         "2024-02-26",
                         _2024_02_26_23_59_59.atZone(TIMEZONE_AMERICA_ST_JOHNS)),
-                Arguments.of(
+                new GetEndZonedDateTimeHappyPathParams(
                         TIMEZONE_AMERICA_TORONTO_ID,
                         "2024-02-26",
                         _2024_02_26_23_59_59.atZone(TIMEZONE_AMERICA_TORONTO)),
-                Arguments.of(
+                new GetEndZonedDateTimeHappyPathParams(
                         TIMEZONE_AMERICA_DENVER_ID, "2024-02-26", _2024_02_26_23_59_59.atZone(TIMEZONE_AMERICA_DENVER)),
-                Arguments.of(null, "2024-09-26", _2024_09_26_23_59_59.atZone(ZoneOffset.UTC)),
-                Arguments.of(ZONE_ID_Z, "2024-09-26", _2024_09_26_23_59_59.atZone(ZoneOffset.UTC)),
-                Arguments.of(TIMEZONE_UTC, "2024-09-26", _2024_09_26_23_59_59.atZone(ZoneOffset.UTC)),
-                Arguments.of(
+                new GetEndZonedDateTimeHappyPathParams(null, "2024-09-26", _2024_09_26_23_59_59.atZone(ZoneOffset.UTC)),
+                new GetEndZonedDateTimeHappyPathParams(
+                        ZONE_ID_Z, "2024-09-26", _2024_09_26_23_59_59.atZone(ZoneOffset.UTC)),
+                new GetEndZonedDateTimeHappyPathParams(
+                        TIMEZONE_UTC, "2024-09-26", _2024_09_26_23_59_59.atZone(ZoneOffset.UTC)),
+                new GetEndZonedDateTimeHappyPathParams(
                         TIMEZONE_AMERICA_ST_JOHNS_ID,
                         "2024-09-26",
                         _2024_09_26_23_59_59.atZone(TIMEZONE_AMERICA_ST_JOHNS)),
-                Arguments.of(
+                new GetEndZonedDateTimeHappyPathParams(
                         TIMEZONE_AMERICA_TORONTO_ID,
                         "2024-09-26",
                         _2024_09_26_23_59_59.atZone(TIMEZONE_AMERICA_TORONTO)),
-                Arguments.of(
+                new GetEndZonedDateTimeHappyPathParams(
                         TIMEZONE_AMERICA_DENVER_ID, "2024-09-26", _2024_09_26_23_59_59.atZone(TIMEZONE_AMERICA_DENVER)),
-                Arguments.of(null, "2024-01-02T12:00:00", _2024_01_02_12_00_00.atZone(ZoneOffset.UTC)),
-                Arguments.of(ZONE_ID_Z, "2024-01-02T12:00:00", _2024_01_02_12_00_00.atZone(ZoneOffset.UTC)),
-                Arguments.of(TIMEZONE_UTC, "2024-01-02T12:00:00", _2024_01_02_12_00_00.atZone(ZoneOffset.UTC)),
-                Arguments.of(
+                new GetEndZonedDateTimeHappyPathParams(
+                        null, "2024-01-02T12:00:00", _2024_01_02_12_00_00.atZone(ZoneOffset.UTC)),
+                new GetEndZonedDateTimeHappyPathParams(
+                        ZONE_ID_Z, "2024-01-02T12:00:00", _2024_01_02_12_00_00.atZone(ZoneOffset.UTC)),
+                new GetEndZonedDateTimeHappyPathParams(
+                        TIMEZONE_UTC, "2024-01-02T12:00:00", _2024_01_02_12_00_00.atZone(ZoneOffset.UTC)),
+                new GetEndZonedDateTimeHappyPathParams(
                         TIMEZONE_AMERICA_ST_JOHNS_ID,
                         "2024-01-02T12:00:00",
                         _2024_01_02_12_00_00.atZone(TIMEZONE_AMERICA_ST_JOHNS)),
-                Arguments.of(
+                new GetEndZonedDateTimeHappyPathParams(
                         TIMEZONE_AMERICA_TORONTO_ID,
                         "2024-01-02T12:00:00",
                         _2024_01_02_12_00_00.atZone(TIMEZONE_AMERICA_TORONTO)),
-                Arguments.of(
+                new GetEndZonedDateTimeHappyPathParams(
                         TIMEZONE_AMERICA_DENVER_ID,
                         "2024-01-02T12:00:00",
                         _2024_01_02_12_00_00.atZone(TIMEZONE_AMERICA_DENVER)),
-                Arguments.of(null, "2024-09-26T12:00:00", _2024_09_26_12_00_00.atZone(ZoneOffset.UTC)),
-                Arguments.of(ZONE_ID_Z, "2024-09-26T12:00:00", _2024_09_26_12_00_00.atZone(ZoneOffset.UTC)),
-                Arguments.of(TIMEZONE_UTC, "2024-09-26T12:00:00", _2024_09_26_12_00_00.atZone(ZoneOffset.UTC)),
-                Arguments.of(
+                new GetEndZonedDateTimeHappyPathParams(
+                        null, "2024-09-26T12:00:00", _2024_09_26_12_00_00.atZone(ZoneOffset.UTC)),
+                new GetEndZonedDateTimeHappyPathParams(
+                        ZONE_ID_Z, "2024-09-26T12:00:00", _2024_09_26_12_00_00.atZone(ZoneOffset.UTC)),
+                new GetEndZonedDateTimeHappyPathParams(
+                        TIMEZONE_UTC, "2024-09-26T12:00:00", _2024_09_26_12_00_00.atZone(ZoneOffset.UTC)),
+                new GetEndZonedDateTimeHappyPathParams(
                         TIMEZONE_AMERICA_ST_JOHNS_ID,
                         "2024-09-26T12:00:00",
                         _2024_09_26_12_00_00.atZone(TIMEZONE_AMERICA_ST_JOHNS)),
-                Arguments.of(
+                new GetEndZonedDateTimeHappyPathParams(
                         TIMEZONE_AMERICA_TORONTO_ID,
                         "2024-09-26T12:00:00",
                         _2024_09_26_12_00_00.atZone(TIMEZONE_AMERICA_TORONTO)),
-                Arguments.of(
+                new GetEndZonedDateTimeHappyPathParams(
                         TIMEZONE_AMERICA_DENVER_ID,
                         "2024-09-26T12:00:00",
                         _2024_09_26_12_00_00.atZone(TIMEZONE_AMERICA_DENVER)));
@@ -269,92 +316,90 @@ class StringTimePeriodHandlerTest {
 
     @ParameterizedTest
     @MethodSource("getStartZonedDateTime_happyPath_params")
-    void getStartZonedDateTime_happyPath(
-            @Nullable String timezone, String theInputPeriodStart, ZonedDateTime expectedResult) {
+    void getStartZonedDateTime_happyPath(GetStartZonedDateTimeHappyPathParams params) {
 
         final ZonedDateTime actualResult =
-                myTestSubject.getStartZonedDateTime(theInputPeriodStart, getRequestDetails(timezone));
+                myTestSubject.getStartZonedDateTime(params.theInputPeriodStart(), getRequestDetails(params.timezone()));
 
-        assertThat(actualResult).isEqualTo(expectedResult);
+        assertThat(actualResult).isEqualTo(params.expectedResult());
     }
 
     @ParameterizedTest
     @MethodSource("getEndZonedDateTime_happyPath_params")
-    void getEndZonedDateTime_happyPath(
-            @Nullable String timezone, String theInputPeriodEnd, ZonedDateTime expectedResult) {
+    void getEndZonedDateTime_happyPath(GetEndZonedDateTimeHappyPathParams params) {
 
         final ZonedDateTime actualResult =
-                myTestSubject.getEndZonedDateTime(theInputPeriodEnd, getRequestDetails(timezone));
+                myTestSubject.getEndZonedDateTime(params.theInputPeriodEnd(), getRequestDetails(params.timezone()));
 
-        assertThat(actualResult).isEqualTo(expectedResult);
+        assertThat(actualResult).isEqualTo(params.expectedResult());
     }
 
-    private static Stream<Arguments> errorParams() {
+    private static Stream<ErrorParams> errorParams() {
         return Stream.of(
-                Arguments.of(
+                new ErrorParams(
                         null,
                         "2024-01-01T12",
                         new InvalidRequestException("Unsupported Date/Time format for input: 2024-01-01T12")),
-                Arguments.of(
+                new ErrorParams(
                         "Middle-Earth/Combe",
                         "2024-01-02",
                         new InvalidRequestException("Invalid value for Timezone header: Middle-Earth/Combe")),
-                Arguments.of(
+                new ErrorParams(
                         null,
                         "2024-01-01T12:00:00-02:30",
                         new InvalidRequestException(
                                 "Unsupported Date/Time format for input: 2024-01-01T12:00:00-02:30")),
-                Arguments.of(
+                new ErrorParams(
                         ZONE_ID_Z,
                         "2024-01-01T12:00:00-02:30",
                         new InvalidRequestException(
                                 "Unsupported Date/Time format for input: 2024-01-01T12:00:00-02:30")),
-                Arguments.of(
+                new ErrorParams(
                         "UTC",
                         "2024-01-01T12:00:00-02:30",
                         new InvalidRequestException(
                                 "Unsupported Date/Time format for input: 2024-01-01T12:00:00-02:30")),
-                Arguments.of(
+                new ErrorParams(
                         TIMEZONE_AMERICA_ST_JOHNS_ID,
                         "2024-01-01T12:00:00-02:30",
                         new InvalidRequestException(
                                 "Unsupported Date/Time format for input: 2024-01-01T12:00:00-02:30")),
-                Arguments.of(
+                new ErrorParams(
                         TIMEZONE_AMERICA_TORONTO_ID,
                         "2024-01-01T12:00:00-02:30",
                         new InvalidRequestException(
                                 "Unsupported Date/Time format for input: 2024-01-01T12:00:00-02:30")),
-                Arguments.of(
+                new ErrorParams(
                         TIMEZONE_AMERICA_DENVER_ID,
                         "2024-01-01T12:00:00-02:30",
                         new InvalidRequestException(
                                 "Unsupported Date/Time format for input: 2024-01-01T12:00:00-02:30")),
-                Arguments.of(
+                new ErrorParams(
                         null,
                         "2024-09-25T12:00:00-06:00",
                         new InvalidRequestException(
                                 "Unsupported Date/Time format for input: 2024-09-25T12:00:00-06:00")),
-                Arguments.of(
+                new ErrorParams(
                         ZONE_ID_Z,
                         "2024-09-25T12:00:00-06:00",
                         new InvalidRequestException(
                                 "Unsupported Date/Time format for input: 2024-09-25T12:00:00-06:00")),
-                Arguments.of(
+                new ErrorParams(
                         "UTC",
                         "2024-09-25T12:00:00-06:00",
                         new InvalidRequestException(
                                 "Unsupported Date/Time format for input: 2024-09-25T12:00:00-06:00")),
-                Arguments.of(
+                new ErrorParams(
                         TIMEZONE_AMERICA_ST_JOHNS_ID,
                         "2024-09-25T12:00:00-06:00",
                         new InvalidRequestException(
                                 "Unsupported Date/Time format for input: 2024-09-25T12:00:00-06:00")),
-                Arguments.of(
+                new ErrorParams(
                         TIMEZONE_AMERICA_TORONTO_ID,
                         "2024-09-25T12:00:00-06:00",
                         new InvalidRequestException(
                                 "Unsupported Date/Time format for input: 2024-09-25T12:00:00-06:00")),
-                Arguments.of(
+                new ErrorParams(
                         TIMEZONE_AMERICA_DENVER_ID,
                         "2024-09-25T12:00:00-06:00",
                         new InvalidRequestException(
@@ -363,68 +408,82 @@ class StringTimePeriodHandlerTest {
 
     @ParameterizedTest
     @MethodSource("errorParams")
-    void getStartZonedDateTime_errorPaths(
-            @Nullable String timezone, @Nullable String theInputPeriodStart, InvalidRequestException expectedResult) {
-        assertThatThrownBy(() -> myTestSubject.getStartZonedDateTime(theInputPeriodStart, getRequestDetails(timezone)))
-                .hasMessage(expectedResult.getMessage())
-                .isInstanceOf(expectedResult.getClass());
+    void getStartZonedDateTime_errorPaths(ErrorParams params) {
+        assertThatThrownBy(() -> myTestSubject.getStartZonedDateTime(
+                        params.theInputPeriod(), getRequestDetails(params.timezone())))
+                .hasMessage(params.expectedResult().getMessage())
+                .isInstanceOf(params.expectedResult().getClass());
     }
 
     @ParameterizedTest
     @MethodSource("errorParams")
-    void getEndZonedDateTime_errorPaths(
-            @Nullable String timezone, @Nullable String theInputPeriodEnd, InvalidRequestException expectedResult) {
-        assertThatThrownBy(() -> myTestSubject.getEndZonedDateTime(theInputPeriodEnd, getRequestDetails(timezone)))
-                .hasMessage(expectedResult.getMessage())
-                .isInstanceOf(expectedResult.getClass());
+    void getEndZonedDateTime_errorPaths(ErrorParams params) {
+        assertThatThrownBy(() -> myTestSubject.getEndZonedDateTime(
+                        params.theInputPeriod(), getRequestDetails(params.timezone())))
+                .hasMessage(params.expectedResult().getMessage())
+                .isInstanceOf(params.expectedResult().getClass());
     }
 
-    private static Stream<Arguments> serializeDeserializeRoundTripParams() {
+    private static Stream<SerializeDeserializeRoundTripParams> serializeDeserializeRoundTripParams() {
         return Stream.of(
-                Arguments.of(_2020_01_01_00_00_00.atZone(ZoneOffset.UTC), "2020-01-01T00:00:00Z"),
-                Arguments.of(_2022_08_31_23_59_59.atZone(ZoneOffset.UTC), "2022-08-31T23:59:59Z"),
-                Arguments.of(_2020_01_01_00_00_00.atZone(TIMEZONE_AMERICA_ST_JOHNS), "2020-01-01T00:00:00-03:30"),
-                Arguments.of(_2022_08_31_23_59_59.atZone(TIMEZONE_AMERICA_ST_JOHNS), "2022-08-31T23:59:59-02:30"),
-                Arguments.of(_2020_01_01_00_00_00.atZone(TIMEZONE_AMERICA_TORONTO), "2020-01-01T00:00:00-05:00"),
-                Arguments.of(_2022_08_31_23_59_59.atZone(TIMEZONE_AMERICA_TORONTO), "2022-08-31T23:59:59-04:00"),
-                Arguments.of(_2020_01_01_00_00_00.atZone(TIMEZONE_AMERICA_DENVER), "2020-01-01T00:00:00-07:00"),
-                Arguments.of(_2022_08_31_23_59_59.atZone(TIMEZONE_AMERICA_DENVER), "2022-08-31T23:59:59-06:00"));
+                new SerializeDeserializeRoundTripParams(
+                        _2020_01_01_00_00_00.atZone(ZoneOffset.UTC), "2020-01-01T00:00:00Z"),
+                new SerializeDeserializeRoundTripParams(
+                        _2022_08_31_23_59_59.atZone(ZoneOffset.UTC), "2022-08-31T23:59:59Z"),
+                new SerializeDeserializeRoundTripParams(
+                        _2020_01_01_00_00_00.atZone(TIMEZONE_AMERICA_ST_JOHNS), "2020-01-01T00:00:00-03:30"),
+                new SerializeDeserializeRoundTripParams(
+                        _2022_08_31_23_59_59.atZone(TIMEZONE_AMERICA_ST_JOHNS), "2022-08-31T23:59:59-02:30"),
+                new SerializeDeserializeRoundTripParams(
+                        _2020_01_01_00_00_00.atZone(TIMEZONE_AMERICA_TORONTO), "2020-01-01T00:00:00-05:00"),
+                new SerializeDeserializeRoundTripParams(
+                        _2022_08_31_23_59_59.atZone(TIMEZONE_AMERICA_TORONTO), "2022-08-31T23:59:59-04:00"),
+                new SerializeDeserializeRoundTripParams(
+                        _2020_01_01_00_00_00.atZone(TIMEZONE_AMERICA_DENVER), "2020-01-01T00:00:00-07:00"),
+                new SerializeDeserializeRoundTripParams(
+                        _2022_08_31_23_59_59.atZone(TIMEZONE_AMERICA_DENVER), "2022-08-31T23:59:59-06:00"));
     }
 
     @ParameterizedTest
     @MethodSource("serializeDeserializeRoundTripParams")
-    void serializeDeserializeRoundTrip(ZonedDateTime theInputDateTime, String expectedResult) {
-        final String actualResult = myTestSubject.serialize(theInputDateTime);
+    void serializeDeserializeRoundTrip(SerializeDeserializeRoundTripParams params) {
+        final String actualResult = myTestSubject.serialize(params.theInputDateTime());
 
-        assertThat(actualResult).isEqualTo(expectedResult);
+        assertThat(actualResult).isEqualTo(params.expectedResult());
 
         final ZonedDateTime deSerialized = myTestSubject.deSerialize(actualResult);
 
-        assertThat(deSerialized).isEqualTo(theInputDateTime);
+        assertThat(deSerialized).isEqualTo(params.theInputDateTime());
     }
 
-    private static Stream<Arguments> deSerializeRoundTripParams() {
+    private static Stream<DeSerializeRoundTripParams> deSerializeRoundTripParams() {
         return Stream.of(
-                Arguments.of("2020-01-01T00:00:00Z", _2020_01_01_00_00_00.atZone(ZoneOffset.UTC)),
-                Arguments.of("2022-08-31T23:59:59Z", _2022_08_31_23_59_59.atZone(ZoneOffset.UTC)),
-                Arguments.of("2020-01-01T00:00:00-03:30", _2020_01_01_00_00_00.atZone(TIMEZONE_AMERICA_ST_JOHNS)),
-                Arguments.of("2022-08-31T23:59:59-02:30", _2022_08_31_23_59_59.atZone(TIMEZONE_AMERICA_ST_JOHNS)),
-                Arguments.of("2020-01-01T00:00:00-05:00", _2020_01_01_00_00_00.atZone(TIMEZONE_AMERICA_TORONTO)),
-                Arguments.of("2022-08-31T23:59:59-04:00", _2022_08_31_23_59_59.atZone(TIMEZONE_AMERICA_TORONTO)),
-                Arguments.of("2020-01-01T00:00:00-07:00", _2020_01_01_00_00_00.atZone(TIMEZONE_AMERICA_DENVER)),
-                Arguments.of("2022-08-31T23:59:59-06:00", _2022_08_31_23_59_59.atZone(TIMEZONE_AMERICA_DENVER)));
+                new DeSerializeRoundTripParams("2020-01-01T00:00:00Z", _2020_01_01_00_00_00.atZone(ZoneOffset.UTC)),
+                new DeSerializeRoundTripParams("2022-08-31T23:59:59Z", _2022_08_31_23_59_59.atZone(ZoneOffset.UTC)),
+                new DeSerializeRoundTripParams(
+                        "2020-01-01T00:00:00-03:30", _2020_01_01_00_00_00.atZone(TIMEZONE_AMERICA_ST_JOHNS)),
+                new DeSerializeRoundTripParams(
+                        "2022-08-31T23:59:59-02:30", _2022_08_31_23_59_59.atZone(TIMEZONE_AMERICA_ST_JOHNS)),
+                new DeSerializeRoundTripParams(
+                        "2020-01-01T00:00:00-05:00", _2020_01_01_00_00_00.atZone(TIMEZONE_AMERICA_TORONTO)),
+                new DeSerializeRoundTripParams(
+                        "2022-08-31T23:59:59-04:00", _2022_08_31_23_59_59.atZone(TIMEZONE_AMERICA_TORONTO)),
+                new DeSerializeRoundTripParams(
+                        "2020-01-01T00:00:00-07:00", _2020_01_01_00_00_00.atZone(TIMEZONE_AMERICA_DENVER)),
+                new DeSerializeRoundTripParams(
+                        "2022-08-31T23:59:59-06:00", _2022_08_31_23_59_59.atZone(TIMEZONE_AMERICA_DENVER)));
     }
 
     @ParameterizedTest
     @MethodSource("deSerializeRoundTripParams")
-    void deSerializeRoundTrip(String theInputString, ZonedDateTime expectedResult) {
-        final ZonedDateTime actualResult = myTestSubject.deSerialize(theInputString);
+    void deSerializeRoundTrip(DeSerializeRoundTripParams params) {
+        final ZonedDateTime actualResult = myTestSubject.deSerialize(params.theInputString());
 
-        assertThat(actualResult).isEqualTo(expectedResult);
+        assertThat(actualResult).isEqualTo(params.expectedResult());
 
         final String serialized = myTestSubject.serialize(actualResult);
 
-        assertThat(serialized).isEqualTo(theInputString);
+        assertThat(serialized).isEqualTo(params.theInputString());
     }
 
     private static RequestDetails getRequestDetails(@Nullable String timezone) {

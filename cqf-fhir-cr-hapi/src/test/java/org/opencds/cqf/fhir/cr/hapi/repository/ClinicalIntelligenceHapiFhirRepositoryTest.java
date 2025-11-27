@@ -36,7 +36,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
@@ -44,6 +43,8 @@ import org.mockito.MockitoAnnotations;
 
 // Admittedly, these aren't fantastic tests, but they prove we don't lose the _count parameter
 class ClinicalIntelligenceHapiFhirRepositoryTest {
+
+    record BundleProvidersParams(IBundleProvider bundleProvider) {}
 
     private static final FhirContext FHIR_CONTEXT = FhirContext.forR4Cached();
     private static final int DEFAULT_PAGE_SIZE = 5;
@@ -144,10 +145,10 @@ class ClinicalIntelligenceHapiFhirRepositoryTest {
 
     @ParameterizedTest
     @MethodSource("bundleProviders")
-    void testSanitizeBundleProvider(IBundleProvider bundleProvider) {
+    void testSanitizeBundleProvider(BundleProvidersParams params) {
         var testSubject = getTestSubject(DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE, null, 0);
 
-        IBundleProvider result = testSubject.sanitizeBundleProvider(bundleProvider);
+        IBundleProvider result = testSubject.sanitizeBundleProvider(params.bundleProvider());
         assertNotNull(result);
     }
 
@@ -236,8 +237,8 @@ class ClinicalIntelligenceHapiFhirRepositoryTest {
         return retVal;
     }
 
-    private static Stream<Arguments> bundleProviders() {
-        return Stream.of(Arguments.of((IBundleProvider) null), Arguments.of(new SimpleBundleProvider()));
+    private static Stream<BundleProvidersParams> bundleProviders() {
+        return Stream.of(new BundleProvidersParams(null), new BundleProvidersParams(new SimpleBundleProvider()));
     }
 
     private void triggerTestCase(

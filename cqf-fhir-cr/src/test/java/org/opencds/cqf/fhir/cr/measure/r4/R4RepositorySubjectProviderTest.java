@@ -21,7 +21,6 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.opencds.cqf.fhir.cr.measure.SubjectProviderOptions;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
@@ -106,21 +105,24 @@ class R4RepositorySubjectProviderTest {
         repository.update(group2);
     }
 
-    public static Stream<Arguments> getSubjectsParams() {
+    private record GetSubjectsParams(
+            R4RepositorySubjectProvider testSubject, List<String> subjectIds, List<String> expectedSubjects) {}
+
+    public static Stream<GetSubjectsParams> getSubjectsParams() {
         return Stream.of(
 
                 // Null subject ID:  all patients
-                Arguments.of(
+                new GetSubjectsParams(
                         TEST_SUBJECT_ENABLE_PART_OF,
                         LIST_SINGLE_NULL,
                         resourcifyList(ResourceType.Patient, PAT_ID_1, PAT_ID_2, PAT_ID_3)),
-                Arguments.of(
+                new GetSubjectsParams(
                         TEST_SUBJECT_DISABLE_PART_OF,
                         LIST_SINGLE_NULL,
                         resourcifyList(ResourceType.Patient, PAT_ID_1, PAT_ID_2, PAT_ID_3)),
 
                 // subject ID:  Organization/{orgid}
-                Arguments.of(
+                new GetSubjectsParams(
                         TEST_SUBJECT_ENABLE_PART_OF,
                         resourcifyList(ResourceType.Organization, ORG_ID_1),
                         // TODO:  LD:  this is technically incorrect:  it should be PAT_ID_1, PAT_ID_2
@@ -128,101 +130,101 @@ class R4RepositorySubjectProviderTest {
                         // do NOT support chained searches, the results can only be accurately verified
                         // with a repository that supports DAOs.
                         resourcifyList(ResourceType.Patient, PAT_ID_1, PAT_ID_1)),
-                Arguments.of(
+                new GetSubjectsParams(
                         TEST_SUBJECT_DISABLE_PART_OF,
                         resourcifyList(ResourceType.Organization, ORG_ID_1),
                         resourcifyList(ResourceType.Patient, PAT_ID_1)),
 
                 // subject ID:  {patid}
-                Arguments.of(
+                new GetSubjectsParams(
                         TEST_SUBJECT_ENABLE_PART_OF, List.of(PAT_ID_1), resourcifyList(ResourceType.Patient, PAT_ID_1)),
-                Arguments.of(
+                new GetSubjectsParams(
                         TEST_SUBJECT_DISABLE_PART_OF,
                         List.of(PAT_ID_1),
                         resourcifyList(ResourceType.Patient, PAT_ID_1)),
-                Arguments.of(
+                new GetSubjectsParams(
                         TEST_SUBJECT_ENABLE_PART_OF, List.of(PAT_ID_2), resourcifyList(ResourceType.Patient, PAT_ID_2)),
-                Arguments.of(
+                new GetSubjectsParams(
                         TEST_SUBJECT_DISABLE_PART_OF,
                         List.of(PAT_ID_2),
                         resourcifyList(ResourceType.Patient, PAT_ID_2)),
-                Arguments.of(
+                new GetSubjectsParams(
                         TEST_SUBJECT_ENABLE_PART_OF,
                         List.of(PAT_ID_1, PAT_ID_2),
                         resourcifyList(ResourceType.Patient, PAT_ID_1, PAT_ID_2)),
-                Arguments.of(
+                new GetSubjectsParams(
                         TEST_SUBJECT_DISABLE_PART_OF,
                         List.of(PAT_ID_1, PAT_ID_2),
                         resourcifyList(ResourceType.Patient, PAT_ID_1, PAT_ID_2)),
 
                 // subject ID:  Patient/{patid}
-                Arguments.of(
+                new GetSubjectsParams(
                         TEST_SUBJECT_ENABLE_PART_OF,
                         resourcifyList(ResourceType.Patient, PAT_ID_1),
                         resourcifyList(ResourceType.Patient, PAT_ID_1)),
-                Arguments.of(
+                new GetSubjectsParams(
                         TEST_SUBJECT_DISABLE_PART_OF,
                         resourcifyList(ResourceType.Patient, PAT_ID_1),
                         resourcifyList(ResourceType.Patient, PAT_ID_1)),
-                Arguments.of(
+                new GetSubjectsParams(
                         TEST_SUBJECT_ENABLE_PART_OF,
                         resourcifyList(ResourceType.Patient, PAT_ID_2),
                         resourcifyList(ResourceType.Patient, PAT_ID_2)),
-                Arguments.of(
+                new GetSubjectsParams(
                         TEST_SUBJECT_DISABLE_PART_OF,
                         resourcifyList(ResourceType.Patient, PAT_ID_2),
                         resourcifyList(ResourceType.Patient, PAT_ID_2)),
-                Arguments.of(
+                new GetSubjectsParams(
                         TEST_SUBJECT_ENABLE_PART_OF,
                         resourcifyList(ResourceType.Patient, PAT_ID_1, PAT_ID_2),
                         resourcifyList(ResourceType.Patient, PAT_ID_1, PAT_ID_2)),
-                Arguments.of(
+                new GetSubjectsParams(
                         TEST_SUBJECT_DISABLE_PART_OF,
                         resourcifyList(ResourceType.Patient, PAT_ID_1, PAT_ID_2),
                         resourcifyList(ResourceType.Patient, PAT_ID_1, PAT_ID_2)),
 
                 // subject ID:  Practitioner/{praid}
-                Arguments.of(
+                new GetSubjectsParams(
                         TEST_SUBJECT_ENABLE_PART_OF,
                         resourcifyList(ResourceType.Practitioner, PRACTITIONER_ID_1),
                         resourcifyList(ResourceType.Patient, PAT_ID_1)),
-                Arguments.of(
+                new GetSubjectsParams(
                         TEST_SUBJECT_DISABLE_PART_OF,
                         resourcifyList(ResourceType.Practitioner, PRACTITIONER_ID_1),
                         resourcifyList(ResourceType.Patient, PAT_ID_1)),
-                Arguments.of(
+                new GetSubjectsParams(
                         TEST_SUBJECT_ENABLE_PART_OF,
                         resourcifyList(ResourceType.Practitioner, PRACTITIONER_ID_2),
                         resourcifyList(ResourceType.Patient, PAT_ID_2)),
-                Arguments.of(
+                new GetSubjectsParams(
                         TEST_SUBJECT_DISABLE_PART_OF,
                         resourcifyList(ResourceType.Practitioner, PRACTITIONER_ID_2),
                         resourcifyList(ResourceType.Patient, PAT_ID_2)),
-                Arguments.of(
+                new GetSubjectsParams(
                         TEST_SUBJECT_ENABLE_PART_OF,
                         resourcifyList(ResourceType.Practitioner, PRACTITIONER_ID_1, PRACTITIONER_ID_2),
                         resourcifyList(ResourceType.Patient, PAT_ID_1, PAT_ID_2)),
-                Arguments.of(
+                new GetSubjectsParams(
                         TEST_SUBJECT_DISABLE_PART_OF,
                         resourcifyList(ResourceType.Practitioner, PRACTITIONER_ID_1, PRACTITIONER_ID_2),
                         resourcifyList(ResourceType.Patient, PAT_ID_1, PAT_ID_2)),
 
                 // Group: Practitioner
-                Arguments.of(
+                new GetSubjectsParams(
                         TEST_SUBJECT_ENABLE_PART_OF,
                         resourcifyList(ResourceType.Group, GROUP_1),
                         resourcifyList(ResourceType.Patient, PAT_ID_1, PAT_ID_2)),
-                Arguments.of(
+                new GetSubjectsParams(
                         TEST_SUBJECT_DISABLE_PART_OF,
                         resourcifyList(ResourceType.Group, GROUP_1),
                         resourcifyList(ResourceType.Patient, PAT_ID_1, PAT_ID_2)),
 
                 // Group: Person
-                Arguments.of(
+                new GetSubjectsParams(
                         TEST_SUBJECT_ENABLE_PART_OF,
                         resourcifyList(ResourceType.Group, GROUP_2),
                         resourcifyList(ResourceType.Patient, PAT_ID_1, PAT_ID_2)),
-                Arguments.of(
+                new GetSubjectsParams(
                         TEST_SUBJECT_DISABLE_PART_OF,
                         resourcifyList(ResourceType.Group, GROUP_2),
                         resourcifyList(ResourceType.Patient, PAT_ID_1, PAT_ID_2)));
@@ -230,11 +232,12 @@ class R4RepositorySubjectProviderTest {
 
     @ParameterizedTest
     @MethodSource("getSubjectsParams")
-    void getSubjects(R4RepositorySubjectProvider testSubject, List<String> subjectIds, List<String> expectedSubjects) {
-        final List<String> actualSubjects =
-                testSubject.getSubjects(repository, subjectIds).toList();
+    void getSubjects(GetSubjectsParams params) {
+        final List<String> actualSubjects = params.testSubject()
+                .getSubjects(repository, params.subjectIds())
+                .toList();
 
-        assertThat(actualSubjects, containsInAnyOrder(expectedSubjects.toArray()));
+        assertThat(actualSubjects, containsInAnyOrder(params.expectedSubjects().toArray()));
     }
 
     private static Reference referencifiy(ResourceType resourceType, String rawId) {

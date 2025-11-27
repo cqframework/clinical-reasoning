@@ -8,31 +8,34 @@ import jakarta.annotation.Nullable;
 import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.opencds.cqf.fhir.utility.r4.Parameters;
 
 class MeasureProcessorCQLParameterTest {
 
-    private static Stream<Arguments> simpleParametersParams() {
+    private record SimpleParametersParams(
+            @Nullable org.hl7.fhir.r4.model.Parameters parameters, int expectedMeasureCount) {}
+
+    private static Stream<SimpleParametersParams> simpleParametersParams() {
         return Stream.of(
-                Arguments.of(null, 0),
-                Arguments.of(Parameters.parameters(Parameters.part("practitionerParam", "bogus")), 0),
-                Arguments.of(
+                new SimpleParametersParams(null, 0),
+                new SimpleParametersParams(Parameters.parameters(Parameters.part("practitionerParam", "bogus")), 0),
+                new SimpleParametersParams(
                         Parameters.parameters(
                                 Parameters.part("bogusPractitionerParam", "SimpleCqlParamsPractitioner1")),
                         0),
-                Arguments.of(Parameters.parameters(Parameters.part("encounterParam", "bogus")), 0),
-                Arguments.of(
+                new SimpleParametersParams(Parameters.parameters(Parameters.part("encounterParam", "bogus")), 0),
+                new SimpleParametersParams(
                         Parameters.parameters(Parameters.part("bogusEncounterParam", "SimpleCqlParamsEncounter1")), 0),
-                Arguments.of(
+                new SimpleParametersParams(
                         Parameters.parameters(Parameters.part("practitionerParam", "SimpleCqlParamsPractitioner1")), 1),
-                Arguments.of(Parameters.parameters(Parameters.part("encounterParam", "SimpleCqlParamsEncounter1")), 1));
+                new SimpleParametersParams(
+                        Parameters.parameters(Parameters.part("encounterParam", "SimpleCqlParamsEncounter1")), 1));
     }
 
     @ParameterizedTest
     @MethodSource("simpleParametersParams")
-    void simpleParameters(@Nullable org.hl7.fhir.r4.model.Parameters parameters, int expectedMeasureCount) {
+    void simpleParameters(SimpleParametersParams params) {
         var when = Measure.given()
                 .repositoryFor("CqlParameters")
                 .when()
@@ -41,7 +44,7 @@ class MeasureProcessorCQLParameterTest {
                 .periodStart("2018-01-01")
                 .periodEnd("2030-12-31")
                 .reportType("subject")
-                .parameters(parameters)
+                .parameters(params.parameters())
                 .evaluate();
 
         var report = when.then().report();
@@ -51,7 +54,7 @@ class MeasureProcessorCQLParameterTest {
         var group = report.getGroupFirstRep();
 
         group.getPopulation().forEach(population -> {
-            assertPopulation(expectedMeasureCount, population);
+            assertPopulation(params.expectedMeasureCount(), population);
         });
     }
 

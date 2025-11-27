@@ -13,44 +13,45 @@ import java.time.ZonedDateTime;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
 
 class DateHelperTest {
 
-    private static Stream<Arguments> resolveRequestDateWithTimeParams() {
+    private record ResolveRequestDateWithTimeParams(
+            String date, LocalDateTime expectedStartTime, LocalDateTime expectedEndTime, ZoneId zoneId) {}
+
+    private static Stream<ResolveRequestDateWithTimeParams> resolveRequestDateWithTimeParams() {
         return Stream.of(
-                Arguments.of(
+                new ResolveRequestDateWithTimeParams(
                         "2019-01-17T12:30:00",
                         LocalDateTime.of(2019, Month.JANUARY, 17, 12, 30, 0),
                         LocalDateTime.of(2019, Month.JANUARY, 17, 12, 30, 0),
                         ZoneId.systemDefault()),
-                Arguments.of(
+                new ResolveRequestDateWithTimeParams(
                         "2019-01-01T22:00:00.0-06:00",
                         LocalDateTime.of(2019, Month.JANUARY, 1, 22, 0, 0),
                         LocalDateTime.of(2019, Month.JANUARY, 1, 22, 0, 0),
                         ZoneId.of("America/Chicago")),
-                Arguments.of(
+                new ResolveRequestDateWithTimeParams(
                         "2017-01-01T00:00:00.000Z",
                         LocalDateTime.of(2017, Month.JANUARY, 1, 0, 0, 0),
                         LocalDateTime.of(2017, Month.JANUARY, 1, 0, 0, 0),
                         ZoneOffset.UTC));
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{index} => testCase={0}")
     @MethodSource("resolveRequestDateWithTimeParams")
-    void resolveRequestDateWithTime(
-            String date, LocalDateTime expectedStartTime, LocalDateTime expectedEndTime, ZoneId zoneId) {
-        var resolvedDateStart = DateHelper.resolveRequestDate(date, true);
+    void resolveRequestDateWithTime(ResolveRequestDateWithTimeParams testCase) {
+        var resolvedDateStart = DateHelper.resolveRequestDate(testCase.date(), true);
         assertNotNull(resolvedDateStart);
-        final DateTime expectedDateStart = getDateTimeForZoneId(expectedStartTime, zoneId);
+        final DateTime expectedDateStart = getDateTimeForZoneId(testCase.expectedStartTime(), testCase.zoneId());
         assertDateTimesEqual(expectedDateStart, resolvedDateStart);
 
-        var resolvedDateEnd = DateHelper.resolveRequestDate(date, false);
+        var resolvedDateEnd = DateHelper.resolveRequestDate(testCase.date(), false);
         assertNotNull(resolvedDateEnd);
         assertEquals(resolvedDateStart, resolvedDateEnd);
-        final DateTime expectedDateEnd = getDateTimeForZoneId(expectedEndTime, zoneId);
+        final DateTime expectedDateEnd = getDateTimeForZoneId(testCase.expectedEndTime(), testCase.zoneId());
         assertDateTimesEqual(expectedDateEnd, resolvedDateEnd);
     }
 

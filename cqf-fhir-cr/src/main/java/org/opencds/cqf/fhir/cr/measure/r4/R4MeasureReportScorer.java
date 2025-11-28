@@ -20,11 +20,13 @@ import org.hl7.fhir.r4.model.Quantity;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 import org.opencds.cqf.fhir.cr.measure.common.BaseMeasureReportScorer;
 import org.opencds.cqf.fhir.cr.measure.common.ContinuousVariableObservationAggregateMethod;
+import org.opencds.cqf.fhir.cr.measure.common.ContinuousVariableObservationConverter;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
+import org.opencds.cqf.fhir.cr.measure.common.QuantityDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumPopulationDef;
@@ -88,6 +90,10 @@ import org.slf4j.LoggerFactory;
 public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport> {
 
     private static final Logger logger = LoggerFactory.getLogger(R4MeasureReportScorer.class);
+
+    // Added by Claude Sonnet 4.5 on 2025-11-28 to facilitate future refactoring
+    private final ContinuousVariableObservationConverter<Quantity> continuousVariableConverter =
+            R4ContinuousVariableObservationConverter.INSTANCE;
 
     @Override
     public void score(String measureUrl, MeasureDef measureDef, MeasureReport measureReport) {
@@ -196,6 +202,7 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
         }
     }
 
+    // Enhanced by Claude Sonnet 4.5 on 2025-11-27 to work with QuantityDef
     @Nullable
     protected Double scoreRatioContVariable(String measureUrl, GroupDef groupDef, List<PopulationDef> populationDefs) {
 
@@ -211,17 +218,17 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
             return null;
         }
 
-        Quantity aggregateNumQuantity = calculateContinuousVariableAggregateQuantity(
-                measureUrl, groupDef, numPopDef, PopulationDef::getAllSubjectResources);
-        Quantity aggregateDenQuantity = calculateContinuousVariableAggregateQuantity(
-                measureUrl, groupDef, denPopDef, PopulationDef::getAllSubjectResources);
+        QuantityDef aggregateNumQuantityDef = calculateContinuousVariableAggregateQuantity(
+                measureUrl, numPopDef, PopulationDef::getAllSubjectResources);
+        QuantityDef aggregateDenQuantityDef = calculateContinuousVariableAggregateQuantity(
+                measureUrl, denPopDef, PopulationDef::getAllSubjectResources);
 
-        if (aggregateNumQuantity == null || aggregateDenQuantity == null) {
+        if (aggregateNumQuantityDef == null || aggregateDenQuantityDef == null) {
             return null;
         }
 
-        Double num = toDouble(aggregateNumQuantity.getValue());
-        Double den = toDouble(aggregateDenQuantity.getValue());
+        Double num = aggregateNumQuantityDef.value();
+        Double den = aggregateDenQuantityDef.value();
 
         if (den == null || den == 0.0) {
             return null;
@@ -235,18 +242,21 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
         return num / den;
     }
 
+    // Enhanced by Claude Sonnet 4.5 on 2025-11-27 to convert QuantityDef at the end
     protected void scoreContinuousVariable(
             String measureUrl, MeasureReportGroupComponent mrgc, GroupDef groupDef, PopulationDef populationDef) {
-        final Quantity aggregateQuantity = calculateContinuousVariableAggregateQuantity(
-                measureUrl, groupDef, populationDef, PopulationDef::getAllSubjectResources);
+        final QuantityDef aggregateQuantityDef = calculateContinuousVariableAggregateQuantity(
+                measureUrl, populationDef, PopulationDef::getAllSubjectResources);
 
+        // Convert QuantityDef to R4 Quantity at the last moment before setting on report
+        Quantity aggregateQuantity = continuousVariableConverter.convertToFhirQuantity(aggregateQuantityDef);
         mrgc.setMeasureScore(aggregateQuantity);
     }
 
+    // Enhanced by Claude Sonnet 4.5 on 2025-11-27 to return QuantityDef
     @Nullable
-    private static Quantity calculateContinuousVariableAggregateQuantity(
+    private static QuantityDef calculateContinuousVariableAggregateQuantity(
             String measureUrl,
-            GroupDef groupDef,
             PopulationDef populationDef,
             Function<PopulationDef, Collection<Object>> popDefToResources) {
 
@@ -262,14 +272,17 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
                 populationDef.getAggregateMethod(), popDefToResources.apply(populationDef));
     }
 
+    // Enhanced by Claude Sonnet 4.5 on 2025-11-27 to return QuantityDef
     @Nullable
-    private static Quantity calculateContinuousVariableAggregateQuantity(
+    private static QuantityDef calculateContinuousVariableAggregateQuantity(
             ContinuousVariableObservationAggregateMethod aggregateMethod, Collection<Object> qualifyingResources) {
         var observationQuantity = collectQuantities(qualifyingResources);
         return aggregate(observationQuantity, aggregateMethod);
     }
 
-    private static Quantity aggregate(List<Quantity> quantities, ContinuousVariableObservationAggregateMethod method) {
+    // Enhanced by Claude Sonnet 4.5 on 2025-11-27 to work with QuantityDef
+    private static QuantityDef aggregate(
+            List<QuantityDef> quantities, ContinuousVariableObservationAggregateMethod method) {
         if (quantities == null || quantities.isEmpty()) {
             return null;
         }
@@ -280,34 +293,42 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
         }
 
         // assume all quantities share the same unit/system/code
-        Quantity base = quantities.get(0);
-        String unit = base.getUnit();
-        String system = base.getSystem();
-        String code = base.getCode();
+        QuantityDef base = quantities.get(0);
+        String unit = base.unit();
+        String system = base.system();
+        String code = base.code();
 
         double result;
 
         switch (method) {
             case SUM:
                 result = quantities.stream()
-                        .mapToDouble(q -> q.getValue().doubleValue())
+                        .map(QuantityDef::value)
+                        .filter(Objects::nonNull)
+                        .mapToDouble(value -> value)
                         .sum();
                 break;
             case MAX:
                 result = quantities.stream()
-                        .mapToDouble(q -> q.getValue().doubleValue())
+                        .map(QuantityDef::value)
+                        .filter(Objects::nonNull)
+                        .mapToDouble(value -> value)
                         .max()
                         .orElse(Double.NaN);
                 break;
             case MIN:
                 result = quantities.stream()
-                        .mapToDouble(q -> q.getValue().doubleValue())
+                        .map(QuantityDef::value)
+                        .filter(Objects::nonNull)
+                        .mapToDouble(value -> value)
                         .min()
                         .orElse(Double.NaN);
                 break;
             case AVG:
                 result = quantities.stream()
-                        .mapToDouble(q -> q.getValue().doubleValue())
+                        .map(QuantityDef::value)
+                        .filter(Objects::nonNull)
+                        .mapToDouble(value -> value)
                         .average()
                         .orElse(Double.NaN);
                 break;
@@ -316,7 +337,8 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
                 break;
             case MEDIAN:
                 List<Double> sorted = quantities.stream()
-                        .map(q -> q.getValue().doubleValue())
+                        .map(QuantityDef::value)
+                        .filter(Objects::nonNull)
                         .sorted()
                         .toList();
                 int n = sorted.size();
@@ -330,10 +352,11 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
                 throw new IllegalArgumentException("Unsupported aggregation method: " + method);
         }
 
-        return new Quantity().setValue(result).setUnit(unit).setSystem(system).setCode(code);
+        return new QuantityDef(result, unit, system, code);
     }
 
-    private static List<Quantity> collectQuantities(Collection<Object> resources) {
+    // Enhanced by Claude Sonnet 4.5 on 2025-11-27 to collect QuantityDef
+    private static List<QuantityDef> collectQuantities(Collection<Object> resources) {
 
         var mapValues = resources.stream()
                 .filter(x -> x instanceof Map<?, ?>)
@@ -343,8 +366,8 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
                 .toList();
 
         return mapValues.stream()
-                .filter(Quantity.class::isInstance)
-                .map(Quantity.class::cast)
+                .filter(QuantityDef.class::isInstance)
+                .map(QuantityDef.class::cast)
                 .toList();
     }
 
@@ -503,11 +526,12 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
                 } else {
                     stratumPopulationDef = null;
                 }
-                return calculateContinuousVariableAggregateQuantity(
+                // Enhanced by Claude Sonnet 4.5 on 2025-11-27 - convert QuantityDef to Quantity
+                QuantityDef quantityDef = calculateContinuousVariableAggregateQuantity(
                         measureUrl,
-                        groupDef,
                         getFirstMeasureObservation(groupDef),
                         populationDef -> getResultsForStratum(populationDef, stratumPopulationDef));
+                return continuousVariableConverter.convertToFhirQuantity(quantityDef);
             }
             default -> {
                 return null;
@@ -515,6 +539,7 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
         }
     }
 
+    // Enhanced by Claude Sonnet 4.5 on 2025-11-27 to work with QuantityDef
     @Nullable
     protected Double scoreRatioContVariableStratum(
             String measureUrl,
@@ -524,25 +549,18 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
             PopulationDef numPopDef,
             PopulationDef denPopDef) {
 
-        Quantity aggregateNumQuantity = calculateContinuousVariableAggregateQuantity(
-                measureUrl,
-                groupDef,
-                numPopDef,
-                populationDef -> getResultsForStratum(populationDef, measureObsNumStratum));
-        calculateContinuousVariableAggregateQuantity(
-                measureUrl, groupDef, numPopDef, PopulationDef::getAllSubjectResources);
-        Quantity aggregateDenQuantity = calculateContinuousVariableAggregateQuantity(
-                measureUrl,
-                groupDef,
-                denPopDef,
-                populationDef -> getResultsForStratum(populationDef, measureObsDenStratum));
+        QuantityDef aggregateNumQuantityDef = calculateContinuousVariableAggregateQuantity(
+                measureUrl, numPopDef, populationDef -> getResultsForStratum(populationDef, measureObsNumStratum));
+        calculateContinuousVariableAggregateQuantity(measureUrl, numPopDef, PopulationDef::getAllSubjectResources);
+        QuantityDef aggregateDenQuantityDef = calculateContinuousVariableAggregateQuantity(
+                measureUrl, denPopDef, populationDef -> getResultsForStratum(populationDef, measureObsDenStratum));
 
-        if (aggregateNumQuantity == null || aggregateDenQuantity == null) {
+        if (aggregateNumQuantityDef == null || aggregateDenQuantityDef == null) {
             return null;
         }
 
-        Double num = toDouble(aggregateNumQuantity.getValue());
-        Double den = toDouble(aggregateDenQuantity.getValue());
+        Double num = aggregateNumQuantityDef.value();
+        Double den = aggregateDenQuantityDef.value();
 
         if (den == null || den == 0.0) {
             return null;

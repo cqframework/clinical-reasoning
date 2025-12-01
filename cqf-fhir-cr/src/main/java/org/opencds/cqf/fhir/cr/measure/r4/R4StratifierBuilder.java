@@ -2,18 +2,12 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import com.google.common.collect.Sets;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import javax.annotation.Nonnull;
-import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Expression;
@@ -25,20 +19,15 @@ import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupComponent;
 import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupComponentComponent;
 import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupPopulationComponent;
 import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
-import org.opencds.cqf.fhir.cr.measure.common.CriteriaResult;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
-import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumPopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumValueDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumValueWrapper;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
-import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureReportBuilder.BuilderContext;
-import org.opencds.cqf.fhir.cr.measure.r4.utils.R4ResourceIdUtils;
 
 /**
  * Convenience class with functionality split out from {@link R4MeasureReportBuilder} to
@@ -52,7 +41,7 @@ class R4StratifierBuilder {
     }
 
     static void buildStratifier(
-            BuilderContext bc,
+            R4MeasureReportBuilderContext bc,
             MeasureGroupStratifierComponent measureStratifier,
             MeasureReportGroupStratifierComponent reportStratifier,
             StratifierDef stratifierDef,
@@ -72,7 +61,7 @@ class R4StratifierBuilder {
     }
 
     private static void buildMultipleStratum(
-            BuilderContext bc,
+            R4MeasureReportBuilderContext bc,
             MeasureReportGroupStratifierComponent reportStratifier,
             StratifierDef stratifierDef,
             List<MeasureGroupPopulationComponent> populations,
@@ -86,7 +75,7 @@ class R4StratifierBuilder {
     }
 
     private static void componentStratifier(
-            BuilderContext bc,
+            R4MeasureReportBuilderContext bc,
             StratifierDef stratifierDef,
             MeasureReportGroupStratifierComponent reportStratifier,
             List<MeasureGroupPopulationComponent> populations,
@@ -100,15 +89,15 @@ class R4StratifierBuilder {
                     stratifierDef,
                     stratumDef,
                     reportStratum,
-                    stratumDef.getValueDefs(),
-                    stratumDef.getSubjectIds(),
+                    stratumDef.valueDefs(),
+                    stratumDef.subjectIds(),
                     populations,
                     groupDef);
         });
     }
 
     private static void nonComponentStratifier(
-            BuilderContext bc,
+            R4MeasureReportBuilderContext bc,
             StratifierDef stratifierDef,
             MeasureReportGroupStratifierComponent reportStratifier,
             List<MeasureGroupPopulationComponent> populations,
@@ -151,7 +140,7 @@ class R4StratifierBuilder {
     }
 
     private static void buildStratumOuter(
-            BuilderContext bc,
+            R4MeasureReportBuilderContext bc,
             StratifierDef stratifierDef,
             StratumDef stratumDef,
             MeasureReportGroupStratifierComponent reportStratifier,
@@ -165,19 +154,19 @@ class R4StratifierBuilder {
                 stratifierDef,
                 stratumDef,
                 reportStratum,
-                stratumDef.getValueDefs(),
-                stratumDef.getSubjectIds(),
+                stratumDef.valueDefs(),
+                stratumDef.subjectIds(),
                 populations,
                 groupDef);
     }
 
     private static void buildStratum(
-            BuilderContext bc,
+            R4MeasureReportBuilderContext bc,
             StratifierDef stratifierDef,
             StratumDef stratumDef,
             StratifierGroupComponent stratum,
             Set<StratumValueDef> values,
-            List<String> subjectIds,
+            Collection<String> subjectIds,
             List<MeasureGroupPopulationComponent> populations,
             GroupDef groupDef) {
         boolean isComponent = values.size() > 1;
@@ -229,7 +218,7 @@ class R4StratifierBuilder {
         // ** subjects with stratifier value: 'F': subject2
         // ** stratum.population
         // ** ** initial-population: subject2
-        for (StratumPopulationDef stratumPopulationDef : stratumDef.getStratumPopulations()) {
+        for (StratumPopulationDef stratumPopulationDef : stratumDef.stratumPopulations()) {
             // This is nasty, and ideally, we ought to be driving this logic entirely off StratumPopulationDef
             final Optional<MeasureGroupPopulationComponent> optMgpc = populations.stream()
                     .filter(population -> population.getId().equals(stratumPopulationDef.id()))
@@ -263,12 +252,13 @@ class R4StratifierBuilder {
 
     // TODO: LD: take the StratumDef and use it to figure out the subject ID intersection instead of
     // the provided list of subjectIds
+    // Simplified by Claude Sonnet 4.5 to use calculated values from StratumPopulationDef
     private static void buildStratumPopulation(
-            BuilderContext bc,
+            R4MeasureReportBuilderContext bc,
             StratifierDef stratifierDef,
             StratumPopulationDef stratumPopulationDef,
             StratifierGroupPopulationComponent sgpc,
-            List<String> subjectIds,
+            Collection<String> subjectIds,
             MeasureGroupPopulationComponent population,
             GroupDef groupDef) {
 
@@ -281,11 +271,7 @@ class R4StratifierBuilder {
         }
 
         var populationDef = groupDef.populations().stream()
-                .filter(t -> t.code()
-                        .codes()
-                        .get(0)
-                        .code()
-                        .equals(population.getCode().getCodingFirstRep().getCode()))
+                .filter(t -> t.id().equals(population.getId()))
                 .findFirst()
                 .orElse(null);
 
@@ -296,30 +282,23 @@ class R4StratifierBuilder {
                             population.getCode().getCodingFirstRep().getCode()));
         }
 
+        // Use the calculated count from StratumPopulationDef
+        sgpc.setCount(stratumPopulationDef.getCount());
+
         final Set<String> subjectsQualifiedOrUnqualified = stratumPopulationDef.subjectsQualifiedOrUnqualified();
 
         if (groupDef.isBooleanBasis()) {
-            buildBooleanBasisStratumPopulation(bc, sgpc, populationDef, subjectsQualifiedOrUnqualified);
+            buildBooleanBasisStratumPopulation(bc, sgpc, subjectsQualifiedOrUnqualified);
         } else {
-            buildResourceBasisStratumPopulation(bc, stratifierDef, sgpc, subjectIds, populationDef, groupDef);
+            buildResourceBasisStratumPopulation(bc, sgpc, stratumPopulationDef.resourceIdsForSubjectList());
         }
     }
 
+    // Simplified by Claude Sonnet 4.5 to use pre-calculated counts from StratumPopulationDef
     private static void buildBooleanBasisStratumPopulation(
-            BuilderContext bc,
+            R4MeasureReportBuilderContext bc,
             StratifierGroupPopulationComponent sgpc,
-            PopulationDef populationDef,
             Set<String> subjectIdsCommonToPopulation) {
-
-        var popSubjectIds = populationDef.getSubjects().stream()
-                .map(R4ResourceIdUtils::addPatientQualifier)
-                .toList();
-        if (popSubjectIds.isEmpty()) {
-            sgpc.setCount(0);
-            return;
-        }
-
-        sgpc.setCount(subjectIdsCommonToPopulation.size());
 
         // subject-list ListResource to match intersection of results
         if (!subjectIdsCommonToPopulation.isEmpty()
@@ -331,19 +310,9 @@ class R4StratifierBuilder {
         }
     }
 
+    // Simplified by Claude Sonnet 4.5 to use pre-calculated resource IDs from StratumPopulationDef
     private static void buildResourceBasisStratumPopulation(
-            BuilderContext bc,
-            StratifierDef stratifierDef,
-            StratifierGroupPopulationComponent sgpc,
-            List<String> subjectIds,
-            PopulationDef populationDef,
-            GroupDef groupDef) {
-
-        final List<String> resourceIds = getResourceIds(subjectIds, groupDef, populationDef);
-
-        final int stratumCount = getStratumCountUpper(stratifierDef, populationDef, resourceIds);
-
-        sgpc.setCount(stratumCount);
+            R4MeasureReportBuilderContext bc, StratifierGroupPopulationComponent sgpc, List<String> resourceIds) {
 
         if (resourceIds.isEmpty()) {
             return;
@@ -356,139 +325,6 @@ class R4StratifierBuilder {
             bc.addContained(popSubjectList);
             sgpc.setSubjectResults(new Reference("#" + popSubjectList.getId()));
         }
-    }
-
-    // population: subject1: org1, subject2: org2
-    // strat1: subject1: org1
-    // strat1: subject2: nothing
-
-    // result:  subject 1: org1    count: 1
-
-    // population: subject1: org1, subject2: org2
-    // strat1: subject1: org1
-    // strat1: subject2: nothing
-    // strat1: subject3: org1
-
-    // result:  subject1 org1:  subject3 org1   count:  1
-
-    // population: subject1: org1, subject2: org2
-    // strat1: subject1: org1
-    // strat1: subject2: org2
-
-    // result:  subject1 org1:  subject2 org2   count:  2
-
-    // population: subject1: org1, subject2: org2
-    // strat1: subject1: org3
-    // strat1: subject2: org3
-
-    // result:  nothing   : count: 0
-
-    // population: subject1: org1, subject2: org2
-    // strat1: subject1: org3
-    // strat1: subject2: org4
-
-    // result:  nothing   : count: 0
-
-    private static int getStratumCountUpper(
-            StratifierDef stratifierDef, PopulationDef populationDef, List<String> resourceIds) {
-
-        if (stratifierDef.isCriteriaStratifier()) {
-            final Map<String, CriteriaResult> stratifierResultsBySubject = stratifierDef.getResults();
-
-            final List<Object> allPopulationStratumIntersectingResources = new ArrayList<>();
-
-            /*
-            *population*:
-
-            patient2
-                Encounter/enc_in_progress_pat2_1
-                Encounter/enc_triaged_pat2_1
-                Encounter/enc_planned_pat2_1
-                Encounter/enc_in_progress_pat2_2
-                Encounter/enc_finished_pat2_1
-
-             patient1
-                Encounter/enc_triaged_pat1_1
-                Encounter/enc_planned_pat1_1
-                Encounter/enc_in_progress_pat1_1
-                Encounter/enc_finished_pat1_1
-
-            *stratifier*:
-              patient2
-                  Encounter/enc_in_progress_pat2_2
-                  Encounter/enc_in_progress_pat2_1
-
-              patient1
-                  Encounter/enc_in_progress_pat1_1
-
-              patient2:  intersection:   enc_in_progress_pat2_2, enc_in_progress_pat2_1
-              patient1:  intersection:   enc_in_progress_pat1_1
-
-              result:
-
-              enc_in_progress_pat2_2, enc_in_progress_pat2_1, enc_in_progress_pat1_1
-
-              count: 3
-
-            */
-
-            // For each subject, we intersect between the population and stratifier results
-            for (Entry<String, CriteriaResult> stratifierEntryBySubject : stratifierResultsBySubject.entrySet()) {
-                final Set<Object> stratifierResultsPerSubject =
-                        stratifierEntryBySubject.getValue().valueAsSet();
-                final Set<Object> populationResultsPerSubject =
-                        populationDef.getResourcesForSubject(stratifierEntryBySubject.getKey());
-
-                allPopulationStratumIntersectingResources.addAll(
-                        Sets.intersection(populationResultsPerSubject, stratifierResultsPerSubject));
-            }
-
-            // We add up all the results of the intersections here:
-            return allPopulationStratumIntersectingResources.size();
-        }
-
-        if (resourceIds.isEmpty()) {
-            return 0;
-        }
-
-        return resourceIds.size();
-    }
-
-    @Nonnull
-    private static List<String> getResourceIds(
-            List<String> subjectIds, GroupDef groupDef, PopulationDef populationDef) {
-        String resourceType;
-        try {
-            // when this method is checked with a primitive value and not ResourceType it returns an error
-            // this try/catch is to prevent the exception thrown from setting the correct value
-            resourceType =
-                    ResourceType.fromCode(groupDef.getPopulationBasis().code()).toString();
-        } catch (FHIRException e) {
-            resourceType = null;
-        }
-
-        // only ResourceType fhirType should return true here
-        boolean isResourceType = resourceType != null;
-        List<String> resourceIds = new ArrayList<>();
-        assert populationDef != null;
-        if (populationDef.getSubjectResources() != null) {
-            for (String subjectId : subjectIds) {
-                // retrieve criteria results by subject Key
-                var resources =
-                        populationDef.getSubjectResources().get(R4ResourceIdUtils.stripPatientQualifier(subjectId));
-                if (resources != null) {
-                    if (isResourceType) {
-                        resourceIds.addAll(resources.stream()
-                                .map(R4StratifierBuilder::getPopulationResourceIds) // get resource id
-                                .toList());
-                    } else {
-                        resourceIds.addAll(
-                                resources.stream().map(Object::toString).toList());
-                    }
-                }
-            }
-        }
-        return resourceIds;
     }
 
     protected static ListResource createIdList(String id, Collection<String> ids) {
@@ -512,7 +348,6 @@ class R4StratifierBuilder {
     }
 
     // TODO: LD:  move this to MeasureEvaluator
-    @Nonnull
     private static List<CodeableConcept> getCodeForReportStratifier(
             StratifierDef stratifierDef, MeasureGroupStratifierComponent measureStratifier) {
 

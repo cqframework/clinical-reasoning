@@ -18,11 +18,14 @@ public class PopulationDef {
     @Nullable
     private final String criteriaReference;
 
+    @Nullable
+    private final ContinuousVariableObservationAggregateMethod aggregateMethod;
+
     protected Set<Object> evaluatedResources;
     protected Map<String, Set<Object>> subjectResources = new HashMap<>();
 
     public PopulationDef(String id, ConceptDef code, MeasurePopulationType measurePopulationType, String expression) {
-        this(id, code, measurePopulationType, expression, null);
+        this(id, code, measurePopulationType, expression, null, null);
     }
 
     public PopulationDef(
@@ -30,12 +33,14 @@ public class PopulationDef {
             ConceptDef code,
             MeasurePopulationType measurePopulationType,
             String expression,
-            @Nullable String criteriaReference) {
+            @Nullable String criteriaReference,
+            @Nullable ContinuousVariableObservationAggregateMethod aggregateMethod) {
         this.id = id;
         this.code = code;
         this.measurePopulationType = measurePopulationType;
         this.expression = expression;
         this.criteriaReference = criteriaReference;
+        this.aggregateMethod = aggregateMethod;
     }
 
     public MeasurePopulationType type() {
@@ -99,6 +104,19 @@ public class PopulationDef {
                 .toList();
     }
 
+    // Extracted from R4MeasureReportBuilder.countObservations() by Claude Sonnet 4.5
+    public int countObservations() {
+        if (this.getAllSubjectResources() == null) {
+            return 0;
+        }
+
+        return this.getAllSubjectResources().stream()
+                .filter(Map.class::isInstance)
+                .map(Map.class::cast)
+                .mapToInt(Map::size)
+                .sum();
+    }
+
     @Nullable
     public String getCriteriaReference() {
         return this.criteriaReference;
@@ -122,5 +140,10 @@ public class PopulationDef {
         subjectResources
                 .computeIfAbsent(key, k -> new HashSetForFhirResourcesAndCqlTypes<>())
                 .add(value);
+    }
+
+    @Nullable
+    public ContinuousVariableObservationAggregateMethod getAggregateMethod() {
+        return this.aggregateMethod;
     }
 }

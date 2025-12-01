@@ -69,7 +69,6 @@ class CompartmentAssigner {
 
     /**
      * Determines the compartment assignment for the supplied resource based on repository conventions.
-     *
      * Possible outcomes:
      * - NONE: No compartment assignment (repository is not compartmentalized)
      * - SHARED: Resource is shared across all compartments
@@ -97,7 +96,6 @@ class CompartmentAssigner {
 
     /**
      * Determines the compartment assignment for the supplied resource type and id
-     *
      * Possible outcomes:
      * - NONE: No compartment assignment (repository is not compartmentalized)
      * - SHARED: Resource is shared across all compartments
@@ -178,7 +176,6 @@ class CompartmentAssigner {
     /**
      * Determines the compartment assignments based on search parameters. If there are multiple possible
      * compartment assignments, only the first is returned.
-     *
      * Possible outcomes:
      * - NONE: No compartment assignment (repository is not compartmentalized)
      * - SHARED: Resource is shared across all compartments
@@ -198,12 +195,13 @@ class CompartmentAssigner {
         // Try to assign based on id search parameter
         if (compartmentMode.type().equalsIgnoreCase(resourceType)) {
             var ids = searchParameters.get("_id").stream()
+                    .filter(Objects::nonNull)
                     .flatMap(List::stream)
-                    .map(x -> x.getValueAsQueryToken(fhirContext))
+                    .map(IQueryParameterType::getValueAsQueryToken)
                     .toList();
 
             // If no _id or multiple _id parameters, cannot determine assignment
-            if (ids.isEmpty() || ids.size() > 1) {
+            if (ids.size() != 1) {
                 return CompartmentAssignment.unknown(compartmentMode.type());
             }
 
@@ -348,7 +346,7 @@ class CompartmentAssigner {
 
         var compartmentType = compartmentMode.type();
         for (var queryValue : values) {
-            var token = queryValue.getValueAsQueryToken(fhirContext);
+            var token = queryValue.getValueAsQueryToken();
             var id = idFromToken(targetIfUnspecified, token);
             if (id != null && compartmentType.equalsIgnoreCase(id.getResourceType())) {
                 return CompartmentAssignment.of(compartmentType, id.getIdPart());

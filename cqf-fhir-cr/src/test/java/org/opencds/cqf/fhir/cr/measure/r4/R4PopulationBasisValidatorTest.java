@@ -23,7 +23,6 @@ import org.hl7.fhir.r4.model.Range;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
@@ -73,21 +72,24 @@ class R4PopulationBasisValidatorTest {
 
     private final R4PopulationBasisValidator testSubject = new R4PopulationBasisValidator();
 
-    private static Stream<Arguments> validateGroupBasisTypeHappyPathParams() {
-        return Stream.of(Arguments.of(
-                buildGroupDef(
-                        Basis.BOOLEAN,
-                        buildPopulationDefs(INITIALPOPULATION, DENOMINATOR, NUMERATOR),
-                        buildStratifierDefs(
-                                EXPRESSION_INITIALPOPULATION, EXPRESSION_DENOMINATOR, EXPRESSION_NUMERATOR)),
-                buildEvaluationResult(Map.of(
-                        EXPRESSION_INITIALPOPULATION,
-                        Boolean.TRUE,
-                        EXPRESSION_DENOMINATOR,
-                        Boolean.TRUE,
-                        EXPRESSION_NUMERATOR,
-                        Boolean.TRUE)),
-                Arguments.of(
+    private record ValidateGroupBasisTypeHappyPathParams(GroupDef groupDef, EvaluationResult evaluationResult) {}
+
+    private static Stream<ValidateGroupBasisTypeHappyPathParams> validateGroupBasisTypeHappyPathParams() {
+        return Stream.of(
+                new ValidateGroupBasisTypeHappyPathParams(
+                        buildGroupDef(
+                                Basis.BOOLEAN,
+                                buildPopulationDefs(INITIALPOPULATION, DENOMINATOR, NUMERATOR),
+                                buildStratifierDefs(
+                                        EXPRESSION_INITIALPOPULATION, EXPRESSION_DENOMINATOR, EXPRESSION_NUMERATOR)),
+                        buildEvaluationResult(Map.of(
+                                EXPRESSION_INITIALPOPULATION,
+                                Boolean.TRUE,
+                                EXPRESSION_DENOMINATOR,
+                                Boolean.TRUE,
+                                EXPRESSION_NUMERATOR,
+                                Boolean.TRUE))),
+                new ValidateGroupBasisTypeHappyPathParams(
                         buildGroupDef(
                                 Basis.BOOLEAN,
                                 buildPopulationDefs(INITIALPOPULATION, DENOMINATOR, NUMERATOR),
@@ -100,7 +102,7 @@ class R4PopulationBasisValidatorTest {
                                 List.of(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE),
                                 EXPRESSION_NUMERATOR,
                                 List.of(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE)))),
-                Arguments.of(
+                new ValidateGroupBasisTypeHappyPathParams(
                         buildGroupDef(
                                 Basis.ENCOUNTER,
                                 buildPopulationDefs(INITIALPOPULATION, DENOMINATOR, NUMERATOR),
@@ -113,7 +115,7 @@ class R4PopulationBasisValidatorTest {
                                 ENCOUNTER,
                                 EXPRESSION_NUMERATOR,
                                 ENCOUNTER))),
-                Arguments.of(
+                new ValidateGroupBasisTypeHappyPathParams(
                         buildGroupDef(
                                 Basis.ENCOUNTER,
                                 buildPopulationDefs(INITIALPOPULATION, DENOMINATOR, NUMERATOR),
@@ -126,7 +128,7 @@ class R4PopulationBasisValidatorTest {
                                 List.of(ENCOUNTER, ENCOUNTER, ENCOUNTER),
                                 EXPRESSION_NUMERATOR,
                                 List.of(ENCOUNTER, ENCOUNTER, ENCOUNTER)))),
-                Arguments.of(
+                new ValidateGroupBasisTypeHappyPathParams(
                         buildGroupDef(
                                 Basis.PROCEDURE,
                                 buildPopulationDefs(INITIALPOPULATION, DENOMINATOR, NUMERATOR),
@@ -139,7 +141,7 @@ class R4PopulationBasisValidatorTest {
                                 PROCEDURE,
                                 EXPRESSION_NUMERATOR,
                                 PROCEDURE))),
-                Arguments.of(
+                new ValidateGroupBasisTypeHappyPathParams(
                         buildGroupDef(
                                 Basis.PROCEDURE,
                                 buildPopulationDefs(INITIALPOPULATION, DENOMINATOR, NUMERATOR),
@@ -151,18 +153,21 @@ class R4PopulationBasisValidatorTest {
                                 EXPRESSION_DENOMINATOR,
                                 List.of(PROCEDURE, PROCEDURE, PROCEDURE),
                                 EXPRESSION_NUMERATOR,
-                                List.of(PROCEDURE, PROCEDURE, PROCEDURE))))));
+                                List.of(PROCEDURE, PROCEDURE, PROCEDURE)))));
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{index} => testCase={0}")
     @MethodSource("validateGroupBasisTypeHappyPathParams")
-    void validateGroupBasisTypeHappyPath(GroupDef groupDef, EvaluationResult evaluationResult) {
-        testSubject.validateGroupPopulations(MEASURE_DEF, groupDef, evaluationResult);
+    void validateGroupBasisTypeHappyPath(ValidateGroupBasisTypeHappyPathParams testCase) {
+        testSubject.validateGroupPopulations(MEASURE_DEF, testCase.groupDef(), testCase.evaluationResult());
     }
 
-    private static Stream<Arguments> validateGroupBasisTypeErrorPathParams() {
+    private record ValidateGroupBasisTypeErrorPathParams(
+            GroupDef groupDef, EvaluationResult evaluationResult, String expectedExceptionMessage) {}
+
+    private static Stream<ValidateGroupBasisTypeErrorPathParams> validateGroupBasisTypeErrorPathParams() {
         return Stream.of(
-                Arguments.of(
+                new ValidateGroupBasisTypeErrorPathParams(
                         buildGroupDef(
                                 Basis.BOOLEAN,
                                 buildPopulationDefs(INITIALPOPULATION, DENOMINATOR, NUMERATOR),
@@ -176,7 +181,7 @@ class R4PopulationBasisValidatorTest {
                                 EXPRESSION_NUMERATOR,
                                 List.of(ENCOUNTER))),
                         "group expression criteria results for expression: [InitialPopulation] and scoring: [PROPORTION] must fall within accepted types for population basis: [boolean] for Measure: [fakeMeasureUrl] due to mismatch between total result classes: [Encounter] and matching result classes: []"),
-                Arguments.of(
+                new ValidateGroupBasisTypeErrorPathParams(
                         buildGroupDef(
                                 Basis.BOOLEAN,
                                 buildPopulationDefs(INITIALPOPULATION, DENOMINATOR, NUMERATOR),
@@ -190,7 +195,7 @@ class R4PopulationBasisValidatorTest {
                                 EXPRESSION_NUMERATOR,
                                 List.of(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE))),
                         "group expression criteria results for expression: [InitialPopulation] and scoring: [PROPORTION] must fall within accepted types for population basis: [boolean] for Measure: [fakeMeasureUrl] due to mismatch between total result classes: [Boolean, Boolean, Encounter] and matching result classes: [Boolean, Boolean]"),
-                Arguments.of(
+                new ValidateGroupBasisTypeErrorPathParams(
                         buildGroupDef(
                                 Basis.BOOLEAN,
                                 buildPopulationDefs(INITIALPOPULATION, DENOMINATOR, NUMERATOR),
@@ -204,7 +209,7 @@ class R4PopulationBasisValidatorTest {
                                 EXPRESSION_NUMERATOR,
                                 List.of(Boolean.TRUE, Boolean.TRUE, ENCOUNTER))),
                         "group expression criteria results for expression: [Numerator] and scoring: [PROPORTION] must fall within accepted types for population basis: [boolean] for Measure: [fakeMeasureUrl] due to mismatch between total result classes: [Boolean, Boolean, Encounter] and matching result classes: [Boolean, Boolean]"),
-                Arguments.of(
+                new ValidateGroupBasisTypeErrorPathParams(
                         buildGroupDef(
                                 Basis.ENCOUNTER,
                                 buildPopulationDefs(INITIALPOPULATION, DENOMINATOR, NUMERATOR),
@@ -218,7 +223,7 @@ class R4PopulationBasisValidatorTest {
                                 EXPRESSION_NUMERATOR,
                                 Boolean.TRUE)),
                         "group expression criteria results for expression: [InitialPopulation] and scoring: [PROPORTION] must fall within accepted types for population basis: [Encounter] for Measure: [fakeMeasureUrl] due to mismatch between total result classes: [Boolean] and matching result classes: []"),
-                Arguments.of(
+                new ValidateGroupBasisTypeErrorPathParams(
                         buildGroupDef(
                                 Basis.ENCOUNTER,
                                 buildPopulationDefs(INITIALPOPULATION, DENOMINATOR, NUMERATOR),
@@ -232,7 +237,7 @@ class R4PopulationBasisValidatorTest {
                                 EXPRESSION_NUMERATOR,
                                 Boolean.TRUE)),
                         "group expression criteria results for expression: [InitialPopulation] and scoring: [PROPORTION] must fall within accepted types for population basis: [Encounter] for Measure: [fakeMeasureUrl] due to mismatch between total result classes: [Boolean] and matching result classes: []"),
-                Arguments.of(
+                new ValidateGroupBasisTypeErrorPathParams(
                         buildGroupDef(
                                 Basis.PROCEDURE,
                                 buildPopulationDefs(INITIALPOPULATION, DENOMINATOR, NUMERATOR),
@@ -246,7 +251,7 @@ class R4PopulationBasisValidatorTest {
                                 EXPRESSION_NUMERATOR,
                                 List.of(ENCOUNTER))),
                         "group expression criteria results for expression: [InitialPopulation] and scoring: [PROPORTION] must fall within accepted types for population basis: [Procedure] for Measure: [fakeMeasureUrl] due to mismatch between total result classes: [Encounter] and matching result classes: []"),
-                Arguments.of(
+                new ValidateGroupBasisTypeErrorPathParams(
                         buildGroupDef(
                                 Basis.ENCOUNTER,
                                 buildPopulationDefs(INITIALPOPULATION, DENOMINATOR, NUMERATOR),
@@ -262,15 +267,14 @@ class R4PopulationBasisValidatorTest {
                         "group expression criteria results for expression: [Numerator] and scoring: [PROPORTION] must fall within accepted types for population basis: [Encounter] for Measure: [fakeMeasureUrl] due to mismatch between total result classes: [Encounter, Procedure, Encounter] and matching result classes: [Encounter, Encounter]"));
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{index} => testCase={0}")
     @MethodSource("validateGroupBasisTypeErrorPathParams")
-    void validateGroupBasisTypeErrorPath(
-            GroupDef groupDef, EvaluationResult evaluationResult, String expectedExceptionMessage) {
+    void validateGroupBasisTypeErrorPath(ValidateGroupBasisTypeErrorPathParams testCase) {
         try {
-            testSubject.validateGroupPopulations(MEASURE_DEF, groupDef, evaluationResult);
+            testSubject.validateGroupPopulations(MEASURE_DEF, testCase.groupDef(), testCase.evaluationResult());
             fail("Expected this test to fail");
         } catch (InvalidRequestException exception) {
-            assertEquals(expectedExceptionMessage, exception.getMessage());
+            assertEquals(testCase.expectedExceptionMessage(), exception.getMessage());
         }
     }
 
@@ -279,9 +283,11 @@ class R4PopulationBasisValidatorTest {
      * Correction to Non-boolean population basis, these should not return type of Resource, they should stratify results based on single return type per subject
      * Of resulting Encounters, which are tied to Gender M or F, Age range 10-50 or 51-100...etc
      */
-    private static Stream<Arguments> validateStratifierBasisTypeHappyPathParams() {
+    private record ValidateStratifierBasisTypeHappyPathParams(GroupDef groupDef, EvaluationResult evaluationResult) {}
+
+    private static Stream<ValidateStratifierBasisTypeHappyPathParams> validateStratifierBasisTypeHappyPathParams() {
         return Stream.of(
-                Arguments.of(
+                new ValidateStratifierBasisTypeHappyPathParams(
                         buildGroupDef(
                                 Basis.BOOLEAN,
                                 buildPopulationDefs(INITIALPOPULATION, DENOMINATOR, NUMERATOR),
@@ -294,7 +300,7 @@ class R4PopulationBasisValidatorTest {
                                 Boolean.TRUE,
                                 EXPRESSION_NUMERATOR,
                                 Boolean.TRUE))),
-                Arguments.of(
+                new ValidateStratifierBasisTypeHappyPathParams(
                         buildGroupDef(
                                 Basis.BOOLEAN,
                                 buildPopulationDefs(INITIALPOPULATION, DENOMINATOR, NUMERATOR),
@@ -307,7 +313,7 @@ class R4PopulationBasisValidatorTest {
                                 List.of(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE),
                                 EXPRESSION_NUMERATOR,
                                 List.of(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE)))),
-                Arguments.of(
+                new ValidateStratifierBasisTypeHappyPathParams(
                         buildGroupDef(
                                 Basis.BOOLEAN,
                                 buildPopulationDefs(INITIALPOPULATION, DENOMINATOR, NUMERATOR),
@@ -320,7 +326,7 @@ class R4PopulationBasisValidatorTest {
                                 List.of(new Reference(), new Coding()),
                                 EXPRESSION_NUMERATOR,
                                 List.of(new Enumeration<>(new CompartmentCodeEnumFactory()), new Code())))),
-                Arguments.of(
+                new ValidateStratifierBasisTypeHappyPathParams(
                         buildGroupDef(
                                 Basis.ENCOUNTER,
                                 buildPopulationDefs(INITIALPOPULATION, DENOMINATOR, NUMERATOR),
@@ -333,7 +339,7 @@ class R4PopulationBasisValidatorTest {
                                 List.of(new Reference(), new Coding()),
                                 EXPRESSION_NUMERATOR,
                                 List.of(new Enumeration<>(new CompartmentCodeEnumFactory()), new Code())))),
-                Arguments.of(
+                new ValidateStratifierBasisTypeHappyPathParams(
                         buildGroupDef(
                                 Basis.ENCOUNTER,
                                 buildPopulationDefs(INITIALPOPULATION, DENOMINATOR, NUMERATOR),
@@ -348,10 +354,10 @@ class R4PopulationBasisValidatorTest {
                                 List.of(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE)))));
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{index} => testCase={0}")
     @MethodSource("validateStratifierBasisTypeHappyPathParams")
-    void validateStratifierBasisTypeHappyPath(GroupDef groupDef, EvaluationResult evaluationResult) {
-        testSubject.validateStratifiers(MEASURE_DEF, groupDef, evaluationResult);
+    void validateStratifierBasisTypeHappyPath(ValidateStratifierBasisTypeHappyPathParams testCase) {
+        testSubject.validateStratifiers(MEASURE_DEF, testCase.groupDef(), testCase.evaluationResult());
     }
 
     @Test
@@ -432,15 +438,7 @@ class R4PopulationBasisValidatorTest {
     private static GroupDef buildGroupDef(
             Basis basis, List<PopulationDef> populationDefs, List<StratifierDef> stratifierDefs) {
         return new GroupDef(
-                null,
-                null,
-                stratifierDefs,
-                populationDefs,
-                MeasureScoring.PROPORTION,
-                false,
-                null,
-                basis.codeDef,
-                null);
+                null, null, stratifierDefs, populationDefs, MeasureScoring.PROPORTION, false, null, basis.codeDef);
     }
 
     @Nonnull
@@ -457,6 +455,7 @@ class R4PopulationBasisValidatorTest {
                 null,
                 measurePopulationType,
                 resolveExpressionFor(measurePopulationType),
+                null,
                 null);
     }
 

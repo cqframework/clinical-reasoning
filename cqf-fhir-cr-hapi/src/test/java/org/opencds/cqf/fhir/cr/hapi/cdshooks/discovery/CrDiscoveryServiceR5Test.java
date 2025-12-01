@@ -17,10 +17,14 @@ import org.hl7.fhir.r5.model.PlanDefinition;
 import org.hl7.fhir.r5.model.ResourceType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 class CrDiscoveryServiceR5Test extends BaseCdsCrDiscoveryServiceTest {
+
+    record CreateRequestUrlParams(DataRequirement dataRequirement, List<String> expectedUrls) {}
+
+    record GetPrefetchUrlListParams(PlanDefinition planDefinition, PrefetchUrlList expectedPrefetchUrlList) {}
+
     private static final IdType PLAN_DEF_ID_TYPE = new IdType(PLAN_DEF_ID);
 
     private static final PrefetchUrlList PREFETCH_URL_LIST_EMPTY = new PrefetchUrlList();
@@ -101,91 +105,96 @@ class CrDiscoveryServiceR5Test extends BaseCdsCrDiscoveryServiceTest {
         testSubject = new CrDiscoveryService(PLAN_DEF_ID_TYPE, repository);
     }
 
-    private static Stream<Arguments> createRequestUrlParams() {
+    private static Stream<CreateRequestUrlParams> createRequestUrlParams() {
         return Stream.of(
-                Arguments.of(DATA_REQUIREMENT_PATIENT, List.of(PREFETCH_URL_PATIENT)),
-                Arguments.of(DATA_REQUIREMENT_PATIENT_CODE_FILTER_NO_CODING, List.of()),
-                Arguments.of(DATA_REQUIREMENT_PATIENT_CODE_FILTER_CODING_EMPTY, List.of()),
-                Arguments.of(
+                new CreateRequestUrlParams(DATA_REQUIREMENT_PATIENT, List.of(PREFETCH_URL_PATIENT)),
+                new CreateRequestUrlParams(DATA_REQUIREMENT_PATIENT_CODE_FILTER_NO_CODING, List.of()),
+                new CreateRequestUrlParams(DATA_REQUIREMENT_PATIENT_CODE_FILTER_CODING_EMPTY, List.of()),
+                new CreateRequestUrlParams(
                         DATA_REQUIREMENT_PATIENT_CODE_FILTER_CODING_NON_EMPTY,
                         List.of(PREFETCH_URL_PATIENT_WITH_PATH_AND_CODE)),
-                Arguments.of(
+                new CreateRequestUrlParams(
                         DATA_REQUIREMENT_ENCOUNTER_CODE_FILTER_CODING_NON_EMPTY,
                         List.of(PREFETCH_URL_ENCOUNTER_WITH_PATH_AND_CODE)));
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{index} => testCase={0}")
     @MethodSource("createRequestUrlParams")
-    void createRequestUrl(DataRequirement dataRequirement, List<String> expectedUrls) {
-        var adapter = dataRequirement == null ? null : adapterFactory.createDataRequirement(dataRequirement);
+    void createRequestUrl(CreateRequestUrlParams testCase) {
+        var adapter = testCase.dataRequirement() == null
+                ? null
+                : adapterFactory.createDataRequirement(testCase.dataRequirement());
         final List<String> requestUrls = testSubject.createRequestUrl(adapter);
 
-        assertEquals(expectedUrls, requestUrls);
+        assertEquals(testCase.expectedUrls(), requestUrls);
     }
 
-    private static Stream<Arguments> getPrefetchUrlListParams() {
+    private static Stream<GetPrefetchUrlListParams> getPrefetchUrlListParams() {
         return Stream.of(
-                Arguments.of(null, PREFETCH_URL_LIST_EMPTY),
-                Arguments.of(new PlanDefinition(), PREFETCH_URL_LIST_EMPTY),
-                Arguments.of(new PlanDefinition().setType(new CodeableConcept()), PREFETCH_URL_LIST_EMPTY),
-                Arguments.of(
+                new GetPrefetchUrlListParams(null, PREFETCH_URL_LIST_EMPTY),
+                new GetPrefetchUrlListParams(new PlanDefinition(), PREFETCH_URL_LIST_EMPTY),
+                new GetPrefetchUrlListParams(
+                        new PlanDefinition().setType(new CodeableConcept()), PREFETCH_URL_LIST_EMPTY),
+                new GetPrefetchUrlListParams(
                         new PlanDefinition().setType(new CodeableConcept().setCoding(List.of())),
                         PREFETCH_URL_LIST_EMPTY),
-                Arguments.of(
+                new GetPrefetchUrlListParams(
                         new PlanDefinition().setType(new CodeableConcept().setCoding(List.of(new Coding()))),
                         PREFETCH_URL_LIST_EMPTY),
-                Arguments.of(
+                new GetPrefetchUrlListParams(
                         new PlanDefinition().setType(new CodeableConcept().setCoding(List.of(CODING_NON_ECA_RULE))),
                         PREFETCH_URL_LIST_EMPTY),
-                Arguments.of(
+                new GetPrefetchUrlListParams(
                         new PlanDefinition()
                                 .setType(new CodeableConcept().setCoding(List.of(CODING_ECA_RULE)))
                                 .setLibrary(List.of(LIBRARY_CANONICAL_TYPE_1)),
                         PREFETCH_URL_LIST_EMPTY),
-                Arguments.of(
+                new GetPrefetchUrlListParams(
                         new PlanDefinition()
                                 .setType(new CodeableConcept().setCoding(List.of(CODING_ECA_RULE)))
                                 .setLibrary(List.of(LIBRARY_CANONICAL_TYPE_2)),
                         PREFETCH_URL_LIST_EMPTY),
-                Arguments.of(
+                new GetPrefetchUrlListParams(
                         new PlanDefinition()
                                 .setType(new CodeableConcept().setCoding(List.of(CODING_ECA_RULE)))
                                 .setLibrary(List.of(LIBRARY_CANONICAL_TYPE_3)),
                         getPrefetchUrlList(PREFETCH_URL_PATIENT)),
-                Arguments.of(
+                new GetPrefetchUrlListParams(
                         new PlanDefinition()
                                 .setType(new CodeableConcept().setCoding(List.of(CODING_ECA_RULE)))
                                 .setLibrary(List.of(LIBRARY_CANONICAL_TYPE_4)),
                         getPrefetchUrlList(PREFETCH_URL_ENCOUNTER)),
-                Arguments.of(
+                new GetPrefetchUrlListParams(
                         new PlanDefinition()
                                 .setType(new CodeableConcept().setCoding(List.of(CODING_ECA_RULE)))
                                 .setLibrary(List.of(LIBRARY_CANONICAL_TYPE_3, LIBRARY_CANONICAL_TYPE_4)),
                         getPrefetchUrlList(PREFETCH_URL_PATIENT)),
-                Arguments.of(
+                new GetPrefetchUrlListParams(
                         new PlanDefinition()
                                 .setType(new CodeableConcept().setCoding(List.of(CODING_ECA_RULE)))
                                 .setLibrary(List.of(LIBRARY_CANONICAL_TYPE_5)),
                         getPrefetchUrlList(PREFETCH_URL_PATIENT_WITH_PATH_AND_CODE)),
-                Arguments.of(
+                new GetPrefetchUrlListParams(
                         new PlanDefinition()
                                 .setType(new CodeableConcept().setCoding(List.of(CODING_ECA_RULE)))
                                 .setLibrary(List.of(LIBRARY_CANONICAL_TYPE_6)),
                         getPrefetchUrlList(PREFETCH_URL_ENCOUNTER_WITH_PATH_AND_CODE)),
-                Arguments.of(
+                new GetPrefetchUrlListParams(
                         new PlanDefinition()
                                 .setType(new CodeableConcept().setCoding(List.of(CODING_ECA_RULE)))
                                 .setLibrary(List.of(LIBRARY_CANONICAL_TYPE_5, LIBRARY_CANONICAL_TYPE_6)),
                         getPrefetchUrlList(PREFETCH_URL_PATIENT_WITH_PATH_AND_CODE)));
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{index} => testCase={0}")
     @MethodSource("getPrefetchUrlListParams")
-    void getPrefetchUrlList(PlanDefinition planDefinition, PrefetchUrlList expectedPrefetchUrlList) {
-        var adapter = planDefinition == null ? null : adapterFactory.createPlanDefinition(planDefinition);
+    void getPrefetchUrlList(GetPrefetchUrlListParams testCase) {
+        var adapter = testCase.planDefinition() == null
+                ? null
+                : adapterFactory.createPlanDefinition(testCase.planDefinition());
         final PrefetchUrlList prefetchUrlList = testSubject.getPrefetchUrlList(adapter);
 
-        assertEquals(expectedPrefetchUrlList, prefetchUrlList);
+        assertEquals(testCase.expectedPrefetchUrlList(), prefetchUrlList);
     }
 
     private static PrefetchUrlList getPrefetchUrlList(String... urls) {

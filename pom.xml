@@ -6,7 +6,7 @@
 
     <groupId>org.opencds.cqf.fhir</groupId>
     <artifactId>cqf-fhir</artifactId>
-    <version>4.0.0-SNAPSHOT</version>
+    <version>4.1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>FHIR Clinical Reasoning</name>
     <description>FHIR Clinical Reasoning Implementations</description>
@@ -22,10 +22,10 @@
 
         <junit.version>5.10.2</junit.version>
         <slf4j.version>2.0.4</slf4j.version>
-        <cql.version>4.0.0</cql.version>
+        <cql.version>4.1.0</cql.version>
         <jmh.version>1.36</jmh.version>
         <spring.version>6.2.12</spring.version>
-        <hapi.version>8.4.0</hapi.version>
+        <hapi.version>8.6.0</hapi.version>
         <picocli.version>4.6.1</picocli.version>
         <guava.version>33.2.1-jre</guava.version>
         <error-prone.version>2.35.1</error-prone.version>
@@ -114,55 +114,10 @@
             <!-- CQL dependencies -->
             <dependency>
                 <groupId>org.cqframework</groupId>
-                <artifactId>engine</artifactId>
+                <artifactId>cql-bom</artifactId>
                 <version>${cql.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.cqframework</groupId>
-                <artifactId>cql-to-elm</artifactId>
-                <version>${cql.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.cqframework</groupId>
-                <artifactId>ucum</artifactId>
-                <version>${cql.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.cqframework</groupId>
-                <artifactId>engine-fhir</artifactId>
-                <version>${cql.version}</version>
-                <exclusions>
-                  <exclusion>
-                    <groupId>junit</groupId>
-                    <artifactId>junit</artifactId>
-                  </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>org.cqframework</groupId>
-                <artifactId>quick</artifactId>
-                <version>${cql.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.cqframework</groupId>
-                <artifactId>elm-fhir</artifactId>
-                <version>${cql.version}</version>
-                <exclusions>
-                  <exclusion>
-                    <groupId>junit</groupId>
-                    <artifactId>junit</artifactId>
-                  </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>org.cqframework</groupId>
-                <artifactId>cqf-fhir</artifactId>
-                <version>${cql.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.cqframework</groupId>
-                <artifactId>cqf-fhir-npm</artifactId>
-                <version>${cql.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
 
             <!-- Guava-->

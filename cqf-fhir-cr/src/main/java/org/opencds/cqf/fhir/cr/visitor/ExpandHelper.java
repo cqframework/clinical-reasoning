@@ -379,25 +379,32 @@ public class ExpandHelper {
         // 3. For each requested parameter, see if the expansion has either:
         //    - the same name with that value, or
         //    - the used-* variant with that value.
-        boolean mismatchOrMissing = requestedValues.entrySet().stream().anyMatch(entry -> {
-            var requestedName = entry.getKey();
-            var expectedValue = entry.getValue();
+        var missingOrMismatchedParams = requestedValues.entrySet().stream()
+                .filter(entry -> {
+                    var requestedName = entry.getKey();
+                    var expectedValue = entry.getValue();
 
-            var usedName = EXPANSION_PARAMETER_USED_NAME_OVERRIDES.get(requestedName);
+                    var usedName = EXPANSION_PARAMETER_USED_NAME_OVERRIDES.get(requestedName);
 
-            boolean hasRequested = expandedValueSet.hasExpansionStringParameter(requestedName, expectedValue);
-            boolean hasUsed = usedName != null && expandedValueSet.hasExpansionStringParameter(usedName, expectedValue);
+                    boolean hasRequested = expandedValueSet.hasExpansionStringParameter(requestedName, expectedValue);
+                    boolean hasUsed =
+                            usedName != null && expandedValueSet.hasExpansionStringParameter(usedName, expectedValue);
 
-            // Neither name has the expected value -> treat as missing/mismatched
-            return !(hasRequested || hasUsed);
-        });
+                    // Neither name has the expected value -> treat as missing/mismatched
+                    return !(hasRequested || hasUsed);
+                })
+                // Include both the parameter name and the expected value to make the warning more informative.
+                .map(entry -> "%s=%s".formatted(entry.getKey(), entry.getValue()))
+                .toList();
 
-        // 4. If *any* requested parameter is missing or mismatched, add a single warning parameter.
-        if (mismatchOrMissing) {
+        // 4. If any requested parameter is missing or mismatched, add a single warning parameter that
+        // includes the list of parameters that were not honored in the expansion.
+        if (!missingOrMismatchedParams.isEmpty()) {
+            var paramList = String.join(", ", missingOrMismatchedParams);
             addExpansionWarningParameter(
                     expandedValueSet,
-                    "Expansion for ValueSet %s did not use expected expansion parameters."
-                            .formatted(expandedValueSet.getUrl()));
+                    "Expansion for ValueSet %s did not use expected expansion parameters: %s."
+                            .formatted(expandedValueSet.getUrl(), paramList));
         }
     }
 

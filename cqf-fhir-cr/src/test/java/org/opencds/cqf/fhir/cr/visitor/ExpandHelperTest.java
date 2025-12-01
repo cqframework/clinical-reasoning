@@ -454,7 +454,16 @@ class ExpandHelperTest {
         assertEquals(1, warningParameters.size());
         var warningValue = warningParameters.get(0).getValue();
         assertNotNull(warningValue);
-        assertTrue(warningValue.primitiveValue().contains("did not use expected expansion parameters"));
+        var warningText = warningValue.primitiveValue();
+        assertTrue(
+                warningText.contains("did not use expected expansion parameters"),
+                "Warning should indicate that expected expansion parameters were not used");
+        assertTrue(
+                warningText.contains("system-version=http://example.org/system|1.0.0"),
+                "Warning should include the expected system-version value");
+        assertTrue(
+                warningText.contains("valueset-version=1.2.3"),
+                "Warning should include the expected valueset-version value");
     }
 
     @Test
@@ -518,7 +527,16 @@ class ExpandHelperTest {
         assertEquals(1, warningParameters.size());
         var warningValue = warningParameters.get(0).getValue();
         assertNotNull(warningValue);
-        assertTrue(warningValue.primitiveValue().contains("did not use expected expansion parameters"));
+        var warningText = warningValue.primitiveValue();
+        assertTrue(
+                warningText.contains("did not use expected expansion parameters"),
+                "Warning should indicate that expected expansion parameters were not used");
+        // Only valueset-version should be reported here, because system-version is honored
+        assertTrue(
+                warningText.contains("valueset-version=" + requestedVersion),
+                "Warning should include the expected valueset-version value");
+        assertFalse(
+                warningText.contains("system-version="), "Warning should not flag system-version when it was honored");
     }
 
     @Test

@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
+import jakarta.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +18,10 @@ public class GroupDef {
     private final CodeDef populationBasis;
     private final CodeDef improvementNotation;
     private final Map<MeasurePopulationType, List<PopulationDef>> populationIndex;
+
+    // Added by Claude Sonnet 4.5 - score storage for version-agnostic measure scoring
+    @Nullable
+    private Double measureScore;
 
     public GroupDef(
             String id,
@@ -128,5 +133,19 @@ public class GroupDef {
 
     public CodeDef getImprovementNotation() {
         return this.improvementNotation;
+    }
+
+    // Added by Claude Sonnet 4.5 - score storage methods for version-agnostic measure scoring
+    public void setMeasureScore(Double score) {
+        this.measureScore = score;
+    }
+
+    @Nullable
+    public Double getMeasureScore() {
+        return this.measureScore;
+    }
+
+    public boolean hasMeasureScore() {
+        return this.measureScore != null;
     }
 }

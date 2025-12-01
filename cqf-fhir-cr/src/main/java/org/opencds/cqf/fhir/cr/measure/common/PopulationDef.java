@@ -14,6 +14,8 @@ public class PopulationDef {
     private final String expression;
     private final ConceptDef code;
     private final MeasurePopulationType measurePopulationType;
+    // Added by Claude Sonnet 4.5 - for better encapsulation in getCountForScoring()
+    private final CodeDef populationBasis;
 
     @Nullable
     private final String criteriaReference;
@@ -24,8 +26,13 @@ public class PopulationDef {
     protected Set<Object> evaluatedResources;
     protected Map<String, Set<Object>> subjectResources = new HashMap<>();
 
-    public PopulationDef(String id, ConceptDef code, MeasurePopulationType measurePopulationType, String expression) {
-        this(id, code, measurePopulationType, expression, null, null);
+    public PopulationDef(
+            String id,
+            ConceptDef code,
+            MeasurePopulationType measurePopulationType,
+            String expression,
+            CodeDef populationBasis) {
+        this(id, code, measurePopulationType, expression, populationBasis, null, null);
     }
 
     public PopulationDef(
@@ -33,12 +40,14 @@ public class PopulationDef {
             ConceptDef code,
             MeasurePopulationType measurePopulationType,
             String expression,
+            CodeDef populationBasis,
             @Nullable String criteriaReference,
             @Nullable ContinuousVariableObservationAggregateMethod aggregateMethod) {
         this.id = id;
         this.code = code;
         this.measurePopulationType = measurePopulationType;
         this.expression = expression;
+        this.populationBasis = populationBasis;
         this.criteriaReference = criteriaReference;
         this.aggregateMethod = aggregateMethod;
     }
@@ -126,6 +135,22 @@ public class PopulationDef {
         return this.expression;
     }
 
+    // Added by Claude Sonnet 4.5 - getter for populationBasis field
+    public CodeDef getPopulationBasis() {
+        return this.populationBasis;
+    }
+
+    /**
+     * Checks if this population uses boolean basis.
+     * Convenience method to avoid verbose populationBasis.code().equals("boolean") checks.
+     * Added by Claude Sonnet 4.5.
+     *
+     * @return true if population basis is boolean, false otherwise
+     */
+    public boolean isBooleanBasis() {
+        return populationBasis.code().equals("boolean");
+    }
+
     // Getter method
     public Map<String, Set<Object>> getSubjectResources() {
         return subjectResources;
@@ -145,5 +170,24 @@ public class PopulationDef {
     @Nullable
     public ContinuousVariableObservationAggregateMethod getAggregateMethod() {
         return this.aggregateMethod;
+    }
+
+    // Added by Claude Sonnet 4.5 - unified count retrieval for scoring
+    /**
+     * Returns the count for this population based on the population basis.
+     * For boolean basis, returns the number of subjects.
+     * For measure observations, returns the count of observations.
+     * For resource basis, returns the count of all subject resources.
+     *
+     * @return the count to use for scoring
+     */
+    public int getCountForScoring() {
+        if (isBooleanBasis()) {
+            return getSubjects().size();
+        } else if (type().equals(MeasurePopulationType.MEASUREOBSERVATION)) {
+            return countObservations();
+        } else {
+            return getAllSubjectResources().size();
+        }
     }
 }

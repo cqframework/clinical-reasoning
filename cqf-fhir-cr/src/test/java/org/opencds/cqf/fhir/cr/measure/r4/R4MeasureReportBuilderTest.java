@@ -262,6 +262,7 @@ class R4MeasureReportBuilderTest {
                 new ConceptDef(List.of(new CodeDef("system", MeasurePopulationType.DATEOFCOMPLIANCE.toCode())), null),
                 MeasurePopulationType.DATEOFCOMPLIANCE,
                 null,
+                new CodeDef(MeasureConstants.POPULATION_BASIS_URL, "boolean"),
                 null,
                 null);
 

@@ -81,6 +81,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         var groupScoring = getGroupMeasureScoring(measure, group);
         // populationBasis
         var groupBasis = getGroupPopulationBasis(group);
+        var populationBasisDef = getPopulationBasisDef(measureBasis, groupBasis);
         // improvement Notation
         var groupImpNotation = getGroupImpNotation(measure, group);
         var hasGroupImpNotation = groupImpNotation != null;
@@ -89,11 +90,11 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         checkIds(group);
 
         var populationsWithCriteriaReference = group.getPopulation().stream()
-                .map(t -> buildPopulationDef(t, group, measure.getUrl()))
+                .map(t -> buildPopulationDef(t, group, measure.getUrl(), populationBasisDef))
                 .toList();
 
-        final Optional<PopulationDef> optPopulationDefDateOfCompliance =
-                buildPopulationDefForDateOfCompliance(measure.getUrl(), group, populationsWithCriteriaReference);
+        final Optional<PopulationDef> optPopulationDefDateOfCompliance = buildPopulationDefForDateOfCompliance(
+                measure.getUrl(), group, populationsWithCriteriaReference, populationBasisDef);
 
         // Stratifiers
         var stratifiers = group.getStratifier().stream()
@@ -108,7 +109,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                 getScoringDef(measure.getUrl(), measureScoring, groupScoring),
                 hasGroupImpNotation,
                 getImprovementNotation(measureImpNotation, groupImpNotation),
-                getPopulationBasisDef(measureBasis, groupBasis));
+                populationBasisDef);
     }
 
     private void checkIds(MeasureGroupComponent group) {
@@ -117,7 +118,10 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
 
     @Nonnull
     private PopulationDef buildPopulationDef(
-            MeasureGroupPopulationComponent population, MeasureGroupComponent group, String measureUrl) {
+            MeasureGroupPopulationComponent population,
+            MeasureGroupComponent group,
+            String measureUrl,
+            CodeDef populationBasis) {
         MeasurePopulationType popType = MeasurePopulationType.fromCode(
                 population.getCode().getCodingFirstRep().getCode());
         // criteriaReference & aggregateMethod are for MeasureObservation populations only
@@ -128,12 +132,16 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                 conceptToConceptDef(population.getCode()),
                 popType,
                 population.getCriteria().getExpression(),
+                populationBasis,
                 criteriaReference,
                 aggregateMethod);
     }
 
     private Optional<PopulationDef> buildPopulationDefForDateOfCompliance(
-            String measureUrl, MeasureGroupComponent group, List<PopulationDef> populationDefs) {
+            String measureUrl,
+            MeasureGroupComponent group,
+            List<PopulationDef> populationDefs,
+            CodeDef populationBasis) {
 
         if (group.getExtensionByUrl(CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL) == null
                 || checkPopulationForCode(populationDefs, DATEOFCOMPLIANCE) == null) {
@@ -149,7 +157,11 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         }
         var expression = expressionType.getExpression();
         var populateDefDateOfCompliance = new PopulationDef(
-                "dateOfCompliance", totalConceptDefCreator(DATEOFCOMPLIANCE), DATEOFCOMPLIANCE, expression);
+                "dateOfCompliance",
+                totalConceptDefCreator(DATEOFCOMPLIANCE),
+                DATEOFCOMPLIANCE,
+                expression,
+                populationBasis);
 
         return Optional.of(populateDefDateOfCompliance);
     }

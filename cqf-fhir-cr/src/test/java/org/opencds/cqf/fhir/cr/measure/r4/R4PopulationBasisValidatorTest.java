@@ -455,6 +455,7 @@ class R4PopulationBasisValidatorTest {
                 null,
                 measurePopulationType,
                 resolveExpressionFor(measurePopulationType),
+                new CodeDef(MeasureConstants.POPULATION_BASIS_URL, "boolean"),
                 null,
                 null);
     }

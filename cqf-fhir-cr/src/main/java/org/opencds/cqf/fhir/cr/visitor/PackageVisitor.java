@@ -18,6 +18,12 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.regex.Pattern;
+
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -32,6 +38,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.Constants;
+import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.PackageHelper;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
@@ -55,6 +62,10 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
     private static final String VALUESET_FHIR_TYPE = "ValueSet";
     private static final String CRMI_INTENDED_USAGE_CONTEXT_URL =
             "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-intendedUsageContext";
+    private static final int MAX_ID_LENGTH = 64;
+    private static final String CANONICAL_ENCODED_PREFIX = "cv-";
+    private static final String CANONICAL_HASHED_PREFIX = "ch-";
+    private static final Pattern FHIR_ID_PATTERN = Pattern.compile("^[A-Za-z0-9\\-.]+$");
     protected final TerminologyServerClient terminologyServerClient;
     protected final ExpandHelper expandHelper;
 
@@ -204,10 +215,18 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
         // comprehensive manifest
         var versionTuple = new ImmutableTriple<>(artifactVersion, checkArtifactVersion, forceArtifactVersion);
         var packagedBundle = BundleHelper.newBundle(fhirVersion);
+
+        // Normalize the id of the root manifest artifact based on its canonical URL and version.
+        normalizeIdFromCanonical(adapter);
+
         addBundleEntry(packagedBundle, isPut, adapter);
         if (include.size() == 1 && include.stream().anyMatch(includedType -> includedType.equals("artifact"))) {
             findUnsupportedCapability(adapter, capability);
             processCanonicals(adapter, versionTuple);
+
+            // Normalize the id based on canonical before adding the manifest artifact as a separate entry.
+            normalizeIdFromCanonical(adapter);
+
             var entry = PackageHelper.createEntry(adapter.get(), isPut);
             BundleHelper.addEntry(packagedBundle, entry);
         } else {
@@ -222,7 +241,11 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
                     terminologyServerClient);
             packagedResources.values().stream()
                     .filter(r -> !r.getCanonical().equals(adapter.getCanonical()))
-                    .forEach(r -> addBundleEntry(packagedBundle, isPut, r));
+                    .forEach(r -> {
+                        // Normalize id based on canonical before adding to the package bundle.
+                        normalizeIdFromCanonical(r);
+                        addBundleEntry(packagedBundle, isPut, r);
+                    });
             var included = findUnsupportedInclude(BundleHelper.getEntry(packagedBundle), include, adapter);
             BundleHelper.setEntry(packagedBundle, included);
         }
@@ -608,5 +631,120 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
                         reference.equals("#" + contained.getIdElement().getValue()))
                 .findFirst();
         return (IBaseParameters) expansionParamResource.orElse(null);
+    }
+
+    /**
+     * Normalize the id of the given knowledge artifact so that it is derived from the canonical URL
+     * and version in a deterministic, FHIR-id-safe way.
+     *
+     * <p>The normalization uses the following strategy:
+     * <ol>
+     *   <li>If the artifact has no canonical URL, the id is left unchanged.</li>
+     *   <li>For typical cases, the id is set to {@code &lt;canonicalTail&gt;[-&lt;version&gt;]} when both
+     *       the tail and version consist only of allowed FHIR id characters and the result is at most
+     *       64 characters.</li>
+     *   <li>If the tail-plus-version form is not usable (for example, due to disallowed characters or
+     *       excessive length), the full {@code canonical[|version]} string is Base64-encoded and
+     *       converted to a FHIR-id-safe alphabet with the {@code cv-} prefix. If that still exceeds
+     *       the id length limit, a stable hashed form is used with the {@code ch-} prefix.</li>
+     * </ol>
+     *
+     * @param adapter the knowledge artifact whose id should be normalized; may be {@code null}, in which
+     *                case this method is a no-op
+     */
+    private void normalizeIdFromCanonical(IKnowledgeArtifactAdapter adapter) {
+        if (adapter == null) {
+            return;
+        }
+
+        String url = adapter.getUrl();
+        if (StringUtils.isBlank(url)) {
+            // No canonical URL available; leave id as-is.
+            return;
+        }
+
+        String version = adapter.getVersion();
+        String identityString = StringUtils.isBlank(version) ? url : url + "|" + version;
+
+        // 1) Try a human-friendly tail[-version] id when both parts are simple and short enough.
+        String tail = getCanonicalTail(url);
+        if (StringUtils.isNotBlank(tail)
+                && isFhirIdSafe(tail)
+                && (StringUtils.isBlank(version) || isFhirIdSafe(version))) {
+
+            String candidateId = StringUtils.isBlank(version) ? tail : tail + "-" + version;
+            if (isValidFhirId(candidateId)) {
+                adapter.setId(Ids.newId(fhirContext(), candidateId));
+                return;
+            }
+        }
+
+        // 2) Encode the full canonical[|version] string using a FHIR-id-safe Base64 variant.
+        String encoded = encodeToIdSafeBase64(identityString);
+        String encodedId = CANONICAL_ENCODED_PREFIX + encoded;
+        if (encodedId.length() <= MAX_ID_LENGTH) {
+            adapter.setId(Ids.newId(fhirContext(), encodedId));
+            return;
+        }
+
+        // 3) Fall back to a hashed form using SHA-256 of the identity string.
+        String hashedEncoded = encodeToIdSafeBase64(sha256(identityString));
+        String hashedId = CANONICAL_HASHED_PREFIX + hashedEncoded;
+        if (hashedId.length() > MAX_ID_LENGTH) {
+            // Truncate the hash if necessary to respect the id length limit.
+            hashedId = hashedId.substring(0, MAX_ID_LENGTH);
+        }
+        adapter.setId(Ids.newId(fhirContext(), hashedId));
+    }
+
+    private static String getCanonicalTail(String url) {
+        int idx = url.lastIndexOf('/');
+        return idx >= 0 && idx + 1 < url.length() ? url.substring(idx + 1) : url;
+    }
+
+    private static boolean isFhirIdSafe(String value) {
+        return value != null && FHIR_ID_PATTERN.matcher(value).matches();
+    }
+
+    private static boolean isValidFhirId(String value) {
+        return value != null && value.length() <= MAX_ID_LENGTH && FHIR_ID_PATTERN.matcher(value).matches();
+    }
+
+    /**
+     * Encode the given string into a FHIR-id-safe Base64 representation using only
+     * characters allowed by the FHIR id regex ([A-Za-z0-9-.]).
+     *
+     * <p>This uses standard Base64, then replaces '+' with '-' and '/' with '.', and
+     * strips any trailing '=' padding. This mapping is reversible because the Base64
+     * alphabet does not include '-' or '.'.
+     *
+     * @param value the string to encode
+     * @return an id-safe encoded string
+     */
+    private static String encodeToIdSafeBase64(String value) {
+        if (value == null) {
+            return "";
+        }
+        byte[] bytes = value.getBytes(StandardCharsets.UTF_8);
+        String base64 = Base64.getEncoder().encodeToString(bytes);
+        // Remove padding and replace disallowed characters with allowed equivalents.
+        base64 = base64.replace("=", "").replace('+', '-').replace('/', '.');
+        return base64;
+    }
+
+    /**
+     * Compute the SHA-256 hash of the given string and return the raw digest bytes.
+     *
+     * @param value the input string
+     * @return the SHA-256 digest bytes
+     */
+    private static String sha256(String value) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            return new String(digest.digest(value.getBytes(StandardCharsets.UTF_8)));
+        } catch (NoSuchAlgorithmException e) {
+            // SHA-256 is guaranteed to be available in the JDK; rethrow as unchecked if it somehow is not.
+            throw new IllegalStateException("SHA-256 MessageDigest not available", e);
+        }
     }
 }

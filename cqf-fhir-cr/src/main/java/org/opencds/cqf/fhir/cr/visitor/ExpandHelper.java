@@ -348,7 +348,7 @@ public class ExpandHelper {
             return;
         }
 
-        // 1. No expansion at all → immediate warning
+        // 1. No expansion at all -> immediate warning
         if (!expandedValueSet.hasExpansion()) {
             addExpansionWarningParameter(
                     expandedValueSet,
@@ -388,7 +388,7 @@ public class ExpandHelper {
             boolean hasRequested = expandedValueSet.hasExpansionStringParameter(requestedName, expectedValue);
             boolean hasUsed = usedName != null && expandedValueSet.hasExpansionStringParameter(usedName, expectedValue);
 
-            // Neither name has the expected value → treat as missing/mismatched
+            // Neither name has the expected value -> treat as missing/mismatched
             return !(hasRequested || hasUsed);
         });
 

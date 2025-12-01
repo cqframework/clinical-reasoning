@@ -25,6 +25,10 @@ public interface IValueSetAdapter extends IKnowledgeArtifactAdapter {
 
     <T extends IBaseBackboneElement> T newExpansion();
 
+    void addExpansionStringParameter(String name, String value);
+
+    boolean hasExpansionStringParameter(String name, String value);
+
     List<IValueSetConceptSetAdapter> getComposeInclude();
 
     List<String> getValueSetIncludes();

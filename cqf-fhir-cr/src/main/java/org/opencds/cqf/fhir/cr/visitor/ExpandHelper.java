@@ -8,10 +8,12 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.util.ParametersUtil;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
@@ -39,6 +41,14 @@ public class ExpandHelper {
     private final IAdapterFactory adapterFactory;
     private final TerminologyServerClient terminologyServerClient;
     public static final List<String> unsupportedParametersToRemove = List.of(Constants.CANONICAL_VERSION);
+
+    // Parameters we care to validate round-trip in the expansion
+    private static final List<String> EXPANSION_PARAMETERS_TO_VALIDATE = List.of("system-version", "valueset-version");
+
+    // If the server uses "used-*" variants, they should be treated as satisfying the request
+    private static final Map<String, String> EXPANSION_PARAMETER_USED_NAME_OVERRIDES = Map.of(
+            "system-version", "used-system-version",
+            "valueset-version", "used-valueset-version");
 
     public ExpandHelper(IRepository repository, TerminologyServerClient server) {
         this.repository = repository;
@@ -124,6 +134,8 @@ public class ExpandHelper {
                         valueSet.get().getClass(),
                         headers);
                 valueSet = (IValueSetAdapter) IAdapterFactory.createAdapterForResource(vs);
+                // Validate that the expansion parameters reflect what we asked for
+                validateExpansionParameters(valueSet, expansionParameters);
             } catch (Exception e) {
                 throw new UnprocessableEntityException(
                         "Cannot expand ValueSet without a terminology server: " + valueSet.getId());
@@ -141,6 +153,8 @@ public class ExpandHelper {
             valueSet.setVersion(expandedValueSet.getVersion());
         }
         valueSet.setExpansion(expandedValueSet.getExpansion());
+        // Validate that the expansion parameters reflect what we asked for
+        validateExpansionParameters(valueSet, expansionParameters);
     }
 
     private void groupExpand(
@@ -301,5 +315,113 @@ public class ExpandHelper {
                     .toList());
         }
         expandValueSet(includedVS, childExpParams, terminologyEndpoint, valueSets, expandedList, expansionTimestamp);
+    }
+
+    /**
+     * Validates that the expansion parameters used by the terminology expansion match the parameters
+     * that were requested for the expansion.
+     * <p>
+     * Currently this validation focuses on the {@code system-version} and {@code valueset-version}
+     * parameters. For each of these parameters that is present in the {@code requestedExpansionParameters}
+     * with a non-blank value, this method verifies that the resulting {@link IValueSetAdapter} expansion
+     * contains either:
+     * <ul>
+     *   <li>a parameter with the same name and the same primitive value, or</li>
+     *   <li>a parameter with the corresponding {@code used-} name (for example,
+     *       {@code system-version} → {@code used-system-version}) and the same primitive value.</li>
+     * </ul>
+     * If there is no expansion at all, or if any requested parameter is missing or has a mismatched value
+     * in the expansion, a single {@code warning} expansion parameter is added via
+     * {@link #addExpansionWarningParameter(IValueSetAdapter, String)} indicating that the expected
+     * expansion parameters were not used.
+     *
+     * @param expandedValueSet            the {@link IValueSetAdapter} containing the expansion to validate;
+     *                                    may be {@code null}, in which case this method is a no-op
+     * @param requestedExpansionParameters the {@link IParametersAdapter} representing the parameters that
+     *                                     were originally sent to the terminology service; may be {@code null},
+     *                                     in which case this method is a no-op
+     */
+    private void validateExpansionParameters(
+            IValueSetAdapter expandedValueSet, IParametersAdapter requestedExpansionParameters) {
+
+        if (expandedValueSet == null || requestedExpansionParameters == null) {
+            return;
+        }
+
+        // 1. No expansion at all → immediate warning
+        if (!expandedValueSet.hasExpansion()) {
+            addExpansionWarningParameter(
+                    expandedValueSet,
+                    "Expansion for ValueSet %s did not use expected expansion parameters (no expansion element)."
+                            .formatted(expandedValueSet.getUrl()));
+            return;
+        }
+
+        // 2. Build map of requested parameters we care about (system-version, valueset-version) -> expected string
+        // value
+        Map<String, String> requestedValues = new HashMap<>();
+        for (String paramName : EXPANSION_PARAMETERS_TO_VALIDATE) {
+            if (!requestedExpansionParameters.hasParameter(paramName)) {
+                continue;
+            }
+
+            var valueOpt = ParametersUtil.getNamedParameterValueAsString(
+                    fhirContext(), (IBaseParameters) requestedExpansionParameters.get(), paramName);
+
+            valueOpt.filter(StringUtils::isNotBlank).ifPresent(v -> requestedValues.put(paramName, v));
+        }
+
+        if (requestedValues.isEmpty()) {
+            // We didn’t actually request any of the parameters we care about with usable values
+            return;
+        }
+
+        // 3. For each requested parameter, see if the expansion has either:
+        //    - the same name with that value, or
+        //    - the used-* variant with that value.
+        boolean mismatchOrMissing = requestedValues.entrySet().stream().anyMatch(entry -> {
+            var requestedName = entry.getKey();
+            var expectedValue = entry.getValue();
+
+            var usedName = EXPANSION_PARAMETER_USED_NAME_OVERRIDES.get(requestedName);
+
+            boolean hasRequested = expandedValueSet.hasExpansionStringParameter(requestedName, expectedValue);
+            boolean hasUsed = usedName != null && expandedValueSet.hasExpansionStringParameter(usedName, expectedValue);
+
+            // Neither name has the expected value → treat as missing/mismatched
+            return !(hasRequested || hasUsed);
+        });
+
+        // 4. If *any* requested parameter is missing or mismatched, add a single warning parameter.
+        if (mismatchOrMissing) {
+            addExpansionWarningParameter(
+                    expandedValueSet,
+                    "Expansion for ValueSet %s did not use expected expansion parameters."
+                            .formatted(expandedValueSet.getUrl()));
+        }
+    }
+
+    /**
+     * Adds a {@code warning} parameter to the supplied ValueSet expansion to surface issues
+     * encountered during expansion parameter validation.
+     * <p>
+     * This method logs the supplied message at {@code WARN} level and, if an expansion is present
+     * on the {@link IValueSetAdapter}, delegates to {@link IValueSetAdapter#addExpansionStringParameter(String, String)}
+     * to append a {@code warning} expansion parameter whose value is the given message. If the
+     * ValueSet does not currently have an expansion, the method logs but does not attempt to add
+     * a parameter.
+     *
+     * @param valueSet the {@link IValueSetAdapter} whose expansion will be annotated; may be {@code null},
+     *                 in which case this method is a no-op
+     * @param message  the warning message to log and add as the value of the {@code warning} expansion parameter;
+     *                 must not be {@code null}, but may be empty
+     */
+    private void addExpansionWarningParameter(IValueSetAdapter valueSet, String message) {
+        log.warn(message);
+        var expansion = valueSet.getExpansion();
+        if (expansion == null) {
+            return;
+        }
+        valueSet.addExpansionStringParameter("warning", message);
     }
 }

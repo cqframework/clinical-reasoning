@@ -14,6 +14,7 @@ import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.r5.model.BooleanType;
 import org.hl7.fhir.r5.model.IntegerType;
 import org.hl7.fhir.r5.model.PrimitiveType;
+import org.hl7.fhir.r5.model.StringType;
 import org.hl7.fhir.r5.model.UsageContext;
 import org.hl7.fhir.r5.model.ValueSet;
 import org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent;
@@ -172,6 +173,16 @@ public class ValueSetAdapter extends KnowledgeArtifactAdapter implements IValueS
         var expansion = new ValueSet.ValueSetExpansionComponent(Date.from(Instant.now()));
         expansion.getContains();
         return expansion;
+    }
+
+    @Override
+    public void addExpansionStringParameter(String name, String value) {
+        getExpansion().addParameter().setName(name).setValue(new StringType(value));
+    }
+
+    @Override
+    public boolean hasExpansionStringParameter(String name, String value) {
+        return hasExpansion() && getExpansion().hasParameterValue(name, value);
     }
 
     @Override

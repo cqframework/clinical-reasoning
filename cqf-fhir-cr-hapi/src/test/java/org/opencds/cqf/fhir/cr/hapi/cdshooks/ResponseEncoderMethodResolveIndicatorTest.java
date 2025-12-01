@@ -11,12 +11,14 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
 @SuppressWarnings("UnstableApiUsage")
 class ResponseEncoderMethodResolveIndicatorTest {
+
+    record ProvideResolveIndicatorTestCasesParams(String indicator, CdsServiceIndicatorEnum expectedIndicator) {}
+
     private final FhirContext fhirContext = FhirContext.forR4Cached();
 
     private CdsResponseEncoderService fixture;
@@ -27,11 +29,11 @@ class ResponseEncoderMethodResolveIndicatorTest {
         fixture = new CdsResponseEncoderService(repository);
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{index} => testCase={0}")
     @MethodSource("provideResolveIndicatorTestCases")
-    void testResolveIndicator_routineCode(String indicator, CdsServiceIndicatorEnum expectedIndicator) {
-        CdsServiceIndicatorEnum result = fixture.resolveIndicator(indicator);
-        assertEquals(expectedIndicator, result);
+    void testResolveIndicator_routineCode(ProvideResolveIndicatorTestCasesParams testCase) {
+        CdsServiceIndicatorEnum result = fixture.resolveIndicator(testCase.indicator());
+        assertEquals(testCase.expectedIndicator(), result);
     }
 
     @Test
@@ -42,10 +44,10 @@ class ResponseEncoderMethodResolveIndicatorTest {
         assertTrue(exception.getMessage().contains("Invalid priority code: invalid"));
     }
 
-    private static Stream<Arguments> provideResolveIndicatorTestCases() {
+    private static Stream<ProvideResolveIndicatorTestCasesParams> provideResolveIndicatorTestCases() {
         return Stream.of(
-                Arguments.of("routine", CdsServiceIndicatorEnum.INFO),
-                Arguments.of("urgent", CdsServiceIndicatorEnum.WARNING),
-                Arguments.of("stat", CdsServiceIndicatorEnum.CRITICAL));
+                new ProvideResolveIndicatorTestCasesParams("routine", CdsServiceIndicatorEnum.INFO),
+                new ProvideResolveIndicatorTestCasesParams("urgent", CdsServiceIndicatorEnum.WARNING),
+                new ProvideResolveIndicatorTestCasesParams("stat", CdsServiceIndicatorEnum.CRITICAL));
     }
 }

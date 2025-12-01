@@ -536,15 +536,10 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
             PopulationDef denPopDef) {
 
         QuantityDef aggregateNumQuantityDef = calculateContinuousVariableAggregateQuantity(
-                measureUrl,
-                numPopDef,
-                populationDef -> getResultsForStratum(populationDef, measureObsNumStratum));
-        calculateContinuousVariableAggregateQuantity(
-                measureUrl, numPopDef, PopulationDef::getAllSubjectResources);
+                measureUrl, numPopDef, populationDef -> getResultsForStratum(populationDef, measureObsNumStratum));
+        calculateContinuousVariableAggregateQuantity(measureUrl, numPopDef, PopulationDef::getAllSubjectResources);
         QuantityDef aggregateDenQuantityDef = calculateContinuousVariableAggregateQuantity(
-                measureUrl,
-                denPopDef,
-                populationDef -> getResultsForStratum(populationDef, measureObsDenStratum));
+                measureUrl, denPopDef, populationDef -> getResultsForStratum(populationDef, measureObsDenStratum));
 
         if (aggregateNumQuantityDef == null || aggregateDenQuantityDef == null) {
             return null;

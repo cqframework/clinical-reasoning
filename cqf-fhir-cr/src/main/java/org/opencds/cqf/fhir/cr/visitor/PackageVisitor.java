@@ -9,21 +9,18 @@ import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.regex.Pattern;
-
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.Base64;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -64,7 +61,6 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
             "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-intendedUsageContext";
     private static final int MAX_ID_LENGTH = 64;
     private static final String CANONICAL_ENCODED_PREFIX = "cv-";
-    private static final String CANONICAL_HASHED_PREFIX = "ch-";
     private static final Pattern FHIR_ID_PATTERN = Pattern.compile("^[A-Za-z0-9\\-.]+$");
     protected final TerminologyServerClient terminologyServerClient;
     protected final ExpandHelper expandHelper;
@@ -217,7 +213,8 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
         var packagedBundle = BundleHelper.newBundle(fhirVersion);
 
         // Normalize the id of the root manifest artifact based on its canonical URL and version.
-        normalizeIdFromCanonical(adapter);
+        // Because this is the manifest artifact, we will surface a warning if we cannot normalize.
+        normalizeIdFromCanonical(adapter, true);
 
         addBundleEntry(packagedBundle, isPut, adapter);
         if (include.size() == 1 && include.stream().anyMatch(includedType -> includedType.equals("artifact"))) {
@@ -225,7 +222,8 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
             processCanonicals(adapter, versionTuple);
 
             // Normalize the id based on canonical before adding the manifest artifact as a separate entry.
-            normalizeIdFromCanonical(adapter);
+            // Because this is the manifest artifact, we will surface a warning if we cannot normalize.
+            normalizeIdFromCanonical(adapter, true);
 
             var entry = PackageHelper.createEntry(adapter.get(), isPut);
             BundleHelper.addEntry(packagedBundle, entry);
@@ -243,7 +241,8 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
                     .filter(r -> !r.getCanonical().equals(adapter.getCanonical()))
                     .forEach(r -> {
                         // Normalize id based on canonical before adding to the package bundle.
-                        normalizeIdFromCanonical(r);
+                        // For non-manifest artifacts, we do not surface a warning if normalization fails.
+                        normalizeIdFromCanonical(r, false);
                         addBundleEntry(packagedBundle, isPut, r);
                     });
             var included = findUnsupportedInclude(BundleHelper.getEntry(packagedBundle), include, adapter);
@@ -635,7 +634,7 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
 
     /**
      * Normalize the id of the given knowledge artifact so that it is derived from the canonical URL
-     * and version in a deterministic, FHIR-id-safe way.
+     * and version in a deterministic, FHIR-id-safe way whenever possible.
      *
      * <p>The normalization uses the following strategy:
      * <ol>
@@ -645,14 +644,19 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
      *       64 characters.</li>
      *   <li>If the tail-plus-version form is not usable (for example, due to disallowed characters or
      *       excessive length), the full {@code canonical[|version]} string is Base64-encoded and
-     *       converted to a FHIR-id-safe alphabet with the {@code cv-} prefix. If that still exceeds
-     *       the id length limit, a stable hashed form is used with the {@code ch-} prefix.</li>
+     *       converted to a FHIR-id-safe alphabet with the {@code cv-} prefix.</li>
+     *   <li>If neither a tail-based nor a cv-encoded form can be represented within the FHIR id
+     *       constraints, the existing id is retained. For the manifest artifact, a warning is
+     *       surfaced in the outcome manifest to indicate that the id could not be normalized
+     *       without loss.</li>
      * </ol>
      *
      * @param adapter the knowledge artifact whose id should be normalized; may be {@code null}, in which
      *                case this method is a no-op
+     * @param warnIfNotNormalized if {@code true}, emits a warning via the outcome manifest when the id
+     *                            cannot be normalized non-lossily
      */
-    private void normalizeIdFromCanonical(IKnowledgeArtifactAdapter adapter) {
+    private void normalizeIdFromCanonical(IKnowledgeArtifactAdapter adapter, boolean warnIfNotNormalized) {
         if (adapter == null) {
             return;
         }
@@ -687,14 +691,27 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
             return;
         }
 
-        // 3) Fall back to a hashed form using SHA-256 of the identity string.
-        String hashedEncoded = encodeToIdSafeBase64(sha256(identityString));
-        String hashedId = CANONICAL_HASHED_PREFIX + hashedEncoded;
-        if (hashedId.length() > MAX_ID_LENGTH) {
-            // Truncate the hash if necessary to respect the id length limit.
-            hashedId = hashedId.substring(0, MAX_ID_LENGTH);
+        // 3) At this point, we cannot represent the canonical|version non-lossily within FHIR id
+        // constraints. Retain the existing id and optionally surface a warning for the manifest.
+        String existingId = adapter.get().getIdElement().getIdPart();
+        String message =
+                "The id for resource %s (%s) could not be normalized from canonical '%s' without loss; retaining existing id '%s'."
+                        .formatted(
+                                adapter.get().fhirType(),
+                                adapter.getUrl(),
+                                identityString,
+                                existingId != null ? existingId : "");
+
+        myLogger.warn(message);
+
+        if (warnIfNotNormalized) {
+            if (messages == null) {
+                messages = OperationOutcomeUtil.createOperationOutcome(
+                        "warning", message, "processing", fhirContext(), null);
+            } else {
+                OperationOutcomeUtil.addIssue(fhirContext(), messages, "warning", message, null, "processing");
+            }
         }
-        adapter.setId(Ids.newId(fhirContext(), hashedId));
     }
 
     private static String getCanonicalTail(String url) {
@@ -707,7 +724,9 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
     }
 
     private static boolean isValidFhirId(String value) {
-        return value != null && value.length() <= MAX_ID_LENGTH && FHIR_ID_PATTERN.matcher(value).matches();
+        return value != null
+                && value.length() <= MAX_ID_LENGTH
+                && FHIR_ID_PATTERN.matcher(value).matches();
     }
 
     /**
@@ -730,21 +749,5 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
         // Remove padding and replace disallowed characters with allowed equivalents.
         base64 = base64.replace("=", "").replace('+', '-').replace('/', '.');
         return base64;
-    }
-
-    /**
-     * Compute the SHA-256 hash of the given string and return the raw digest bytes.
-     *
-     * @param value the input string
-     * @return the SHA-256 digest bytes
-     */
-    private static String sha256(String value) {
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            return new String(digest.digest(value.getBytes(StandardCharsets.UTF_8)));
-        } catch (NoSuchAlgorithmException e) {
-            // SHA-256 is guaranteed to be available in the JDK; rethrow as unchecked if it somehow is not.
-            throw new IllegalStateException("SHA-256 MessageDigest not available", e);
-        }
     }
 }

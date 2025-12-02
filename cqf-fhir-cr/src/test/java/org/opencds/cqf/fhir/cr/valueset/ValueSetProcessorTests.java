@@ -36,7 +36,10 @@ class ValueSetProcessorTests {
                 .isPut(Boolean.FALSE);
         var bundle = when.thenPackage().getBundle();
         assertNotNull(bundle);
-        var library = when.thenDataRequirements().getLibrary();
+        var library = when.valueSetUrl(new org.hl7.fhir.r4.model.CanonicalType(
+                        "http://hl7.org/fhir/us/vrdr/ValueSet/AdministrativeGender"))
+                .thenDataRequirements()
+                .getLibrary();
         assertNotNull(library);
     }
 

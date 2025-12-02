@@ -30,8 +30,8 @@ public class NpmBackedRepository implements INpmComboRepository {
     }
 
     @Override
-    public <T extends IBaseResource, I extends IIdType> T read(Class<T> resourceType, I id,
-        Map<String, String> headers) {
+    public <T extends IBaseResource, I extends IIdType> T read(
+            Class<T> resourceType, I id, Map<String, String> headers) {
         return repository.read(resourceType, id, headers);
     }
 
@@ -46,15 +46,17 @@ public class NpmBackedRepository implements INpmComboRepository {
     }
 
     @Override
-    public <T extends IBaseResource, I extends IIdType> MethodOutcome delete(Class<T> resourceType,
-        I id, Map<String, String> headers) {
+    public <T extends IBaseResource, I extends IIdType> MethodOutcome delete(
+            Class<T> resourceType, I id, Map<String, String> headers) {
         throw new NotImplementedException();
     }
 
     @Override
-    public <B extends IBaseBundle, T extends IBaseResource> B search(Class<B> bundleType,
-        Class<T> resourceType, Multimap<String, List<IQueryParameterType>> searchParameters,
-        Map<String, String> headers) {
+    public <B extends IBaseBundle, T extends IBaseResource> B search(
+            Class<B> bundleType,
+            Class<T> resourceType,
+            Multimap<String, List<IQueryParameterType>> searchParameters,
+            Map<String, String> headers) {
 
         B bundle = repository.search(bundleType, resourceType, searchParameters, headers);
 
@@ -82,7 +84,7 @@ public class NpmBackedRepository implements INpmComboRepository {
             bundleBuilder.addCollectionEntry(entry);
         }
 
-        return (B)bundleBuilder.getBundle();
+        return (B) bundleBuilder.getBundle();
     }
 
     @Override

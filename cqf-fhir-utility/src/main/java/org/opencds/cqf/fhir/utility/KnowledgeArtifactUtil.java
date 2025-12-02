@@ -10,6 +10,5 @@ public class KnowledgeArtifactUtil {
      * The set of all "knowledge" resource types.
      */
     public static final Set<String> RESOURCE_TYPES = new HashSet<>(Arrays.asList(
-        "Library", "Measure", "PlanDefinition", "StructureDefinition", "ActivityDefinition", "Questionnaire"));
-
+            "Library", "Measure", "PlanDefinition", "StructureDefinition", "ActivityDefinition", "Questionnaire"));
 }

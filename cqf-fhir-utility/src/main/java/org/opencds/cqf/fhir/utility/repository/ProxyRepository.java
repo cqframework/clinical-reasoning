@@ -228,7 +228,6 @@ public class ProxyRepository implements IRepository {
         return (terminologyResourceSet.contains(type));
     }
 
-
     private boolean isContentResource(String type) {
         return (RESOURCE_TYPES.contains(type));
     }

@@ -76,19 +76,13 @@ public class QuestionnaireProcessor {
             return this;
         }
 
-        public Builder setIOperationProcessors(
-            List<? extends IOperationProcessor> operationProcessors) {
+        public Builder setIOperationProcessors(List<? extends IOperationProcessor> operationProcessors) {
             this.operationProcessors = operationProcessors;
             return this;
         }
 
         public QuestionnaireProcessor build() {
-            return new QuestionnaireProcessor(
-                repository,
-                npmRepository,
-                crSettings,
-                operationProcessors
-            );
+            return new QuestionnaireProcessor(repository, npmRepository, crSettings, operationProcessors);
         }
     }
 
@@ -104,7 +98,8 @@ public class QuestionnaireProcessor {
         this(repository, crSettings, null);
     }
 
-    public QuestionnaireProcessor(IRepository repository, CrSettings crSettings, List<? extends IOperationProcessor> opProcessors) {
+    public QuestionnaireProcessor(
+            IRepository repository, CrSettings crSettings, List<? extends IOperationProcessor> opProcessors) {
         this(repository, null, crSettings, opProcessors);
     }
 
@@ -135,12 +130,9 @@ public class QuestionnaireProcessor {
             });
         }
 
-        this.questionnaireResolver = new ResourceResolverWithNpmBacking(
-            "Questionnaire", repository, npmRepository
-        );
-        this.structureDefResolver = new ResourceResolverWithNpmBacking(
-            "StructureDefinition", repository, npmRepository
-        );
+        this.questionnaireResolver = new ResourceResolverWithNpmBacking("Questionnaire", repository, npmRepository);
+        this.structureDefResolver =
+                new ResourceResolverWithNpmBacking("StructureDefinition", repository, npmRepository);
     }
 
     public CrSettings getSettings() {

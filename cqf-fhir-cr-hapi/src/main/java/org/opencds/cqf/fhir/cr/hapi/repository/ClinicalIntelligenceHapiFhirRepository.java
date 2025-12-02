@@ -70,7 +70,6 @@ public class ClinicalIntelligenceHapiFhirRepository extends HapiFhirRepository {
             Multimap<String, List<IQueryParameterType>> searchParameters,
             Map<String, String> headers) {
 
-
         var details = ClinicalIntelligenceRequestDetailsCloner.startWith(requestDetails)
                 .setAction(RestOperationTypeEnum.SEARCH_TYPE)
                 .addHeaders(headers)

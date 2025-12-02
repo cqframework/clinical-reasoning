@@ -43,8 +43,6 @@ public class RepositoryFhirLibrarySourceProvider extends BaseFhirLibrarySourcePr
                 this.fhirContext.getResourceDefinition("Bundle").getImplementingClass();
         var lt = this.fhirContext.getResourceDefinition("Library").getImplementingClass();
 
-
-
         var libs = repository.search(
                 bt, lt, Searches.byNameAndVersion(libraryIdentifier.getId(), libraryIdentifier.getVersion()));
 

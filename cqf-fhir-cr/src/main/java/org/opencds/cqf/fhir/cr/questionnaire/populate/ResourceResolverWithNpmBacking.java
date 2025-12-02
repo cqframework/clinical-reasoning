@@ -4,8 +4,8 @@ import ca.uhn.fhir.repository.IRepository;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.opencds.cqf.fhir.utility.repository.INpmRepository;
 import org.opencds.cqf.fhir.cr.common.ResourceResolver;
+import org.opencds.cqf.fhir.utility.repository.INpmRepository;
 
 public class ResourceResolverWithNpmBacking extends ResourceResolver {
 

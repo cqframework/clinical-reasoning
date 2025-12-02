@@ -2,10 +2,6 @@ package org.opencds.cqf.fhir.cr.questionnaire.populate;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.repository.IRepository;
-import org.hl7.fhir.r4.model.ContactPoint;
-import org.hl7.fhir.r4.model.ContactPoint.ContactPointSystem;
-import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent;
-import org.hl7.fhir.r4.model.Type;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -32,10 +28,6 @@ public class NpmBackedRepoTest {
     @Test
     public void search_forAppropriateResources_works() {
         // setup
-        ContactPoint value = new ContactPoint();
-        value.setSystem(ContactPointSystem.FAX);
-        value.setValue("+1 (123) 4567890");
 
-        new QuestionnaireResponseItemAnswerComponent().setValue((Type) value);
     }
 }

@@ -60,9 +60,6 @@ public class CrProcessorConfig {
                 .setCrSettings(crSettings)
                 .setINpmRepository(npmRepositoryFactory().getNpmRepository())
                 .build();
-
-        //        return rd -> new QuestionnaireProcessor(repositoryFactory.create(rd),
-        //            npmRepositoryFactory().getNpmRepository(), crSettings, null);
     }
 
     @Bean

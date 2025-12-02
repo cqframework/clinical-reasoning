@@ -34,12 +34,6 @@
       <version>4.1.1-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
-      <dependency>
-          <groupId>ca.uhn.hapi.fhir</groupId>
-          <artifactId>hapi-fhir-test-utilities</artifactId>
-          <version>8.7.1-SNAPSHOT</version>
-          <scope>test</scope>
-      </dependency>
     <dependency>
       <groupId>org.skyscreamer</groupId>
       <artifactId>jsonassert</artifactId>
@@ -70,10 +64,6 @@
         <artifactId>slf4j-test</artifactId>
         <scope>test</scope>
     </dependency>
-      <dependency>
-          <groupId>org.springframework</groupId>
-          <artifactId>spring-test</artifactId>
-      </dependency>
   </dependencies>
 
   <build>

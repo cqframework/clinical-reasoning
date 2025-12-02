@@ -73,17 +73,6 @@ public class RepositoryFhirModelInfoProvider extends BaseFhirModelInfoProvider {
                 this.fhirContext.getResourceDefinition("Bundle").getImplementingClass();
         var lt = this.fhirContext.getResourceDefinition("Library").getImplementingClass();
 
-        //        if (repository instanceof INpmComboRepository npm) {
-        //            List<? extends IBaseResource> libraries = npm.resolveByUrl(lt, null);
-        //            if (libraries != null && !libraries.isEmpty()) {
-        //                var library = this.libraryVersionSelector.select(libraryIdentifier,
-        //                    libraries.stream().map(l -> (IBaseResource)l).toList());
-        //                if (library != null) {
-        //                    return library;
-        //                }
-        //            }
-        //        }
-
         var libs = repository.search(
                 bt, lt, Searches.byNameAndVersion(libraryIdentifier.getId(), libraryIdentifier.getVersion()));
 

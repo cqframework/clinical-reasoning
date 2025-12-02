@@ -1,6 +1,6 @@
 package org.opencds.cqf.fhir.cr.hapi.common;
 
-import org.opencds.cqf.fhir.cr.common.INpmRepository;
+import org.opencds.cqf.fhir.utility.repository.INpmRepository;
 
 public class NpmRepositoryFactory {
 

@@ -8,14 +8,17 @@ import static org.hl7.elm_modelinfo.r1.serializing.XmlModelInfoReaderKt.parseMod
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.repository.IRepository;
 import java.util.ArrayList;
+import java.util.List;
 import org.hl7.cql.model.ModelIdentifier;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.elm_modelinfo.r1.ModelInfo;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Library;
 import org.opencds.cqf.fhir.cql.cql2elm.util.LibraryVersionSelector;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.iterable.BundleIterable;
+import org.opencds.cqf.fhir.utility.repository.INpmComboRepository;
 import org.opencds.cqf.fhir.utility.search.Searches;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,6 +75,19 @@ public class RepositoryFhirModelInfoProvider extends BaseFhirModelInfoProvider {
         var bt = (Class<IBaseBundle>)
                 this.fhirContext.getResourceDefinition("Bundle").getImplementingClass();
         var lt = this.fhirContext.getResourceDefinition("Library").getImplementingClass();
+
+
+//        if (repository instanceof INpmComboRepository npm) {
+//            List<? extends IBaseResource> libraries = npm.resolveByUrl(lt, null);
+//            if (libraries != null && !libraries.isEmpty()) {
+//                var library = this.libraryVersionSelector.select(libraryIdentifier,
+//                    libraries.stream().map(l -> (IBaseResource)l).toList());
+//                if (library != null) {
+//                    return library;
+//                }
+//            }
+//        }
+
 
         var libs = repository.search(
                 bt, lt, Searches.byNameAndVersion(libraryIdentifier.getId(), libraryIdentifier.getVersion()));

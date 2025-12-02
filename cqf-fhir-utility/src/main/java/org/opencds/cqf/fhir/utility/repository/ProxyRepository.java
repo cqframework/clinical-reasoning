@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.utility.repository;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.opencds.cqf.fhir.utility.KnowledgeArtifactUtil.RESOURCE_TYPES;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -227,10 +228,8 @@ public class ProxyRepository implements IRepository {
         return (terminologyResourceSet.contains(type));
     }
 
-    private static final Set<String> contentResourceSet = new HashSet<>(Arrays.asList(
-            "Library", "Measure", "PlanDefinition", "StructureDefinition", "ActivityDefinition", "Questionnaire"));
 
     private boolean isContentResource(String type) {
-        return (contentResourceSet.contains(type));
+        return (RESOURCE_TYPES.contains(type));
     }
 }

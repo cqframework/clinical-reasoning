@@ -20,7 +20,6 @@ import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.CrSettings;
 import org.opencds.cqf.fhir.cr.common.DataRequirementsProcessor;
 import org.opencds.cqf.fhir.cr.common.IDataRequirementsProcessor;
-import org.opencds.cqf.fhir.cr.common.INpmRepository;
 import org.opencds.cqf.fhir.cr.common.IOperationProcessor;
 import org.opencds.cqf.fhir.cr.common.IPackageProcessor;
 import org.opencds.cqf.fhir.cr.common.PackageProcessor;
@@ -29,12 +28,14 @@ import org.opencds.cqf.fhir.cr.questionnaire.generate.GenerateProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.GenerateRequest;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.IGenerateProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.populate.IPopulateProcessor;
+import org.opencds.cqf.fhir.cr.questionnaire.populate.NpmBackedRepository;
 import org.opencds.cqf.fhir.cr.questionnaire.populate.PopulateProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.populate.PopulateRequest;
 import org.opencds.cqf.fhir.cr.questionnaire.populate.ResourceResolverWithNpmBacking;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.monad.Either3;
+import org.opencds.cqf.fhir.utility.repository.INpmRepository;
 
 @SuppressWarnings("UnstableApiUsage")
 public class QuestionnaireProcessor {
@@ -202,9 +203,7 @@ public class QuestionnaireProcessor {
     }
 
     private IRepository createProxyRepoForNpmResourceLookup() {
-//        return proxy(new ComboProxyRepo(repository.fhirContext(), npmRepository, repository),
-//            null, null);
-        return repository;
+        return new NpmBackedRepository(repository, npmRepository);
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource generateQuestionnaire(
@@ -334,7 +333,6 @@ public class QuestionnaireProcessor {
             IBaseExtension<?, ?> launchContext,
             IBaseBundle data,
             LibraryEngine libraryEngine) {
-        // TODO - edit here
         return populate(resolveQuestionnaire(questionnaire), subjectId, context, launchContext, data, libraryEngine);
     }
 

@@ -8,6 +8,7 @@ import static org.opencds.cqf.fhir.utility.adapter.IAdapterFactory.createAdapter
 import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
+import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -298,6 +299,7 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
                         .getExpansionForCanonical(v.getCanonical(), expansionParamsHash.orElse(null));
                 if (cachedExpansion != null) {
                     v.setExpansion(cachedExpansion.getExpansion());
+                    addExpansionWarningsToOperationOutcome(v);
                     expandedList.add(v.getUrl());
                     missingInCache.remove(v);
                 }
@@ -316,6 +318,7 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
                     .toList());
             try {
                 expandHelper.expandValueSet(valueSet, params, terminologyEndpoint, valueSets, expandedList, new Date());
+                addExpansionWarningsToOperationOutcome(valueSet);
                 var elapsed = String.valueOf(((new Date()).getTime() - expansionStartTime) / 1000);
                 myLogger.info("Expanded {} in {}s", url, elapsed);
                 if (expansionCache.isPresent()) {
@@ -323,15 +326,57 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
                 }
             } catch (Exception e) {
                 myLogger.warn("Failed to expand {}. Reporting in outcome manifest", url);
-                if (messages == null) {
-                    messages = OperationOutcomeUtil.createOperationOutcome(
-                            "warning", e.getMessage(), "processing", fhirContext(), null);
-                } else {
-                    OperationOutcomeUtil.addIssue(
-                            fhirContext(), messages, "warning", e.getMessage(), null, "processing");
-                }
+                addMessageIssue("warning", e.getMessage());
             }
         });
+    }
+
+    // Helper to surface expansion parameter warnings as OperationOutcome issues
+    private void addExpansionWarningsToOperationOutcome(IValueSetAdapter valueSetAdapter) {
+        if (valueSetAdapter == null || valueSetAdapter.getExpansion() == null) {
+            return;
+        }
+
+        var expansion = valueSetAdapter.getExpansion();
+        try {
+            FhirTerser terser = new FhirTerser(fhirContext());
+            var parameters = terser.getValues(expansion, "parameter");
+            if (parameters == null || parameters.isEmpty()) {
+                return;
+            }
+
+            for (var parameter : parameters) {
+                String name = terser.getSinglePrimitiveValueOrNull(parameter, "name");
+                if (!"warning".equals(name)) {
+                    continue;
+                }
+
+                String warning = terser.getSinglePrimitiveValueOrNull(parameter, "value");
+                if (StringUtils.isBlank(warning)) {
+                    continue;
+                }
+
+                addMessageIssue("warning", warning);
+            }
+        } catch (Exception e) {
+            myLogger.debug(
+                    "Unable to read expansion warning parameters for ValueSet {}: {}",
+                    valueSetAdapter.getUrl(),
+                    e.getMessage());
+        }
+    }
+
+    private void addMessageIssue(String severity, String details) {
+        if (StringUtils.isBlank(details)) {
+            return;
+        }
+
+        if (messages == null) {
+            messages =
+                    OperationOutcomeUtil.createOperationOutcome(severity, details, "processing", fhirContext(), null);
+        } else {
+            OperationOutcomeUtil.addIssue(fhirContext(), messages, severity, details, null, "processing");
+        }
     }
 
     protected void applyManifestUsageContextsToValueSets(IKnowledgeArtifactAdapter manifest, IBaseBundle bundle) {

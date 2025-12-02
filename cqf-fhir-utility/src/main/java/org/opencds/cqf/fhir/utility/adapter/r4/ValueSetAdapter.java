@@ -15,6 +15,7 @@ import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.PrimitiveType;
+import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.UsageContext;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent;
@@ -171,6 +172,25 @@ public class ValueSetAdapter extends KnowledgeArtifactAdapter implements IValueS
         var expansion = new ValueSet.ValueSetExpansionComponent(new DateTimeType(Date.from(Instant.now())));
         expansion.getContains();
         return expansion;
+    }
+
+    @Override
+    public void addExpansionStringParameter(String name, String value) {
+        getExpansion().addParameter().setName(name).setValue(new StringType(value));
+    }
+
+    @Override
+    public boolean hasExpansionStringParameter(String name, String value) {
+        if (!hasExpansion() || value == null) {
+            return false;
+        }
+
+        return getExpansion().getParameter().stream()
+                .filter(p -> name.equals(p.getName()))
+                .map(ValueSet.ValueSetExpansionParameterComponent::getValue)
+                .filter(v -> v instanceof org.hl7.fhir.instance.model.api.IPrimitiveType)
+                .map(v -> (org.hl7.fhir.instance.model.api.IPrimitiveType<?>) v)
+                .anyMatch(primitive -> value.equals(primitive.getValueAsString()));
     }
 
     @Override

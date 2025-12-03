@@ -1,6 +1,5 @@
 package org.opencds.cqf.fhir.cr.measure.dstu3;
 
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.Optional;
 import org.hl7.fhir.dstu3.model.MeasureReport;
 import org.hl7.fhir.dstu3.model.MeasureReport.MeasureReportGroupComponent;
@@ -8,12 +7,18 @@ import org.hl7.fhir.dstu3.model.MeasureReport.MeasureReportGroupPopulationCompon
 import org.hl7.fhir.dstu3.model.MeasureReport.MeasureReportGroupStratifierComponent;
 import org.hl7.fhir.dstu3.model.MeasureReport.StratifierGroupComponent;
 import org.hl7.fhir.dstu3.model.MeasureReport.StratifierGroupPopulationComponent;
-import org.opencds.cqf.fhir.cr.measure.common.BaseMeasureReportScorer;
+import org.opencds.cqf.fhir.cr.measure.common.ContinuousVariableObservationConverter;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureReportScorer;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 
-public class Dstu3MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport> {
+public class Dstu3MeasureReportScorer implements MeasureReportScorer<MeasureReport> {
+
+    @Override
+    public ContinuousVariableObservationConverter<org.hl7.fhir.dstu3.model.Quantity> getContinuousVariableConverter() {
+        return Dstu3ContinuousVariableObservationConverter.INSTANCE;
+    }
 
     @Override
     public void score(String measureUrl, MeasureDef measureDef, MeasureReport measureReport) {
@@ -27,17 +32,10 @@ public class Dstu3MeasureReportScorer extends BaseMeasureReportScorer<MeasureRep
         if (measureReport.getGroup().isEmpty()) {
             return;
         }
-        // Dstu3 doesn't have scoring on group level, extract first assigned groupDef measureScore
-        MeasureScoring measureScoring = measureDef.groups().get(0).measureScoring();
-
-        // validate scoring
-        if (measureScoring == null) {
-            throw new InvalidRequestException(
-                    "Measure: %s does not have a scoring methodology defined. Add a \"scoring\" property to the measure definition or the group definition."
-                            .formatted(measureUrl));
-        }
 
         for (MeasureReportGroupComponent mrgc : measureReport.getGroup()) {
+            // Use base class helper to get scoring type (supports multi-rate measures)
+            MeasureScoring measureScoring = getGroupMeasureScoringById(measureDef, mrgc.getId());
             scoreGroup(measureScoring, mrgc);
         }
     }

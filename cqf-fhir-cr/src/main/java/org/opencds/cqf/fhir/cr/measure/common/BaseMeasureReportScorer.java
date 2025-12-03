@@ -9,7 +9,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 // Extracted version-agnostic patterns from R4MeasureReportScorer by Claude Sonnet 4.5
-public abstract class BaseMeasureReportScorer<MeasureReportT> implements MeasureReportScorer<MeasureReportT> {
+public abstract class BaseMeasureReportScorer<MeasureReportT> implements IMeasureReportScorer<MeasureReportT> {
 
     // Version-agnostic population type constants
     protected static final String NUMERATOR = "numerator";

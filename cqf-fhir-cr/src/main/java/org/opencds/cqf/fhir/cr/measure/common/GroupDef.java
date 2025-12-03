@@ -18,6 +18,10 @@ public class GroupDef {
     private final CodeDef improvementNotation;
     private final Map<MeasurePopulationType, List<PopulationDef>> populationIndex;
 
+    // Added by Claude Sonnet 4.5 on 2025-12-03
+    // Mutable score field for version-agnostic scoring
+    private Double score;
+
     public GroupDef(
             String id,
             ConceptDef code,
@@ -144,5 +148,55 @@ public class GroupDef {
                 .findFirst()
                 .map(pop -> pop.getCount(this))
                 .orElse(0);
+    }
+
+    /**
+     * Added by Claude Sonnet 4.5 on 2025-12-03
+     * Get the computed score for this group.
+     * Used by version-agnostic MeasureDefScorer.
+     *
+     * @return the score, or null if not yet computed
+     */
+    public Double getScore() {
+        return this.score;
+    }
+
+    /**
+     * Added by Claude Sonnet 4.5 on 2025-12-03
+     * Set the computed score for this group.
+     * Used by version-agnostic MeasureDefScorer to store computed scores.
+     *
+     * @param score the computed score
+     */
+    public void setScore(Double score) {
+        this.score = score;
+    }
+
+    /**
+     * Added by Claude Sonnet 4.5 on 2025-12-03
+     * Get the measure score adjusted for improvement notation.
+     * <p>
+     * Similar to R4MeasureReportScorer#scoreGroup(Double, boolean, MeasureReportGroupComponent),
+     * this method:
+     * <ul>
+     *   <li>Returns null if score is null</li>
+     *   <li>Returns null if score is negative (invalid score scenario)</li>
+     *   <li>Returns score as-is if improvement notation is "increase"</li>
+     *   <li>Returns (1 - score) if improvement notation is "decrease"</li>
+     * </ul>
+     *
+     * @return the adjusted score, or null if score is null or negative
+     */
+    public Double getMeasureScore() {
+        // When applySetMembership=false, this value can receive strange values
+        // This should prevent scoring in certain scenarios like <0
+        if (this.score != null && this.score >= 0) {
+            if (isIncreaseImprovementNotation()) {
+                return this.score;
+            } else {
+                return 1 - this.score;
+            }
+        }
+        return null;
     }
 }

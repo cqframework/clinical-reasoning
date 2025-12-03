@@ -43,11 +43,11 @@ import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.fhir.cr.measure.common.CriteriaResult;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
+import org.opencds.cqf.fhir.cr.measure.common.IMeasureReportScorer;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureInfo;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportBuilder;
-import org.opencds.cqf.fhir.cr.measure.common.MeasureReportScorer;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.SdeDef;
@@ -64,7 +64,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
     protected static final String POPULATION_BASIS_URL =
             "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-populationBasis";
 
-    protected MeasureReportScorer<MeasureReport> measureReportScorer;
+    protected IMeasureReportScorer<MeasureReport> measureReportScorer;
 
     public Dstu3MeasureReportBuilder() {
         this.measureReportScorer = new Dstu3MeasureReportScorer();

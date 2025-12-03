@@ -43,11 +43,11 @@ import org.opencds.cqf.fhir.cr.measure.common.CodeDef;
 import org.opencds.cqf.fhir.cr.measure.common.ConceptDef;
 import org.opencds.cqf.fhir.cr.measure.common.FhirResourceUtils;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
+import org.opencds.cqf.fhir.cr.measure.common.IMeasureReportScorer;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureInfo;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportBuilder;
-import org.opencds.cqf.fhir.cr.measure.common.MeasureReportScorer;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
@@ -61,7 +61,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
     protected static final String POPULATION_SUBJECT_SET = "POPULATION_SUBJECT_SET";
 
-    private final MeasureReportScorer<MeasureReport> measureReportScorer;
+    private final IMeasureReportScorer<MeasureReport> measureReportScorer;
 
     public R4MeasureReportBuilder() {
         this.measureReportScorer = new R4MeasureReportScorer();

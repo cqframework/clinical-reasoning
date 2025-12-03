@@ -24,6 +24,9 @@ public class ResourceResolverWithNpmBacking extends ResourceResolver {
         // if not found, check the npm repository
         if (resource == null) {
             List<? extends IBaseResource> resources = npmRepository.resolveByUrl(clazz, url.getValue());
+            // we only take the first one because this method only expects
+            // a single one to be returned
+            // sorting can be implemented to have the most recent version first
             if (resources != null && !resources.isEmpty()) {
                 resource = resources.stream().findFirst().get();
             }

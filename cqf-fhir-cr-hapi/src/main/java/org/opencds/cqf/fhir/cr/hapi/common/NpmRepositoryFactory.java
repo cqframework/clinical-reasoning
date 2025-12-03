@@ -6,10 +6,16 @@ public class NpmRepositoryFactory {
 
     private INpmRepository npmRepository;
 
+    /**
+     * Fetch the INpmRepository
+     */
     public INpmRepository getNpmRepository() {
         return npmRepository;
     }
 
+    /**
+     * Register the INpmRepository
+     */
     public void register(INpmRepository npmRepository) {
         this.npmRepository = npmRepository;
     }

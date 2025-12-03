@@ -14,7 +14,6 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.jetbrains.annotations.NotNull;
 import org.opencds.cqf.fhir.utility.KnowledgeArtifactUtil;
 import org.opencds.cqf.fhir.utility.repository.INpmComboRepository;
 import org.opencds.cqf.fhir.utility.repository.INpmRepository;
@@ -51,6 +50,7 @@ public class NpmBackedRepository implements INpmComboRepository {
         throw new NotImplementedException();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public <B extends IBaseBundle, T extends IBaseResource> B search(
             Class<B> bundleType,
@@ -62,20 +62,30 @@ public class NpmBackedRepository implements INpmComboRepository {
 
         String rt = fhirContext().getResourceType(resourceType);
 
-        // if this isn't a knowledge resource type, we'll won't check the backing IG
-        // (because backing IG would only contain knowledge resources)
+        /*
+         * If this isn't a knowledge type resource (Library, StructureDefinition, SearchParameter, etc),
+         * we won't bother checking the NPM 'repository', because IGs do not contain
+         * non-knowledge type resources.
+         */
         if (!KnowledgeArtifactUtil.RESOURCE_TYPES.contains(rt)) {
             return bundle;
         }
 
-        // TODO - this is inelegant; only check the npm for the various actual questionnaire etc resources
-        // bundle.isEmpty() means nothing, so we have to check
-        // if there are actually results in it by retrieving the actual results first
+        // TODO - this is inelegant; only check the npm for the various actual
+        //  questionnaire etc resources
+        /*
+         * bundle.isEmpty() means nothing, so we have to check
+         * if there are actually results in it by retrieving
+         * the actual resource entries.
+         */
         List<IBaseResource> resources = BundleUtil.toListOfResources(fhirContext(), bundle);
-        if (resources != null && !resources.isEmpty()) {
+        if (!resources.isEmpty()) {
+            // there are resources - so we'll return this bundle
             return bundle;
         }
 
+        // no resources in db; we'll check the NPM 'repository'
+        // without a URL (because we don't have one)
         List<T> allTypes = npmRepository.resolveByUrl(resourceType, null);
 
         BundleBuilder bundleBuilder = new BundleBuilder(fhirContext());
@@ -88,12 +98,12 @@ public class NpmBackedRepository implements INpmComboRepository {
     }
 
     @Override
-    public @NotNull FhirContext fhirContext() {
+    public @Nonnull FhirContext fhirContext() {
         return repository.fhirContext();
     }
 
     @Override
-    public <T extends IBaseResource> List<T> resolveByUrl(Class<T> clazz, String url) {
+    public <T extends IBaseResource> List<T> resolveByUrl(@Nonnull Class<T> clazz, String url) {
         return npmRepository.resolveByUrl(clazz, url);
     }
 }

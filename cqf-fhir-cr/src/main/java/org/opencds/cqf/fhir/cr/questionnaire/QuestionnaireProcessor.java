@@ -53,6 +53,9 @@ public class QuestionnaireProcessor {
     protected IPopulateProcessor populateProcessor;
     protected INpmRepository npmRepository;
 
+    /**
+     * Builder for parameters for creating a QuestionnaireProcessor
+     */
     public static class Builder {
         private final IRepository repository;
 

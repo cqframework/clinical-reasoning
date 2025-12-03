@@ -18,6 +18,22 @@
 * Figure out the Base64 content vs Path and initialize the CQL content with a ByteArrayInputStream, figuring out all the FHIR version specific machinery up front
 * Do we need a wrapper interface for FHIR resources and data that are involved in data providers, just as some sort of marker?
 
+# JP
+
+* NPM should return FHIR resources, not "Defs"
+* Should return un-validated resources
+* NPM interface should reflect this, common with IRepository
+* These APIs are at the boundary of our "protected world"
+* As close as possible to that boundary point, do the validation and "sanitize" the resources
+* Have everywhere that uses IAdapter, parse into "Defs" immediately
+  * So use IAdapter but confine its use to conversion
+* Do we need a MeasureReportDef, that then gets converted to R4 MeasureReport at the last minute?
+* Convert to a version of FHIR, like R6, and then use *existing* FHIR core code to convert to a specific version, such as R4
+* As an alternative, convert to Measure R6, then pass that around instead of MeasureDef
+* In the event of an R7, we just change the imports and tweak the logic a little bit
+* Add another line of conditional logic for the back versions we support
+* Need to define the incremental steps
+
 # MeasureDef
 
 * id
@@ -31,6 +47,11 @@
   * etc...
 * sdes
 * errors
+
+## Non-requirements
+
+* Any data points exclusively used by MeasureReport builders
+* Any data points specific to any FHIR version
  
 ## Thoughts
 
@@ -40,9 +61,15 @@
   * Library CQL content
 
 
+# Performance
+
+* Do we care about cutting down the number of SQL or other queries to get back libraries?
+* Do we want to consider some type of caching mechanism, such as all the measure library CQL inputstreams, and some kind wrapper on top of IRepository or other data retrieval API?
+
 # Etc...
 
-* Talk to Brenin
+* Other FHIR resources, used outside of measure evaluation, are used by clinical-reasoning and DQM
+* Talk to Brenin for more details
 
 # Integration Points
 
@@ -66,6 +93,8 @@
       * Get the byte[] from the attachment adapter
       * Get a ByteArrayInputStream
   * Model Info
+* Brenin domain
+  * IAdapter/etc
 
 # NPM?
 
@@ -75,3 +104,5 @@
 # IDefRepo (need better name)
 
 * Top-level interface for all defs (IDef.java)
+* At a minimum, use this as a marker for APIs
+  * ex:  <T extends IDef.class> T read(Class<T> defClass, IidType (or something))

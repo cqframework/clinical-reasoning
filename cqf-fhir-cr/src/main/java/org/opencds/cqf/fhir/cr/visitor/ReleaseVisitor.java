@@ -398,8 +398,10 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
                 if (!artifactAdapter.getUrl().equals(rootAdapter.getUrl())) {
                     // Safety net: warn if resolved dependency is not a canonical URL
                     if (dependencyAdapter != null && Canonicals.getUrl(dependency.getReference()) == null) {
-                        logger.warn("Resolved dependency reference does not appear to be a canonical URL (url or url|version): '{}', artifact URL: '{}'",
-                                dependency.getReference(), artifactAdapter.getUrl());
+                        logger.warn(
+                                "Resolved dependency reference does not appear to be a canonical URL (url or url|version): '{}', artifact URL: '{}'",
+                                dependency.getReference(),
+                                artifactAdapter.getUrl());
                     }
                     var newDep = IKnowledgeArtifactAdapter.newRelatedArtifact(
                             fhirVersion(),

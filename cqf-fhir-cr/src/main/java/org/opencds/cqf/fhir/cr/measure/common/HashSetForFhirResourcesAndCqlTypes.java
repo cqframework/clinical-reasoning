@@ -233,7 +233,7 @@ public class HashSetForFhirResourcesAndCqlTypes<T> extends HashSet<T> {
         }
 
         // We're relying on all CqlTypes to implement equal() properly
-        // Not this is equal(), not Object.equals()
-        return cqlDate1.equal(cqlDate2);
+        // Note this is equal(), not Object.equals()
+        return Boolean.TRUE.equals(cqlDate1.equal(cqlDate2));
     }
 }

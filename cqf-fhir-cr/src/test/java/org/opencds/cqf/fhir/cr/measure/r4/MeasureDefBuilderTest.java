@@ -33,7 +33,6 @@ import org.hl7.fhir.r4.model.Measure.MeasureGroupStratifierComponent;
 import org.hl7.fhir.r4.model.Measure.MeasureGroupStratifierComponentComponent;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 import org.opencds.cqf.fhir.cr.measure.common.CodeDef;
@@ -339,23 +338,38 @@ class MeasureDefBuilderTest {
         }
     }
 
-    private static Stream<Arguments> scoringMeasureScoringAndGroupParams() {
-        return Stream.of(
-                Arguments.of("cohort", "ratio", "proportion", MeasureScoring.RATIO, MeasureScoring.PROPORTION),
-                Arguments.of("cohort", null, null, MeasureScoring.COHORT, MeasureScoring.COHORT),
-                Arguments.of(null, "ratio", "proportion", MeasureScoring.RATIO, MeasureScoring.PROPORTION));
-    }
-
-    @ParameterizedTest
-    @MethodSource("scoringMeasureScoringAndGroupParams")
-    void scoringMeasureScoringAndGroup(
+    private record ScoringMeasureScoringAndGroupParams(
             String measureScoring,
             @Nullable String group1Scoring,
             @Nullable String group2Scoring,
             MeasureScoring expectedGroup1MeasureScoring,
-            MeasureScoring expectedGroup2MeasureScoring) {
+            MeasureScoring expectedGroup2MeasureScoring) {}
+
+    private static Stream<ScoringMeasureScoringAndGroupParams> scoringMeasureScoringAndGroupParams() {
+        return Stream.of(
+                new ScoringMeasureScoringAndGroupParams(
+                        "cohort", "ratio", "proportion", MeasureScoring.RATIO, MeasureScoring.PROPORTION),
+                new ScoringMeasureScoringAndGroupParams(
+                        "cohort", null, null, MeasureScoring.COHORT, MeasureScoring.COHORT),
+                new ScoringMeasureScoringAndGroupParams(
+                        null, "ratio", "proportion", MeasureScoring.RATIO, MeasureScoring.PROPORTION));
+    }
+
+    @ParameterizedTest(name = "{index} => testCase={0}")
+    @MethodSource("scoringMeasureScoringAndGroupParams")
+    void scoringMeasureScoringAndGroup(ScoringMeasureScoringAndGroupParams testCase) {
         var def = measureDefBuilder(
-                null, group1Scoring, null, null, null, group2Scoring, null, null, "boolean", measureScoring, decrease);
+                null,
+                testCase.group1Scoring(),
+                null,
+                null,
+                null,
+                testCase.group2Scoring(),
+                null,
+                null,
+                "boolean",
+                testCase.measureScoring(),
+                decrease);
 
         validateMeasureDef(
                 def,
@@ -363,13 +377,13 @@ class MeasureDefBuilderTest {
                 "boolean",
                 false,
                 "decrease",
-                expectedGroup1MeasureScoring,
+                testCase.expectedGroup1MeasureScoring(),
                 null,
                 true,
                 "boolean",
                 false,
                 "decrease",
-                expectedGroup2MeasureScoring,
+                testCase.expectedGroup2MeasureScoring(),
                 null);
     }
 
@@ -484,41 +498,43 @@ class MeasureDefBuilderTest {
         }
     }
 
-    public static Stream<Arguments> basicStratifiersParams() {
+    private record BasicStratifiersParams(
+            List<MeasureGroupStratifierComponent> inputStratifiersGroup1,
+            List<MeasureGroupStratifierComponent> inputStratifiersGroup2,
+            List<StratifierDef> outputStratifiersGroup1,
+            List<StratifierDef> outputStratifiersGroup2) {}
+
+    public static Stream<BasicStratifiersParams> basicStratifiersParams() {
         return Stream.of(
-                Arguments.of(
+                new BasicStratifiersParams(
                         buildInputStratifiers(),
                         buildInputStratifiers(),
                         buildOutputStratifiers(),
                         buildOutputStratifiers()),
-                Arguments.of(
+                new BasicStratifiersParams(
                         buildInputStratifiers(1),
                         buildInputStratifiers(2),
                         buildOutputStratifiers(1),
                         buildOutputStratifiers(2)),
-                Arguments.of(
+                new BasicStratifiersParams(
                         buildInputStratifiers("InitialPopulation"),
                         buildInputStratifiers("Denominator"),
                         buildOutputStratifiers("InitialPopulation"),
                         buildOutputStratifiers("Denominator")));
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{index} => testCase={0}")
     @MethodSource("basicStratifiersParams")
-    void basicStratifiers(
-            List<MeasureGroupStratifierComponent> inputStratifiersGroup1,
-            List<MeasureGroupStratifierComponent> inputStratifiersGroup2,
-            List<StratifierDef> outputStratifiersGroup1,
-            List<StratifierDef> outputStratifiersGroup2) {
+    void basicStratifiers(BasicStratifiersParams testCase) {
         var def = measureDefBuilder(
                 null,
                 "ratio",
                 null,
-                inputStratifiersGroup1,
+                testCase.inputStratifiersGroup1(),
                 null,
                 "proportion",
                 null,
-                inputStratifiersGroup2,
+                testCase.inputStratifiersGroup2(),
                 "boolean",
                 null,
                 null);
@@ -530,13 +546,13 @@ class MeasureDefBuilderTest {
                 false,
                 "increase",
                 MeasureScoring.RATIO,
-                outputStratifiersGroup1,
+                testCase.outputStratifiersGroup1(),
                 true,
                 "boolean",
                 false,
                 "increase",
                 MeasureScoring.PROPORTION,
-                outputStratifiersGroup2);
+                testCase.outputStratifiersGroup2());
     }
 
     private static List<MeasureGroupStratifierComponent> buildInputStratifiers(String... expressions) {

@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.annotation.Nonnull;
@@ -31,16 +32,21 @@ public class MeasureEvaluationResultHandler {
     }
 
     /**
-     * Method that consumes pre-generated CQL results into Measure defined fields that reference associated CQL expressions
-     * This is meant to be called by CQL CLI.
+     * Method that consumes pre-generated CQL results into Measure defined fields that reference
+     * associated CQL expressions This is meant to be called by CQL CLI.
      *
-     * @param evalResultsPerSubject criteria expression evalResultsPerSubject
-     * @param measureDef Measure defined objects
-     * @param measureEvalType the type of evaluation algorithm to apply to Criteria results
-     * @param applyScoring whether Measure Evaluator will apply set membership per measure scoring algorithm
-     * @param populationBasisValidator the validator class to use for checking consistency of results
+     * @param fhirContext              FHIR context for FHIR version
+     * @param evalResultsPerSubject    criteria expression evalResultsPerSubject
+     * @param measureDef               Measure defined objects
+     * @param measureEvalType          the type of evaluation algorithm to apply to Criteria
+     *                                 results
+     * @param applyScoring             whether Measure Evaluator will apply set membership per
+     *                                 measure scoring algorithm
+     * @param populationBasisValidator the validator class to use for checking consistency of
+     *                                 results
      */
     public static void processResults(
+            FhirContext fhirContext,
             Map<String, EvaluationResult> evalResultsPerSubject,
             MeasureDef measureDef,
             @Nonnull MeasureEvalType measureEvalType,
@@ -69,7 +75,7 @@ public class MeasureEvaluationResultHandler {
             }
         }
 
-        evaluator.postEvaluation(measureDef);
+        MeasureMultiSubjectEvaluator.postEvaluationMultiSubject(fhirContext, measureDef);
     }
 
     /**

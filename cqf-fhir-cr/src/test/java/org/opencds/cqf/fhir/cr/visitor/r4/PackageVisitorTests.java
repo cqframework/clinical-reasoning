@@ -24,7 +24,9 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import jakarta.annotation.Nullable;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -792,6 +794,119 @@ class PackageVisitorTests {
         }
     }
 
+    @Test
+    void packageOperation_normalizes_ids_from_canonical_tail_and_version() {
+        // Arrange
+        Bundle bundle = (Bundle) jsonParser.parseResource(
+                PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
+        repo.transaction(bundle);
+        PackageVisitor packageVisitor = new PackageVisitor(repo);
+        Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
+                .copy();
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+
+        // Act
+        Parameters params = parameters();
+        Bundle packaged = (Bundle) libraryAdapter.accept(packageVisitor, params);
+
+        // Assert: manifest Library id should be normalized to tail-version
+        assertNotNull(packaged);
+        assertTrue(packaged.hasEntry());
+        var manifest = (Library) packaged.getEntryFirstRep().getResource();
+        var manifestUrl = manifest.getUrl();
+        var manifestVersion = manifest.getVersion();
+        var tail = manifestUrl.substring(manifestUrl.lastIndexOf('/') + 1);
+        assertEquals(tail + "-" + manifestVersion, manifest.getIdElement().getIdPart());
+
+        // Assert: a known ValueSet also has its id normalized to tail-version
+        var dxtcValueSet = packaged.getEntry().stream()
+                .map(BundleEntryComponent::getResource)
+                .filter(r -> r instanceof ValueSet)
+                .map(ValueSet.class::cast)
+                .filter(vs -> "http://ersd.aimsplatform.org/fhir/ValueSet/dxtc".equals(vs.getUrl()))
+                .findFirst()
+                .orElse(null);
+
+        assertNotNull(dxtcValueSet, "Expected ValueSet dxtc to be present in packaged bundle");
+        assertEquals("dxtc-2022-11-19", dxtcValueSet.getIdElement().getIdPart());
+    }
+
+    @Test
+    void packageOperation_normalizes_ids_with_encoded_canonical_when_version_not_id_safe() {
+        // Arrange: create a Library with a version that contains a character not allowed in FHIR ids,
+        // and a short canonical URL so the encoded form fits under the FHIR id length limit.
+        PackageVisitor packageVisitor = new PackageVisitor(repo);
+        Library lib = new Library();
+        lib.setUrl("http://x/L/W");
+        lib.setVersion("1.0.0#1"); // '#' is not allowed in FHIR id values
+        lib.setId("server-assigned-id");
+
+        // Use a copy via the adapter as the manifest artifact
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(lib.copy());
+
+        // Act
+        Parameters params = parameters();
+        Bundle packaged = (Bundle) libraryAdapter.accept(packageVisitor, params);
+
+        // Assert
+        assertNotNull(packaged);
+        assertTrue(packaged.hasEntry());
+        var manifest = (Library) packaged.getEntryFirstRep().getResource();
+        String id = manifest.getIdElement().getIdPart();
+
+        // Because the version is not FHIR-id-safe but the identity string is short,
+        // we expect the encoded canonical form with cv- prefix.
+        assertTrue(id.startsWith("cv-"), "Expected encoded canonical id prefix cv- for non-id-safe version");
+        assertTrue(id.length() <= 64, "FHIR id must not exceed 64 characters");
+        assertTrue(id.substring(3).matches("[A-Za-z0-9\\-.]+"), "Encoded id should only use FHIR id-safe characters");
+
+        // Decode the cv-encoded id back to the original canonical|version identity string
+        String decodedIdentity = decodeCanonicalFromCvId(id);
+        assertEquals(
+                lib.getUrl() + "|" + lib.getVersion(),
+                decodedIdentity,
+                "Decoded cv-encoded id should round-trip to canonical|version");
+    }
+
+    @Test
+    void packageOperation_retains_existing_id_and_adds_warning_when_canonical_cannot_be_normalized() {
+        // Arrange: create a Library with a long canonical and a non-id-safe version so that the
+        // canonical|version cannot be represented non-lossily within FHIR id constraints.
+        PackageVisitor packageVisitor = new PackageVisitor(repo);
+        Library lib = new Library();
+        lib.setUrl("http://example.org/fhir/Library/" + "VeryLongWeirdName".repeat(5));
+        lib.setVersion("1.0.0#1"); // non-id-safe due to '#'
+        lib.setId("server-assigned-id");
+
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(lib.copy());
+
+        // Act
+        Parameters params = parameters();
+        Bundle packaged = (Bundle) libraryAdapter.accept(packageVisitor, params);
+
+        // Assert: the manifest Library should retain the existing server-assigned id
+        assertNotNull(packaged);
+        assertTrue(packaged.hasEntry());
+        var manifest = (Library) packaged.getEntryFirstRep().getResource();
+        String id = manifest.getIdElement().getIdPart();
+        assertEquals(
+                "server-assigned-id",
+                id,
+                "Expected manifest Library to retain existing id when canonical cannot be normalized non-lossily");
+
+        // And the manifest artifact should have a cqf-messages extension with a warning recorded
+        assertTrue(
+                libraryAdapter.hasExtension(ILibraryAdapter.CQF_MESSAGES_EXT_URL),
+                "Expected manifest adapter to have cqf-messages extension when id normalization fails");
+        assertTrue(
+                libraryAdapter.hasContained(),
+                "Expected manifest adapter to contain an OperationOutcome warning when id normalization fails");
+        var oo = (OperationOutcome) libraryAdapter.getContained().get(0);
+        assertTrue(
+                oo.getIssueFirstRep().getDiagnostics().contains("could not be normalized from canonical"),
+                "Expected warning OperationOutcome to describe failed canonical-based id normalization");
+    }
+
     private IEndpointAdapter createEndpoint(String authoritativeSource) {
         var factory = IAdapterFactory.forFhirVersion(FhirVersionEnum.R4);
         var endpoint = factory.createEndpoint(new org.hl7.fhir.r4.model.Endpoint());
@@ -933,5 +1048,23 @@ class PackageVisitorTests {
         verify(vsAdapterMock, times(0)).addUseContext(any());
 
         staticBundleHelper.close();
+    }
+
+    /**
+     * Decode a cv-encoded canonical id back into the original canonical|version identity string.
+     * This reverses the mapping performed in PackageVisitor.encodeToIdSafeBase64:
+     *   - replace '-' with '+' and '.' with '/'
+     *   - restore Base64 padding
+     *   - Base64-decode to a UTF-8 string
+     */
+    private static String decodeCanonicalFromCvId(String id) {
+        String body = id.substring(3); // strip "cv-"
+        String base64 = body.replace('-', '+').replace('.', '/');
+        int mod = base64.length() % 4;
+        if (mod != 0) {
+            base64 = base64 + "====".substring(mod);
+        }
+        byte[] bytes = Base64.getDecoder().decode(base64);
+        return new String(bytes, StandardCharsets.UTF_8);
     }
 }

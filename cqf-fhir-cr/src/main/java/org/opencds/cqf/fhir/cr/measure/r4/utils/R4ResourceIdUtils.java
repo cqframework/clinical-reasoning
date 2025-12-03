@@ -1,7 +1,7 @@
 package org.opencds.cqf.fhir.cr.measure.r4.utils;
 
+import jakarta.annotation.Nonnull;
 import java.util.regex.Pattern;
-import javax.annotation.Nonnull;
 import org.hl7.fhir.r4.model.ResourceType;
 
 /**
@@ -12,11 +12,6 @@ public class R4ResourceIdUtils {
 
     private R4ResourceIdUtils() {
         // Static utility class
-    }
-
-    @Nonnull
-    public static String addPatientQualifier(String t) {
-        return ResourceType.Patient.toString().concat("/").concat(t);
     }
 
     @Nonnull

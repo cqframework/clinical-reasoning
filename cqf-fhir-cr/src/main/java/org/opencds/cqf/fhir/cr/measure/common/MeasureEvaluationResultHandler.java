@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.Optional;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.elm.r1.VersionedIdentifier;
-import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.EvaluationResultsForMultiLib;
@@ -85,16 +84,13 @@ public class MeasureEvaluationResultHandler {
      * @param zonedMeasurementPeriod offset defined measurement period for evaluation
      * @param context cql engine context
      * @param multiLibraryIdMeasureEngineDetails container for engine, library and measure IDs
-     * @param continuousVariableObservationConverter used for continuous variable scoring FHIR version
-     *                                               specific
      * @return CQL results for Library defined in the Measure resource
      */
-    public static <T extends ICompositeType> CompositeEvaluationResultsPerMeasure getEvaluationResults(
+    public static CompositeEvaluationResultsPerMeasure getEvaluationResults(
             List<String> subjectIds,
             ZonedDateTime zonedMeasurementPeriod,
             CqlEngine context,
-            MultiLibraryIdMeasureEngineDetails multiLibraryIdMeasureEngineDetails,
-            ContinuousVariableObservationConverter<T> continuousVariableObservationConverter) {
+            MultiLibraryIdMeasureEngineDetails multiLibraryIdMeasureEngineDetails) {
 
         // measure -> subject -> results
         var resultsBuilder = CompositeEvaluationResultsPerMeasure.builder();
@@ -141,8 +137,7 @@ public class MeasureEvaluationResultHandler {
                                     measureDefs,
                                     libraryVersionedIdentifier,
                                     evaluationResult,
-                                    subjectTypePart,
-                                    continuousVariableObservationConverter);
+                                    subjectTypePart);
 
                     resultsBuilder.addResults(measureDefs, subjectId, evaluationResult, measureObservationResults);
 

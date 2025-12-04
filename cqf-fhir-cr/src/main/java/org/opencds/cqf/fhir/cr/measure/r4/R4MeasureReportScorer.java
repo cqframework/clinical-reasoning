@@ -588,6 +588,8 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
             return 0;
         }
 
+        // TODO:  LD:  we need to make this matching more sophisticated, since we could have two
+        // MeasureObservations in the result, one for numerator, and one for denominator
         PopulationDef populationDef = groupDef.getSingle(populationType);
         return stratumDef.getPopulationCount(populationDef);
     }

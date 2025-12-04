@@ -170,4 +170,20 @@ public class PopulationDef {
             return getAllSubjectResources().size();
         }
     }
+
+    @Override
+    public String toString() {
+        String codeText = (code != null && code.text() != null) ? code.text() : "null";
+        String criteriaRef = (criteriaReference != null) ? criteriaReference : "null";
+        String aggMethod = (aggregateMethod != null) ? aggregateMethod.toString() : "null";
+
+        return "PopulationDef{"
+                + "id='" + id + '\''
+                + ", code.text='" + codeText + '\''
+                + ", type=" + measurePopulationType
+                + ", expression='" + expression + '\''
+                + ", criteriaReference='" + criteriaRef + '\''
+                + ", aggregateMethod=" + aggMethod
+                + '}';
+    }
 }

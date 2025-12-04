@@ -123,6 +123,12 @@ public class MeasureDefScorer {
         switch (measureScoring) {
             case PROPORTION:
             case RATIO:
+                // Special case: RATIO with separate numerator/denominator observations
+                if (measureScoring == MeasureScoring.RATIO
+                        && groupDef.hasPopulationType(MeasurePopulationType.MEASUREOBSERVATION)) {
+                    return scoreRatioMeasureObservationGroup(measureUrl, groupDef);
+                }
+
                 // Standard proportion/ratio scoring: (n - nx) / (d - dx - de)
                 int numerator = groupDef.getPopulationCount(MeasurePopulationType.NUMERATOR);
                 int numeratorExclusion = groupDef.getPopulationCount(MeasurePopulationType.NUMERATOREXCLUSION);
@@ -136,7 +142,7 @@ public class MeasureDefScorer {
             case CONTINUOUSVARIABLE:
                 // Continuous variable scoring - returns aggregate value
                 PopulationDef measureObsPop = groupDef.getSingle(MeasurePopulationType.MEASUREOBSERVATION);
-                QuantityDef quantityDef = scoreContinuousVariable(measureUrl, groupDef, measureObsPop);
+                QuantityDef quantityDef = scoreContinuousVariable(measureUrl, measureObsPop);
                 return quantityDef != null ? quantityDef.value() : null;
 
             default:
@@ -145,11 +151,59 @@ public class MeasureDefScorer {
     }
 
     /**
+     * Score a group for RATIO measures with MEASUREOBSERVATION populations.
+     * Handles continuous variable ratio scoring where numerator and denominator have separate observations.
+     *
+     * @param measureUrl the measure URL for error reporting
+     * @param groupDef the group definition
+     * @return the calculated score or null
+     */
+    @Nullable
+    private Double scoreRatioMeasureObservationGroup(String measureUrl, GroupDef groupDef) {
+        // Get all MEASUREOBSERVATION populations
+        var measureObservationPopulationDefs = groupDef.getPopulationDefs(MeasurePopulationType.MEASUREOBSERVATION);
+
+        // Find Measure Observations for Numerator and Denominator
+        PopulationDef numPopDef =
+                findPopulationDef(groupDef, measureObservationPopulationDefs, MeasurePopulationType.NUMERATOR);
+        PopulationDef denPopDef =
+                findPopulationDef(groupDef, measureObservationPopulationDefs, MeasurePopulationType.DENOMINATOR);
+
+        if (numPopDef == null || denPopDef == null) {
+            return null;
+        }
+
+        // Calculate aggregate quantities for numerator and denominator
+        QuantityDef numeratorAgg = calculateContinuousVariableAggregateQuantity(
+                measureUrl, numPopDef, PopulationDef::getAllSubjectResources);
+        QuantityDef denominatorAgg = calculateContinuousVariableAggregateQuantity(
+                measureUrl, denPopDef, PopulationDef::getAllSubjectResources);
+
+        if (numeratorAgg == null || denominatorAgg == null) {
+            return null;
+        }
+
+        Double num = numeratorAgg.value();
+        Double den = denominatorAgg.value();
+
+        if (den == null || den == 0.0) {
+            return null;
+        }
+
+        if (num == null || num == 0.0) {
+            // Explicitly handle numerator zero with positive denominator
+            return den > 0.0 ? 0.0 : null;
+        }
+
+        return num / den;
+    }
+
+    /**
      * Score continuous variable measure - returns QuantityDef with aggregated value.
      * Simplified version of R4MeasureReportScorer#scoreContinuousVariable that just
      * returns the aggregate without setting it on a FHIR report.
      */
-    private QuantityDef scoreContinuousVariable(String measureUrl, GroupDef groupDef, PopulationDef populationDef) {
+    private QuantityDef scoreContinuousVariable(String measureUrl, PopulationDef populationDef) {
         return calculateContinuousVariableAggregateQuantity(
                 measureUrl, populationDef, PopulationDef::getAllSubjectResources);
     }
@@ -240,18 +294,20 @@ public class MeasureDefScorer {
         }
 
         // Get all MEASUREOBSERVATION populations
-        var populationDefs = getMeasureObservations(groupDef);
+        var measureObservationPopulationDefs = groupDef.getPopulationDefs(MeasurePopulationType.MEASUREOBSERVATION);
 
         // Find Measure Observations for Numerator and Denominator
-        PopulationDef numPopDef = findPopulationDef(groupDef, populationDefs, MeasurePopulationType.NUMERATOR);
-        PopulationDef denPopDef = findPopulationDef(groupDef, populationDefs, MeasurePopulationType.DENOMINATOR);
+        PopulationDef numPopDef =
+                findPopulationDef(groupDef, measureObservationPopulationDefs, MeasurePopulationType.NUMERATOR);
+        PopulationDef denPopDef =
+                findPopulationDef(groupDef, measureObservationPopulationDefs, MeasurePopulationType.DENOMINATOR);
 
         // Get stratum populations for numerator and denominator
         StratumPopulationDef stratumPopulationDefNum = getStratumPopDefFromPopDef(stratumDef, numPopDef);
         StratumPopulationDef stratumPopulationDefDen = getStratumPopDefFromPopDef(stratumDef, denPopDef);
 
         return scoreRatioContVariableStratum(
-                measureUrl, groupDef, stratumPopulationDefNum, stratumPopulationDefDen, numPopDef, denPopDef);
+                measureUrl, stratumPopulationDefNum, stratumPopulationDefDen, numPopDef, denPopDef);
     }
 
     /**
@@ -311,7 +367,6 @@ public class MeasureDefScorer {
      * Copied from R4MeasureReportScorer#scoreRatioContVariableStratum.
      *
      * @param measureUrl the measure URL for error reporting
-     * @param groupDef the group definition
      * @param measureObsNumStratum stratum population for numerator measure observation
      * @param measureObsDenStratum stratum population for denominator measure observation
      * @param numPopDef numerator population definition
@@ -320,7 +375,6 @@ public class MeasureDefScorer {
      */
     private Double scoreRatioContVariableStratum(
             String measureUrl,
-            GroupDef groupDef,
             StratumPopulationDef measureObsNumStratum,
             StratumPopulationDef measureObsDenStratum,
             PopulationDef numPopDef,
@@ -354,19 +408,6 @@ public class MeasureDefScorer {
     }
 
     /**
-     * Get all MEASUREOBSERVATION populations from a group.
-     * Copied from BaseMeasureReportScorer - version-agnostic helper.
-     *
-     * @param groupDef the group definition
-     * @return list of MEASUREOBSERVATION PopulationDef
-     */
-    private List<PopulationDef> getMeasureObservations(GroupDef groupDef) {
-        return groupDef.populations().stream()
-                .filter(t -> t.type().equals(MeasurePopulationType.MEASUREOBSERVATION))
-                .toList();
-    }
-
-    /**
      * Find PopulationDef by matching criteria reference.
      * Copied from BaseMeasureReportScorer - version-agnostic helper.
      *
@@ -378,12 +419,12 @@ public class MeasureDefScorer {
     @Nullable
     private PopulationDef findPopulationDef(
             GroupDef groupDef, List<PopulationDef> populationDefs, MeasurePopulationType type) {
-        var groupPops = groupDef.get(type);
-        if (groupPops == null || groupPops.isEmpty() || groupPops.get(0).id() == null) {
+        PopulationDef firstPop = groupDef.getFirstWithId(type);
+        if (firstPop == null) {
             return null;
         }
 
-        String criteriaId = groupPops.get(0).id();
+        String criteriaId = firstPop.id();
 
         return populationDefs.stream()
                 .filter(p -> criteriaId.equals(p.getCriteriaReference()))
@@ -393,7 +434,7 @@ public class MeasureDefScorer {
 
     /**
      * Extract StratumPopulationDef from StratumDef that matches a PopulationDef.
-     * Copied from BaseMeasureReportScorer - version-agnostic helper.
+     * Uses direct PopulationDef reference instead of ID matching.
      *
      * @param stratumDef the stratum definition
      * @param populationDef the population definition to match
@@ -405,14 +446,15 @@ public class MeasureDefScorer {
             return null;
         }
         return stratumDef.stratumPopulations().stream()
-                .filter(t -> t.id().equals(populationDef.id()))
+                .filter(t -> t.populationDef() == populationDef)
                 .findFirst()
                 .orElse(null);
     }
 
     /**
      * Get results filtered for a specific stratum.
-     * Copied from BaseMeasureReportScorer - extracts resources belonging to stratum subjects.
+     * Filters at the subject level (Map.Entry key) rather than observation Map keys.
+     * Aligned with BaseMeasureReportScorer pattern for correct stratification.
      *
      * @param populationDef the population definition (MEASUREOBSERVATION)
      * @param stratumPopulationDef the stratum population to filter by
@@ -425,20 +467,14 @@ public class MeasureDefScorer {
             return List.of();
         }
 
-        // Get all subject resources from the population
-        Collection<Object> allResources = populationDef.getAllSubjectResources();
-
         // Filter to only resources that belong to subjects in this stratum
         Set<String> stratumSubjects = stratumPopulationDef.subjectsQualifiedOrUnqualified();
 
-        return allResources.stream()
-                .filter(resource -> {
-                    if (resource instanceof Map<?, ?> map) {
-                        // Check if any key in the map belongs to a stratum subject
-                        return map.keySet().stream().anyMatch(key -> stratumSubjects.contains(String.valueOf(key)));
-                    }
-                    return false;
-                })
+        // Filter at the subjectResources Map.Entry level (subject ID is the key)
+        return populationDef.getSubjectResources().entrySet().stream()
+                .filter(entry -> stratumSubjects.contains(entry.getKey()))
+                .map(Map.Entry::getValue)
+                .flatMap(Collection::stream)
                 .collect(Collectors.toList());
     }
 

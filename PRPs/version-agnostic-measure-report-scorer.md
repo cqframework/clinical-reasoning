@@ -1545,4 +1545,385 @@ All requirements clarified, design decisions finalized, and implementation appro
 
 ---
 
+---
+
+## Implementation Outcomes and Lessons Learned
+
+### Overview
+
+This section documents the actual implementation outcomes from Phase 1 (test coverage enhancement) which revealed important gaps and bugs that needed to be addressed. The implementation was completed on 2025-12-04 with all tests passing.
+
+### Test Coverage Completed (4/4 Tests) ✅
+
+All four planned tests were successfully implemented:
+
+1. ✅ **Test 1**: `testScoreGroup_RatioWithObservations_GroupLevel` - Ratio with observations at group level
+2. ✅ **Test 2**: `testScoreStratifier_RatioWithObservations_StratumLevel` - Ratio with observations at stratum level
+3. ✅ **Test 3**: `testScoreGroup_CohortMeasure_NoScoreSet` - Cohort measures return null score
+4. ✅ **Test 4**: `testScoreGroup_MissingScoringType_ThrowsException` - Missing scoring type validation
+
+**Total Test Count**: 20 tests (16 existing + 4 new) - All passing ✅
+**Module-wide Test Results**: 954 tests run, 0 failures, 0 errors, 13 skipped
+
+### Implementation Gaps Discovered
+
+#### 1. Missing Group-Level Ratio with Observations Implementation
+
+**File**: `MeasureDefScorer.java:153-199`
+
+Test 1 revealed that the group-level ratio with MEASUREOBSERVATION populations logic was completely missing. This required implementing a new method `scoreRatioMeasureObservationGroup()`:
+
+**Key Logic**:
+- Find MEASUREOBSERVATION populations linked to numerator and denominator via `criteriaReference`
+- Calculate aggregate quantities for each using the configured aggregation method
+- Return the ratio of numerator aggregate to denominator aggregate
+- Handle edge cases: null aggregates, zero denominator
+
+**Implementation Pattern**:
+```java
+@Nullable
+private Double scoreRatioMeasureObservationGroup(String measureUrl, GroupDef groupDef) {
+    // Get all MEASUREOBSERVATION populations
+    var measureObservationPopulationDefs = groupDef.getPopulationDefs(MeasurePopulationType.MEASUREOBSERVATION);
+
+    // Find Measure Observations for Numerator and Denominator
+    PopulationDef numPopDef = findPopulationDef(groupDef, measureObservationPopulationDefs, MeasurePopulationType.NUMERATOR);
+    PopulationDef denPopDef = findPopulationDef(groupDef, measureObservationPopulationDefs, MeasurePopulationType.DENOMINATOR);
+
+    // Calculate aggregates and return ratio
+}
+```
+
+#### 2. Critical Stratum Filtering Bug
+
+**File**: `MeasureDefScorer.java:465-490`
+
+Test 2 revealed a critical bug in `getResultsForStratum()` that was filtering at the wrong level.
+
+**Original Implementation** (INCORRECT):
+```java
+return allResources.stream()
+    .filter(resource -> {
+        if (resource instanceof Map<?, ?> map) {
+            // WRONG: Checking observation Map keys instead of subject IDs
+            return map.keySet().stream()
+                .anyMatch(key -> stratumSubjects.contains(String.valueOf(key)));
+        }
+        return false;
+    })
+    .collect(Collectors.toList());
+```
+
+**Fixed Implementation**:
+```java
+// Filter at the subjectResources Map.Entry level (subject ID is the key)
+return populationDef.getSubjectResources().entrySet().stream()
+    .filter(entry -> stratumSubjects.contains(entry.getKey()))
+    .map(Map.Entry::getValue)
+    .flatMap(Collection::stream)
+    .collect(Collectors.toList());
+```
+
+**Root Cause**: The data structure for MEASUREOBSERVATION populations is:
+- Outer Map: `Map<String, Set<Object>> subjectResources` where key = subject ID (e.g., "p1")
+- Inner Set: Contains observation Maps with observation IDs as keys (e.g., "obs-num-1")
+
+The fix filters at the **outer Map.Entry level** (subject ID) instead of the **inner observation Map keys**.
+
+### Data Structure Insights
+
+#### PopulationDef.subjectResources Structure
+
+Understanding this data structure was critical to fixing Test 2:
+
+```java
+Map<String, Set<Object>> subjectResources
+```
+
+Where:
+- **Outer Map key**: Subject ID (e.g., "p1", "p2", "p3")
+- **Outer Map value**: Set of observation objects
+- **Each observation object**: `Map<String, QuantityDef>` where inner map key is observation ID
+
+**Example**:
+```java
+subjectResources = {
+    "p1" -> Set[ Map{"obs-num-1" -> QuantityDef(10.0)} ],
+    "p2" -> Set[ Map{"obs-num-2" -> QuantityDef(20.0)} ],
+    "p3" -> Set[ Map{"obs-num-3" -> QuantityDef(30.0)} ]
+}
+```
+
+**Critical Insight**: When filtering for stratum subjects, you must filter at the **outer Map.Entry level** (subject ID), not the inner Map keys (observation IDs).
+
+#### criteriaReference Usage
+
+MEASUREOBSERVATION populations use the `criteriaReference` field to link to their source population (numerator or denominator):
+
+```java
+PopulationDef numeratorMeasureObs = new PopulationDef(
+    "num-obs-1",
+    code,
+    MeasurePopulationType.MEASUREOBSERVATION,
+    "expression",
+    "num-1",  // criteriaReference points to numerator population ID
+    ContinuousVariableObservationAggregateMethod.SUM);
+```
+
+This allows MeasureDefScorer to determine which MEASUREOBSERVATION belongs to numerator vs denominator.
+
+### Additional Refactoring Completed
+
+During implementation, several improvements were made to push more responsibility to Def classes:
+
+#### 1. Enhanced StratumPopulationDef with PopulationDef Reference
+
+**File**: `StratumPopulationDef.java:16-35`
+
+Replaced String ID parameter with direct PopulationDef reference for better type safety:
+
+**BEFORE**:
+```java
+public record StratumPopulationDef(
+    String id,  // String-based lookup
+    Set<String> subjectsQualifiedOrUnqualified,
+    // ...
+)
+```
+
+**AFTER**:
+```java
+public record StratumPopulationDef(
+    PopulationDef populationDef,  // Direct reference
+    Set<String> subjectsQualifiedOrUnqualified,
+    // ...
+) {
+    @Nullable
+    public String id() {
+        return populationDef != null ? populationDef.id() : null;
+    }
+}
+```
+
+This eliminated ID-based matching in favor of direct object references:
+```java
+// BEFORE: ID-based matching
+.filter(t -> t.id().equals(populationDef.id()))
+
+// AFTER: Direct reference matching
+.filter(t -> t.populationDef() == populationDef)
+```
+
+**Updated all constructor calls in**:
+- `MeasureDefScorerTest.java`
+- `MeasureMultiSubjectEvaluator.java`
+- `StratumPopulationDefToStringTest.java`
+- `MeasureScorerTest.java`
+
+#### 2. Renamed Methods in GroupDef
+
+**File**: `GroupDef.java:84-86`
+
+- Renamed `get()` to `getPopulationDefs()` for clarity
+- Updated all callers across:
+  - `MeasureDefScorer.java`
+  - `BaseMeasureReportScorer.java`
+  - `MeasureEvaluator.java`
+
+#### 3. Added Helper Method in GroupDef
+
+**File**: `GroupDef.java:88-101`
+
+- Added `getFirstWithId(MeasurePopulationType)` method
+- Returns first population with non-null ID (used for criteriaReference matching)
+- Annotated with `@Nullable`
+
+#### 4. Enhanced toString() Methods
+
+**File**: `PopulationDef.java:174-188`
+
+Added comprehensive toString() method:
+```java
+@Override
+public String toString() {
+    String codeText = (code != null && code.text() != null) ? code.text() : "null";
+    String criteriaRef = (criteriaReference != null) ? criteriaReference : "null";
+    String aggMethod = (aggregateMethod != null) ? aggregateMethod.toString() : "null";
+
+    return "PopulationDef{"
+            + "id='" + id + '\''
+            + ", code.text='" + codeText + '\''
+            + ", type=" + measurePopulationType
+            + ", expression='" + expression + '\''
+            + ", criteriaReference='" + criteriaRef + '\''
+            + ", aggregateMethod=" + aggMethod
+            + '}';
+}
+```
+
+**File**: `StratumPopulationDef.java:65-77`
+
+Updated to use PopulationDef's toString() - provides much richer debugging information including all population attributes.
+
+### Test Implementation Details
+
+#### Test 1: Ratio with Observations - Group Level ✅
+
+**Lines**: `MeasureDefScorerTest.java:796-883`
+
+**Scenario**:
+- 5 patients with separate numerator and denominator MEASUREOBSERVATION populations
+- Numerator observations sum: 10 + 15 + 20 + 25 + 30 = 100
+- Denominator observations sum: 10 + 15 + 15 + 10 + 10 = 60
+- Expected score: 100 / 60 = 1.6667
+
+**Key Learning**: This test initially failed because the group-level ratio with observations logic (`scoreRatioMeasureObservationGroup`) was missing from MeasureDefScorer. After implementing it (lines 153-199), the test passed.
+
+#### Test 2: Ratio with Observations - Stratum Level ✅
+
+**Lines**: `MeasureDefScorerTest.java:885-1027`
+
+**Scenario**:
+- Stratified by gender (male/female)
+- Male stratum: numerator sum = 40, denominator sum = 20 → score = 2.0
+- Female stratum: numerator sum = 30, denominator sum = 10 → score = 3.0
+
+**Key Learning**: This test initially failed with NullPointerException because:
+1. `getResultsForStratum()` was filtering at the wrong level (observation Map keys instead of subject IDs)
+2. Test had StratumPopulationDef constructor parameters in wrong order
+
+After fixing both issues, the test passed.
+
+#### Test 3: Cohort Measure - No Score ✅
+
+**Lines**: `MeasureDefScorerTest.java:735-761`
+
+**Scenario**:
+- COHORT scoring type with 10 patients in initial population
+- Expected: score remains null (cohort measures don't have scores)
+
+**Key Learning**: This test passed immediately as the existing COHORT handling was correct.
+
+#### Test 4: Missing Scoring Type - Exception ✅
+
+**Lines**: `MeasureDefScorerTest.java:763-790`
+
+**Scenario**:
+- GroupDef with `measureScoring = null`
+- Expected: throws `InvalidRequestException`
+
+**Key Learning**: This test passed immediately as the existing validation was in place.
+
+### Lessons Learned
+
+#### 1. Test-Driven Development Reveals Gaps
+
+The original PRP assumed ratio with observations was fully implemented. TDD revealed:
+- Group-level logic was completely missing
+- Stratum-level logic had a critical filtering bug
+- Test data structure issues (constructor parameter ordering)
+
+**Takeaway**: Even with thorough planning, implementation gaps only become visible through comprehensive testing. TDD is essential for ensuring complete coverage.
+
+#### 2. Data Structure Understanding is Critical
+
+Understanding the `PopulationDef.subjectResources` Map structure was essential to fixing the stratum filtering bug. The distinction between:
+- Outer Map key (subject ID) - for filtering
+- Inner Map key (observation ID) - for data
+
+Was the key insight.
+
+**Takeaway**: When working with nested data structures, deeply understanding the structure at each level is critical to writing correct filtering logic.
+
+#### 3. Type Safety Improvements
+
+Replacing String IDs with direct object references (`StratumPopulationDef.populationDef`) provides:
+- Better type safety
+- Clearer relationships
+- Elimination of ID-based lookups
+- More maintainable code
+
+**Takeaway**: Direct object references are preferable to String ID lookups wherever possible. They make relationships explicit and prevent lookup errors.
+
+#### 4. R4 Pattern Reuse
+
+The R4MeasureReportScorer provided the correct pattern for stratum filtering:
+```java
+return measureObservationPopulationDef.getSubjectResources().entrySet().stream()
+    .filter(entry -> stratumSubjects.contains(entry.getKey()))
+    .map(Entry::getValue)
+    .flatMap(Collection::stream)
+```
+
+This pattern was successfully applied to MeasureDefScorer.
+
+**Takeaway**: Existing working implementations (especially in version-specific code) often contain the correct patterns for solving similar problems in version-agnostic code.
+
+### Future Simplification Opportunities
+
+#### Considered: Map-Based StratumPopulationDef Lookup
+
+An experimental version of `scoreRatioMeasureObservationStratum()` was implemented using a Map-based approach:
+
+```java
+// Build map of criteriaReference -> StratumPopulationDef
+Map<String, StratumPopulationDef> criteriaRefMap = stratumDef.stratumPopulations().stream()
+    .filter(sp -> sp.populationDef() != null
+            && sp.populationDef().type() == MeasurePopulationType.MEASUREOBSERVATION
+            && sp.populationDef().getCriteriaReference() != null)
+    .collect(Collectors.toMap(
+            sp -> sp.populationDef().getCriteriaReference(),
+            sp -> sp));
+```
+
+**Status**: Tested and working, but **rolled back** to keep the existing implementation stable.
+
+**Rationale**: The Map-based approach is cleaner but represents a non-trivial refactoring. Keeping the working implementation ensures stability while the experimental code remains available for future consideration.
+
+### Risk Assessment - Updated
+
+**Original Assessment**: Low Risk (test-only changes)
+
+**Actual Risk**: Medium (required implementation changes)
+
+**Issues Encountered**:
+1. ✅ **RESOLVED**: Group-level ratio with observations was missing → Added implementation
+2. ✅ **RESOLVED**: Stratum filtering bug → Fixed filtering logic
+3. ✅ **RESOLVED**: Test data structure issues → Fixed constructor calls
+4. ✅ **VERIFIED**: Missing scoring type validation → Already in place
+5. ✅ **COMPLETED**: Additional refactoring for better code quality
+
+All issues were successfully resolved.
+
+### Success Criteria - Final Status
+
+From Phase 6 (Comprehensive Unit Testing):
+
+- ✅ All 4 new tests pass
+- ✅ All 16 existing tests continue to pass
+- ✅ Code coverage for MeasureDefScorer increased:
+  - Lines 153-199 (group-level ratio with observations) - NEW CODE ADDED
+  - Lines 280-313 (stratum-level ratio with observations) - FIXED
+  - Lines 465-490 (getResultsForStratum) - FIXED
+  - Line 143 (cohort null return) - VERIFIED
+  - Null scoring type handling - VERIFIED
+- ✅ MeasureDefScorer.java changes required and implemented
+- ✅ MeasureDefScorerTest.java has comprehensive coverage for all scoring types
+- ✅ All refactoring work completed
+- ✅ Enhanced Def classes with better responsibility distribution
+
+### Related PRPs
+
+This implementation work is **Phase 1** of the larger effort documented in `measure-def-scorer-test-coverage-enhancement.md`. Future phases will:
+- Phase 2: Integrate MeasureDefScorer into MeasureEvaluationResultHandler
+- Phase 3: Modify R4MeasureReportBuilder to copy scores from Def classes
+- Phase 4: Modify Dstu3MeasureReportBuilder similarly
+- Phase 5: Run integration tests
+- Phase 6: Remove IMeasureReportScorer hierarchy
+- Phase 7: Final verification
+
+**Status**: Phase 1 is complete with comprehensive test coverage and bug fixes applied. Ready to proceed with Phase 2 integration work.
+
+---
+
 **End of PRP**

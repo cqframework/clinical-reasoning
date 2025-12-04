@@ -70,7 +70,7 @@ public abstract class BaseMeasureReportScorer<MeasureReportT> implements IMeasur
     @Nullable
     protected PopulationDef findPopulationDef(
             GroupDef groupDef, List<PopulationDef> populationDefs, MeasurePopulationType type) {
-        var groupPops = groupDef.get(type);
+        var groupPops = groupDef.getPopulationDefs(type);
         if (groupPops == null || groupPops.isEmpty() || groupPops.get(0).id() == null) {
             return null;
         }

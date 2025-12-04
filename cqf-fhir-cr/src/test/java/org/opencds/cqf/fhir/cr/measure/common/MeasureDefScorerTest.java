@@ -142,14 +142,14 @@ class MeasureDefScorerTest {
         CodeDef booleanBasisCode = createPopulationBasisCode("boolean");
 
         StratumPopulationDef maleNumPop = new StratumPopulationDef(
-                "num-1",
+                numeratorPop,
                 Set.of("male1", "male2", "male3"),
                 Set.of(),
                 List.of(),
                 MeasureStratifierType.VALUE,
                 booleanBasisCode);
         StratumPopulationDef maleDenPop = new StratumPopulationDef(
-                "den-1",
+                denominatorPop,
                 Set.of("male1", "male2", "male3", "male4", "male5"),
                 Set.of(),
                 List.of(),
@@ -165,14 +165,14 @@ class MeasureDefScorerTest {
 
         // Create stratum populations for Female stratum
         StratumPopulationDef femaleNumPop = new StratumPopulationDef(
-                "num-1",
+                numeratorPop,
                 Set.of("female1", "female2", "female3", "female4", "female5"),
                 Set.of(),
                 List.of(),
                 MeasureStratifierType.VALUE,
                 booleanBasisCode);
         StratumPopulationDef femaleDenPop = new StratumPopulationDef(
-                "den-1",
+                denominatorPop,
                 Set.of("female1", "female2", "female3", "female4", "female5"),
                 Set.of(),
                 List.of(),
@@ -726,6 +726,320 @@ class MeasureDefScorerTest {
         // VERIFY: Score is based on encounter count, NOT subject count
         // 5 encounters / 9 encounters = 0.556
         assertEquals(0.556, groupDef.getScore(), 0.001);
+    }
+
+    // ============================================================================
+    // Additional Test Coverage - Cohort and Edge Cases
+    // ============================================================================
+
+    @Test
+    void testScoreGroup_CohortMeasure_NoScoreSet() {
+        // Setup: Cohort measure with only INITIALPOPULATION
+        PopulationDef initialPopulation = createPopulationDef(
+                "ip-1",
+                MeasurePopulationType.INITIALPOPULATION,
+                Set.of("p1", "p2", "p3", "p4", "p5", "p6", "p7", "p8", "p9", "p10"));
+
+        GroupDef groupDef = new GroupDef(
+                "group-1",
+                createTextOnlyConcept("Cohort Measure Test"),
+                List.of(), // No stratifiers
+                List.of(initialPopulation),
+                MeasureScoring.COHORT,
+                false,
+                createImprovementNotationCode("increase"),
+                createPopulationBasisCode("boolean"));
+
+        // Verify score is null before scoring
+        assertNull(groupDef.getScore());
+
+        // Execute
+        MeasureDefScorer scorer = new MeasureDefScorer();
+        scorer.scoreGroup("http://example.com/Measure/cohort-test", groupDef);
+
+        // VERIFY: Cohort measures do not have scores
+        assertNull(groupDef.getScore());
+        assertNull(groupDef.getMeasureScore());
+    }
+
+    @Test
+    void testScoreGroup_MissingScoringType_ThrowsException() {
+        // Setup: GroupDef with null scoring type
+        PopulationDef numeratorPop =
+                createPopulationDef("num-1", MeasurePopulationType.NUMERATOR, Set.of("p1", "p2", "p3"));
+        PopulationDef denominatorPop =
+                createPopulationDef("den-1", MeasurePopulationType.DENOMINATOR, Set.of("p1", "p2", "p3", "p4"));
+
+        GroupDef groupDef = new GroupDef(
+                "group-1",
+                createTextOnlyConcept("Missing Scoring Type Test"),
+                List.of(),
+                List.of(numeratorPop, denominatorPop),
+                null, // NULL scoring type
+                false,
+                createImprovementNotationCode("increase"),
+                createPopulationBasisCode("boolean"));
+
+        // Execute and verify exception
+        MeasureDefScorer scorer = new MeasureDefScorer();
+
+        Exception exception = assertThrows(
+                Exception.class, () -> scorer.scoreGroup("http://example.com/Measure/missing-scoring", groupDef));
+
+        // Verify exception message contains useful information
+        assertTrue(exception.getMessage().contains("scoring"));
+    }
+
+    // ============================================================================
+    // Ratio with Observations Tests - Group and Stratum Level
+    // ============================================================================
+
+    @Test
+    void testScoreGroup_RatioWithObservations_GroupLevel() {
+        // Setup: RATIO measure with separate numerator/denominator MEASUREOBSERVATION populations
+        PopulationDef initialPopulation =
+                createPopulationDef("ip-1", MeasurePopulationType.INITIALPOPULATION, Set.of("p1", "p2", "p3"));
+        PopulationDef measurePopulation =
+                createPopulationDef("mp-1", MeasurePopulationType.MEASUREPOPULATION, Set.of("p1", "p2", "p3"));
+
+        // Create standard NUMERATOR and DENOMINATOR populations (referenced by measure observations)
+        PopulationDef numeratorPop =
+                createPopulationDef("num-1", MeasurePopulationType.NUMERATOR, Set.of("p1", "p2", "p3"));
+        PopulationDef denominatorPop =
+                createPopulationDef("den-1", MeasurePopulationType.DENOMINATOR, Set.of("p1", "p2", "p3"));
+
+        // Create numerator MEASUREOBSERVATION with criteriaReference to numerator
+        ConceptDef numObsCode = createMeasurePopulationConcept(MeasurePopulationType.MEASUREOBSERVATION);
+        PopulationDef numeratorMeasureObs = new PopulationDef(
+                "num-obs-1",
+                numObsCode,
+                MeasurePopulationType.MEASUREOBSERVATION,
+                "NumeratorExpression",
+                "num-1", // criteriaReference to NUMERATOR population
+                ContinuousVariableObservationAggregateMethod.SUM);
+
+        // Add numerator observations
+        Map<String, QuantityDef> numObs1 = new HashMap<>();
+        numObs1.put("obs-num-1", new QuantityDef(10.0));
+        numeratorMeasureObs.addResource("p1", numObs1);
+
+        Map<String, QuantityDef> numObs2 = new HashMap<>();
+        numObs2.put("obs-num-2", new QuantityDef(20.0));
+        numeratorMeasureObs.addResource("p2", numObs2);
+
+        Map<String, QuantityDef> numObs3 = new HashMap<>();
+        numObs3.put("obs-num-3", new QuantityDef(30.0));
+        numeratorMeasureObs.addResource("p3", numObs3);
+
+        // Create denominator MEASUREOBSERVATION with criteriaReference to denominator
+        ConceptDef denObsCode = createMeasurePopulationConcept(MeasurePopulationType.MEASUREOBSERVATION);
+        PopulationDef denominatorMeasureObs = new PopulationDef(
+                "den-obs-1",
+                denObsCode,
+                MeasurePopulationType.MEASUREOBSERVATION,
+                "DenominatorExpression",
+                "den-1", // criteriaReference to DENOMINATOR population
+                ContinuousVariableObservationAggregateMethod.SUM);
+
+        // Add denominator observations
+        Map<String, QuantityDef> denObs1 = new HashMap<>();
+        denObs1.put("obs-den-1", new QuantityDef(5.0));
+        denominatorMeasureObs.addResource("p1", denObs1);
+
+        Map<String, QuantityDef> denObs2 = new HashMap<>();
+        denObs2.put("obs-den-2", new QuantityDef(10.0));
+        denominatorMeasureObs.addResource("p2", denObs2);
+
+        Map<String, QuantityDef> denObs3 = new HashMap<>();
+        denObs3.put("obs-den-3", new QuantityDef(15.0));
+        denominatorMeasureObs.addResource("p3", denObs3);
+
+        // Create GroupDef with RATIO scoring
+        GroupDef groupDef = new GroupDef(
+                "group-1",
+                createTextOnlyConcept("Ratio with Observations Test"),
+                List.of(), // No stratifiers
+                List.of(
+                        initialPopulation,
+                        measurePopulation,
+                        numeratorPop,
+                        denominatorPop,
+                        numeratorMeasureObs,
+                        denominatorMeasureObs),
+                MeasureScoring.RATIO,
+                false,
+                createImprovementNotationCode("increase"),
+                createPopulationBasisCode("boolean"));
+
+        // Verify score is null before scoring
+        assertNull(groupDef.getScore());
+
+        // Execute
+        MeasureDefScorer scorer = new MeasureDefScorer();
+        scorer.scoreGroup("http://example.com/Measure/ratio-obs-test", groupDef);
+
+        // VERIFY: Score is 60.0 / 30.0 = 2.0
+        assertEquals(2.0, groupDef.getScore(), 0.001);
+        assertEquals(2.0, groupDef.getMeasureScore(), 0.001);
+    }
+
+    @Test
+    void testScoreStratifier_RatioWithObservations_StratumLevel() {
+        // Setup: Ratio measure with stratifier by gender
+        // Male patients: p1, p2, p3
+        // Female patients: p4, p5
+
+        PopulationDef initialPopulation = createPopulationDef(
+                "ip-1", MeasurePopulationType.INITIALPOPULATION, Set.of("p1", "p2", "p3", "p4", "p5"));
+
+        // Create standard NUMERATOR and DENOMINATOR populations
+        PopulationDef numeratorPop =
+                createPopulationDef("num-1", MeasurePopulationType.NUMERATOR, Set.of("p1", "p2", "p3", "p4", "p5"));
+        PopulationDef denominatorPop =
+                createPopulationDef("den-1", MeasurePopulationType.DENOMINATOR, Set.of("p1", "p2", "p3", "p4", "p5"));
+
+        // Create numerator MEASUREOBSERVATION
+        ConceptDef numObsCode = createMeasurePopulationConcept(MeasurePopulationType.MEASUREOBSERVATION);
+        PopulationDef numeratorMeasureObs = new PopulationDef(
+                "num-obs-1",
+                numObsCode,
+                MeasurePopulationType.MEASUREOBSERVATION,
+                "NumeratorExpression",
+                "num-1",
+                ContinuousVariableObservationAggregateMethod.SUM);
+
+        // Male numerator observations: 10 + 15 + 15 = 40
+        Map<String, QuantityDef> numObs1 = new HashMap<>();
+        numObs1.put("p1", new QuantityDef(10.0));
+        numeratorMeasureObs.addResource("p1", numObs1);
+
+        Map<String, QuantityDef> numObs2 = new HashMap<>();
+        numObs2.put("p2", new QuantityDef(15.0));
+        numeratorMeasureObs.addResource("p2", numObs2);
+
+        Map<String, QuantityDef> numObs3 = new HashMap<>();
+        numObs3.put("p3", new QuantityDef(15.0));
+        numeratorMeasureObs.addResource("p3", numObs3);
+
+        // Female numerator observations: 10 + 20 = 30
+        Map<String, QuantityDef> numObs4 = new HashMap<>();
+        numObs4.put("p4", new QuantityDef(10.0));
+        numeratorMeasureObs.addResource("p4", numObs4);
+
+        Map<String, QuantityDef> numObs5 = new HashMap<>();
+        numObs5.put("p5", new QuantityDef(20.0));
+        numeratorMeasureObs.addResource("p5", numObs5);
+
+        // Create denominator MEASUREOBSERVATION
+        ConceptDef denObsCode = createMeasurePopulationConcept(MeasurePopulationType.MEASUREOBSERVATION);
+        PopulationDef denominatorMeasureObs = new PopulationDef(
+                "den-obs-1",
+                denObsCode,
+                MeasurePopulationType.MEASUREOBSERVATION,
+                "DenominatorExpression",
+                "den-1",
+                ContinuousVariableObservationAggregateMethod.SUM);
+
+        // Male denominator observations: 5 + 7 + 8 = 20
+        Map<String, QuantityDef> denObs1 = new HashMap<>();
+        denObs1.put("p1", new QuantityDef(5.0));
+        denominatorMeasureObs.addResource("p1", denObs1);
+
+        Map<String, QuantityDef> denObs2 = new HashMap<>();
+        denObs2.put("p2", new QuantityDef(7.0));
+        denominatorMeasureObs.addResource("p2", denObs2);
+
+        Map<String, QuantityDef> denObs3 = new HashMap<>();
+        denObs3.put("p3", new QuantityDef(8.0));
+        denominatorMeasureObs.addResource("p3", denObs3);
+
+        // Female denominator observations: 4 + 6 = 10
+        Map<String, QuantityDef> denObs4 = new HashMap<>();
+        denObs4.put("p4", new QuantityDef(4.0));
+        denominatorMeasureObs.addResource("p4", denObs4);
+
+        Map<String, QuantityDef> denObs5 = new HashMap<>();
+        denObs5.put("p5", new QuantityDef(6.0));
+        denominatorMeasureObs.addResource("p5", denObs5);
+
+        // Create stratum populations for Male stratum
+        CodeDef booleanBasisCode = createPopulationBasisCode("boolean");
+
+        // Male stratum - MEASUREOBSERVATION populations
+        StratumPopulationDef maleNumObs = new StratumPopulationDef(
+                numeratorMeasureObs,
+                Set.of("p1", "p2", "p3"), // subjectsQualifiedOrUnqualified
+                Set.of(), // populationDefEvaluationResultIntersection
+                List.of(), // resourceIdsForSubjectList
+                MeasureStratifierType.VALUE,
+                booleanBasisCode);
+
+        StratumPopulationDef maleDenObs = new StratumPopulationDef(
+                denominatorMeasureObs,
+                Set.of("p1", "p2", "p3"),
+                Set.of(),
+                List.of(),
+                MeasureStratifierType.VALUE,
+                booleanBasisCode);
+
+        StratifierComponentDef genderComponent =
+                new StratifierComponentDef("gender-component", createTextOnlyConcept("Gender"), "Gender");
+        StratumDef maleStratum = new StratumDef(
+                List.of(maleNumObs, maleDenObs),
+                Set.of(new StratumValueDef(new StratumValueWrapper("male"), genderComponent)),
+                Set.of("p1", "p2", "p3"));
+
+        // Female stratum - MEASUREOBSERVATION populations
+        StratumPopulationDef femaleNumObs = new StratumPopulationDef(
+                numeratorMeasureObs,
+                Set.of("p4", "p5"),
+                Set.of(),
+                List.of(),
+                MeasureStratifierType.VALUE,
+                booleanBasisCode);
+
+        StratumPopulationDef femaleDenObs = new StratumPopulationDef(
+                denominatorMeasureObs,
+                Set.of("p4", "p5"),
+                Set.of(),
+                List.of(),
+                MeasureStratifierType.VALUE,
+                booleanBasisCode);
+
+        StratumDef femaleStratum = new StratumDef(
+                List.of(femaleNumObs, femaleDenObs),
+                Set.of(new StratumValueDef(new StratumValueWrapper("female"), genderComponent)),
+                Set.of("p4", "p5"));
+
+        // Create StratifierDef with strata
+        StratifierDef stratifierDef = new StratifierDef(
+                "gender-stratifier", createTextOnlyConcept("Gender Stratifier"), "Gender", MeasureStratifierType.VALUE);
+        stratifierDef.addAllStratum(List.of(maleStratum, femaleStratum));
+
+        // Create GroupDef
+        GroupDef groupDef = new GroupDef(
+                "group-1",
+                createTextOnlyConcept("Ratio with Observations Stratified"),
+                List.of(stratifierDef),
+                List.of(initialPopulation, numeratorPop, denominatorPop, numeratorMeasureObs, denominatorMeasureObs),
+                MeasureScoring.RATIO,
+                false,
+                createImprovementNotationCode("increase"),
+                booleanBasisCode);
+
+        // Verify scores are null before scoring
+        assertNull(maleStratum.getScore());
+        assertNull(femaleStratum.getScore());
+
+        // Execute
+        MeasureDefScorer scorer = new MeasureDefScorer();
+        scorer.scoreGroup("http://example.com/Measure/ratio-obs-stratified", groupDef);
+
+        // VERIFY: Male stratum score = 40/20 = 2.0
+        assertEquals(2.0, maleStratum.getScore(), 0.001);
+
+        // VERIFY: Female stratum score = 30/10 = 3.0
+        assertEquals(3.0, femaleStratum.getScore(), 0.001);
     }
 
     // ============================================================================

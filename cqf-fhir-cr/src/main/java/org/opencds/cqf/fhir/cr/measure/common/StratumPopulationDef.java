@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import java.util.List;
 import java.util.Set;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -13,7 +14,7 @@ import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
  * This is meant to be the source of truth for all data points regarding stratum populations.
  */
 public record StratumPopulationDef(
-        String id,
+        PopulationDef populationDef,
         /*
          * The subjectIds as they are, whether they are qualified with a resource
          * (ex: [Patient/pat1, Patient/pat2] or [pat1, pat2]
@@ -23,6 +24,15 @@ public record StratumPopulationDef(
         List<String> resourceIdsForSubjectList,
         MeasureStratifierType measureStratifierType,
         CodeDef populationBasis) {
+
+    /**
+     * Get the ID from the associated PopulationDef.
+     * @return the population ID, or null if populationDef is null
+     */
+    @Nullable
+    public String id() {
+        return populationDef != null ? populationDef.id() : null;
+    }
 
     /**
      * @return The subjectIds without a FHIR resource qualifier, whether they previously had a
@@ -55,8 +65,9 @@ public record StratumPopulationDef(
     @Nonnull
     @Override
     public String toString() {
+        String popDefStr = (populationDef != null) ? populationDef.toString() : "null";
         return "StratumPopulationDef{"
-                + "id='" + id + '\''
+                + "populationDef=" + popDefStr
                 + ", measureStratifierType=" + measureStratifierType
                 + ", populationBasis=" + populationBasis.code()
                 + ", subjectsQualifiedOrUnqualified=" + limitCollection(subjectsQualifiedOrUnqualified)

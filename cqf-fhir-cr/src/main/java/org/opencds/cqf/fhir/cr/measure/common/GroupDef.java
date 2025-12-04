@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
+import jakarta.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -81,8 +82,24 @@ public class GroupDef {
         return defs.get(0);
     }
 
-    public List<PopulationDef> get(MeasurePopulationType type) {
+    public List<PopulationDef> getPopulationDefs(MeasurePopulationType type) {
         return this.populationIndex.computeIfAbsent(type, x -> Collections.emptyList());
+    }
+
+    /**
+     * Get the first population of the specified type, but only if it has a non-null ID.
+     * Returns null if the first population doesn't have an ID.
+     * Used for finding populations that can be referenced by criteriaReference.
+     *
+     * @param type the population type to find
+     * @return the first PopulationDef of the specified type if it has a non-null ID, or null otherwise
+     */
+    @Nullable
+    public PopulationDef getFirstWithId(MeasurePopulationType type) {
+        return this.getPopulationDefs(type).stream()
+                .findFirst()
+                .filter(pop -> pop.id() != null)
+                .orElse(null);
     }
 
     // Extracted from R4MeasureReportBuilder.getReportPopulation() by Claude Sonnet 4.5

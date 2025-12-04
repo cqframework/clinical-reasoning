@@ -46,7 +46,7 @@ public class Eithers {
 
     /**
      * Creates an Either3 instance from three values. If the left value is not null, the Either3 will be left. If the middle value is not null, the Either3 will be middle. Otherwise, it will be right.
-     * Exactly of the values must be present.
+     * Exactly one of the values must be present.
      *
      * @param <L> the left type
      * @param <M> the middle type

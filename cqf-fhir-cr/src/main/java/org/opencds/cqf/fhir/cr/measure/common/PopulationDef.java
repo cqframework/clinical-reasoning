@@ -146,4 +146,28 @@ public class PopulationDef {
     public ContinuousVariableObservationAggregateMethod getAggregateMethod() {
         return this.aggregateMethod;
     }
+
+    /**
+     * Added by Claude Sonnet 4.5 on 2025-12-02
+     * Get the count for this population based on its type and the group's scoring type.
+     * This is the single source of truth for population counts.
+     *
+     * @param groupDef the GroupDef containing this population (needed for scoring type)
+     * @return the count for this population
+     */
+    public int getCount(GroupDef groupDef) {
+        // For MEASUREOBSERVATION populations, count the observations
+        if (this.measurePopulationType == MeasurePopulationType.MEASUREOBSERVATION) {
+            return countObservations();
+        }
+
+        // For other population types, use scoring-appropriate count
+        if (groupDef.isBooleanBasis()) {
+            // Boolean basis: count unique subjects
+            return getSubjects().size();
+        } else {
+            // Non-boolean basis: count all resources (including duplicates across subjects)
+            return getAllSubjectResources().size();
+        }
+    }
 }

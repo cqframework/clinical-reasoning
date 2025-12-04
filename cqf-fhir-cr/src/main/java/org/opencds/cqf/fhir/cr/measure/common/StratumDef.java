@@ -26,4 +26,33 @@ public record StratumDef(
     public boolean isComponent() {
         return valueDefs.size() > 1;
     }
+
+    /**
+     * Added by Claude Sonnet 4.5 on 2025-12-02
+     * Get the StratumPopulationDef for a specific PopulationDef.
+     *
+     * @param populationDef the PopulationDef to match by ID
+     * @return the StratumPopulationDef, or null if not found
+     */
+    public StratumPopulationDef getStratumPopulation(PopulationDef populationDef) {
+        if (populationDef == null) {
+            return null;
+        }
+        return stratumPopulations.stream()
+                .filter(stratumPop -> stratumPop.id().equals(populationDef.id()))
+                .findFirst()
+                .orElse(null);
+    }
+
+    /**
+     * Added by Claude Sonnet 4.5 on 2025-12-02
+     * Get the count for a specific PopulationDef in this stratum.
+     *
+     * @param populationDef the PopulationDef to match by ID
+     * @return the count, or 0 if not found
+     */
+    public int getPopulationCount(PopulationDef populationDef) {
+        StratumPopulationDef stratumPop = getStratumPopulation(populationDef);
+        return stratumPop != null ? stratumPop.getCount() : 0;
+    }
 }

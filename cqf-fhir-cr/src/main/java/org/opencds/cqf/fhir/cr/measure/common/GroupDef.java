@@ -139,6 +139,8 @@ public class GroupDef {
      * @return the count for the population, or 0 if not found
      */
     public int getPopulationCount(MeasurePopulationType populationType) {
+        // TODO:  LD:  we need to make this matching more sophisticated, since we could have two
+        // MeasureObservations in the result, one for numerator, and one for denominator
         return this.populations.stream()
                 .filter(pop -> pop.type() == populationType)
                 .findFirst()

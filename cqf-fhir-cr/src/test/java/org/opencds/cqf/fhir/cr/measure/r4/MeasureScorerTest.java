@@ -563,7 +563,7 @@ class MeasureScorerTest {
                     // Create StratumPopulationDef
                     // For CRITERIA stratifiers, the count comes from populationDefEvaluationResultIntersection
                     var stratumPopDef = new StratumPopulationDef(
-                            populationDef.id(), // Use the same ID as the PopulationDef
+                            populationDef, // Use direct PopulationDef reference
                             new HashSet<>(), // subjects (not used for CRITERIA)
                             evaluationResults, // evaluationResultIntersection (used for CRITERIA count)
                             new ArrayList<>(), // resourceIdsForSubjectList

@@ -106,7 +106,7 @@ public class MeasureMultiSubjectEvaluator {
         }
 
         return new StratumPopulationDef(
-                populationDef.id(),
+                populationDef,
                 qualifiedSubjectIdsCommonToPopulation,
                 populationDefEvaluationResultIntersection,
                 resourceIdsForSubjectList,

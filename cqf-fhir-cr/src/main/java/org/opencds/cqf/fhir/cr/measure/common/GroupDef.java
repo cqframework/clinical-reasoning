@@ -118,6 +118,33 @@ public class GroupDef {
                 .orElse(null);
     }
 
+    /**
+     * Find MEASUREOBSERVATION PopulationDef that references the specified population type.
+     * Used for ratio observation scoring to locate numerator/denominator observations.
+     * <p>
+     * Added by Claude Sonnet 4.5 on 2025-12-05 for ratio observation optimization.
+     *
+     * @param measureObservationPopulationDefs list of MEASUREOBSERVATION populations
+     * @param targetType the population type (NUMERATOR or DENOMINATOR) to find
+     * @return matching PopulationDef or null
+     */
+    @Nullable
+    public PopulationDef findRatioObservationPopulationDef(
+            List<PopulationDef> measureObservationPopulationDefs, MeasurePopulationType targetType) {
+
+        PopulationDef referencedPopulation = this.getFirstWithId(targetType);
+        if (referencedPopulation == null) {
+            return null;
+        }
+
+        String targetId = referencedPopulation.id();
+        return measureObservationPopulationDefs.stream()
+                .filter(obs -> obs.getCriteriaReference() != null
+                        && obs.getCriteriaReference().equals(targetId))
+                .findFirst()
+                .orElse(null);
+    }
+
     private Map<MeasurePopulationType, List<PopulationDef>> index(List<PopulationDef> populations) {
         return populations.stream().collect(Collectors.groupingBy(PopulationDef::type));
     }

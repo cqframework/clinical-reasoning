@@ -582,7 +582,10 @@ class MeasureScorerTest {
 
             // Create StratumDef
             var stratumDef = new StratumDef(
-                    stratumPopulations, stratumValueDefs, new ArrayList<>() // subjectIds
+                    stratumPopulations,
+                    stratumValueDefs,
+                    new ArrayList<>(), // subjectIds
+                    null // ratioObservationCache
                     );
 
             stratumDefs.add(stratumDef);

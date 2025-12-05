@@ -279,11 +279,7 @@ public class R4MeasureProcessor {
 
         // populate results from Library $evaluate
         return MeasureEvaluationResultHandler.getEvaluationResults(
-                subjects,
-                zonedMeasurementPeriod,
-                context,
-                multiLibraryIdMeasureEngineDetails,
-                R4ContinuousVariableObservationConverter.INSTANCE);
+                subjects, zonedMeasurementPeriod, context, multiLibraryIdMeasureEngineDetails);
     }
 
     /**

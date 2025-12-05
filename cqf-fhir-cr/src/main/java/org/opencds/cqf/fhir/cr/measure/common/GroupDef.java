@@ -129,4 +129,22 @@ public class GroupDef {
     public CodeDef getImprovementNotation() {
         return this.improvementNotation;
     }
+
+    /**
+     * Added by Claude Sonnet 4.5 on 2025-12-02
+     * Get the count for a specific population type in this group.
+     * Moved from R4MeasureReportScorer to make it reusable across FHIR versions.
+     *
+     * @param populationType the MeasurePopulationType to find
+     * @return the count for the population, or 0 if not found
+     */
+    public int getPopulationCount(MeasurePopulationType populationType) {
+        // TODO:  LD:  we need to make this matching more sophisticated, since we could have two
+        // MeasureObservations in the result, one for numerator, and one for denominator
+        return this.populations.stream()
+                .filter(pop -> pop.type() == populationType)
+                .findFirst()
+                .map(pop -> pop.getCount(this))
+                .orElse(0);
+    }
 }

@@ -1,43 +1,20 @@
 package org.opencds.cqf.fhir.cr.measure.dstu3;
 
-import jakarta.annotation.Nullable;
 import org.hl7.fhir.dstu3.model.Quantity;
 import org.opencds.cqf.fhir.cr.measure.common.ContinuousVariableObservationConverter;
 import org.opencds.cqf.fhir.cr.measure.common.QuantityDef;
 
+// Updated by Claude Sonnet 4.5 on 2025-12-02
 /**
- * DSTU3 version of {@link ContinuousVariableObservationConverter}, with the singleton pattern
- * enforced by an enum.
+ * DSTU3-specific converter for QuantityDef to FHIR Quantity.
  *
- * This implementation only handles DSTU3-specific Quantity conversions.
- * All common logic (Number, String, null handling) is in the interface default methods.
+ * This implementation only handles conversion TO DSTU3 Quantity for MeasureReport population.
+ * Conversion FROM CQL results is handled in ContinuousVariableObservationHandler.
  */
 @SuppressWarnings("squid:S6548")
 public enum Dstu3ContinuousVariableObservationConverter implements ContinuousVariableObservationConverter<Quantity> {
     INSTANCE;
 
-    // Added by Claude Sonnet 4.5 on 2025-11-27
-    /**
-     * Extract QuantityDef from DSTU3 Quantity.
-     * Returns null if result is not a DSTU3 Quantity (allowing default method to handle other types).
-     */
-    @Nullable
-    @Override
-    public QuantityDef extractQuantityDef(Object result) {
-        if (result instanceof Quantity existing) {
-            return new QuantityDef(
-                    existing.hasValue() ? existing.getValue().doubleValue() : null,
-                    existing.getUnit(),
-                    existing.getSystem(),
-                    existing.getCode());
-        }
-        return null;
-    }
-
-    // Enhanced by Claude Sonnet 4.5 on 2025-11-27
-    /**
-     * Convert QuantityDef to DSTU3 Quantity for MeasureReport population.
-     */
     @Override
     public Quantity convertToFhirQuantity(QuantityDef quantityDef) {
         if (quantityDef == null) {
@@ -49,15 +26,7 @@ public enum Dstu3ContinuousVariableObservationConverter implements ContinuousVar
         if (value != null) {
             quantity.setValue(value);
         }
-        if (quantityDef.unit() != null) {
-            quantity.setUnit(quantityDef.unit());
-        }
-        if (quantityDef.system() != null) {
-            quantity.setSystem(quantityDef.system());
-        }
-        if (quantityDef.code() != null) {
-            quantity.setCode(quantityDef.code());
-        }
+        // Note: unit, system, code are not preserved - only the numeric value
         return quantity;
     }
 }

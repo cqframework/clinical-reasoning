@@ -44,6 +44,15 @@ import org.opencds.cqf.fhir.utility.client.TerminologyServerClientSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Main visitor/driver for the $release operation.
+ * <p>
+ * This visitor gathers dependencies for the artifact being released via {@link IDependencyInfo}.
+ * By contract, {@link IDependencyInfo#getReference()} is expected to represent a FHIR canonical reference
+ * (i.e., {@code url} or {@code url|version}) wherever the dependency can be resolved.
+ * Non-canonical references coming from adapters are resolved (when possible) and rewritten to canonical form;
+ * unresolved dependencies may remain non-canonical but are added as-is.
+ */
 public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
     private static final String NOT_SUPPORTED = " not supported";
     private Logger logger = LoggerFactory.getLogger(ReleaseVisitor.class);
@@ -387,6 +396,13 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
                 }
                 // only add the dependency to the manifest if it is from a leaf artifact
                 if (!artifactAdapter.getUrl().equals(rootAdapter.getUrl())) {
+                    // Safety net: warn if resolved dependency is not a canonical URL
+                    if (dependencyAdapter != null && Canonicals.getUrl(dependency.getReference()) == null) {
+                        logger.warn(
+                                "Resolved dependency reference does not appear to be a canonical URL (url or url|version): '{}', artifact URL: '{}'",
+                                dependency.getReference(),
+                                artifactAdapter.getUrl());
+                    }
                     var newDep = IKnowledgeArtifactAdapter.newRelatedArtifact(
                             fhirVersion(),
                             Constants.RELATEDARTIFACT_TYPE_DEPENDSON,

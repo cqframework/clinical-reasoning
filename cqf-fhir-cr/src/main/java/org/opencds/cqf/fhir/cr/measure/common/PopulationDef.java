@@ -104,6 +104,19 @@ public class PopulationDef {
                 .toList();
     }
 
+    // Extracted from R4MeasureReportBuilder.countObservations() by Claude Sonnet 4.5
+    public int countObservations() {
+        if (this.getAllSubjectResources() == null) {
+            return 0;
+        }
+
+        return this.getAllSubjectResources().stream()
+                .filter(Map.class::isInstance)
+                .map(Map.class::cast)
+                .mapToInt(Map::size)
+                .sum();
+    }
+
     @Nullable
     public String getCriteriaReference() {
         return this.criteriaReference;
@@ -132,5 +145,45 @@ public class PopulationDef {
     @Nullable
     public ContinuousVariableObservationAggregateMethod getAggregateMethod() {
         return this.aggregateMethod;
+    }
+
+    /**
+     * Added by Claude Sonnet 4.5 on 2025-12-02
+     * Get the count for this population based on its type and the group's scoring type.
+     * This is the single source of truth for population counts.
+     *
+     * @param groupDef the GroupDef containing this population (needed for scoring type)
+     * @return the count for this population
+     */
+    public int getCount(GroupDef groupDef) {
+        // For MEASUREOBSERVATION populations, count the observations
+        if (this.measurePopulationType == MeasurePopulationType.MEASUREOBSERVATION) {
+            return countObservations();
+        }
+
+        // For other population types, use scoring-appropriate count
+        if (groupDef.isBooleanBasis()) {
+            // Boolean basis: count unique subjects
+            return getSubjects().size();
+        } else {
+            // Non-boolean basis: count all resources (including duplicates across subjects)
+            return getAllSubjectResources().size();
+        }
+    }
+
+    @Override
+    public String toString() {
+        String codeText = (code != null && code.text() != null) ? code.text() : "null";
+        String criteriaRef = (criteriaReference != null) ? criteriaReference : "null";
+        String aggMethod = (aggregateMethod != null) ? aggregateMethod.toString() : "null";
+
+        return "PopulationDef{"
+                + "id='" + id + '\''
+                + ", code.text='" + codeText + '\''
+                + ", type=" + measurePopulationType
+                + ", expression='" + expression + '\''
+                + ", criteriaReference='" + criteriaRef + '\''
+                + ", aggregateMethod=" + aggMethod
+                + '}';
     }
 }

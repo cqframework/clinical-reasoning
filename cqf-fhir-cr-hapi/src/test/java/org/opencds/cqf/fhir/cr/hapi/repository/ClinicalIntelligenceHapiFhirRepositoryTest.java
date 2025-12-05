@@ -36,7 +36,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
@@ -44,6 +43,8 @@ import org.mockito.MockitoAnnotations;
 
 // Admittedly, these aren't fantastic tests, but they prove we don't lose the _count parameter
 class ClinicalIntelligenceHapiFhirRepositoryTest {
+
+    record BundleProvidersParams(IBundleProvider bundleProvider) {}
 
     private static final FhirContext FHIR_CONTEXT = FhirContext.forR4Cached();
     private static final int DEFAULT_PAGE_SIZE = 5;
@@ -142,12 +143,12 @@ class ClinicalIntelligenceHapiFhirRepositoryTest {
         triggerTestCase(50, 100, null, 100, 50);
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{index} => testCase={0}")
     @MethodSource("bundleProviders")
-    void testSanitizeBundleProvider(IBundleProvider bundleProvider) {
+    void testSanitizeBundleProvider(BundleProvidersParams testCase) {
         var testSubject = getTestSubject(DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE, null, 0);
 
-        IBundleProvider result = testSubject.sanitizeBundleProvider(bundleProvider);
+        IBundleProvider result = testSubject.sanitizeBundleProvider(testCase.bundleProvider());
         assertNotNull(result);
     }
 
@@ -200,17 +201,17 @@ class ClinicalIntelligenceHapiFhirRepositoryTest {
         assertEquals(BundleTypeEnum.SEARCHSET, bundleType, "Default bundle type should be SEARCHSET");
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{index} => testCase={0}")
     @EnumSource(BundleTypeEnum.class)
-    void testExtractBundleTypeFromRequestParameters_withExplicitValue(BundleTypeEnum bundleType) {
+    void testExtractBundleTypeFromRequestParameters_withExplicitValue(BundleTypeEnum testCase) {
         var testSubject = getTestSubject(DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE, null, 0);
 
-        String typeStr = bundleType.getCode().toLowerCase();
+        String typeStr = testCase.getCode().toLowerCase();
         Map<String, String[]> parameters = createRequestParametersWithBundleType(typeStr);
         BundleTypeEnum extractedBundleType = testSubject.extractBundleTypeFromRequestParameters(parameters);
 
         assertNotNull(extractedBundleType);
-        assertEquals(bundleType, extractedBundleType, "Bundle type should match explicitly provided value");
+        assertEquals(testCase, extractedBundleType, "Bundle type should match explicitly provided value");
     }
 
     @Test
@@ -236,8 +237,8 @@ class ClinicalIntelligenceHapiFhirRepositoryTest {
         return retVal;
     }
 
-    private static Stream<Arguments> bundleProviders() {
-        return Stream.of(Arguments.of((IBundleProvider) null), Arguments.of(new SimpleBundleProvider()));
+    private static Stream<BundleProvidersParams> bundleProviders() {
+        return Stream.of(new BundleProvidersParams(null), new BundleProvidersParams(new SimpleBundleProvider()));
     }
 
     private void triggerTestCase(

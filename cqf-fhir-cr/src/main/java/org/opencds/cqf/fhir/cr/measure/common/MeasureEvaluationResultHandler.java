@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.annotation.Nonnull;
@@ -9,7 +10,6 @@ import java.util.Map;
 import java.util.Optional;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.elm.r1.VersionedIdentifier;
-import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.EvaluationResultsForMultiLib;
@@ -31,16 +31,21 @@ public class MeasureEvaluationResultHandler {
     }
 
     /**
-     * Method that consumes pre-generated CQL results into Measure defined fields that reference associated CQL expressions
-     * This is meant to be called by CQL CLI.
+     * Method that consumes pre-generated CQL results into Measure defined fields that reference
+     * associated CQL expressions This is meant to be called by CQL CLI.
      *
-     * @param evalResultsPerSubject criteria expression evalResultsPerSubject
-     * @param measureDef Measure defined objects
-     * @param measureEvalType the type of evaluation algorithm to apply to Criteria results
-     * @param applyScoring whether Measure Evaluator will apply set membership per measure scoring algorithm
-     * @param populationBasisValidator the validator class to use for checking consistency of results
+     * @param fhirContext              FHIR context for FHIR version
+     * @param evalResultsPerSubject    criteria expression evalResultsPerSubject
+     * @param measureDef               Measure defined objects
+     * @param measureEvalType          the type of evaluation algorithm to apply to Criteria
+     *                                 results
+     * @param applyScoring             whether Measure Evaluator will apply set membership per
+     *                                 measure scoring algorithm
+     * @param populationBasisValidator the validator class to use for checking consistency of
+     *                                 results
      */
     public static void processResults(
+            FhirContext fhirContext,
             Map<String, EvaluationResult> evalResultsPerSubject,
             MeasureDef measureDef,
             @Nonnull MeasureEvalType measureEvalType,
@@ -69,7 +74,7 @@ public class MeasureEvaluationResultHandler {
             }
         }
 
-        evaluator.postEvaluation(measureDef);
+        MeasureMultiSubjectEvaluator.postEvaluationMultiSubject(fhirContext, measureDef);
     }
 
     /**
@@ -79,16 +84,13 @@ public class MeasureEvaluationResultHandler {
      * @param zonedMeasurementPeriod offset defined measurement period for evaluation
      * @param context cql engine context
      * @param multiLibraryIdMeasureEngineDetails container for engine, library and measure IDs
-     * @param continuousVariableObservationConverter used for continuous variable scoring FHIR version
-     *                                               specific
      * @return CQL results for Library defined in the Measure resource
      */
-    public static <T extends ICompositeType> CompositeEvaluationResultsPerMeasure getEvaluationResults(
+    public static CompositeEvaluationResultsPerMeasure getEvaluationResults(
             List<String> subjectIds,
             ZonedDateTime zonedMeasurementPeriod,
             CqlEngine context,
-            MultiLibraryIdMeasureEngineDetails multiLibraryIdMeasureEngineDetails,
-            ContinuousVariableObservationConverter<T> continuousVariableObservationConverter) {
+            MultiLibraryIdMeasureEngineDetails multiLibraryIdMeasureEngineDetails) {
 
         // measure -> subject -> results
         var resultsBuilder = CompositeEvaluationResultsPerMeasure.builder();
@@ -135,8 +137,7 @@ public class MeasureEvaluationResultHandler {
                                     measureDefs,
                                     libraryVersionedIdentifier,
                                     evaluationResult,
-                                    subjectTypePart,
-                                    continuousVariableObservationConverter);
+                                    subjectTypePart);
 
                     resultsBuilder.addResults(measureDefs, subjectId, evaluationResult, measureObservationResults);
 

@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.dstu3;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.time.ZonedDateTime;
@@ -41,6 +42,7 @@ public class Dstu3MeasureProcessor {
     private final MeasureEvaluationOptions measureEvaluationOptions;
     private final SubjectProvider subjectProvider;
     private final MeasureProcessorUtils measureProcessorUtils = new MeasureProcessorUtils();
+    private final FhirContext fhirContext = FhirContext.forDstu3Cached();
 
     public Dstu3MeasureProcessor(IRepository repository, MeasureEvaluationOptions measureEvaluationOptions) {
         this(repository, measureEvaluationOptions, new Dstu3RepositorySubjectProvider());
@@ -115,14 +117,11 @@ public class Dstu3MeasureProcessor {
         // populate results from Library $evaluate
         if (!subjects.isEmpty()) {
             var results = MeasureEvaluationResultHandler.getEvaluationResults(
-                    subjectIds,
-                    zonedMeasurementPeriod,
-                    context,
-                    measureLibraryIdEngineDetails,
-                    Dstu3ContinuousVariableObservationConverter.INSTANCE);
+                    subjectIds, zonedMeasurementPeriod, context, measureLibraryIdEngineDetails);
 
             // Process Criteria Expression Results
             MeasureEvaluationResultHandler.processResults(
+                    fhirContext,
                     results.processMeasureForSuccessOrFailure(measureDef),
                     measureDef,
                     evalType,

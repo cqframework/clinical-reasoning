@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -49,6 +50,7 @@ public class R4MeasureProcessor {
     private final IRepository repository;
     private final MeasureEvaluationOptions measureEvaluationOptions;
     private final MeasureProcessorUtils measureProcessorUtils;
+    private final FhirContext fhirContext = FhirContext.forR4Cached();
 
     public R4MeasureProcessor(
             IRepository repository,
@@ -116,6 +118,7 @@ public class R4MeasureProcessor {
 
         // Process Criteria Expression Results
         MeasureEvaluationResultHandler.processResults(
+                fhirContext,
                 results,
                 measureDef,
                 evaluationType,
@@ -161,6 +164,7 @@ public class R4MeasureProcessor {
                 compositeEvaluationResultsPerMeasure.processMeasureForSuccessOrFailure(measureDef);
 
         MeasureEvaluationResultHandler.processResults(
+                fhirContext,
                 resultForThisMeasure,
                 measureDef,
                 evaluationType,
@@ -275,11 +279,7 @@ public class R4MeasureProcessor {
 
         // populate results from Library $evaluate
         return MeasureEvaluationResultHandler.getEvaluationResults(
-                subjects,
-                zonedMeasurementPeriod,
-                context,
-                multiLibraryIdMeasureEngineDetails,
-                R4ContinuousVariableObservationConverter.INSTANCE);
+                subjects, zonedMeasurementPeriod, context, multiLibraryIdMeasureEngineDetails);
     }
 
     /**

@@ -174,7 +174,7 @@ public class MeasureEvaluator {
     @Nullable
     private PopulationDef getPopulationDefByCriteriaRef(
             GroupDef groupDef, MeasurePopulationType populationType, PopulationDef inclusionDef) {
-        return groupDef.get(populationType).stream()
+        return groupDef.getPopulationDefs(populationType).stream()
                 .filter(x -> {
                     if (x.getCriteriaReference() == null) {
                         throw new InvalidRequestException("Criteria reference is null on PopulationDef");
@@ -191,11 +191,12 @@ public class MeasureEvaluator {
      */
     protected void validateRatioContinuousVariable(GroupDef groupDef) {
         // must have 2 MeasureObservations defined
-        if (!groupDef.get(MEASUREOBSERVATION).isEmpty()
-                && groupDef.get(MEASUREOBSERVATION).size() != 2) {
+        if (!groupDef.getPopulationDefs(MEASUREOBSERVATION).isEmpty()
+                && groupDef.getPopulationDefs(MEASUREOBSERVATION).size() != 2) {
             throw new InvalidRequestException(
                     "Ratio Continuous Variable requires 2 Measure Observations defined, you have: %s"
-                            .formatted(groupDef.get(MEASUREOBSERVATION).size()));
+                            .formatted(groupDef.getPopulationDefs(MEASUREOBSERVATION)
+                                    .size()));
         }
     }
 

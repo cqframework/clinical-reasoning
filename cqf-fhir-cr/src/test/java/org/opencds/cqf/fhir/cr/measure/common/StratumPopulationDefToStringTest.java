@@ -23,14 +23,17 @@ class StratumPopulationDefToStringTest {
         List<String> resourceIds = List.of("res1", "res2", "res3", "res4", "res5", "res6");
         Set<Object> intersection = Set.of("obj1", "obj2");
         CodeDef populationBasis = new CodeDef(null, null, "boolean", null);
+        PopulationDef populationDef =
+                new PopulationDef("stratum-1", null, MeasurePopulationType.INITIALPOPULATION, "expression");
 
         // When
         StratumPopulationDef stratumDef = new StratumPopulationDef(
-                "stratum-1", subjects, intersection, resourceIds, MeasureStratifierType.CRITERIA, populationBasis);
+                populationDef, subjects, intersection, resourceIds, MeasureStratifierType.CRITERIA, populationBasis);
         String result = stratumDef.toString();
 
-        // Then: Should contain id, measureStratifierType, and populationBasis
-        assertTrue(result.contains("id='stratum-1'"), "Should contain id");
+        // Then: Should contain populationDef with id, measureStratifierType, and populationBasis
+        assertTrue(
+                result.contains("populationDef=PopulationDef{id='stratum-1'"), "Should contain PopulationDef with id");
         assertTrue(result.contains("measureStratifierType=CRITERIA"), "Should contain CRITERIA type");
         assertTrue(result.contains("populationBasis=boolean"), "Should contain boolean basis");
 
@@ -50,14 +53,18 @@ class StratumPopulationDefToStringTest {
         List<String> resourceIds = List.of("enc1", "enc2");
         Set<Object> intersection = Set.of();
         CodeDef populationBasis = new CodeDef(null, null, "Encounter", null);
+        PopulationDef populationDef =
+                new PopulationDef("stratum-value-1", null, MeasurePopulationType.INITIALPOPULATION, "expression");
 
         // When
         StratumPopulationDef stratumDef = new StratumPopulationDef(
-                "stratum-value-1", subjects, intersection, resourceIds, MeasureStratifierType.VALUE, populationBasis);
+                populationDef, subjects, intersection, resourceIds, MeasureStratifierType.VALUE, populationBasis);
         String result = stratumDef.toString();
 
         // Then
-        assertTrue(result.contains("id='stratum-value-1'"), "Should contain id");
+        assertTrue(
+                result.contains("populationDef=PopulationDef{id='stratum-value-1'"),
+                "Should contain PopulationDef with id");
         assertTrue(result.contains("measureStratifierType=VALUE"), "Should contain VALUE type");
         assertTrue(result.contains("populationBasis=Encounter"), "Should contain Encounter basis");
 
@@ -83,10 +90,12 @@ class StratumPopulationDefToStringTest {
         Set<String> subjects = Set.of("Patient/1");
         List<String> resourceIds = List.of("pat1");
         CodeDef populationBasis = new CodeDef(null, null, "boolean", null);
+        PopulationDef populationDef =
+                new PopulationDef("stratum-patients", null, MeasurePopulationType.INITIALPOPULATION, "expression");
 
         // When
         StratumPopulationDef stratumDef = new StratumPopulationDef(
-                "stratum-patients",
+                populationDef,
                 subjects,
                 patientResources,
                 resourceIds,
@@ -118,15 +127,12 @@ class StratumPopulationDefToStringTest {
         Set<String> subjects = Set.of("Patient/1");
         List<String> resourceIds = List.of("res1");
         CodeDef populationBasis = new CodeDef(null, null, "boolean", null);
+        PopulationDef populationDef =
+                new PopulationDef("stratum-quantities", null, MeasurePopulationType.INITIALPOPULATION, "expression");
 
         // When
         StratumPopulationDef stratumDef = new StratumPopulationDef(
-                "stratum-quantities",
-                subjects,
-                quantities,
-                resourceIds,
-                MeasureStratifierType.CRITERIA,
-                populationBasis);
+                populationDef, subjects, quantities, resourceIds, MeasureStratifierType.CRITERIA, populationBasis);
         String result = stratumDef.toString();
 
         // Then: Should show IBase formatted as fhirType()
@@ -151,10 +157,12 @@ class StratumPopulationDefToStringTest {
         Set<String> subjects = Set.of("Patient/1", "Patient/2");
         List<String> resourceIds = List.of("res1", "res2");
         CodeDef populationBasis = new CodeDef(null, null, "boolean", null);
+        PopulationDef populationDef =
+                new PopulationDef("stratum-intervals", null, MeasurePopulationType.INITIALPOPULATION, "expression");
 
         // When
         StratumPopulationDef stratumDef = new StratumPopulationDef(
-                "stratum-intervals", subjects, intervals, resourceIds, MeasureStratifierType.CRITERIA, populationBasis);
+                populationDef, subjects, intervals, resourceIds, MeasureStratifierType.CRITERIA, populationBasis);
         String result = stratumDef.toString();
 
         // Then: Should show Interval objects as toString()
@@ -195,14 +203,18 @@ class StratumPopulationDefToStringTest {
         Set<String> subjects = Set.of("Patient/1", "Patient/2", "Patient/3", "Patient/4", "Patient/5", "Patient/6");
         List<String> resourceIds = List.of("res1", "res2", "res3", "res4", "res5", "res6", "res7", "res8", "res9");
         CodeDef populationBasis = new CodeDef(null, null, "Encounter", null);
+        PopulationDef populationDef =
+                new PopulationDef("stratum-mixed", null, MeasurePopulationType.INITIALPOPULATION, "expression");
 
         // When
         StratumPopulationDef stratumDef = new StratumPopulationDef(
-                "stratum-mixed", subjects, mixed, resourceIds, MeasureStratifierType.VALUE, populationBasis);
+                populationDef, subjects, mixed, resourceIds, MeasureStratifierType.VALUE, populationBasis);
         String result = stratumDef.toString();
 
         // Then
-        assertTrue(result.contains("id='stratum-mixed'"), "Should contain id");
+        assertTrue(
+                result.contains("populationDef=PopulationDef{id='stratum-mixed'"),
+                "Should contain PopulationDef with id");
         assertTrue(result.contains("measureStratifierType=VALUE"), "Should contain VALUE type");
         assertTrue(result.contains("populationBasis=Encounter"), "Should contain Encounter basis");
         assertTrue(result.contains("populationDefEvaluationResultIntersection="), "Should contain intersection field");
@@ -229,15 +241,12 @@ class StratumPopulationDefToStringTest {
         }
 
         CodeDef populationBasis = new CodeDef(null, null, "boolean", null);
+        PopulationDef populationDef =
+                new PopulationDef("stratum-exactly-5", null, MeasurePopulationType.INITIALPOPULATION, "expression");
 
         // When
         StratumPopulationDef stratumDef = new StratumPopulationDef(
-                "stratum-exactly-5",
-                subjects,
-                fivePatients,
-                resourceIds,
-                MeasureStratifierType.CRITERIA,
-                populationBasis);
+                populationDef, subjects, fivePatients, resourceIds, MeasureStratifierType.CRITERIA, populationBasis);
         String result = stratumDef.toString();
 
         // Then: Should NOT contain ellipsis since we have exactly 5

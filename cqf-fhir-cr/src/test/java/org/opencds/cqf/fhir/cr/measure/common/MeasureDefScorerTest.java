@@ -161,7 +161,8 @@ class MeasureDefScorerTest {
         StratumDef maleStratum = new StratumDef(
                 List.of(maleNumPop, maleDenPop),
                 Set.of(new StratumValueDef(new StratumValueWrapper("male"), genderComponent)),
-                Set.of("male1", "male2", "male3", "male4", "male5"));
+                Set.of("male1", "male2", "male3", "male4", "male5"),
+                null);
 
         // Create stratum populations for Female stratum
         StratumPopulationDef femaleNumPop = new StratumPopulationDef(
@@ -182,7 +183,8 @@ class MeasureDefScorerTest {
         StratumDef femaleStratum = new StratumDef(
                 List.of(femaleNumPop, femaleDenPop),
                 Set.of(new StratumValueDef(new StratumValueWrapper("female"), genderComponent)),
-                Set.of("female1", "female2", "female3", "female4", "female5"));
+                Set.of("female1", "female2", "female3", "female4", "female5"),
+                null);
 
         StratifierDef stratifierDef = new StratifierDef(
                 "gender-stratifier", createTextOnlyConcept("Gender Stratifier"), "Gender", MeasureStratifierType.VALUE);
@@ -984,10 +986,15 @@ class MeasureDefScorerTest {
 
         StratifierComponentDef genderComponent =
                 new StratifierComponentDef("gender-component", createTextOnlyConcept("Gender"), "Gender");
+
+        // Create measure observation cache for male stratum
+        MeasureObservationStratumCache maleCache = new MeasureObservationStratumCache(maleNumObs, maleDenObs);
+
         StratumDef maleStratum = new StratumDef(
                 List.of(maleNumObs, maleDenObs),
                 Set.of(new StratumValueDef(new StratumValueWrapper("male"), genderComponent)),
-                Set.of("p1", "p2", "p3"));
+                Set.of("p1", "p2", "p3"),
+                maleCache);
 
         // Female stratum - MEASUREOBSERVATION populations
         StratumPopulationDef femaleNumObs = new StratumPopulationDef(
@@ -1006,10 +1013,14 @@ class MeasureDefScorerTest {
                 MeasureStratifierType.VALUE,
                 booleanBasisCode);
 
+        // Create measure observation cache for female stratum
+        MeasureObservationStratumCache femaleCache = new MeasureObservationStratumCache(femaleNumObs, femaleDenObs);
+
         StratumDef femaleStratum = new StratumDef(
                 List.of(femaleNumObs, femaleDenObs),
                 Set.of(new StratumValueDef(new StratumValueWrapper("female"), genderComponent)),
-                Set.of("p4", "p5"));
+                Set.of("p4", "p5"),
+                femaleCache);
 
         // Create StratifierDef with strata
         StratifierDef stratifierDef = new StratifierDef(

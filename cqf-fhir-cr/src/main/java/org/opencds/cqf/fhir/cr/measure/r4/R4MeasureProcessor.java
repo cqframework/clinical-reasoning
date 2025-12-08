@@ -125,6 +125,11 @@ public class R4MeasureProcessor {
                 this.measureEvaluationOptions.getApplyScoringSetMembership(),
                 new R4PopulationBasisValidator());
 
+        // Capture Def snapshot if callback is registered (for testing frameworks)
+        if (this.measureEvaluationOptions.getDefCaptureCallback() != null) {
+            this.measureEvaluationOptions.getDefCaptureCallback().onDefCaptured(measureDef.createSnapshot());
+        }
+
         // Build Measure Report with Results
         return new R4MeasureReportBuilder()
                 .build(
@@ -170,6 +175,11 @@ public class R4MeasureProcessor {
                 evaluationType,
                 this.measureEvaluationOptions.getApplyScoringSetMembership(),
                 new R4PopulationBasisValidator());
+
+        // Capture Def snapshot if callback is registered (for testing frameworks)
+        if (this.measureEvaluationOptions.getDefCaptureCallback() != null) {
+            this.measureEvaluationOptions.getDefCaptureCallback().onDefCaptured(measureDef.createSnapshot());
+        }
 
         var measurementPeriod = measureProcessorUtils.getMeasurementPeriod(periodStart, periodEnd, context);
 

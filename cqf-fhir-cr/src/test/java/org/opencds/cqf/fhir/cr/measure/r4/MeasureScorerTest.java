@@ -427,7 +427,7 @@ class MeasureScorerTest {
             MeasureReportGroupComponent reportGroup = measureReport.getGroup().get(i);
 
             for (var populationDef : groupDef.populations()) {
-                int defCount = populationDef.getCount(groupDef);
+                int defCount = populationDef.getCount();
                 int reportCount = reportGroup.getPopulation().stream()
                         .filter(pop -> pop.getCode()
                                 .getCodingFirstRep()

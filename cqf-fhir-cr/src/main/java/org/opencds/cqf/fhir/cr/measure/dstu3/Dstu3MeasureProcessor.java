@@ -127,6 +127,11 @@ public class Dstu3MeasureProcessor {
                     evalType,
                     measureEvaluationOptions.getApplyScoringSetMembership(),
                     new Dstu3PopulationBasisValidator());
+
+            // Capture Def snapshot if callback is registered (for testing frameworks)
+            if (this.measureEvaluationOptions.getDefCaptureCallback() != null) {
+                this.measureEvaluationOptions.getDefCaptureCallback().onDefCaptured(measureDef.createSnapshot());
+            }
         }
 
         // Build Measure Report with Results

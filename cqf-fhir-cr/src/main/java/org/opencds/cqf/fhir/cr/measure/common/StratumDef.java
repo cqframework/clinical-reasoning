@@ -99,4 +99,31 @@ public class StratumDef {
     public void setScore(Double score) {
         this.score = score;
     }
+
+    /**
+     * Creates a deep copy snapshot of this StratumDef including mutable score field.
+     * <p>
+     * Copies all collections (stratumPopulations, valueDefs, subjectIds) and the
+     * mutable score field.
+     *
+     * @return A new StratumDef instance with deep copied collections and copied score
+     */
+    public StratumDef createSnapshot() {
+        // Deep copy stratumPopulations (StratumPopulationDef is immutable record)
+        List<StratumPopulationDef> snapshotPopulations = List.copyOf(stratumPopulations);
+
+        // Deep copy valueDefs (StratumValueDef is immutable record)
+        Set<StratumValueDef> snapshotValueDefs = Set.copyOf(valueDefs);
+
+        // Deep copy subjectIds
+        Collection<String> snapshotSubjectIds = List.copyOf(subjectIds);
+
+        // Create new StratumDef
+        StratumDef snapshot = new StratumDef(snapshotPopulations, snapshotValueDefs, snapshotSubjectIds);
+
+        // Copy mutable score field (added 2025-12-03 for version-agnostic scoring)
+        snapshot.score = this.score;
+
+        return snapshot;
+    }
 }

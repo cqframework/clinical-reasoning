@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cr.measure;
 import java.util.HashMap;
 import java.util.Map;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
+import org.opencds.cqf.fhir.cr.measure.common.DefCaptureCallback;
 import org.opencds.cqf.fhir.utility.ValidationProfile;
 
 public class MeasureEvaluationOptions {
@@ -18,6 +19,8 @@ public class MeasureEvaluationOptions {
     private SubjectProviderOptions subjectProviderOptions;
 
     private EvaluationSettings evaluationSettings = null;
+
+    private DefCaptureCallback defCaptureCallback = null;
 
     public boolean isValidationEnabled() {
         return this.isValidationEnabled;
@@ -60,5 +63,37 @@ public class MeasureEvaluationOptions {
 
     public boolean getApplyScoringSetMembership() {
         return this.applyScoringSetMembership;
+    }
+
+    /**
+     * Get the DefCaptureCallback for capturing MeasureDef snapshots during evaluation.
+     * <p>
+     * This callback is invoked by MeasureProcessor implementations after processResults()
+     * completes, allowing test frameworks to capture immutable snapshots of the MeasureDef state.
+     * <p>
+     * If null (default), no snapshot capture occurs (zero production impact).
+     *
+     * @return the DefCaptureCallback, or null if not set
+     * @see DefCaptureCallback
+     */
+    public DefCaptureCallback getDefCaptureCallback() {
+        return this.defCaptureCallback;
+    }
+
+    /**
+     * Set the DefCaptureCallback for capturing MeasureDef snapshots during evaluation.
+     * <p>
+     * This is an opt-in mechanism for testing frameworks. When set, the callback will be
+     * invoked after processResults() completes with an immutable snapshot of the MeasureDef.
+     * <p>
+     * Setting to null (default) disables snapshot capture entirely.
+     *
+     * @param defCaptureCallback the callback to invoke, or null to disable
+     * @return this MeasureEvaluationOptions instance for method chaining
+     * @see DefCaptureCallback
+     */
+    public MeasureEvaluationOptions setDefCaptureCallback(DefCaptureCallback defCaptureCallback) {
+        this.defCaptureCallback = defCaptureCallback;
+        return this;
     }
 }

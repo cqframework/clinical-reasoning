@@ -257,11 +257,13 @@ class R4MeasureReportBuilderTest {
     }
 
     private static PopulationDef buildPopulationRef(Collection<Object> resources) {
+        CodeDef booleanBasis = new CodeDef(MeasureConstants.POPULATION_BASIS_URL, "boolean");
         final PopulationDef populationDef = new PopulationDef(
                 null,
                 new ConceptDef(List.of(new CodeDef("system", MeasurePopulationType.DATEOFCOMPLIANCE.toCode())), null),
                 MeasurePopulationType.DATEOFCOMPLIANCE,
                 null,
+                booleanBasis,
                 null,
                 null);
 

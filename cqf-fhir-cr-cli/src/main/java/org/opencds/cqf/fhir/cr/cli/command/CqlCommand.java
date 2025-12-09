@@ -6,9 +6,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.stream.Stream;
 import org.apache.commons.lang3.tuple.Pair;
 import org.cqframework.cql.cql2elm.DefaultLibrarySourceProvider;
 import org.cqframework.fhir.npm.NpmProcessor;
@@ -27,31 +28,19 @@ public class CqlCommand implements Callable<Integer> {
 
     @Override
     public Integer call() throws IOException {
-        var results = evaluate(this.args);
-
-        if (args.outputPath != null) {
-            Files.createDirectories(Path.of(args.outputPath));
-            try (var os = Files.newOutputStream(
-                    Path.of(args.outputPath),
-                    StandardOpenOption.TRUNCATE_EXISTING,
-                    StandardOpenOption.WRITE,
-                    StandardOpenOption.CREATE)) {
-                results.forEach(r -> Utilities.writeResult(r.result(), os));
-            }
-        } else {
-            results.forEach(r -> Utilities.writeResult(r.result(), System.out));
-        }
+        evaluateAndWriteResults(this.args);
         return 0;
     }
 
-    record SubjectAndResult(String subjectId, EvaluationResult result) {}
-
-    public static Stream<SubjectAndResult> evaluate(CqlCommandArgument arguments) {
+    public static void evaluateAndWriteResults(CqlCommandArgument arguments) throws IOException {
+        // Set up FhirContext once
         FhirContext fhirContext = FhirContext.forCached(FhirVersionEnum.valueOf(arguments.fhir.fhirVersion));
 
+        // Set up evaluation settings once
         var evaluationSettings =
                 Utilities.createEvaluationSettings(arguments.content.cqlPath, arguments.hedisCompatibilityMode);
 
+        // Initialize NPM processor once if needed
         NpmProcessor npmProcessor = null;
         if (arguments.fhir.implementationGuidePath != null && arguments.fhir.rootDirectory != null) {
             try {
@@ -67,29 +56,141 @@ public class CqlCommand implements Callable<Integer> {
         }
 
         evaluationSettings.setNpmProcessor(npmProcessor);
-        var repository = Utilities.createRepository(fhirContext, arguments.fhir.terminologyUrl, arguments.fhir.dataUrl);
-        VersionedIdentifier identifier = new VersionedIdentifier().withId(arguments.content.name);
 
+        // Create repository once
+        var repository = Utilities.createRepository(fhirContext, arguments.fhir.terminologyUrl, arguments.fhir.dataUrl);
+
+        // Create engine once
+        var engine = Engines.forRepository(repository, evaluationSettings);
+
+        // Register library source provider once
+        if (arguments.content.cqlPath != null) {
+            var provider = new DefaultLibrarySourceProvider(
+                    new kotlinx.io.files.Path(Path.of(arguments.content.cqlPath).toFile()));
+            engine.getEnvironment().getLibraryManager().getLibrarySourceLoader().registerProvider(provider);
+        }
+
+        VersionedIdentifier identifier = new VersionedIdentifier().withId(arguments.content.name);
         Set<String> expressions = arguments.content.expression != null ? Set.of(arguments.content.expression) : null;
 
-        return arguments.parameters.context.stream().map(c -> {
-            var engine = Engines.forRepository(repository, evaluationSettings);
-            if (arguments.content.cqlPath != null) {
-                var provider = new DefaultLibrarySourceProvider(new kotlinx.io.files.Path(
-                        Path.of(arguments.content.cqlPath).toFile()));
-                engine.getEnvironment()
-                        .getLibraryManager()
-                        .getLibrarySourceLoader()
-                        .registerProvider(provider);
-            }
-
+        // Process each context value iteratively
+        for (var c : arguments.parameters.context) {
             // This is incorrect because cql supports multiple context parameters
             // Encounter=123 and Patient=456 can be set simultaneously.
             // For now, we assume only one context parameter is provided.
             var subjectId = c.contextName + "/" + c.contextValue;
+
+            // Determine output file path
+            Path outputPath = null;
+            if (arguments.outputPath != null) {
+                outputPath = Path.of(arguments.outputPath, c.contextValue + ".txt");
+
+                // Skip if already processed
+                if (Files.exists(outputPath)) {
+                    System.out.println("⏭️  Skipping " + c.contextValue + " (already processed)");
+                    continue;
+                }
+
+                // Ensure parent directory exists
+                Files.createDirectories(outputPath.getParent());
+            }
+
+            System.out.println("▶️  Evaluating " + c.contextValue + "...");
+
+            // Evaluate CQL for this context
             var contextParameter = Pair.<String, Object>of(c.contextName, c.contextValue);
             var cqlResult = engine.evaluate(identifier, expressions, contextParameter);
-            return new SubjectAndResult(subjectId, cqlResult);
-        });
+
+            // Write results immediately
+            if (outputPath != null) {
+                writeResultToFile(cqlResult, subjectId, outputPath);
+                System.out.println("✅ Completed " + c.contextValue);
+            } else {
+                // Write to stdout if no output path specified
+                Utilities.writeResult(cqlResult, System.out);
+            }
+
+            // Result goes out of scope here, allowing GC to free memory
+        }
+    }
+
+    private static void writeResultToFile(EvaluationResult result, String subjectId, Path outputPath)
+            throws IOException {
+        try (var writer = Files.newBufferedWriter(outputPath, StandardOpenOption.CREATE, StandardOpenOption.WRITE)) {
+            writer.write("Subject: " + subjectId + "\n\n");
+
+            // Write expression results
+            for (var entry : result.getExpressionResults().entrySet()) {
+                writer.write(entry.getKey() + " = "
+                        + Utilities.tempConvert(entry.getValue().value()) + "\n");
+            }
+
+            writer.write("\n");
+        }
+    }
+
+    /**
+     * Record to hold subject ID and evaluation result.
+     * Used by MeasureCommand which needs to collect all results before generating reports.
+     */
+    public record SubjectAndResult(String subjectId, EvaluationResult result) {}
+
+    /**
+     * Evaluates CQL and returns results in memory.
+     * This method is provided for MeasureCommand which needs all CQL results before generating reports.
+     * For direct CQL evaluation, use evaluateAndWriteResults() instead for better memory efficiency.
+     */
+    public static List<SubjectAndResult> evaluate(CqlCommandArgument arguments) {
+        List<SubjectAndResult> results = new ArrayList<>();
+
+        // Set up FhirContext once
+        FhirContext fhirContext = FhirContext.forCached(FhirVersionEnum.valueOf(arguments.fhir.fhirVersion));
+
+        // Set up evaluation settings once
+        var evaluationSettings =
+                Utilities.createEvaluationSettings(arguments.content.cqlPath, arguments.hedisCompatibilityMode);
+
+        // Initialize NPM processor once if needed
+        NpmProcessor npmProcessor = null;
+        if (arguments.fhir.implementationGuidePath != null && arguments.fhir.rootDirectory != null) {
+            try {
+                var context = new IGContext();
+                context.initializeFromIg(
+                        arguments.fhir.rootDirectory,
+                        arguments.fhir.implementationGuidePath,
+                        fhirContext.getVersion().getVersion().getFhirVersionString());
+                npmProcessor = new NpmProcessor(context);
+            } catch (Exception e) {
+                throw new IllegalArgumentException("Failed to initialize IGContext from provided path", e);
+            }
+        }
+
+        evaluationSettings.setNpmProcessor(npmProcessor);
+
+        // Create repository once
+        var repository = Utilities.createRepository(fhirContext, arguments.fhir.terminologyUrl, arguments.fhir.dataUrl);
+
+        // Create engine once
+        var engine = Engines.forRepository(repository, evaluationSettings);
+
+        // Register library source provider once
+        if (arguments.content.cqlPath != null) {
+            var provider = new DefaultLibrarySourceProvider(
+                    new kotlinx.io.files.Path(Path.of(arguments.content.cqlPath).toFile()));
+            engine.getEnvironment().getLibraryManager().getLibrarySourceLoader().registerProvider(provider);
+        }
+
+        VersionedIdentifier identifier = new VersionedIdentifier().withId(arguments.content.name);
+        Set<String> expressions = arguments.content.expression != null ? Set.of(arguments.content.expression) : null;
+
+        // Process each context value iteratively
+        for (var c : arguments.parameters.context) {
+            var subjectId = c.contextName + "/" + c.contextValue;
+            var contextParameter = Pair.<String, Object>of(c.contextName, c.contextValue);
+            var cqlResult = engine.evaluate(identifier, expressions, contextParameter);
+            results.add(new SubjectAndResult(subjectId, cqlResult));
+        }
+
+        return results;
     }
 }

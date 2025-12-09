@@ -16,9 +16,9 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
@@ -82,7 +82,7 @@ public class MeasureCommand implements Callable<Integer> {
 
     record SubjectAndReport(String subjectId, EvaluationResult result, MeasureReport measureReport) {}
 
-    public static Stream<SubjectAndReport> evaluate(MeasureCommandArgument args) {
+    public static List<SubjectAndReport> evaluate(MeasureCommandArgument args) {
         var cqlArgs = args.cql;
         var results = CqlCommand.evaluate(cqlArgs);
         var fhirContext = FhirContext.forCached(FhirVersionEnum.valueOf(cqlArgs.fhir.fhirVersion));
@@ -106,13 +106,15 @@ public class MeasureCommand implements Callable<Integer> {
         // Something askew here, we should get one result per subject for subject report.
         // Probably need to refactor the evaluateMeasureResults method to handle this.
         // "subject" and "summary" need separate overloads, possibly with different parameter types.
-        var map = results.collect(Collectors.toMap(SubjectAndResult::subjectId, SubjectAndResult::result));
+        var map = results.stream().collect(Collectors.toMap(SubjectAndResult::subjectId, SubjectAndResult::result));
 
-        return map.entrySet().stream().map(entry -> {
-            var report = processor.evaluateMeasureResults(
-                    resource, start, end, "subject", Collections.singletonList(entry.getKey()), map);
-            return new SubjectAndReport(entry.getKey(), entry.getValue(), report);
-        });
+        return map.entrySet().stream()
+                .map(entry -> {
+                    var report = processor.evaluateMeasureResults(
+                            resource, start, end, "subject", Collections.singletonList(entry.getKey()), map);
+                    return new SubjectAndReport(entry.getKey(), entry.getValue(), report);
+                })
+                .collect(Collectors.toList());
     }
 
     @Nullable

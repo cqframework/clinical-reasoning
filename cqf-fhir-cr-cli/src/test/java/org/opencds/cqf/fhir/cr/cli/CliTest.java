@@ -744,6 +744,7 @@ class CliTest {
             "-source=/Users/justinmckelvy/Documents/HEDIS MY 2025.1.0/input/cql",
             "-name=AAB_Reporting",
             "-data=/Users/justinmckelvy/Documents/HEDIS/MY2025/AAB/Sample/tests",
+            "-terminology=/Users/justinmckelvy/Documents/HEDIS MY 2025.1.0",
             "-c=Patient",
             "-cv=patient.2025.aab.0.95424",
             "-c=Patient",

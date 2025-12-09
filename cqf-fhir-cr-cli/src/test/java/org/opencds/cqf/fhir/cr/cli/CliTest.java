@@ -631,6 +631,7 @@ class CliTest {
             "-cv=123",
             "-c=Patient",
             "-cv=456",
+            "--apply-scoring=false",
             "--measure-path=" + testResourcePath + "/compartment/input/resources/measure/",
             "--measure=%s".formatted(measureId),
         };
@@ -722,5 +723,96 @@ class CliTest {
         }
 
         return multimapBuilder.build();
+    }
+
+    @Test
+    void runHedisContent() {
+
+//        java -jar target/cql-cli-tester.jar measure \
+//        --measure-path="/Users/justinmckelvy/Documents/HEDIS MY 2025.1.0/input/Measure" \
+//        --measure=AAB-Reporting \
+//        -source="/Users/justinmckelvy/Documents/HEDIS MY 2025.1.0/input/cql" \
+//        -name=AAB_Reporting \
+//        -data="/Users/justinmckelvy/Documents/HEDIS/MY2025/AAB/Sample/tests" \
+//        --report-path=/Users/justinmckelvy/Documents/HEDIS/MY2025/AAB/Sample/tests/report \
+//        --output-path=/Users/justinmckelvy/Documents/HEDIS/MY2025/AAB/Sample/tests/txt \
+//        -terminology="/Users/justinmckelvy/Documents/HEDIS MY 2025.1.0" \
+//        --enable-hedis-compatibility-mode
+
+        String[] args = new String[] {
+            "measure",
+            "-source=/Users/justinmckelvy/Documents/HEDIS MY 2025.1.0/input/cql",
+            "-name=AAB_Reporting",
+            "-data=/Users/justinmckelvy/Documents/HEDIS/MY2025/AAB/Sample/tests",
+            "-c=Patient",
+            "-cv=patient.2025.aab.0.95424",
+            "-c=Patient",
+            "-cv=patient.2025.aab.0.128322",
+            "-c=Patient",
+            "-cv=patient.2025.aab.0.150238",
+            "-c=Patient",
+            "-cv=patient.2025.aab.0.100548",
+            "-c=Patient",
+            "-cv=patient.2025.aab.0.113963",
+            "-c=Patient",
+            "-cv=patient.2025.aab.0.105806",
+            "-c=Patient",
+            "-cv=patient.2025.aab.0.154698",
+            "-c=Patient",
+            "-cv=patient.2025.aab.0.119465",
+            "-c=Patient",
+            "-cv=patient.2025.aab.0.149315",
+            "-c=Patient",
+            "-cv=patient.2025.aab.0.139062",
+            "-c=Patient",
+            "-cv=patient.2025.aab.0.111608",
+            "-c=Patient",
+            "-cv=patient.2025.aab.0.136816",
+            "-c=Patient",
+            "-cv=patient.2025.aab.0.120973",
+            "-c=Patient",
+            "-cv=patient.2025.aab.0.141944",
+            "-c=Patient",
+            "-cv=patient.2025.aab.0.97373",
+            "-c=Patient",
+            "-cv=patient.2025.aab.0.108725",
+            "-c=Patient",
+            "-cv=patient.2025.aab.0.140896",
+            "-c=Patient",
+            "-cv=patient.2025.aab.0.98109",
+            "-c=Patient",
+            "-cv=patient.2025.aab.0.102811",
+            "-c=Patient",
+            "-cv=patient.2025.aab.0.139250",
+            "-c=Patient",
+            "-cv=patient.2025.aab.0.138382",
+            "-c=Patient",
+            "-cv=patient.2025.aab.0.114974",
+            "-c=Patient",
+            "-cv=patient.2025.aab.0.140298",
+            "-c=Patient",
+            "-cv=patient.2025.aab.0.98935",
+            "-c=Patient",
+            "-cv=patient.2025.aab.0.136218",
+            "-c=Patient",
+            "-cv=patient.2025.aab.0.97141",
+            "-c=Patient",
+            "-cv=patient.2025.aab.0.114148",
+            "-c=Patient",
+            "-cv=patient.2025.aab.0.96093",
+            "-c=Patient",
+            "-cv=patient.2025.aab.0.108517",
+            "--apply-scoring=false",
+            "--measure-path=/Users/justinmckelvy/Documents/HEDIS MY 2025.1.0/input/Measure",
+            "--measure=AAB-Reporting",
+        };
+
+        Main.run(args);
+
+        // Should be two MeasureReports printed to the console
+        String output = outContent.toString();
+        assertTrue(output.contains("\"resourceType\":\"MeasureReport\""));
+        assertTrue(output.contains("\"subject\":{\"reference\":\"Patient/123\""));
+        assertTrue(output.contains("\"subject\":{\"reference\":\"Patient/456\""));
     }
 }

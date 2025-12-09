@@ -23,6 +23,8 @@ import picocli.CommandLine.Command;
 
 @Command(name = "cql", mixinStandardHelpOptions = true, description = "Evaluate CQL libraries against FHIR resources.")
 public class CqlCommand implements Callable<Integer> {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CqlCommand.class);
+
     @ArgGroup(multiplicity = "1", exclusive = false)
     public CqlCommandArgument args;
 
@@ -75,9 +77,6 @@ public class CqlCommand implements Callable<Integer> {
 
         // Process each context value iteratively
         for (var c : arguments.parameters.context) {
-            // This is incorrect because cql supports multiple context parameters
-            // Encounter=123 and Patient=456 can be set simultaneously.
-            // For now, we assume only one context parameter is provided.
             var subjectId = c.contextName + "/" + c.contextValue;
 
             // Determine output file path
@@ -87,7 +86,7 @@ public class CqlCommand implements Callable<Integer> {
 
                 // Skip if already processed
                 if (Files.exists(outputPath)) {
-                    System.out.println("⏭️  Skipping " + c.contextValue + " (already processed)");
+                    log.info("⏭️  Skipping " + c.contextValue + " (already processed)");
                     continue;
                 }
 
@@ -95,7 +94,7 @@ public class CqlCommand implements Callable<Integer> {
                 Files.createDirectories(outputPath.getParent());
             }
 
-            System.out.println("▶️  Evaluating " + c.contextValue + "...");
+            log.info("▶\uFE0F  Evaluating {}...", c.contextValue);
 
             // Evaluate CQL for this context
             var contextParameter = Pair.<String, Object>of(c.contextName, c.contextValue);
@@ -104,7 +103,7 @@ public class CqlCommand implements Callable<Integer> {
             // Write results immediately
             if (outputPath != null) {
                 writeResultToFile(cqlResult, subjectId, outputPath);
-                System.out.println("✅ Completed " + c.contextValue);
+                log.info("✅ Completed {}", c.contextValue);
             } else {
                 // Write to stdout if no output path specified
                 Utilities.writeResult(cqlResult, System.out);

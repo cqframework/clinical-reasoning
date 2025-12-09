@@ -16,15 +16,21 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.stream.Collectors;
+import org.apache.commons.lang3.tuple.Pair;
+import org.cqframework.cql.cql2elm.DefaultLibrarySourceProvider;
+import org.cqframework.fhir.npm.NpmProcessor;
+import org.cqframework.fhir.utilities.IGContext;
+import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
+import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cr.cli.argument.MeasureCommandArgument;
-import org.opencds.cqf.fhir.cr.cli.command.CqlCommand.SubjectAndResult;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorUtils;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureProcessor;
@@ -43,55 +49,58 @@ public class MeasureCommand implements Callable<Integer> {
 
     @Override
     public Integer call() throws IOException {
-        var results = MeasureCommand.evaluate(this.args);
-
-        if (args.cql.outputPath != null) {
-            Files.createDirectories(Path.of(args.cql.outputPath));
-        }
-
-        var fhirContext = FhirContext.forCached(FhirVersionEnum.valueOf(args.cql.fhir.fhirVersion));
-        var parser = fhirContext.newJsonParser();
-        results.forEach(r -> {
-            try {
-                var json = parser.encodeResourceToString(r.measureReport);
-                if (args.reportPath != null) {
-                    writeJsonToFile(json, r.subjectId, Path.of(args.reportPath));
-                } else {
-                    System.out.println(json);
-                }
-
-                if (args.cql.outputPath != null) {
-                    var path = Path.of(args.cql.outputPath, r.subjectId + ".txt");
-                    Files.createDirectories(path.getParent());
-                    try (OutputStream out = Files.newOutputStream(
-                            path,
-                            StandardOpenOption.CREATE,
-                            StandardOpenOption.TRUNCATE_EXISTING,
-                            StandardOpenOption.WRITE)) {
-                        Utilities.writeResult(r.result, out);
-                        log.info("Cql for patient {} written to: {}", r.subjectId, path);
-                    }
-                }
-            } catch (IOException e) {
-                log.error("Failed to process report for patient {}", r.subjectId, e);
-            }
-        });
-
-        return 0; // Return an appropriate exit code
+        evaluateAndWriteResults(this.args);
+        return 0;
     }
 
-    record SubjectAndReport(String subjectId, EvaluationResult result, MeasureReport measureReport) {}
-
-    public static List<SubjectAndReport> evaluate(MeasureCommandArgument args) {
+    public static void evaluateAndWriteResults(MeasureCommandArgument args) throws IOException {
         var cqlArgs = args.cql;
-        var results = CqlCommand.evaluate(cqlArgs);
-        var fhirContext = FhirContext.forCached(FhirVersionEnum.valueOf(cqlArgs.fhir.fhirVersion));
-        var parser = fhirContext.newJsonParser();
-        var resource = getMeasure(parser, args.measurePath, args.measureName);
-        var processor = getR4MeasureProcessor(
-                Utilities.createEvaluationSettings(cqlArgs.content.cqlPath, cqlArgs.hedisCompatibilityMode),
-                Utilities.createRepository(fhirContext, cqlArgs.fhir.terminologyUrl, cqlArgs.fhir.dataUrl));
 
+        // Set up FhirContext once
+        FhirContext fhirContext = FhirContext.forCached(FhirVersionEnum.valueOf(cqlArgs.fhir.fhirVersion));
+        IParser parser = fhirContext.newJsonParser();
+
+        // Set up evaluation settings once
+        var evaluationSettings =
+                Utilities.createEvaluationSettings(cqlArgs.content.cqlPath, cqlArgs.hedisCompatibilityMode);
+
+        // Initialize NPM processor once if needed
+        NpmProcessor npmProcessor = null;
+        if (cqlArgs.fhir.implementationGuidePath != null && cqlArgs.fhir.rootDirectory != null) {
+            try {
+                var context = new IGContext();
+                context.initializeFromIg(
+                        cqlArgs.fhir.rootDirectory,
+                        cqlArgs.fhir.implementationGuidePath,
+                        fhirContext.getVersion().getVersion().getFhirVersionString());
+                npmProcessor = new NpmProcessor(context);
+            } catch (Exception e) {
+                throw new IllegalArgumentException("Failed to initialize IGContext from provided path", e);
+            }
+        }
+
+        evaluationSettings.setNpmProcessor(npmProcessor);
+
+        // Create repository once
+        var repository = Utilities.createRepository(fhirContext, cqlArgs.fhir.terminologyUrl, cqlArgs.fhir.dataUrl);
+
+        // Create engine once
+        var engine = Engines.forRepository(repository, evaluationSettings);
+
+        // Register library source provider once
+        if (cqlArgs.content.cqlPath != null) {
+            var provider = new DefaultLibrarySourceProvider(
+                    new kotlinx.io.files.Path(Path.of(cqlArgs.content.cqlPath).toFile()));
+            engine.getEnvironment().getLibraryManager().getLibrarySourceLoader().registerProvider(provider);
+        }
+
+        // Load measure once
+        Measure measure = getMeasure(parser, args.measurePath, args.measureName);
+
+        // Create measure processor once
+        R4MeasureProcessor processor = getR4MeasureProcessor(evaluationSettings, repository);
+
+        // Parse period dates once
         var start = args.periodStart != null
                 ? LocalDate.parse(args.periodStart, DateTimeFormatter.ISO_LOCAL_DATE)
                         .atStartOfDay(ZoneId.systemDefault())
@@ -103,18 +112,74 @@ public class MeasureCommand implements Callable<Integer> {
                         .atZone(ZoneId.systemDefault())
                 : null;
 
-        // Something askew here, we should get one result per subject for subject report.
-        // Probably need to refactor the evaluateMeasureResults method to handle this.
-        // "subject" and "summary" need separate overloads, possibly with different parameter types.
-        var map = results.stream().collect(Collectors.toMap(SubjectAndResult::subjectId, SubjectAndResult::result));
+        VersionedIdentifier identifier = new VersionedIdentifier().withId(cqlArgs.content.name);
+        Set<String> expressions = cqlArgs.content.expression != null ? Set.of(cqlArgs.content.expression) : null;
 
-        return map.entrySet().stream()
-                .map(entry -> {
-                    var report = processor.evaluateMeasureResults(
-                            resource, start, end, "subject", Collections.singletonList(entry.getKey()), map);
-                    return new SubjectAndReport(entry.getKey(), entry.getValue(), report);
-                })
-                .collect(Collectors.toList());
+        // Create output directories if needed
+        if (args.cql.outputPath != null) {
+            Files.createDirectories(Path.of(args.cql.outputPath));
+        }
+        if (args.reportPath != null) {
+            Files.createDirectories(Path.of(args.reportPath));
+        }
+
+        // Process each context value iteratively
+        for (var c : cqlArgs.parameters.context) {
+            var subjectId = c.contextName + "/" + c.contextValue;
+
+            // Check if already processed (skip if both output files exist)
+            boolean cqlExists =
+                    args.cql.outputPath != null && Files.exists(Path.of(args.cql.outputPath, c.contextValue + ".txt"));
+            boolean reportExists =
+                    args.reportPath != null && Files.exists(Path.of(args.reportPath, c.contextValue + ".json"));
+
+            if (cqlExists && reportExists) {
+                log.info("⏭\uFE0F  Skipping {} (already processed)", c.contextValue);
+                continue;
+            }
+
+            log.info("▶\uFE0F  Evaluating {}...", c.contextValue);
+
+            // Evaluate CQL for this context
+            var contextParameter = Pair.<String, Object>of(c.contextName, c.contextValue);
+            var cqlResult = engine.evaluate(identifier, expressions, contextParameter);
+
+            // Create single-entry map for measure processor
+            // The API requires a map, so we create a map with just this one result
+            Map<String, EvaluationResult> resultMap = new HashMap<>();
+            resultMap.put(subjectId, cqlResult);
+
+            // Generate measure report for this context
+            MeasureReport measureReport = processor.evaluateMeasureResults(
+                    measure, start, end, "subject", Collections.singletonList(subjectId), resultMap);
+
+            // Write measure report immediately
+            if (args.reportPath != null) {
+                var json = parser.encodeResourceToString(measureReport);
+                writeMeasureReportToFile(json, c.contextValue, Path.of(args.reportPath));
+                log.info("Measure report for {} written to: {}", c.contextValue, args.reportPath);
+            } else {
+                // Write to stdout if no report path specified
+                log.info(parser.encodeResourceToString(measureReport));
+            }
+
+            // Write CQL results immediately
+            if (args.cql.outputPath != null) {
+                var path = Path.of(args.cql.outputPath, c.contextValue + ".txt");
+                try (OutputStream out = Files.newOutputStream(
+                        path,
+                        StandardOpenOption.CREATE,
+                        StandardOpenOption.TRUNCATE_EXISTING,
+                        StandardOpenOption.WRITE)) {
+                    Utilities.writeResult(cqlResult, out);
+                    log.info("CQL results for {} written to: {}", c.contextValue, path);
+                }
+            }
+
+            log.info("✅ Completed {}", c.contextValue);
+
+            // Results go out of scope here, allowing GC to free memory
+        }
     }
 
     @Nullable
@@ -142,8 +207,8 @@ public class MeasureCommand implements Callable<Integer> {
         return new R4MeasureProcessor(repository, evaluationOptions, new MeasureProcessorUtils());
     }
 
-    private void writeJsonToFile(String json, String patientId, Path path) throws IOException {
-        Path outputPath = path.resolve(patientId + ".json");
+    private static void writeMeasureReportToFile(String json, String contextValue, Path path) throws IOException {
+        Path outputPath = path.resolve(contextValue + ".json");
         // Ensure parent directories exist
         Files.createDirectories(outputPath.getParent());
 
@@ -154,7 +219,6 @@ public class MeasureCommand implements Callable<Integer> {
                 StandardOpenOption.TRUNCATE_EXISTING,
                 StandardOpenOption.WRITE)) {
             out.write(json.getBytes());
-            log.info("report for patient {} written to: {}", patientId, outputPath);
         }
     }
 }

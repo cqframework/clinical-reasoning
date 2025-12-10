@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
@@ -727,23 +728,14 @@ class CliTest {
 
     @Test
     void runHedisContent() {
-
-//        java -jar target/cql-cli-tester.jar measure \
-//        --measure-path="/Users/justinmckelvy/Documents/HEDIS MY 2025.1.0/input/Measure" \
-//        --measure=AAB-Reporting \
-//        -source="/Users/justinmckelvy/Documents/HEDIS MY 2025.1.0/input/cql" \
-//        -name=AAB_Reporting \
-//        -data="/Users/justinmckelvy/Documents/HEDIS/MY2025/AAB/Sample/tests" \
-//        --report-path=/Users/justinmckelvy/Documents/HEDIS/MY2025/AAB/Sample/tests/report \
-//        --output-path=/Users/justinmckelvy/Documents/HEDIS/MY2025/AAB/Sample/tests/txt \
-//        -terminology="/Users/justinmckelvy/Documents/HEDIS MY 2025.1.0" \
-//        --enable-hedis-compatibility-mode
+        var hedisRoot = Path.of("/Users/justinmckelvy/Documents/HEDIS MY 2025.1.0");
+        assumeTrue(Files.isDirectory(hedisRoot), "External HEDIS content not available on this machine");
 
         String[] args = new String[] {
             "measure",
-            "-source=/Users/justinmckelvy/Documents/HEDIS MY 2025.1.0/input/cql",
+            "-source=" + hedisRoot + "/input/cql",
             "-name=AAB_Reporting",
-            "-data=/Users/justinmckelvy/Documents/HEDIS/MY2025/AAB/Sample/tests",
+            "-data=" + hedisRoot + "/input",
             "-c=Patient",
             "-cv=patient.2025.aab.0.95424",
             "-c=Patient",
@@ -803,7 +795,7 @@ class CliTest {
             "-c=Patient",
             "-cv=patient.2025.aab.0.108517",
             "--apply-scoring=false",
-            "--measure-path=/Users/justinmckelvy/Documents/HEDIS MY 2025.1.0/input/Measure",
+            "--measure-path=" + hedisRoot + "/input/Measure",
             "--measure=AAB-Reporting",
         };
 

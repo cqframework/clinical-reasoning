@@ -36,8 +36,8 @@ public class MeasureCommandArgument {
     public String reportPath;
 
     @Option(
-        names = {"--apply-scoring"},
-        defaultValue = "true",
-        description = "Tells evaluation to apply scoring algorithm to returned results.")
+            names = {"--apply-scoring"},
+            defaultValue = "true",
+            description = "Tells evaluation to apply scoring algorithm to returned results.")
     public String applyScoring;
 }

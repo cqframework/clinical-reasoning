@@ -19,7 +19,6 @@ public class StratumDef {
     private final Set<StratumValueDef> valueDefs;
     private final Collection<String> subjectIds;
 
-    // Added by Claude Sonnet 4.5 on 2025-12-03
     // Mutable score field for version-agnostic scoring
     private Double score;
 
@@ -50,7 +49,6 @@ public class StratumDef {
     }
 
     /**
-     * Added by Claude Sonnet 4.5 on 2025-12-02
      * Get the StratumPopulationDef for a specific PopulationDef.
      *
      * @param populationDef the PopulationDef to match by ID
@@ -67,7 +65,6 @@ public class StratumDef {
     }
 
     /**
-     * Added by Claude Sonnet 4.5 on 2025-12-02
      * Get the count for a specific PopulationDef in this stratum.
      *
      * @param populationDef the PopulationDef to match by ID
@@ -79,7 +76,6 @@ public class StratumDef {
     }
 
     /**
-     * Added by Claude Sonnet 4.5 on 2025-12-03
      * Get the computed score for this stratum.
      * Used by version-agnostic MeasureDefScorer.
      *
@@ -90,7 +86,6 @@ public class StratumDef {
     }
 
     /**
-     * Added by Claude Sonnet 4.5 on 2025-12-03
      * Set the computed score for this stratum.
      * Used by version-agnostic MeasureDefScorer to store computed scores.
      *
@@ -101,28 +96,40 @@ public class StratumDef {
     }
 
     /**
+     * Get the measure score for this stratum, applying improvement notation.
+     *
+     * Note: Improvement notation is applied at GroupDef level, not per-stratum.
+     * Stratifiers inherit improvement notation from their parent group.
+     *
+     * @return the score with improvement notation applied, or null if no score
+     */
+    public Double getMeasureScore() {
+        if (this.score == null) {
+            return null;
+        }
+
+        // Note: Improvement notation applied at GroupDef level, not per-stratum
+        // Stratifiers inherit improvement notation from their parent group
+        return this.score;
+    }
+
+    /**
      * Creates a deep copy snapshot of this StratumDef including mutable score field.
-     * <p>
-     * Copies all collections (stratumPopulations, valueDefs, subjectIds) and the
-     * mutable score field.
+     *
+     * Copies all collections (stratumPopulations, valueDefs, subjectIds) and the mutable score field.
      *
      * @return A new StratumDef instance with deep copied collections and copied score
      */
     public StratumDef createSnapshot() {
-        // Deep copy stratumPopulations (StratumPopulationDef is immutable record)
         List<StratumPopulationDef> snapshotPopulations = List.copyOf(stratumPopulations);
-
-        // Deep copy valueDefs (StratumValueDef is immutable record)
         Set<StratumValueDef> snapshotValueDefs = Set.copyOf(valueDefs);
-
-        // Deep copy subjectIds
         Collection<String> snapshotSubjectIds = List.copyOf(subjectIds);
 
-        // Create new StratumDef
+        // Create snapshot using constructor
         StratumDef snapshot = new StratumDef(snapshotPopulations, snapshotValueDefs, snapshotSubjectIds);
 
-        // Copy mutable score field (added 2025-12-03 for version-agnostic scoring)
-        snapshot.score = this.score;
+        // Copy mutable score field using setter
+        snapshot.setScore(this.score);
 
         return snapshot;
     }

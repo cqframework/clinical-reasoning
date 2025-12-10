@@ -8,7 +8,17 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-// Extracted version-agnostic patterns from R4MeasureReportScorer by Claude Sonnet 4.5
+/**
+ * Base class for version-specific MeasureReport scoring.
+ * Extracted version-agnostic patterns from R4MeasureReportScorer.
+ *
+ * <p><strong>Note:</strong> This class will be removed in a future PR.
+ * For external consumers (e.g., cdr-cr project), use
+ * {@link MeasureReportScoringFhirAdapter#score(org.hl7.fhir.instance.model.api.IBaseResource, org.hl7.fhir.instance.model.api.IBaseResource)}
+ * for version-agnostic post-hoc scoring.
+ * For internal use, this class will be replaced by {@link MeasureDefScorer}
+ * integrated into the evaluation workflow in Part 2.
+ */
 public abstract class BaseMeasureReportScorer<MeasureReportT> implements IMeasureReportScorer<MeasureReportT> {
 
     // Version-agnostic population type constants

@@ -145,7 +145,13 @@ public class MeasureDefScorer {
                 QuantityDef quantityDef = scoreContinuousVariable(measureUrl, measureObsPop);
                 return quantityDef != null ? quantityDef.value() : null;
 
+            case COHORT:
+                // COHORT measures don't have scores - they report counts only
+                return null;
+
             default:
+                // COMPOSITE and other unsupported scoring types
+                logger.warn("Unsupported measure scoring type: {} for measure: {}", measureScoring, measureUrl);
                 return null;
         }
     }

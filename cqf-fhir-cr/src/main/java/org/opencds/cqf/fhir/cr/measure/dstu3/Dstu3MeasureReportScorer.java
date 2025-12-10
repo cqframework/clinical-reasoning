@@ -13,6 +13,16 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 
+/**
+ * DSTU3 Measure Report Scorer.
+ *
+ * <p><strong>Note:</strong> This class will be removed in a future PR.
+ * For external consumers (e.g., cdr-cr project), use
+ * {@link org.opencds.cqf.fhir.cr.measure.common.MeasureReportScoringFhirAdapter#score(org.hl7.fhir.instance.model.api.IBaseResource, org.hl7.fhir.instance.model.api.IBaseResource)}
+ * for version-agnostic post-hoc scoring.
+ * For internal use, this class will be replaced by {@link org.opencds.cqf.fhir.cr.measure.common.MeasureDefScorer}
+ * integrated into the evaluation workflow in Part 2.
+ */
 public class Dstu3MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport> {
 
     @Override

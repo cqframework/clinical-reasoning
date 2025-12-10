@@ -311,4 +311,81 @@ class R4MeasureReportBuilderTest {
                 .addStratifier(new MeasureGroupStratifierComponent())
                 .setId(id);
     }
+
+    // ========== Score Copying Tests (Part 1 - Phase 7) ==========
+
+    @Test
+    void testScoreCopying_GroupScore() {
+        // Given: MeasureDef with a group score set
+        var r4MeasureReportBuilder = new R4MeasureReportBuilder();
+        MeasureDef measureDef = buildMeasureDef(MEASURE_ID_1, MEASURE_URL_1, 1, 0, true, Set.of());
+
+        // Manually set a score on the first group
+        measureDef.groups().get(0).setScore(0.75);
+
+        // When: Build the MeasureReport
+        var measureReport = r4MeasureReportBuilder.build(
+                buildMeasure(MEASURE_ID_1, MEASURE_URL_1, 1, 0),
+                measureDef,
+                MeasureReportType.INDIVIDUAL,
+                null,
+                List.of());
+
+        // Then: Group score should be copied to the report
+        assertNotNull(measureReport);
+        assertNotNull(measureReport.getGroup());
+        assertEquals(1, measureReport.getGroup().size());
+
+        var reportGroup = measureReport.getGroup().get(0);
+        assertTrue(reportGroup.hasMeasureScore(), "Group should have a measure score");
+        assertEquals(0.75, reportGroup.getMeasureScore().getValue().doubleValue(), 0.001);
+    }
+
+    @Test
+    void testScoreCopying_NullScore() {
+        // Given: MeasureDef with null score (e.g., COHORT measure)
+        var r4MeasureReportBuilder = new R4MeasureReportBuilder();
+        MeasureDef measureDef = buildMeasureDef(MEASURE_ID_1, MEASURE_URL_1, 1, 0, true, Set.of());
+
+        // Explicitly set null score (or just don't set it)
+        measureDef.groups().get(0).setScore(null);
+
+        // When: Build the MeasureReport
+        var measureReport = r4MeasureReportBuilder.build(
+                buildMeasure(MEASURE_ID_1, MEASURE_URL_1, 1, 0),
+                measureDef,
+                MeasureReportType.INDIVIDUAL,
+                null,
+                List.of());
+
+        // Then: FHIR returns empty Quantity for null scores (not null)
+        assertNotNull(measureReport);
+        var reportGroup = measureReport.getGroup().get(0);
+        assertNotNull(reportGroup.getMeasureScore(), "FHIR creates empty Quantity for null score");
+        assertTrue(reportGroup.getMeasureScore().isEmpty(), "Quantity should be empty for null score");
+    }
+
+    @Test
+    void testScoreCopying_NegativeScore() {
+        // Given: MeasureDef with negative score (error indicator)
+        var r4MeasureReportBuilder = new R4MeasureReportBuilder();
+        MeasureDef measureDef = buildMeasureDef(MEASURE_ID_1, MEASURE_URL_1, 1, 0, true, Set.of());
+
+        // Set negative score
+        measureDef.groups().get(0).setScore(-1.0);
+
+        // When: Build the MeasureReport
+        var measureReport = r4MeasureReportBuilder.build(
+                buildMeasure(MEASURE_ID_1, MEASURE_URL_1, 1, 0),
+                measureDef,
+                MeasureReportType.INDIVIDUAL,
+                null,
+                List.of());
+
+        // Then: FHIR returns empty Quantity for negative scores (filtered by >= 0 check)
+        assertNotNull(measureReport);
+        var reportGroup = measureReport.getGroup().get(0);
+        assertNotNull(reportGroup.getMeasureScore(), "FHIR creates empty Quantity for negative score");
+        assertTrue(reportGroup.getMeasureScore().isEmpty(), "Quantity should be empty for negative score");
+    }
 }

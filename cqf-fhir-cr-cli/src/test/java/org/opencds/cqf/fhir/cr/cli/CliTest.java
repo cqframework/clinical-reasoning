@@ -742,7 +742,7 @@ class CliTest {
 
         var patientDirectory = hedisRoot.resolve("tests/data/fhir/patient");
         List<String> patientIds = Files.list(patientDirectory)
-                .limit(100)
+                .limit(1200)
                 .map(Path::getFileName)
                 .map(Path::toString)
                 .toList();

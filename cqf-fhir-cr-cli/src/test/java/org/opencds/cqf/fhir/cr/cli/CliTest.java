@@ -18,6 +18,7 @@ import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -587,7 +588,6 @@ class CliTest {
             "-cv=123",
             "-c=Patient",
             "-cv=456",
-            "--measure-path=" + testResourcePath + "/compartment/input/resources/measure/",
             "--measure=%s".formatted(measureId),
             "--output-path=" + Path.of(testResultsPath, libraryName, TXTRESULTS_FOLDER),
             "--report-path=" + Path.of(testResultsPath, libraryName, MEASUREREPORTS_FOLDER),
@@ -633,7 +633,6 @@ class CliTest {
             "-c=Patient",
             "-cv=456",
             "--apply-scoring=false",
-            "--measure-path=" + testResourcePath + "/compartment/input/resources/measure/",
             "--measure=%s".formatted(measureId),
         };
 
@@ -727,77 +726,33 @@ class CliTest {
     }
 
     @Test
-    void runHedisContent() {
-        var hedisRoot = Path.of("/Users/justinmckelvy/Documents/HEDIS MY 2025.1.0");
+    void runHedisContent() throws IOException {
+        var hedisRoot = Path.of("/Users/jp/repos/DCS-HEDIS-2025-v1");
         assumeTrue(Files.isDirectory(hedisRoot), "External HEDIS content not available on this machine");
 
-        String[] args = new String[] {
-            "measure",
-            "-source=" + hedisRoot + "/input/cql",
-            "-name=AAB_Reporting",
-            "-data=" + hedisRoot + "/input",
-            "-c=Patient",
-            "-cv=patient.2025.aab.0.95424",
-            "-c=Patient",
-            "-cv=patient.2025.aab.0.128322",
-            "-c=Patient",
-            "-cv=patient.2025.aab.0.150238",
-            "-c=Patient",
-            "-cv=patient.2025.aab.0.100548",
-            "-c=Patient",
-            "-cv=patient.2025.aab.0.113963",
-            "-c=Patient",
-            "-cv=patient.2025.aab.0.105806",
-            "-c=Patient",
-            "-cv=patient.2025.aab.0.154698",
-            "-c=Patient",
-            "-cv=patient.2025.aab.0.119465",
-            "-c=Patient",
-            "-cv=patient.2025.aab.0.149315",
-            "-c=Patient",
-            "-cv=patient.2025.aab.0.139062",
-            "-c=Patient",
-            "-cv=patient.2025.aab.0.111608",
-            "-c=Patient",
-            "-cv=patient.2025.aab.0.136816",
-            "-c=Patient",
-            "-cv=patient.2025.aab.0.120973",
-            "-c=Patient",
-            "-cv=patient.2025.aab.0.141944",
-            "-c=Patient",
-            "-cv=patient.2025.aab.0.97373",
-            "-c=Patient",
-            "-cv=patient.2025.aab.0.108725",
-            "-c=Patient",
-            "-cv=patient.2025.aab.0.140896",
-            "-c=Patient",
-            "-cv=patient.2025.aab.0.98109",
-            "-c=Patient",
-            "-cv=patient.2025.aab.0.102811",
-            "-c=Patient",
-            "-cv=patient.2025.aab.0.139250",
-            "-c=Patient",
-            "-cv=patient.2025.aab.0.138382",
-            "-c=Patient",
-            "-cv=patient.2025.aab.0.114974",
-            "-c=Patient",
-            "-cv=patient.2025.aab.0.140298",
-            "-c=Patient",
-            "-cv=patient.2025.aab.0.98935",
-            "-c=Patient",
-            "-cv=patient.2025.aab.0.136218",
-            "-c=Patient",
-            "-cv=patient.2025.aab.0.97141",
-            "-c=Patient",
-            "-cv=patient.2025.aab.0.114148",
-            "-c=Patient",
-            "-cv=patient.2025.aab.0.96093",
-            "-c=Patient",
-            "-cv=patient.2025.aab.0.108517",
-            "--apply-scoring=false",
-            "--measure-path=" + hedisRoot + "/input/Measure",
-            "--measure=AAB-Reporting",
-        };
+        List<String> argsList = new ArrayList<>();
+        argsList.addAll(List.of(
+                "measure",
+                "-name=AAB_Reporting",
+                "--measure=AAB-Reporting",
+                "--apply-scoring=false",
+                "--enable-hedis-compatibility-mode",
+                "-source=" + hedisRoot.resolve("src/cql"),
+                "-data=" + hedisRoot));
+
+        var patientDirectory = hedisRoot.resolve("tests/data/fhir/patient");
+        List<String> patientIds = Files.list(patientDirectory)
+                .limit(100)
+                .map(Path::getFileName)
+                .map(Path::toString)
+                .toList();
+
+        for (int i = 0; i < patientIds.size(); i++) {
+            argsList.add("-c=Patient");
+            argsList.add("-cv=" + patientIds.get(i));
+        }
+
+        String[] args = argsList.toArray(new String[0]);
 
         Main.run(args);
 

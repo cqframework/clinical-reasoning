@@ -18,7 +18,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
@@ -44,9 +46,24 @@ public class MeasureCommand implements Callable<Integer> {
 
     @Override
     public Integer call() throws IOException {
+        var setupStart = System.nanoTime();
         var result = createMeasureCommandResult(this.args);
-        // the stream is lazy, so we need a terminal operation to drive evaluation
-        result.measureReports().forEach(x -> {});
+        var setupEnd = System.nanoTime();
+        var initializationTime = (setupEnd - setupStart) / 1_000_000.0; // Convert to milliseconds
+
+        var evalStart = System.nanoTime();
+
+        AtomicLong counter = new AtomicLong();
+        result.measureReports().forEach(x -> {
+            counter.incrementAndGet();
+        });
+
+        var evalEnd = System.nanoTime();
+        var evalTime = (evalEnd - evalStart) / 1_000_000;
+        log.info("Completed evaluation for {} measure reports", counter.get());
+        log.info("Initialization time: {} ms", initializationTime);
+        log.info("Evaluation time: {} ms", evalTime);
+        log.info("Average time per measure report: {} ms", evalTime / counter.get());
         return 0;
     }
 
@@ -56,8 +73,7 @@ public class MeasureCommand implements Callable<Integer> {
         var cqlResult = CqlCommand.createCqlCommandResult(args.cql);
         var bundle = cqlResult.engineBundle();
 
-        // Load measure once
-        Measure measure = getMeasure(bundle.parser(), args.measurePath, args.measureName);
+        var measure = bundle.repository().read(Measure.class, new IdType(args.measureName));
 
         // Create measure processor once
         R4MeasureProcessor processor = getR4MeasureProcessor(

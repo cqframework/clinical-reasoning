@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.elm.r1.VersionedIdentifier;
@@ -24,10 +25,24 @@ public class CqlCommand implements Callable<Integer> {
 
     @Override
     public Integer call() throws IOException {
+        var setupStart = System.nanoTime();
         var result = createCqlCommandResult(this.args);
+        var setupEnd = System.nanoTime();
+        var initializationTime = (setupEnd - setupStart) / 1_000_000.0; // Convert to milliseconds
 
-        // the stream is lazy, so we need a terminal operation to drive evaluation
-        result.subjectResults().forEach(x -> {});
+        var evalStart = System.nanoTime();
+
+        AtomicLong counter = new AtomicLong();
+        result.subjectResults().forEach(x -> {
+            counter.incrementAndGet();
+        });
+
+        var evalEnd = System.nanoTime();
+        var evalTime = (evalEnd - evalStart) / 1_000_000;
+        log.info("Completed {} cql evaluations", counter.get());
+        log.info("Initialization time: {} ms", initializationTime);
+        log.info("Evaluation time: {} ms", evalTime);
+        log.info("Average time per evaluation: {} ms", evalTime / counter.get());
         return 0;
     }
 

@@ -35,7 +35,11 @@ public class CqlCommand implements Callable<Integer> {
      * Record to hold subject ID and evaluation result.
      * Used by MeasureCommand which needs to collect all results before generating reports.
      */
-    public record SubjectAndResult(String subjectId, EvaluationResult result) {}
+    public record SubjectAndResult(SubjectContext subject, EvaluationResult result) {
+        public String subjectId() {
+            return subject.subjectId();
+        }
+    }
 
     public record SubjectContext(String name, String value) {
         public String subjectId() {
@@ -64,11 +68,11 @@ public class CqlCommand implements Callable<Integer> {
         var resultStream = contexts.map(sc -> {
                     var contextParameter = Pair.<String, Object>of(sc.name(), sc.value());
                     var cqlResult = bundle.engine().evaluate(identifier, expressions, contextParameter);
-                    return new SubjectAndResult(sc.subjectId(), cqlResult);
+                    return new SubjectAndResult(sc, cqlResult);
                 })
                 .map(cqlResult -> {
                     if (baseOutput != null) {
-                        Path outputPath = baseOutput.resolve(cqlResult.subjectId() + ".txt");
+                        Path outputPath = baseOutput.resolve(cqlResult.subject().value() + ".txt");
                         try {
                             writeResultToFile(cqlResult.result(), cqlResult.subjectId(), outputPath);
                             log.info("✅ Completed {}", cqlResult.subjectId());
@@ -87,15 +91,11 @@ public class CqlCommand implements Callable<Integer> {
     private static void writeResultToFile(EvaluationResult result, String subjectId, Path outputPath)
             throws IOException {
         try (var writer = Files.newBufferedWriter(outputPath, StandardOpenOption.CREATE, StandardOpenOption.WRITE)) {
-            writer.write("Subject: " + subjectId + "\n\n");
-
-            // Write expression results
             for (var entry : result.getExpressionResults().entrySet()) {
-                writer.write(entry.getKey() + " = "
-                        + Utilities.tempConvert(entry.getValue().value()) + "\n");
+                writer.write(entry.getKey() + "="
+                        + Utilities.tempConvert(entry.getValue().value()));
+                writer.newLine();
             }
-
-            writer.write("\n");
         }
     }
 }

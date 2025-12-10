@@ -127,12 +127,12 @@ public class MeasureCommand implements Callable<Integer> {
             SubjectAndResult subjectAndResult) {
 
         Map<String, EvaluationResult> resultMap = new HashMap<>();
-        var subjectId = subjectAndResult.subjectId();
+        var subjectId = subjectAndResult.subject().subjectId();
         resultMap.put(subjectId, subjectAndResult.result());
 
         var report = processor.evaluateMeasureResults(
                 measure, start, end, "subject", Collections.singletonList(subjectId), resultMap);
-        return new SubjectAndReport(subjectId, report);
+        return new SubjectAndReport(subjectAndResult.subject().value(), report);
     }
 
     @Nonnull

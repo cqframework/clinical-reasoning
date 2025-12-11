@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
@@ -18,7 +17,6 @@ import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -723,43 +721,5 @@ class CliTest {
         }
 
         return multimapBuilder.build();
-    }
-
-    @Test
-    void runHedisContent() throws IOException {
-        var hedisRoot = Path.of("/Users/jp/repos/DCS-HEDIS-2025-v1");
-        assumeTrue(Files.isDirectory(hedisRoot), "External HEDIS content not available on this machine");
-
-        List<String> argsList = new ArrayList<>();
-        argsList.addAll(List.of(
-                "measure",
-                "-name=AAB_Reporting",
-                "--measure=AAB-Reporting",
-                "--apply-scoring=false",
-                "--enable-hedis-compatibility-mode",
-                "-source=" + hedisRoot.resolve("src/cql"),
-                "-data=" + hedisRoot));
-
-        var patientDirectory = hedisRoot.resolve("tests/data/fhir/patient");
-        List<String> patientIds = Files.list(patientDirectory)
-                .limit(1200)
-                .map(Path::getFileName)
-                .map(Path::toString)
-                .toList();
-
-        for (int i = 0; i < patientIds.size(); i++) {
-            argsList.add("-c=Patient");
-            argsList.add("-cv=" + patientIds.get(i));
-        }
-
-        String[] args = argsList.toArray(new String[0]);
-
-        Main.run(args);
-
-        // Should be two MeasureReports printed to the console
-        String output = outContent.toString();
-        assertTrue(output.contains("\"resourceType\":\"MeasureReport\""));
-        assertTrue(output.contains("\"subject\":{\"reference\":\"Patient/123\""));
-        assertTrue(output.contains("\"subject\":{\"reference\":\"Patient/456\""));
     }
 }

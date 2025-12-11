@@ -28,7 +28,6 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupPopulationComponent;
-import org.opencds.cqf.fhir.cr.measure.r4.selected.def.SelectedMeasureDefCollection;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupStratifierComponent;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportStatus;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportType;
@@ -46,6 +45,7 @@ import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
+import org.opencds.cqf.fhir.cr.measure.r4.selected.def.SelectedMeasureDefCollection;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
@@ -293,8 +293,7 @@ class MultiMeasure {
          * @return SelectedMeasureDefCollection for fluent MeasureDef collection assertions
          */
         public SelectedMeasureDefCollection<Then> defs() {
-            return new SelectedMeasureDefCollection<>(
-                    evaluation.measureDefs(), this);
+            return new SelectedMeasureDefCollection<>(evaluation.measureDefs(), this);
         }
 
         // Backward compatibility - delegate to report()

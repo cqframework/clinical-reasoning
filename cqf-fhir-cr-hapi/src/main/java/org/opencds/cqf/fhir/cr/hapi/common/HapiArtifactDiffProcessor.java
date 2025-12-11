@@ -40,8 +40,7 @@ import org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.r4.model.ValueSet.ValueSetComposeComponent;
 import org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionContainsComponent;
-import org.opencds.cqf.fhir.cr.common.ArtifactDiffProcessor.DiffCache;
-import org.opencds.cqf.fhir.cr.common.IArtifactDiffProcessor;
+import org.opencds.cqf.fhir.cr.common.ArtifactDiffProcessor;
 import org.opencds.cqf.fhir.cr.visitor.ExpandHelper;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.Constants;
@@ -54,7 +53,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanWrapperImpl;
 
-public class HapiArtifactDiffProcessor implements IArtifactDiffProcessor {
+public class HapiArtifactDiffProcessor extends ArtifactDiffProcessor {
 
     private static final Logger logger = LoggerFactory.getLogger(HapiArtifactDiffProcessor.class);
 

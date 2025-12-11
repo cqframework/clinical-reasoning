@@ -14,15 +14,20 @@ import static org.opencds.cqf.fhir.utility.Constants.CPG_RELATED_ARTIFACT;
 import java.util.Date;
 import java.util.List;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.r4.model.Attachment;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r4.model.Expression;
 import org.hl7.fhir.r4.model.GraphDefinition;
 import org.hl7.fhir.r4.model.Library;
+import org.hl7.fhir.r4.model.RelatedArtifact;
+import org.hl7.fhir.r4.model.RelatedArtifact.RelatedArtifactType;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IGraphDefinitionAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IGraphDefinitionAdaptorTest;
 import org.opencds.cqf.fhir.utility.adapter.TestVisitor;
 
-class GraphDefinitionAdapterTest {
+class GraphDefinitionAdapterTest implements IGraphDefinitionAdaptorTest<GraphDefinition> {
     private final org.opencds.cqf.fhir.utility.adapter.IAdapterFactory adapterFactory = new AdapterFactory();
 
     @Test
@@ -119,12 +124,20 @@ class GraphDefinitionAdapterTest {
         var graphDef = new GraphDefinition();
         graphDef.getMeta().addProfile(dependencies.get(0));
 
+        RelatedArtifact cpgArtifact = new RelatedArtifact();
+        cpgArtifact.setType(RelatedArtifactType.DEPENDSON);
+        cpgArtifact.setResource(dependencies.get(1));
+
         graphDef.addExtension(
                 CPG_RELATED_ARTIFACT,
-                new Expression().setReference(dependencies.get(1)).setExpression("someExp"));
-        graphDef.addExtension(
-                ARTIFACT_RELATED_ARTIFACT,
-                new Expression().setReference(dependencies.get(2)).setExpression("someExp"));
+                cpgArtifact);
+
+        RelatedArtifact artifact = new RelatedArtifact();
+        artifact.setType(RelatedArtifactType.DEPENDSON);
+        artifact.setResource(dependencies.get(2));
+        graphDef.addExtension(ARTIFACT_RELATED_ARTIFACT, artifact);
+
+        // we shouldn't find this one
         graphDef.addExtension(
                 "someURL", new Expression().setReference("someRef").setExpression("someExp"));
 
@@ -157,5 +170,26 @@ class GraphDefinitionAdapterTest {
         var adapter = (IGraphDefinitionAdapter) adapterFactory.createKnowledgeArtifactAdapter(graphDef);
 
         assertEquals(0, adapter.getNode().size());
+    }
+
+    @Override
+    public IAdapterFactory getAdaptorFactory() {
+        return adapterFactory;
+    }
+
+    @Override
+    public GraphDefinition getGraphDefinition(GraphDefinitionInformation information) {
+        GraphDefinition definition = new GraphDefinition();
+        definition.getMeta().addProfile(information.ProfileRef);
+
+        for (RelatedArtifactInfo info : information.RelatedArtifactInfo) {
+            RelatedArtifact artifact = new RelatedArtifact();
+            artifact.setType(RelatedArtifactType.DEPENDSON);
+            artifact.setResource(info.CanonicalResourceURL);
+
+            definition.addExtension(info.ExtensionUrl, artifact);
+        }
+
+        return definition;
     }
 }

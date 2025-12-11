@@ -1,21 +1,26 @@
 package org.opencds.cqf.fhir.utility.adapter.r4;
 
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import org.hl7.fhir.instance.model.api.IBaseDatatype;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
-import org.hl7.fhir.r4.model.Expression;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.GraphDefinition;
+import org.hl7.fhir.r4.model.RelatedArtifact;
+import org.hl7.fhir.r4.model.RelatedArtifact.RelatedArtifactType;
 import org.hl7.fhir.r4.model.UsageContext;
-import org.opencds.cqf.fhir.utility.Constants;
-import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IGraphDefinitionAdapter;
 
-public class GraphDefinitionAdapter extends ResourceAdapter implements IGraphDefinitionAdapter {
+public class GraphDefinitionAdapter extends ResourceAdapter implements IGraphDefinitionAdapter<GraphDefinition> {
+
     public GraphDefinitionAdapter(IDomainResource graphDefinition) {
         super(graphDefinition);
         if (!(graphDefinition instanceof GraphDefinition)) {
@@ -52,25 +57,18 @@ public class GraphDefinitionAdapter extends ResourceAdapter implements IGraphDef
            extension[cpg-relatedArtifact].reference
         */
 
-        get().getExtensionsByUrl(Constants.CPG_RELATED_ARTIFACT).stream()
-                .filter(e -> e.getValue() instanceof Expression)
-                .map(e -> (Expression) e.getValue())
-                .filter(Expression::hasReference)
-                .forEach(expression -> references.add(new DependencyInfo(
-                        referenceSource,
-                        expression.getReference(),
-                        expression.getExtension(),
-                        expression::setReference)));
+//        get().getExtensionsByUrl(Constants.CPG_RELATED_ARTIFACT).stream()
+//                .filter(e -> e.getValue() instanceof Expression)
+//                .map(e -> (Expression) e.getValue())
+//                .filter(Expression::hasReference)
+//                .forEach(expression -> references.add(new DependencyInfo(
+//                        referenceSource,
+//                        expression.getReference(),
+//                        expression.getExtension(),
+//                        expression::setReference)));
+//
 
-        get().getExtensionsByUrl(Constants.ARTIFACT_RELATED_ARTIFACT).stream()
-                .filter(e -> e.getValue() instanceof Expression)
-                .map(e -> (Expression) e.getValue())
-                .filter(Expression::hasReference)
-                .forEach(expression -> references.add(new DependencyInfo(
-                        referenceSource,
-                        expression.getReference(),
-                        expression.getExtension(),
-                        expression::setReference)));
+        extractRelatedArtifactReferences(get(), referenceSource, references);
 
         return references;
     }
@@ -107,4 +105,21 @@ public class GraphDefinitionAdapter extends ResourceAdapter implements IGraphDef
     public List<IBaseBackboneElement> getNode() {
         return List.of();
     }
+
+    @Override
+    public <EXTENSION extends IBaseExtension<?, ?>> Class<EXTENSION> extensionClass() {
+        return (Class<EXTENSION>) Extension.class;
+    }
+
+    @Override
+    public <RA extends IBaseDatatype> void validateRelatedArtifact(RA relatedArtifact, List<String> errors) {
+        if (relatedArtifact instanceof RelatedArtifact relArtifact) {
+            if (relArtifact.getType() != RelatedArtifactType.DEPENDSON) {
+                errors.add(String.format("Expected RelatedArtifact of type DEPENDSON, but found %s", relArtifact.getType().toCode()));
+            }
+        } else {
+            errors.add(String.format("Expected RelatedArtifact; found %s", relatedArtifact == null ? "null" : relatedArtifact.fhirType()));
+        }
+    }
+
 }

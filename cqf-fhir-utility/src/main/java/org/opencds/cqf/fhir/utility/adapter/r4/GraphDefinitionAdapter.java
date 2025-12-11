@@ -50,6 +50,7 @@ public class GraphDefinitionAdapter extends ResourceAdapter implements IGraphDef
 
         /*
            extension[cpg-relatedArtifact].reference
+           Expression.reference is expected to be a canonical (url or url|version) for these extensions.
         */
 
         get().getExtensionsByUrl(Constants.CPG_RELATED_ARTIFACT).stream()

@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableListMultimap;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -107,6 +108,70 @@ public class R4MeasureProcessor {
             @Nonnull List<String> subjectIds,
             @Nonnull Map<String, EvaluationResult> results) {
 
+        return evaluateMeasureCaptureDefs(measure, periodStart, periodEnd, reportType, subjectIds, results)
+                .measureReport();
+    }
+
+    /**
+     * Evaluation method that generates CQL results, Processes results, builds Measure Report
+     * @param measure Measure resource
+     * @param periodStart start date of Measurement Period
+     * @param periodEnd end date of Measurement Period
+     * @param reportType type of report that defines MeasureReport Type
+     * @param subjectIds the subjectIds to process
+     * @param evalType the type of evaluation to process, this is an output of reportType param
+     * @return Measure Report resource
+     */
+    public MeasureReport evaluateMeasure(
+            Measure measure,
+            @Nullable ZonedDateTime periodStart,
+            @Nullable ZonedDateTime periodEnd,
+            String reportType,
+            List<String> subjectIds,
+            MeasureEvalType evalType,
+            CqlEngine context,
+            CompositeEvaluationResultsPerMeasure compositeEvaluationResultsPerMeasure) {
+
+        return evaluateMeasureCaptureDefs(
+                        measure,
+                        periodStart,
+                        periodEnd,
+                        reportType,
+                        subjectIds,
+                        evalType,
+                        context,
+                        compositeEvaluationResultsPerMeasure)
+                .measureReport();
+    }
+
+    /**
+     * Test-visible evaluation method that captures both MeasureDef and MeasureReport.
+     * <p>
+     * <strong>TEST INFRASTRUCTURE ONLY - DO NOT USE IN PRODUCTION CODE</strong>
+     * </p>
+     * <p>
+     * This method is package-private and annotated with @VisibleForTesting to support
+     * test frameworks that need to assert on both pre-scoring state (MeasureDef) and
+     * post-scoring state (MeasureReport).
+     * </p>
+     *
+     * @param measure Measure resource
+     * @param periodStart start date of Measurement Period
+     * @param periodEnd end date of Measurement Period
+     * @param reportType type of report
+     * @param subjectIds the subjectIds to process
+     * @param results the pre-calculated expression results
+     * @return MeasureDefAndR4MeasureReport containing both MeasureDef and MeasureReport
+     */
+    @VisibleForTesting
+    MeasureDefAndR4MeasureReport evaluateMeasureCaptureDefs(
+            Measure measure,
+            @Nullable ZonedDateTime periodStart,
+            @Nullable ZonedDateTime periodEnd,
+            String reportType,
+            @Nonnull List<String> subjectIds,
+            @Nonnull Map<String, EvaluationResult> results) {
+
         checkMeasureLibrary(measure);
 
         MeasureEvalType evaluationType = measureProcessorUtils.getEvalType(null, reportType, subjectIds);
@@ -125,32 +190,39 @@ public class R4MeasureProcessor {
                 this.measureEvaluationOptions.getApplyScoringSetMembership(),
                 new R4PopulationBasisValidator());
 
-        // Capture Def snapshot if callback is registered (for testing frameworks)
-        if (this.measureEvaluationOptions.getDefCaptureCallback() != null) {
-            this.measureEvaluationOptions.getDefCaptureCallback().onDefCaptured(measureDef.createSnapshot());
-        }
-
         // Build Measure Report with Results
-        return new R4MeasureReportBuilder()
+        MeasureReport measureReport = new R4MeasureReportBuilder()
                 .build(
                         measure,
                         measureDef,
                         r4EvalTypeToReportType(evaluationType, measure),
                         measurementPeriod,
                         subjectIds);
+
+        return new MeasureDefAndR4MeasureReport(measureDef, measureReport);
     }
 
     /**
-     * Evaluation method that generates CQL results, Processes results, builds Measure Report
+     * Test-visible evaluation method that captures both MeasureDef and MeasureReport.
+     * <p>
+     * <strong>TEST INFRASTRUCTURE ONLY - DO NOT USE IN PRODUCTION CODE</strong>
+     * </p>
+     * <p>
+     * This overload accepts CompositeEvaluationResultsPerMeasure for multi-measure evaluation.
+     * </p>
+     *
      * @param measure Measure resource
      * @param periodStart start date of Measurement Period
      * @param periodEnd end date of Measurement Period
      * @param reportType type of report that defines MeasureReport Type
      * @param subjectIds the subjectIds to process
-     * @param evalType the type of evaluation to process, this is an output of reportType param
-     * @return Measure Report resource
+     * @param evalType the type of evaluation to process
+     * @param context CQL engine context
+     * @param compositeEvaluationResultsPerMeasure composite evaluation results
+     * @return MeasureDefAndR4MeasureReport containing both MeasureDef and MeasureReport
      */
-    public MeasureReport evaluateMeasure(
+    @VisibleForTesting
+    MeasureDefAndR4MeasureReport evaluateMeasureCaptureDefs(
             Measure measure,
             @Nullable ZonedDateTime periodStart,
             @Nullable ZonedDateTime periodEnd,
@@ -176,21 +248,60 @@ public class R4MeasureProcessor {
                 this.measureEvaluationOptions.getApplyScoringSetMembership(),
                 new R4PopulationBasisValidator());
 
-        // Capture Def snapshot if callback is registered (for testing frameworks)
-        if (this.measureEvaluationOptions.getDefCaptureCallback() != null) {
-            this.measureEvaluationOptions.getDefCaptureCallback().onDefCaptured(measureDef.createSnapshot());
-        }
-
         var measurementPeriod = measureProcessorUtils.getMeasurementPeriod(periodStart, periodEnd, context);
 
         // Build Measure Report with Results
-        return new R4MeasureReportBuilder()
+        MeasureReport measureReport = new R4MeasureReportBuilder()
                 .build(
                         measure,
                         measureDef,
                         r4EvalTypeToReportType(evaluationType, measure),
                         measurementPeriod,
                         subjectIds);
+
+        return new MeasureDefAndR4MeasureReport(measureDef, measureReport);
+    }
+
+    /**
+     * Test-visible evaluation method that captures both MeasureDef and MeasureReport.
+     * <p>
+     * <strong>TEST INFRASTRUCTURE ONLY - DO NOT USE IN PRODUCTION CODE</strong>
+     * </p>
+     * <p>
+     * This overload accepts Either3 for flexible measure resolution (by URL, ID, or resource)
+     * and delegates to the Measure-based overload after resolution.
+     * </p>
+     *
+     * @param measure Either canonical URL, ID, or Measure resource
+     * @param periodStart start date of Measurement Period
+     * @param periodEnd end date of Measurement Period
+     * @param reportType type of report that defines MeasureReport Type
+     * @param subjectIds the subjectIds to process
+     * @param evalType the type of evaluation to process
+     * @param context CQL engine context
+     * @param compositeEvaluationResultsPerMeasure composite evaluation results
+     * @return MeasureDefAndR4MeasureReport containing both MeasureDef and MeasureReport
+     */
+    @VisibleForTesting
+    MeasureDefAndR4MeasureReport evaluateMeasureCaptureDefs(
+            Either3<CanonicalType, IdType, Measure> measure,
+            @Nullable ZonedDateTime periodStart,
+            @Nullable ZonedDateTime periodEnd,
+            String reportType,
+            List<String> subjectIds,
+            MeasureEvalType evalType,
+            CqlEngine context,
+            CompositeEvaluationResultsPerMeasure compositeEvaluationResultsPerMeasure) {
+
+        return evaluateMeasureCaptureDefs(
+                R4MeasureServiceUtils.foldMeasure(measure, this.repository),
+                periodStart,
+                periodEnd,
+                reportType,
+                subjectIds,
+                evalType,
+                context,
+                compositeEvaluationResultsPerMeasure);
     }
 
     public CompositeEvaluationResultsPerMeasure evaluateMeasureWithCqlEngine(

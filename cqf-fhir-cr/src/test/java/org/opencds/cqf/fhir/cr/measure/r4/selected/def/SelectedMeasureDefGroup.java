@@ -1,4 +1,4 @@
-package org.opencds.cqf.fhir.cr.measure.fhir2deftest;
+package org.opencds.cqf.fhir.cr.measure.r4.selected.def;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -35,9 +35,9 @@ import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
  * @author Claude (Anthropic AI Assistant)
  * @since 4.1.0
  */
-public class SelectedDefGroup extends Selected<GroupDef, SelectedDef> {
+public class SelectedMeasureDefGroup<P> extends org.opencds.cqf.fhir.cr.measure.r4.Measure.Selected<GroupDef, P> {
 
-    public SelectedDefGroup(GroupDef value, SelectedDef parent) {
+    public SelectedMeasureDefGroup(GroupDef value, P parent) {
         super(value, parent);
     }
 
@@ -47,10 +47,10 @@ public class SelectedDefGroup extends Selected<GroupDef, SelectedDef> {
      * Navigate to a population by code (e.g., "numerator", "denominator").
      *
      * @param populationCode the population code
-     * @return SelectedDefPopulation for the matching population
+     * @return SelectedMeasureDefPopulation for the matching population
      * @throws AssertionError if no population with the given code is found
      */
-    public SelectedDefPopulation population(String populationCode) {
+    public SelectedMeasureDefPopulation<SelectedMeasureDefGroup<P>> population(String populationCode) {
         assertNotNull(value(), "GroupDef is null");
         PopulationDef population = value().populations().stream()
                 .filter(p -> p.code() != null
@@ -59,65 +59,65 @@ public class SelectedDefGroup extends Selected<GroupDef, SelectedDef> {
                 .findFirst()
                 .orElse(null);
         assertNotNull(population, "No population found with code: " + populationCode);
-        return new SelectedDefPopulation(population, this);
+        return new SelectedMeasureDefPopulation<>(population, this);
     }
 
     /**
      * Navigate to a population by ID.
      *
      * @param id the population ID
-     * @return SelectedDefPopulation for the matching population
+     * @return SelectedMeasureDefPopulation for the matching population
      * @throws AssertionError if no population with the given ID is found
      */
-    public SelectedDefPopulation populationById(String id) {
+    public SelectedMeasureDefPopulation<SelectedMeasureDefGroup<P>> populationById(String id) {
         assertNotNull(value(), "GroupDef is null");
         PopulationDef population = value().populations().stream()
                 .filter(p -> id.equals(p.id()))
                 .findFirst()
                 .orElse(null);
         assertNotNull(population, "No population found with ID: " + id);
-        return new SelectedDefPopulation(population, this);
+        return new SelectedMeasureDefPopulation<>(population, this);
     }
 
     /**
      * Navigate to the first population in the group.
      *
-     * @return SelectedDefPopulation for the first population
+     * @return SelectedMeasureDefPopulation for the first population
      * @throws AssertionError if no populations exist
      */
-    public SelectedDefPopulation firstPopulation() {
+    public SelectedMeasureDefPopulation<SelectedMeasureDefGroup<P>> firstPopulation() {
         assertNotNull(value(), "GroupDef is null");
         assertFalse(value().populations().isEmpty(), "No populations found in GroupDef");
-        return new SelectedDefPopulation(value().populations().get(0), this);
+        return new SelectedMeasureDefPopulation<>(value().populations().get(0), this);
     }
 
     /**
      * Navigate to a stratifier by ID.
      *
      * @param stratifierId the stratifier ID
-     * @return SelectedDefStratifier for the matching stratifier
+     * @return SelectedMeasureDefStratifier for the matching stratifier
      * @throws AssertionError if no stratifier with the given ID is found
      */
-    public SelectedDefStratifier stratifier(String stratifierId) {
+    public SelectedMeasureDefStratifier<SelectedMeasureDefGroup<P>> stratifier(String stratifierId) {
         assertNotNull(value(), "GroupDef is null");
         StratifierDef stratifier = value().stratifiers().stream()
                 .filter(s -> stratifierId.equals(s.id()))
                 .findFirst()
                 .orElse(null);
         assertNotNull(stratifier, "No stratifier found with ID: " + stratifierId);
-        return new SelectedDefStratifier(stratifier, this);
+        return new SelectedMeasureDefStratifier<>(stratifier, this);
     }
 
     /**
      * Navigate to the first stratifier in the group.
      *
-     * @return SelectedDefStratifier for the first stratifier
+     * @return SelectedMeasureDefStratifier for the first stratifier
      * @throws AssertionError if no stratifiers exist
      */
-    public SelectedDefStratifier firstStratifier() {
+    public SelectedMeasureDefStratifier<SelectedMeasureDefGroup<P>> firstStratifier() {
         assertNotNull(value(), "GroupDef is null");
         assertFalse(value().stratifiers().isEmpty(), "No stratifiers found in GroupDef");
-        return new SelectedDefStratifier(value().stratifiers().get(0), this);
+        return new SelectedMeasureDefStratifier<>(value().stratifiers().get(0), this);
     }
 
     // ==================== Assertion Methods ====================
@@ -126,9 +126,9 @@ public class SelectedDefGroup extends Selected<GroupDef, SelectedDef> {
      * Assert the number of populations in the group.
      *
      * @param count expected population count
-     * @return this SelectedDefGroup for chaining
+     * @return this SelectedMeasureDefGroup for chaining
      */
-    public SelectedDefGroup hasPopulationCount(int count) {
+    public SelectedMeasureDefGroup<P> hasPopulationCount(int count) {
         assertNotNull(value(), "GroupDef is null");
         assertEquals(count, value().populations().size(), "Population count mismatch");
         return this;
@@ -138,9 +138,9 @@ public class SelectedDefGroup extends Selected<GroupDef, SelectedDef> {
      * Assert the number of stratifiers in the group.
      *
      * @param count expected stratifier count
-     * @return this SelectedDefGroup for chaining
+     * @return this SelectedMeasureDefGroup for chaining
      */
-    public SelectedDefGroup hasStratifierCount(int count) {
+    public SelectedMeasureDefGroup<P> hasStratifierCount(int count) {
         assertNotNull(value(), "GroupDef is null");
         assertEquals(count, value().stratifiers().size(), "Stratifier count mismatch");
         return this;
@@ -150,9 +150,9 @@ public class SelectedDefGroup extends Selected<GroupDef, SelectedDef> {
      * Assert the group score value.
      *
      * @param score expected score
-     * @return this SelectedDefGroup for chaining
+     * @return this SelectedMeasureDefGroup for chaining
      */
-    public SelectedDefGroup hasScore(Double score) {
+    public SelectedMeasureDefGroup<P> hasScore(Double score) {
         assertNotNull(value(), "GroupDef is null");
         assertEquals(score, value().getScore(), "Group score mismatch");
         return this;
@@ -161,9 +161,9 @@ public class SelectedDefGroup extends Selected<GroupDef, SelectedDef> {
     /**
      * Assert that the group score is null (pre-scoring state).
      *
-     * @return this SelectedDefGroup for chaining
+     * @return this SelectedMeasureDefGroup for chaining
      */
-    public SelectedDefGroup hasNullScore() {
+    public SelectedMeasureDefGroup<P> hasNullScore() {
         assertNotNull(value(), "GroupDef is null");
         assertNull(value().getScore(), "Expected null score (pre-scoring), but found: " + value().getScore());
         return this;
@@ -173,9 +173,9 @@ public class SelectedDefGroup extends Selected<GroupDef, SelectedDef> {
      * Assert the measure scoring type.
      *
      * @param scoring expected MeasureScoring type
-     * @return this SelectedDefGroup for chaining
+     * @return this SelectedMeasureDefGroup for chaining
      */
-    public SelectedDefGroup hasMeasureScoring(MeasureScoring scoring) {
+    public SelectedMeasureDefGroup<P> hasMeasureScoring(MeasureScoring scoring) {
         assertNotNull(value(), "GroupDef is null");
         assertEquals(scoring, value().measureScoring(), "MeasureScoring mismatch");
         return this;
@@ -185,9 +185,9 @@ public class SelectedDefGroup extends Selected<GroupDef, SelectedDef> {
      * Assert the population basis.
      *
      * @param basis expected population basis ("boolean" or resource type)
-     * @return this SelectedDefGroup for chaining
+     * @return this SelectedMeasureDefGroup for chaining
      */
-    public SelectedDefGroup hasPopulationBasis(String basis) {
+    public SelectedMeasureDefGroup<P> hasPopulationBasis(String basis) {
         assertNotNull(value(), "GroupDef is null");
         assertEquals(basis, value().getPopulationBasis().code(), "Population basis mismatch");
         return this;
@@ -196,9 +196,9 @@ public class SelectedDefGroup extends Selected<GroupDef, SelectedDef> {
     /**
      * Assert that the group has boolean basis.
      *
-     * @return this SelectedDefGroup for chaining
+     * @return this SelectedMeasureDefGroup for chaining
      */
-    public SelectedDefGroup isBooleanBasis() {
+    public SelectedMeasureDefGroup<P> isBooleanBasis() {
         return hasPopulationBasis("boolean");
     }
 
@@ -206,9 +206,9 @@ public class SelectedDefGroup extends Selected<GroupDef, SelectedDef> {
      * Assert the group ID.
      *
      * @param id expected group ID
-     * @return this SelectedDefGroup for chaining
+     * @return this SelectedMeasureDefGroup for chaining
      */
-    public SelectedDefGroup hasGroupId(String id) {
+    public SelectedMeasureDefGroup<P> hasGroupId(String id) {
         assertNotNull(value(), "GroupDef is null");
         assertEquals(id, value().id(), "Group ID mismatch");
         return this;

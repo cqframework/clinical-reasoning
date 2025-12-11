@@ -98,45 +98,4 @@ public class MeasureDef {
                 .add("errors=" + errors)
                 .toString();
     }
-
-    /**
-     * Creates a deep copy snapshot of this MeasureDef for preservation/testing.
-     * <p>
-     * This method performs a recursive deep copy of the entire MeasureDef object graph:
-     * <ul>
-     *   <li>All collections (Lists, Sets, Maps) are deep copied</li>
-     *   <li>FHIR resource objects are shared (shallow copied)</li>
-     *   <li>Mutable fields (scores) are value copied</li>
-     * </ul>
-     * <p>
-     * Intended for use by testing frameworks to capture MeasureDef state after evaluation
-     * for analysis, comparison, or serialization. This operation has minimal performance
-     * impact as it creates ~100-500 object allocations (< 10ms for typical measures).
-     * <p>
-     * <strong>Thread Safety:</strong> This method is NOT thread-safe. Do not call while
-     * the MeasureDef is being mutated by evaluation/scoring operations.
-     * <p>
-     * <strong>FHIR Resource Sharing:</strong> FHIR resource objects referenced in
-     * PopulationDef collections are shared between the original and snapshot. Mutations
-     * to FHIR resources will be visible in both instances.
-     *
-     * @return A new MeasureDef instance containing deep copies of all collections but
-     *         sharing FHIR resource references with the original
-     */
-    public MeasureDef createSnapshot() {
-        // Deep copy groups (recursively snapshots all nested Defs)
-        List<GroupDef> snapshotGroups =
-                groups.stream().map(GroupDef::createSnapshot).toList();
-
-        // Deep copy SDEs
-        List<SdeDef> snapshotSdes = sdes.stream().map(SdeDef::createSnapshot).toList();
-
-        // Create new MeasureDef with snapshot collections
-        MeasureDef snapshot = new MeasureDef(idType, url, version, snapshotGroups, snapshotSdes);
-
-        // Deep copy errors list (mutable ArrayList)
-        snapshot.errors.addAll(this.errors);
-
-        return snapshot;
-    }
 }

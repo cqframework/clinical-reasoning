@@ -298,7 +298,7 @@ class MeasureScorerTest {
                 .periodEnd("2030-12-31")
                 .reportType("population")
                 .evaluate();
-        MeasureReport report = when.then().report();
+        MeasureReport report = when.then().measureReport();
         assertNotNull(report);
         assertEquals(1, report.getGroup().size());
         assertEquals(16, report.getGroupFirstRep().getPopulation().get(0).getCount());

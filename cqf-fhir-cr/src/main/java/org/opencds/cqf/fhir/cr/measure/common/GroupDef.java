@@ -216,40 +216,4 @@ public class GroupDef {
         }
         return null;
     }
-
-    /**
-     * Creates a deep copy snapshot of this GroupDef including mutable score field.
-     * <p>
-     * Recursively snapshots all stratifiers and populations while preserving the
-     * current score value. The populationIndex is automatically rebuilt from the
-     * snapshotted populations in the constructor.
-     *
-     * @return A new GroupDef instance with deep copied collections and copied score
-     */
-    public GroupDef createSnapshot() {
-        // Deep copy stratifiers (each recursively snapshots stratum)
-        List<StratifierDef> snapshotStratifiers =
-                stratifiers.stream().map(StratifierDef::createSnapshot).toList();
-
-        // Deep copy populations (includes Maps/Sets of subject resources)
-        List<PopulationDef> snapshotPopulations =
-                populations.stream().map(PopulationDef::createSnapshot).toList();
-
-        // Create new GroupDef with snapshot collections
-        // populationIndex will be automatically created from snapshotPopulations
-        GroupDef snapshot = new GroupDef(
-                id,
-                code,
-                snapshotStratifiers,
-                snapshotPopulations,
-                measureScoring,
-                isGroupImpNotation,
-                improvementNotation,
-                populationBasis);
-
-        // Copy mutable score field (added 2025-12-03 for version-agnostic scoring)
-        snapshot.score = this.score;
-
-        return snapshot;
-    }
 }

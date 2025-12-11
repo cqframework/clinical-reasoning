@@ -1,4 +1,4 @@
-package org.opencds.cqf.fhir.cr.measure.fhir2deftest;
+package org.opencds.cqf.fhir.cr.measure.r4.selected.def;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -30,9 +30,9 @@ import org.opencds.cqf.fhir.cr.measure.common.StratumPopulationDef;
  * @author Claude (Anthropic AI Assistant)
  * @since 4.1.0
  */
-public class SelectedDefStratum extends Selected<StratumDef, SelectedDefStratifier> {
+public class SelectedMeasureDefStratum<P> extends org.opencds.cqf.fhir.cr.measure.r4.Measure.Selected<StratumDef, P> {
 
-    public SelectedDefStratum(StratumDef value, SelectedDefStratifier parent) {
+    public SelectedMeasureDefStratum(StratumDef value, P parent) {
         super(value, parent);
     }
 
@@ -42,10 +42,10 @@ public class SelectedDefStratum extends Selected<StratumDef, SelectedDefStratifi
      * Navigate to a stratum population by code (e.g., "numerator").
      *
      * @param populationCode the population code
-     * @return SelectedDefStratumPopulation for the matching population
+     * @return SelectedMeasureDefStratumPopulation for the matching population
      * @throws AssertionError if no population with the given code is found
      */
-    public SelectedDefStratumPopulation population(String populationCode) {
+    public SelectedMeasureDefStratumPopulation<SelectedMeasureDefStratum<P>> population(String populationCode) {
         assertNotNull(value(), "StratumDef is null");
         StratumPopulationDef population = value().stratumPopulations().stream()
                 .filter(p -> p.populationDef() != null
@@ -55,36 +55,37 @@ public class SelectedDefStratum extends Selected<StratumDef, SelectedDefStratifi
                 .findFirst()
                 .orElse(null);
         assertNotNull(population, "No stratum population found with code: " + populationCode);
-        return new SelectedDefStratumPopulation(population, this);
+        return new SelectedMeasureDefStratumPopulation<>(population, this);
     }
 
     /**
      * Navigate to a stratum population by ID.
      *
      * @param id the population ID
-     * @return SelectedDefStratumPopulation for the matching population
+     * @return SelectedMeasureDefStratumPopulation for the matching population
      * @throws AssertionError if no population with the given ID is found
      */
-    public SelectedDefStratumPopulation populationById(String id) {
+    public SelectedMeasureDefStratumPopulation<SelectedMeasureDefStratum<P>> populationById(String id) {
         assertNotNull(value(), "StratumDef is null");
         StratumPopulationDef population = value().stratumPopulations().stream()
                 .filter(p -> id.equals(p.id()))
                 .findFirst()
                 .orElse(null);
         assertNotNull(population, "No stratum population found with ID: " + id);
-        return new SelectedDefStratumPopulation(population, this);
+        return new SelectedMeasureDefStratumPopulation<>(population, this);
     }
 
     /**
      * Navigate to the first stratum population.
      *
-     * @return SelectedDefStratumPopulation for the first population
+     * @return SelectedMeasureDefStratumPopulation for the first population
      * @throws AssertionError if no populations exist
      */
-    public SelectedDefStratumPopulation firstPopulation() {
+    public SelectedMeasureDefStratumPopulation<SelectedMeasureDefStratum<P>> firstPopulation() {
         assertNotNull(value(), "StratumDef is null");
         assertFalse(value().stratumPopulations().isEmpty(), "No populations found in StratumDef");
-        return new SelectedDefStratumPopulation(value().stratumPopulations().get(0), this);
+        return new SelectedMeasureDefStratumPopulation<>(
+                value().stratumPopulations().get(0), this);
     }
 
     // ==================== Assertion Methods ====================
@@ -93,9 +94,9 @@ public class SelectedDefStratum extends Selected<StratumDef, SelectedDefStratifi
      * Assert the number of populations in this stratum.
      *
      * @param count expected population count
-     * @return this SelectedDefStratum for chaining
+     * @return this SelectedMeasureDefStratum for chaining
      */
-    public SelectedDefStratum hasPopulationCount(int count) {
+    public SelectedMeasureDefStratum<P> hasPopulationCount(int count) {
         assertNotNull(value(), "StratumDef is null");
         assertEquals(count, value().stratumPopulations().size(), "Stratum population count mismatch");
         return this;
@@ -105,9 +106,9 @@ public class SelectedDefStratum extends Selected<StratumDef, SelectedDefStratifi
      * Assert the number of subjects in this stratum (across all populations).
      *
      * @param count expected subject count
-     * @return this SelectedDefStratum for chaining
+     * @return this SelectedMeasureDefStratum for chaining
      */
-    public SelectedDefStratum hasSubjectCount(int count) {
+    public SelectedMeasureDefStratum<P> hasSubjectCount(int count) {
         assertNotNull(value(), "StratumDef is null");
         assertEquals(count, value().subjectIds().size(), "Stratum subject count mismatch");
         return this;
@@ -117,9 +118,9 @@ public class SelectedDefStratum extends Selected<StratumDef, SelectedDefStratifi
      * Assert the stratum score value.
      *
      * @param score expected score
-     * @return this SelectedDefStratum for chaining
+     * @return this SelectedMeasureDefStratum for chaining
      */
-    public SelectedDefStratum hasScore(Double score) {
+    public SelectedMeasureDefStratum<P> hasScore(Double score) {
         assertNotNull(value(), "StratumDef is null");
         assertEquals(score, value().getScore(), "Stratum score mismatch");
         return this;
@@ -128,9 +129,9 @@ public class SelectedDefStratum extends Selected<StratumDef, SelectedDefStratifi
     /**
      * Assert that the stratum score is null (pre-scoring state).
      *
-     * @return this SelectedDefStratum for chaining
+     * @return this SelectedMeasureDefStratum for chaining
      */
-    public SelectedDefStratum hasNullScore() {
+    public SelectedMeasureDefStratum<P> hasNullScore() {
         assertNotNull(value(), "StratumDef is null");
         assertNull(value().getScore(), "Expected null score (pre-scoring), but found: " + value().getScore());
         return this;
@@ -140,9 +141,9 @@ public class SelectedDefStratum extends Selected<StratumDef, SelectedDefStratifi
      * Assert the stratum value definition text (e.g., "male", "female").
      *
      * @param valueText expected value text
-     * @return this SelectedDefStratum for chaining
+     * @return this SelectedMeasureDefStratum for chaining
      */
-    public SelectedDefStratum hasValueDef(String valueText) {
+    public SelectedMeasureDefStratum<P> hasValueDef(String valueText) {
         assertNotNull(value(), "StratumDef is null");
         assertNotNull(value().valueDefs(), "No value definitions found");
         boolean found = value().valueDefs().stream()
@@ -154,9 +155,9 @@ public class SelectedDefStratum extends Selected<StratumDef, SelectedDefStratifi
     /**
      * Assert that this is a component stratum (has multiple value definitions).
      *
-     * @return this SelectedDefStratum for chaining
+     * @return this SelectedMeasureDefStratum for chaining
      */
-    public SelectedDefStratum isComponentStratum() {
+    public SelectedMeasureDefStratum<P> isComponentStratum() {
         assertNotNull(value(), "StratumDef is null");
         assertNotNull(value().valueDefs(), "No value definitions found");
         assertTrue(

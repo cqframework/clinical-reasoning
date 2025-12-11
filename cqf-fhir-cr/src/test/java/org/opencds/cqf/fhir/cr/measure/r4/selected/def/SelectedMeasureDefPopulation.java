@@ -1,4 +1,4 @@
-package org.opencds.cqf.fhir.cr.measure.fhir2deftest;
+package org.opencds.cqf.fhir.cr.measure.r4.selected.def;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -29,9 +29,10 @@ import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
  * @author Claude (Anthropic AI Assistant)
  * @since 4.1.0
  */
-public class SelectedDefPopulation extends Selected<PopulationDef, SelectedDefGroup> {
+public class SelectedMeasureDefPopulation<P>
+        extends org.opencds.cqf.fhir.cr.measure.r4.Measure.Selected<PopulationDef, P> {
 
-    public SelectedDefPopulation(PopulationDef value, SelectedDefGroup parent) {
+    public SelectedMeasureDefPopulation(PopulationDef value, P parent) {
         super(value, parent);
     }
 
@@ -41,9 +42,9 @@ public class SelectedDefPopulation extends Selected<PopulationDef, SelectedDefGr
      * Assert the number of subjects in this population.
      *
      * @param count expected subject count
-     * @return this SelectedDefPopulation for chaining
+     * @return this SelectedMeasureDefPopulation for chaining
      */
-    public SelectedDefPopulation hasSubjectCount(int count) {
+    public SelectedMeasureDefPopulation<P> hasSubjectCount(int count) {
         assertNotNull(value(), "PopulationDef is null");
         assertEquals(count, value().getSubjectResources().size(), "Subject count mismatch");
         return this;
@@ -53,9 +54,9 @@ public class SelectedDefPopulation extends Selected<PopulationDef, SelectedDefGr
      * Assert that specific subjects are in this population.
      *
      * @param subjectIds expected subject IDs (e.g., "Patient/1")
-     * @return this SelectedDefPopulation for chaining
+     * @return this SelectedMeasureDefPopulation for chaining
      */
-    public SelectedDefPopulation hasSubjects(String... subjectIds) {
+    public SelectedMeasureDefPopulation<P> hasSubjects(String... subjectIds) {
         assertNotNull(value(), "PopulationDef is null");
         for (String subjectId : subjectIds) {
             assertTrue(
@@ -70,9 +71,9 @@ public class SelectedDefPopulation extends Selected<PopulationDef, SelectedDefGr
      * Assert that a specific subject is NOT in this population.
      *
      * @param subjectId subject ID that should not be present
-     * @return this SelectedDefPopulation for chaining
+     * @return this SelectedMeasureDefPopulation for chaining
      */
-    public SelectedDefPopulation doesNotHaveSubject(String subjectId) {
+    public SelectedMeasureDefPopulation<P> doesNotHaveSubject(String subjectId) {
         assertNotNull(value(), "PopulationDef is null");
         assertFalse(
                 value().getSubjectResources().containsKey(subjectId),
@@ -95,9 +96,9 @@ public class SelectedDefPopulation extends Selected<PopulationDef, SelectedDefGr
      * </p>
      *
      * @param count expected population count
-     * @return this SelectedDefPopulation for chaining
+     * @return this SelectedMeasureDefPopulation for chaining
      */
-    public SelectedDefPopulation hasCount(int count) {
+    public SelectedMeasureDefPopulation<P> hasCount(int count) {
         assertNotNull(value(), "PopulationDef is null");
         int actualCount = value().getCount();
         assertEquals(count, actualCount, "Population count mismatch");
@@ -108,9 +109,9 @@ public class SelectedDefPopulation extends Selected<PopulationDef, SelectedDefGr
      * Assert the number of evaluated resources (from evaluatedResources set).
      *
      * @param count expected evaluated resource count
-     * @return this SelectedDefPopulation for chaining
+     * @return this SelectedMeasureDefPopulation for chaining
      */
-    public SelectedDefPopulation hasEvaluatedResourceCount(int count) {
+    public SelectedMeasureDefPopulation<P> hasEvaluatedResourceCount(int count) {
         assertNotNull(value(), "PopulationDef is null");
         assertEquals(count, value().getEvaluatedResources().size(), "Evaluated resource count mismatch");
         return this;
@@ -121,9 +122,9 @@ public class SelectedDefPopulation extends Selected<PopulationDef, SelectedDefGr
      *
      * @param subjectId the subject ID
      * @param count expected resource count for this subject
-     * @return this SelectedDefPopulation for chaining
+     * @return this SelectedMeasureDefPopulation for chaining
      */
-    public SelectedDefPopulation subjectHasResourceCount(String subjectId, int count) {
+    public SelectedMeasureDefPopulation<P> subjectHasResourceCount(String subjectId, int count) {
         assertNotNull(value(), "PopulationDef is null");
         assertTrue(value().getSubjectResources().containsKey(subjectId), "Subject not found: " + subjectId);
         java.util.Set<?> resources = value().getSubjectResources().get(subjectId);
@@ -137,9 +138,9 @@ public class SelectedDefPopulation extends Selected<PopulationDef, SelectedDefGr
      * Assert the population type/code (e.g., "numerator", "denominator").
      *
      * @param type expected population type code
-     * @return this SelectedDefPopulation for chaining
+     * @return this SelectedMeasureDefPopulation for chaining
      */
-    public SelectedDefPopulation hasType(String type) {
+    public SelectedMeasureDefPopulation<P> hasType(String type) {
         assertNotNull(value(), "PopulationDef is null");
         assertEquals(type, value().type().toCode(), "Population type mismatch");
         return this;
@@ -149,9 +150,9 @@ public class SelectedDefPopulation extends Selected<PopulationDef, SelectedDefGr
      * Assert the population expression name.
      *
      * @param expression expected expression name
-     * @return this SelectedDefPopulation for chaining
+     * @return this SelectedMeasureDefPopulation for chaining
      */
-    public SelectedDefPopulation hasExpression(String expression) {
+    public SelectedMeasureDefPopulation<P> hasExpression(String expression) {
         assertNotNull(value(), "PopulationDef is null");
         assertEquals(expression, value().expression(), "Population expression mismatch");
         return this;
@@ -161,9 +162,9 @@ public class SelectedDefPopulation extends Selected<PopulationDef, SelectedDefGr
      * Assert the population criteria reference (for MEASUREOBSERVATION populations).
      *
      * @param criteriaReference expected criteria reference
-     * @return this SelectedDefPopulation for chaining
+     * @return this SelectedMeasureDefPopulation for chaining
      */
-    public SelectedDefPopulation hasCriteriaReference(String criteriaReference) {
+    public SelectedMeasureDefPopulation<P> hasCriteriaReference(String criteriaReference) {
         assertNotNull(value(), "PopulationDef is null");
         assertEquals(criteriaReference, value().getCriteriaReference(), "Criteria reference mismatch");
         return this;
@@ -173,9 +174,9 @@ public class SelectedDefPopulation extends Selected<PopulationDef, SelectedDefGr
      * Assert the population ID.
      *
      * @param id expected population ID
-     * @return this SelectedDefPopulation for chaining
+     * @return this SelectedMeasureDefPopulation for chaining
      */
-    public SelectedDefPopulation hasPopulationId(String id) {
+    public SelectedMeasureDefPopulation<P> hasPopulationId(String id) {
         assertNotNull(value(), "PopulationDef is null");
         assertEquals(id, value().id(), "Population ID mismatch");
         return this;
@@ -184,9 +185,9 @@ public class SelectedDefPopulation extends Selected<PopulationDef, SelectedDefGr
     /**
      * Assert that this population is a boolean-basis population.
      *
-     * @return this SelectedDefPopulation for chaining
+     * @return this SelectedMeasureDefPopulation for chaining
      */
-    public SelectedDefPopulation isBooleanBasis() {
+    public SelectedMeasureDefPopulation<P> isBooleanBasis() {
         // Boolean basis is implied by the populationBasis field on GroupDef
         // This is a convenience method that doesn't directly check PopulationDef
         return this;

@@ -1,4 +1,4 @@
-package org.opencds.cqf.fhir.cr.measure.fhir2deftest;
+package org.opencds.cqf.fhir.cr.measure.r4.selected.def;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -25,9 +25,10 @@ import org.opencds.cqf.fhir.cr.measure.common.StratumPopulationDef;
  * @author Claude (Anthropic AI Assistant)
  * @since 4.1.0
  */
-public class SelectedDefStratumPopulation extends Selected<StratumPopulationDef, SelectedDefStratum> {
+public class SelectedMeasureDefStratumPopulation<P>
+        extends org.opencds.cqf.fhir.cr.measure.r4.Measure.Selected<StratumPopulationDef, P> {
 
-    public SelectedDefStratumPopulation(StratumPopulationDef value, SelectedDefStratum parent) {
+    public SelectedMeasureDefStratumPopulation(StratumPopulationDef value, P parent) {
         super(value, parent);
     }
 
@@ -37,9 +38,9 @@ public class SelectedDefStratumPopulation extends Selected<StratumPopulationDef,
      * Assert the count value for this stratum population (number of subjects/resources).
      *
      * @param count expected count
-     * @return this SelectedDefStratumPopulation for chaining
+     * @return this SelectedMeasureDefStratumPopulation for chaining
      */
-    public SelectedDefStratumPopulation hasCount(int count) {
+    public SelectedMeasureDefStratumPopulation<P> hasCount(int count) {
         assertNotNull(value(), "StratumPopulationDef is null");
         assertEquals(count, value().subjectsQualifiedOrUnqualified().size(), "Stratum population count mismatch");
         return this;
@@ -49,9 +50,9 @@ public class SelectedDefStratumPopulation extends Selected<StratumPopulationDef,
      * Assert the number of subjects in this stratum population.
      *
      * @param count expected subject count
-     * @return this SelectedDefStratumPopulation for chaining
+     * @return this SelectedMeasureDefStratumPopulation for chaining
      */
-    public SelectedDefStratumPopulation hasSubjectCount(int count) {
+    public SelectedMeasureDefStratumPopulation<P> hasSubjectCount(int count) {
         assertNotNull(value(), "StratumPopulationDef is null");
         assertEquals(
                 count, value().subjectsQualifiedOrUnqualified().size(), "Stratum population subject count mismatch");
@@ -62,9 +63,9 @@ public class SelectedDefStratumPopulation extends Selected<StratumPopulationDef,
      * Assert that specific subjects are in this stratum population.
      *
      * @param subjectIds expected subject IDs (e.g., "Patient/1")
-     * @return this SelectedDefStratumPopulation for chaining
+     * @return this SelectedMeasureDefStratumPopulation for chaining
      */
-    public SelectedDefStratumPopulation hasSubjects(String... subjectIds) {
+    public SelectedMeasureDefStratumPopulation<P> hasSubjects(String... subjectIds) {
         assertNotNull(value(), "StratumPopulationDef is null");
         for (String subjectId : subjectIds) {
             assertTrue(
@@ -81,9 +82,9 @@ public class SelectedDefStratumPopulation extends Selected<StratumPopulationDef,
      * Assert the total number of resources in this stratum population.
      *
      * @param count expected resource count
-     * @return this SelectedDefStratumPopulation for chaining
+     * @return this SelectedMeasureDefStratumPopulation for chaining
      */
-    public SelectedDefStratumPopulation hasResourceCount(int count) {
+    public SelectedMeasureDefStratumPopulation<P> hasResourceCount(int count) {
         assertNotNull(value(), "StratumPopulationDef is null");
         assertEquals(count, value().resourceIdsForSubjectList().size(), "Stratum population resource count mismatch");
         return this;
@@ -98,9 +99,9 @@ public class SelectedDefStratumPopulation extends Selected<StratumPopulationDef,
      * rather than resource membership.
      * </p>
      *
-     * @return this SelectedDefStratumPopulation for chaining
+     * @return this SelectedMeasureDefStratumPopulation for chaining
      */
-    public SelectedDefStratumPopulation isBooleanBasis() {
+    public SelectedMeasureDefStratumPopulation<P> isBooleanBasis() {
         // Boolean basis is implied by the populationBasis field on GroupDef
         // This is a convenience method for semantic clarity
         return this;
@@ -112,9 +113,9 @@ public class SelectedDefStratumPopulation extends Selected<StratumPopulationDef,
      * Resource basis means the population count is based on resource membership.
      * </p>
      *
-     * @return this SelectedDefStratumPopulation for chaining
+     * @return this SelectedMeasureDefStratumPopulation for chaining
      */
-    public SelectedDefStratumPopulation isResourceBasis() {
+    public SelectedMeasureDefStratumPopulation<P> isResourceBasis() {
         // Resource basis is implied by the populationBasis field on GroupDef
         // This is a convenience method for semantic clarity
         return this;
@@ -124,9 +125,9 @@ public class SelectedDefStratumPopulation extends Selected<StratumPopulationDef,
      * Assert the stratum population ID matches the underlying populationDef ID.
      *
      * @param id expected ID
-     * @return this SelectedDefStratumPopulation for chaining
+     * @return this SelectedMeasureDefStratumPopulation for chaining
      */
-    public SelectedDefStratumPopulation hasPopulationId(String id) {
+    public SelectedMeasureDefStratumPopulation<P> hasPopulationId(String id) {
         assertNotNull(value(), "StratumPopulationDef is null");
         assertEquals(id, value().populationDef().id(), "Stratum population ID mismatch");
         return this;

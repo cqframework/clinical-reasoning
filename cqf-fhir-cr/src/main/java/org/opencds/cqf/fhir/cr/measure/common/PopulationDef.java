@@ -214,43 +214,4 @@ public class PopulationDef {
                 + ", aggregateMethod=" + aggMethod
                 + '}';
     }
-
-    /**
-     * Creates a deep copy snapshot of this PopulationDef.
-     * <p>
-     * This is the most complex snapshot operation as PopulationDef contains:
-     * <ul>
-     *   <li>evaluatedResources: Set of FHIR resource objects (lazy-initialized)</li>
-     *   <li>subjectResources: Map of subject IDs to Sets of FHIR resources</li>
-     * </ul>
-     * <p>
-     * Collections are deep copied, but FHIR resource objects themselves are shared
-     * references for performance/memory efficiency.
-     *
-     * @return A new PopulationDef instance with deep copied collections but shared
-     *         FHIR resource references
-     */
-    public PopulationDef createSnapshot() {
-        // Create new PopulationDef instance
-        PopulationDef snapshot = new PopulationDef(
-                id, code, measurePopulationType, expression, populationBasis, criteriaReference, aggregateMethod);
-
-        // Deep copy evaluatedResources Set (handles lazy initialization)
-        // FHIR resources within Set are shared references
-        if (this.evaluatedResources != null) {
-            snapshot.evaluatedResources = new HashSetForFhirResourcesAndCqlTypes<>();
-            snapshot.evaluatedResources.addAll(this.evaluatedResources);
-        }
-        // If null, leave snapshot.evaluatedResources as null (lazy init preserved)
-
-        // Deep copy subjectResources Map<String, Set<Object>>
-        // Outer Map is new, inner Sets are new, but FHIR resources are shared
-        for (Map.Entry<String, Set<Object>> entry : this.subjectResources.entrySet()) {
-            Set<Object> newSet = new HashSetForFhirResourcesAndCqlTypes<>();
-            newSet.addAll(entry.getValue());
-            snapshot.subjectResources.put(entry.getKey(), newSet);
-        }
-
-        return snapshot;
-    }
 }

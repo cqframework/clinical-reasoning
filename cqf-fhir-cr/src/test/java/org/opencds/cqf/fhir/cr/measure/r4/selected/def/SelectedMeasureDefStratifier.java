@@ -1,4 +1,4 @@
-package org.opencds.cqf.fhir.cr.measure.fhir2deftest;
+package org.opencds.cqf.fhir.cr.measure.r4.selected.def;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -38,9 +38,10 @@ import org.opencds.cqf.fhir.cr.measure.common.StratumDef;
  * @author Claude (Anthropic AI Assistant)
  * @since 4.1.0
  */
-public class SelectedDefStratifier extends Selected<StratifierDef, SelectedDefGroup> {
+public class SelectedMeasureDefStratifier<P>
+        extends org.opencds.cqf.fhir.cr.measure.r4.Measure.Selected<StratifierDef, P> {
 
-    public SelectedDefStratifier(StratifierDef value, SelectedDefGroup parent) {
+    public SelectedMeasureDefStratifier(StratifierDef value, P parent) {
         super(value, parent);
     }
 
@@ -50,38 +51,38 @@ public class SelectedDefStratifier extends Selected<StratifierDef, SelectedDefGr
      * Navigate to a stratum by index (0-based).
      *
      * @param index the stratum index
-     * @return SelectedDefStratum for the stratum at the given index
+     * @return SelectedMeasureDefStratum for the stratum at the given index
      * @throws AssertionError if index is out of bounds
      */
-    public SelectedDefStratum stratum(int index) {
+    public SelectedMeasureDefStratum<SelectedMeasureDefStratifier<P>> stratum(int index) {
         assertNotNull(value(), "StratifierDef is null");
         assertTrue(
                 index >= 0 && index < value().getStratum().size(),
                 "Stratum index out of bounds: " + index + ", size: "
                         + value().getStratum().size());
-        return new SelectedDefStratum(value().getStratum().get(index), this);
+        return new SelectedMeasureDefStratum<>(value().getStratum().get(index), this);
     }
 
     /**
      * Navigate to the first stratum.
      *
-     * @return SelectedDefStratum for the first stratum
+     * @return SelectedMeasureDefStratum for the first stratum
      * @throws AssertionError if no strata exist
      */
-    public SelectedDefStratum firstStratum() {
+    public SelectedMeasureDefStratum<SelectedMeasureDefStratifier<P>> firstStratum() {
         assertNotNull(value(), "StratifierDef is null");
         assertFalse(value().getStratum().isEmpty(), "No strata found in StratifierDef");
-        return new SelectedDefStratum(value().getStratum().get(0), this);
+        return new SelectedMeasureDefStratum<>(value().getStratum().get(0), this);
     }
 
     /**
      * Navigate to a stratum by its value text.
      *
      * @param valueText the stratum value text (e.g., "male", "female")
-     * @return SelectedDefStratum for the matching stratum
+     * @return SelectedMeasureDefStratum for the matching stratum
      * @throws AssertionError if no stratum with the given value is found
      */
-    public SelectedDefStratum stratumByValue(String valueText) {
+    public SelectedMeasureDefStratum<SelectedMeasureDefStratifier<P>> stratumByValue(String valueText) {
         assertNotNull(value(), "StratifierDef is null");
         StratumDef stratum = value().getStratum().stream()
                 .filter(s -> s.valueDefs() != null
@@ -90,7 +91,7 @@ public class SelectedDefStratifier extends Selected<StratifierDef, SelectedDefGr
                 .findFirst()
                 .orElse(null);
         assertNotNull(stratum, "No stratum found with value: " + valueText);
-        return new SelectedDefStratum(stratum, this);
+        return new SelectedMeasureDefStratum<>(stratum, this);
     }
 
     // ==================== Assertion Methods ====================
@@ -99,9 +100,9 @@ public class SelectedDefStratifier extends Selected<StratifierDef, SelectedDefGr
      * Assert the number of strata in this stratifier.
      *
      * @param count expected stratum count
-     * @return this SelectedDefStratifier for chaining
+     * @return this SelectedMeasureDefStratifier for chaining
      */
-    public SelectedDefStratifier hasStratumCount(int count) {
+    public SelectedMeasureDefStratifier<P> hasStratumCount(int count) {
         assertNotNull(value(), "StratifierDef is null");
         assertEquals(count, value().getStratum().size(), "Stratum count mismatch");
         return this;
@@ -111,9 +112,9 @@ public class SelectedDefStratifier extends Selected<StratifierDef, SelectedDefGr
      * Assert the number of stratifier components.
      *
      * @param count expected component count
-     * @return this SelectedDefStratifier for chaining
+     * @return this SelectedMeasureDefStratifier for chaining
      */
-    public SelectedDefStratifier hasComponentCount(int count) {
+    public SelectedMeasureDefStratifier<P> hasComponentCount(int count) {
         assertNotNull(value(), "StratifierDef is null");
         assertEquals(count, value().components().size(), "Component count mismatch");
         return this;
@@ -123,9 +124,9 @@ public class SelectedDefStratifier extends Selected<StratifierDef, SelectedDefGr
      * Assert the stratifier expression name.
      *
      * @param expression expected expression name
-     * @return this SelectedDefStratifier for chaining
+     * @return this SelectedMeasureDefStratifier for chaining
      */
-    public SelectedDefStratifier hasExpression(String expression) {
+    public SelectedMeasureDefStratifier<P> hasExpression(String expression) {
         assertNotNull(value(), "StratifierDef is null");
         assertEquals(expression, value().expression(), "Stratifier expression mismatch");
         return this;
@@ -134,9 +135,9 @@ public class SelectedDefStratifier extends Selected<StratifierDef, SelectedDefGr
     /**
      * Assert that this is a component stratifier.
      *
-     * @return this SelectedDefStratifier for chaining
+     * @return this SelectedMeasureDefStratifier for chaining
      */
-    public SelectedDefStratifier isComponentStratifier() {
+    public SelectedMeasureDefStratifier<P> isComponentStratifier() {
         assertNotNull(value(), "StratifierDef is null");
         assertFalse(value().components().isEmpty(), "Expected component stratifier, but no components found");
         return this;
@@ -146,9 +147,9 @@ public class SelectedDefStratifier extends Selected<StratifierDef, SelectedDefGr
      * Assert that the stratifier has results for a specific subject.
      *
      * @param subjectId the subject ID
-     * @return this SelectedDefStratifier for chaining
+     * @return this SelectedMeasureDefStratifier for chaining
      */
-    public SelectedDefStratifier hasResultForSubject(String subjectId) {
+    public SelectedMeasureDefStratifier<P> hasResultForSubject(String subjectId) {
         assertNotNull(value(), "StratifierDef is null");
         assertTrue(value().getResults().containsKey(subjectId), "No stratifier result found for subject: " + subjectId);
         return this;
@@ -158,9 +159,9 @@ public class SelectedDefStratifier extends Selected<StratifierDef, SelectedDefGr
      * Assert the number of subjects with stratifier results.
      *
      * @param count expected result count
-     * @return this SelectedDefStratifier for chaining
+     * @return this SelectedMeasureDefStratifier for chaining
      */
-    public SelectedDefStratifier hasResultCount(int count) {
+    public SelectedMeasureDefStratifier<P> hasResultCount(int count) {
         assertNotNull(value(), "StratifierDef is null");
         assertEquals(count, value().getResults().size(), "Stratifier result count mismatch");
         return this;
@@ -170,9 +171,9 @@ public class SelectedDefStratifier extends Selected<StratifierDef, SelectedDefGr
      * Assert the stratifier ID.
      *
      * @param id expected stratifier ID
-     * @return this SelectedDefStratifier for chaining
+     * @return this SelectedMeasureDefStratifier for chaining
      */
-    public SelectedDefStratifier hasStratifierId(String id) {
+    public SelectedMeasureDefStratifier<P> hasStratifierId(String id) {
         assertNotNull(value(), "StratifierDef is null");
         assertEquals(id, value().id(), "Stratifier ID mismatch");
         return this;

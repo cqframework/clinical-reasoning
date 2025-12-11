@@ -40,24 +40,4 @@ public class SdeDef {
 
         return this.results;
     }
-
-    /**
-     * Creates a shallow copy snapshot of this SdeDef.
-     * <p>
-     * Copies the results map. All other fields are immutable.
-     *
-     * @return A new SdeDef instance with copied results map
-     */
-    public SdeDef createSnapshot() {
-        // Create new instance
-        SdeDef snapshot = new SdeDef(id, code, expression);
-
-        // Deep copy results map (CriteriaResult is immutable)
-        if (this.results != null) {
-            snapshot.results = new HashMap<>(this.results);
-        }
-        // If null, leave snapshot.results as null (lazy init preserved)
-
-        return snapshot;
-    }
 }

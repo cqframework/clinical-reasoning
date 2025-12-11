@@ -194,6 +194,37 @@ class MultiMeasureServiceTest {
                 .evaluate();
 
         when.then()
+                // MeasureDef assertions (pre-scoring) - verify internal state after processing
+                .defs()
+                .hasCount(7)
+                .byMeasureUrl("http://example.com/Measure/MinimalProportionNoBasisSingleGroup")
+                .first()
+                .hasNoErrors()
+                .firstGroup()
+                .population("initial-population")
+                .hasCount(10)
+                .up()
+                .population("denominator")
+                .hasCount(10)
+                .up()
+                .population("denominator-exclusion")
+                .hasCount(2)
+                .up()
+                .population("denominator-exception")
+                .hasCount(1)
+                .up()
+                .population("numerator-exclusion")
+                .hasCount(3)
+                .up()
+                .population("numerator")
+                .hasCount(7)
+                .up()
+                // TODO: Add score assertion in subsequent measure scoring refactoring PR
+                .up()
+                .up()
+                .up()
+                .up()
+                // MeasureReport assertions (post-scoring) - verify FHIR resource output
                 // This is a population/summary report so we should have a single bundle containing
                 // all MeasureReports
                 .hasBundleCount(1)
@@ -336,6 +367,26 @@ class MultiMeasureServiceTest {
                 .evaluate();
 
         when.then()
+                // MeasureDef assertions (pre-scoring) - verify internal state after processing
+                .defs()
+                .hasCount(70)
+                .first()
+                .hasNoErrors()
+                .firstGroup()
+                .population("initial-population")
+                .hasCount(10)
+                .up()
+                .population("denominator")
+                .hasCount(10)
+                .up()
+                .population("numerator")
+                .hasCount(7)
+                .up()
+                // TODO: Add score assertion in subsequent measure scoring refactoring PR
+                .up()
+                .up()
+                .up()
+                // MeasureReport assertions (post-scoring) - verify FHIR resource output
                 // This is a subject/individual report so we should have one bundle per subject
                 // so 10 bundles
                 .hasBundleCount(10)

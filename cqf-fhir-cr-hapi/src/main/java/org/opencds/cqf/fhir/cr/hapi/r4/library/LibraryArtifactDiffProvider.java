@@ -38,8 +38,8 @@ public class LibraryArtifactDiffProvider {
             @OperationParam(name = "compareComputable", typeName = "Boolean") IPrimitiveType<Boolean> compareComputable,
             @OperationParam(name = "terminologyEndpoint") Endpoint terminologyEndpoint)
             throws UnprocessableEntityException, ResourceNotFoundException {
-        IIdType sourceId = getIdType(FhirVersionEnum.R4, "Library", source);
-        IIdType targetId = getIdType(FhirVersionEnum.R4, "Library", target);
+        IIdType sourceId = getIdType(fhirVersion, "Library", source);
+        IIdType targetId = getIdType(fhirVersion, "Library", target);
 
         return libraryProcessorFactory
                 .create(requestDetails)

@@ -53,6 +53,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanWrapperImpl;
 
+@SuppressWarnings("UnstableApiUsage")
 public class HapiArtifactDiffProcessor extends ArtifactDiffProcessor {
 
     private static final Logger logger = LoggerFactory.getLogger(HapiArtifactDiffProcessor.class);

@@ -50,11 +50,10 @@ public class GraphDefinitionAdaptorTest implements IGraphDefinitionAdaptorTest<G
     public void getDependencies_noReferenceButHasResourceRef_shouldWork() {
         // setup
         GraphDefinition definition = new GraphDefinition();
-        definition.getMeta()
-            .addProfile("profileref");
+        definition.getMeta().addProfile("profileref");
         String ref = "resourceRef";
         int count = 0;
-        for (String url : new String[] { Constants.CPG_RELATED_ARTIFACT, Constants.ARTIFACT_RELATED_ARTIFACT }) {
+        for (String url : new String[] {Constants.CPG_RELATED_ARTIFACT, Constants.ARTIFACT_RELATED_ARTIFACT}) {
             RelatedArtifact artifact = new RelatedArtifact();
             artifact.setType(RelatedArtifactType.DEPENDSON);
             artifact.setResourceReference(new Reference(ref + count++));
@@ -68,12 +67,10 @@ public class GraphDefinitionAdaptorTest implements IGraphDefinitionAdaptorTest<G
 
         // verify
         assertEquals(3, dependencies.size());
-        assertTrue(dependencies.stream()
-            .anyMatch(d -> d.getReference().equals("profileref")));
+        assertTrue(dependencies.stream().anyMatch(d -> d.getReference().equals("profileref")));
         for (int i = 0; i < 2; i++) {
             String val = ref + i;
-            assertTrue(dependencies.stream()
-                .anyMatch(d -> d.getReference().equals(val)));
+            assertTrue(dependencies.stream().anyMatch(d -> d.getReference().equals(val)));
         }
     }
 }

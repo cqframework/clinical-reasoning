@@ -20,7 +20,8 @@ public interface IGraphDefinitionAdaptorTest<T extends IBaseResource> {
     String RESOURCE_REF_1 = "RESOURCE_REF_1";
     String RESOURCE_REF_2 = "RESOURCE_REF_2";
 
-    String VALID_GRAPH_DEF_JSON_TEMPLATE = """
+    String VALID_GRAPH_DEF_JSON_TEMPLATE =
+            """
         {
             "resourceType": "GraphDefinition",
             "meta": [{
@@ -76,11 +77,11 @@ public interface IGraphDefinitionAdaptorTest<T extends IBaseResource> {
         String resourceRef2 = "http://example.com/canonical-url-2";
         IParser parser = fhirContext().newJsonParser();
         String graphDefStr = VALID_GRAPH_DEF_JSON_TEMPLATE
-            .replaceAll(PROFILE_REF, profileRef)
-            .replaceAll(RESOURCE_REF_1, toCanonicalReference(resourceRef1))
-            .replaceAll(RESOURCE_REF_2, toCanonicalReference(resourceRef2))
-            .replaceAll(RELATED_ARTIFACT_TYPE_1, "depends-on")
-            .replaceAll(RELATED_ARTIFACT_TYPE_2, "depends-on");
+                .replaceAll(PROFILE_REF, profileRef)
+                .replaceAll(RESOURCE_REF_1, toCanonicalReference(resourceRef1))
+                .replaceAll(RESOURCE_REF_2, toCanonicalReference(resourceRef2))
+                .replaceAll(RELATED_ARTIFACT_TYPE_1, "depends-on")
+                .replaceAll(RELATED_ARTIFACT_TYPE_2, "depends-on");
         log.info(graphDefStr);
         T graphDefinition = parser.parseResource(graphDefinitionClass(), graphDefStr);
 
@@ -98,10 +99,8 @@ public interface IGraphDefinitionAdaptorTest<T extends IBaseResource> {
         // has profile
         assertTrue(dependencies.stream().anyMatch(d -> d.getReference().equals(profileRef)));
         // has the canonical references for relatedartifacts
-        assertTrue(dependencies.stream()
-            .anyMatch(d -> d.getReference().equals(resourceRef1)));
-        assertTrue(dependencies.stream()
-            .anyMatch(d -> d.getReference().equals(resourceRef2)));
+        assertTrue(dependencies.stream().anyMatch(d -> d.getReference().equals(resourceRef1)));
+        assertTrue(dependencies.stream().anyMatch(d -> d.getReference().equals(resourceRef2)));
     }
 
     @Test
@@ -109,7 +108,8 @@ public interface IGraphDefinitionAdaptorTest<T extends IBaseResource> {
         // setup
         String ref = "http://example.com/canonical";
         IParser parser = fhirContext().newJsonParser();
-        String graphDefStr = String.format("""
+        String graphDefStr = String.format(
+                """
             {
                 "resourceType": "GraphDefinition",
                 "meta": [{
@@ -131,7 +131,8 @@ public interface IGraphDefinitionAdaptorTest<T extends IBaseResource> {
                     }
                 ]
             }
-            """, toCanonicalReference(ref));
+            """,
+                toCanonicalReference(ref));
         log.info(graphDefStr);
         T graphDefinition = parser.parseResource(graphDefinitionClass(), graphDefStr);
 
@@ -143,15 +144,15 @@ public interface IGraphDefinitionAdaptorTest<T extends IBaseResource> {
             adapter.getDependencies();
             fail();
         } catch (IllegalArgumentException ex) {
-            assertTrue(ex.getMessage().contains("No reference found on extension"),
-                ex.getMessage());
+            assertTrue(ex.getMessage().contains("No reference found on extension"), ex.getMessage());
         }
     }
 
     @Test
     default void getDependencies_noRelatedArtifact_throwsErrors() {
         // setup
-        String graphDefStr = """
+        String graphDefStr =
+                """
             {
                "resourceType": "GraphDefinition",
                "meta": [{
@@ -180,8 +181,7 @@ public interface IGraphDefinitionAdaptorTest<T extends IBaseResource> {
             adatper.getDependencies();
             fail();
         } catch (IllegalArgumentException ex) {
-            assertTrue(ex.getMessage()
-                .contains("Expected RelatedArtifact;"), ex.getMessage());
+            assertTrue(ex.getMessage().contains("Expected RelatedArtifact;"), ex.getMessage());
         }
     }
 
@@ -194,11 +194,13 @@ public interface IGraphDefinitionAdaptorTest<T extends IBaseResource> {
             String resourceRef2 = "http://example.com/canonical-url-2";
             IParser parser = fhirContext().newJsonParser();
             String graphDefStr = VALID_GRAPH_DEF_JSON_TEMPLATE
-                .replaceAll(PROFILE_REF, profileRef)
-                .replaceAll(RESOURCE_REF_1, toCanonicalReference(resourceRef1))
-                .replaceAll(RESOURCE_REF_2, toCanonicalReference(resourceRef2))
-                .replaceAll(RELATED_ARTIFACT_TYPE_1, "depends-on")
-                .replaceAll(RELATED_ARTIFACT_TYPE_2, relatedArtifactType == null ? "" : relatedArtifactType); // invalid type
+                    .replaceAll(PROFILE_REF, profileRef)
+                    .replaceAll(RESOURCE_REF_1, toCanonicalReference(resourceRef1))
+                    .replaceAll(RESOURCE_REF_2, toCanonicalReference(resourceRef2))
+                    .replaceAll(RELATED_ARTIFACT_TYPE_1, "depends-on")
+                    .replaceAll(
+                            RELATED_ARTIFACT_TYPE_2,
+                            relatedArtifactType == null ? "" : relatedArtifactType); // invalid type
             System.out.println(graphDefStr);
             T graphDefinition = parser.parseResource(graphDefinitionClass(), graphDefStr);
 
@@ -210,9 +212,8 @@ public interface IGraphDefinitionAdaptorTest<T extends IBaseResource> {
                 adapter.getDependencies();
                 fail();
             } catch (IllegalArgumentException ex) {
-                assertTrue(ex.getMessage()
-                        .contains("Expected RelatedArtifact of type \"depends-on\";"),
-                    ex.getMessage());
+                assertTrue(
+                        ex.getMessage().contains("Expected RelatedArtifact of type \"depends-on\";"), ex.getMessage());
             }
         }
     }

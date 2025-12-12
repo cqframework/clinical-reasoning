@@ -53,7 +53,7 @@ public class GraphDefinitionAdapter extends ResourceAdapter implements IGraphDef
 
         /*
          * extension[cpg-relatedArtifact].resource
-        */
+         */
         extractRelatedArtifactReferences(get(), referenceSource, references);
 
         return references;

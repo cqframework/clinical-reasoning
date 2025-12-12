@@ -19,14 +19,14 @@ class ReviseProcessorTests {
         var repository = new InMemoryFhirRepository(FhirContext.forR4());
         processor = new ReviseProcessor(repository);
 
-        Bundle draftBundle =
-            ClasspathUtil.loadResource(FhirContext.forR4(), Bundle.class, "org/opencds/cqf/fhir/cr/visitor/r4/Bundle-small-draft.json");
+        Bundle draftBundle = ClasspathUtil.loadResource(
+                FhirContext.forR4(), Bundle.class, "org/opencds/cqf/fhir/cr/visitor/r4/Bundle-small-draft.json");
         repository.transaction(draftBundle);
         Library existingLibrary = draftBundle.getEntry().stream()
-            .filter(e -> e.getResource() instanceof Library)
-            .map(e -> (Library) e.getResource())
-            .findFirst()
-            .get();
+                .filter(e -> e.getResource() instanceof Library)
+                .map(e -> (Library) e.getResource())
+                .findFirst()
+                .get();
 
         Library proposedLibrary = existingLibrary.copy();
         proposedLibrary.setVersion("10.0.0-draft");
@@ -43,14 +43,14 @@ class ReviseProcessorTests {
         var repository = new InMemoryFhirRepository(FhirContext.forR4());
         processor = new ReviseProcessor(repository);
 
-        Bundle activeBundle =
-            ClasspathUtil.loadResource(FhirContext.forR4(), Bundle.class, "org/opencds/cqf/fhir/cr/visitor/r4/Bundle-ersd-small-active.json");
+        Bundle activeBundle = ClasspathUtil.loadResource(
+                FhirContext.forR4(), Bundle.class, "org/opencds/cqf/fhir/cr/visitor/r4/Bundle-ersd-small-active.json");
         repository.transaction(activeBundle);
         Library existingLibrary = activeBundle.getEntry().stream()
-            .filter(e -> e.getResource() instanceof Library)
-            .map(e -> (Library) e.getResource())
-            .findFirst()
-            .get();
+                .filter(e -> e.getResource() instanceof Library)
+                .map(e -> (Library) e.getResource())
+                .findFirst()
+                .get();
 
         Library proposedLibrary = existingLibrary.copy();
         proposedLibrary.setVersion("10.0.0");
@@ -63,14 +63,14 @@ class ReviseProcessorTests {
         var repository = new InMemoryFhirRepository(FhirContext.forR4());
         processor = new ReviseProcessor(repository);
 
-        Bundle draftBundle =
-            ClasspathUtil.loadResource(FhirContext.forR4(), Bundle.class, "org/opencds/cqf/fhir/cr/visitor/r4/Bundle-small-draft.json");
+        Bundle draftBundle = ClasspathUtil.loadResource(
+                FhirContext.forR4(), Bundle.class, "org/opencds/cqf/fhir/cr/visitor/r4/Bundle-small-draft.json");
         repository.transaction(draftBundle);
         Library existingLibrary = draftBundle.getEntry().stream()
-            .filter(e -> e.getResource() instanceof Library)
-            .map(e -> (Library) e.getResource())
-            .findFirst()
-            .get();
+                .filter(e -> e.getResource() instanceof Library)
+                .map(e -> (Library) e.getResource())
+                .findFirst()
+                .get();
 
         Library proposedLibrary = existingLibrary.copy();
         proposedLibrary.setStatus(PublicationStatus.ACTIVE);
@@ -83,18 +83,17 @@ class ReviseProcessorTests {
         var repository = new InMemoryFhirRepository(FhirContext.forR4());
         processor = new ReviseProcessor(repository);
 
-        Bundle draftBundle =
-            ClasspathUtil.loadResource(FhirContext.forR4(), Bundle.class, "org/opencds/cqf/fhir/cr/visitor/r4/Bundle-small-draft.json");
+        Bundle draftBundle = ClasspathUtil.loadResource(
+                FhirContext.forR4(), Bundle.class, "org/opencds/cqf/fhir/cr/visitor/r4/Bundle-small-draft.json");
         Library existingLibrary = draftBundle.getEntry().stream()
-            .filter(e -> e.getResource() instanceof Library)
-            .map(e -> (Library) e.getResource())
-            .findFirst()
-            .get();
+                .filter(e -> e.getResource() instanceof Library)
+                .map(e -> (Library) e.getResource())
+                .findFirst()
+                .get();
 
         Library proposedLibrary = existingLibrary.copy();
         proposedLibrary.setVersion("10.0.0-draft");
 
         Assertions.assertThrows(ResourceNotFoundException.class, () -> processor.reviseResource(proposedLibrary));
     }
-
 }

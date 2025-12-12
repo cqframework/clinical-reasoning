@@ -258,10 +258,8 @@ public class LibraryProcessor {
         return processor.withdrawResource(resolveLibrary(library), parameters);
     }
 
-    public IBaseResource reviseLibrary(
-        IBaseResource resource) {
+    public IBaseResource reviseLibrary(IBaseResource resource) {
         var processor = reviseProcessor != null ? reviseProcessor : new ReviseProcessor(repository);
         return processor.reviseResource(resource);
     }
-
 }

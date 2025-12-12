@@ -23,13 +23,17 @@ public class ReviseProcessor implements IReviseProcessor {
         }
 
         if (!existingResource.getStatus().equals(Enumerations.PublicationStatus.DRAFT)) {
-            throw new IllegalStateException(String.format("Current resource status is '%s'. Only resources with status of 'draft' can be revised.", existingResource.getStatus().toString()));
+            throw new IllegalStateException(String.format(
+                    "Current resource status is '%s'. Only resources with status of 'draft' can be revised.",
+                    existingResource.getStatus().toString()));
         }
 
         var proposedResource = (MetadataResource) resource;
 
         if (!proposedResource.getStatus().equals(Enumerations.PublicationStatus.DRAFT)) {
-            throw new IllegalStateException(String.format("The resource status can not be updated from 'draft'. The proposed resource has status: %s", proposedResource.getStatus().toString()));
+            throw new IllegalStateException(String.format(
+                    "The resource status can not be updated from 'draft'. The proposed resource has status: %s",
+                    proposedResource.getStatus().toString()));
         }
 
         repository.update(proposedResource);

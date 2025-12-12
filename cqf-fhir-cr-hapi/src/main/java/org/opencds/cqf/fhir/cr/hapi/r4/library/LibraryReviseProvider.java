@@ -23,10 +23,10 @@ public class LibraryReviseProvider {
 
     @Operation(name = "revise", idempotent = true, global = true, type = Library.class)
     @Description(shortDefinition = "$revise", value = "Update an existing artifact in 'draft' status")
-    public IBaseResource reviseOperation(@OperationParam(name = "resource") IBaseResource resource, RequestDetails requestDetails) throws FHIRException {
+    public IBaseResource reviseOperation(
+            @OperationParam(name = "resource") IBaseResource resource, RequestDetails requestDetails)
+            throws FHIRException {
 
-        return libraryProcessorFactory
-            .create(requestDetails)
-            .reviseLibrary(resource);
+        return libraryProcessorFactory.create(requestDetails).reviseLibrary(resource);
     }
 }

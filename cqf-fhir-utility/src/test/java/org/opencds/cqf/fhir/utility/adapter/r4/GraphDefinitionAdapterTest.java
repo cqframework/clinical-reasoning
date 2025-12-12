@@ -27,8 +27,12 @@ import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IGraphDefinitionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IGraphDefinitionAdaptorTest;
 import org.opencds.cqf.fhir.utility.adapter.TestVisitor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class GraphDefinitionAdapterTest implements IGraphDefinitionAdaptorTest<GraphDefinition> {
+
+    private static final Logger log = LoggerFactory.getLogger(GraphDefinitionAdapterTest.class);
     private final org.opencds.cqf.fhir.utility.adapter.IAdapterFactory adapterFactory = new AdapterFactory();
 
     private final FhirContext fhirCtxt = FhirContext.forR4Cached();
@@ -174,6 +178,11 @@ class GraphDefinitionAdapterTest implements IGraphDefinitionAdaptorTest<GraphDef
     }
 
     @Override
+    public Class<GraphDefinition> graphDefinitionClass() {
+        return GraphDefinition.class;
+    }
+
+    @Override
     public FhirContext fhirContext() {
         return fhirCtxt;
     }
@@ -184,29 +193,10 @@ class GraphDefinitionAdapterTest implements IGraphDefinitionAdaptorTest<GraphDef
     }
 
     @Override
-    public GraphDefinition getGraphDefinition(GraphDefinitionInformation information) {
-        GraphDefinition definition = new GraphDefinition();
-        definition.getMeta().addProfile(information.ProfileRef);
-
-        for (RelatedArtifactInfo info : information.RelatedArtifactInfo) {
-            RelatedArtifact artifact = new RelatedArtifact();
-            if (info.getRelatedArtifactType() == null) {
-                artifact.setType(RelatedArtifactType.DEPENDSON);
-            } else {
-                artifact.setType((RelatedArtifactType) info.getRelatedArtifactType());
-            }
-            artifact.setResource(info.CanonicalResourceURL);
-
-            definition.addExtension(info.ExtensionUrl, artifact);
-        }
-
-        return definition;
-    }
-
-    @Override
-    public List<? extends Enum<?>> getAllNonProcessableTypeForRelatedArtifact() {
+    public List<String> getAllNonProcessableTypeForRelatedArtifact() {
         return Arrays.stream(RelatedArtifactType.values())
-                .filter(e -> e != RelatedArtifactType.DEPENDSON)
+                .filter(e -> e != RelatedArtifactType.DEPENDSON && e != RelatedArtifactType.NULL)
+                .map(e -> e.toCode())
                 .toList();
     }
 }

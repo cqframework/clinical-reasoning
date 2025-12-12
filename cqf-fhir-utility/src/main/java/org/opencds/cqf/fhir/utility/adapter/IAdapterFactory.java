@@ -243,6 +243,7 @@ public interface IAdapterFactory {
      * @param graphDefinition a FHIR GraphDefinition Resource
      * @return an adapter exposing common api calls
      */
+    @SuppressWarnings("rawtypes")
     IGraphDefinitionAdapter createGraphDefinition(IBaseResource graphDefinition);
 
     /**

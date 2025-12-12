@@ -27,10 +27,16 @@ public interface IGraphDefinitionAdapter<GRAPHDEF extends IBaseResource> extends
 
     /**
      * Proper Fhir version  class for Extension
-     * @return
-     * @param <EXTENSION>
      */
     <EXTENSION extends IBaseExtension<?, ?>> Class<EXTENSION> extensionClass();
+
+    /**
+     * Validates the RelatedArtifact fhir type to ensure it is, indeed,
+     * a RelatedArtifact and has the correct type value.
+     * @param relatedArtifact the potential related artifact from the extension's value field
+     * @param errors list on which to append errors, if they are found
+     */
+    <RA extends IBaseDatatype> void validateRelatedArtifact(RA relatedArtifact, List<String> errors);
 
     /**
      * Retrieve the reference from the RelatedArtifact
@@ -44,8 +50,12 @@ public interface IGraphDefinitionAdapter<GRAPHDEF extends IBaseResource> extends
         return canonicalUrl == null ? null : canonicalUrl.getValue();
     }
 
-    <RA extends IBaseDatatype> void validateRelatedArtifact(RA relatedArtifact, List<String> errors);
-
+    /**
+     * Extracts the RelatedArtifact.resource values from a given GraphDefinition
+     * @param graphDefinition the graphdefinition in question
+     * @param referenceSource the resource source
+     * @param dependencies list of dependencies on which to append the found references
+     */
     default void extractRelatedArtifactReferences(
             GRAPHDEF graphDefinition, String referenceSource, List<IDependencyInfo> dependencies) {
         List<String> errors = new ArrayList<>();
@@ -69,7 +79,7 @@ public interface IGraphDefinitionAdapter<GRAPHDEF extends IBaseResource> extends
             String canonicalUrl = getReferenceFromArtifact(relatedArtifact);
 
             if (isBlank(canonicalUrl)) {
-                errors.add("No Canonical reference");
+                errors.add(String.format("No reference found on extension %s", extension.getUrl()));
                 break;
             }
 
@@ -85,6 +95,9 @@ public interface IGraphDefinitionAdapter<GRAPHDEF extends IBaseResource> extends
         }
     }
 
+    /**
+     * throws an exception if there are any errors
+     */
     default void handleGetDependenciesErrors(List<String> errors) {
         throw new IllegalArgumentException(String.join(", ", errors));
     }

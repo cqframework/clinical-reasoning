@@ -2,142 +2,218 @@ package org.opencds.cqf.fhir.utility.adapter;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.util.FhirTerser;
+import ca.uhn.fhir.parser.IParser;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.Test;
-import org.opencds.cqf.fhir.utility.Constants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public interface IGraphDefinitionAdaptorTest<T extends IBaseResource> {
 
-    class RelatedArtifactInfo {
+    String PROFILE_REF = "PROFILE_REF";
+    String RELATED_ARTIFACT_TYPE_1 = "RELATED_ARTIFACT_TYPE_1";
+    String RELATED_ARTIFACT_TYPE_2 = "RELATED_ARTIFACT_TYPE_2";
+    String RESOURCE_REF_1 = "RESOURCE_REF_1";
+    String RESOURCE_REF_2 = "RESOURCE_REF_2";
 
-        /**
-         * The extension url
-         */
-        public final String ExtensionUrl;
-        /**
-         * The canonical url.
-         */
-        public final String CanonicalResourceURL;
-
-        private Enum<?> relatedArtifactType;
-
-        public RelatedArtifactInfo(String url, String canonicalResourceUrl) {
-            ExtensionUrl = url;
-            CanonicalResourceURL = canonicalResourceUrl;
+    String VALID_GRAPH_DEF_JSON_TEMPLATE = """
+        {
+            "resourceType": "GraphDefinition",
+            "meta": [{
+                "profile": "PROFILE_REF"
+            }],
+            "extension": [
+                {
+                    "url": "http://hl7.org/fhir/StructureDefinition/artifact-relatedArtifact",
+                    "valueRelatedArtifact": {
+                        "type": "RELATED_ARTIFACT_TYPE_1",
+                        "resource": RESOURCE_REF_1
+                    }
+                },
+                {
+                    "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-relatedArtifact",
+                    "valueRelatedArtifact": {
+                        "type": "RELATED_ARTIFACT_TYPE_2",
+                        "resource": RESOURCE_REF_2
+                    }
+                }
+            ]
         }
+        """;
+    Logger log = LoggerFactory.getLogger(IGraphDefinitionAdaptorTest.class);
 
-        public Enum<?> getRelatedArtifactType() {
-            return relatedArtifactType;
-        }
+    Class<T> graphDefinitionClass();
 
-        public RelatedArtifactInfo setRelatedArtifactType(Enum<?> theRelatedArtifactType) {
-            relatedArtifactType = theRelatedArtifactType;
-            return this;
-        }
-    }
-
-    class GraphDefinitionInformation {
-
-        /**
-         * The profile reference to apply to the GraphDefinition
-         */
-        public String ProfileRef;
-        /**
-         * List of any/all related artifact extensions to add
-         */
-        public final List<RelatedArtifactInfo> RelatedArtifactInfo;
-
-        public GraphDefinitionInformation(String profileRef, List<RelatedArtifactInfo> relatedArtifactInfos) {
-            ProfileRef = profileRef;
-            RelatedArtifactInfo = relatedArtifactInfos == null ? List.of() : relatedArtifactInfos;
-        }
-    }
-
+    /**
+     * Returns the fhir context to use
+     */
     FhirContext fhirContext();
 
+    /**
+     * Returns the AdapterFactory to use
+     */
     IAdapterFactory getAdaptorFactory();
 
-    T getGraphDefinition(GraphDefinitionInformation information);
+    /**
+     * Returns the list of all RelatedArtifactType values that are
+     * not valid for getDependencies
+     */
+    List<String> getAllNonProcessableTypeForRelatedArtifact();
+
+    default String toCanonicalReference(String ref) {
+        return "\"" + ref + "\"";
+    }
 
     @Test
     default void getDependencies_withRelatedArtifact_retrievesCorrectReference() {
         // setup
-        GraphDefinitionInformation graphInfo = new GraphDefinitionInformation(
-                "profileref",
-                List.of(
-                        new RelatedArtifactInfo(Constants.ARTIFACT_RELATED_ARTIFACT, "http://example.com/canonical_1"),
-                        new RelatedArtifactInfo(Constants.CPG_RELATED_ARTIFACT, "http://example.com/canonical_2")));
-        T graphDefinition = getGraphDefinition(graphInfo);
+        String profileRef = "profileRef";
+        String resourceRef1 = "http://example.com/canonical-url-1";
+        String resourceRef2 = "http://example.com/canonical-url-2";
+        IParser parser = fhirContext().newJsonParser();
+        String graphDefStr = VALID_GRAPH_DEF_JSON_TEMPLATE
+            .replaceAll(PROFILE_REF, profileRef)
+            .replaceAll(RESOURCE_REF_1, toCanonicalReference(resourceRef1))
+            .replaceAll(RESOURCE_REF_2, toCanonicalReference(resourceRef2))
+            .replaceAll(RELATED_ARTIFACT_TYPE_1, "depends-on")
+            .replaceAll(RELATED_ARTIFACT_TYPE_2, "depends-on");
+        log.info(graphDefStr);
+        T graphDefinition = parser.parseResource(graphDefinitionClass(), graphDefStr);
 
         // profile + 1 for each of the RelatedArtifacts
         // (but a variable in case this changes)
         int dependenciesExpected = 3;
 
         // test
-        IGraphDefinitionAdapter adapter = getAdaptorFactory().createGraphDefinition(graphDefinition);
+        @SuppressWarnings("unchecked")
+        IGraphDefinitionAdapter<T> adapter = getAdaptorFactory().createGraphDefinition(graphDefinition);
         List<IDependencyInfo> dependencies = adapter.getDependencies();
 
         // verify
         assertEquals(dependenciesExpected, dependencies.size());
-        assertTrue(dependencies.stream().anyMatch(d -> d.getReference().equals(graphInfo.ProfileRef)));
-        for (RelatedArtifactInfo info : graphInfo.RelatedArtifactInfo) {
-            assertTrue(dependencies.stream().anyMatch(d -> d.getReference().equals(info.CanonicalResourceURL)));
-        }
+        // has profile
+        assertTrue(dependencies.stream().anyMatch(d -> d.getReference().equals(profileRef)));
+        // has the canonical references for relatedartifacts
+        assertTrue(dependencies.stream()
+            .anyMatch(d -> d.getReference().equals(resourceRef1)));
+        assertTrue(dependencies.stream()
+            .anyMatch(d -> d.getReference().equals(resourceRef2)));
     }
 
     @Test
     default void getDependencies_noRef_throwsError() {
         // setup
-        GraphDefinitionInformation graphInfo = new GraphDefinitionInformation(
-                "profileref",
-                List.of(
-                        new RelatedArtifactInfo(Constants.ARTIFACT_RELATED_ARTIFACT, null),
-                        new RelatedArtifactInfo(Constants.CPG_RELATED_ARTIFACT, "http://example.com/canonical_2")));
-        T graphDefinition = getGraphDefinition(graphInfo);
+        String ref = "http://example.com/canonical";
+        IParser parser = fhirContext().newJsonParser();
+        String graphDefStr = String.format("""
+            {
+                "resourceType": "GraphDefinition",
+                "meta": [{
+                    "profile": "profileRef"
+                }],
+                "extension": [
+                    {
+                        "url": "http://hl7.org/fhir/StructureDefinition/artifact-relatedArtifact",
+                        "valueRelatedArtifact": {
+                            "type": "depends-on",
+                            "resource": %s
+                        }
+                    },
+                    {
+                        "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-relatedArtifact",
+                        "valueRelatedArtifact": {
+                            "type": "depends-on"
+                        }
+                    }
+                ]
+            }
+            """, toCanonicalReference(ref));
+        log.info(graphDefStr);
+        T graphDefinition = parser.parseResource(graphDefinitionClass(), graphDefStr);
 
         // test
-        IGraphDefinitionAdapter adapter = getAdaptorFactory().createGraphDefinition(graphDefinition);
+        @SuppressWarnings("unchecked")
+        IGraphDefinitionAdapter<T> adapter = getAdaptorFactory().createGraphDefinition(graphDefinition);
 
         try {
-            List<IDependencyInfo> dependencies = adapter.getDependencies();
+            adapter.getDependencies();
+            fail();
         } catch (IllegalArgumentException ex) {
-            assertTrue(ex.getMessage().contains("No Canonical reference"));
+            assertTrue(ex.getMessage().contains("No reference found on extension"),
+                ex.getMessage());
+        }
+    }
+
+    @Test
+    default void getDependencies_noRelatedArtifact_throwsErrors() {
+        // setup
+        String graphDefStr = """
+            {
+               "resourceType": "GraphDefinition",
+               "meta": [{
+                    "profile": "profileRef"
+               }],
+               "extension": [
+                {
+                    "url": "http://hl7.org/fhir/StructureDefinition/artifact-relatedArtifact",
+                    "reference": "resource-ref"
+                },
+                {
+                    "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-relatedArtifact",
+                    "reference": "resource-ref2"
+                }
+            ]
+            }
+            """;
+        log.info(graphDefStr);
+        IParser parser = fhirContext().newJsonParser();
+        T graphDef = parser.parseResource(graphDefinitionClass(), graphDefStr);
+
+        @SuppressWarnings("unchecked")
+        IGraphDefinitionAdapter<T> adatper = getAdaptorFactory().createGraphDefinition(graphDef);
+
+        try {
+            adatper.getDependencies();
+            fail();
+        } catch (IllegalArgumentException ex) {
+            assertTrue(ex.getMessage()
+                .contains("Expected RelatedArtifact;"), ex.getMessage());
         }
     }
 
     @Test
     default void getDependencies_wrongType_throwsError() {
         // setup
-        FhirTerser terser = fhirContext().newTerser();
-        for (Enum<?> relatedArtifactType : getAllNonProcessableTypeForRelatedArtifact()) {
-            GraphDefinitionInformation graphInfo = new GraphDefinitionInformation(
-                    "profileref",
-                    List.of(
-                            new RelatedArtifactInfo(
-                                            Constants.ARTIFACT_RELATED_ARTIFACT, "http://example.com/canonical_1")
-                                    .setRelatedArtifactType(relatedArtifactType), // we only need to set one
-                            new RelatedArtifactInfo(Constants.CPG_RELATED_ARTIFACT, "http://example.com/canonical_2")));
-            T graphDefinition = getGraphDefinition(graphInfo);
+        for (String relatedArtifactType : getAllNonProcessableTypeForRelatedArtifact()) {
+            String profileRef = "profileRef";
+            String resourceRef1 = "http://example.com/canonical-url-1";
+            String resourceRef2 = "http://example.com/canonical-url-2";
+            IParser parser = fhirContext().newJsonParser();
+            String graphDefStr = VALID_GRAPH_DEF_JSON_TEMPLATE
+                .replaceAll(PROFILE_REF, profileRef)
+                .replaceAll(RESOURCE_REF_1, toCanonicalReference(resourceRef1))
+                .replaceAll(RESOURCE_REF_2, toCanonicalReference(resourceRef2))
+                .replaceAll(RELATED_ARTIFACT_TYPE_1, "depends-on")
+                .replaceAll(RELATED_ARTIFACT_TYPE_2, relatedArtifactType == null ? "" : relatedArtifactType); // invalid type
+            System.out.println(graphDefStr);
+            T graphDefinition = parser.parseResource(graphDefinitionClass(), graphDefStr);
+
+            @SuppressWarnings("unchecked")
+            IGraphDefinitionAdapter<T> adapter = getAdaptorFactory().createGraphDefinition(graphDefinition);
 
             // test
             try {
-                IGraphDefinitionAdapter adapter = getAdaptorFactory().createGraphDefinition(graphDefinition);
+                adapter.getDependencies();
+                fail();
             } catch (IllegalArgumentException ex) {
                 assertTrue(ex.getMessage()
-                        .contains(String.format(
-                                "Expected RelatedArtifact of type DEPENDSON, but found %s",
-                                relatedArtifactType.name())));
+                        .contains("Expected RelatedArtifact of type \"depends-on\";"),
+                    ex.getMessage());
             }
         }
     }
-
-    /**
-     * Returns the list of all RelatedArtifactType values that are
-     * not valid for getDependencies
-     */
-    List<? extends Enum<?>> getAllNonProcessableTypeForRelatedArtifact();
 }

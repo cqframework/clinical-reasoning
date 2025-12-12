@@ -121,12 +121,12 @@ public class GraphDefinitionAdapter extends ResourceAdapter implements IGraphDef
         if (relatedArtifact instanceof RelatedArtifact relArtifact) {
             if (relArtifact.getType() != RelatedArtifactType.DEPENDSON) {
                 errors.add(String.format(
-                        "Expected RelatedArtifact of type DEPENDSON; found %s",
-                        relArtifact.getType().toCode()));
+                        "Expected RelatedArtifact of type \"depends-on\"; found \"%s\"",
+                        relArtifact.getType().name()));
             }
         } else {
             errors.add(String.format(
-                    "Expected RelatedArtifact. Found %s",
+                    "Expected RelatedArtifact; found %s",
                     relatedArtifact == null ? "null" : relatedArtifact.fhirType()));
         }
     }

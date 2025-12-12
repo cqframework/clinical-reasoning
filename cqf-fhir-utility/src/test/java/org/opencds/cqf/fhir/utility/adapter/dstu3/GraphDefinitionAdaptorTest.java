@@ -7,14 +7,25 @@ import org.hl7.fhir.dstu3.model.GraphDefinition;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.RelatedArtifact;
 import org.hl7.fhir.dstu3.model.RelatedArtifact.RelatedArtifactType;
+import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IGraphDefinitionAdaptorTest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class GraphDefinitionAdaptorTest implements IGraphDefinitionAdaptorTest<GraphDefinition> {
+
+    private static final Logger log = LoggerFactory.getLogger(GraphDefinitionAdaptorTest.class);
     private final org.opencds.cqf.fhir.utility.adapter.IAdapterFactory adapterFactory =
             new org.opencds.cqf.fhir.utility.adapter.dstu3.AdapterFactory();
 
     private final FhirContext fhirCtxt = FhirContext.forDstu3Cached();
+
+    @Override
+    public Class<GraphDefinition> graphDefinitionClass() {
+        return GraphDefinition.class;
+    }
 
     @Override
     public FhirContext fhirContext() {
@@ -26,30 +37,29 @@ public class GraphDefinitionAdaptorTest implements IGraphDefinitionAdaptorTest<G
         return adapterFactory;
     }
 
-    @Override
-    public GraphDefinition getGraphDefinition(GraphDefinitionInformation information) {
+    @Test
+    public void test() {
         GraphDefinition definition = new GraphDefinition();
-        definition.getMeta().addProfile(information.ProfileRef);
+        RelatedArtifact artifact = new RelatedArtifact();
+        artifact.setType(RelatedArtifactType.DEPENDSON);
+        artifact.setResource(new Reference("canonical"));
+        definition.addExtension(Constants.ARTIFACT_RELATED_ARTIFACT, artifact);
 
-        for (RelatedArtifactInfo info : information.RelatedArtifactInfo) {
-            RelatedArtifact artifact = new RelatedArtifact();
-            if (info.getRelatedArtifactType() == null) {
-                artifact.setType(RelatedArtifactType.DEPENDSON);
-            } else {
-                artifact.setType((RelatedArtifactType) info.getRelatedArtifactType());
-            }
-            artifact.setResource(new Reference(info.CanonicalResourceURL));
-
-            definition.addExtension(info.ExtensionUrl, artifact);
-        }
-
-        return definition;
+        System.out.println(fhirCtxt.newJsonParser().encodeToString(definition));
     }
 
     @Override
-    public List<? extends Enum<?>> getAllNonProcessableTypeForRelatedArtifact() {
+    public List<String> getAllNonProcessableTypeForRelatedArtifact() {
         return Arrays.stream(RelatedArtifactType.values())
-                .filter(v -> v != RelatedArtifactType.DEPENDSON)
+                .filter(v -> v != RelatedArtifactType.DEPENDSON && v != RelatedArtifactType.NULL)
+                .map(d -> d.toCode())
                 .toList();
+    }
+
+    @Override
+    public String toCanonicalReference(String ref) {
+        // dstu3 does not set canonical references as urls directly,
+        // but wraps them in a reference
+        return String.format("{\"reference\":\"%s\"}", ref);
     }
 }

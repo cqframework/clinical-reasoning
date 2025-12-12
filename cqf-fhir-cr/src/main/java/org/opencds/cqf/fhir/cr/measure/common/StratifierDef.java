@@ -111,4 +111,36 @@ public class StratifierDef {
             return Set.of(value);
         }
     }
+
+    /**
+     * Creates a deep copy snapshot of this StratifierDef including all stratum and results.
+     * <p>
+     * Recursively snapshots all stratum (which contain stratumPopulations) and copies
+     * the results map.
+     *
+     * @return A new StratifierDef instance with deep copied collections
+     */
+    public StratifierDef createSnapshot() {
+        // Deep copy components (if present)
+        List<StratifierComponentDef> snapshotComponents =
+                components.stream().map(StratifierComponentDef::createSnapshot).toList();
+
+        // Create new StratifierDef with snapshot components
+        StratifierDef snapshot = new StratifierDef(id, code, expression, stratifierType, snapshotComponents);
+
+        // Deep copy stratum list (each StratumDef recursively snapshots)
+        List<StratumDef> snapshotStratum =
+                stratum.stream().map(StratumDef::createSnapshot).toList();
+
+        // Populate stratum list (mutable ArrayList initialized in constructor)
+        snapshot.stratum.addAll(snapshotStratum);
+
+        // Deep copy results map (CriteriaResult is immutable, so shallow copy of values)
+        if (this.results != null) {
+            snapshot.results = new HashMap<>(this.results);
+        }
+        // If null, leave snapshot.results as null (lazy init preserved)
+
+        return snapshot;
+    }
 }

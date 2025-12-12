@@ -36,6 +36,13 @@ import org.slf4j.LoggerFactory;
 /**
  * Evaluation of Measure Report Data showing raw CQL criteria results compared to resulting Measure Report.
  *
+ * <p><strong>Note:</strong> This class will be removed in a future PR.
+ * For external consumers (e.g., cdr-cr project), use
+ * {@link org.opencds.cqf.fhir.cr.measure.common.MeasureReportScoringFhirAdapter#score(org.hl7.fhir.instance.model.api.IBaseResource, org.hl7.fhir.instance.model.api.IBaseResource)}
+ * for version-agnostic post-hoc scoring.
+ * For internal use, this class will be replaced by {@link org.opencds.cqf.fhir.cr.measure.common.MeasureDefScorer}
+ * integrated into the evaluation workflow in Part 2.
+ *
  * <p>Each row represents a subject as raw cql criteria expression output:
  *
  * <pre>{@code

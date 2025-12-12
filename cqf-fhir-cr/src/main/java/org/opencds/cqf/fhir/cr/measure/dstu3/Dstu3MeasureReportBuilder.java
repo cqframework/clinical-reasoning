@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -52,10 +53,14 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.SdeDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
+import org.opencds.cqf.fhir.cr.measure.common.StratumDef;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, MeasureReport, DomainResource> {
 
+    private static final Logger logger = LoggerFactory.getLogger(Dstu3MeasureReportBuilder.class);
     protected static final String POPULATION_SUBJECT_SET = "POPULATION_SUBJECT_SET";
     protected static final String EXT_POPULATION_DESCRIPTION_URL =
             "http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.population.description";
@@ -94,6 +99,9 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
 
         buildGroups(measure, measureDef);
         processSdes(measure, measureDef, subjectIds);
+
+        // Copy scores from Def objects (Part 1: null scores, Part 2: active after MeasureDefScorer)
+        copyScoresFromDef(measureDef);
 
         this.measureReportScorer.score(measure.getUrl(), measureDef, this.report);
 
@@ -737,5 +745,154 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         private String joinValues(String... elements) {
             return String.join("-", elements);
         }
+    }
+
+    /**
+     * Copy scores from Def objects to MeasureReport.
+     * In Part 1, scores are null (no-op). In Part 2, after MeasureDefScorer integration,
+     * this becomes the primary score source.
+     *
+     * Logic is driven by Def objects, matching report structures by ID.
+     *
+     * @param measureDef the measure definition
+     */
+    private void copyScoresFromDef(MeasureDef measureDef) {
+        // Iterate through GroupDefs (drive from Def side)
+        for (var groupDef : measureDef.groups()) {
+            copyGroupScore(groupDef);
+        }
+    }
+
+    /**
+     * Copy score from a single GroupDef to matching MeasureReport group.
+     *
+     * @param groupDef the GroupDef containing the score
+     */
+    private void copyGroupScore(GroupDef groupDef) {
+        MeasureReportGroupComponent reportGroup = null;
+
+        // For single-group measures, use positional matching (no ID required)
+        // For multi-group measures, match by ID
+        if (this.report.getGroup().size() == 1) {
+            reportGroup = this.report.getGroupFirstRep();
+        } else {
+            // Multi-group: match by ID
+            reportGroup = this.report.getGroup().stream()
+                    .filter(rg -> groupDef.id() != null && groupDef.id().equals(rg.getId()))
+                    .findFirst()
+                    .orElse(null);
+        }
+
+        if (reportGroup == null) {
+            logger.warn("No matching MeasureReport group found for GroupDef with id: {}", groupDef.id());
+            return;
+        }
+
+        // Copy group-level score (DSTU3 uses setMeasureScore(Double) directly)
+        Double groupScore = groupDef.getMeasureScore();
+        if (groupScore != null) {
+            reportGroup.setMeasureScore(groupScore);
+        }
+
+        // Copy stratifier scores
+        copyStratifierScores(reportGroup, groupDef);
+    }
+
+    /**
+     * Copy scores from stratifier StratumDefs to MeasureReport stratifiers.
+     * Logic is driven by StratifierDef objects, matching report stratifiers by ID.
+     *
+     * @param reportGroup the MeasureReport group component
+     * @param groupDef the GroupDef containing stratifier definitions
+     */
+    private void copyStratifierScores(MeasureReportGroupComponent reportGroup, GroupDef groupDef) {
+        // Iterate through StratifierDefs (drive from Def side)
+        for (var stratifierDef : groupDef.stratifiers()) {
+            copyStratifierScore(reportGroup, stratifierDef);
+        }
+    }
+
+    /**
+     * Copy scores from a single StratifierDef to matching MeasureReport stratifier.
+     *
+     * @param reportGroup the MeasureReport group component
+     * @param stratifierDef the StratifierDef containing stratum scores
+     */
+    private void copyStratifierScore(MeasureReportGroupComponent reportGroup, StratifierDef stratifierDef) {
+        MeasureReport.MeasureReportGroupStratifierComponent reportStratifier = null;
+
+        // For single-stratifier, use positional matching (no ID required)
+        // For multiple stratifiers, match by ID
+        if (reportGroup.getStratifier().size() == 1) {
+            reportStratifier = reportGroup.getStratifierFirstRep();
+        } else {
+            // Multi-stratifier: match by ID
+            reportStratifier = reportGroup.getStratifier().stream()
+                    .filter(rs ->
+                            stratifierDef.id() != null && stratifierDef.id().equals(rs.getId()))
+                    .findFirst()
+                    .orElse(null);
+        }
+
+        if (reportStratifier == null) {
+            logger.warn("No matching MeasureReport stratifier found for StratifierDef with id: {}", stratifierDef.id());
+            return;
+        }
+
+        // Iterate through StratumDefs (drive from Def side)
+        for (var stratumDef : stratifierDef.getStratum()) {
+            copyStratumScore(reportStratifier, stratumDef, stratifierDef.id());
+        }
+    }
+
+    /**
+     * Copy score from a single StratumDef to matching MeasureReport stratum.
+     *
+     * @param reportStratifier the MeasureReport stratifier component
+     * @param stratumDef the StratumDef containing the score
+     * @param stratifierDefId the StratifierDef ID (for logging)
+     */
+    private void copyStratumScore(
+            MeasureReportGroupStratifierComponent reportStratifier, StratumDef stratumDef, String stratifierDefId) {
+        // Find matching report stratum by comparing value strings
+        var reportStratum = reportStratifier.getStratum().stream()
+                .filter(rs -> matchesStratumValue(rs, stratumDef))
+                .findFirst()
+                .orElse(null);
+
+        if (reportStratum == null) {
+            logger.debug("No matching MeasureReport stratum found for StratumDef in stratifier: {}", stratifierDefId);
+            return;
+        }
+
+        // Copy stratum score (DSTU3 uses setMeasureScore(Double) directly)
+        Double stratumScore = stratumDef.getMeasureScore();
+        if (stratumScore != null) {
+            reportStratum.setMeasureScore(stratumScore);
+        }
+    }
+
+    /**
+     * Check if a MeasureReport stratum matches a StratumDef by comparing string representations.
+     * DSTU3 uses StratifierGroupComponent (not StratifierGroupComponent like R4).
+     *
+     * @param reportStratum the MeasureReport stratum (DSTU3 StratifierGroupComponent)
+     * @param stratumDef the StratumDef
+     * @return true if values match
+     */
+    private boolean matchesStratumValue(StratifierGroupComponent reportStratum, StratumDef stratumDef) {
+        // Get values from StratumDef
+        var stratumValues = stratumDef.valueDefs();
+
+        // Single value comparison - DSTU3 doesn't have component stratifiers like R4
+        if (reportStratum.hasValue() && stratumValues.size() == 1) {
+            var stratumValue = stratumValues.iterator().next();
+            String reportValue = reportStratum.getValue();
+            String defValue =
+                    stratumValue.value() != null ? stratumValue.value().getValueAsString() : null;
+            return Objects.equals(reportValue, defValue);
+        }
+
+        return false;
     }
 }

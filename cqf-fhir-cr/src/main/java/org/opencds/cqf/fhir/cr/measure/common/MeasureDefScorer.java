@@ -68,7 +68,7 @@ import org.slf4j.LoggerFactory;
  *   <li>MeasureDef.groups() for group iteration</li>
  *   <li>GroupDef.stratifiers() for stratifier iteration</li>
  *   <li>StratifierDef.getStratum() for stratum iteration</li>
- *   <li>PopulationDef.getCount(GroupDef) for population counts</li>
+ *   <li>PopulationDef.getCount() for population counts</li>
  *   <li>StratumDef.getPopulationCount(PopulationDef) for stratum counts</li>
  * </ul>
  *
@@ -145,7 +145,13 @@ public class MeasureDefScorer {
                 QuantityDef quantityDef = scoreContinuousVariable(measureUrl, measureObsPop);
                 return quantityDef != null ? quantityDef.value() : null;
 
+            case COHORT:
+                // COHORT measures don't have scores - they report counts only
+                return null;
+
             default:
+                // COMPOSITE and other unsupported scoring types
+                logger.warn("Unsupported measure scoring type: {} for measure: {}", measureScoring, measureUrl);
                 return null;
         }
     }

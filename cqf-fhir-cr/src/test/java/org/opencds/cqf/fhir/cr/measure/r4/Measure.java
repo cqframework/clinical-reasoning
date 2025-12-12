@@ -1090,7 +1090,12 @@ public class Measure {
                 Selector<MeasureReport.StratifierGroupComponent, MeasureReport.MeasureReportGroupStratifierComponent>
                         stratumSelector) {
             var s = stratumSelector.select(value());
-            return new SelectedStratum(s, this);
+            var stratum = new SelectedStratum(s, this);
+            assertNotNull(
+                    stratum.value(),
+                    "Expected stratum() to return a stratum, but it was null. Stratifier has "
+                            + value().getStratum().size() + " strata.");
+            return stratum;
         }
 
         public SelectedStratifier hasCodeText(String stratifierCodeText) {
@@ -1134,7 +1139,12 @@ public class Measure {
         }
 
         public SelectedStratumPopulation firstPopulation() {
-            return population(MeasureReport.StratifierGroupComponent::getPopulationFirstRep);
+            var population = population(MeasureReport.StratifierGroupComponent::getPopulationFirstRep);
+            assertNotNull(
+                    population,
+                    "Expected firstPopulation() to return a population, but it was null. Stratum has "
+                            + value().getPopulation().size() + " populations.");
+            return population;
         }
 
         public SelectedStratum hasValue(String textValue) {

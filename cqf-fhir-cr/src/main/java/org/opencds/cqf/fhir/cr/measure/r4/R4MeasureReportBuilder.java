@@ -52,13 +52,18 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.SdeDef;
+import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
+import org.opencds.cqf.fhir.cr.measure.common.StratumDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumValueWrapper;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4DateHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, MeasureReport, DomainResource> {
 
+    private static final Logger logger = LoggerFactory.getLogger(R4MeasureReportBuilder.class);
     protected static final String POPULATION_SUBJECT_SET = "POPULATION_SUBJECT_SET";
 
     private final IMeasureReportScorer<MeasureReport> measureReportScorer;
@@ -92,6 +97,9 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         for (var r : bc.contained().values()) {
             bc.report().addContained(r);
         }
+
+        // Copy scores from Def objects (Part 1: null scores, Part 2: active after MeasureDefScorer)
+        copyScoresFromDef(bc);
 
         this.measureReportScorer.score(measure.getUrl(), measureDef, bc.report());
         setReportStatus(bc);
@@ -577,5 +585,195 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         cc.setText(observationName);
         obs.setCode(cc);
         return obs;
+    }
+
+    /**
+     * Copy scores from Def objects to MeasureReport.
+     * In Part 1, scores are null (no-op). In Part 2, after MeasureDefScorer integration,
+     * this becomes the primary score source.
+     *
+     * Logic is driven by Def objects, matching report structures by ID.
+     *
+     * @param bc the builder context
+     */
+    private void copyScoresFromDef(R4MeasureReportBuilderContext bc) {
+        var report = bc.report();
+        var measureDef = bc.measureDef();
+
+        // Iterate through GroupDefs (drive from Def side)
+        for (var groupDef : measureDef.groups()) {
+            copyGroupScore(report, groupDef);
+        }
+    }
+
+    /**
+     * Copy score from a single GroupDef to matching MeasureReport group.
+     *
+     * @param report the MeasureReport
+     * @param groupDef the GroupDef containing the score
+     */
+    private void copyGroupScore(MeasureReport report, GroupDef groupDef) {
+        MeasureReportGroupComponent reportGroup = null;
+
+        // For single-group measures, use positional matching (no ID required)
+        // For multi-group measures, match by ID
+        if (report.getGroup().size() == 1) {
+            reportGroup = report.getGroupFirstRep();
+        } else {
+            // Multi-group: match by ID
+            reportGroup = report.getGroup().stream()
+                    .filter(rg -> groupDef.id() != null && groupDef.id().equals(rg.getId()))
+                    .findFirst()
+                    .orElse(null);
+        }
+
+        if (reportGroup == null) {
+            logger.warn("No matching MeasureReport group found for GroupDef with id: {}", groupDef.id());
+            return;
+        }
+
+        // Copy group-level score
+        Double groupScore = groupDef.getMeasureScore();
+        if (groupScore != null) {
+            reportGroup.getMeasureScore().setValue(groupScore);
+        }
+
+        // Copy stratifier scores
+        copyStratifierScores(reportGroup, groupDef);
+    }
+
+    /**
+     * Copy scores from stratifier StratumDefs to MeasureReport stratifiers.
+     * Logic is driven by StratifierDef objects, matching report stratifiers by ID.
+     *
+     * @param reportGroup the MeasureReport group component
+     * @param groupDef the GroupDef containing stratifier definitions
+     */
+    private void copyStratifierScores(MeasureReportGroupComponent reportGroup, GroupDef groupDef) {
+        // Iterate through StratifierDefs (drive from Def side)
+        for (var stratifierDef : groupDef.stratifiers()) {
+            copyStratifierScore(reportGroup, stratifierDef);
+        }
+    }
+
+    /**
+     * Copy scores from a single StratifierDef to matching MeasureReport stratifier.
+     *
+     * @param reportGroup the MeasureReport group component
+     * @param stratifierDef the StratifierDef containing stratum scores
+     */
+    private void copyStratifierScore(MeasureReportGroupComponent reportGroup, StratifierDef stratifierDef) {
+        MeasureReport.MeasureReportGroupStratifierComponent reportStratifier = null;
+
+        // For single-stratifier, use positional matching (no ID required)
+        // For multiple stratifiers, match by ID
+        if (reportGroup.getStratifier().size() == 1) {
+            reportStratifier = reportGroup.getStratifierFirstRep();
+        } else {
+            // Multi-stratifier: match by ID
+            reportStratifier = reportGroup.getStratifier().stream()
+                    .filter(rs ->
+                            stratifierDef.id() != null && stratifierDef.id().equals(rs.getId()))
+                    .findFirst()
+                    .orElse(null);
+        }
+
+        if (reportStratifier == null) {
+            logger.warn("No matching MeasureReport stratifier found for StratifierDef with id: {}", stratifierDef.id());
+            return;
+        }
+
+        // Iterate through StratumDefs (drive from Def side)
+        for (var stratumDef : stratifierDef.getStratum()) {
+            copyStratumScore(reportStratifier, stratumDef, stratifierDef.id());
+        }
+    }
+
+    /**
+     * Copy score from a single StratumDef to matching MeasureReport stratum.
+     *
+     * @param reportStratifier the MeasureReport stratifier component
+     * @param stratumDef the StratumDef containing the score
+     * @param stratifierDefId the StratifierDef ID (for logging)
+     */
+    private void copyStratumScore(
+            MeasureReport.MeasureReportGroupStratifierComponent reportStratifier,
+            StratumDef stratumDef,
+            String stratifierDefId) {
+        // Find matching report stratum by comparing value strings
+        var reportStratum = reportStratifier.getStratum().stream()
+                .filter(rs -> matchesStratumValue(rs, stratumDef))
+                .findFirst()
+                .orElse(null);
+
+        if (reportStratum == null) {
+            logger.debug("No matching MeasureReport stratum found for StratumDef in stratifier: {}", stratifierDefId);
+            return;
+        }
+
+        // Copy stratum score
+        Double stratumScore = stratumDef.getMeasureScore();
+        if (stratumScore != null) {
+            reportStratum.getMeasureScore().setValue(stratumScore);
+        }
+    }
+
+    /**
+     * Check if a MeasureReport stratum matches a StratumDef by comparing string representations.
+     *
+     * @param reportStratum the MeasureReport stratum
+     * @param stratumDef the StratumDef
+     * @return true if values match
+     */
+    private boolean matchesStratumValue(MeasureReport.StratifierGroupComponent reportStratum, StratumDef stratumDef) {
+        // Get values from StratumDef
+        var stratumValues = stratumDef.valueDefs();
+
+        // Compare component values (for multi-component stratifiers)
+        if (reportStratum.hasComponent()) {
+            if (stratumValues.size() != reportStratum.getComponent().size()) {
+                return false;
+            }
+
+            for (var reportComponent : reportStratum.getComponent()) {
+                // Safe read-only access - don't create empty Coding objects
+                String componentCode = reportComponent.hasCode()
+                                && !reportComponent.getCode().getCoding().isEmpty()
+                        ? reportComponent.getCode().getCoding().get(0).getCode()
+                        : null;
+                String componentValue = reportComponent.hasValue()
+                                && !reportComponent.getValue().getCoding().isEmpty()
+                        ? reportComponent.getValue().getCoding().get(0).getCode()
+                        : null;
+
+                boolean matchFound = stratumValues.stream().anyMatch(sv -> {
+                    String svCode = sv.def() != null && sv.def().code() != null
+                            ? sv.def().code().text()
+                            : null;
+                    String svValue = sv.value() != null ? sv.value().getValueAsString() : null;
+                    return Objects.equals(componentCode, svCode) && Objects.equals(componentValue, svValue);
+                });
+
+                if (!matchFound) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        // Single value comparison - use string representation
+        if (reportStratum.hasValue() && stratumValues.size() == 1) {
+            var stratumValue = stratumValues.iterator().next();
+            // Safe read-only access - don't create empty Coding objects
+            String reportValue = reportStratum.hasValue()
+                            && !reportStratum.getValue().getCoding().isEmpty()
+                    ? reportStratum.getValue().getCoding().get(0).getCode()
+                    : null;
+            String defValue =
+                    stratumValue.value() != null ? stratumValue.value().getValueAsString() : null;
+            return Objects.equals(reportValue, defValue);
+        }
+
+        return false;
     }
 }

@@ -40,4 +40,24 @@ public class StratifierComponentDef {
 
         return this.results;
     }
+
+    /**
+     * Creates a shallow copy snapshot of this StratifierComponentDef.
+     * <p>
+     * Copies the results map. All other fields are immutable.
+     *
+     * @return A new StratifierComponentDef instance with copied results map
+     */
+    public StratifierComponentDef createSnapshot() {
+        // Create new instance
+        StratifierComponentDef snapshot = new StratifierComponentDef(id, code, expression);
+
+        // Deep copy results map (CriteriaResult is immutable)
+        if (this.results != null) {
+            snapshot.results = new HashMap<>(this.results);
+        }
+        // If null, leave snapshot.results as null (lazy init preserved)
+
+        return snapshot;
+    }
 }

@@ -7,6 +7,7 @@ import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.MetadataResource;
 import org.opencds.cqf.fhir.utility.SearchHelper;
 
+@SuppressWarnings("UnstableApiUsage")
 public class ReviseProcessor implements IReviseProcessor {
 
     private final IRepository repository;

@@ -69,7 +69,7 @@ class CdsCrUtilsTest {
     void readPlanDefinition_forUnsupportedVersions_shouldReturnNull(FhirVersionEnum theUnsupportedVersion) {
         IIdType dontCare = null;
         // Arrange
-        FhirContext fhirContext = FhirContext.forVersion(theUnsupportedVersion);
+        FhirContext fhirContext = FhirContext.forCached(theUnsupportedVersion);
         IRepository repository = Mockito.mock(IRepository.class);
         Mockito.when(repository.fhirContext()).thenReturn(fhirContext);
 

@@ -25,13 +25,13 @@ public class MeasureCommandArgument {
     public String periodEnd;
 
     @Option(
-            names = {"--measure-path"},
-            required = true,
-            description = "Specifies the path to the measure resource.")
-    public String measurePath;
-
-    @Option(
             names = {"--report-path"},
             description = "Specifies the path to the report output directory.")
     public String reportPath;
+
+    @Option(
+            names = {"--apply-scoring"},
+            defaultValue = "true",
+            description = "Tells evaluation to apply scoring algorithm to returned results.")
+    public String applyScoring;
 }

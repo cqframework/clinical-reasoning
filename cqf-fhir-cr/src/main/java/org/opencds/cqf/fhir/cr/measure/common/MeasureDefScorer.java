@@ -293,18 +293,19 @@ public class MeasureDefScorer {
             return null;
         }
 
-        // Get all MEASUREOBSERVATION populations
-        var measureObservationPopulationDefs = groupDef.getPopulationDefs(MeasurePopulationType.MEASUREOBSERVATION);
+        // Use pre-computed cache - eliminates all lookups
+        MeasureObservationStratumCache cache = stratumDef.getMeasureObservationCache();
+        if (cache == null) {
+            return null;
+        }
 
-        // Find Measure Observations for Numerator and Denominator
-        PopulationDef numPopDef =
-                findPopulationDef(groupDef, measureObservationPopulationDefs, MeasurePopulationType.NUMERATOR);
-        PopulationDef denPopDef =
-                findPopulationDef(groupDef, measureObservationPopulationDefs, MeasurePopulationType.DENOMINATOR);
+        // Extract cached references
+        StratumPopulationDef stratumPopulationDefNum = cache.numeratorObservation();
+        StratumPopulationDef stratumPopulationDefDen = cache.denominatorObservation();
 
-        // Get stratum populations for numerator and denominator
-        StratumPopulationDef stratumPopulationDefNum = getStratumPopDefFromPopDef(stratumDef, numPopDef);
-        StratumPopulationDef stratumPopulationDefDen = getStratumPopDefFromPopDef(stratumDef, denPopDef);
+        // Get parent PopulationDefs directly from StratumPopulationDef
+        PopulationDef numPopDef = stratumPopulationDefNum.populationDef();
+        PopulationDef denPopDef = stratumPopulationDefDen.populationDef();
 
         return scoreRatioContVariableStratum(
                 measureUrl, stratumPopulationDefNum, stratumPopulationDefDen, numPopDef, denPopDef);

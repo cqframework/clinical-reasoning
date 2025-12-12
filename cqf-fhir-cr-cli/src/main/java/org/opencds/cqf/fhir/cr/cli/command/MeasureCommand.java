@@ -1,7 +1,5 @@
 package org.opencds.cqf.fhir.cr.cli.command;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.repository.IRepository;
 import jakarta.annotation.Nonnull;
@@ -14,17 +12,22 @@ import java.nio.file.StandardOpenOption;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Callable;
-import java.util.stream.Collectors;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cr.cli.argument.MeasureCommandArgument;
 import org.opencds.cqf.fhir.cr.cli.command.CqlCommand.SubjectAndResult;
+import org.opencds.cqf.fhir.cr.cli.command.EngineFactory.EngineBundle;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorUtils;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureProcessor;
@@ -43,55 +46,40 @@ public class MeasureCommand implements Callable<Integer> {
 
     @Override
     public Integer call() throws IOException {
-        var results = MeasureCommand.evaluate(this.args);
+        var setupStart = System.nanoTime();
+        var result = createMeasureCommandResult(this.args);
+        var setupEnd = System.nanoTime();
+        var initializationTime = (setupEnd - setupStart) / 1_000_000.0; // Convert to milliseconds
 
-        if (args.cql.outputPath != null) {
-            Files.createDirectories(Path.of(args.cql.outputPath));
-        }
+        var evalStart = System.nanoTime();
 
-        var fhirContext = FhirContext.forCached(FhirVersionEnum.valueOf(args.cql.fhir.fhirVersion));
-        var parser = fhirContext.newJsonParser();
-        results.forEach(r -> {
-            try {
-                var json = parser.encodeResourceToString(r.measureReport);
-                if (args.reportPath != null) {
-                    writeJsonToFile(json, r.subjectId, Path.of(args.reportPath));
-                } else {
-                    System.out.println(json);
-                }
-
-                if (args.cql.outputPath != null) {
-                    var path = Path.of(args.cql.outputPath, r.subjectId + ".txt");
-                    Files.createDirectories(path.getParent());
-                    try (OutputStream out = Files.newOutputStream(
-                            path,
-                            StandardOpenOption.CREATE,
-                            StandardOpenOption.TRUNCATE_EXISTING,
-                            StandardOpenOption.WRITE)) {
-                        Utilities.writeResult(r.result, out);
-                        log.info("Cql for patient {} written to: {}", r.subjectId, path);
-                    }
-                }
-            } catch (IOException e) {
-                log.error("Failed to process report for patient {}", r.subjectId, e);
-            }
+        AtomicLong counter = new AtomicLong();
+        result.measureReports().forEach(x -> {
+            counter.incrementAndGet();
         });
 
-        return 0; // Return an appropriate exit code
+        var evalEnd = System.nanoTime();
+        var evalTime = (evalEnd - evalStart) / 1_000_000;
+        log.info("Completed evaluation for {} measure reports", counter.get());
+        log.info("Initialization time: {} ms", initializationTime);
+        log.info("Evaluation time: {} ms", evalTime);
+        log.info("Average time per measure report: {} ms", evalTime / counter.get());
+        return 0;
     }
 
-    record SubjectAndReport(String subjectId, EvaluationResult result, MeasureReport measureReport) {}
+    public record MeasureCommandResult(Stream<MeasureReport> measureReports, EngineBundle engineBundle) {}
 
-    public static Stream<SubjectAndReport> evaluate(MeasureCommandArgument args) {
-        var cqlArgs = args.cql;
-        var results = CqlCommand.evaluate(cqlArgs);
-        var fhirContext = FhirContext.forCached(FhirVersionEnum.valueOf(cqlArgs.fhir.fhirVersion));
-        var parser = fhirContext.newJsonParser();
-        var resource = getMeasure(parser, args.measurePath, args.measureName);
-        var processor = getR4MeasureProcessor(
-                Utilities.createEvaluationSettings(cqlArgs.content.cqlPath, cqlArgs.hedisCompatibilityMode),
-                Utilities.createRepository(fhirContext, cqlArgs.fhir.terminologyUrl, cqlArgs.fhir.dataUrl));
+    public static MeasureCommandResult createMeasureCommandResult(MeasureCommandArgument args) throws IOException {
+        var cqlResult = CqlCommand.createCqlCommandResult(args.cql);
+        var bundle = cqlResult.engineBundle();
 
+        var measure = bundle.repository().read(Measure.class, new IdType(args.measureName));
+
+        // Create measure processor once
+        R4MeasureProcessor processor = getR4MeasureProcessor(
+                bundle.evaluationSettings(), bundle.repository(), Boolean.parseBoolean(args.applyScoring));
+
+        // Parse period dates once
         var start = args.periodStart != null
                 ? LocalDate.parse(args.periodStart, DateTimeFormatter.ISO_LOCAL_DATE)
                         .atStartOfDay(ZoneId.systemDefault())
@@ -103,16 +91,32 @@ public class MeasureCommand implements Callable<Integer> {
                         .atZone(ZoneId.systemDefault())
                 : null;
 
-        // Something askew here, we should get one result per subject for subject report.
-        // Probably need to refactor the evaluateMeasureResults method to handle this.
-        // "subject" and "summary" need separate overloads, possibly with different parameter types.
-        var map = results.collect(Collectors.toMap(SubjectAndResult::subjectId, SubjectAndResult::result));
+        Path reportOutput = args.reportPath != null ? Path.of(args.reportPath) : null;
+        if (reportOutput != null) {
+            Files.createDirectories(reportOutput);
+        }
 
-        return map.entrySet().stream().map(entry -> {
-            var report = processor.evaluateMeasureResults(
-                    resource, start, end, "subject", Collections.singletonList(entry.getKey()), map);
-            return new SubjectAndReport(entry.getKey(), entry.getValue(), report);
-        });
+        var measureResults = cqlResult
+                .subjectResults()
+                .map(sr -> evaluateMeasureForSubject(processor, measure, start, end, sr))
+                .map(sr -> {
+                    if (reportOutput != null) {
+                        var json = bundle.parser().encodeResourceToString(sr.report());
+                        try {
+                            writeMeasureReportToFile(json, sr.subjectId(), reportOutput);
+                            log.info("Measure report for {} written to: {}", sr.subjectId(), reportOutput);
+                        } catch (IOException e) {
+                            throw new RuntimeException("Failed to write measure report for " + sr.subjectId(), e);
+                        }
+                    } else {
+                        System.out.println(bundle.parser().encodeResourceToString(sr.report()));
+                    }
+
+                    log.info("✅ Completed {}", sr.subjectId());
+                    return sr.report();
+                });
+
+        return new MeasureCommandResult(measureResults, bundle);
     }
 
     @Nullable
@@ -129,19 +133,37 @@ public class MeasureCommand implements Callable<Integer> {
         }
     }
 
+    public record SubjectAndReport(String subjectId, MeasureReport report) {}
+
+    private static SubjectAndReport evaluateMeasureForSubject(
+            R4MeasureProcessor processor,
+            Measure measure,
+            ZonedDateTime start,
+            ZonedDateTime end,
+            SubjectAndResult subjectAndResult) {
+
+        Map<String, EvaluationResult> resultMap = new HashMap<>();
+        var subjectId = subjectAndResult.subject().subjectId();
+        resultMap.put(subjectId, subjectAndResult.result());
+
+        var report = processor.evaluateMeasureResults(
+                measure, start, end, "subject", Collections.singletonList(subjectId), resultMap);
+        return new SubjectAndReport(subjectAndResult.subject().value(), report);
+    }
+
     @Nonnull
     private static R4MeasureProcessor getR4MeasureProcessor(
-            EvaluationSettings evaluationSettings, IRepository repository) {
+            EvaluationSettings evaluationSettings, IRepository repository, boolean applyScoring) {
 
         MeasureEvaluationOptions evaluationOptions = new MeasureEvaluationOptions();
-        evaluationOptions.setApplyScoringSetMembership(false);
+        evaluationOptions.setApplyScoringSetMembership(applyScoring);
         evaluationOptions.setEvaluationSettings(evaluationSettings);
 
         return new R4MeasureProcessor(repository, evaluationOptions, new MeasureProcessorUtils());
     }
 
-    private void writeJsonToFile(String json, String patientId, Path path) throws IOException {
-        Path outputPath = path.resolve(patientId + ".json");
+    private static void writeMeasureReportToFile(String json, String contextValue, Path path) throws IOException {
+        Path outputPath = path.resolve(contextValue + ".json");
         // Ensure parent directories exist
         Files.createDirectories(outputPath.getParent());
 
@@ -152,7 +174,6 @@ public class MeasureCommand implements Callable<Integer> {
                 StandardOpenOption.TRUNCATE_EXISTING,
                 StandardOpenOption.WRITE)) {
             out.write(json.getBytes());
-            log.info("report for patient {} written to: {}", patientId, outputPath);
         }
     }
 }

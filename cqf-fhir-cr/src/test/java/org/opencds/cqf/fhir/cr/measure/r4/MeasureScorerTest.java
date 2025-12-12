@@ -298,7 +298,7 @@ class MeasureScorerTest {
                 .periodEnd("2030-12-31")
                 .reportType("population")
                 .evaluate();
-        MeasureReport report = when.then().report();
+        MeasureReport report = when.then().measureReport();
         assertNotNull(report);
         assertEquals(1, report.getGroup().size());
         assertEquals(16, report.getGroupFirstRep().getPopulation().get(0).getCount());
@@ -427,7 +427,7 @@ class MeasureScorerTest {
             MeasureReportGroupComponent reportGroup = measureReport.getGroup().get(i);
 
             for (var populationDef : groupDef.populations()) {
-                int defCount = populationDef.getCount(groupDef);
+                int defCount = populationDef.getCount();
                 int reportCount = reportGroup.getPopulation().stream()
                         .filter(pop -> pop.getCode()
                                 .getCodingFirstRep()
@@ -582,7 +582,10 @@ class MeasureScorerTest {
 
             // Create StratumDef
             var stratumDef = new StratumDef(
-                    stratumPopulations, stratumValueDefs, new ArrayList<>() // subjectIds
+                    stratumPopulations,
+                    stratumValueDefs,
+                    new ArrayList<>(), // subjectIds
+                    null // ratioObservationCache
                     );
 
             stratumDefs.add(stratumDef);

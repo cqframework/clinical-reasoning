@@ -24,10 +24,14 @@ class MeasureDefScorerTest {
     @Test
     void testScoreGroup_SetsScoreOnGroupDef() {
         // Setup: Simple proportion measure with 3/4 subjects meeting criteria
+        CodeDef encounterBasis = createPopulationBasisCode("Encounter");
         PopulationDef numeratorPop = createPopulationDef(
-                "num-1", MeasurePopulationType.NUMERATOR, Set.of("patient1", "patient2", "patient3"));
+                "num-1", MeasurePopulationType.NUMERATOR, Set.of("patient1", "patient2", "patient3"), encounterBasis);
         PopulationDef denominatorPop = createPopulationDef(
-                "den-1", MeasurePopulationType.DENOMINATOR, Set.of("patient1", "patient2", "patient3", "patient4"));
+                "den-1",
+                MeasurePopulationType.DENOMINATOR,
+                Set.of("patient1", "patient2", "patient3", "patient4"),
+                encounterBasis);
 
         GroupDef groupDef = new GroupDef(
                 "group-1",
@@ -37,7 +41,7 @@ class MeasureDefScorerTest {
                 MeasureScoring.PROPORTION,
                 false,
                 createImprovementNotationCode("increase"),
-                createPopulationBasisCode("Encounter"));
+                encounterBasis);
 
         // Score is null before scoring
         assertNull(groupDef.getScore());
@@ -56,22 +60,25 @@ class MeasureDefScorerTest {
         // Setup: Proportion measure with exclusions and exceptions
         // Formula: (n - nx) / (d - dx - de)
         // (10 - 2) / (20 - 3 - 1) = 8 / 16 = 0.5
+        CodeDef stringBasis = createPopulationBasisCode("String");
         PopulationDef numeratorPop = createPopulationDef(
                 "num-1",
                 MeasurePopulationType.NUMERATOR,
-                Set.of("p1", "p2", "p3", "p4", "p5", "p6", "p7", "p8", "p9", "p10"));
+                Set.of("p1", "p2", "p3", "p4", "p5", "p6", "p7", "p8", "p9", "p10"),
+                stringBasis);
         PopulationDef denominatorPop = createPopulationDef(
                 "den-1",
                 MeasurePopulationType.DENOMINATOR,
                 Set.of(
                         "p1", "p2", "p3", "p4", "p5", "p6", "p7", "p8", "p9", "p10", "p11", "p12", "p13", "p14", "p15",
-                        "p16", "p17", "p18", "p19", "p20"));
-        PopulationDef denExclusionPop =
-                createPopulationDef("dex-1", MeasurePopulationType.DENOMINATOREXCLUSION, Set.of("p11", "p12", "p13"));
+                        "p16", "p17", "p18", "p19", "p20"),
+                stringBasis);
+        PopulationDef denExclusionPop = createPopulationDef(
+                "dex-1", MeasurePopulationType.DENOMINATOREXCLUSION, Set.of("p11", "p12", "p13"), stringBasis);
         PopulationDef denExceptionPop =
-                createPopulationDef("dexc-1", MeasurePopulationType.DENOMINATOREXCEPTION, Set.of("p14"));
+                createPopulationDef("dexc-1", MeasurePopulationType.DENOMINATOREXCEPTION, Set.of("p14"), stringBasis);
         PopulationDef numExclusionPop =
-                createPopulationDef("nex-1", MeasurePopulationType.NUMERATOREXCLUSION, Set.of("p1", "p2"));
+                createPopulationDef("nex-1", MeasurePopulationType.NUMERATOREXCLUSION, Set.of("p1", "p2"), stringBasis);
 
         GroupDef groupDef = new GroupDef(
                 "group-1",
@@ -81,7 +88,7 @@ class MeasureDefScorerTest {
                 MeasureScoring.PROPORTION,
                 false,
                 createImprovementNotationCode("increase"),
-                createPopulationBasisCode("String"));
+                stringBasis);
 
         MeasureDefScorer scorer = new MeasureDefScorer();
         scorer.scoreGroup("http://example.com/Measure/test", groupDef);
@@ -93,16 +100,19 @@ class MeasureDefScorerTest {
     @Test
     void testScoreGroup_ZeroDenominator_SetsNullScore() {
         // Setup: All subjects excluded from denominator
-        PopulationDef numeratorPop =
-                createPopulationDef("num-1", MeasurePopulationType.NUMERATOR, Set.of("p1", "p2", "p3", "p4", "p5"));
+        CodeDef dateBasis = createPopulationBasisCode("date");
+        PopulationDef numeratorPop = createPopulationDef(
+                "num-1", MeasurePopulationType.NUMERATOR, Set.of("p1", "p2", "p3", "p4", "p5"), dateBasis);
         PopulationDef denominatorPop = createPopulationDef(
                 "den-1",
                 MeasurePopulationType.DENOMINATOR,
-                Set.of("p1", "p2", "p3", "p4", "p5", "p6", "p7", "p8", "p9", "p10"));
+                Set.of("p1", "p2", "p3", "p4", "p5", "p6", "p7", "p8", "p9", "p10"),
+                dateBasis);
         PopulationDef denExclusionPop = createPopulationDef(
                 "dex-1",
                 MeasurePopulationType.DENOMINATOREXCLUSION,
-                Set.of("p1", "p2", "p3", "p4", "p5", "p6", "p7", "p8", "p9", "p10")); // All excluded
+                Set.of("p1", "p2", "p3", "p4", "p5", "p6", "p7", "p8", "p9", "p10"),
+                dateBasis); // All excluded
 
         GroupDef groupDef = new GroupDef(
                 "group-1",
@@ -112,7 +122,7 @@ class MeasureDefScorerTest {
                 MeasureScoring.PROPORTION,
                 false,
                 createImprovementNotationCode("increase"),
-                createPopulationBasisCode("date"));
+                dateBasis);
 
         MeasureDefScorer scorer = new MeasureDefScorer();
         scorer.scoreGroup("http://example.com/Measure/test", groupDef);
@@ -127,19 +137,21 @@ class MeasureDefScorerTest {
         // Male stratum: 3/5 = 0.6
         // Female stratum: 5/5 = 1.0
 
+        CodeDef booleanBasisCode = createPopulationBasisCode("boolean");
         PopulationDef numeratorPop = createPopulationDef(
                 "num-1",
                 MeasurePopulationType.NUMERATOR,
-                Set.of("male1", "male2", "male3", "female1", "female2", "female3", "female4", "female5"));
+                Set.of("male1", "male2", "male3", "female1", "female2", "female3", "female4", "female5"),
+                booleanBasisCode);
         PopulationDef denominatorPop = createPopulationDef(
                 "den-1",
                 MeasurePopulationType.DENOMINATOR,
                 Set.of(
                         "male1", "male2", "male3", "male4", "male5", "female1", "female2", "female3", "female4",
-                        "female5"));
+                        "female5"),
+                booleanBasisCode);
 
         // Create stratum populations for Male stratum
-        CodeDef booleanBasisCode = createPopulationBasisCode("boolean");
 
         StratumPopulationDef maleNumPop = new StratumPopulationDef(
                 numeratorPop,
@@ -161,7 +173,8 @@ class MeasureDefScorerTest {
         StratumDef maleStratum = new StratumDef(
                 List.of(maleNumPop, maleDenPop),
                 Set.of(new StratumValueDef(new StratumValueWrapper("male"), genderComponent)),
-                Set.of("male1", "male2", "male3", "male4", "male5"));
+                Set.of("male1", "male2", "male3", "male4", "male5"),
+                null);
 
         // Create stratum populations for Female stratum
         StratumPopulationDef femaleNumPop = new StratumPopulationDef(
@@ -182,7 +195,8 @@ class MeasureDefScorerTest {
         StratumDef femaleStratum = new StratumDef(
                 List.of(femaleNumPop, femaleDenPop),
                 Set.of(new StratumValueDef(new StratumValueWrapper("female"), genderComponent)),
-                Set.of("female1", "female2", "female3", "female4", "female5"));
+                Set.of("female1", "female2", "female3", "female4", "female5"),
+                null);
 
         StratifierDef stratifierDef = new StratifierDef(
                 "gender-stratifier", createTextOnlyConcept("Gender Stratifier"), "Gender", MeasureStratifierType.VALUE);
@@ -214,12 +228,14 @@ class MeasureDefScorerTest {
     @Test
     void testScoreGroup_RatioMeasure() {
         // Setup: Ratio measure with 6/12 = 0.5
+        CodeDef stringBasis = createPopulationBasisCode("String");
         PopulationDef numeratorPop = createPopulationDef(
-                "num-1", MeasurePopulationType.NUMERATOR, Set.of("p1", "p2", "p3", "p4", "p5", "p6"));
+                "num-1", MeasurePopulationType.NUMERATOR, Set.of("p1", "p2", "p3", "p4", "p5", "p6"), stringBasis);
         PopulationDef denominatorPop = createPopulationDef(
                 "den-1",
                 MeasurePopulationType.DENOMINATOR,
-                Set.of("p1", "p2", "p3", "p4", "p5", "p6", "p7", "p8", "p9", "p10", "p11", "p12"));
+                Set.of("p1", "p2", "p3", "p4", "p5", "p6", "p7", "p8", "p9", "p10", "p11", "p12"),
+                stringBasis);
 
         GroupDef groupDef = new GroupDef(
                 "group-1",
@@ -229,7 +245,7 @@ class MeasureDefScorerTest {
                 MeasureScoring.RATIO,
                 false,
                 createImprovementNotationCode("increase"),
-                createPopulationBasisCode("String"));
+                stringBasis);
 
         assertNull(groupDef.getScore());
 
@@ -243,11 +259,12 @@ class MeasureDefScorerTest {
     void testScoreGroup_ContinuousVariable_SumAggregation() {
         // Setup: Continuous variable measure with SUM aggregation
         // Subject observations: 10.0, 20.0, 30.0 = 60.0 total
-        PopulationDef initialPopulation =
-                createPopulationDef("ip-1", MeasurePopulationType.INITIALPOPULATION, Set.of("p1", "p2", "p3"));
+        CodeDef dateBasis = createPopulationBasisCode("date");
+        PopulationDef initialPopulation = createPopulationDef(
+                "ip-1", MeasurePopulationType.INITIALPOPULATION, Set.of("p1", "p2", "p3"), dateBasis);
 
-        PopulationDef measurePopulation =
-                createPopulationDef("mp-1", MeasurePopulationType.MEASUREPOPULATION, Set.of("p1", "p2", "p3"));
+        PopulationDef measurePopulation = createPopulationDef(
+                "mp-1", MeasurePopulationType.MEASUREPOPULATION, Set.of("p1", "p2", "p3"), dateBasis);
 
         // Create MEASUREOBSERVATION population with QuantityDef observations
         // Default aggregation method is SUM when not specified
@@ -257,6 +274,7 @@ class MeasureDefScorerTest {
                 measureObsCode,
                 MeasurePopulationType.MEASUREOBSERVATION,
                 "expression",
+                dateBasis,
                 null,
                 ContinuousVariableObservationAggregateMethod.SUM);
 
@@ -281,7 +299,7 @@ class MeasureDefScorerTest {
                 MeasureScoring.CONTINUOUSVARIABLE,
                 false,
                 createImprovementNotationCode("increase"),
-                createPopulationBasisCode("date"));
+                dateBasis);
 
         assertNull(groupDef.getScore());
 
@@ -296,11 +314,12 @@ class MeasureDefScorerTest {
     void testScoreGroup_ContinuousVariable_AvgAggregation() {
         // Setup: Continuous variable measure with AVG aggregation
         // Subject observations: 10.0, 20.0, 30.0 = 20.0 average
-        PopulationDef initialPopulation =
-                createPopulationDef("ip-1", MeasurePopulationType.INITIALPOPULATION, Set.of("p1", "p2", "p3"));
+        CodeDef booleanBasis = createBooleanBasisCode();
+        PopulationDef initialPopulation = createPopulationDef(
+                "ip-1", MeasurePopulationType.INITIALPOPULATION, Set.of("p1", "p2", "p3"), booleanBasis);
 
-        PopulationDef measurePopulation =
-                createPopulationDef("mp-1", MeasurePopulationType.MEASUREPOPULATION, Set.of("p1", "p2", "p3"));
+        PopulationDef measurePopulation = createPopulationDef(
+                "mp-1", MeasurePopulationType.MEASUREPOPULATION, Set.of("p1", "p2", "p3"), booleanBasis);
 
         ConceptDef measureObsCode = createMeasurePopulationConcept(MeasurePopulationType.MEASUREOBSERVATION);
         PopulationDef measureObsPop = new PopulationDef(
@@ -308,6 +327,7 @@ class MeasureDefScorerTest {
                 measureObsCode,
                 MeasurePopulationType.MEASUREOBSERVATION,
                 "expression",
+                booleanBasis,
                 null,
                 ContinuousVariableObservationAggregateMethod.AVG);
 
@@ -331,7 +351,7 @@ class MeasureDefScorerTest {
                 MeasureScoring.CONTINUOUSVARIABLE,
                 false,
                 createImprovementNotationCode("increase"),
-                createPopulationBasisCode("boolean"));
+                booleanBasis);
 
         assertNull(groupDef.getScore());
 
@@ -346,11 +366,12 @@ class MeasureDefScorerTest {
     void testScoreGroup_ContinuousVariable_MinAggregation() {
         // Setup: Continuous variable with MIN aggregation
         // Subject observations: 10.0, 20.0, 30.0 = 10.0 min
-        PopulationDef initialPopulation =
-                createPopulationDef("ip-1", MeasurePopulationType.INITIALPOPULATION, Set.of("p1", "p2", "p3"));
+        CodeDef encounterBasis = createPopulationBasisCode("Encounter");
+        PopulationDef initialPopulation = createPopulationDef(
+                "ip-1", MeasurePopulationType.INITIALPOPULATION, Set.of("p1", "p2", "p3"), encounterBasis);
 
-        PopulationDef measurePopulation =
-                createPopulationDef("mp-1", MeasurePopulationType.MEASUREPOPULATION, Set.of("p1", "p2", "p3"));
+        PopulationDef measurePopulation = createPopulationDef(
+                "mp-1", MeasurePopulationType.MEASUREPOPULATION, Set.of("p1", "p2", "p3"), encounterBasis);
 
         ConceptDef measureObsCode = createMeasurePopulationConcept(MeasurePopulationType.MEASUREOBSERVATION);
         PopulationDef measureObsPop = new PopulationDef(
@@ -358,6 +379,7 @@ class MeasureDefScorerTest {
                 measureObsCode,
                 MeasurePopulationType.MEASUREOBSERVATION,
                 "expression",
+                encounterBasis,
                 null,
                 ContinuousVariableObservationAggregateMethod.MIN);
 
@@ -381,7 +403,7 @@ class MeasureDefScorerTest {
                 MeasureScoring.CONTINUOUSVARIABLE,
                 false,
                 createImprovementNotationCode("increase"),
-                createPopulationBasisCode("Encounter"));
+                encounterBasis);
 
         assertNull(groupDef.getScore());
 
@@ -396,11 +418,12 @@ class MeasureDefScorerTest {
     void testScoreGroup_ContinuousVariable_MaxAggregation() {
         // Setup: Continuous variable with MAX aggregation
         // Subject observations: 10.0, 20.0, 30.0 = 30.0 max
-        PopulationDef initialPopulation =
-                createPopulationDef("ip-1", MeasurePopulationType.INITIALPOPULATION, Set.of("p1", "p2", "p3"));
+        CodeDef stringBasis = createPopulationBasisCode("String");
+        PopulationDef initialPopulation = createPopulationDef(
+                "ip-1", MeasurePopulationType.INITIALPOPULATION, Set.of("p1", "p2", "p3"), stringBasis);
 
-        PopulationDef measurePopulation =
-                createPopulationDef("mp-1", MeasurePopulationType.MEASUREPOPULATION, Set.of("p1", "p2", "p3"));
+        PopulationDef measurePopulation = createPopulationDef(
+                "mp-1", MeasurePopulationType.MEASUREPOPULATION, Set.of("p1", "p2", "p3"), stringBasis);
 
         ConceptDef measureObsCode = createMeasurePopulationConcept(MeasurePopulationType.MEASUREOBSERVATION);
         PopulationDef measureObsPop = new PopulationDef(
@@ -408,6 +431,7 @@ class MeasureDefScorerTest {
                 measureObsCode,
                 MeasurePopulationType.MEASUREOBSERVATION,
                 "expression",
+                stringBasis,
                 null,
                 ContinuousVariableObservationAggregateMethod.MAX);
 
@@ -431,7 +455,7 @@ class MeasureDefScorerTest {
                 MeasureScoring.CONTINUOUSVARIABLE,
                 false,
                 createImprovementNotationCode("increase"),
-                createPopulationBasisCode("String"));
+                stringBasis);
 
         assertNull(groupDef.getScore());
 
@@ -449,10 +473,14 @@ class MeasureDefScorerTest {
     @Test
     void testGetMeasureScore_NullScore() {
         // Setup: Group with no scoring performed (score is null)
+        CodeDef dateBasis = createPopulationBasisCode("date");
         PopulationDef numeratorPop = createPopulationDef(
-                "num-1", MeasurePopulationType.NUMERATOR, Set.of("patient1", "patient2", "patient3"));
+                "num-1", MeasurePopulationType.NUMERATOR, Set.of("patient1", "patient2", "patient3"), dateBasis);
         PopulationDef denominatorPop = createPopulationDef(
-                "den-1", MeasurePopulationType.DENOMINATOR, Set.of("patient1", "patient2", "patient3", "patient4"));
+                "den-1",
+                MeasurePopulationType.DENOMINATOR,
+                Set.of("patient1", "patient2", "patient3", "patient4"),
+                dateBasis);
 
         GroupDef groupDef = new GroupDef(
                 "group-1",
@@ -462,7 +490,7 @@ class MeasureDefScorerTest {
                 MeasureScoring.PROPORTION,
                 false,
                 createImprovementNotationCode("increase"),
-                createPopulationBasisCode("date"));
+                dateBasis);
 
         // VERIFY: getMeasureScore returns null when score is null
         assertNull(groupDef.getScore());
@@ -472,10 +500,14 @@ class MeasureDefScorerTest {
     @Test
     void testGetMeasureScore_ZeroScore_IncreaseNotation() {
         // Setup: Group with zero score and increase notation
+        CodeDef encounterBasis = createPopulationBasisCode("Encounter");
         PopulationDef numeratorPop =
-                createPopulationDef("num-1", MeasurePopulationType.NUMERATOR, Set.of()); // No subjects
+                createPopulationDef("num-1", MeasurePopulationType.NUMERATOR, Set.of(), encounterBasis); // No subjects
         PopulationDef denominatorPop = createPopulationDef(
-                "den-1", MeasurePopulationType.DENOMINATOR, Set.of("patient1", "patient2", "patient3", "patient4"));
+                "den-1",
+                MeasurePopulationType.DENOMINATOR,
+                Set.of("patient1", "patient2", "patient3", "patient4"),
+                encounterBasis);
 
         GroupDef groupDef = new GroupDef(
                 "group-1",
@@ -485,7 +517,7 @@ class MeasureDefScorerTest {
                 MeasureScoring.PROPORTION,
                 false,
                 createImprovementNotationCode("increase"),
-                createPopulationBasisCode("Encounter"));
+                encounterBasis);
 
         MeasureDefScorer scorer = new MeasureDefScorer();
         scorer.scoreGroup("http://example.com/Measure/test", groupDef);
@@ -499,10 +531,14 @@ class MeasureDefScorerTest {
     @Test
     void testGetMeasureScore_NegativeScore_ReturnsNull() {
         // Setup: Group with manually set negative score (simulating applySetMembership=false scenario)
+        CodeDef stringBasis = createPopulationBasisCode("String");
         PopulationDef numeratorPop = createPopulationDef(
-                "num-1", MeasurePopulationType.NUMERATOR, Set.of("patient1", "patient2", "patient3"));
+                "num-1", MeasurePopulationType.NUMERATOR, Set.of("patient1", "patient2", "patient3"), stringBasis);
         PopulationDef denominatorPop = createPopulationDef(
-                "den-1", MeasurePopulationType.DENOMINATOR, Set.of("patient1", "patient2", "patient3", "patient4"));
+                "den-1",
+                MeasurePopulationType.DENOMINATOR,
+                Set.of("patient1", "patient2", "patient3", "patient4"),
+                stringBasis);
 
         GroupDef groupDef = new GroupDef(
                 "group-1",
@@ -512,7 +548,7 @@ class MeasureDefScorerTest {
                 MeasureScoring.PROPORTION,
                 false,
                 createImprovementNotationCode("increase"),
-                createPopulationBasisCode("String"));
+                stringBasis);
 
         // Manually set negative score to simulate strange value scenario
         groupDef.setScore(-0.5);
@@ -526,10 +562,14 @@ class MeasureDefScorerTest {
     @Test
     void testGetMeasureScore_PositiveScore_IncreaseNotation() {
         // Setup: Group with positive score and increase notation
+        CodeDef dateBasis = createPopulationBasisCode("date");
         PopulationDef numeratorPop = createPopulationDef(
-                "num-1", MeasurePopulationType.NUMERATOR, Set.of("patient1", "patient2", "patient3"));
+                "num-1", MeasurePopulationType.NUMERATOR, Set.of("patient1", "patient2", "patient3"), dateBasis);
         PopulationDef denominatorPop = createPopulationDef(
-                "den-1", MeasurePopulationType.DENOMINATOR, Set.of("patient1", "patient2", "patient3", "patient4"));
+                "den-1",
+                MeasurePopulationType.DENOMINATOR,
+                Set.of("patient1", "patient2", "patient3", "patient4"),
+                dateBasis);
 
         GroupDef groupDef = new GroupDef(
                 "group-1",
@@ -539,7 +579,7 @@ class MeasureDefScorerTest {
                 MeasureScoring.PROPORTION,
                 false,
                 createImprovementNotationCode("increase"),
-                createPopulationBasisCode("date"));
+                dateBasis);
 
         MeasureDefScorer scorer = new MeasureDefScorer();
         scorer.scoreGroup("http://example.com/Measure/test", groupDef);
@@ -553,10 +593,14 @@ class MeasureDefScorerTest {
     @Test
     void testGetMeasureScore_PositiveScore_DecreaseNotation() {
         // Setup: Group with positive score and decrease notation
+        CodeDef booleanBasis = createBooleanBasisCode();
         PopulationDef numeratorPop = createPopulationDef(
-                "num-1", MeasurePopulationType.NUMERATOR, Set.of("patient1", "patient2", "patient3"));
+                "num-1", MeasurePopulationType.NUMERATOR, Set.of("patient1", "patient2", "patient3"), booleanBasis);
         PopulationDef denominatorPop = createPopulationDef(
-                "den-1", MeasurePopulationType.DENOMINATOR, Set.of("patient1", "patient2", "patient3", "patient4"));
+                "den-1",
+                MeasurePopulationType.DENOMINATOR,
+                Set.of("patient1", "patient2", "patient3", "patient4"),
+                booleanBasis);
 
         GroupDef groupDef = new GroupDef(
                 "group-1",
@@ -566,7 +610,7 @@ class MeasureDefScorerTest {
                 MeasureScoring.PROPORTION,
                 false,
                 createImprovementNotationCode("decrease"), // DECREASE notation
-                createPopulationBasisCode("boolean"));
+                booleanBasis);
 
         MeasureDefScorer scorer = new MeasureDefScorer();
         scorer.scoreGroup("http://example.com/Measure/test", groupDef);
@@ -596,8 +640,9 @@ class MeasureDefScorerTest {
     void testScoreGroup_BooleanBasis_CountsUniqueSubjects() {
         // Create numerator with 2 subjects, each having multiple resources
         ConceptDef numeratorCode = createMeasurePopulationConcept(MeasurePopulationType.NUMERATOR);
+        CodeDef booleanBasis = createBooleanBasisCode();
         PopulationDef numeratorPop =
-                new PopulationDef("num-1", numeratorCode, MeasurePopulationType.NUMERATOR, "Numerator");
+                new PopulationDef("num-1", numeratorCode, MeasurePopulationType.NUMERATOR, "Numerator", booleanBasis);
 
         // Patient1: 3 encounters in numerator
         numeratorPop.addResource("patient1", "Encounter/enc1");
@@ -610,8 +655,9 @@ class MeasureDefScorerTest {
 
         // Create denominator with 3 subjects, each having multiple resources
         ConceptDef denominatorCode = createMeasurePopulationConcept(MeasurePopulationType.DENOMINATOR);
-        PopulationDef denominatorPop =
-                new PopulationDef("den-1", denominatorCode, MeasurePopulationType.DENOMINATOR, "Denominator");
+        CodeDef booleanBasis2 = createBooleanBasisCode();
+        PopulationDef denominatorPop = new PopulationDef(
+                "den-1", denominatorCode, MeasurePopulationType.DENOMINATOR, "Denominator", booleanBasis2);
 
         // Patient1: 3 encounters in denominator
         denominatorPop.addResource("patient1", "Encounter/enc1");
@@ -641,8 +687,8 @@ class MeasureDefScorerTest {
 
         // Verify counts BEFORE scoring
         // Boolean basis: count unique subjects, NOT resources
-        assertEquals(2, numeratorPop.getCount(groupDef)); // 2 subjects (patient1, patient2)
-        assertEquals(3, denominatorPop.getCount(groupDef)); // 3 subjects (patient1, patient2, patient3)
+        assertEquals(2, numeratorPop.getCount()); // 2 subjects (patient1, patient2)
+        assertEquals(3, denominatorPop.getCount()); // 3 subjects (patient1, patient2, patient3)
 
         // Execute scoring
         MeasureDefScorer scorer = new MeasureDefScorer();
@@ -671,8 +717,9 @@ class MeasureDefScorerTest {
     void testScoreGroup_EncounterBasis_CountsAllResources() {
         // Create numerator with 2 subjects, each having multiple resources
         ConceptDef numeratorCode = createMeasurePopulationConcept(MeasurePopulationType.NUMERATOR);
+        CodeDef encounterBasis = createPopulationBasisCode("Encounter");
         PopulationDef numeratorPop =
-                new PopulationDef("num-1", numeratorCode, MeasurePopulationType.NUMERATOR, "Numerator");
+                new PopulationDef("num-1", numeratorCode, MeasurePopulationType.NUMERATOR, "Numerator", encounterBasis);
 
         // Patient1: 3 encounters in numerator
         numeratorPop.addResource("patient1", "Encounter/enc1");
@@ -685,8 +732,8 @@ class MeasureDefScorerTest {
 
         // Create denominator with 3 subjects, each having multiple resources
         ConceptDef denominatorCode = createMeasurePopulationConcept(MeasurePopulationType.DENOMINATOR);
-        PopulationDef denominatorPop =
-                new PopulationDef("den-1", denominatorCode, MeasurePopulationType.DENOMINATOR, "Denominator");
+        PopulationDef denominatorPop = new PopulationDef(
+                "den-1", denominatorCode, MeasurePopulationType.DENOMINATOR, "Denominator", encounterBasis);
 
         // Patient1: 3 encounters in denominator
         denominatorPop.addResource("patient1", "Encounter/enc1");
@@ -712,12 +759,12 @@ class MeasureDefScorerTest {
                 MeasureScoring.PROPORTION,
                 false,
                 createImprovementNotationCode("increase"),
-                createPopulationBasisCode("Encounter"));
+                encounterBasis);
 
         // Verify counts BEFORE scoring
         // Encounter basis: count ALL resources, not just unique subjects
-        assertEquals(5, numeratorPop.getCount(groupDef)); // 5 encounters (3 + 2)
-        assertEquals(9, denominatorPop.getCount(groupDef)); // 9 encounters (3 + 2 + 4)
+        assertEquals(5, numeratorPop.getCount()); // 5 encounters (3 + 2)
+        assertEquals(9, denominatorPop.getCount()); // 9 encounters (3 + 2 + 4)
 
         // Execute scoring
         MeasureDefScorer scorer = new MeasureDefScorer();
@@ -735,10 +782,12 @@ class MeasureDefScorerTest {
     @Test
     void testScoreGroup_CohortMeasure_NoScoreSet() {
         // Setup: Cohort measure with only INITIALPOPULATION
+        CodeDef booleanBasis = createBooleanBasisCode();
         PopulationDef initialPopulation = createPopulationDef(
                 "ip-1",
                 MeasurePopulationType.INITIALPOPULATION,
-                Set.of("p1", "p2", "p3", "p4", "p5", "p6", "p7", "p8", "p9", "p10"));
+                Set.of("p1", "p2", "p3", "p4", "p5", "p6", "p7", "p8", "p9", "p10"),
+                booleanBasis);
 
         GroupDef groupDef = new GroupDef(
                 "group-1",
@@ -748,7 +797,7 @@ class MeasureDefScorerTest {
                 MeasureScoring.COHORT,
                 false,
                 createImprovementNotationCode("increase"),
-                createPopulationBasisCode("boolean"));
+                booleanBasis);
 
         // Verify score is null before scoring
         assertNull(groupDef.getScore());
@@ -765,10 +814,11 @@ class MeasureDefScorerTest {
     @Test
     void testScoreGroup_MissingScoringType_ThrowsException() {
         // Setup: GroupDef with null scoring type
+        CodeDef booleanBasis = createBooleanBasisCode();
         PopulationDef numeratorPop =
-                createPopulationDef("num-1", MeasurePopulationType.NUMERATOR, Set.of("p1", "p2", "p3"));
-        PopulationDef denominatorPop =
-                createPopulationDef("den-1", MeasurePopulationType.DENOMINATOR, Set.of("p1", "p2", "p3", "p4"));
+                createPopulationDef("num-1", MeasurePopulationType.NUMERATOR, Set.of("p1", "p2", "p3"), booleanBasis);
+        PopulationDef denominatorPop = createPopulationDef(
+                "den-1", MeasurePopulationType.DENOMINATOR, Set.of("p1", "p2", "p3", "p4"), booleanBasis);
 
         GroupDef groupDef = new GroupDef(
                 "group-1",
@@ -778,7 +828,7 @@ class MeasureDefScorerTest {
                 null, // NULL scoring type
                 false,
                 createImprovementNotationCode("increase"),
-                createPopulationBasisCode("boolean"));
+                booleanBasis);
 
         // Execute and verify exception
         MeasureDefScorer scorer = new MeasureDefScorer();
@@ -797,16 +847,17 @@ class MeasureDefScorerTest {
     @Test
     void testScoreGroup_RatioWithObservations_GroupLevel() {
         // Setup: RATIO measure with separate numerator/denominator MEASUREOBSERVATION populations
-        PopulationDef initialPopulation =
-                createPopulationDef("ip-1", MeasurePopulationType.INITIALPOPULATION, Set.of("p1", "p2", "p3"));
-        PopulationDef measurePopulation =
-                createPopulationDef("mp-1", MeasurePopulationType.MEASUREPOPULATION, Set.of("p1", "p2", "p3"));
+        CodeDef booleanBasis = createBooleanBasisCode();
+        PopulationDef initialPopulation = createPopulationDef(
+                "ip-1", MeasurePopulationType.INITIALPOPULATION, Set.of("p1", "p2", "p3"), booleanBasis);
+        PopulationDef measurePopulation = createPopulationDef(
+                "mp-1", MeasurePopulationType.MEASUREPOPULATION, Set.of("p1", "p2", "p3"), booleanBasis);
 
         // Create standard NUMERATOR and DENOMINATOR populations (referenced by measure observations)
         PopulationDef numeratorPop =
-                createPopulationDef("num-1", MeasurePopulationType.NUMERATOR, Set.of("p1", "p2", "p3"));
+                createPopulationDef("num-1", MeasurePopulationType.NUMERATOR, Set.of("p1", "p2", "p3"), booleanBasis);
         PopulationDef denominatorPop =
-                createPopulationDef("den-1", MeasurePopulationType.DENOMINATOR, Set.of("p1", "p2", "p3"));
+                createPopulationDef("den-1", MeasurePopulationType.DENOMINATOR, Set.of("p1", "p2", "p3"), booleanBasis);
 
         // Create numerator MEASUREOBSERVATION with criteriaReference to numerator
         ConceptDef numObsCode = createMeasurePopulationConcept(MeasurePopulationType.MEASUREOBSERVATION);
@@ -815,6 +866,7 @@ class MeasureDefScorerTest {
                 numObsCode,
                 MeasurePopulationType.MEASUREOBSERVATION,
                 "NumeratorExpression",
+                booleanBasis,
                 "num-1", // criteriaReference to NUMERATOR population
                 ContinuousVariableObservationAggregateMethod.SUM);
 
@@ -838,6 +890,7 @@ class MeasureDefScorerTest {
                 denObsCode,
                 MeasurePopulationType.MEASUREOBSERVATION,
                 "DenominatorExpression",
+                booleanBasis,
                 "den-1", // criteriaReference to DENOMINATOR population
                 ContinuousVariableObservationAggregateMethod.SUM);
 
@@ -869,7 +922,7 @@ class MeasureDefScorerTest {
                 MeasureScoring.RATIO,
                 false,
                 createImprovementNotationCode("increase"),
-                createPopulationBasisCode("boolean"));
+                booleanBasis);
 
         // Verify score is null before scoring
         assertNull(groupDef.getScore());
@@ -889,14 +942,15 @@ class MeasureDefScorerTest {
         // Male patients: p1, p2, p3
         // Female patients: p4, p5
 
+        CodeDef booleanBasis = createBooleanBasisCode();
         PopulationDef initialPopulation = createPopulationDef(
-                "ip-1", MeasurePopulationType.INITIALPOPULATION, Set.of("p1", "p2", "p3", "p4", "p5"));
+                "ip-1", MeasurePopulationType.INITIALPOPULATION, Set.of("p1", "p2", "p3", "p4", "p5"), booleanBasis);
 
         // Create standard NUMERATOR and DENOMINATOR populations
-        PopulationDef numeratorPop =
-                createPopulationDef("num-1", MeasurePopulationType.NUMERATOR, Set.of("p1", "p2", "p3", "p4", "p5"));
-        PopulationDef denominatorPop =
-                createPopulationDef("den-1", MeasurePopulationType.DENOMINATOR, Set.of("p1", "p2", "p3", "p4", "p5"));
+        PopulationDef numeratorPop = createPopulationDef(
+                "num-1", MeasurePopulationType.NUMERATOR, Set.of("p1", "p2", "p3", "p4", "p5"), booleanBasis);
+        PopulationDef denominatorPop = createPopulationDef(
+                "den-1", MeasurePopulationType.DENOMINATOR, Set.of("p1", "p2", "p3", "p4", "p5"), booleanBasis);
 
         // Create numerator MEASUREOBSERVATION
         ConceptDef numObsCode = createMeasurePopulationConcept(MeasurePopulationType.MEASUREOBSERVATION);
@@ -905,6 +959,7 @@ class MeasureDefScorerTest {
                 numObsCode,
                 MeasurePopulationType.MEASUREOBSERVATION,
                 "NumeratorExpression",
+                booleanBasis,
                 "num-1",
                 ContinuousVariableObservationAggregateMethod.SUM);
 
@@ -937,6 +992,7 @@ class MeasureDefScorerTest {
                 denObsCode,
                 MeasurePopulationType.MEASUREOBSERVATION,
                 "DenominatorExpression",
+                booleanBasis,
                 "den-1",
                 ContinuousVariableObservationAggregateMethod.SUM);
 
@@ -963,8 +1019,6 @@ class MeasureDefScorerTest {
         denominatorMeasureObs.addResource("p5", denObs5);
 
         // Create stratum populations for Male stratum
-        CodeDef booleanBasisCode = createPopulationBasisCode("boolean");
-
         // Male stratum - MEASUREOBSERVATION populations
         StratumPopulationDef maleNumObs = new StratumPopulationDef(
                 numeratorMeasureObs,
@@ -972,7 +1026,7 @@ class MeasureDefScorerTest {
                 Set.of(), // populationDefEvaluationResultIntersection
                 List.of(), // resourceIdsForSubjectList
                 MeasureStratifierType.VALUE,
-                booleanBasisCode);
+                booleanBasis);
 
         StratumPopulationDef maleDenObs = new StratumPopulationDef(
                 denominatorMeasureObs,
@@ -980,14 +1034,19 @@ class MeasureDefScorerTest {
                 Set.of(),
                 List.of(),
                 MeasureStratifierType.VALUE,
-                booleanBasisCode);
+                booleanBasis);
 
         StratifierComponentDef genderComponent =
                 new StratifierComponentDef("gender-component", createTextOnlyConcept("Gender"), "Gender");
+
+        // Create measure observation cache for male stratum
+        MeasureObservationStratumCache maleCache = new MeasureObservationStratumCache(maleNumObs, maleDenObs);
+
         StratumDef maleStratum = new StratumDef(
                 List.of(maleNumObs, maleDenObs),
                 Set.of(new StratumValueDef(new StratumValueWrapper("male"), genderComponent)),
-                Set.of("p1", "p2", "p3"));
+                Set.of("p1", "p2", "p3"),
+                maleCache);
 
         // Female stratum - MEASUREOBSERVATION populations
         StratumPopulationDef femaleNumObs = new StratumPopulationDef(
@@ -996,7 +1055,7 @@ class MeasureDefScorerTest {
                 Set.of(),
                 List.of(),
                 MeasureStratifierType.VALUE,
-                booleanBasisCode);
+                booleanBasis);
 
         StratumPopulationDef femaleDenObs = new StratumPopulationDef(
                 denominatorMeasureObs,
@@ -1004,12 +1063,16 @@ class MeasureDefScorerTest {
                 Set.of(),
                 List.of(),
                 MeasureStratifierType.VALUE,
-                booleanBasisCode);
+                booleanBasis);
+
+        // Create measure observation cache for female stratum
+        MeasureObservationStratumCache femaleCache = new MeasureObservationStratumCache(femaleNumObs, femaleDenObs);
 
         StratumDef femaleStratum = new StratumDef(
                 List.of(femaleNumObs, femaleDenObs),
                 Set.of(new StratumValueDef(new StratumValueWrapper("female"), genderComponent)),
-                Set.of("p4", "p5"));
+                Set.of("p4", "p5"),
+                femaleCache);
 
         // Create StratifierDef with strata
         StratifierDef stratifierDef = new StratifierDef(
@@ -1025,7 +1088,7 @@ class MeasureDefScorerTest {
                 MeasureScoring.RATIO,
                 false,
                 createImprovementNotationCode("increase"),
-                booleanBasisCode);
+                booleanBasis);
 
         // Verify scores are null before scoring
         assertNull(maleStratum.getScore());
@@ -1047,11 +1110,13 @@ class MeasureDefScorerTest {
     // ============================================================================
 
     /**
-     * Create PopulationDef with subjects for boolean basis populations.
+     * Create PopulationDef with subjects and specified population basis.
+     * The populationBasis CodeDef should be the SAME instance used for the GroupDef.
      */
-    private PopulationDef createPopulationDef(String id, MeasurePopulationType type, Set<String> subjects) {
+    private PopulationDef createPopulationDef(
+            String id, MeasurePopulationType type, Set<String> subjects, CodeDef populationBasis) {
         ConceptDef code = createMeasurePopulationConcept(type);
-        PopulationDef pop = new PopulationDef(id, code, type, "expression");
+        PopulationDef pop = new PopulationDef(id, code, type, "expression", populationBasis);
 
         // Add subjects to population
         for (String subject : subjects) {
@@ -1059,6 +1124,13 @@ class MeasureDefScorerTest {
         }
 
         return pop;
+    }
+
+    /**
+     * Create CodeDef for boolean population basis.
+     */
+    private CodeDef createBooleanBasisCode() {
+        return new CodeDef("http://hl7.org/fhir/fhir-types", "boolean");
     }
 
     /**

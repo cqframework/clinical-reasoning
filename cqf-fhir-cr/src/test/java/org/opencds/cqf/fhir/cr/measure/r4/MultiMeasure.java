@@ -45,6 +45,7 @@ import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
+import org.opencds.cqf.fhir.cr.measure.r4.selected.def.SelectedMeasureDefCollection;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
@@ -155,15 +156,17 @@ class MultiMeasure {
         }
 
         public MultiMeasure.When when() {
-            return new MultiMeasure.When(buildMeasureService());
+            return new MultiMeasure.When(buildMeasureService(), this.repository);
         }
     }
 
     public static class When {
         private final R4MultiMeasureService service;
+        private final IRepository repository;
 
-        When(R4MultiMeasureService service) {
+        When(R4MultiMeasureService service, IRepository repository) {
             this.service = service;
+            this.repository = repository;
         }
 
         private List<IdType> measureId = new ArrayList<>();
@@ -176,7 +179,7 @@ class MultiMeasure {
         private Bundle additionalData;
         private Parameters parameters;
 
-        private Supplier<Parameters> operation;
+        private Supplier<MeasureDefAndR4ParametersWithMeasureReports> operation;
         private String productLine;
         private String reporter;
 
@@ -238,7 +241,7 @@ class MultiMeasure {
         }
 
         public MultiMeasure.When evaluate() {
-            this.operation = () -> service.evaluate(
+            this.operation = () -> service.evaluateWithDefs(
                     measureId,
                     measureUrl,
                     measureIdentifier,
@@ -256,13 +259,69 @@ class MultiMeasure {
             return this;
         }
 
-        public MultiMeasure.SelectedReport then() {
+        public MultiMeasure.Then then() {
             if (this.operation == null) {
                 throw new IllegalStateException(
                         "No operation was selected as part of 'when'. Choose an operation to invoke by adding one, such as 'evaluate' to the method chain.");
             }
 
-            return new MultiMeasure.SelectedReport(this.operation.get());
+            return new MultiMeasure.Then(this.operation.get(), this.repository);
+        }
+    }
+
+    public static class Then {
+        private final MeasureDefAndR4ParametersWithMeasureReports evaluation;
+        private final IRepository repository;
+
+        Then(MeasureDefAndR4ParametersWithMeasureReports evaluation, IRepository repository) {
+            this.evaluation = evaluation;
+            this.repository = repository;
+        }
+
+        /**
+         * Access the Parameters with bundled MeasureReports for post-scoring assertions.
+         *
+         * @return SelectedReport for fluent MeasureReport assertions on Parameters
+         */
+        public MultiMeasure.SelectedReport report() {
+            return new MultiMeasure.SelectedReport(evaluation.parameters());
+        }
+
+        /**
+         * Access the List<MeasureDef> collection for pre-scoring assertions.
+         *
+         * @return SelectedMeasureDefCollection for fluent MeasureDef collection assertions
+         */
+        public SelectedMeasureDefCollection<Then> defs() {
+            return new SelectedMeasureDefCollection<>(evaluation.measureDefs(), this);
+        }
+
+        // Backward compatibility - delegate to report()
+        public MultiMeasure.Then hasBundleCount(int count) {
+            report().hasBundleCount(count);
+            return this;
+        }
+
+        public MultiMeasure.Then hasMeasureReportCount(int count) {
+            report().hasMeasureReportCount(count);
+            return this;
+        }
+
+        public MultiMeasure.Then hasMeasureReportCountPerUrl(int count, String measureUrl) {
+            report().hasMeasureReportCountPerUrl(count, measureUrl);
+            return this;
+        }
+
+        public MultiMeasure.SelectedMeasureReport measureReport(String measureUrl) {
+            return report().measureReport(measureUrl);
+        }
+
+        public MultiMeasure.SelectedMeasureReport measureReport(String measureUrl, String subject) {
+            return report().measureReport(measureUrl, subject);
+        }
+
+        public MultiMeasure.SelectedMeasureReport getFirstMeasureReport() {
+            return report().getFirstMeasureReport();
         }
     }
 

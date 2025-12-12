@@ -586,7 +586,6 @@ class CliTest {
             "-cv=123",
             "-c=Patient",
             "-cv=456",
-            "--measure-path=" + testResourcePath + "/compartment/input/resources/measure/",
             "--measure=%s".formatted(measureId),
             "--output-path=" + Path.of(testResultsPath, libraryName, TXTRESULTS_FOLDER),
             "--report-path=" + Path.of(testResultsPath, libraryName, MEASUREREPORTS_FOLDER),
@@ -631,7 +630,7 @@ class CliTest {
             "-cv=123",
             "-c=Patient",
             "-cv=456",
-            "--measure-path=" + testResourcePath + "/compartment/input/resources/measure/",
+            "--apply-scoring=false",
             "--measure=%s".formatted(measureId),
         };
 

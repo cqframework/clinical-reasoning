@@ -68,7 +68,7 @@ import org.slf4j.LoggerFactory;
  *   <li>MeasureDef.groups() for group iteration</li>
  *   <li>GroupDef.stratifiers() for stratifier iteration</li>
  *   <li>StratifierDef.getStratum() for stratum iteration</li>
- *   <li>PopulationDef.getCount(GroupDef) for population counts</li>
+ *   <li>PopulationDef.getCount() for population counts</li>
  *   <li>StratumDef.getPopulationCount(PopulationDef) for stratum counts</li>
  * </ul>
  *
@@ -280,6 +280,9 @@ public class MeasureDefScorer {
     /**
      * Score a stratum for RATIO measures with MEASUREOBSERVATION populations.
      * Handles continuous variable ratio scoring where numerator and denominator have separate observations.
+     * <p>
+     * Optimized by Claude Sonnet 4.5 on 2025-12-05 to use pre-computed cache,
+     * eliminating redundant lookups during scoring.
      *
      * @param measureUrl the measure URL for error reporting
      * @param groupDef the group definition
@@ -293,18 +296,19 @@ public class MeasureDefScorer {
             return null;
         }
 
-        // Get all MEASUREOBSERVATION populations
-        var measureObservationPopulationDefs = groupDef.getPopulationDefs(MeasurePopulationType.MEASUREOBSERVATION);
+        // Use pre-computed cache - eliminates all lookups
+        MeasureObservationStratumCache cache = stratumDef.getMeasureObservationCache();
+        if (cache == null) {
+            return null;
+        }
 
-        // Find Measure Observations for Numerator and Denominator
-        PopulationDef numPopDef =
-                findPopulationDef(groupDef, measureObservationPopulationDefs, MeasurePopulationType.NUMERATOR);
-        PopulationDef denPopDef =
-                findPopulationDef(groupDef, measureObservationPopulationDefs, MeasurePopulationType.DENOMINATOR);
+        // Extract cached references
+        StratumPopulationDef stratumPopulationDefNum = cache.numeratorObservation();
+        StratumPopulationDef stratumPopulationDefDen = cache.denominatorObservation();
 
-        // Get stratum populations for numerator and denominator
-        StratumPopulationDef stratumPopulationDefNum = getStratumPopDefFromPopDef(stratumDef, numPopDef);
-        StratumPopulationDef stratumPopulationDefDen = getStratumPopDefFromPopDef(stratumDef, denPopDef);
+        // Get parent PopulationDefs directly from StratumPopulationDef
+        PopulationDef numPopDef = stratumPopulationDefNum.populationDef();
+        PopulationDef denPopDef = stratumPopulationDefDen.populationDef();
 
         return scoreRatioContVariableStratum(
                 measureUrl, stratumPopulationDefNum, stratumPopulationDefDen, numPopDef, denPopDef);

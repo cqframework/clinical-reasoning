@@ -233,4 +233,8 @@ public class Constants {
     public static final String RELATEDARTIFACT_TYPE_DEPENDSON = "depends-on";
     public static final String RESOURCETYPE_VALUESET = "ValueSet";
     public static final String RESOURCETYPE_CODESYSTEM = "CodeSystem";
+
+    public static final String EMPTY = "empty";
+
+    public static final String PREVIOUS_VALUE = "previousValue";
 }

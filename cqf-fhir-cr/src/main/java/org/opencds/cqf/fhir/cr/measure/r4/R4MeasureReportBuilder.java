@@ -52,13 +52,18 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.SdeDef;
+import org.opencds.cqf.fhir.cr.measure.common.StratumDef;
+import org.opencds.cqf.fhir.cr.measure.common.StratumValueDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumValueWrapper;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4DateHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, MeasureReport, DomainResource> {
 
+    private static final Logger logger = LoggerFactory.getLogger(R4MeasureReportBuilder.class);
     protected static final String POPULATION_SUBJECT_SET = "POPULATION_SUBJECT_SET";
 
     private final IMeasureReportScorer<MeasureReport> measureReportScorer;
@@ -93,6 +98,12 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             bc.report().addContained(r);
         }
 
+        // Part 1: Copy scores from Def objects (currently does nothing - Def scores are null)
+        // This becomes active in Part 2 when MeasureDefScorer is integrated into evaluation flow
+        copyScoresFromDef(bc);
+
+        // Part 1: Old scorer still produces all scores (remains source of truth)
+        // Part 2: Old scorer will be removed - Def scores become source of truth
         this.measureReportScorer.score(measure.getUrl(), measureDef, bc.report());
         setReportStatus(bc);
         return bc.report();
@@ -577,5 +588,159 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         cc.setText(observationName);
         obs.setCode(cc);
         return obs;
+    }
+
+    /**
+     * Copy scores from MeasureDef to MeasureReport.
+     * Added in Part 1 (integrate-measure-def-scorer-part1-foundation).
+     * In Part 1, this does nothing because Def objects have null scores.
+     * In Part 2 (integrate-measure-def-scorer-part2-integration), this becomes active
+     * when MeasureDefScorer is called in MeasureEvaluationResultHandler.
+     *
+     * <p>Logic is driven by Def objects, matching report structures by ID.
+     * Logs warnings when matching report structures are not found.
+     *
+     * @param bc the builder context
+     */
+    private void copyScoresFromDef(R4MeasureReportBuilderContext bc) {
+        var report = bc.report();
+        var measureDef = bc.measureDef();
+
+        // Iterate through GroupDefs (drive from Def side)
+        for (var groupDef : measureDef.groups()) {
+            MeasureReportGroupComponent reportGroup = null;
+
+            // For single-group measures, use positional matching (no ID required)
+            // For multi-group measures, match by ID
+            if (report.getGroup().size() == 1) {
+                reportGroup = report.getGroupFirstRep();
+            } else {
+                // Multi-group: match by ID
+                reportGroup = report.getGroup().stream()
+                        .filter(rg -> groupDef.id() != null && groupDef.id().equals(rg.getId()))
+                        .findFirst()
+                        .orElse(null);
+            }
+
+            if (reportGroup == null) {
+                logger.warn("No matching MeasureReport group found for GroupDef with id: {}", groupDef.id());
+                continue;
+            }
+
+            // Copy group-level score
+            Double groupScore = groupDef.getMeasureScore();
+            if (groupScore != null) {
+                reportGroup.getMeasureScore().setValue(groupScore);
+            }
+
+            // Copy stratifier scores
+            copyStratifierScores(reportGroup, groupDef);
+        }
+    }
+
+    /**
+     * Copy stratifier scores from StratifierDef objects to MeasureReport stratifiers.
+     * Logic is driven by StratifierDef objects, matching report stratifiers by ID.
+     *
+     * @param reportGroup the MeasureReport group component
+     * @param groupDef the GroupDef containing stratifier scores
+     */
+    private void copyStratifierScores(MeasureReportGroupComponent reportGroup, GroupDef groupDef) {
+        // Iterate through StratifierDefs (drive from Def side)
+        for (var stratifierDef : groupDef.stratifiers()) {
+            // Find matching report stratifier by ID
+            var reportStratifier = reportGroup.getStratifier().stream()
+                    .filter(rs -> stratifierDef.id().equals(rs.getId()))
+                    .findFirst()
+                    .orElse(null);
+
+            if (reportStratifier == null) {
+                logger.warn(
+                        "No matching MeasureReport stratifier found for StratifierDef with id: {}", stratifierDef.id());
+                continue;
+            }
+
+            // Iterate through StratumDefs (drive from Def side)
+            for (var stratumDef : stratifierDef.getStratum()) {
+                // Find matching report stratum by comparing value strings
+                var reportStratum = reportStratifier.getStratum().stream()
+                        .filter(rs -> matchesStratumValue(rs, stratumDef))
+                        .findFirst()
+                        .orElse(null);
+
+                if (reportStratum == null) {
+                    logger.debug(
+                            "No matching MeasureReport stratum found for StratumDef in stratifier: {}",
+                            stratifierDef.id());
+                    continue;
+                }
+
+                // Copy stratum score
+                Double stratumScore = stratumDef.getScore();
+                if (stratumScore != null) {
+                    reportStratum.getMeasureScore().setValue(stratumScore);
+                }
+            }
+        }
+    }
+
+    /**
+     * Check if a MeasureReport stratum matches a StratumDef by comparing text representations.
+     * Uses text-based comparison to match R4MeasureReportScorer behavior.
+     * Added in Part 1 to fix Gap 1 (text-based stratum matching).
+     *
+     * <p><strong>CRITICAL:</strong> This method uses CodeableConcept.text comparison instead of
+     * coding codes. This prevents 17 test failures in RATIO and CONTINUOUSVARIABLE measures
+     * with stratifiers when old scorers are removed in Part 2.
+     *
+     * @param reportStratum the MeasureReport stratum
+     * @param stratumDef the StratumDef
+     * @return true if values match
+     */
+    private boolean matchesStratumValue(MeasureReport.StratifierGroupComponent reportStratum, StratumDef stratumDef) {
+        // Use the same logic as R4MeasureReportScorer: compare CodeableConcept.text
+        String reportText = reportStratum.hasValue() ? reportStratum.getValue().getText() : null;
+        String defText = getStratumDefText(stratumDef);
+        return Objects.equals(reportText, defText);
+    }
+
+    /**
+     * Extract text representation from StratumDef for matching.
+     * Based on R4MeasureReportScorer#getStratumDefTextForR4.
+     * Added in Part 1 to fix Gap 1 (text-based stratum matching).
+     *
+     * @param stratumDef the StratumDef
+     * @return text representation of the stratum value
+     */
+    private String getStratumDefText(StratumDef stratumDef) {
+        String stratumText = null;
+
+        for (StratumValueDef valuePair : stratumDef.valueDefs()) {
+            var value = valuePair.value();
+            var componentDef = valuePair.def();
+
+            // Handle CodeableConcept values
+            if (value.getValueClass().equals(org.hl7.fhir.r4.model.CodeableConcept.class)) {
+                if (stratumDef.isComponent()) {
+                    // component stratifier: use code text
+                    stratumText = componentDef != null && componentDef.code() != null
+                            ? componentDef.code().text()
+                            : null;
+                } else {
+                    // non-component: extract text from CodeableConcept value
+                    if (value.getValue() instanceof org.hl7.fhir.r4.model.CodeableConcept codeableConcept) {
+                        stratumText = codeableConcept.getText();
+                    }
+                }
+            } else if (stratumDef.isComponent()) {
+                // Component with non-CodeableConcept value: convert to string
+                stratumText = value.getValueAsString();
+            } else {
+                // Non-component with non-CodeableConcept value: convert to string
+                stratumText = value.getValueAsString();
+            }
+        }
+
+        return stratumText;
     }
 }

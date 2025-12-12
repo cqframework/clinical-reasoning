@@ -61,13 +61,16 @@ public class MeasureMultiSubjectEvaluator {
             List<PopulationDef> populationDefs,
             GroupDef groupDef) {
 
-        return new StratumDef(
-                populationDefs.stream()
-                        .map(popDef ->
-                                buildStratumPopulationDef(fhirContext, stratifierDef, popDef, subjectIds, groupDef))
-                        .toList(),
-                values,
-                subjectIds);
+        // Build all stratum populations
+        List<StratumPopulationDef> stratumPopulations = populationDefs.stream()
+                .map(popDef -> buildStratumPopulationDef(fhirContext, stratifierDef, popDef, subjectIds, groupDef))
+                .toList();
+
+        // Pre-compute measure observation cache if applicable
+        MeasureObservationStratumCache observationCache =
+                buildMeasureObservationCacheIfApplicable(groupDef, stratumPopulations);
+
+        return new StratumDef(stratumPopulations, values, subjectIds, observationCache);
     }
 
     // Enhanced by Claude Sonnet 4.5 to calculate and populate all StratumPopulationDef fields
@@ -106,12 +109,68 @@ public class MeasureMultiSubjectEvaluator {
         }
 
         return new StratumPopulationDef(
-                populationDef.id(),
+                populationDef,
                 qualifiedSubjectIdsCommonToPopulation,
                 populationDefEvaluationResultIntersection,
                 resourceIdsForSubjectList,
                 stratifierDef.getStratifierType(),
                 groupDef.getPopulationBasis());
+    }
+
+    /**
+     * Build measure observation cache if this measure has MEASUREOBSERVATION populations
+     * linked to NUMERATOR and DENOMINATOR populations (e.g., ratio measures with observations).
+     * Returns null if not applicable or if lookups fail (preserves existing null behavior).
+     * <p>
+     * Added by Claude Sonnet 4.5 on 2025-12-05 for measure observation optimization.
+     *
+     * @param groupDef the group definition
+     * @param stratumPopulations the list of stratum populations for this stratum
+     * @return the cache or null if not applicable
+     */
+    private static MeasureObservationStratumCache buildMeasureObservationCacheIfApplicable(
+            GroupDef groupDef, List<StratumPopulationDef> stratumPopulations) {
+
+        // Only applicable for measures with observations
+        if (!groupDef.hasPopulationType(MeasurePopulationType.MEASUREOBSERVATION)) {
+            return null;
+        }
+
+        // Get all MEASUREOBSERVATION populations
+        List<PopulationDef> measureObservationPopulationDefs =
+                groupDef.getPopulationDefs(MeasurePopulationType.MEASUREOBSERVATION);
+
+        if (measureObservationPopulationDefs.isEmpty()) {
+            return null;
+        }
+
+        // Find numerator and denominator observation PopulationDefs
+        PopulationDef numObsPopDef = groupDef.findRatioObservationPopulationDef(
+                measureObservationPopulationDefs, MeasurePopulationType.NUMERATOR);
+        PopulationDef denObsPopDef = groupDef.findRatioObservationPopulationDef(
+                measureObservationPopulationDefs, MeasurePopulationType.DENOMINATOR);
+
+        if (numObsPopDef == null || denObsPopDef == null) {
+            return null;
+        }
+
+        // Find corresponding StratumPopulationDefs
+        StratumPopulationDef numObsStratumPop = stratumPopulations.stream()
+                .filter(sp -> sp.populationDef() == numObsPopDef)
+                .findFirst()
+                .orElse(null);
+
+        StratumPopulationDef denObsStratumPop = stratumPopulations.stream()
+                .filter(sp -> sp.populationDef() == denObsPopDef)
+                .findFirst()
+                .orElse(null);
+
+        // All-or-nothing: only create cache if both found
+        if (numObsStratumPop == null || denObsStratumPop == null) {
+            return null;
+        }
+
+        return new MeasureObservationStratumCache(numObsStratumPop, denObsStratumPop);
     }
 
     private static List<StratumDef> componentStratumPlural(

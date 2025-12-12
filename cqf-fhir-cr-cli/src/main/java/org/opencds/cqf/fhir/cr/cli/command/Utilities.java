@@ -135,6 +135,9 @@ public class Utilities {
         if (modelUrl != null) {
             Path path = Path.of(modelUrl);
             data = new IgRepository(fhirContext, path);
+            if (terminologyUrl == null) {
+                return data;
+            }
         }
 
         if (terminologyUrl != null) {

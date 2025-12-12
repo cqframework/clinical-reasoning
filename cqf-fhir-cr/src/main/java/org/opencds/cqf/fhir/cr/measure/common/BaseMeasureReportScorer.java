@@ -9,7 +9,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 // Extracted version-agnostic patterns from R4MeasureReportScorer by Claude Sonnet 4.5
-public abstract class BaseMeasureReportScorer<MeasureReportT> implements MeasureReportScorer<MeasureReportT> {
+public abstract class BaseMeasureReportScorer<MeasureReportT> implements IMeasureReportScorer<MeasureReportT> {
 
     // Version-agnostic population type constants
     protected static final String NUMERATOR = "numerator";
@@ -70,7 +70,7 @@ public abstract class BaseMeasureReportScorer<MeasureReportT> implements Measure
     @Nullable
     protected PopulationDef findPopulationDef(
             GroupDef groupDef, List<PopulationDef> populationDefs, MeasurePopulationType type) {
-        var groupPops = groupDef.get(type);
+        var groupPops = groupDef.getPopulationDefs(type);
         if (groupPops == null || groupPops.isEmpty() || groupPops.get(0).id() == null) {
             return null;
         }

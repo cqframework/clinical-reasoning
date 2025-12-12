@@ -30,7 +30,6 @@ public class GraphDefinitionAdaptorTest implements IGraphDefinitionAdaptorTest<G
         return adapterFactory;
     }
 
-
     @Override
     public List<String> getAllNonProcessableTypeForRelatedArtifact() {
         return Arrays.stream(RelatedArtifactType.values())

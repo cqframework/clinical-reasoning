@@ -41,7 +41,7 @@ public interface IGraphDefinitionAdapter extends IKnowledgeArtifactAdapter {
      * @param dependencies list of dependencies on which to append the found references
      */
     default void extractRelatedArtifactReferences(String referenceSource, List<IDependencyInfo> dependencies) {
-        for (String url : new String[] { Constants.ARTIFACT_RELATED_ARTIFACT, Constants.CPG_RELATED_ARTIFACT }) {
+        for (String url : new String[] {Constants.ARTIFACT_RELATED_ARTIFACT, Constants.CPG_RELATED_ARTIFACT}) {
             IBaseExtension<?, ?> extension = getExtensionByUrl(url);
 
             IBaseDatatype relatedArtifact = extension.getValue();

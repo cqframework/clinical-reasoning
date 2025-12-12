@@ -4,8 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 import org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.dstu3.model.GraphDefinition;
+import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.dstu3.model.RelatedArtifact;
+import org.hl7.fhir.dstu3.model.RelatedArtifact.RelatedArtifactType;
 import org.hl7.fhir.dstu3.model.UsageContext;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
@@ -46,8 +50,9 @@ public class GraphDefinitionAdapter extends ResourceAdapter implements IGraphDef
         addProfileReferences(references, referenceSource);
 
         /*
-           extension[cpg-relatedArtifact].reference
-        */
+         *  extension[cpg-relatedArtifact].resource
+         */
+        extractRelatedArtifactReferences(referenceSource, references);
 
         return references;
     }
@@ -81,5 +86,26 @@ public class GraphDefinitionAdapter extends ResourceAdapter implements IGraphDef
     @Override
     public List<IBaseBackboneElement> getNode() {
         return List.of();
+    }
+
+    @Override
+    public <ARTIFACT extends IBaseDatatype> String getReferenceFromArtifact(ARTIFACT artifact) {
+        String url = null;
+        if (artifact instanceof RelatedArtifact relArt) {
+            Reference ref = relArt.getResource();
+            if (ref != null) {
+                url = ref.getReference();
+            }
+        }
+        return url;
+    }
+
+    @Override
+    public <RA extends IBaseDatatype> boolean canProcessRelatedArtifact(RA relatedArtifact) {
+        if (relatedArtifact instanceof RelatedArtifact relArtifact) {
+            return relArtifact.getType() == RelatedArtifactType.DEPENDSON;
+        }
+
+        return false;
     }
 }

@@ -3,19 +3,20 @@ package org.opencds.cqf.fhir.utility.adapter.r4;
 import java.util.ArrayList;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
-import org.hl7.fhir.r4.model.Expression;
 import org.hl7.fhir.r4.model.GraphDefinition;
+import org.hl7.fhir.r4.model.RelatedArtifact;
+import org.hl7.fhir.r4.model.RelatedArtifact.RelatedArtifactType;
 import org.hl7.fhir.r4.model.UsageContext;
-import org.opencds.cqf.fhir.utility.Constants;
-import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IGraphDefinitionAdapter;
 
 public class GraphDefinitionAdapter extends ResourceAdapter implements IGraphDefinitionAdapter {
+
     public GraphDefinitionAdapter(IDomainResource graphDefinition) {
         super(graphDefinition);
         if (!(graphDefinition instanceof GraphDefinition)) {
@@ -49,29 +50,9 @@ public class GraphDefinitionAdapter extends ResourceAdapter implements IGraphDef
         addProfileReferences(references, referenceSource);
 
         /*
-           extension[cpg-relatedArtifact].reference
-           Expression.reference is expected to be a canonical (url or url|version) for these extensions.
-        */
-
-        get().getExtensionsByUrl(Constants.CPG_RELATED_ARTIFACT).stream()
-                .filter(e -> e.getValue() instanceof Expression)
-                .map(e -> (Expression) e.getValue())
-                .filter(Expression::hasReference)
-                .forEach(expression -> references.add(new DependencyInfo(
-                        referenceSource,
-                        expression.getReference(),
-                        expression.getExtension(),
-                        expression::setReference)));
-
-        get().getExtensionsByUrl(Constants.ARTIFACT_RELATED_ARTIFACT).stream()
-                .filter(e -> e.getValue() instanceof Expression)
-                .map(e -> (Expression) e.getValue())
-                .filter(Expression::hasReference)
-                .forEach(expression -> references.add(new DependencyInfo(
-                        referenceSource,
-                        expression.getReference(),
-                        expression.getExtension(),
-                        expression::setReference)));
+         * extension[cpg-relatedArtifact].resource
+         */
+        extractRelatedArtifactReferences(referenceSource, references);
 
         return references;
     }
@@ -107,5 +88,14 @@ public class GraphDefinitionAdapter extends ResourceAdapter implements IGraphDef
     @Override
     public List<IBaseBackboneElement> getNode() {
         return List.of();
+    }
+
+    @Override
+    public <RA extends IBaseDatatype> boolean canProcessRelatedArtifact(RA relatedArtifact) {
+        if (relatedArtifact instanceof RelatedArtifact relArtifact) {
+            return relArtifact.getType() == RelatedArtifactType.DEPENDSON;
+        }
+
+        return false;
     }
 }

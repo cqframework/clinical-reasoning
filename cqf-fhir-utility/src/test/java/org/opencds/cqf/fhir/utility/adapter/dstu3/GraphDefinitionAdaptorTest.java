@@ -4,11 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import java.util.Arrays;
 import java.util.List;
 import org.hl7.fhir.dstu3.model.GraphDefinition;
-import org.hl7.fhir.dstu3.model.Reference;
-import org.hl7.fhir.dstu3.model.RelatedArtifact;
 import org.hl7.fhir.dstu3.model.RelatedArtifact.RelatedArtifactType;
-import org.junit.jupiter.api.Test;
-import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IGraphDefinitionAdaptorTest;
 import org.slf4j.Logger;
@@ -35,17 +31,6 @@ public class GraphDefinitionAdaptorTest implements IGraphDefinitionAdaptorTest<G
     @Override
     public IAdapterFactory getAdaptorFactory() {
         return adapterFactory;
-    }
-
-    @Test
-    public void test() {
-        GraphDefinition definition = new GraphDefinition();
-        RelatedArtifact artifact = new RelatedArtifact();
-        artifact.setType(RelatedArtifactType.DEPENDSON);
-        artifact.setResource(new Reference("canonical"));
-        definition.addExtension(Constants.ARTIFACT_RELATED_ARTIFACT, artifact);
-
-        System.out.println(fhirCtxt.newJsonParser().encodeToString(definition));
     }
 
     @Override

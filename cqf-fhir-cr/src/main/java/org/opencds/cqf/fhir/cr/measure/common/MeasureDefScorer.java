@@ -68,7 +68,7 @@ import org.slf4j.LoggerFactory;
  *   <li>MeasureDef.groups() for group iteration</li>
  *   <li>GroupDef.stratifiers() for stratifier iteration</li>
  *   <li>StratifierDef.getStratum() for stratum iteration</li>
- *   <li>PopulationDef.getCount(GroupDef) for population counts</li>
+ *   <li>PopulationDef.getCount() for population counts</li>
  *   <li>StratumDef.getPopulationCount(PopulationDef) for stratum counts</li>
  * </ul>
  *

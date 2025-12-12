@@ -79,7 +79,7 @@ class R4PopulationBasisValidatorTest {
                 new ValidateGroupBasisTypeHappyPathParams(
                         buildGroupDef(
                                 Basis.BOOLEAN,
-                                buildPopulationDefs(INITIALPOPULATION, DENOMINATOR, NUMERATOR),
+                                buildPopulationDefs(Basis.BOOLEAN, INITIALPOPULATION, DENOMINATOR, NUMERATOR),
                                 buildStratifierDefs(
                                         EXPRESSION_INITIALPOPULATION, EXPRESSION_DENOMINATOR, EXPRESSION_NUMERATOR)),
                         buildEvaluationResult(Map.of(
@@ -92,7 +92,7 @@ class R4PopulationBasisValidatorTest {
                 new ValidateGroupBasisTypeHappyPathParams(
                         buildGroupDef(
                                 Basis.BOOLEAN,
-                                buildPopulationDefs(INITIALPOPULATION, DENOMINATOR, NUMERATOR),
+                                buildPopulationDefs(Basis.BOOLEAN, INITIALPOPULATION, DENOMINATOR, NUMERATOR),
                                 buildStratifierDefs(
                                         EXPRESSION_INITIALPOPULATION, EXPRESSION_DENOMINATOR, EXPRESSION_NUMERATOR)),
                         buildEvaluationResult(Map.of(
@@ -105,7 +105,7 @@ class R4PopulationBasisValidatorTest {
                 new ValidateGroupBasisTypeHappyPathParams(
                         buildGroupDef(
                                 Basis.ENCOUNTER,
-                                buildPopulationDefs(INITIALPOPULATION, DENOMINATOR, NUMERATOR),
+                                buildPopulationDefs(Basis.ENCOUNTER, INITIALPOPULATION, DENOMINATOR, NUMERATOR),
                                 buildStratifierDefs(
                                         EXPRESSION_INITIALPOPULATION, EXPRESSION_DENOMINATOR, EXPRESSION_NUMERATOR)),
                         buildEvaluationResult(Map.of(
@@ -118,7 +118,7 @@ class R4PopulationBasisValidatorTest {
                 new ValidateGroupBasisTypeHappyPathParams(
                         buildGroupDef(
                                 Basis.ENCOUNTER,
-                                buildPopulationDefs(INITIALPOPULATION, DENOMINATOR, NUMERATOR),
+                                buildPopulationDefs(Basis.ENCOUNTER, INITIALPOPULATION, DENOMINATOR, NUMERATOR),
                                 buildStratifierDefs(
                                         EXPRESSION_INITIALPOPULATION, EXPRESSION_DENOMINATOR, EXPRESSION_NUMERATOR)),
                         buildEvaluationResult(Map.of(
@@ -131,7 +131,7 @@ class R4PopulationBasisValidatorTest {
                 new ValidateGroupBasisTypeHappyPathParams(
                         buildGroupDef(
                                 Basis.PROCEDURE,
-                                buildPopulationDefs(INITIALPOPULATION, DENOMINATOR, NUMERATOR),
+                                buildPopulationDefs(Basis.PROCEDURE, INITIALPOPULATION, DENOMINATOR, NUMERATOR),
                                 buildStratifierDefs(
                                         EXPRESSION_INITIALPOPULATION, EXPRESSION_DENOMINATOR, EXPRESSION_NUMERATOR)),
                         buildEvaluationResult(Map.of(
@@ -144,7 +144,7 @@ class R4PopulationBasisValidatorTest {
                 new ValidateGroupBasisTypeHappyPathParams(
                         buildGroupDef(
                                 Basis.PROCEDURE,
-                                buildPopulationDefs(INITIALPOPULATION, DENOMINATOR, NUMERATOR),
+                                buildPopulationDefs(Basis.PROCEDURE, INITIALPOPULATION, DENOMINATOR, NUMERATOR),
                                 buildStratifierDefs(
                                         EXPRESSION_INITIALPOPULATION, EXPRESSION_DENOMINATOR, EXPRESSION_NUMERATOR)),
                         buildEvaluationResult(Map.of(
@@ -170,7 +170,7 @@ class R4PopulationBasisValidatorTest {
                 new ValidateGroupBasisTypeErrorPathParams(
                         buildGroupDef(
                                 Basis.BOOLEAN,
-                                buildPopulationDefs(INITIALPOPULATION, DENOMINATOR, NUMERATOR),
+                                buildPopulationDefs(Basis.BOOLEAN, INITIALPOPULATION, DENOMINATOR, NUMERATOR),
                                 buildStratifierDefs(
                                         EXPRESSION_INITIALPOPULATION, EXPRESSION_DENOMINATOR, EXPRESSION_NUMERATOR)),
                         buildEvaluationResult(Map.of(
@@ -184,7 +184,7 @@ class R4PopulationBasisValidatorTest {
                 new ValidateGroupBasisTypeErrorPathParams(
                         buildGroupDef(
                                 Basis.BOOLEAN,
-                                buildPopulationDefs(INITIALPOPULATION, DENOMINATOR, NUMERATOR),
+                                buildPopulationDefs(Basis.BOOLEAN, INITIALPOPULATION, DENOMINATOR, NUMERATOR),
                                 buildStratifierDefs(
                                         EXPRESSION_INITIALPOPULATION, EXPRESSION_DENOMINATOR, EXPRESSION_NUMERATOR)),
                         buildEvaluationResult(Map.of(
@@ -198,7 +198,7 @@ class R4PopulationBasisValidatorTest {
                 new ValidateGroupBasisTypeErrorPathParams(
                         buildGroupDef(
                                 Basis.BOOLEAN,
-                                buildPopulationDefs(INITIALPOPULATION, DENOMINATOR, NUMERATOR),
+                                buildPopulationDefs(Basis.BOOLEAN, INITIALPOPULATION, DENOMINATOR, NUMERATOR),
                                 buildStratifierDefs(
                                         EXPRESSION_INITIALPOPULATION, EXPRESSION_DENOMINATOR, EXPRESSION_NUMERATOR)),
                         buildEvaluationResult(Map.of(
@@ -212,7 +212,7 @@ class R4PopulationBasisValidatorTest {
                 new ValidateGroupBasisTypeErrorPathParams(
                         buildGroupDef(
                                 Basis.ENCOUNTER,
-                                buildPopulationDefs(INITIALPOPULATION, DENOMINATOR, NUMERATOR),
+                                buildPopulationDefs(Basis.ENCOUNTER, INITIALPOPULATION, DENOMINATOR, NUMERATOR),
                                 buildStratifierDefs(
                                         EXPRESSION_INITIALPOPULATION, EXPRESSION_DENOMINATOR, EXPRESSION_NUMERATOR)),
                         buildEvaluationResult(Map.of(
@@ -226,7 +226,7 @@ class R4PopulationBasisValidatorTest {
                 new ValidateGroupBasisTypeErrorPathParams(
                         buildGroupDef(
                                 Basis.ENCOUNTER,
-                                buildPopulationDefs(INITIALPOPULATION, DENOMINATOR, NUMERATOR),
+                                buildPopulationDefs(Basis.ENCOUNTER, INITIALPOPULATION, DENOMINATOR, NUMERATOR),
                                 buildStratifierDefs(
                                         EXPRESSION_INITIALPOPULATION, EXPRESSION_DENOMINATOR, EXPRESSION_NUMERATOR)),
                         buildEvaluationResult(Map.of(
@@ -240,7 +240,7 @@ class R4PopulationBasisValidatorTest {
                 new ValidateGroupBasisTypeErrorPathParams(
                         buildGroupDef(
                                 Basis.PROCEDURE,
-                                buildPopulationDefs(INITIALPOPULATION, DENOMINATOR, NUMERATOR),
+                                buildPopulationDefs(Basis.PROCEDURE, INITIALPOPULATION, DENOMINATOR, NUMERATOR),
                                 buildStratifierDefs(
                                         EXPRESSION_INITIALPOPULATION, EXPRESSION_DENOMINATOR, EXPRESSION_NUMERATOR)),
                         buildEvaluationResult(Map.of(
@@ -254,7 +254,7 @@ class R4PopulationBasisValidatorTest {
                 new ValidateGroupBasisTypeErrorPathParams(
                         buildGroupDef(
                                 Basis.ENCOUNTER,
-                                buildPopulationDefs(INITIALPOPULATION, DENOMINATOR, NUMERATOR),
+                                buildPopulationDefs(Basis.ENCOUNTER, INITIALPOPULATION, DENOMINATOR, NUMERATOR),
                                 buildStratifierDefs(
                                         EXPRESSION_INITIALPOPULATION, EXPRESSION_DENOMINATOR, EXPRESSION_NUMERATOR)),
                         buildEvaluationResult(Map.of(
@@ -290,7 +290,7 @@ class R4PopulationBasisValidatorTest {
                 new ValidateStratifierBasisTypeHappyPathParams(
                         buildGroupDef(
                                 Basis.BOOLEAN,
-                                buildPopulationDefs(INITIALPOPULATION, DENOMINATOR, NUMERATOR),
+                                buildPopulationDefs(Basis.BOOLEAN, INITIALPOPULATION, DENOMINATOR, NUMERATOR),
                                 buildStratifierDefs(
                                         EXPRESSION_INITIALPOPULATION, EXPRESSION_DENOMINATOR, EXPRESSION_NUMERATOR)),
                         buildEvaluationResult(Map.of(
@@ -303,7 +303,7 @@ class R4PopulationBasisValidatorTest {
                 new ValidateStratifierBasisTypeHappyPathParams(
                         buildGroupDef(
                                 Basis.BOOLEAN,
-                                buildPopulationDefs(INITIALPOPULATION, DENOMINATOR, NUMERATOR),
+                                buildPopulationDefs(Basis.BOOLEAN, INITIALPOPULATION, DENOMINATOR, NUMERATOR),
                                 buildStratifierDefs(
                                         EXPRESSION_INITIALPOPULATION, EXPRESSION_DENOMINATOR, EXPRESSION_NUMERATOR)),
                         buildEvaluationResult(Map.of(
@@ -316,7 +316,7 @@ class R4PopulationBasisValidatorTest {
                 new ValidateStratifierBasisTypeHappyPathParams(
                         buildGroupDef(
                                 Basis.BOOLEAN,
-                                buildPopulationDefs(INITIALPOPULATION, DENOMINATOR, NUMERATOR),
+                                buildPopulationDefs(Basis.BOOLEAN, INITIALPOPULATION, DENOMINATOR, NUMERATOR),
                                 buildStratifierDefs(
                                         EXPRESSION_INITIALPOPULATION, EXPRESSION_DENOMINATOR, EXPRESSION_NUMERATOR)),
                         buildEvaluationResult(Map.of(
@@ -329,7 +329,7 @@ class R4PopulationBasisValidatorTest {
                 new ValidateStratifierBasisTypeHappyPathParams(
                         buildGroupDef(
                                 Basis.ENCOUNTER,
-                                buildPopulationDefs(INITIALPOPULATION, DENOMINATOR, NUMERATOR),
+                                buildPopulationDefs(Basis.ENCOUNTER, INITIALPOPULATION, DENOMINATOR, NUMERATOR),
                                 buildStratifierDefs(
                                         EXPRESSION_INITIALPOPULATION, EXPRESSION_DENOMINATOR, EXPRESSION_NUMERATOR)),
                         buildEvaluationResult(Map.of(
@@ -342,7 +342,7 @@ class R4PopulationBasisValidatorTest {
                 new ValidateStratifierBasisTypeHappyPathParams(
                         buildGroupDef(
                                 Basis.ENCOUNTER,
-                                buildPopulationDefs(INITIALPOPULATION, DENOMINATOR, NUMERATOR),
+                                buildPopulationDefs(Basis.ENCOUNTER, INITIALPOPULATION, DENOMINATOR, NUMERATOR),
                                 buildStratifierDefs(
                                         EXPRESSION_INITIALPOPULATION, EXPRESSION_DENOMINATOR, EXPRESSION_NUMERATOR)),
                         buildEvaluationResult(Map.of(
@@ -364,7 +364,7 @@ class R4PopulationBasisValidatorTest {
     void mismatchBooleanBasisSingleEncounterResult() {
         var expectedGroupDef = buildGroupDef(
                 Basis.BOOLEAN,
-                buildPopulationDefs(INITIALPOPULATION, DENOMINATOR, NUMERATOR),
+                buildPopulationDefs(Basis.BOOLEAN, INITIALPOPULATION, DENOMINATOR, NUMERATOR),
                 buildStratifierDefs(EXPRESSION_INITIALPOPULATION, EXPRESSION_DENOMINATOR, EXPRESSION_NUMERATOR));
 
         var expectedEvaluationResult = buildEvaluationResult(Map.of(
@@ -386,7 +386,7 @@ class R4PopulationBasisValidatorTest {
 
         var expectedGroupDef = buildGroupDef(
                 Basis.BOOLEAN,
-                buildPopulationDefs(INITIALPOPULATION, DENOMINATOR, NUMERATOR),
+                buildPopulationDefs(Basis.BOOLEAN, INITIALPOPULATION, DENOMINATOR, NUMERATOR),
                 buildStratifierDefs(EXPRESSION_INITIALPOPULATION, EXPRESSION_DENOMINATOR, EXPRESSION_NUMERATOR));
 
         var expectedEvaluationResult = buildEvaluationResult(Map.of(
@@ -407,7 +407,7 @@ class R4PopulationBasisValidatorTest {
     void mismatchBooleanBasisMixedMultipleBooleanAndEncounterResults() {
         var expectedGroupDef = buildGroupDef(
                 Basis.BOOLEAN,
-                buildPopulationDefs(INITIALPOPULATION, DENOMINATOR, NUMERATOR),
+                buildPopulationDefs(Basis.BOOLEAN, INITIALPOPULATION, DENOMINATOR, NUMERATOR),
                 buildStratifierDefs(EXPRESSION_INITIALPOPULATION, EXPRESSION_DENOMINATOR, EXPRESSION_NUMERATOR));
 
         var expectedEvaluationResult = buildEvaluationResult(Map.of(
@@ -442,19 +442,21 @@ class R4PopulationBasisValidatorTest {
     }
 
     @Nonnull
-    private static List<PopulationDef> buildPopulationDefs(MeasurePopulationType... measurePopulationTypes) {
+    private static List<PopulationDef> buildPopulationDefs(
+            Basis basis, MeasurePopulationType... measurePopulationTypes) {
         return Arrays.stream(measurePopulationTypes)
-                .map(R4PopulationBasisValidatorTest::buildPopulationDef)
+                .map(type -> buildPopulationDef(basis, type))
                 .toList();
     }
 
     @Nonnull
-    private static PopulationDef buildPopulationDef(MeasurePopulationType measurePopulationType) {
+    private static PopulationDef buildPopulationDef(Basis basis, MeasurePopulationType measurePopulationType) {
         return new PopulationDef(
                 measurePopulationType.toCode(),
                 null,
                 measurePopulationType,
                 resolveExpressionFor(measurePopulationType),
+                basis.codeDef,
                 null,
                 null);
     }

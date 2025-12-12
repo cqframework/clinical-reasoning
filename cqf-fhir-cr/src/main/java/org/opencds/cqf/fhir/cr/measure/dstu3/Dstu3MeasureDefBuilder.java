@@ -68,13 +68,18 @@ public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         for (MeasureGroupComponent group : measure.getGroup()) {
             // Populations
             List<PopulationDef> populations = new ArrayList<>();
+            var populationBasisDef = getPopulationBasisDef(measureBasis);
             for (MeasureGroupPopulationComponent pop : group.getPopulation()) {
                 checkId(pop);
                 var populationType = MeasurePopulationType.fromCode(
                         pop.getCode().getCodingFirstRep().getCode());
 
                 populations.add(new PopulationDef(
-                        pop.getId(), conceptToConceptDef(pop.getCode()), populationType, pop.getCriteria()));
+                        pop.getId(),
+                        conceptToConceptDef(pop.getCode()),
+                        populationType,
+                        pop.getCriteria(),
+                        populationBasisDef));
             }
 
             // Stratifiers
@@ -99,7 +104,7 @@ public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                     measureScoring,
                     false, // no group scoring
                     getImprovementNotation(measureImpNotation),
-                    getPopulationBasisDef(measureBasis));
+                    populationBasisDef);
             groups.add(groupDef);
         }
 

@@ -25,6 +25,7 @@ import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.opencds.cqf.fhir.cr.measure.dstu3.Measure.SelectedGroup.SelectedReference;
+import org.opencds.cqf.fhir.cr.measure.dstu3.selected.def.SelectedMeasureDef;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 public class Measure {
@@ -40,11 +41,11 @@ public class Measure {
         T select(S from);
     }
 
-    interface ChildOf<T> {
+    public interface ChildOf<T> {
         T up();
     }
 
-    interface SelectedOf<T> {
+    public interface SelectedOf<T> {
         T selected();
     }
 
@@ -91,16 +92,22 @@ public class Measure {
             return new Dstu3MeasureProcessor(repository, evaluationOptions, new Dstu3RepositorySubjectProvider());
         }
 
+        public IRepository getRepository() {
+            return repository;
+        }
+
         public When when() {
-            return new When(buildProcessor());
+            return new When(buildProcessor(), repository);
         }
     }
 
     public static class When {
         private final Dstu3MeasureProcessor processor;
+        private final IRepository repository;
 
-        When(Dstu3MeasureProcessor processor) {
+        When(Dstu3MeasureProcessor processor, IRepository repository) {
             this.processor = processor;
+            this.repository = repository;
         }
 
         private String measureId;
@@ -114,7 +121,7 @@ public class Measure {
         private Bundle additionalData;
         private Parameters parameters;
 
-        private Supplier<MeasureReport> operation;
+        private Supplier<MeasureDefAndDstu3MeasureReport> operation;
 
         public When measureId(String measureId) {
             this.measureId = measureId;
@@ -152,7 +159,7 @@ public class Measure {
         }
 
         public When evaluate() {
-            this.operation = () -> processor.evaluateMeasure(
+            this.operation = () -> processor.evaluateMeasureCaptureDefs(
                     new IdType("Measure", measureId),
                     periodStart,
                     periodEnd,
@@ -163,13 +170,66 @@ public class Measure {
             return this;
         }
 
-        public SelectedReport then() {
+        public Then then() {
             if (this.operation == null) {
                 throw new IllegalStateException(
                         "No operation was selected as part of 'when'. Choose an operation to invoke by adding one, such as 'evaluate' to the method chain.");
             }
 
-            return new SelectedReport(this.operation.get());
+            return new Then(this.operation.get());
+        }
+    }
+
+    public static class Then {
+        private final MeasureDefAndDstu3MeasureReport evaluation;
+
+        Then(MeasureDefAndDstu3MeasureReport evaluation) {
+            this.evaluation = evaluation;
+        }
+
+        /**
+         * Access the MeasureReport hierarchy for post-scoring assertions.
+         *
+         * @return SelectedReport for fluent MeasureReport assertions
+         */
+        public SelectedReport report() {
+            return new SelectedReport(evaluation.measureReport());
+        }
+
+        /**
+         * Get the raw MeasureReport object.
+         *
+         * @return raw MeasureReport
+         */
+        public MeasureReport measureReport() {
+            return evaluation.measureReport();
+        }
+
+        /**
+         * Access the MeasureDef hierarchy for pre-scoring assertions.
+         *
+         * @return SelectedMeasureDef for fluent MeasureDef assertions
+         */
+        public SelectedMeasureDef<Then> def() {
+            return new SelectedMeasureDef<>(evaluation.measureDef(), this);
+        }
+
+        // Backward compatibility - delegate to report()
+        public SelectedGroup firstGroup() {
+            return report().firstGroup();
+        }
+
+        public SelectedGroup group(String id) {
+            return report().group(id);
+        }
+
+        public SelectedGroup group(Selector<MeasureReportGroupComponent, MeasureReport> groupSelector) {
+            return report().group(groupSelector);
+        }
+
+        public Then passes(Validator<MeasureReport> measureReportValidator) {
+            report().passes(measureReportValidator);
+            return this;
         }
     }
 
@@ -222,7 +282,7 @@ public class Measure {
         }
     }
 
-    static class SelectedGroup
+    public static class SelectedGroup
             implements ChildOf<SelectedReport>, SelectedOf<MeasureReport.MeasureReportGroupComponent> {
         private final SelectedReport selectedReport;
         private final MeasureReport.MeasureReportGroupComponent group;
@@ -280,7 +340,7 @@ public class Measure {
             return this.group;
         }
 
-        static class SelectedReference<T> implements ChildOf<T>, SelectedOf<Reference> {
+        public static class SelectedReference<T> implements ChildOf<T>, SelectedOf<Reference> {
             private final T parent;
             private final Reference reference;
 
@@ -322,7 +382,7 @@ public class Measure {
             }
         }
 
-        static class SelectedPopulation
+        public static class SelectedPopulation
                 implements ChildOf<SelectedGroup>, SelectedOf<MeasureReport.MeasureReportGroupPopulationComponent> {
             private final SelectedGroup selectedGroup;
             private final MeasureReport.MeasureReportGroupPopulationComponent population;
@@ -355,7 +415,7 @@ public class Measure {
         }
     }
 
-    static class SelectedStratifier
+    public static class SelectedStratifier
             implements ChildOf<SelectedGroup>, SelectedOf<MeasureReport.MeasureReportGroupStratifierComponent> {
 
         private final SelectedGroup selectedGroup;

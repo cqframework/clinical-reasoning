@@ -26,6 +26,21 @@ class Dstu3MeasureAdditionalDataTest {
                 .additionalData(additionalData)
                 .evaluate()
                 .then()
+                // MeasureDef assertions (pre-scoring) - verify internal state after processing
+                .def()
+                .hasNoErrors()
+                .firstGroup()
+                .population("numerator")
+                .hasCount(0)
+                .up()
+                .population("denominator")
+                .hasCount(1)
+                .up()
+                // TODO: Add score assertion in subsequent measure scoring refactoring PR
+                .up()
+                .up()
+                // MeasureReport assertions (post-scoring) - verify FHIR resource output
+                .report()
                 .firstGroup()
                 .population("numerator")
                 .hasCount(0)

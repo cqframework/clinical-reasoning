@@ -14,6 +14,7 @@ public class PopulationDef {
     private final String expression;
     private final ConceptDef code;
     private final MeasurePopulationType measurePopulationType;
+    private final CodeDef populationBasis;
 
     @Nullable
     private final String criteriaReference;
@@ -24,8 +25,13 @@ public class PopulationDef {
     protected Set<Object> evaluatedResources;
     protected Map<String, Set<Object>> subjectResources = new HashMap<>();
 
-    public PopulationDef(String id, ConceptDef code, MeasurePopulationType measurePopulationType, String expression) {
-        this(id, code, measurePopulationType, expression, null, null);
+    public PopulationDef(
+            String id,
+            ConceptDef code,
+            MeasurePopulationType measurePopulationType,
+            String expression,
+            CodeDef populationBasis) {
+        this(id, code, measurePopulationType, expression, populationBasis, null, null);
     }
 
     public PopulationDef(
@@ -33,12 +39,14 @@ public class PopulationDef {
             ConceptDef code,
             MeasurePopulationType measurePopulationType,
             String expression,
+            CodeDef populationBasis,
             @Nullable String criteriaReference,
             @Nullable ContinuousVariableObservationAggregateMethod aggregateMethod) {
         this.id = id;
         this.code = code;
         this.measurePopulationType = measurePopulationType;
         this.expression = expression;
+        this.populationBasis = populationBasis;
         this.criteriaReference = criteriaReference;
         this.aggregateMethod = aggregateMethod;
     }
@@ -53,6 +61,26 @@ public class PopulationDef {
 
     public ConceptDef code() {
         return this.code;
+    }
+
+    /**
+     * Get the population basis code for this population.
+     * The population basis determines how population members are counted.
+     *
+     * @return the population basis CodeDef
+     */
+    public CodeDef getPopulationBasis() {
+        return this.populationBasis;
+    }
+
+    /**
+     * Check if this population uses boolean basis (patient-based counting).
+     * When true, counts unique subjects. When false, counts all resources.
+     *
+     * @return true if population basis is "boolean", false otherwise
+     */
+    public boolean isBooleanBasis() {
+        return this.populationBasis.code().equals("boolean");
     }
 
     public Set<Object> getEvaluatedResources() {
@@ -149,20 +177,20 @@ public class PopulationDef {
 
     /**
      * Added by Claude Sonnet 4.5 on 2025-12-02
-     * Get the count for this population based on its type and the group's scoring type.
+     * Updated by Claude Sonnet 4.5 on 2025-12-08 to use own populationBasis instead of GroupDef parameter.
+     * Get the count for this population based on its type and population basis.
      * This is the single source of truth for population counts.
      *
-     * @param groupDef the GroupDef containing this population (needed for scoring type)
      * @return the count for this population
      */
-    public int getCount(GroupDef groupDef) {
+    public int getCount() {
         // For MEASUREOBSERVATION populations, count the observations
         if (this.measurePopulationType == MeasurePopulationType.MEASUREOBSERVATION) {
             return countObservations();
         }
 
-        // For other population types, use scoring-appropriate count
-        if (groupDef.isBooleanBasis()) {
+        // For other population types, use population basis to determine count
+        if (isBooleanBasis()) {
             // Boolean basis: count unique subjects
             return getSubjects().size();
         } else {

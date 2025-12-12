@@ -11,8 +11,10 @@ import static org.mockito.Mockito.verify;
 import static org.opencds.cqf.fhir.utility.Constants.ARTIFACT_RELATED_ARTIFACT;
 import static org.opencds.cqf.fhir.utility.Constants.CPG_RELATED_ARTIFACT;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Attachment;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
@@ -29,6 +31,8 @@ import org.opencds.cqf.fhir.utility.adapter.TestVisitor;
 
 class GraphDefinitionAdapterTest implements IGraphDefinitionAdaptorTest<GraphDefinition> {
     private final org.opencds.cqf.fhir.utility.adapter.IAdapterFactory adapterFactory = new AdapterFactory();
+
+    private final FhirContext fhirCtxt = FhirContext.forR4Cached();
 
     @Test
     void invalid_object_fails() {
@@ -173,6 +177,11 @@ class GraphDefinitionAdapterTest implements IGraphDefinitionAdaptorTest<GraphDef
     }
 
     @Override
+    public FhirContext fhirContext() {
+        return fhirCtxt;
+    }
+
+    @Override
     public IAdapterFactory getAdaptorFactory() {
         return adapterFactory;
     }
@@ -184,12 +193,23 @@ class GraphDefinitionAdapterTest implements IGraphDefinitionAdaptorTest<GraphDef
 
         for (RelatedArtifactInfo info : information.RelatedArtifactInfo) {
             RelatedArtifact artifact = new RelatedArtifact();
-            artifact.setType(RelatedArtifactType.DEPENDSON);
+            if (info.getRelatedArtifactType() == null) {
+                artifact.setType(RelatedArtifactType.DEPENDSON);
+            } else {
+                artifact.setType((RelatedArtifactType) info.getRelatedArtifactType());
+            }
             artifact.setResource(info.CanonicalResourceURL);
 
             definition.addExtension(info.ExtensionUrl, artifact);
         }
 
         return definition;
+    }
+
+    @Override
+    public List<? extends Enum<?>> getAllNonProcessableTypeForRelatedArtifact() {
+        return Arrays.stream(RelatedArtifactType.values())
+            .filter(e -> e != RelatedArtifactType.DEPENDSON)
+            .toList();
     }
 }

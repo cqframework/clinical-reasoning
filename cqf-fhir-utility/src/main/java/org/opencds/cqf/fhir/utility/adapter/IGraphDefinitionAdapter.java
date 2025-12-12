@@ -73,8 +73,6 @@ public interface IGraphDefinitionAdapter<GRAPHDEF extends IBaseResource> extends
                 break;
             }
 
-            // TODO - handle RelatedArtifacts based on type
-
             List<? extends IBaseExtension<?, ?>> extensionList =
                     terser.getValues(relatedArtifact, "extension", extensionClass());
             dependencies.add(new DependencyInfo(referenceSource, canonicalUrl, extensionList, ref -> {

@@ -52,20 +52,8 @@ public class GraphDefinitionAdapter extends ResourceAdapter implements IGraphDef
         addProfileReferences(references, referenceSource);
 
         /*
-           extension[cpg-relatedArtifact].reference
+         * extension[cpg-relatedArtifact].resource
         */
-
-        //        get().getExtensionsByUrl(Constants.CPG_RELATED_ARTIFACT).stream()
-        //                .filter(e -> e.getValue() instanceof Expression)
-        //                .map(e -> (Expression) e.getValue())
-        //                .filter(Expression::hasReference)
-        //                .forEach(expression -> references.add(new DependencyInfo(
-        //                        referenceSource,
-        //                        expression.getReference(),
-        //                        expression.getExtension(),
-        //                        expression::setReference)));
-        //
-
         extractRelatedArtifactReferences(get(), referenceSource, references);
 
         return references;

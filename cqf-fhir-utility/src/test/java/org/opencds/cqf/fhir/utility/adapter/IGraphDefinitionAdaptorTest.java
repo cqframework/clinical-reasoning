@@ -1,8 +1,8 @@
 package org.opencds.cqf.fhir.utility.adapter;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
@@ -14,6 +14,8 @@ import org.slf4j.LoggerFactory;
 
 public interface IGraphDefinitionAdaptorTest<T extends IBaseResource> {
 
+    Logger log = LoggerFactory.getLogger(IGraphDefinitionAdaptorTest.class);
+
     String PROFILE_REF = "PROFILE_REF";
     String RELATED_ARTIFACT_TYPE_1 = "RELATED_ARTIFACT_TYPE_1";
     String RELATED_ARTIFACT_TYPE_2 = "RELATED_ARTIFACT_TYPE_2";
@@ -21,31 +23,30 @@ public interface IGraphDefinitionAdaptorTest<T extends IBaseResource> {
     String RESOURCE_REF_2 = "RESOURCE_REF_2";
 
     String VALID_GRAPH_DEF_JSON_TEMPLATE =
-            """
-        {
-            "resourceType": "GraphDefinition",
-            "meta": [{
-                "profile": "PROFILE_REF"
-            }],
-            "extension": [
-                {
-                    "url": "http://hl7.org/fhir/StructureDefinition/artifact-relatedArtifact",
-                    "valueRelatedArtifact": {
-                        "type": "RELATED_ARTIFACT_TYPE_1",
-                        "resource": RESOURCE_REF_1
+        """
+            {
+                "resourceType": "GraphDefinition",
+                "meta": [{
+                    "profile": "PROFILE_REF"
+                }],
+                "extension": [
+                    {
+                        "url": "http://hl7.org/fhir/StructureDefinition/artifact-relatedArtifact",
+                        "valueRelatedArtifact": {
+                            "type": "RELATED_ARTIFACT_TYPE_1",
+                            "resource": RESOURCE_REF_1
+                        }
+                    },
+                    {
+                        "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-relatedArtifact",
+                        "valueRelatedArtifact": {
+                            "type": "RELATED_ARTIFACT_TYPE_2",
+                            "resource": RESOURCE_REF_2
+                        }
                     }
-                },
-                {
-                    "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-relatedArtifact",
-                    "valueRelatedArtifact": {
-                        "type": "RELATED_ARTIFACT_TYPE_2",
-                        "resource": RESOURCE_REF_2
-                    }
-                }
-            ]
-        }
-        """;
-    Logger log = LoggerFactory.getLogger(IGraphDefinitionAdaptorTest.class);
+                ]
+            }
+            """;
 
     Class<T> graphDefinitionClass();
 
@@ -60,8 +61,7 @@ public interface IGraphDefinitionAdaptorTest<T extends IBaseResource> {
     IAdapterFactory getAdaptorFactory();
 
     /**
-     * Returns the list of all RelatedArtifactType values that are
-     * not valid for getDependencies
+     * Returns the list of all RelatedArtifactType values that are not valid for getDependencies
      */
     List<String> getAllNonProcessableTypeForRelatedArtifact();
 
@@ -77,11 +77,11 @@ public interface IGraphDefinitionAdaptorTest<T extends IBaseResource> {
         String resourceRef2 = "http://example.com/canonical-url-2";
         IParser parser = fhirContext().newJsonParser();
         String graphDefStr = VALID_GRAPH_DEF_JSON_TEMPLATE
-                .replaceAll(PROFILE_REF, profileRef)
-                .replaceAll(RESOURCE_REF_1, toCanonicalReference(resourceRef1))
-                .replaceAll(RESOURCE_REF_2, toCanonicalReference(resourceRef2))
-                .replaceAll(RELATED_ARTIFACT_TYPE_1, "depends-on")
-                .replaceAll(RELATED_ARTIFACT_TYPE_2, "depends-on");
+            .replaceAll(PROFILE_REF, profileRef)
+            .replaceAll(RESOURCE_REF_1, toCanonicalReference(resourceRef1))
+            .replaceAll(RESOURCE_REF_2, toCanonicalReference(resourceRef2))
+            .replaceAll(RELATED_ARTIFACT_TYPE_1, "depends-on")
+            .replaceAll(RELATED_ARTIFACT_TYPE_2, "depends-on");
         log.info(graphDefStr);
         T graphDefinition = parser.parseResource(graphDefinitionClass(), graphDefStr);
 
@@ -90,8 +90,8 @@ public interface IGraphDefinitionAdaptorTest<T extends IBaseResource> {
         int dependenciesExpected = 3;
 
         // test
-        @SuppressWarnings("unchecked")
-        IGraphDefinitionAdapter<T> adapter = getAdaptorFactory().createGraphDefinition(graphDefinition);
+        IGraphDefinitionAdapter adapter = getAdaptorFactory().createGraphDefinition(
+            graphDefinition);
         List<IDependencyInfo> dependencies = adapter.getDependencies();
 
         // verify
@@ -104,89 +104,89 @@ public interface IGraphDefinitionAdaptorTest<T extends IBaseResource> {
     }
 
     @Test
-    default void getDependencies_noRef_throwsError() {
+    default void getDependencies_noRef_isIgnored() {
         // setup
         String ref = "http://example.com/canonical";
         IParser parser = fhirContext().newJsonParser();
         String graphDefStr = String.format(
-                """
-            {
-                "resourceType": "GraphDefinition",
-                "meta": [{
-                    "profile": "profileRef"
-                }],
-                "extension": [
-                    {
-                        "url": "http://hl7.org/fhir/StructureDefinition/artifact-relatedArtifact",
-                        "valueRelatedArtifact": {
-                            "type": "depends-on",
-                            "resource": %s
+            """
+                {
+                    "resourceType": "GraphDefinition",
+                    "meta": [{
+                        "profile": "profileRef"
+                    }],
+                    "extension": [
+                        {
+                            "url": "http://hl7.org/fhir/StructureDefinition/artifact-relatedArtifact",
+                            "valueRelatedArtifact": {
+                                "type": "depends-on",
+                                "resource": %s
+                            }
+                        },
+                        {
+                            "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-relatedArtifact",
+                            "valueRelatedArtifact": {
+                                "type": "depends-on"
+                            }
                         }
-                    },
-                    {
-                        "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-relatedArtifact",
-                        "valueRelatedArtifact": {
-                            "type": "depends-on"
-                        }
-                    }
-                ]
-            }
-            """,
-                toCanonicalReference(ref));
+                    ]
+                }
+                """,
+            toCanonicalReference(ref));
         log.info(graphDefStr);
         T graphDefinition = parser.parseResource(graphDefinitionClass(), graphDefStr);
 
         // test
-        @SuppressWarnings("unchecked")
-        IGraphDefinitionAdapter<T> adapter = getAdaptorFactory().createGraphDefinition(graphDefinition);
+        IGraphDefinitionAdapter adapter = getAdaptorFactory().createGraphDefinition(
+            graphDefinition);
+        List<IDependencyInfo> dependencies = adapter.getDependencies();
 
-        try {
-            adapter.getDependencies();
-            fail();
-        } catch (IllegalArgumentException ex) {
-            assertTrue(ex.getMessage().contains("No reference found on extension"), ex.getMessage());
-        }
+        // validate
+        assertEquals(2, dependencies.size());
+        assertTrue(dependencies.stream()
+            .anyMatch(d -> d.getReference().equals("profileRef")));
+        assertTrue(dependencies.stream()
+            .anyMatch(d -> d.getReference().equals(ref)));
     }
 
     @Test
-    default void getDependencies_noRelatedArtifact_throwsErrors() {
+    default void getDependencies_noRelatedArtifact_processesButReturnsNothing() {
         // setup
         String graphDefStr =
-                """
-            {
-               "resourceType": "GraphDefinition",
-               "meta": [{
-                    "profile": "profileRef"
-               }],
-               "extension": [
+            """
                 {
-                    "url": "http://hl7.org/fhir/StructureDefinition/artifact-relatedArtifact",
-                    "reference": "resource-ref"
-                },
-                {
-                    "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-relatedArtifact",
-                    "reference": "resource-ref2"
+                   "resourceType": "GraphDefinition",
+                   "meta": [{
+                        "profile": "profileRef"
+                   }],
+                   "extension": [
+                    {
+                        "url": "http://hl7.org/fhir/StructureDefinition/artifact-relatedArtifact",
+                        "reference": "resource-ref"
+                    },
+                    {
+                        "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-relatedArtifact",
+                        "reference": "resource-ref2"
+                    }
+                ]
                 }
-            ]
-            }
-            """;
+                """;
         log.info(graphDefStr);
         IParser parser = fhirContext().newJsonParser();
         T graphDef = parser.parseResource(graphDefinitionClass(), graphDefStr);
 
-        @SuppressWarnings("unchecked")
-        IGraphDefinitionAdapter<T> adatper = getAdaptorFactory().createGraphDefinition(graphDef);
+        // test
+        IGraphDefinitionAdapter adatper = getAdaptorFactory().createGraphDefinition(graphDef);
+        List<IDependencyInfo> dependencies = adatper.getDependencies();
 
-        try {
-            adatper.getDependencies();
-            fail();
-        } catch (IllegalArgumentException ex) {
-            assertTrue(ex.getMessage().contains("Expected RelatedArtifact;"), ex.getMessage());
-        }
+        // validate
+        // no relatedartifacts -> no dependencies set
+        assertEquals(1, dependencies.size());
+        assertEquals("profileRef", dependencies.get(0).getReference());
     }
 
     @Test
-    default void getDependencies_wrongType_throwsError() {
+    default void getDependencies_invalidArtifactType_shouldBeIgnored() {
         // setup
         for (String relatedArtifactType : getAllNonProcessableTypeForRelatedArtifact()) {
             String profileRef = "profileRef";
@@ -194,27 +194,31 @@ public interface IGraphDefinitionAdaptorTest<T extends IBaseResource> {
             String resourceRef2 = "http://example.com/canonical-url-2";
             IParser parser = fhirContext().newJsonParser();
             String graphDefStr = VALID_GRAPH_DEF_JSON_TEMPLATE
-                    .replaceAll(PROFILE_REF, profileRef)
-                    .replaceAll(RESOURCE_REF_1, toCanonicalReference(resourceRef1))
-                    .replaceAll(RESOURCE_REF_2, toCanonicalReference(resourceRef2))
-                    .replaceAll(RELATED_ARTIFACT_TYPE_1, "depends-on")
-                    .replaceAll(
-                            RELATED_ARTIFACT_TYPE_2,
-                            relatedArtifactType == null ? "" : relatedArtifactType); // invalid type
+                .replaceAll(PROFILE_REF, profileRef)
+                .replaceAll(RESOURCE_REF_1, toCanonicalReference(resourceRef1))
+                .replaceAll(RESOURCE_REF_2, toCanonicalReference(resourceRef2))
+                .replaceAll(RELATED_ARTIFACT_TYPE_1, "depends-on")
+                .replaceAll(
+                    RELATED_ARTIFACT_TYPE_2,
+                    relatedArtifactType == null ? "" : relatedArtifactType); // invalid type
             System.out.println(graphDefStr);
             T graphDefinition = parser.parseResource(graphDefinitionClass(), graphDefStr);
 
-            @SuppressWarnings("unchecked")
-            IGraphDefinitionAdapter<T> adapter = getAdaptorFactory().createGraphDefinition(graphDefinition);
+            IGraphDefinitionAdapter adapter = getAdaptorFactory().createGraphDefinition(
+                graphDefinition);
 
             // test
-            try {
-                adapter.getDependencies();
-                fail();
-            } catch (IllegalArgumentException ex) {
-                assertTrue(
-                        ex.getMessage().contains("Expected RelatedArtifact of type \"depends-on\";"), ex.getMessage());
-            }
+            List<IDependencyInfo> dependencies = adapter.getDependencies();
+
+            // validate
+            assertEquals(2, dependencies.size());
+            assertTrue(dependencies.stream()
+                .anyMatch(d -> d.getReference().equals(profileRef)));
+            assertTrue(dependencies.stream()
+                .anyMatch(d -> d.getReference().equals(resourceRef1)));
+            // invalid type should not be matched
+            assertFalse(dependencies.stream()
+                .anyMatch(d -> d.getReference().equals(resourceRef2)));
         }
     }
 }

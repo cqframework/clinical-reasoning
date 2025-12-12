@@ -61,8 +61,7 @@ public class GraphDefinitionAdaptorTest implements IGraphDefinitionAdaptorTest<G
         }
 
         // test
-        @SuppressWarnings("unchecked")
-        IGraphDefinitionAdapter<GraphDefinition> adapter = getAdaptorFactory().createGraphDefinition(definition);
+        IGraphDefinitionAdapter adapter = getAdaptorFactory().createGraphDefinition(definition);
         List<IDependencyInfo> dependencies = adapter.getDependencies();
 
         // verify

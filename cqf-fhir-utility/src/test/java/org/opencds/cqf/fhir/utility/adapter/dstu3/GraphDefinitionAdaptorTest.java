@@ -7,12 +7,9 @@ import org.hl7.fhir.dstu3.model.GraphDefinition;
 import org.hl7.fhir.dstu3.model.RelatedArtifact.RelatedArtifactType;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IGraphDefinitionAdaptorTest;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class GraphDefinitionAdaptorTest implements IGraphDefinitionAdaptorTest<GraphDefinition> {
 
-    private static final Logger log = LoggerFactory.getLogger(GraphDefinitionAdaptorTest.class);
     private final org.opencds.cqf.fhir.utility.adapter.IAdapterFactory adapterFactory =
             new org.opencds.cqf.fhir.utility.adapter.dstu3.AdapterFactory();
 
@@ -32,6 +29,7 @@ public class GraphDefinitionAdaptorTest implements IGraphDefinitionAdaptorTest<G
     public IAdapterFactory getAdaptorFactory() {
         return adapterFactory;
     }
+
 
     @Override
     public List<String> getAllNonProcessableTypeForRelatedArtifact() {

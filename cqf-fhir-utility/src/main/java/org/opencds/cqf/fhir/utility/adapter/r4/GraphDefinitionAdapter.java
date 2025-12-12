@@ -4,12 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
-import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
-import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.GraphDefinition;
 import org.hl7.fhir.r4.model.RelatedArtifact;
 import org.hl7.fhir.r4.model.RelatedArtifact.RelatedArtifactType;
@@ -17,7 +15,7 @@ import org.hl7.fhir.r4.model.UsageContext;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IGraphDefinitionAdapter;
 
-public class GraphDefinitionAdapter extends ResourceAdapter implements IGraphDefinitionAdapter<GraphDefinition> {
+public class GraphDefinitionAdapter extends ResourceAdapter implements IGraphDefinitionAdapter {
 
     public GraphDefinitionAdapter(IDomainResource graphDefinition) {
         super(graphDefinition);
@@ -54,7 +52,7 @@ public class GraphDefinitionAdapter extends ResourceAdapter implements IGraphDef
         /*
          * extension[cpg-relatedArtifact].resource
          */
-        extractRelatedArtifactReferences(get(), referenceSource, references);
+        extractRelatedArtifactReferences(referenceSource, references);
 
         return references;
     }
@@ -93,22 +91,11 @@ public class GraphDefinitionAdapter extends ResourceAdapter implements IGraphDef
     }
 
     @Override
-    public <EXTENSION extends IBaseExtension<?, ?>> Class<EXTENSION> extensionClass() {
-        return (Class<EXTENSION>) Extension.class;
-    }
-
-    @Override
-    public <RA extends IBaseDatatype> void validateRelatedArtifact(RA relatedArtifact, List<String> errors) {
+    public <RA extends IBaseDatatype> boolean canProcessRelatedArtifact(RA relatedArtifact) {
         if (relatedArtifact instanceof RelatedArtifact relArtifact) {
-            if (relArtifact.getType() != RelatedArtifactType.DEPENDSON) {
-                errors.add(String.format(
-                        "Expected RelatedArtifact of type \"depends-on\"; found \"%s\"",
-                        relArtifact.getType().toCode()));
-            }
-        } else {
-            errors.add(String.format(
-                    "Expected RelatedArtifact; found %s",
-                    relatedArtifact == null ? "null" : relatedArtifact.fhirType()));
+            return relArtifact.getType() == RelatedArtifactType.DEPENDSON;
         }
+
+        return false;
     }
 }

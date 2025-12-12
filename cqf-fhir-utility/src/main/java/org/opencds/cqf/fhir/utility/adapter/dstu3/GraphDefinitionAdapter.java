@@ -3,7 +3,6 @@ package org.opencds.cqf.fhir.utility.adapter.dstu3;
 import java.util.ArrayList;
 import java.util.List;
 import org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus;
-import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.GraphDefinition;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.RelatedArtifact;
@@ -11,14 +10,13 @@ import org.hl7.fhir.dstu3.model.RelatedArtifact.RelatedArtifactType;
 import org.hl7.fhir.dstu3.model.UsageContext;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
-import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IGraphDefinitionAdapter;
 
-public class GraphDefinitionAdapter extends ResourceAdapter implements IGraphDefinitionAdapter<GraphDefinition> {
+public class GraphDefinitionAdapter extends ResourceAdapter implements IGraphDefinitionAdapter {
     public GraphDefinitionAdapter(IDomainResource graphDefinition) {
         super(graphDefinition);
         if (!(graphDefinition instanceof GraphDefinition)) {
@@ -54,7 +52,7 @@ public class GraphDefinitionAdapter extends ResourceAdapter implements IGraphDef
         /*
          *  extension[cpg-relatedArtifact].resource
          */
-        extractRelatedArtifactReferences(get(), referenceSource, references);
+        extractRelatedArtifactReferences(referenceSource, references);
 
         return references;
     }
@@ -91,11 +89,6 @@ public class GraphDefinitionAdapter extends ResourceAdapter implements IGraphDef
     }
 
     @Override
-    public <EXTENSION extends IBaseExtension<?, ?>> Class<EXTENSION> extensionClass() {
-        return (Class<EXTENSION>) Extension.class;
-    }
-
-    @Override
     public <ARTIFACT extends IBaseDatatype> String getReferenceFromArtifact(ARTIFACT artifact) {
         String url = null;
         if (artifact instanceof RelatedArtifact relArt) {
@@ -108,17 +101,11 @@ public class GraphDefinitionAdapter extends ResourceAdapter implements IGraphDef
     }
 
     @Override
-    public <RA extends IBaseDatatype> void validateRelatedArtifact(RA relatedArtifact, List<String> errors) {
+    public <RA extends IBaseDatatype> boolean canProcessRelatedArtifact(RA relatedArtifact) {
         if (relatedArtifact instanceof RelatedArtifact relArtifact) {
-            if (relArtifact.getType() != RelatedArtifactType.DEPENDSON) {
-                errors.add(String.format(
-                        "Expected RelatedArtifact of type \"depends-on\"; found \"%s\"",
-                        relArtifact.getType().name()));
-            }
-        } else {
-            errors.add(String.format(
-                    "Expected RelatedArtifact; found %s",
-                    relatedArtifact == null ? "null" : relatedArtifact.fhirType()));
+            return relArtifact.getType() == RelatedArtifactType.DEPENDSON;
         }
+
+        return false;
     }
 }

@@ -11,12 +11,11 @@ import static org.mockito.Mockito.verify;
 import static org.opencds.cqf.fhir.utility.Constants.ARTIFACT_RELATED_ARTIFACT;
 import static org.opencds.cqf.fhir.utility.Constants.CPG_RELATED_ARTIFACT;
 
+import ca.uhn.fhir.context.FhirContext;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.r4.model.Attachment;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r4.model.Expression;
 import org.hl7.fhir.r4.model.GraphDefinition;
@@ -132,9 +131,7 @@ class GraphDefinitionAdapterTest implements IGraphDefinitionAdaptorTest<GraphDef
         cpgArtifact.setType(RelatedArtifactType.DEPENDSON);
         cpgArtifact.setResource(dependencies.get(1));
 
-        graphDef.addExtension(
-                CPG_RELATED_ARTIFACT,
-                cpgArtifact);
+        graphDef.addExtension(CPG_RELATED_ARTIFACT, cpgArtifact);
 
         RelatedArtifact artifact = new RelatedArtifact();
         artifact.setType(RelatedArtifactType.DEPENDSON);
@@ -209,7 +206,7 @@ class GraphDefinitionAdapterTest implements IGraphDefinitionAdaptorTest<GraphDef
     @Override
     public List<? extends Enum<?>> getAllNonProcessableTypeForRelatedArtifact() {
         return Arrays.stream(RelatedArtifactType.values())
-            .filter(e -> e != RelatedArtifactType.DEPENDSON)
-            .toList();
+                .filter(e -> e != RelatedArtifactType.DEPENDSON)
+                .toList();
     }
 }

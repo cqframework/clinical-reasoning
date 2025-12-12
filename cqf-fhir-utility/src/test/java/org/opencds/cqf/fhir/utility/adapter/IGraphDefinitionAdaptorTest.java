@@ -66,9 +66,11 @@ public interface IGraphDefinitionAdaptorTest<T extends IBaseResource> {
     @Test
     default void getDependencies_withRelatedArtifact_retrievesCorrectReference() {
         // setup
-        GraphDefinitionInformation graphInfo = new GraphDefinitionInformation("profileref",
-            List.of(new RelatedArtifactInfo(Constants.ARTIFACT_RELATED_ARTIFACT,  "http://example.com/canonical_1"),
-                new RelatedArtifactInfo(Constants.CPG_RELATED_ARTIFACT,  "http://example.com/canonical_2")));
+        GraphDefinitionInformation graphInfo = new GraphDefinitionInformation(
+                "profileref",
+                List.of(
+                        new RelatedArtifactInfo(Constants.ARTIFACT_RELATED_ARTIFACT, "http://example.com/canonical_1"),
+                        new RelatedArtifactInfo(Constants.CPG_RELATED_ARTIFACT, "http://example.com/canonical_2")));
         T graphDefinition = getGraphDefinition(graphInfo);
 
         // profile + 1 for each of the RelatedArtifacts
@@ -81,20 +83,20 @@ public interface IGraphDefinitionAdaptorTest<T extends IBaseResource> {
 
         // verify
         assertEquals(dependenciesExpected, dependencies.size());
-        assertTrue(dependencies.stream()
-            .anyMatch(d -> d.getReference().equals(graphInfo.ProfileRef)));
+        assertTrue(dependencies.stream().anyMatch(d -> d.getReference().equals(graphInfo.ProfileRef)));
         for (RelatedArtifactInfo info : graphInfo.RelatedArtifactInfo) {
-            assertTrue(dependencies.stream()
-                .anyMatch(d -> d.getReference().equals(info.CanonicalResourceURL)));
+            assertTrue(dependencies.stream().anyMatch(d -> d.getReference().equals(info.CanonicalResourceURL)));
         }
     }
 
     @Test
     default void getDependencies_noRef_throwsError() {
         // setup
-        GraphDefinitionInformation graphInfo = new GraphDefinitionInformation("profileref",
-            List.of(new RelatedArtifactInfo(Constants.ARTIFACT_RELATED_ARTIFACT,  null),
-                new RelatedArtifactInfo(Constants.CPG_RELATED_ARTIFACT,  "http://example.com/canonical_2")));
+        GraphDefinitionInformation graphInfo = new GraphDefinitionInformation(
+                "profileref",
+                List.of(
+                        new RelatedArtifactInfo(Constants.ARTIFACT_RELATED_ARTIFACT, null),
+                        new RelatedArtifactInfo(Constants.CPG_RELATED_ARTIFACT, "http://example.com/canonical_2")));
         T graphDefinition = getGraphDefinition(graphInfo);
 
         // test
@@ -112,22 +114,23 @@ public interface IGraphDefinitionAdaptorTest<T extends IBaseResource> {
         // setup
         FhirTerser terser = fhirContext().newTerser();
         for (Enum<?> relatedArtifactType : getAllNonProcessableTypeForRelatedArtifact()) {
-            GraphDefinitionInformation graphInfo = new GraphDefinitionInformation("profileref",
-                List.of(new RelatedArtifactInfo(Constants.ARTIFACT_RELATED_ARTIFACT,
-                        "http://example.com/canonical_1")
-                        .setRelatedArtifactType(relatedArtifactType), // we only need to set one
-                    new RelatedArtifactInfo(Constants.CPG_RELATED_ARTIFACT,
-                        "http://example.com/canonical_2")));
+            GraphDefinitionInformation graphInfo = new GraphDefinitionInformation(
+                    "profileref",
+                    List.of(
+                            new RelatedArtifactInfo(
+                                            Constants.ARTIFACT_RELATED_ARTIFACT, "http://example.com/canonical_1")
+                                    .setRelatedArtifactType(relatedArtifactType), // we only need to set one
+                            new RelatedArtifactInfo(Constants.CPG_RELATED_ARTIFACT, "http://example.com/canonical_2")));
             T graphDefinition = getGraphDefinition(graphInfo);
 
             // test
             try {
-                IGraphDefinitionAdapter adapter = getAdaptorFactory().createGraphDefinition(
-                    graphDefinition);
+                IGraphDefinitionAdapter adapter = getAdaptorFactory().createGraphDefinition(graphDefinition);
             } catch (IllegalArgumentException ex) {
                 assertTrue(ex.getMessage()
-                    .contains(
-                        String.format("Expected RelatedArtifact of type DEPENDSON, but found %s", relatedArtifactType.name())));
+                        .contains(String.format(
+                                "Expected RelatedArtifact of type DEPENDSON, but found %s",
+                                relatedArtifactType.name())));
             }
         }
     }

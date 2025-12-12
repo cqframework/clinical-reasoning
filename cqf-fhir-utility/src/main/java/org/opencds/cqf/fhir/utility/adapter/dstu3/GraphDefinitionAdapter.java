@@ -108,15 +108,17 @@ public class GraphDefinitionAdapter extends ResourceAdapter implements IGraphDef
     }
 
     @Override
-    public <RA extends IBaseDatatype> void validateRelatedArtifact(RA relatedArtifact,
-        List<String> errors) {
+    public <RA extends IBaseDatatype> void validateRelatedArtifact(RA relatedArtifact, List<String> errors) {
         if (relatedArtifact instanceof RelatedArtifact relArtifact) {
             if (relArtifact.getType() != RelatedArtifactType.DEPENDSON) {
-                errors.add(String.format("Expected RelatedArtifact of type DEPENDSON, found %s", relArtifact.getType().toCode()));
+                errors.add(String.format(
+                        "Expected RelatedArtifact of type DEPENDSON, found %s",
+                        relArtifact.getType().toCode()));
             }
         } else {
-            errors.add(String.format("Expected RelatedArtifact; found %s", relatedArtifact == null ? "null" : relatedArtifact.fhirType()));
+            errors.add(String.format(
+                    "Expected RelatedArtifact; found %s",
+                    relatedArtifact == null ? "null" : relatedArtifact.fhirType()));
         }
     }
-
 }

@@ -1,10 +1,11 @@
 package org.opencds.cqf.fhir.utility.adapter;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.util.ExtensionUtil;
 import ca.uhn.fhir.util.FhirTerser;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
@@ -12,9 +13,6 @@ import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.utility.Constants;
-
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.valueOf;
 
 /**
  * This interface exposes common functionality across all FHIR GraphDefinition versions.
@@ -42,14 +40,14 @@ public interface IGraphDefinitionAdapter<GRAPHDEF extends IBaseResource> extends
     default <ARTIFACT extends IBaseDatatype> String getReferenceFromArtifact(ARTIFACT artifact) {
         FhirTerser terser = fhirContext().newTerser();
 
-        IPrimitiveType<String> canonicalUrl = terser.getSingleValueOrNull(artifact, "resource",
-            IPrimitiveType.class);
+        IPrimitiveType<String> canonicalUrl = terser.getSingleValueOrNull(artifact, "resource", IPrimitiveType.class);
         return canonicalUrl == null ? null : canonicalUrl.getValue();
     }
 
     <RA extends IBaseDatatype> void validateRelatedArtifact(RA relatedArtifact, List<String> errors);
 
-    default void extractRelatedArtifactReferences(GRAPHDEF graphDefinition, String referenceSource, List<IDependencyInfo> dependencies) {
+    default void extractRelatedArtifactReferences(
+            GRAPHDEF graphDefinition, String referenceSource, List<IDependencyInfo> dependencies) {
         List<String> errors = new ArrayList<>();
 
         FhirContext ctx = fhirContext();
@@ -58,7 +56,7 @@ public interface IGraphDefinitionAdapter<GRAPHDEF extends IBaseResource> extends
         // get all RelatedArtifact extensions
         List<IBaseExtension<?, ?>> extensions = ExtensionUtil.getExtensionsMatchingPredicate(graphDefinition, e -> {
             return e.getUrl().equals(Constants.ARTIFACT_RELATED_ARTIFACT)
-                || e.getUrl().equals(Constants.CPG_RELATED_ARTIFACT);
+                    || e.getUrl().equals(Constants.CPG_RELATED_ARTIFACT);
         });
 
         // process the extensions
@@ -77,16 +75,11 @@ public interface IGraphDefinitionAdapter<GRAPHDEF extends IBaseResource> extends
 
             // TODO - handle RelatedArtifacts based on type
 
-            List<? extends IBaseExtension<?, ?>> extensionList = terser.getValues(relatedArtifact,
-                "extension", extensionClass());
-            dependencies.add(new DependencyInfo(
-                referenceSource,
-                canonicalUrl,
-                extensionList,
-                ref -> {
-                    terser.setElement(relatedArtifact, "resource", ref);
-                }
-            ));
+            List<? extends IBaseExtension<?, ?>> extensionList =
+                    terser.getValues(relatedArtifact, "extension", extensionClass());
+            dependencies.add(new DependencyInfo(referenceSource, canonicalUrl, extensionList, ref -> {
+                terser.setElement(relatedArtifact, "resource", ref);
+            }));
         }
 
         if (!errors.isEmpty()) {

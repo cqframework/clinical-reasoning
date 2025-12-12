@@ -1,16 +1,17 @@
 package org.opencds.cqf.fhir.utility.adapter.r5;
 
 import ca.uhn.fhir.context.FhirContext;
+import java.util.Arrays;
+import java.util.List;
 import org.hl7.fhir.r5.model.GraphDefinition;
 import org.hl7.fhir.r5.model.RelatedArtifact;
 import org.hl7.fhir.r5.model.RelatedArtifact.RelatedArtifactType;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IGraphDefinitionAdaptorTest;
-import java.util.Arrays;
-import java.util.List;
 
 public class GraphDefinitionAdaptorTest implements IGraphDefinitionAdaptorTest<GraphDefinition> {
-    private final org.opencds.cqf.fhir.utility.adapter.IAdapterFactory adapterFactory = new org.opencds.cqf.fhir.utility.adapter.r5.AdapterFactory();
+    private final org.opencds.cqf.fhir.utility.adapter.IAdapterFactory adapterFactory =
+            new org.opencds.cqf.fhir.utility.adapter.r5.AdapterFactory();
 
     private final FhirContext fhirCtxt = FhirContext.forR5Cached();
 
@@ -47,7 +48,7 @@ public class GraphDefinitionAdaptorTest implements IGraphDefinitionAdaptorTest<G
     @Override
     public List<? extends Enum<?>> getAllNonProcessableTypeForRelatedArtifact() {
         return Arrays.stream(RelatedArtifactType.values())
-            .filter(e -> e != RelatedArtifactType.DEPENDSON)
-            .toList();
+                .filter(e -> e != RelatedArtifactType.DEPENDSON)
+                .toList();
     }
 }

@@ -270,7 +270,7 @@ public class LibraryProcessor {
         var processor = reviseProcessor != null ? reviseProcessor : new ReviseProcessor(repository);
         return processor.reviseResource(resource);
     }
-  
+
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseParameters artifactDiff(
             Either3<C, IIdType, R> sourceLibrary,
             Either3<C, IIdType, R> targetLibrary,

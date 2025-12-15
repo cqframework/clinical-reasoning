@@ -14,9 +14,6 @@ import java.util.stream.Collectors;
  * <p>Extracted version-agnostic patterns from R4MeasureReportScorer
  *
  * <p><strong>DEPRECATION NOTICE:</strong> This class is deprecated and will be removed in a future release.
- * For external consumers (e.g., cdr-cr project), use
- * {@link MeasureReportScoringFhirAdapter#score(org.hl7.fhir.instance.model.api.IBaseResource, org.hl7.fhir.instance.model.api.IBaseResource)}
- * for version-agnostic post-hoc scoring.
  * For internal use, this class will be replaced by {@link MeasureDefScorer}
  * integrated into the evaluation workflow in Part 2.
  * See: integrate-measure-def-scorer-part2-integration PRP

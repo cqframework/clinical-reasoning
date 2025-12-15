@@ -4,9 +4,6 @@ package org.opencds.cqf.fhir.cr.measure.common;
  * Interface for scoring FHIR MeasureReports.
  *
  * <p><strong>DEPRECATION NOTICE:</strong> This interface is deprecated and will be removed in a future release.
- * For external consumers (e.g., cdr-cr project), use
- * {@link MeasureReportScoringFhirAdapter#score(org.hl7.fhir.instance.model.api.IBaseResource, org.hl7.fhir.instance.model.api.IBaseResource)}
- * for version-agnostic post-hoc scoring.
  * For internal use, this interface will be replaced by {@link MeasureDefScorer}
  * integrated into the evaluation workflow in Part 2.
  * See: integrate-measure-def-scorer-part2-integration PRP

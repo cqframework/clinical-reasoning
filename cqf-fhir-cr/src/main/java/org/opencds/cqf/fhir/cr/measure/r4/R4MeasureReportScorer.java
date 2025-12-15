@@ -37,9 +37,6 @@ import org.slf4j.LoggerFactory;
  * Evaluation of Measure Report Data showing raw CQL criteria results compared to resulting Measure Report.
  *
  * <p><strong>DEPRECATION NOTICE:</strong> This class is deprecated and will be removed in a future release.
- * For external consumers (e.g., cdr-cr project), use
- * {@link org.opencds.cqf.fhir.cr.measure.common.MeasureReportScoringFhirAdapter#score(org.hl7.fhir.instance.model.api.IBaseResource, org.hl7.fhir.instance.model.api.IBaseResource)}
- * for version-agnostic post-hoc scoring.
  * For internal use, this class will be replaced by {@link org.opencds.cqf.fhir.cr.measure.common.MeasureDefScorer}
  * integrated into the evaluation workflow in Part 2.
  * See: integrate-measure-def-scorer-part2-integration PRP

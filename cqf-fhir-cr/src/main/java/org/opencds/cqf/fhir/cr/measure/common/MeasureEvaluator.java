@@ -147,7 +147,8 @@ public class MeasureEvaluator {
         ExpressionResult matchingResult;
         if (expression == null || expression.isEmpty()) {
             // find matching expression
-            matchingResult = evaluationResult.get(inclusionDef.expression());
+            var inclusionExpression = inclusionDef.expression();
+            matchingResult = inclusionExpression == null ? null : evaluationResult.get(inclusionExpression);
         } else {
             matchingResult = evaluationResult.get(expression);
         }

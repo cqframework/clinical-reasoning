@@ -113,13 +113,4 @@ public class GraphDefinitionAdapter extends ResourceAdapter implements IGraphDef
     public List<IBaseBackboneElement> getNode() {
         return List.of();
     }
-
-    //    @Override
-    //    public <RA extends IBaseDatatype> boolean canProcessRelatedArtifact(RA relatedArtifact) {
-    //        if (relatedArtifact instanceof RelatedArtifact relArtifact) {
-    //            return relArtifact.getType() == RelatedArtifactType.DEPENDSON;
-    //        }
-    //
-    //        return false;
-    //    }
 }

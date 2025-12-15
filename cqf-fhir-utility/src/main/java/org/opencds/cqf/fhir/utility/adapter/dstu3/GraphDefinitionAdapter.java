@@ -109,25 +109,4 @@ public class GraphDefinitionAdapter extends ResourceAdapter implements IGraphDef
     public List<IBaseBackboneElement> getNode() {
         return List.of();
     }
-
-    //    @Override
-    //    public <ARTIFACT extends IBaseDatatype> String getReferenceFromArtifact(ARTIFACT artifact) {
-    //        String url = null;
-    //        if (artifact instanceof RelatedArtifact relArt) {
-    //            Reference ref = relArt.getResource();
-    //            if (ref != null) {
-    //                url = ref.getReference();
-    //            }
-    //        }
-    //        return url;
-    //    }
-    //
-    //    @Override
-    //    public <RA extends IBaseDatatype> boolean canProcessRelatedArtifact(RA relatedArtifact) {
-    //        if (relatedArtifact instanceof RelatedArtifact relArtifact) {
-    //            return relArtifact.getType() == RelatedArtifactType.DEPENDSON;
-    //        }
-    //
-    //        return false;
-    //    }
 }

@@ -1,9 +1,11 @@
 package org.opencds.cqf.fhir.utility.adapter.r4;
 
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
@@ -12,6 +14,8 @@ import org.hl7.fhir.r4.model.GraphDefinition;
 import org.hl7.fhir.r4.model.RelatedArtifact;
 import org.hl7.fhir.r4.model.RelatedArtifact.RelatedArtifactType;
 import org.hl7.fhir.r4.model.UsageContext;
+import org.opencds.cqf.fhir.utility.Constants;
+import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IGraphDefinitionAdapter;
 
@@ -52,7 +56,11 @@ public class GraphDefinitionAdapter extends ResourceAdapter implements IGraphDef
         /*
          * extension[cpg-relatedArtifact].resource
          */
-        extractRelatedArtifactReferences(referenceSource, references);
+        //        extractRelatedArtifactReferences(referenceSource, references);
+        getRelatedArtifactsOfType(Constants.RELATEDARTIFACT_TYPE_DEPENDSON).stream()
+                .filter(ra -> ((RelatedArtifact) ra).hasResource())
+                .map(ra -> DependencyInfo.convertRelatedArtifact(ra, referenceSource))
+                .forEach(references::add);
 
         return references;
     }
@@ -74,8 +82,24 @@ public class GraphDefinitionAdapter extends ResourceAdapter implements IGraphDef
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public <T extends ICompositeType & IBaseHasExtensions> List<T> getRelatedArtifactsOfType(String codeString) {
-        return List.of();
+        RelatedArtifactType type;
+        try {
+            type = RelatedArtifactType.fromCode(codeString);
+        } catch (FHIRException e) {
+            throw new UnprocessableEntityException("Invalid related artifact code");
+        }
+        return getExtensionsByUrls(get(), Set.of(Constants.CPG_RELATED_ARTIFACT, Constants.ARTIFACT_RELATED_ARTIFACT))
+                .stream()
+                .filter(ext -> {
+                    if (ext.getValue() instanceof RelatedArtifact ra) {
+                        return ra.getType() == type;
+                    }
+                    return false;
+                })
+                .map(ext -> (T) ext.getValue())
+                .toList();
     }
 
     @Override
@@ -90,12 +114,12 @@ public class GraphDefinitionAdapter extends ResourceAdapter implements IGraphDef
         return List.of();
     }
 
-    @Override
-    public <RA extends IBaseDatatype> boolean canProcessRelatedArtifact(RA relatedArtifact) {
-        if (relatedArtifact instanceof RelatedArtifact relArtifact) {
-            return relArtifact.getType() == RelatedArtifactType.DEPENDSON;
-        }
-
-        return false;
-    }
+    //    @Override
+    //    public <RA extends IBaseDatatype> boolean canProcessRelatedArtifact(RA relatedArtifact) {
+    //        if (relatedArtifact instanceof RelatedArtifact relArtifact) {
+    //            return relArtifact.getType() == RelatedArtifactType.DEPENDSON;
+    //        }
+    //
+    //        return false;
+    //    }
 }

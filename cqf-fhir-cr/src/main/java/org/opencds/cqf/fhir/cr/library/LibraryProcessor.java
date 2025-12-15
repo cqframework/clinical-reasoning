@@ -29,11 +29,13 @@ import org.opencds.cqf.fhir.cr.common.IOperationProcessor;
 import org.opencds.cqf.fhir.cr.common.IPackageProcessor;
 import org.opencds.cqf.fhir.cr.common.IReleaseProcessor;
 import org.opencds.cqf.fhir.cr.common.IRetireProcessor;
+import org.opencds.cqf.fhir.cr.common.IReviseProcessor;
 import org.opencds.cqf.fhir.cr.common.IWithdrawProcessor;
 import org.opencds.cqf.fhir.cr.common.PackageProcessor;
 import org.opencds.cqf.fhir.cr.common.ReleaseProcessor;
 import org.opencds.cqf.fhir.cr.common.ResourceResolver;
 import org.opencds.cqf.fhir.cr.common.RetireProcessor;
+import org.opencds.cqf.fhir.cr.common.ReviseProcessor;
 import org.opencds.cqf.fhir.cr.common.WithdrawProcessor;
 import org.opencds.cqf.fhir.cr.library.evaluate.EvaluateProcessor;
 import org.opencds.cqf.fhir.cr.library.evaluate.EvaluateRequest;
@@ -53,6 +55,7 @@ public class LibraryProcessor {
     protected IDeleteProcessor deleteProcessor;
     protected IRetireProcessor retireProcessor;
     protected IWithdrawProcessor withdrawProcessor;
+    protected IReviseProcessor reviseProcessor;
     protected IArtifactDiffProcessor artifactDiffProcessor;
 
     protected IRepository repository;
@@ -91,6 +94,9 @@ public class LibraryProcessor {
                 }
                 if (p instanceof IWithdrawProcessor withdraw) {
                     withdrawProcessor = withdraw;
+                }
+                if (p instanceof IReviseProcessor revise) {
+                    reviseProcessor = revise;
                 }
                 if (p instanceof IArtifactDiffProcessor artifactDiff) {
                     artifactDiffProcessor = artifactDiff;
@@ -260,6 +266,11 @@ public class LibraryProcessor {
         return processor.withdrawResource(resolveLibrary(library), parameters);
     }
 
+    public IBaseResource reviseLibrary(IBaseResource resource) {
+        var processor = reviseProcessor != null ? reviseProcessor : new ReviseProcessor(repository);
+        return processor.reviseResource(resource);
+    }
+  
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseParameters artifactDiff(
             Either3<C, IIdType, R> sourceLibrary,
             Either3<C, IIdType, R> targetLibrary,

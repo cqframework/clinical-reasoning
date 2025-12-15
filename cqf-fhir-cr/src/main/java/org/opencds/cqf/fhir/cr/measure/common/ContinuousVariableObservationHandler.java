@@ -131,7 +131,7 @@ public class ContinuousVariableObservationHandler {
             final ExpressionResult observationResult =
                     evaluateObservationCriteria(result, observationExpression, groupDef.isBooleanBasis(), context);
 
-            var quantity = convertCqlResultToQuantityDef(observationResult.value());
+            var quantity = convertCqlResultToQuantityDef(observationResult.getValue());
             // add function results to existing EvaluationResult under new expression
             // name
             // need a way to capture input parameter here too, otherwise we have no way
@@ -139,7 +139,7 @@ public class ContinuousVariableObservationHandler {
             // key= input parameter to function
             // value= the output Observation resource containing calculated value
             functionResults.put(result, quantity);
-            evaluatedResources.addAll(observationResult.evaluatedResources());
+            evaluatedResources.addAll(observationResult.getEvaluatedResources());
         }
 
         return buildEvaluationResult(expressionName, functionResults, evaluatedResources);
@@ -256,11 +256,10 @@ public class ContinuousVariableObservationHandler {
 
     private static Iterable<?> getResultIterable(
             EvaluationResult evaluationResult, ExpressionResult expressionResult, String subjectTypePart) {
-        if (expressionResult.value() instanceof Boolean) {
-            if ((Boolean.TRUE.equals(expressionResult.value()))) {
+        if (expressionResult.getValue() instanceof Boolean) {
+            if ((Boolean.TRUE.equals(expressionResult.getValue()))) {
                 // if Boolean, returns context by SubjectType
-                Object booleanResult =
-                        evaluationResult.forExpression(subjectTypePart).value();
+                Object booleanResult = evaluationResult.get(subjectTypePart);
                 // remove evaluated resources
                 return Collections.singletonList(booleanResult);
             } else {
@@ -269,7 +268,7 @@ public class ContinuousVariableObservationHandler {
             }
         }
 
-        Object value = expressionResult.value();
+        Object value = expressionResult.getValue();
         if (value instanceof Iterable<?> iterable) {
             return iterable;
         } else {

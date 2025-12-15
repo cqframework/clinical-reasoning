@@ -12,7 +12,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
-import org.opencds.cqf.cql.engine.execution.EvaluationResultsForMultiLib;
+import org.opencds.cqf.cql.engine.execution.EvaluationResults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -175,11 +175,10 @@ public class MeasureEvaluationResultHandler {
     }
 
     private static void validateEvaluationResultExistsForIdentifier(
-            VersionedIdentifier versionedIdentifierFromQuery,
-            EvaluationResultsForMultiLib evaluationResultsForMultiLib) {
+            VersionedIdentifier versionedIdentifierFromQuery, EvaluationResults evaluationResults) {
 
-        var containsResults = evaluationResultsForMultiLib.containsResultsFor(versionedIdentifierFromQuery);
-        var containsExceptions = evaluationResultsForMultiLib.containsExceptionsFor(versionedIdentifierFromQuery);
+        var containsResults = evaluationResults.containsResultsFor(versionedIdentifierFromQuery);
+        var containsExceptions = evaluationResults.containsExceptionsFor(versionedIdentifierFromQuery);
 
         if (!containsResults && !containsExceptions) {
             throw new InternalErrorException(

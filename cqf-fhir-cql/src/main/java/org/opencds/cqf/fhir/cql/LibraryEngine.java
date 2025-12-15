@@ -25,7 +25,7 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
-import org.opencds.cqf.cql.engine.execution.EvaluationResultsForMultiLib;
+import org.opencds.cqf.cql.engine.execution.EvaluationResults;
 import org.opencds.cqf.cql.engine.runtime.Tuple;
 import org.opencds.cqf.fhir.cql.engine.parameters.CqlFhirParametersConverter;
 import org.opencds.cqf.fhir.cql.engine.parameters.CqlParameterDefinition;
@@ -294,7 +294,7 @@ public class LibraryEngine {
         return result;
     }
 
-    public EvaluationResultsForMultiLib getEvaluationResult(
+    public EvaluationResults getEvaluationResult(
             List<VersionedIdentifier> ids,
             String patientId,
             IBaseParameters parameters,

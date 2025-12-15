@@ -107,8 +107,7 @@ public class CqlCommand implements Callable<Integer> {
             throws IOException {
         try (var writer = Files.newBufferedWriter(outputPath, StandardOpenOption.CREATE, StandardOpenOption.WRITE)) {
             for (var entry : result.getExpressionResults().entrySet()) {
-                writer.write(entry.getKey() + "="
-                        + Utilities.tempConvert(entry.getValue().value()));
+                writer.write(entry.getKey() + "=" + Utilities.tempConvert(entry.getValue()));
                 writer.newLine();
             }
         }

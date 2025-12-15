@@ -171,7 +171,7 @@ public class LibraryEngine {
         requestSettings.getLibrarySourceProviders().add(new StringLibrarySourceProvider(Lists.newArrayList(cql)));
         var engine = Engines.forRepository(repository, requestSettings, bundle);
 
-        var id = new VersionedIdentifier().withId(libraryName).withVersion(libraryVersion);
+        var id = new VersionedIdentifier().withId(libraryName);
         var expressions = new HashMap<VersionedIdentifier, List<EvaluationExpressionRef>>();
         expressions.put(id, List.of(new EvaluationExpressionRef("return")));
         var result = engine.evaluate(new EvaluationParams(

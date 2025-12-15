@@ -24,6 +24,7 @@ import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.opencds.cqf.cql.engine.execution.EvaluationExpressionRef;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
 import org.opencds.cqf.cql.engine.runtime.Code;
@@ -481,7 +482,7 @@ class R4PopulationBasisValidatorTest {
     private static EvaluationResult buildEvaluationResult(Map<String, Object> expressionResultMap) {
         final EvaluationResult evaluationResult = new EvaluationResult();
         expressionResultMap.forEach((key, value) ->
-                evaluationResult.getExpressionResults().put(key, new ExpressionResult(value, Set.of())));
+                evaluationResult.set(new EvaluationExpressionRef(key), new ExpressionResult(value, Set.of())));
         return evaluationResult;
     }
 

@@ -166,7 +166,7 @@ public class Utilities {
             for (Map.Entry<String, ExpressionResult> libraryEntry :
                     result.getExpressionResults().entrySet()) {
                 String key = libraryEntry.getKey();
-                Object value = Utilities.tempConvert(libraryEntry.getValue());
+                Object value = Utilities.tempConvert(libraryEntry.getValue().getValue());
                 writer.write(key + "=" + value);
                 writer.newLine();
             }

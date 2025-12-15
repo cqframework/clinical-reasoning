@@ -4,12 +4,16 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.Set;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
-import org.apache.commons.lang3.tuple.Pair;
+import kotlin.Pair;
 import org.hl7.elm.r1.VersionedIdentifier;
+import org.opencds.cqf.cql.engine.execution.EvaluationExpressionRef;
+import org.opencds.cqf.cql.engine.execution.EvaluationParams;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.fhir.cr.cli.argument.CqlCommandArgument;
 import org.opencds.cqf.fhir.cr.cli.command.EngineFactory.EngineBundle;
@@ -74,15 +78,23 @@ public class CqlCommand implements Callable<Integer> {
         }
 
         VersionedIdentifier identifier = new VersionedIdentifier().withId(arguments.content.name);
-        Set<String> expressions = arguments.content.expression != null ? Set.of(arguments.content.expression) : null;
+        var evaluationExpressionRefs = arguments.content.expression == null
+                ? null
+                : Arrays.stream(arguments.content.expression)
+                        .map(EvaluationExpressionRef::new)
+                        .toList();
+        var expressions = new HashMap<VersionedIdentifier, List<EvaluationExpressionRef>>();
+        expressions.put(identifier, evaluationExpressionRefs);
         var bundle = EngineFactory.createEngineBundle(arguments);
 
         var contexts =
                 arguments.parameters.context.stream().map(c -> new SubjectContext(c.contextName, c.contextValue));
 
         var resultStream = contexts.map(sc -> {
-                    var contextParameter = Pair.<String, Object>of(sc.name(), sc.value());
-                    var cqlResult = bundle.engine().evaluate(identifier, expressions, contextParameter);
+                    var contextParameter = new Pair<>(sc.name(), sc.value());
+                    var cqlResult = bundle.engine()
+                            .evaluate(new EvaluationParams(expressions, contextParameter, null, null, null))
+                            .getOnlyResultOrThrow();
                     return new SubjectAndResult(sc, cqlResult);
                 })
                 .map(cqlResult -> {
@@ -108,7 +120,7 @@ public class CqlCommand implements Callable<Integer> {
         try (var writer = Files.newBufferedWriter(outputPath, StandardOpenOption.CREATE, StandardOpenOption.WRITE)) {
             for (var entry : result.getExpressionResults().entrySet()) {
                 writer.write(entry.getKey() + "="
-                        + Utilities.tempConvert(entry.getValue().value()));
+                        + Utilities.tempConvert(entry.getValue().getValue()));
                 writer.newLine();
             }
         }

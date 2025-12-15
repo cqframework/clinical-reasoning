@@ -12,7 +12,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
-import org.opencds.cqf.cql.engine.execution.EvaluationResultsForMultiLib;
+import org.opencds.cqf.cql.engine.execution.EvaluationResults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -110,7 +110,7 @@ public class MeasureEvaluationResultHandler {
             try {
                 var libraryIdentifiers = multiLibraryIdMeasureEngineDetails.getLibraryIdentifiers();
 
-                var evaluationResultsForMultiLib = multiLibraryIdMeasureEngineDetails
+                var evaluationResults = multiLibraryIdMeasureEngineDetails
                         .getLibraryEngine()
                         .getEvaluationResult(
                                 libraryIdentifiers,
@@ -124,9 +124,8 @@ public class MeasureEvaluationResultHandler {
                                 context);
 
                 for (var libraryVersionedIdentifier : libraryIdentifiers) {
-                    validateEvaluationResultExistsForIdentifier(
-                            libraryVersionedIdentifier, evaluationResultsForMultiLib);
-                    var evaluationResult = evaluationResultsForMultiLib.getResultFor(libraryVersionedIdentifier);
+                    validateEvaluationResultExistsForIdentifier(libraryVersionedIdentifier, evaluationResults);
+                    var evaluationResult = evaluationResults.getResultFor(libraryVersionedIdentifier);
 
                     var measureDefs =
                             multiLibraryIdMeasureEngineDetails.getMeasureDefsForLibrary(libraryVersionedIdentifier);
@@ -141,7 +140,7 @@ public class MeasureEvaluationResultHandler {
 
                     resultsBuilder.addResults(measureDefs, subjectId, evaluationResult, measureObservationResults);
 
-                    Optional.ofNullable(evaluationResultsForMultiLib.getExceptionFor(libraryVersionedIdentifier))
+                    Optional.ofNullable(evaluationResults.getExceptionFor(libraryVersionedIdentifier))
                             .ifPresent(exception -> {
                                 var error = EXCEPTION_FOR_SUBJECT_ID_MESSAGE_TEMPLATE.formatted(
                                         subjectId, exception.getMessage());
@@ -175,11 +174,10 @@ public class MeasureEvaluationResultHandler {
     }
 
     private static void validateEvaluationResultExistsForIdentifier(
-            VersionedIdentifier versionedIdentifierFromQuery,
-            EvaluationResultsForMultiLib evaluationResultsForMultiLib) {
+            VersionedIdentifier versionedIdentifierFromQuery, EvaluationResults evaluationResults) {
 
-        var containsResults = evaluationResultsForMultiLib.containsResultsFor(versionedIdentifierFromQuery);
-        var containsExceptions = evaluationResultsForMultiLib.containsExceptionsFor(versionedIdentifierFromQuery);
+        var containsResults = evaluationResults.containsResultsFor(versionedIdentifierFromQuery);
+        var containsExceptions = evaluationResults.containsExceptionsFor(versionedIdentifierFromQuery);
 
         if (!containsResults && !containsExceptions) {
             throw new InternalErrorException(

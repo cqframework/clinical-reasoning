@@ -110,7 +110,7 @@ public class MeasureEvaluationResultHandler {
             try {
                 var libraryIdentifiers = multiLibraryIdMeasureEngineDetails.getLibraryIdentifiers();
 
-                var evaluationResultsForMultiLib = multiLibraryIdMeasureEngineDetails
+                var evaluationResults = multiLibraryIdMeasureEngineDetails
                         .getLibraryEngine()
                         .getEvaluationResult(
                                 libraryIdentifiers,
@@ -124,9 +124,8 @@ public class MeasureEvaluationResultHandler {
                                 context);
 
                 for (var libraryVersionedIdentifier : libraryIdentifiers) {
-                    validateEvaluationResultExistsForIdentifier(
-                            libraryVersionedIdentifier, evaluationResultsForMultiLib);
-                    var evaluationResult = evaluationResultsForMultiLib.getResultFor(libraryVersionedIdentifier);
+                    validateEvaluationResultExistsForIdentifier(libraryVersionedIdentifier, evaluationResults);
+                    var evaluationResult = evaluationResults.getResultFor(libraryVersionedIdentifier);
 
                     var measureDefs =
                             multiLibraryIdMeasureEngineDetails.getMeasureDefsForLibrary(libraryVersionedIdentifier);
@@ -141,7 +140,7 @@ public class MeasureEvaluationResultHandler {
 
                     resultsBuilder.addResults(measureDefs, subjectId, evaluationResult, measureObservationResults);
 
-                    Optional.ofNullable(evaluationResultsForMultiLib.getExceptionFor(libraryVersionedIdentifier))
+                    Optional.ofNullable(evaluationResults.getExceptionFor(libraryVersionedIdentifier))
                             .ifPresent(exception -> {
                                 var error = EXCEPTION_FOR_SUBJECT_ID_MESSAGE_TEMPLATE.formatted(
                                         subjectId, exception.getMessage());

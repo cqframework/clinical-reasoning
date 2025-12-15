@@ -1,5 +1,7 @@
 package org.opencds.cqf.fhir.utility.adapter.dstu3;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
+
 import ca.uhn.fhir.context.FhirContext;
 import java.util.Arrays;
 import java.util.List;
@@ -11,8 +13,6 @@ import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IGraphDefinitionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IGraphDefinitionAdaptorTest;
-
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class GraphDefinitionAdaptorTest implements IGraphDefinitionAdaptorTest<GraphDefinition> {
 

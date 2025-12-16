@@ -19,7 +19,8 @@ public interface IValueSetAdapterTest<T extends IBaseResource> extends IBaseAdap
     String RESOURCE_REF_1 = "RESOURCE_REF_1";
     String RESOURCE_REF_2 = "RESOURCE_REF_2";
 
-    String TEMPLATE = """
+    String TEMPLATE =
+            """
         {
             "resourceType": "ValueSet",
             "status": "active",
@@ -50,36 +51,34 @@ public interface IValueSetAdapterTest<T extends IBaseResource> extends IBaseAdap
         String canonical1 = "http://canonical.com/res1";
         String canonical2 = "http://canonical.com/res2";
         IParser parser = fhirContext().newJsonParser();
-        String vsStr = TEMPLATE
-            .replaceAll(RESOURCE_REF_1, toRelatedArtifactCanonicalReference(canonical1))
-            .replaceAll(RESOURCE_REF_2, toRelatedArtifactCanonicalReference(canonical2))
-            .replaceAll(RELATED_ARTIFACT_TYPE_1, "depends-on")
-            .replaceAll(RELATED_ARTIFACT_TYPE_2, "depends-on");
+        String vsStr = TEMPLATE.replaceAll(RESOURCE_REF_1, toRelatedArtifactCanonicalReference(canonical1))
+                .replaceAll(RESOURCE_REF_2, toRelatedArtifactCanonicalReference(canonical2))
+                .replaceAll(RELATED_ARTIFACT_TYPE_1, "depends-on")
+                .replaceAll(RELATED_ARTIFACT_TYPE_2, "depends-on");
         log.info(vsStr);
 
         T vs = parser.parseResource(valueSetClass(), vsStr);
 
-        var adapter = getAdapterFactory()
-            .createValueSet(vs);
+        var adapter = getAdapterFactory().createValueSet(vs);
 
         // test
         List<? extends ICompositeType> relatedArtifacts = adapter.getRelatedArtifact();
 
         // verify
         assertEquals(2, relatedArtifacts.size());
+        assertTrue(relatedArtifacts.stream().allMatch(a -> a.fhirType().equals("RelatedArtifact")));
         assertTrue(relatedArtifacts.stream()
-            .allMatch(a -> a.fhirType().equals("RelatedArtifact")));
+                .anyMatch(ra -> parser.encodeToString(ra).contains(canonical1)));
         assertTrue(relatedArtifacts.stream()
-            .anyMatch(ra -> parser.encodeToString(ra).contains(canonical1)));
-        assertTrue(relatedArtifacts.stream()
-            .anyMatch(ra -> parser.encodeToString(ra).contains(canonical2)));
+                .anyMatch(ra -> parser.encodeToString(ra).contains(canonical2)));
     }
 
     @Test
     default void getRelatedArtifact_noRelevantExtensions_returnsNothing() {
         // setup
         IParser parser = fhirContext().newJsonParser();
-        String str = """
+        String str =
+                """
                 {
             "resourceType": "ValueSet",
             "status": "active",
@@ -93,7 +92,8 @@ public interface IValueSetAdapterTest<T extends IBaseResource> extends IBaseAdap
                 }
             ]
         }
-        """.replaceAll("REF", toRelatedArtifactCanonicalReference("some-ref"));
+        """
+                        .replaceAll("REF", toRelatedArtifactCanonicalReference("some-ref"));
 
         T valueSet = parser.parseResource(valueSetClass(), str);
         IValueSetAdapter adapter = getAdapterFactory().createValueSet(valueSet);

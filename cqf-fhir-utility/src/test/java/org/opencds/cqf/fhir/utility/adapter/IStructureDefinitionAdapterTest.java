@@ -19,7 +19,8 @@ public interface IStructureDefinitionAdapterTest<T extends IBaseResource> extend
     String RESOURCE_REF_1 = "RESOURCE_REF_1";
     String RESOURCE_REF_2 = "RESOURCE_REF_2";
 
-    String TEMPLATE = """
+    String TEMPLATE =
+            """
         {
             "resourceType": "StructureDefinition",
             "url": "http://canonical.com/sd-url",
@@ -52,36 +53,35 @@ public interface IStructureDefinitionAdapterTest<T extends IBaseResource> extend
         String canonical1 = "http://canonical.com/res1";
         String canonical2 = "http://canonical.com/res2";
         IParser parser = fhirContext().newJsonParser();
-        String structureDefinitionStr = TEMPLATE
-            .replaceAll(RESOURCE_REF_1, toRelatedArtifactCanonicalReference(canonical1))
-            .replaceAll(RESOURCE_REF_2, toRelatedArtifactCanonicalReference(canonical2))
-            .replaceAll(RELATED_ARTIFACT_TYPE_1, "depends-on")
-            .replaceAll(RELATED_ARTIFACT_TYPE_2, "depends-on");
+        String structureDefinitionStr = TEMPLATE.replaceAll(
+                        RESOURCE_REF_1, toRelatedArtifactCanonicalReference(canonical1))
+                .replaceAll(RESOURCE_REF_2, toRelatedArtifactCanonicalReference(canonical2))
+                .replaceAll(RELATED_ARTIFACT_TYPE_1, "depends-on")
+                .replaceAll(RELATED_ARTIFACT_TYPE_2, "depends-on");
         log.info(structureDefinitionStr);
 
         T sd = parser.parseResource(structureDefinitionClass(), structureDefinitionStr);
 
-        var adapter = getAdapterFactory()
-            .createStructureDefinition(sd);
+        var adapter = getAdapterFactory().createStructureDefinition(sd);
 
         // test
         List<? extends ICompositeType> relatedArtifacts = adapter.getRelatedArtifact();
 
         // verify
         assertEquals(2, relatedArtifacts.size());
+        assertTrue(relatedArtifacts.stream().allMatch(a -> a.fhirType().equals("RelatedArtifact")));
         assertTrue(relatedArtifacts.stream()
-            .allMatch(a -> a.fhirType().equals("RelatedArtifact")));
+                .anyMatch(ra -> parser.encodeToString(ra).contains(canonical1)));
         assertTrue(relatedArtifacts.stream()
-            .anyMatch(ra -> parser.encodeToString(ra).contains(canonical1)));
-        assertTrue(relatedArtifacts.stream()
-            .anyMatch(ra -> parser.encodeToString(ra).contains(canonical2)));
+                .anyMatch(ra -> parser.encodeToString(ra).contains(canonical2)));
     }
 
     @Test
     default void getRelatedArtifact_noRelevantExtension_returnsNothing() {
         // setup
         IParser parser = fhirContext().newJsonParser();
-        String str = """
+        String str =
+                """
         {
             "resourceType": "StructureDefinition",
             "url": "http://canonical.com/sd-url",
@@ -97,7 +97,8 @@ public interface IStructureDefinitionAdapterTest<T extends IBaseResource> extend
                 }
             ]
         }
-        """.replaceAll("REF", toRelatedArtifactCanonicalReference("some-ref"));
+        """
+                        .replaceAll("REF", toRelatedArtifactCanonicalReference("some-ref"));
 
         T structuredDef = parser.parseResource(structureDefinitionClass(), str);
         IStructureDefinitionAdapter adapter = getAdapterFactory().createStructureDefinition(structuredDef);

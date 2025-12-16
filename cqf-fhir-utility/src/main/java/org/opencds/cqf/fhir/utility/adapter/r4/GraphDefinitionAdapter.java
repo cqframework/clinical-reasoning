@@ -1,10 +1,7 @@
 package org.opencds.cqf.fhir.utility.adapter.r4;
 
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.ICompositeType;
@@ -83,26 +80,26 @@ public class GraphDefinitionAdapter extends ResourceAdapter implements IGraphDef
     }
 
     @Override
-//    @SuppressWarnings("unchecked")
+    //    @SuppressWarnings("unchecked")
     public <T extends ICompositeType & IBaseHasExtensions> List<T> getRelatedArtifactsOfType(String codeString) {
         RelatedArtifactType type = RelatedArtifactUtil.getRelatedArtifactType(codeString, fhirVersion());
-//        return getExtensionsByUrls(get(), Set.of(Constants.CPG_RELATED_ARTIFACT, Constants.ARTIFACT_RELATED_ARTIFACT))
-//                .stream()
-//                .filter(ext -> {
-//                    if (ext.getValue() instanceof RelatedArtifact ra) {
-//                        return ra.getType() == type;
-//                    }
-//                    return false;
-//                })
-//                .map(ext -> (T) ext.getValue())
-//                .toList();
-        return getRelatedArtifact()
-            .stream()
-            .filter(ra -> {
-                return ((RelatedArtifact)ra).getType() == type;
-            })
-            .map(e -> (T)e)
-            .toList();
+        //        return getExtensionsByUrls(get(), Set.of(Constants.CPG_RELATED_ARTIFACT,
+        // Constants.ARTIFACT_RELATED_ARTIFACT))
+        //                .stream()
+        //                .filter(ext -> {
+        //                    if (ext.getValue() instanceof RelatedArtifact ra) {
+        //                        return ra.getType() == type;
+        //                    }
+        //                    return false;
+        //                })
+        //                .map(ext -> (T) ext.getValue())
+        //                .toList();
+        return getRelatedArtifact().stream()
+                .filter(ra -> {
+                    return ((RelatedArtifact) ra).getType() == type;
+                })
+                .map(e -> (T) e)
+                .toList();
     }
 
     @Override

@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public interface IQuestionnaireAdapterTest<T extends IBaseResource> extends IBaseAdapterTest{
+public interface IQuestionnaireAdapterTest<T extends IBaseResource> extends IBaseAdapterTest {
     Logger log = LoggerFactory.getLogger(IQuestionnaireAdapterTest.class);
 
     String RELATED_ARTIFACT_TYPE_1 = "RELATED_ARTIFACT_TYPE_1";
@@ -19,7 +19,8 @@ public interface IQuestionnaireAdapterTest<T extends IBaseResource> extends IBas
     String RESOURCE_REF_1 = "RESOURCE_REF_1";
     String RESOURCE_REF_2 = "RESOURCE_REF_2";
 
-    String TEMPLATE = """
+    String TEMPLATE =
+            """
         {
             "resourceType": "Questionnaire",
             "status": "active",
@@ -50,11 +51,10 @@ public interface IQuestionnaireAdapterTest<T extends IBaseResource> extends IBas
         String canonical1 = "http://canonical.com/url-1";
         String canonical2 = "http://canonical.com/url-2";
         IParser parser = fhirContext().newJsonParser();
-        String questionnaireStr = TEMPLATE
-            .replaceAll(RESOURCE_REF_1, toRelatedArtifactCanonicalReference(canonical1))
-            .replaceAll(RESOURCE_REF_2, toRelatedArtifactCanonicalReference(canonical2))
-            .replaceAll(RELATED_ARTIFACT_TYPE_1, "depends-on")
-            .replaceAll(RELATED_ARTIFACT_TYPE_2, "depends-on");
+        String questionnaireStr = TEMPLATE.replaceAll(RESOURCE_REF_1, toRelatedArtifactCanonicalReference(canonical1))
+                .replaceAll(RESOURCE_REF_2, toRelatedArtifactCanonicalReference(canonical2))
+                .replaceAll(RELATED_ARTIFACT_TYPE_1, "depends-on")
+                .replaceAll(RELATED_ARTIFACT_TYPE_2, "depends-on");
         log.info(questionnaireStr);
 
         T questionnaire = parser.parseResource(questionnaireClass(), questionnaireStr);
@@ -66,19 +66,19 @@ public interface IQuestionnaireAdapterTest<T extends IBaseResource> extends IBas
 
         // verify
         assertEquals(2, relatedArtifacts.size());
+        assertTrue(relatedArtifacts.stream().allMatch(a -> a.fhirType().equals("RelatedArtifact")));
         assertTrue(relatedArtifacts.stream()
-            .allMatch(a -> a.fhirType().equals("RelatedArtifact")));
+                .anyMatch(ra -> parser.encodeToString(ra).contains(canonical1)));
         assertTrue(relatedArtifacts.stream()
-            .anyMatch(ra -> parser.encodeToString(ra).contains(canonical1)));
-        assertTrue(relatedArtifacts.stream()
-            .anyMatch(ra -> parser.encodeToString(ra).contains(canonical2)));
+                .anyMatch(ra -> parser.encodeToString(ra).contains(canonical2)));
     }
 
     @Test
     default void getRelatedArtifact_noValidExtensions_returnsNothing() {
         // setup
         IParser parser = fhirContext().newJsonParser();
-        String str = """
+        String str =
+                """
         {
             "resourceType": "Questionnaire",
             "status": "active",
@@ -92,7 +92,8 @@ public interface IQuestionnaireAdapterTest<T extends IBaseResource> extends IBas
                 }
             ]
         }
-        """.replaceAll("REF", toRelatedArtifactCanonicalReference("some-ref"));
+        """
+                        .replaceAll("REF", toRelatedArtifactCanonicalReference("some-ref"));
 
         T questionnaire = parser.parseResource(questionnaireClass(), str);
 

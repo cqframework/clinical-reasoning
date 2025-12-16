@@ -27,15 +27,20 @@ public abstract class BaseMeasureReportScorer<MeasureReportT> implements IMeasur
     protected static final String DENOMINATOR_EXCEPTION = "denominator-exception";
     protected static final String NUMERATOR_EXCLUSION = "numerator-exclusion";
 
+    /**
+     * Calculate proportion score: numerator / denominator.
+     * Delegates to {@link MeasureScoreCalculator} for the calculation.
+     *
+     * @param numeratorCount Effective numerator count (after exclusions applied)
+     * @param denominatorCount Effective denominator count (after exclusions/exceptions applied)
+     * @return The calculated score, or {@code null} if denominator is 0
+     */
     protected Double calcProportionScore(Integer numeratorCount, Integer denominatorCount) {
         if (numeratorCount == null) {
             numeratorCount = 0;
         }
-        if (denominatorCount != null && denominatorCount != 0) {
-            return numeratorCount / (double) denominatorCount;
-        }
-
-        return null;
+        // Delegate to MeasureScoreCalculator (pass 0 for exclusions since they're already applied)
+        return MeasureScoreCalculator.calculateProportionScore(numeratorCount, 0, denominatorCount, 0, 0);
     }
 
     protected MeasureScoring checkMissingScoringType(MeasureDef measureDef, MeasureScoring measureScoring) {

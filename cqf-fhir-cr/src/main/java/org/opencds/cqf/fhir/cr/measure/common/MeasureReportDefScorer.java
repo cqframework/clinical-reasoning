@@ -5,7 +5,6 @@ import jakarta.annotation.Nullable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -128,14 +127,13 @@ public class MeasureReportDefScorer {
                 }
 
                 // Standard proportion/ratio scoring: (n - nx) / (d - dx - de)
-                int numerator = groupDef.getPopulationCount(MeasurePopulationType.NUMERATOR);
-                int numeratorExclusion = groupDef.getPopulationCount(MeasurePopulationType.NUMERATOREXCLUSION);
-                int denominator = groupDef.getPopulationCount(MeasurePopulationType.DENOMINATOR);
-                int denominatorExclusion = groupDef.getPopulationCount(MeasurePopulationType.DENOMINATOREXCLUSION);
-                int denominatorException = groupDef.getPopulationCount(MeasurePopulationType.DENOMINATOREXCEPTION);
-
-                return calcProportionScore(
-                        numerator - numeratorExclusion, denominator - denominatorExclusion - denominatorException);
+                // Delegate to MeasureScoreCalculator
+                return MeasureScoreCalculator.calculateProportionScore(
+                        groupDef.getPopulationCount(MeasurePopulationType.NUMERATOR),
+                        groupDef.getPopulationCount(MeasurePopulationType.NUMERATOREXCLUSION),
+                        groupDef.getPopulationCount(MeasurePopulationType.DENOMINATOR),
+                        groupDef.getPopulationCount(MeasurePopulationType.DENOMINATOREXCLUSION),
+                        groupDef.getPopulationCount(MeasurePopulationType.DENOMINATOREXCEPTION));
 
             case CONTINUOUSVARIABLE:
                 // Continuous variable scoring - returns aggregate value
@@ -193,16 +191,12 @@ public class MeasureReportDefScorer {
         Double num = numeratorAgg.value();
         Double den = denominatorAgg.value();
 
-        if (den == null || den == 0.0) {
+        if (num == null || den == null) {
             return null;
         }
 
-        if (num == null || num == 0.0) {
-            // Explicitly handle numerator zero with positive denominator
-            return den > 0.0 ? 0.0 : null;
-        }
-
-        return num / den;
+        // Delegate ratio scoring to MeasureScoreCalculator
+        return MeasureScoreCalculator.calculateRatioScore(num, den);
     }
 
     /**
@@ -332,7 +326,8 @@ public class MeasureReportDefScorer {
         int numeratorCount = stratumDef.getPopulationCount(groupDef.getSingle(MeasurePopulationType.NUMERATOR));
         int denominatorCount = stratumDef.getPopulationCount(groupDef.getSingle(MeasurePopulationType.DENOMINATOR));
 
-        return calcProportionScore(numeratorCount, denominatorCount);
+        // Delegate to MeasureScoreCalculator (pass 0 for exclusions since they're already applied at stratum level)
+        return MeasureScoreCalculator.calculateProportionScore(numeratorCount, 0, denominatorCount, 0, 0);
     }
 
     /**
@@ -404,16 +399,12 @@ public class MeasureReportDefScorer {
         Double num = aggregateNumQuantityDef.value();
         Double den = aggregateDenQuantityDef.value();
 
-        if (den == null || den == 0.0) {
+        if (num == null || den == null) {
             return null;
         }
 
-        if (num == null || num == 0.0) {
-            // Explicitly handle numerator zero with positive denominator
-            return den > 0.0 ? 0.0 : null;
-        }
-
-        return num / den;
+        // Delegate ratio scoring to MeasureScoreCalculator
+        return MeasureScoreCalculator.calculateRatioScore(num, den);
     }
 
     /**
@@ -498,7 +489,7 @@ public class MeasureReportDefScorer {
 
     /**
      * Calculate continuous variable aggregate quantity.
-     * Copied from R4MeasureReportScorer with minor adaptations.
+     * Delegates to {@link MeasureScoreCalculator} for the actual aggregation.
      *
      * @param measureUrl the measure URL for error reporting
      * @param populationDef the population definition containing observation data
@@ -522,7 +513,7 @@ public class MeasureReportDefScorer {
 
     /**
      * Calculate continuous variable aggregate quantity.
-     * Copied from R4MeasureReportScorer.
+     * Delegates to {@link MeasureScoreCalculator} for collection and aggregation.
      *
      * @param aggregateMethod the aggregation method (SUM, AVG, MIN, MAX, MEDIAN, COUNT)
      * @param qualifyingResources the resources containing QuantityDef observations
@@ -531,114 +522,9 @@ public class MeasureReportDefScorer {
     @Nullable
     private static QuantityDef calculateContinuousVariableAggregateQuantity(
             ContinuousVariableObservationAggregateMethod aggregateMethod, Collection<Object> qualifyingResources) {
-        var observationQuantity = collectQuantities(qualifyingResources);
-        return aggregate(observationQuantity, aggregateMethod);
-    }
-
-    /**
-     * Aggregate a list of QuantityDefs using the specified method.
-     * Copied from R4MeasureReportScorer.
-     *
-     * @param quantities list of QuantityDef to aggregate
-     * @param method aggregation method
-     * @return aggregated QuantityDef with computed value
-     */
-    private static QuantityDef aggregate(
-            List<QuantityDef> quantities, ContinuousVariableObservationAggregateMethod method) {
-        if (quantities == null || quantities.isEmpty()) {
-            return null;
-        }
-
-        if (ContinuousVariableObservationAggregateMethod.N_A == method) {
-            throw new InvalidRequestException(
-                    "Aggregate method must be provided for continuous variable scoring, but is NO-OP.");
-        }
-
-        // Enhanced switch with early returns - short-circuit logic
-        return switch (method) {
-            case COUNT -> new QuantityDef((double) quantities.size());
-            case MEDIAN -> {
-                List<Double> sorted = quantities.stream()
-                        .map(QuantityDef::value)
-                        .filter(Objects::nonNull)
-                        .sorted()
-                        .toList();
-                int n = sorted.size();
-                double result = (n % 2 == 1) ? sorted.get(n / 2) : (sorted.get(n / 2 - 1) + sorted.get(n / 2)) / 2.0;
-                yield new QuantityDef(result);
-            }
-            case SUM -> {
-                double result = quantities.stream()
-                        .map(QuantityDef::value)
-                        .filter(Objects::nonNull)
-                        .mapToDouble(value -> value)
-                        .sum();
-                yield new QuantityDef(result);
-            }
-            case MAX -> {
-                double result = quantities.stream()
-                        .map(QuantityDef::value)
-                        .filter(Objects::nonNull)
-                        .mapToDouble(value -> value)
-                        .max()
-                        .orElse(Double.NaN);
-                yield new QuantityDef(result);
-            }
-            case MIN -> {
-                double result = quantities.stream()
-                        .map(QuantityDef::value)
-                        .filter(Objects::nonNull)
-                        .mapToDouble(value -> value)
-                        .min()
-                        .orElse(Double.NaN);
-                yield new QuantityDef(result);
-            }
-            case AVG -> {
-                double result = quantities.stream()
-                        .map(QuantityDef::value)
-                        .filter(Objects::nonNull)
-                        .mapToDouble(value -> value)
-                        .average()
-                        .orElse(Double.NaN);
-                yield new QuantityDef(result);
-            }
-            default -> throw new IllegalArgumentException("Unsupported aggregation method: " + method);
-        };
-    }
-
-    /**
-     * Collect QuantityDef objects from nested Map structures in resources.
-     * Copied from R4MeasureReportScorer.
-     *
-     * @param resources collection of objects that may contain Maps with QuantityDef values
-     * @return list of QuantityDef objects found
-     */
-    private static List<QuantityDef> collectQuantities(Collection<Object> resources) {
-        var mapValues = resources.stream()
-                .filter(x -> x instanceof Map<?, ?>)
-                .map(x -> (Map<?, ?>) x)
-                .map(Map::values)
-                .flatMap(Collection::stream)
-                .toList();
-
-        return mapValues.stream()
-                .filter(QuantityDef.class::isInstance)
-                .map(QuantityDef.class::cast)
-                .toList();
-    }
-
-    /**
-     * Calculate proportion/ratio score: numerator / denominator.
-     * Reused from BaseMeasureReportScorer pattern.
-     */
-    protected Double calcProportionScore(Integer numeratorCount, Integer denominatorCount) {
-        if (numeratorCount == null) {
-            numeratorCount = 0;
-        }
-        if (denominatorCount != null && denominatorCount != 0) {
-            return numeratorCount / (double) denominatorCount;
-        }
-        return null;
+        // Delegate to MeasureScoreCalculator for collection and aggregation
+        var observationQuantity = MeasureScoreCalculator.collectQuantities(qualifyingResources);
+        return MeasureScoreCalculator.aggregateContinuousVariable(observationQuantity, aggregateMethod);
     }
 
     /**

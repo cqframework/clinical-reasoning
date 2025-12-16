@@ -5,7 +5,6 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.annotation.Nullable;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
@@ -24,6 +23,7 @@ import org.opencds.cqf.fhir.cr.measure.common.ContinuousVariableObservationConve
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureScoreCalculator;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.QuantityDef;
@@ -195,12 +195,13 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
                     score = scoreRatioContVariable(measureUrl, groupDef, getMeasureObservations(groupDef));
                 } else {
                     // Standard Proportion & Ratio Scoring
-                    score = calcProportionScore(
-                            getCountFromGroupPopulation(mrgc.getPopulation(), NUMERATOR)
-                                    - getCountFromGroupPopulation(mrgc.getPopulation(), NUMERATOR_EXCLUSION),
-                            getCountFromGroupPopulation(mrgc.getPopulation(), DENOMINATOR)
-                                    - getCountFromGroupPopulation(mrgc.getPopulation(), DENOMINATOR_EXCLUSION)
-                                    - getCountFromGroupPopulation(mrgc.getPopulation(), DENOMINATOR_EXCEPTION));
+                    // Delegate to MeasureScoreCalculator
+                    score = MeasureScoreCalculator.calculateProportionScore(
+                            getCountFromGroupPopulation(mrgc.getPopulation(), NUMERATOR),
+                            getCountFromGroupPopulation(mrgc.getPopulation(), NUMERATOR_EXCLUSION),
+                            getCountFromGroupPopulation(mrgc.getPopulation(), DENOMINATOR),
+                            getCountFromGroupPopulation(mrgc.getPopulation(), DENOMINATOR_EXCLUSION),
+                            getCountFromGroupPopulation(mrgc.getPopulation(), DENOMINATOR_EXCEPTION));
                 }
                 scoreGroup(score, isIncreaseImprovementNotation, mrgc);
                 break;
@@ -245,16 +246,12 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
         Double num = aggregateNumQuantityDef.value();
         Double den = aggregateDenQuantityDef.value();
 
-        if (den == null || den == 0.0) {
+        if (num == null || den == null) {
             return null;
         }
 
-        if (num == null || num == 0.0) {
-            // Explicitly handle numerator zero with positive denominator
-            return den > 0.0 ? 0.0 : null;
-        }
-
-        return num / den;
+        // Delegate to MeasureScoreCalculator
+        return MeasureScoreCalculator.calculateRatioScore(num, den);
     }
 
     protected void scoreContinuousVariable(
@@ -288,91 +285,9 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
     @Nullable
     private static QuantityDef calculateContinuousVariableAggregateQuantity(
             ContinuousVariableObservationAggregateMethod aggregateMethod, Collection<Object> qualifyingResources) {
-        var observationQuantity = collectQuantities(qualifyingResources);
-        return aggregate(observationQuantity, aggregateMethod);
-    }
-
-    private static QuantityDef aggregate(
-            List<QuantityDef> quantities, ContinuousVariableObservationAggregateMethod method) {
-        if (quantities == null || quantities.isEmpty()) {
-            return null;
-        }
-
-        if (ContinuousVariableObservationAggregateMethod.N_A == method) {
-            throw new InvalidRequestException(
-                    "Aggregate method must be provided for continuous variable scoring, but is NO-OP.");
-        }
-
-        double result;
-
-        switch (method) {
-            case SUM:
-                result = quantities.stream()
-                        .map(QuantityDef::value)
-                        .filter(Objects::nonNull)
-                        .mapToDouble(value -> value)
-                        .sum();
-                break;
-            case MAX:
-                result = quantities.stream()
-                        .map(QuantityDef::value)
-                        .filter(Objects::nonNull)
-                        .mapToDouble(value -> value)
-                        .max()
-                        .orElse(Double.NaN);
-                break;
-            case MIN:
-                result = quantities.stream()
-                        .map(QuantityDef::value)
-                        .filter(Objects::nonNull)
-                        .mapToDouble(value -> value)
-                        .min()
-                        .orElse(Double.NaN);
-                break;
-            case AVG:
-                result = quantities.stream()
-                        .map(QuantityDef::value)
-                        .filter(Objects::nonNull)
-                        .mapToDouble(value -> value)
-                        .average()
-                        .orElse(Double.NaN);
-                break;
-            case COUNT:
-                result = quantities.size();
-                break;
-            case MEDIAN:
-                List<Double> sorted = quantities.stream()
-                        .map(QuantityDef::value)
-                        .filter(Objects::nonNull)
-                        .sorted()
-                        .toList();
-                int n = sorted.size();
-                if (n % 2 == 1) {
-                    result = sorted.get(n / 2);
-                } else {
-                    result = (sorted.get(n / 2 - 1) + sorted.get(n / 2)) / 2.0;
-                }
-                break;
-            default:
-                throw new IllegalArgumentException("Unsupported aggregation method: " + method);
-        }
-
-        return new QuantityDef(result);
-    }
-
-    private static List<QuantityDef> collectQuantities(Collection<Object> resources) {
-
-        var mapValues = resources.stream()
-                .filter(x -> x instanceof Map<?, ?>)
-                .map(x -> (Map<?, ?>) x)
-                .map(Map::values)
-                .flatMap(Collection::stream)
-                .toList();
-
-        return mapValues.stream()
-                .filter(QuantityDef.class::isInstance)
-                .map(QuantityDef.class::cast)
-                .toList();
+        // Delegate to MeasureScoreCalculator for collection and aggregation
+        var observationQuantity = MeasureScoreCalculator.collectQuantities(qualifyingResources);
+        return MeasureScoreCalculator.aggregateContinuousVariable(observationQuantity, aggregateMethod);
     }
 
     protected void scoreStratifier(
@@ -512,9 +427,13 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
                             denPopDef);
                 } else {
                     // Standard Proportion & Ratio Scoring
-                    score = calcProportionScore(
+                    // Delegate to MeasureScoreCalculator (pass 0 for exclusions since already applied at stratum level)
+                    score = MeasureScoreCalculator.calculateProportionScore(
                             getCountFromStratifierPopulation(stratum.getPopulation(), NUMERATOR),
-                            getCountFromStratifierPopulation(stratum.getPopulation(), DENOMINATOR));
+                            0,
+                            getCountFromStratifierPopulation(stratum.getPopulation(), DENOMINATOR),
+                            0,
+                            0);
                 }
                 if (score != null) {
                     return new Quantity(score);
@@ -567,16 +486,12 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
         Double num = aggregateNumQuantityDef.value();
         Double den = aggregateDenQuantityDef.value();
 
-        if (den == null || den == 0.0) {
+        if (num == null || den == null) {
             return null;
         }
 
-        if (num == null || num == 0.0) {
-            // Explicitly handle numerator zero with positive denominator
-            return den > 0.0 ? 0.0 : null;
-        }
-
-        return num / den;
+        // Delegate to MeasureScoreCalculator
+        return MeasureScoreCalculator.calculateRatioScore(num, den);
     }
 
     /**

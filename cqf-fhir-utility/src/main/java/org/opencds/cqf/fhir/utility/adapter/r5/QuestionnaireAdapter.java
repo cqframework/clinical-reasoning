@@ -2,9 +2,12 @@ package org.opencds.cqf.fhir.utility.adapter.r5;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IDomainResource;
+import org.hl7.fhir.r5.model.RelatedArtifact;
+import org.hl7.fhir.r5.model.RelatedArtifact.RelatedArtifactType;
 import org.hl7.fhir.r5.model.CanonicalType;
 import org.hl7.fhir.r5.model.Expression;
 import org.hl7.fhir.r5.model.Questionnaire;
@@ -170,5 +173,16 @@ public class QuestionnaireAdapter extends KnowledgeArtifactAdapter implements IQ
                 .map(IAdapter::get)
                 .map(QuestionnaireItemComponent.class::cast)
                 .forEach(item -> getQuestionnaire().addItem(item));
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public List<RelatedArtifact> getRelatedArtifact() {
+        var extensions = getExtensionsByUrls(get(), Set.of(Constants.CPG_RELATED_ARTIFACT, Constants.ARTIFACT_RELATED_ARTIFACT));
+
+        return extensions.stream()
+            .filter(e -> e.getValue() instanceof RelatedArtifact)
+            .map(e -> (RelatedArtifact) e.getValue())
+            .toList();
     }
 }

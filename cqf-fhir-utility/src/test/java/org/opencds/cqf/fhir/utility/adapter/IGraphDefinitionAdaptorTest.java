@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -12,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public interface IGraphDefinitionAdaptorTest<T extends IBaseResource> {
+public interface IGraphDefinitionAdaptorTest<T extends IBaseResource> extends IBaseAdapterTest {
 
     Logger log = LoggerFactory.getLogger(IGraphDefinitionAdaptorTest.class);
 
@@ -23,7 +22,7 @@ public interface IGraphDefinitionAdaptorTest<T extends IBaseResource> {
     String RESOURCE_REF_2 = "RESOURCE_REF_2";
 
     String VALID_GRAPH_DEF_JSON_TEMPLATE =
-            """
+        """
             {
                 "resourceType": "GraphDefinition",
                 "meta": [{
@@ -51,23 +50,9 @@ public interface IGraphDefinitionAdaptorTest<T extends IBaseResource> {
     Class<T> graphDefinitionClass();
 
     /**
-     * Returns the fhir context to use
-     */
-    FhirContext fhirContext();
-
-    /**
-     * Returns the AdapterFactory to use
-     */
-    IAdapterFactory getAdaptorFactory();
-
-    /**
      * Returns the list of all RelatedArtifactType values that are not valid for getDependencies
      */
     List<String> getAllNonProcessableTypeForRelatedArtifact();
-
-    default String toCanonicalReference(String ref) {
-        return "\"" + ref + "\"";
-    }
 
     @Test
     default void getDependencies_withRelatedArtifact_retrievesCorrectReference() {
@@ -77,11 +62,11 @@ public interface IGraphDefinitionAdaptorTest<T extends IBaseResource> {
         String resourceRef2 = "http://example.com/canonical-url-2";
         IParser parser = fhirContext().newJsonParser();
         String graphDefStr = VALID_GRAPH_DEF_JSON_TEMPLATE
-                .replaceAll(PROFILE_REF, profileRef)
-                .replaceAll(RESOURCE_REF_1, toCanonicalReference(resourceRef1))
-                .replaceAll(RESOURCE_REF_2, toCanonicalReference(resourceRef2))
-                .replaceAll(RELATED_ARTIFACT_TYPE_1, "depends-on")
-                .replaceAll(RELATED_ARTIFACT_TYPE_2, "depends-on");
+            .replaceAll(PROFILE_REF, profileRef)
+            .replaceAll(RESOURCE_REF_1, toRelatedArtifactCanonicalReference(resourceRef1))
+            .replaceAll(RESOURCE_REF_2, toRelatedArtifactCanonicalReference(resourceRef2))
+            .replaceAll(RELATED_ARTIFACT_TYPE_1, "depends-on")
+            .replaceAll(RELATED_ARTIFACT_TYPE_2, "depends-on");
         log.info(graphDefStr);
         T graphDefinition = parser.parseResource(graphDefinitionClass(), graphDefStr);
 
@@ -90,7 +75,8 @@ public interface IGraphDefinitionAdaptorTest<T extends IBaseResource> {
         int dependenciesExpected = 3;
 
         // test
-        IGraphDefinitionAdapter adapter = getAdaptorFactory().createGraphDefinition(graphDefinition);
+        IGraphDefinitionAdapter adapter = getAdapterFactory().createGraphDefinition(
+            graphDefinition);
         List<IDependencyInfo> dependencies = adapter.getDependencies();
 
         // verify
@@ -108,7 +94,7 @@ public interface IGraphDefinitionAdaptorTest<T extends IBaseResource> {
         String ref = "http://example.com/canonical";
         IParser parser = fhirContext().newJsonParser();
         String graphDefStr = String.format(
-                """
+            """
                 {
                     "resourceType": "GraphDefinition",
                     "meta": [{
@@ -131,12 +117,13 @@ public interface IGraphDefinitionAdaptorTest<T extends IBaseResource> {
                     ]
                 }
                 """,
-                toCanonicalReference(ref));
+            toRelatedArtifactCanonicalReference(ref));
         log.info(graphDefStr);
         T graphDefinition = parser.parseResource(graphDefinitionClass(), graphDefStr);
 
         // test
-        IGraphDefinitionAdapter adapter = getAdaptorFactory().createGraphDefinition(graphDefinition);
+        IGraphDefinitionAdapter adapter = getAdapterFactory().createGraphDefinition(
+            graphDefinition);
         List<IDependencyInfo> dependencies = adapter.getDependencies();
 
         // validate
@@ -149,7 +136,7 @@ public interface IGraphDefinitionAdaptorTest<T extends IBaseResource> {
     default void getDependencies_noRelatedArtifact_processesButReturnsNothing() {
         // setup
         String graphDefStr =
-                """
+            """
                 {
                    "resourceType": "GraphDefinition",
                    "meta": [{
@@ -172,7 +159,7 @@ public interface IGraphDefinitionAdaptorTest<T extends IBaseResource> {
         T graphDef = parser.parseResource(graphDefinitionClass(), graphDefStr);
 
         // test
-        IGraphDefinitionAdapter adatper = getAdaptorFactory().createGraphDefinition(graphDef);
+        IGraphDefinitionAdapter adatper = getAdapterFactory().createGraphDefinition(graphDef);
         List<IDependencyInfo> dependencies = adatper.getDependencies();
 
         // validate
@@ -190,17 +177,18 @@ public interface IGraphDefinitionAdaptorTest<T extends IBaseResource> {
             String resourceRef2 = "http://example.com/canonical-url-2";
             IParser parser = fhirContext().newJsonParser();
             String graphDefStr = VALID_GRAPH_DEF_JSON_TEMPLATE
-                    .replaceAll(PROFILE_REF, profileRef)
-                    .replaceAll(RESOURCE_REF_1, toCanonicalReference(resourceRef1))
-                    .replaceAll(RESOURCE_REF_2, toCanonicalReference(resourceRef2))
-                    .replaceAll(RELATED_ARTIFACT_TYPE_1, "depends-on")
-                    .replaceAll(
-                            RELATED_ARTIFACT_TYPE_2,
-                            relatedArtifactType == null ? "" : relatedArtifactType); // invalid type
+                .replaceAll(PROFILE_REF, profileRef)
+                .replaceAll(RESOURCE_REF_1, toRelatedArtifactCanonicalReference(resourceRef1))
+                .replaceAll(RESOURCE_REF_2, toRelatedArtifactCanonicalReference(resourceRef2))
+                .replaceAll(RELATED_ARTIFACT_TYPE_1, "depends-on")
+                .replaceAll(
+                    RELATED_ARTIFACT_TYPE_2,
+                    relatedArtifactType == null ? "" : relatedArtifactType); // invalid type
             System.out.println(graphDefStr);
             T graphDefinition = parser.parseResource(graphDefinitionClass(), graphDefStr);
 
-            IGraphDefinitionAdapter adapter = getAdaptorFactory().createGraphDefinition(graphDefinition);
+            IGraphDefinitionAdapter adapter = getAdapterFactory().createGraphDefinition(
+                graphDefinition);
 
             // test
             List<IDependencyInfo> dependencies = adapter.getDependencies();

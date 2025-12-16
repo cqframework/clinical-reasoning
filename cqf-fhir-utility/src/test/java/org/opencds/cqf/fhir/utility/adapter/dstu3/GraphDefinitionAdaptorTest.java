@@ -26,7 +26,7 @@ public class GraphDefinitionAdaptorTest implements IGraphDefinitionAdaptorTest<G
     }
 
     @Override
-    public IAdapterFactory getAdaptorFactory() {
+    public IAdapterFactory getAdapterFactory() {
         return adapterFactory;
     }
 
@@ -39,7 +39,7 @@ public class GraphDefinitionAdaptorTest implements IGraphDefinitionAdaptorTest<G
     }
 
     @Override
-    public String toCanonicalReference(String ref) {
+    public String toRelatedArtifactCanonicalReference(String ref) {
         // dstu3 does not set canonical references as urls directly,
         // but wraps them in a reference
         return String.format("{\"reference\":\"%s\"}", ref);

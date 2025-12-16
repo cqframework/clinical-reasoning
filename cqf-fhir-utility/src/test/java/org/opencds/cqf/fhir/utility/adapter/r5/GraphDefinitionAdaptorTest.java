@@ -34,7 +34,7 @@ public class GraphDefinitionAdaptorTest implements IGraphDefinitionAdaptorTest<G
     }
 
     @Override
-    public IAdapterFactory getAdaptorFactory() {
+    public IAdapterFactory getAdapterFactory() {
         return adapterFactory;
     }
 
@@ -61,7 +61,7 @@ public class GraphDefinitionAdaptorTest implements IGraphDefinitionAdaptorTest<G
         }
 
         // test
-        IGraphDefinitionAdapter adapter = getAdaptorFactory().createGraphDefinition(definition);
+        IGraphDefinitionAdapter adapter = getAdapterFactory().createGraphDefinition(definition);
         List<IDependencyInfo> dependencies = adapter.getDependencies();
 
         // verify

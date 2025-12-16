@@ -10,6 +10,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.time.LocalDate;
 import java.util.Date;
@@ -27,10 +28,13 @@ import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType;
 import org.hl7.fhir.r4.model.RelatedArtifact;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.utility.Constants;
+import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
+import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireAdapterTest;
 import org.opencds.cqf.fhir.utility.adapter.TestVisitor;
 
-class QuestionnaireAdapterTest {
+class QuestionnaireAdapterTest implements IQuestionnaireAdapterTest<Questionnaire> {
     private final org.opencds.cqf.fhir.utility.adapter.IAdapterFactory adapterFactory = new AdapterFactory();
+    private final FhirContext fhirContext = FhirContext.forR4Cached();
 
     @Test
     void invalid_object_fails() {
@@ -245,5 +249,20 @@ class QuestionnaireAdapterTest {
         assertEquals(1, adapter.getItem().size());
         adapter.addItems(List.of(item2, item3, item4));
         assertEquals(4, adapter.getItem().size());
+    }
+
+    @Override
+    public Class<Questionnaire> questionnaireClass() {
+        return Questionnaire.class;
+    }
+
+    @Override
+    public FhirContext fhirContext() {
+        return fhirContext;
+    }
+
+    @Override
+    public IAdapterFactory getAdapterFactory() {
+        return adapterFactory;
     }
 }

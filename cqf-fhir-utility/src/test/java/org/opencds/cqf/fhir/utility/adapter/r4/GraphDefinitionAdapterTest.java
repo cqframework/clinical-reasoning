@@ -188,7 +188,7 @@ class GraphDefinitionAdapterTest implements IGraphDefinitionAdaptorTest<GraphDef
     }
 
     @Override
-    public IAdapterFactory getAdaptorFactory() {
+    public IAdapterFactory getAdapterFactory() {
         return adapterFactory;
     }
 

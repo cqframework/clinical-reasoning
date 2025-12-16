@@ -15,6 +15,7 @@ import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.opencds.cqf.fhir.utility.Constants;
+import org.opencds.cqf.fhir.utility.RelatedArtifactUtil;
 import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IGraphDefinitionAdapter;
@@ -82,12 +83,7 @@ public class GraphDefinitionAdapter extends ResourceAdapter implements IGraphDef
     @Override
     @SuppressWarnings("unchecked")
     public <T extends ICompositeType & IBaseHasExtensions> List<T> getRelatedArtifactsOfType(String codeString) {
-        RelatedArtifactType type;
-        try {
-            type = RelatedArtifactType.fromCode(codeString);
-        } catch (FHIRException e) {
-            throw new UnprocessableEntityException("Invalid related artifact code");
-        }
+        RelatedArtifactType type = RelatedArtifactUtil.getRelatedArtifactType(codeString, fhirVersion());
         return getExtensionsByUrls(get(), Set.of(Constants.CPG_RELATED_ARTIFACT, Constants.ARTIFACT_RELATED_ARTIFACT))
                 .stream()
                 .filter(ext -> {

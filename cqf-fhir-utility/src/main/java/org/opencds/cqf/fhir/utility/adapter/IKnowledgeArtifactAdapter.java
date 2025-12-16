@@ -11,6 +11,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -19,6 +20,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
@@ -274,13 +276,6 @@ public interface IKnowledgeArtifactAdapter extends IResourceAdapter {
 
     default boolean hasRelatedArtifact() {
         return !getRelatedArtifact().isEmpty();
-    }
-
-    @SuppressWarnings("unchecked")
-    default <T extends ICompositeType & IBaseHasExtensions> List<T> getRelatedArtifact() {
-        return resolvePathList(get(), "relatedArtifact").stream()
-                .map(r -> (T) r)
-                .collect(Collectors.toList());
     }
 
     default <T extends ICompositeType & IBaseHasExtensions> void addRelatedArtifact(T relatedArtifact) {

@@ -1167,4 +1167,104 @@ class MeasureDefScorerTest {
     private ConceptDef createTextOnlyConcept(String text) {
         return new ConceptDef(List.of(), text);
     }
+
+    @Test
+    void testScoreStratifier_QualifiedVsUnqualifiedSubjectIds() {
+        // Setup: Group with stratifier where StratumPopulationDef uses qualified IDs
+        // but PopulationDef.subjectResources uses unqualified IDs
+
+        CodeDef booleanBasis = createBooleanBasisCode();
+
+        // Create populations with UNQUALIFIED subject IDs
+        PopulationDef numeratorPop = createPopulationDef(
+                "num-1",
+                MeasurePopulationType.NUMERATOR,
+                Set.of("patient-1965-female", "patient-1966-female", "patient-1967-male"),
+                booleanBasis);
+
+        PopulationDef denominatorPop = createPopulationDef(
+                "den-1",
+                MeasurePopulationType.DENOMINATOR,
+                Set.of("patient-1965-female", "patient-1966-female", "patient-1967-male", "patient-1968-male"),
+                booleanBasis);
+
+        // Create stratum populations with QUALIFIED subject IDs (e.g., "Patient/patient-1965-female")
+        // Female stratum: 2 numerator / 2 denominator = 1.0
+        StratumPopulationDef femaleNumPop = new StratumPopulationDef(
+                numeratorPop,
+                Set.of("Patient/patient-1965-female", "Patient/patient-1966-female"), // QUALIFIED IDs
+                Set.of(),
+                List.of(),
+                MeasureStratifierType.VALUE,
+                booleanBasis);
+
+        StratumPopulationDef femaleDenPop = new StratumPopulationDef(
+                denominatorPop,
+                Set.of("Patient/patient-1965-female", "Patient/patient-1966-female"), // QUALIFIED IDs
+                Set.of(),
+                List.of(),
+                MeasureStratifierType.VALUE,
+                booleanBasis);
+
+        StratifierComponentDef genderComponent =
+                new StratifierComponentDef("gender-component", createTextOnlyConcept("Gender"), "Gender");
+
+        StratumDef femaleStratum = new StratumDef(
+                List.of(femaleNumPop, femaleDenPop),
+                Set.of(new StratumValueDef(new StratumValueWrapper("female"), genderComponent)),
+                Set.of("Patient/patient-1965-female", "Patient/patient-1966-female"), // QUALIFIED IDs
+                null); // No MeasureObservationStratumCache needed for proportion measures
+
+        // Male stratum: 1 numerator / 2 denominator = 0.5
+        StratumPopulationDef maleNumPop = new StratumPopulationDef(
+                numeratorPop,
+                Set.of("Patient/patient-1967-male"), // QUALIFIED IDs
+                Set.of(),
+                List.of(),
+                MeasureStratifierType.VALUE,
+                booleanBasis);
+
+        StratumPopulationDef maleDenPop = new StratumPopulationDef(
+                denominatorPop,
+                Set.of("Patient/patient-1967-male", "Patient/patient-1968-male"), // QUALIFIED IDs
+                Set.of(),
+                List.of(),
+                MeasureStratifierType.VALUE,
+                booleanBasis);
+
+        StratumDef maleStratum = new StratumDef(
+                List.of(maleNumPop, maleDenPop),
+                Set.of(new StratumValueDef(new StratumValueWrapper("male"), genderComponent)),
+                Set.of("Patient/patient-1967-male", "Patient/patient-1968-male"), // QUALIFIED IDs
+                null); // No MeasureObservationStratumCache needed for proportion measures
+
+        StratifierDef stratifierDef = new StratifierDef(
+                "gender-stratifier", createTextOnlyConcept("Gender Stratifier"), "Gender", MeasureStratifierType.VALUE);
+        stratifierDef.addAllStratum(List.of(femaleStratum, maleStratum));
+
+        GroupDef groupDef = new GroupDef(
+                "group-1",
+                createTextOnlyConcept("Qualified vs Unqualified ID Test"),
+                List.of(stratifierDef),
+                List.of(numeratorPop, denominatorPop),
+                MeasureScoring.PROPORTION,
+                false,
+                createImprovementNotationCode("increase"),
+                booleanBasis);
+
+        // Verify scores are null before scoring
+        assertNull(femaleStratum.getScore());
+        assertNull(maleStratum.getScore());
+
+        // Execute
+        MeasureDefScorer scorer = new MeasureDefScorer();
+        scorer.scoreGroup("http://example.com/Measure/qualified-ids-test", groupDef);
+
+        // VERIFY: Scorer correctly matched qualified stratum IDs to unqualified population IDs
+        // Female stratum: 2/2 = 1.0
+        assertEquals(1.0, femaleStratum.getScore(), 0.001, "Female stratum should have score 1.0 (2/2)");
+
+        // Male stratum: 1/2 = 0.5
+        assertEquals(0.5, maleStratum.getScore(), 0.001, "Male stratum should have score 0.5 (1/2)");
+    }
 }

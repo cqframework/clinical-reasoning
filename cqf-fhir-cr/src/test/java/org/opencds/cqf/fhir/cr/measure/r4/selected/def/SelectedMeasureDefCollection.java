@@ -3,15 +3,15 @@ package org.opencds.cqf.fhir.cr.measure.r4.selected.def;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
-import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.MeasureReportDef;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure;
 
 /**
  * Fluent API for asserting on collections of MeasureDefs from multi-measure evaluation.
  */
-public class SelectedMeasureDefCollection<P> extends Measure.Selected<List<MeasureDef>, P> {
+public class SelectedMeasureDefCollection<P> extends Measure.Selected<List<MeasureReportDef>, P> {
 
-    public SelectedMeasureDefCollection(List<MeasureDef> measureDefs, P parent) {
+    public SelectedMeasureDefCollection(List<MeasureReportDef> measureDefs, P parent) {
         super(measureDefs, parent);
     }
 
@@ -36,7 +36,7 @@ public class SelectedMeasureDefCollection<P> extends Measure.Selected<List<Measu
 
     // Access by measure URL - returns collection (can be multiple in subject evaluation)
     public SelectedMeasureDefCollection<SelectedMeasureDefCollection<P>> byMeasureUrl(String measureUrl) {
-        List<MeasureDef> found =
+        List<MeasureReportDef> found =
                 value.stream().filter(def -> measureUrl.equals(def.url())).toList();
         assertFalse(found.isEmpty(), "No MeasureDefs found for measure URL: " + measureUrl);
         return new SelectedMeasureDefCollection<>(found, this);
@@ -44,7 +44,7 @@ public class SelectedMeasureDefCollection<P> extends Measure.Selected<List<Measu
 
     // Access by measure ID - returns collection (can be multiple in subject evaluation)
     public SelectedMeasureDefCollection<SelectedMeasureDefCollection<P>> byMeasureId(String measureId) {
-        List<MeasureDef> found =
+        List<MeasureReportDef> found =
                 value.stream().filter(def -> measureId.equals(def.id())).toList();
         assertFalse(found.isEmpty(), "No MeasureDefs found for measure ID: " + measureId);
         return new SelectedMeasureDefCollection<>(found, this);
@@ -67,13 +67,13 @@ public class SelectedMeasureDefCollection<P> extends Measure.Selected<List<Measu
     // }
 
     // Assert all satisfy condition
-    public SelectedMeasureDefCollection<P> allSatisfy(java.util.function.Consumer<MeasureDef> assertion) {
+    public SelectedMeasureDefCollection<P> allSatisfy(java.util.function.Consumer<MeasureReportDef> assertion) {
         value.forEach(assertion);
         return this;
     }
 
     // Get raw list for custom assertions
-    public List<MeasureDef> list() {
+    public List<MeasureReportDef> list() {
         return value;
     }
 }

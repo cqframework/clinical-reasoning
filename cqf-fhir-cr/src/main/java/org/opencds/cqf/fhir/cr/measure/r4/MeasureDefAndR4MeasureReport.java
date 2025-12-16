@@ -2,25 +2,35 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 
 import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.r4.model.MeasureReport;
-import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.MeasureReportDef;
 
 /**
- * Evaluation result containing both MeasureDef (internal model) and
+ * Evaluation result containing both MeasureReportDef (internal model with evaluation state) and
  * MeasureReport (FHIR R4 resource).
  *
  * <p><strong>TEST INFRASTRUCTURE ONLY - DO NOT USE IN PRODUCTION CODE</strong></p>
  *
  * <p>This record is used by R4 test frameworks to assert on both:</p>
  * <ul>
- *   <li><strong>MeasureDef</strong>: Pre-scoring internal state</li>
- *   <li><strong>MeasureReport</strong>: Post-scoring FHIR resource</li>
+ *   <li><strong>MeasureDef</strong>: Immutable measure structure (via measureDef())</li>
+ *   <li><strong>MeasureReportDef</strong>: Evaluation results and internal state</li>
+ *   <li><strong>MeasureReport</strong>: Scored FHIR resource</li>
  * </ul>
  *
  * <p><strong>Thread Safety:</strong> Assumes synchronous, single-threaded evaluation.
- * MeasureDef is mutable and safe only because test assertions run after evaluation completes.</p>
+ * MeasureReportDef is mutable and safe only because test assertions run after evaluation completes.</p>
  *
- * @param measureDef The populated MeasureDef after processResults (mutable reference)
+ * @param measureReportDef The populated MeasureReportDef after evaluation (mutable reference)
  * @param measureReport The scored R4 MeasureReport FHIR resource
  */
 @VisibleForTesting
-public record MeasureDefAndR4MeasureReport(MeasureDef measureDef, MeasureReport measureReport) {}
+public record MeasureDefAndR4MeasureReport(MeasureReportDef measureReportDef, MeasureReport measureReport) {
+
+    /**
+     * Convenience method to access the immutable MeasureDef structure.
+     * Delegates to measureReportDef.measureDef().
+     */
+    public org.opencds.cqf.fhir.cr.measure.common.def.measure.MeasureDef measureDef() {
+        return measureReportDef.measureDef();
+    }
+}

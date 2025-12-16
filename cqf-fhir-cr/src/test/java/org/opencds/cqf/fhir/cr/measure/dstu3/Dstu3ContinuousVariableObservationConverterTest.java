@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import org.hl7.fhir.dstu3.model.Quantity;
 import org.junit.jupiter.api.Test;
-import org.opencds.cqf.fhir.cr.measure.common.QuantityDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.QuantityReportDef;
 
 // Updated by Claude Sonnet 4.5 on 2025-12-02
 // Trimmed to only test convertToFhirQuantity() - conversion FROM CQL is now in ContinuousVariableObservationHandler
@@ -14,7 +14,7 @@ class Dstu3ContinuousVariableObservationConverterTest {
     void testConvertQuantityDefToDstu3Quantity() {
         var converter = Dstu3ContinuousVariableObservationConverter.INSTANCE;
 
-        QuantityDef qd = new QuantityDef(75.0);
+        QuantityReportDef qd = new QuantityReportDef(75.0);
 
         Quantity result = converter.convertToFhirQuantity(qd);
 
@@ -29,7 +29,7 @@ class Dstu3ContinuousVariableObservationConverterTest {
     void testConvertQuantityDefWithValueOnly() {
         var converter = Dstu3ContinuousVariableObservationConverter.INSTANCE;
 
-        QuantityDef qd = new QuantityDef(42.0);
+        QuantityReportDef qd = new QuantityReportDef(42.0);
 
         Quantity result = converter.convertToFhirQuantity(qd);
 
@@ -50,7 +50,7 @@ class Dstu3ContinuousVariableObservationConverterTest {
     void testConvertQuantityDefWithNullValue() {
         var converter = Dstu3ContinuousVariableObservationConverter.INSTANCE;
 
-        QuantityDef qd = new QuantityDef(null);
+        QuantityReportDef qd = new QuantityReportDef(null);
 
         Quantity result = converter.convertToFhirQuantity(qd);
 

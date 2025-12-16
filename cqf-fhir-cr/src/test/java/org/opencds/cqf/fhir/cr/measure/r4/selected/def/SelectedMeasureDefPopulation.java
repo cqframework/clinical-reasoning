@@ -5,7 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.PopulationReportDef;
+import org.opencds.cqf.fhir.cr.measure.r4.Measure;
 
 /**
  * Fluent assertion API for PopulationDef objects.
@@ -29,10 +30,9 @@ import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
  * @author Claude (Anthropic AI Assistant)
  * @since 4.1.0
  */
-public class SelectedMeasureDefPopulation<P>
-        extends org.opencds.cqf.fhir.cr.measure.r4.Measure.Selected<PopulationDef, P> {
+public class SelectedMeasureDefPopulation<P> extends Measure.Selected<PopulationReportDef, P> {
 
-    public SelectedMeasureDefPopulation(PopulationDef value, P parent) {
+    public SelectedMeasureDefPopulation(PopulationReportDef value, P parent) {
         super(value, parent);
     }
 
@@ -198,7 +198,7 @@ public class SelectedMeasureDefPopulation<P>
      *
      * @return the PopulationDef instance
      */
-    public PopulationDef populationDef() {
+    public PopulationReportDef populationDef() {
         return value();
     }
 }

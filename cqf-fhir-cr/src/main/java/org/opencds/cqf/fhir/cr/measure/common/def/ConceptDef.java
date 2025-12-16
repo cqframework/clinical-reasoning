@@ -1,4 +1,4 @@
-package org.opencds.cqf.fhir.cr.measure.common;
+package org.opencds.cqf.fhir.cr.measure.common.def;
 
 import java.util.List;
 

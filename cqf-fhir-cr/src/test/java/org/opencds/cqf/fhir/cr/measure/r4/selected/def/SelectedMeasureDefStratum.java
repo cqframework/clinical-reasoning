@@ -6,8 +6,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.opencds.cqf.fhir.cr.measure.common.StratumDef;
-import org.opencds.cqf.fhir.cr.measure.common.StratumPopulationDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.StratumPopulationReportDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.StratumReportDef;
+import org.opencds.cqf.fhir.cr.measure.r4.Measure;
 
 /**
  * Fluent assertion API for StratumDef objects.
@@ -30,9 +31,9 @@ import org.opencds.cqf.fhir.cr.measure.common.StratumPopulationDef;
  * @author Claude (Anthropic AI Assistant)
  * @since 4.1.0
  */
-public class SelectedMeasureDefStratum<P> extends org.opencds.cqf.fhir.cr.measure.r4.Measure.Selected<StratumDef, P> {
+public class SelectedMeasureDefStratum<P> extends Measure.Selected<StratumReportDef, P> {
 
-    public SelectedMeasureDefStratum(StratumDef value, P parent) {
+    public SelectedMeasureDefStratum(StratumReportDef value, P parent) {
         super(value, parent);
     }
 
@@ -47,7 +48,7 @@ public class SelectedMeasureDefStratum<P> extends org.opencds.cqf.fhir.cr.measur
      */
     public SelectedMeasureDefStratumPopulation<SelectedMeasureDefStratum<P>> population(String populationCode) {
         assertNotNull(value(), "StratumDef is null");
-        StratumPopulationDef population = value().stratumPopulations().stream()
+        StratumPopulationReportDef population = value().stratumPopulations().stream()
                 .filter(p -> p.populationDef() != null
                         && p.populationDef().code() != null
                         && !p.populationDef().code().isEmpty()
@@ -67,7 +68,7 @@ public class SelectedMeasureDefStratum<P> extends org.opencds.cqf.fhir.cr.measur
      */
     public SelectedMeasureDefStratumPopulation<SelectedMeasureDefStratum<P>> populationById(String id) {
         assertNotNull(value(), "StratumDef is null");
-        StratumPopulationDef population = value().stratumPopulations().stream()
+        StratumPopulationReportDef population = value().stratumPopulations().stream()
                 .filter(p -> id.equals(p.id()))
                 .findFirst()
                 .orElse(null);
@@ -172,7 +173,7 @@ public class SelectedMeasureDefStratum<P> extends org.opencds.cqf.fhir.cr.measur
      *
      * @return the StratumDef instance
      */
-    public StratumDef stratumDef() {
+    public StratumReportDef stratumDef() {
         return value();
     }
 }

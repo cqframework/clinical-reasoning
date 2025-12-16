@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
 import org.hl7.fhir.instance.model.api.ICompositeType;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.QuantityReportDef;
 
 // Updated by Claude Sonnet 4.5 on 2025-12-02
 /**
@@ -17,5 +18,5 @@ public interface ContinuousVariableObservationConverter<T extends ICompositeType
      * @param quantityDef the version-agnostic quantity (only contains value)
      * @return FHIR-specific Quantity (R4 or DSTU3)
      */
-    T convertToFhirQuantity(QuantityDef quantityDef);
+    T convertToFhirQuantity(QuantityReportDef quantityDef);
 }

@@ -39,20 +39,20 @@ import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
 import org.opencds.cqf.cql.engine.runtime.Interval;
-import org.opencds.cqf.fhir.cr.measure.common.CodeDef;
-import org.opencds.cqf.fhir.cr.measure.common.ConceptDef;
 import org.opencds.cqf.fhir.cr.measure.common.FhirResourceUtils;
-import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.IMeasureReportScorer;
-import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureInfo;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportBuilder;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
-import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
-import org.opencds.cqf.fhir.cr.measure.common.SdeDef;
-import org.opencds.cqf.fhir.cr.measure.common.StratumValueWrapper;
+import org.opencds.cqf.fhir.cr.measure.common.def.CodeDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.ConceptDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.GroupReportDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.MeasureReportDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.PopulationReportDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.SdeReportDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.StratumValueWrapperReportDef;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4DateHelper;
@@ -70,7 +70,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
     @Override
     public MeasureReport build(
             Measure measure,
-            MeasureDef measureDef,
+            MeasureReportDef measureDef,
             MeasureReportType measureReportType,
             Interval measurementPeriod,
             List<String> subjectIds) {
@@ -150,7 +150,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             R4MeasureReportBuilderContext bc,
             MeasureGroupComponent measureGroup,
             MeasureReportGroupComponent reportGroup,
-            GroupDef groupDef) {
+            GroupReportDef groupDef) {
 
         var groupDefSizeDiff = 0;
         if (groupDef.hasPopulationType(MeasurePopulationType.DATEOFCOMPLIANCE)) {
@@ -180,7 +180,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             // Report Population Component
             var measurePop = measureGroup.getPopulation().get(i);
             // Groups can have more than one of the same PopulationType, we need a Unique value to bind on
-            PopulationDef defPop = groupDef.findPopulationById(measurePop.getId());
+            PopulationReportDef defPop = groupDef.findPopulationById(measurePop.getId());
             var reportPop = reportGroup.addPopulation();
             buildPopulation(bc, measurePop, reportPop, defPop, groupDef);
         }
@@ -226,7 +226,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         }
     }
 
-    private void addExtensionImprovementNotation(MeasureReportGroupComponent reportGroup, GroupDef groupDef) {
+    private void addExtensionImprovementNotation(MeasureReportGroupComponent reportGroup, GroupReportDef groupDef) {
         // if already set on Measure, don't set on groups too
         if (groupDef.isGroupImprovementNotation()) {
             if (groupDef.isIncreaseImprovementNotation()) {
@@ -258,8 +258,8 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             R4MeasureReportBuilderContext bc,
             MeasureGroupPopulationComponent measurePopulation,
             MeasureReportGroupPopulationComponent reportPopulation,
-            PopulationDef populationDef,
-            GroupDef groupDef) {
+            PopulationReportDef populationDef,
+            GroupReportDef groupDef) {
 
         reportPopulation.setCode(measurePopulation.getCode());
         reportPopulation.setId(measurePopulation.getId());
@@ -356,7 +356,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
     // Case 5: population - resource types
     // add sde reference with criteria reference extension for each resource
     // if not an evaluated resource, add to contained
-    private void buildSDE(R4MeasureReportBuilderContext bc, SdeDef sde) {
+    private void buildSDE(R4MeasureReportBuilderContext bc, SdeReportDef sde) {
         var report = bc.report();
 
         // No SDEs were calculated, do nothing
@@ -371,13 +371,13 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
         CodeableConcept concept = conceptDefToConcept(sde.code());
 
-        Map<StratumValueWrapper, Long> accumulated = sde.getResults().values().stream()
+        Map<StratumValueWrapperReportDef, Long> accumulated = sde.getResults().values().stream()
                 .flatMap(x -> Lists.newArrayList(x.iterableValue()).stream())
                 .filter(Objects::nonNull)
-                .map(StratumValueWrapper::new)
+                .map(StratumValueWrapperReportDef::new)
                 .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
 
-        for (Map.Entry<StratumValueWrapper, Long> accumulator : accumulated.entrySet()) {
+        for (Map.Entry<StratumValueWrapperReportDef, Long> accumulator : accumulated.entrySet()) {
 
             Resource obs;
             if (!(accumulator.getKey().getValue() instanceof Resource resource)) {
@@ -431,7 +431,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
     private MeasureReport createMeasureReport(
             Measure measure,
-            MeasureDef measureDef,
+            MeasureReportDef measureDef,
             MeasureReportType type,
             List<String> subjectIds,
             Interval measurementPeriod) {

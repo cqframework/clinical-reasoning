@@ -16,12 +16,12 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.runtime.Code;
-import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
-import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationBasisValidator;
-import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
-import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierUtils;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.GroupReportDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.MeasureReportDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.PopulationReportDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.StratifierReportDef;
 
 /**
  * Validates group populations and stratifiers against population basis-es for R4 only.
@@ -49,21 +49,23 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
             Code.class));
 
     @Override
-    public void validateGroupPopulations(MeasureDef measureDef, GroupDef groupDef, EvaluationResult evaluationResult) {
+    public void validateGroupPopulations(
+            MeasureReportDef measureDef, GroupReportDef groupDef, EvaluationResult evaluationResult) {
         groupDef.populations()
                 .forEach(population ->
                         validateGroupPopulationBasisType(measureDef.url(), groupDef, population, evaluationResult));
     }
 
     @Override
-    public void validateStratifiers(MeasureDef measureDef, GroupDef groupDef, EvaluationResult evaluationResult) {
+    public void validateStratifiers(
+            MeasureReportDef measureDef, GroupReportDef groupDef, EvaluationResult evaluationResult) {
         groupDef.stratifiers()
                 .forEach(stratifier -> validateStratifierPopulationBasisType(
                         measureDef.url(), groupDef, stratifier, evaluationResult));
     }
 
     private void validateGroupPopulationBasisType(
-            String url, GroupDef groupDef, PopulationDef populationDef, EvaluationResult evaluationResult) {
+            String url, GroupReportDef groupDef, PopulationReportDef populationDef, EvaluationResult evaluationResult) {
 
         // PROPORTION
         var scoring = groupDef.measureScoring();
@@ -101,7 +103,7 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
     }
 
     private void validateStratifierPopulationBasisType(
-            String url, GroupDef groupDef, StratifierDef stratifierDef, EvaluationResult evaluationResult) {
+            String url, GroupReportDef groupDef, StratifierReportDef stratifierDef, EvaluationResult evaluationResult) {
 
         if (stratifierDef.isComponentStratifier()) {
             for (var component : stratifierDef.components()) {
@@ -113,8 +115,8 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
     }
 
     private void validateExpressionResultType(
-            GroupDef groupDef,
-            StratifierDef stratifierDef,
+            GroupReportDef groupDef,
+            StratifierReportDef stratifierDef,
             String expression,
             EvaluationResult evaluationResult,
             String url) {

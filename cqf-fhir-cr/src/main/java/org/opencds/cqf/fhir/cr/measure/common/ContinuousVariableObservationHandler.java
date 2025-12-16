@@ -19,6 +19,10 @@ import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
 import org.opencds.cqf.cql.engine.execution.Libraries;
 import org.opencds.cqf.cql.engine.execution.Variable;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.GroupReportDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.MeasureReportDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.PopulationReportDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.QuantityReportDef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,12 +38,12 @@ public class ContinuousVariableObservationHandler {
 
     static List<EvaluationResult> continuousVariableEvaluation(
             CqlEngine context,
-            List<MeasureDef> measureDefs,
+            List<MeasureReportDef> measureDefs,
             VersionedIdentifier libraryIdentifier,
             EvaluationResult evaluationResult,
             String subjectTypePart) {
 
-        final List<MeasureDef> measureDefsWithMeasureObservations = measureDefs.stream()
+        final List<MeasureReportDef> measureDefsWithMeasureObservations = measureDefs.stream()
                 // if measure contains measure-observation, otherwise short circuit
                 .filter(ContinuousVariableObservationHandler::hasMeasureObservation)
                 .toList();
@@ -55,16 +59,16 @@ public class ContinuousVariableObservationHandler {
 
         try {
             // one Library may be linked to multiple Measures
-            for (MeasureDef measureDefWithMeasureObservations : measureDefsWithMeasureObservations) {
+            for (MeasureReportDef measureDefWithMeasureObservations : measureDefsWithMeasureObservations) {
 
                 // get function for measure-observation from populationDef
-                for (GroupDef groupDef : measureDefWithMeasureObservations.groups()) {
+                for (GroupReportDef groupDef : measureDefWithMeasureObservations.groups()) {
 
-                    final List<PopulationDef> measureObservationPopulations = groupDef.populations().stream()
+                    final List<PopulationReportDef> measureObservationPopulations = groupDef.populations().stream()
                             .filter(populationDef ->
                                     MeasurePopulationType.MEASUREOBSERVATION.equals(populationDef.type()))
                             .toList();
-                    for (PopulationDef populationDef : measureObservationPopulations) {
+                    for (PopulationReportDef populationDef : measureObservationPopulations) {
                         // each measureObservation is evaluated
                         var result = processMeasureObservation(
                                 context, evaluationResult, subjectTypePart, groupDef, populationDef);
@@ -91,8 +95,8 @@ public class ContinuousVariableObservationHandler {
             CqlEngine context,
             EvaluationResult evaluationResult,
             String subjectTypePart,
-            GroupDef groupDef,
-            PopulationDef populationDef) {
+            GroupReportDef groupDef,
+            PopulationReportDef populationDef) {
 
         if (populationDef.getCriteriaReference() == null) {
             // We screwed up building the PopulationDef, somehow
@@ -107,7 +111,7 @@ public class ContinuousVariableObservationHandler {
         // get expression from criteriaPopulation reference
         var criteriaExpressionInput = groupDef.populations().stream()
                 .filter(populationDefInner -> populationDefInner.id().equals(criteriaPopulationId))
-                .map(PopulationDef::expression)
+                .map(PopulationReportDef::expression)
                 .findFirst()
                 .orElse(null);
 
@@ -155,20 +159,20 @@ public class ContinuousVariableObservationHandler {
      * @return QuantityDef containing the numeric value
      * @throws InvalidRequestException if result cannot be converted to a number
      */
-    private static QuantityDef convertCqlResultToQuantityDef(Object result) {
+    private static QuantityReportDef convertCqlResultToQuantityDef(Object result) {
         if (result == null) {
             return null;
         }
 
         // Handle Number (most common case)
         if (result instanceof Number number) {
-            return new QuantityDef(number.doubleValue());
+            return new QuantityReportDef(number.doubleValue());
         }
 
         // Handle String with validation
         if (result instanceof String s) {
             try {
-                return new QuantityDef(Double.parseDouble(s));
+                return new QuantityReportDef(Double.parseDouble(s));
             } catch (NumberFormatException e) {
                 throw new InvalidRequestException("String is not a valid number: " + s, e);
             }
@@ -294,7 +298,7 @@ public class ContinuousVariableObservationHandler {
      * @param measureDef the MeasureDef to check
      * @return true if any PopulationDef in any GroupDef is MEASUREOBSERVATION
      */
-    private static boolean hasMeasureObservation(MeasureDef measureDef) {
+    private static boolean hasMeasureObservation(MeasureReportDef measureDef) {
         if (measureDef == null || measureDef.groups() == null) {
             return false;
         }

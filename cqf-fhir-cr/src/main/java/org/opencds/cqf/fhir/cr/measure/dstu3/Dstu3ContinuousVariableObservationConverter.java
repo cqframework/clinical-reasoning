@@ -2,7 +2,7 @@ package org.opencds.cqf.fhir.cr.measure.dstu3;
 
 import org.hl7.fhir.dstu3.model.Quantity;
 import org.opencds.cqf.fhir.cr.measure.common.ContinuousVariableObservationConverter;
-import org.opencds.cqf.fhir.cr.measure.common.QuantityDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.QuantityReportDef;
 
 // Updated by Claude Sonnet 4.5 on 2025-12-02
 /**
@@ -16,7 +16,7 @@ public enum Dstu3ContinuousVariableObservationConverter implements ContinuousVar
     INSTANCE;
 
     @Override
-    public Quantity convertToFhirQuantity(QuantityDef quantityDef) {
+    public Quantity convertToFhirQuantity(QuantityReportDef quantityDef) {
         if (quantityDef == null) {
             return null;
         }

@@ -9,6 +9,13 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.GroupReportDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.MeasureReportDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.PopulationReportDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.QuantityReportDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.StratifierReportDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.StratumPopulationReportDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.StratumReportDef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -87,9 +94,9 @@ public class MeasureDefScorer {
      * @param measureUrl the measure URL for error reporting
      * @param measureDef the measure definition containing groups to score
      */
-    public void score(String measureUrl, MeasureDef measureDef) {
+    public void score(String measureUrl, MeasureReportDef measureDef) {
         // Def-first iteration: iterate over MeasureDef.groups()
-        for (GroupDef groupDef : measureDef.groups()) {
+        for (GroupReportDef groupDef : measureDef.groups()) {
             scoreGroup(measureUrl, groupDef);
         }
     }
@@ -100,7 +107,7 @@ public class MeasureDefScorer {
      * @param measureUrl the measure URL for error reporting
      * @param groupDef the group definition to score (will be mutated with setScore())
      */
-    public void scoreGroup(String measureUrl, GroupDef groupDef) {
+    public void scoreGroup(String measureUrl, GroupReportDef groupDef) {
         MeasureScoring measureScoring = checkMissingScoringType(measureUrl, groupDef.measureScoring());
 
         // Calculate group-level score
@@ -111,7 +118,7 @@ public class MeasureDefScorer {
 
         // Score all stratifiers using Def-first iteration
         // Modified from R4MeasureReportScorer to iterate over Def classes instead of FHIR components
-        for (StratifierDef stratifierDef : groupDef.stratifiers()) {
+        for (StratifierReportDef stratifierDef : groupDef.stratifiers()) {
             scoreStratifier(measureUrl, groupDef, stratifierDef, measureScoring);
         }
     }
@@ -119,7 +126,7 @@ public class MeasureDefScorer {
     /**
      * Calculate score for a group based on its scoring type.
      */
-    private Double calculateGroupScore(String measureUrl, GroupDef groupDef, MeasureScoring measureScoring) {
+    private Double calculateGroupScore(String measureUrl, GroupReportDef groupDef, MeasureScoring measureScoring) {
         switch (measureScoring) {
             case PROPORTION:
             case RATIO:
@@ -141,8 +148,8 @@ public class MeasureDefScorer {
 
             case CONTINUOUSVARIABLE:
                 // Continuous variable scoring - returns aggregate value
-                PopulationDef measureObsPop = groupDef.getSingle(MeasurePopulationType.MEASUREOBSERVATION);
-                QuantityDef quantityDef = scoreContinuousVariable(measureUrl, measureObsPop);
+                PopulationReportDef measureObsPop = groupDef.getSingle(MeasurePopulationType.MEASUREOBSERVATION);
+                QuantityReportDef quantityDef = scoreContinuousVariable(measureUrl, measureObsPop);
                 return quantityDef != null ? quantityDef.value() : null;
 
             default:
@@ -159,14 +166,14 @@ public class MeasureDefScorer {
      * @return the calculated score or null
      */
     @Nullable
-    private Double scoreRatioMeasureObservationGroup(String measureUrl, GroupDef groupDef) {
+    private Double scoreRatioMeasureObservationGroup(String measureUrl, GroupReportDef groupDef) {
         // Get all MEASUREOBSERVATION populations
         var measureObservationPopulationDefs = groupDef.getPopulationDefs(MeasurePopulationType.MEASUREOBSERVATION);
 
         // Find Measure Observations for Numerator and Denominator
-        PopulationDef numPopDef =
+        PopulationReportDef numPopDef =
                 findPopulationDef(groupDef, measureObservationPopulationDefs, MeasurePopulationType.NUMERATOR);
-        PopulationDef denPopDef =
+        PopulationReportDef denPopDef =
                 findPopulationDef(groupDef, measureObservationPopulationDefs, MeasurePopulationType.DENOMINATOR);
 
         if (numPopDef == null || denPopDef == null) {
@@ -174,10 +181,10 @@ public class MeasureDefScorer {
         }
 
         // Calculate aggregate quantities for numerator and denominator
-        QuantityDef numeratorAgg = calculateContinuousVariableAggregateQuantity(
-                measureUrl, numPopDef, PopulationDef::getAllSubjectResources);
-        QuantityDef denominatorAgg = calculateContinuousVariableAggregateQuantity(
-                measureUrl, denPopDef, PopulationDef::getAllSubjectResources);
+        QuantityReportDef numeratorAgg = calculateContinuousVariableAggregateQuantity(
+                measureUrl, numPopDef, PopulationReportDef::getAllSubjectResources);
+        QuantityReportDef denominatorAgg = calculateContinuousVariableAggregateQuantity(
+                measureUrl, denPopDef, PopulationReportDef::getAllSubjectResources);
 
         if (numeratorAgg == null || denominatorAgg == null) {
             return null;
@@ -203,9 +210,9 @@ public class MeasureDefScorer {
      * Simplified version of R4MeasureReportScorer#scoreContinuousVariable that just
      * returns the aggregate without setting it on a FHIR report.
      */
-    private QuantityDef scoreContinuousVariable(String measureUrl, PopulationDef populationDef) {
+    private QuantityReportDef scoreContinuousVariable(String measureUrl, PopulationReportDef populationDef) {
         return calculateContinuousVariableAggregateQuantity(
-                measureUrl, populationDef, PopulationDef::getAllSubjectResources);
+                measureUrl, populationDef, PopulationReportDef::getAllSubjectResources);
     }
 
     /**
@@ -218,10 +225,13 @@ public class MeasureDefScorer {
      * @param measureScoring the scoring type
      */
     private void scoreStratifier(
-            String measureUrl, GroupDef groupDef, StratifierDef stratifierDef, MeasureScoring measureScoring) {
+            String measureUrl,
+            GroupReportDef groupDef,
+            StratifierReportDef stratifierDef,
+            MeasureScoring measureScoring) {
 
         // Def-first iteration: iterate over StratifierDef.getStratum()
-        for (StratumDef stratumDef : stratifierDef.getStratum()) {
+        for (StratumReportDef stratumDef : stratifierDef.getStratum()) {
             scoreStratum(measureUrl, groupDef, stratumDef, measureScoring);
         }
     }
@@ -236,7 +246,7 @@ public class MeasureDefScorer {
      * @param measureScoring the scoring type
      */
     private void scoreStratum(
-            String measureUrl, GroupDef groupDef, StratumDef stratumDef, MeasureScoring measureScoring) {
+            String measureUrl, GroupReportDef groupDef, StratumReportDef stratumDef, MeasureScoring measureScoring) {
 
         Double score = getStratumScoreOrNull(measureUrl, groupDef, stratumDef, measureScoring);
 
@@ -256,7 +266,7 @@ public class MeasureDefScorer {
      */
     @Nullable
     private Double getStratumScoreOrNull(
-            String measureUrl, GroupDef groupDef, StratumDef stratumDef, MeasureScoring measureScoring) {
+            String measureUrl, GroupReportDef groupDef, StratumReportDef stratumDef, MeasureScoring measureScoring) {
 
         switch (measureScoring) {
             case PROPORTION:
@@ -287,7 +297,8 @@ public class MeasureDefScorer {
      * @return the calculated score or null
      */
     @Nullable
-    private Double scoreRatioMeasureObservationStratum(String measureUrl, GroupDef groupDef, StratumDef stratumDef) {
+    private Double scoreRatioMeasureObservationStratum(
+            String measureUrl, GroupReportDef groupDef, StratumReportDef stratumDef) {
 
         if (stratumDef == null) {
             return null;
@@ -297,14 +308,14 @@ public class MeasureDefScorer {
         var measureObservationPopulationDefs = groupDef.getPopulationDefs(MeasurePopulationType.MEASUREOBSERVATION);
 
         // Find Measure Observations for Numerator and Denominator
-        PopulationDef numPopDef =
+        PopulationReportDef numPopDef =
                 findPopulationDef(groupDef, measureObservationPopulationDefs, MeasurePopulationType.NUMERATOR);
-        PopulationDef denPopDef =
+        PopulationReportDef denPopDef =
                 findPopulationDef(groupDef, measureObservationPopulationDefs, MeasurePopulationType.DENOMINATOR);
 
         // Get stratum populations for numerator and denominator
-        StratumPopulationDef stratumPopulationDefNum = getStratumPopDefFromPopDef(stratumDef, numPopDef);
-        StratumPopulationDef stratumPopulationDefDen = getStratumPopDefFromPopDef(stratumDef, denPopDef);
+        StratumPopulationReportDef stratumPopulationDefNum = getStratumPopDefFromPopDef(stratumDef, numPopDef);
+        StratumPopulationReportDef stratumPopulationDefDen = getStratumPopDefFromPopDef(stratumDef, denPopDef);
 
         return scoreRatioContVariableStratum(
                 measureUrl, stratumPopulationDefNum, stratumPopulationDefDen, numPopDef, denPopDef);
@@ -319,7 +330,7 @@ public class MeasureDefScorer {
      * @return the calculated score or null
      */
     @Nullable
-    private Double scoreProportionRatioStratum(GroupDef groupDef, StratumDef stratumDef) {
+    private Double scoreProportionRatioStratum(GroupReportDef groupDef, StratumReportDef stratumDef) {
         int numeratorCount = stratumDef.getPopulationCount(groupDef.getSingle(MeasurePopulationType.NUMERATOR));
         int denominatorCount = stratumDef.getPopulationCount(groupDef.getSingle(MeasurePopulationType.DENOMINATOR));
 
@@ -336,16 +347,17 @@ public class MeasureDefScorer {
      * @return the calculated score or null
      */
     @Nullable
-    private Double scoreContinuousVariableStratum(String measureUrl, GroupDef groupDef, StratumDef stratumDef) {
+    private Double scoreContinuousVariableStratum(
+            String measureUrl, GroupReportDef groupDef, StratumReportDef stratumDef) {
 
         // Get the MEASUREOBSERVATION population from GroupDef
-        PopulationDef measureObsPop = groupDef.getSingle(MeasurePopulationType.MEASUREOBSERVATION);
+        PopulationReportDef measureObsPop = groupDef.getSingle(MeasurePopulationType.MEASUREOBSERVATION);
         if (measureObsPop == null) {
             return null;
         }
 
         // Find the stratum population corresponding to MEASUREOBSERVATION
-        StratumPopulationDef stratumPopulationDef = stratumDef.stratumPopulations().stream()
+        StratumPopulationReportDef stratumPopulationDef = stratumDef.stratumPopulations().stream()
                 .filter(stratumPopDef ->
                         stratumPopDef.id().startsWith(MeasurePopulationType.MEASUREOBSERVATION.toCode()))
                 .findFirst()
@@ -356,7 +368,7 @@ public class MeasureDefScorer {
         }
 
         // Calculate aggregate using stratum-filtered resources
-        QuantityDef quantityDef = calculateContinuousVariableAggregateQuantity(
+        QuantityReportDef quantityDef = calculateContinuousVariableAggregateQuantity(
                 measureUrl, measureObsPop, populationDef -> getResultsForStratum(populationDef, stratumPopulationDef));
 
         return quantityDef != null ? quantityDef.value() : null;
@@ -375,17 +387,17 @@ public class MeasureDefScorer {
      */
     private Double scoreRatioContVariableStratum(
             String measureUrl,
-            StratumPopulationDef measureObsNumStratum,
-            StratumPopulationDef measureObsDenStratum,
-            PopulationDef numPopDef,
-            PopulationDef denPopDef) {
+            StratumPopulationReportDef measureObsNumStratum,
+            StratumPopulationReportDef measureObsDenStratum,
+            PopulationReportDef numPopDef,
+            PopulationReportDef denPopDef) {
 
         // Calculate aggregate for numerator observations filtered by stratum
-        QuantityDef aggregateNumQuantityDef = calculateContinuousVariableAggregateQuantity(
+        QuantityReportDef aggregateNumQuantityDef = calculateContinuousVariableAggregateQuantity(
                 measureUrl, numPopDef, populationDef -> getResultsForStratum(populationDef, measureObsNumStratum));
 
         // Calculate aggregate for denominator observations filtered by stratum
-        QuantityDef aggregateDenQuantityDef = calculateContinuousVariableAggregateQuantity(
+        QuantityReportDef aggregateDenQuantityDef = calculateContinuousVariableAggregateQuantity(
                 measureUrl, denPopDef, populationDef -> getResultsForStratum(populationDef, measureObsDenStratum));
 
         if (aggregateNumQuantityDef == null || aggregateDenQuantityDef == null) {
@@ -417,9 +429,9 @@ public class MeasureDefScorer {
      * @return matching PopulationDef or null
      */
     @Nullable
-    private PopulationDef findPopulationDef(
-            GroupDef groupDef, List<PopulationDef> populationDefs, MeasurePopulationType type) {
-        PopulationDef firstPop = groupDef.getFirstWithId(type);
+    private PopulationReportDef findPopulationDef(
+            GroupReportDef groupDef, List<PopulationReportDef> populationDefs, MeasurePopulationType type) {
+        PopulationReportDef firstPop = groupDef.getFirstWithId(type);
         if (firstPop == null) {
             return null;
         }
@@ -441,7 +453,8 @@ public class MeasureDefScorer {
      * @return matching StratumPopulationDef or null
      */
     @Nullable
-    private StratumPopulationDef getStratumPopDefFromPopDef(StratumDef stratumDef, PopulationDef populationDef) {
+    private StratumPopulationReportDef getStratumPopDefFromPopDef(
+            StratumReportDef stratumDef, PopulationReportDef populationDef) {
         if (populationDef == null) {
             return null;
         }
@@ -461,7 +474,7 @@ public class MeasureDefScorer {
      * @return collection of resources belonging to this stratum
      */
     private static Collection<Object> getResultsForStratum(
-            PopulationDef populationDef, StratumPopulationDef stratumPopulationDef) {
+            PopulationReportDef populationDef, StratumPopulationReportDef stratumPopulationDef) {
 
         if (stratumPopulationDef == null) {
             return List.of();
@@ -488,10 +501,10 @@ public class MeasureDefScorer {
      * @return aggregated QuantityDef or null if population is null
      */
     @Nullable
-    private static QuantityDef calculateContinuousVariableAggregateQuantity(
+    private static QuantityReportDef calculateContinuousVariableAggregateQuantity(
             String measureUrl,
-            PopulationDef populationDef,
-            Function<PopulationDef, Collection<Object>> popDefToResources) {
+            PopulationReportDef populationDef,
+            Function<PopulationReportDef, Collection<Object>> popDefToResources) {
 
         if (populationDef == null) {
             logger.warn("Measure population group has no measure population defined for measure: {}", measureUrl);
@@ -511,7 +524,7 @@ public class MeasureDefScorer {
      * @return aggregated QuantityDef or null if no resources
      */
     @Nullable
-    private static QuantityDef calculateContinuousVariableAggregateQuantity(
+    private static QuantityReportDef calculateContinuousVariableAggregateQuantity(
             ContinuousVariableObservationAggregateMethod aggregateMethod, Collection<Object> qualifyingResources) {
         var observationQuantity = collectQuantities(qualifyingResources);
         return aggregate(observationQuantity, aggregateMethod);
@@ -525,8 +538,8 @@ public class MeasureDefScorer {
      * @param method aggregation method
      * @return aggregated QuantityDef with computed value
      */
-    private static QuantityDef aggregate(
-            List<QuantityDef> quantities, ContinuousVariableObservationAggregateMethod method) {
+    private static QuantityReportDef aggregate(
+            List<QuantityReportDef> quantities, ContinuousVariableObservationAggregateMethod method) {
         if (quantities == null || quantities.isEmpty()) {
             return null;
         }
@@ -538,51 +551,51 @@ public class MeasureDefScorer {
 
         // Enhanced switch with early returns - short-circuit logic
         return switch (method) {
-            case COUNT -> new QuantityDef((double) quantities.size());
+            case COUNT -> new QuantityReportDef((double) quantities.size());
             case MEDIAN -> {
                 List<Double> sorted = quantities.stream()
-                        .map(QuantityDef::value)
+                        .map(QuantityReportDef::value)
                         .filter(Objects::nonNull)
                         .sorted()
                         .toList();
                 int n = sorted.size();
                 double result = (n % 2 == 1) ? sorted.get(n / 2) : (sorted.get(n / 2 - 1) + sorted.get(n / 2)) / 2.0;
-                yield new QuantityDef(result);
+                yield new QuantityReportDef(result);
             }
             case SUM -> {
                 double result = quantities.stream()
-                        .map(QuantityDef::value)
+                        .map(QuantityReportDef::value)
                         .filter(Objects::nonNull)
                         .mapToDouble(value -> value)
                         .sum();
-                yield new QuantityDef(result);
+                yield new QuantityReportDef(result);
             }
             case MAX -> {
                 double result = quantities.stream()
-                        .map(QuantityDef::value)
+                        .map(QuantityReportDef::value)
                         .filter(Objects::nonNull)
                         .mapToDouble(value -> value)
                         .max()
                         .orElse(Double.NaN);
-                yield new QuantityDef(result);
+                yield new QuantityReportDef(result);
             }
             case MIN -> {
                 double result = quantities.stream()
-                        .map(QuantityDef::value)
+                        .map(QuantityReportDef::value)
                         .filter(Objects::nonNull)
                         .mapToDouble(value -> value)
                         .min()
                         .orElse(Double.NaN);
-                yield new QuantityDef(result);
+                yield new QuantityReportDef(result);
             }
             case AVG -> {
                 double result = quantities.stream()
-                        .map(QuantityDef::value)
+                        .map(QuantityReportDef::value)
                         .filter(Objects::nonNull)
                         .mapToDouble(value -> value)
                         .average()
                         .orElse(Double.NaN);
-                yield new QuantityDef(result);
+                yield new QuantityReportDef(result);
             }
             default -> throw new IllegalArgumentException("Unsupported aggregation method: " + method);
         };
@@ -595,7 +608,7 @@ public class MeasureDefScorer {
      * @param resources collection of objects that may contain Maps with QuantityDef values
      * @return list of QuantityDef objects found
      */
-    private static List<QuantityDef> collectQuantities(Collection<Object> resources) {
+    private static List<QuantityReportDef> collectQuantities(Collection<Object> resources) {
         var mapValues = resources.stream()
                 .filter(x -> x instanceof Map<?, ?>)
                 .map(x -> (Map<?, ?>) x)
@@ -604,8 +617,8 @@ public class MeasureDefScorer {
                 .toList();
 
         return mapValues.stream()
-                .filter(QuantityDef.class::isInstance)
-                .map(QuantityDef.class::cast)
+                .filter(QuantityReportDef.class::isInstance)
+                .map(QuantityReportDef.class::cast)
                 .toList();
     }
 

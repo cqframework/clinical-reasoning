@@ -42,6 +42,7 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationResultHandler;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorUtils;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
 import org.opencds.cqf.fhir.cr.measure.common.MultiLibraryIdMeasureEngineDetails;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.MeasureReportDef;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4DateHelper;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.monad.Either3;
@@ -178,14 +179,15 @@ public class R4MeasureProcessor {
         // Measurement Period: operation parameter defined measurement period
         Interval measurementPeriod = buildMeasurementPeriod(periodStart, periodEnd);
 
-        // setup MeasureDef
+        // setup immutable MeasureDef, then convert to mutable MeasureReportDef
         var measureDef = new R4MeasureDefBuilder().build(measure);
+        var measureReportDef = MeasureReportDef.fromMeasureDef(measureDef);
 
         // Process Criteria Expression Results
         MeasureEvaluationResultHandler.processResults(
                 fhirContext,
                 results,
-                measureDef,
+                measureReportDef,
                 evaluationType,
                 this.measureEvaluationOptions.getApplyScoringSetMembership(),
                 new R4PopulationBasisValidator());
@@ -194,12 +196,12 @@ public class R4MeasureProcessor {
         MeasureReport measureReport = new R4MeasureReportBuilder()
                 .build(
                         measure,
-                        measureDef,
+                        measureReportDef,
                         r4EvalTypeToReportType(evaluationType, measure),
                         measurementPeriod,
                         subjectIds);
 
-        return new MeasureDefAndR4MeasureReport(measureDef, measureReport);
+        return new MeasureDefAndR4MeasureReport(measureReportDef, measureReport);
     }
 
     /**
@@ -234,16 +236,17 @@ public class R4MeasureProcessor {
 
         MeasureEvalType evaluationType = measureProcessorUtils.getEvalType(evalType, reportType, subjectIds);
 
-        // setup MeasureDef
+        // setup immutable MeasureDef, then convert to mutable MeasureReportDef
         var measureDef = new R4MeasureDefBuilder().build(measure);
+        var measureReportDef = MeasureReportDef.fromMeasureDef(measureDef);
 
         final Map<String, EvaluationResult> resultForThisMeasure =
-                compositeEvaluationResultsPerMeasure.processMeasureForSuccessOrFailure(measureDef);
+                compositeEvaluationResultsPerMeasure.processMeasureForSuccessOrFailure(measureReportDef);
 
         MeasureEvaluationResultHandler.processResults(
                 fhirContext,
                 resultForThisMeasure,
-                measureDef,
+                measureReportDef,
                 evaluationType,
                 this.measureEvaluationOptions.getApplyScoringSetMembership(),
                 new R4PopulationBasisValidator());
@@ -254,12 +257,12 @@ public class R4MeasureProcessor {
         MeasureReport measureReport = new R4MeasureReportBuilder()
                 .build(
                         measure,
-                        measureDef,
+                        measureReportDef,
                         r4EvalTypeToReportType(evaluationType, measure),
                         measurementPeriod,
                         subjectIds);
 
-        return new MeasureDefAndR4MeasureReport(measureDef, measureReport);
+        return new MeasureDefAndR4MeasureReport(measureReportDef, measureReport);
     }
 
     /**
@@ -450,7 +453,11 @@ public class R4MeasureProcessor {
         var libraryIdentifiersToMeasureIds = measures.stream()
                 .collect(ImmutableListMultimap.toImmutableListMultimap(
                         this::getLibraryVersionIdentifier, // key function
-                        measure -> new R4MeasureDefBuilder().build(measure) // value function
+                        measure -> {
+                            // Build immutable MeasureDef, then convert to mutable MeasureReportDef
+                            var measureDef = new R4MeasureDefBuilder().build(measure);
+                            return MeasureReportDef.fromMeasureDef(measureDef);
+                        } // value function
                         ));
 
         var libraryEngine = new LibraryEngine(repository, this.measureEvaluationOptions.getEvaluationSettings());

@@ -4,7 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.opencds.cqf.fhir.cr.measure.common.StratumPopulationDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.StratumPopulationReportDef;
+import org.opencds.cqf.fhir.cr.measure.r4.Measure;
 
 /**
  * Fluent assertion API for StratumPopulationDef objects.
@@ -25,10 +26,9 @@ import org.opencds.cqf.fhir.cr.measure.common.StratumPopulationDef;
  * @author Claude (Anthropic AI Assistant)
  * @since 4.1.0
  */
-public class SelectedMeasureDefStratumPopulation<P>
-        extends org.opencds.cqf.fhir.cr.measure.r4.Measure.Selected<StratumPopulationDef, P> {
+public class SelectedMeasureDefStratumPopulation<P> extends Measure.Selected<StratumPopulationReportDef, P> {
 
-    public SelectedMeasureDefStratumPopulation(StratumPopulationDef value, P parent) {
+    public SelectedMeasureDefStratumPopulation(StratumPopulationReportDef value, P parent) {
         super(value, parent);
     }
 
@@ -138,7 +138,7 @@ public class SelectedMeasureDefStratumPopulation<P>
      *
      * @return the StratumPopulationDef instance
      */
-    public StratumPopulationDef stratumPopulationDef() {
+    public StratumPopulationReportDef stratumPopulationDef() {
         return value();
     }
 }

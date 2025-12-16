@@ -163,7 +163,7 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
         measureReport = r4MeasureServiceUtils.addSubjectReference(measureReport, practitioner, subjectId);
 
         // Return new record with updated MeasureReport
-        return new MeasureDefAndR4MeasureReport(result.measureDef(), measureReport);
+        return new MeasureDefAndR4MeasureReport(result.measureReportDef(), measureReport);
     }
 
     @Nonnull

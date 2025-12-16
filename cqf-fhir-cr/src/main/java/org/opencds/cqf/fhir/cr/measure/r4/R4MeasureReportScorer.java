@@ -19,17 +19,17 @@ import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 import org.opencds.cqf.fhir.cr.measure.common.BaseMeasureReportScorer;
 import org.opencds.cqf.fhir.cr.measure.common.ContinuousVariableObservationAggregateMethod;
 import org.opencds.cqf.fhir.cr.measure.common.ContinuousVariableObservationConverter;
-import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
-import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
-import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
-import org.opencds.cqf.fhir.cr.measure.common.QuantityDef;
-import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
-import org.opencds.cqf.fhir.cr.measure.common.StratumDef;
-import org.opencds.cqf.fhir.cr.measure.common.StratumPopulationDef;
-import org.opencds.cqf.fhir.cr.measure.common.StratumValueDef;
-import org.opencds.cqf.fhir.cr.measure.common.StratumValueWrapper;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.GroupReportDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.MeasureReportDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.PopulationReportDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.QuantityReportDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.StratifierReportDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.StratumPopulationReportDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.StratumReportDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.StratumValueReportDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.StratumValueWrapperReportDef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -94,7 +94,7 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
             R4ContinuousVariableObservationConverter.INSTANCE;
 
     @Override
-    public void score(String measureUrl, MeasureDef measureDef, MeasureReport measureReport) {
+    public void score(String measureUrl, MeasureReportDef measureDef, MeasureReport measureReport) {
         // Measure Def Check
         if (measureDef == null) {
             throw new InvalidRequestException(
@@ -115,7 +115,7 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
         }
     }
 
-    protected GroupDef getGroupDef(MeasureDef measureDef, MeasureReportGroupComponent mrgc) {
+    protected GroupReportDef getGroupDef(MeasureReportDef measureDef, MeasureReportGroupComponent mrgc) {
         var groupDefs = measureDef.groups();
         if (groupDefs.size() == 1) {
             return groupDefs.get(0);
@@ -126,14 +126,14 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
                 .orElse(null);
     }
 
-    protected MeasureScoring getGroupMeasureScoring(MeasureReportGroupComponent mrgc, MeasureDef measureDef) {
+    protected MeasureScoring getGroupMeasureScoring(MeasureReportGroupComponent mrgc, MeasureReportDef measureDef) {
         MeasureScoring groupScoringType = null;
         // if not multi-rate, get first groupDef scoringType
         if (measureDef.groups().size() == 1) {
             groupScoringType = measureDef.groups().get(0).measureScoring();
         } else {
             // multi rate measure, match groupComponent to groupDef to extract scoringType
-            for (GroupDef groupDef : measureDef.groups()) {
+            for (GroupReportDef groupDef : measureDef.groups()) {
                 var groupDefMeasureScoring = groupDef.measureScoring();
                 // groups must have id populated
                 groupHasValidId(measureDef, mrgc.getId());
@@ -166,7 +166,7 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
             MeasureScoring measureScoring,
             MeasureReportGroupComponent mrgc,
             boolean isIncreaseImprovementNotation,
-            GroupDef groupDef) {
+            GroupReportDef groupDef) {
 
         switch (measureScoring) {
             case PROPORTION, RATIO:
@@ -203,24 +203,25 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
 
     // Enhanced by Claude Sonnet 4.5 on 2025-11-27 to work with QuantityDef
     @Nullable
-    protected Double scoreRatioContVariable(String measureUrl, GroupDef groupDef, List<PopulationDef> populationDefs) {
+    protected Double scoreRatioContVariable(
+            String measureUrl, GroupReportDef groupDef, List<PopulationReportDef> populationDefs) {
 
         // Defensive checks
         if (groupDef == null || populationDefs == null || populationDefs.isEmpty()) {
             return null;
         }
 
-        PopulationDef numPopDef = findPopulationDef(groupDef, populationDefs, MeasurePopulationType.NUMERATOR);
-        PopulationDef denPopDef = findPopulationDef(groupDef, populationDefs, MeasurePopulationType.DENOMINATOR);
+        PopulationReportDef numPopDef = findPopulationDef(groupDef, populationDefs, MeasurePopulationType.NUMERATOR);
+        PopulationReportDef denPopDef = findPopulationDef(groupDef, populationDefs, MeasurePopulationType.DENOMINATOR);
 
         if (numPopDef == null || denPopDef == null) {
             return null;
         }
 
-        QuantityDef aggregateNumQuantityDef = calculateContinuousVariableAggregateQuantity(
-                measureUrl, numPopDef, PopulationDef::getAllSubjectResources);
-        QuantityDef aggregateDenQuantityDef = calculateContinuousVariableAggregateQuantity(
-                measureUrl, denPopDef, PopulationDef::getAllSubjectResources);
+        QuantityReportDef aggregateNumQuantityDef = calculateContinuousVariableAggregateQuantity(
+                measureUrl, numPopDef, PopulationReportDef::getAllSubjectResources);
+        QuantityReportDef aggregateDenQuantityDef = calculateContinuousVariableAggregateQuantity(
+                measureUrl, denPopDef, PopulationReportDef::getAllSubjectResources);
 
         if (aggregateNumQuantityDef == null || aggregateDenQuantityDef == null) {
             return null;
@@ -243,9 +244,12 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
 
     // Enhanced by Claude Sonnet 4.5 on 2025-11-27 to convert QuantityDef at the end
     protected void scoreContinuousVariable(
-            String measureUrl, MeasureReportGroupComponent mrgc, GroupDef groupDef, PopulationDef populationDef) {
-        final QuantityDef aggregateQuantityDef = calculateContinuousVariableAggregateQuantity(
-                measureUrl, populationDef, PopulationDef::getAllSubjectResources);
+            String measureUrl,
+            MeasureReportGroupComponent mrgc,
+            GroupReportDef groupDef,
+            PopulationReportDef populationDef) {
+        final QuantityReportDef aggregateQuantityDef = calculateContinuousVariableAggregateQuantity(
+                measureUrl, populationDef, PopulationReportDef::getAllSubjectResources);
 
         // Convert QuantityDef to R4 Quantity at the last moment before setting on report
         Quantity aggregateQuantity = continuousVariableConverter.convertToFhirQuantity(aggregateQuantityDef);
@@ -254,10 +258,10 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
 
     // Enhanced by Claude Sonnet 4.5 on 2025-11-27 to return QuantityDef
     @Nullable
-    private static QuantityDef calculateContinuousVariableAggregateQuantity(
+    private static QuantityReportDef calculateContinuousVariableAggregateQuantity(
             String measureUrl,
-            PopulationDef populationDef,
-            Function<PopulationDef, Collection<Object>> popDefToResources) {
+            PopulationReportDef populationDef,
+            Function<PopulationReportDef, Collection<Object>> popDefToResources) {
 
         if (populationDef == null) {
             // In the case where we're missing a measure population definition, we don't want to
@@ -273,15 +277,15 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
 
     // Enhanced by Claude Sonnet 4.5 on 2025-11-27 to return QuantityDef
     @Nullable
-    private static QuantityDef calculateContinuousVariableAggregateQuantity(
+    private static QuantityReportDef calculateContinuousVariableAggregateQuantity(
             ContinuousVariableObservationAggregateMethod aggregateMethod, Collection<Object> qualifyingResources) {
         var observationQuantity = collectQuantities(qualifyingResources);
         return aggregate(observationQuantity, aggregateMethod);
     }
 
     // Enhanced by Claude Sonnet 4.5 on 2025-11-27 to work with QuantityDef
-    private static QuantityDef aggregate(
-            List<QuantityDef> quantities, ContinuousVariableObservationAggregateMethod method) {
+    private static QuantityReportDef aggregate(
+            List<QuantityReportDef> quantities, ContinuousVariableObservationAggregateMethod method) {
         if (quantities == null || quantities.isEmpty()) {
             return null;
         }
@@ -296,14 +300,14 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
         switch (method) {
             case SUM:
                 result = quantities.stream()
-                        .map(QuantityDef::value)
+                        .map(QuantityReportDef::value)
                         .filter(Objects::nonNull)
                         .mapToDouble(value -> value)
                         .sum();
                 break;
             case MAX:
                 result = quantities.stream()
-                        .map(QuantityDef::value)
+                        .map(QuantityReportDef::value)
                         .filter(Objects::nonNull)
                         .mapToDouble(value -> value)
                         .max()
@@ -311,7 +315,7 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
                 break;
             case MIN:
                 result = quantities.stream()
-                        .map(QuantityDef::value)
+                        .map(QuantityReportDef::value)
                         .filter(Objects::nonNull)
                         .mapToDouble(value -> value)
                         .min()
@@ -319,7 +323,7 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
                 break;
             case AVG:
                 result = quantities.stream()
-                        .map(QuantityDef::value)
+                        .map(QuantityReportDef::value)
                         .filter(Objects::nonNull)
                         .mapToDouble(value -> value)
                         .average()
@@ -330,7 +334,7 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
                 break;
             case MEDIAN:
                 List<Double> sorted = quantities.stream()
-                        .map(QuantityDef::value)
+                        .map(QuantityReportDef::value)
                         .filter(Objects::nonNull)
                         .sorted()
                         .toList();
@@ -345,11 +349,11 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
                 throw new IllegalArgumentException("Unsupported aggregation method: " + method);
         }
 
-        return new QuantityDef(result);
+        return new QuantityReportDef(result);
     }
 
     // Enhanced by Claude Sonnet 4.5 on 2025-11-27 to collect QuantityDef
-    private static List<QuantityDef> collectQuantities(Collection<Object> resources) {
+    private static List<QuantityReportDef> collectQuantities(Collection<Object> resources) {
 
         var mapValues = resources.stream()
                 .filter(x -> x instanceof Map<?, ?>)
@@ -359,21 +363,21 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
                 .toList();
 
         return mapValues.stream()
-                .filter(QuantityDef.class::isInstance)
-                .map(QuantityDef.class::cast)
+                .filter(QuantityReportDef.class::isInstance)
+                .map(QuantityReportDef.class::cast)
                 .toList();
     }
 
     protected void scoreStratifier(
             String measureUrl,
-            GroupDef groupDef,
+            GroupReportDef groupDef,
             MeasureScoring measureScoring,
             MeasureReportGroupStratifierComponent stratifierComponent) {
 
         for (StratifierGroupComponent sgc : stratifierComponent.getStratum()) {
 
             // This isn't fantastic, but it seems to work
-            final Optional<StratifierDef> optStratifierDef = groupDef.stratifiers().stream()
+            final Optional<StratifierReportDef> optStratifierDef = groupDef.stratifiers().stream()
                     .filter(stratifierDef -> stratifierComponent.getId().equals(stratifierDef.id()))
                     .findFirst();
 
@@ -381,9 +385,9 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
                 throw new InternalErrorException("Stratifier component " + sgc.getId() + " does not exist.");
             }
 
-            final StratifierDef stratifierDef = optStratifierDef.get();
+            final StratifierReportDef stratifierDef = optStratifierDef.get();
 
-            final StratumDef stratumDef = stratifierDef.getStratum().stream()
+            final StratumReportDef stratumDef = stratifierDef.getStratum().stream()
                     .filter(stratumDefInner -> doesStratumDefMatchStratum(sgc, stratifierDef, stratumDefInner))
                     .findFirst()
                     .orElse(null);
@@ -399,16 +403,16 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
 
     // TODO:  LD: consider refining this logic:
     private boolean doesStratumDefMatchStratum(
-            StratifierGroupComponent sgc, StratifierDef stratifierDef, StratumDef stratumDefInner) {
+            StratifierGroupComponent sgc, StratifierReportDef stratifierDef, StratumReportDef stratumDefInner) {
         return Objects.equals(
                 getStratumDefTextForR4(stratifierDef, stratumDefInner),
                 sgc.getValue().getText());
     }
 
-    private static String getStratumDefTextForR4(StratifierDef stratifierDef, StratumDef stratumDef) {
+    private static String getStratumDefTextForR4(StratifierReportDef stratifierDef, StratumReportDef stratumDef) {
         String stratumText = null;
 
-        for (StratumValueDef valuePair : stratumDef.valueDefs()) {
+        for (StratumValueReportDef valuePair : stratumDef.valueDefs()) {
             var value = valuePair.value();
             var componentDef = valuePair.def();
             // Set Stratum value to indicate which value is displaying results
@@ -443,14 +447,14 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
 
     // This is weird pattern where we have multiple qualifying values within a single stratum,
     // which was previously unsupported.  So for now, comma-delim the first five values.
-    private static CodeableConcept expressionResultToCodableConcept(StratumValueWrapper value) {
+    private static CodeableConcept expressionResultToCodableConcept(StratumValueWrapperReportDef value) {
         return new CodeableConcept().setText(value.getValueAsString());
     }
 
     protected void scoreStratum(
             String measureUrl,
-            GroupDef groupDef,
-            StratumDef stratumDef,
+            GroupReportDef groupDef,
+            StratumReportDef stratumDef,
             MeasureScoring measureScoring,
             StratifierGroupComponent stratum) {
         final Quantity quantity = getStratumScoreOrNull(measureUrl, groupDef, stratumDef, measureScoring, stratum);
@@ -463,8 +467,8 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
     @Nullable
     private Quantity getStratumScoreOrNull(
             String measureUrl,
-            GroupDef groupDef,
-            StratumDef stratumDef,
+            GroupReportDef groupDef,
+            StratumReportDef stratumDef,
             MeasureScoring measureScoring,
             StratifierGroupComponent stratum) {
 
@@ -475,10 +479,10 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
                 if (measureScoring.equals(MeasureScoring.RATIO)
                         && groupDef.hasPopulationType(MeasurePopulationType.MEASUREOBSERVATION)) {
                     // new
-                    final StratumPopulationDef stratumPopulationDefNum;
-                    final StratumPopulationDef stratumPopulationDefDen;
-                    PopulationDef numPopDef = null;
-                    PopulationDef denPopDef = null;
+                    final StratumPopulationReportDef stratumPopulationDefNum;
+                    final StratumPopulationReportDef stratumPopulationDefDen;
+                    PopulationReportDef numPopDef = null;
+                    PopulationReportDef denPopDef = null;
                     if (stratumDef != null) {
                         var populationDefs = getMeasureObservations(groupDef);
                         // get Measure Observation for Numerator and Denominator
@@ -513,7 +517,7 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
                 return null;
             }
             case CONTINUOUSVARIABLE -> {
-                final StratumPopulationDef stratumPopulationDef;
+                final StratumPopulationReportDef stratumPopulationDef;
                 if (stratumDef != null) {
                     stratumPopulationDef = stratumDef.stratumPopulations().stream()
                             // Ex:  match "measure-observation-1" with "measure-observation"
@@ -525,7 +529,7 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
                     stratumPopulationDef = null;
                 }
                 // Enhanced by Claude Sonnet 4.5 on 2025-11-27 - convert QuantityDef to Quantity
-                QuantityDef quantityDef = calculateContinuousVariableAggregateQuantity(
+                QuantityReportDef quantityDef = calculateContinuousVariableAggregateQuantity(
                         measureUrl,
                         getFirstMeasureObservation(groupDef),
                         populationDef -> getResultsForStratum(populationDef, stratumPopulationDef));
@@ -541,16 +545,17 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
     @Nullable
     protected Double scoreRatioContVariableStratum(
             String measureUrl,
-            GroupDef groupDef,
-            StratumPopulationDef measureObsNumStratum,
-            StratumPopulationDef measureObsDenStratum,
-            PopulationDef numPopDef,
-            PopulationDef denPopDef) {
+            GroupReportDef groupDef,
+            StratumPopulationReportDef measureObsNumStratum,
+            StratumPopulationReportDef measureObsDenStratum,
+            PopulationReportDef numPopDef,
+            PopulationReportDef denPopDef) {
 
-        QuantityDef aggregateNumQuantityDef = calculateContinuousVariableAggregateQuantity(
+        QuantityReportDef aggregateNumQuantityDef = calculateContinuousVariableAggregateQuantity(
                 measureUrl, numPopDef, populationDef -> getResultsForStratum(populationDef, measureObsNumStratum));
-        calculateContinuousVariableAggregateQuantity(measureUrl, numPopDef, PopulationDef::getAllSubjectResources);
-        QuantityDef aggregateDenQuantityDef = calculateContinuousVariableAggregateQuantity(
+        calculateContinuousVariableAggregateQuantity(
+                measureUrl, numPopDef, PopulationReportDef::getAllSubjectResources);
+        QuantityReportDef aggregateDenQuantityDef = calculateContinuousVariableAggregateQuantity(
                 measureUrl, denPopDef, populationDef -> getResultsForStratum(populationDef, measureObsDenStratum));
 
         if (aggregateNumQuantityDef == null || aggregateDenQuantityDef == null) {
@@ -583,14 +588,14 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
      * @return the count for the stratum population, or 0 if not found
      */
     private int getCountFromStratifierPopulation(
-            GroupDef groupDef, StratumDef stratumDef, MeasurePopulationType populationType) {
+            GroupReportDef groupDef, StratumReportDef stratumDef, MeasurePopulationType populationType) {
         if (stratumDef == null) {
             return 0;
         }
 
         // TODO:  LD:  we need to make this matching more sophisticated, since we could have two
         // MeasureObservations in the result, one for numerator, and one for denominator
-        PopulationDef populationDef = groupDef.getSingle(populationType);
+        PopulationReportDef populationDef = groupDef.getSingle(populationType);
         return stratumDef.getPopulationCount(populationDef);
     }
 }

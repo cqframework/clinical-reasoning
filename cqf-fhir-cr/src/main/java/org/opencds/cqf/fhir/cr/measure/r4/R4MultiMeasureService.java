@@ -25,10 +25,10 @@ import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.CompositeEvaluationResultsPerMeasure;
-import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorUtils;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.MeasureReportDef;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.builder.BundleBuilder;
@@ -227,7 +227,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
             String productLine,
             String reporter) {
 
-        final List<MeasureDef> measureDefs = new ArrayList<>();
+        final List<MeasureReportDef> measureDefs = new ArrayList<>();
 
         // Create Parameters to hold the bundle(s)
         Parameters result = new Parameters();
@@ -250,7 +250,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
                     context,
                     compositeEvaluationResultsPerMeasure);
 
-            measureDefs.add(captured.measureDef());
+            measureDefs.add(captured.measureReportDef());
 
             MeasureReport measureReport = captured.measureReport();
 
@@ -301,7 +301,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
             String productLine,
             String reporter) {
 
-        final List<MeasureDef> measureDefs = new ArrayList<>();
+        final List<MeasureReportDef> measureDefs = new ArrayList<>();
 
         // Create Parameters to hold the bundle(s)
         Parameters result = new Parameters();
@@ -329,7 +329,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
                         context,
                         compositeEvaluationResultsPerMeasure);
 
-                measureDefs.add(captured.measureDef());
+                measureDefs.add(captured.measureReportDef());
 
                 MeasureReport measureReport = captured.measureReport();
 

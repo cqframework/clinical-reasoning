@@ -21,12 +21,12 @@ import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupPopulationComponent;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
-import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
-import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
-import org.opencds.cqf.fhir.cr.measure.common.StratumDef;
-import org.opencds.cqf.fhir.cr.measure.common.StratumPopulationDef;
-import org.opencds.cqf.fhir.cr.measure.common.StratumValueDef;
-import org.opencds.cqf.fhir.cr.measure.common.StratumValueWrapper;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.GroupReportDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.StratifierReportDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.StratumPopulationReportDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.StratumReportDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.StratumValueReportDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.StratumValueWrapperReportDef;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 
 /**
@@ -44,9 +44,9 @@ class R4StratifierBuilder {
             R4MeasureReportBuilderContext bc,
             MeasureGroupStratifierComponent measureStratifier,
             MeasureReportGroupStratifierComponent reportStratifier,
-            StratifierDef stratifierDef,
+            StratifierReportDef stratifierDef,
             List<MeasureGroupPopulationComponent> populations,
-            GroupDef groupDef) {
+            GroupReportDef groupDef) {
         // the top level stratifier 'id' and 'code'
         reportStratifier.setCode(getCodeForReportStratifier(stratifierDef, measureStratifier));
         reportStratifier.setId(measureStratifier.getId());
@@ -63,9 +63,9 @@ class R4StratifierBuilder {
     private static void buildMultipleStratum(
             R4MeasureReportBuilderContext bc,
             MeasureReportGroupStratifierComponent reportStratifier,
-            StratifierDef stratifierDef,
+            StratifierReportDef stratifierDef,
             List<MeasureGroupPopulationComponent> populations,
-            GroupDef groupDef) {
+            GroupReportDef groupDef) {
 
         if (stratifierDef.isComponentStratifier()) {
             componentStratifier(bc, stratifierDef, reportStratifier, populations, groupDef);
@@ -76,10 +76,10 @@ class R4StratifierBuilder {
 
     private static void componentStratifier(
             R4MeasureReportBuilderContext bc,
-            StratifierDef stratifierDef,
+            StratifierReportDef stratifierDef,
             MeasureReportGroupStratifierComponent reportStratifier,
             List<MeasureGroupPopulationComponent> populations,
-            GroupDef groupDef) {
+            GroupReportDef groupDef) {
 
         stratifierDef.getStratum().forEach(stratumDef -> {
             var reportStratum = reportStratifier.addStratum();
@@ -98,10 +98,10 @@ class R4StratifierBuilder {
 
     private static void nonComponentStratifier(
             R4MeasureReportBuilderContext bc,
-            StratifierDef stratifierDef,
+            StratifierReportDef stratifierDef,
             MeasureReportGroupStratifierComponent reportStratifier,
             List<MeasureGroupPopulationComponent> populations,
-            GroupDef groupDef) {
+            GroupReportDef groupDef) {
 
         // nonComponent stratifiers will have a single expression that can generate results, instead of grouping
         // combinations of results
@@ -113,7 +113,7 @@ class R4StratifierBuilder {
             var reportStratum = reportStratifier.addStratum();
             // Ideally, the stratum def should have these values empty in MeasureEvaluator
             // Seems to be irrelevant for criteria based stratifiers
-            var stratValues = Set.<StratumValueDef>of();
+            var stratValues = Set.<StratumValueReportDef>of();
             // Seems to be irrelevant for criteria based stratifiers
             var patients = List.<String>of();
 
@@ -134,18 +134,18 @@ class R4StratifierBuilder {
         // Stratum 2
         // Value: 'F'--> subjects: subject2
         // loop through each value key
-        for (StratumDef stratumDef : stratifierDef.getStratum()) {
+        for (StratumReportDef stratumDef : stratifierDef.getStratum()) {
             buildStratumOuter(bc, stratifierDef, stratumDef, reportStratifier, populations, groupDef);
         }
     }
 
     private static void buildStratumOuter(
             R4MeasureReportBuilderContext bc,
-            StratifierDef stratifierDef,
-            StratumDef stratumDef,
+            StratifierReportDef stratifierDef,
+            StratumReportDef stratumDef,
             MeasureReportGroupStratifierComponent reportStratifier,
             List<MeasureGroupPopulationComponent> populations,
-            GroupDef groupDef) {
+            GroupReportDef groupDef) {
 
         var reportStratum = reportStratifier.addStratum();
 
@@ -162,16 +162,16 @@ class R4StratifierBuilder {
 
     private static void buildStratum(
             R4MeasureReportBuilderContext bc,
-            StratifierDef stratifierDef,
-            StratumDef stratumDef,
+            StratifierReportDef stratifierDef,
+            StratumReportDef stratumDef,
             StratifierGroupComponent stratum,
-            Set<StratumValueDef> values,
+            Set<StratumValueReportDef> values,
             Collection<String> subjectIds,
             List<MeasureGroupPopulationComponent> populations,
-            GroupDef groupDef) {
+            GroupReportDef groupDef) {
         boolean isComponent = values.size() > 1;
-        for (StratumValueDef valuePair : values) {
-            StratumValueWrapper value = valuePair.value();
+        for (StratumValueReportDef valuePair : values) {
+            StratumValueWrapperReportDef value = valuePair.value();
             var componentDef = valuePair.def();
             // Set Stratum value to indicate which value is displaying results
             // ex. for Gender stratifier, code 'Male'
@@ -218,7 +218,7 @@ class R4StratifierBuilder {
         // ** subjects with stratifier value: 'F': subject2
         // ** stratum.population
         // ** ** initial-population: subject2
-        for (StratumPopulationDef stratumPopulationDef : stratumDef.stratumPopulations()) {
+        for (StratumPopulationReportDef stratumPopulationDef : stratumDef.stratumPopulations()) {
             // This is nasty, and ideally, we ought to be driving this logic entirely off StratumPopulationDef
             final Optional<MeasureGroupPopulationComponent> optMgpc = populations.stream()
                     .filter(population -> population.getId().equals(stratumPopulationDef.id()))
@@ -232,8 +232,8 @@ class R4StratifierBuilder {
         }
     }
 
-    private static StratumDef getOnlyStratumDef(StratifierDef stratifierDef) {
-        final List<StratumDef> stratumDefs = stratifierDef.getStratum();
+    private static StratumReportDef getOnlyStratumDef(StratifierReportDef stratifierDef) {
+        final List<StratumReportDef> stratumDefs = stratifierDef.getStratum();
 
         if (stratumDefs.size() != 1) {
             throw new InternalErrorException(
@@ -246,7 +246,7 @@ class R4StratifierBuilder {
 
     // This is weird pattern where we have multiple qualifying values within a single stratum,
     // which was previously unsupported.  So for now, comma-delim the first five values.
-    private static CodeableConcept expressionResultToCodableConcept(StratumValueWrapper value) {
+    private static CodeableConcept expressionResultToCodableConcept(StratumValueWrapperReportDef value) {
         return new CodeableConcept().setText(value.getValueAsString());
     }
 
@@ -255,12 +255,12 @@ class R4StratifierBuilder {
     // Simplified by Claude Sonnet 4.5 to use calculated values from StratumPopulationDef
     private static void buildStratumPopulation(
             R4MeasureReportBuilderContext bc,
-            StratifierDef stratifierDef,
-            StratumPopulationDef stratumPopulationDef,
+            StratifierReportDef stratifierDef,
+            StratumPopulationReportDef stratumPopulationDef,
             StratifierGroupPopulationComponent sgpc,
             Collection<String> subjectIds,
             MeasureGroupPopulationComponent population,
-            GroupDef groupDef) {
+            GroupReportDef groupDef) {
 
         sgpc.setCode(population.getCode());
         sgpc.setId(population.getId());
@@ -349,7 +349,7 @@ class R4StratifierBuilder {
 
     // TODO: LD:  move this to MeasureEvaluator
     private static List<CodeableConcept> getCodeForReportStratifier(
-            StratifierDef stratifierDef, MeasureGroupStratifierComponent measureStratifier) {
+            StratifierReportDef stratifierDef, MeasureGroupStratifierComponent measureStratifier) {
 
         final Expression criteria = measureStratifier.getCriteria();
 

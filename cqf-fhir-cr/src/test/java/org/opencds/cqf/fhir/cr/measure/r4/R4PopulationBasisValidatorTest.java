@@ -28,13 +28,13 @@ import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
 import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
-import org.opencds.cqf.fhir.cr.measure.common.CodeDef;
-import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
-import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
-import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
-import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.CodeDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.GroupReportDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.MeasureReportDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.PopulationReportDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.StratifierReportDef;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 
 class R4PopulationBasisValidatorTest {
@@ -42,7 +42,7 @@ class R4PopulationBasisValidatorTest {
     private static final String FAKE_MEASURE_URL = "fakeMeasureUrl";
     // Not ENTIRELY realistic since the GroupDefs are ultimately sourced from a MeasureDef, but for this simplistic
     // test, it works
-    private static final MeasureDef MEASURE_DEF = new MeasureDef(null, FAKE_MEASURE_URL, null, null, null);
+    private static final MeasureReportDef MEASURE_DEF = new MeasureReportDef(null, FAKE_MEASURE_URL, null, null, null);
     private static final String EXPRESSION_INITIALPOPULATION = "InitialPopulation";
     private static final String EXPRESSION_DENOMINATOR = "Denominator";
     private static final String EXPRESSION_NUMERATOR = "Numerator";
@@ -72,7 +72,7 @@ class R4PopulationBasisValidatorTest {
 
     private final R4PopulationBasisValidator testSubject = new R4PopulationBasisValidator();
 
-    private record ValidateGroupBasisTypeHappyPathParams(GroupDef groupDef, EvaluationResult evaluationResult) {}
+    private record ValidateGroupBasisTypeHappyPathParams(GroupReportDef groupDef, EvaluationResult evaluationResult) {}
 
     private static Stream<ValidateGroupBasisTypeHappyPathParams> validateGroupBasisTypeHappyPathParams() {
         return Stream.of(
@@ -163,7 +163,7 @@ class R4PopulationBasisValidatorTest {
     }
 
     private record ValidateGroupBasisTypeErrorPathParams(
-            GroupDef groupDef, EvaluationResult evaluationResult, String expectedExceptionMessage) {}
+            GroupReportDef groupDef, EvaluationResult evaluationResult, String expectedExceptionMessage) {}
 
     private static Stream<ValidateGroupBasisTypeErrorPathParams> validateGroupBasisTypeErrorPathParams() {
         return Stream.of(
@@ -283,7 +283,8 @@ class R4PopulationBasisValidatorTest {
      * Correction to Non-boolean population basis, these should not return type of Resource, they should stratify results based on single return type per subject
      * Of resulting Encounters, which are tied to Gender M or F, Age range 10-50 or 51-100...etc
      */
-    private record ValidateStratifierBasisTypeHappyPathParams(GroupDef groupDef, EvaluationResult evaluationResult) {}
+    private record ValidateStratifierBasisTypeHappyPathParams(
+            GroupReportDef groupDef, EvaluationResult evaluationResult) {}
 
     private static Stream<ValidateStratifierBasisTypeHappyPathParams> validateStratifierBasisTypeHappyPathParams() {
         return Stream.of(
@@ -425,7 +426,7 @@ class R4PopulationBasisValidatorTest {
     }
 
     private void validateStratifierBasisTypeErrorPath(
-            GroupDef groupDef, EvaluationResult evaluationResult, String expectedExceptionMessage) {
+            GroupReportDef groupDef, EvaluationResult evaluationResult, String expectedExceptionMessage) {
         try {
             testSubject.validateStratifiers(MEASURE_DEF, groupDef, evaluationResult);
             fail("Expected this test to fail");
@@ -435,14 +436,14 @@ class R4PopulationBasisValidatorTest {
     }
 
     @Nonnull
-    private static GroupDef buildGroupDef(
-            Basis basis, List<PopulationDef> populationDefs, List<StratifierDef> stratifierDefs) {
-        return new GroupDef(
+    private static GroupReportDef buildGroupDef(
+            Basis basis, List<PopulationReportDef> populationDefs, List<StratifierReportDef> stratifierDefs) {
+        return new GroupReportDef(
                 null, null, stratifierDefs, populationDefs, MeasureScoring.PROPORTION, false, null, basis.codeDef);
     }
 
     @Nonnull
-    private static List<PopulationDef> buildPopulationDefs(
+    private static List<PopulationReportDef> buildPopulationDefs(
             Basis basis, MeasurePopulationType... measurePopulationTypes) {
         return Arrays.stream(measurePopulationTypes)
                 .map(type -> buildPopulationDef(basis, type))
@@ -450,8 +451,8 @@ class R4PopulationBasisValidatorTest {
     }
 
     @Nonnull
-    private static PopulationDef buildPopulationDef(Basis basis, MeasurePopulationType measurePopulationType) {
-        return new PopulationDef(
+    private static PopulationReportDef buildPopulationDef(Basis basis, MeasurePopulationType measurePopulationType) {
+        return new PopulationReportDef(
                 measurePopulationType.toCode(),
                 null,
                 measurePopulationType,
@@ -466,15 +467,15 @@ class R4PopulationBasisValidatorTest {
     }
 
     @Nonnull
-    private static List<StratifierDef> buildStratifierDefs(String... populations) {
+    private static List<StratifierReportDef> buildStratifierDefs(String... populations) {
         return Arrays.stream(populations)
                 .map(R4PopulationBasisValidatorTest::buildStratifierDef)
                 .toList();
     }
 
     @Nonnull
-    private static StratifierDef buildStratifierDef(String expression) {
-        return new StratifierDef(null, null, expression, MeasureStratifierType.VALUE, List.of());
+    private static StratifierReportDef buildStratifierDef(String expression) {
+        return new StratifierReportDef(null, null, expression, MeasureStratifierType.VALUE, List.of());
     }
 
     @Nonnull

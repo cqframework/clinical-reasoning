@@ -31,16 +31,16 @@ import org.junit.jupiter.api.Test;
 import org.opencds.cqf.cql.engine.runtime.Date;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
-import org.opencds.cqf.fhir.cr.measure.common.CodeDef;
-import org.opencds.cqf.fhir.cr.measure.common.ConceptDef;
-import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
-import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
-import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
-import org.opencds.cqf.fhir.cr.measure.common.SdeDef;
-import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.CodeDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.ConceptDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.GroupReportDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.MeasureReportDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.PopulationReportDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.SdeReportDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.StratifierReportDef;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 
 class R4MeasureReportBuilderTest {
@@ -161,7 +161,7 @@ class R4MeasureReportBuilderTest {
     void errorMismatchedGroupsSizes_tooMany() {
         var r4MeasureReportBuilder = new R4MeasureReportBuilder();
         final Measure measure = buildMeasure(MEASURE_ID_1, MEASURE_URL_1, 1, 2);
-        final MeasureDef measureDef = buildMeasureDef(MEASURE_ID_1, MEASURE_URL_1, 2, 2, true, Set.of());
+        final MeasureReportDef measureDef = buildMeasureDef(MEASURE_ID_1, MEASURE_URL_1, 2, 2, true, Set.of());
         final List<String> subjectIds = List.of();
 
         try {
@@ -178,7 +178,7 @@ class R4MeasureReportBuilderTest {
     void errorMismatchedGroupsSizes_tooFew() {
         var r4MeasureReportBuilder = new R4MeasureReportBuilder();
         final Measure measure = buildMeasure(MEASURE_ID_1, MEASURE_URL_1, 2, 2);
-        final MeasureDef measureDef = buildMeasureDef(MEASURE_ID_1, MEASURE_URL_1, 1, 2, true, Set.of());
+        final MeasureReportDef measureDef = buildMeasureDef(MEASURE_ID_1, MEASURE_URL_1, 1, 2, true, Set.of());
         final List<String> subjectIds = List.of();
 
         try {
@@ -208,14 +208,14 @@ class R4MeasureReportBuilderTest {
     }
 
     @Nonnull
-    private static MeasureDef buildMeasureDef(
+    private static MeasureReportDef buildMeasureDef(
             String id,
             String url,
             int numGroups,
             int numSdes,
             boolean isKeyResource,
             Collection<Object> evaluatedResources) {
-        return new MeasureDef(
+        return new MeasureReportDef(
                 new IdType(ResourceType.Measure.name(), id),
                 url,
                 null,
@@ -227,8 +227,9 @@ class R4MeasureReportBuilderTest {
                         .toList());
     }
 
-    private static SdeDef buildSdes(String id, boolean isKeyResource, @Nullable Collection<Object> evaluatedResources) {
-        final SdeDef sdeDef = new SdeDef(
+    private static SdeReportDef buildSdes(
+            String id, boolean isKeyResource, @Nullable Collection<Object> evaluatedResources) {
+        final SdeReportDef sdeDef = new SdeReportDef(
                 id,
                 new ConceptDef(List.of(new CodeDef("system", MeasurePopulationType.DATEOFCOMPLIANCE.toCode())), null),
                 null);
@@ -244,8 +245,8 @@ class R4MeasureReportBuilderTest {
     }
 
     @Nonnull
-    private static GroupDef buildGroupDef(String id, Collection<Object> resources) {
-        return new GroupDef(
+    private static GroupReportDef buildGroupDef(String id, Collection<Object> resources) {
+        return new GroupReportDef(
                 id,
                 null,
                 List.of(buildStratifierDef()),
@@ -256,9 +257,9 @@ class R4MeasureReportBuilderTest {
                 new CodeDef(MeasureConstants.POPULATION_BASIS_URL, "boolean"));
     }
 
-    private static PopulationDef buildPopulationRef(Collection<Object> resources) {
+    private static PopulationReportDef buildPopulationRef(Collection<Object> resources) {
         CodeDef booleanBasis = new CodeDef(MeasureConstants.POPULATION_BASIS_URL, "boolean");
-        final PopulationDef populationDef = new PopulationDef(
+        final PopulationReportDef populationDef = new PopulationReportDef(
                 null,
                 new ConceptDef(List.of(new CodeDef("system", MeasurePopulationType.DATEOFCOMPLIANCE.toCode())), null),
                 MeasurePopulationType.DATEOFCOMPLIANCE,
@@ -287,8 +288,8 @@ class R4MeasureReportBuilderTest {
     }
 
     @Nonnull
-    private static StratifierDef buildStratifierDef() {
-        return new StratifierDef(null, null, null, MeasureStratifierType.VALUE);
+    private static StratifierReportDef buildStratifierDef() {
+        return new StratifierReportDef(null, null, null, MeasureStratifierType.VALUE);
     }
 
     private static Measure buildMeasure(String id, String url, int numGroups, int numSdes) {

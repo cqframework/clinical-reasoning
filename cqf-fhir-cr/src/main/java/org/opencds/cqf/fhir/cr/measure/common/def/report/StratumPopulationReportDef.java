@@ -1,4 +1,4 @@
-package org.opencds.cqf.fhir.cr.measure.common;
+package org.opencds.cqf.fhir.cr.measure.common.def.report;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -7,14 +7,16 @@ import java.util.Set;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
+import org.opencds.cqf.fhir.cr.measure.common.FhirResourceUtils;
+import org.opencds.cqf.fhir.cr.measure.common.def.CodeDef;
 
 /**
  * Equivalent to the FHIR stratum population.
  * <p/>
  * This is meant to be the source of truth for all data points regarding stratum populations.
  */
-public record StratumPopulationDef(
-        PopulationDef populationDef,
+public record StratumPopulationReportDef(
+        PopulationReportDef populationDef,
         /*
          * The subjectIds as they are, whether they are qualified with a resource
          * (ex: [Patient/pat1, Patient/pat2] or [pat1, pat2]

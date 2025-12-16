@@ -5,8 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
-import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.GroupReportDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.MeasureReportDef;
+import org.opencds.cqf.fhir.cr.measure.r4.Measure;
 
 /**
  * Fluent assertion API for MeasureDef objects.
@@ -37,9 +38,9 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
  * @author Claude (Anthropic AI Assistant)
  * @since 4.1.0
  */
-public class SelectedMeasureDef<P> extends org.opencds.cqf.fhir.cr.measure.r4.Measure.Selected<MeasureDef, P> {
+public class SelectedMeasureDef<P> extends Measure.Selected<MeasureReportDef, P> {
 
-    public SelectedMeasureDef(MeasureDef value, P parent) {
+    public SelectedMeasureDef(MeasureReportDef value, P parent) {
         super(value, parent);
     }
 
@@ -66,7 +67,7 @@ public class SelectedMeasureDef<P> extends org.opencds.cqf.fhir.cr.measure.r4.Me
      */
     public SelectedMeasureDefGroup<SelectedMeasureDef<P>> group(String id) {
         assertNotNull(value(), "MeasureDef is null");
-        GroupDef group = value().groups().stream()
+        GroupReportDef group = value().groups().stream()
                 .filter(g -> id.equals(g.id()))
                 .findFirst()
                 .orElse(null);
@@ -181,7 +182,7 @@ public class SelectedMeasureDef<P> extends org.opencds.cqf.fhir.cr.measure.r4.Me
      *
      * @return the MeasureDef instance
      */
-    public MeasureDef measureDef() {
+    public MeasureReportDef measureDef() {
         return value();
     }
 }

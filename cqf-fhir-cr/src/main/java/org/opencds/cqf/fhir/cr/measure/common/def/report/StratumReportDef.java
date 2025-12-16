@@ -1,4 +1,4 @@
-package org.opencds.cqf.fhir.cr.measure.common;
+package org.opencds.cqf.fhir.cr.measure.common.def.report;
 
 import java.util.Collection;
 import java.util.List;
@@ -13,19 +13,19 @@ import java.util.Set;
  * <p/>
  * Converted from record to class by Claude Sonnet 4.5 on 2025-12-03 to support mutable score field.
  */
-public class StratumDef {
+public class StratumReportDef {
 
-    private final List<StratumPopulationDef> stratumPopulations;
-    private final Set<StratumValueDef> valueDefs;
+    private final List<StratumPopulationReportDef> stratumPopulations;
+    private final Set<StratumValueReportDef> valueDefs;
     private final Collection<String> subjectIds;
 
     // Added by Claude Sonnet 4.5 on 2025-12-03
     // Mutable score field for version-agnostic scoring
     private Double score;
 
-    public StratumDef(
-            List<StratumPopulationDef> stratumPopulations,
-            Set<StratumValueDef> valueDefs,
+    public StratumReportDef(
+            List<StratumPopulationReportDef> stratumPopulations,
+            Set<StratumValueReportDef> valueDefs,
             Collection<String> subjectIds) {
         this.stratumPopulations = List.copyOf(stratumPopulations);
         this.valueDefs = valueDefs;
@@ -33,11 +33,11 @@ public class StratumDef {
     }
 
     // Record-style accessor methods (maintain compatibility)
-    public List<StratumPopulationDef> stratumPopulations() {
+    public List<StratumPopulationReportDef> stratumPopulations() {
         return stratumPopulations;
     }
 
-    public Set<StratumValueDef> valueDefs() {
+    public Set<StratumValueReportDef> valueDefs() {
         return valueDefs;
     }
 
@@ -56,7 +56,7 @@ public class StratumDef {
      * @param populationDef the PopulationDef to match by ID
      * @return the StratumPopulationDef, or null if not found
      */
-    public StratumPopulationDef getStratumPopulation(PopulationDef populationDef) {
+    public StratumPopulationReportDef getStratumPopulation(PopulationReportDef populationDef) {
         if (populationDef == null) {
             return null;
         }
@@ -73,8 +73,8 @@ public class StratumDef {
      * @param populationDef the PopulationDef to match by ID
      * @return the count, or 0 if not found
      */
-    public int getPopulationCount(PopulationDef populationDef) {
-        StratumPopulationDef stratumPop = getStratumPopulation(populationDef);
+    public int getPopulationCount(PopulationReportDef populationDef) {
+        StratumPopulationReportDef stratumPop = getStratumPopulation(populationDef);
         return stratumPop != null ? stratumPop.getCount() : 0;
     }
 

@@ -12,6 +12,10 @@ import jakarta.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import org.opencds.cqf.fhir.cr.measure.common.def.CodeDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.ConceptDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.measure.MeasureDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.measure.PopulationDef;
 
 public interface MeasureDefBuilder<MeasureT> {
     MeasureDef build(MeasureT measure);

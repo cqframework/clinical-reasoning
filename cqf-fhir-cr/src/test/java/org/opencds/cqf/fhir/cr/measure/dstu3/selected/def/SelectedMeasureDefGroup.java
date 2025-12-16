@@ -2,8 +2,8 @@ package org.opencds.cqf.fhir.cr.measure.dstu3.selected.def;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
-import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.GroupReportDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.PopulationReportDef;
 
 /**
  * Fluent API for asserting on GroupDef (pre-scoring group state) from DSTU3 measure evaluation.
@@ -11,15 +11,15 @@ import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
  * @param <P> parent type for up() navigation
  */
 public class SelectedMeasureDefGroup<P> {
-    protected final GroupDef groupDef;
+    protected final GroupReportDef groupDef;
     protected final P parent;
 
-    public SelectedMeasureDefGroup(GroupDef groupDef, P parent) {
+    public SelectedMeasureDefGroup(GroupReportDef groupDef, P parent) {
         this.groupDef = groupDef;
         this.parent = parent;
     }
 
-    public GroupDef value() {
+    public GroupReportDef value() {
         return groupDef;
     }
 
@@ -29,7 +29,7 @@ public class SelectedMeasureDefGroup<P> {
 
     // Access population by name
     public SelectedMeasureDefPopulation<SelectedMeasureDefGroup<P>> population(String populationName) {
-        PopulationDef found = groupDef.populations().stream()
+        PopulationReportDef found = groupDef.populations().stream()
                 .filter(pop -> pop.code() != null
                         && !pop.code().isEmpty()
                         && pop.code().first().code().equals(populationName))

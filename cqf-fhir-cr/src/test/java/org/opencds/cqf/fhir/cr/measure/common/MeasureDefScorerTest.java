@@ -8,6 +8,17 @@ import java.util.Map;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
+import org.opencds.cqf.fhir.cr.measure.common.def.CodeDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.ConceptDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.GroupReportDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.PopulationReportDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.QuantityReportDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.StratifierComponentReportDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.StratifierReportDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.StratumPopulationReportDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.StratumReportDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.StratumValueReportDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.StratumValueWrapperReportDef;
 
 /**
  * Comprehensive unit tests for version-agnostic MeasureDefScorer.
@@ -25,15 +36,15 @@ class MeasureDefScorerTest {
     void testScoreGroup_SetsScoreOnGroupDef() {
         // Setup: Simple proportion measure with 3/4 subjects meeting criteria
         CodeDef encounterBasis = createPopulationBasisCode("Encounter");
-        PopulationDef numeratorPop = createPopulationDef(
+        PopulationReportDef numeratorPop = createPopulationDef(
                 "num-1", MeasurePopulationType.NUMERATOR, Set.of("patient1", "patient2", "patient3"), encounterBasis);
-        PopulationDef denominatorPop = createPopulationDef(
+        PopulationReportDef denominatorPop = createPopulationDef(
                 "den-1",
                 MeasurePopulationType.DENOMINATOR,
                 Set.of("patient1", "patient2", "patient3", "patient4"),
                 encounterBasis);
 
-        GroupDef groupDef = new GroupDef(
+        GroupReportDef groupDef = new GroupReportDef(
                 "group-1",
                 createTextOnlyConcept("Test Group"),
                 List.of(), // No stratifiers
@@ -61,26 +72,26 @@ class MeasureDefScorerTest {
         // Formula: (n - nx) / (d - dx - de)
         // (10 - 2) / (20 - 3 - 1) = 8 / 16 = 0.5
         CodeDef stringBasis = createPopulationBasisCode("String");
-        PopulationDef numeratorPop = createPopulationDef(
+        PopulationReportDef numeratorPop = createPopulationDef(
                 "num-1",
                 MeasurePopulationType.NUMERATOR,
                 Set.of("p1", "p2", "p3", "p4", "p5", "p6", "p7", "p8", "p9", "p10"),
                 stringBasis);
-        PopulationDef denominatorPop = createPopulationDef(
+        PopulationReportDef denominatorPop = createPopulationDef(
                 "den-1",
                 MeasurePopulationType.DENOMINATOR,
                 Set.of(
                         "p1", "p2", "p3", "p4", "p5", "p6", "p7", "p8", "p9", "p10", "p11", "p12", "p13", "p14", "p15",
                         "p16", "p17", "p18", "p19", "p20"),
                 stringBasis);
-        PopulationDef denExclusionPop = createPopulationDef(
+        PopulationReportDef denExclusionPop = createPopulationDef(
                 "dex-1", MeasurePopulationType.DENOMINATOREXCLUSION, Set.of("p11", "p12", "p13"), stringBasis);
-        PopulationDef denExceptionPop =
+        PopulationReportDef denExceptionPop =
                 createPopulationDef("dexc-1", MeasurePopulationType.DENOMINATOREXCEPTION, Set.of("p14"), stringBasis);
-        PopulationDef numExclusionPop =
+        PopulationReportDef numExclusionPop =
                 createPopulationDef("nex-1", MeasurePopulationType.NUMERATOREXCLUSION, Set.of("p1", "p2"), stringBasis);
 
-        GroupDef groupDef = new GroupDef(
+        GroupReportDef groupDef = new GroupReportDef(
                 "group-1",
                 createTextOnlyConcept("Test Group"),
                 List.of(),
@@ -101,20 +112,20 @@ class MeasureDefScorerTest {
     void testScoreGroup_ZeroDenominator_SetsNullScore() {
         // Setup: All subjects excluded from denominator
         CodeDef dateBasis = createPopulationBasisCode("date");
-        PopulationDef numeratorPop = createPopulationDef(
+        PopulationReportDef numeratorPop = createPopulationDef(
                 "num-1", MeasurePopulationType.NUMERATOR, Set.of("p1", "p2", "p3", "p4", "p5"), dateBasis);
-        PopulationDef denominatorPop = createPopulationDef(
+        PopulationReportDef denominatorPop = createPopulationDef(
                 "den-1",
                 MeasurePopulationType.DENOMINATOR,
                 Set.of("p1", "p2", "p3", "p4", "p5", "p6", "p7", "p8", "p9", "p10"),
                 dateBasis);
-        PopulationDef denExclusionPop = createPopulationDef(
+        PopulationReportDef denExclusionPop = createPopulationDef(
                 "dex-1",
                 MeasurePopulationType.DENOMINATOREXCLUSION,
                 Set.of("p1", "p2", "p3", "p4", "p5", "p6", "p7", "p8", "p9", "p10"),
                 dateBasis); // All excluded
 
-        GroupDef groupDef = new GroupDef(
+        GroupReportDef groupDef = new GroupReportDef(
                 "group-1",
                 createTextOnlyConcept("Test Group"),
                 List.of(),
@@ -138,12 +149,12 @@ class MeasureDefScorerTest {
         // Female stratum: 5/5 = 1.0
 
         CodeDef booleanBasisCode = createPopulationBasisCode("boolean");
-        PopulationDef numeratorPop = createPopulationDef(
+        PopulationReportDef numeratorPop = createPopulationDef(
                 "num-1",
                 MeasurePopulationType.NUMERATOR,
                 Set.of("male1", "male2", "male3", "female1", "female2", "female3", "female4", "female5"),
                 booleanBasisCode);
-        PopulationDef denominatorPop = createPopulationDef(
+        PopulationReportDef denominatorPop = createPopulationDef(
                 "den-1",
                 MeasurePopulationType.DENOMINATOR,
                 Set.of(
@@ -153,14 +164,14 @@ class MeasureDefScorerTest {
 
         // Create stratum populations for Male stratum
 
-        StratumPopulationDef maleNumPop = new StratumPopulationDef(
+        StratumPopulationReportDef maleNumPop = new StratumPopulationReportDef(
                 numeratorPop,
                 Set.of("male1", "male2", "male3"),
                 Set.of(),
                 List.of(),
                 MeasureStratifierType.VALUE,
                 booleanBasisCode);
-        StratumPopulationDef maleDenPop = new StratumPopulationDef(
+        StratumPopulationReportDef maleDenPop = new StratumPopulationReportDef(
                 denominatorPop,
                 Set.of("male1", "male2", "male3", "male4", "male5"),
                 Set.of(),
@@ -168,22 +179,22 @@ class MeasureDefScorerTest {
                 MeasureStratifierType.VALUE,
                 booleanBasisCode);
 
-        StratifierComponentDef genderComponent =
-                new StratifierComponentDef("gender-component", createTextOnlyConcept("Gender"), "Gender");
-        StratumDef maleStratum = new StratumDef(
+        StratifierComponentReportDef genderComponent =
+                new StratifierComponentReportDef("gender-component", createTextOnlyConcept("Gender"), "Gender");
+        StratumReportDef maleStratum = new StratumReportDef(
                 List.of(maleNumPop, maleDenPop),
-                Set.of(new StratumValueDef(new StratumValueWrapper("male"), genderComponent)),
+                Set.of(new StratumValueReportDef(new StratumValueWrapperReportDef("male"), genderComponent)),
                 Set.of("male1", "male2", "male3", "male4", "male5"));
 
         // Create stratum populations for Female stratum
-        StratumPopulationDef femaleNumPop = new StratumPopulationDef(
+        StratumPopulationReportDef femaleNumPop = new StratumPopulationReportDef(
                 numeratorPop,
                 Set.of("female1", "female2", "female3", "female4", "female5"),
                 Set.of(),
                 List.of(),
                 MeasureStratifierType.VALUE,
                 booleanBasisCode);
-        StratumPopulationDef femaleDenPop = new StratumPopulationDef(
+        StratumPopulationReportDef femaleDenPop = new StratumPopulationReportDef(
                 denominatorPop,
                 Set.of("female1", "female2", "female3", "female4", "female5"),
                 Set.of(),
@@ -191,16 +202,16 @@ class MeasureDefScorerTest {
                 MeasureStratifierType.VALUE,
                 booleanBasisCode);
 
-        StratumDef femaleStratum = new StratumDef(
+        StratumReportDef femaleStratum = new StratumReportDef(
                 List.of(femaleNumPop, femaleDenPop),
-                Set.of(new StratumValueDef(new StratumValueWrapper("female"), genderComponent)),
+                Set.of(new StratumValueReportDef(new StratumValueWrapperReportDef("female"), genderComponent)),
                 Set.of("female1", "female2", "female3", "female4", "female5"));
 
-        StratifierDef stratifierDef = new StratifierDef(
+        StratifierReportDef stratifierDef = new StratifierReportDef(
                 "gender-stratifier", createTextOnlyConcept("Gender Stratifier"), "Gender", MeasureStratifierType.VALUE);
         stratifierDef.addAllStratum(List.of(maleStratum, femaleStratum));
 
-        GroupDef groupDef = new GroupDef(
+        GroupReportDef groupDef = new GroupReportDef(
                 "group-1",
                 createTextOnlyConcept("Test Group"),
                 List.of(stratifierDef),
@@ -227,15 +238,15 @@ class MeasureDefScorerTest {
     void testScoreGroup_RatioMeasure() {
         // Setup: Ratio measure with 6/12 = 0.5
         CodeDef stringBasis = createPopulationBasisCode("String");
-        PopulationDef numeratorPop = createPopulationDef(
+        PopulationReportDef numeratorPop = createPopulationDef(
                 "num-1", MeasurePopulationType.NUMERATOR, Set.of("p1", "p2", "p3", "p4", "p5", "p6"), stringBasis);
-        PopulationDef denominatorPop = createPopulationDef(
+        PopulationReportDef denominatorPop = createPopulationDef(
                 "den-1",
                 MeasurePopulationType.DENOMINATOR,
                 Set.of("p1", "p2", "p3", "p4", "p5", "p6", "p7", "p8", "p9", "p10", "p11", "p12"),
                 stringBasis);
 
-        GroupDef groupDef = new GroupDef(
+        GroupReportDef groupDef = new GroupReportDef(
                 "group-1",
                 createTextOnlyConcept("Test Group"),
                 List.of(),
@@ -258,16 +269,16 @@ class MeasureDefScorerTest {
         // Setup: Continuous variable measure with SUM aggregation
         // Subject observations: 10.0, 20.0, 30.0 = 60.0 total
         CodeDef dateBasis = createPopulationBasisCode("date");
-        PopulationDef initialPopulation = createPopulationDef(
+        PopulationReportDef initialPopulation = createPopulationDef(
                 "ip-1", MeasurePopulationType.INITIALPOPULATION, Set.of("p1", "p2", "p3"), dateBasis);
 
-        PopulationDef measurePopulation = createPopulationDef(
+        PopulationReportDef measurePopulation = createPopulationDef(
                 "mp-1", MeasurePopulationType.MEASUREPOPULATION, Set.of("p1", "p2", "p3"), dateBasis);
 
         // Create MEASUREOBSERVATION population with QuantityDef observations
         // Default aggregation method is SUM when not specified
         ConceptDef measureObsCode = createMeasurePopulationConcept(MeasurePopulationType.MEASUREOBSERVATION);
-        PopulationDef measureObsPop = new PopulationDef(
+        PopulationReportDef measureObsPop = new PopulationReportDef(
                 "msrobs-1",
                 measureObsCode,
                 MeasurePopulationType.MEASUREOBSERVATION,
@@ -277,19 +288,19 @@ class MeasureDefScorerTest {
                 ContinuousVariableObservationAggregateMethod.SUM);
 
         // Add QuantityDef observations for each subject
-        Map<String, QuantityDef> obs1 = new HashMap<>();
-        obs1.put("obs-1", new QuantityDef(10.0));
+        Map<String, QuantityReportDef> obs1 = new HashMap<>();
+        obs1.put("obs-1", new QuantityReportDef(10.0));
         measureObsPop.addResource("p1", obs1);
 
-        Map<String, QuantityDef> obs2 = new HashMap<>();
-        obs2.put("obs-2", new QuantityDef(20.0));
+        Map<String, QuantityReportDef> obs2 = new HashMap<>();
+        obs2.put("obs-2", new QuantityReportDef(20.0));
         measureObsPop.addResource("p2", obs2);
 
-        Map<String, QuantityDef> obs3 = new HashMap<>();
-        obs3.put("obs-3", new QuantityDef(30.0));
+        Map<String, QuantityReportDef> obs3 = new HashMap<>();
+        obs3.put("obs-3", new QuantityReportDef(30.0));
         measureObsPop.addResource("p3", obs3);
 
-        GroupDef groupDef = new GroupDef(
+        GroupReportDef groupDef = new GroupReportDef(
                 "group-1",
                 createTextOnlyConcept("Test Group"),
                 List.of(),
@@ -313,14 +324,14 @@ class MeasureDefScorerTest {
         // Setup: Continuous variable measure with AVG aggregation
         // Subject observations: 10.0, 20.0, 30.0 = 20.0 average
         CodeDef booleanBasis = createBooleanBasisCode();
-        PopulationDef initialPopulation = createPopulationDef(
+        PopulationReportDef initialPopulation = createPopulationDef(
                 "ip-1", MeasurePopulationType.INITIALPOPULATION, Set.of("p1", "p2", "p3"), booleanBasis);
 
-        PopulationDef measurePopulation = createPopulationDef(
+        PopulationReportDef measurePopulation = createPopulationDef(
                 "mp-1", MeasurePopulationType.MEASUREPOPULATION, Set.of("p1", "p2", "p3"), booleanBasis);
 
         ConceptDef measureObsCode = createMeasurePopulationConcept(MeasurePopulationType.MEASUREOBSERVATION);
-        PopulationDef measureObsPop = new PopulationDef(
+        PopulationReportDef measureObsPop = new PopulationReportDef(
                 "msrobs-1",
                 measureObsCode,
                 MeasurePopulationType.MEASUREOBSERVATION,
@@ -329,19 +340,19 @@ class MeasureDefScorerTest {
                 null,
                 ContinuousVariableObservationAggregateMethod.AVG);
 
-        Map<String, QuantityDef> obs1 = new HashMap<>();
-        obs1.put("obs-1", new QuantityDef(10.0));
+        Map<String, QuantityReportDef> obs1 = new HashMap<>();
+        obs1.put("obs-1", new QuantityReportDef(10.0));
         measureObsPop.addResource("p1", obs1);
 
-        Map<String, QuantityDef> obs2 = new HashMap<>();
-        obs2.put("obs-2", new QuantityDef(20.0));
+        Map<String, QuantityReportDef> obs2 = new HashMap<>();
+        obs2.put("obs-2", new QuantityReportDef(20.0));
         measureObsPop.addResource("p2", obs2);
 
-        Map<String, QuantityDef> obs3 = new HashMap<>();
-        obs3.put("obs-3", new QuantityDef(30.0));
+        Map<String, QuantityReportDef> obs3 = new HashMap<>();
+        obs3.put("obs-3", new QuantityReportDef(30.0));
         measureObsPop.addResource("p3", obs3);
 
-        GroupDef groupDef = new GroupDef(
+        GroupReportDef groupDef = new GroupReportDef(
                 "group-1",
                 createTextOnlyConcept("Test Group"),
                 List.of(),
@@ -365,14 +376,14 @@ class MeasureDefScorerTest {
         // Setup: Continuous variable with MIN aggregation
         // Subject observations: 10.0, 20.0, 30.0 = 10.0 min
         CodeDef encounterBasis = createPopulationBasisCode("Encounter");
-        PopulationDef initialPopulation = createPopulationDef(
+        PopulationReportDef initialPopulation = createPopulationDef(
                 "ip-1", MeasurePopulationType.INITIALPOPULATION, Set.of("p1", "p2", "p3"), encounterBasis);
 
-        PopulationDef measurePopulation = createPopulationDef(
+        PopulationReportDef measurePopulation = createPopulationDef(
                 "mp-1", MeasurePopulationType.MEASUREPOPULATION, Set.of("p1", "p2", "p3"), encounterBasis);
 
         ConceptDef measureObsCode = createMeasurePopulationConcept(MeasurePopulationType.MEASUREOBSERVATION);
-        PopulationDef measureObsPop = new PopulationDef(
+        PopulationReportDef measureObsPop = new PopulationReportDef(
                 "msrobs-1",
                 measureObsCode,
                 MeasurePopulationType.MEASUREOBSERVATION,
@@ -381,19 +392,19 @@ class MeasureDefScorerTest {
                 null,
                 ContinuousVariableObservationAggregateMethod.MIN);
 
-        Map<String, QuantityDef> obs1 = new HashMap<>();
-        obs1.put("obs-1", new QuantityDef(10.0));
+        Map<String, QuantityReportDef> obs1 = new HashMap<>();
+        obs1.put("obs-1", new QuantityReportDef(10.0));
         measureObsPop.addResource("p1", obs1);
 
-        Map<String, QuantityDef> obs2 = new HashMap<>();
-        obs2.put("obs-2", new QuantityDef(20.0));
+        Map<String, QuantityReportDef> obs2 = new HashMap<>();
+        obs2.put("obs-2", new QuantityReportDef(20.0));
         measureObsPop.addResource("p2", obs2);
 
-        Map<String, QuantityDef> obs3 = new HashMap<>();
-        obs3.put("obs-3", new QuantityDef(30.0));
+        Map<String, QuantityReportDef> obs3 = new HashMap<>();
+        obs3.put("obs-3", new QuantityReportDef(30.0));
         measureObsPop.addResource("p3", obs3);
 
-        GroupDef groupDef = new GroupDef(
+        GroupReportDef groupDef = new GroupReportDef(
                 "group-1",
                 createTextOnlyConcept("Test Group"),
                 List.of(),
@@ -417,14 +428,14 @@ class MeasureDefScorerTest {
         // Setup: Continuous variable with MAX aggregation
         // Subject observations: 10.0, 20.0, 30.0 = 30.0 max
         CodeDef stringBasis = createPopulationBasisCode("String");
-        PopulationDef initialPopulation = createPopulationDef(
+        PopulationReportDef initialPopulation = createPopulationDef(
                 "ip-1", MeasurePopulationType.INITIALPOPULATION, Set.of("p1", "p2", "p3"), stringBasis);
 
-        PopulationDef measurePopulation = createPopulationDef(
+        PopulationReportDef measurePopulation = createPopulationDef(
                 "mp-1", MeasurePopulationType.MEASUREPOPULATION, Set.of("p1", "p2", "p3"), stringBasis);
 
         ConceptDef measureObsCode = createMeasurePopulationConcept(MeasurePopulationType.MEASUREOBSERVATION);
-        PopulationDef measureObsPop = new PopulationDef(
+        PopulationReportDef measureObsPop = new PopulationReportDef(
                 "msrobs-1",
                 measureObsCode,
                 MeasurePopulationType.MEASUREOBSERVATION,
@@ -433,19 +444,19 @@ class MeasureDefScorerTest {
                 null,
                 ContinuousVariableObservationAggregateMethod.MAX);
 
-        Map<String, QuantityDef> obs1 = new HashMap<>();
-        obs1.put("obs-1", new QuantityDef(10.0));
+        Map<String, QuantityReportDef> obs1 = new HashMap<>();
+        obs1.put("obs-1", new QuantityReportDef(10.0));
         measureObsPop.addResource("p1", obs1);
 
-        Map<String, QuantityDef> obs2 = new HashMap<>();
-        obs2.put("obs-2", new QuantityDef(20.0));
+        Map<String, QuantityReportDef> obs2 = new HashMap<>();
+        obs2.put("obs-2", new QuantityReportDef(20.0));
         measureObsPop.addResource("p2", obs2);
 
-        Map<String, QuantityDef> obs3 = new HashMap<>();
-        obs3.put("obs-3", new QuantityDef(30.0));
+        Map<String, QuantityReportDef> obs3 = new HashMap<>();
+        obs3.put("obs-3", new QuantityReportDef(30.0));
         measureObsPop.addResource("p3", obs3);
 
-        GroupDef groupDef = new GroupDef(
+        GroupReportDef groupDef = new GroupReportDef(
                 "group-1",
                 createTextOnlyConcept("Test Group"),
                 List.of(),
@@ -472,15 +483,15 @@ class MeasureDefScorerTest {
     void testGetMeasureScore_NullScore() {
         // Setup: Group with no scoring performed (score is null)
         CodeDef dateBasis = createPopulationBasisCode("date");
-        PopulationDef numeratorPop = createPopulationDef(
+        PopulationReportDef numeratorPop = createPopulationDef(
                 "num-1", MeasurePopulationType.NUMERATOR, Set.of("patient1", "patient2", "patient3"), dateBasis);
-        PopulationDef denominatorPop = createPopulationDef(
+        PopulationReportDef denominatorPop = createPopulationDef(
                 "den-1",
                 MeasurePopulationType.DENOMINATOR,
                 Set.of("patient1", "patient2", "patient3", "patient4"),
                 dateBasis);
 
-        GroupDef groupDef = new GroupDef(
+        GroupReportDef groupDef = new GroupReportDef(
                 "group-1",
                 createTextOnlyConcept("Test Group"),
                 List.of(),
@@ -499,15 +510,15 @@ class MeasureDefScorerTest {
     void testGetMeasureScore_ZeroScore_IncreaseNotation() {
         // Setup: Group with zero score and increase notation
         CodeDef encounterBasis = createPopulationBasisCode("Encounter");
-        PopulationDef numeratorPop =
+        PopulationReportDef numeratorPop =
                 createPopulationDef("num-1", MeasurePopulationType.NUMERATOR, Set.of(), encounterBasis); // No subjects
-        PopulationDef denominatorPop = createPopulationDef(
+        PopulationReportDef denominatorPop = createPopulationDef(
                 "den-1",
                 MeasurePopulationType.DENOMINATOR,
                 Set.of("patient1", "patient2", "patient3", "patient4"),
                 encounterBasis);
 
-        GroupDef groupDef = new GroupDef(
+        GroupReportDef groupDef = new GroupReportDef(
                 "group-1",
                 createTextOnlyConcept("Test Group"),
                 List.of(),
@@ -530,15 +541,15 @@ class MeasureDefScorerTest {
     void testGetMeasureScore_NegativeScore_ReturnsNull() {
         // Setup: Group with manually set negative score (simulating applySetMembership=false scenario)
         CodeDef stringBasis = createPopulationBasisCode("String");
-        PopulationDef numeratorPop = createPopulationDef(
+        PopulationReportDef numeratorPop = createPopulationDef(
                 "num-1", MeasurePopulationType.NUMERATOR, Set.of("patient1", "patient2", "patient3"), stringBasis);
-        PopulationDef denominatorPop = createPopulationDef(
+        PopulationReportDef denominatorPop = createPopulationDef(
                 "den-1",
                 MeasurePopulationType.DENOMINATOR,
                 Set.of("patient1", "patient2", "patient3", "patient4"),
                 stringBasis);
 
-        GroupDef groupDef = new GroupDef(
+        GroupReportDef groupDef = new GroupReportDef(
                 "group-1",
                 createTextOnlyConcept("Test Group"),
                 List.of(),
@@ -561,15 +572,15 @@ class MeasureDefScorerTest {
     void testGetMeasureScore_PositiveScore_IncreaseNotation() {
         // Setup: Group with positive score and increase notation
         CodeDef dateBasis = createPopulationBasisCode("date");
-        PopulationDef numeratorPop = createPopulationDef(
+        PopulationReportDef numeratorPop = createPopulationDef(
                 "num-1", MeasurePopulationType.NUMERATOR, Set.of("patient1", "patient2", "patient3"), dateBasis);
-        PopulationDef denominatorPop = createPopulationDef(
+        PopulationReportDef denominatorPop = createPopulationDef(
                 "den-1",
                 MeasurePopulationType.DENOMINATOR,
                 Set.of("patient1", "patient2", "patient3", "patient4"),
                 dateBasis);
 
-        GroupDef groupDef = new GroupDef(
+        GroupReportDef groupDef = new GroupReportDef(
                 "group-1",
                 createTextOnlyConcept("Test Group"),
                 List.of(),
@@ -592,15 +603,15 @@ class MeasureDefScorerTest {
     void testGetMeasureScore_PositiveScore_DecreaseNotation() {
         // Setup: Group with positive score and decrease notation
         CodeDef booleanBasis = createBooleanBasisCode();
-        PopulationDef numeratorPop = createPopulationDef(
+        PopulationReportDef numeratorPop = createPopulationDef(
                 "num-1", MeasurePopulationType.NUMERATOR, Set.of("patient1", "patient2", "patient3"), booleanBasis);
-        PopulationDef denominatorPop = createPopulationDef(
+        PopulationReportDef denominatorPop = createPopulationDef(
                 "den-1",
                 MeasurePopulationType.DENOMINATOR,
                 Set.of("patient1", "patient2", "patient3", "patient4"),
                 booleanBasis);
 
-        GroupDef groupDef = new GroupDef(
+        GroupReportDef groupDef = new GroupReportDef(
                 "group-1",
                 createTextOnlyConcept("Test Group"),
                 List.of(),
@@ -639,8 +650,8 @@ class MeasureDefScorerTest {
         // Create numerator with 2 subjects, each having multiple resources
         ConceptDef numeratorCode = createMeasurePopulationConcept(MeasurePopulationType.NUMERATOR);
         CodeDef booleanBasis = createBooleanBasisCode();
-        PopulationDef numeratorPop =
-                new PopulationDef("num-1", numeratorCode, MeasurePopulationType.NUMERATOR, "Numerator", booleanBasis);
+        PopulationReportDef numeratorPop = new PopulationReportDef(
+                "num-1", numeratorCode, MeasurePopulationType.NUMERATOR, "Numerator", booleanBasis);
 
         // Patient1: 3 encounters in numerator
         numeratorPop.addResource("patient1", "Encounter/enc1");
@@ -654,7 +665,7 @@ class MeasureDefScorerTest {
         // Create denominator with 3 subjects, each having multiple resources
         ConceptDef denominatorCode = createMeasurePopulationConcept(MeasurePopulationType.DENOMINATOR);
         CodeDef booleanBasis2 = createBooleanBasisCode();
-        PopulationDef denominatorPop = new PopulationDef(
+        PopulationReportDef denominatorPop = new PopulationReportDef(
                 "den-1", denominatorCode, MeasurePopulationType.DENOMINATOR, "Denominator", booleanBasis2);
 
         // Patient1: 3 encounters in denominator
@@ -673,7 +684,7 @@ class MeasureDefScorerTest {
         denominatorPop.addResource("patient3", "Encounter/enc9");
 
         // CRITICAL: Use boolean basis
-        GroupDef groupDef = new GroupDef(
+        GroupReportDef groupDef = new GroupReportDef(
                 "group-1",
                 createTextOnlyConcept("Boolean Basis Test"),
                 List.of(),
@@ -716,8 +727,8 @@ class MeasureDefScorerTest {
         // Create numerator with 2 subjects, each having multiple resources
         ConceptDef numeratorCode = createMeasurePopulationConcept(MeasurePopulationType.NUMERATOR);
         CodeDef encounterBasis = createPopulationBasisCode("Encounter");
-        PopulationDef numeratorPop =
-                new PopulationDef("num-1", numeratorCode, MeasurePopulationType.NUMERATOR, "Numerator", encounterBasis);
+        PopulationReportDef numeratorPop = new PopulationReportDef(
+                "num-1", numeratorCode, MeasurePopulationType.NUMERATOR, "Numerator", encounterBasis);
 
         // Patient1: 3 encounters in numerator
         numeratorPop.addResource("patient1", "Encounter/enc1");
@@ -730,7 +741,7 @@ class MeasureDefScorerTest {
 
         // Create denominator with 3 subjects, each having multiple resources
         ConceptDef denominatorCode = createMeasurePopulationConcept(MeasurePopulationType.DENOMINATOR);
-        PopulationDef denominatorPop = new PopulationDef(
+        PopulationReportDef denominatorPop = new PopulationReportDef(
                 "den-1", denominatorCode, MeasurePopulationType.DENOMINATOR, "Denominator", encounterBasis);
 
         // Patient1: 3 encounters in denominator
@@ -749,7 +760,7 @@ class MeasureDefScorerTest {
         denominatorPop.addResource("patient3", "Encounter/enc9");
 
         // CRITICAL: Use Encounter basis (non-boolean)
-        GroupDef groupDef = new GroupDef(
+        GroupReportDef groupDef = new GroupReportDef(
                 "group-1",
                 createTextOnlyConcept("Encounter Basis Test"),
                 List.of(),
@@ -781,13 +792,13 @@ class MeasureDefScorerTest {
     void testScoreGroup_CohortMeasure_NoScoreSet() {
         // Setup: Cohort measure with only INITIALPOPULATION
         CodeDef booleanBasis = createBooleanBasisCode();
-        PopulationDef initialPopulation = createPopulationDef(
+        PopulationReportDef initialPopulation = createPopulationDef(
                 "ip-1",
                 MeasurePopulationType.INITIALPOPULATION,
                 Set.of("p1", "p2", "p3", "p4", "p5", "p6", "p7", "p8", "p9", "p10"),
                 booleanBasis);
 
-        GroupDef groupDef = new GroupDef(
+        GroupReportDef groupDef = new GroupReportDef(
                 "group-1",
                 createTextOnlyConcept("Cohort Measure Test"),
                 List.of(), // No stratifiers
@@ -813,12 +824,12 @@ class MeasureDefScorerTest {
     void testScoreGroup_MissingScoringType_ThrowsException() {
         // Setup: GroupDef with null scoring type
         CodeDef booleanBasis = createBooleanBasisCode();
-        PopulationDef numeratorPop =
+        PopulationReportDef numeratorPop =
                 createPopulationDef("num-1", MeasurePopulationType.NUMERATOR, Set.of("p1", "p2", "p3"), booleanBasis);
-        PopulationDef denominatorPop = createPopulationDef(
+        PopulationReportDef denominatorPop = createPopulationDef(
                 "den-1", MeasurePopulationType.DENOMINATOR, Set.of("p1", "p2", "p3", "p4"), booleanBasis);
 
-        GroupDef groupDef = new GroupDef(
+        GroupReportDef groupDef = new GroupReportDef(
                 "group-1",
                 createTextOnlyConcept("Missing Scoring Type Test"),
                 List.of(),
@@ -846,20 +857,20 @@ class MeasureDefScorerTest {
     void testScoreGroup_RatioWithObservations_GroupLevel() {
         // Setup: RATIO measure with separate numerator/denominator MEASUREOBSERVATION populations
         CodeDef booleanBasis = createBooleanBasisCode();
-        PopulationDef initialPopulation = createPopulationDef(
+        PopulationReportDef initialPopulation = createPopulationDef(
                 "ip-1", MeasurePopulationType.INITIALPOPULATION, Set.of("p1", "p2", "p3"), booleanBasis);
-        PopulationDef measurePopulation = createPopulationDef(
+        PopulationReportDef measurePopulation = createPopulationDef(
                 "mp-1", MeasurePopulationType.MEASUREPOPULATION, Set.of("p1", "p2", "p3"), booleanBasis);
 
         // Create standard NUMERATOR and DENOMINATOR populations (referenced by measure observations)
-        PopulationDef numeratorPop =
+        PopulationReportDef numeratorPop =
                 createPopulationDef("num-1", MeasurePopulationType.NUMERATOR, Set.of("p1", "p2", "p3"), booleanBasis);
-        PopulationDef denominatorPop =
+        PopulationReportDef denominatorPop =
                 createPopulationDef("den-1", MeasurePopulationType.DENOMINATOR, Set.of("p1", "p2", "p3"), booleanBasis);
 
         // Create numerator MEASUREOBSERVATION with criteriaReference to numerator
         ConceptDef numObsCode = createMeasurePopulationConcept(MeasurePopulationType.MEASUREOBSERVATION);
-        PopulationDef numeratorMeasureObs = new PopulationDef(
+        PopulationReportDef numeratorMeasureObs = new PopulationReportDef(
                 "num-obs-1",
                 numObsCode,
                 MeasurePopulationType.MEASUREOBSERVATION,
@@ -869,21 +880,21 @@ class MeasureDefScorerTest {
                 ContinuousVariableObservationAggregateMethod.SUM);
 
         // Add numerator observations
-        Map<String, QuantityDef> numObs1 = new HashMap<>();
-        numObs1.put("obs-num-1", new QuantityDef(10.0));
+        Map<String, QuantityReportDef> numObs1 = new HashMap<>();
+        numObs1.put("obs-num-1", new QuantityReportDef(10.0));
         numeratorMeasureObs.addResource("p1", numObs1);
 
-        Map<String, QuantityDef> numObs2 = new HashMap<>();
-        numObs2.put("obs-num-2", new QuantityDef(20.0));
+        Map<String, QuantityReportDef> numObs2 = new HashMap<>();
+        numObs2.put("obs-num-2", new QuantityReportDef(20.0));
         numeratorMeasureObs.addResource("p2", numObs2);
 
-        Map<String, QuantityDef> numObs3 = new HashMap<>();
-        numObs3.put("obs-num-3", new QuantityDef(30.0));
+        Map<String, QuantityReportDef> numObs3 = new HashMap<>();
+        numObs3.put("obs-num-3", new QuantityReportDef(30.0));
         numeratorMeasureObs.addResource("p3", numObs3);
 
         // Create denominator MEASUREOBSERVATION with criteriaReference to denominator
         ConceptDef denObsCode = createMeasurePopulationConcept(MeasurePopulationType.MEASUREOBSERVATION);
-        PopulationDef denominatorMeasureObs = new PopulationDef(
+        PopulationReportDef denominatorMeasureObs = new PopulationReportDef(
                 "den-obs-1",
                 denObsCode,
                 MeasurePopulationType.MEASUREOBSERVATION,
@@ -893,20 +904,20 @@ class MeasureDefScorerTest {
                 ContinuousVariableObservationAggregateMethod.SUM);
 
         // Add denominator observations
-        Map<String, QuantityDef> denObs1 = new HashMap<>();
-        denObs1.put("obs-den-1", new QuantityDef(5.0));
+        Map<String, QuantityReportDef> denObs1 = new HashMap<>();
+        denObs1.put("obs-den-1", new QuantityReportDef(5.0));
         denominatorMeasureObs.addResource("p1", denObs1);
 
-        Map<String, QuantityDef> denObs2 = new HashMap<>();
-        denObs2.put("obs-den-2", new QuantityDef(10.0));
+        Map<String, QuantityReportDef> denObs2 = new HashMap<>();
+        denObs2.put("obs-den-2", new QuantityReportDef(10.0));
         denominatorMeasureObs.addResource("p2", denObs2);
 
-        Map<String, QuantityDef> denObs3 = new HashMap<>();
-        denObs3.put("obs-den-3", new QuantityDef(15.0));
+        Map<String, QuantityReportDef> denObs3 = new HashMap<>();
+        denObs3.put("obs-den-3", new QuantityReportDef(15.0));
         denominatorMeasureObs.addResource("p3", denObs3);
 
         // Create GroupDef with RATIO scoring
-        GroupDef groupDef = new GroupDef(
+        GroupReportDef groupDef = new GroupReportDef(
                 "group-1",
                 createTextOnlyConcept("Ratio with Observations Test"),
                 List.of(), // No stratifiers
@@ -941,18 +952,18 @@ class MeasureDefScorerTest {
         // Female patients: p4, p5
 
         CodeDef booleanBasis = createBooleanBasisCode();
-        PopulationDef initialPopulation = createPopulationDef(
+        PopulationReportDef initialPopulation = createPopulationDef(
                 "ip-1", MeasurePopulationType.INITIALPOPULATION, Set.of("p1", "p2", "p3", "p4", "p5"), booleanBasis);
 
         // Create standard NUMERATOR and DENOMINATOR populations
-        PopulationDef numeratorPop = createPopulationDef(
+        PopulationReportDef numeratorPop = createPopulationDef(
                 "num-1", MeasurePopulationType.NUMERATOR, Set.of("p1", "p2", "p3", "p4", "p5"), booleanBasis);
-        PopulationDef denominatorPop = createPopulationDef(
+        PopulationReportDef denominatorPop = createPopulationDef(
                 "den-1", MeasurePopulationType.DENOMINATOR, Set.of("p1", "p2", "p3", "p4", "p5"), booleanBasis);
 
         // Create numerator MEASUREOBSERVATION
         ConceptDef numObsCode = createMeasurePopulationConcept(MeasurePopulationType.MEASUREOBSERVATION);
-        PopulationDef numeratorMeasureObs = new PopulationDef(
+        PopulationReportDef numeratorMeasureObs = new PopulationReportDef(
                 "num-obs-1",
                 numObsCode,
                 MeasurePopulationType.MEASUREOBSERVATION,
@@ -962,30 +973,30 @@ class MeasureDefScorerTest {
                 ContinuousVariableObservationAggregateMethod.SUM);
 
         // Male numerator observations: 10 + 15 + 15 = 40
-        Map<String, QuantityDef> numObs1 = new HashMap<>();
-        numObs1.put("p1", new QuantityDef(10.0));
+        Map<String, QuantityReportDef> numObs1 = new HashMap<>();
+        numObs1.put("p1", new QuantityReportDef(10.0));
         numeratorMeasureObs.addResource("p1", numObs1);
 
-        Map<String, QuantityDef> numObs2 = new HashMap<>();
-        numObs2.put("p2", new QuantityDef(15.0));
+        Map<String, QuantityReportDef> numObs2 = new HashMap<>();
+        numObs2.put("p2", new QuantityReportDef(15.0));
         numeratorMeasureObs.addResource("p2", numObs2);
 
-        Map<String, QuantityDef> numObs3 = new HashMap<>();
-        numObs3.put("p3", new QuantityDef(15.0));
+        Map<String, QuantityReportDef> numObs3 = new HashMap<>();
+        numObs3.put("p3", new QuantityReportDef(15.0));
         numeratorMeasureObs.addResource("p3", numObs3);
 
         // Female numerator observations: 10 + 20 = 30
-        Map<String, QuantityDef> numObs4 = new HashMap<>();
-        numObs4.put("p4", new QuantityDef(10.0));
+        Map<String, QuantityReportDef> numObs4 = new HashMap<>();
+        numObs4.put("p4", new QuantityReportDef(10.0));
         numeratorMeasureObs.addResource("p4", numObs4);
 
-        Map<String, QuantityDef> numObs5 = new HashMap<>();
-        numObs5.put("p5", new QuantityDef(20.0));
+        Map<String, QuantityReportDef> numObs5 = new HashMap<>();
+        numObs5.put("p5", new QuantityReportDef(20.0));
         numeratorMeasureObs.addResource("p5", numObs5);
 
         // Create denominator MEASUREOBSERVATION
         ConceptDef denObsCode = createMeasurePopulationConcept(MeasurePopulationType.MEASUREOBSERVATION);
-        PopulationDef denominatorMeasureObs = new PopulationDef(
+        PopulationReportDef denominatorMeasureObs = new PopulationReportDef(
                 "den-obs-1",
                 denObsCode,
                 MeasurePopulationType.MEASUREOBSERVATION,
@@ -995,30 +1006,30 @@ class MeasureDefScorerTest {
                 ContinuousVariableObservationAggregateMethod.SUM);
 
         // Male denominator observations: 5 + 7 + 8 = 20
-        Map<String, QuantityDef> denObs1 = new HashMap<>();
-        denObs1.put("p1", new QuantityDef(5.0));
+        Map<String, QuantityReportDef> denObs1 = new HashMap<>();
+        denObs1.put("p1", new QuantityReportDef(5.0));
         denominatorMeasureObs.addResource("p1", denObs1);
 
-        Map<String, QuantityDef> denObs2 = new HashMap<>();
-        denObs2.put("p2", new QuantityDef(7.0));
+        Map<String, QuantityReportDef> denObs2 = new HashMap<>();
+        denObs2.put("p2", new QuantityReportDef(7.0));
         denominatorMeasureObs.addResource("p2", denObs2);
 
-        Map<String, QuantityDef> denObs3 = new HashMap<>();
-        denObs3.put("p3", new QuantityDef(8.0));
+        Map<String, QuantityReportDef> denObs3 = new HashMap<>();
+        denObs3.put("p3", new QuantityReportDef(8.0));
         denominatorMeasureObs.addResource("p3", denObs3);
 
         // Female denominator observations: 4 + 6 = 10
-        Map<String, QuantityDef> denObs4 = new HashMap<>();
-        denObs4.put("p4", new QuantityDef(4.0));
+        Map<String, QuantityReportDef> denObs4 = new HashMap<>();
+        denObs4.put("p4", new QuantityReportDef(4.0));
         denominatorMeasureObs.addResource("p4", denObs4);
 
-        Map<String, QuantityDef> denObs5 = new HashMap<>();
-        denObs5.put("p5", new QuantityDef(6.0));
+        Map<String, QuantityReportDef> denObs5 = new HashMap<>();
+        denObs5.put("p5", new QuantityReportDef(6.0));
         denominatorMeasureObs.addResource("p5", denObs5);
 
         // Create stratum populations for Male stratum
         // Male stratum - MEASUREOBSERVATION populations
-        StratumPopulationDef maleNumObs = new StratumPopulationDef(
+        StratumPopulationReportDef maleNumObs = new StratumPopulationReportDef(
                 numeratorMeasureObs,
                 Set.of("p1", "p2", "p3"), // subjectsQualifiedOrUnqualified
                 Set.of(), // populationDefEvaluationResultIntersection
@@ -1026,7 +1037,7 @@ class MeasureDefScorerTest {
                 MeasureStratifierType.VALUE,
                 booleanBasis);
 
-        StratumPopulationDef maleDenObs = new StratumPopulationDef(
+        StratumPopulationReportDef maleDenObs = new StratumPopulationReportDef(
                 denominatorMeasureObs,
                 Set.of("p1", "p2", "p3"),
                 Set.of(),
@@ -1034,15 +1045,15 @@ class MeasureDefScorerTest {
                 MeasureStratifierType.VALUE,
                 booleanBasis);
 
-        StratifierComponentDef genderComponent =
-                new StratifierComponentDef("gender-component", createTextOnlyConcept("Gender"), "Gender");
-        StratumDef maleStratum = new StratumDef(
+        StratifierComponentReportDef genderComponent =
+                new StratifierComponentReportDef("gender-component", createTextOnlyConcept("Gender"), "Gender");
+        StratumReportDef maleStratum = new StratumReportDef(
                 List.of(maleNumObs, maleDenObs),
-                Set.of(new StratumValueDef(new StratumValueWrapper("male"), genderComponent)),
+                Set.of(new StratumValueReportDef(new StratumValueWrapperReportDef("male"), genderComponent)),
                 Set.of("p1", "p2", "p3"));
 
         // Female stratum - MEASUREOBSERVATION populations
-        StratumPopulationDef femaleNumObs = new StratumPopulationDef(
+        StratumPopulationReportDef femaleNumObs = new StratumPopulationReportDef(
                 numeratorMeasureObs,
                 Set.of("p4", "p5"),
                 Set.of(),
@@ -1050,7 +1061,7 @@ class MeasureDefScorerTest {
                 MeasureStratifierType.VALUE,
                 booleanBasis);
 
-        StratumPopulationDef femaleDenObs = new StratumPopulationDef(
+        StratumPopulationReportDef femaleDenObs = new StratumPopulationReportDef(
                 denominatorMeasureObs,
                 Set.of("p4", "p5"),
                 Set.of(),
@@ -1058,18 +1069,18 @@ class MeasureDefScorerTest {
                 MeasureStratifierType.VALUE,
                 booleanBasis);
 
-        StratumDef femaleStratum = new StratumDef(
+        StratumReportDef femaleStratum = new StratumReportDef(
                 List.of(femaleNumObs, femaleDenObs),
-                Set.of(new StratumValueDef(new StratumValueWrapper("female"), genderComponent)),
+                Set.of(new StratumValueReportDef(new StratumValueWrapperReportDef("female"), genderComponent)),
                 Set.of("p4", "p5"));
 
         // Create StratifierDef with strata
-        StratifierDef stratifierDef = new StratifierDef(
+        StratifierReportDef stratifierDef = new StratifierReportDef(
                 "gender-stratifier", createTextOnlyConcept("Gender Stratifier"), "Gender", MeasureStratifierType.VALUE);
         stratifierDef.addAllStratum(List.of(maleStratum, femaleStratum));
 
         // Create GroupDef
-        GroupDef groupDef = new GroupDef(
+        GroupReportDef groupDef = new GroupReportDef(
                 "group-1",
                 createTextOnlyConcept("Ratio with Observations Stratified"),
                 List.of(stratifierDef),
@@ -1102,10 +1113,10 @@ class MeasureDefScorerTest {
      * Create PopulationDef with subjects and specified population basis.
      * The populationBasis CodeDef should be the SAME instance used for the GroupDef.
      */
-    private PopulationDef createPopulationDef(
+    private PopulationReportDef createPopulationDef(
             String id, MeasurePopulationType type, Set<String> subjects, CodeDef populationBasis) {
         ConceptDef code = createMeasurePopulationConcept(type);
-        PopulationDef pop = new PopulationDef(id, code, type, "expression", populationBasis);
+        PopulationReportDef pop = new PopulationReportDef(id, code, type, "expression", populationBasis);
 
         // Add subjects to population
         for (String subject : subjects) {

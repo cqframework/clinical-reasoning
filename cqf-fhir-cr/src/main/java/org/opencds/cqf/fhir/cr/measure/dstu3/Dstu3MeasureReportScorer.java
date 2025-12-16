@@ -9,14 +9,14 @@ import org.hl7.fhir.dstu3.model.MeasureReport.MeasureReportGroupStratifierCompon
 import org.hl7.fhir.dstu3.model.MeasureReport.StratifierGroupComponent;
 import org.hl7.fhir.dstu3.model.MeasureReport.StratifierGroupPopulationComponent;
 import org.opencds.cqf.fhir.cr.measure.common.BaseMeasureReportScorer;
-import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.MeasureReportDef;
 
 public class Dstu3MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport> {
 
     @Override
-    public void score(String measureUrl, MeasureDef measureDef, MeasureReport measureReport) {
+    public void score(String measureUrl, MeasureReportDef measureDef, MeasureReport measureReport) {
         // Measure Def Check
         if (measureDef == null) {
             // This isn't due to user error

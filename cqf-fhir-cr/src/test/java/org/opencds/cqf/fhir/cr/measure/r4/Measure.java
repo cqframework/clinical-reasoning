@@ -282,7 +282,7 @@ public class Measure {
          * @return SelectedMeasureDef for fluent MeasureDef assertions
          */
         public SelectedMeasureDef<Then> def() {
-            return new SelectedMeasureDef<>(evaluation.measureDef(), this);
+            return new SelectedMeasureDef<>(evaluation.measureReportDef(), this);
         }
 
         // Backward compatibility - delegate to report()

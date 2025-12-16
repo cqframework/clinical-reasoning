@@ -13,6 +13,7 @@ import org.hl7.elm.r1.VersionedIdentifier;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.EvaluationResultsForMultiLib;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.MeasureReportDef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +37,7 @@ public class MeasureEvaluationResultHandler {
      *
      * @param fhirContext              FHIR context for FHIR version
      * @param evalResultsPerSubject    criteria expression evalResultsPerSubject
-     * @param measureDef               Measure defined objects
+     * @param measureReportDef         Measure report definition to populate with evaluation results
      * @param measureEvalType          the type of evaluation algorithm to apply to Criteria
      *                                 results
      * @param applyScoring             whether Measure Evaluator will apply set membership per
@@ -47,12 +48,12 @@ public class MeasureEvaluationResultHandler {
     public static void processResults(
             FhirContext fhirContext,
             Map<String, EvaluationResult> evalResultsPerSubject,
-            MeasureDef measureDef,
+            MeasureReportDef measureReportDef,
             @Nonnull MeasureEvalType measureEvalType,
             boolean applyScoring,
             PopulationBasisValidator populationBasisValidator) {
         MeasureEvaluator evaluator = new MeasureEvaluator(populationBasisValidator);
-        // Populate MeasureDef using MeasureEvaluator
+        // Populate MeasureReportDef using MeasureEvaluator
         for (Map.Entry<String, EvaluationResult> entry : evalResultsPerSubject.entrySet()) {
             // subject
             String subjectId = entry.getKey();
@@ -61,20 +62,20 @@ public class MeasureEvaluationResultHandler {
             var subjectTypePart = sub.getLeft();
             EvaluationResult evalResult = entry.getValue();
             try {
-                // populate CQL results into MeasureDef
+                // populate CQL results into MeasureReportDef
                 evaluator.evaluate(
-                        measureDef, measureEvalType, subjectTypePart, subjectIdPart, evalResult, applyScoring);
+                        measureReportDef, measureEvalType, subjectTypePart, subjectIdPart, evalResult, applyScoring);
             } catch (Exception e) {
                 // Catch Exceptions from evaluation per subject, but allow rest of subjects to be processed (if
                 // applicable)
                 var error = EXCEPTION_FOR_SUBJECT_ID_MESSAGE_TEMPLATE.formatted(subjectId, e.getMessage());
                 // Capture error for MeasureReportBuilder
-                measureDef.addError(error);
+                measureReportDef.addError(error);
                 logger.error(error, e);
             }
         }
 
-        MeasureMultiSubjectEvaluator.postEvaluationMultiSubject(fhirContext, measureDef);
+        MeasureMultiSubjectEvaluator.postEvaluationMultiSubject(fhirContext, measureReportDef);
     }
 
     /**

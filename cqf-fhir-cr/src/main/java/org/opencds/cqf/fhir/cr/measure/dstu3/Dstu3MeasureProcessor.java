@@ -34,6 +34,7 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorUtils;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
 import org.opencds.cqf.fhir.cr.measure.common.MultiLibraryIdMeasureEngineDetails;
 import org.opencds.cqf.fhir.cr.measure.common.SubjectProvider;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.MeasureReportDef;
 import org.opencds.cqf.fhir.utility.repository.FederatedRepository;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
@@ -157,8 +158,9 @@ public class Dstu3MeasureProcessor {
 
         Interval measurementPeriodParams = measureProcessorUtils.buildMeasurementPeriod(periodStart, periodEnd);
 
-        // setup MeasureDef
+        // setup immutable MeasureDef, then convert to mutable MeasureReportDef
         var measureDef = new Dstu3MeasureDefBuilder().build(measure);
+        var measureReportDef = MeasureReportDef.fromMeasureDef(measureDef);
 
         var actualRepo = this.repository;
         if (additionalData != null) {
@@ -192,8 +194,8 @@ public class Dstu3MeasureProcessor {
             // Process Criteria Expression Results
             MeasureEvaluationResultHandler.processResults(
                     fhirContext,
-                    results.processMeasureForSuccessOrFailure(measureDef),
-                    measureDef,
+                    results.processMeasureForSuccessOrFailure(measureReportDef),
+                    measureReportDef,
                     evalType,
                     measureEvaluationOptions.getApplyScoringSetMembership(),
                     new Dstu3PopulationBasisValidator());
@@ -201,9 +203,9 @@ public class Dstu3MeasureProcessor {
 
         // Build Measure Report with Results
         MeasureReport measureReport = new Dstu3MeasureReportBuilder()
-                .build(measure, measureDef, evalTypeToReportType(evalType), measurementPeriod, subjects);
+                .build(measure, measureReportDef, evalTypeToReportType(evalType), measurementPeriod, subjects);
 
-        return new MeasureDefAndDstu3MeasureReport(measureDef, measureReport);
+        return new MeasureDefAndDstu3MeasureReport(measureReportDef, measureReport);
     }
 
     // Ideally this would be done in MeasureProcessorUtils, but it's too much work to change for now
@@ -214,10 +216,13 @@ public class Dstu3MeasureProcessor {
 
         final LibraryEngine libraryEngine = getLibraryEngine(parameters, libraryVersionIdentifier, context);
 
+        // Build immutable MeasureDef, then convert to mutable MeasureReportDef
         var measureDef = new Dstu3MeasureDefBuilder().build(measure);
+        var measureReportDef = MeasureReportDef.fromMeasureDef(measureDef);
 
         return MultiLibraryIdMeasureEngineDetails.builder(libraryEngine)
-                .addLibraryIdToMeasureId(new VersionedIdentifier().withId(libraryVersionIdentifier.getId()), measureDef)
+                .addLibraryIdToMeasureId(
+                        new VersionedIdentifier().withId(libraryVersionIdentifier.getId()), measureReportDef)
                 .build();
     }
 

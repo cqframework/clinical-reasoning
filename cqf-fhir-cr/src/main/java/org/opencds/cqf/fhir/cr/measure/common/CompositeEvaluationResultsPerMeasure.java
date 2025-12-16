@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.MeasureReportDef;
 
 /**
  * Container meant to hold the results or an early and cached CQL measure evaluation that holds
@@ -16,21 +17,21 @@ import org.opencds.cqf.cql.engine.execution.EvaluationResult;
  * </ol>
  * These data points are not mutually exclusive, meaning a measure may have both successful results and errors.
  * <p/>
- * This class also allows the caller to mutate a {@link MeasureDef} with the errors that occurred during the evaluation
+ * This class also allows the caller to mutate a {@link MeasureReportDef} with the errors that occurred during the evaluation
  */
 public class CompositeEvaluationResultsPerMeasure {
     // The same measure may have successful results AND errors, so account for both
-    private final Map<MeasureDef, Map<String, EvaluationResult>> resultsPerMeasure;
+    private final Map<MeasureReportDef, Map<String, EvaluationResult>> resultsPerMeasure;
     // We may get several errors for a given measure
-    private final Map<MeasureDef, List<String>> errorsPerMeasure;
+    private final Map<MeasureReportDef, List<String>> errorsPerMeasure;
 
     private CompositeEvaluationResultsPerMeasure(Builder builder) {
 
-        var resultsBuilder = ImmutableMap.<MeasureDef, Map<String, EvaluationResult>>builder();
+        var resultsBuilder = ImmutableMap.<MeasureReportDef, Map<String, EvaluationResult>>builder();
         builder.resultsPerMeasure.forEach((key, value) -> resultsBuilder.put(key, ImmutableMap.copyOf(value)));
         resultsPerMeasure = resultsBuilder.build();
 
-        var errorsBuilder = ImmutableMap.<MeasureDef, List<String>>builder();
+        var errorsBuilder = ImmutableMap.<MeasureReportDef, List<String>>builder();
         builder.errorsPerMeasure.forEach((key, value) -> errorsBuilder.put(key, List.copyOf(value)));
         errorsPerMeasure = errorsBuilder.build();
     }
@@ -43,7 +44,7 @@ public class CompositeEvaluationResultsPerMeasure {
      *
      * @return a map of evaluation results per subject, or an empty map if none exist
      */
-    public Map<String, EvaluationResult> processMeasureForSuccessOrFailure(MeasureDef measureDef) {
+    public Map<String, EvaluationResult> processMeasureForSuccessOrFailure(MeasureReportDef measureDef) {
         errorsPerMeasure.getOrDefault(measureDef, List.of()).forEach(measureDef::addError);
 
         // We are explicitly maintaining the logic of accepting the lack of any sort of results,
@@ -57,7 +58,7 @@ public class CompositeEvaluationResultsPerMeasure {
      * and associated EvaluationResult produced from CQL expression evaluation
      * @return {@code Map<IIdType, Map<String, EvaluationResult>>}
      */
-    public Map<MeasureDef, Map<String, EvaluationResult>> getResultsPerMeasure() {
+    public Map<MeasureReportDef, Map<String, EvaluationResult>> getResultsPerMeasure() {
         return this.resultsPerMeasure;
     }
 
@@ -66,7 +67,7 @@ public class CompositeEvaluationResultsPerMeasure {
      * When an error is produced while evaluating, we capture the errors generated in this object, which can be rendered per Measure evaluated.
      * @return {@code Map<IIdType, List<String>>}
      */
-    public Map<MeasureDef, List<String>> getErrorsPerMeasure() {
+    public Map<MeasureReportDef, List<String>> getErrorsPerMeasure() {
         return this.errorsPerMeasure;
     }
 
@@ -75,25 +76,25 @@ public class CompositeEvaluationResultsPerMeasure {
     }
 
     public static class Builder {
-        private final Map<MeasureDef, Map<String, EvaluationResult>> resultsPerMeasure = new HashMap<>();
-        private final Map<MeasureDef, List<String>> errorsPerMeasure = new HashMap<>();
+        private final Map<MeasureReportDef, Map<String, EvaluationResult>> resultsPerMeasure = new HashMap<>();
+        private final Map<MeasureReportDef, List<String>> errorsPerMeasure = new HashMap<>();
 
         public CompositeEvaluationResultsPerMeasure build() {
             return new CompositeEvaluationResultsPerMeasure(this);
         }
 
         public void addResults(
-                List<MeasureDef> measureDefs,
+                List<MeasureReportDef> measureDefs,
                 String subjectId,
                 EvaluationResult evaluationResult,
                 List<EvaluationResult> measureObservationResults) {
-            for (MeasureDef measureDef : measureDefs) {
+            for (MeasureReportDef measureDef : measureDefs) {
                 addResult(measureDef, subjectId, evaluationResult, measureObservationResults);
             }
         }
 
         public void addResult(
-                MeasureDef measureDef,
+                MeasureReportDef measureDef,
                 String subjectId,
                 EvaluationResult evaluationResult,
                 List<EvaluationResult> measureObservationResults) {
@@ -111,17 +112,17 @@ public class CompositeEvaluationResultsPerMeasure {
             resultPerMeasure.put(subjectId, evaluationResultToUse);
         }
 
-        public void addErrors(List<MeasureDef> measureDefs, String error) {
+        public void addErrors(List<MeasureReportDef> measureDefs, String error) {
             if (error == null || error.isEmpty()) {
                 return;
             }
 
-            for (MeasureDef measureDef : measureDefs) {
+            for (MeasureReportDef measureDef : measureDefs) {
                 addError(measureDef, error);
             }
         }
 
-        public void addError(MeasureDef measureDef, String error) {
+        public void addError(MeasureReportDef measureDef, String error) {
             if (error == null || error.isBlank()) {
                 return;
             }

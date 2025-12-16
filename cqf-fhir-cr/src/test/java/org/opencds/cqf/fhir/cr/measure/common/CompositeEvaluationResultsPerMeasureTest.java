@@ -12,15 +12,16 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.MeasureReportDef;
 
 class CompositeEvaluationResultsPerMeasureTest {
 
     @Test
     void gettersContainExpectedData() {
         // Arrange
-        var measureDef1 = MeasureDef.fromIdAndUrl(
+        var measureDef1 = MeasureReportDef.fromIdAndUrl(
                 new IdType(ResourceType.Measure.name(), "measureOne"), "http://example.com/Measure/one");
-        var measureDef2 = MeasureDef.fromIdAndUrl(
+        var measureDef2 = MeasureReportDef.fromIdAndUrl(
                 new IdType(ResourceType.Measure.name(), "measureTwo"), "http://example.com/Measure/two");
 
         // Create a non-empty EvaluationResult without depending on ExpressionResult constructors
@@ -35,8 +36,8 @@ class CompositeEvaluationResultsPerMeasureTest {
         CompositeEvaluationResultsPerMeasure composite = builder.build();
 
         // Act
-        Map<MeasureDef, Map<String, EvaluationResult>> resultsPerMeasure = composite.getResultsPerMeasure();
-        Map<MeasureDef, List<String>> errorsPerMeasure = composite.getErrorsPerMeasure();
+        Map<MeasureReportDef, Map<String, EvaluationResult>> resultsPerMeasure = composite.getResultsPerMeasure();
+        Map<MeasureReportDef, List<String>> errorsPerMeasure = composite.getErrorsPerMeasure();
 
         // Assert: results present for m1, none for m2
         assertTrue(resultsPerMeasure.containsKey(measureDef1));
@@ -52,7 +53,7 @@ class CompositeEvaluationResultsPerMeasureTest {
 
     @Test
     void gettersReturnImmutableViews() {
-        var measureDef1 = MeasureDef.fromIdAndUrl(
+        var measureDef1 = MeasureReportDef.fromIdAndUrl(
                 new IdType(ResourceType.Measure.name(), "measureimmutable"), "http://example.com/Measure/immutable");
 
         EvaluationResult er = new EvaluationResult();
@@ -62,8 +63,8 @@ class CompositeEvaluationResultsPerMeasureTest {
                 CompositeEvaluationResultsPerMeasure.builder().build(); // empty instance to test top-level immutability
 
         // Top-level maps should be unmodifiable
-        Map<MeasureDef, Map<String, EvaluationResult>> resultsPerMeasure = composite.getResultsPerMeasure();
-        Map<MeasureDef, List<String>> errorsPerMeasure = composite.getErrorsPerMeasure();
+        Map<MeasureReportDef, Map<String, EvaluationResult>> resultsPerMeasure = composite.getResultsPerMeasure();
+        Map<MeasureReportDef, List<String>> errorsPerMeasure = composite.getErrorsPerMeasure();
 
         final Map<String, EvaluationResult> evalMap = Map.of("s", er);
 

@@ -35,13 +35,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
-import org.opencds.cqf.fhir.cr.measure.common.CodeDef;
-import org.opencds.cqf.fhir.cr.measure.common.ConceptDef;
-import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
-import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
-import org.opencds.cqf.fhir.cr.measure.common.StratifierComponentDef;
-import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.CodeDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.ConceptDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.GroupReportDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.MeasureReportDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.StratifierComponentReportDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.StratifierReportDef;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants;
 
@@ -63,7 +63,7 @@ class MeasureDefBuilderTest {
     private final FhirContext fhirContext = FhirContext.forCached(FhirVersionEnum.R4);
     private final IParser parser = fhirContext.newJsonParser();
 
-    public MeasureDef measureDefBuilder(
+    public MeasureReportDef measureDefBuilder(
             String group1Basis,
             String group1Scoring,
             CodeableConcept group1ImpNotation,
@@ -140,25 +140,25 @@ class MeasureDefBuilderTest {
                     .setUrl(MeasureConstants.POPULATION_BASIS_URL)
                     .setValue(new CodeType(measureBasis)));
         }
-        return defBuilder.build(measure);
+        return MeasureReportDef.fromMeasureDef(defBuilder.build(measure));
     }
 
     public void validateMeasureDef(
-            MeasureDef measureDef,
+            MeasureReportDef measureDef,
             boolean group1IsBooleanBasis,
             String group1Basis,
             boolean group1IsGroupImpNotation,
             String group1ImpNotationValue,
             MeasureScoring group1MeasureScoring,
-            List<StratifierDef> group1Stratifiers,
+            List<StratifierReportDef> group1Stratifiers,
             boolean group2IsBooleanBasis,
             String group2Basis,
             boolean group2IsGroupImpNotation,
             String group2ImpNotationValue,
             MeasureScoring group2MeasureScoring,
-            List<StratifierDef> group2Stratifiers) {
+            List<StratifierReportDef> group2Stratifiers) {
 
-        var groupsById = measureDef.groups().stream().collect(Collectors.toMap(GroupDef::id, entry -> entry));
+        var groupsById = measureDef.groups().stream().collect(Collectors.toMap(GroupReportDef::id, entry -> entry));
 
         var group1 = groupsById.get("group-1");
         // Basis
@@ -501,8 +501,8 @@ class MeasureDefBuilderTest {
     private record BasicStratifiersParams(
             List<MeasureGroupStratifierComponent> inputStratifiersGroup1,
             List<MeasureGroupStratifierComponent> inputStratifiersGroup2,
-            List<StratifierDef> outputStratifiersGroup1,
-            List<StratifierDef> outputStratifiersGroup2) {}
+            List<StratifierReportDef> outputStratifiersGroup1,
+            List<StratifierReportDef> outputStratifiersGroup2) {}
 
     public static Stream<BasicStratifiersParams> basicStratifiersParams() {
         return Stream.of(
@@ -588,18 +588,18 @@ class MeasureDefBuilderTest {
                 .setId(expression);
     }
 
-    private static List<StratifierDef> buildOutputStratifiers(String... expressions) {
+    private static List<StratifierReportDef> buildOutputStratifiers(String... expressions) {
         return buildOutputStratifiers(0, expressions);
     }
 
-    private static List<StratifierDef> buildOutputStratifiers(int componentCount, String... expressions) {
+    private static List<StratifierReportDef> buildOutputStratifiers(int componentCount, String... expressions) {
         return Arrays.stream(expressions)
                 .map(expression -> buildOutputStratifierDef(componentCount, expression))
                 .toList();
     }
 
-    private static StratifierDef buildOutputStratifierDef(int componentCount, String expression) {
-        return new StratifierDef(
+    private static StratifierReportDef buildOutputStratifierDef(int componentCount, String expression) {
+        return new StratifierReportDef(
                 expression,
                 new ConceptDef(List.of(new CodeDef("system", "code")), expression),
                 expression,
@@ -609,8 +609,8 @@ class MeasureDefBuilderTest {
                         .toList());
     }
 
-    private static StratifierComponentDef buildOutputStratifierComponentDef(String text) {
-        return new StratifierComponentDef(text, new ConceptDef(List.of(new CodeDef(null, null)), text), null);
+    private static StratifierComponentReportDef buildOutputStratifierComponentDef(String text) {
+        return new StratifierComponentReportDef(text, new ConceptDef(List.of(new CodeDef(null, null)), text), null);
     }
 
     private <T> void assertWithZip(List<T> expectedList, List<T> actualList, BiConsumer<T, T> assertConsumer) {
@@ -627,11 +627,12 @@ class MeasureDefBuilderTest {
         }
     }
 
-    private void validateStratifiers(List<StratifierDef> expectedStratifiers, GroupDef actualGroupDef) {
+    private void validateStratifiers(List<StratifierReportDef> expectedStratifiers, GroupReportDef actualGroupDef) {
         assertWithZip(expectedStratifiers, actualGroupDef.stratifiers(), this::validateStratifier);
     }
 
-    private void validateStratifier(StratifierDef expectedStratifierDef, StratifierDef actualStratifierDef) {
+    private void validateStratifier(
+            StratifierReportDef expectedStratifierDef, StratifierReportDef actualStratifierDef) {
         assertNotNull(expectedStratifierDef);
 
         assertEquals(expectedStratifierDef.id(), actualStratifierDef.id());
@@ -642,13 +643,14 @@ class MeasureDefBuilderTest {
     }
 
     private void assertComponentsEqual(
-            List<StratifierComponentDef> expectedComponents, List<StratifierComponentDef> actualComponents) {
+            List<StratifierComponentReportDef> expectedComponents,
+            List<StratifierComponentReportDef> actualComponents) {
 
         assertWithZip(expectedComponents, actualComponents, this::assertComponentEquals);
     }
 
     private void assertComponentEquals(
-            StratifierComponentDef expectedComponent, StratifierComponentDef actualComponent) {
+            StratifierComponentReportDef expectedComponent, StratifierComponentReportDef actualComponent) {
         assertEquals(expectedComponent.id(), actualComponent.id());
         assertCodesEqual(expectedComponent.code(), actualComponent.code());
         assertEquals(expectedComponent.expression(), actualComponent.expression());

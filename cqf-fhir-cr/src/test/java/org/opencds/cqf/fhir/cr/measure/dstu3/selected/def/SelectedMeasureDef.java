@@ -2,7 +2,7 @@ package org.opencds.cqf.fhir.cr.measure.dstu3.selected.def;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.MeasureReportDef;
 
 /**
  * Fluent API for asserting on MeasureDef (pre-scoring internal state) from DSTU3 measure evaluation.
@@ -14,15 +14,15 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
  * @param <P> parent type for up() navigation
  */
 public class SelectedMeasureDef<P> {
-    protected final MeasureDef measureDef;
+    protected final MeasureReportDef measureDef;
     protected final P parent;
 
-    public SelectedMeasureDef(MeasureDef measureDef, P parent) {
+    public SelectedMeasureDef(MeasureReportDef measureDef, P parent) {
         this.measureDef = measureDef;
         this.parent = parent;
     }
 
-    public MeasureDef value() {
+    public MeasureReportDef value() {
         return measureDef;
     }
 

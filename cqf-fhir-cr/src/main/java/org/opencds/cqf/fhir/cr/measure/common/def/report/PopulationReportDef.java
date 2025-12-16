@@ -1,4 +1,4 @@
-package org.opencds.cqf.fhir.cr.measure.common;
+package org.opencds.cqf.fhir.cr.measure.common.def.report;
 
 import jakarta.annotation.Nullable;
 import java.util.Collection;
@@ -7,34 +7,54 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import org.opencds.cqf.fhir.cr.measure.common.ContinuousVariableObservationAggregateMethod;
+import org.opencds.cqf.fhir.cr.measure.common.HashSetForFhirResourcesAndCqlTypes;
+import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
+import org.opencds.cqf.fhir.cr.measure.common.def.CodeDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.ConceptDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.measure.PopulationDef;
 
-public class PopulationDef {
+public class PopulationReportDef {
 
-    private final String id;
-    private final String expression;
-    private final ConceptDef code;
-    private final MeasurePopulationType measurePopulationType;
-    private final CodeDef populationBasis;
+    private final PopulationDef populationDef; // Reference to immutable structure
+    private final Map<String, Set<Object>> subjectResources = new HashMap<>(); // Evaluation-only state
+    protected Set<Object> evaluatedResources; // Evaluation-only state
 
-    @Nullable
-    private final String criteriaReference;
+    /**
+     * Factory method to create PopulationReportDef from immutable PopulationDef.
+     * The PopulationReportDef will have empty mutable state (subjectResources, evaluatedResources).
+     */
+    public static PopulationReportDef fromPopulationDef(PopulationDef populationDef) {
+        return new PopulationReportDef(populationDef);
+    }
 
-    @Nullable
-    private final ContinuousVariableObservationAggregateMethod aggregateMethod;
+    /**
+     * Constructor for creating PopulationReportDef with a PopulationDef reference.
+     * This is the primary constructor for production use.
+     */
+    public PopulationReportDef(PopulationDef populationDef) {
+        this.populationDef = populationDef;
+    }
 
-    protected Set<Object> evaluatedResources;
-    protected Map<String, Set<Object>> subjectResources = new HashMap<>();
-
-    public PopulationDef(
+    /**
+     * Test-only constructor for creating PopulationReportDef with explicit structural data (5 params).
+     * Creates a minimal PopulationDef internally. Use fromPopulationDef() for production code.
+     */
+    public PopulationReportDef(
             String id,
             ConceptDef code,
             MeasurePopulationType measurePopulationType,
             String expression,
             CodeDef populationBasis) {
-        this(id, code, measurePopulationType, expression, populationBasis, null, null);
+        this.populationDef =
+                new PopulationDef(id, code, measurePopulationType, expression, populationBasis, null, null);
     }
 
-    public PopulationDef(
+    /**
+     * Test-only constructor for creating PopulationReportDef with explicit structural data (7 params).
+     * Creates a minimal PopulationDef internally. Use fromPopulationDef() for production code.
+     */
+    public PopulationReportDef(
             String id,
             ConceptDef code,
             MeasurePopulationType measurePopulationType,
@@ -42,25 +62,28 @@ public class PopulationDef {
             CodeDef populationBasis,
             @Nullable String criteriaReference,
             @Nullable ContinuousVariableObservationAggregateMethod aggregateMethod) {
-        this.id = id;
-        this.code = code;
-        this.measurePopulationType = measurePopulationType;
-        this.expression = expression;
-        this.populationBasis = populationBasis;
-        this.criteriaReference = criteriaReference;
-        this.aggregateMethod = aggregateMethod;
+        this.populationDef = new PopulationDef(
+                id, code, measurePopulationType, expression, populationBasis, criteriaReference, aggregateMethod);
     }
 
+    /**
+     * Accessor for the immutable structural definition.
+     */
+    public PopulationDef populationDef() {
+        return this.populationDef;
+    }
+
+    // Delegate structural queries to populationDef
     public MeasurePopulationType type() {
-        return this.measurePopulationType;
+        return populationDef.type();
     }
 
     public String id() {
-        return this.id;
+        return populationDef.id();
     }
 
     public ConceptDef code() {
-        return this.code;
+        return populationDef.code();
     }
 
     /**
@@ -70,7 +93,7 @@ public class PopulationDef {
      * @return the population basis CodeDef
      */
     public CodeDef getPopulationBasis() {
-        return this.populationBasis;
+        return populationDef.getPopulationBasis();
     }
 
     /**
@@ -80,7 +103,7 @@ public class PopulationDef {
      * @return true if population basis is "boolean", false otherwise
      */
     public boolean isBooleanBasis() {
-        return this.populationBasis.code().equals("boolean");
+        return populationDef.isBooleanBasis();
     }
 
     public Set<Object> getEvaluatedResources() {
@@ -95,19 +118,19 @@ public class PopulationDef {
         return this.getSubjectResources().keySet();
     }
 
-    public void retainAllResources(String subjectId, PopulationDef otherPopulationDef) {
+    public void retainAllResources(String subjectId, PopulationReportDef otherPopulationDef) {
         getResourcesForSubject(subjectId).retainAll(otherPopulationDef.getResourcesForSubject(subjectId));
     }
 
-    public void retainAllSubjects(PopulationDef otherPopulationDef) {
+    public void retainAllSubjects(PopulationReportDef otherPopulationDef) {
         this.getSubjects().retainAll(otherPopulationDef.getSubjects());
     }
 
-    public void removeAllResources(String subjectId, PopulationDef otherPopulationDef) {
+    public void removeAllResources(String subjectId, PopulationReportDef otherPopulationDef) {
         getResourcesForSubject(subjectId).removeAll(otherPopulationDef.getResourcesForSubject(subjectId));
     }
 
-    public void removeAllSubjects(PopulationDef otherPopulationDef) {
+    public void removeAllSubjects(PopulationReportDef otherPopulationDef) {
         this.getSubjects().removeAll(otherPopulationDef.getSubjects());
     }
 
@@ -147,11 +170,11 @@ public class PopulationDef {
 
     @Nullable
     public String getCriteriaReference() {
-        return this.criteriaReference;
+        return populationDef.getCriteriaReference();
     }
 
     public String expression() {
-        return this.expression;
+        return populationDef.expression();
     }
 
     // Getter method
@@ -172,7 +195,7 @@ public class PopulationDef {
 
     @Nullable
     public ContinuousVariableObservationAggregateMethod getAggregateMethod() {
-        return this.aggregateMethod;
+        return populationDef.getAggregateMethod();
     }
 
     /**
@@ -185,7 +208,7 @@ public class PopulationDef {
      */
     public int getCount() {
         // For MEASUREOBSERVATION populations, count the observations
-        if (this.measurePopulationType == MeasurePopulationType.MEASUREOBSERVATION) {
+        if (populationDef.type() == MeasurePopulationType.MEASUREOBSERVATION) {
             return countObservations();
         }
 
@@ -201,15 +224,18 @@ public class PopulationDef {
 
     @Override
     public String toString() {
-        String codeText = (code != null && code.text() != null) ? code.text() : "null";
-        String criteriaRef = (criteriaReference != null) ? criteriaReference : "null";
-        String aggMethod = (aggregateMethod != null) ? aggregateMethod.toString() : "null";
+        ConceptDef codeObj = populationDef.code();
+        String codeText = (codeObj != null && codeObj.text() != null) ? codeObj.text() : "null";
+        String criteriaRef =
+                (populationDef.getCriteriaReference() != null) ? populationDef.getCriteriaReference() : "null";
+        ContinuousVariableObservationAggregateMethod aggMethodObj = populationDef.getAggregateMethod();
+        String aggMethod = (aggMethodObj != null) ? aggMethodObj.toString() : "null";
 
         return "PopulationDef{"
-                + "id='" + id + '\''
+                + "id='" + populationDef.id() + '\''
                 + ", code.text='" + codeText + '\''
-                + ", type=" + measurePopulationType
-                + ", expression='" + expression + '\''
+                + ", type=" + populationDef.type()
+                + ", expression='" + populationDef.expression() + '\''
                 + ", criteriaReference='" + criteriaRef + '\''
                 + ", aggregateMethod=" + aggMethod
                 + '}';

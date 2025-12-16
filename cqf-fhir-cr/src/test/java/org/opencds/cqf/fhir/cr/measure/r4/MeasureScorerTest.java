@@ -23,15 +23,15 @@ import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupPopulationComponent;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
-import org.opencds.cqf.fhir.cr.measure.common.CodeDef;
-import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
-import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
-import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
-import org.opencds.cqf.fhir.cr.measure.common.StratumDef;
-import org.opencds.cqf.fhir.cr.measure.common.StratumPopulationDef;
-import org.opencds.cqf.fhir.cr.measure.common.StratumValueDef;
-import org.opencds.cqf.fhir.cr.measure.common.StratumValueWrapper;
+import org.opencds.cqf.fhir.cr.measure.common.def.CodeDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.GroupReportDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.MeasureReportDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.PopulationReportDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.StratumPopulationReportDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.StratumReportDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.StratumValueReportDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.StratumValueWrapperReportDef;
 import org.opencds.cqf.fhir.utility.repository.FhirResourceLoader;
 
 class MeasureScorerTest {
@@ -207,7 +207,7 @@ class MeasureScorerTest {
                 List.of(new StratumCounts("false", new PopulationCounts(3, 3, 0, 0, 1))) // stratifier 2
                 );
 
-        GroupDef groupDef = measureScoringDef.groups().get(0);
+        GroupReportDef groupDef = measureScoringDef.groups().get(0);
         for (int i = 0; i < stratifierCounts.size(); i++) {
             populateStratifierWithCounts(groupDef, i, stratifierCounts.get(i));
         }
@@ -323,18 +323,18 @@ class MeasureScorerTest {
         assertEquals(errorMsg, e.getMessage());
     }
 
-    private MeasureDef mockMeasureDef(int numGroups) {
-        final MeasureDef measureDef = mock(MeasureDef.class);
+    private MeasureReportDef mockMeasureDef(int numGroups) {
+        final MeasureReportDef measureDef = mock(MeasureReportDef.class);
         doReturn(mockGroupDefs(numGroups)).when(measureDef).groups();
         return measureDef;
     }
 
-    private List<GroupDef> mockGroupDefs(int numGroups) {
+    private List<GroupReportDef> mockGroupDefs(int numGroups) {
         return IntStream.range(0, numGroups).mapToObj(num -> mockGroupDef()).toList();
     }
 
-    private GroupDef mockGroupDef() {
-        final GroupDef groupDef = mock(GroupDef.class);
+    private GroupReportDef mockGroupDef() {
+        final GroupReportDef groupDef = mock(GroupReportDef.class);
 
         doReturn(mockMeasureScoring()).when(groupDef).measureScoring();
 
@@ -398,13 +398,13 @@ class MeasureScorerTest {
         return measureReportList;
     }
 
-    private MeasureDef getMeasureScoringDef(String measureUrl) {
+    private MeasureReportDef getMeasureScoringDef(String measureUrl) {
         var measureRes = measures.stream()
                 .filter(measure -> measureUrl.equals(measure.getUrl()))
                 .findAny()
                 .orElse(null);
         R4MeasureDefBuilder measureDefBuilder = new R4MeasureDefBuilder();
-        return measureDefBuilder.build(measureRes);
+        return MeasureReportDef.fromMeasureDef(measureDefBuilder.build(measureRes));
     }
 
     private MeasureReport getMeasureReport(String measureUrl) {
@@ -421,9 +421,9 @@ class MeasureScorerTest {
      * @param measureDef the MeasureDef with populated counts
      * @param measureReport the MeasureReport to compare against
      */
-    private void verifyGroupPopulationCounts(MeasureDef measureDef, MeasureReport measureReport) {
+    private void verifyGroupPopulationCounts(MeasureReportDef measureDef, MeasureReport measureReport) {
         for (int i = 0; i < measureDef.groups().size(); i++) {
-            GroupDef groupDef = measureDef.groups().get(i);
+            GroupReportDef groupDef = measureDef.groups().get(i);
             MeasureReportGroupComponent reportGroup = measureReport.getGroup().get(i);
 
             for (var populationDef : groupDef.populations()) {
@@ -462,7 +462,7 @@ class MeasureScorerTest {
      * @param isBooleanBasis whether the group uses boolean basis (true) or resource basis (false)
      */
     private void populatePopulationDefWithCount(
-            PopulationDef populationDef, int count, int groupIndex, boolean isBooleanBasis) {
+            PopulationReportDef populationDef, int count, int groupIndex, boolean isBooleanBasis) {
         if (isBooleanBasis) {
             // Add subjects (e.g., "Patient/1", "Patient/2", ...)
             for (int i = 0; i < count; i++) {
@@ -485,11 +485,11 @@ class MeasureScorerTest {
      * @param measureDef the MeasureDef to populate
      * @param groupCounts list of PopulationCounts, one per group
      */
-    private void populateMeasureDefWithCounts(MeasureDef measureDef, List<PopulationCounts> groupCounts) {
+    private void populateMeasureDefWithCounts(MeasureReportDef measureDef, List<PopulationCounts> groupCounts) {
         for (int groupIndex = 0;
                 groupIndex < measureDef.groups().size() && groupIndex < groupCounts.size();
                 groupIndex++) {
-            GroupDef groupDef = measureDef.groups().get(groupIndex);
+            GroupReportDef groupDef = measureDef.groups().get(groupIndex);
             PopulationCounts counts = groupCounts.get(groupIndex);
 
             // Populate each PopulationDef with mock subjects based on the counts
@@ -528,14 +528,14 @@ class MeasureScorerTest {
      * @param stratumCountsList list of StratumCounts for this stratifier
      */
     private void populateStratifierWithCounts(
-            GroupDef groupDef, int stratifierIndex, List<StratumCounts> stratumCountsList) {
+            GroupReportDef groupDef, int stratifierIndex, List<StratumCounts> stratumCountsList) {
 
         if (stratifierIndex >= groupDef.stratifiers().size()) {
             return;
         }
 
         var stratifierDef = groupDef.stratifiers().get(stratifierIndex);
-        var stratumDefs = new ArrayList<StratumDef>();
+        var stratumDefs = new ArrayList<StratumReportDef>();
 
         // Create a StratumDef for each stratum value
         for (StratumCounts stratumCounts : stratumCountsList) {
@@ -543,7 +543,7 @@ class MeasureScorerTest {
             PopulationCounts populationCounts = stratumCounts.populationCounts();
 
             // Create StratumPopulationDef for each population in this stratum
-            var stratumPopulations = new ArrayList<StratumPopulationDef>();
+            var stratumPopulations = new ArrayList<StratumPopulationReportDef>();
 
             for (var populationDef : groupDef.populations()) {
                 int count = getCountForPopulationType(
@@ -562,7 +562,7 @@ class MeasureScorerTest {
 
                     // Create StratumPopulationDef
                     // For CRITERIA stratifiers, the count comes from populationDefEvaluationResultIntersection
-                    var stratumPopDef = new StratumPopulationDef(
+                    var stratumPopDef = new StratumPopulationReportDef(
                             populationDef, // Use direct PopulationDef reference
                             new HashSet<>(), // subjects (not used for CRITERIA)
                             evaluationResults, // evaluationResultIntersection (used for CRITERIA count)
@@ -575,13 +575,13 @@ class MeasureScorerTest {
             }
 
             // Create StratumValueDef
-            var stratumValueWrapper = new StratumValueWrapper(stratumValue);
-            var stratumValueDef = new StratumValueDef(stratumValueWrapper, null);
-            var stratumValueDefs = new HashSet<StratumValueDef>();
+            var stratumValueWrapper = new StratumValueWrapperReportDef(stratumValue);
+            var stratumValueDef = new StratumValueReportDef(stratumValueWrapper, null);
+            var stratumValueDefs = new HashSet<StratumValueReportDef>();
             stratumValueDefs.add(stratumValueDef);
 
             // Create StratumDef
-            var stratumDef = new StratumDef(
+            var stratumDef = new StratumReportDef(
                     stratumPopulations, stratumValueDefs, new ArrayList<>() // subjectIds
                     );
 

@@ -32,12 +32,12 @@ public class Measure {
     public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/measure/dstu3";
 
     @FunctionalInterface
-    interface Validator<T> {
+    public interface Validator<T> {
         void validate(T value);
     }
 
     @FunctionalInterface
-    interface Selector<T, S> {
+    public interface Selector<T, S> {
         T select(S from);
     }
 
@@ -211,7 +211,7 @@ public class Measure {
          * @return SelectedMeasureDef for fluent MeasureDef assertions
          */
         public SelectedMeasureDef<Then> def() {
-            return new SelectedMeasureDef<>(evaluation.measureDef(), this);
+            return new SelectedMeasureDef<>(evaluation.measureReportDef(), this);
         }
 
         // Backward compatibility - delegate to report()

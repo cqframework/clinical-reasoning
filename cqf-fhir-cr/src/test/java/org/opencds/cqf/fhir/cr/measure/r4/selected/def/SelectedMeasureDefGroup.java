@@ -5,10 +5,11 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
-import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
-import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.GroupReportDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.PopulationReportDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.StratifierReportDef;
+import org.opencds.cqf.fhir.cr.measure.r4.Measure;
 
 /**
  * Fluent assertion API for GroupDef objects.
@@ -35,9 +36,9 @@ import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
  * @author Claude (Anthropic AI Assistant)
  * @since 4.1.0
  */
-public class SelectedMeasureDefGroup<P> extends org.opencds.cqf.fhir.cr.measure.r4.Measure.Selected<GroupDef, P> {
+public class SelectedMeasureDefGroup<P> extends Measure.Selected<GroupReportDef, P> {
 
-    public SelectedMeasureDefGroup(GroupDef value, P parent) {
+    public SelectedMeasureDefGroup(GroupReportDef value, P parent) {
         super(value, parent);
     }
 
@@ -52,7 +53,7 @@ public class SelectedMeasureDefGroup<P> extends org.opencds.cqf.fhir.cr.measure.
      */
     public SelectedMeasureDefPopulation<SelectedMeasureDefGroup<P>> population(String populationCode) {
         assertNotNull(value(), "GroupDef is null");
-        PopulationDef population = value().populations().stream()
+        PopulationReportDef population = value().populations().stream()
                 .filter(p -> p.code() != null
                         && !p.code().isEmpty()
                         && p.code().first().code().equals(populationCode))
@@ -71,7 +72,7 @@ public class SelectedMeasureDefGroup<P> extends org.opencds.cqf.fhir.cr.measure.
      */
     public SelectedMeasureDefPopulation<SelectedMeasureDefGroup<P>> populationById(String id) {
         assertNotNull(value(), "GroupDef is null");
-        PopulationDef population = value().populations().stream()
+        PopulationReportDef population = value().populations().stream()
                 .filter(p -> id.equals(p.id()))
                 .findFirst()
                 .orElse(null);
@@ -100,7 +101,7 @@ public class SelectedMeasureDefGroup<P> extends org.opencds.cqf.fhir.cr.measure.
      */
     public SelectedMeasureDefStratifier<SelectedMeasureDefGroup<P>> stratifier(String stratifierId) {
         assertNotNull(value(), "GroupDef is null");
-        StratifierDef stratifier = value().stratifiers().stream()
+        StratifierReportDef stratifier = value().stratifiers().stream()
                 .filter(s -> stratifierId.equals(s.id()))
                 .findFirst()
                 .orElse(null);
@@ -219,7 +220,7 @@ public class SelectedMeasureDefGroup<P> extends org.opencds.cqf.fhir.cr.measure.
      *
      * @return the GroupDef instance
      */
-    public GroupDef groupDef() {
+    public GroupReportDef groupDef() {
         return value();
     }
 }

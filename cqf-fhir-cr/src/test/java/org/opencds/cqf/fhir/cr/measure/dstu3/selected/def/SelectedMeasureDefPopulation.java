@@ -2,7 +2,7 @@ package org.opencds.cqf.fhir.cr.measure.dstu3.selected.def;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.PopulationReportDef;
 
 /**
  * Fluent API for asserting on PopulationDef (pre-scoring population state) from DSTU3 measure evaluation.
@@ -10,15 +10,15 @@ import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
  * @param <P> parent type for up() navigation
  */
 public class SelectedMeasureDefPopulation<P> {
-    protected final PopulationDef populationDef;
+    protected final PopulationReportDef populationDef;
     protected final P parent;
 
-    public SelectedMeasureDefPopulation(PopulationDef populationDef, P parent) {
+    public SelectedMeasureDefPopulation(PopulationReportDef populationDef, P parent) {
         this.populationDef = populationDef;
         this.parent = parent;
     }
 
-    public PopulationDef value() {
+    public PopulationReportDef value() {
         return populationDef;
     }
 

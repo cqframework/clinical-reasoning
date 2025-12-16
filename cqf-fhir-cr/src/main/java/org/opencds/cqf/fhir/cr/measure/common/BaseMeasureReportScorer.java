@@ -7,6 +7,11 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.GroupReportDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.MeasureReportDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.PopulationReportDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.StratumPopulationReportDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.StratumReportDef;
 
 // Extracted version-agnostic patterns from R4MeasureReportScorer by Claude Sonnet 4.5
 public abstract class BaseMeasureReportScorer<MeasureReportT> implements IMeasureReportScorer<MeasureReportT> {
@@ -30,7 +35,7 @@ public abstract class BaseMeasureReportScorer<MeasureReportT> implements IMeasur
     }
 
     // Moved from R4MeasureReportScorer by Claude Sonnet 4.5 - version-agnostic validation
-    protected MeasureScoring checkMissingScoringType(MeasureDef measureDef, MeasureScoring measureScoring) {
+    protected MeasureScoring checkMissingScoringType(MeasureReportDef measureDef, MeasureScoring measureScoring) {
         if (measureScoring == null) {
             throw new InvalidRequestException(
                     "Measure does not have a scoring methodology defined. Add a \"scoring\" property to the measure definition or the group definition for MeasureDef: "
@@ -40,7 +45,7 @@ public abstract class BaseMeasureReportScorer<MeasureReportT> implements IMeasur
     }
 
     // Moved from R4MeasureReportScorer by Claude Sonnet 4.5 - version-agnostic validation
-    protected void groupHasValidId(MeasureDef measureDef, String id) {
+    protected void groupHasValidId(MeasureReportDef measureDef, String id) {
         if (id == null || id.isEmpty()) {
             throw new InvalidRequestException(
                     "Measure resources with more than one group component require a unique group.id() defined to score appropriately for MeasureDef: "
@@ -50,7 +55,7 @@ public abstract class BaseMeasureReportScorer<MeasureReportT> implements IMeasur
 
     // Moved from R4MeasureReportScorer by Claude Sonnet 4.5 - version-agnostic helper
     @Nullable
-    protected PopulationDef getFirstMeasureObservation(GroupDef groupDef) {
+    protected PopulationReportDef getFirstMeasureObservation(GroupReportDef groupDef) {
         var measureObservations = getMeasureObservations(groupDef);
         if (!measureObservations.isEmpty()) {
             return getMeasureObservations(groupDef).get(0);
@@ -60,7 +65,7 @@ public abstract class BaseMeasureReportScorer<MeasureReportT> implements IMeasur
     }
 
     // Moved from R4MeasureReportScorer by Claude Sonnet 4.5 - version-agnostic helper
-    protected List<PopulationDef> getMeasureObservations(GroupDef groupDef) {
+    protected List<PopulationReportDef> getMeasureObservations(GroupReportDef groupDef) {
         return groupDef.populations().stream()
                 .filter(t -> t.type().equals(MeasurePopulationType.MEASUREOBSERVATION))
                 .toList();
@@ -68,8 +73,8 @@ public abstract class BaseMeasureReportScorer<MeasureReportT> implements IMeasur
 
     // Moved from R4MeasureReportScorer by Claude Sonnet 4.5 - version-agnostic helper
     @Nullable
-    protected PopulationDef findPopulationDef(
-            GroupDef groupDef, List<PopulationDef> populationDefs, MeasurePopulationType type) {
+    protected PopulationReportDef findPopulationDef(
+            GroupReportDef groupDef, List<PopulationReportDef> populationDefs, MeasurePopulationType type) {
         var groupPops = groupDef.getPopulationDefs(type);
         if (groupPops == null || groupPops.isEmpty() || groupPops.get(0).id() == null) {
             return null;
@@ -98,7 +103,8 @@ public abstract class BaseMeasureReportScorer<MeasureReportT> implements IMeasur
      */
     // Moved from R4MeasureReportScorer by Claude Sonnet 4.5 - version-agnostic helper
     @Nullable
-    protected StratumPopulationDef getStratumPopDefFromPopDef(StratumDef stratumDef, PopulationDef populationDef) {
+    protected StratumPopulationReportDef getStratumPopDefFromPopDef(
+            StratumReportDef stratumDef, PopulationReportDef populationDef) {
         return stratumDef.stratumPopulations().stream()
                 .filter(t -> t.id().equals(populationDef.id()))
                 .findFirst()
@@ -137,7 +143,7 @@ public abstract class BaseMeasureReportScorer<MeasureReportT> implements IMeasur
      */
     // Moved from R4MeasureReportScorer by Claude Sonnet 4.5 - version-agnostic helper
     protected Set<Object> getResultsForStratum(
-            PopulationDef measureObservationPopulationDef, StratumPopulationDef stratumPopulationDef) {
+            PopulationReportDef measureObservationPopulationDef, StratumPopulationReportDef stratumPopulationDef) {
 
         return measureObservationPopulationDef.getSubjectResources().entrySet().stream()
                 .filter(entry -> doesStratumPopDefMatchGroupPopDef(stratumPopulationDef, entry))
@@ -148,7 +154,7 @@ public abstract class BaseMeasureReportScorer<MeasureReportT> implements IMeasur
 
     // Moved from R4MeasureReportScorer by Claude Sonnet 4.5 - version-agnostic helper
     protected boolean doesStratumPopDefMatchGroupPopDef(
-            StratumPopulationDef stratumPopulationDef, Entry<String, Set<Object>> entry) {
+            StratumPopulationReportDef stratumPopulationDef, Entry<String, Set<Object>> entry) {
 
         return stratumPopulationDef.getSubjectsUnqualified().stream()
                 .collect(Collectors.toUnmodifiableSet())

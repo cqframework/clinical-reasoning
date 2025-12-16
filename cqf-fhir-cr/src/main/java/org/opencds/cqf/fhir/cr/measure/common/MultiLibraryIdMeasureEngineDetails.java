@@ -5,6 +5,7 @@ import com.google.common.collect.ListMultimap;
 import java.util.List;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.MeasureReportDef;
 
 /**
  * Convenience class to hold a library engine and a mapping of library IDs to measure IDs for
@@ -12,7 +13,7 @@ import org.opencds.cqf.fhir.cql.LibraryEngine;
  */
 public class MultiLibraryIdMeasureEngineDetails {
     private final LibraryEngine libraryEngine;
-    private final ListMultimap<VersionedIdentifier, MeasureDef> libraryIdToMeasureDef;
+    private final ListMultimap<VersionedIdentifier, MeasureReportDef> libraryIdToMeasureDef;
 
     private MultiLibraryIdMeasureEngineDetails(Builder builder) {
         this.libraryEngine = builder.libraryEngine;
@@ -28,7 +29,7 @@ public class MultiLibraryIdMeasureEngineDetails {
         return List.copyOf(libraryIdToMeasureDef.keySet());
     }
 
-    public List<MeasureDef> getMeasureDefsForLibrary(VersionedIdentifier libraryId) {
+    public List<MeasureReportDef> getMeasureDefsForLibrary(VersionedIdentifier libraryId) {
         return libraryIdToMeasureDef.get(libraryId);
     }
 
@@ -36,20 +37,20 @@ public class MultiLibraryIdMeasureEngineDetails {
         return new Builder(engine);
     }
 
-    public List<MeasureDef> getAllMeasureDefs() {
+    public List<MeasureReportDef> getAllMeasureDefs() {
         return List.copyOf(libraryIdToMeasureDef.values());
     }
 
     public static class Builder {
         private final LibraryEngine libraryEngine;
-        private final ImmutableListMultimap.Builder<VersionedIdentifier, MeasureDef> libraryIdToMeasureDefBuilder =
-                ImmutableListMultimap.builder();
+        private final ImmutableListMultimap.Builder<VersionedIdentifier, MeasureReportDef>
+                libraryIdToMeasureDefBuilder = ImmutableListMultimap.builder();
 
         public Builder(LibraryEngine libraryEngine) {
             this.libraryEngine = libraryEngine;
         }
 
-        public Builder addLibraryIdToMeasureId(VersionedIdentifier libraryId, MeasureDef measureDef) {
+        public Builder addLibraryIdToMeasureId(VersionedIdentifier libraryId, MeasureReportDef measureDef) {
             libraryIdToMeasureDefBuilder.put(libraryId, measureDef);
             return this;
         }

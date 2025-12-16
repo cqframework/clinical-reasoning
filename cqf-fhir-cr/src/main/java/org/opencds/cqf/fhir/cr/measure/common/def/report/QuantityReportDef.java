@@ -1,4 +1,4 @@
-package org.opencds.cqf.fhir.cr.measure.common;
+package org.opencds.cqf.fhir.cr.measure.common.def.report;
 
 import jakarta.annotation.Nullable;
 
@@ -9,15 +9,15 @@ import jakarta.annotation.Nullable;
  *
  * Only stores the numeric value - unit, system, and code are not needed for scoring calculations.
  *
- * @see CodeDef
- * @see ConceptDef
+ * NOTE: This class intentionally uses instance-based equality (not value-based) because it represents
+ * individual observations. Multiple observations with the same value should be counted separately.
  */
-public class QuantityDef {
+public class QuantityReportDef {
 
     @Nullable
     private final Double value;
 
-    public QuantityDef(@Nullable Double value) {
+    public QuantityReportDef(@Nullable Double value) {
         this.value = value;
     }
 

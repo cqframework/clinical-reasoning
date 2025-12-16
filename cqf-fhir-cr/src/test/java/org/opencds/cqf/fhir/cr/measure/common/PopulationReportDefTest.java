@@ -13,14 +13,16 @@ import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.cr.measure.common.def.CodeDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.PopulationReportDef;
 
-class PopulationDefTest {
+class PopulationReportDefTest {
 
     @Test
     void setHandlingStrings() {
         CodeDef stringBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "String");
-        final PopulationDef popDef1 = new PopulationDef("one", null, null, null, stringBasis);
-        final PopulationDef popDef2 = new PopulationDef("two", null, null, null, stringBasis);
+        final PopulationReportDef popDef1 = new PopulationReportDef("one", null, null, null, stringBasis);
+        final PopulationReportDef popDef2 = new PopulationReportDef("two", null, null, null, stringBasis);
 
         assertFalse(popDef1.isBooleanBasis());
         assertFalse(popDef2.isBooleanBasis());
@@ -36,8 +38,8 @@ class PopulationDefTest {
     @Test
     void setHandlingIntegers() {
         CodeDef integerBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "integer");
-        final PopulationDef popDef1 = new PopulationDef("one", null, null, null, integerBasis);
-        final PopulationDef popDef2 = new PopulationDef("two", null, null, null, integerBasis);
+        final PopulationReportDef popDef1 = new PopulationReportDef("one", null, null, null, integerBasis);
+        final PopulationReportDef popDef2 = new PopulationReportDef("two", null, null, null, integerBasis);
 
         assertFalse(popDef1.isBooleanBasis());
         assertFalse(popDef2.isBooleanBasis());
@@ -53,8 +55,8 @@ class PopulationDefTest {
     @Test
     void setHandlingEncounters() {
         CodeDef encounterBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "Encounter");
-        final PopulationDef popDef1 = new PopulationDef("one", null, null, null, encounterBasis);
-        final PopulationDef popDef2 = new PopulationDef("two", null, null, null, encounterBasis);
+        final PopulationReportDef popDef1 = new PopulationReportDef("one", null, null, null, encounterBasis);
+        final PopulationReportDef popDef2 = new PopulationReportDef("two", null, null, null, encounterBasis);
 
         assertFalse(popDef1.isBooleanBasis());
         assertFalse(popDef2.isBooleanBasis());
@@ -73,7 +75,7 @@ class PopulationDefTest {
         assertTrue(getResourcesDistinctAcrossAllSubjects(popDef1).contains(enc1b));
     }
 
-    private Set<Object> getResourcesDistinctAcrossAllSubjects(PopulationDef popDef) {
+    private Set<Object> getResourcesDistinctAcrossAllSubjects(PopulationReportDef popDef) {
         return new HashSetForFhirResourcesAndCqlTypes<>(popDef.getSubjectResources().values().stream()
                 .flatMap(Collection::stream)
                 .filter(Objects::nonNull)
@@ -86,7 +88,7 @@ class PopulationDefTest {
     @Test
     void testIsBooleanBasis_WithBooleanBasis() {
         CodeDef booleanBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "boolean");
-        PopulationDef popDef = new PopulationDef(
+        PopulationReportDef popDef = new PopulationReportDef(
                 "pop-1", null, MeasurePopulationType.INITIALPOPULATION, "InitialPopulation", booleanBasis);
 
         assertTrue(popDef.isBooleanBasis(), "Expected isBooleanBasis() to return true for boolean basis");
@@ -100,18 +102,18 @@ class PopulationDefTest {
     void testIsBooleanBasis_WithNonBooleanBasis() {
         // Test various non-boolean basis types
         CodeDef encounterBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "Encounter");
-        PopulationDef encounterPop = new PopulationDef(
+        PopulationReportDef encounterPop = new PopulationReportDef(
                 "pop-1", null, MeasurePopulationType.INITIALPOPULATION, "InitialPopulation", encounterBasis);
         assertFalse(encounterPop.isBooleanBasis(), "Expected isBooleanBasis() to return false for Encounter basis");
 
         CodeDef stringBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "String");
-        PopulationDef stringPop =
-                new PopulationDef("pop-2", null, MeasurePopulationType.DENOMINATOR, "Denominator", stringBasis);
+        PopulationReportDef stringPop =
+                new PopulationReportDef("pop-2", null, MeasurePopulationType.DENOMINATOR, "Denominator", stringBasis);
         assertFalse(stringPop.isBooleanBasis(), "Expected isBooleanBasis() to return false for String basis");
 
         CodeDef dateBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "date");
-        PopulationDef datePop =
-                new PopulationDef("pop-3", null, MeasurePopulationType.NUMERATOR, "Numerator", dateBasis);
+        PopulationReportDef datePop =
+                new PopulationReportDef("pop-3", null, MeasurePopulationType.NUMERATOR, "Numerator", dateBasis);
         assertFalse(datePop.isBooleanBasis(), "Expected isBooleanBasis() to return false for date basis");
     }
 
@@ -121,7 +123,7 @@ class PopulationDefTest {
     @Test
     void testGetCount_BooleanBasis_CountsUniqueSubjects() {
         CodeDef booleanBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "boolean");
-        PopulationDef popDef = new PopulationDef(
+        PopulationReportDef popDef = new PopulationReportDef(
                 "pop-1", null, MeasurePopulationType.INITIALPOPULATION, "InitialPopulation", booleanBasis);
 
         // Add 3 unique subjects
@@ -140,7 +142,7 @@ class PopulationDefTest {
     @Test
     void testGetCount_EncounterBasis_CountsAllResources() {
         CodeDef encounterBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "Encounter");
-        PopulationDef popDef = new PopulationDef(
+        PopulationReportDef popDef = new PopulationReportDef(
                 "pop-1", null, MeasurePopulationType.INITIALPOPULATION, "InitialPopulation", encounterBasis);
 
         // Subject 1 has 2 encounters
@@ -162,8 +164,8 @@ class PopulationDefTest {
     @Test
     void testGetCount_StringBasis_CountsAllResources() {
         CodeDef stringBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "String");
-        PopulationDef popDef =
-                new PopulationDef("pop-1", null, MeasurePopulationType.NUMERATOR, "Numerator", stringBasis);
+        PopulationReportDef popDef =
+                new PopulationReportDef("pop-1", null, MeasurePopulationType.NUMERATOR, "Numerator", stringBasis);
 
         // Add string values for different subjects
         // Even if the same string value appears for different subjects, count all
@@ -182,8 +184,8 @@ class PopulationDefTest {
     @Test
     void testGetCount_DateBasis_CountsAllResources() {
         CodeDef dateBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "date");
-        PopulationDef popDef =
-                new PopulationDef("pop-1", null, MeasurePopulationType.DENOMINATOR, "Denominator", dateBasis);
+        PopulationReportDef popDef =
+                new PopulationReportDef("pop-1", null, MeasurePopulationType.DENOMINATOR, "Denominator", dateBasis);
 
         // Add date values for subjects
         popDef.addResource("Patient/1", "2024-01-01");
@@ -201,7 +203,7 @@ class PopulationDefTest {
     @Test
     void testGetCount_MeasureObservation_CountsObservations() {
         CodeDef booleanBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "boolean");
-        PopulationDef popDef = new PopulationDef(
+        PopulationReportDef popDef = new PopulationReportDef(
                 "pop-obs", null, MeasurePopulationType.MEASUREOBSERVATION, "MeasureObservation", booleanBasis);
 
         // Add observations (Maps) for subjects

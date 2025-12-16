@@ -10,13 +10,13 @@ import org.hl7.fhir.r4.model.ResourceType;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
-import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorUtils;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.MeasureReportDef;
 import org.opencds.cqf.fhir.cr.measure.r4.MultiMeasure.Given;
 
 class R4MeasureProcessorTest {
     private static final Given GIVEN_REPO = MultiMeasure.given().repositoryFor("MinimalMeasureEvaluation");
-    private static final MeasureDef MINIMAL_COHORT_BOOLEAN_BASIS_SINGLE_GROUP = MeasureDef.fromIdAndUrl(
+    private static final MeasureReportDef MINIMAL_COHORT_BOOLEAN_BASIS_SINGLE_GROUP = MeasureReportDef.fromIdAndUrl(
             new IdType(ResourceType.Measure.name(), "MinimalCohortBooleanBasisSingleGroup"),
             "http://example.com/Measure/MinimalCohortBooleanBasisSingleGroup");
     private static final String SUBJECT_ID = "Patient/female-1914";

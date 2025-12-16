@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.GroupReportDef;
 
 /**
  * Utility class for handling FHIR resource ID formatting, including detection and removal of resource type qualifiers.
@@ -52,7 +53,7 @@ public class FhirResourceUtils {
     }
 
     @Nullable
-    public static String determineFhirResourceTypeOrNull(FhirContext fhirContext, GroupDef groupDef) {
+    public static String determineFhirResourceTypeOrNull(FhirContext fhirContext, GroupReportDef groupDef) {
         final String populationBasis = groupDef.getPopulationBasis().code();
 
         if (StringUtils.isBlank(populationBasis)) {

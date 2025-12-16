@@ -1,4 +1,4 @@
-package org.opencds.cqf.fhir.cr.measure.common;
+package org.opencds.cqf.fhir.cr.measure.common.def.report;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.StringJoiner;
@@ -15,11 +15,11 @@ import org.opencds.cqf.cql.engine.runtime.Code;
  * This is some hackery because most of these objects don't implement
  * hashCode or equals, meaning it's hard to detect distinct values;
  */
-public class StratumValueWrapper {
+public class StratumValueWrapperReportDef {
 
     protected Object value;
 
-    public StratumValueWrapper(Object value) {
+    public StratumValueWrapperReportDef(Object value) {
         this.value = value;
     }
 
@@ -40,7 +40,7 @@ public class StratumValueWrapper {
             return false;
         }
 
-        StratumValueWrapper other = (StratumValueWrapper) o;
+        StratumValueWrapperReportDef other = (StratumValueWrapperReportDef) o;
 
         if (other.getValue() == null ^ this.getValue() == null) {
             return false;
@@ -55,7 +55,7 @@ public class StratumValueWrapper {
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", StratumValueWrapper.class.getSimpleName() + "[", "]")
+        return new StringJoiner(", ", StratumValueWrapperReportDef.class.getSimpleName() + "[", "]")
                 .add("value=" + value)
                 .toString();
     }

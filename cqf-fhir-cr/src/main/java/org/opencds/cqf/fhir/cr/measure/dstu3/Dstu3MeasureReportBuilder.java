@@ -42,16 +42,16 @@ import org.opencds.cqf.cql.engine.runtime.Date;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.fhir.cr.measure.common.CriteriaResult;
-import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.IMeasureReportScorer;
-import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureInfo;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportBuilder;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
-import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
-import org.opencds.cqf.fhir.cr.measure.common.SdeDef;
-import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.GroupReportDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.MeasureReportDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.PopulationReportDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.SdeReportDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.StratifierReportDef;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 
 public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, MeasureReport, DomainResource> {
@@ -83,7 +83,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
     @Override
     public MeasureReport build(
             Measure measure,
-            MeasureDef measureDef,
+            MeasureReportDef measureDef,
             MeasureReportType measureReportType,
             Interval measurementPeriod,
             List<String> subjectIds) {
@@ -109,7 +109,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         return this.report;
     }
 
-    protected void buildGroups(Measure measure, MeasureDef measureDef) {
+    protected void buildGroups(Measure measure, MeasureReportDef measureDef) {
         if (measure.getGroup().size() != measureDef.groups().size()) {
             // This is not a user error:
             throw new IllegalArgumentException(
@@ -131,11 +131,11 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
     }
 
     protected void buildGroup(
-            MeasureDef measureDef,
+            MeasureReportDef measureDef,
             String groupKey,
             MeasureGroupComponent measureGroup,
             MeasureReportGroupComponent reportGroup,
-            GroupDef groupDef) {
+            GroupReportDef groupDef) {
         if (measureGroup.getPopulation().size() != (groupDef.populations().size())) {
             // This is not a user error:
             throw new IllegalArgumentException(
@@ -193,7 +193,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
             Integer stratIndex,
             MeasureGroupStratifierComponent measureStratifier,
             MeasureReportGroupStratifierComponent reportStratifier,
-            StratifierDef stratifierDef,
+            StratifierReportDef stratifierDef,
             List<MeasureGroupPopulationComponent> populations) {
         reportStratifier.setId(measureStratifier.getId());
 
@@ -277,11 +277,11 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
     }
 
     protected void buildPopulation(
-            MeasureDef measureDef,
+            MeasureReportDef measureDef,
             String groupKey,
             MeasureGroupPopulationComponent measurePopulation,
             MeasureReportGroupPopulationComponent reportPopulation,
-            PopulationDef populationDef) {
+            PopulationReportDef populationDef) {
 
         reportPopulation.setCode(measurePopulation.getCode());
         reportPopulation.setId(measurePopulation.getId());
@@ -384,12 +384,12 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         return this.getEvaluatedResourceReferences().computeIfAbsent(id, x -> new Reference(id));
     }
 
-    protected void processSdes(Measure measure, MeasureDef measureDef, List<String> subjectIds) {
+    protected void processSdes(Measure measure, MeasureReportDef measureDef, List<String> subjectIds) {
         // ASSUMPTION: Measure SDEs are in the same order as MeasureDef SDEs
         for (int i = 0; i < measure.getSupplementalData().size(); i++) {
             MeasureSupplementalDataComponent msdc =
                     measure.getSupplementalData().get(i);
-            SdeDef sde = measureDef.sdes().get(i);
+            SdeReportDef sde = measureDef.sdes().get(i);
 
             processSdeEvaluatedResourceExtension(sde);
 
@@ -451,7 +451,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         }
     }
 
-    private void processSdeEvaluatedResourceExtension(SdeDef sdeDef) {
+    private void processSdeEvaluatedResourceExtension(SdeReportDef sdeDef) {
         for (CriteriaResult r : sdeDef.getResults().values()) {
             for (Object o : r.evaluatedResources()) {
                 if (o instanceof IBaseResource iBaseResource) {

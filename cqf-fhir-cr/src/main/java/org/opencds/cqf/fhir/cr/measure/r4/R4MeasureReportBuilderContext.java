@@ -14,7 +14,7 @@ import org.hl7.fhir.r4.model.OperationOutcome.IssueType;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
-import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.MeasureReportDef;
 
 /**
  * Package-private context class for building R4 MeasureReports.
@@ -22,14 +22,14 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
  */
 class R4MeasureReportBuilderContext {
     private final Measure measure;
-    private final MeasureDef measureDef;
+    private final MeasureReportDef measureDef;
     private final MeasureReport measureReport;
 
     private final HashMap<String, Reference> evaluatedResourceReferences = new HashMap<>();
     private final HashMap<String, Reference> supplementalDataReferences = new HashMap<>();
     private final Map<String, Resource> contained = new HashMap<>();
 
-    public R4MeasureReportBuilderContext(Measure measure, MeasureDef measureDef, MeasureReport measureReport) {
+    public R4MeasureReportBuilderContext(Measure measure, MeasureReportDef measureDef, MeasureReport measureReport) {
         this.measure = measure;
         this.measureDef = measureDef;
         this.measureReport = measureReport;
@@ -56,7 +56,7 @@ class R4MeasureReportBuilderContext {
         return this.measureReport;
     }
 
-    public MeasureDef measureDef() {
+    public MeasureReportDef measureDef() {
         return this.measureDef;
     }
 

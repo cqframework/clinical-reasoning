@@ -5,8 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
-import org.opencds.cqf.fhir.cr.measure.common.StratumDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.StratifierReportDef;
+import org.opencds.cqf.fhir.cr.measure.common.def.report.StratumReportDef;
+import org.opencds.cqf.fhir.cr.measure.r4.Measure;
 
 /**
  * Fluent assertion API for StratifierDef objects.
@@ -38,10 +39,9 @@ import org.opencds.cqf.fhir.cr.measure.common.StratumDef;
  * @author Claude (Anthropic AI Assistant)
  * @since 4.1.0
  */
-public class SelectedMeasureDefStratifier<P>
-        extends org.opencds.cqf.fhir.cr.measure.r4.Measure.Selected<StratifierDef, P> {
+public class SelectedMeasureDefStratifier<P> extends Measure.Selected<StratifierReportDef, P> {
 
-    public SelectedMeasureDefStratifier(StratifierDef value, P parent) {
+    public SelectedMeasureDefStratifier(StratifierReportDef value, P parent) {
         super(value, parent);
     }
 
@@ -84,7 +84,7 @@ public class SelectedMeasureDefStratifier<P>
      */
     public SelectedMeasureDefStratum<SelectedMeasureDefStratifier<P>> stratumByValue(String valueText) {
         assertNotNull(value(), "StratifierDef is null");
-        StratumDef stratum = value().getStratum().stream()
+        StratumReportDef stratum = value().getStratum().stream()
                 .filter(s -> s.valueDefs() != null
                         && s.valueDefs().stream()
                                 .anyMatch(vd -> valueText.equals(vd.value().getDescription())))
@@ -184,7 +184,7 @@ public class SelectedMeasureDefStratifier<P>
      *
      * @return the StratifierDef instance
      */
-    public StratifierDef stratifierDef() {
+    public StratifierReportDef stratifierDef() {
         return value();
     }
 }

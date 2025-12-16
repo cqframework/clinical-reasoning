@@ -13,6 +13,14 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 
+/**
+ * DSTU3-specific implementation of MeasureReport scoring.
+ *
+ * <p><strong>DEPRECATION NOTICE:</strong> This class is deprecated and will be removed in a future release.
+ * For internal use, this class will be replaced by {@link org.opencds.cqf.fhir.cr.measure.common.MeasureDefScorer}
+ * integrated into the evaluation workflow in Part 2.
+ * See: integrate-measure-def-scorer-part2-integration PRP
+ */
 public class Dstu3MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport> {
 
     @Override

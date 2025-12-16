@@ -130,13 +130,13 @@ public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
 
     private void checkId(Element e) {
         if (e.getId() == null || StringUtils.isBlank(e.getId())) {
-            throw new NullPointerException("id is required on all Elements of type: " + e.fhirType());
+            throw new InvalidRequestException("id is required on all Elements of type: " + e.fhirType());
         }
     }
 
     private void checkId(Resource r) {
         if (r.getId() == null || StringUtils.isBlank(r.getId())) {
-            throw new NullPointerException("id is required on all Resources of type: " + r.fhirType());
+            throw new InvalidRequestException("id is required on all Resources of type: " + r.fhirType());
         }
     }
 

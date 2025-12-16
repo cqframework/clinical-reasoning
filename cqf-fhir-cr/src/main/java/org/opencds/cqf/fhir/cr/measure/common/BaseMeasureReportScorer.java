@@ -8,7 +8,16 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-// Extracted version-agnostic patterns from R4MeasureReportScorer by Claude Sonnet 4.5
+/**
+ * Base class for version-specific MeasureReport scorers.
+ *
+ * <p>Extracted version-agnostic patterns from R4MeasureReportScorer
+ *
+ * <p><strong>DEPRECATION NOTICE:</strong> This class is deprecated and will be removed in a future release.
+ * For internal use, this class will be replaced by {@link MeasureDefScorer}
+ * integrated into the evaluation workflow in Part 2.
+ * See: integrate-measure-def-scorer-part2-integration PRP
+ */
 public abstract class BaseMeasureReportScorer<MeasureReportT> implements IMeasureReportScorer<MeasureReportT> {
 
     // Version-agnostic population type constants
@@ -29,7 +38,6 @@ public abstract class BaseMeasureReportScorer<MeasureReportT> implements IMeasur
         return null;
     }
 
-    // Moved from R4MeasureReportScorer by Claude Sonnet 4.5 - version-agnostic validation
     protected MeasureScoring checkMissingScoringType(MeasureDef measureDef, MeasureScoring measureScoring) {
         if (measureScoring == null) {
             throw new InvalidRequestException(
@@ -39,7 +47,6 @@ public abstract class BaseMeasureReportScorer<MeasureReportT> implements IMeasur
         return measureScoring;
     }
 
-    // Moved from R4MeasureReportScorer by Claude Sonnet 4.5 - version-agnostic validation
     protected void groupHasValidId(MeasureDef measureDef, String id) {
         if (id == null || id.isEmpty()) {
             throw new InvalidRequestException(
@@ -48,7 +55,6 @@ public abstract class BaseMeasureReportScorer<MeasureReportT> implements IMeasur
         }
     }
 
-    // Moved from R4MeasureReportScorer by Claude Sonnet 4.5 - version-agnostic helper
     @Nullable
     protected PopulationDef getFirstMeasureObservation(GroupDef groupDef) {
         var measureObservations = getMeasureObservations(groupDef);
@@ -59,14 +65,12 @@ public abstract class BaseMeasureReportScorer<MeasureReportT> implements IMeasur
         }
     }
 
-    // Moved from R4MeasureReportScorer by Claude Sonnet 4.5 - version-agnostic helper
     protected List<PopulationDef> getMeasureObservations(GroupDef groupDef) {
         return groupDef.populations().stream()
                 .filter(t -> t.type().equals(MeasurePopulationType.MEASUREOBSERVATION))
                 .toList();
     }
 
-    // Moved from R4MeasureReportScorer by Claude Sonnet 4.5 - version-agnostic helper
     @Nullable
     protected PopulationDef findPopulationDef(
             GroupDef groupDef, List<PopulationDef> populationDefs, MeasurePopulationType type) {
@@ -83,7 +87,6 @@ public abstract class BaseMeasureReportScorer<MeasureReportT> implements IMeasur
                 .orElse(null);
     }
 
-    // Moved from R4MeasureReportScorer by Claude Sonnet 4.5 - version-agnostic utility
     @Nullable
     protected Double toDouble(Number value) {
         return value == null ? null : value.doubleValue();
@@ -96,7 +99,6 @@ public abstract class BaseMeasureReportScorer<MeasureReportT> implements IMeasur
      * @param populationDef the measureObservation population related to the stratumPopulationDef to extract
      * @return the matching StratumPopulationDef or null if not found
      */
-    // Moved from R4MeasureReportScorer by Claude Sonnet 4.5 - version-agnostic helper
     @Nullable
     protected StratumPopulationDef getStratumPopDefFromPopDef(StratumDef stratumDef, PopulationDef populationDef) {
         return stratumDef.stratumPopulations().stream()
@@ -135,7 +137,6 @@ public abstract class BaseMeasureReportScorer<MeasureReportT> implements IMeasur
      * @param stratumPopulationDef the stratum population definition with subject filters
      * @return the filtered set of resources for subjects in the stratum
      */
-    // Moved from R4MeasureReportScorer by Claude Sonnet 4.5 - version-agnostic helper
     protected Set<Object> getResultsForStratum(
             PopulationDef measureObservationPopulationDef, StratumPopulationDef stratumPopulationDef) {
 
@@ -146,7 +147,6 @@ public abstract class BaseMeasureReportScorer<MeasureReportT> implements IMeasur
                 .collect(Collectors.toUnmodifiableSet());
     }
 
-    // Moved from R4MeasureReportScorer by Claude Sonnet 4.5 - version-agnostic helper
     protected boolean doesStratumPopDefMatchGroupPopDef(
             StratumPopulationDef stratumPopulationDef, Entry<String, Set<Object>> entry) {
 

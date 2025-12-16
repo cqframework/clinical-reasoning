@@ -36,6 +36,11 @@ import org.slf4j.LoggerFactory;
 /**
  * Evaluation of Measure Report Data showing raw CQL criteria results compared to resulting Measure Report.
  *
+ * <p><strong>DEPRECATION NOTICE:</strong> This class is deprecated and will be removed in a future release.
+ * For internal use, this class will be replaced by {@link org.opencds.cqf.fhir.cr.measure.common.MeasureDefScorer}
+ * integrated into the evaluation workflow in Part 2.
+ * See: integrate-measure-def-scorer-part2-integration PRP
+ *
  * <p>Each row represents a subject as raw cql criteria expression output:
  *
  * <pre>{@code
@@ -89,7 +94,6 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
 
     private static final Logger logger = LoggerFactory.getLogger(R4MeasureReportScorer.class);
 
-    // Added by Claude Sonnet 4.5 on 2025-11-28 to facilitate future refactoring
     private final ContinuousVariableObservationConverter<Quantity> continuousVariableConverter =
             R4ContinuousVariableObservationConverter.INSTANCE;
 
@@ -177,7 +181,6 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
                     score = scoreRatioContVariable(measureUrl, groupDef, getMeasureObservations(groupDef));
                 } else {
                     // Standard Proportion & Ratio Scoring
-                    // Refactored by Claude Sonnet 4.5 on 2025-12-02 to use GroupDef.getPopulationCount()
                     score = calcProportionScore(
                             groupDef.getPopulationCount(MeasurePopulationType.NUMERATOR)
                                     - groupDef.getPopulationCount(MeasurePopulationType.NUMERATOREXCLUSION),
@@ -201,7 +204,6 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
         }
     }
 
-    // Enhanced by Claude Sonnet 4.5 on 2025-11-27 to work with QuantityDef
     @Nullable
     protected Double scoreRatioContVariable(String measureUrl, GroupDef groupDef, List<PopulationDef> populationDefs) {
 
@@ -241,7 +243,6 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
         return num / den;
     }
 
-    // Enhanced by Claude Sonnet 4.5 on 2025-11-27 to convert QuantityDef at the end
     protected void scoreContinuousVariable(
             String measureUrl, MeasureReportGroupComponent mrgc, GroupDef groupDef, PopulationDef populationDef) {
         final QuantityDef aggregateQuantityDef = calculateContinuousVariableAggregateQuantity(
@@ -252,7 +253,6 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
         mrgc.setMeasureScore(aggregateQuantity);
     }
 
-    // Enhanced by Claude Sonnet 4.5 on 2025-11-27 to return QuantityDef
     @Nullable
     private static QuantityDef calculateContinuousVariableAggregateQuantity(
             String measureUrl,
@@ -271,7 +271,6 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
                 populationDef.getAggregateMethod(), popDefToResources.apply(populationDef));
     }
 
-    // Enhanced by Claude Sonnet 4.5 on 2025-11-27 to return QuantityDef
     @Nullable
     private static QuantityDef calculateContinuousVariableAggregateQuantity(
             ContinuousVariableObservationAggregateMethod aggregateMethod, Collection<Object> qualifyingResources) {
@@ -279,7 +278,6 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
         return aggregate(observationQuantity, aggregateMethod);
     }
 
-    // Enhanced by Claude Sonnet 4.5 on 2025-11-27 to work with QuantityDef
     private static QuantityDef aggregate(
             List<QuantityDef> quantities, ContinuousVariableObservationAggregateMethod method) {
         if (quantities == null || quantities.isEmpty()) {
@@ -348,7 +346,6 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
         return new QuantityDef(result);
     }
 
-    // Enhanced by Claude Sonnet 4.5 on 2025-11-27 to collect QuantityDef
     private static List<QuantityDef> collectQuantities(Collection<Object> resources) {
 
         var mapValues = resources.stream()
@@ -432,7 +429,6 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
                 // value being stratified: 'M'
                 stratumText = expressionResultToCodableConcept(value).getText();
             } else if (MeasureStratifierType.CRITERIA == stratifierDef.getStratifierType()) {
-                // Updated by Claude Sonnet 4.5 on 2025-12-02
                 // Handle CRITERIA-type stratifiers with non-CodeableConcept values (e.g., String, Boolean)
                 stratumText = expressionResultToCodableConcept(value).getText();
             }
@@ -502,7 +498,6 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
                             denPopDef);
                 } else {
                     // Standard Proportion & Ratio Scoring
-                    // Refactored by Claude Sonnet 4.5 on 2025-12-02 to use StratumPopulationDef.getCount()
                     score = calcProportionScore(
                             getCountFromStratifierPopulation(groupDef, stratumDef, MeasurePopulationType.NUMERATOR),
                             getCountFromStratifierPopulation(groupDef, stratumDef, MeasurePopulationType.DENOMINATOR));
@@ -524,7 +519,6 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
                 } else {
                     stratumPopulationDef = null;
                 }
-                // Enhanced by Claude Sonnet 4.5 on 2025-11-27 - convert QuantityDef to Quantity
                 QuantityDef quantityDef = calculateContinuousVariableAggregateQuantity(
                         measureUrl,
                         getFirstMeasureObservation(groupDef),
@@ -537,7 +531,6 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
         }
     }
 
-    // Enhanced by Claude Sonnet 4.5 on 2025-11-27 to work with QuantityDef
     @Nullable
     protected Double scoreRatioContVariableStratum(
             String measureUrl,
@@ -573,7 +566,6 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
     }
 
     /**
-     * Updated by Claude Sonnet 4.5 on 2025-12-02
      * Get count from StratumDef's StratumPopulationDef.
      * Optimized to use GroupDef.getSingle() and StratumDef.getPopulationCount().
      *

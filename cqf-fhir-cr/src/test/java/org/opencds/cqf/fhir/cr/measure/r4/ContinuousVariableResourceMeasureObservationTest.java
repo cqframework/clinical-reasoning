@@ -48,10 +48,10 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .population("measure-observation")
                 .hasCount(11)
                 .up()
+                .hasScore(74.0)
                 .stratifier("stratifier-gender")
                 .hasStratumCount(4)
                 .up()
-                // TODO: Add score assertion in subsequent measure scoring refactoring PR
                 .up()
                 .up()
                 // MeasureReport assertions (post-scoring) - verify FHIR resource output
@@ -168,7 +168,7 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .population("measure-population")
                 .hasSubjectCount(10)
                 .up()
-                // TODO: Add score assertion in subsequent measure scoring refactoring PR
+                .hasScore(230.54545454545453)
                 .up()
                 .up()
                 // MeasureReport assertions (post-scoring) - verify FHIR resource output
@@ -269,10 +269,10 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .population("measure-observation")
                 .hasCount(11)
                 .up()
+                .hasScore(11.0)
                 .stratifier("stratifier-gender")
                 .hasStratumCount(4)
                 .up()
-                // TODO: Add score assertion in subsequent measure scoring refactoring PR
                 .up()
                 .up()
                 // MeasureReport assertions (post-scoring) - verify FHIR resource output
@@ -381,7 +381,7 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .population("measure-population")
                 .hasSubjectCount(10)
                 .up()
-                // TODO: Add score assertion in subsequent measure scoring refactoring PR
+                .hasScore(11.0)
                 .up()
                 .up()
                 // MeasureReport assertions (post-scoring) - verify FHIR resource output
@@ -482,10 +482,10 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .population("measure-observation")
                 .hasCount(11)
                 .up()
+                .hasScore(79.0)
                 .stratifier("stratifier-gender")
                 .hasStratumCount(4)
                 .up()
-                // TODO: Add score assertion in subsequent measure scoring refactoring PR
                 .up()
                 .up()
                 // MeasureReport assertions (post-scoring) - verify FHIR resource output
@@ -594,7 +594,7 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .population("measure-population")
                 .hasSubjectCount(10)
                 .up()
-                // TODO: Add score assertion in subsequent measure scoring refactoring PR
+                .hasScore(120.0)
                 .up()
                 .up()
                 // MeasureReport assertions (post-scoring) - verify FHIR resource output
@@ -686,7 +686,7 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .population("measure-population")
                 .hasSubjectCount(11)
                 .up()
-                // TODO: Add score assertion in subsequent measure scoring refactoring PR
+                .hasScore(54.0)
                 .up()
                 .up()
                 // MeasureReport assertions (post-scoring) - verify FHIR resource output
@@ -795,7 +795,7 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .population("measure-population")
                 .hasSubjectCount(10)
                 .up()
-                // TODO: Add score assertion in subsequent measure scoring refactoring PR
+                .hasScore(15.0)
                 .up()
                 .up()
                 // MeasureReport assertions (post-scoring) - verify FHIR resource output
@@ -887,7 +887,7 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .population("measure-population")
                 .hasSubjectCount(11)
                 .up()
-                // TODO: Add score assertion in subsequent measure scoring refactoring PR
+                .hasScore(84.0)
                 .up()
                 .up()
                 // MeasureReport assertions (post-scoring) - verify FHIR resource output
@@ -996,7 +996,7 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .population("measure-population")
                 .hasSubjectCount(10)
                 .up()
-                // TODO: Add score assertion in subsequent measure scoring refactoring PR
+                .hasScore(840.0)
                 .up()
                 .up()
                 // MeasureReport assertions (post-scoring) - verify FHIR resource output
@@ -1088,7 +1088,7 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .population("measure-population")
                 .hasSubjectCount(11)
                 .up()
-                // TODO: Add score assertion in subsequent measure scoring refactoring PR
+                .hasScore(814.0)
                 .up()
                 .up()
                 // MeasureReport assertions (post-scoring) - verify FHIR resource output
@@ -1197,7 +1197,7 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .population("measure-population")
                 .hasSubjectCount(10)
                 .up()
-                // TODO: Add score assertion in subsequent measure scoring refactoring PR
+                .hasScore(2536.0)
                 .up()
                 .up()
                 // MeasureReport assertions (post-scoring) - verify FHIR resource output

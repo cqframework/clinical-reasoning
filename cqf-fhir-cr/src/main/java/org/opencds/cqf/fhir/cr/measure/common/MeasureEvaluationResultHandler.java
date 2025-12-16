@@ -13,6 +13,7 @@ import org.hl7.elm.r1.VersionedIdentifier;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.EvaluationResultsForMultiLib;
+import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,32 +27,31 @@ public class MeasureEvaluationResultHandler {
 
     private static final String EXCEPTION_FOR_SUBJECT_ID_MESSAGE_TEMPLATE = "Exception for subjectId: %s, Message: %s";
 
-    private MeasureEvaluationResultHandler() {
-        // static class
+    private final MeasureEvaluationOptions measureEvaluationOptions;
+    private final MeasureEvaluator measureEvaluator;
+    private final MeasureReportDefScorer measureReportDefScorer = new MeasureReportDefScorer();
+
+    public MeasureEvaluationResultHandler(
+            MeasureEvaluationOptions measureEvaluationOptions, PopulationBasisValidator populationBasisValidator) {
+        this.measureEvaluationOptions = measureEvaluationOptions;
+        this.measureEvaluator = new MeasureEvaluator(populationBasisValidator);
     }
 
     /**
      * Method that consumes pre-generated CQL results into Measure defined fields that reference
      * associated CQL expressions This is meant to be called by CQL CLI.
      *
-     * @param fhirContext              FHIR context for FHIR version
-     * @param evalResultsPerSubject    criteria expression evalResultsPerSubject
-     * @param measureDef               Measure defined objects
-     * @param measureEvalType          the type of evaluation algorithm to apply to Criteria
-     *                                 results
-     * @param applyScoring             whether Measure Evaluator will apply set membership per
-     *                                 measure scoring algorithm
-     * @param populationBasisValidator the validator class to use for checking consistency of
-     *                                 results
+     * @param fhirContext           FHIR context for FHIR version
+     * @param evalResultsPerSubject criteria expression evalResultsPerSubject
+     * @param measureDef            Measure defined objects
+     * @param measureEvalType       the type of evaluation algorithm to apply to Criteria results
      */
-    public static void processResults(
+    public void processResults(
             FhirContext fhirContext,
             Map<String, EvaluationResult> evalResultsPerSubject,
             MeasureDef measureDef,
-            @Nonnull MeasureEvalType measureEvalType,
-            boolean applyScoring,
-            PopulationBasisValidator populationBasisValidator) {
-        MeasureEvaluator evaluator = new MeasureEvaluator(populationBasisValidator);
+            @Nonnull MeasureEvalType measureEvalType) {
+
         // Populate MeasureDef using MeasureEvaluator
         for (Map.Entry<String, EvaluationResult> entry : evalResultsPerSubject.entrySet()) {
             // subject
@@ -62,8 +62,13 @@ public class MeasureEvaluationResultHandler {
             EvaluationResult evalResult = entry.getValue();
             try {
                 // populate CQL results into MeasureDef
-                evaluator.evaluate(
-                        measureDef, measureEvalType, subjectTypePart, subjectIdPart, evalResult, applyScoring);
+                measureEvaluator.evaluate(
+                        measureDef,
+                        measureEvalType,
+                        subjectTypePart,
+                        subjectIdPart,
+                        evalResult,
+                        measureEvaluationOptions.getApplyScoringSetMembership());
             } catch (Exception e) {
                 // Catch Exceptions from evaluation per subject, but allow rest of subjects to be processed (if
                 // applicable)
@@ -75,6 +80,13 @@ public class MeasureEvaluationResultHandler {
         }
 
         MeasureMultiSubjectEvaluator.postEvaluationMultiSubject(fhirContext, measureDef);
+
+        // Score all groups and stratifiers using version-agnostic scorer
+        // Populates scores in MeasureDef before builders run
+        // Note: Scoring is always performed, independent of applyScoring flag
+        // (applyScoring controls set membership filtering, not numeric scoring)
+        logger.debug("Scoring MeasureDef using MeasureReportDefScorer for measure: {}", measureDef.url());
+        measureReportDefScorer.score(measureDef.url(), measureDef);
     }
 
     /**

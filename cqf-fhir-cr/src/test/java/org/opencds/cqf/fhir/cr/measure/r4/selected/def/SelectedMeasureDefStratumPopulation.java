@@ -42,7 +42,7 @@ public class SelectedMeasureDefStratumPopulation<P>
      */
     public SelectedMeasureDefStratumPopulation<P> hasCount(int count) {
         assertNotNull(value(), "StratumPopulationDef is null");
-        assertEquals(count, value().subjectsQualifiedOrUnqualified().size(), "Stratum population count mismatch");
+        assertEquals(count, value().getCount(), "Stratum population count mismatch");
         return this;
     }
 

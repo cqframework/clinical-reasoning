@@ -43,7 +43,6 @@ import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.fhir.cr.measure.common.CriteriaResult;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
-import org.opencds.cqf.fhir.cr.measure.common.IMeasureReportScorer;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureInfo;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
@@ -68,12 +67,6 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
             "http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.supplementalDataElement.reference";
     protected static final String POPULATION_BASIS_URL =
             "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-populationBasis";
-
-    protected IMeasureReportScorer<MeasureReport> measureReportScorer;
-
-    public Dstu3MeasureReportBuilder() {
-        this.measureReportScorer = new Dstu3MeasureReportScorer();
-    }
 
     protected Measure measure = null;
     protected MeasureReport report = null;
@@ -100,13 +93,8 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         buildGroups(measure, measureDef);
         processSdes(measure, measureDef, subjectIds);
 
-        // Part 1: Copy scores from Def objects (currently does nothing - Def scores are null)
-        // This becomes active in Part 2 when MeasureDefScorer is integrated into evaluation flow
+        // Copy scores from Def objects (populated by MeasureReportDefScorer in MeasureEvaluationResultHandler)
         copyScoresFromDef(measureDef);
-
-        // Part 1: Old scorer still produces all scores (remains source of truth)
-        // Part 2: Old scorer will be removed - Def scores become source of truth
-        this.measureReportScorer.score(measure.getUrl(), measureDef, this.report);
 
         // Only add evaluated resources to individual reports
         if (measureReportType == MeasureReportType.INDIVIDUAL) {

@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import java.util.Collections;
+import java.util.List;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeType;
@@ -199,5 +200,17 @@ class LibraryOperationsProviderIT extends BaseCrR4TestServer {
                     .withId("SpecificationLibrary")
                     .execute();
         });
+    }
+
+    private List<Parameters.ParametersParameterComponent> getOperationsByType(
+            List<Parameters.ParametersParameterComponent> parameters, String type) {
+        return parameters.stream()
+                .filter(p -> p.getName().equals("operation")
+                        && p.getPart().stream()
+                                .anyMatch(part -> part.getName().equals("type")
+                                        && ((CodeType) part.getValue())
+                                                .getCode()
+                                                .equals(type)))
+                .toList();
     }
 }

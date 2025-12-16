@@ -686,7 +686,7 @@ public class HapiArtifactDiffProcessor extends ArtifactDiffProcessor {
             if (path.isPresent()) {
                 var pathString = ((StringType) path.get().getValue()).getValue();
                 var newIndex = "relatedArtifact[" + relatedArtifactIndex + "]"; // Replace with your desired string
-                var indexedPathString = pathString.replaceAll("relatedArtifact\\[([^\\]]+)\\]", newIndex);
+                var indexedPathString = pathString.replaceAll("relatedArtifact\\[([^]]+)]", newIndex);
                 path.get().setValue(new StringType(indexedPathString));
             }
         }
@@ -923,7 +923,7 @@ public class HapiArtifactDiffProcessor extends ArtifactDiffProcessor {
                                 "Error while following changelog path to extract context:" + err.getMessage());
                     }
                     var newIndex = "[" + (i + newStart) + "]"; // Replace with your desired string
-                    var result = pathString.replaceAll("\\[([^\\]]+)\\]", newIndex);
+                    var result = pathString.replaceAll("\[([^]]+)]", newIndex);
                     path.get().setValue(new StringType(result));
                 }
             }
@@ -963,7 +963,7 @@ public class HapiArtifactDiffProcessor extends ArtifactDiffProcessor {
                     if ((pathString.contains("expansion.contains") || pathString.contains("compose.include"))
                             && value.isPresent()) {
                         var newIndex = "[" + (opCounter - 1 + newStart) + "]";
-                        var result = pathString.replaceAll("\\[([^\\]]+)\\]", newIndex);
+                        var result = pathString.replaceAll("\[([^]]+)]", newIndex);
                         path.get().setValue(new StringType(result));
                     }
                 }

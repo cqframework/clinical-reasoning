@@ -75,12 +75,12 @@ public class ArtifactDiffProcessor implements IArtifactDiffProcessor {
 
         public List<DiffCacheResource> getResourcesForUrl(String url) {
             return this.resources.keySet().stream()
-                    .filter(k -> Canonicals.getUrl(k).equals(url))
+                    .filter(k -> url.equals(Canonicals.getUrl(k)))
                     .map(this.resources::get)
                     .toList();
         }
 
-        public class DiffCacheResource {
+        public static class DiffCacheResource {
             public final MetadataResource resource;
             public final boolean isSource;
 

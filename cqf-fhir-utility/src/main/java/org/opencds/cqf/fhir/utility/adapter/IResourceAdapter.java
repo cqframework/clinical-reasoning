@@ -87,15 +87,16 @@ public interface IResourceAdapter extends IAdapter<IBaseResource> {
         } else {
             // for KnowledgeResources that do not have relatedArtifact properties,
             // we'll filter the extensions for these 2 RelatedArtifact
-            List<T> extensionArtifacts = getExtensionsByUrls(
-                            get(), Set.of(Constants.CPG_RELATED_ARTIFACT, Constants.ARTIFACT_RELATED_ARTIFACT))
-                    .stream()
-                    .filter(ext -> {
-                        return ext.getValue() != null
-                                && ext.getValue().fhirType().equals("RelatedArtifact");
-                    })
-                    .map(ext -> (T) ext.getValue())
-                    .toList();
+            List<T> extensionArtifacts =
+                    getExtensionsByUrls(
+                                    get(), Set.of(Constants.CPG_RELATED_ARTIFACT, Constants.ARTIFACT_RELATED_ARTIFACT))
+                            .stream()
+                            .filter(ext -> {
+                                return ext.getValue() != null
+                                        && ext.getValue().fhirType().equals("RelatedArtifact");
+                            })
+                            .map(ext -> (T) ext.getValue())
+                            .toList();
             artifacts.addAll(extensionArtifacts);
         }
         return artifacts;

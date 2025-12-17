@@ -44,8 +44,7 @@ class ValueSetAdapterTest implements IValueSetAdapterTest<ValueSet> {
 
     @Override
     public String getTemplate() {
-        String templateStr =
-                """
+        return """
         {
             "resourceType": "ValueSet",
             "status": "active",
@@ -61,7 +60,6 @@ class ValueSetAdapterTest implements IValueSetAdapterTest<ValueSet> {
             ]
         }
         """;
-        return templateStr;
     }
 
     @Test

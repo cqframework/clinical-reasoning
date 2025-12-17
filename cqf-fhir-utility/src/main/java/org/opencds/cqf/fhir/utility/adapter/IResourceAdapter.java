@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.utility.adapter;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -77,14 +78,16 @@ public interface IResourceAdapter extends IAdapter<IBaseResource> {
 
     @SuppressWarnings("unchecked")
     default <T extends ICompositeType & IBaseHasExtensions> List<T> getRelatedArtifact() {
+        List<T> artifacts = new ArrayList<>();
         if (hasProperty("relatedArtifact")) {
-            return resolvePathList(get(), "relatedArtifact").stream()
+            List<T> relatedArtifacts = resolvePathList(get(), "relatedArtifact").stream()
                     .map(r -> (T) r)
-                    .collect(Collectors.toList());
+                    .toList();
+            artifacts.addAll(relatedArtifacts);
         } else {
             // for KnowledgeResources that do not have relatedArtifact properties,
             // we'll filter the extensions for these 2 RelatedArtifact
-            return getExtensionsByUrls(
+            List<T> extensionArtifacts = getExtensionsByUrls(
                             get(), Set.of(Constants.CPG_RELATED_ARTIFACT, Constants.ARTIFACT_RELATED_ARTIFACT))
                     .stream()
                     .filter(ext -> {
@@ -93,6 +96,8 @@ public interface IResourceAdapter extends IAdapter<IBaseResource> {
                     })
                     .map(ext -> (T) ext.getValue())
                     .toList();
+            artifacts.addAll(extensionArtifacts);
         }
+        return artifacts;
     }
 }

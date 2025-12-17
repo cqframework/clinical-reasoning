@@ -42,6 +42,27 @@ class ValueSetAdapterTest implements IValueSetAdapterTest<ValueSet> {
 
     private final FhirContext fhirContext = FhirContext.forR5Cached();
 
+    @Override
+    public String getTemplate() {
+        String templateStr = """
+        {
+            "resourceType": "ValueSet",
+            "status": "active",
+            "relatedArtifact": [
+                {
+                    "type": "RELATED_ARTIFACT_TYPE_1",
+                    "resource": RESOURCE_REF_1
+                },
+                {
+                    "type": "RELATED_ARTIFACT_TYPE_2",
+                    "resource": RESOURCE_REF_2
+                }
+            ]
+        }
+        """;
+        return templateStr;
+    }
+
     @Test
     void invalid_object_fails() {
         var library = new Library();

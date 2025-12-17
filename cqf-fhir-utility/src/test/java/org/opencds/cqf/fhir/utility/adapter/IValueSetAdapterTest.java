@@ -43,6 +43,10 @@ public interface IValueSetAdapterTest<T extends IBaseResource> extends IBaseAdap
         }
         """;
 
+    default String getTemplate() {
+        return TEMPLATE;
+    }
+
     Class<T> valueSetClass();
 
     @Test
@@ -51,7 +55,7 @@ public interface IValueSetAdapterTest<T extends IBaseResource> extends IBaseAdap
         String canonical1 = "http://canonical.com/res1";
         String canonical2 = "http://canonical.com/res2";
         IParser parser = fhirContext().newJsonParser();
-        String vsStr = TEMPLATE.replaceAll(RESOURCE_REF_1, toRelatedArtifactCanonicalReference(canonical1))
+        String vsStr = getTemplate().replaceAll(RESOURCE_REF_1, toRelatedArtifactCanonicalReference(canonical1))
                 .replaceAll(RESOURCE_REF_2, toRelatedArtifactCanonicalReference(canonical2))
                 .replaceAll(RELATED_ARTIFACT_TYPE_1, "depends-on")
                 .replaceAll(RELATED_ARTIFACT_TYPE_2, "depends-on");
@@ -80,20 +84,19 @@ public interface IValueSetAdapterTest<T extends IBaseResource> extends IBaseAdap
         String str =
                 """
                 {
-            "resourceType": "ValueSet",
-            "status": "active",
-            "extension": [
-                {
-                    "url": "http://hl7.org/fhir/StructureDefinition/something-else",
-                    "valueRelatedArtifact": {
-                        "type": "depends-on",
-                        "resource": REF
+                    "resourceType": "ValueSet",
+                    "status": "active",
+                    "extension": [
+                    {
+                        "url": "http://hl7.org/fhir/StructureDefinition/something-else",
+                        "valueRelatedArtifact": {
+                            "type": "depends-on",
+                            "resource": REF
+                        }
                     }
-                }
             ]
         }
-        """
-                        .replaceAll("REF", toRelatedArtifactCanonicalReference("some-ref"));
+        """.replaceAll("REF", toRelatedArtifactCanonicalReference("some-ref"));
 
         T valueSet = parser.parseResource(valueSetClass(), str);
         IValueSetAdapter adapter = getAdapterFactory().createValueSet(valueSet);

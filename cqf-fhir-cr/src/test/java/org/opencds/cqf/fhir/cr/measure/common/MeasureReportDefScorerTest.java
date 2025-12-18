@@ -52,8 +52,6 @@ class MeasureReportDefScorerTest {
 
         // VERIFY: Score is set on GroupDef via mutation
         assertEquals(0.75, groupDef.getScore(), 0.001);
-        // VERIFY: getMeasureScore returns score as-is for increase notation
-        assertEquals(0.75, groupDef.getMeasureScore(), 0.001);
     }
 
     @Test
@@ -487,7 +485,6 @@ class MeasureReportDefScorerTest {
 
         // VERIFY: getMeasureScore returns null when score is null
         assertNull(groupDef.getScore());
-        assertNull(groupDef.getMeasureScore());
     }
 
     @Test
@@ -516,8 +513,6 @@ class MeasureReportDefScorerTest {
 
         // VERIFY: Score is 0/4 = 0.0
         assertEquals(0.0, groupDef.getScore(), 0.001);
-        // VERIFY: getMeasureScore returns 0.0 for increase notation
-        assertEquals(0.0, groupDef.getMeasureScore(), 0.001);
     }
 
     @Test
@@ -543,12 +538,10 @@ class MeasureReportDefScorerTest {
                 stringBasis);
 
         // Manually set negative score to simulate strange value scenario
-        groupDef.setScore(-0.5);
+        groupDef.setScoreAndAdaptToImprovementNotation(-0.5);
 
-        // VERIFY: getScore returns the negative value
-        assertEquals(-0.5, groupDef.getScore(), 0.001);
         // VERIFY: getMeasureScore returns null for negative scores
-        assertNull(groupDef.getMeasureScore());
+        assertNull(groupDef.getScore());
     }
 
     @Test
@@ -577,8 +570,6 @@ class MeasureReportDefScorerTest {
 
         // VERIFY: Score is 3/4 = 0.75
         assertEquals(0.75, groupDef.getScore(), 0.001);
-        // VERIFY: getMeasureScore returns score as-is for increase notation
-        assertEquals(0.75, groupDef.getMeasureScore(), 0.001);
     }
 
     @Test
@@ -605,10 +596,8 @@ class MeasureReportDefScorerTest {
 
         scorer.scoreGroup("http://example.com/Measure/test", groupDef);
 
-        // VERIFY: Score is 3/4 = 0.75
-        assertEquals(0.75, groupDef.getScore(), 0.001);
         // VERIFY: getMeasureScore returns (1 - score) = 0.25 for decrease notation
-        assertEquals(0.25, groupDef.getMeasureScore(), 0.001);
+        assertEquals(0.25, groupDef.getScore(), 0.001);
     }
 
     // ============================================================================
@@ -795,7 +784,6 @@ class MeasureReportDefScorerTest {
 
         // VERIFY: Cohort measures do not have scores
         assertNull(groupDef.getScore());
-        assertNull(groupDef.getMeasureScore());
     }
 
     @Test
@@ -917,7 +905,6 @@ class MeasureReportDefScorerTest {
 
         // VERIFY: Score is 60.0 / 30.0 = 2.0
         assertEquals(2.0, groupDef.getScore(), 0.001);
-        assertEquals(2.0, groupDef.getMeasureScore(), 0.001);
     }
 
     @Test

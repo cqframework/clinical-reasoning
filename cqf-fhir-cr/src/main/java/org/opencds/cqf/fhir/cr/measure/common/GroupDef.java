@@ -204,17 +204,13 @@ public class GroupDef {
         return this.score;
     }
 
-    /**
-     * Set the measure score adjusted for improvement notation.
-     * <ul>
-     *   <li>null if score is null</li>
-     *   <li>null if score is negative (invalid score scenario)</li>
-     *   <li>score as-is if improvement notation is "increase"</li>
-     *   <li>(1 - score) if improvement notation is "decrease"</li>
-     * </ul>
-     */
-    public void setScoreAndAdaptToImprovementNotation(Double score) {
-        this.score = MeasureScoreCalculator.scoreGroupAccordingToIncreaseImprovementNotation(
-                score, isIncreaseImprovementNotation());
+    public void setScoreAndAdaptToImprovementNotation(Double originalScore) {
+        if ((MeasureScoring.RATIO == measureScoring && hasPopulationType(MeasurePopulationType.MEASUREOBSERVATION))
+                || MeasureScoring.PROPORTION == measureScoring) {
+            this.score = MeasureScoreCalculator.scoreGroupAccordingToIncreaseImprovementNotation(
+                    originalScore, isIncreaseImprovementNotation());
+        } else {
+            this.score = originalScore;
+        }
     }
 }

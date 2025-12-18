@@ -501,7 +501,7 @@ class MeasureStratifierTest {
     get error:  criteria-based stratifier is invalid for expression: ...
      */
     @Test
-    void cohortBooleanCriteriaStratSinglePatientSingleEncounterZeroResultsOutsideOfPeriodNoError() {
+    void cohortEncounterCriteriaStratSinglePatientSingleEncounterZeroResultsOutsideOfPeriodNoError() {
         GIVEN_CRITERIA_BASED_STRAT_COMPLEX
                 .when()
                 .measureId("CriteriaBasedStratifiersComplex")

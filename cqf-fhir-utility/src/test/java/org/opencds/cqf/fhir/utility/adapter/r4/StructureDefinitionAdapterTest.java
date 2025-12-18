@@ -11,6 +11,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.time.LocalDate;
 import java.util.Date;
@@ -24,11 +25,14 @@ import org.hl7.fhir.r4.model.RelatedArtifact;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.utility.Constants;
+import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IStructureDefinitionAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IStructureDefinitionAdapterTest;
 import org.opencds.cqf.fhir.utility.adapter.TestVisitor;
 
-class StructureDefinitionAdapterTest {
+class StructureDefinitionAdapterTest implements IStructureDefinitionAdapterTest<StructureDefinition> {
     private final org.opencds.cqf.fhir.utility.adapter.IAdapterFactory adapterFactory = new AdapterFactory();
+    private final FhirContext fhirContext = FhirContext.forR4Cached();
 
     @Test
     void invalid_object_fails() {
@@ -216,5 +220,20 @@ class StructureDefinitionAdapterTest {
         assertEquals(1, snapshotElements.size());
         var differentialElements = adapter.getDifferentialElements();
         assertEquals(2, differentialElements.size());
+    }
+
+    @Override
+    public Class<StructureDefinition> structureDefinitionClass() {
+        return StructureDefinition.class;
+    }
+
+    @Override
+    public FhirContext fhirContext() {
+        return fhirContext;
+    }
+
+    @Override
+    public IAdapterFactory getAdapterFactory() {
+        return adapterFactory;
     }
 }

@@ -43,7 +43,6 @@ import org.opencds.cqf.fhir.cr.measure.common.CodeDef;
 import org.opencds.cqf.fhir.cr.measure.common.ConceptDef;
 import org.opencds.cqf.fhir.cr.measure.common.FhirResourceUtils;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
-import org.opencds.cqf.fhir.cr.measure.common.IMeasureReportScorer;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureInfo;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
@@ -65,12 +64,6 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
     private static final Logger logger = LoggerFactory.getLogger(R4MeasureReportBuilder.class);
     protected static final String POPULATION_SUBJECT_SET = "POPULATION_SUBJECT_SET";
-
-    private final IMeasureReportScorer<MeasureReport> measureReportScorer;
-
-    public R4MeasureReportBuilder() {
-        this.measureReportScorer = new R4MeasureReportScorer();
-    }
 
     @Override
     public MeasureReport build(
@@ -98,13 +91,9 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             bc.report().addContained(r);
         }
 
-        // Part 1: Copy scores from Def objects (currently does nothing - Def scores are null)
-        // This becomes active in Part 2 when MeasureDefScorer is integrated into evaluation flow
+        // Copy scores from Def objects (populated by MeasureReportDefScorer in MeasureEvaluationResultHandler)
         copyScoresFromDef(bc);
 
-        // Part 1: Old scorer still produces all scores (remains source of truth)
-        // Part 2: Old scorer will be removed - Def scores become source of truth
-        this.measureReportScorer.score(measure.getUrl(), measureDef, bc.report());
         setReportStatus(bc);
         return bc.report();
     }
@@ -592,10 +581,6 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
     /**
      * Copy scores from MeasureDef to MeasureReport.
-     * Added in Part 1 (integrate-measure-def-scorer-part1-foundation).
-     * In Part 1, this does nothing because Def objects have null scores.
-     * In Part 2 (integrate-measure-def-scorer-part2-integration), this becomes active
-     * when MeasureDefScorer is called in MeasureEvaluationResultHandler.
      *
      * <p>Logic is driven by Def objects, matching report structures by ID.
      * Logs warnings when matching report structures are not found.
@@ -628,7 +613,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             }
 
             // Copy group-level score
-            Double groupScore = groupDef.getMeasureScore();
+            Double groupScore = groupDef.getScore();
             if (groupScore != null) {
                 reportGroup.getMeasureScore().setValue(groupScore);
             }

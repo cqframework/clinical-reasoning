@@ -75,9 +75,9 @@ import org.slf4j.LoggerFactory;
  * <p>This class computes scores and SETS them on Def objects using setScore() methods.
  * All methods are void. This makes Def classes the complete data model for measure scoring.
  */
-public class MeasureDefScorer {
+public class MeasureReportDefScorer {
 
-    private static final Logger logger = LoggerFactory.getLogger(MeasureDefScorer.class);
+    private static final Logger logger = LoggerFactory.getLogger(MeasureReportDefScorer.class);
 
     /**
      * Score all groups in a measure definition - MUTATES GroupDef objects.

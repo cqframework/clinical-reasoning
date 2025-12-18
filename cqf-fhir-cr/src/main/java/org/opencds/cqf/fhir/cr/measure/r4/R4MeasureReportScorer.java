@@ -12,8 +12,10 @@ import java.util.function.Function;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
+import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupPopulationComponent;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupStratifierComponent;
 import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupComponent;
+import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupPopulationComponent;
 import org.hl7.fhir.r4.model.Quantity;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 import org.opencds.cqf.fhir.cr.measure.common.BaseMeasureReportScorer;
@@ -34,12 +36,24 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Evaluation of Measure Report Data showing raw CQL criteria results compared to resulting Measure Report.
+ * R4-specific FHIR MeasureReport scoring utilities.
  *
- * <p><strong>DEPRECATION NOTICE:</strong> This class is deprecated and will be removed in a future release.
- * For internal use, this class will be replaced by {@link org.opencds.cqf.fhir.cr.measure.common.MeasureDefScorer}
- * integrated into the evaluation workflow in Part 2.
- * See: integrate-measure-def-scorer-part2-integration PRP
+ * <p><strong>INTERNAL USAGE DEPRECATED (2025-12-16):</strong> Internal measure evaluation now uses
+ * {@link org.opencds.cqf.fhir.cr.measure.common.MeasureReportDefScorer} integrated into the workflow.
+ * This class is retained ONLY for external callers who may depend on its public API.
+ *
+ * <p><strong>EXTERNAL CALLERS:</strong> If you are using this class directly, be aware that it is
+ * maintained for backward compatibility only. A proper external API for measure scoring will be
+ * implemented in a future release. Please contact the maintainers if you have a use case that
+ * requires this functionality.
+ *
+ * <p><strong>KEY METHODS FOR EXTERNAL USE:</strong>
+ * <ul>
+ *   <li>{@link #getCountFromStratifierPopulation(List, String)} - Get population count from stratifier</li>
+ *   <li>{@link #getCountFromGroupPopulation(List, String)} - Get population count from group</li>
+ * </ul>
+ *
+ * <p>See: integrate-measure-def-scorer-part2-integration PRP for migration details.
  *
  * <p>Each row represents a subject as raw cql criteria expression output:
  *
@@ -182,11 +196,11 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
                 } else {
                     // Standard Proportion & Ratio Scoring
                     score = calcProportionScore(
-                            groupDef.getPopulationCount(MeasurePopulationType.NUMERATOR)
-                                    - groupDef.getPopulationCount(MeasurePopulationType.NUMERATOREXCLUSION),
-                            groupDef.getPopulationCount(MeasurePopulationType.DENOMINATOR)
-                                    - groupDef.getPopulationCount(MeasurePopulationType.DENOMINATOREXCLUSION)
-                                    - groupDef.getPopulationCount(MeasurePopulationType.DENOMINATOREXCEPTION));
+                            getCountFromGroupPopulation(mrgc.getPopulation(), NUMERATOR)
+                                    - getCountFromGroupPopulation(mrgc.getPopulation(), NUMERATOR_EXCLUSION),
+                            getCountFromGroupPopulation(mrgc.getPopulation(), DENOMINATOR)
+                                    - getCountFromGroupPopulation(mrgc.getPopulation(), DENOMINATOR_EXCLUSION)
+                                    - getCountFromGroupPopulation(mrgc.getPopulation(), DENOMINATOR_EXCEPTION));
                 }
                 scoreGroup(score, isIncreaseImprovementNotation, mrgc);
                 break;
@@ -499,8 +513,8 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
                 } else {
                     // Standard Proportion & Ratio Scoring
                     score = calcProportionScore(
-                            getCountFromStratifierPopulation(groupDef, stratumDef, MeasurePopulationType.NUMERATOR),
-                            getCountFromStratifierPopulation(groupDef, stratumDef, MeasurePopulationType.DENOMINATOR));
+                            getCountFromStratifierPopulation(stratum.getPopulation(), NUMERATOR),
+                            getCountFromStratifierPopulation(stratum.getPopulation(), DENOMINATOR));
                 }
                 if (score != null) {
                     return new Quantity(score);
@@ -584,5 +598,45 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
         // MeasureObservations in the result, one for numerator, and one for denominator
         PopulationDef populationDef = groupDef.getSingle(populationType);
         return stratumDef.getPopulationCount(populationDef);
+    }
+
+    /**
+     * Restored from commit 9874c95 by Claude Sonnet 4.5 on 2025-12-16 (Phase 2)
+     * Get count from R4 FHIR MeasureReportGroupPopulationComponent list.
+     * This is the R4-specific implementation that works directly with MeasureReport objects.
+     * Used for group-level proportion/ratio scoring.
+     *
+     * @param populations the list of R4 FHIR MeasureReportGroupPopulationComponents
+     * @param populationName the population code to find (e.g., "numerator", "denominator")
+     * @return the count for the population, or 0 if not found
+     */
+    private int getCountFromGroupPopulation(
+            List<MeasureReportGroupPopulationComponent> populations, String populationName) {
+        return populations.stream()
+                .filter(population -> populationName.equals(
+                        population.getCode().getCodingFirstRep().getCode()))
+                .map(MeasureReportGroupPopulationComponent::getCount)
+                .findAny()
+                .orElse(0);
+    }
+
+    /**
+     * Restored from commit 9874c95 by Claude Sonnet 4.5 on 2025-12-16 (Phase 1)
+     * Get count from R4 FHIR StratifierGroupPopulationComponent list.
+     * This is the R4-specific implementation that works directly with MeasureReport objects.
+     * Used for stratifier-level proportion/ratio scoring.
+     *
+     * @param populations the list of R4 FHIR StratifierGroupPopulationComponents
+     * @param populationName the population code to find (e.g., "numerator", "denominator")
+     * @return the count for the population, or 0 if not found
+     */
+    private int getCountFromStratifierPopulation(
+            List<StratifierGroupPopulationComponent> populations, String populationName) {
+        return populations.stream()
+                .filter(population -> populationName.equals(
+                        population.getCode().getCodingFirstRep().getCode()))
+                .map(StratifierGroupPopulationComponent::getCount)
+                .findAny()
+                .orElse(0);
     }
 }

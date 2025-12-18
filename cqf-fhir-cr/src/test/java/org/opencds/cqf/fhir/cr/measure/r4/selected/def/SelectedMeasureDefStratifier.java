@@ -87,7 +87,7 @@ public class SelectedMeasureDefStratifier<P>
         StratumDef stratum = value().getStratum().stream()
                 .filter(s -> s.valueDefs() != null
                         && s.valueDefs().stream()
-                                .anyMatch(vd -> valueText.equals(vd.value().getDescription())))
+                                .anyMatch(vd -> valueText.equals(vd.value().getValueAsString())))
                 .findFirst()
                 .orElse(null);
         assertNotNull(stratum, "No stratum found with value: " + valueText);

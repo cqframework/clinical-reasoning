@@ -11,6 +11,8 @@ import static org.mockito.Mockito.verify;
 import static org.opencds.cqf.fhir.utility.Constants.ARTIFACT_RELATED_ARTIFACT;
 import static org.opencds.cqf.fhir.utility.Constants.CPG_RELATED_ARTIFACT;
 
+import ca.uhn.fhir.context.FhirContext;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -18,12 +20,22 @@ import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r4.model.Expression;
 import org.hl7.fhir.r4.model.GraphDefinition;
 import org.hl7.fhir.r4.model.Library;
+import org.hl7.fhir.r4.model.RelatedArtifact;
+import org.hl7.fhir.r4.model.RelatedArtifact.RelatedArtifactType;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IGraphDefinitionAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IGraphDefinitionAdaptorTest;
 import org.opencds.cqf.fhir.utility.adapter.TestVisitor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-class GraphDefinitionAdapterTest {
+class GraphDefinitionAdapterTest implements IGraphDefinitionAdaptorTest<GraphDefinition> {
+
+    private static final Logger log = LoggerFactory.getLogger(GraphDefinitionAdapterTest.class);
     private final org.opencds.cqf.fhir.utility.adapter.IAdapterFactory adapterFactory = new AdapterFactory();
+
+    private final FhirContext fhirCtxt = FhirContext.forR4Cached();
 
     @Test
     void invalid_object_fails() {
@@ -119,12 +131,18 @@ class GraphDefinitionAdapterTest {
         var graphDef = new GraphDefinition();
         graphDef.getMeta().addProfile(dependencies.get(0));
 
-        graphDef.addExtension(
-                CPG_RELATED_ARTIFACT,
-                new Expression().setReference(dependencies.get(1)).setExpression("someExp"));
-        graphDef.addExtension(
-                ARTIFACT_RELATED_ARTIFACT,
-                new Expression().setReference(dependencies.get(2)).setExpression("someExp"));
+        RelatedArtifact cpgArtifact = new RelatedArtifact();
+        cpgArtifact.setType(RelatedArtifactType.DEPENDSON);
+        cpgArtifact.setResource(dependencies.get(1));
+
+        graphDef.addExtension(CPG_RELATED_ARTIFACT, cpgArtifact);
+
+        RelatedArtifact artifact = new RelatedArtifact();
+        artifact.setType(RelatedArtifactType.DEPENDSON);
+        artifact.setResource(dependencies.get(2));
+        graphDef.addExtension(ARTIFACT_RELATED_ARTIFACT, artifact);
+
+        // we shouldn't find this one
         graphDef.addExtension(
                 "someURL", new Expression().setReference("someRef").setExpression("someExp"));
 
@@ -157,5 +175,28 @@ class GraphDefinitionAdapterTest {
         var adapter = (IGraphDefinitionAdapter) adapterFactory.createKnowledgeArtifactAdapter(graphDef);
 
         assertEquals(0, adapter.getNode().size());
+    }
+
+    @Override
+    public Class<GraphDefinition> graphDefinitionClass() {
+        return GraphDefinition.class;
+    }
+
+    @Override
+    public FhirContext fhirContext() {
+        return fhirCtxt;
+    }
+
+    @Override
+    public IAdapterFactory getAdapterFactory() {
+        return adapterFactory;
+    }
+
+    @Override
+    public List<String> getAllNonProcessableTypeForRelatedArtifact() {
+        return Arrays.stream(RelatedArtifactType.values())
+                .filter(e -> e != RelatedArtifactType.DEPENDSON && e != RelatedArtifactType.NULL)
+                .map(e -> e.toCode())
+                .toList();
     }
 }

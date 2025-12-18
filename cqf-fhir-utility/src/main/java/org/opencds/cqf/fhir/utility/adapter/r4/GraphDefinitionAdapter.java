@@ -7,15 +7,18 @@ import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
-import org.hl7.fhir.r4.model.Expression;
 import org.hl7.fhir.r4.model.GraphDefinition;
+import org.hl7.fhir.r4.model.RelatedArtifact;
+import org.hl7.fhir.r4.model.RelatedArtifact.RelatedArtifactType;
 import org.hl7.fhir.r4.model.UsageContext;
 import org.opencds.cqf.fhir.utility.Constants;
+import org.opencds.cqf.fhir.utility.RelatedArtifactUtil;
 import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IGraphDefinitionAdapter;
 
 public class GraphDefinitionAdapter extends ResourceAdapter implements IGraphDefinitionAdapter {
+
     public GraphDefinitionAdapter(IDomainResource graphDefinition) {
         super(graphDefinition);
         if (!(graphDefinition instanceof GraphDefinition)) {
@@ -49,29 +52,13 @@ public class GraphDefinitionAdapter extends ResourceAdapter implements IGraphDef
         addProfileReferences(references, referenceSource);
 
         /*
-           extension[cpg-relatedArtifact].reference
-           Expression.reference is expected to be a canonical (url or url|version) for these extensions.
-        */
-
-        get().getExtensionsByUrl(Constants.CPG_RELATED_ARTIFACT).stream()
-                .filter(e -> e.getValue() instanceof Expression)
-                .map(e -> (Expression) e.getValue())
-                .filter(Expression::hasReference)
-                .forEach(expression -> references.add(new DependencyInfo(
-                        referenceSource,
-                        expression.getReference(),
-                        expression.getExtension(),
-                        expression::setReference)));
-
-        get().getExtensionsByUrl(Constants.ARTIFACT_RELATED_ARTIFACT).stream()
-                .filter(e -> e.getValue() instanceof Expression)
-                .map(e -> (Expression) e.getValue())
-                .filter(Expression::hasReference)
-                .forEach(expression -> references.add(new DependencyInfo(
-                        referenceSource,
-                        expression.getReference(),
-                        expression.getExtension(),
-                        expression::setReference)));
+         * extension[cpg-relatedArtifact].resource
+         */
+        //        extractRelatedArtifactReferences(referenceSource, references);
+        getRelatedArtifactsOfType(Constants.RELATEDARTIFACT_TYPE_DEPENDSON).stream()
+                .filter(ra -> ((RelatedArtifact) ra).hasResource())
+                .map(ra -> DependencyInfo.convertRelatedArtifact(ra, referenceSource))
+                .forEach(references::add);
 
         return references;
     }
@@ -93,8 +80,26 @@ public class GraphDefinitionAdapter extends ResourceAdapter implements IGraphDef
     }
 
     @Override
+    //    @SuppressWarnings("unchecked")
     public <T extends ICompositeType & IBaseHasExtensions> List<T> getRelatedArtifactsOfType(String codeString) {
-        return List.of();
+        RelatedArtifactType type = RelatedArtifactUtil.getRelatedArtifactType(codeString, fhirVersion());
+        //        return getExtensionsByUrls(get(), Set.of(Constants.CPG_RELATED_ARTIFACT,
+        // Constants.ARTIFACT_RELATED_ARTIFACT))
+        //                .stream()
+        //                .filter(ext -> {
+        //                    if (ext.getValue() instanceof RelatedArtifact ra) {
+        //                        return ra.getType() == type;
+        //                    }
+        //                    return false;
+        //                })
+        //                .map(ext -> (T) ext.getValue())
+        //                .toList();
+        return getRelatedArtifact().stream()
+                .filter(ra -> {
+                    return ((RelatedArtifact) ra).getType() == type;
+                })
+                .map(e -> (T) e)
+                .toList();
     }
 
     @Override

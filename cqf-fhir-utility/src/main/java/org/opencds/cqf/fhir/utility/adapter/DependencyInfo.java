@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.utility.adapter;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.List;
 import java.util.function.Consumer;
+import org.apache.commons.lang3.ObjectUtils;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 
@@ -68,8 +69,18 @@ public class DependencyInfo implements IDependencyInfo {
                     source, reference.getResource(), reference.getExtension(), reference::setResource);
 
         } else if (ra instanceof org.hl7.fhir.r5.model.RelatedArtifact reference) {
+            // R5 can have either a Resource (canonical URL) or a ResourceReference
+            //      we'll take the canonicalURL if it's there, but fallback to ResourceReference
+            //      if it's not.
             return new DependencyInfo(
-                    source, reference.getResource(), reference.getExtension(), reference::setResource);
+                    source,
+                    ObjectUtils.firstNonNull(
+                            reference.getResource(),
+                            reference.getResourceReference() == null
+                                    ? null
+                                    : reference.getResourceReference().getReference()),
+                    reference.getExtension(),
+                    reference::setResource);
         } else {
             throw new UnprocessableEntityException("A valid RelatedArtifact object must be provided");
         }

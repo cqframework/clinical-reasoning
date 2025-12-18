@@ -228,12 +228,6 @@ public class StructureDefinitionAdapter extends ResourceAdapter implements IStru
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<RelatedArtifact> getRelatedArtifact() {
-        return new ArrayList<>();
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
     public List<RelatedArtifact> getRelatedArtifactsOfType(String codeString) {
         return new ArrayList<>();
     }

@@ -17,6 +17,7 @@ import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.RelatedArtifact;
 import org.hl7.fhir.r4.model.RelatedArtifact.RelatedArtifactType;
 import org.hl7.fhir.r4.model.UsageContext;
+import org.opencds.cqf.fhir.utility.RelatedArtifactUtil;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
 
@@ -80,12 +81,7 @@ public class KnowledgeArtifactAdapter extends ResourceAdapter implements IKnowle
     @SuppressWarnings("unchecked")
     @Override
     public List<RelatedArtifact> getRelatedArtifactsOfType(String codeString) {
-        RelatedArtifactType type;
-        try {
-            type = RelatedArtifactType.fromCode(codeString);
-        } catch (FHIRException e) {
-            throw new UnprocessableEntityException("Invalid related artifact code");
-        }
+        RelatedArtifactType type = RelatedArtifactUtil.getRelatedArtifactType(codeString, fhirVersion());
         return getRelatedArtifact().stream()
                 .map(ra -> (RelatedArtifact) ra)
                 .filter(ra -> ra.getType() == type)

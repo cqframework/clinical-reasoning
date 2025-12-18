@@ -257,11 +257,13 @@ class R4MeasureReportBuilderTest {
     }
 
     private static PopulationDef buildPopulationRef(Collection<Object> resources) {
+        CodeDef booleanBasis = new CodeDef(MeasureConstants.POPULATION_BASIS_URL, "boolean");
         final PopulationDef populationDef = new PopulationDef(
                 null,
                 new ConceptDef(List.of(new CodeDef("system", MeasurePopulationType.DATEOFCOMPLIANCE.toCode())), null),
                 MeasurePopulationType.DATEOFCOMPLIANCE,
                 null,
+                booleanBasis,
                 null,
                 null);
 
@@ -286,7 +288,7 @@ class R4MeasureReportBuilderTest {
 
     @Nonnull
     private static StratifierDef buildStratifierDef() {
-        return new StratifierDef(null, null, null, MeasureStratifierType.VALUE);
+        return new StratifierDef("stratifier-1", null, null, MeasureStratifierType.VALUE);
     }
 
     private static Measure buildMeasure(String id, String url, int numGroups, int numSdes) {

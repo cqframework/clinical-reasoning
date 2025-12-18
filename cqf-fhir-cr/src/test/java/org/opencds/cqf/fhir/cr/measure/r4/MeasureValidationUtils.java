@@ -18,11 +18,11 @@ import org.hl7.fhir.r4.model.ResourceType;
 
 public class MeasureValidationUtils {
 
-    protected static void validateGroupScore(MeasureReport.MeasureReportGroupComponent group, String score) {
+    public static void validateGroupScore(MeasureReport.MeasureReportGroupComponent group, String score) {
         validateGroupScore(group, new BigDecimal(score));
     }
 
-    protected static void validateGroupScore(MeasureReport.MeasureReportGroupComponent group, BigDecimal score) {
+    public static void validateGroupScore(MeasureReport.MeasureReportGroupComponent group, BigDecimal score) {
         assertTrue(group.hasMeasureScore(), "group \"%s\" does not have a score".formatted(group.getId()));
         assertEquals(score, group.getMeasureScore().getValue());
     }
@@ -40,8 +40,7 @@ public class MeasureValidationUtils {
         validatePopulation(population.get(), count);
     }
 
-    protected static void validatePopulation(
-            MeasureReport.MeasureReportGroupPopulationComponent population, int count) {
+    public static void validatePopulation(MeasureReport.MeasureReportGroupPopulationComponent population, int count) {
         assertEquals(
                 count,
                 population.getCount(),
@@ -91,12 +90,12 @@ public class MeasureValidationUtils {
         validateStratumScore(stratum, score);
     }
 
-    protected static void validateStratumScore(MeasureReport.StratifierGroupComponent stratum, BigDecimal score) {
+    public static void validateStratumScore(MeasureReport.StratifierGroupComponent stratum, BigDecimal score) {
         assertTrue(stratum.hasMeasureScore(), "stratum \"%s\" does not have a score".formatted(stratum.getId()));
         assertEquals(score, stratum.getMeasureScore().getValue());
     }
 
-    protected static void validateStratumScore(MeasureReport.StratifierGroupComponent stratum, String score) {
+    public static void validateStratumScore(MeasureReport.StratifierGroupComponent stratum, String score) {
         validateStratumScore(stratum, new BigDecimal(score));
     }
 

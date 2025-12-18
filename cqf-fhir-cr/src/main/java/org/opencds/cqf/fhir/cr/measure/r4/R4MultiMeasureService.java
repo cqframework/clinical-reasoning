@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 import static org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils.getFullUrl;
 
 import ca.uhn.fhir.repository.IRepository;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import jakarta.annotation.Nullable;
 import java.time.ZonedDateTime;
@@ -24,6 +25,7 @@ import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.CompositeEvaluationResultsPerMeasure;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorUtils;
@@ -82,12 +84,73 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
             String productLine,
             String reporter) {
 
+        return evaluateWithDefs(
+                        measureId,
+                        measureUrl,
+                        measureIdentifier,
+                        periodStart,
+                        periodEnd,
+                        reportType,
+                        subject,
+                        contentEndpoint,
+                        terminologyEndpoint,
+                        dataEndpoint,
+                        additionalData,
+                        parameters,
+                        productLine,
+                        reporter)
+                .parameters();
+    }
+
+    /**
+     * Test-visible evaluation method that captures both MeasureDef and MeasureReport for each measure.
+     * <p>
+     * <strong>TEST INFRASTRUCTURE ONLY - DO NOT USE IN PRODUCTION CODE</strong>
+     * </p>
+     * <p>
+     * This method is package-private and annotated with @VisibleForTesting to support
+     * test frameworks that need to assert on both pre-scoring state (MeasureDef) and
+     * post-scoring state (MeasureReport) for each evaluated measure.
+     * </p>
+     *
+     * @param measureId list of Measure IDs
+     * @param measureUrl list of Measure URLs
+     * @param measureIdentifier list of Measure identifiers
+     * @param periodStart start date of Measurement Period
+     * @param periodEnd end date of Measurement Period
+     * @param reportType type of report
+     * @param subject the subject ID (or practitioner)
+     * @param contentEndpoint content endpoint
+     * @param terminologyEndpoint terminology endpoint
+     * @param dataEndpoint data endpoint
+     * @param additionalData additional data bundle
+     * @param parameters CQL parameters
+     * @param productLine product line
+     * @param reporter reporter ID
+     * @return MeasureDefAndR4ParametersWithMeasureReports containing Set of MeasureDefs and Parameters with bundled MeasureReports
+     */
+    @VisibleForTesting
+    MeasureDefAndR4ParametersWithMeasureReports evaluateWithDefs(
+            List<IdType> measureId,
+            List<String> measureUrl,
+            List<String> measureIdentifier,
+            @Nullable ZonedDateTime periodStart,
+            @Nullable ZonedDateTime periodEnd,
+            String reportType,
+            String subject,
+            Endpoint contentEndpoint,
+            Endpoint terminologyEndpoint,
+            Endpoint dataEndpoint,
+            Bundle additionalData,
+            Parameters parameters,
+            String productLine,
+            String reporter) {
+
         measurePeriodValidator.validatePeriodStartAndEnd(periodStart, periodEnd);
 
         final R4MeasureProcessor r4ProcessorToUse;
         final R4MeasureServiceUtils r4MeasureServiceUtilsToUse;
         if (dataEndpoint != null && contentEndpoint != null && terminologyEndpoint != null) {
-            // if needing to use proxy repository, initialize new R4MeasureProcessor and R4MeasureServiceUtils
             var repositoryToUse =
                     Repositories.proxy(repository, true, dataEndpoint, contentEndpoint, terminologyEndpoint);
 
@@ -106,29 +169,23 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
 
         var evalType = r4MeasureServiceUtilsToUse.getMeasureEvalType(reportType, subject);
 
-        // get subjects
         var subjects = getSubjects(subjectProvider, subject);
-
-        // create parameters
-        var result = new Parameters();
 
         var context = Engines.forRepository(
                 r4ProcessorToUse.getRepository(),
                 this.measureEvaluationOptions.getEvaluationSettings(),
                 additionalData);
 
-        // This is basically a Map of measure -> subject -> EvaluationResult
         var compositeEvaluationResultsPerMeasure = r4ProcessorToUse.evaluateMultiMeasuresWithCqlEngine(
                 subjects, measures, periodStart, periodEnd, parameters, context);
 
-        // evaluate Measures
+        // Build bundles correctly based on evaluation type
         if (evalType.equals(MeasureEvalType.POPULATION) || evalType.equals(MeasureEvalType.SUBJECTLIST)) {
-            populationMeasureReport(
+            return populationMeasureReport(
                     r4ProcessorToUse,
                     r4MeasureServiceUtilsToUse,
                     compositeEvaluationResultsPerMeasure,
                     context,
-                    result,
                     measures,
                     periodStart,
                     periodEnd,
@@ -139,12 +196,11 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
                     productLine,
                     reporter);
         } else {
-            subjectMeasureReport(
+            return subjectMeasureReport(
                     r4ProcessorToUse,
                     r4MeasureServiceUtilsToUse,
                     compositeEvaluationResultsPerMeasure,
                     context,
-                    result,
                     measures,
                     periodStart,
                     periodEnd,
@@ -154,16 +210,13 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
                     productLine,
                     reporter);
         }
-
-        return result;
     }
 
-    protected void populationMeasureReport(
+    protected MeasureDefAndR4ParametersWithMeasureReports populationMeasureReport(
             R4MeasureProcessor r4Processor,
             R4MeasureServiceUtils r4MeasureServiceUtils,
             CompositeEvaluationResultsPerMeasure compositeEvaluationResultsPerMeasure,
             CqlEngine context,
-            Parameters result,
             List<Measure> measures,
             @Nullable ZonedDateTime periodStart,
             @Nullable ZonedDateTime periodEnd,
@@ -174,16 +227,20 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
             String productLine,
             String reporter) {
 
-        // create bundle
+        final List<MeasureDef> measureDefs = new ArrayList<>();
+
+        // Create Parameters to hold the bundle(s)
+        Parameters result = new Parameters();
+
+        // create bundle - ONE bundle for all measures
         Bundle bundle = new BundleBuilder<>(Bundle.class)
                 .withType(BundleType.SEARCHSET.toString())
                 .build();
 
         var totalMeasures = measures.size();
         for (Measure measure : measures) {
-            MeasureReport measureReport;
-            // evaluate each measure
-            measureReport = r4Processor.evaluateMeasure(
+            // Capture both MeasureDef and MeasureReport
+            var captured = r4Processor.evaluateMeasureCaptureDefs(
                     measure,
                     periodStart,
                     periodEnd,
@@ -192,6 +249,10 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
                     evalType,
                     context,
                     compositeEvaluationResultsPerMeasure);
+
+            measureDefs.add(captured.measureDef());
+
+            MeasureReport measureReport = captured.measureReport();
 
             // add ProductLine after report is generated
             measureReport = r4MeasureServiceUtils.addProductLineExtension(measureReport, productLine);
@@ -222,14 +283,15 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
 
         // add bundle to result
         result.addParameter().setName("return").setResource(bundle);
+
+        return new MeasureDefAndR4ParametersWithMeasureReports(measureDefs, result);
     }
 
-    protected void subjectMeasureReport(
+    protected MeasureDefAndR4ParametersWithMeasureReports subjectMeasureReport(
             R4MeasureProcessor r4Processor,
             R4MeasureServiceUtils r4MeasureServiceUtils,
             CompositeEvaluationResultsPerMeasure compositeEvaluationResultsPerMeasure,
             CqlEngine context,
-            Parameters result,
             List<Measure> measures,
             @Nullable ZonedDateTime periodStart,
             @Nullable ZonedDateTime periodEnd,
@@ -239,7 +301,13 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
             String productLine,
             String reporter) {
 
+        final List<MeasureDef> measureDefs = new ArrayList<>();
+
+        // Create Parameters to hold the bundle(s)
+        Parameters result = new Parameters();
+
         // create individual reports for each subject, and each measure
+        // ONE bundle PER SUBJECT containing all their measure reports
         var totalReports = subjects.size() * measures.size();
         var totalMeasures = measures.size();
         var subjectMeasures = new HashMap<String, List<Resource>>();
@@ -250,9 +318,8 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
                 measures.size());
         for (Measure measure : measures) {
             for (String subject : subjects) {
-                MeasureReport measureReport;
-                // evaluate each measure
-                measureReport = r4Processor.evaluateMeasure(
+                // Capture both MeasureDef and MeasureReport
+                var captured = r4Processor.evaluateMeasureCaptureDefs(
                         measure,
                         periodStart,
                         periodEnd,
@@ -261,6 +328,10 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
                         evalType,
                         context,
                         compositeEvaluationResultsPerMeasure);
+
+                measureDefs.add(captured.measureDef());
+
+                MeasureReport measureReport = captured.measureReport();
 
                 // add ProductLine after report is generated
                 measureReport = r4MeasureServiceUtils.addProductLineExtension(measureReport, productLine);
@@ -290,7 +361,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
             }
         }
 
-        // create subject bundles
+        // create subject bundles - ONE per subject
         subjects.forEach(s -> {
             Bundle bundle = new BundleBuilder<>(Bundle.class)
                     .withType(BundleType.SEARCHSET.toString())
@@ -300,6 +371,8 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorMultiple {
             // add bundle to result
             result.addParameter().setName("return").setResource(bundle);
         });
+
+        return new MeasureDefAndR4ParametersWithMeasureReports(measureDefs, result);
     }
 
     protected List<String> getSubjects(R4RepositorySubjectProvider subjectProvider, String subjectId) {

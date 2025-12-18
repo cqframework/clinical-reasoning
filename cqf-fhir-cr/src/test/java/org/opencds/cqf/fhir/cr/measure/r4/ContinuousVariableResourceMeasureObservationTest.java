@@ -32,9 +32,11 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .measureId("ContinuousVariableResourceMeasureObservationBooleanBasisAvg")
                 .evaluate()
                 .then()
+                // MeasureDef assertions (pre-scoring) - verify internal state after processing
+                .def()
+                .hasNoErrors()
                 .firstGroup()
                 .population("initial-population")
-                // 10 encounters in all
                 .hasCount(11)
                 .up()
                 .population("measure-population")
@@ -44,7 +46,27 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .hasCount(0)
                 .up()
                 .population("measure-observation")
-                // There are 10 patients in all
+                .hasCount(11)
+                .up()
+                .stratifier("stratifier-gender")
+                .hasStratumCount(4)
+                .up()
+                // TODO: Add score assertion in subsequent measure scoring refactoring PR
+                .up()
+                .up()
+                // MeasureReport assertions (post-scoring) - verify FHIR resource output
+                .report()
+                .firstGroup()
+                .population("initial-population")
+                .hasCount(11)
+                .up()
+                .population("measure-population")
+                .hasCount(11)
+                .up()
+                .population("measure-population-exclusion")
+                .hasCount(0)
+                .up()
+                .population("measure-observation")
                 .hasCount(11)
                 .up()
                 .hasScore("74.0")
@@ -128,12 +150,7 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .hasCount(0)
                 .up()
                 .population("measure-observation")
-                .hasCount(4)
-                .up()
-                .up()
-                .up()
-                .up()
-                .report();
+                .hasCount(4);
     }
 
     @Test
@@ -144,6 +161,18 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .measureId("ContinuousVariableResourceMeasureObservationEncounterBasisAvg")
                 .evaluate()
                 .then()
+                // MeasureDef assertions (pre-scoring) - verify internal state after processing
+                .def()
+                .hasNoErrors()
+                .firstGroup()
+                .population("measure-population")
+                .hasSubjectCount(10)
+                .up()
+                // TODO: Add score assertion in subsequent measure scoring refactoring PR
+                .up()
+                .up()
+                // MeasureReport assertions (post-scoring) - verify FHIR resource output
+                .report()
                 .firstGroup()
                 .population("initial-population")
                 .hasCount(11)
@@ -224,9 +253,11 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .measureId("ContinuousVariableResourceMeasureObservationBooleanBasisCount")
                 .evaluate()
                 .then()
+                // MeasureDef assertions (pre-scoring) - verify internal state after processing
+                .def()
+                .hasNoErrors()
                 .firstGroup()
                 .population("initial-population")
-                // 10 encounters in all
                 .hasCount(11)
                 .up()
                 .population("measure-population")
@@ -236,7 +267,27 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .hasCount(0)
                 .up()
                 .population("measure-observation")
-                // There are 10 patients in all
+                .hasCount(11)
+                .up()
+                .stratifier("stratifier-gender")
+                .hasStratumCount(4)
+                .up()
+                // TODO: Add score assertion in subsequent measure scoring refactoring PR
+                .up()
+                .up()
+                // MeasureReport assertions (post-scoring) - verify FHIR resource output
+                .report()
+                .firstGroup()
+                .population("initial-population")
+                .hasCount(11)
+                .up()
+                .population("measure-population")
+                .hasCount(11)
+                .up()
+                .population("measure-population-exclusion")
+                .hasCount(0)
+                .up()
+                .population("measure-observation")
                 .hasCount(11)
                 .up()
                 .hasScore("11.0")
@@ -323,6 +374,18 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .measureId("ContinuousVariableResourceMeasureObservationEncounterBasisCount")
                 .evaluate()
                 .then()
+                // MeasureDef assertions (pre-scoring) - verify internal state after processing
+                .def()
+                .hasNoErrors()
+                .firstGroup()
+                .population("measure-population")
+                .hasSubjectCount(10)
+                .up()
+                // TODO: Add score assertion in subsequent measure scoring refactoring PR
+                .up()
+                .up()
+                // MeasureReport assertions (post-scoring) - verify FHIR resource output
+                .report()
                 .firstGroup()
                 .population("initial-population")
                 .hasCount(11)
@@ -403,9 +466,11 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .measureId("ContinuousVariableResourceMeasureObservationBooleanBasisMedian")
                 .evaluate()
                 .then()
+                // MeasureDef assertions (pre-scoring) - verify internal state after processing
+                .def()
+                .hasNoErrors()
                 .firstGroup()
                 .population("initial-population")
-                // 10 encounters in all
                 .hasCount(11)
                 .up()
                 .population("measure-population")
@@ -415,7 +480,27 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .hasCount(0)
                 .up()
                 .population("measure-observation")
-                // There are 10 patients in all
+                .hasCount(11)
+                .up()
+                .stratifier("stratifier-gender")
+                .hasStratumCount(4)
+                .up()
+                // TODO: Add score assertion in subsequent measure scoring refactoring PR
+                .up()
+                .up()
+                // MeasureReport assertions (post-scoring) - verify FHIR resource output
+                .report()
+                .firstGroup()
+                .population("initial-population")
+                .hasCount(11)
+                .up()
+                .population("measure-population")
+                .hasCount(11)
+                .up()
+                .population("measure-population-exclusion")
+                .hasCount(0)
+                .up()
+                .population("measure-observation")
                 .hasCount(11)
                 .up()
                 .hasScore("79.0")
@@ -502,6 +587,18 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .measureId("ContinuousVariableResourceMeasureObservationEncounterBasisMedian")
                 .evaluate()
                 .then()
+                // MeasureDef assertions (pre-scoring) - verify internal state after processing
+                .def()
+                .hasNoErrors()
+                .firstGroup()
+                .population("measure-population")
+                .hasSubjectCount(10)
+                .up()
+                // TODO: Add score assertion in subsequent measure scoring refactoring PR
+                .up()
+                .up()
+                // MeasureReport assertions (post-scoring) - verify FHIR resource output
+                .report()
                 .firstGroup()
                 .population("initial-population")
                 .hasCount(11)
@@ -582,9 +679,20 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .measureId("ContinuousVariableResourceMeasureObservationBooleanBasisMin")
                 .evaluate()
                 .then()
+                // MeasureDef assertions (pre-scoring) - verify internal state after processing
+                .def()
+                .hasNoErrors()
+                .firstGroup()
+                .population("measure-population")
+                .hasSubjectCount(11)
+                .up()
+                // TODO: Add score assertion in subsequent measure scoring refactoring PR
+                .up()
+                .up()
+                // MeasureReport assertions (post-scoring) - verify FHIR resource output
+                .report()
                 .firstGroup()
                 .population("initial-population")
-                // 11 encounters in all
                 .hasCount(11)
                 .up()
                 .population("measure-population")
@@ -594,7 +702,6 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .hasCount(0)
                 .up()
                 .population("measure-observation")
-                // There are 10 patients in all
                 .hasCount(11)
                 .up()
                 .hasScore("54.0")
@@ -681,6 +788,18 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .measureId("ContinuousVariableResourceMeasureObservationEncounterBasisMin")
                 .evaluate()
                 .then()
+                // MeasureDef assertions (pre-scoring) - verify internal state after processing
+                .def()
+                .hasNoErrors()
+                .firstGroup()
+                .population("measure-population")
+                .hasSubjectCount(10)
+                .up()
+                // TODO: Add score assertion in subsequent measure scoring refactoring PR
+                .up()
+                .up()
+                // MeasureReport assertions (post-scoring) - verify FHIR resource output
+                .report()
                 .firstGroup()
                 .population("initial-population")
                 .hasCount(11)
@@ -761,9 +880,20 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .measureId("ContinuousVariableResourceMeasureObservationBooleanBasisMax")
                 .evaluate()
                 .then()
+                // MeasureDef assertions (pre-scoring) - verify internal state after processing
+                .def()
+                .hasNoErrors()
+                .firstGroup()
+                .population("measure-population")
+                .hasSubjectCount(11)
+                .up()
+                // TODO: Add score assertion in subsequent measure scoring refactoring PR
+                .up()
+                .up()
+                // MeasureReport assertions (post-scoring) - verify FHIR resource output
+                .report()
                 .firstGroup()
                 .population("initial-population")
-                // 11 encounters in all
                 .hasCount(11)
                 .up()
                 .population("measure-population")
@@ -773,7 +903,6 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .hasCount(0)
                 .up()
                 .population("measure-observation")
-                // There are 10 patients in all
                 .hasCount(11)
                 .up()
                 .hasScore("84.0")
@@ -860,6 +989,18 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .measureId("ContinuousVariableResourceMeasureObservationEncounterBasisMax")
                 .evaluate()
                 .then()
+                // MeasureDef assertions (pre-scoring) - verify internal state after processing
+                .def()
+                .hasNoErrors()
+                .firstGroup()
+                .population("measure-population")
+                .hasSubjectCount(10)
+                .up()
+                // TODO: Add score assertion in subsequent measure scoring refactoring PR
+                .up()
+                .up()
+                // MeasureReport assertions (post-scoring) - verify FHIR resource output
+                .report()
                 .firstGroup()
                 .population("initial-population")
                 .hasCount(11)
@@ -940,9 +1081,20 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .measureId("ContinuousVariableResourceMeasureObservationBooleanBasisSum")
                 .evaluate()
                 .then()
+                // MeasureDef assertions (pre-scoring) - verify internal state after processing
+                .def()
+                .hasNoErrors()
+                .firstGroup()
+                .population("measure-population")
+                .hasSubjectCount(11)
+                .up()
+                // TODO: Add score assertion in subsequent measure scoring refactoring PR
+                .up()
+                .up()
+                // MeasureReport assertions (post-scoring) - verify FHIR resource output
+                .report()
                 .firstGroup()
                 .population("initial-population")
-                // 10 encounters in all
                 .hasCount(11)
                 .up()
                 .population("measure-population")
@@ -952,7 +1104,6 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .hasCount(0)
                 .up()
                 .population("measure-observation")
-                // There are 10 patients in all
                 .hasCount(11)
                 .up()
                 .hasScore("814.0")
@@ -1039,6 +1190,18 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .measureId("ContinuousVariableResourceMeasureObservationEncounterBasisSum")
                 .evaluate()
                 .then()
+                // MeasureDef assertions (pre-scoring) - verify internal state after processing
+                .def()
+                .hasNoErrors()
+                .firstGroup()
+                .population("measure-population")
+                .hasSubjectCount(10)
+                .up()
+                // TODO: Add score assertion in subsequent measure scoring refactoring PR
+                .up()
+                .up()
+                // MeasureReport assertions (post-scoring) - verify FHIR resource output
+                .report()
                 .firstGroup()
                 .population("initial-population")
                 .hasCount(11)

@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
@@ -93,6 +94,14 @@ public interface IAdapter<T extends IBase> {
     default <E extends IBaseExtension<?, ?>> List<E> getExtensionsByUrl(IBase base, String url) {
         return getExtension(base).stream()
                 .filter(e -> e.getUrl().equals(url))
+                .map(e -> (E) e)
+                .collect(Collectors.toList());
+    }
+
+    @SuppressWarnings("unchecked")
+    default <E extends IBaseExtension<?, ?>> List<E> getExtensionsByUrls(IBase base, Set<String> urls) {
+        return getExtension(base).stream()
+                .filter(e -> urls.contains(e.getUrl()))
                 .map(e -> (E) e)
                 .collect(Collectors.toList());
     }

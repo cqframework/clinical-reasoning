@@ -190,7 +190,7 @@ public class GroupDef {
         return this.populations.stream()
                 .filter(pop -> pop.type() == populationType)
                 .findFirst()
-                .map(pop -> pop.getCount(this))
+                .map(PopulationDef::getCount)
                 .orElse(0);
     }
 

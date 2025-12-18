@@ -276,13 +276,6 @@ public interface IKnowledgeArtifactAdapter extends IResourceAdapter {
         return !getRelatedArtifact().isEmpty();
     }
 
-    @SuppressWarnings("unchecked")
-    default <T extends ICompositeType & IBaseHasExtensions> List<T> getRelatedArtifact() {
-        return resolvePathList(get(), "relatedArtifact").stream()
-                .map(r -> (T) r)
-                .collect(Collectors.toList());
-    }
-
     default <T extends ICompositeType & IBaseHasExtensions> void addRelatedArtifact(T relatedArtifact) {
         try {
             getModelResolver().setValue(get(), "relatedArtifact", List.of(relatedArtifact));

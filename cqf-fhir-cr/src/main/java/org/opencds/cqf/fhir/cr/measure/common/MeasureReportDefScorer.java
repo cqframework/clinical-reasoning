@@ -104,7 +104,7 @@ public class MeasureReportDefScorer {
         Double groupScore = calculateGroupScore(measureUrl, groupDef, measureScoring);
 
         // MUTATE: Set score on GroupDef
-        groupDef.setScore(groupScore);
+        groupDef.setScoreAndAdaptToImprovementNotation(groupScore);
 
         // Score all stratifiers using Def-first iteration
         // Modified from R4MeasureReportScorer to iterate over Def classes instead of FHIR components

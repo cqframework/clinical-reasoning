@@ -167,15 +167,13 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
         return checkMissingScoringType(measureDef, groupScoringType);
     }
 
-    protected void scoreGroup(Double score, boolean isIncreaseImprovementNotation, MeasureReportGroupComponent mrgc) {
-        // When applySetMembership=false, this value can receive strange values
-        // This should prevent scoring in certain scenarios like <0
-        if (score != null && score >= 0) {
-            if (isIncreaseImprovementNotation) {
-                mrgc.setMeasureScore(new Quantity(score));
-            } else {
-                mrgc.setMeasureScore(new Quantity(1 - score));
-            }
+    protected void scoreGroup(
+            Double originalScore, boolean isIncreaseImprovementNotation, MeasureReportGroupComponent mrgc) {
+        final Double updatedScore = MeasureScoreCalculator.scoreGroupAccordingToIncreaseImprovementNotation(
+                originalScore, isIncreaseImprovementNotation);
+
+        if (updatedScore != null) {
+            mrgc.setMeasureScore(new Quantity(updatedScore));
         }
     }
 

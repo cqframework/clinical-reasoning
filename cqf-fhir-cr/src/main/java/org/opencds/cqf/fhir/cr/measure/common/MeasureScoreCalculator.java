@@ -88,6 +88,21 @@ public class MeasureScoreCalculator {
         return calcProportionScore(effectiveNumerator, effectiveDenominator);
     }
 
+    public static Double scoreGroupAccordingToIncreaseImprovementNotation(
+            Double originalScore, boolean isIncreaseImprovementNotation) {
+        // When applySetMembership=false, this value can receive strange values
+        // This should prevent scoring in certain scenarios like <0
+        if (originalScore != null && originalScore >= 0) {
+            if (isIncreaseImprovementNotation) {
+                return originalScore;
+            }
+
+            return 1 - originalScore;
+        }
+
+        return null;
+    }
+
     /**
      * Calculate ratio score for continuous variable measures.
      *

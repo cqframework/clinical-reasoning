@@ -16,6 +16,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.cqframework.cql.cql2elm.CqlCompilerOptions;
@@ -401,7 +402,9 @@ public class R4DataRequirementsService {
                     .forEach(stratifier ->
                             expressionSet.add(stratifier.getCriteria().getExpression()));
         });
-        return expressionSet;
+
+        // Exclude null expression names from returned set
+        return expressionSet.stream().filter(Objects::nonNull).collect(java.util.stream.Collectors.toSet());
     }
 
     private static org.hl7.fhir.r4.model.Library addDataRequirementFhirQueries(

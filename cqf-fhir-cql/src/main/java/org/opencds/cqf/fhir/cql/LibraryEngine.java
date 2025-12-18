@@ -11,21 +11,24 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import kotlin.Pair;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.cqframework.cql.cql2elm.StringLibrarySourceProvider;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
+import org.opencds.cqf.cql.engine.execution.EvaluationExpressionRef;
+import org.opencds.cqf.cql.engine.execution.EvaluationParams;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
-import org.opencds.cqf.cql.engine.execution.EvaluationResultsForMultiLib;
+import org.opencds.cqf.cql.engine.execution.EvaluationResults;
 import org.opencds.cqf.cql.engine.runtime.Tuple;
 import org.opencds.cqf.fhir.cql.engine.parameters.CqlFhirParametersConverter;
 import org.opencds.cqf.fhir.cql.engine.parameters.CqlParameterDefinition;
@@ -65,7 +68,7 @@ public class LibraryEngine {
             if (patientId.startsWith("Patient/")) {
                 patientId = patientId.replace("Patient/", "");
             }
-            contextParameter = Pair.of("Patient", patientId);
+            contextParameter = new Pair<>("Patient", patientId);
         }
 
         return contextParameter;
@@ -168,9 +171,12 @@ public class LibraryEngine {
         requestSettings.getLibrarySourceProviders().add(new StringLibrarySourceProvider(Lists.newArrayList(cql)));
         var engine = Engines.forRepository(repository, requestSettings, bundle);
 
-        var id = new VersionedIdentifier().withId(libraryName).withVersion(libraryVersion);
-        var result =
-                engine.evaluate(id.getId(), Set.of("return"), buildContextParameter(patientId), evaluationParameters);
+        var id = new VersionedIdentifier().withId(libraryName);
+        var expressions = new HashMap<VersionedIdentifier, List<EvaluationExpressionRef>>();
+        expressions.put(id, List.of(new EvaluationExpressionRef("return")));
+        var result = engine.evaluate(new EvaluationParams(
+                        expressions, buildContextParameter(patientId), evaluationParameters, null, null))
+                .getOnlyResultOrThrow();
 
         return cqlFhirParametersConverter.toFhirParameters(result);
     }
@@ -294,7 +300,7 @@ public class LibraryEngine {
         return result;
     }
 
-    public EvaluationResultsForMultiLib getEvaluationResult(
+    public EvaluationResults getEvaluationResult(
             List<VersionedIdentifier> ids,
             String patientId,
             IBaseParameters parameters,
@@ -317,17 +323,22 @@ public class LibraryEngine {
             evaluationParameters.putAll(rawParameters);
         }
 
-        var versionlessIdentifiers = ids.stream()
-                .map(id -> new VersionedIdentifier().withId(id.getId()))
-                .toList();
+        var evaluationExpressionRefs = expressions == null
+                ? null
+                : expressions.stream().map(EvaluationExpressionRef::new).toList();
 
-        return engineToUse.evaluate(
-                versionlessIdentifiers,
-                expressions,
+        var evaluationParamsExpressions = new HashMap<VersionedIdentifier, List<EvaluationExpressionRef>>();
+        for (var id : ids) {
+            var versionedIdentifier = new VersionedIdentifier().withId(id.getId());
+            evaluationParamsExpressions.put(versionedIdentifier, evaluationExpressionRefs);
+        }
+
+        return engineToUse.evaluate(new EvaluationParams(
+                evaluationParamsExpressions,
                 buildContextParameter(patientId),
                 evaluationParameters,
                 null,
-                zonedDateTime);
+                zonedDateTime));
     }
 
     public EvaluationResult getEvaluationResult(
@@ -341,7 +352,7 @@ public class LibraryEngine {
             @Nullable ZonedDateTime zonedDateTime,
             CqlEngine engine) {
 
-        var evaluationResultsForMultiLib = getEvaluationResult(
+        var evaluationResults = getEvaluationResult(
                 List.of(id),
                 patientId,
                 parameters,
@@ -352,6 +363,6 @@ public class LibraryEngine {
                 zonedDateTime,
                 engine);
 
-        return evaluationResultsForMultiLib.getOnlyResultOrThrow();
+        return evaluationResults.getOnlyResultOrThrow();
     }
 }

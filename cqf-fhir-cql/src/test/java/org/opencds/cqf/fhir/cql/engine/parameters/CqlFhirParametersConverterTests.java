@@ -23,6 +23,7 @@ import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.cql.engine.execution.EvaluationExpressionRef;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
 import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverterFactory;
@@ -64,8 +65,8 @@ class CqlFhirParametersConverterTests {
         expected.addParameter().setName("Numerator").setValue(new BooleanType(true));
 
         var testData = new EvaluationResult();
-        testData.getExpressionResults().put("Patient", new ExpressionResult(new Patient(), null));
-        testData.getExpressionResults().put("Numerator", new ExpressionResult(true, null));
+        testData.set(new EvaluationExpressionRef("Patient"), new ExpressionResult(new Patient(), null));
+        testData.set(new EvaluationExpressionRef("Numerator"), new ExpressionResult(true, null));
 
         var actual = (Parameters) cqlFhirParametersConverter.toFhirParameters(testData);
 
@@ -79,8 +80,8 @@ class CqlFhirParametersConverterTests {
         expected.addParameter().setName("Encounters").setValue(emptyListMarker());
 
         var testData = new EvaluationResult();
-        testData.getExpressionResults().put("Patient", new ExpressionResult(new Patient(), null));
-        testData.getExpressionResults().put("Encounters", new ExpressionResult(Collections.emptyList(), null));
+        testData.set(new EvaluationExpressionRef("Patient"), new ExpressionResult(new Patient(), null));
+        testData.set(new EvaluationExpressionRef("Encounters"), new ExpressionResult(Collections.emptyList(), null));
 
         Parameters actual = (Parameters) cqlFhirParametersConverter.toFhirParameters(testData);
 
@@ -98,7 +99,7 @@ class CqlFhirParametersConverterTests {
         testList.add(5);
 
         var testData = new EvaluationResult();
-        testData.getExpressionResults().put("NullInList", new ExpressionResult(testList, null));
+        testData.set(new EvaluationExpressionRef("NullInList"), new ExpressionResult(testList, null));
 
         var actual = (Parameters) cqlFhirParametersConverter.toFhirParameters(testData);
 
@@ -112,8 +113,8 @@ class CqlFhirParametersConverterTests {
         expected.addParameter().setName("Null").setValue(nullValueMarker());
 
         var testData = new EvaluationResult();
-        testData.getExpressionResults().put("Patient", new ExpressionResult(new Patient(), null));
-        testData.getExpressionResults().put("Null", new ExpressionResult(null, null));
+        testData.set(new EvaluationExpressionRef("Patient"), new ExpressionResult(new Patient(), null));
+        testData.set(new EvaluationExpressionRef("Null"), new ExpressionResult(null, null));
 
         var actual = (Parameters) cqlFhirParametersConverter.toFhirParameters(testData);
 

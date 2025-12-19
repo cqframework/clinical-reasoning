@@ -111,7 +111,7 @@ public class R4MeasureProcessor {
             @Nonnull List<String> subjectIds,
             @Nonnull Map<String, EvaluationResult> results) {
 
-        return evaluateMeasureCaptureDefs(measure, periodStart, periodEnd, reportType, subjectIds, results)
+        return evaluateMeasureCaptureDef(measure, periodStart, periodEnd, reportType, subjectIds, results)
                 .measureReport();
     }
 
@@ -135,7 +135,7 @@ public class R4MeasureProcessor {
             CqlEngine context,
             CompositeEvaluationResultsPerMeasure compositeEvaluationResultsPerMeasure) {
 
-        return evaluateMeasureCaptureDefs(
+        return evaluateMeasureCaptureDef(
                         measure,
                         periodStart,
                         periodEnd,
@@ -167,7 +167,7 @@ public class R4MeasureProcessor {
      * @return MeasureDefAndR4MeasureReport containing both MeasureDef and MeasureReport
      */
     @VisibleForTesting
-    MeasureDefAndR4MeasureReport evaluateMeasureCaptureDefs(
+    MeasureDefAndR4MeasureReport evaluateMeasureCaptureDef(
             Measure measure,
             @Nullable ZonedDateTime periodStart,
             @Nullable ZonedDateTime periodEnd,
@@ -219,7 +219,7 @@ public class R4MeasureProcessor {
      * @return MeasureDefAndR4MeasureReport containing both MeasureDef and MeasureReport
      */
     @VisibleForTesting
-    MeasureDefAndR4MeasureReport evaluateMeasureCaptureDefs(
+    MeasureDefAndR4MeasureReport evaluateMeasureCaptureDef(
             Measure measure,
             @Nullable ZonedDateTime periodStart,
             @Nullable ZonedDateTime periodEnd,
@@ -274,7 +274,7 @@ public class R4MeasureProcessor {
      * @return MeasureDefAndR4MeasureReport containing both MeasureDef and MeasureReport
      */
     @VisibleForTesting
-    MeasureDefAndR4MeasureReport evaluateMeasureCaptureDefs(
+    MeasureDefAndR4MeasureReport evaluateMeasureCaptureDef(
             Either3<CanonicalType, IdType, Measure> measure,
             @Nullable ZonedDateTime periodStart,
             @Nullable ZonedDateTime periodEnd,
@@ -284,7 +284,7 @@ public class R4MeasureProcessor {
             CqlEngine context,
             CompositeEvaluationResultsPerMeasure compositeEvaluationResultsPerMeasure) {
 
-        return evaluateMeasureCaptureDefs(
+        return evaluateMeasureCaptureDef(
                 R4MeasureServiceUtils.foldMeasure(measure, this.repository),
                 periodStart,
                 periodEnd,

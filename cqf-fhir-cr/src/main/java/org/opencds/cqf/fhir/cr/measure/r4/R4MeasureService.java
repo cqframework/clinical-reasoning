@@ -25,6 +25,7 @@ import org.opencds.cqf.fhir.utility.repository.FederatedRepository;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.repository.Repositories;
 
+@Deprecated
 public class R4MeasureService implements R4MeasureEvaluatorSingle {
     private final IRepository repository;
     private final MeasureEvaluationOptions measureEvaluationOptions;
@@ -152,7 +153,7 @@ public class R4MeasureService implements R4MeasureEvaluatorSingle {
                 processor.evaluateMeasureWithCqlEngine(subjects, measure, periodStart, periodEnd, parameters, context);
 
         // Call processor's test-visible method to get both MeasureDef and MeasureReport
-        MeasureDefAndR4MeasureReport result = processor.evaluateMeasureCaptureDefs(
+        MeasureDefAndR4MeasureReport result = processor.evaluateMeasureCaptureDef(
                 measure, periodStart, periodEnd, reportType, subjects, evalType, context, evaluationResults);
 
         // add ProductLine after report is generated

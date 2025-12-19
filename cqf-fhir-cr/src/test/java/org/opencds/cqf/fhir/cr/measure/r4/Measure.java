@@ -88,6 +88,7 @@ public class Measure {
     public static class Given {
         private IRepository repository;
         private MeasureEvaluationOptions evaluationOptions;
+        private String serverBase;
         private final MeasurePeriodValidator measurePeriodValidator;
 
         public Given(@Nullable Boolean applyScoringSetMembership) {
@@ -110,6 +111,8 @@ public class Measure {
                     .getEvaluationSettings()
                     .getTerminologySettings()
                     .setValuesetExpansionMode(VALUESET_EXPANSION_MODE.PERFORM_NAIVE_EXPANSION);
+
+            this.serverBase = "http://localhost";
 
             this.measurePeriodValidator = new MeasurePeriodValidator();
         }
@@ -140,16 +143,23 @@ public class Measure {
             return new R4MeasureService(repository, evaluationOptions, measurePeriodValidator);
         }
 
+        private R4MultiMeasureService buildMultiMeasureService() {
+            return new R4MultiMeasureService(repository, evaluationOptions, serverBase, measurePeriodValidator);
+        }
+
         public When when() {
-            return new When(buildMeasureService());
+            return new When(buildMeasureService(), buildMultiMeasureService());
         }
     }
 
     public static class When {
+        // LUKETODO:  remove single R4MeasureService completely
         private final R4MeasureService service;
+        private final R4MultiMeasureService multiMeasureService;
 
-        When(R4MeasureService service) {
+        When(R4MeasureService service, R4MultiMeasureService multiMeasureService) {
             this.service = service;
+            this.multiMeasureService = multiMeasureService;
         }
 
         private String measureId;
@@ -222,20 +232,21 @@ public class Measure {
         }
 
         public When evaluate() {
-            this.operation = () -> service.evaluateMeasureCaptureDefs(
-                    Eithers.forMiddle3(new IdType("Measure", measureId)),
-                    periodStart,
-                    periodEnd,
-                    reportType,
-                    subject,
-                    null,
-                    null,
-                    null,
-                    null,
-                    additionalData,
-                    parameters,
-                    productLine,
-                    practitioner);
+            this.operation = () ->
+                    multiMeasureService.evaluateSingleMeasureCaptureDef(
+                            Eithers.forMiddle3(new IdType("Measure", measureId)),
+                            periodStart,
+                            periodEnd,
+                            reportType,
+                            subject,
+                            null,
+                            null,
+                            null,
+                            null,
+                            additionalData,
+                            parameters,
+                            productLine,
+                            practitioner);
             return this;
         }
 

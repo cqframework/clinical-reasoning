@@ -1,41 +1,37 @@
-package org.opencds.cqf.fhir.cr.visitor.r4;
+package org.opencds.cqf.fhir.cr.visitor.r5;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.opencds.cqf.fhir.utility.r4.Parameters.parameters;
-import static org.opencds.cqf.fhir.utility.r4.Parameters.part;
+import static org.opencds.cqf.fhir.utility.r5.Parameters.parameters;
+import static org.opencds.cqf.fhir.utility.r5.Parameters.part;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.repository.IRepository;
-import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Library;
-import org.hl7.fhir.r4.model.Parameters;
-import org.hl7.fhir.r4.model.SearchParameter;
+import org.hl7.fhir.r5.model.Library;
+import org.hl7.fhir.r5.model.SearchParameter;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.visitor.IWithdrawVisitorTest;
-import org.opencds.cqf.fhir.cr.visitor.WithdrawVisitor;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
-import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactVisitor;
-import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
-import org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory;
+import org.opencds.cqf.fhir.utility.adapter.r5.AdapterFactory;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-class WithdrawVisitorTests implements IWithdrawVisitorTest {
-    private final FhirContext fhirContext = FhirContext.forR4Cached();
-    private IRepository repo;
-    private final IParser jsonParser = fhirContext.newJsonParser();
+public class WithdrawVisitorTest implements IWithdrawVisitorTest {
+
+    private static final Logger log = LoggerFactory.getLogger(WithdrawVisitorTest.class);
+    private final FhirContext fhirContext = FhirContext.forR5Cached();
+
     private final AdapterFactory factory = new AdapterFactory();
+    private IRepository repo;
+
+    private final IParser jsonParser = fhirContext.newJsonParser();
 
     @BeforeEach
     void setup() {
         SearchParameter sp = (SearchParameter) jsonParser.parseResource(
-                getClass().getResourceAsStream("SearchParameter-artifactAssessment.json"));
+            getClass().getResourceAsStream("SearchParameter-artifactAssessment.json"));
         repo = new InMemoryFhirRepository(fhirContext);
         repo.update(sp);
     }

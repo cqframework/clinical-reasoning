@@ -87,7 +87,6 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
         return repository;
     }
 
-    // LUKETODO:  test this from Measure and CQIS
     @Override
     public MeasureReport evaluate(
             Either3<CanonicalType, IdType, Measure> measure,
@@ -156,53 +155,18 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
                 null); // reporter is null in the single measure case
 
         if (resultsAsListOfList.size() != 1) {
-            // LUKETODO:???
+            // LUKETODO: better error
             throw new InternalErrorException("");
         }
 
         final List<MeasureDefAndR4MeasureReport> measureDefAndR4MeasureReports = resultsAsListOfList.get(0);
 
-        // LUKETODO:  a null subject triggers this Exception:
         if (measureDefAndR4MeasureReports.size() != 1) {
-            // LUKETODO:???
+            // LUKETODO: better error
             throw new InternalErrorException("");
         }
 
         return measureDefAndR4MeasureReports.get(0);
-    }
-
-    private record SingleToMultiMeasureParamConversion(
-            List<IdType> measureId, List<String> measureUrl, List<String> measureIdentifier) {}
-
-    private static SingleToMultiMeasureParamConversion unfold(Either3<CanonicalType, IdType, Measure> either) {
-        final List<IdType> measureId;
-        final List<String> measureUrl;
-        final List<String> measureIdentifier = List.of();
-
-        if (either.isLeft()) {
-            measureId = List.of();
-            measureUrl = List.of(either.middleOrThrow().asStringValue());
-        } else if (either.isMiddle()) {
-            measureId = List.of(either.middleOrThrow());
-            measureUrl = List.of();
-        } else if (either.isRight()) {
-            final Measure measure = either.rightOrThrow();
-
-            // LUKETODO:  this is gross:
-            if (StringUtils.isBlank(measure.getUrl())) {
-                measureId = List.of();
-                measureUrl = List.of(either.middleOrThrow().asStringValue());
-            } else {
-                measureId = List.of();
-                measureUrl = List.of(measure.getUrl());
-            }
-
-        } else {
-            // LUKETODO: ???
-            throw new InternalErrorException("huh?");
-        }
-
-        return new SingleToMultiMeasureParamConversion(measureId, measureUrl, measureIdentifier);
     }
 
     @Override
@@ -323,8 +287,6 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
 
         measurePeriodValidator.validatePeriodStartAndEnd(periodStart, periodEnd);
 
-        // LUKETODO: This is slightly different than the single measure case, where the measureserviceutils are on the
-        // derived repository
         final R4MeasureProcessor r4ProcessorToUse;
         final R4MeasureServiceUtils r4MeasureServiceUtilsToUse;
         if (dataEndpoint != null && contentEndpoint != null && terminologyEndpoint != null) {
@@ -343,8 +305,15 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
         r4MeasureServiceUtilsToUse.ensureSupplementalDataElementSearchParameter();
 
         // LUKETODO:  in the single measure case, we set the subjectId to practitioner, but we don't here
+        /*
+        if (StringUtils.isNotBlank(practitioner)) {
+            if (!practitioner.contains("/")) {
+                practitioner = "Practitioner/".concat(practitioner);
+            }
+            subjectId = practitioner;
+        }
+        */
 
-        // LUKETODO:  conditional for single vs. multiple
         final List<Measure> measures;
         if (measure == null) {
             measures = r4MeasureServiceUtilsToUse.getMeasures(measureId, measureIdentifier, measureUrl);
@@ -355,7 +324,6 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
         // LUKETODO:  log
         log.info("multi-evaluate-measure, measures to evaluate: {}", measures.size());
 
-        // LUKETODO:  likewise, this is different from the single measure case
         var evalType = r4MeasureServiceUtilsToUse.getMeasureEvalType(reportType, subject);
 
         // LUKETODO:  this is hacky:  need to figure out a better way:
@@ -374,25 +342,10 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
                 r4ProcessorToUse.evaluateMultiMeasuresWithCqlEngine(
                         subjects, measures, periodStart, periodEnd, parameters, context);
 
-        // LUKETODO:  optimize conditional logic
-        if (SingleOrMultiple.SINGLE == singleOrMultiple) {
-            return populationReport(
-                    r4ProcessorToUse,
-                    r4MeasureServiceUtilsToUse,
-                    compositeEvaluationResultsPerMeasure,
-                    context,
-                    measures,
-                    subjects,
-                    periodStart,
-                    periodEnd,
-                    reportType,
-                    evalType,
-                    reporter,
-                    subject);
-        }
-
-        if (evalType.equals(MeasureEvalType.POPULATION) || evalType.equals(MeasureEvalType.SUBJECTLIST)) {
-            return populationReport(
+        if (SingleOrMultiple.SINGLE == singleOrMultiple
+                || evalType.equals(MeasureEvalType.POPULATION)
+                || evalType.equals(MeasureEvalType.SUBJECTLIST)) {
+            return populationOrSingleMeasureReport(
                     r4ProcessorToUse,
                     r4MeasureServiceUtilsToUse,
                     compositeEvaluationResultsPerMeasure,
@@ -422,7 +375,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
                 productLine);
     }
 
-    private List<List<MeasureDefAndR4MeasureReport>> populationReport(
+    private List<List<MeasureDefAndR4MeasureReport>> populationOrSingleMeasureReport(
             R4MeasureProcessor r4Processor,
             R4MeasureServiceUtils r4MeasureServiceUtils,
             CompositeEvaluationResultsPerMeasure compositeEvaluationResultsPerMeasure,
@@ -639,7 +592,6 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
         return new MeasureDefAndR4ParametersWithMeasureReports(measureDefs, parameters);
     }
 
-    // LUKETODO:  the single measure workflow implementation is different, and sets up a federated repository
     protected List<String> getSubjects(R4RepositorySubjectProvider subjectProvider, String subjectId) {
         return subjectProvider.getSubjects(repository, subjectId).toList();
     }

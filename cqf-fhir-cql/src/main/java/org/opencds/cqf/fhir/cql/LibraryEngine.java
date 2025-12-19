@@ -31,6 +31,7 @@ import org.opencds.cqf.fhir.cql.engine.parameters.CqlFhirParametersConverter;
 import org.opencds.cqf.fhir.cql.engine.parameters.CqlParameterDefinition;
 import org.opencds.cqf.fhir.utility.CqfExpression;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
+import org.opencds.cqf.fhir.utility.repository.INpmRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,15 +41,21 @@ public class LibraryEngine {
     private static final Logger logger = LoggerFactory.getLogger(LibraryEngine.class);
 
     protected final IRepository repository;
+    protected final INpmRepository npmRepository;
     protected final FhirContext fhirContext;
     protected final EvaluationSettings settings;
     protected final IAdapterFactory adapterFactory;
 
-    public LibraryEngine(IRepository repository, EvaluationSettings evaluationSettings) {
+    public LibraryEngine(IRepository repository, EvaluationSettings settings) {
+        this(repository, null, settings);
+    }
+
+    public LibraryEngine(IRepository repository, INpmRepository npmRepository, EvaluationSettings evaluationSettings) {
         this.repository = requireNonNull(repository, "repository can not be null");
         this.settings = requireNonNull(evaluationSettings, "evaluationSettings can not be null");
         fhirContext = repository.fhirContext();
         adapterFactory = IAdapterFactory.forFhirContext(fhirContext);
+        this.npmRepository = npmRepository;
     }
 
     public IRepository getRepository() {
@@ -320,7 +327,6 @@ public class LibraryEngine {
         var versionlessIdentifiers = ids.stream()
                 .map(id -> new VersionedIdentifier().withId(id.getId()))
                 .toList();
-
         return engineToUse.evaluate(
                 versionlessIdentifiers,
                 expressions,

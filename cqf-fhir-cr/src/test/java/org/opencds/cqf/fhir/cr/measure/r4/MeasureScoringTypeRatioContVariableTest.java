@@ -119,6 +119,8 @@ class MeasureScoringTypeRatioContVariableTest {
                 .hasScore(
                         "0.14285714285714285") // 150/1050  sum(30,120) /sum(30, 180, 120, 120, 120, 120, 120, 120, 120)
                 .up()
+                // LUKETODO: get rid of this:
+                .logReportJson()
                 .report();
     }
 

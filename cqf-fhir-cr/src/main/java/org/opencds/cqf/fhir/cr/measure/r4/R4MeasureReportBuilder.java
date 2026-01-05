@@ -310,20 +310,15 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             bc.addContained(subjectList);
             reportPopulation.setSubjectResults(new Reference("#" + subjectList.getId()));
         }
-
-        // LUKETODO: tests and assertions
-        // Add either the aggregation result to the numerator or denominator, if applicable
-        populateAggregationResultExtension(measurePopulation, populationDef);
     }
 
     private void populateAggregationResultExtension(
-            MeasureGroupPopulationComponent measurePopulation, PopulationDef populationDef) {
+            MeasureReportGroupPopulationComponent measurePopulation, PopulationDef populationDef) {
 
-        measurePopulation.addExtension(
-                MeasureConstants.EXT_AGGREGATION_METHOD_RESULT,
-                Optional.ofNullable(populationDef.getAggregationResult())
-                        .map(DecimalType::new)
-                        .orElse(null));
+        // Add either the aggregation result to the numerator or denominator, if applicable
+        Optional.ofNullable(populationDef.getAggregationResult())
+                .ifPresent(nonNullAggregationResult -> measurePopulation.addExtension(
+                        MeasureConstants.EXT_AGGREGATION_METHOD_RESULT, new DecimalType(nonNullAggregationResult)));
     }
 
     static ListResource createList(String id) {
@@ -634,8 +629,17 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                 reportGroup.getMeasureScore().setValue(groupScore);
             }
 
+            copyPopulationAggregationResults(reportGroup, groupDef);
+
             // Copy stratifier scores
             copyStratifierScores(reportGroup, groupDef);
+        }
+    }
+
+    private void copyPopulationAggregationResults(MeasureReportGroupComponent reportGroup, GroupDef groupDef) {
+        for (MeasureReportGroupPopulationComponent fhirPopulation : reportGroup.getPopulation()) {
+            var populationDef = groupDef.findPopulationById(fhirPopulation.getId());
+            populateAggregationResultExtension(fhirPopulation, populationDef);
         }
     }
 

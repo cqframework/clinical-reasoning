@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportStatus;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 
 /**
@@ -79,48 +80,67 @@ class MeasureScoringTypeRatioContVariableTest {
                 .up()
                 .population("denominator")
                 .hasCount(11) // final Denominator = 9 (11-2)
-                .up()
-                .population("denominator-exclusion")
-                .hasCount(2)
-                .up()
-                .population("numerator-exclusion")
-                .hasCount(0)
+                .hasNoAggregationResults()
                 .up()
                 .population("numerator")
                 .hasCount(2) // final Numerator = 2
+                .hasNoAggregationResults()
                 .up()
                 .hasScore(0.14285714285714285) // 150/1050  sum(30,120) /sum(30, 180, 120, 120, 120, 120, 120, 120, 120)
+                .population("denominator-exclusion")
+                .hasCount(2)
+                .hasNoAggregationResults()
+                .up()
+                .population("numerator-exclusion")
+                .hasCount(0)
+                .hasNoAggregationResults()
+                .up()
+                .populationById("observation-den")
+                .hasType(MeasurePopulationType.MEASUREOBSERVATION)
+                .hasCount(9)
+                .hasAggregationResults(1050.0)
+                .up()
+                .populationById("observation-num")
+                .hasType(MeasurePopulationType.MEASUREOBSERVATION)
+                .hasCount(2)
+                .hasAggregationResults(150.0)
+                .up()
                 .up()
                 .up()
                 // MeasureReport assertions (post-scoring) - verify FHIR resource output
                 .report()
                 .firstGroup()
                 .population("initial-population")
+                .hasNoAggregationResultsExtensionValue()
                 .hasCount(11)
                 .up()
                 .population("denominator")
                 .hasCount(11) // final Denominator = 9 (11-2)
+                .hasNoAggregationResultsExtensionValue()
                 .up()
                 .population("denominator-exclusion")
                 .hasCount(2)
+                .hasNoAggregationResultsExtensionValue()
                 .up()
                 .population("numerator-exclusion")
                 .hasCount(0)
+                .hasNoAggregationResultsExtensionValue()
                 .up()
                 .population("numerator")
                 .hasCount(2) // final Numerator = 2
+                .hasNoAggregationResultsExtensionValue()
                 .up()
                 .populationId("observation-den")
                 .hasCount(9) // we remove exclusions in these counts so users can see final Observation count used
+                .hasAggregationResultsExtensionValue(1050.0)
                 .up()
                 .populationId("observation-num")
+                .hasAggregationResultsExtensionValue(150.0)
                 .hasCount(2) // we remove exclusions in these counts so users can see final Observation count used
                 .up()
                 .hasScore(
                         "0.14285714285714285") // 150/1050  sum(30,120) /sum(30, 180, 120, 120, 120, 120, 120, 120, 120)
                 .up()
-                // LUKETODO: get rid of this:
-                .logReportJson()
                 .report();
     }
 

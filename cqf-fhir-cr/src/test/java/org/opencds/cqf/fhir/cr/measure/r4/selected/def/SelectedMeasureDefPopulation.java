@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 
 /**
@@ -105,6 +106,17 @@ public class SelectedMeasureDefPopulation<P>
         return this;
     }
 
+    public SelectedMeasureDefPopulation<P> hasNoAggregationResults() {
+        return hasAggregationResults(null);
+    }
+
+    public SelectedMeasureDefPopulation<P> hasAggregationResults(Object expectedAggregationResult) {
+        assertNotNull(value(), "PopulationDef is null");
+        final Double actualAggregationResult = value().getAggregationResult();
+        assertEquals(expectedAggregationResult, actualAggregationResult, "Population aggregation result mismatch");
+        return this;
+    }
+
     /**
      * Assert the number of evaluated resources (from evaluatedResources set).
      *
@@ -140,9 +152,9 @@ public class SelectedMeasureDefPopulation<P>
      * @param type expected population type code
      * @return this SelectedMeasureDefPopulation for chaining
      */
-    public SelectedMeasureDefPopulation<P> hasType(String type) {
+    public SelectedMeasureDefPopulation<P> hasType(MeasurePopulationType type) {
         assertNotNull(value(), "PopulationDef is null");
-        assertEquals(type, value().type().toCode(), "Population type mismatch");
+        assertEquals(type, value().type(), "Population type mismatch");
         return this;
     }
 

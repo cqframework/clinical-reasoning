@@ -106,11 +106,11 @@ public class SelectedMeasureDefPopulation<P>
         return this;
     }
 
-    public SelectedMeasureDefPopulation<P> hasNoAggregationResults() {
-        return hasAggregationResults(null);
+    public SelectedMeasureDefPopulation<P> hasNoAggregationResult() {
+        return hasAggregationResult(null);
     }
 
-    public SelectedMeasureDefPopulation<P> hasAggregationResults(Object expectedAggregationResult) {
+    public SelectedMeasureDefPopulation<P> hasAggregationResult(Object expectedAggregationResult) {
         assertNotNull(value(), "PopulationDef is null");
         final Double actualAggregationResult = value().getAggregationResult();
         assertEquals(expectedAggregationResult, actualAggregationResult, "Population aggregation result mismatch");

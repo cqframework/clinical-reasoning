@@ -15,6 +15,7 @@ import org.hl7.elm.r1.FunctionDef;
 import org.hl7.elm.r1.OperandDef;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
+import org.opencds.cqf.cql.engine.execution.EvaluationExpressionRef;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
 import org.opencds.cqf.cql.engine.execution.Libraries;
@@ -248,7 +249,9 @@ public class ContinuousVariableObservationHandler {
         final Map<String, ExpressionResult> expressionResults = evaluationResult.getExpressionResults();
 
         if (!expressionResults.containsKey(expressionName)) {
-            throw new InvalidRequestException("Could not find expression result for expression: " + expressionName);
+            throw new InvalidRequestException(
+                    "Could not find expression result for expression: %s. Available expressions: %s"
+                            .formatted(expressionName, expressionResults.keySet()));
         }
 
         return Optional.of(evaluationResult.getExpressionResults().get(expressionName));
@@ -331,9 +334,8 @@ public class ContinuousVariableObservationHandler {
 
         final EvaluationResult evaluationResultToReturn = new EvaluationResult();
 
-        evaluationResultToReturn
-                .getExpressionResults()
-                .put(expressionName, new ExpressionResult(functionResults, evaluatedResources));
+        evaluationResultToReturn.set(
+                new EvaluationExpressionRef(expressionName), new ExpressionResult(functionResults, evaluatedResources));
 
         return evaluationResultToReturn;
     }

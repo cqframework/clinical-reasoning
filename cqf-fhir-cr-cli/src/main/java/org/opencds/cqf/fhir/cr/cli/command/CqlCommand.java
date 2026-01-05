@@ -8,8 +8,9 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
-import org.apache.commons.lang3.tuple.Pair;
+import kotlin.Unit;
 import org.hl7.elm.r1.VersionedIdentifier;
+import org.opencds.cqf.cql.engine.execution.EvaluationParams;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.fhir.cr.cli.argument.CqlCommandArgument;
 import org.opencds.cqf.fhir.cr.cli.command.EngineFactory.EngineBundle;
@@ -81,9 +82,20 @@ public class CqlCommand implements Callable<Integer> {
                 arguments.parameters.context.stream().map(c -> new SubjectContext(c.contextName, c.contextValue));
 
         var resultStream = contexts.map(sc -> {
-                    var contextParameter = Pair.<String, Object>of(sc.name(), sc.value());
-                    var cqlResult = bundle.engine().evaluate(identifier, expressions, contextParameter);
-                    return new SubjectAndResult(sc, cqlResult);
+                    var contextParameter = new kotlin.Pair<String, Object>(sc.name(), sc.value());
+                    var paramBuilder = new EvaluationParams.Builder();
+                    paramBuilder.setContextParameter(contextParameter);
+                    if (expressions == null || expressions.isEmpty()) {
+                        paramBuilder.library(identifier, null);
+                    } else {
+                        paramBuilder.library(identifier, builder -> {
+                            builder.expressions(expressions);
+                            return Unit.INSTANCE;
+                        });
+                    }
+
+                    var cqlResult = bundle.engine().evaluate(paramBuilder.build());
+                    return new SubjectAndResult(sc, cqlResult.getOnlyResultOrThrow());
                 })
                 .map(cqlResult -> {
                     if (baseOutput != null) {
@@ -107,7 +119,8 @@ public class CqlCommand implements Callable<Integer> {
             throws IOException {
         try (var writer = Files.newBufferedWriter(outputPath, StandardOpenOption.CREATE, StandardOpenOption.WRITE)) {
             for (var entry : result.getExpressionResults().entrySet()) {
-                writer.write(entry.getKey() + "=" + Utilities.tempConvert(entry.getValue()));
+                writer.write(entry.getKey() + "="
+                        + Utilities.tempConvert(entry.getValue().getValue()));
                 writer.newLine();
             }
         }

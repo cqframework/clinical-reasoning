@@ -69,7 +69,11 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
         var scoring = groupDef.measureScoring();
         // Numerator
         var populationExpression = populationDef.expression();
-        var expressionResult = evaluationResult.get(populationDef.expression());
+        if (populationExpression == null || populationExpression.isBlank()) {
+            return;
+        }
+
+        var expressionResult = evaluationResult.get(populationExpression);
 
         if (expressionResult == null || expressionResult.getValue() == null) {
             return;

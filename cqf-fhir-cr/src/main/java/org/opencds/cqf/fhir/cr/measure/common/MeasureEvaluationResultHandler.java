@@ -126,6 +126,7 @@ public class MeasureEvaluationResultHandler {
                 for (var libraryVersionedIdentifier : libraryIdentifiers) {
                     validateEvaluationResultExistsForIdentifier(
                             libraryVersionedIdentifier, evaluationResultsForMultiLib);
+
                     var evaluationResult = evaluationResultsForMultiLib.getResultFor(libraryVersionedIdentifier);
 
                     var measureDefs =

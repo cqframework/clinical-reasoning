@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.opencds.cqf.cql.engine.execution.EvaluationExpressionRef;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 
 /**
@@ -139,7 +140,9 @@ public class CompositeEvaluationResultsPerMeasure {
                 copyOfExpressionResults.putAll(measureObservationResult.getExpressionResults());
             }
 
-            evaluationResult.getExpressionResults().putAll(copyOfExpressionResults);
+            copyOfExpressionResults.entrySet().forEach(e -> {
+                evaluationResult.set(new EvaluationExpressionRef(e.getKey()), e.getValue());
+            });
 
             return evaluationResult;
         }

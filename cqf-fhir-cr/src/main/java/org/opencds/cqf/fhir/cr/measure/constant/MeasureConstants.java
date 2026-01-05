@@ -30,7 +30,8 @@ public class MeasureConstants {
     // http://build.fhir.org/ig/HL7/davinci-deqm/StructureDefinition-extension-supplementalData.html
     public static final String EXT_SDE_URL =
             "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-supplementalData";
-
+    public static final String EXT_SUPPORTING_EVIDENCE_URL =
+            "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-supportingEvidence";
     // http://hl7.org/fhir/us/davinci-deqm/2023Jan/StructureDefinition-extension-criteriaReference.html
     public static final String EXT_CRITERIA_REFERENCE_URL =
             "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-criteriaReference";

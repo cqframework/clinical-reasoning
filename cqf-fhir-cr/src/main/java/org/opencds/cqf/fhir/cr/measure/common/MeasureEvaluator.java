@@ -130,6 +130,20 @@ public class MeasureEvaluator {
         }
     }
 
+    protected Iterable<Object> evaluateSupportingCriteria(ExpressionResult expressionResult) {
+
+        if (expressionResult == null || expressionResult.value() == null) {
+            return Collections.emptyList();
+        }
+
+        Object value = expressionResult.value();
+        if (value instanceof Iterable<?>) {
+            return (Iterable<Object>) value;
+        } else {
+            return Collections.singletonList(value);
+        }
+    }
+
     protected PopulationDef evaluatePopulationMembership(
             String subjectType, String subjectId, PopulationDef inclusionDef, EvaluationResult evaluationResult) {
         return evaluatePopulationMembership(subjectType, subjectId, inclusionDef, evaluationResult, null);
@@ -302,6 +316,9 @@ public class MeasureEvaluator {
             var doc = evaluateDateOfCompliance(dateOfCompliance, evaluationResult);
             dateOfCompliance.addResource(subjectId, doc);
         }
+        for (PopulationDef p : groupDef.populations()) {
+            populateSupportingEvidence(p, reportType, evaluationResult, subjectId);
+        }
         // Ratio Cont Variable Scoring
         if (observationNum != null && observationDen != null) {
             // Num alignment
@@ -331,6 +348,24 @@ public class MeasureEvaluator {
                 removeObservationSubjectResourcesInPopulation(
                         denominatorExclusion.subjectResources, observationDen.subjectResources);
                 removeObservationResourcesInPopulation(subjectId, denominatorExclusion, observationDen);
+            }
+        }
+    }
+
+    protected void populateSupportingEvidence(
+            PopulationDef populationDef,
+            MeasureReportType reportType,
+            EvaluationResult evaluationResult,
+            String subjectId) {
+        // only enabled for subject level reports
+        if (reportType.equals(MeasureReportType.INDIVIDUAL)
+                && populationDef.getExtDefs() != null
+                && !populationDef.getExtDefs().isEmpty()) {
+            var extDef = populationDef.getExtDefs();
+            for (ExtensionDef e : extDef) {
+                var result = evaluationResult.forExpression(e.getExpression());
+                var object = evaluateSupportingCriteria(result);
+                e.addResource(subjectId, object);
             }
         }
     }

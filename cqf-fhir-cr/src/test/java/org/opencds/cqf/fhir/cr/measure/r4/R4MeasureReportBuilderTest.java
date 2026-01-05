@@ -265,6 +265,7 @@ class R4MeasureReportBuilderTest {
                 null,
                 booleanBasis,
                 null,
+                null,
                 null);
 
         if (resources != null) {

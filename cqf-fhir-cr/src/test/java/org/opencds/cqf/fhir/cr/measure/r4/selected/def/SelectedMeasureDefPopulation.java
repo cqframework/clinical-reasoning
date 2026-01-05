@@ -201,4 +201,12 @@ public class SelectedMeasureDefPopulation<P>
     public PopulationDef populationDef() {
         return value();
     }
+
+    public SelectedMeasureDefPopulationExtension<SelectedMeasureDefPopulation<P>> getExtDef(String expressionName) {
+        var extDef = this.value.getExtDefs().stream()
+                .filter(t -> t.getExpression().equals(expressionName))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Expression not found"));
+        return new SelectedMeasureDefPopulationExtension<>(extDef, this);
+    }
 }

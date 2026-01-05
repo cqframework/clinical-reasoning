@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
 import jakarta.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -15,6 +16,7 @@ public class PopulationDef {
     private final ConceptDef code;
     private final MeasurePopulationType measurePopulationType;
     private final CodeDef populationBasis;
+    private final List<ExtensionDef> extDefs;
 
     @Nullable
     private final String criteriaReference;
@@ -30,8 +32,9 @@ public class PopulationDef {
             ConceptDef code,
             MeasurePopulationType measurePopulationType,
             String expression,
-            CodeDef populationBasis) {
-        this(id, code, measurePopulationType, expression, populationBasis, null, null);
+            CodeDef populationBasis,
+            @Nullable List<ExtensionDef> extDefs) {
+        this(id, code, measurePopulationType, expression, populationBasis, null, null, extDefs);
     }
 
     public PopulationDef(
@@ -41,7 +44,8 @@ public class PopulationDef {
             String expression,
             CodeDef populationBasis,
             @Nullable String criteriaReference,
-            @Nullable ContinuousVariableObservationAggregateMethod aggregateMethod) {
+            @Nullable ContinuousVariableObservationAggregateMethod aggregateMethod,
+            @Nullable List<ExtensionDef> extDefs) {
         this.id = id;
         this.code = code;
         this.measurePopulationType = measurePopulationType;
@@ -49,6 +53,7 @@ public class PopulationDef {
         this.populationBasis = populationBasis;
         this.criteriaReference = criteriaReference;
         this.aggregateMethod = aggregateMethod;
+        this.extDefs = extDefs;
     }
 
     public MeasurePopulationType type() {
@@ -213,5 +218,9 @@ public class PopulationDef {
                 + ", criteriaReference='" + criteriaRef + '\''
                 + ", aggregateMethod=" + aggMethod
                 + '}';
+    }
+
+    public List<ExtensionDef> getExtDefs() {
+        return extDefs == null ? null : new ArrayList<>(extDefs);
     }
 }

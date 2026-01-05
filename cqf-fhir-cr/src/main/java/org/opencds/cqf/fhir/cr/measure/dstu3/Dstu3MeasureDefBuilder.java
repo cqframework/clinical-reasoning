@@ -79,7 +79,8 @@ public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                         conceptToConceptDef(pop.getCode()),
                         populationType,
                         pop.getCriteria(),
-                        populationBasisDef));
+                        populationBasisDef,
+                        null));
             }
 
             // Stratifiers

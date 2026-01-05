@@ -271,7 +271,8 @@ class MeasureReportDefScorerTest {
                 "expression",
                 dateBasis,
                 null,
-                ContinuousVariableObservationAggregateMethod.SUM);
+                ContinuousVariableObservationAggregateMethod.SUM,
+                null);
 
         // Add QuantityDef observations for each subject
         Map<String, QuantityDef> obs1 = new HashMap<>();
@@ -323,7 +324,8 @@ class MeasureReportDefScorerTest {
                 "expression",
                 booleanBasis,
                 null,
-                ContinuousVariableObservationAggregateMethod.AVG);
+                ContinuousVariableObservationAggregateMethod.AVG,
+                null);
 
         Map<String, QuantityDef> obs1 = new HashMap<>();
         obs1.put("obs-1", new QuantityDef(10.0));
@@ -374,7 +376,8 @@ class MeasureReportDefScorerTest {
                 "expression",
                 encounterBasis,
                 null,
-                ContinuousVariableObservationAggregateMethod.MIN);
+                ContinuousVariableObservationAggregateMethod.MIN,
+                null);
 
         Map<String, QuantityDef> obs1 = new HashMap<>();
         obs1.put("obs-1", new QuantityDef(10.0));
@@ -425,7 +428,8 @@ class MeasureReportDefScorerTest {
                 "expression",
                 stringBasis,
                 null,
-                ContinuousVariableObservationAggregateMethod.MAX);
+                ContinuousVariableObservationAggregateMethod.MAX,
+                null);
 
         Map<String, QuantityDef> obs1 = new HashMap<>();
         obs1.put("obs-1", new QuantityDef(10.0));
@@ -620,8 +624,8 @@ class MeasureReportDefScorerTest {
         // Create numerator with 2 subjects, each having multiple resources
         ConceptDef numeratorCode = createMeasurePopulationConcept(MeasurePopulationType.NUMERATOR);
         CodeDef booleanBasis = createBooleanBasisCode();
-        PopulationDef numeratorPop =
-                new PopulationDef("num-1", numeratorCode, MeasurePopulationType.NUMERATOR, "Numerator", booleanBasis);
+        PopulationDef numeratorPop = new PopulationDef(
+                "num-1", numeratorCode, MeasurePopulationType.NUMERATOR, "Numerator", booleanBasis, null);
 
         // Patient1: 3 encounters in numerator
         numeratorPop.addResource("patient1", "Encounter/enc1");
@@ -636,7 +640,7 @@ class MeasureReportDefScorerTest {
         ConceptDef denominatorCode = createMeasurePopulationConcept(MeasurePopulationType.DENOMINATOR);
         CodeDef booleanBasis2 = createBooleanBasisCode();
         PopulationDef denominatorPop = new PopulationDef(
-                "den-1", denominatorCode, MeasurePopulationType.DENOMINATOR, "Denominator", booleanBasis2);
+                "den-1", denominatorCode, MeasurePopulationType.DENOMINATOR, "Denominator", booleanBasis2, null);
 
         // Patient1: 3 encounters in denominator
         denominatorPop.addResource("patient1", "Encounter/enc1");
@@ -696,8 +700,8 @@ class MeasureReportDefScorerTest {
         // Create numerator with 2 subjects, each having multiple resources
         ConceptDef numeratorCode = createMeasurePopulationConcept(MeasurePopulationType.NUMERATOR);
         CodeDef encounterBasis = createPopulationBasisCode("Encounter");
-        PopulationDef numeratorPop =
-                new PopulationDef("num-1", numeratorCode, MeasurePopulationType.NUMERATOR, "Numerator", encounterBasis);
+        PopulationDef numeratorPop = new PopulationDef(
+                "num-1", numeratorCode, MeasurePopulationType.NUMERATOR, "Numerator", encounterBasis, null);
 
         // Patient1: 3 encounters in numerator
         numeratorPop.addResource("patient1", "Encounter/enc1");
@@ -711,7 +715,7 @@ class MeasureReportDefScorerTest {
         // Create denominator with 3 subjects, each having multiple resources
         ConceptDef denominatorCode = createMeasurePopulationConcept(MeasurePopulationType.DENOMINATOR);
         PopulationDef denominatorPop = new PopulationDef(
-                "den-1", denominatorCode, MeasurePopulationType.DENOMINATOR, "Denominator", encounterBasis);
+                "den-1", denominatorCode, MeasurePopulationType.DENOMINATOR, "Denominator", encounterBasis, null);
 
         // Patient1: 3 encounters in denominator
         denominatorPop.addResource("patient1", "Encounter/enc1");
@@ -841,7 +845,8 @@ class MeasureReportDefScorerTest {
                 "NumeratorExpression",
                 booleanBasis,
                 "num-1", // criteriaReference to NUMERATOR population
-                ContinuousVariableObservationAggregateMethod.SUM);
+                ContinuousVariableObservationAggregateMethod.SUM,
+                null);
 
         // Add numerator observations
         Map<String, QuantityDef> numObs1 = new HashMap<>();
@@ -865,7 +870,8 @@ class MeasureReportDefScorerTest {
                 "DenominatorExpression",
                 booleanBasis,
                 "den-1", // criteriaReference to DENOMINATOR population
-                ContinuousVariableObservationAggregateMethod.SUM);
+                ContinuousVariableObservationAggregateMethod.SUM,
+                null);
 
         // Add denominator observations
         Map<String, QuantityDef> denObs1 = new HashMap<>();
@@ -932,7 +938,8 @@ class MeasureReportDefScorerTest {
                 "NumeratorExpression",
                 booleanBasis,
                 "num-1",
-                ContinuousVariableObservationAggregateMethod.SUM);
+                ContinuousVariableObservationAggregateMethod.SUM,
+                null);
 
         // Male numerator observations: 10 + 15 + 15 = 40
         Map<String, QuantityDef> numObs1 = new HashMap<>();
@@ -965,7 +972,8 @@ class MeasureReportDefScorerTest {
                 "DenominatorExpression",
                 booleanBasis,
                 "den-1",
-                ContinuousVariableObservationAggregateMethod.SUM);
+                ContinuousVariableObservationAggregateMethod.SUM,
+                null);
 
         // Male denominator observations: 5 + 7 + 8 = 20
         Map<String, QuantityDef> denObs1 = new HashMap<>();
@@ -1086,7 +1094,7 @@ class MeasureReportDefScorerTest {
     private PopulationDef createPopulationDef(
             String id, MeasurePopulationType type, Set<String> subjects, CodeDef populationBasis) {
         ConceptDef code = createMeasurePopulationConcept(type);
-        PopulationDef pop = new PopulationDef(id, code, type, "expression", populationBasis);
+        PopulationDef pop = new PopulationDef(id, code, type, "expression", populationBasis, null);
 
         // Add subjects to population
         for (String subject : subjects) {

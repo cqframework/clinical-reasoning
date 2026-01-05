@@ -5,6 +5,7 @@ import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.CQFM_CAR
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.CQFM_SCORING_EXT_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_CQFM_AGGREGATE_METHOD_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_CQFM_CRITERIA_REFERENCE;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_SUPPORTING_EVIDENCE_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_EXTENSION;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.SDE_USAGE_CODE;
 
@@ -33,6 +34,7 @@ import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 import org.opencds.cqf.fhir.cr.measure.common.CodeDef;
 import org.opencds.cqf.fhir.cr.measure.common.ConceptDef;
 import org.opencds.cqf.fhir.cr.measure.common.ContinuousVariableObservationAggregateMethod;
+import org.opencds.cqf.fhir.cr.measure.common.ExtensionDef;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDefBuilder;
@@ -90,7 +92,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
 
         var populationBasisDef = getPopulationBasisDef(measureBasis, groupBasis);
         var populationsWithCriteriaReference = group.getPopulation().stream()
-                .map(t -> buildPopulationDef(t, group, measure.getUrl(), populationBasisDef))
+                .map(t -> buildPopulationDef(t, group, measure.getUrl(), populationBasisDef, getExtensionDefs(t)))
                 .toList();
 
         final Optional<PopulationDef> optPopulationDefDateOfCompliance = buildPopulationDefForDateOfCompliance(
@@ -112,6 +114,23 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                 populationBasisDef);
     }
 
+    @Nullable
+    private List<ExtensionDef> getExtensionDefs(MeasureGroupPopulationComponent groupPopulation) {
+        List<Extension> ext = groupPopulation.getExtension().stream()
+                .filter(t -> t.getUrl().equals(EXT_SUPPORTING_EVIDENCE_URL))
+                .toList();
+        List<ExtensionDef> extensionDefs = new ArrayList<>();
+        if (!ext.isEmpty()) {
+            for (Extension e : ext) {
+                String expression = e.getValue().toString();
+                extensionDefs.add(new ExtensionDef(expression, EXT_SUPPORTING_EVIDENCE_URL));
+            }
+            return extensionDefs;
+        } else {
+            return null;
+        }
+    }
+
     private void checkIds(MeasureGroupComponent group) {
         group.getPopulation().forEach(R4MeasureDefBuilder::checkId);
     }
@@ -121,7 +140,8 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
             MeasureGroupPopulationComponent population,
             MeasureGroupComponent group,
             String measureUrl,
-            CodeDef populationBasis) {
+            CodeDef populationBasis,
+            @Nullable List<ExtensionDef> extensionDefs) {
         MeasurePopulationType popType = MeasurePopulationType.fromCode(
                 population.getCode().getCodingFirstRep().getCode());
         // criteriaReference & aggregateMethod are for MeasureObservation populations only
@@ -134,9 +154,12 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                 population.getCriteria().getExpression(),
                 populationBasis,
                 criteriaReference,
-                aggregateMethod);
+                aggregateMethod,
+                extensionDefs);
     }
 
+    // TODO: JM, DateOfCompliance can now be more simply exposed via supporting evidence instead of this current
+    // workflow. Should deprecate.
     private Optional<PopulationDef> buildPopulationDefForDateOfCompliance(
             String measureUrl,
             MeasureGroupComponent group,
@@ -161,7 +184,8 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                 totalConceptDefCreator(DATEOFCOMPLIANCE),
                 DATEOFCOMPLIANCE,
                 expression,
-                populationBasis);
+                populationBasis,
+                null);
 
         return Optional.of(populateDefDateOfCompliance);
     }

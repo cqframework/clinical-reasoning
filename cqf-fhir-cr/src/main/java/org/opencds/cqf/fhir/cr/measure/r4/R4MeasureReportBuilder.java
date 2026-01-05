@@ -613,7 +613,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             }
 
             // Copy group-level score
-            Double groupScore = groupDef.getMeasureScore();
+            Double groupScore = groupDef.getScore();
             if (groupScore != null) {
                 reportGroup.getMeasureScore().setValue(groupScore);
             }

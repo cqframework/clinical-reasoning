@@ -770,7 +770,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
             }
 
             // Copy group-level score (DSTU3 uses setMeasureScore(Double) directly)
-            Double groupScore = groupDef.getMeasureScore();
+            Double groupScore = groupDef.getScore();
             if (groupScore != null) {
                 reportGroup.setMeasureScore(groupScore);
             }

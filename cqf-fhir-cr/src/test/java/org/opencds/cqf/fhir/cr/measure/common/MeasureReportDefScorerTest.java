@@ -997,8 +997,8 @@ class MeasureReportDefScorerTest {
     void testScoreGroup_RatioWithObservations_ZeroCount() {
         // Setup: RATIO measure with MEASUREOBSERVATION but NO observations
         CodeDef booleanBasis = createBooleanBasisCode();
-        PopulationDef initialPopulation = createPopulationDef(
-                "ip-1", MeasurePopulationType.INITIALPOPULATION, Set.of(), booleanBasis);
+        PopulationDef initialPopulation =
+                createPopulationDef("ip-1", MeasurePopulationType.INITIALPOPULATION, Set.of(), booleanBasis);
 
         PopulationDef numeratorPop =
                 createPopulationDef("num-1", MeasurePopulationType.NUMERATOR, Set.of(), booleanBasis);
@@ -1030,12 +1030,7 @@ class MeasureReportDefScorerTest {
                 "group-1",
                 createTextOnlyConcept("Ratio with Zero Observations"),
                 List.of(),
-                List.of(
-                        initialPopulation,
-                        numeratorPop,
-                        denominatorPop,
-                        numeratorMeasureObs,
-                        denominatorMeasureObs),
+                List.of(initialPopulation, numeratorPop, denominatorPop, numeratorMeasureObs, denominatorMeasureObs),
                 MeasureScoring.RATIO,
                 false,
                 createImprovementNotationCode("increase"),

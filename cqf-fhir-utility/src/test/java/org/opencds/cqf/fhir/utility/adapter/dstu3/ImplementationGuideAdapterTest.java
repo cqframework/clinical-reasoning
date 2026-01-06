@@ -31,12 +31,15 @@ import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
+import org.opencds.cqf.fhir.utility.adapter.IImplementationGuideAdapterTest;
 import org.opencds.cqf.fhir.utility.adapter.TestVisitor;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
-public class ImplementationGuideAdapterTest {
+public class ImplementationGuideAdapterTest implements IImplementationGuideAdapterTest<ImplementationGuide> {
     private final org.opencds.cqf.fhir.utility.adapter.IAdapterFactory adapterFactory = new AdapterFactory();
+    private final FhirContext fhirContext = FhirContext.forDstu3Cached();
 
     @Test
     void invalid_object_fails() {
@@ -263,5 +266,27 @@ public class ImplementationGuideAdapterTest {
 
         ig.setExperimental(Boolean.FALSE);
         assertFalse(adapter.getExperimental());
+    }
+
+    @Override
+    public Class<ImplementationGuide> implementationGuideClass() {
+        return ImplementationGuide.class;
+    }
+
+    @Override
+    public FhirContext fhirContext() {
+        return fhirContext;
+    }
+
+    @Override
+    public IAdapterFactory getAdapterFactory() {
+        return adapterFactory;
+    }
+
+    @Override
+    public String toRelatedArtifactCanonicalReference(String ref) {
+        // dstu3 does not set canonical references as urls directly,
+        // but wraps them in a reference
+        return String.format("{\"reference\":\"%s\"}", ref);
     }
 }

@@ -32,12 +32,14 @@ import org.hl7.fhir.r5.model.StructureDefinition;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
+import org.opencds.cqf.fhir.utility.adapter.IImplementationGuideAdapterTest;
 import org.opencds.cqf.fhir.utility.adapter.TestVisitor;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
-public class ImplementationGuideAdapterTest {
+public class ImplementationGuideAdapterTest implements IImplementationGuideAdapterTest<ImplementationGuide> {
 
     private final IAdapterFactory adapterFactory = new AdapterFactory();
+    private final FhirContext fhirContext = FhirContext.forR5Cached();
 
     @Test
     void invalid_object_fails() {
@@ -270,5 +272,20 @@ public class ImplementationGuideAdapterTest {
 
         ig.setExperimental(Boolean.FALSE);
         assertFalse(adapter.getExperimental());
+    }
+
+    @Override
+    public Class<ImplementationGuide> implementationGuideClass() {
+        return ImplementationGuide.class;
+    }
+
+    @Override
+    public FhirContext fhirContext() {
+        return fhirContext;
+    }
+
+    @Override
+    public IAdapterFactory getAdapterFactory() {
+        return adapterFactory;
     }
 }

@@ -288,7 +288,7 @@ class R4MeasureReportBuilderTest {
 
     @Nonnull
     private static StratifierDef buildStratifierDef() {
-        return new StratifierDef(null, null, null, MeasureStratifierType.VALUE);
+        return new StratifierDef("stratifier-1", null, null, MeasureStratifierType.VALUE);
     }
 
     private static Measure buildMeasure(String id, String url, int numGroups, int numSdes) {

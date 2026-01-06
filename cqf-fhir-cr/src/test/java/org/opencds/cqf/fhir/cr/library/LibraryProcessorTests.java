@@ -19,11 +19,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.CrSettings;
+import org.opencds.cqf.fhir.cr.common.ArtifactDiffProcessor;
 import org.opencds.cqf.fhir.cr.common.DataRequirementsProcessor;
 import org.opencds.cqf.fhir.cr.common.DeleteProcessor;
 import org.opencds.cqf.fhir.cr.common.PackageProcessor;
 import org.opencds.cqf.fhir.cr.common.ReleaseProcessor;
 import org.opencds.cqf.fhir.cr.common.RetireProcessor;
+import org.opencds.cqf.fhir.cr.common.ReviseProcessor;
 import org.opencds.cqf.fhir.cr.common.WithdrawProcessor;
 import org.opencds.cqf.fhir.cr.helpers.RequestHelpers;
 import org.opencds.cqf.fhir.cr.library.evaluate.EvaluateProcessor;
@@ -72,7 +74,10 @@ class LibraryProcessorTests {
                         new EvaluateProcessor(repository, EvaluationSettings.getDefault()),
                         new DeleteProcessor(repository),
                         new RetireProcessor(repository),
-                        new WithdrawProcessor(repository)));
+                        new WithdrawProcessor(repository),
+                        new ReviseProcessor(repository),
+                        new ArtifactDiffProcessor()));
+
         assertNotNull(processor.settings());
         var result = processor.resolveLibrary(Eithers.forMiddle3(
                 Ids.newId(repository.fhirContext(), "Library", "OutpatientPriorAuthorizationPrepopulation")));

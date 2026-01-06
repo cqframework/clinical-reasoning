@@ -11,6 +11,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.time.LocalDate;
 import java.util.Date;
@@ -30,12 +31,36 @@ import org.hl7.fhir.r5.model.ValueSet.ValueSetComposeComponent;
 import org.hl7.fhir.r5.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.r5.model.ValueSet.ValueSetExpansionContainsComponent;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IUsageContextAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapterTest;
 import org.opencds.cqf.fhir.utility.adapter.TestVisitor;
 
-class ValueSetAdapterTest {
+class ValueSetAdapterTest implements IValueSetAdapterTest<ValueSet> {
     private final org.opencds.cqf.fhir.utility.adapter.IAdapterFactory adapterFactory = new AdapterFactory();
+
+    private final FhirContext fhirContext = FhirContext.forR5Cached();
+
+    @Override
+    public String getTemplate() {
+        return """
+        {
+            "resourceType": "ValueSet",
+            "status": "active",
+            "relatedArtifact": [
+                {
+                    "type": "RELATED_ARTIFACT_TYPE_1",
+                    "resource": RESOURCE_REF_1
+                },
+                {
+                    "type": "RELATED_ARTIFACT_TYPE_2",
+                    "resource": RESOURCE_REF_2
+                }
+            ]
+        }
+        """;
+    }
 
     @Test
     void invalid_object_fails() {
@@ -371,5 +396,20 @@ class ValueSetAdapterTest {
         assertEquals(2, vs.getUseContext().size(), "incoming non-duplicate should be added");
         assertTrue(vs.getUseContext().get(0).equalsDeep(pre));
         assertTrue(vs.getUseContext().get(1).equalsDeep(incoming));
+    }
+
+    @Override
+    public Class<ValueSet> valueSetClass() {
+        return ValueSet.class;
+    }
+
+    @Override
+    public FhirContext fhirContext() {
+        return fhirContext;
+    }
+
+    @Override
+    public IAdapterFactory getAdapterFactory() {
+        return adapterFactory;
     }
 }

@@ -1,0 +1,214 @@
+package org.opencds.cqf.fhir.cr.measure.r4.utils;
+
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.CQFM_SCORING_EXT_URL;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.IMPROVEMENT_NOTATION_SYSTEM_DECREASE;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.IMPROVEMENT_NOTATION_SYSTEM_INCREASE;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_EXTENSION;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM;
+
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import jakarta.annotation.Nullable;
+import java.util.Objects;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.Measure;
+import org.hl7.fhir.r4.model.Measure.MeasureGroupComponent;
+import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
+import org.hl7.fhir.r4.model.Type;
+import org.opencds.cqf.fhir.cr.measure.common.CodeDef;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
+
+/**
+ * Utility class for extracting data from R4 FHIR Measure resources.
+ *
+ * <p>This class provides static helper methods for working with Measure resources, including:
+ * <ul>
+ *   <li>Extracting measure scoring (Measure-level and Group-level)</li>
+ *   <li>Extracting improvement notation</li>
+ *   <li>Matching measure groups</li>
+ * </ul>
+ *
+ * <p>All methods are static and designed to be reusable across different measure evaluation contexts.
+ */
+public class R4MeasureUtils {
+
+    private R4MeasureUtils() {
+        // Utility class
+    }
+
+    /**
+     * Extract MeasureScoring from Measure.scoring.
+     *
+     * @param measure the Measure resource
+     * @return the MeasureScoring enum value
+     * @throws InvalidRequestException if scoring code is invalid
+     */
+    public static MeasureScoring getMeasureScoring(Measure measure) {
+        var scoringCode = measure.getScoring().getCodingFirstRep().getCode();
+        return getMeasureScoring(measure.getUrl(), scoringCode);
+    }
+
+    /**
+     * Parse and validate a measure scoring code string.
+     *
+     * @param measureUrl the measure URL (for error messages)
+     * @param scoringCode the scoring code to parse
+     * @return the MeasureScoring enum value, or null if scoringCode is null
+     * @throws InvalidRequestException if scoring code is invalid
+     */
+    @Nullable
+    public static MeasureScoring getMeasureScoring(String measureUrl, @Nullable String scoringCode) {
+        if (scoringCode != null) {
+            var code = MeasureScoring.fromCode(scoringCode);
+            if (code == null) {
+                throw new InvalidRequestException(
+                        "Measure Scoring code: %s, is not a valid Measure Scoring Type for measure: %s."
+                                .formatted(scoringCode, measureUrl));
+            } else {
+                return code;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Extract group-level measure scoring from the cqfm-scoring extension.
+     *
+     * @param measureUrl the measure URL (for error messages)
+     * @param measureGroup the MeasureGroupComponent
+     * @return the group-level MeasureScoring, or null if no extension present
+     * @throws InvalidRequestException if scoring code is invalid
+     */
+    @Nullable
+    public static MeasureScoring getGroupMeasureScoring(String measureUrl, MeasureGroupComponent measureGroup) {
+        final Extension ext = measureGroup.getExtensionByUrl(CQFM_SCORING_EXT_URL);
+
+        if (ext != null) {
+            final Type extVal = ext.getValue();
+            if (extVal instanceof CodeableConcept coding) {
+                final String scoringCode = coding.getCodingFirstRep().getCode();
+                final MeasureScoring groupMeasureScoring = MeasureScoring.fromCode(scoringCode);
+
+                if (groupMeasureScoring == null) {
+                    throw new InvalidRequestException(
+                            "Measure Scoring code: %s, is not a valid Measure Scoring Type for measure: %s."
+                                    .formatted(scoringCode, measureUrl));
+                }
+
+                return groupMeasureScoring;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Extract group-level measure scoring, with convenience overload.
+     *
+     * @param measure the Measure resource (for URL)
+     * @param measureGroup the MeasureGroupComponent
+     * @return the group-level MeasureScoring, or null if no extension present
+     */
+    @Nullable
+    public static MeasureScoring getGroupMeasureScoring(Measure measure, MeasureGroupComponent measureGroup) {
+        return getGroupMeasureScoring(measure.getUrl(), measureGroup);
+    }
+
+    /**
+     * Extract group-level improvement notation from extension.
+     *
+     * @param measure the Measure resource (for URL/validation)
+     * @param measureGroup the MeasureGroupComponent
+     * @return the CodeDef representing the improvement notation, or null if not present
+     * @throws InvalidRequestException if the improvement notation code is invalid
+     */
+    @Nullable
+    public static CodeDef getGroupImprovementNotation(Measure measure, MeasureGroupComponent measureGroup) {
+        var ext = measureGroup.getExtensionByUrl(MEASUREREPORT_IMPROVEMENT_NOTATION_EXTENSION);
+        if (ext != null) {
+            var value = ext.getValue();
+            if (value instanceof CodeableConcept coding) {
+                var codeDef = new CodeDef(
+                        coding.getCodingFirstRep().getSystem(),
+                        coding.getCodingFirstRep().getCode());
+                validateImprovementNotationCode(measure.getUrl(), codeDef);
+                return codeDef;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Check if the improvement notation represents "increase".
+     *
+     * @param improvementNotation the CodeDef to check (may be null)
+     * @return true if the code is "increase", or true if improvementNotation is null (default)
+     */
+    public static boolean isIncreaseImprovementNotation(@Nullable CodeDef improvementNotation) {
+        if (improvementNotation != null) {
+            return improvementNotation.code().equals("increase");
+        } else {
+            // default response if null
+            return true;
+        }
+    }
+
+    /**
+     * Validate that an improvement notation code has a valid system and code.
+     *
+     * @param measureUrl the measure URL (for error messages)
+     * @param improvementNotation the CodeDef to validate
+     * @throws InvalidRequestException if the system or code is invalid
+     */
+    public static void validateImprovementNotationCode(String measureUrl, CodeDef improvementNotation) {
+        var code = improvementNotation.code();
+        var system = improvementNotation.system();
+        boolean hasValidSystem = system.equals(MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM);
+        boolean hasValidCode =
+                IMPROVEMENT_NOTATION_SYSTEM_INCREASE.equals(code) || IMPROVEMENT_NOTATION_SYSTEM_DECREASE.equals(code);
+        if (!hasValidCode || !hasValidSystem) {
+            throw new InvalidRequestException(
+                    "ImprovementNotation Coding has invalid System: %s, code: %s, combination for Measure: %s"
+                            .formatted(system, code, measureUrl));
+        }
+    }
+
+    /**
+     * Find a MeasureGroupComponent by matching with a MeasureReportGroupComponent.
+     * Matches by ID if present, otherwise returns null.
+     *
+     * @param measure the Measure resource
+     * @param reportGroup the MeasureReportGroupComponent to match
+     * @return the matching MeasureGroupComponent, or null if not found
+     */
+    @Nullable
+    public static MeasureGroupComponent getMeasureGroup(Measure measure, MeasureReportGroupComponent reportGroup) {
+        if (reportGroup.getId() == null) {
+            return null;
+        }
+        return measure.getGroup().stream()
+                .filter(measureGroup -> Objects.nonNull(measureGroup.getId()))
+                .filter(measureGroup -> measureGroup.getId().equals(reportGroup.getId()))
+                .findFirst()
+                .orElse(null);
+    }
+
+    /**
+     * Find a MeasureGroupComponent by ID.
+     *
+     * @param measure the Measure resource
+     * @param groupId the group ID to match
+     * @return the matching MeasureGroupComponent, or null if not found
+     */
+    @Nullable
+    public static MeasureGroupComponent getMeasureGroup(Measure measure, String groupId) {
+        if (groupId == null) {
+            return null;
+        }
+        return measure.getGroup().stream()
+                .filter(measureGroup -> Objects.nonNull(measureGroup.getId()))
+                .filter(measureGroup -> measureGroup.getId().equals(groupId))
+                .findFirst()
+                .orElse(null);
+    }
+}

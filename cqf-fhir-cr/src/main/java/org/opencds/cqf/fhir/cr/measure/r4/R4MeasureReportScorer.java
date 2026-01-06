@@ -32,6 +32,7 @@ import org.opencds.cqf.fhir.cr.measure.common.StratumDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumPopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumValueDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumValueWrapper;
+import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureReportUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -514,10 +515,8 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
     }
 
     /**
-     * Restored from commit 9874c95 by Claude Sonnet 4.5 on 2025-12-16 (Phase 2)
      * Get count from R4 FHIR MeasureReportGroupPopulationComponent list.
-     * This is the R4-specific implementation that works directly with MeasureReport objects.
-     * Used for group-level proportion/ratio scoring.
+     * Delegates to R4MeasureReportUtils for implementation.
      *
      * @param populations the list of R4 FHIR MeasureReportGroupPopulationComponents
      * @param populationName the population code to find (e.g., "numerator", "denominator")
@@ -525,19 +524,12 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
      */
     private int getCountFromGroupPopulation(
             List<MeasureReportGroupPopulationComponent> populations, String populationName) {
-        return populations.stream()
-                .filter(population -> populationName.equals(
-                        population.getCode().getCodingFirstRep().getCode()))
-                .map(MeasureReportGroupPopulationComponent::getCount)
-                .findAny()
-                .orElse(0);
+        return R4MeasureReportUtils.getCountFromGroupPopulation(populations, populationName);
     }
 
     /**
-     * Restored from commit 9874c95 by Claude Sonnet 4.5 on 2025-12-16 (Phase 1)
      * Get count from R4 FHIR StratifierGroupPopulationComponent list.
-     * This is the R4-specific implementation that works directly with MeasureReport objects.
-     * Used for stratifier-level proportion/ratio scoring.
+     * Delegates to R4MeasureReportUtils for implementation.
      *
      * @param populations the list of R4 FHIR StratifierGroupPopulationComponents
      * @param populationName the population code to find (e.g., "numerator", "denominator")
@@ -545,11 +537,6 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
      */
     private int getCountFromStratifierPopulation(
             List<StratifierGroupPopulationComponent> populations, String populationName) {
-        return populations.stream()
-                .filter(population -> populationName.equals(
-                        population.getCode().getCodingFirstRep().getCode()))
-                .map(StratifierGroupPopulationComponent::getCount)
-                .findAny()
-                .orElse(0);
+        return R4MeasureReportUtils.getCountFromStratifierPopulation(populations, populationName);
     }
 }

@@ -2,10 +2,8 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 
 import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.DATEOFCOMPLIANCE;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL;
-import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.CQFM_SCORING_EXT_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_CQFM_AGGREGATE_METHOD_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_CQFM_CRITERIA_REFERENCE;
-import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_EXTENSION;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.SDE_USAGE_CODE;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -43,6 +41,7 @@ import org.opencds.cqf.fhir.cr.measure.common.SdeDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierComponentDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
+import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureUtils;
 
 public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
 
@@ -361,8 +360,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
     }
 
     private MeasureScoring getMeasureScoring(Measure measure) {
-        var scoringCode = measure.getScoring().getCodingFirstRep().getCode();
-        return getMeasureScoring(measure.getUrl(), scoringCode);
+        return R4MeasureUtils.getMeasureScoring(measure);
     }
 
     public CodeDef getMeasureBasis(Measure measure) {
@@ -388,7 +386,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
             var codeDef = new CodeDef(
                     improvementNotationValue.getCodingFirstRep().getSystem(),
                     improvementNotationValue.getCodingFirstRep().getCode());
-            validateImprovementNotationCode(measure.getUrl(), codeDef);
+            R4MeasureUtils.validateImprovementNotationCode(measure.getUrl(), codeDef);
             return codeDef;
         }
         return null;
@@ -400,35 +398,16 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
             var codeDef = new CodeDef(
                     improvementNotationValue.getCodingFirstRep().getSystem(),
                     improvementNotationValue.getCodingFirstRep().getCode());
-            validateImprovementNotationCode(measure.getUrl(), codeDef);
+            R4MeasureUtils.validateImprovementNotationCode(measure.getUrl(), codeDef);
         }
     }
 
     public CodeDef getGroupImpNotation(Measure measure, MeasureGroupComponent group) {
-        var ext = group.getExtensionByUrl(MEASUREREPORT_IMPROVEMENT_NOTATION_EXTENSION);
-        if (ext != null) {
-            var value = ext.getValue();
-            if (value instanceof CodeableConcept coding) {
-                var codeDef = new CodeDef(
-                        coding.getCodingFirstRep().getSystem(),
-                        coding.getCodingFirstRep().getCode());
-                validateImprovementNotationCode(measure.getUrl(), codeDef);
-                return codeDef;
-            }
-        }
-        return null;
+        return R4MeasureUtils.getGroupImprovementNotation(measure, group);
     }
 
     public MeasureScoring getGroupMeasureScoring(Measure measure, MeasureGroupComponent group) {
-        var ext = group.getExtensionByUrl(CQFM_SCORING_EXT_URL);
-        if (ext != null) {
-            var extVal = ext.getValue();
-            assert extVal instanceof CodeableConcept;
-            CodeableConcept coding = (CodeableConcept) extVal;
-            return getMeasureScoring(
-                    measure.getUrl(), coding.getCodingFirstRep().getCode());
-        }
-        return null;
+        return R4MeasureUtils.getGroupMeasureScoring(measure, group);
     }
 
     public CodeDef getGroupPopulationBasis(MeasureGroupComponent group) {

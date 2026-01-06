@@ -188,15 +188,18 @@ public class MeasureReportDefScorer {
             return null;
         }
 
-        Double num = numeratorAgg.value();
-        Double den = denominatorAgg.value();
+        Double aggregatedResultNumerator = numeratorAgg.value();
+        Double aggregatedResultDenominator = denominatorAgg.value();
 
-        if (num == null || den == null) {
+        if (aggregatedResultNumerator == null || aggregatedResultDenominator == null) {
             return null;
         }
 
+        numPopDef.setAggregationResult(aggregatedResultNumerator);
+        denPopDef.setAggregationResult(aggregatedResultDenominator);
+
         // Delegate ratio scoring to MeasureScoreCalculator
-        return MeasureScoreCalculator.calculateRatioScore(num, den);
+        return MeasureScoreCalculator.calculateRatioScore(aggregatedResultNumerator, aggregatedResultDenominator);
     }
 
     /**
@@ -350,8 +353,8 @@ public class MeasureReportDefScorer {
 
         // Find the stratum population corresponding to MEASUREOBSERVATION
         StratumPopulationDef stratumPopulationDef = stratumDef.stratumPopulations().stream()
-                .filter(stratumPopDef ->
-                        stratumPopDef.id().startsWith(MeasurePopulationType.MEASUREOBSERVATION.toCode()))
+                .filter(stratumPopDef -> MeasurePopulationType.MEASUREOBSERVATION
+                        == stratumPopDef.populationDef().type())
                 .findFirst()
                 .orElse(null);
 

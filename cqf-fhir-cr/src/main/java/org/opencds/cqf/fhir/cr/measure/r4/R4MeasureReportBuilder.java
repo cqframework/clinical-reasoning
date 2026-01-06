@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
@@ -22,6 +23,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IntegerType;
@@ -594,7 +596,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
         // Iterate through GroupDefs (drive from Def side)
         for (var groupDef : measureDef.groups()) {
-            MeasureReportGroupComponent reportGroup = null;
+            MeasureReportGroupComponent reportGroup;
 
             // For single-group measures, use positional matching (no ID required)
             // For multi-group measures, match by ID
@@ -619,9 +621,27 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                 reportGroup.getMeasureScore().setValue(groupScore);
             }
 
+            copyPopulationAggregationResults(reportGroup, groupDef);
+
             // Copy stratifier scores
             copyStratifierScores(reportGroup, groupDef);
         }
+    }
+
+    private void copyPopulationAggregationResults(MeasureReportGroupComponent reportGroup, GroupDef groupDef) {
+        for (MeasureReportGroupPopulationComponent fhirPopulation : reportGroup.getPopulation()) {
+            var populationDef = groupDef.findPopulationById(fhirPopulation.getId());
+            populateAggregationResultExtension(fhirPopulation, populationDef);
+        }
+    }
+
+    private static void populateAggregationResultExtension(
+            MeasureReportGroupPopulationComponent measurePopulation, PopulationDef populationDef) {
+
+        // Add either the aggregation result to the numerator or denominator, if applicable
+        Optional.ofNullable(populationDef.getAggregationResult())
+                .ifPresent(nonNullAggregationResult -> measurePopulation.addExtension(
+                        MeasureConstants.EXT_AGGREGATION_METHOD_RESULT, new DecimalType(nonNullAggregationResult)));
     }
 
     /**

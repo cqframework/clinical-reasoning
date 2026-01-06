@@ -262,7 +262,7 @@ public class ContinuousVariableObservationHandler {
         if (expressionResult.getValue() instanceof Boolean) {
             if ((Boolean.TRUE.equals(expressionResult.getValue()))) {
                 // if Boolean, returns context by SubjectType
-                Object booleanResult = evaluationResult.get(subjectTypePart);
+                Object booleanResult = evaluationResult.get(subjectTypePart).getValue();
                 // remove evaluated resources
                 return Collections.singletonList(booleanResult);
             } else {

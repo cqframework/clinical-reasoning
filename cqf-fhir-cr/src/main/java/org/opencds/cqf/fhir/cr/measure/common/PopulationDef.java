@@ -178,7 +178,6 @@ public class PopulationDef {
         return this.aggregateMethod;
     }
 
-    // LUKETODO: tests and assertions
     @Nullable
     public Double getAggregationResult() {
         return aggregationResult;

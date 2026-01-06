@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.common.StratumDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumPopulationDef;
 
@@ -38,6 +39,21 @@ public class SelectedMeasureDefStratum<P> extends org.opencds.cqf.fhir.cr.measur
 
     // ==================== Navigation Methods ====================
 
+    public SelectedMeasureDefStratum<P> hasNoPopulationOfType(MeasurePopulationType expectedMeasurePopulationType) {
+        assertNotNull(value(), "StratumDef is null");
+
+        StratumPopulationDef population = value().stratumPopulations().stream()
+                .filter(p -> p.populationDef() != null
+                        && p.populationDef().code() != null
+                        && !p.populationDef().code().isEmpty()
+                        && p.populationDef().code().first().code().equals(expectedMeasurePopulationType.toCode()))
+                .findFirst()
+                .orElse(null);
+
+        assertNull(population, "No stratum population found with code: " + population);
+        return this;
+    }
+
     /**
      * Navigate to a stratum population by code (e.g., "numerator").
      *
@@ -48,10 +64,7 @@ public class SelectedMeasureDefStratum<P> extends org.opencds.cqf.fhir.cr.measur
     public SelectedMeasureDefStratumPopulation<SelectedMeasureDefStratum<P>> population(String populationCode) {
         assertNotNull(value(), "StratumDef is null");
         StratumPopulationDef population = value().stratumPopulations().stream()
-                .filter(p -> p.populationDef() != null
-                        && p.populationDef().code() != null
-                        && !p.populationDef().code().isEmpty()
-                        && p.populationDef().code().first().code().equals(populationCode))
+                .filter(p -> populationCode.equals(p.id()))
                 .findFirst()
                 .orElse(null);
         assertNotNull(population, "No stratum population found with code: " + populationCode);

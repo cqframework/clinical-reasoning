@@ -28,7 +28,6 @@ public class SelectedMeasureReportPopulation
         assertNotNull(value(), "PopulationDef is null");
 
         assertTrue(value().hasCode(), "Measure population does not have a code!");
-        assertTrue(value().hasCode(), "Measure population does not have a code!");
         assertEquals(
                 expectedMeasurePopulationType.toCode(),
                 value().getCode().getCodingFirstRep().getCode(),

@@ -1171,6 +1171,10 @@ class MeasureScoringTypeRatioContVariableTest {
                 .hasType(MeasurePopulationType.DENOMINATOR)
                 .hasCount(6) // final Denominator = 9 (11-2)
                 .up()
+                .population("numerator")
+                .hasType(MeasurePopulationType.NUMERATOR)
+                .hasCount(5) // final Numerator = 2
+                .up()
                 .population("denominator-exclusion")
                 .hasType(MeasurePopulationType.DENOMINATOREXCLUSION)
                 .hasCount(1)

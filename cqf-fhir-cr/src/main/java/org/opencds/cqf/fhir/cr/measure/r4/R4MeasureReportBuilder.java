@@ -312,15 +312,6 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         }
     }
 
-    private void populateAggregationResultExtension(
-            MeasureReportGroupPopulationComponent measurePopulation, PopulationDef populationDef) {
-
-        // Add either the aggregation result to the numerator or denominator, if applicable
-        Optional.ofNullable(populationDef.getAggregationResult())
-                .ifPresent(nonNullAggregationResult -> measurePopulation.addExtension(
-                        MeasureConstants.EXT_AGGREGATION_METHOD_RESULT, new DecimalType(nonNullAggregationResult)));
-    }
-
     static ListResource createList(String id) {
         return (ListResource) new ListResource().setId(id);
     }
@@ -641,6 +632,15 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             var populationDef = groupDef.findPopulationById(fhirPopulation.getId());
             populateAggregationResultExtension(fhirPopulation, populationDef);
         }
+    }
+
+    private static void populateAggregationResultExtension(
+            MeasureReportGroupPopulationComponent measurePopulation, PopulationDef populationDef) {
+
+        // Add either the aggregation result to the numerator or denominator, if applicable
+        Optional.ofNullable(populationDef.getAggregationResult())
+                .ifPresent(nonNullAggregationResult -> measurePopulation.addExtension(
+                        MeasureConstants.EXT_AGGREGATION_METHOD_RESULT, new DecimalType(nonNullAggregationResult)));
     }
 
     /**

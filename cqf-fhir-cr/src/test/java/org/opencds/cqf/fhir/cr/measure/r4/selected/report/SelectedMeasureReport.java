@@ -37,7 +37,6 @@ import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ResourceType;
-import org.opencds.cqf.fhir.cr.ecr.r4.R4ERSDTransformService;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Selected;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Selector;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Then;
@@ -48,7 +47,7 @@ import org.slf4j.LoggerFactory;
 
 public class SelectedMeasureReport extends Selected<MeasureReport, Then> {
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-    private static final Logger logger = LoggerFactory.getLogger(R4ERSDTransformService.class);
+    private static final Logger logger = LoggerFactory.getLogger(SelectedMeasureReport.class);
 
     private final IRepository repository;
     private final FhirContext fhirContext;

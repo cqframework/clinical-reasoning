@@ -388,16 +388,16 @@ public class R4DataRequirementsService {
 
     private static Set<String> getExpressions(org.hl7.fhir.r5.model.Measure measureToUse) {
         Set<String> expressionSet = new HashSet<>();
-        measureToUse
-                .getSupplementalData()
+        measureToUse.getSupplementalData().stream()
+                .filter(x -> x.hasCriteria() && x.getCriteria().hasExpression())
                 .forEach(supData -> expressionSet.add(supData.getCriteria().getExpression()));
         measureToUse.getGroup().forEach(groupMember -> {
-            groupMember
-                    .getPopulation()
+            groupMember.getPopulation().stream()
+                    .filter(x -> x.hasCriteria() && x.getCriteria().hasExpression())
                     .forEach(population ->
                             expressionSet.add(population.getCriteria().getExpression()));
-            groupMember
-                    .getStratifier()
+            groupMember.getStratifier().stream()
+                    .filter(x -> x.hasCriteria() && x.getCriteria().hasExpression())
                     .forEach(stratifier ->
                             expressionSet.add(stratifier.getCriteria().getExpression()));
         });

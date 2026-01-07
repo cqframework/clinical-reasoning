@@ -11,7 +11,9 @@ import java.util.Map;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.cql.engine.execution.EvaluationExpressionRef;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
+import org.opencds.cqf.cql.engine.execution.ExpressionResult;
 
 class CompositeEvaluationResultsPerMeasureTest {
 
@@ -25,7 +27,7 @@ class CompositeEvaluationResultsPerMeasureTest {
 
         // Create a non-empty EvaluationResult without depending on ExpressionResult constructors
         EvaluationResult er = new EvaluationResult();
-        er.getExpressionResults().put("subject-123", null); // non-empty map is all the Builder checks
+        er.set(new EvaluationExpressionRef("subject-123"), new ExpressionResult(null, null));
 
         CompositeEvaluationResultsPerMeasure.Builder builder = CompositeEvaluationResultsPerMeasure.builder();
         builder.addResult(measureDef1, "subject-123", er, List.of());

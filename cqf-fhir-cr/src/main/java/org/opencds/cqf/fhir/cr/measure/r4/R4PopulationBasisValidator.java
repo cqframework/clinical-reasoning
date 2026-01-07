@@ -73,13 +73,17 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
         var scoring = groupDef.measureScoring();
         // Numerator
         var populationExpression = populationDef.expression();
-        var expressionResult = evaluationResult.forExpression(populationDef.expression());
-
-        if (expressionResult == null || expressionResult.value() == null) {
+        if (populationExpression == null || populationExpression.isBlank()) {
             return;
         }
 
-        var resultClasses = StratifierUtils.extractClassesFromSingleOrListResult(expressionResult.value());
+        var expressionResult = evaluationResult.get(populationExpression);
+
+        if (expressionResult == null || expressionResult.getValue() == null) {
+            return;
+        }
+
+        var resultClasses = StratifierUtils.extractClassesFromSingleOrListResult(expressionResult.getValue());
         // Encounter
         var groupPopulationBasisCode = groupDef.getPopulationBasis().code();
         var optResourceClass = extractResourceType(groupPopulationBasisCode);
@@ -123,13 +127,13 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
             EvaluationResult evaluationResult,
             String url) {
 
-        var expressionResult = evaluationResult.forExpression(expression);
+        var expressionResult = evaluationResult.get(expression);
 
-        if (expressionResult == null || expressionResult.value() == null) {
+        if (expressionResult == null || expressionResult.getValue() == null) {
             return;
         }
 
-        var resultClasses = StratifierUtils.extractClassesFromSingleOrListResult(expressionResult.value());
+        var resultClasses = StratifierUtils.extractClassesFromSingleOrListResult(expressionResult.getValue());
         var groupPopulationBasisCode = groupDef.getPopulationBasis().code();
 
         if (stratifierDef.isCriteriaStratifier()) {

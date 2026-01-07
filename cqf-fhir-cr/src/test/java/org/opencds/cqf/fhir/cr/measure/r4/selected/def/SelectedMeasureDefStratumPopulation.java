@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.common.StratumPopulationDef;
 
 /**
@@ -140,5 +141,11 @@ public class SelectedMeasureDefStratumPopulation<P>
      */
     public StratumPopulationDef stratumPopulationDef() {
         return value();
+    }
+
+    public SelectedMeasureDefStratumPopulation<P> hasType(MeasurePopulationType expectedMeasurePopulationType) {
+        assertNotNull(value(), "StratumPopulationDef is null");
+        assertEquals(expectedMeasurePopulationType, value().populationDef().type());
+        return this;
     }
 }

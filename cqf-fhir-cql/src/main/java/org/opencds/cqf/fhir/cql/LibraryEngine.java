@@ -16,16 +16,17 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import kotlin.Unit;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.cqframework.cql.cql2elm.StringLibrarySourceProvider;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
+import org.opencds.cqf.cql.engine.execution.EvaluationParams;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
-import org.opencds.cqf.cql.engine.execution.EvaluationResultsForMultiLib;
+import org.opencds.cqf.cql.engine.execution.EvaluationResults;
 import org.opencds.cqf.cql.engine.runtime.Tuple;
 import org.opencds.cqf.fhir.cql.engine.parameters.CqlFhirParametersConverter;
 import org.opencds.cqf.fhir.cql.engine.parameters.CqlParameterDefinition;
@@ -59,13 +60,13 @@ public class LibraryEngine {
         return settings;
     }
 
-    private Pair<String, Object> buildContextParameter(String patientId) {
-        Pair<String, Object> contextParameter = null;
+    private kotlin.Pair<String, Object> buildContextParameter(String patientId) {
+        kotlin.Pair<String, Object> contextParameter = null;
         if (patientId != null) {
             if (patientId.startsWith("Patient/")) {
                 patientId = patientId.replace("Patient/", "");
             }
-            contextParameter = Pair.of("Patient", patientId);
+            contextParameter = new kotlin.Pair<>("Patient", patientId);
         }
 
         return contextParameter;
@@ -169,8 +170,16 @@ public class LibraryEngine {
         var engine = Engines.forRepository(repository, requestSettings, bundle);
 
         var id = new VersionedIdentifier().withId(libraryName).withVersion(libraryVersion);
-        var result =
-                engine.evaluate(id.getId(), Set.of("return"), buildContextParameter(patientId), evaluationParameters);
+
+        var paramsBuilder = new EvaluationParams.Builder();
+        paramsBuilder.setParameters(evaluationParameters);
+        paramsBuilder.setContextParameter(buildContextParameter(patientId));
+        paramsBuilder.library(id, builder -> {
+            builder.expressions(("return"));
+            return Unit.INSTANCE;
+        });
+
+        var result = engine.evaluate(paramsBuilder.build()).getOnlyResultOrThrow();
 
         return cqlFhirParametersConverter.toFhirParameters(result);
     }
@@ -294,7 +303,7 @@ public class LibraryEngine {
         return result;
     }
 
-    public EvaluationResultsForMultiLib getEvaluationResult(
+    public EvaluationResults getEvaluationResult(
             List<VersionedIdentifier> ids,
             String patientId,
             IBaseParameters parameters,
@@ -317,17 +326,22 @@ public class LibraryEngine {
             evaluationParameters.putAll(rawParameters);
         }
 
-        var versionlessIdentifiers = ids.stream()
-                .map(id -> new VersionedIdentifier().withId(id.getId()))
-                .toList();
+        var paramsBuilder = new EvaluationParams.Builder();
+        paramsBuilder.setParameters(evaluationParameters);
+        paramsBuilder.setContextParameter(buildContextParameter(patientId));
+        paramsBuilder.setEvaluationDateTime(zonedDateTime);
+        ids.forEach(i -> {
+            if (expressions != null && !expressions.isEmpty()) {
+                paramsBuilder.library(i, builder -> {
+                    builder.expressions(expressions);
+                    return Unit.INSTANCE;
+                });
+            } else {
+                paramsBuilder.library(i, null);
+            }
+        });
 
-        return engineToUse.evaluate(
-                versionlessIdentifiers,
-                expressions,
-                buildContextParameter(patientId),
-                evaluationParameters,
-                null,
-                zonedDateTime);
+        return engineToUse.evaluate(paramsBuilder.build());
     }
 
     public EvaluationResult getEvaluationResult(

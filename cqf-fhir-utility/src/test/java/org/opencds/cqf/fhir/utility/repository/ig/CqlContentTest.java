@@ -84,6 +84,39 @@ class CqlContentTest {
     }
 
     @Test
+    void validateContentMatchesLibraryNameMismatchThrows() {
+        var cqlContent = "library Unexpected version '1.0.0'";
+        assertThrows(
+                ResourceNotFoundException.class,
+                () -> CqlContent.validateContentMatchesLibrary(cqlContent, "1.0.0", "Expected"));
+    }
+
+    @Test
+    void validateContentMatchesLibraryVersionMismatchThrows() {
+        var cqlContent = "library Matching version '2.0.0'";
+        assertThrows(
+                ResourceNotFoundException.class,
+                () -> CqlContent.validateContentMatchesLibrary(cqlContent, "1.0.0", "Matching"));
+    }
+
+    @Test
+    void validateContentMatchesLibraryMissingVersionDoesNotThrow() {
+        var cqlContent = "library Matching";
+        assertDoesNotThrow(() -> CqlContent.validateContentMatchesLibrary(cqlContent, "1.0.0", "Matching"));
+    }
+
+    @Test
+    void validateContentMatchesLibraryMissingNameDoesNotThrow() {
+        var cqlContent = "define Hello: true";
+        assertDoesNotThrow(() -> CqlContent.validateContentMatchesLibrary(cqlContent, "1.0.0", "Expected"));
+    }
+
+    @Test
+    void validateContentMatchesLibraryNullContentDoesNotThrow() {
+        assertDoesNotThrow(() -> CqlContent.validateContentMatchesLibrary(null, "1.0.0", "Expected"));
+    }
+
+    @Test
     void nullThrows() {
         assertThrows(NullPointerException.class, () -> {
             CqlContent.loadCqlContent(null, tempDir);

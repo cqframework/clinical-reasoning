@@ -1020,7 +1020,8 @@ class MeasureReportDefScorerTest {
                 "NumeratorExpression",
                 booleanBasis,
                 "num-1",
-                ContinuousVariableObservationAggregateMethod.SUM);
+                ContinuousVariableObservationAggregateMethod.SUM,
+                null);
 
         ConceptDef denObsCode = createMeasurePopulationConcept(MeasurePopulationType.MEASUREOBSERVATION);
         PopulationDef denominatorMeasureObs = new PopulationDef(
@@ -1030,7 +1031,8 @@ class MeasureReportDefScorerTest {
                 "DenominatorExpression",
                 booleanBasis,
                 "den-1",
-                ContinuousVariableObservationAggregateMethod.SUM);
+                ContinuousVariableObservationAggregateMethod.SUM,
+                null);
 
         GroupDef groupDef = new GroupDef(
                 "group-1",
@@ -1079,7 +1081,8 @@ class MeasureReportDefScorerTest {
                 "NumeratorExpression",
                 booleanBasis,
                 "num-1",
-                ContinuousVariableObservationAggregateMethod.AVG); // AVG instead of SUM
+                ContinuousVariableObservationAggregateMethod.AVG,
+                null); // AVG instead of SUM
 
         Map<String, QuantityDef> numObs1 = new HashMap<>();
         numObs1.put("obs-num-1", new QuantityDef(10.0));
@@ -1102,7 +1105,8 @@ class MeasureReportDefScorerTest {
                 "DenominatorExpression",
                 booleanBasis,
                 "den-1",
-                ContinuousVariableObservationAggregateMethod.AVG); // AVG instead of SUM
+                ContinuousVariableObservationAggregateMethod.AVG,
+                null); // AVG instead of SUM
 
         Map<String, QuantityDef> denObs1 = new HashMap<>();
         denObs1.put("obs-den-1", new QuantityDef(5.0));

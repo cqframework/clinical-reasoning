@@ -132,11 +132,11 @@ public class MeasureEvaluator {
 
     protected Iterable<Object> evaluateSupportingCriteria(ExpressionResult expressionResult) {
 
-        if (expressionResult == null || expressionResult.value() == null) {
+        if (expressionResult == null || expressionResult.getValue() == null) {
             return Collections.emptyList();
         }
 
-        Object value = expressionResult.value();
+        Object value = expressionResult.getValue();
         if (value instanceof Iterable<?>) {
             return (Iterable<Object>) value;
         } else {
@@ -363,7 +363,7 @@ public class MeasureEvaluator {
                 && !populationDef.getExtDefs().isEmpty()) {
             var extDef = populationDef.getExtDefs();
             for (ExtensionDef e : extDef) {
-                var result = evaluationResult.forExpression(e.getExpression());
+                var result = evaluationResult.get(e.getExpression());
                 var object = evaluateSupportingCriteria(result);
                 e.addResource(subjectId, object);
             }

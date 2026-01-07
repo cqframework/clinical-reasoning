@@ -105,6 +105,14 @@
             },
             {
               "url": "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-supportingEvidence",
+              "valueString": "TestIntervalList"
+            },
+            {
+              "url": "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-supportingEvidence",
+              "valueString": "TestDecimalList"
+            },
+            {
+              "url": "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-supportingEvidence",
               "valueString": "test code"
             },
             {
@@ -114,6 +122,10 @@
             {
               "url": "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-supportingEvidence",
               "valueString": "NullExample"
+            },
+            {
+              "url": "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-supportingEvidence",
+              "valueString": "PatientRes"
             }
           ]
         },

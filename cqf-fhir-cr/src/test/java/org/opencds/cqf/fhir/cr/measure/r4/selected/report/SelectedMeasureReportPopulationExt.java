@@ -52,16 +52,39 @@ public class SelectedMeasureReportPopulationExt extends Selected<Extension, Sele
         return this;
     }
 
-    public SelectedMeasureReportPopulationExt hasDecimalResult(Double expected) {
-        BigDecimal actual = this.value.getExtension().stream()
-                .filter(e -> "resultDecimal".equals(e.getUrl()))
+    public SelectedMeasureReportPopulationExt hasResourceIdResult(String expected) {
+        String actual = this.value.getExtension().stream()
+                .filter(e -> "resultResourceId".equals(e.getUrl()))
                 .map(Extension::getValue)
-                .filter(v -> v instanceof DecimalType)
-                .map(v -> ((DecimalType) v).getValue())
+                .filter(v -> v instanceof StringType)
+                .map(v -> ((StringType) v).getValue())
                 .findFirst()
                 .orElse(null);
 
-        assertEquals(BigDecimal.valueOf(expected), actual);
+        assertEquals(expected, actual);
+        return this;
+    }
+
+    public SelectedMeasureReportPopulationExt hasDecimalResult(Double expected) {
+
+        BigDecimal expectedValue = BigDecimal.valueOf(expected);
+        BigDecimal tolerance = new BigDecimal("0.00001");
+
+        BigDecimal actual = this.value.getExtension().stream()
+                .filter(e -> "resultDecimal".equals(e.getUrl()))
+                .map(Extension::getValue)
+                .filter(DecimalType.class::isInstance)
+                .map(DecimalType.class::cast)
+                .map(DecimalType::getValue)
+                .findFirst()
+                .orElse(null);
+
+        assertNotNull(actual, "Expected resultDecimal but none was found");
+
+        assertTrue(
+                actual.subtract(expectedValue).abs().compareTo(tolerance) <= 0,
+                "Decimal result not within tolerance (±0.00001). expected=" + expectedValue + ", actual=" + actual);
+
         return this;
     }
 
@@ -107,7 +130,7 @@ public class SelectedMeasureReportPopulationExt extends Selected<Extension, Sele
     // -------------------------
     // resultResourceId (stored as valueString)
     // -------------------------
-    public SelectedMeasureReportPopulationExt hasResourceIdResult(String expectedResourceId) {
+    public SelectedMeasureReportPopulationExt hasListResourceIdResult(String expectedResourceId) {
         String actual = this.value.getExtension().stream()
                 .filter(e -> "resultList".equals(e.getUrl()))
                 .findFirst()
@@ -378,6 +401,68 @@ public class SelectedMeasureReportPopulationExt extends Selected<Extension, Sele
                 .anyMatch(expectedItem::equals);
 
         assertTrue(found, "Tuple field '" + fieldName + "' missing list itemResourceId=" + expectedItem);
+        return this;
+    }
+
+    public SelectedMeasureReportPopulationExt hasListDecimalItem(Double expectedValue) {
+
+        // 5 decimal places tolerance
+        BigDecimal expected = BigDecimal.valueOf(expectedValue);
+        BigDecimal tolerance = new BigDecimal("0.00001");
+
+        Extension resultList = this.value.getExtension().stream()
+                .filter(e -> "resultList".equals(e.getUrl()))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Missing resultList"));
+
+        boolean found = resultList.getExtension().stream()
+                .filter(e -> "itemDecimal".equals(e.getUrl()))
+                .map(Extension::getValue)
+                .filter(DecimalType.class::isInstance)
+                .map(DecimalType.class::cast)
+                .map(DecimalType::getValue)
+                .anyMatch(actual ->
+                        actual != null && actual.subtract(expected).abs().compareTo(tolerance) <= 0);
+
+        assertTrue(found, "Expected decimal not found within tolerance (±0.00001): " + expected);
+
+        return this;
+    }
+
+    public SelectedMeasureReportPopulationExt hasListIntervalItem(Period expected) {
+
+        Extension resultList = this.value.getExtension().stream()
+                .filter(e -> "resultList".equals(e.getUrl()))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Missing resultList"));
+
+        Period actual = resultList.getExtension().stream()
+                .filter(e -> "itemPeriod".equals(e.getUrl()))
+                .map(Extension::getValue)
+                .filter(v -> v instanceof Period)
+                .map(v -> (Period) v)
+                .filter(p -> expected.getStartElement()
+                                .getValueAsString()
+                                .equals(p.getStartElement().getValueAsString())
+                        && expected.getEndElement()
+                                .getValueAsString()
+                                .equals(p.getEndElement().getValueAsString()))
+                .findFirst()
+                .orElse(null);
+
+        assertNotNull(actual, "Expected itemPeriod in resultList but none matched");
+
+        // Compare start/end explicitly to avoid equals() pitfalls
+        assertEquals(
+                expected.getStartElement().getValueAsString(),
+                actual.getStartElement().getValueAsString(),
+                "Period.start does not match");
+
+        assertEquals(
+                expected.getEndElement().getValueAsString(),
+                actual.getEndElement().getValueAsString(),
+                "Period.end does not match");
+
         return this;
     }
 }

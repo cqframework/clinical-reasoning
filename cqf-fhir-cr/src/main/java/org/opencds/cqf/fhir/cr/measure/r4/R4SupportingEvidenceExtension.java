@@ -2,7 +2,6 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_SUPPORTING_EVIDENCE_URL;
 
-import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -81,22 +80,7 @@ public class R4SupportingEvidenceExtension {
             return subjectResources.values().iterator().next();
         }
 
-        // Special fallback: if we can find exactly one Interval anywhere, use it
-        Interval found = null;
-        for (Set<Object> set : subjectResources.values()) {
-            if (set == null) continue;
-            for (Object o : set) {
-                Interval interval = asInterval(o);
-                if (interval != null) {
-                    if (found != null) {
-                        // more than one interval present -> ambiguous
-                        return null;
-                    }
-                    found = interval;
-                }
-            }
-        }
-        return found; // may be null
+        return null;
     }
 
     private static void addResultValue(Extension target, Object value) {
@@ -152,19 +136,6 @@ public class R4SupportingEvidenceExtension {
             return;
         }
 
-        if (value instanceof java.util.Map<?, ?> map) {
-            collectLeaves(map.values(), out, depth + 1);
-            return;
-        }
-
-        if (value.getClass().isArray()) {
-            int len = java.lang.reflect.Array.getLength(value);
-            for (int i = 0; i < len; i++) {
-                collectLeaves(java.lang.reflect.Array.get(value, i), out, depth + 1);
-            }
-            return;
-        }
-
         out.add(value);
     }
 
@@ -204,16 +175,10 @@ public class R4SupportingEvidenceExtension {
             target.addExtension(new Extension("resultInteger", new IntegerType(i)));
         } else if (leaf instanceof BigDecimal bd) {
             target.addExtension(new Extension("resultDecimal", new DecimalType(bd)));
-        } else if (leaf instanceof Double d) {
-            target.addExtension(new Extension("resultDecimal", new DecimalType(BigDecimal.valueOf(d))));
-        } else if (leaf instanceof Float f) {
-            target.addExtension(new Extension("resultDecimal", new DecimalType(BigDecimal.valueOf(f.doubleValue()))));
         } else if (leaf instanceof String s) {
             target.addExtension(new Extension("resultString", new StringType(s)));
         } else if (leaf instanceof IBaseResource r) {
             target.addExtension(new Extension("resultResourceId", new StringType(resourceIdString(r))));
-        } else if (leaf instanceof org.hl7.fhir.r4.model.Type t) {
-            target.addExtension(new Extension("result", t));
         } else {
             target.addExtension(new Extension("resultString", new StringType(String.valueOf(leaf))));
         }
@@ -256,18 +221,8 @@ public class R4SupportingEvidenceExtension {
             listExt.addExtension(new Extension("itemInteger", new IntegerType(i)));
         } else if (leaf instanceof BigDecimal bd) {
             listExt.addExtension(new Extension("itemDecimal", new DecimalType(bd)));
-        } else if (leaf instanceof Double d) {
-            listExt.addExtension(new Extension("itemDecimal", new DecimalType(BigDecimal.valueOf(d))));
-        } else if (leaf instanceof Float f) {
-            listExt.addExtension(new Extension("itemDecimal", new DecimalType(BigDecimal.valueOf(f.doubleValue()))));
-        } else if (leaf != null
-                && "org.opencds.cqf.cql.engine.runtime.Decimal"
-                        .equals(leaf.getClass().getName())) {
-            listExt.addExtension(new Extension("itemDecimal", new DecimalType(new BigDecimal(leaf.toString()))));
         } else if (leaf instanceof String s) {
             listExt.addExtension(new Extension("itemString", new StringType(s)));
-        } else if (leaf instanceof org.hl7.fhir.r4.model.Type t) {
-            listExt.addExtension(new Extension("item", t));
         } else {
             listExt.addExtension(new Extension("itemString", new StringType(String.valueOf(leaf))));
         }
@@ -279,25 +234,13 @@ public class R4SupportingEvidenceExtension {
      */
     private static Period tryBuildPeriod(Interval interval) {
         // First try directly (works when getStart/getEnd are DateTime/Date)
+        Period period = null;
         try {
-            return DATE_HELPER.buildMeasurementPeriod(interval);
+            period = DATE_HELPER.buildMeasurementPeriod(interval);
         } catch (IllegalArgumentException ex) {
             // fall through
         }
-
-        // Retry using low/high if present (some Interval instances populate these instead)
-        Object low = invokeNoArgIfPresent(interval, "getLow");
-        Object high = invokeNoArgIfPresent(interval, "getHigh");
-        if (low == null && high == null) {
-            return null;
-        }
-
-        try {
-            Interval rebuilt = new Interval(low, true, high, true);
-            return DATE_HELPER.buildMeasurementPeriod(rebuilt);
-        } catch (Exception ex) {
-            return null;
-        }
+        return period;
     }
 
     /**
@@ -307,16 +250,6 @@ public class R4SupportingEvidenceExtension {
         if (o instanceof Interval i) return i;
 
         return null;
-    }
-
-    private static Object invokeNoArgIfPresent(Object target, String methodName) {
-        if (target == null) return null;
-        try {
-            Method m = target.getClass().getMethod(methodName);
-            return m.invoke(target);
-        } catch (Exception e) {
-            return null;
-        }
     }
 
     private static String resourceIdString(IBaseResource r) {

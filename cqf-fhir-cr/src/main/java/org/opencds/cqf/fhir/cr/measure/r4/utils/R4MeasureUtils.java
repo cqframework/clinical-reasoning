@@ -102,6 +102,30 @@ public class R4MeasureUtils {
         return null;
     }
 
+    // LUKETODO:  test this:
+    // LUKETODO:  javadoc
+    public static MeasureScoring computeScoring(Measure measure, MeasureGroupComponent measureGroup) {
+        return computeScoring(
+                measure.getUrl(), getMeasureScoring(measure), getGroupMeasureScoring(measure.getUrl(), measureGroup));
+    }
+
+    /**
+     * Determines the scoring definition for a measure group.
+     * Validates that at least one scoring is specified and returns the group-level scoring if present,
+     * otherwise the measure-level scoring.
+     */
+    public static MeasureScoring computeScoring(
+            String measureUrl, MeasureScoring measureScoring, MeasureScoring groupScoring) {
+        if (groupScoring == null && measureScoring == null) {
+            throw new InvalidRequestException(
+                    "MeasureScoring must be specified on Group or Measure for Measure: " + measureUrl);
+        }
+        if (groupScoring != null) {
+            return groupScoring;
+        }
+        return measureScoring;
+    }
+
     /**
      * Extract group-level measure scoring, with convenience overload.
      *

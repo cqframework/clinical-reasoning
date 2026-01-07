@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.r4.utils;
 
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -36,32 +37,61 @@ public class R4MeasureReportUtils {
     }
 
     /**
-     * Get population count from a list of MeasureReportGroupPopulationComponents by population code.
+     * Get population count from a list of MeasureReportGroupPopulationComponents by population type.
+     * Expect a single population only or will throw.
      *
      * @param populations the list of population components
-     * @param populationCode the population code to find (e.g., "numerator", "denominator")
+     * @param measurePopulationType MeasurePopulationType to search for
      * @return the count for the population, or 0 if not found
      */
-    public static int getCountFromGroupPopulation(
-            List<MeasureReportGroupPopulationComponent> populations, String populationCode) {
-        return populations.stream()
-                .filter(population -> populationCode.equals(
-                        population.getCode().getCodingFirstRep().getCode()))
-                .map(MeasureReportGroupPopulationComponent::getCount)
-                .findAny()
-                .orElse(0);
+    public static int getCountFromGroupPopulationByPopulationType(
+            List<MeasureReportGroupPopulationComponent> populations, MeasurePopulationType measurePopulationType) {
+
+        final List<MeasureReportGroupPopulationComponent> filteredPopulations = populations.stream()
+                .filter(population -> measurePopulationType
+                        .toCode()
+                        .equals(population.getCode().getCodingFirstRep().getCode()))
+                .toList();
+
+        if (filteredPopulations.isEmpty()) {
+            return 0;
+        }
+
+        if (filteredPopulations.size() > 1) {
+            throw new InvalidRequestException(
+                    "Expected only a single population for this type, but found more than one for population type: %s"
+                            .formatted(measurePopulationType));
+        }
+
+        return filteredPopulations.get(0).getCount();
     }
 
     /**
-     * Get population count from a list of MeasureReportGroupPopulationComponents by population type.
+     * Get population count from a list of MeasureReportGroupPopulationComponents by population ID.
+     * Expect a single population only or will throw.
      *
      * @param populations the list of population components
-     * @param populationType the MeasurePopulationType to find
+     * @param populationId ID of the specific population
      * @return the count for the population, or 0 if not found
      */
-    public static int getCountFromGroupPopulation(
-            List<MeasureReportGroupPopulationComponent> populations, MeasurePopulationType populationType) {
-        return getCountFromGroupPopulation(populations, populationType.toCode());
+    public static int getCountFromGroupPopulationByPopulationId(
+            List<MeasureReportGroupPopulationComponent> populations, String populationId) {
+
+        final List<MeasureReportGroupPopulationComponent> filteredPopulations = populations.stream()
+                .filter(population -> populationId.equals(population.getId()))
+                .toList();
+
+        if (filteredPopulations.isEmpty()) {
+            return 0;
+        }
+
+        if (filteredPopulations.size() > 1) {
+            throw new InvalidRequestException(
+                    "Expected only a single population for this ID, but found more than one for population ID: %s"
+                            .formatted(populationId));
+        }
+
+        return filteredPopulations.get(0).getCount();
     }
 
     /**
@@ -71,38 +101,41 @@ public class R4MeasureReportUtils {
      * @param populationType the MeasurePopulationType to find
      * @return the count for the population, or 0 if not found
      */
-    public static int getCountFromGroupPopulation(
+    public static int getCountFromGroupPopulationByPopulationType(
             MeasureReportGroupComponent group, MeasurePopulationType populationType) {
-        return getCountFromGroupPopulation(group.getPopulation(), populationType);
+        return getCountFromGroupPopulationByPopulationType(group.getPopulation(), populationType);
+    }
+
+    public static int getCountFromGroupPopulationById(MeasureReportGroupComponent group, String populationId) {
+        return getCountFromGroupPopulationByPopulationId(group.getPopulation(), populationId);
     }
 
     /**
      * Get population count from a list of StratifierGroupPopulationComponents by population code.
      *
      * @param populations the list of stratifier population components
-     * @param populationCode the population code to find (e.g., "numerator", "denominator")
-     * @return the count for the population, or 0 if not found
-     */
-    public static int getCountFromStratifierPopulation(
-            List<StratifierGroupPopulationComponent> populations, String populationCode) {
-        return populations.stream()
-                .filter(population -> populationCode.equals(
-                        population.getCode().getCodingFirstRep().getCode()))
-                .map(StratifierGroupPopulationComponent::getCount)
-                .findAny()
-                .orElse(0);
-    }
-
-    /**
-     * Get population count from a list of StratifierGroupPopulationComponents by population type.
-     *
-     * @param populations the list of stratifier population components
      * @param populationType the MeasurePopulationType to find
      * @return the count for the population, or 0 if not found
      */
-    public static int getCountFromStratifierPopulation(
+    public static int getCountFromStratumPopulationByType(
             List<StratifierGroupPopulationComponent> populations, MeasurePopulationType populationType) {
-        return getCountFromStratifierPopulation(populations, populationType.toCode());
+
+        final List<StratifierGroupPopulationComponent> matchingStratumPopulations = populations.stream()
+                .filter(population -> populationType
+                        .toCode()
+                        .equals(population.getCode().getCodingFirstRep().getCode()))
+                .toList();
+
+        if (matchingStratumPopulations.isEmpty()) {
+            return 0;
+        }
+
+        if (matchingStratumPopulations.size() > 1) {
+            throw new InvalidRequestException(
+                    "Got back more than one stratum population for population type: %s".formatted(populationType));
+        }
+
+        return matchingStratumPopulations.get(0).getCount();
     }
 
     /**
@@ -112,9 +145,22 @@ public class R4MeasureReportUtils {
      * @param populationType the MeasurePopulationType to find
      * @return the count for the population, or 0 if not found
      */
-    public static int getCountFromStratifierPopulation(
+    public static int getCountFromStratumPopulationByType(
             StratifierGroupComponent stratum, MeasurePopulationType populationType) {
-        return getCountFromStratifierPopulation(stratum.getPopulation(), populationType);
+        return getCountFromStratumPopulationByType(stratum.getPopulation(), populationType);
+    }
+
+    public static int getCountFromStratumPopulationById(StratifierGroupComponent stratum, String populationId) {
+        return getCountFromStratumPopulationById(stratum.getPopulation(), populationId);
+    }
+
+    public static int getCountFromStratumPopulationById(
+            List<StratifierGroupPopulationComponent> populations, String populationId) {
+        return populations.stream()
+                .filter(population -> populationId.equals(population.getId()))
+                .map(StratifierGroupPopulationComponent::getCount)
+                .findAny()
+                .orElse(0);
     }
 
     /**

@@ -50,7 +50,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         checkId(measure);
 
         // scoring
-        var measureScoring = getMeasureScoring(measure);
+        var measureScoring = R4MeasureUtils.getMeasureScoring(measure);
         // populationBasis
         var measureBasis = getMeasureBasis(measure);
         // improvement Notation
@@ -105,7 +105,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                 conceptToConceptDef(group.getCode()),
                 stratifiers,
                 mergePopulations(populationsWithCriteriaReference, optPopulationDefDateOfCompliance.orElse(null)),
-                getScoringDef(measure.getUrl(), measureScoring, groupScoring),
+                R4MeasureUtils.computeScoring(measure.getUrl(), measureScoring, groupScoring),
                 hasGroupImpNotation,
                 getImprovementNotation(measureImpNotation, groupImpNotation),
                 populationBasisDef);
@@ -313,9 +313,6 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         // Create instance to call instance methods
         var builder = new R4MeasureDefBuilder();
 
-        // scoring
-        builder.getMeasureScoring(measure);
-
         builder.validateMeasureImprovementNotation(measure);
     }
 
@@ -357,10 +354,6 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         if (r.getId() == null || StringUtils.isBlank(r.getId())) {
             throw new InvalidRequestException("id is required on all Resources of type: " + r.fhirType());
         }
-    }
-
-    private MeasureScoring getMeasureScoring(Measure measure) {
-        return R4MeasureUtils.getMeasureScoring(measure);
     }
 
     public CodeDef getMeasureBasis(Measure measure) {

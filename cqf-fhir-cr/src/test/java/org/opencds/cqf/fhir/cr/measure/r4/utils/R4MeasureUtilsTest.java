@@ -291,4 +291,133 @@ class R4MeasureUtilsTest {
 
         assertNull(result);
     }
+
+    // ========================================
+    // Tests for computeScoring(String, MeasureScoring, MeasureScoring)
+    // ========================================
+
+    @Test
+    void testComputeScoring_GroupScoringPresent_ReturnsGroupScoring() {
+        String measureUrl = "http://example.com/Measure/test";
+        MeasureScoring measureScoring = MeasureScoring.PROPORTION;
+        MeasureScoring groupScoring = MeasureScoring.RATIO;
+
+        MeasureScoring result = R4MeasureUtils.computeScoring(measureUrl, measureScoring, groupScoring);
+
+        assertEquals(MeasureScoring.RATIO, result);
+    }
+
+    @Test
+    void testComputeScoring_OnlyMeasureScoringPresent_ReturnsMeasureScoring() {
+        String measureUrl = "http://example.com/Measure/test";
+        MeasureScoring measureScoring = MeasureScoring.COHORT;
+        MeasureScoring groupScoring = null;
+
+        MeasureScoring result = R4MeasureUtils.computeScoring(measureUrl, measureScoring, groupScoring);
+
+        assertEquals(MeasureScoring.COHORT, result);
+    }
+
+    @Test
+    void testComputeScoring_BothNull_ThrowsException() {
+        String measureUrl = "http://example.com/Measure/test";
+
+        InvalidRequestException exception = assertThrows(
+                InvalidRequestException.class, () -> R4MeasureUtils.computeScoring(measureUrl, null, null));
+
+        assertTrue(exception.getMessage().contains("MeasureScoring must be specified"));
+        assertTrue(exception.getMessage().contains(measureUrl));
+    }
+
+    @Test
+    void testComputeScoring_GroupScoringOverridesMeasure() {
+        String measureUrl = "http://example.com/Measure/test";
+        MeasureScoring measureScoring = MeasureScoring.PROPORTION;
+        MeasureScoring groupScoring = MeasureScoring.CONTINUOUSVARIABLE;
+
+        MeasureScoring result = R4MeasureUtils.computeScoring(measureUrl, measureScoring, groupScoring);
+
+        // Group scoring should take precedence
+        assertEquals(MeasureScoring.CONTINUOUSVARIABLE, result);
+    }
+
+    // ========================================
+    // Tests for computeScoring(Measure, MeasureGroupComponent) - Convenience Method
+    // ========================================
+
+    @Test
+    void testComputeScoring_FromMeasureAndGroup_GroupScoringPresent() {
+        Measure measure = new Measure();
+        measure.setUrl("http://example.com/Measure/test");
+        measure.setScoring(new CodeableConcept()
+                .addCoding(new Coding()
+                        .setSystem("http://terminology.hl7.org/CodeSystem/measure-scoring")
+                        .setCode("proportion")));
+
+        MeasureGroupComponent group = new MeasureGroupComponent();
+        group.addExtension(
+                CQFM_SCORING_EXT_URL,
+                new CodeableConcept()
+                        .addCoding(new Coding()
+                                .setSystem("http://terminology.hl7.org/CodeSystem/measure-scoring")
+                                .setCode("ratio")));
+
+        MeasureScoring result = R4MeasureUtils.computeScoring(measure, group);
+
+        assertEquals(MeasureScoring.RATIO, result);
+    }
+
+    @Test
+    void testComputeScoring_FromMeasureAndGroup_OnlyMeasureScoring() {
+        Measure measure = new Measure();
+        measure.setUrl("http://example.com/Measure/test");
+        measure.setScoring(new CodeableConcept()
+                .addCoding(new Coding()
+                        .setSystem("http://terminology.hl7.org/CodeSystem/measure-scoring")
+                        .setCode("cohort")));
+
+        MeasureGroupComponent group = new MeasureGroupComponent();
+
+        MeasureScoring result = R4MeasureUtils.computeScoring(measure, group);
+
+        assertEquals(MeasureScoring.COHORT, result);
+    }
+
+    @Test
+    void testComputeScoring_FromMeasureAndGroup_BothAbsent_ThrowsException() {
+        Measure measure = new Measure();
+        measure.setUrl("http://example.com/Measure/test");
+        // No scoring set on measure
+
+        MeasureGroupComponent group = new MeasureGroupComponent();
+        // No scoring extension on group
+
+        InvalidRequestException exception =
+                assertThrows(InvalidRequestException.class, () -> R4MeasureUtils.computeScoring(measure, group));
+
+        assertTrue(exception.getMessage().contains("MeasureScoring must be specified"));
+    }
+
+    @Test
+    void testComputeScoring_FromMeasureAndGroup_GroupOverridesMeasure() {
+        Measure measure = new Measure();
+        measure.setUrl("http://example.com/Measure/test");
+        measure.setScoring(new CodeableConcept()
+                .addCoding(new Coding()
+                        .setSystem("http://terminology.hl7.org/CodeSystem/measure-scoring")
+                        .setCode("proportion")));
+
+        MeasureGroupComponent group = new MeasureGroupComponent();
+        group.addExtension(
+                CQFM_SCORING_EXT_URL,
+                new CodeableConcept()
+                        .addCoding(new Coding()
+                                .setSystem("http://terminology.hl7.org/CodeSystem/measure-scoring")
+                                .setCode("continuous-variable")));
+
+        MeasureScoring result = R4MeasureUtils.computeScoring(measure, group);
+
+        // Group scoring should take precedence
+        assertEquals(MeasureScoring.CONTINUOUSVARIABLE, result);
+    }
 }

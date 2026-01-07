@@ -3,8 +3,10 @@ package org.opencds.cqf.fhir.cr.measure.r4.utils;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -33,7 +35,8 @@ class R4MeasureReportUtilsTest {
         denominator.setCount(20);
         populations.add(denominator);
 
-        int count = R4MeasureReportUtils.getCountFromGroupPopulation(populations, "numerator");
+        int count = R4MeasureReportUtils.getCountFromGroupPopulationByPopulationType(
+                populations, MeasurePopulationType.NUMERATOR);
 
         assertEquals(10, count);
     }
@@ -47,7 +50,8 @@ class R4MeasureReportUtilsTest {
         numerator.setCount(10);
         populations.add(numerator);
 
-        int count = R4MeasureReportUtils.getCountFromGroupPopulation(populations, "denominator-exclusion");
+        int count = R4MeasureReportUtils.getCountFromGroupPopulationByPopulationType(
+                populations, MeasurePopulationType.NUMERATOREXCLUSION);
 
         assertEquals(0, count);
     }
@@ -61,7 +65,8 @@ class R4MeasureReportUtilsTest {
         numerator.setCount(15);
         populations.add(numerator);
 
-        int count = R4MeasureReportUtils.getCountFromGroupPopulation(populations, MeasurePopulationType.NUMERATOR);
+        int count = R4MeasureReportUtils.getCountFromGroupPopulationByPopulationType(
+                populations, MeasurePopulationType.NUMERATOR);
 
         assertEquals(15, count);
     }
@@ -75,7 +80,8 @@ class R4MeasureReportUtilsTest {
         denominator.setCount(25);
         group.addPopulation(denominator);
 
-        int count = R4MeasureReportUtils.getCountFromGroupPopulation(group, MeasurePopulationType.DENOMINATOR);
+        int count = R4MeasureReportUtils.getCountFromGroupPopulationByPopulationType(
+                group, MeasurePopulationType.DENOMINATOR);
 
         assertEquals(25, count);
     }
@@ -94,7 +100,8 @@ class R4MeasureReportUtilsTest {
         denominator.setCount(8);
         populations.add(denominator);
 
-        int count = R4MeasureReportUtils.getCountFromStratifierPopulation(populations, "denominator");
+        int count = R4MeasureReportUtils.getCountFromStratumPopulationByType(
+                populations, MeasurePopulationType.DENOMINATOR);
 
         assertEquals(8, count);
     }
@@ -108,7 +115,8 @@ class R4MeasureReportUtilsTest {
         numerator.setCount(5);
         populations.add(numerator);
 
-        int count = R4MeasureReportUtils.getCountFromStratifierPopulation(populations, "denominator");
+        int count = R4MeasureReportUtils.getCountFromStratumPopulationByType(
+                populations, MeasurePopulationType.DENOMINATOR);
 
         assertEquals(0, count);
     }
@@ -122,7 +130,8 @@ class R4MeasureReportUtilsTest {
         numerator.setCount(7);
         populations.add(numerator);
 
-        int count = R4MeasureReportUtils.getCountFromStratifierPopulation(populations, MeasurePopulationType.NUMERATOR);
+        int count =
+                R4MeasureReportUtils.getCountFromStratumPopulationByType(populations, MeasurePopulationType.NUMERATOR);
 
         assertEquals(7, count);
     }
@@ -136,7 +145,8 @@ class R4MeasureReportUtilsTest {
         denominator.setCount(12);
         stratum.addPopulation(denominator);
 
-        int count = R4MeasureReportUtils.getCountFromStratifierPopulation(stratum, MeasurePopulationType.DENOMINATOR);
+        int count =
+                R4MeasureReportUtils.getCountFromStratumPopulationByType(stratum, MeasurePopulationType.DENOMINATOR);
 
         assertEquals(12, count);
     }
@@ -204,6 +214,249 @@ class R4MeasureReportUtilsTest {
         boolean matches = R4MeasureReportUtils.doesPopulationTypeMatch(denominator, MeasurePopulationType.NUMERATOR);
 
         assertFalse(matches);
+    }
+
+    // ========================================
+    // Tests for getCountFromGroupPopulationByPopulationType - Failure Path
+    // ========================================
+
+    @Test
+    void testGetCountFromGroupPopulationByPopulationType_MultiplePopulationsWithSameType_ThrowsException() {
+        List<MeasureReportGroupPopulationComponent> populations = new ArrayList<>();
+
+        // Add two numerator populations - this is invalid
+        MeasureReportGroupPopulationComponent numerator1 = new MeasureReportGroupPopulationComponent();
+        numerator1.setCode(new CodeableConcept().addCoding(new Coding().setCode("numerator")));
+        numerator1.setCount(10);
+        numerator1.setId("numerator-1");
+        populations.add(numerator1);
+
+        MeasureReportGroupPopulationComponent numerator2 = new MeasureReportGroupPopulationComponent();
+        numerator2.setCode(new CodeableConcept().addCoding(new Coding().setCode("numerator")));
+        numerator2.setCount(20);
+        numerator2.setId("numerator-2");
+        populations.add(numerator2);
+
+        InvalidRequestException exception = assertThrows(
+                InvalidRequestException.class,
+                () -> R4MeasureReportUtils.getCountFromGroupPopulationByPopulationType(
+                        populations, MeasurePopulationType.NUMERATOR));
+
+        assertTrue(exception.getMessage().contains("Expected only a single population"));
+        assertTrue(exception.getMessage().contains("NUMERATOR"));
+    }
+
+    // ========================================
+    // Tests for getCountFromGroupPopulationByPopulationId - Happy Path
+    // ========================================
+
+    @Test
+    void testGetCountFromGroupPopulationByPopulationId_Found() {
+        List<MeasureReportGroupPopulationComponent> populations = new ArrayList<>();
+
+        MeasureReportGroupPopulationComponent numerator = new MeasureReportGroupPopulationComponent();
+        numerator.setCode(new CodeableConcept().addCoding(new Coding().setCode("numerator")));
+        numerator.setCount(15);
+        numerator.setId("numerator-1");
+        populations.add(numerator);
+
+        MeasureReportGroupPopulationComponent denominator = new MeasureReportGroupPopulationComponent();
+        denominator.setCode(new CodeableConcept().addCoding(new Coding().setCode("denominator")));
+        denominator.setCount(30);
+        denominator.setId("denominator-1");
+        populations.add(denominator);
+
+        int count = R4MeasureReportUtils.getCountFromGroupPopulationByPopulationId(populations, "denominator-1");
+
+        assertEquals(30, count);
+    }
+
+    @Test
+    void testGetCountFromGroupPopulationByPopulationId_NotFound() {
+        List<MeasureReportGroupPopulationComponent> populations = new ArrayList<>();
+
+        MeasureReportGroupPopulationComponent numerator = new MeasureReportGroupPopulationComponent();
+        numerator.setCode(new CodeableConcept().addCoding(new Coding().setCode("numerator")));
+        numerator.setCount(15);
+        numerator.setId("numerator-1");
+        populations.add(numerator);
+
+        int count = R4MeasureReportUtils.getCountFromGroupPopulationByPopulationId(populations, "missing-id");
+
+        assertEquals(0, count);
+    }
+
+    // ========================================
+    // Tests for getCountFromGroupPopulationByPopulationId - Failure Path
+    // ========================================
+
+    @Test
+    void testGetCountFromGroupPopulationByPopulationId_MultiplePopulationsWithSameId_ThrowsException() {
+        List<MeasureReportGroupPopulationComponent> populations = new ArrayList<>();
+
+        // Add two populations with the same ID - this is invalid
+        MeasureReportGroupPopulationComponent pop1 = new MeasureReportGroupPopulationComponent();
+        pop1.setCode(new CodeableConcept().addCoding(new Coding().setCode("numerator")));
+        pop1.setCount(10);
+        pop1.setId("duplicate-id");
+        populations.add(pop1);
+
+        MeasureReportGroupPopulationComponent pop2 = new MeasureReportGroupPopulationComponent();
+        pop2.setCode(new CodeableConcept().addCoding(new Coding().setCode("denominator")));
+        pop2.setCount(20);
+        pop2.setId("duplicate-id");
+        populations.add(pop2);
+
+        InvalidRequestException exception = assertThrows(
+                InvalidRequestException.class,
+                () -> R4MeasureReportUtils.getCountFromGroupPopulationByPopulationId(populations, "duplicate-id"));
+
+        assertTrue(exception.getMessage().contains("Expected only a single population"));
+        assertTrue(exception.getMessage().contains("duplicate-id"));
+    }
+
+    // ========================================
+    // Tests for getCountFromGroupPopulationById (convenience method)
+    // ========================================
+
+    @Test
+    void testGetCountFromGroupPopulationById_FromGroupComponent() {
+        MeasureReportGroupComponent group = new MeasureReportGroupComponent();
+
+        MeasureReportGroupPopulationComponent numerator = new MeasureReportGroupPopulationComponent();
+        numerator.setCode(new CodeableConcept().addCoding(new Coding().setCode("numerator")));
+        numerator.setCount(42);
+        numerator.setId("numerator-1");
+        group.addPopulation(numerator);
+
+        MeasureReportGroupPopulationComponent denominator = new MeasureReportGroupPopulationComponent();
+        denominator.setCode(new CodeableConcept().addCoding(new Coding().setCode("denominator")));
+        denominator.setCount(100);
+        denominator.setId("denominator-1");
+        group.addPopulation(denominator);
+
+        int count = R4MeasureReportUtils.getCountFromGroupPopulationById(group, "numerator-1");
+
+        assertEquals(42, count);
+    }
+
+    @Test
+    void testGetCountFromGroupPopulationById_NotFound() {
+        MeasureReportGroupComponent group = new MeasureReportGroupComponent();
+
+        MeasureReportGroupPopulationComponent numerator = new MeasureReportGroupPopulationComponent();
+        numerator.setCode(new CodeableConcept().addCoding(new Coding().setCode("numerator")));
+        numerator.setCount(42);
+        numerator.setId("numerator-1");
+        group.addPopulation(numerator);
+
+        int count = R4MeasureReportUtils.getCountFromGroupPopulationById(group, "missing-id");
+
+        assertEquals(0, count);
+    }
+
+    // ========================================
+    // Tests for getCountFromStratumPopulationByType - Failure Path
+    // ========================================
+
+    @Test
+    void testGetCountFromStratumPopulationByType_MultiplePopulationsWithSameType_ThrowsException() {
+        List<StratifierGroupPopulationComponent> populations = new ArrayList<>();
+
+        // Add two numerator populations - this is invalid
+        StratifierGroupPopulationComponent numerator1 = new StratifierGroupPopulationComponent();
+        numerator1.setCode(new CodeableConcept().addCoding(new Coding().setCode("numerator")));
+        numerator1.setCount(5);
+        populations.add(numerator1);
+
+        StratifierGroupPopulationComponent numerator2 = new StratifierGroupPopulationComponent();
+        numerator2.setCode(new CodeableConcept().addCoding(new Coding().setCode("numerator")));
+        numerator2.setCount(7);
+        populations.add(numerator2);
+
+        InvalidRequestException exception = assertThrows(
+                InvalidRequestException.class,
+                () -> R4MeasureReportUtils.getCountFromStratumPopulationByType(
+                        populations, MeasurePopulationType.NUMERATOR));
+
+        assertTrue(exception.getMessage().contains("Got back more than one stratum population"));
+        assertTrue(exception.getMessage().contains("NUMERATOR"));
+    }
+
+    // ========================================
+    // Tests for getCountFromStratumPopulationById - Happy Path
+    // ========================================
+
+    @Test
+    void testGetCountFromStratumPopulationById_FromList_Found() {
+        List<StratifierGroupPopulationComponent> populations = new ArrayList<>();
+
+        StratifierGroupPopulationComponent numerator = new StratifierGroupPopulationComponent();
+        numerator.setCode(new CodeableConcept().addCoding(new Coding().setCode("numerator")));
+        numerator.setCount(8);
+        numerator.setId("num-1");
+        populations.add(numerator);
+
+        StratifierGroupPopulationComponent denominator = new StratifierGroupPopulationComponent();
+        denominator.setCode(new CodeableConcept().addCoding(new Coding().setCode("denominator")));
+        denominator.setCount(16);
+        denominator.setId("den-1");
+        populations.add(denominator);
+
+        int count = R4MeasureReportUtils.getCountFromStratumPopulationById(populations, "den-1");
+
+        assertEquals(16, count);
+    }
+
+    @Test
+    void testGetCountFromStratumPopulationById_FromList_NotFound() {
+        List<StratifierGroupPopulationComponent> populations = new ArrayList<>();
+
+        StratifierGroupPopulationComponent numerator = new StratifierGroupPopulationComponent();
+        numerator.setCode(new CodeableConcept().addCoding(new Coding().setCode("numerator")));
+        numerator.setCount(8);
+        numerator.setId("num-1");
+        populations.add(numerator);
+
+        int count = R4MeasureReportUtils.getCountFromStratumPopulationById(populations, "missing-id");
+
+        assertEquals(0, count);
+    }
+
+    @Test
+    void testGetCountFromStratumPopulationById_FromStratum_Found() {
+        StratifierGroupComponent stratum = new StratifierGroupComponent();
+
+        StratifierGroupPopulationComponent numerator = new StratifierGroupPopulationComponent();
+        numerator.setCode(new CodeableConcept().addCoding(new Coding().setCode("numerator")));
+        numerator.setCount(25);
+        numerator.setId("num-1");
+        stratum.addPopulation(numerator);
+
+        StratifierGroupPopulationComponent denominator = new StratifierGroupPopulationComponent();
+        denominator.setCode(new CodeableConcept().addCoding(new Coding().setCode("denominator")));
+        denominator.setCount(50);
+        denominator.setId("den-1");
+        stratum.addPopulation(denominator);
+
+        int count = R4MeasureReportUtils.getCountFromStratumPopulationById(stratum, "num-1");
+
+        assertEquals(25, count);
+    }
+
+    @Test
+    void testGetCountFromStratumPopulationById_FromStratum_NotFound() {
+        StratifierGroupComponent stratum = new StratifierGroupComponent();
+
+        StratifierGroupPopulationComponent numerator = new StratifierGroupPopulationComponent();
+        numerator.setCode(new CodeableConcept().addCoding(new Coding().setCode("numerator")));
+        numerator.setCount(25);
+        numerator.setId("num-1");
+        stratum.addPopulation(numerator);
+
+        int count = R4MeasureReportUtils.getCountFromStratumPopulationById(stratum, "missing-id");
+
+        assertEquals(0, count);
     }
 
     // Note: testGetStratumDefText and testMatchesStratumValue tests omitted

@@ -1,14 +1,19 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import org.hl7.fhir.r4.model.Period;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 
 public class MeasureSupportingEvidenceTest {
 
     private static final Given given = Measure.given().repositoryFor("MeasureTest");
+    private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
 
     @Test
-    void ratioSupportingEvidence() {
+    void ratioSupportingEvidence() throws ParseException {
 
         given.when()
                 .measureId("RatioGroupBooleanAllPopulationsSuppEvidence")
@@ -57,6 +62,59 @@ public class MeasureSupportingEvidenceTest {
                 .getPopulationExtension("Denominator Resource")
                 .hasResourceIdResult("Encounter/patient-9-encounter-2")
                 .hasResourceIdResult("Encounter/patient-9-encounter-1")
+                .up()
+                .getPopulationExtension("list of boolean")
+                .hasListBooleanResult(true)
+                .hasListBooleanResult(false)
+                .up()
+                .getPopulationExtension("string")
+                .hasStringResult("string test")
+                .up()
+                .getPopulationExtension("date")
+                .hasStringResult("2026-01-01")
+                .up()
+                .getPopulationExtension("decimal")
+                .hasDecimalResult(31.31)
+                .up()
+                .getPopulationExtension("number")
+                .hasIntegerResult(31)
+                .up()
+                .getPopulationExtension("list of dates")
+                .hasListStringResult("2024-01-01")
+                .hasListStringResult("2024-01-02")
+                .hasListStringResult("2024-01-03")
+                .up()
+                .getPopulationExtension("list of numbers")
+                .hasListIntegerResult(31)
+                .hasListIntegerResult(88)
+                .hasListIntegerResult(11)
+                .up()
+                .getPopulationExtension("list of string")
+                .hasListStringResult("test1")
+                .hasListStringResult("test2")
+                .hasListStringResult("test3")
+                .up()
+                .getPopulationExtension("test tuple")
+                .hasTupleInteger("number", 31)
+                .hasTupleListStringItem("dates", "2024-01-01")
+                .hasTupleListStringItem("dates", "2024-01-02")
+                .hasTupleListStringItem("dates", "2024-01-03")
+                .hasTupleString("birthYear", "string test")
+                .up()
+                .getPopulationExtension("interval")
+                .hasIntervalResult(new Period()
+                        .setStart(DATE_FORMAT.parse("2024-01-01T00:00:00-07:00"))
+                        .setEnd(DATE_FORMAT.parse("2024-12-31T23:59:59-07:00")))
+                .up()
+                .getPopulationExtension("test code")
+                .hasStringResult(
+                        "Code { code: M, system: http://hl7.org/fhir/v3/AdministrativeGender, version: null, display: Male }")
+                .up()
+                .getPopulationExtension("EmptyListExample")
+                .hasStringResult("null")
+                .up()
+                .getPopulationExtension("NullExample")
+                .hasStringResult("null")
                 .up()
                 .up()
                 .population("denominator-exclusion")

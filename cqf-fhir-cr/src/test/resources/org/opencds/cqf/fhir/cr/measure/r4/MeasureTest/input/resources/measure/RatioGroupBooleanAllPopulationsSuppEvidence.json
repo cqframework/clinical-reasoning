@@ -97,10 +97,6 @@
             },
             {
               "url": "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-supportingEvidence",
-              "valueString": "list of boolean"
-            },
-            {
-              "url": "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-supportingEvidence",
               "valueString": "test tuple"
             },
             {

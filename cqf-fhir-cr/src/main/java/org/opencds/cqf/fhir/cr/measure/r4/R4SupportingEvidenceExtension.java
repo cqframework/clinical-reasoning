@@ -3,12 +3,14 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_SUPPORTING_EVIDENCE_URL;
 
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.MeasureReport;
@@ -200,6 +202,12 @@ public class R4SupportingEvidenceExtension {
             target.addExtension(new Extension("resultBoolean", new BooleanType(b)));
         } else if (leaf instanceof Integer i) {
             target.addExtension(new Extension("resultInteger", new IntegerType(i)));
+        } else if (leaf instanceof BigDecimal bd) {
+            target.addExtension(new Extension("resultDecimal", new DecimalType(bd)));
+        } else if (leaf instanceof Double d) {
+            target.addExtension(new Extension("resultDecimal", new DecimalType(BigDecimal.valueOf(d))));
+        } else if (leaf instanceof Float f) {
+            target.addExtension(new Extension("resultDecimal", new DecimalType(BigDecimal.valueOf(f.doubleValue()))));
         } else if (leaf instanceof String s) {
             target.addExtension(new Extension("resultString", new StringType(s)));
         } else if (leaf instanceof IBaseResource r) {
@@ -246,6 +254,16 @@ public class R4SupportingEvidenceExtension {
             listExt.addExtension(new Extension("itemBoolean", new BooleanType(b)));
         } else if (leaf instanceof Integer i) {
             listExt.addExtension(new Extension("itemInteger", new IntegerType(i)));
+        } else if (leaf instanceof BigDecimal bd) {
+            listExt.addExtension(new Extension("itemDecimal", new DecimalType(bd)));
+        } else if (leaf instanceof Double d) {
+            listExt.addExtension(new Extension("itemDecimal", new DecimalType(BigDecimal.valueOf(d))));
+        } else if (leaf instanceof Float f) {
+            listExt.addExtension(new Extension("itemDecimal", new DecimalType(BigDecimal.valueOf(f.doubleValue()))));
+        } else if (leaf != null
+                && "org.opencds.cqf.cql.engine.runtime.Decimal"
+                        .equals(leaf.getClass().getName())) {
+            listExt.addExtension(new Extension("itemDecimal", new DecimalType(new BigDecimal(leaf.toString()))));
         } else if (leaf instanceof String s) {
             listExt.addExtension(new Extension("itemString", new StringType(s)));
         } else if (leaf instanceof org.hl7.fhir.r4.model.Type t) {

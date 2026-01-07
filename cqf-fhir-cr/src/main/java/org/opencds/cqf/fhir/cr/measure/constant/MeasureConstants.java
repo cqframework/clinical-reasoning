@@ -48,4 +48,8 @@ public class MeasureConstants {
     public static final String FHIR_ALL_TYPES_SYSTEM_URL = "http://hl7.org/fhir/fhir-types";
     public static final String POPULATION_BASIS_URL =
             "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-populationBasis";
+
+    // Capture the numerator or denominator aggregation result in the population
+    public static final String EXT_AGGREGATION_METHOD_RESULT =
+            "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/extension-aggregationMethodResult";
 }

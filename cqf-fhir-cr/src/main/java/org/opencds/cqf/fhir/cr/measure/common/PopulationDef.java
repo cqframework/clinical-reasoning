@@ -24,6 +24,9 @@ public class PopulationDef {
     @Nullable
     private final ContinuousVariableObservationAggregateMethod aggregateMethod;
 
+    @Nullable
+    private Double aggregationResult;
+
     protected Set<Object> evaluatedResources;
     protected Map<String, Set<Object>> subjectResources = new HashMap<>();
 
@@ -178,6 +181,15 @@ public class PopulationDef {
     @Nullable
     public ContinuousVariableObservationAggregateMethod getAggregateMethod() {
         return this.aggregateMethod;
+    }
+
+    @Nullable
+    public Double getAggregationResult() {
+        return aggregationResult;
+    }
+
+    public void setAggregationResult(@Nullable Double aggregationResult) {
+        this.aggregationResult = aggregationResult;
     }
 
     /**

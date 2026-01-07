@@ -110,7 +110,7 @@ public class CqlFhirParametersConverter {
         for (Map.Entry<String, ExpressionResult> entry :
                 evaluationResult.getExpressionResults().entrySet()) {
             String name = entry.getKey();
-            Object value = entry.getValue().value();
+            Object value = entry.getValue().getValue();
 
             if (value instanceof Iterable<?> iterable) {
                 if (!iterable.iterator().hasNext()) {

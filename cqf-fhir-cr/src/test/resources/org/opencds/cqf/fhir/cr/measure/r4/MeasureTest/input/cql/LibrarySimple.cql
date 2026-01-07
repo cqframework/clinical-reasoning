@@ -133,6 +133,17 @@ define "test tuple":
     birthYear: "string"
   }
 
+define "list test tuple":
+         {{
+    number: "number",
+    dates: "list of dates",
+    birthYear: "string"
+  },{
+    number: "number",
+    dates: "list of dates",
+    birthYear: "string"
+  }}
+
 define "test code":
     "SDE Sex"
 

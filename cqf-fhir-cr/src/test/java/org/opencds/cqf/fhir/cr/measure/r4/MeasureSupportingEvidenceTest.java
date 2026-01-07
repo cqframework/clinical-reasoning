@@ -132,6 +132,8 @@ public class MeasureSupportingEvidenceTest {
                 .getPopulationExtension("PatientRes")
                 .hasResourceIdResult("Patient/patient-9")
                 .up()
+                .getPopulationExtension("list test tuple")
+                .up()
                 .up()
                 .population("denominator-exclusion")
                 .hasCount(0)

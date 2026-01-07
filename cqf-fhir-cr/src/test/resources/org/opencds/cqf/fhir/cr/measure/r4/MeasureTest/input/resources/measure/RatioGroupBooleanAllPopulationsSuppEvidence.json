@@ -126,6 +126,10 @@
             {
               "url": "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-supportingEvidence",
               "valueString": "PatientRes"
+            },
+            {
+              "url": "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-supportingEvidence",
+              "valueString": "list test tuple"
             }
           ]
         },

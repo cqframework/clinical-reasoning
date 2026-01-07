@@ -62,6 +62,62 @@
             {
               "url": "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-supportingEvidence",
               "valueString": "Denominator Resource"
+            },
+            {
+              "url": "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-supportingEvidence",
+              "valueString": "list of boolean"
+            },
+            {
+              "url": "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-supportingEvidence",
+              "valueString": "string"
+            },
+            {
+              "url": "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-supportingEvidence",
+              "valueString": "date"
+            },
+            {
+              "url": "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-supportingEvidence",
+              "valueString": "decimal"
+            },
+            {
+              "url": "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-supportingEvidence",
+              "valueString": "number"
+            },
+            {
+              "url": "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-supportingEvidence",
+              "valueString": "list of dates"
+            },
+            {
+              "url": "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-supportingEvidence",
+              "valueString": "list of numbers"
+            },
+            {
+              "url": "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-supportingEvidence",
+              "valueString": "list of string"
+            },
+            {
+              "url": "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-supportingEvidence",
+              "valueString": "list of boolean"
+            },
+            {
+              "url": "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-supportingEvidence",
+              "valueString": "test tuple"
+            },
+            {
+              "url": "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-supportingEvidence",
+              "valueString": "interval"
+            },
+            {
+              "url": "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-supportingEvidence",
+              "valueString": "test code"
+            },
+            {
+              "url": "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-supportingEvidence",
+              "valueString": "EmptyListExample"
+            },
+            {
+              "url": "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-supportingEvidence",
+              "valueString": "NullExample"
             }
           ]
         },

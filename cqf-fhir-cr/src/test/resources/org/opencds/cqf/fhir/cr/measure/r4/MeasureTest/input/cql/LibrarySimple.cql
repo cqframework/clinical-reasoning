@@ -75,6 +75,52 @@ define "always false":
 define "always true":
     true
 
+define "list of boolean":
+    {true, false, true}
+
+define "list of dates":
+  { @2024-01-01, @2024-01-02, @2024-01-03 }
+
+define "list of string":
+    {'test1', 'test2', 'test3'}
+
+define "interval":
+    Interval[@2024-01-01T00:00:00, @2024-12-31T23:59:59]
+
+define "list of numbers":
+    {31, 88, 11}
+
+define "string":
+    'string test'
+
+define "date":
+    @2026-01-01
+
+define "datetime":
+    @2026-12-30T23:59:59
+
+define "NullExample":
+         null
+
+define "EmptyListExample":
+  { }
+
+define "number":
+         31
+
+define "decimal":
+         31.31
+
+define "test tuple":
+         {
+    number: "number",
+    dates: "list of dates",
+    birthYear: "string"
+  }
+
+define "test code":
+    "SDE Sex"
+
 // sde single value
 
 define "SDE Sex":

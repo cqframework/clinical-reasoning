@@ -3,7 +3,6 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.DATEOFCOMPLIANCE;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_SDE_REFERENCE_URL;
-import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_SUPPORTING_EVIDENCE_URL;
 
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -20,7 +19,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -43,7 +41,6 @@ import org.hl7.fhir.r4.model.StringType;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.fhir.cr.measure.common.CodeDef;
 import org.opencds.cqf.fhir.cr.measure.common.ConceptDef;
-import org.opencds.cqf.fhir.cr.measure.common.ExtensionDef;
 import org.opencds.cqf.fhir.cr.measure.common.FhirResourceUtils;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
@@ -284,7 +281,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                 && populationDef.getExtDefs() != null
                 && !populationDef.getExtDefs().isEmpty()) {
             var extDefs = populationDef.getExtDefs();
-            addCqlResultExtension(reportPopulation, extDefs);
+            R4SupportingEvidenceExtension.addCqlResultExtension(reportPopulation, extDefs);
         }
 
         if (measurePopulation.hasDescription()) {
@@ -318,162 +315,6 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             bc.addContained(subjectList);
             reportPopulation.setSubjectResults(new Reference("#" + subjectList.getId()));
         }
-    }
-
-    public static void addCqlResultExtension(
-            MeasureReportGroupPopulationComponent reportPopulation, List<ExtensionDef> extensionDefs) {
-
-        if (extensionDefs == null || extensionDefs.isEmpty()) {
-            return;
-        }
-
-        Extension parent = new Extension().setUrl(EXT_SUPPORTING_EVIDENCE_URL);
-
-        for (ExtensionDef def : extensionDefs) {
-            Extension resultExt = new Extension();
-
-            // Expression name
-            resultExt.addExtension(new Extension("expression", new StringType(def.getExpression())));
-
-            // Expression result
-            addResultValue(resultExt, def.getSubjectResources().values());
-
-            parent.addExtension(resultExt);
-        }
-
-        reportPopulation.addExtension(parent);
-    }
-
-    private static void addResultValue(Extension target, Object value) {
-        List<Object> leaves = new ArrayList<>();
-        collectLeaves(value, leaves, 0);
-
-        if (leaves.isEmpty()) {
-            target.addExtension(new Extension("result", new StringType("null")));
-            return;
-        }
-
-        if (leaves.size() == 1) {
-            addSingleLeaf(target, leaves.get(0));
-            return;
-        }
-
-        Extension listExt = new Extension("resultList");
-        for (Object leaf : leaves) {
-            addListItem(listExt, leaf);
-        }
-        target.addExtension(listExt);
-    }
-
-    private static final int MAX_DEPTH = 25;
-
-    private static void collectLeaves(Object value, List<Object> out, int depth) {
-        if (value == null) return;
-        if (depth > MAX_DEPTH) {
-            out.add("[max-depth]");
-            return;
-        }
-
-        // Your custom set is still Iterable -> this will traverse it
-        if (value instanceof Iterable<?> it) {
-            for (Object item : it) {
-                collectLeaves(item, out, depth + 1);
-            }
-            return;
-        }
-
-        if (value instanceof java.util.Map<?, ?> map) {
-            collectLeaves(map.values(), out, depth + 1);
-            return;
-        }
-
-        // Arrays
-        if (value.getClass().isArray()) {
-            int len = java.lang.reflect.Array.getLength(value);
-            for (int i = 0; i < len; i++) {
-                collectLeaves(java.lang.reflect.Array.get(value, i), out, depth + 1);
-            }
-            return;
-        }
-
-        // CQL engine type wrapper (store as string, or enhance later per type)
-        if (value instanceof org.opencds.cqf.cql.engine.runtime.CqlType cql) {
-            // Prefer the engine's equality semantics; for reporting store a stable string
-            out.add(String.valueOf(cql));
-            return;
-        }
-
-        // Leaf
-        out.add(value);
-    }
-
-    private static void addSingleLeaf(Extension target, Object leaf) {
-        if (leaf == null) {
-            target.addExtension(new Extension("result", new StringType("null")));
-            return;
-        }
-
-        // --- Tuple handling ---
-        if (leaf instanceof org.opencds.cqf.cql.engine.runtime.Tuple tuple) {
-            Extension tupleExt = new Extension("resultTuple");
-
-            // Tuple exposes element names; exact API can vary slightly by version
-            for (String name : tuple.getElements().keySet()) {
-                Object fieldValue = tuple.getElements().get(name);
-
-                Extension fieldExt = new Extension("field");
-                fieldExt.addExtension(new Extension("name", new StringType(name)));
-
-                addResultValue(fieldExt, fieldValue);
-
-                tupleExt.addExtension(fieldExt);
-            }
-
-            target.addExtension(tupleExt);
-            return;
-        }
-
-        // --- existing scalar/resource/type handling ---
-        if (leaf instanceof Boolean b) {
-            target.addExtension(new Extension("resultBoolean", new BooleanType(b)));
-        } else if (leaf instanceof Integer i) {
-            target.addExtension(new Extension("resultInteger", new IntegerType(i)));
-        } else if (leaf instanceof String s) {
-            target.addExtension(new Extension("resultString", new StringType(s)));
-        } else if (leaf instanceof org.hl7.fhir.instance.model.api.IBaseResource r) {
-            target.addExtension(new Extension("resultResourceId", new StringType(resourceIdString(r))));
-        } else if (leaf instanceof org.hl7.fhir.r4.model.Type t) {
-            target.addExtension(new Extension("result", t));
-        } else {
-            target.addExtension(new Extension("resultString", new StringType(String.valueOf(leaf))));
-        }
-    }
-
-    private static void addListItem(Extension listExt, Object leaf) {
-        if (leaf == null) {
-            listExt.addExtension(new Extension("itemNull", new StringType("null")));
-        } else if (leaf instanceof org.hl7.fhir.instance.model.api.IBaseResource r) {
-            listExt.addExtension(new Extension("itemResourceId", new StringType(resourceIdString(r))));
-        } else if (leaf instanceof Boolean b) {
-            listExt.addExtension(new Extension("itemBoolean", new BooleanType(b)));
-        } else if (leaf instanceof Integer i) {
-            listExt.addExtension(new Extension("itemInteger", new IntegerType(i)));
-        } else if (leaf instanceof String s) {
-            listExt.addExtension(new Extension("itemString", new StringType(s)));
-        } else if (leaf instanceof org.hl7.fhir.r4.model.Type t) {
-            listExt.addExtension(new Extension("item", t));
-        } else {
-            listExt.addExtension(new Extension("itemString", new StringType(String.valueOf(leaf))));
-        }
-    }
-
-    private static String resourceIdString(org.hl7.fhir.instance.model.api.IBaseResource r) {
-        var id = r.getIdElement();
-        if (id == null || id.isEmpty()) {
-            return "(no-id)";
-        }
-        // Typically gives "ResourceType/id" or absolute; normalize if you want:
-        return id.toUnqualifiedVersionless().getValue();
     }
 
     static ListResource createList(String id) {

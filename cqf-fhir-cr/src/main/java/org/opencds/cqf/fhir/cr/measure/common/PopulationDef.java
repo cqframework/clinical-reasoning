@@ -16,7 +16,7 @@ public class PopulationDef {
     private final ConceptDef code;
     private final MeasurePopulationType measurePopulationType;
     private final CodeDef populationBasis;
-    private final List<ExtensionDef> extDefs;
+    private final List<SupportingEvidenceDef> extDefs;
 
     @Nullable
     private final String criteriaReference;
@@ -36,7 +36,7 @@ public class PopulationDef {
             MeasurePopulationType measurePopulationType,
             String expression,
             CodeDef populationBasis,
-            @Nullable List<ExtensionDef> extDefs) {
+            @Nullable List<SupportingEvidenceDef> extDefs) {
         this(id, code, measurePopulationType, expression, populationBasis, null, null, extDefs);
     }
 
@@ -48,7 +48,7 @@ public class PopulationDef {
             CodeDef populationBasis,
             @Nullable String criteriaReference,
             @Nullable ContinuousVariableObservationAggregateMethod aggregateMethod,
-            @Nullable List<ExtensionDef> extDefs) {
+            @Nullable List<SupportingEvidenceDef> extDefs) {
         this.id = id;
         this.code = code;
         this.measurePopulationType = measurePopulationType;
@@ -232,7 +232,7 @@ public class PopulationDef {
                 + '}';
     }
 
-    public List<ExtensionDef> getExtDefs() {
+    public List<SupportingEvidenceDef> getExtDefs() {
         return extDefs == null ? null : new ArrayList<>(extDefs);
     }
 }

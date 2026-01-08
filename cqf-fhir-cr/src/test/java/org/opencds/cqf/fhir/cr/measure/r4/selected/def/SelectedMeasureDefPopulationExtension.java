@@ -2,15 +2,15 @@ package org.opencds.cqf.fhir.cr.measure.r4.selected.def;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-import org.opencds.cqf.fhir.cr.measure.common.ExtensionDef;
+import org.opencds.cqf.fhir.cr.measure.common.SupportingEvidenceDef;
 
 public class SelectedMeasureDefPopulationExtension<P>
-        extends org.opencds.cqf.fhir.cr.measure.r4.Measure.Selected<ExtensionDef, P> {
-    public SelectedMeasureDefPopulationExtension(ExtensionDef value, P parent) {
+        extends org.opencds.cqf.fhir.cr.measure.r4.Measure.Selected<SupportingEvidenceDef, P> {
+    public SelectedMeasureDefPopulationExtension(SupportingEvidenceDef value, P parent) {
         super(value, parent);
     }
 
-    public ExtensionDef extensionDef() {
+    public SupportingEvidenceDef extensionDef() {
         return value();
     }
 

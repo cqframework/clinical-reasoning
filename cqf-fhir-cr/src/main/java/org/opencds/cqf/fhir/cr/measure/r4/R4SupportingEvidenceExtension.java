@@ -18,7 +18,7 @@ import org.hl7.fhir.r4.model.StringType;
 import org.opencds.cqf.cql.engine.runtime.CqlType;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.cql.engine.runtime.Tuple;
-import org.opencds.cqf.fhir.cr.measure.common.ExtensionDef;
+import org.opencds.cqf.fhir.cr.measure.common.SupportingEvidenceDef;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4DateHelper;
 
 public class R4SupportingEvidenceExtension {
@@ -33,15 +33,15 @@ public class R4SupportingEvidenceExtension {
      * - nested extension contains ONLY result nodes
      */
     public static void addCqlResultExtension(
-            MeasureReport.MeasureReportGroupPopulationComponent reportPopulation, List<ExtensionDef> extensionDefs) {
+            MeasureReport.MeasureReportGroupPopulationComponent reportPopulation, List<SupportingEvidenceDef> supportingEvidenceDefs) {
 
-        if (reportPopulation == null || extensionDefs == null || extensionDefs.isEmpty()) {
+        if (reportPopulation == null || supportingEvidenceDefs == null || supportingEvidenceDefs.isEmpty()) {
             return;
         }
 
         Extension parent = new Extension().setUrl(EXT_SUPPORTING_EVIDENCE_URL);
 
-        for (ExtensionDef def : extensionDefs) {
+        for (SupportingEvidenceDef def : supportingEvidenceDefs) {
             if (def == null) continue;
 
             String expressionName = def.getExpression();
@@ -63,7 +63,7 @@ public class R4SupportingEvidenceExtension {
      * If not found, try to find a single Interval anywhere in the values (common for Measurement Period).
      * Avoid subjectResources.values() “mix-all-expressions” fallback.
      */
-    private static Object resolveExpressionValue(ExtensionDef def, String expressionName) {
+    private static Object resolveExpressionValue(SupportingEvidenceDef def, String expressionName) {
         Map<String, Set<Object>> subjectResources = def.getSubjectResources();
         if (subjectResources == null || subjectResources.isEmpty()) {
             return null;

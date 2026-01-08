@@ -4,12 +4,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-public class ExtensionDef {
+public class SupportingEvidenceDef {
     private final String expression;
     private final String systemUrl;
     protected Map<String, Set<Object>> subjectResources = new HashMap<>();
 
-    public ExtensionDef(String expression, String systemUrl) {
+    public SupportingEvidenceDef(String expression, String systemUrl) {
         this.expression = expression;
         this.systemUrl = systemUrl;
     }

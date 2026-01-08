@@ -362,7 +362,7 @@ public class MeasureEvaluator {
                 && populationDef.getExtDefs() != null
                 && !populationDef.getExtDefs().isEmpty()) {
             var extDef = populationDef.getExtDefs();
-            for (ExtensionDef e : extDef) {
+            for (SupportingEvidenceDef e : extDef) {
                 var result = evaluationResult.get(e.getExpression());
                 var object = evaluateSupportingCriteria(result);
                 e.addResource(subjectId, object);

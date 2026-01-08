@@ -215,7 +215,7 @@ public class SelectedMeasureDefPopulation<P>
     }
 
     public SelectedMeasureDefPopulationExtension<SelectedMeasureDefPopulation<P>> getExtDef(String expressionName) {
-        var extDef = this.value.getExtDefs().stream()
+        var extDef = this.value.getSupportingEvidenceDefs().stream()
                 .filter(t -> t.getExpression().equals(expressionName))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Expression not found"));

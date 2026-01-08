@@ -280,10 +280,10 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         }
         // Supporting Evidence
         if (bc.report().getType().equals(MeasureReport.MeasureReportType.INDIVIDUAL)
-                && populationDef.getExtDefs() != null
-                && !populationDef.getExtDefs().isEmpty()) {
-            var extDefs = populationDef.getExtDefs();
-            R4SupportingEvidenceExtension.addCqlResultExtension(reportPopulation, extDefs);
+                && populationDef.getSupportingEvidenceDefs() != null
+                && !populationDef.getSupportingEvidenceDefs().isEmpty()) {
+            var extDefs = populationDef.getSupportingEvidenceDefs();
+            R4SupportingEvidenceExtension.addSupportingEvidenceExtensions(reportPopulation, extDefs);
         }
 
         if (measurePopulation.hasDescription()) {

@@ -232,7 +232,7 @@ public class PopulationDef {
                 + '}';
     }
 
-    public List<SupportingEvidenceDef> getsupportingEvidenceDefs() {
+    public List<SupportingEvidenceDef> getSupportingEvidenceDefs() {
         return supportingEvidenceDefs == null ? null : new ArrayList<>(supportingEvidenceDefs);
     }
 }

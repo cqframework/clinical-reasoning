@@ -1,81 +1,119 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
-import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_SUPPORTING_EVIDENCE_URL;
-
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.StringType;
+
 import org.opencds.cqf.cql.engine.runtime.CqlType;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.cql.engine.runtime.Tuple;
+import org.opencds.cqf.fhir.cr.measure.common.CodeDef;
+import org.opencds.cqf.fhir.cr.measure.common.ConceptDef;
 import org.opencds.cqf.fhir.cr.measure.common.SupportingEvidenceDef;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4DateHelper;
+
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.EXT_SUPPORTING_EVIDENCE_URL;
 
 public class R4SupportingEvidenceExtension {
 
     private static final R4DateHelper DATE_HELPER = new R4DateHelper();
     private static final int MAX_DEPTH = 25;
 
+    // If you have the official constant for this, use it instead of the literal:
+    private static final String EXT_CQF_EXPRESSION_CODE =
+        "http://hl7.org/fhir/StructureDefinition/cqf-expressionCode";
+
     /**
-     * Produces ONE parent extension (url = EXT_SUPPORTING_EVIDENCE_URL) and within it
-     * a nested extension per CQL expression, where:
-     * - nested extension url == expressionName
-     * - nested extension contains ONLY result nodes
+     * Produces ONE cqf-supportingEvidence extension PER SupportingEvidenceDef, and adds
+     * each to reportPopulation.extension.
+     *
+     * Each supportingEvidence extension contains:
+     * - name (required)
+     * - description (optional)
+     * - code (optional CodeableConcept)
+     * - value (0..*) as repeated nested extensions holding the result(s)
+     *
+     * Matches StructureDefinition cqf-supportingEvidence (FHIR R5) shape, but authored on R4 MeasureReport.
      */
-    public static void addCqlResultExtension(
-            MeasureReport.MeasureReportGroupPopulationComponent reportPopulation, List<SupportingEvidenceDef> supportingEvidenceDefs) {
+    public static void addSupportingEvidenceExtensions(
+        MeasureReport.MeasureReportGroupPopulationComponent reportPopulation,
+        List<SupportingEvidenceDef> supportingEvidenceDefs) {
 
         if (reportPopulation == null || supportingEvidenceDefs == null || supportingEvidenceDefs.isEmpty()) {
             return;
         }
 
-        Extension parent = new Extension().setUrl(EXT_SUPPORTING_EVIDENCE_URL);
-
         for (SupportingEvidenceDef def : supportingEvidenceDefs) {
             if (def == null) continue;
 
-            String expressionName = def.getExpression();
-            if (expressionName == null || expressionName.isBlank()) continue;
+            // Name is required by the SD (min=1)
+            String name = def.getName();
+            if (name == null || name.isBlank()) {
+                // Fallback to expression if name wasn't provided
+                name = def.getExpression();
+            }
+            if (name == null || name.isBlank()) continue;
 
-            Extension exprExt = new Extension().setUrl(expressionName);
+            Extension seExt = new Extension().setUrl(EXT_SUPPORTING_EVIDENCE_URL);
 
-            Object exprValue = resolveExpressionValue(def, expressionName);
+            // ---- name slice (required) ----
+            seExt.addExtension(new Extension("name", new StringType(name))); // SD says valueCode; in R4 use StringType or CodeType as needed
+            // If you truly need valueCode specifically, swap to: new CodeType(name)
 
-            addResultValue(exprExt, exprValue);
-            parent.addExtension(exprExt);
+            // ---- description slice (optional) ----
+            String desc = def.getExpressionDescription();
+            if (desc != null && !desc.isBlank()) {
+                seExt.addExtension(new Extension("description", new StringType(desc)));
+            }
+
+            // ---- code slice (optional CodeableConcept) ----
+            CodeableConcept codeConcept = conceptDefToConcept(def.getCode());
+            if (codeConcept != null && codeConcept.hasCoding()) {
+                seExt.addExtension(new Extension("code", codeConcept));
+            }
+
+            // ---- value slice(s) (0..*) ----
+            Object exprValue = resolveExpressionValue(def);
+            addValues(seExt, exprValue);
+
+            reportPopulation.addExtension(seExt);
         }
-
-        reportPopulation.addExtension(parent);
     }
 
     /**
-     * Prefer the set for this expressionName.
-     * If not found, try to find a single Interval anywhere in the values (common for Measurement Period).
-     * Avoid subjectResources.values() “mix-all-expressions” fallback.
+     * Pick the data you want to render for this SupportingEvidenceDef.
+     *
+     * Primary: subjectResources for the expression (if present).
+     * Fallback: if a single key exists, use it.
      */
-    private static Object resolveExpressionValue(SupportingEvidenceDef def, String expressionName) {
+    private static Object resolveExpressionValue(SupportingEvidenceDef def) {
         Map<String, Set<Object>> subjectResources = def.getSubjectResources();
         if (subjectResources == null || subjectResources.isEmpty()) {
             return null;
         }
 
-        // Direct match by expression name
-        Set<Object> direct = subjectResources.get(expressionName);
-        if (direct != null) {
-            return direct;
+        String expr = def.getExpression();
+        if (expr != null) {
+            Set<Object> direct = subjectResources.get(expr);
+            if (direct != null) {
+                return direct;
+            }
         }
 
-        // Safe fallback: if there is exactly one key, use its set
         if (subjectResources.size() == 1) {
             return subjectResources.values().iterator().next();
         }
@@ -83,9 +121,16 @@ public class R4SupportingEvidenceExtension {
         return null;
     }
 
-    private static void addResultValue(Extension target, Object value) {
+    /**
+     * Adds repeated "value" nested extensions under the supportingEvidence extension.
+     * Each "value" entry may contain:
+     * - value[x] for scalar/period/resourceId/etc
+     * - nested extensions for tuple/list representations
+     */
+    private static void addValues(Extension supportingEvidenceExt, Object value) {
         if (value == null) {
-            target.addExtension(new Extension("resultString", new StringType("null")));
+            // SD says min 0 on value, so you can omit entirely. If you prefer explicit null, uncomment:
+            // supportingEvidenceExt.addExtension(new Extension("value", new StringType("null")));
             return;
         }
 
@@ -93,22 +138,21 @@ public class R4SupportingEvidenceExtension {
         collectLeaves(value, leaves, 0);
 
         if (leaves.isEmpty()) {
-            target.addExtension(new Extension("resultString", new StringType("null")));
             return;
         }
 
-        if (leaves.size() == 1) {
-            addSingleLeaf(target, leaves.get(0));
-            return;
-        }
-
-        Extension listExt = new Extension("resultList");
+        // Create one "value" extension per leaf
         for (Object leaf : leaves) {
-            addListItem(listExt, leaf);
+            Extension valueExt = new Extension("value");
+            encodeLeafIntoValue(valueExt, leaf);
+            supportingEvidenceExt.addExtension(valueExt);
         }
-        target.addExtension(listExt);
     }
 
+    /**
+     * Collect leaves without destroying Interval/Tuple structure.
+     * Keep CqlType as leaf; encode later (don't stringify here).
+     */
     private static void collectLeaves(Object value, List<Object> out, int depth) {
         if (value == null) return;
         if (depth > MAX_DEPTH) {
@@ -122,13 +166,13 @@ public class R4SupportingEvidenceExtension {
             return;
         }
 
-        // Preserve CqlType as leaf (don't stringify here)
+        // Preserve CqlType as leaf (engine wrappers). We'll encode later.
         if (value instanceof CqlType) {
             out.add(value);
             return;
         }
 
-        // Flatten containers
+        // Flatten iterables (Set/List/HashSetForFhirResourcesAndCqlTypes)
         if (value instanceof Iterable<?> it) {
             for (Object item : it) {
                 collectLeaves(item, out, depth + 1);
@@ -136,119 +180,75 @@ public class R4SupportingEvidenceExtension {
             return;
         }
 
+        // Single leaf
         out.add(value);
     }
 
-    private static void addSingleLeaf(Extension target, Object leaf) {
+    /**
+     * Encode a single leaf into a "value" extension.
+     * This is where we map to FHIR value[x] or nested extensions for tuples/lists.
+     */
+    private static void encodeLeafIntoValue(Extension valueExt, Object leaf) {
         if (leaf == null) {
-            target.addExtension(new Extension("resultString", new StringType("null")));
+            valueExt.setValue(new StringType("null"));
             return;
         }
 
-        // Interval<DateTime>/Interval<Date> -> Period via existing helper, with CQF accessor fallback
+        // Interval<DateTime>/Interval<Date> -> Period
         Interval interval = asInterval(leaf);
         if (interval != null) {
             Period p = tryBuildPeriod(interval);
             if (p != null) {
-                target.addExtension(new Extension("resultPeriod", p));
+                valueExt.setValue(p); // valuePeriod
                 return;
             }
-            // if it isn't Date/DateTime interval, fall through to string fallback
+            // non-date interval -> fall through to string
         }
 
-        // Tuple (field name in url)
+        // Tuple -> represented as nested extensions under this "value"
         if (leaf instanceof Tuple tuple) {
-            Extension tupleExt = new Extension("resultTuple");
+            // Represent each tuple field as a nested extension where url == fieldName,
+            // and its value is stored as value[x] or nested structure.
             for (Map.Entry<String, Object> entry : tuple.getElements().entrySet()) {
                 Extension fieldExt = new Extension(entry.getKey());
-                addResultValue(fieldExt, entry.getValue());
-                tupleExt.addExtension(fieldExt);
+                // A field can have multiple leaves; store them as repeated nested "value" inside fieldExt
+                addValues(fieldExt, entry.getValue());
+                valueExt.addExtension(fieldExt);
             }
-            target.addExtension(tupleExt);
             return;
         }
 
-        // Scalars / resources / FHIR datatypes
+        // Scalars / resources / numeric
         if (leaf instanceof Boolean b) {
-            target.addExtension(new Extension("resultBoolean", new BooleanType(b)));
+            valueExt.setValue(new BooleanType(b));
         } else if (leaf instanceof Integer i) {
-            target.addExtension(new Extension("resultInteger", new IntegerType(i)));
+            valueExt.setValue(new IntegerType(i));
         } else if (leaf instanceof BigDecimal bd) {
-            target.addExtension(new Extension("resultDecimal", new DecimalType(bd)));
+            valueExt.setValue(new DecimalType(bd));
         } else if (leaf instanceof String s) {
-            target.addExtension(new Extension("resultString", new StringType(s)));
+            valueExt.setValue(new StringType(s));
         } else if (leaf instanceof IBaseResource r) {
-            target.addExtension(new Extension("resultResourceId", new StringType(resourceIdString(r))));
+            // store id string
+            valueExt.setValue(new StringType(resourceIdString(r)));
+        } else if (leaf instanceof org.hl7.fhir.r4.model.Type t) {
+            // allow direct FHIR datatype
+            valueExt.setValue(t);
         } else {
-            target.addExtension(new Extension("resultString", new StringType(String.valueOf(leaf))));
+            // fallback
+            valueExt.setValue(new StringType(String.valueOf(leaf)));
         }
     }
 
-    private static void addListItem(Extension listExt, Object leaf) {
-        if (leaf == null) {
-            listExt.addExtension(new Extension("itemNull", new StringType("null")));
-            return;
-        }
-
-        // Interval item -> Period when possible
-        Interval interval = asInterval(leaf);
-        if (interval != null) {
-            Period p = tryBuildPeriod(interval);
-            if (p != null) {
-                listExt.addExtension(new Extension("itemPeriod", p));
-                return;
-            }
-        }
-
-        // Tuple item
-        if (leaf instanceof Tuple tuple) {
-            Extension tupleItem = new Extension("itemTuple");
-            for (Map.Entry<String, Object> entry : tuple.getElements().entrySet()) {
-                Extension fieldExt = new Extension(entry.getKey());
-                addResultValue(fieldExt, entry.getValue());
-                tupleItem.addExtension(fieldExt);
-            }
-            listExt.addExtension(tupleItem);
-            return;
-        }
-
-        // Scalar/resource items
-        if (leaf instanceof IBaseResource r) {
-            listExt.addExtension(new Extension("itemResourceId", new StringType(resourceIdString(r))));
-        } else if (leaf instanceof Boolean b) {
-            listExt.addExtension(new Extension("itemBoolean", new BooleanType(b)));
-        } else if (leaf instanceof Integer i) {
-            listExt.addExtension(new Extension("itemInteger", new IntegerType(i)));
-        } else if (leaf instanceof BigDecimal bd) {
-            listExt.addExtension(new Extension("itemDecimal", new DecimalType(bd)));
-        } else if (leaf instanceof String s) {
-            listExt.addExtension(new Extension("itemString", new StringType(s)));
-        } else {
-            listExt.addExtension(new Extension("itemString", new StringType(String.valueOf(leaf))));
-        }
-    }
-
-    /**
-     * Uses existing R4DateHelper, but if interval.getStart()/getEnd() are not populated,
-     * rebuilds a new Interval using getLow()/getHigh() (common CQF variation) and retries.
-     */
     private static Period tryBuildPeriod(Interval interval) {
-        // First try directly (works when getStart/getEnd are DateTime/Date)
-        Period period = null;
         try {
-            period = DATE_HELPER.buildMeasurementPeriod(interval);
+            return DATE_HELPER.buildMeasurementPeriod(interval);
         } catch (IllegalArgumentException ex) {
-            // fall through
+            return null;
         }
-        return period;
     }
 
-    /**
-     * Returns Interval if object is an Interval or if it's wrapped as a CqlType that is actually Interval.
-     */
     private static Interval asInterval(Object o) {
         if (o instanceof Interval i) return i;
-
         return null;
     }
 
@@ -258,5 +258,33 @@ public class R4SupportingEvidenceExtension {
             return "(no-id)";
         }
         return id.toUnqualifiedVersionless().getValue();
+    }
+
+    /**
+     * Builds CodeableConcept for the "code" slice from SupportingEvidenceDef.
+     * This example assumes you have a Coding available on the def, OR it is stored
+     * similarly to your earlier valueExpression extension approach.
+     *
+     * Adjust to your real SupportingEvidenceDef model.
+     */
+    @Nullable
+    private static CodeableConcept conceptDefToConcept(ConceptDef c) {
+        if (c == null) {return null;}
+        var cc = new CodeableConcept().setText(c.text());
+        for (var cd : c.codes()) {
+            cc.addCoding(codeDefToCoding(cd));
+        }
+
+        return cc;
+    }
+
+    private static Coding codeDefToCoding(CodeDef c) {
+        var cd = new Coding();
+        cd.setSystem(c.system());
+        cd.setCode(c.code());
+        cd.setVersion(c.version());
+        cd.setDisplay(c.display());
+
+        return cd;
     }
 }

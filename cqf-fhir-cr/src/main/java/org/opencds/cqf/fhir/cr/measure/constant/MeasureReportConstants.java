@@ -43,4 +43,6 @@ public class MeasureReportConstants {
     public static final String RESOURCE_TYPE_ORGANIZATION = "Organization";
     public static final String RESOURCE_TYPE_LOCATION = "Location";
     public static final String RESOURCE_TYPE_PATIENT = "Patient";
+    public static final String EXT_SUPPORTING_EVIDENCE_URL =
+        "http://hl7.org/fhir/StructureDefinition/cqf-supportingEvidence";
 }

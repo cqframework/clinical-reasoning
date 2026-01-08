@@ -5,7 +5,9 @@ import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.CQFM_CAR
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.CQFM_SCORING_EXT_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_CQFM_AGGREGATE_METHOD_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_CQFM_CRITERIA_REFERENCE;
-import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_SUPPORTING_EVIDENCE_URL;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_CQF_EXPRESSION_CODE;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_SUPPORTING_EVIDENCE_DEFINITION_URL;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.EXT_SUPPORTING_EVIDENCE_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_EXTENSION;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.SDE_USAGE_CODE;
 
@@ -92,7 +94,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
 
         var populationBasisDef = getPopulationBasisDef(measureBasis, groupBasis);
         var populationsWithCriteriaReference = group.getPopulation().stream()
-                .map(t -> buildPopulationDef(t, group, measure.getUrl(), populationBasisDef, getExtensionDefs(t)))
+                .map(t -> buildPopulationDef(t, group, measure.getUrl(), populationBasisDef, getSupportingEvidenceDefs(t)))
                 .toList();
 
         final Optional<PopulationDef> optPopulationDefDateOfCompliance = buildPopulationDefForDateOfCompliance(
@@ -115,20 +117,62 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
     }
 
     @Nullable
-    private List<SupportingEvidenceDef> getExtensionDefs(MeasureGroupPopulationComponent groupPopulation) {
+    private List<SupportingEvidenceDef> getSupportingEvidenceDefs(MeasureGroupPopulationComponent groupPopulation) {
         List<Extension> ext = groupPopulation.getExtension().stream()
-                .filter(t -> t.getUrl().equals(EXT_SUPPORTING_EVIDENCE_URL))
+                .filter(t -> t.getUrl().equals(EXT_SUPPORTING_EVIDENCE_DEFINITION_URL))
                 .toList();
         List<SupportingEvidenceDef> supportingEvidenceDefs = new ArrayList<>();
         if (!ext.isEmpty()) {
             for (Extension e : ext) {
-                String expression = e.getValue().toString();
-                supportingEvidenceDefs.add(new SupportingEvidenceDef(expression, EXT_SUPPORTING_EVIDENCE_URL));
+
+                Expression expr = e.getValue() instanceof Expression
+                    ? (Expression) e.getValue()
+                    : null;
+
+                if (expr == null) {
+                    throw new IllegalStateException("Extension does not contain valueExpression");
+                }
+
+                supportingEvidenceDefs.add(new SupportingEvidenceDef(
+                    expr.getExpression(),
+                    EXT_SUPPORTING_EVIDENCE_URL,
+                    expr.getDescription(),
+                    expr.getName(),
+                    expr.getLanguage(),
+                    extractConceptDefFromExpression(expr)));
             }
             return supportingEvidenceDefs;
         } else {
             return null;
         }
+    }
+
+    public static ConceptDef extractConceptDefFromExpression(Expression expr) {
+        if (expr == null) {
+            return null;
+        }
+
+        Coding coding =
+            expr.getExtension().stream()
+                .filter(e -> EXT_CQF_EXPRESSION_CODE.equals(e.getUrl()))
+                .map(Extension::getValue)
+                .filter(Coding.class::isInstance)
+                .map(Coding.class::cast)
+                .findFirst()
+                .orElse(null);
+
+        if (coding == null) {
+            return null;
+        }
+
+        CodeDef codeDef = new CodeDef(
+            coding.getSystem(),
+            coding.getVersion(),
+            coding.getCode(),
+            coding.getDisplay()
+        );
+
+        return new ConceptDef(List.of(codeDef), null);
     }
 
     private void checkIds(MeasureGroupComponent group) {

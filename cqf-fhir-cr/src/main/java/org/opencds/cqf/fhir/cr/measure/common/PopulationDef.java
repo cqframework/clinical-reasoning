@@ -16,7 +16,7 @@ public class PopulationDef {
     private final ConceptDef code;
     private final MeasurePopulationType measurePopulationType;
     private final CodeDef populationBasis;
-    private final List<SupportingEvidenceDef> extDefs;
+    private final List<SupportingEvidenceDef> supportingEvidenceDefs;
 
     @Nullable
     private final String criteriaReference;
@@ -36,8 +36,8 @@ public class PopulationDef {
             MeasurePopulationType measurePopulationType,
             String expression,
             CodeDef populationBasis,
-            @Nullable List<SupportingEvidenceDef> extDefs) {
-        this(id, code, measurePopulationType, expression, populationBasis, null, null, extDefs);
+            @Nullable List<SupportingEvidenceDef> supportingEvidenceDefs) {
+        this(id, code, measurePopulationType, expression, populationBasis, null, null, supportingEvidenceDefs);
     }
 
     public PopulationDef(
@@ -48,7 +48,7 @@ public class PopulationDef {
             CodeDef populationBasis,
             @Nullable String criteriaReference,
             @Nullable ContinuousVariableObservationAggregateMethod aggregateMethod,
-            @Nullable List<SupportingEvidenceDef> extDefs) {
+            @Nullable List<SupportingEvidenceDef> supportingEvidenceDefs) {
         this.id = id;
         this.code = code;
         this.measurePopulationType = measurePopulationType;
@@ -56,7 +56,7 @@ public class PopulationDef {
         this.populationBasis = populationBasis;
         this.criteriaReference = criteriaReference;
         this.aggregateMethod = aggregateMethod;
-        this.extDefs = extDefs;
+        this.supportingEvidenceDefs = supportingEvidenceDefs;
     }
 
     public MeasurePopulationType type() {
@@ -232,7 +232,7 @@ public class PopulationDef {
                 + '}';
     }
 
-    public List<SupportingEvidenceDef> getExtDefs() {
-        return extDefs == null ? null : new ArrayList<>(extDefs);
+    public List<SupportingEvidenceDef> getsupportingEvidenceDefs() {
+        return supportingEvidenceDefs == null ? null : new ArrayList<>(supportingEvidenceDefs);
     }
 }

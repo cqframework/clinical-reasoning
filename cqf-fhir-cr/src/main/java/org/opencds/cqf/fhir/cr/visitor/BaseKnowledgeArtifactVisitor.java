@@ -246,7 +246,8 @@ public abstract class BaseKnowledgeArtifactVisitor implements IKnowledgeArtifact
 
         // If no version was requested, attempt to return the "latest"
         if (requestedVersion == null) {
-            return IKnowledgeArtifactAdapter.findLatestVersion(bundle).orElse(null);
+            return IKnowledgeArtifactAdapter.findLatestVersion(bundle)
+                    .orElseGet(() -> (IDomainResource) BundleHelper.getEntryResourceFirstRep(bundle));
         }
 
         // Search through all entries to find one matching the requested version

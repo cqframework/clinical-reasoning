@@ -244,9 +244,9 @@ public abstract class BaseKnowledgeArtifactVisitor implements IKnowledgeArtifact
         var requestedVersion = Canonicals.getVersion(canonical);
         var requestedUrl = Canonicals.getUrl(canonical);
 
-        // If no version was requested, just return the first entry
+        // If no version was requested, attempt to return the "latest"
         if (requestedVersion == null) {
-            return (IDomainResource) BundleHelper.getEntryResourceFirstRep(bundle);
+            return IKnowledgeArtifactAdapter.findLatestVersion(bundle).orElse(null);
         }
 
         // Search through all entries to find one matching the requested version

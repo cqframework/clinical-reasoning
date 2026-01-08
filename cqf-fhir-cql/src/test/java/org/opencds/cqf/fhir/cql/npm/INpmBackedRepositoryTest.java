@@ -297,14 +297,16 @@ public interface INpmBackedRepositoryTest {
         }
 
         // create the package speck (package.json)
-        String pkgJson = String.format("""
+        String pkgJson = String.format(
+                """
             {
                 "packageUrl": "file://%s",
                 "name": "%s",
                 "version": "1.0.0",
                 "installMode": "STORE_ONLY"
             }
-            """, packagePath.toString(), pkgName);
+            """,
+                packagePath.toString(), pkgName);
 
         File packagejson = new File(packagePath.toString(), "package.json");
         Files.writeString(packagejson.toPath(), pkgJson);

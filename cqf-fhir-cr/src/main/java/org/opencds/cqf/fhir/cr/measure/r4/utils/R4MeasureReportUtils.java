@@ -1,6 +1,9 @@
 package org.opencds.cqf.fhir.cr.measure.r4.utils;
 
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_CQFM_AGGREGATE_METHOD_URL;
+
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import jakarta.annotation.Nullable;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -12,6 +15,7 @@ import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupPopulationComponent
 import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupComponent;
 import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupPopulationComponent;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
+import org.opencds.cqf.fhir.cr.measure.common.ContinuousVariableObservationAggregateMethod;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumDef;
@@ -270,6 +274,32 @@ public class R4MeasureReportUtils {
         String reportText = reportStratum.hasValue() ? reportStratum.getValue().getText() : null;
         String defText = getStratumDefText(stratifierDef, stratumDef);
         return Objects.equals(reportText, defText);
+    }
+
+    public static ContinuousVariableObservationAggregateMethod getAggregateMethod(
+            String measureUrl, @Nullable MeasureReportGroupPopulationComponent groupPopulation) {
+
+        if (groupPopulation == null) {
+            return ContinuousVariableObservationAggregateMethod.N_A;
+        }
+
+        var aggMethodExt = groupPopulation.getExtensionByUrl(EXT_CQFM_AGGREGATE_METHOD_URL);
+        if (aggMethodExt != null) {
+            // this method is only required if scoringType = continuous-variable or Ratio Continuous variable
+            var aggregateMethodString = aggMethodExt.getValue().toString();
+
+            var aggregateMethod = ContinuousVariableObservationAggregateMethod.fromString(aggregateMethodString);
+
+            // check that method is accepted
+            if (aggregateMethod == null) {
+                throw new InvalidRequestException("Aggregation method: %s is not a valid value for Measure: %s"
+                        .formatted(aggregateMethodString, measureUrl));
+            }
+
+            return aggregateMethod;
+        }
+
+        return ContinuousVariableObservationAggregateMethod.N_A;
     }
 
     /**

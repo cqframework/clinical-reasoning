@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.measure.r4.utils;
 
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.CQFM_SCORING_EXT_URL;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_CQFM_AGGREGATE_METHOD_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.IMPROVEMENT_NOTATION_SYSTEM_DECREASE;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.IMPROVEMENT_NOTATION_SYSTEM_INCREASE;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_EXTENSION;
@@ -13,9 +14,11 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.Measure.MeasureGroupComponent;
+import org.hl7.fhir.r4.model.Measure.MeasureGroupPopulationComponent;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
 import org.hl7.fhir.r4.model.Type;
 import org.opencds.cqf.fhir.cr.measure.common.CodeDef;
+import org.opencds.cqf.fhir.cr.measure.common.ContinuousVariableObservationAggregateMethod;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 
 /**
@@ -234,5 +237,31 @@ public class R4MeasureUtils {
                 .filter(measureGroup -> measureGroup.getId().equals(groupId))
                 .findFirst()
                 .orElse(null);
+    }
+
+    public static ContinuousVariableObservationAggregateMethod getAggregateMethod(
+            String measureUrl, @Nullable MeasureGroupPopulationComponent groupPopulation) {
+
+        if (groupPopulation == null) {
+            return ContinuousVariableObservationAggregateMethod.N_A;
+        }
+
+        var aggMethodExt = groupPopulation.getExtensionByUrl(EXT_CQFM_AGGREGATE_METHOD_URL);
+        if (aggMethodExt != null) {
+            // this method is only required if scoringType = continuous-variable or Ratio Continuous variable
+            var aggregateMethodString = aggMethodExt.getValue().toString();
+
+            var aggregateMethod = ContinuousVariableObservationAggregateMethod.fromString(aggregateMethodString);
+
+            // check that method is accepted
+            if (aggregateMethod == null) {
+                throw new InvalidRequestException("Aggregation method: %s is not a valid value for Measure: %s"
+                        .formatted(aggregateMethodString, measureUrl));
+            }
+
+            return aggregateMethod;
+        }
+
+        return ContinuousVariableObservationAggregateMethod.N_A;
     }
 }

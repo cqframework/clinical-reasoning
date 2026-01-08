@@ -2,7 +2,6 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 
 import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.DATEOFCOMPLIANCE;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL;
-import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_CQFM_AGGREGATE_METHOD_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_CQFM_CRITERIA_REFERENCE;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.SDE_USAGE_CODE;
 
@@ -125,7 +124,8 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                 population.getCode().getCodingFirstRep().getCode());
         // criteriaReference & aggregateMethod are for MeasureObservation populations only
         String criteriaReference = getCriteriaReference(group, population, popType, measureUrl);
-        ContinuousVariableObservationAggregateMethod aggregateMethod = getAggregateMethod(measureUrl, population);
+        ContinuousVariableObservationAggregateMethod aggregateMethod =
+                R4MeasureUtils.getAggregateMethod(measureUrl, population);
         return new PopulationDef(
                 population.getId(),
                 conceptToConceptDef(population.getCode()),
@@ -163,32 +163,6 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                 populationBasis);
 
         return Optional.of(populateDefDateOfCompliance);
-    }
-
-    private ContinuousVariableObservationAggregateMethod getAggregateMethod(
-            String measureUrl, @Nullable MeasureGroupPopulationComponent measureObservationPopulation) {
-
-        if (measureObservationPopulation == null) {
-            return ContinuousVariableObservationAggregateMethod.N_A;
-        }
-
-        var aggMethodExt = measureObservationPopulation.getExtensionByUrl(EXT_CQFM_AGGREGATE_METHOD_URL);
-        if (aggMethodExt != null) {
-            // this method is only required if scoringType = continuous-variable or Ratio Continuous variable
-            var aggregateMethodString = aggMethodExt.getValue().toString();
-
-            var aggregateMethod = ContinuousVariableObservationAggregateMethod.fromString(aggregateMethodString);
-
-            // check that method is accepted
-            if (aggregateMethod == null) {
-                throw new InvalidRequestException("Measure Observation method: %s is not a valid value for Measure: %s"
-                        .formatted(aggregateMethodString, measureUrl));
-            }
-
-            return aggregateMethod;
-        }
-
-        return ContinuousVariableObservationAggregateMethod.N_A;
     }
 
     @Nullable

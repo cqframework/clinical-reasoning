@@ -631,17 +631,24 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
     private void copyPopulationAggregationResults(MeasureReportGroupComponent reportGroup, GroupDef groupDef) {
         for (MeasureReportGroupPopulationComponent fhirPopulation : reportGroup.getPopulation()) {
             var populationDef = groupDef.findPopulationById(fhirPopulation.getId());
-            populateAggregationResultExtension(fhirPopulation, populationDef);
+            populateAggregationResultExtensions(fhirPopulation, populationDef);
         }
     }
 
-    private static void populateAggregationResultExtension(
+    private static void populateAggregationResultExtensions(
             MeasureReportGroupPopulationComponent measurePopulation, PopulationDef populationDef) {
 
         // Add either the aggregation result to the numerator or denominator, if applicable
         Optional.ofNullable(populationDef.getAggregationResult())
                 .ifPresent(nonNullAggregationResult -> measurePopulation.addExtension(
                         MeasureConstants.EXT_AGGREGATION_METHOD_RESULT, new DecimalType(nonNullAggregationResult)));
+
+        // Ensure the aggregation method is added to the report, using the same extension as the
+        // one on the Measure:
+        Optional.ofNullable(populationDef.getAggregateMethod())
+                .ifPresent(nonNonAggregateMethod -> measurePopulation.addExtension(
+                        MeasureConstants.EXT_CQFM_AGGREGATE_METHOD_URL,
+                        new StringType(nonNonAggregateMethod.getText())));
     }
 
     /**

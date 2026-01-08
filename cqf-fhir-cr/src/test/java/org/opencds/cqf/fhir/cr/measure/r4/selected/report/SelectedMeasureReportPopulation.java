@@ -91,10 +91,6 @@ public class SelectedMeasureReportPopulation
         return hasAggregateMethodExtension(null);
     }
 
-    public SelectedMeasureReportPopulation hasAggregateMethodExtensionNA() {
-        return hasAggregateMethodExtension(ContinuousVariableObservationAggregateMethod.N_A);
-    }
-
     public SelectedMeasureReportPopulation hasAggregateMethodExtension(
             ContinuousVariableObservationAggregateMethod expectedAggregateMethod) {
         assertNotNull(value(), "PopulationDef is null");

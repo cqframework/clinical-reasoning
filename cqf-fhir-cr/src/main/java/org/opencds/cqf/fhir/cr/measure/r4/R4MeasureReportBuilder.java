@@ -43,6 +43,7 @@ import org.hl7.fhir.r4.model.StringType;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.fhir.cr.measure.common.CodeDef;
 import org.opencds.cqf.fhir.cr.measure.common.ConceptDef;
+import org.opencds.cqf.fhir.cr.measure.common.ContinuousVariableObservationAggregateMethod;
 import org.opencds.cqf.fhir.cr.measure.common.FhirResourceUtils;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
@@ -646,6 +647,9 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         // Ensure the aggregation method is added to the report, using the same extension as the
         // one on the Measure:
         Optional.ofNullable(populationDef.getAggregateMethod())
+                // There's no point in capturing "N_A" aggregation methods here, as this could cause
+                // bugs
+                .filter(aggregateMethod -> ContinuousVariableObservationAggregateMethod.N_A != aggregateMethod)
                 .ifPresent(nonNonAggregateMethod -> measurePopulation.addExtension(
                         MeasureConstants.EXT_CQFM_AGGREGATE_METHOD_URL,
                         new StringType(nonNonAggregateMethod.getText())));

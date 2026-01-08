@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.CQFM_SCORING_EXT_URL;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_CQFM_AGGREGATE_METHOD_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.IMPROVEMENT_NOTATION_SYSTEM_DECREASE;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.IMPROVEMENT_NOTATION_SYSTEM_INCREASE;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_EXTENSION;
@@ -17,9 +18,12 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.Measure.MeasureGroupComponent;
+import org.hl7.fhir.r4.model.Measure.MeasureGroupPopulationComponent;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
+import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.common.CodeDef;
+import org.opencds.cqf.fhir.cr.measure.common.ContinuousVariableObservationAggregateMethod;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 
 class R4MeasureUtilsTest {
@@ -419,5 +423,107 @@ class R4MeasureUtilsTest {
 
         // Group scoring should take precedence
         assertEquals(MeasureScoring.CONTINUOUSVARIABLE, result);
+    }
+
+    // ========================================
+    // Tests for getAggregateMethod
+    // ========================================
+
+    @Test
+    void testGetAggregateMethod_WithSumExtension() {
+        String measureUrl = "http://example.com/Measure/test";
+        MeasureGroupPopulationComponent population = new MeasureGroupPopulationComponent();
+        population.addExtension(EXT_CQFM_AGGREGATE_METHOD_URL, new StringType("sum"));
+
+        ContinuousVariableObservationAggregateMethod result = R4MeasureUtils.getAggregateMethod(measureUrl, population);
+
+        assertEquals(ContinuousVariableObservationAggregateMethod.SUM, result);
+    }
+
+    @Test
+    void testGetAggregateMethod_WithAvgExtension() {
+        String measureUrl = "http://example.com/Measure/test";
+        MeasureGroupPopulationComponent population = new MeasureGroupPopulationComponent();
+        population.addExtension(EXT_CQFM_AGGREGATE_METHOD_URL, new StringType("avg"));
+
+        ContinuousVariableObservationAggregateMethod result = R4MeasureUtils.getAggregateMethod(measureUrl, population);
+
+        assertEquals(ContinuousVariableObservationAggregateMethod.AVG, result);
+    }
+
+    @Test
+    void testGetAggregateMethod_WithCountExtension() {
+        String measureUrl = "http://example.com/Measure/test";
+        MeasureGroupPopulationComponent population = new MeasureGroupPopulationComponent();
+        population.addExtension(EXT_CQFM_AGGREGATE_METHOD_URL, new StringType("count"));
+
+        ContinuousVariableObservationAggregateMethod result = R4MeasureUtils.getAggregateMethod(measureUrl, population);
+
+        assertEquals(ContinuousVariableObservationAggregateMethod.COUNT, result);
+    }
+
+    @Test
+    void testGetAggregateMethod_WithMinExtension() {
+        String measureUrl = "http://example.com/Measure/test";
+        MeasureGroupPopulationComponent population = new MeasureGroupPopulationComponent();
+        population.addExtension(EXT_CQFM_AGGREGATE_METHOD_URL, new StringType("min"));
+
+        ContinuousVariableObservationAggregateMethod result = R4MeasureUtils.getAggregateMethod(measureUrl, population);
+
+        assertEquals(ContinuousVariableObservationAggregateMethod.MIN, result);
+    }
+
+    @Test
+    void testGetAggregateMethod_WithMaxExtension() {
+        String measureUrl = "http://example.com/Measure/test";
+        MeasureGroupPopulationComponent population = new MeasureGroupPopulationComponent();
+        population.addExtension(EXT_CQFM_AGGREGATE_METHOD_URL, new StringType("max"));
+
+        ContinuousVariableObservationAggregateMethod result = R4MeasureUtils.getAggregateMethod(measureUrl, population);
+
+        assertEquals(ContinuousVariableObservationAggregateMethod.MAX, result);
+    }
+
+    @Test
+    void testGetAggregateMethod_WithMedianExtension() {
+        String measureUrl = "http://example.com/Measure/test";
+        MeasureGroupPopulationComponent population = new MeasureGroupPopulationComponent();
+        population.addExtension(EXT_CQFM_AGGREGATE_METHOD_URL, new StringType("median"));
+
+        ContinuousVariableObservationAggregateMethod result = R4MeasureUtils.getAggregateMethod(measureUrl, population);
+
+        assertEquals(ContinuousVariableObservationAggregateMethod.MEDIAN, result);
+    }
+
+    @Test
+    void testGetAggregateMethod_NoExtension() {
+        String measureUrl = "http://example.com/Measure/test";
+        MeasureGroupPopulationComponent population = new MeasureGroupPopulationComponent();
+
+        ContinuousVariableObservationAggregateMethod result = R4MeasureUtils.getAggregateMethod(measureUrl, population);
+
+        assertEquals(ContinuousVariableObservationAggregateMethod.N_A, result);
+    }
+
+    @Test
+    void testGetAggregateMethod_NullPopulation() {
+        String measureUrl = "http://example.com/Measure/test";
+
+        ContinuousVariableObservationAggregateMethod result = R4MeasureUtils.getAggregateMethod(measureUrl, null);
+
+        assertEquals(ContinuousVariableObservationAggregateMethod.N_A, result);
+    }
+
+    @Test
+    void testGetAggregateMethod_InvalidExtensionValue() {
+        String measureUrl = "http://example.com/Measure/test";
+        MeasureGroupPopulationComponent population = new MeasureGroupPopulationComponent();
+        population.addExtension(EXT_CQFM_AGGREGATE_METHOD_URL, new StringType("invalid-method"));
+
+        InvalidRequestException exception = assertThrows(
+                InvalidRequestException.class, () -> R4MeasureUtils.getAggregateMethod(measureUrl, population));
+
+        assertTrue(exception.getMessage().contains("Aggregation method: invalid-method is not a valid value"));
+        assertTrue(exception.getMessage().contains(measureUrl));
     }
 }

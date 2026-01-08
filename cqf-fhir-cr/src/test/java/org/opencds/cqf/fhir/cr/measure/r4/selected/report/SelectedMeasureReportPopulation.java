@@ -9,7 +9,9 @@ import static org.junit.jupiter.api.Assertions.fail;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.MeasureReport;
+import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Type;
+import org.opencds.cqf.fhir.cr.measure.common.ContinuousVariableObservationAggregateMethod;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Selected;
@@ -82,6 +84,41 @@ public class SelectedMeasureReportPopulation
     public SelectedMeasureReportPopulation passes(
             Validator<MeasureReport.MeasureReportGroupPopulationComponent> populationValidator) {
         populationValidator.validate(value());
+        return this;
+    }
+
+    public SelectedMeasureReportPopulation hasNoAggregateMethodExtension() {
+        return hasAggregateMethodExtension(null);
+    }
+
+    public SelectedMeasureReportPopulation hasAggregateMethodExtensionNA() {
+        return hasAggregateMethodExtension(ContinuousVariableObservationAggregateMethod.N_A);
+    }
+
+    public SelectedMeasureReportPopulation hasAggregateMethodExtension(
+            ContinuousVariableObservationAggregateMethod expectedAggregateMethod) {
+        assertNotNull(value(), "PopulationDef is null");
+        final Extension extension = value().getExtensionByUrl(MeasureConstants.EXT_CQFM_AGGREGATE_METHOD_URL);
+
+        if (null == expectedAggregateMethod) {
+            assertNull(extension, "extension EXT_CQFM_AGGREGATE_METHOD_URL is not null");
+            return this;
+        }
+
+        assertNotNull(extension, "extension EXT_CQFM_AGGREGATE_METHOD_URL is null");
+
+        final Type extensionValue = extension.getValue();
+
+        if (extensionValue instanceof StringType actualAggregateMethodExtension) {
+            assertEquals(
+                    expectedAggregateMethod.getText(),
+                    actualAggregateMethodExtension.getValue(),
+                    "Population aggregate method extension value mismatch");
+        } else {
+            fail("Population aggregate method extension value is not a string type: "
+                    + extensionValue.primitiveValue());
+        }
+
         return this;
     }
 }

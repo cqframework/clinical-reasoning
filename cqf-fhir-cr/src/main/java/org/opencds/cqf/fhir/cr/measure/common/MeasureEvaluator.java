@@ -379,7 +379,8 @@ public class MeasureEvaluator {
             String subjectType,
             String subjectId,
             EvaluationResult evaluationResult,
-            boolean applyScoring) {
+            boolean applyScoring,
+            MeasureReportType reportType) {
         PopulationDef initialPopulation = groupDef.getSingle(INITIALPOPULATION);
         PopulationDef measurePopulation = groupDef.getSingle(MEASUREPOPULATION);
         PopulationDef measurePopulationExclusion = groupDef.getSingle(MEASUREPOPULATIONEXCLUSION);
@@ -428,6 +429,9 @@ public class MeasureEvaluator {
                             measurePopulationObservation.getSubjectResources());
                 }
             }
+        }
+        for (PopulationDef p : groupDef.populations()) {
+            populateSupportingEvidence(p, reportType, evaluationResult, subjectId);
         }
     }
     /**
@@ -630,13 +634,19 @@ public class MeasureEvaluator {
     }
 
     protected void evaluateCohort(
-            GroupDef groupDef, String subjectType, String subjectId, EvaluationResult evaluationResult) {
+            GroupDef groupDef, String subjectType, String subjectId, EvaluationResult evaluationResult,
+        MeasureReportType reportType) {
         PopulationDef initialPopulation = groupDef.getSingle(INITIALPOPULATION);
         // Validate Required Populations are Present
         R4MeasureScoringTypePopulations.validateScoringTypePopulations(
                 groupDef.populations().stream().map(PopulationDef::type).toList(), MeasureScoring.COHORT);
         // Evaluate Population
         evaluatePopulationMembership(subjectType, subjectId, initialPopulation, evaluationResult);
+
+        //supporting evidence
+        for (PopulationDef p : groupDef.populations()) {
+            populateSupportingEvidence(p, reportType, evaluationResult, subjectId);
+        }
     }
 
     protected void evaluateGroup(
@@ -659,10 +669,10 @@ public class MeasureEvaluator {
                 evaluateProportion(groupDef, subjectType, subjectId, reportType, evaluationResult, applyScoring);
                 break;
             case CONTINUOUSVARIABLE:
-                evaluateContinuousVariable(groupDef, subjectType, subjectId, evaluationResult, applyScoring);
+                evaluateContinuousVariable(groupDef, subjectType, subjectId, evaluationResult, applyScoring, reportType);
                 break;
             case COHORT:
-                evaluateCohort(groupDef, subjectType, subjectId, evaluationResult);
+                evaluateCohort(groupDef, subjectType, subjectId, evaluationResult, reportType);
                 break;
         }
     }

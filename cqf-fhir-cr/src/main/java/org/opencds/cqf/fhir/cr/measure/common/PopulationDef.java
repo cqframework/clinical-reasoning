@@ -221,6 +221,7 @@ public class PopulationDef {
         String codeText = (code != null && code.text() != null) ? code.text() : "null";
         String criteriaRef = (criteriaReference != null) ? criteriaReference : "null";
         String aggMethod = (aggregateMethod != null) ? aggregateMethod.toString() : "null";
+        String aggResult = (aggregationResult != null) ? aggregationResult.toString() : "null";
 
         return "PopulationDef{"
                 + "id='" + id + '\''
@@ -229,6 +230,7 @@ public class PopulationDef {
                 + ", expression='" + expression + '\''
                 + ", criteriaReference='" + criteriaRef + '\''
                 + ", aggregateMethod=" + aggMethod
+                + ", aggregationResult=" + aggResult
                 + '}';
     }
 

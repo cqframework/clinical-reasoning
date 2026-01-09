@@ -11,7 +11,9 @@ import java.util.List;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupPopulationComponent;
+import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Type;
+import org.opencds.cqf.fhir.cr.measure.common.ContinuousVariableObservationAggregateMethod;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Selected;
@@ -121,6 +123,37 @@ public class SelectedMeasureReportPopulation
 
         assertTrue(
                 evidenceExts.isEmpty(), "Expected NO supportingEvidence extensions, but found " + evidenceExts.size());
+
+        return this;
+    }
+
+    public SelectedMeasureReportPopulation hasNoAggregateMethodExtension() {
+        return hasAggregateMethodExtension(null);
+    }
+
+    public SelectedMeasureReportPopulation hasAggregateMethodExtension(
+            ContinuousVariableObservationAggregateMethod expectedAggregateMethod) {
+        assertNotNull(value(), "PopulationDef is null");
+        final Extension extension = value().getExtensionByUrl(MeasureConstants.EXT_CQFM_AGGREGATE_METHOD_URL);
+
+        if (null == expectedAggregateMethod) {
+            assertNull(extension, "extension EXT_CQFM_AGGREGATE_METHOD_URL is not null");
+            return this;
+        }
+
+        assertNotNull(extension, "extension EXT_CQFM_AGGREGATE_METHOD_URL is null");
+
+        final Type extensionValue = extension.getValue();
+
+        if (extensionValue instanceof StringType actualAggregateMethodExtension) {
+            assertEquals(
+                    expectedAggregateMethod.getText(),
+                    actualAggregateMethodExtension.getValue(),
+                    "Population aggregate method extension value mismatch");
+        } else {
+            fail("Population aggregate method extension value is not a string type: "
+                    + extensionValue.primitiveValue());
+        }
 
         return this;
     }

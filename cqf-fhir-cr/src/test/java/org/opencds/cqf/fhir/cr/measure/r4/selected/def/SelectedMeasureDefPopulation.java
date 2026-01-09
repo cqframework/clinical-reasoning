@@ -3,8 +3,10 @@ package org.opencds.cqf.fhir.cr.measure.r4.selected.def;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import org.opencds.cqf.fhir.cr.measure.common.ContinuousVariableObservationAggregateMethod;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 
@@ -114,6 +116,29 @@ public class SelectedMeasureDefPopulation<P>
         assertNotNull(value(), "PopulationDef is null");
         final Double actualAggregationResult = value().getAggregationResult();
         assertEquals(expectedAggregationResult, actualAggregationResult, "Population aggregation result mismatch");
+        return this;
+    }
+
+    public SelectedMeasureDefPopulation<P> hasNoAggregateMethod() {
+        return hasAggregateMethod(null);
+    }
+
+    public SelectedMeasureDefPopulation<P> hasAggregateMethodNA() {
+        return hasAggregateMethod(ContinuousVariableObservationAggregateMethod.N_A);
+    }
+
+    public SelectedMeasureDefPopulation<P> hasAggregateMethod(
+            ContinuousVariableObservationAggregateMethod expectedAggregateMethod) {
+        assertNotNull(value(), "PopulationDef is null");
+        final ContinuousVariableObservationAggregateMethod actualAggregateMethod = value().getAggregateMethod();
+
+        if (null == expectedAggregateMethod) {
+            assertNull(actualAggregateMethod, "PopulationDef aggregate method is not null");
+            return this;
+        }
+
+        assertNotNull(actualAggregateMethod, "PopulationDef aggregate method is null");
+        assertEquals(expectedAggregateMethod, actualAggregateMethod, "Population aggregate method mismatch");
         return this;
     }
 

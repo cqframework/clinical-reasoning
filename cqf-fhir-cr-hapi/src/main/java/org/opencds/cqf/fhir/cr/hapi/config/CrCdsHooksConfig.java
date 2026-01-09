@@ -1,7 +1,9 @@
 package org.opencds.cqf.fhir.cr.hapi.config;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.api.server.IRepositoryFactory;
@@ -124,6 +126,7 @@ public class CrCdsHooksConfig {
             CdsServiceRegistryImpl cdsServiceRegistry,
             ICrDiscoveryServiceFactory discoveryServiceFactory,
             ICdsCrServiceFactory crServiceFactory,
+            PartitionSettings partitionSettings,
             Optional<IResourceChangeListenerRegistry> resourceChangeListenerRegistry) {
         if (resourceChangeListenerRegistry.isEmpty()) {
             return null;
@@ -132,7 +135,11 @@ public class CrCdsHooksConfig {
         resourceChangeListenerRegistry
                 .get()
                 .registerResourceResourceChangeListener(
-                        PLAN_DEFINITION_RESOURCE_NAME, SearchParameterMap.newSynchronous(), listener, 1000);
+                        PLAN_DEFINITION_RESOURCE_NAME,
+                        RequestPartitionId.defaultPartition(partitionSettings),
+                        SearchParameterMap.newSynchronous(),
+                        listener,
+                        1000);
         return listener;
     }
 }

@@ -3,8 +3,10 @@ package org.opencds.cqf.fhir.cr.measure.r4.selected.def;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import org.opencds.cqf.fhir.cr.measure.common.ContinuousVariableObservationAggregateMethod;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 
@@ -117,6 +119,29 @@ public class SelectedMeasureDefPopulation<P>
         return this;
     }
 
+    public SelectedMeasureDefPopulation<P> hasNoAggregateMethod() {
+        return hasAggregateMethod(null);
+    }
+
+    public SelectedMeasureDefPopulation<P> hasAggregateMethodNA() {
+        return hasAggregateMethod(ContinuousVariableObservationAggregateMethod.N_A);
+    }
+
+    public SelectedMeasureDefPopulation<P> hasAggregateMethod(
+            ContinuousVariableObservationAggregateMethod expectedAggregateMethod) {
+        assertNotNull(value(), "PopulationDef is null");
+        final ContinuousVariableObservationAggregateMethod actualAggregateMethod = value().getAggregateMethod();
+
+        if (null == expectedAggregateMethod) {
+            assertNull(actualAggregateMethod, "PopulationDef aggregate method is not null");
+            return this;
+        }
+
+        assertNotNull(actualAggregateMethod, "PopulationDef aggregate method is null");
+        assertEquals(expectedAggregateMethod, actualAggregateMethod, "Population aggregate method mismatch");
+        return this;
+    }
+
     /**
      * Assert the number of evaluated resources (from evaluatedResources set).
      *
@@ -212,5 +237,40 @@ public class SelectedMeasureDefPopulation<P>
      */
     public PopulationDef populationDef() {
         return value();
+    }
+
+    public SelectedMeasureDefPopulationExtension<SelectedMeasureDefPopulation<P>> getExtDef(String expressionName) {
+        var extDef = this.value.getSupportingEvidenceDefs().stream()
+                .filter(t -> t.getExpression().equals(expressionName))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Expression not found"));
+        return new SelectedMeasureDefPopulationExtension<>(extDef, this);
+    }
+
+    public SelectedMeasureDefPopulation<P> assertNoSupportingEvidenceResults() {
+
+        var defs = this.value.getSupportingEvidenceDefs();
+
+        if (defs == null || defs.isEmpty()) {
+            return this; // nothing to check
+        }
+
+        for (var def : defs) {
+            var subjectResources = def.getSubjectResources();
+
+            if (subjectResources == null || subjectResources.isEmpty()) {
+                continue;
+            }
+
+            // Any key with a non-empty Set is a failure
+            for (var entry : subjectResources.entrySet()) {
+                if (entry.getValue() != null && !entry.getValue().isEmpty()) {
+                    throw new AssertionError("SupportingEvidenceDef '" + def.getName() + "' produced results for key '"
+                            + entry.getKey() + "': " + entry.getValue());
+                }
+            }
+        }
+
+        return this;
     }
 }

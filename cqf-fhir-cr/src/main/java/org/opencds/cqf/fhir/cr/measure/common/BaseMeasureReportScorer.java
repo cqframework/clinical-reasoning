@@ -14,18 +14,12 @@ import java.util.stream.Collectors;
  * <p>Extracted version-agnostic patterns from R4MeasureReportScorer
  *
  * <p><strong>DEPRECATION NOTICE:</strong> This class is deprecated and will be removed in a future release.
- * For internal use, this class will be replaced by {@link MeasureDefScorer}
+ * For internal use, this class will be replaced by {@link MeasureReportDefScorer}
  * integrated into the evaluation workflow in Part 2.
  * See: integrate-measure-def-scorer-part2-integration PRP
  */
+@Deprecated
 public abstract class BaseMeasureReportScorer<MeasureReportT> implements IMeasureReportScorer<MeasureReportT> {
-
-    // Version-agnostic population type constants
-    protected static final String NUMERATOR = "numerator";
-    protected static final String DENOMINATOR = "denominator";
-    protected static final String DENOMINATOR_EXCLUSION = "denominator-exclusion";
-    protected static final String DENOMINATOR_EXCEPTION = "denominator-exception";
-    protected static final String NUMERATOR_EXCLUSION = "numerator-exclusion";
 
     /**
      * Calculate proportion score: numerator / denominator.

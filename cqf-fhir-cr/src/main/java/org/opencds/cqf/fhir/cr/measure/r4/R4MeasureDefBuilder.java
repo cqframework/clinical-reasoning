@@ -117,33 +117,31 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                 populationBasisDef);
     }
 
-    @Nullable
     private List<SupportingEvidenceDef> getSupportingEvidenceDefs(MeasureGroupPopulationComponent groupPopulation) {
-        List<Extension> ext = groupPopulation.getExtension().stream()
-                .filter(t -> t.getUrl().equals(EXT_SUPPORTING_EVIDENCE_DEFINITION_URL))
-                .toList();
+
         List<SupportingEvidenceDef> supportingEvidenceDefs = new ArrayList<>();
-        if (!ext.isEmpty()) {
-            for (Extension e : ext) {
 
-                Expression expr = e.getValue() instanceof Expression ? (Expression) e.getValue() : null;
+        List<Extension> ext = groupPopulation.getExtension().stream()
+                .filter(t -> EXT_SUPPORTING_EVIDENCE_DEFINITION_URL.equals(t.getUrl()))
+                .toList();
 
-                if (expr == null) {
-                    throw new InvalidRequestException("Extension does not contain valueExpression");
-                }
+        for (Extension e : ext) {
+            Expression expr = e.getValue() instanceof Expression ? (Expression) e.getValue() : null;
 
-                supportingEvidenceDefs.add(new SupportingEvidenceDef(
-                        expr.getExpression(),
-                        EXT_SUPPORTING_EVIDENCE_URL,
-                        expr.getDescription(),
-                        expr.getName(),
-                        expr.getLanguage(),
-                        extractConceptDefFromExpression(expr)));
+            if (expr == null) {
+                throw new InvalidRequestException("Extension does not contain valueExpression");
             }
-            return supportingEvidenceDefs;
-        } else {
-            return null;
+
+            supportingEvidenceDefs.add(new SupportingEvidenceDef(
+                    expr.getExpression(),
+                    EXT_SUPPORTING_EVIDENCE_URL,
+                    expr.getDescription(),
+                    expr.getName(),
+                    expr.getLanguage(),
+                    extractConceptDefFromExpression(expr)));
         }
+
+        return supportingEvidenceDefs;
     }
 
     public static ConceptDef extractConceptDefFromExpression(Expression expr) {

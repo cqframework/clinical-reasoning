@@ -108,6 +108,7 @@ public class R4SupportingEvidenceExtension {
      * Primary: subjectResources for the expression (if present).
      * Fallback: if a single key exists, use it.
      */
+    @Nullable
     private static Object resolveExpressionValue(SupportingEvidenceDef def) {
         Map<String, Set<Object>> subjectResources = def.getSubjectResources();
         if (subjectResources == null || subjectResources.isEmpty()) {

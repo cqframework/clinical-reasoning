@@ -151,18 +151,21 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
                 additionalData,
                 parameters,
                 productLine,
-                null); // reporter is null in the single measure case
+                null,
+                practitioner); // reporter is null in the single measure case
 
         if (resultsAsListOfList.size() != 1) {
-            // LUKETODO: better error
-            throw new InternalErrorException("");
+            throw new InternalErrorException(
+                    "Expected only a single MeasureReport but got multiples for measureId: %s and subjectId: %s"
+                            .formatted(measure, subjectId));
         }
 
         final List<MeasureDefAndR4MeasureReport> measureDefAndR4MeasureReports = resultsAsListOfList.get(0);
 
         if (measureDefAndR4MeasureReports.size() != 1) {
-            // LUKETODO: better error
-            throw new InternalErrorException("");
+            throw new InternalErrorException(
+                    "Expected only a single MeasureReport but got multiples for measureId: %s and subjectId: %s"
+                            .formatted(measure, subjectId));
         }
 
         return measureDefAndR4MeasureReports.get(0);
@@ -263,7 +266,8 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
                 additionalData,
                 parameters,
                 productLine,
-                reporter));
+                reporter,
+                null));
     }
 
     private List<List<MeasureDefAndR4MeasureReport>> evaluateToListOfList(
@@ -282,7 +286,8 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
             Bundle additionalData,
             Parameters parameters,
             String productLine,
-            String reporter) {
+            String reporter,
+            @Nullable String practitioner) {
 
         measurePeriodValidator.validatePeriodStartAndEnd(periodStart, periodEnd);
 
@@ -303,15 +308,21 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
 
         r4MeasureServiceUtilsToUse.ensureSupplementalDataElementSearchParameter();
 
-        // LUKETODO:  in the single measure case, we set the subjectId to practitioner, but we don't here
-        /*
-        if (StringUtils.isNotBlank(practitioner)) {
-            if (!practitioner.contains("/")) {
-                practitioner = "Practitioner/".concat(practitioner);
+        // backward compatibility: in the single measure case, we set the subjectId to practitioner,
+        // but we don't in the multi-measure case.
+        final String subjectToUse;
+        if (SingleOrMultiple.SINGLE == singleOrMultiple) {
+            if (StringUtils.isNotBlank(practitioner)) {
+                if (!practitioner.contains("/")) {
+                    practitioner = "Practitioner/".concat(practitioner);
+                }
+                subjectToUse = practitioner;
+            } else {
+                subjectToUse = subject;
             }
-            subjectId = practitioner;
+        } else {
+            subjectToUse = subject;
         }
-        */
 
         final List<Measure> measures;
         if (measure == null) {
@@ -320,16 +331,15 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
             measures = List.of(R4MeasureServiceUtils.foldMeasure(measure, this.repository));
         }
 
-        // LUKETODO:  log
-        log.info("multi-evaluate-measure, measures to evaluate: {}", measures.size());
+        log.debug("multi-evaluate-measure, measures to evaluate: {}", measures.size());
 
-        var evalType = r4MeasureServiceUtilsToUse.getMeasureEvalType(reportType, subject);
+        var evalType = r4MeasureServiceUtilsToUse.getMeasureEvalType(reportType, subjectToUse);
 
-        // LUKETODO:  this is hacky:  need to figure out a better way:
+        // another flex point between single and multi measures
         var subjects =
                 switch (singleOrMultiple) {
-                    case SINGLE -> getSubjectsForEvaluateSingle(subject, repository, additionalData);
-                    case MULTIPLE -> getSubjects(subjectProvider, subject);
+                    case SINGLE -> getSubjectsForEvaluateSingle(subjectToUse, repository, additionalData);
+                    case MULTIPLE -> getSubjects(subjectProvider, subjectToUse);
                 };
 
         var context = Engines.forRepository(
@@ -404,9 +414,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
                 reporter);
 
         if (listOfListOfMeasureEvalResults.size() != 1) {
-            // LUKETODO: better error
-            throw new InternalErrorException(
-                    "sucks %s".formatted(measures.get(0).getUrl()));
+            throw new InternalErrorException("Expected only a single MeasureReport");
         }
 
         return listOfListOfMeasureEvalResults;

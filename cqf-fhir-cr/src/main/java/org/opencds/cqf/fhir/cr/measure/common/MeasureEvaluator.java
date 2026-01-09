@@ -130,18 +130,23 @@ public class MeasureEvaluator {
         }
     }
 
+    @SuppressWarnings("unchecked")
     protected Iterable<Object> evaluateSupportingCriteria(ExpressionResult expressionResult) {
 
+        // Case 1 — true null
         if (expressionResult == null || expressionResult.getValue() == null) {
-            return Collections.emptyList();
+            return null; // need to preserve result
         }
 
         Object value = expressionResult.getValue();
+
+        // Case 2 — list
         if (value instanceof Iterable<?>) {
-            return (Iterable<Object>) value;
-        } else {
-            return Collections.singletonList(value);
+            return (Iterable<Object>) value; // may be empty or not
         }
+
+        // Case 3 — scalar
+        return List.of(value);
     }
 
     protected PopulationDef evaluatePopulationMembership(

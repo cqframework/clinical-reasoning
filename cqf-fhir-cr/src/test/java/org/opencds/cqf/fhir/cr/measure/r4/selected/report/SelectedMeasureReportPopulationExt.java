@@ -20,6 +20,11 @@ import org.opencds.cqf.fhir.cr.measure.r4.Measure.Selected;
 public class SelectedMeasureReportPopulationExt extends Selected<Extension, SelectedMeasureReportPopulation> {
 
     private static final BigDecimal DECIMAL_TOLERANCE = new BigDecimal("0.00001");
+    private static final String EXT_DATA_ABSENT_REASON = "http://hl7.org/fhir/StructureDefinition/data-absent-reason";
+
+    private static final String EXT_CQF_IS_EMPTY_LIST = "http://hl7.org/fhir/StructureDefinition/cqf-isEmptyList";
+
+    private static final String EXT_CQF_CQL_TYPE = "http://hl7.org/fhir/StructureDefinition/cqf-cqlType";
 
     public SelectedMeasureReportPopulationExt(Extension value, SelectedMeasureReportPopulation parent) {
         super(value, parent);
@@ -463,6 +468,71 @@ public class SelectedMeasureReportPopulationExt extends Selected<Extension, Sele
                 .anyMatch(expectedItem::equals);
 
         assertTrue(found, "Tuple list missing resourceId item for field=" + fieldName + " item=" + expectedItem);
+        return this;
+    }
+
+    public SelectedMeasureReportPopulationExt hasNullResult() {
+
+        Extension valueSlice =
+                valueSlices().stream().findFirst().orElseThrow(() -> new AssertionError("Missing value slice"));
+
+        assertInstanceOf(
+                BooleanType.class,
+                valueSlice.getValue(),
+                "Null result must be encoded as BooleanType with primitive extensions");
+
+        BooleanType prim = (BooleanType) valueSlice.getValue();
+
+        // No boolean value should be present
+        assertNull(prim.getValue(), "Boolean value must be null for null result");
+
+        Extension dar = prim.getExtension().stream()
+                .filter(e -> EXT_DATA_ABSENT_REASON.equals(e.getUrl()))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Missing data-absent-reason extension"));
+
+        assertEquals("unknown", dar.getValue().primitiveValue(), "data-absent-reason must be 'unknown'");
+
+        Extension type = prim.getExtension().stream()
+                .filter(e -> EXT_CQF_CQL_TYPE.equals(e.getUrl()))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Missing cqf-cqlType extension"));
+
+        assertEquals("System.Any", type.getValue().primitiveValue(), "cqf-cqlType must be System.Any");
+
+        return this;
+    }
+
+    public SelectedMeasureReportPopulationExt hasEmptyListResult() {
+
+        Extension valueSlice =
+                valueSlices().stream().findFirst().orElseThrow(() -> new AssertionError("Missing value slice"));
+
+        assertInstanceOf(
+                BooleanType.class,
+                valueSlice.getValue(),
+                "Empty list result must be encoded as BooleanType with primitive extensions");
+
+        BooleanType prim = (BooleanType) valueSlice.getValue();
+
+        // Boolean value must be null
+        assertNull(prim.getValue(), "Boolean value must be null for empty list marker");
+
+        Extension empty = prim.getExtension().stream()
+                .filter(e -> EXT_CQF_IS_EMPTY_LIST.equals(e.getUrl()))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Missing cqf-isEmptyList extension"));
+
+        BooleanType isEmpty = (BooleanType) empty.getValue();
+        assertTrue(isEmpty.booleanValue(), "cqf-isEmptyList must be true");
+
+        Extension type = prim.getExtension().stream()
+                .filter(e -> EXT_CQF_CQL_TYPE.equals(e.getUrl()))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Missing cqf-cqlType extension"));
+
+        assertEquals("List<System.Any>", type.getValue().primitiveValue(), "cqf-cqlType must be List<System.Any>");
+
         return this;
     }
 }

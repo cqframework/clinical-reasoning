@@ -149,10 +149,10 @@ public class MeasureSupportingEvidenceTest {
                         "Code { code: M, system: http://hl7.org/fhir/v3/AdministrativeGender, version: null, display: Male }")
                 .up()
                 .getPopulationExtension("EmptyListExample")
-                .hasStringValue("null")
+                .hasEmptyListResult()
                 .up()
                 .getPopulationExtension("NullExample")
-                .hasStringValue("null")
+                .hasNullResult() // since subjectResources is Set<Object> it appears as emptyList instead of Null
                 .up()
                 .getPopulationExtension("PatientRes")
                 .hasResourceIdValue("Patient/patient-9")

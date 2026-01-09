@@ -276,6 +276,13 @@ public class R4MeasureReportUtils {
         return Objects.equals(reportText, defText);
     }
 
+    public static boolean hasAggregateMethod(
+            String measureUrl,
+            MeasureReportGroupPopulationComponent groupPopulation,
+            ContinuousVariableObservationAggregateMethod aggregateMethod) {
+        return aggregateMethod == getAggregateMethod(measureUrl, groupPopulation);
+    }
+
     public static ContinuousVariableObservationAggregateMethod getAggregateMethod(
             String measureUrl, @Nullable MeasureReportGroupPopulationComponent groupPopulation) {
 

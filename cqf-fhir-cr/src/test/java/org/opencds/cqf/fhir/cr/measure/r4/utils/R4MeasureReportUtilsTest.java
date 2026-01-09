@@ -481,6 +481,8 @@ class R4MeasureReportUtilsTest {
         ContinuousVariableObservationAggregateMethod result =
                 R4MeasureReportUtils.getAggregateMethod(measureUrl, population);
 
+        assertTrue(R4MeasureReportUtils.hasAggregateMethod(
+                measureUrl, population, ContinuousVariableObservationAggregateMethod.SUM));
         assertEquals(ContinuousVariableObservationAggregateMethod.SUM, result);
     }
 
@@ -493,6 +495,8 @@ class R4MeasureReportUtilsTest {
         ContinuousVariableObservationAggregateMethod result =
                 R4MeasureReportUtils.getAggregateMethod(measureUrl, population);
 
+        assertTrue(R4MeasureReportUtils.hasAggregateMethod(
+                measureUrl, population, ContinuousVariableObservationAggregateMethod.AVG));
         assertEquals(ContinuousVariableObservationAggregateMethod.AVG, result);
     }
 
@@ -505,6 +509,8 @@ class R4MeasureReportUtilsTest {
         ContinuousVariableObservationAggregateMethod result =
                 R4MeasureReportUtils.getAggregateMethod(measureUrl, population);
 
+        assertTrue(R4MeasureReportUtils.hasAggregateMethod(
+                measureUrl, population, ContinuousVariableObservationAggregateMethod.COUNT));
         assertEquals(ContinuousVariableObservationAggregateMethod.COUNT, result);
     }
 
@@ -517,6 +523,8 @@ class R4MeasureReportUtilsTest {
         ContinuousVariableObservationAggregateMethod result =
                 R4MeasureReportUtils.getAggregateMethod(measureUrl, population);
 
+        assertTrue(R4MeasureReportUtils.hasAggregateMethod(
+                measureUrl, population, ContinuousVariableObservationAggregateMethod.MIN));
         assertEquals(ContinuousVariableObservationAggregateMethod.MIN, result);
     }
 
@@ -529,6 +537,8 @@ class R4MeasureReportUtilsTest {
         ContinuousVariableObservationAggregateMethod result =
                 R4MeasureReportUtils.getAggregateMethod(measureUrl, population);
 
+        assertTrue(R4MeasureReportUtils.hasAggregateMethod(
+                measureUrl, population, ContinuousVariableObservationAggregateMethod.MAX));
         assertEquals(ContinuousVariableObservationAggregateMethod.MAX, result);
     }
 
@@ -541,6 +551,8 @@ class R4MeasureReportUtilsTest {
         ContinuousVariableObservationAggregateMethod result =
                 R4MeasureReportUtils.getAggregateMethod(measureUrl, population);
 
+        assertTrue(R4MeasureReportUtils.hasAggregateMethod(
+                measureUrl, population, ContinuousVariableObservationAggregateMethod.MEDIAN));
         assertEquals(ContinuousVariableObservationAggregateMethod.MEDIAN, result);
     }
 
@@ -552,6 +564,8 @@ class R4MeasureReportUtilsTest {
         ContinuousVariableObservationAggregateMethod result =
                 R4MeasureReportUtils.getAggregateMethod(measureUrl, population);
 
+        assertTrue(R4MeasureReportUtils.hasAggregateMethod(
+                measureUrl, population, ContinuousVariableObservationAggregateMethod.N_A));
         assertEquals(ContinuousVariableObservationAggregateMethod.N_A, result);
     }
 

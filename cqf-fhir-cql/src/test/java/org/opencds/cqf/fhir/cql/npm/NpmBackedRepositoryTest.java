@@ -3,7 +3,9 @@ package org.opencds.cqf.fhir.cql.npm;
 import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r4.model.Library;
+import org.hl7.fhir.r4.model.Measure;
 import org.junit.jupiter.api.Nested;
 
 public class NpmBackedRepositoryTest {
@@ -24,6 +26,14 @@ public class NpmBackedRepositoryTest {
             library.setUrl(canonicalUrl);
             library.setName(name);
             return library;
+        }
+
+        @Override
+        public IBaseResource createMeasureResource(String canonicalUrl) {
+            Measure measure = new Measure();
+            measure.setStatus(PublicationStatus.ACTIVE);
+            measure.setUrl(canonicalUrl);
+            return measure;
         }
 
         @Override
@@ -53,6 +63,14 @@ public class NpmBackedRepositoryTest {
         }
 
         @Override
+        public IBaseResource createMeasureResource(String canonicalUrl) {
+            var measure = new org.hl7.fhir.r5.model.Measure();
+            measure.setStatus(org.hl7.fhir.r5.model.Enumerations.PublicationStatus.ACTIVE);
+            measure.setUrl(canonicalUrl);
+            return measure;
+        }
+
+        @Override
         @SuppressWarnings("unchecked")
         public <T extends IBaseResource> Class<T> getResourceClass(String resourceName) {
             return (Class<T>) fhirContext.getResourceDefinition(resourceName).getImplementingClass();
@@ -76,6 +94,14 @@ public class NpmBackedRepositoryTest {
             library.setUrl(canonicalUrl);
             library.setName(name);
             return library;
+        }
+
+        @Override
+        public IBaseResource createMeasureResource(String canonicalUrl) {
+            var measure = new org.hl7.fhir.dstu3.model.Measure();
+            measure.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
+            measure.setUrl(canonicalUrl);
+            return measure;
         }
 
         @Override

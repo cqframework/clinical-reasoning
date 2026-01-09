@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cql.npm;
 
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -45,6 +46,8 @@ public interface INpmBackedRepositoryTest {
 
     IBaseResource createLibraryResource(String name, String canonicalUrl);
 
+    IBaseResource createMeasureResource(String canonicalUrl);
+
     <T extends IBaseResource> Class<T> getResourceClass(String resourceName);
 
     default String getCanonicalUrlFromResource(IBaseResource resource) {
@@ -58,6 +61,49 @@ public interface INpmBackedRepositoryTest {
             return pt.getValueAsString();
         }
         return null;
+    }
+
+    @Test
+    default void resolveByUrl_multipleResourceBaseTest_works(@TempDir Path tempDir) throws IOException {
+        // setup
+        String name = "testIg";
+        int count = 4;
+        String urlBase = "http://example.com/";
+
+        createPackage(tempDir, name, count, (Function<Integer, IBaseResource>) val -> {
+            if (val % 2 == 0) {
+                return createLibraryResource("Library" + val, String.format(urlBase + "%s/%s", "Library", val + ""));
+            } else {
+                return createMeasureResource(String.format(urlBase + "%s/%s", "Measure", val + ""));
+            }
+        });
+
+        // create the repo
+        NpmBackedRepository repo = new NpmBackedRepository(getFhirContext(), EvaluationSettings.getDefault());
+        repo.loadIg(tempDir.toString(), name);
+
+        // test(s)
+        String libraryUrl = urlBase + "Library/0";
+        for (String url : new String[] {libraryUrl, null}) {
+            List<IBaseResource> libraries = repo.resolveByUrl(getResourceClass("Library"), url);
+
+            int expected = isEmpty(url) ? 2 : 1;
+            assertEquals(expected, libraries.size());
+            for (IBaseResource resource : libraries) {
+                assertEquals("Library", resource.fhirType());
+            }
+        }
+
+        String measureUrl = urlBase + "Measure/1";
+        for (String url : new String[] {measureUrl, null}) {
+            List<IBaseResource> measures = repo.resolveByUrl(getResourceClass("Measure"), url);
+
+            int expected = isEmpty(url) ? 2 : 1;
+            assertEquals(expected, measures.size());
+            for (IBaseResource resource : measures) {
+                assertEquals("Measure", resource.fhirType());
+            }
+        }
     }
 
     @Test

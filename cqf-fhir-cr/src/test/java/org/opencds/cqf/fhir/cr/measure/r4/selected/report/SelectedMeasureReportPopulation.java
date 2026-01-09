@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.EXT_SUPPORTING_EVIDENCE_URL;
 
+import java.util.List;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupPopulationComponent;
@@ -88,16 +89,17 @@ public class SelectedMeasureReportPopulation
 
     public SelectedMeasureReportPopulationExt getPopulationExtension(String expressionName) {
         // pop extensions that are for supporting evidence
-        var evidenceExt = value.getExtension().stream()
+        List<Extension> evidenceExts = value.getExtension().stream()
                 .filter(e -> e.getUrl().equals(EXT_SUPPORTING_EVIDENCE_URL))
-                .findFirst()
-                .orElse(null);
-        assertNotNull(evidenceExt, "No extension found for SUPPORTING_EVIDENCE_URL");
+                .toList();
+        assertNotNull(evidenceExts, "No extension found for SUPPORTING_EVIDENCE_URL");
         Extension expressionExtension = null;
-        for (Extension extension : evidenceExt.getExtension()) {
-            if (extension.getUrl().equals(expressionName)) {
-                expressionExtension = extension;
-                break;
+        for (Extension extension : evidenceExts) {
+            for (Extension ext : extension.getExtension()) {
+                if (ext.getValue() != null && ext.getValue().toString().equals(expressionName)) {
+                    expressionExtension = extension;
+                    break;
+                }
             }
         }
         assertNotNull(expressionExtension, String.format("No extension found with expressionName: %s", expressionName));

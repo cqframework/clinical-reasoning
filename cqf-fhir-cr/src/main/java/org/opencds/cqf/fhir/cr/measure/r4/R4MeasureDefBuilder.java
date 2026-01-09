@@ -36,7 +36,6 @@ import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 import org.opencds.cqf.fhir.cr.measure.common.CodeDef;
 import org.opencds.cqf.fhir.cr.measure.common.ConceptDef;
 import org.opencds.cqf.fhir.cr.measure.common.ContinuousVariableObservationAggregateMethod;
-import org.opencds.cqf.fhir.cr.measure.common.SupportingEvidenceDef;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDefBuilder;
@@ -46,6 +45,7 @@ import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.SdeDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierComponentDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
+import org.opencds.cqf.fhir.cr.measure.common.SupportingEvidenceDef;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 
 public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
@@ -94,7 +94,8 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
 
         var populationBasisDef = getPopulationBasisDef(measureBasis, groupBasis);
         var populationsWithCriteriaReference = group.getPopulation().stream()
-                .map(t -> buildPopulationDef(t, group, measure.getUrl(), populationBasisDef, getSupportingEvidenceDefs(t)))
+                .map(t -> buildPopulationDef(
+                        t, group, measure.getUrl(), populationBasisDef, getSupportingEvidenceDefs(t)))
                 .toList();
 
         final Optional<PopulationDef> optPopulationDefDateOfCompliance = buildPopulationDefForDateOfCompliance(
@@ -125,21 +126,19 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         if (!ext.isEmpty()) {
             for (Extension e : ext) {
 
-                Expression expr = e.getValue() instanceof Expression
-                    ? (Expression) e.getValue()
-                    : null;
+                Expression expr = e.getValue() instanceof Expression ? (Expression) e.getValue() : null;
 
                 if (expr == null) {
                     throw new IllegalStateException("Extension does not contain valueExpression");
                 }
 
                 supportingEvidenceDefs.add(new SupportingEvidenceDef(
-                    expr.getExpression(),
-                    EXT_SUPPORTING_EVIDENCE_URL,
-                    expr.getDescription(),
-                    expr.getName(),
-                    expr.getLanguage(),
-                    extractConceptDefFromExpression(expr)));
+                        expr.getExpression(),
+                        EXT_SUPPORTING_EVIDENCE_URL,
+                        expr.getDescription(),
+                        expr.getName(),
+                        expr.getLanguage(),
+                        extractConceptDefFromExpression(expr)));
             }
             return supportingEvidenceDefs;
         } else {
@@ -152,8 +151,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
             return null;
         }
 
-        Coding coding =
-            expr.getExtension().stream()
+        Coding coding = expr.getExtension().stream()
                 .filter(e -> EXT_CQF_EXPRESSION_CODE.equals(e.getUrl()))
                 .map(Extension::getValue)
                 .filter(Coding.class::isInstance)
@@ -165,12 +163,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
             return null;
         }
 
-        CodeDef codeDef = new CodeDef(
-            coding.getSystem(),
-            coding.getVersion(),
-            coding.getCode(),
-            coding.getDisplay()
-        );
+        CodeDef codeDef = new CodeDef(coding.getSystem(), coding.getVersion(), coding.getCode(), coding.getDisplay());
 
         return new ConceptDef(List.of(codeDef), null);
     }
@@ -199,7 +192,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                 populationBasis,
                 criteriaReference,
                 aggregateMethod,
-            supportingEvidenceDefs);
+                supportingEvidenceDefs);
     }
 
     // TODO: JM, DateOfCompliance can now be more simply exposed via supporting evidence instead of this current

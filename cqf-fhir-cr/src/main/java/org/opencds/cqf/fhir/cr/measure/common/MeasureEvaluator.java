@@ -360,7 +360,7 @@ public class MeasureEvaluator {
         // only enabled for subject level reports
         if (reportType.equals(MeasureReportType.INDIVIDUAL)
                 && populationDef.getSupportingEvidenceDefs() != null
-                && !populationDef.getSupportingEvidenceDefs() .isEmpty()) {
+                && !populationDef.getSupportingEvidenceDefs().isEmpty()) {
             var extDef = populationDef.getSupportingEvidenceDefs();
             for (SupportingEvidenceDef e : extDef) {
                 var result = evaluationResult.get(e.getExpression());
@@ -634,8 +634,11 @@ public class MeasureEvaluator {
     }
 
     protected void evaluateCohort(
-            GroupDef groupDef, String subjectType, String subjectId, EvaluationResult evaluationResult,
-        MeasureReportType reportType) {
+            GroupDef groupDef,
+            String subjectType,
+            String subjectId,
+            EvaluationResult evaluationResult,
+            MeasureReportType reportType) {
         PopulationDef initialPopulation = groupDef.getSingle(INITIALPOPULATION);
         // Validate Required Populations are Present
         R4MeasureScoringTypePopulations.validateScoringTypePopulations(
@@ -643,7 +646,7 @@ public class MeasureEvaluator {
         // Evaluate Population
         evaluatePopulationMembership(subjectType, subjectId, initialPopulation, evaluationResult);
 
-        //supporting evidence
+        // supporting evidence
         for (PopulationDef p : groupDef.populations()) {
             populateSupportingEvidence(p, reportType, evaluationResult, subjectId);
         }
@@ -669,7 +672,8 @@ public class MeasureEvaluator {
                 evaluateProportion(groupDef, subjectType, subjectId, reportType, evaluationResult, applyScoring);
                 break;
             case CONTINUOUSVARIABLE:
-                evaluateContinuousVariable(groupDef, subjectType, subjectId, evaluationResult, applyScoring, reportType);
+                evaluateContinuousVariable(
+                        groupDef, subjectType, subjectId, evaluationResult, applyScoring, reportType);
                 break;
             case COHORT:
                 evaluateCohort(groupDef, subjectType, subjectId, evaluationResult, reportType);

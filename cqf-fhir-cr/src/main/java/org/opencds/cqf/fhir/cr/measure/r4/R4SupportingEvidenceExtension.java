@@ -1,12 +1,13 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.EXT_SUPPORTING_EVIDENCE_URL;
+
+import jakarta.annotation.Nullable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -17,7 +18,6 @@ import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.StringType;
-
 import org.opencds.cqf.cql.engine.runtime.CqlType;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.cql.engine.runtime.Tuple;
@@ -26,16 +26,13 @@ import org.opencds.cqf.fhir.cr.measure.common.ConceptDef;
 import org.opencds.cqf.fhir.cr.measure.common.SupportingEvidenceDef;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4DateHelper;
 
-import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.EXT_SUPPORTING_EVIDENCE_URL;
-
 public class R4SupportingEvidenceExtension {
 
     private static final R4DateHelper DATE_HELPER = new R4DateHelper();
     private static final int MAX_DEPTH = 25;
 
     // If you have the official constant for this, use it instead of the literal:
-    private static final String EXT_CQF_EXPRESSION_CODE =
-        "http://hl7.org/fhir/StructureDefinition/cqf-expressionCode";
+    private static final String EXT_CQF_EXPRESSION_CODE = "http://hl7.org/fhir/StructureDefinition/cqf-expressionCode";
 
     /**
      * Produces ONE cqf-supportingEvidence extension PER SupportingEvidenceDef, and adds
@@ -50,8 +47,8 @@ public class R4SupportingEvidenceExtension {
      * Matches StructureDefinition cqf-supportingEvidence (FHIR R5) shape, but authored on R4 MeasureReport.
      */
     public static void addSupportingEvidenceExtensions(
-        MeasureReport.MeasureReportGroupPopulationComponent reportPopulation,
-        List<SupportingEvidenceDef> supportingEvidenceDefs) {
+            MeasureReport.MeasureReportGroupPopulationComponent reportPopulation,
+            List<SupportingEvidenceDef> supportingEvidenceDefs) {
 
         if (reportPopulation == null || supportingEvidenceDefs == null || supportingEvidenceDefs.isEmpty()) {
             return;
@@ -71,7 +68,8 @@ public class R4SupportingEvidenceExtension {
             Extension seExt = new Extension().setUrl(EXT_SUPPORTING_EVIDENCE_URL);
 
             // ---- name slice (required) ----
-            seExt.addExtension(new Extension("name", new StringType(name))); // SD says valueCode; in R4 use StringType or CodeType as needed
+            seExt.addExtension(new Extension(
+                    "name", new StringType(name))); // SD says valueCode; in R4 use StringType or CodeType as needed
             // If you truly need valueCode specifically, swap to: new CodeType(name)
 
             // ---- description slice (optional) ----
@@ -269,7 +267,9 @@ public class R4SupportingEvidenceExtension {
      */
     @Nullable
     private static CodeableConcept conceptDefToConcept(ConceptDef c) {
-        if (c == null) {return null;}
+        if (c == null) {
+            return null;
+        }
         var cc = new CodeableConcept().setText(c.text());
         for (var cd : c.codes()) {
             cc.addCoding(codeDefToCoding(cd));

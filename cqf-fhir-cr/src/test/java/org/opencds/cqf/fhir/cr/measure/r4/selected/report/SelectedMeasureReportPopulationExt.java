@@ -1,12 +1,13 @@
 package org.opencds.cqf.fhir.cr.measure.r4.selected.report;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Objects;
 import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IntegerType;
@@ -16,225 +17,80 @@ import org.opencds.cqf.fhir.cr.measure.r4.Measure.Selected;
 
 public class SelectedMeasureReportPopulationExt extends Selected<Extension, SelectedMeasureReportPopulation> {
 
+    private static final BigDecimal DECIMAL_TOLERANCE = new BigDecimal("0.00001");
+
     public SelectedMeasureReportPopulationExt(Extension value, SelectedMeasureReportPopulation parent) {
         super(value, parent);
     }
 
-    // -------------------------
-    // resultBoolean (given)
-    // -------------------------
-    public SelectedMeasureReportPopulationExt hasBooleanResult(Boolean expected) {
-        Boolean actual = this.value.getExtension().stream()
-                .filter(e -> "resultBoolean".equals(e.getUrl()))
-                .map(Extension::getValue)
-                .filter(v -> v instanceof BooleanType)
-                .map(v -> ((BooleanType) v).booleanValue())
+    // ============================================================
+    // Helpers: slice access
+    // ============================================================
+
+    /** Returns all nested extensions for a given slice url (e.g., "value", "name", "description", "code"). */
+    private List<Extension> slices(String sliceUrl) {
+        return this.value.getExtension().stream()
+                .filter(e -> sliceUrl.equals(e.getUrl()))
+                .toList();
+    }
+
+    /** Returns the first slice (or null) for a given slice url. */
+    private Extension firstSlice(String sliceUrl) {
+        return this.value.getExtension().stream()
+                .filter(e -> sliceUrl.equals(e.getUrl()))
                 .findFirst()
                 .orElse(null);
+    }
 
-        assertEquals(expected, actual);
+    /** Returns all "value" slices under this supportingEvidence extension. */
+    private List<Extension> valueSlices() {
+        return slices("value");
+    }
+
+    // ============================================================
+    // Optional metadata assertions (name/description/code)
+    // ============================================================
+
+    public SelectedMeasureReportPopulationExt hasName(String expected) {
+        Extension nameExt = firstSlice("name");
+        assertNotNull(nameExt, "Missing 'name' slice");
+
+        // Some profiles use valueCode, some use valueString. Support both.
+        String actual = (nameExt.getValue() instanceof CodeType ct)
+                ? ct.getValue()
+                : (nameExt.getValue() instanceof StringType st) ? st.getValue() : null;
+
+        assertEquals(expected, actual, "SupportingEvidence.name mismatch");
         return this;
     }
 
-    // -------------------------
-    // resultString
-    // -------------------------
-    public SelectedMeasureReportPopulationExt hasStringResult(String expected) {
-        String actual = this.value.getExtension().stream()
-                .filter(e -> "resultString".equals(e.getUrl()))
-                .map(Extension::getValue)
-                .filter(v -> v instanceof StringType)
-                .map(v -> ((StringType) v).getValue())
-                .findFirst()
-                .orElse(null);
+    public SelectedMeasureReportPopulationExt hasDescription(String expected) {
+        Extension descExt = firstSlice("description");
+        assertNotNull(descExt, "Missing 'description' slice");
 
-        assertEquals(expected, actual);
+        String actual = descExt.getValue() instanceof StringType st ? st.getValue() : null;
+        assertEquals(expected, actual, "SupportingEvidence.description mismatch");
         return this;
     }
 
-    public SelectedMeasureReportPopulationExt hasResourceIdResult(String expected) {
-        String actual = this.value.getExtension().stream()
-                .filter(e -> "resultResourceId".equals(e.getUrl()))
-                .map(Extension::getValue)
-                .filter(v -> v instanceof StringType)
-                .map(v -> ((StringType) v).getValue())
-                .findFirst()
-                .orElse(null);
+    public SelectedMeasureReportPopulationExt hasCode(CodeableConcept expected) {
+        Extension codeExt = firstSlice("code");
+        assertNotNull(codeExt, "Missing 'code' slice");
 
-        assertEquals(expected, actual);
+        CodeableConcept actual = codeExt.getValue() instanceof CodeableConcept cc ? cc : null;
+        assertNotNull(actual, "SupportingEvidence.code is not a CodeableConcept");
+        // If you want deep equality, compare coding/system/code/display explicitly.
+        // For now, basic non-null & equals:
+        assertEquals(expected, actual, "SupportingEvidence.code mismatch");
         return this;
     }
 
-    public SelectedMeasureReportPopulationExt hasDecimalResult(Double expected) {
+    // ============================================================
+    // Scalar assertions (value[x] stored directly on each "value" slice)
+    // ============================================================
 
-        BigDecimal expectedValue = BigDecimal.valueOf(expected);
-        BigDecimal tolerance = new BigDecimal("0.00001");
-
-        BigDecimal actual = this.value.getExtension().stream()
-                .filter(e -> "resultDecimal".equals(e.getUrl()))
-                .map(Extension::getValue)
-                .filter(DecimalType.class::isInstance)
-                .map(DecimalType.class::cast)
-                .map(DecimalType::getValue)
-                .findFirst()
-                .orElse(null);
-
-        assertNotNull(actual, "Expected resultDecimal but none was found");
-
-        assertTrue(
-                actual.subtract(expectedValue).abs().compareTo(tolerance) <= 0,
-                "Decimal result not within tolerance (±0.00001). expected=" + expectedValue + ", actual=" + actual);
-
-        return this;
-    }
-
-    public SelectedMeasureReportPopulationExt hasIntegerResult(int expected) {
-        Integer actual = this.value.getExtension().stream()
-                .filter(e -> "resultInteger".equals(e.getUrl()))
-                .map(Extension::getValue)
-                .filter(v -> v instanceof IntegerType)
-                .map(v -> ((IntegerType) v).getValue())
-                .findFirst()
-                .orElse(null);
-
-        assertEquals(Integer.valueOf(expected), actual);
-        return this;
-    }
-
-    public SelectedMeasureReportPopulationExt hasIntervalResult(Period expected) {
-
-        Period actual = this.value.getExtension().stream()
-                .filter(e -> "resultPeriod".equals(e.getUrl()))
-                .map(Extension::getValue)
-                .filter(v -> v instanceof Period)
-                .map(v -> (Period) v)
-                .findFirst()
-                .orElse(null);
-
-        assertNotNull(actual, "Expected resultPeriod extension but none was found");
-
-        // Compare start/end explicitly to avoid equals() pitfalls
-        assertEquals(
-                expected.getStartElement().getValueAsString(),
-                actual.getStartElement().getValueAsString(),
-                "Period.start does not match");
-
-        assertEquals(
-                expected.getEndElement().getValueAsString(),
-                actual.getEndElement().getValueAsString(),
-                "Period.end does not match");
-
-        return this;
-    }
-
-    // -------------------------
-    // resultResourceId (stored as valueString)
-    // -------------------------
-    public SelectedMeasureReportPopulationExt hasListResourceIdResult(String expectedResourceId) {
-        String actual = this.value.getExtension().stream()
-                .filter(e -> "resultList".equals(e.getUrl()))
-                .findFirst()
-                .orElseThrow(() -> new AssertionError("Missing resultList"))
-                .getExtension()
-                .stream()
-                .filter(item -> "itemResourceId".equals(item.getUrl()))
-                .map(Extension::getValue)
-                .filter(StringType.class::isInstance)
-                .map(StringType.class::cast)
-                .map(StringType::getValue)
-                .filter(expectedResourceId::equals)
-                .findFirst()
-                .orElse(null);
-
-        assertEquals(expectedResourceId, actual);
-        return this;
-    }
-
-    public SelectedMeasureReportPopulationExt hasListBooleanResult(Boolean expectedResult) {
-        Boolean actual = this.value.getExtension().stream()
-                .filter(e -> "resultList".equals(e.getUrl()))
-                .findFirst()
-                .orElseThrow(() -> new AssertionError("Missing resultList"))
-                .getExtension()
-                .stream()
-                .filter(item -> "itemBoolean".equals(item.getUrl()))
-                .map(Extension::getValue)
-                .filter(BooleanType.class::isInstance)
-                .map(BooleanType.class::cast)
-                .map(BooleanType::getValue)
-                .filter(expectedResult::equals)
-                .findFirst()
-                .orElse(null);
-
-        assertEquals(expectedResult, actual);
-        return this;
-    }
-
-    public SelectedMeasureReportPopulationExt hasListStringResult(String expectedResult) {
-        String actual = this.value.getExtension().stream()
-                .filter(e -> "resultList".equals(e.getUrl()))
-                .findFirst()
-                .orElseThrow(() -> new AssertionError("Missing resultList"))
-                .getExtension()
-                .stream()
-                .filter(item -> "itemString".equals(item.getUrl()))
-                .map(Extension::getValue)
-                .filter(StringType.class::isInstance)
-                .map(StringType.class::cast)
-                .map(StringType::getValue)
-                .filter(expectedResult::equals)
-                .findFirst()
-                .orElse(null);
-
-        assertEquals(expectedResult, actual);
-        return this;
-    }
-
-    public SelectedMeasureReportPopulationExt hasListIntegerResult(int expectedResult) {
-
-        boolean found = this.value.getExtension().stream()
-                .filter(e -> "resultList".equals(e.getUrl()))
-                .findFirst()
-                .orElseThrow(() -> new AssertionError("Missing resultList"))
-                .getExtension()
-                .stream()
-                .filter(item -> "itemInteger".equals(item.getUrl()))
-                .map(Extension::getValue)
-                .filter(IntegerType.class::isInstance)
-                .map(IntegerType.class::cast)
-                .map(IntegerType::getValue)
-                .anyMatch(v -> v != null && v == expectedResult);
-
-        assertTrue(found, "Expected integer " + expectedResult + " not found in resultList");
-
-        return this;
-    }
-
-    // -------------------------
-    // Core tuple navigation
-    // -------------------------
-
-    private Extension getTupleField(String fieldName) {
-        Extension tuple = this.value.getExtension().stream()
-                .filter(e -> "resultTuple".equals(e.getUrl()))
-                .findFirst()
-                .orElseThrow(() -> new AssertionError("Missing resultTuple"));
-
-        return tuple.getExtension().stream()
-                .filter(f -> fieldName.equals(f.getUrl()))
-                .findFirst()
-                .orElseThrow(() -> new AssertionError("Missing tuple field: " + fieldName));
-    }
-
-    // -------------------------
-    // Scalar result assertions
-    // -------------------------
-
-    public SelectedMeasureReportPopulationExt hasTupleBoolean(String fieldName, boolean expected) {
-        Extension field = getTupleField(fieldName);
-
-        Boolean actual = field.getExtension().stream()
-                .filter(e -> "resultBoolean".equals(e.getUrl()))
+    public SelectedMeasureReportPopulationExt hasBooleanValue(boolean expected) {
+        Boolean actual = valueSlices().stream()
                 .map(Extension::getValue)
                 .filter(BooleanType.class::isInstance)
                 .map(BooleanType.class::cast)
@@ -242,15 +98,12 @@ public class SelectedMeasureReportPopulationExt extends Selected<Extension, Sele
                 .findFirst()
                 .orElse(null);
 
-        assertEquals(expected, actual, "Tuple field '" + fieldName + "' boolean mismatch");
+        assertEquals(expected, actual, "Boolean value mismatch");
         return this;
     }
 
-    public SelectedMeasureReportPopulationExt hasTupleInteger(String fieldName, int expected) {
-        Extension field = getTupleField(fieldName);
-
-        Integer actual = field.getExtension().stream()
-                .filter(e -> "resultInteger".equals(e.getUrl()))
+    public SelectedMeasureReportPopulationExt hasIntegerValue(int expected) {
+        Integer actual = valueSlices().stream()
                 .map(Extension::getValue)
                 .filter(IntegerType.class::isInstance)
                 .map(IntegerType.class::cast)
@@ -258,15 +111,41 @@ public class SelectedMeasureReportPopulationExt extends Selected<Extension, Sele
                 .findFirst()
                 .orElse(null);
 
-        assertEquals(Integer.valueOf(expected), actual, "Tuple field '" + fieldName + "' integer mismatch");
+        assertEquals(Integer.valueOf(expected), actual, "Integer value mismatch");
         return this;
     }
 
-    public SelectedMeasureReportPopulationExt hasTupleDecimal(String fieldName, BigDecimal expected) {
-        Extension field = getTupleField(fieldName);
+    public SelectedMeasureReportPopulationExt hasStringValue(String expected) {
+        String actual = valueSlices().stream()
+                .map(Extension::getValue)
+                .filter(StringType.class::isInstance)
+                .map(StringType.class::cast)
+                .map(StringType::getValue)
+                .findFirst()
+                .orElse(null);
 
-        BigDecimal actual = field.getExtension().stream()
-                .filter(e -> "resultDecimal".equals(e.getUrl()))
+        assertEquals(expected, actual, "String value mismatch");
+        return this;
+    }
+
+    /** ResourceId stored as valueString. */
+    public SelectedMeasureReportPopulationExt hasResourceIdValue(String expectedResourceId) {
+        String actual = valueSlices().stream()
+                .map(Extension::getValue)
+                .filter(StringType.class::isInstance)
+                .map(StringType.class::cast)
+                .map(StringType::getValue)
+                .findFirst()
+                .orElse(null);
+
+        assertEquals(expectedResourceId, actual, "ResourceId value mismatch");
+        return this;
+    }
+
+    public SelectedMeasureReportPopulationExt hasDecimalValue(Double expected) {
+        BigDecimal expectedBd = BigDecimal.valueOf(expected);
+
+        BigDecimal actual = valueSlices().stream()
                 .map(Extension::getValue)
                 .filter(DecimalType.class::isInstance)
                 .map(DecimalType.class::cast)
@@ -274,195 +153,291 @@ public class SelectedMeasureReportPopulationExt extends Selected<Extension, Sele
                 .findFirst()
                 .orElse(null);
 
-        assertEquals(expected, actual, "Tuple field '" + fieldName + "' decimal mismatch");
+        assertNotNull(actual, "Expected decimal value but none was found");
+        assertTrue(
+                actual.subtract(expectedBd).abs().compareTo(DECIMAL_TOLERANCE) <= 0,
+                "Decimal not within tolerance (±0.00001). expected=" + expectedBd + ", actual=" + actual);
         return this;
     }
 
-    public SelectedMeasureReportPopulationExt hasTupleString(String fieldName, String expected) {
-        Extension field = getTupleField(fieldName);
-
-        String actual = field.getExtension().stream()
-                .filter(e -> "resultString".equals(e.getUrl()))
-                .map(Extension::getValue)
-                .filter(StringType.class::isInstance)
-                .map(StringType.class::cast)
-                .map(StringType::getValue)
-                .findFirst()
-                .orElse(null);
-
-        assertEquals(expected, actual, "Tuple field '" + fieldName + "' string mismatch");
-        return this;
-    }
-
-    public SelectedMeasureReportPopulationExt hasTupleResourceId(String fieldName, String expected) {
-        Extension field = getTupleField(fieldName);
-
-        String actual = field.getExtension().stream()
-                .filter(e -> "resultResourceId".equals(e.getUrl()))
-                .map(Extension::getValue)
-                .filter(StringType.class::isInstance)
-                .map(StringType.class::cast)
-                .map(StringType::getValue)
-                .findFirst()
-                .orElse(null);
-
-        assertEquals(expected, actual, "Tuple field '" + fieldName + "' resourceId mismatch");
-        return this;
-    }
-
-    public SelectedMeasureReportPopulationExt hasTuplePeriod(String fieldName, Period expected) {
-        Extension field = getTupleField(fieldName);
-
-        Period actual = field.getExtension().stream()
-                .filter(e -> "resultPeriod".equals(e.getUrl()))
+    public SelectedMeasureReportPopulationExt hasPeriodValue(Period expected) {
+        Period actual = valueSlices().stream()
                 .map(Extension::getValue)
                 .filter(Period.class::isInstance)
                 .map(Period.class::cast)
                 .findFirst()
                 .orElse(null);
 
-        assertNotNull(actual, "Tuple field '" + fieldName + "' missing Period");
+        assertNotNull(actual, "Expected Period value but none was found");
 
-        // Compare explicitly (FHIR Period equality can be tricky)
         assertEquals(
                 expected.hasStart() ? expected.getStartElement().getValueAsString() : null,
                 actual.hasStart() ? actual.getStartElement().getValueAsString() : null,
-                "Tuple field '" + fieldName + "' period.start mismatch");
+                "Period.start mismatch");
         assertEquals(
                 expected.hasEnd() ? expected.getEndElement().getValueAsString() : null,
                 actual.hasEnd() ? actual.getEndElement().getValueAsString() : null,
-                "Tuple field '" + fieldName + "' period.end mismatch");
+                "Period.end mismatch");
 
         return this;
     }
 
-    // -------------------------
-    // List assertions inside tuple fields
-    // (expects field -> resultList -> itemX...)
-    // -------------------------
+    // ============================================================
+    // List assertions (multiple repeated "value" slices)
+    // ============================================================
 
-    private List<Extension> getTupleResultListItems(String fieldName) {
-        Extension field = getTupleField(fieldName);
-
-        Extension list = field.getExtension().stream()
-                .filter(e -> "resultList".equals(e.getUrl()))
-                .findFirst()
-                .orElseThrow(() -> new AssertionError("Tuple field '" + fieldName + "' missing resultList"));
-
-        return list.getExtension();
-    }
-
-    public SelectedMeasureReportPopulationExt hasTupleListStringItem(String fieldName, String expectedItem) {
-        boolean found = getTupleResultListItems(fieldName).stream()
-                .filter(e -> "itemString".equals(e.getUrl()))
-                .map(Extension::getValue)
-                .filter(StringType.class::isInstance)
-                .map(StringType.class::cast)
-                .map(StringType::getValue)
-                .anyMatch(expectedItem::equals);
-
-        assertTrue(found, "Tuple field '" + fieldName + "' missing list itemString=" + expectedItem);
-        return this;
-    }
-
-    public SelectedMeasureReportPopulationExt hasTupleListIntegerItem(String fieldName, int expectedItem) {
-        boolean found = getTupleResultListItems(fieldName).stream()
-                .filter(e -> "itemInteger".equals(e.getUrl()))
-                .map(Extension::getValue)
-                .filter(IntegerType.class::isInstance)
-                .map(IntegerType.class::cast)
-                .map(IntegerType::getValue)
-                .anyMatch(v -> v != null && v == expectedItem);
-
-        assertTrue(found, "Tuple field '" + fieldName + "' missing list itemInteger=" + expectedItem);
-        return this;
-    }
-
-    public SelectedMeasureReportPopulationExt hasTupleListBooleanItem(String fieldName, boolean expectedItem) {
-        boolean found = getTupleResultListItems(fieldName).stream()
-                .filter(e -> "itemBoolean".equals(e.getUrl()))
+    public SelectedMeasureReportPopulationExt hasListBooleanItem(boolean expectedItem) {
+        boolean found = valueSlices().stream()
                 .map(Extension::getValue)
                 .filter(BooleanType.class::isInstance)
                 .map(BooleanType.class::cast)
                 .map(BooleanType::booleanValue)
                 .anyMatch(v -> v == expectedItem);
 
-        assertTrue(found, "Tuple field '" + fieldName + "' missing list itemBoolean=" + expectedItem);
+        assertTrue(found, "Expected boolean item not found: " + expectedItem);
         return this;
     }
 
-    public SelectedMeasureReportPopulationExt hasTupleListResourceIdItem(String fieldName, String expectedItem) {
-        boolean found = getTupleResultListItems(fieldName).stream()
-                .filter(e -> "itemResourceId".equals(e.getUrl()))
+    public SelectedMeasureReportPopulationExt hasListIntegerItem(int expectedItem) {
+        boolean found = valueSlices().stream()
+                .map(Extension::getValue)
+                .filter(IntegerType.class::isInstance)
+                .map(IntegerType.class::cast)
+                .map(IntegerType::getValue)
+                .filter(Objects::nonNull)
+                .anyMatch(v -> v == expectedItem);
+
+        assertTrue(found, "Expected integer item not found: " + expectedItem);
+        return this;
+    }
+
+    public SelectedMeasureReportPopulationExt hasListStringItem(String expectedItem) {
+        boolean found = valueSlices().stream()
                 .map(Extension::getValue)
                 .filter(StringType.class::isInstance)
                 .map(StringType.class::cast)
                 .map(StringType::getValue)
                 .anyMatch(expectedItem::equals);
 
-        assertTrue(found, "Tuple field '" + fieldName + "' missing list itemResourceId=" + expectedItem);
+        assertTrue(found, "Expected string item not found: " + expectedItem);
+        return this;
+    }
+
+    public SelectedMeasureReportPopulationExt hasListResourceIdItem(String expectedResourceId) {
+        boolean found = valueSlices().stream()
+                .map(Extension::getValue)
+                .filter(StringType.class::isInstance)
+                .map(StringType.class::cast)
+                .map(StringType::getValue)
+                .anyMatch(expectedResourceId::equals);
+
+        assertTrue(found, "Expected resourceId item not found: " + expectedResourceId);
         return this;
     }
 
     public SelectedMeasureReportPopulationExt hasListDecimalItem(Double expectedValue) {
-
-        // 5 decimal places tolerance
         BigDecimal expected = BigDecimal.valueOf(expectedValue);
-        BigDecimal tolerance = new BigDecimal("0.00001");
 
-        Extension resultList = this.value.getExtension().stream()
-                .filter(e -> "resultList".equals(e.getUrl()))
-                .findFirst()
-                .orElseThrow(() -> new AssertionError("Missing resultList"));
-
-        boolean found = resultList.getExtension().stream()
-                .filter(e -> "itemDecimal".equals(e.getUrl()))
+        boolean found = valueSlices().stream()
                 .map(Extension::getValue)
                 .filter(DecimalType.class::isInstance)
                 .map(DecimalType.class::cast)
                 .map(DecimalType::getValue)
                 .anyMatch(actual ->
-                        actual != null && actual.subtract(expected).abs().compareTo(tolerance) <= 0);
+                        actual != null && actual.subtract(expected).abs().compareTo(DECIMAL_TOLERANCE) <= 0);
 
-        assertTrue(found, "Expected decimal not found within tolerance (±0.00001): " + expected);
+        assertTrue(found, "Expected decimal item not found within tolerance (±0.00001): " + expected);
+        return this;
+    }
+
+    public SelectedMeasureReportPopulationExt hasListPeriodItem(Period expected) {
+        Period actual = valueSlices().stream()
+                .map(Extension::getValue)
+                .filter(Period.class::isInstance)
+                .map(Period.class::cast)
+                .filter(p -> Objects.equals(
+                                expected.hasStart() ? expected.getStartElement().getValueAsString() : null,
+                                p.hasStart() ? p.getStartElement().getValueAsString() : null)
+                        && Objects.equals(
+                                expected.hasEnd() ? expected.getEndElement().getValueAsString() : null,
+                                p.hasEnd() ? p.getEndElement().getValueAsString() : null))
+                .findFirst()
+                .orElse(null);
+
+        assertNotNull(actual, "Expected Period item not found in repeated value slices");
+        return this;
+    }
+
+    // ============================================================
+    // Tuple assertions
+    //
+    // Tuple encoding assumed:
+    // - one "value" slice has no value[x] but HAS nested extensions
+    // - those nested extensions are tuple fields (url = fieldName)
+    // - each field has repeated nested extensions[url="value"] for the field values
+    // ============================================================
+
+    private Extension tupleValueSlice() {
+        return valueSlices().stream()
+                .filter(v -> v.getValue() == null && v.hasExtension())
+                .findFirst()
+                .orElseThrow(
+                        () -> new AssertionError("Missing tuple value slice (value with nested field extensions)"));
+    }
+
+    private Extension tupleField(String fieldName) {
+        Extension tupleValue = tupleValueSlice();
+        return tupleValue.getExtension().stream()
+                .filter(f -> fieldName.equals(f.getUrl()))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Missing tuple field: " + fieldName));
+    }
+
+    private List<Extension> tupleFieldValueSlices(String fieldName) {
+        return tupleField(fieldName).getExtension().stream()
+                .filter(e -> "value".equals(e.getUrl()))
+                .toList();
+    }
+
+    public SelectedMeasureReportPopulationExt hasTupleBoolean(String fieldName, boolean expected) {
+        Boolean actual = tupleFieldValueSlices(fieldName).stream()
+                .map(Extension::getValue)
+                .filter(BooleanType.class::isInstance)
+                .map(BooleanType.class::cast)
+                .map(BooleanType::booleanValue)
+                .findFirst()
+                .orElse(null);
+
+        assertEquals(expected, actual, "Tuple boolean mismatch for field=" + fieldName);
+        return this;
+    }
+
+    public SelectedMeasureReportPopulationExt hasTupleInteger(String fieldName, int expected) {
+        Integer actual = tupleFieldValueSlices(fieldName).stream()
+                .map(Extension::getValue)
+                .filter(IntegerType.class::isInstance)
+                .map(IntegerType.class::cast)
+                .map(IntegerType::getValue)
+                .findFirst()
+                .orElse(null);
+
+        assertEquals(Integer.valueOf(expected), actual, "Tuple integer mismatch for field=" + fieldName);
+        return this;
+    }
+
+    public SelectedMeasureReportPopulationExt hasTupleString(String fieldName, String expected) {
+        String actual = tupleFieldValueSlices(fieldName).stream()
+                .map(Extension::getValue)
+                .filter(StringType.class::isInstance)
+                .map(StringType.class::cast)
+                .map(StringType::getValue)
+                .findFirst()
+                .orElse(null);
+
+        assertEquals(expected, actual, "Tuple string mismatch for field=" + fieldName);
+        return this;
+    }
+
+    public SelectedMeasureReportPopulationExt hasTupleResourceId(String fieldName, String expected) {
+        String actual = tupleFieldValueSlices(fieldName).stream()
+                .map(Extension::getValue)
+                .filter(StringType.class::isInstance)
+                .map(StringType.class::cast)
+                .map(StringType::getValue)
+                .findFirst()
+                .orElse(null);
+
+        assertEquals(expected, actual, "Tuple resourceId mismatch for field=" + fieldName);
+        return this;
+    }
+
+    public SelectedMeasureReportPopulationExt hasTupleDecimal(String fieldName, Double expected) {
+        BigDecimal expectedBd = BigDecimal.valueOf(expected);
+
+        BigDecimal actual = tupleFieldValueSlices(fieldName).stream()
+                .map(Extension::getValue)
+                .filter(DecimalType.class::isInstance)
+                .map(DecimalType.class::cast)
+                .map(DecimalType::getValue)
+                .findFirst()
+                .orElse(null);
+
+        assertNotNull(actual, "Tuple decimal missing for field=" + fieldName);
+        assertTrue(
+                actual.subtract(expectedBd).abs().compareTo(DECIMAL_TOLERANCE) <= 0,
+                "Tuple decimal not within tolerance (±0.00001). expected=" + expectedBd + ", actual=" + actual);
+        return this;
+    }
+
+    public SelectedMeasureReportPopulationExt hasTuplePeriod(String fieldName, Period expected) {
+        Period actual = tupleFieldValueSlices(fieldName).stream()
+                .map(Extension::getValue)
+                .filter(Period.class::isInstance)
+                .map(Period.class::cast)
+                .findFirst()
+                .orElse(null);
+
+        assertNotNull(actual, "Tuple Period missing for field=" + fieldName);
+
+        assertEquals(
+                expected.hasStart() ? expected.getStartElement().getValueAsString() : null,
+                actual.hasStart() ? actual.getStartElement().getValueAsString() : null,
+                "Tuple Period.start mismatch for field=" + fieldName);
+        assertEquals(
+                expected.hasEnd() ? expected.getEndElement().getValueAsString() : null,
+                actual.hasEnd() ? actual.getEndElement().getValueAsString() : null,
+                "Tuple Period.end mismatch for field=" + fieldName);
 
         return this;
     }
 
-    public SelectedMeasureReportPopulationExt hasListIntervalItem(Period expected) {
-
-        Extension resultList = this.value.getExtension().stream()
-                .filter(e -> "resultList".equals(e.getUrl()))
-                .findFirst()
-                .orElseThrow(() -> new AssertionError("Missing resultList"));
-
-        Period actual = resultList.getExtension().stream()
-                .filter(e -> "itemPeriod".equals(e.getUrl()))
+    // Tuple “list of values” assertions (field has repeated value slices)
+    public SelectedMeasureReportPopulationExt hasTupleListStringItem(String fieldName, String expectedItem) {
+        boolean found = tupleFieldValueSlices(fieldName).stream()
                 .map(Extension::getValue)
-                .filter(v -> v instanceof Period)
-                .map(v -> (Period) v)
-                .filter(p -> expected.getStartElement()
-                                .getValueAsString()
-                                .equals(p.getStartElement().getValueAsString())
-                        && expected.getEndElement()
-                                .getValueAsString()
-                                .equals(p.getEndElement().getValueAsString()))
-                .findFirst()
-                .orElse(null);
+                .filter(StringType.class::isInstance)
+                .map(StringType.class::cast)
+                .map(StringType::getValue)
+                .anyMatch(expectedItem::equals);
 
-        assertNotNull(actual, "Expected itemPeriod in resultList but none matched");
+        assertTrue(found, "Tuple list missing string item for field=" + fieldName + " item=" + expectedItem);
+        return this;
+    }
 
-        // Compare start/end explicitly to avoid equals() pitfalls
-        assertEquals(
-                expected.getStartElement().getValueAsString(),
-                actual.getStartElement().getValueAsString(),
-                "Period.start does not match");
+    public SelectedMeasureReportPopulationExt hasTupleListIntegerItem(String fieldName, int expectedItem) {
+        boolean found = tupleFieldValueSlices(fieldName).stream()
+                .map(Extension::getValue)
+                .filter(IntegerType.class::isInstance)
+                .map(IntegerType.class::cast)
+                .map(IntegerType::getValue)
+                .filter(Objects::nonNull)
+                .anyMatch(v -> v == expectedItem);
 
-        assertEquals(
-                expected.getEndElement().getValueAsString(),
-                actual.getEndElement().getValueAsString(),
-                "Period.end does not match");
+        assertTrue(found, "Tuple list missing integer item for field=" + fieldName + " item=" + expectedItem);
+        return this;
+    }
 
+    public SelectedMeasureReportPopulationExt hasTupleListBooleanItem(String fieldName, boolean expectedItem) {
+        boolean found = tupleFieldValueSlices(fieldName).stream()
+                .map(Extension::getValue)
+                .filter(BooleanType.class::isInstance)
+                .map(BooleanType.class::cast)
+                .map(BooleanType::booleanValue)
+                .anyMatch(v -> v == expectedItem);
+
+        assertTrue(found, "Tuple list missing boolean item for field=" + fieldName + " item=" + expectedItem);
+        return this;
+    }
+
+    public SelectedMeasureReportPopulationExt hasTupleListResourceIdItem(String fieldName, String expectedItem) {
+        boolean found = tupleFieldValueSlices(fieldName).stream()
+                .map(Extension::getValue)
+                .filter(StringType.class::isInstance)
+                .map(StringType.class::cast)
+                .map(StringType::getValue)
+                .anyMatch(expectedItem::equals);
+
+        assertTrue(found, "Tuple list missing resourceId item for field=" + fieldName + " item=" + expectedItem);
         return this;
     }
 }

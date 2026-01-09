@@ -1,0 +1,65 @@
+{
+  "id": "CohortBooleanSupportingEvidence",
+  "resourceType": "Measure",
+  "url": "http://example.com/Measure/CohortBooleanSupportingEvidence",
+  "library": [
+    "http://example.com/Library/LibrarySimple"
+  ],
+  "scoring": {
+    "coding": [
+      {
+        "system": "http://hl7.org/fhir/measure-scoring",
+        "code": "cohort"
+      }
+    ]
+  },
+  "group": [
+    {
+      "id": "group-1",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-populationBasis",
+          "valueCode": "boolean"
+        }
+      ],
+      "population": [
+        {
+          "id": "initial-population",
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code": "initial-population",
+                "display": "Initial Population"
+              }
+            ]
+          },
+          "criteria": {
+            "language": "text/cql-identifier",
+            "expression": "Initial Population Boolean"
+          },
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/cqf-supportingEvidenceDefinition",
+              "valueExpression": {
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/cqf-expressionCode",
+                    "valueCoding": {
+                      "code": "denominator-resource",
+                      "system": "http://example.org/fhir/CodeSystem/example-supporting-evidence-codes",
+                      "display": "Denominator Resource"
+                    }
+                  }
+                ],
+                "description": "Example of supporting evidence that is a Denominator Resource",
+                "language": "text/cql-identifier",
+                "name": "DenominatorResource",
+                "expression": "Denominator Resource"
+              }
+            }
+          ]
+        }
+      ]
+    }]
+}

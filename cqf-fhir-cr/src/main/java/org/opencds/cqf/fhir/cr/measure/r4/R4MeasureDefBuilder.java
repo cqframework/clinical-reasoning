@@ -5,6 +5,9 @@ import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.CQFM_CAR
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.CQFM_SCORING_EXT_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_CQFM_AGGREGATE_METHOD_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_CQFM_CRITERIA_REFERENCE;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_CQF_EXPRESSION_CODE;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_SUPPORTING_EVIDENCE_DEFINITION_URL;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.EXT_SUPPORTING_EVIDENCE_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_EXTENSION;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.SDE_USAGE_CODE;
 
@@ -42,6 +45,7 @@ import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.SdeDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierComponentDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
+import org.opencds.cqf.fhir.cr.measure.common.SupportingEvidenceDef;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 
 public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
@@ -90,7 +94,8 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
 
         var populationBasisDef = getPopulationBasisDef(measureBasis, groupBasis);
         var populationsWithCriteriaReference = group.getPopulation().stream()
-                .map(t -> buildPopulationDef(t, group, measure.getUrl(), populationBasisDef))
+                .map(t -> buildPopulationDef(
+                        t, group, measure.getUrl(), populationBasisDef, getSupportingEvidenceDefs(t)))
                 .toList();
 
         final Optional<PopulationDef> optPopulationDefDateOfCompliance = buildPopulationDefForDateOfCompliance(
@@ -112,6 +117,55 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                 populationBasisDef);
     }
 
+    private List<SupportingEvidenceDef> getSupportingEvidenceDefs(MeasureGroupPopulationComponent groupPopulation) {
+
+        List<SupportingEvidenceDef> supportingEvidenceDefs = new ArrayList<>();
+
+        List<Extension> ext = groupPopulation.getExtension().stream()
+                .filter(t -> EXT_SUPPORTING_EVIDENCE_DEFINITION_URL.equals(t.getUrl()))
+                .toList();
+
+        for (Extension e : ext) {
+            Expression expr = e.getValue() instanceof Expression ? (Expression) e.getValue() : null;
+
+            if (expr == null) {
+                throw new InvalidRequestException("Extension does not contain valueExpression");
+            }
+
+            supportingEvidenceDefs.add(new SupportingEvidenceDef(
+                    expr.getExpression(),
+                    EXT_SUPPORTING_EVIDENCE_URL,
+                    expr.getDescription(),
+                    expr.getName(),
+                    expr.getLanguage(),
+                    extractConceptDefFromExpression(expr)));
+        }
+
+        return supportingEvidenceDefs;
+    }
+
+    public static ConceptDef extractConceptDefFromExpression(Expression expr) {
+        if (expr == null) {
+            return null;
+        }
+
+        Coding coding = expr.getExtension().stream()
+                .filter(e -> EXT_CQF_EXPRESSION_CODE.equals(e.getUrl()))
+                .map(Extension::getValue)
+                .filter(Coding.class::isInstance)
+                .map(Coding.class::cast)
+                .findFirst()
+                .orElse(null);
+
+        if (coding == null) {
+            return null;
+        }
+
+        CodeDef codeDef = new CodeDef(coding.getSystem(), coding.getVersion(), coding.getCode(), coding.getDisplay());
+
+        return new ConceptDef(List.of(codeDef), null);
+    }
+
     private void checkIds(MeasureGroupComponent group) {
         group.getPopulation().forEach(R4MeasureDefBuilder::checkId);
     }
@@ -121,7 +175,8 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
             MeasureGroupPopulationComponent population,
             MeasureGroupComponent group,
             String measureUrl,
-            CodeDef populationBasis) {
+            CodeDef populationBasis,
+            @Nullable List<SupportingEvidenceDef> supportingEvidenceDefs) {
         MeasurePopulationType popType = MeasurePopulationType.fromCode(
                 population.getCode().getCodingFirstRep().getCode());
         // criteriaReference & aggregateMethod are for MeasureObservation populations only
@@ -134,9 +189,12 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                 population.getCriteria().getExpression(),
                 populationBasis,
                 criteriaReference,
-                aggregateMethod);
+                aggregateMethod,
+                supportingEvidenceDefs);
     }
 
+    // TODO: JM, DateOfCompliance can now be more simply exposed via supporting evidence instead of this current
+    // workflow. Should deprecate.
     private Optional<PopulationDef> buildPopulationDefForDateOfCompliance(
             String measureUrl,
             MeasureGroupComponent group,
@@ -161,7 +219,8 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                 totalConceptDefCreator(DATEOFCOMPLIANCE),
                 DATEOFCOMPLIANCE,
                 expression,
-                populationBasis);
+                populationBasis,
+                null);
 
         return Optional.of(populateDefDateOfCompliance);
     }

@@ -1,0 +1,273 @@
+{
+  "id": "RatioGroupBooleanAllPopulationsSuppEvidence",
+  "resourceType": "Measure",
+  "url": "http://example.com/Measure/RatioGroupBooleanAllPopulationsSuppEvidence",
+  "library": [
+    "http://example.com/Library/LibrarySimple"
+  ],
+  "scoring": {
+    "coding": [
+      {
+        "system": "http://hl7.org/fhir/measure-scoring",
+        "code": "ratio"
+      }
+    ]
+  },
+  "group": [
+    {
+      "id": "group-1",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-populationBasis",
+          "valueCode": "boolean"
+        }
+      ],
+      "population": [
+        {
+          "id": "initial-population",
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code": "initial-population",
+                "display": "Initial Population"
+              }
+            ]
+          },
+          "criteria": {
+            "language": "text/cql-identifier",
+            "expression": "Initial Population Boolean"
+          }
+        },
+        {
+          "id": "denominator",
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code": "denominator",
+                "display": "Denominator"
+              }
+            ]
+          },
+          "criteria": {
+            "language": "text/cql-identifier",
+            "expression": "Denominator Boolean"
+          },
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/cqf-supportingEvidenceDefinition",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "name": "always true",
+                "expression": "always true"
+              }
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/cqf-supportingEvidenceDefinition",
+              "valueExpression": {
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/cqf-expressionCode",
+                    "valueCoding": {
+                      "code": "denominator-resource",
+                      "system": "http://example.org/fhir/CodeSystem/example-supporting-evidence-codes",
+                      "display": "Denominator Resource"
+                    }
+                  }
+                ],
+                "description": "Example of supporting evidence that is a Denominator Resource",
+                "language": "text/cql-identifier",
+                "name": "DenominatorResource",
+                "expression": "Denominator Resource"
+              }
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/cqf-supportingEvidenceDefinition",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "name": "list of boolean",
+                "expression": "list of boolean"
+              }
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/cqf-supportingEvidenceDefinition",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "name": "string",
+                "expression": "string"
+              }
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/cqf-supportingEvidenceDefinition",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "name": "date",
+                "expression": "date"
+              }
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/cqf-supportingEvidenceDefinition",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "name": "decimal",
+                "expression": "decimal"
+              }
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/cqf-supportingEvidenceDefinition",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "name": "number",
+                "expression": "number"
+              }
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/cqf-supportingEvidenceDefinition",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "name": "list of dates",
+                "expression": "list of dates"
+              }
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/cqf-supportingEvidenceDefinition",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "name": "list of numbers",
+                "expression": "list of numbers"
+              }
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/cqf-supportingEvidenceDefinition",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "name": "list of string",
+                "expression": "list of string"
+              }
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/cqf-supportingEvidenceDefinition",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "name": "test tuple",
+                "expression": "test tuple"
+              }
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/cqf-supportingEvidenceDefinition",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "name": "interval",
+                "expression": "interval"
+              }
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/cqf-supportingEvidenceDefinition",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "name": "TestIntervalList",
+                "expression": "TestIntervalList"
+              }
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/cqf-supportingEvidenceDefinition",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "name": "TestDecimalList",
+                "expression": "TestDecimalList"
+              }
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/cqf-supportingEvidenceDefinition",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "name": "test code",
+                "expression": "test code"
+              }
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/cqf-supportingEvidenceDefinition",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "name": "EmptyListExample",
+                "expression": "EmptyListExample"
+              }
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/cqf-supportingEvidenceDefinition",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "name": "NullExample",
+                "expression": "NullExample"
+              }
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/cqf-supportingEvidenceDefinition",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "name": "PatientRes",
+                "expression": "PatientRes"
+              }
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/cqf-supportingEvidenceDefinition",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "name": "list test tuple",
+                "expression": "list test tuple"
+              }
+            }
+          ]
+        },
+        {
+          "id": "denominator-exclusion",
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code": "denominator-exclusion",
+                "display": "Denominator-Exclusion"
+              }
+            ]
+          },
+          "criteria": {
+            "language": "text/cql-identifier",
+            "expression": "Denominator Exclusion Boolean"
+          }
+        },
+        {
+          "id": "numerator-exclusion",
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code": "numerator-exclusion",
+                "display": "Numerator Exclusion"
+              }
+            ]
+          },
+          "criteria": {
+            "language": "text/cql-identifier",
+            "expression": "Numerator Exclusion Boolean"
+          }
+        },
+        {
+          "id": "numerator",
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code": "numerator",
+                "display": "Numerator"
+              }
+            ]
+          },
+          "criteria": {
+            "language": "text/cql-identifier",
+            "expression": "Numerator Boolean"
+          }
+        }
+      ]
+    }]
+}

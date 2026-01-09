@@ -54,41 +54,52 @@ public class R4SupportingEvidenceExtension {
         }
 
         for (SupportingEvidenceDef def : supportingEvidenceDefs) {
-            if (def == null) continue;
-
-            // Name is required by the SD (min=1)
-            String name = def.getName();
-            if (name == null || name.isBlank()) {
-                // Fallback to expression if name wasn't provided
-                name = def.getExpression();
+            Extension seExt = buildSupportingEvidenceExtension(def);
+            if (seExt != null) {
+                reportPopulation.addExtension(seExt);
             }
-            if (name == null || name.isBlank()) continue;
-
-            Extension seExt = new Extension().setUrl(def.getSystemUrl());
-
-            // ---- name slice (required) ----
-            seExt.addExtension(new Extension(
-                    "name", new StringType(name))); // SD says valueCode; in R4 use StringType or CodeType as needed
-            // If you truly need valueCode specifically, swap to: new CodeType(name)
-
-            // ---- description slice (optional) ----
-            String desc = def.getExpressionDescription();
-            if (desc != null && !desc.isBlank()) {
-                seExt.addExtension(new Extension("description", new StringType(desc)));
-            }
-
-            // ---- code slice (optional CodeableConcept) ----
-            CodeableConcept codeConcept = conceptDefToConcept(def.getCode());
-            if (codeConcept != null && codeConcept.hasCoding()) {
-                seExt.addExtension(new Extension("code", codeConcept));
-            }
-
-            // ---- value slice(s) (0..*) ----
-            Object exprValue = resolveExpressionValue(def);
-            addValues(seExt, exprValue);
-
-            reportPopulation.addExtension(seExt);
         }
+    }
+
+    private static Extension buildSupportingEvidenceExtension(SupportingEvidenceDef def) {
+        if (def == null) {
+            return null;
+        }
+
+        // Name is required by SD (min=1)
+        String name = firstNonBlank(def.getName(), def.getExpression());
+        if (name == null) {
+            return null;
+        }
+
+        Extension seExt = new Extension().setUrl(def.getSystemUrl());
+
+        // ---- name slice (required) ----
+        seExt.addExtension(new Extension("name", new StringType(name)));
+
+        // ---- description slice (optional) ----
+        String desc = def.getExpressionDescription();
+        if (desc != null && !desc.isBlank()) {
+            seExt.addExtension(new Extension("description", new StringType(desc)));
+        }
+
+        // ---- code slice (optional) ----
+        CodeableConcept codeConcept = conceptDefToConcept(def.getCode());
+        if (codeConcept != null && codeConcept.hasCoding()) {
+            seExt.addExtension(new Extension("code", codeConcept));
+        }
+
+        // ---- value slice(s) ----
+        Object exprValue = resolveExpressionValue(def);
+        addValues(seExt, exprValue);
+
+        return seExt;
+    }
+
+    private static String firstNonBlank(String a, String b) {
+        if (a != null && !a.isBlank()) return a;
+        if (b != null && !b.isBlank()) return b;
+        return null;
     }
 
     /**

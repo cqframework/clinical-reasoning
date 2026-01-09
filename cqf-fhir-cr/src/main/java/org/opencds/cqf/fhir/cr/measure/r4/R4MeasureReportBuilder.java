@@ -13,7 +13,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
@@ -23,7 +22,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IntegerType;
@@ -43,7 +41,6 @@ import org.hl7.fhir.r4.model.StringType;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.fhir.cr.measure.common.CodeDef;
 import org.opencds.cqf.fhir.cr.measure.common.ConceptDef;
-import org.opencds.cqf.fhir.cr.measure.common.ContinuousVariableObservationAggregateMethod;
 import org.opencds.cqf.fhir.cr.measure.common.FhirResourceUtils;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
@@ -640,19 +637,11 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             MeasureReportGroupPopulationComponent measurePopulation, PopulationDef populationDef) {
 
         // Add either the aggregation result to the numerator or denominator, if applicable
-        Optional.ofNullable(populationDef.getAggregationResult())
-                .ifPresent(nonNullAggregationResult -> measurePopulation.addExtension(
-                        MeasureConstants.EXT_AGGREGATION_METHOD_RESULT, new DecimalType(nonNullAggregationResult)));
+        R4MeasureReportUtils.addAggregationResult(measurePopulation, populationDef);
 
         // Ensure the aggregation method is added to the report, using the same extension as the
         // one on the Measure:
-        Optional.ofNullable(populationDef.getAggregateMethod())
-                // There's no point in capturing "N_A" aggregation methods here, as this could cause
-                // bugs
-                .filter(aggregateMethod -> ContinuousVariableObservationAggregateMethod.N_A != aggregateMethod)
-                .ifPresent(nonNonAggregateMethod -> measurePopulation.addExtension(
-                        MeasureConstants.EXT_CQFM_AGGREGATE_METHOD_URL,
-                        new StringType(nonNonAggregateMethod.getText())));
+        R4MeasureReportUtils.addAggregateMethod(measurePopulation, populationDef);
     }
 
     /**

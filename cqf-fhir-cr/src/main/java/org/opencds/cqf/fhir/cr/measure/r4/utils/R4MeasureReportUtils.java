@@ -4,23 +4,30 @@ import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_CQFM
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.annotation.Nullable;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.DecimalType;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupPopulationComponent;
 import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupComponent;
 import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupPopulationComponent;
+import org.hl7.fhir.r4.model.StringType;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 import org.opencds.cqf.fhir.cr.measure.common.ContinuousVariableObservationAggregateMethod;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
+import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumValueDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumValueWrapper;
+import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 
 /**
  * Utility class for extracting data from R4 FHIR MeasureReport resources.
@@ -307,6 +314,49 @@ public class R4MeasureReportUtils {
         }
 
         return ContinuousVariableObservationAggregateMethod.N_A;
+    }
+
+    public static BigDecimal getAggregationResult(MeasureReportGroupPopulationComponent reportPopulation) {
+        return Optional.ofNullable(reportPopulation.getExtensionByUrl(MeasureConstants.EXT_AGGREGATION_METHOD_RESULT))
+                .map(Extension::getValue)
+                .filter(DecimalType.class::isInstance)
+                .map(DecimalType.class::cast)
+                .map(DecimalType::getValue)
+                .orElse(BigDecimal.ZERO);
+    }
+
+    public static void addAggregationResult(
+            MeasureReportGroupPopulationComponent measurePopulation, PopulationDef populationDef) {
+
+        addAggregationResult(measurePopulation, populationDef.getAggregationResult());
+    }
+
+    public static void addAggregationResult(
+            MeasureReportGroupPopulationComponent measurePopulation, @Nullable Double aggregationResult) {
+
+        Optional.ofNullable(aggregationResult)
+                .ifPresent(nonNullAggregationResult -> measurePopulation.addExtension(
+                        MeasureConstants.EXT_AGGREGATION_METHOD_RESULT, new DecimalType(nonNullAggregationResult)));
+    }
+
+    public static void addAggregateMethod(
+            MeasureReportGroupPopulationComponent measurePopulation, PopulationDef populationDef) {
+
+        addAggregateMethod(measurePopulation, populationDef.getAggregateMethod());
+    }
+
+    public static void addAggregateMethod(
+            MeasureReportGroupPopulationComponent measurePopulation,
+            @Nullable ContinuousVariableObservationAggregateMethod aggregateMethod) {
+
+        Optional.ofNullable(aggregateMethod)
+                // There's no point in capturing "N_A" aggregation methods here, as this could cause
+                // bugs
+                .filter(nonNonAggregateMethod ->
+                        ContinuousVariableObservationAggregateMethod.N_A != nonNonAggregateMethod)
+                .ifPresent(nonNonAggregateMethod -> measurePopulation.addExtension(
+                        MeasureConstants.EXT_CQFM_AGGREGATE_METHOD_URL,
+                        new StringType(nonNonAggregateMethod.getText())));
     }
 
     /**

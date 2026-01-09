@@ -2,25 +2,34 @@ package org.opencds.cqf.fhir.cr.measure.r4.utils;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_CQFM_AGGREGATE_METHOD_URL;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.DecimalType;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupPopulationComponent;
 import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupComponent;
 import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupPopulationComponent;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.cr.measure.common.CodeDef;
+import org.opencds.cqf.fhir.cr.measure.common.ConceptDef;
 import org.opencds.cqf.fhir.cr.measure.common.ContinuousVariableObservationAggregateMethod;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
+import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
+import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 
 class R4MeasureReportUtilsTest {
 
@@ -589,5 +598,283 @@ class R4MeasureReportUtilsTest {
 
         assertTrue(exception.getMessage().contains("Aggregation method: invalid-method is not a valid value"));
         assertTrue(exception.getMessage().contains(measureUrl));
+    }
+
+    // ========================================
+    // Tests for getAggregationResult
+    // ========================================
+
+    @Test
+    void testGetAggregationResult_WithExtension() {
+        MeasureReportGroupPopulationComponent population = new MeasureReportGroupPopulationComponent();
+        population.addExtension(MeasureConstants.EXT_AGGREGATION_METHOD_RESULT, new DecimalType(42.5));
+
+        BigDecimal result = R4MeasureReportUtils.getAggregationResult(population);
+
+        assertEquals(new BigDecimal("42.5"), result);
+    }
+
+    @Test
+    void testGetAggregationResult_NoExtension() {
+        MeasureReportGroupPopulationComponent population = new MeasureReportGroupPopulationComponent();
+
+        BigDecimal result = R4MeasureReportUtils.getAggregationResult(population);
+
+        assertEquals(BigDecimal.ZERO, result);
+    }
+
+    @Test
+    void testGetAggregationResult_WithWrongExtensionType() {
+        MeasureReportGroupPopulationComponent population = new MeasureReportGroupPopulationComponent();
+        // Add extension with wrong type (StringType instead of DecimalType)
+        population.addExtension(MeasureConstants.EXT_AGGREGATION_METHOD_RESULT, new StringType("42.5"));
+
+        BigDecimal result = R4MeasureReportUtils.getAggregationResult(population);
+
+        // Should return ZERO because the extension value is not a DecimalType
+        assertEquals(BigDecimal.ZERO, result);
+    }
+
+    @Test
+    void testGetAggregationResult_WithZeroValue() {
+        MeasureReportGroupPopulationComponent population = new MeasureReportGroupPopulationComponent();
+        population.addExtension(MeasureConstants.EXT_AGGREGATION_METHOD_RESULT, new DecimalType(0.0));
+
+        BigDecimal result = R4MeasureReportUtils.getAggregationResult(population);
+
+        assertEquals(new BigDecimal("0.0"), result);
+    }
+
+    @Test
+    void testGetAggregationResult_WithNegativeValue() {
+        MeasureReportGroupPopulationComponent population = new MeasureReportGroupPopulationComponent();
+        population.addExtension(MeasureConstants.EXT_AGGREGATION_METHOD_RESULT, new DecimalType(-15.75));
+
+        BigDecimal result = R4MeasureReportUtils.getAggregationResult(population);
+
+        assertEquals(new BigDecimal("-15.75"), result);
+    }
+
+    // ========================================
+    // Tests for addAggregationResult - with PopulationDef
+    // ========================================
+
+    @Test
+    void testAddAggregationResult_FromPopulationDef_WithResult() {
+        MeasureReportGroupPopulationComponent population = new MeasureReportGroupPopulationComponent();
+        PopulationDef populationDef = createPopulationDef(
+                "pop1", MeasurePopulationType.NUMERATOR, null, ContinuousVariableObservationAggregateMethod.SUM);
+        populationDef.setAggregationResult(123.45);
+
+        R4MeasureReportUtils.addAggregationResult(population, populationDef);
+
+        Extension ext = population.getExtensionByUrl(MeasureConstants.EXT_AGGREGATION_METHOD_RESULT);
+        assertNotNull(ext);
+        assertInstanceOf(DecimalType.class, ext.getValue());
+        assertEquals(new BigDecimal("123.45"), ((DecimalType) ext.getValue()).getValue());
+    }
+
+    @Test
+    void testAddAggregationResult_FromPopulationDef_WithNullResult() {
+        MeasureReportGroupPopulationComponent population = new MeasureReportGroupPopulationComponent();
+        PopulationDef populationDef = createPopulationDef(
+                "pop1", MeasurePopulationType.NUMERATOR, null, ContinuousVariableObservationAggregateMethod.SUM);
+        // aggregationResult is null by default
+
+        R4MeasureReportUtils.addAggregationResult(population, populationDef);
+
+        Extension ext = population.getExtensionByUrl(MeasureConstants.EXT_AGGREGATION_METHOD_RESULT);
+        assertNull(ext, "No extension should be added when aggregationResult is null");
+    }
+
+    @Test
+    void testAddAggregationResult_FromPopulationDef_WithZeroResult() {
+        MeasureReportGroupPopulationComponent population = new MeasureReportGroupPopulationComponent();
+        PopulationDef populationDef = createPopulationDef(
+                "pop1", MeasurePopulationType.NUMERATOR, null, ContinuousVariableObservationAggregateMethod.SUM);
+        populationDef.setAggregationResult(0.0);
+
+        R4MeasureReportUtils.addAggregationResult(population, populationDef);
+
+        Extension ext = population.getExtensionByUrl(MeasureConstants.EXT_AGGREGATION_METHOD_RESULT);
+        assertNotNull(ext);
+        assertEquals(new BigDecimal("0.0"), ((DecimalType) ext.getValue()).getValue());
+    }
+
+    // ========================================
+    // Tests for addAggregationResult - with Double
+    // ========================================
+
+    @Test
+    void testAddAggregationResult_FromDouble_WithValue() {
+        MeasureReportGroupPopulationComponent population = new MeasureReportGroupPopulationComponent();
+
+        R4MeasureReportUtils.addAggregationResult(population, 99.99);
+
+        Extension ext = population.getExtensionByUrl(MeasureConstants.EXT_AGGREGATION_METHOD_RESULT);
+        assertNotNull(ext);
+        assertInstanceOf(DecimalType.class, ext.getValue());
+        assertEquals(new BigDecimal("99.99"), ((DecimalType) ext.getValue()).getValue());
+    }
+
+    @Test
+    void testAddAggregationResult_FromDouble_WithNullValue() {
+        MeasureReportGroupPopulationComponent population = new MeasureReportGroupPopulationComponent();
+
+        R4MeasureReportUtils.addAggregationResult(population, (Double) null);
+
+        Extension ext = population.getExtensionByUrl(MeasureConstants.EXT_AGGREGATION_METHOD_RESULT);
+        assertNull(ext, "No extension should be added when value is null");
+    }
+
+    @Test
+    void testAddAggregationResult_FromDouble_WithZeroValue() {
+        MeasureReportGroupPopulationComponent population = new MeasureReportGroupPopulationComponent();
+
+        R4MeasureReportUtils.addAggregationResult(population, 0.0);
+
+        Extension ext = population.getExtensionByUrl(MeasureConstants.EXT_AGGREGATION_METHOD_RESULT);
+        assertNotNull(ext);
+        assertEquals(new BigDecimal("0.0"), ((DecimalType) ext.getValue()).getValue());
+    }
+
+    // ========================================
+    // Tests for addAggregateMethod - with PopulationDef
+    // ========================================
+
+    @Test
+    void testAddAggregateMethod_FromPopulationDef_WithSum() {
+        MeasureReportGroupPopulationComponent population = new MeasureReportGroupPopulationComponent();
+        PopulationDef populationDef = createPopulationDef(
+                "pop1", MeasurePopulationType.NUMERATOR, null, ContinuousVariableObservationAggregateMethod.SUM);
+
+        R4MeasureReportUtils.addAggregateMethod(population, populationDef);
+
+        Extension ext = population.getExtensionByUrl(EXT_CQFM_AGGREGATE_METHOD_URL);
+        assertNotNull(ext);
+        assertInstanceOf(StringType.class, ext.getValue());
+        assertEquals("sum", ((StringType) ext.getValue()).getValue());
+    }
+
+    @Test
+    void testAddAggregateMethod_FromPopulationDef_WithAvg() {
+        MeasureReportGroupPopulationComponent population = new MeasureReportGroupPopulationComponent();
+        PopulationDef populationDef = createPopulationDef(
+                "pop1", MeasurePopulationType.NUMERATOR, null, ContinuousVariableObservationAggregateMethod.AVG);
+
+        R4MeasureReportUtils.addAggregateMethod(population, populationDef);
+
+        Extension ext = population.getExtensionByUrl(EXT_CQFM_AGGREGATE_METHOD_URL);
+        assertNotNull(ext);
+        assertEquals("avg", ((StringType) ext.getValue()).getValue());
+    }
+
+    @Test
+    void testAddAggregateMethod_FromPopulationDef_WithNullMethod() {
+        MeasureReportGroupPopulationComponent population = new MeasureReportGroupPopulationComponent();
+        PopulationDef populationDef = createPopulationDef("pop1", MeasurePopulationType.NUMERATOR, null, null);
+
+        R4MeasureReportUtils.addAggregateMethod(population, populationDef);
+
+        Extension ext = population.getExtensionByUrl(EXT_CQFM_AGGREGATE_METHOD_URL);
+        assertNull(ext, "No extension should be added when aggregateMethod is null");
+    }
+
+    @Test
+    void testAddAggregateMethod_FromPopulationDef_WithN_A() {
+        MeasureReportGroupPopulationComponent population = new MeasureReportGroupPopulationComponent();
+        PopulationDef populationDef = createPopulationDef(
+                "pop1", MeasurePopulationType.NUMERATOR, null, ContinuousVariableObservationAggregateMethod.N_A);
+
+        R4MeasureReportUtils.addAggregateMethod(population, populationDef);
+
+        Extension ext = population.getExtensionByUrl(EXT_CQFM_AGGREGATE_METHOD_URL);
+        assertNull(ext, "No extension should be added when aggregateMethod is N_A");
+    }
+
+    // ========================================
+    // Tests for addAggregateMethod - with ContinuousVariableObservationAggregateMethod
+    // ========================================
+
+    @Test
+    void testAddAggregateMethod_FromEnum_WithMin() {
+        MeasureReportGroupPopulationComponent population = new MeasureReportGroupPopulationComponent();
+
+        R4MeasureReportUtils.addAggregateMethod(population, ContinuousVariableObservationAggregateMethod.MIN);
+
+        Extension ext = population.getExtensionByUrl(EXT_CQFM_AGGREGATE_METHOD_URL);
+        assertNotNull(ext);
+        assertInstanceOf(StringType.class, ext.getValue());
+        assertEquals("min", ((StringType) ext.getValue()).getValue());
+    }
+
+    @Test
+    void testAddAggregateMethod_FromEnum_WithMax() {
+        MeasureReportGroupPopulationComponent population = new MeasureReportGroupPopulationComponent();
+
+        R4MeasureReportUtils.addAggregateMethod(population, ContinuousVariableObservationAggregateMethod.MAX);
+
+        Extension ext = population.getExtensionByUrl(EXT_CQFM_AGGREGATE_METHOD_URL);
+        assertNotNull(ext);
+        assertEquals("max", ((StringType) ext.getValue()).getValue());
+    }
+
+    @Test
+    void testAddAggregateMethod_FromEnum_WithMedian() {
+        MeasureReportGroupPopulationComponent population = new MeasureReportGroupPopulationComponent();
+
+        R4MeasureReportUtils.addAggregateMethod(population, ContinuousVariableObservationAggregateMethod.MEDIAN);
+
+        Extension ext = population.getExtensionByUrl(EXT_CQFM_AGGREGATE_METHOD_URL);
+        assertNotNull(ext);
+        assertEquals("median", ((StringType) ext.getValue()).getValue());
+    }
+
+    @Test
+    void testAddAggregateMethod_FromEnum_WithCount() {
+        MeasureReportGroupPopulationComponent population = new MeasureReportGroupPopulationComponent();
+
+        R4MeasureReportUtils.addAggregateMethod(population, ContinuousVariableObservationAggregateMethod.COUNT);
+
+        Extension ext = population.getExtensionByUrl(EXT_CQFM_AGGREGATE_METHOD_URL);
+        assertNotNull(ext);
+        assertEquals("count", ((StringType) ext.getValue()).getValue());
+    }
+
+    @Test
+    void testAddAggregateMethod_FromEnum_WithNullValue() {
+        MeasureReportGroupPopulationComponent population = new MeasureReportGroupPopulationComponent();
+
+        R4MeasureReportUtils.addAggregateMethod(population, (ContinuousVariableObservationAggregateMethod) null);
+
+        Extension ext = population.getExtensionByUrl(EXT_CQFM_AGGREGATE_METHOD_URL);
+        assertNull(ext, "No extension should be added when method is null");
+    }
+
+    @Test
+    void testAddAggregateMethod_FromEnum_WithN_A() {
+        MeasureReportGroupPopulationComponent population = new MeasureReportGroupPopulationComponent();
+
+        R4MeasureReportUtils.addAggregateMethod(population, ContinuousVariableObservationAggregateMethod.N_A);
+
+        Extension ext = population.getExtensionByUrl(EXT_CQFM_AGGREGATE_METHOD_URL);
+        assertNull(ext, "No extension should be added when method is N_A");
+    }
+
+    // ========================================
+    // Helper methods
+    // ========================================
+
+    /**
+     * Helper to create a PopulationDef for testing.
+     */
+    private PopulationDef createPopulationDef(
+            String id,
+            MeasurePopulationType type,
+            String criteriaReference,
+            ContinuousVariableObservationAggregateMethod aggregateMethod) {
+        ConceptDef code = new ConceptDef(List.of(new CodeDef("system", type.toCode())), null);
+        CodeDef populationBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "boolean");
+        return new PopulationDef(id, code, type, "TestExpression", populationBasis, criteriaReference, aggregateMethod);
     }
 }

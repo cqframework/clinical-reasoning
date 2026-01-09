@@ -358,9 +358,8 @@ public class MeasureEvaluator {
             EvaluationResult evaluationResult,
             String subjectId) {
         // only enabled for subject level reports
-        if (reportType.equals(MeasureReportType.INDIVIDUAL)
-                && populationDef.getSupportingEvidenceDefs() != null
-                && !populationDef.getSupportingEvidenceDefs().isEmpty()) {
+        if (reportType == MeasureReportType.INDIVIDUAL
+                && !CollectionUtils.isEmpty(populationDef.getSupportingEvidenceDefs())) {
             var extDef = populationDef.getSupportingEvidenceDefs();
             for (SupportingEvidenceDef e : extDef) {
                 var result = evaluationResult.get(e.getExpression());

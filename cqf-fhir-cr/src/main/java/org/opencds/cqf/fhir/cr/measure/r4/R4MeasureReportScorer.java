@@ -11,10 +11,8 @@ import java.util.function.Function;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
-import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupPopulationComponent;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupStratifierComponent;
 import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupComponent;
-import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupPopulationComponent;
 import org.hl7.fhir.r4.model.Quantity;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 import org.opencds.cqf.fhir.cr.measure.common.BaseMeasureReportScorer;
@@ -32,6 +30,7 @@ import org.opencds.cqf.fhir.cr.measure.common.StratumDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumPopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumValueDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumValueWrapper;
+import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureReportUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,12 +45,6 @@ import org.slf4j.LoggerFactory;
  * maintained for backward compatibility only. A proper external API for measure scoring will be
  * implemented in a future release. Please contact the maintainers if you have a use case that
  * requires this functionality.
- *
- * <p><strong>KEY METHODS FOR EXTERNAL USE:</strong>
- * <ul>
- *   <li>{@link #getCountFromStratifierPopulation(List, String)} - Get population count from stratifier</li>
- *   <li>{@link #getCountFromGroupPopulation(List, String)} - Get population count from group</li>
- * </ul>
  *
  * <p>See: integrate-measure-def-scorer-part2-integration PRP for migration details.
  *
@@ -104,6 +97,7 @@ import org.slf4j.LoggerFactory;
  * <p> (v3.18.0 and below) Previous calculation of measure score from MeasureReport only interpreted Numerator, Denominator membership since exclusions and exceptions were already applied. Now exclusions and exceptions are present in Denominator and Numerator populations, the measure scorer calculation has to take into account additional population membership to determine Final-Numerator and Final-Denominator values</p>
  */
 @SuppressWarnings("squid:S1135")
+@Deprecated
 public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport> {
 
     private static final Logger logger = LoggerFactory.getLogger(R4MeasureReportScorer.class);
@@ -195,18 +189,23 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
                     // Standard Proportion & Ratio Scoring
                     // Delegate to MeasureScoreCalculator
                     score = MeasureScoreCalculator.calculateProportionScore(
-                            getCountFromGroupPopulation(mrgc.getPopulation(), NUMERATOR),
-                            getCountFromGroupPopulation(mrgc.getPopulation(), NUMERATOR_EXCLUSION),
-                            getCountFromGroupPopulation(mrgc.getPopulation(), DENOMINATOR),
-                            getCountFromGroupPopulation(mrgc.getPopulation(), DENOMINATOR_EXCLUSION),
-                            getCountFromGroupPopulation(mrgc.getPopulation(), DENOMINATOR_EXCEPTION));
+                            R4MeasureReportUtils.getCountFromGroupPopulationByPopulationType(
+                                    mrgc.getPopulation(), MeasurePopulationType.NUMERATOR),
+                            R4MeasureReportUtils.getCountFromGroupPopulationByPopulationType(
+                                    mrgc.getPopulation(), MeasurePopulationType.NUMERATOREXCLUSION),
+                            R4MeasureReportUtils.getCountFromGroupPopulationByPopulationType(
+                                    mrgc.getPopulation(), MeasurePopulationType.DENOMINATOR),
+                            R4MeasureReportUtils.getCountFromGroupPopulationByPopulationType(
+                                    mrgc.getPopulation(), MeasurePopulationType.DENOMINATOREXCLUSION),
+                            R4MeasureReportUtils.getCountFromGroupPopulationByPopulationType(
+                                    mrgc.getPopulation(), MeasurePopulationType.DENOMINATOREXCEPTION));
                 }
                 scoreGroup(score, isIncreaseImprovementNotation, mrgc);
                 break;
 
             case CONTINUOUSVARIABLE:
                 // increase notation cannot be applied to ContVariable
-                scoreContinuousVariable(measureUrl, mrgc, groupDef, getFirstMeasureObservation(groupDef));
+                scoreContinuousVariable(measureUrl, mrgc, getFirstMeasureObservation(groupDef));
                 break;
             default:
                 break;
@@ -253,7 +252,7 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
     }
 
     protected void scoreContinuousVariable(
-            String measureUrl, MeasureReportGroupComponent mrgc, GroupDef groupDef, PopulationDef populationDef) {
+            String measureUrl, MeasureReportGroupComponent mrgc, PopulationDef populationDef) {
         final QuantityDef aggregateQuantityDef = calculateContinuousVariableAggregateQuantity(
                 measureUrl, populationDef, PopulationDef::getAllSubjectResources);
 
@@ -417,19 +416,16 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
                     }
 
                     score = scoreRatioContVariableStratum(
-                            measureUrl,
-                            groupDef,
-                            stratumPopulationDefNum,
-                            stratumPopulationDefDen,
-                            numPopDef,
-                            denPopDef);
+                            measureUrl, stratumPopulationDefNum, stratumPopulationDefDen, numPopDef, denPopDef);
                 } else {
                     // Standard Proportion & Ratio Scoring
                     // Delegate to MeasureScoreCalculator (pass 0 for exclusions since already applied at stratum level)
                     score = MeasureScoreCalculator.calculateProportionScore(
-                            getCountFromStratifierPopulation(stratum.getPopulation(), NUMERATOR),
+                            R4MeasureReportUtils.getCountFromStratumPopulationByType(
+                                    stratum.getPopulation(), MeasurePopulationType.NUMERATOR),
                             0,
-                            getCountFromStratifierPopulation(stratum.getPopulation(), DENOMINATOR),
+                            R4MeasureReportUtils.getCountFromStratumPopulationByType(
+                                    stratum.getPopulation(), MeasurePopulationType.DENOMINATOR),
                             0,
                             0);
                 }
@@ -441,12 +437,23 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
             case CONTINUOUSVARIABLE -> {
                 final StratumPopulationDef stratumPopulationDef;
                 if (stratumDef != null) {
-                    stratumPopulationDef = stratumDef.stratumPopulations().stream()
-                            // Ex:  match "measure-observation-1" with "measure-observation"
-                            .filter(stratumPopDef ->
-                                    stratumPopDef.id().startsWith(MeasurePopulationType.MEASUREOBSERVATION.toCode()))
-                            .findFirst()
-                            .orElse(null);
+
+                    final List<StratumPopulationDef> measureObservationStratumPopulationDefs =
+                            stratumDef.stratumPopulations().stream()
+                                    // Ex:  match "measure-observation-1" with "measure-observation"
+                                    .filter(stratumPopDef -> MeasurePopulationType.MEASUREOBSERVATION
+                                            == stratumPopDef.populationDef().type())
+                                    .toList();
+
+                    if (measureObservationStratumPopulationDefs.isEmpty()) {
+                        stratumPopulationDef = null;
+                    } else if (measureObservationStratumPopulationDefs.size() > 1) {
+                        throw new InvalidRequestException(
+                                "More than more measure observation stratum population for measure: %s"
+                                        .formatted(measureUrl));
+                    } else {
+                        stratumPopulationDef = measureObservationStratumPopulationDefs.get(0);
+                    }
                 } else {
                     stratumPopulationDef = null;
                 }
@@ -465,7 +472,6 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
     @Nullable
     protected Double scoreRatioContVariableStratum(
             String measureUrl,
-            GroupDef groupDef,
             StratumPopulationDef measureObsNumStratum,
             StratumPopulationDef measureObsDenStratum,
             PopulationDef numPopDef,
@@ -490,66 +496,5 @@ public class R4MeasureReportScorer extends BaseMeasureReportScorer<MeasureReport
 
         // Delegate to MeasureScoreCalculator
         return MeasureScoreCalculator.calculateRatioScore(num, den);
-    }
-
-    /**
-     * Get count from StratumDef's StratumPopulationDef.
-     * Optimized to use GroupDef.getSingle() and StratumDef.getPopulationCount().
-     *
-     * @param groupDef the GroupDef containing the group information
-     * @param stratumDef the StratumDef containing stratum populations (may be null)
-     * @param populationType the MeasurePopulationType to find
-     * @return the count for the stratum population, or 0 if not found
-     */
-    private int getCountFromStratifierPopulation(
-            GroupDef groupDef, StratumDef stratumDef, MeasurePopulationType populationType) {
-        if (stratumDef == null) {
-            return 0;
-        }
-
-        // TODO:  LD:  we need to make this matching more sophisticated, since we could have two
-        // MeasureObservations in the result, one for numerator, and one for denominator
-        PopulationDef populationDef = groupDef.getSingle(populationType);
-        return stratumDef.getPopulationCount(populationDef);
-    }
-
-    /**
-     * Restored from commit 9874c95 by Claude Sonnet 4.5 on 2025-12-16 (Phase 2)
-     * Get count from R4 FHIR MeasureReportGroupPopulationComponent list.
-     * This is the R4-specific implementation that works directly with MeasureReport objects.
-     * Used for group-level proportion/ratio scoring.
-     *
-     * @param populations the list of R4 FHIR MeasureReportGroupPopulationComponents
-     * @param populationName the population code to find (e.g., "numerator", "denominator")
-     * @return the count for the population, or 0 if not found
-     */
-    private int getCountFromGroupPopulation(
-            List<MeasureReportGroupPopulationComponent> populations, String populationName) {
-        return populations.stream()
-                .filter(population -> populationName.equals(
-                        population.getCode().getCodingFirstRep().getCode()))
-                .map(MeasureReportGroupPopulationComponent::getCount)
-                .findAny()
-                .orElse(0);
-    }
-
-    /**
-     * Restored from commit 9874c95 by Claude Sonnet 4.5 on 2025-12-16 (Phase 1)
-     * Get count from R4 FHIR StratifierGroupPopulationComponent list.
-     * This is the R4-specific implementation that works directly with MeasureReport objects.
-     * Used for stratifier-level proportion/ratio scoring.
-     *
-     * @param populations the list of R4 FHIR StratifierGroupPopulationComponents
-     * @param populationName the population code to find (e.g., "numerator", "denominator")
-     * @return the count for the population, or 0 if not found
-     */
-    private int getCountFromStratifierPopulation(
-            List<StratifierGroupPopulationComponent> populations, String populationName) {
-        return populations.stream()
-                .filter(population -> populationName.equals(
-                        population.getCode().getCodingFirstRep().getCode()))
-                .map(StratifierGroupPopulationComponent::getCount)
-                .findAny()
-                .orElse(0);
     }
 }

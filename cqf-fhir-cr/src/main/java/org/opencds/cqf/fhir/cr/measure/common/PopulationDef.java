@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
 import jakarta.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -15,6 +16,7 @@ public class PopulationDef {
     private final ConceptDef code;
     private final MeasurePopulationType measurePopulationType;
     private final CodeDef populationBasis;
+    private final List<SupportingEvidenceDef> supportingEvidenceDefs;
 
     @Nullable
     private final String criteriaReference;
@@ -33,8 +35,9 @@ public class PopulationDef {
             ConceptDef code,
             MeasurePopulationType measurePopulationType,
             String expression,
-            CodeDef populationBasis) {
-        this(id, code, measurePopulationType, expression, populationBasis, null, null);
+            CodeDef populationBasis,
+            List<SupportingEvidenceDef> supportingEvidenceDefs) {
+        this(id, code, measurePopulationType, expression, populationBasis, null, null, supportingEvidenceDefs);
     }
 
     public PopulationDef(
@@ -44,7 +47,8 @@ public class PopulationDef {
             String expression,
             CodeDef populationBasis,
             @Nullable String criteriaReference,
-            @Nullable ContinuousVariableObservationAggregateMethod aggregateMethod) {
+            @Nullable ContinuousVariableObservationAggregateMethod aggregateMethod,
+            @Nullable List<SupportingEvidenceDef> supportingEvidenceDefs) {
         this.id = id;
         this.code = code;
         this.measurePopulationType = measurePopulationType;
@@ -52,6 +56,7 @@ public class PopulationDef {
         this.populationBasis = populationBasis;
         this.criteriaReference = criteriaReference;
         this.aggregateMethod = aggregateMethod;
+        this.supportingEvidenceDefs = supportingEvidenceDefs;
     }
 
     public MeasurePopulationType type() {
@@ -216,6 +221,7 @@ public class PopulationDef {
         String codeText = (code != null && code.text() != null) ? code.text() : "null";
         String criteriaRef = (criteriaReference != null) ? criteriaReference : "null";
         String aggMethod = (aggregateMethod != null) ? aggregateMethod.toString() : "null";
+        String aggResult = (aggregationResult != null) ? aggregationResult.toString() : "null";
 
         return "PopulationDef{"
                 + "id='" + id + '\''
@@ -224,6 +230,11 @@ public class PopulationDef {
                 + ", expression='" + expression + '\''
                 + ", criteriaReference='" + criteriaRef + '\''
                 + ", aggregateMethod=" + aggMethod
+                + ", aggregationResult=" + aggResult
                 + '}';
+    }
+
+    public List<SupportingEvidenceDef> getSupportingEvidenceDefs() {
+        return supportingEvidenceDefs == null ? null : new ArrayList<>(supportingEvidenceDefs);
     }
 }

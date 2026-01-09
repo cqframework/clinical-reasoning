@@ -229,6 +229,8 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
             var entry = PackageHelper.createEntry(adapter.get(), isPut);
             BundleHelper.addEntry(packagedBundle, entry);
         } else {
+            // Use array wrapper to allow messages to be updated by recursiveGather
+            var messagesWrapper = new IBaseOperationOutcome[] {messages};
             var packagedResources = new HashMap<String, IKnowledgeArtifactAdapter>();
             recursiveGather(
                     adapter,
@@ -237,7 +239,9 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
                     include,
                     versionTuple,
                     terminologyEndpoint.orElse(null),
-                    terminologyServerClient);
+                    terminologyServerClient,
+                    messagesWrapper);
+            messages = messagesWrapper[0]; // Capture any messages created during gathering
             packagedResources.values().stream()
                     .filter(r -> !r.getCanonical().equals(adapter.getCanonical()))
                     .forEach(r -> {
@@ -252,7 +256,8 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
         handleValueSets(packagedBundle, terminologyEndpoint);
         applyManifestUsageContextsToValueSets(adapter, packagedBundle);
 
-        if (messages != null) {
+        // Only add messages if there are actual issues
+        if (messages != null && ca.uhn.fhir.util.OperationOutcomeUtil.hasIssues(fhirContext(), messages)) {
             messages.setId("messages");
             getRootSpecificationLibrary(packagedBundle).addCqfMessagesExtension(messages);
         }

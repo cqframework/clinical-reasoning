@@ -21,6 +21,7 @@ import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
@@ -34,8 +35,11 @@ import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactVisitor;
 import org.opencds.cqf.fhir.utility.client.TerminologyServerClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class BaseKnowledgeArtifactVisitor implements IKnowledgeArtifactVisitor {
+    private static final Logger logger = LoggerFactory.getLogger(BaseKnowledgeArtifactVisitor.class);
     String isOwnedUrl = "http://hl7.org/fhir/StructureDefinition/artifact-isOwned";
     protected final IRepository repository;
     protected final Optional<IValueSetExpansionCache> valueSetExpansionCache;
@@ -114,7 +118,7 @@ public abstract class BaseKnowledgeArtifactVisitor implements IKnowledgeArtifact
             List<String> include,
             ImmutableTriple<List<String>, List<String>, List<String>> versionTuple)
             throws PreconditionFailedException {
-        recursiveGather(adapter, gatheredResources, capability, include, versionTuple, null, null);
+        recursiveGather(adapter, gatheredResources, capability, include, versionTuple, null, null, null);
     }
 
     protected void recursiveGather(
@@ -124,7 +128,8 @@ public abstract class BaseKnowledgeArtifactVisitor implements IKnowledgeArtifact
             List<String> include,
             ImmutableTriple<List<String>, List<String>, List<String>> versionTuple,
             IEndpointAdapter terminologyEndpoint,
-            TerminologyServerClient client)
+            TerminologyServerClient client,
+            IBaseOperationOutcome[] messagesWrapper)
             throws PreconditionFailedException {
         if (adapter == null) {
             return;
@@ -161,7 +166,8 @@ public abstract class BaseKnowledgeArtifactVisitor implements IKnowledgeArtifact
                         if (hasUrl) {
                             return Optional.ofNullable(SearchHelper.searchRepositoryByCanonicalWithPaging(
                                             repository, ra.getReference()))
-                                    .map(bundle -> (IDomainResource) BundleHelper.getEntryResourceFirstRep(bundle))
+                                    .map(bundle ->
+                                            findResourceMatchingVersion(bundle, ra.getReference(), messagesWrapper))
                                     .orElseGet(() -> tryGetValueSetsFromTxServer(ra, client, terminologyEndpoint));
                         }
                         return null;
@@ -175,7 +181,8 @@ public abstract class BaseKnowledgeArtifactVisitor implements IKnowledgeArtifact
                             include,
                             versionTuple,
                             terminologyEndpoint,
-                            client));
+                            client,
+                            messagesWrapper));
         }
     }
 
@@ -217,5 +224,73 @@ public abstract class BaseKnowledgeArtifactVisitor implements IKnowledgeArtifact
             return client.getValueSetResource(endpoint, ra.getReference()).orElse(null);
         }
         return null;
+    }
+
+    /**
+     * Finds a resource in the bundle that matches the version specified in the canonical reference.
+     * If a version is specified in the canonical, this method will search through all bundle entries
+     * to find a resource with the matching URL and version. If no version is specified, it returns
+     * the first entry. If a version is specified but no matching version is found, and messagesWrapper is
+     * not null, an issue is added to the OperationOutcome and null is returned.
+     *
+     * @param bundle The bundle containing search results
+     * @param canonical The canonical reference (may include version)
+     * @param messagesWrapper Optional array wrapper containing OperationOutcome to add issues to when version mismatch occurs
+     * @return The matching resource, null if version specified but not found and messagesWrapper is provided,
+     *         or the first resource if no version match is found and messagesWrapper is null
+     */
+    private IDomainResource findResourceMatchingVersion(
+            IBaseBundle bundle, String canonical, IBaseOperationOutcome[] messagesWrapper) {
+        var requestedVersion = Canonicals.getVersion(canonical);
+        var requestedUrl = Canonicals.getUrl(canonical);
+
+        // If no version was requested, attempt to return the "latest"
+        if (requestedVersion == null) {
+            return IKnowledgeArtifactAdapter.findLatestVersion(bundle)
+                    .orElseGet(() -> (IDomainResource) BundleHelper.getEntryResourceFirstRep(bundle));
+        }
+
+        // Search through all entries to find one matching the requested version
+        var entries = BundleHelper.getEntryResources(bundle);
+        for (var resource : entries) {
+            if (resource instanceof IDomainResource domainResource) {
+                var adapter =
+                        IAdapterFactory.forFhirVersion(fhirVersion()).createKnowledgeArtifactAdapter(domainResource);
+                if (adapter.getUrl() != null
+                        && adapter.getUrl().equals(requestedUrl)
+                        && adapter.hasVersion()
+                        && adapter.getVersion().equals(requestedVersion)) {
+                    return domainResource;
+                }
+            }
+        }
+
+        // No matching version found
+        if (messagesWrapper != null) {
+            // For $package operation: add error message and return null (don't include resource)
+            var errorMessage = String.format(
+                    "Requested version '%s' for resource '%s' not found in repository. Resource will not be included in package.",
+                    requestedVersion, canonical);
+            // Create messages OperationOutcome if it doesn't exist yet
+            if (messagesWrapper[0] == null) {
+                messagesWrapper[0] = ca.uhn.fhir.util.OperationOutcomeUtil.newInstance(fhirContext());
+            }
+            ca.uhn.fhir.util.OperationOutcomeUtil.addIssue(
+                    fhirContext(), messagesWrapper[0], "error", errorMessage, null, "processing");
+            return null;
+        } else {
+            // For other operations: log warning and return first entry (backward compatibility)
+            var firstResource = (IDomainResource) BundleHelper.getEntryResourceFirstRep(bundle);
+            if (firstResource != null) {
+                var firstAdapter =
+                        IAdapterFactory.forFhirVersion(fhirVersion()).createKnowledgeArtifactAdapter(firstResource);
+                logger.warn(
+                        "Requested version '{}' for resource '{}' not found. Using version '{}' instead.",
+                        requestedVersion,
+                        requestedUrl,
+                        firstAdapter.getVersion());
+            }
+            return firstResource;
+        }
     }
 }

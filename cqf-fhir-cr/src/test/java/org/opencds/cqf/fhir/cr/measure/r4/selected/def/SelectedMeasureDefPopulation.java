@@ -221,4 +221,31 @@ public class SelectedMeasureDefPopulation<P>
                 .orElseThrow(() -> new IllegalArgumentException("Expression not found"));
         return new SelectedMeasureDefPopulationExtension<>(extDef, this);
     }
+
+    public SelectedMeasureDefPopulation<P> assertNoSupportingEvidenceResults() {
+
+        var defs = this.value.getSupportingEvidenceDefs();
+
+        if (defs == null || defs.isEmpty()) {
+            return this; // nothing to check
+        }
+
+        for (var def : defs) {
+            var subjectResources = def.getSubjectResources();
+
+            if (subjectResources == null || subjectResources.isEmpty()) {
+                continue;
+            }
+
+            // Any key with a non-empty Set is a failure
+            for (var entry : subjectResources.entrySet()) {
+                if (entry.getValue() != null && !entry.getValue().isEmpty()) {
+                    throw new AssertionError("SupportingEvidenceDef '" + def.getName() + "' produced results for key '"
+                            + entry.getKey() + "': " + entry.getValue());
+                }
+            }
+        }
+
+        return this;
+    }
 }

@@ -87,22 +87,41 @@ public class SelectedMeasureReportPopulation
         return this;
     }
 
-    public SelectedMeasureReportPopulationExt getPopulationExtension(String expressionName) {
+    public SelectedMeasureReportPopulationExt getPopulationExtension(String supportingEvidenceName) {
         // pop extensions that are for supporting evidence
         List<Extension> evidenceExts = value.getExtension().stream()
                 .filter(e -> e.getUrl().equals(EXT_SUPPORTING_EVIDENCE_URL))
                 .toList();
         assertNotNull(evidenceExts, "No extension found for SUPPORTING_EVIDENCE_URL");
         Extension expressionExtension = null;
+        // look through all supporting evidence Extensions for population
         for (Extension extension : evidenceExts) {
-            for (Extension ext : extension.getExtension()) {
-                if (ext.getValue() != null && ext.getValue().toString().equals(expressionName)) {
+            // then look for "name" field with matching name value
+            for (Extension ext : extension.getExtension().stream()
+                    .filter(x -> x.getUrl().toString().equals("name"))
+                    .toList()) {
+                if (ext.getValue() != null && ext.getValue().toString().equals(supportingEvidenceName)) {
                     expressionExtension = extension;
                     break;
                 }
             }
+            if (expressionExtension != null) {
+                break;
+            }
         }
-        assertNotNull(expressionExtension, String.format("No extension found with expressionName: %s", expressionName));
+        assertNotNull(expressionExtension, String.format("No extension found with 'name': %s", supportingEvidenceName));
         return new SelectedMeasureReportPopulationExt(expressionExtension, this);
+    }
+
+    public SelectedMeasureReportPopulation assertNoSupportingEvidence() {
+
+        List<Extension> evidenceExts = value.getExtension().stream()
+                .filter(e -> EXT_SUPPORTING_EVIDENCE_URL.equals(e.getUrl()))
+                .toList();
+
+        assertTrue(
+                evidenceExts.isEmpty(), "Expected NO supportingEvidence extensions, but found " + evidenceExts.size());
+
+        return this;
     }
 }

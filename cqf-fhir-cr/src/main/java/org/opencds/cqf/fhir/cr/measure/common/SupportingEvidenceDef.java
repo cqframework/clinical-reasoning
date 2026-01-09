@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,6 +25,15 @@ public class SupportingEvidenceDef {
 
     protected Map<String, Set<Object>> subjectResources = new HashMap<>();
 
+    /**
+     * Supporting Evidence Def used to store fhir agnostic supporting evidence definition and results
+     * @param expression CQL expression name found in the library where the expression resides.
+     * @param systemUrl the url that will be used on MeasureReport to signify results as 'Supporting Evidence'
+     * @param expressionDescription the text describing any context as to how the result is supporting evidence
+     * @param name the unique identifier for the supporting evidence component
+     * @param expressionLanguage language tag for expression ex: 'text/cql-identifier'
+     * @param code CodeableConcept for expression definition
+     */
     public SupportingEvidenceDef(
             String expression,
             String systemUrl,
@@ -31,10 +41,12 @@ public class SupportingEvidenceDef {
             String name,
             @Nullable String expressionLanguage,
             @Nullable ConceptDef code) {
-        this.expression = expression;
-        this.systemUrl = systemUrl;
+        // must be populated
+        this.expression = requireNonBlank(expression, "expression");
+        this.systemUrl = requireNonBlank(systemUrl, "systemUrl");
+        this.name = requireNonBlank(name, "name");
+        // optionally populated
         this.expressionDescription = expressionDescription;
-        this.name = name;
         this.expressionLanguage = expressionLanguage;
         this.code = code;
     }
@@ -80,5 +92,15 @@ public class SupportingEvidenceDef {
         subjectResources
                 .computeIfAbsent(key, k -> new HashSetForFhirResourcesAndCqlTypes<>())
                 .add(value);
+    }
+
+    private static String requireNonBlank(String value, String fieldName) {
+        if (value == null) {
+            throw new InvalidRequestException(fieldName + " must not be null");
+        }
+        if (value.isBlank()) {
+            throw new InvalidRequestException(fieldName + " must not be blank");
+        }
+        return value;
     }
 }

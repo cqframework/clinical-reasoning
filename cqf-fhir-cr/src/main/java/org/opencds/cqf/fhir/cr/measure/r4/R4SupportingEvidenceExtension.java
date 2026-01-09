@@ -1,7 +1,5 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
-import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.EXT_SUPPORTING_EVIDENCE_URL;
-
 import jakarta.annotation.Nullable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -26,20 +24,21 @@ import org.opencds.cqf.fhir.cr.measure.common.ConceptDef;
 import org.opencds.cqf.fhir.cr.measure.common.SupportingEvidenceDef;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4DateHelper;
 
+/**
+ * * R4SupportingEvidenceExtension appends Supporting Evidence Criteria Results to Measure Report.
+ * Appends to MeasureReport.Group.Population.Ext that as defined on Measure Resource.
+ */
 public class R4SupportingEvidenceExtension {
 
     private static final R4DateHelper DATE_HELPER = new R4DateHelper();
     private static final int MAX_DEPTH = 25;
-
-    // If you have the official constant for this, use it instead of the literal:
-    private static final String EXT_CQF_EXPRESSION_CODE = "http://hl7.org/fhir/StructureDefinition/cqf-expressionCode";
 
     /**
      * Produces ONE cqf-supportingEvidence extension PER SupportingEvidenceDef, and adds
      * each to reportPopulation.extension.
      *
      * Each supportingEvidence extension contains:
-     * - name (required)
+     * - name (required) - the reference to Measure Definition object
      * - description (optional)
      * - code (optional CodeableConcept)
      * - value (0..*) as repeated nested extensions holding the result(s)
@@ -65,7 +64,7 @@ public class R4SupportingEvidenceExtension {
             }
             if (name == null || name.isBlank()) continue;
 
-            Extension seExt = new Extension().setUrl(EXT_SUPPORTING_EVIDENCE_URL);
+            Extension seExt = new Extension().setUrl(def.getSystemUrl());
 
             // ---- name slice (required) ----
             seExt.addExtension(new Extension(
@@ -126,20 +125,29 @@ public class R4SupportingEvidenceExtension {
      * - nested extensions for tuple/list representations
      */
     private static void addValues(Extension supportingEvidenceExt, Object value) {
+
+        // ---- NULL ----
         if (value == null) {
-            // SD says min 0 on value, so you can omit entirely. If you prefer explicit null, uncomment:
-            // supportingEvidenceExt.addExtension(new Extension("value", new StringType("null")));
+            supportingEvidenceExt.addExtension(new Extension("value", new StringType("null")));
+            return;
+        }
+
+        // ---- EMPTY LIST / SET ----
+        if (isEmptyContainer(value)) {
+            supportingEvidenceExt.addExtension(new Extension("value", new StringType("null")));
             return;
         }
 
         List<Object> leaves = new ArrayList<>();
         collectLeaves(value, leaves, 0);
 
+        // Safety fallback
         if (leaves.isEmpty()) {
+            supportingEvidenceExt.addExtension(new Extension("value", new StringType("null")));
             return;
         }
 
-        // Create one "value" extension per leaf
+        // Normal encoding
         for (Object leaf : leaves) {
             Extension valueExt = new Extension("value");
             encodeLeafIntoValue(valueExt, leaf);
@@ -153,24 +161,25 @@ public class R4SupportingEvidenceExtension {
      */
     private static void collectLeaves(Object value, List<Object> out, int depth) {
         if (value == null) return;
+
         if (depth > MAX_DEPTH) {
             out.add("[max-depth]");
             return;
         }
 
-        // Preserve Interval and Tuple as structural leaves
+        // Preserve Interval and Tuple as atomic values
         if (asInterval(value) != null || value instanceof Tuple) {
             out.add(value);
             return;
         }
 
-        // Preserve CqlType as leaf (engine wrappers). We'll encode later.
+        // Preserve CQL runtime wrappers
         if (value instanceof CqlType) {
             out.add(value);
             return;
         }
 
-        // Flatten iterables (Set/List/HashSetForFhirResourcesAndCqlTypes)
+        // Flatten lists & sets
         if (value instanceof Iterable<?> it) {
             for (Object item : it) {
                 collectLeaves(item, out, depth + 1);
@@ -178,8 +187,20 @@ public class R4SupportingEvidenceExtension {
             return;
         }
 
-        // Single leaf
+        // Leaf
         out.add(value);
+    }
+
+    private static boolean isEmptyContainer(Object value) {
+        if (value instanceof Iterable<?> it) {
+            return !it.iterator().hasNext();
+        }
+
+        if (value instanceof Map<?, ?> map) {
+            return map.isEmpty();
+        }
+
+        return false;
     }
 
     /**

@@ -364,6 +364,11 @@ public class MeasureEvaluator {
             var extDef = populationDef.getSupportingEvidenceDefs();
             for (SupportingEvidenceDef e : extDef) {
                 var result = evaluationResult.get(e.getExpression());
+                if (result == null) {
+                    throw new InvalidRequestException(
+                            "Supporting Evidence defined expression: '%s', is not found in Evaluation Results"
+                                    .formatted(e.getExpression()));
+                }
                 var object = evaluateSupportingCriteria(result);
                 e.addResource(subjectId, object);
             }

@@ -3,11 +3,13 @@ package org.opencds.cqf.fhir.cr.measure.r4.selected.report;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.math.BigDecimal;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Objects;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IntegerType;
@@ -79,9 +81,29 @@ public class SelectedMeasureReportPopulationExt extends Selected<Extension, Sele
 
         CodeableConcept actual = codeExt.getValue() instanceof CodeableConcept cc ? cc : null;
         assertNotNull(actual, "SupportingEvidence.code is not a CodeableConcept");
-        // If you want deep equality, compare coding/system/code/display explicitly.
-        // For now, basic non-null & equals:
-        assertEquals(expected, actual, "SupportingEvidence.code mismatch");
+        assertNotNull(expected, "Expected CodeableConcept must not be null");
+
+        // If expected has text, require it to match
+        if (expected.hasText()) {
+            assertEquals(expected.getText(), actual.getText(), "SupportingEvidence.code.text mismatch");
+        }
+
+        // Require that for each expected coding, there exists a matching actual coding
+        for (Coding exp : expected.getCoding()) {
+            boolean found = actual.getCoding().stream()
+                    .anyMatch(act -> Objects.equals(exp.getSystem(), act.getSystem())
+                            && Objects.equals(exp.getCode(), act.getCode())
+                            &&
+                            // only compare display if expected display is present
+                            (!exp.hasDisplay() || Objects.equals(exp.getDisplay(), act.getDisplay())));
+
+            assertTrue(
+                    found,
+                    "SupportingEvidence.code missing expected coding: system=" + exp.getSystem()
+                            + " code=" + exp.getCode()
+                            + (exp.hasDisplay() ? " display=" + exp.getDisplay() : ""));
+        }
+
         return this;
     }
 
@@ -160,24 +182,21 @@ public class SelectedMeasureReportPopulationExt extends Selected<Extension, Sele
         return this;
     }
 
-    public SelectedMeasureReportPopulationExt hasPeriodValue(Period expected) {
-        Period actual = valueSlices().stream()
+    public SelectedMeasureReportPopulationExt hasPeriodValue(ZonedDateTime expectedStart, ZonedDateTime expectedEnd) {
+
+        Period actual = this.value.getExtension().stream()
+                .filter(e -> "value".equals(e.getUrl()))
                 .map(Extension::getValue)
                 .filter(Period.class::isInstance)
                 .map(Period.class::cast)
                 .findFirst()
                 .orElse(null);
 
-        assertNotNull(actual, "Expected Period value but none was found");
+        assertNotNull(actual, "Expected resultPeriod extension but none was found");
 
-        assertEquals(
-                expected.hasStart() ? expected.getStartElement().getValueAsString() : null,
-                actual.hasStart() ? actual.getStartElement().getValueAsString() : null,
-                "Period.start mismatch");
-        assertEquals(
-                expected.hasEnd() ? expected.getEndElement().getValueAsString() : null,
-                actual.hasEnd() ? actual.getEndElement().getValueAsString() : null,
-                "Period.end mismatch");
+        assertEquals(expectedStart.toInstant(), actual.getStart().toInstant(), "Period.start mismatch");
+
+        assertEquals(expectedEnd.toInstant(), actual.getEnd().toInstant(), "Period.end mismatch");
 
         return this;
     }
@@ -250,21 +269,27 @@ public class SelectedMeasureReportPopulationExt extends Selected<Extension, Sele
         return this;
     }
 
-    public SelectedMeasureReportPopulationExt hasListPeriodItem(Period expected) {
-        Period actual = valueSlices().stream()
+    public SelectedMeasureReportPopulationExt hasListPeriodItem(
+            ZonedDateTime expectedStart, ZonedDateTime expectedEnd) {
+
+        Period actual = this.value.getExtension().stream()
+                // value slices
+                .filter(e -> "value".equals(e.getUrl()))
                 .map(Extension::getValue)
                 .filter(Period.class::isInstance)
                 .map(Period.class::cast)
-                .filter(p -> Objects.equals(
-                                expected.hasStart() ? expected.getStartElement().getValueAsString() : null,
-                                p.hasStart() ? p.getStartElement().getValueAsString() : null)
-                        && Objects.equals(
-                                expected.hasEnd() ? expected.getEndElement().getValueAsString() : null,
-                                p.hasEnd() ? p.getEndElement().getValueAsString() : null))
+                .filter(p -> p.hasStart()
+                        && p.hasEnd()
+                        && expectedStart.toInstant().equals(p.getStart().toInstant())
+                        && expectedEnd.toInstant().equals(p.getEnd().toInstant()))
                 .findFirst()
                 .orElse(null);
 
-        assertNotNull(actual, "Expected Period item not found in repeated value slices");
+        assertNotNull(
+                actual,
+                "Expected Period not found in repeated valuePeriod slices. " + "Looked for start=" + expectedStart
+                        + " end=" + expectedEnd);
+
         return this;
     }
 

@@ -66,8 +66,19 @@
             {
               "url": "http://hl7.org/fhir/StructureDefinition/cqf-supportingEvidenceDefinition",
               "valueExpression": {
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/cqf-expressionCode",
+                    "valueCoding": {
+                      "code": "denominator-resource",
+                      "system": "http://example.org/fhir/CodeSystem/example-supporting-evidence-codes",
+                      "display": "Denominator Resource"
+                    }
+                  }
+                ],
+                "description": "Example of supporting evidence that is a Denominator Resource",
                 "language": "text/cql-identifier",
-                "name": "Denominator Resource",
+                "name": "DenominatorResource",
                 "expression": "Denominator Resource"
               }
             },

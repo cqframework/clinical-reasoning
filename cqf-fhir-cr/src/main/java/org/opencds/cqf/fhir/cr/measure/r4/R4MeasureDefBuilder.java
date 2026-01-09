@@ -129,7 +129,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                 Expression expr = e.getValue() instanceof Expression ? (Expression) e.getValue() : null;
 
                 if (expr == null) {
-                    throw new IllegalStateException("Extension does not contain valueExpression");
+                    throw new InvalidRequestException("Extension does not contain valueExpression");
                 }
 
                 supportingEvidenceDefs.add(new SupportingEvidenceDef(

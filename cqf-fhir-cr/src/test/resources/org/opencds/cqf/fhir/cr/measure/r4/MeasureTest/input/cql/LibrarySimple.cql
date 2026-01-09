@@ -94,6 +94,7 @@ define "TestIntervalList":
   {
     Interval[@2024-01-01T00:00:00, @2024-01-31T23:59:59],
     Interval[@2024-02-01T00:00:00, @2024-02-29T23:59:59]
+
   }
 
 define "TestDecimalList":

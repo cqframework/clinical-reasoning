@@ -36,7 +36,7 @@ public class PopulationDef {
             MeasurePopulationType measurePopulationType,
             String expression,
             CodeDef populationBasis,
-            @Nullable List<SupportingEvidenceDef> supportingEvidenceDefs) {
+            List<SupportingEvidenceDef> supportingEvidenceDefs) {
         this(id, code, measurePopulationType, expression, populationBasis, null, null, supportingEvidenceDefs);
     }
 

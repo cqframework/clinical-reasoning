@@ -81,8 +81,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
         this.r4MeasureServiceUtilsStandardRepository = new R4MeasureServiceUtils(repository);
     }
 
-    // LUKETODO:  consider getting rid of this once if/when eliminated the Measure test class
-    // For the Measure test class
+    // We should eliminate this if/when we eliminate the Measure test class
     public IRepository getRepository() {
         return repository;
     }

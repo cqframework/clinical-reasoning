@@ -33,12 +33,10 @@ import org.opencds.cqf.fhir.cr.measure.r4.selected.report.SelectedMeasureReportR
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
-// LUKETODO:  consider rolling this entire thing into MultiMeasure with "single measure" assertions
+// consider rolling this entire thing into MultiMeasure with "single measure" assertions
 @SuppressWarnings({"squid:S2699", "squid:S5960", "squid:S1135"})
 public class Measure {
     public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/measure/r4";
-
-    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     @FunctionalInterface
     public interface Validator<T> {

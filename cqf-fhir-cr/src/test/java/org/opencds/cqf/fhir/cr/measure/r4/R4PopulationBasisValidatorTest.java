@@ -459,6 +459,7 @@ class R4PopulationBasisValidatorTest {
                 resolveExpressionFor(measurePopulationType),
                 basis.codeDef,
                 null,
+                null,
                 null);
     }
 

@@ -130,6 +130,25 @@ public class MeasureEvaluator {
         }
     }
 
+    @SuppressWarnings("unchecked")
+    protected Iterable<Object> evaluateSupportingCriteria(ExpressionResult expressionResult) {
+
+        // Case 1 — true null
+        if (expressionResult == null || expressionResult.getValue() == null) {
+            return null; // need to preserve result
+        }
+
+        Object value = expressionResult.getValue();
+
+        // Case 2 — list
+        if (value instanceof Iterable<?>) {
+            return (Iterable<Object>) value; // may be empty or not
+        }
+
+        // Case 3 — scalar
+        return List.of(value);
+    }
+
     protected PopulationDef evaluatePopulationMembership(
             String subjectType, String subjectId, PopulationDef inclusionDef, EvaluationResult evaluationResult) {
         return evaluatePopulationMembership(subjectType, subjectId, inclusionDef, evaluationResult, null);
@@ -302,6 +321,9 @@ public class MeasureEvaluator {
             var doc = evaluateDateOfCompliance(dateOfCompliance, evaluationResult);
             dateOfCompliance.addResource(subjectId, doc);
         }
+        for (PopulationDef p : groupDef.populations()) {
+            populateSupportingEvidence(p, reportType, evaluationResult, subjectId);
+        }
         // Ratio Cont Variable Scoring
         if (observationNum != null && observationDen != null) {
             // Num alignment
@@ -335,6 +357,28 @@ public class MeasureEvaluator {
         }
     }
 
+    protected void populateSupportingEvidence(
+            PopulationDef populationDef,
+            MeasureReportType reportType,
+            EvaluationResult evaluationResult,
+            String subjectId) {
+        // only enabled for subject level reports
+        if (reportType == MeasureReportType.INDIVIDUAL
+                && !CollectionUtils.isEmpty(populationDef.getSupportingEvidenceDefs())) {
+            var extDef = populationDef.getSupportingEvidenceDefs();
+            for (SupportingEvidenceDef e : extDef) {
+                var result = evaluationResult.get(e.getExpression());
+                if (result == null) {
+                    throw new InvalidRequestException(
+                            "Supporting Evidence defined expression: '%s', is not found in Evaluation Results"
+                                    .formatted(e.getExpression()));
+                }
+                var object = evaluateSupportingCriteria(result);
+                e.addResource(subjectId, object);
+            }
+        }
+    }
+
     protected String getCriteriaExpressionName(PopulationDef populationDef) {
         return populationDef.getCriteriaReference() + "-" + populationDef.expression();
     }
@@ -344,7 +388,8 @@ public class MeasureEvaluator {
             String subjectType,
             String subjectId,
             EvaluationResult evaluationResult,
-            boolean applyScoring) {
+            boolean applyScoring,
+            MeasureReportType reportType) {
         PopulationDef initialPopulation = groupDef.getSingle(INITIALPOPULATION);
         PopulationDef measurePopulation = groupDef.getSingle(MEASUREPOPULATION);
         PopulationDef measurePopulationExclusion = groupDef.getSingle(MEASUREPOPULATIONEXCLUSION);
@@ -393,6 +438,9 @@ public class MeasureEvaluator {
                             measurePopulationObservation.getSubjectResources());
                 }
             }
+        }
+        for (PopulationDef p : groupDef.populations()) {
+            populateSupportingEvidence(p, reportType, evaluationResult, subjectId);
         }
     }
     /**
@@ -595,13 +643,22 @@ public class MeasureEvaluator {
     }
 
     protected void evaluateCohort(
-            GroupDef groupDef, String subjectType, String subjectId, EvaluationResult evaluationResult) {
+            GroupDef groupDef,
+            String subjectType,
+            String subjectId,
+            EvaluationResult evaluationResult,
+            MeasureReportType reportType) {
         PopulationDef initialPopulation = groupDef.getSingle(INITIALPOPULATION);
         // Validate Required Populations are Present
         R4MeasureScoringTypePopulations.validateScoringTypePopulations(
                 groupDef.populations().stream().map(PopulationDef::type).toList(), MeasureScoring.COHORT);
         // Evaluate Population
         evaluatePopulationMembership(subjectType, subjectId, initialPopulation, evaluationResult);
+
+        // supporting evidence
+        for (PopulationDef p : groupDef.populations()) {
+            populateSupportingEvidence(p, reportType, evaluationResult, subjectId);
+        }
     }
 
     protected void evaluateGroup(
@@ -624,10 +681,11 @@ public class MeasureEvaluator {
                 evaluateProportion(groupDef, subjectType, subjectId, reportType, evaluationResult, applyScoring);
                 break;
             case CONTINUOUSVARIABLE:
-                evaluateContinuousVariable(groupDef, subjectType, subjectId, evaluationResult, applyScoring);
+                evaluateContinuousVariable(
+                        groupDef, subjectType, subjectId, evaluationResult, applyScoring, reportType);
                 break;
             case COHORT:
-                evaluateCohort(groupDef, subjectType, subjectId, evaluationResult);
+                evaluateCohort(groupDef, subjectType, subjectId, evaluationResult, reportType);
                 break;
         }
     }

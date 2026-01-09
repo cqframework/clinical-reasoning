@@ -277,6 +277,13 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                 reportPopulation.setCount(populationDef.getAllSubjectResources().size());
             }
         }
+        // Supporting Evidence
+        if (bc.report().getType().equals(MeasureReport.MeasureReportType.INDIVIDUAL)
+                && populationDef.getSupportingEvidenceDefs() != null
+                && !populationDef.getSupportingEvidenceDefs().isEmpty()) {
+            var extDefs = populationDef.getSupportingEvidenceDefs();
+            R4SupportingEvidenceExtension.addSupportingEvidenceExtensions(reportPopulation, extDefs);
+        }
 
         if (measurePopulation.hasDescription()) {
             reportPopulation.addExtension(

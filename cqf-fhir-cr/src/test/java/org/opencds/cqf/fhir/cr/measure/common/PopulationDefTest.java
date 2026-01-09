@@ -19,8 +19,8 @@ class PopulationDefTest {
     @Test
     void setHandlingStrings() {
         CodeDef stringBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "String");
-        final PopulationDef popDef1 = new PopulationDef("one", null, null, null, stringBasis);
-        final PopulationDef popDef2 = new PopulationDef("two", null, null, null, stringBasis);
+        final PopulationDef popDef1 = new PopulationDef("one", null, null, null, stringBasis, null);
+        final PopulationDef popDef2 = new PopulationDef("two", null, null, null, stringBasis, null);
 
         assertFalse(popDef1.isBooleanBasis());
         assertFalse(popDef2.isBooleanBasis());
@@ -36,8 +36,8 @@ class PopulationDefTest {
     @Test
     void setHandlingIntegers() {
         CodeDef integerBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "integer");
-        final PopulationDef popDef1 = new PopulationDef("one", null, null, null, integerBasis);
-        final PopulationDef popDef2 = new PopulationDef("two", null, null, null, integerBasis);
+        final PopulationDef popDef1 = new PopulationDef("one", null, null, null, integerBasis, null);
+        final PopulationDef popDef2 = new PopulationDef("two", null, null, null, integerBasis, null);
 
         assertFalse(popDef1.isBooleanBasis());
         assertFalse(popDef2.isBooleanBasis());
@@ -53,8 +53,8 @@ class PopulationDefTest {
     @Test
     void setHandlingEncounters() {
         CodeDef encounterBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "Encounter");
-        final PopulationDef popDef1 = new PopulationDef("one", null, null, null, encounterBasis);
-        final PopulationDef popDef2 = new PopulationDef("two", null, null, null, encounterBasis);
+        final PopulationDef popDef1 = new PopulationDef("one", null, null, null, encounterBasis, null);
+        final PopulationDef popDef2 = new PopulationDef("two", null, null, null, encounterBasis, null);
 
         assertFalse(popDef1.isBooleanBasis());
         assertFalse(popDef2.isBooleanBasis());
@@ -87,7 +87,7 @@ class PopulationDefTest {
     void testIsBooleanBasis_WithBooleanBasis() {
         CodeDef booleanBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "boolean");
         PopulationDef popDef = new PopulationDef(
-                "pop-1", null, MeasurePopulationType.INITIALPOPULATION, "InitialPopulation", booleanBasis);
+                "pop-1", null, MeasurePopulationType.INITIALPOPULATION, "InitialPopulation", booleanBasis, null);
 
         assertTrue(popDef.isBooleanBasis(), "Expected isBooleanBasis() to return true for boolean basis");
         assertEquals(booleanBasis, popDef.getPopulationBasis());
@@ -101,17 +101,17 @@ class PopulationDefTest {
         // Test various non-boolean basis types
         CodeDef encounterBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "Encounter");
         PopulationDef encounterPop = new PopulationDef(
-                "pop-1", null, MeasurePopulationType.INITIALPOPULATION, "InitialPopulation", encounterBasis);
+                "pop-1", null, MeasurePopulationType.INITIALPOPULATION, "InitialPopulation", encounterBasis, null);
         assertFalse(encounterPop.isBooleanBasis(), "Expected isBooleanBasis() to return false for Encounter basis");
 
         CodeDef stringBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "String");
         PopulationDef stringPop =
-                new PopulationDef("pop-2", null, MeasurePopulationType.DENOMINATOR, "Denominator", stringBasis);
+                new PopulationDef("pop-2", null, MeasurePopulationType.DENOMINATOR, "Denominator", stringBasis, null);
         assertFalse(stringPop.isBooleanBasis(), "Expected isBooleanBasis() to return false for String basis");
 
         CodeDef dateBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "date");
         PopulationDef datePop =
-                new PopulationDef("pop-3", null, MeasurePopulationType.NUMERATOR, "Numerator", dateBasis);
+                new PopulationDef("pop-3", null, MeasurePopulationType.NUMERATOR, "Numerator", dateBasis, null);
         assertFalse(datePop.isBooleanBasis(), "Expected isBooleanBasis() to return false for date basis");
     }
 
@@ -122,7 +122,7 @@ class PopulationDefTest {
     void testGetCount_BooleanBasis_CountsUniqueSubjects() {
         CodeDef booleanBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "boolean");
         PopulationDef popDef = new PopulationDef(
-                "pop-1", null, MeasurePopulationType.INITIALPOPULATION, "InitialPopulation", booleanBasis);
+                "pop-1", null, MeasurePopulationType.INITIALPOPULATION, "InitialPopulation", booleanBasis, null);
 
         // Add 3 unique subjects
         popDef.addResource("Patient/1", true);
@@ -141,7 +141,7 @@ class PopulationDefTest {
     void testGetCount_EncounterBasis_CountsAllResources() {
         CodeDef encounterBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "Encounter");
         PopulationDef popDef = new PopulationDef(
-                "pop-1", null, MeasurePopulationType.INITIALPOPULATION, "InitialPopulation", encounterBasis);
+                "pop-1", null, MeasurePopulationType.INITIALPOPULATION, "InitialPopulation", encounterBasis, null);
 
         // Subject 1 has 2 encounters
         popDef.addResource("Patient/1", new Encounter().setId("Encounter/1"));
@@ -163,7 +163,7 @@ class PopulationDefTest {
     void testGetCount_StringBasis_CountsAllResources() {
         CodeDef stringBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "String");
         PopulationDef popDef =
-                new PopulationDef("pop-1", null, MeasurePopulationType.NUMERATOR, "Numerator", stringBasis);
+                new PopulationDef("pop-1", null, MeasurePopulationType.NUMERATOR, "Numerator", stringBasis, null);
 
         // Add string values for different subjects
         // Even if the same string value appears for different subjects, count all
@@ -183,7 +183,7 @@ class PopulationDefTest {
     void testGetCount_DateBasis_CountsAllResources() {
         CodeDef dateBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "date");
         PopulationDef popDef =
-                new PopulationDef("pop-1", null, MeasurePopulationType.DENOMINATOR, "Denominator", dateBasis);
+                new PopulationDef("pop-1", null, MeasurePopulationType.DENOMINATOR, "Denominator", dateBasis, null);
 
         // Add date values for subjects
         popDef.addResource("Patient/1", "2024-01-01");
@@ -202,7 +202,7 @@ class PopulationDefTest {
     void testGetCount_MeasureObservation_CountsObservations() {
         CodeDef booleanBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "boolean");
         PopulationDef popDef = new PopulationDef(
-                "pop-obs", null, MeasurePopulationType.MEASUREOBSERVATION, "MeasureObservation", booleanBasis);
+                "pop-obs", null, MeasurePopulationType.MEASUREOBSERVATION, "MeasureObservation", booleanBasis, null);
 
         // Add observations (Maps) for subjects
         // Each observation is a Map with key-value pairs

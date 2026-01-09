@@ -875,6 +875,7 @@ class R4MeasureReportUtilsTest {
             ContinuousVariableObservationAggregateMethod aggregateMethod) {
         ConceptDef code = new ConceptDef(List.of(new CodeDef("system", type.toCode())), null);
         CodeDef populationBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "boolean");
-        return new PopulationDef(id, code, type, "TestExpression", populationBasis, criteriaReference, aggregateMethod);
+        return new PopulationDef(
+                id, code, type, "TestExpression", populationBasis, criteriaReference, aggregateMethod, List.of());
     }
 }

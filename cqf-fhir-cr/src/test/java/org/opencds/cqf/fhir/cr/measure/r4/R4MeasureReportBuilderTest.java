@@ -343,7 +343,8 @@ class R4MeasureReportBuilderTest {
                 null,
                 new CodeDef(MeasureConstants.POPULATION_BASIS_URL, "boolean"),
                 null,
-                ContinuousVariableObservationAggregateMethod.N_A);
+                ContinuousVariableObservationAggregateMethod.N_A,
+                List.of());
 
         var groupDef = new GroupDef(
                 "group_0",

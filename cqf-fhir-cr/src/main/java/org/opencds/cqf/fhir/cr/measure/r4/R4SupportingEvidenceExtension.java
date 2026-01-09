@@ -149,8 +149,7 @@ public class R4SupportingEvidenceExtension {
             return;
         }
 
-        List<Object> leaves = new ArrayList<>();
-        collectLeaves(value, leaves, 0);
+        List<Object> leaves = collectLeaves(value);
 
         // Safety fallback
         if (leaves.isEmpty()) {
@@ -170,7 +169,13 @@ public class R4SupportingEvidenceExtension {
      * Collect leaves without destroying Interval/Tuple structure.
      * Keep CqlType as leaf; encode later (don't stringify here).
      */
-    private static void collectLeaves(Object value, List<Object> out, int depth) {
+    private static List<Object> collectLeaves(Object value) {
+        List<Object> leaves = new ArrayList<>();
+        collectLeavesInto(value, leaves, 0);
+        return leaves;
+    }
+
+    private static void collectLeavesInto(Object value, List<Object> out, int depth) {
         if (value == null) return;
 
         if (depth > MAX_DEPTH) {
@@ -193,7 +198,7 @@ public class R4SupportingEvidenceExtension {
         // Flatten lists & sets
         if (value instanceof Iterable<?> it) {
             for (Object item : it) {
-                collectLeaves(item, out, depth + 1);
+                collectLeavesInto(item, out, depth + 1);
             }
             return;
         }

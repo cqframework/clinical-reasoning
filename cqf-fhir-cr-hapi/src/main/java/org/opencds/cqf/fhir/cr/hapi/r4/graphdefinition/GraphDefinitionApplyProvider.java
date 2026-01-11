@@ -19,6 +19,7 @@ import org.hl7.fhir.r4.model.GraphDefinition;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
+import org.hl7.fhir.r4.model.Reference;
 import org.opencds.cqf.fhir.cr.hapi.common.CanonicalHelper;
 import org.opencds.cqf.fhir.cr.hapi.common.IGraphDefinitionApplyRequestBuilderFactory;
 import org.opencds.cqf.fhir.cr.hapi.common.IGraphDefinitionProcessorFactory;
@@ -41,6 +42,10 @@ public class GraphDefinitionApplyProvider {
         this.graphDefinitionApplyRequestBuilderFactory = graphDefinitionApplyRequestBuilderFactory;
         this.fhirVersion = fhirVersion;
         this.stringTimePeriodHandler = stringTimePeriodHandler;
+    }
+
+    private String getReferenceValue(Reference ref) {
+        return ref != null ? ref.getReference() : null;
     }
 
     /**
@@ -96,10 +101,10 @@ public class GraphDefinitionApplyProvider {
             @OperationParam(name = "canonical", typeName = "string") String canonical,
             @OperationParam(name = "url", typeName = "string") String url,
             @OperationParam(name = "version", typeName = "string") String version,
-            @OperationParam(name = "subject", typeName = "string") String subject,
-            @OperationParam(name = "encounter", typeName = "string") String encounter,
-            @OperationParam(name = "practitioner", typeName = "string") String practitioner,
-            @OperationParam(name = "organization", typeName = "string") String organization,
+            @OperationParam(name = "subject") Reference subject,
+            @OperationParam(name = "encounter") Reference encounter,
+            @OperationParam(name = "practitioner") Reference practitioner,
+            @OperationParam(name = "organization") Reference organization,
             @OperationParam(name = "userType") CodeableConcept userType,
             @OperationParam(name = "userLanguage") CodeableConcept userLanguage,
             @OperationParam(name = "userTaskContext") CodeableConcept userTaskContext,
@@ -124,10 +129,10 @@ public class GraphDefinitionApplyProvider {
                 .withGraphDefinitionId(id)
                 .withCanonicalType(canonicalType)
                 .withGraphDefinition(graphDefinition)
-                .withSubject(subject)
-                .withEncounter(encounter)
-                .withPractitioner(practitioner)
-                .withOrganization(organization)
+                .withSubject(getReferenceValue(subject))
+                .withEncounter(getReferenceValue(encounter))
+                .withPractitioner(getReferenceValue(practitioner))
+                .withOrganization(getReferenceValue(organization))
                 .withUserType(userType)
                 .withUserLanguage(userLanguage)
                 .withUserTaskContext(userTaskContext)
@@ -154,10 +159,10 @@ public class GraphDefinitionApplyProvider {
             @OperationParam(name = "canonical", typeName = "string") String canonical,
             @OperationParam(name = "url", typeName = "string") String url,
             @OperationParam(name = "version", typeName = "string") String version,
-            @OperationParam(name = "subject", typeName = "string") String subject,
-            @OperationParam(name = "encounter", typeName = "string") String encounter,
-            @OperationParam(name = "practitioner", typeName = "string") String practitioner,
-            @OperationParam(name = "organization", typeName = "string") String organization,
+            @OperationParam(name = "subject") Reference subject,
+            @OperationParam(name = "encounter") Reference encounter,
+            @OperationParam(name = "practitioner") Reference practitioner,
+            @OperationParam(name = "organization") Reference organization,
             @OperationParam(name = "userType") CodeableConcept userType,
             @OperationParam(name = "userLanguage") CodeableConcept userLanguage,
             @OperationParam(name = "userTaskContext") CodeableConcept userTaskContext,
@@ -181,10 +186,10 @@ public class GraphDefinitionApplyProvider {
                 .createApplyRequestBuilder(requestDetails)
                 .withCanonicalType(canonicalType)
                 .withGraphDefinition(graphDefinition)
-                .withSubject(subject)
-                .withEncounter(encounter)
-                .withPractitioner(practitioner)
-                .withOrganization(organization)
+                .withSubject(getReferenceValue(subject))
+                .withEncounter(getReferenceValue(encounter))
+                .withPractitioner(getReferenceValue(practitioner))
+                .withOrganization(getReferenceValue(organization))
                 .withUserType(userType)
                 .withUserLanguage(userLanguage)
                 .withUserTaskContext(userTaskContext)

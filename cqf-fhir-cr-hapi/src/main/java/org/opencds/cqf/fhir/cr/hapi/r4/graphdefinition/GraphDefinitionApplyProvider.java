@@ -93,13 +93,13 @@ public class GraphDefinitionApplyProvider {
     public IBaseResource apply(
             @IdParam IdType id,
             @OperationParam(name = "graphDefinition") GraphDefinition graphDefinition,
-            @OperationParam(name = "canonical") String canonical,
-            @OperationParam(name = "url") String url,
-            @OperationParam(name = "version") String version,
-            @OperationParam(name = "subject") String subject,
-            @OperationParam(name = "encounter") String encounter,
-            @OperationParam(name = "practitioner") String practitioner,
-            @OperationParam(name = "organization") String organization,
+            @OperationParam(name = "canonical", typeName = "string") String canonical,
+            @OperationParam(name = "url", typeName = "string") String url,
+            @OperationParam(name = "version", typeName = "string") String version,
+            @OperationParam(name = "subject", typeName = "string") String subject,
+            @OperationParam(name = "encounter", typeName = "string") String encounter,
+            @OperationParam(name = "practitioner", typeName = "string") String practitioner,
+            @OperationParam(name = "organization", typeName = "string") String organization,
             @OperationParam(name = "userType") CodeableConcept userType,
             @OperationParam(name = "userLanguage") CodeableConcept userLanguage,
             @OperationParam(name = "userTaskContext") CodeableConcept userTaskContext,
@@ -112,8 +112,8 @@ public class GraphDefinitionApplyProvider {
             @OperationParam(name = "dataEndpoint") Parameters.ParametersParameterComponent dataEndpoint,
             @OperationParam(name = "contentEndpoint") Parameters.ParametersParameterComponent contentEndpoint,
             @OperationParam(name = "terminologyEndpoint") Parameters.ParametersParameterComponent terminologyEndpoint,
-            @OperationParam(name = "periodStart") String periodStart,
-            @OperationParam(name = "periodEnd") String periodEnd,
+            @OperationParam(name = "periodStart", typeName = "string") String periodStart,
+            @OperationParam(name = "periodEnd", typeName = "string") String periodEnd,
             RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
 
@@ -151,13 +151,13 @@ public class GraphDefinitionApplyProvider {
     @Operation(name = ProviderConstants.CR_OPERATION_APPLY, idempotent = true, type = GraphDefinition.class)
     public IBaseResource apply(
             @OperationParam(name = "graphDefinition") GraphDefinition graphDefinition,
-            @OperationParam(name = "canonical") String canonical,
-            @OperationParam(name = "url") String url,
-            @OperationParam(name = "version") String version,
-            @OperationParam(name = "subject") String subject,
-            @OperationParam(name = "encounter") String encounter,
-            @OperationParam(name = "practitioner") String practitioner,
-            @OperationParam(name = "organization") String organization,
+            @OperationParam(name = "canonical", typeName = "string") String canonical,
+            @OperationParam(name = "url", typeName = "string") String url,
+            @OperationParam(name = "version", typeName = "string") String version,
+            @OperationParam(name = "subject", typeName = "string") String subject,
+            @OperationParam(name = "encounter", typeName = "string") String encounter,
+            @OperationParam(name = "practitioner", typeName = "string") String practitioner,
+            @OperationParam(name = "organization", typeName = "string") String organization,
             @OperationParam(name = "userType") CodeableConcept userType,
             @OperationParam(name = "userLanguage") CodeableConcept userLanguage,
             @OperationParam(name = "userTaskContext") CodeableConcept userTaskContext,
@@ -170,8 +170,8 @@ public class GraphDefinitionApplyProvider {
             @OperationParam(name = "dataEndpoint") Parameters.ParametersParameterComponent dataEndpoint,
             @OperationParam(name = "contentEndpoint") Parameters.ParametersParameterComponent contentEndpoint,
             @OperationParam(name = "terminologyEndpoint") Parameters.ParametersParameterComponent terminologyEndpoint,
-            @OperationParam(name = "periodStart") String periodStart,
-            @OperationParam(name = "periodEnd") String periodEnd,
+            @OperationParam(name = "periodStart", typeName = "string") String periodStart,
+            @OperationParam(name = "periodEnd", typeName = "string") String periodEnd,
             RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
 

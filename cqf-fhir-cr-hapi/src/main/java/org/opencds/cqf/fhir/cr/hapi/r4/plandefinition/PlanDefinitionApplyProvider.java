@@ -21,6 +21,7 @@ import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.PlanDefinition;
+import org.hl7.fhir.r4.model.Reference;
 import org.opencds.cqf.fhir.cr.hapi.common.IPlanDefinitionProcessorFactory;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.springframework.stereotype.Component;
@@ -34,6 +35,20 @@ public class PlanDefinitionApplyProvider {
     public PlanDefinitionApplyProvider(IPlanDefinitionProcessorFactory planDefinitionProcessorFactory) {
         this.planDefinitionProcessorFactory = planDefinitionProcessorFactory;
         fhirVersion = FhirVersionEnum.R4;
+    }
+
+    private String getReferenceValue(Reference ref) {
+        return ref != null ? ref.getReference() : null;
+    }
+
+    private List<String> getReferenceValues(List<Reference> refs) {
+        if (refs == null) {
+            return null;
+        }
+        return refs.stream()
+                .map(this::getReferenceValue)
+                .filter(java.util.Objects::nonNull)
+                .toList();
     }
 
     /**
@@ -78,13 +93,13 @@ public class PlanDefinitionApplyProvider {
     public IBaseResource apply(
             @IdParam IdType id,
             @OperationParam(name = "planDefinition") PlanDefinition planDefinition,
-            @OperationParam(name = "canonical") String canonical,
-            @OperationParam(name = "url") String url,
-            @OperationParam(name = "version") String version,
-            @OperationParam(name = "subject") String subject,
-            @OperationParam(name = "encounter") String encounter,
-            @OperationParam(name = "practitioner") String practitioner,
-            @OperationParam(name = "organization") String organization,
+            @OperationParam(name = "canonical", typeName = "string") String canonical,
+            @OperationParam(name = "url", typeName = "string") String url,
+            @OperationParam(name = "version", typeName = "string") String version,
+            @OperationParam(name = "subject") Reference subject,
+            @OperationParam(name = "encounter") Reference encounter,
+            @OperationParam(name = "practitioner") Reference practitioner,
+            @OperationParam(name = "organization") Reference organization,
             @OperationParam(name = "userType") CodeableConcept userType,
             @OperationParam(name = "userLanguage") CodeableConcept userLanguage,
             @OperationParam(name = "userTaskContext") CodeableConcept userTaskContext,
@@ -107,10 +122,10 @@ public class PlanDefinitionApplyProvider {
                 .create(requestDetails)
                 .apply(
                         Eithers.for3(canonicalType, id, planDefinition),
-                        subject,
-                        encounter,
-                        practitioner,
-                        organization,
+                        getReferenceValue(subject),
+                        getReferenceValue(encounter),
+                        getReferenceValue(practitioner),
+                        getReferenceValue(organization),
                         userType,
                         userLanguage,
                         userTaskContext,
@@ -128,13 +143,13 @@ public class PlanDefinitionApplyProvider {
     @Operation(name = ProviderConstants.CR_OPERATION_APPLY, idempotent = true, type = PlanDefinition.class)
     public IBaseResource apply(
             @OperationParam(name = "planDefinition") PlanDefinition planDefinition,
-            @OperationParam(name = "canonical") String canonical,
-            @OperationParam(name = "url") String url,
-            @OperationParam(name = "version") String version,
-            @OperationParam(name = "subject") String subject,
-            @OperationParam(name = "encounter") String encounter,
-            @OperationParam(name = "practitioner") String practitioner,
-            @OperationParam(name = "organization") String organization,
+            @OperationParam(name = "canonical", typeName = "string") String canonical,
+            @OperationParam(name = "url", typeName = "string") String url,
+            @OperationParam(name = "version", typeName = "string") String version,
+            @OperationParam(name = "subject") Reference subject,
+            @OperationParam(name = "encounter") Reference encounter,
+            @OperationParam(name = "practitioner") Reference practitioner,
+            @OperationParam(name = "organization") Reference organization,
             @OperationParam(name = "userType") CodeableConcept userType,
             @OperationParam(name = "userLanguage") CodeableConcept userLanguage,
             @OperationParam(name = "userTaskContext") CodeableConcept userTaskContext,
@@ -157,10 +172,10 @@ public class PlanDefinitionApplyProvider {
                 .create(requestDetails)
                 .apply(
                         Eithers.for3(canonicalType, null, planDefinition),
-                        subject,
-                        encounter,
-                        practitioner,
-                        organization,
+                        getReferenceValue(subject),
+                        getReferenceValue(encounter),
+                        getReferenceValue(practitioner),
+                        getReferenceValue(organization),
                         userType,
                         userLanguage,
                         userTaskContext,
@@ -217,13 +232,13 @@ public class PlanDefinitionApplyProvider {
     public IBaseResource applyR5(
             @IdParam IdType id,
             @OperationParam(name = "planDefinition") PlanDefinition planDefinition,
-            @OperationParam(name = "canonical") String canonical,
-            @OperationParam(name = "url") String url,
-            @OperationParam(name = "version") String version,
-            @OperationParam(name = "subject", min = 1, max = MAX_UNLIMITED) List<String> subject,
-            @OperationParam(name = "encounter") String encounter,
-            @OperationParam(name = "practitioner") String practitioner,
-            @OperationParam(name = "organization") String organization,
+            @OperationParam(name = "canonical", typeName = "string") String canonical,
+            @OperationParam(name = "url", typeName = "string") String url,
+            @OperationParam(name = "version", typeName = "string") String version,
+            @OperationParam(name = "subject", min = 1, max = MAX_UNLIMITED) List<Reference> subject,
+            @OperationParam(name = "encounter") Reference encounter,
+            @OperationParam(name = "practitioner") Reference practitioner,
+            @OperationParam(name = "organization") Reference organization,
             @OperationParam(name = "userType") CodeableConcept userType,
             @OperationParam(name = "userLanguage") CodeableConcept userLanguage,
             @OperationParam(name = "userTaskContext") CodeableConcept userTaskContext,
@@ -246,10 +261,10 @@ public class PlanDefinitionApplyProvider {
                 .create(requestDetails)
                 .applyR5(
                         Eithers.for3(canonicalType, id, planDefinition),
-                        subject,
-                        encounter,
-                        practitioner,
-                        organization,
+                        getReferenceValues(subject),
+                        getReferenceValue(encounter),
+                        getReferenceValue(practitioner),
+                        getReferenceValue(organization),
                         userType,
                         userLanguage,
                         userTaskContext,
@@ -267,13 +282,13 @@ public class PlanDefinitionApplyProvider {
     @Operation(name = ProviderConstants.CR_OPERATION_R5_APPLY, idempotent = true, type = PlanDefinition.class)
     public IBaseResource applyR5(
             @OperationParam(name = "planDefinition") PlanDefinition planDefinition,
-            @OperationParam(name = "canonical") String canonical,
-            @OperationParam(name = "url") String url,
-            @OperationParam(name = "version") String version,
-            @OperationParam(name = "subject", min = 1, max = MAX_UNLIMITED) List<String> subject,
-            @OperationParam(name = "encounter") String encounter,
-            @OperationParam(name = "practitioner") String practitioner,
-            @OperationParam(name = "organization") String organization,
+            @OperationParam(name = "canonical", typeName = "string") String canonical,
+            @OperationParam(name = "url", typeName = "string") String url,
+            @OperationParam(name = "version", typeName = "string") String version,
+            @OperationParam(name = "subject", min = 1, max = MAX_UNLIMITED) List<Reference> subject,
+            @OperationParam(name = "encounter") Reference encounter,
+            @OperationParam(name = "practitioner") Reference practitioner,
+            @OperationParam(name = "organization") Reference organization,
             @OperationParam(name = "userType") CodeableConcept userType,
             @OperationParam(name = "userLanguage") CodeableConcept userLanguage,
             @OperationParam(name = "userTaskContext") CodeableConcept userTaskContext,
@@ -296,10 +311,10 @@ public class PlanDefinitionApplyProvider {
                 .create(requestDetails)
                 .applyR5(
                         Eithers.for3(canonicalType, null, planDefinition),
-                        subject,
-                        encounter,
-                        practitioner,
-                        organization,
+                        getReferenceValues(subject),
+                        getReferenceValue(encounter),
+                        getReferenceValue(practitioner),
+                        getReferenceValue(organization),
                         userType,
                         userLanguage,
                         userTaskContext,

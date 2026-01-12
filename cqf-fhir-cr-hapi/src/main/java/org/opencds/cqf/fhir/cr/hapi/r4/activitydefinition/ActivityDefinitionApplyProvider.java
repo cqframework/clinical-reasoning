@@ -19,6 +19,7 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Reference;
 import org.opencds.cqf.fhir.cr.hapi.common.IActivityDefinitionProcessorFactory;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.springframework.stereotype.Component;
@@ -32,6 +33,10 @@ public class ActivityDefinitionApplyProvider {
     public ActivityDefinitionApplyProvider(IActivityDefinitionProcessorFactory activityDefinitionProcessorFactory) {
         this.activityDefinitionProcessorFactory = activityDefinitionProcessorFactory;
         fhirVersion = FhirVersionEnum.R4;
+    }
+
+    private String getReferenceValue(Reference ref) {
+        return ref != null ? ref.getReference() : null;
     }
 
     /**
@@ -75,13 +80,13 @@ public class ActivityDefinitionApplyProvider {
     public IBaseResource apply(
             @IdParam IdType id,
             @OperationParam(name = "activityDefinition") ActivityDefinition activityDefinition,
-            @OperationParam(name = "canonical") String canonical,
-            @OperationParam(name = "url") String url,
-            @OperationParam(name = "version") String version,
-            @OperationParam(name = "subject") String subject,
-            @OperationParam(name = "encounter") String encounter,
-            @OperationParam(name = "practitioner") String practitioner,
-            @OperationParam(name = "organization") String organization,
+            @OperationParam(name = "canonical", typeName = "string") String canonical,
+            @OperationParam(name = "url", typeName = "string") String url,
+            @OperationParam(name = "version", typeName = "string") String version,
+            @OperationParam(name = "subject") Reference subject,
+            @OperationParam(name = "encounter") Reference encounter,
+            @OperationParam(name = "practitioner") Reference practitioner,
+            @OperationParam(name = "organization") Reference organization,
             @OperationParam(name = "userType") CodeableConcept userType,
             @OperationParam(name = "userLanguage") CodeableConcept userLanguage,
             @OperationParam(name = "userTaskContext") CodeableConcept userTaskContext,
@@ -103,10 +108,10 @@ public class ActivityDefinitionApplyProvider {
                 .create(requestDetails)
                 .apply(
                         Eithers.for3(canonicalType, id, activityDefinition),
-                        subject,
-                        encounter,
-                        practitioner,
-                        organization,
+                        getReferenceValue(subject),
+                        getReferenceValue(encounter),
+                        getReferenceValue(practitioner),
+                        getReferenceValue(organization),
                         userType,
                         userLanguage,
                         userTaskContext,
@@ -123,13 +128,13 @@ public class ActivityDefinitionApplyProvider {
     @Operation(name = ProviderConstants.CR_OPERATION_APPLY, idempotent = true, type = ActivityDefinition.class)
     public IBaseResource apply(
             @OperationParam(name = "activityDefinition") ActivityDefinition activityDefinition,
-            @OperationParam(name = "canonical") String canonical,
-            @OperationParam(name = "url") String url,
-            @OperationParam(name = "version") String version,
-            @OperationParam(name = "subject") String subject,
-            @OperationParam(name = "encounter") String encounter,
-            @OperationParam(name = "practitioner") String practitioner,
-            @OperationParam(name = "organization") String organization,
+            @OperationParam(name = "canonical", typeName = "string") String canonical,
+            @OperationParam(name = "url", typeName = "string") String url,
+            @OperationParam(name = "version", typeName = "string") String version,
+            @OperationParam(name = "subject") Reference subject,
+            @OperationParam(name = "encounter") Reference encounter,
+            @OperationParam(name = "practitioner") Reference practitioner,
+            @OperationParam(name = "organization") Reference organization,
             @OperationParam(name = "userType") CodeableConcept userType,
             @OperationParam(name = "userLanguage") CodeableConcept userLanguage,
             @OperationParam(name = "userTaskContext") CodeableConcept userTaskContext,
@@ -151,10 +156,10 @@ public class ActivityDefinitionApplyProvider {
                 .create(requestDetails)
                 .apply(
                         Eithers.for3(canonicalType, null, activityDefinition),
-                        subject,
-                        encounter,
-                        practitioner,
-                        organization,
+                        getReferenceValue(subject),
+                        getReferenceValue(encounter),
+                        getReferenceValue(practitioner),
+                        getReferenceValue(organization),
                         userType,
                         userLanguage,
                         userTaskContext,

@@ -1,7 +1,9 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportStatus;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.common.ContinuousVariableObservationAggregateMethod;
@@ -1198,16 +1200,14 @@ class MeasureScoringTypeRatioContVariableTest {
      */
     @Test
     void ratioContinuousVariableBadDenDef() {
-        try {
-            given.when()
-                    .measureId("RatioContVarResourceSumError2")
-                    .subject("Patient/patient-9")
-                    .evaluate()
-                    .then()
-                    .report();
-        } catch (Exception ex) {
-            assertTrue(ex.getMessage().contains("no matching criteria reference was found for extension"));
-        }
+        var expectedException = assertThrows(InvalidRequestException.class, () -> given.when()
+                .measureId("RatioContVarResourceSumError2")
+                .subject("Patient/patient-9")
+                .evaluate()
+                .then()
+                .report());
+
+        assertTrue(expectedException.getMessage().contains("no matching criteria reference was found for extension"));
     }
 
     /**

@@ -105,8 +105,6 @@ public class R4MeasureUtils {
         return null;
     }
 
-    // LUKETODO:  test this:
-    // LUKETODO:  javadoc
     public static MeasureScoring computeScoring(Measure measure, MeasureGroupComponent measureGroup) {
         return computeScoring(
                 measure.getUrl(), getMeasureScoring(measure), getGroupMeasureScoring(measure.getUrl(), measureGroup));

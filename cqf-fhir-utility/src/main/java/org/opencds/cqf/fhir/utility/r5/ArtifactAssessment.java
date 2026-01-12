@@ -31,8 +31,8 @@ import org.hl7.fhir.r5.model.StringType;
 import org.hl7.fhir.r5.model.UriType;
 
 @ResourceDef(
-    id = "ArtifactAssessment",
-    profile = "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-artifactAssessment")
+        id = "ArtifactAssessment",
+        profile = "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-artifactAssessment")
 public class ArtifactAssessment extends Basic {
     public enum ArtifactAssessmentContentInformationType {
         /**
@@ -64,7 +64,8 @@ public class ArtifactAssessment extends Basic {
          */
         NULL;
 
-        public static ArtifactAssessment.ArtifactAssessmentContentInformationType fromCode(String codeString) throws FHIRException {
+        public static ArtifactAssessment.ArtifactAssessmentContentInformationType fromCode(String codeString)
+                throws FHIRException {
             if (StringUtils.isBlank(codeString)) {
                 return null;
             }
@@ -167,27 +168,27 @@ public class ArtifactAssessment extends Basic {
     }
 
     public static class ArtifactAssessmentContentInformationTypeEnumFactory
-        implements
-        EnumFactory<ArtifactAssessment.ArtifactAssessmentContentInformationType> {
-        public ArtifactAssessment.ArtifactAssessmentContentInformationType fromCode(String codeString) throws IllegalArgumentException {
+            implements EnumFactory<ArtifactAssessment.ArtifactAssessmentContentInformationType> {
+        public ArtifactAssessment.ArtifactAssessmentContentInformationType fromCode(String codeString)
+                throws IllegalArgumentException {
             return ArtifactAssessment.ArtifactAssessmentContentInformationType.fromCode(codeString);
         }
 
-        public Enumeration<ArtifactAssessment.ArtifactAssessmentContentInformationType> fromType(
-            Base code) throws FHIRException {
+        public Enumeration<ArtifactAssessment.ArtifactAssessmentContentInformationType> fromType(Base code)
+                throws FHIRException {
             if (code == null) return null;
             if (code.isEmpty()) return new Enumeration<>(this);
             return new Enumeration<>(
-                this, ArtifactAssessment.ArtifactAssessmentContentInformationType.fromCode(((PrimitiveType<?>) code).asStringValue()));
+                    this,
+                    ArtifactAssessment.ArtifactAssessmentContentInformationType.fromCode(
+                            ((PrimitiveType<?>) code).asStringValue()));
         }
 
-        public String toCode(
-            ArtifactAssessment.ArtifactAssessmentContentInformationType code) {
+        public String toCode(ArtifactAssessment.ArtifactAssessmentContentInformationType code) {
             return code.toCode();
         }
 
-        public String toSystem(
-            ArtifactAssessment.ArtifactAssessmentContentInformationType code) {
+        public String toSystem(ArtifactAssessment.ArtifactAssessmentContentInformationType code) {
             return code.getSystem();
         }
     }
@@ -262,7 +263,8 @@ public class ArtifactAssessment extends Basic {
          */
         NULL;
 
-        public static ArtifactAssessment.ArtifactAssessmentContentClassifier fromCode(String codeString) throws FHIRException {
+        public static ArtifactAssessment.ArtifactAssessmentContentClassifier fromCode(String codeString)
+                throws FHIRException {
             if (StringUtils.isBlank(codeString)) {
                 return null;
             }
@@ -352,21 +354,21 @@ public class ArtifactAssessment extends Basic {
         public String getSystem() {
             switch (this) {
                 case HIGH,
-                     MODERATE,
-                     LOW,
-                     VERY_LOW,
-                     NO_CONCERN,
-                     SERIOUS_CONCERN,
-                     VERY_SERIOUS_CONCERN,
-                     EXTREMELY_SERIOUS_CONCERN,
-                     PRESENT,
-                     ABSENT,
-                     NO_CHANGE,
-                     DOWNCODE1,
-                     DOWNCODE2,
-                     DOWNCODE3,
-                     UPCODE1,
-                     UPCODE2:
+                        MODERATE,
+                        LOW,
+                        VERY_LOW,
+                        NO_CONCERN,
+                        SERIOUS_CONCERN,
+                        VERY_SERIOUS_CONCERN,
+                        EXTREMELY_SERIOUS_CONCERN,
+                        PRESENT,
+                        ABSENT,
+                        NO_CHANGE,
+                        DOWNCODE1,
+                        DOWNCODE2,
+                        DOWNCODE3,
+                        UPCODE1,
+                        UPCODE2:
                     return "http://terminology.hl7.org/CodeSystem/certainty-rating";
                 case NULL:
                     return null;
@@ -459,12 +461,14 @@ public class ArtifactAssessment extends Basic {
     }
 
     public static class ArtifactAssessmentContentClassifierEnumFactory
-        implements EnumFactory<ArtifactAssessment.ArtifactAssessmentContentClassifier> {
-        public ArtifactAssessment.ArtifactAssessmentContentClassifier fromCode(String codeString) throws IllegalArgumentException {
+            implements EnumFactory<ArtifactAssessment.ArtifactAssessmentContentClassifier> {
+        public ArtifactAssessment.ArtifactAssessmentContentClassifier fromCode(String codeString)
+                throws IllegalArgumentException {
             return ArtifactAssessment.ArtifactAssessmentContentClassifier.fromCode(codeString);
         }
 
-        public Enumeration<ArtifactAssessment.ArtifactAssessmentContentClassifier> fromType(Base code) throws FHIRException {
+        public Enumeration<ArtifactAssessment.ArtifactAssessmentContentClassifier> fromType(Base code)
+                throws FHIRException {
             if (code == null) {
                 return null;
             }
@@ -472,16 +476,16 @@ public class ArtifactAssessment extends Basic {
                 return new Enumeration<>(this);
             }
             return new Enumeration<>(
-                this, ArtifactAssessment.ArtifactAssessmentContentClassifier.fromCode(((PrimitiveType<?>) code).asStringValue()));
+                    this,
+                    ArtifactAssessment.ArtifactAssessmentContentClassifier.fromCode(
+                            ((PrimitiveType<?>) code).asStringValue()));
         }
 
-        public String toCode(
-            ArtifactAssessment.ArtifactAssessmentContentClassifier code) {
+        public String toCode(ArtifactAssessment.ArtifactAssessmentContentClassifier code) {
             return code.toCode();
         }
 
-        public String toSystem(
-            ArtifactAssessment.ArtifactAssessmentContentClassifier code) {
+        public String toSystem(ArtifactAssessment.ArtifactAssessmentContentClassifier code) {
             return code.getSystem();
         }
     }
@@ -530,7 +534,8 @@ public class ArtifactAssessment extends Basic {
          */
         NULL;
 
-        public static ArtifactAssessment.ArtifactAssessmentWorkflowStatus fromCode(String codeString) throws FHIRException {
+        public static ArtifactAssessment.ArtifactAssessmentWorkflowStatus fromCode(String codeString)
+                throws FHIRException {
             if (StringUtils.isBlank(codeString)) {
                 return null;
             }
@@ -648,12 +653,14 @@ public class ArtifactAssessment extends Basic {
     }
 
     public static class ArtifactAssessmentWorkflowStatusEnumFactory
-        implements EnumFactory<ArtifactAssessment.ArtifactAssessmentWorkflowStatus> {
-        public ArtifactAssessment.ArtifactAssessmentWorkflowStatus fromCode(String codeString) throws IllegalArgumentException {
+            implements EnumFactory<ArtifactAssessment.ArtifactAssessmentWorkflowStatus> {
+        public ArtifactAssessment.ArtifactAssessmentWorkflowStatus fromCode(String codeString)
+                throws IllegalArgumentException {
             return ArtifactAssessment.ArtifactAssessmentWorkflowStatus.fromCode(codeString);
         }
 
-        public Enumeration<ArtifactAssessment.ArtifactAssessmentWorkflowStatus> fromType(Base code) throws FHIRException {
+        public Enumeration<ArtifactAssessment.ArtifactAssessmentWorkflowStatus> fromType(Base code)
+                throws FHIRException {
             if (code == null) {
                 return null;
             }
@@ -661,16 +668,16 @@ public class ArtifactAssessment extends Basic {
                 return new Enumeration<>(this);
             }
             return new Enumeration<>(
-                this, ArtifactAssessment.ArtifactAssessmentWorkflowStatus.fromCode(((PrimitiveType<?>) code).asStringValue()));
+                    this,
+                    ArtifactAssessment.ArtifactAssessmentWorkflowStatus.fromCode(
+                            ((PrimitiveType<?>) code).asStringValue()));
         }
 
-        public String toCode(
-            ArtifactAssessment.ArtifactAssessmentWorkflowStatus code) {
+        public String toCode(ArtifactAssessment.ArtifactAssessmentWorkflowStatus code) {
             return code.toCode();
         }
 
-        public String toSystem(
-            ArtifactAssessment.ArtifactAssessmentWorkflowStatus code) {
+        public String toSystem(ArtifactAssessment.ArtifactAssessmentWorkflowStatus code) {
             return code.getSystem();
         }
     }
@@ -701,7 +708,8 @@ public class ArtifactAssessment extends Basic {
          */
         NULL;
 
-        public static ArtifactAssessment.ArtifactAssessmentDisposition fromCode(String codeString) throws FHIRException {
+        public static ArtifactAssessment.ArtifactAssessmentDisposition fromCode(String codeString)
+                throws FHIRException {
             if (StringUtils.isBlank(codeString)) {
                 return null;
             }
@@ -786,8 +794,10 @@ public class ArtifactAssessment extends Basic {
         }
     }
 
-    public static class ArtifactAssessmentDispositionEnumFactory implements EnumFactory<ArtifactAssessment.ArtifactAssessmentDisposition> {
-        public ArtifactAssessment.ArtifactAssessmentDisposition fromCode(String codeString) throws IllegalArgumentException {
+    public static class ArtifactAssessmentDispositionEnumFactory
+            implements EnumFactory<ArtifactAssessment.ArtifactAssessmentDisposition> {
+        public ArtifactAssessment.ArtifactAssessmentDisposition fromCode(String codeString)
+                throws IllegalArgumentException {
             return ArtifactAssessment.ArtifactAssessmentDisposition.fromCode(codeString);
         }
 
@@ -799,39 +809,39 @@ public class ArtifactAssessment extends Basic {
                 return new Enumeration<>(this);
             }
             return new Enumeration<>(
-                this, ArtifactAssessment.ArtifactAssessmentDisposition.fromCode(((PrimitiveType<?>) code).asStringValue()));
+                    this,
+                    ArtifactAssessment.ArtifactAssessmentDisposition.fromCode(
+                            ((PrimitiveType<?>) code).asStringValue()));
         }
 
-        public String toCode(
-            ArtifactAssessment.ArtifactAssessmentDisposition code) {
+        public String toCode(ArtifactAssessment.ArtifactAssessmentDisposition code) {
             return code.toCode();
         }
 
-        public String toSystem(
-            ArtifactAssessment.ArtifactAssessmentDisposition code) {
+        public String toSystem(ArtifactAssessment.ArtifactAssessmentDisposition code) {
             return code.getSystem();
         }
     }
 
     public static final String ARTIFACT_COMMENT_EXTENSION_URL =
-        "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-artifactComment";
+            "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-artifactComment";
     public static final String CONTENT =
-        "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-artifactAssessmentContent";
+            "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-artifactAssessmentContent";
     public static final String ARTIFACT =
-        "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-artifactAssessmentArtifact";
+            "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-artifactAssessmentArtifact";
     public static final String CITEAS = "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-artifactAssessmentCiteAs";
     public static final String TITLE = "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-artifactAssessmentTitle";
     public static final String DATE = "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-artifactAssessmentDate";
     public static final String COPYRIGHT =
-        "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-artifactAssessmentCopyright";
+            "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-artifactAssessmentCopyright";
     public static final String APPROVAL_DATE =
-        "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-artifactAssessmentApprovalDate";
+            "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-artifactAssessmentApprovalDate";
     public static final String LAST_REVIEW_DATE =
-        "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-artifactAssessmentLastReviewDate";
+            "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-artifactAssessmentLastReviewDate";
     public static final String WORKFLOW_STATUS =
-        "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-artifactAssessmentWorkflowStatus";
+            "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-artifactAssessmentWorkflowStatus";
     public static final String DISPOSITION =
-        "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-artifactAssessmentDisposition";
+            "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-artifactAssessmentDisposition";
 
     public ArtifactAssessment() {
         super();
@@ -853,14 +863,15 @@ public class ArtifactAssessment extends Basic {
     }
 
     public ArtifactAssessment createArtifactComment(
-        CodeType type,
-        Reference targetReference,
-        Optional<CanonicalType> derivedFromUri,
-        Optional<MarkdownType> text,
-        Optional<CanonicalType> reference,
-        Optional<Reference> user)
-        throws FHIRException {
-        ArtifactAssessment.ArtifactAssessmentContentExtension content = new ArtifactAssessment.ArtifactAssessmentContentExtension();
+            CodeType type,
+            Reference targetReference,
+            Optional<CanonicalType> derivedFromUri,
+            Optional<MarkdownType> text,
+            Optional<CanonicalType> reference,
+            Optional<Reference> user)
+            throws FHIRException {
+        ArtifactAssessment.ArtifactAssessmentContentExtension content =
+                new ArtifactAssessment.ArtifactAssessmentContentExtension();
         if (type != null) {
             content.setInfoType(type);
         }
@@ -874,7 +885,7 @@ public class ArtifactAssessment extends Basic {
             content.setAuthorExtension(user.get());
         }
         if (derivedFromUri.isPresent()
-            && !StringUtils.isBlank(derivedFromUri.get().getValue())) {
+                && !StringUtils.isBlank(derivedFromUri.get().getValue())) {
             content.addRelatedArtifact(derivedFromUri.get(), RelatedArtifactType.DERIVEDFROM);
         }
         this.addExtension(content);
@@ -886,14 +897,15 @@ public class ArtifactAssessment extends Basic {
     }
 
     public ArtifactAssessment createArtifactComment(
-        CodeType type,
-        CanonicalType targetReference,
-        Optional<CanonicalType> derivedFromUri,
-        Optional<MarkdownType> text,
-        Optional<CanonicalType> reference,
-        Optional<Reference> user)
-        throws FHIRException {
-        ArtifactAssessment.ArtifactAssessmentContentExtension content = new ArtifactAssessment.ArtifactAssessmentContentExtension();
+            CodeType type,
+            CanonicalType targetReference,
+            Optional<CanonicalType> derivedFromUri,
+            Optional<MarkdownType> text,
+            Optional<CanonicalType> reference,
+            Optional<Reference> user)
+            throws FHIRException {
+        ArtifactAssessment.ArtifactAssessmentContentExtension content =
+                new ArtifactAssessment.ArtifactAssessmentContentExtension();
         if (type != null) {
             content.setInfoType(type);
         }
@@ -907,7 +919,7 @@ public class ArtifactAssessment extends Basic {
             content.setAuthorExtension(user.get());
         }
         if (derivedFromUri.isPresent()
-            && !StringUtils.isBlank(derivedFromUri.get().getValue())) {
+                && !StringUtils.isBlank(derivedFromUri.get().getValue())) {
             content.addRelatedArtifact(derivedFromUri.get(), RelatedArtifactType.DERIVEDFROM);
         }
         this.addExtension(content);
@@ -919,14 +931,15 @@ public class ArtifactAssessment extends Basic {
     }
 
     public ArtifactAssessment createArtifactComment(
-        CodeType type,
-        UriType targetReference,
-        Optional<CanonicalType> derivedFromUri,
-        Optional<MarkdownType> text,
-        Optional<CanonicalType> reference,
-        Optional<Reference> user)
-        throws FHIRException {
-        ArtifactAssessment.ArtifactAssessmentContentExtension content = new ArtifactAssessment.ArtifactAssessmentContentExtension();
+            CodeType type,
+            UriType targetReference,
+            Optional<CanonicalType> derivedFromUri,
+            Optional<MarkdownType> text,
+            Optional<CanonicalType> reference,
+            Optional<Reference> user)
+            throws FHIRException {
+        ArtifactAssessment.ArtifactAssessmentContentExtension content =
+                new ArtifactAssessment.ArtifactAssessmentContentExtension();
         if (type != null) {
             content.setInfoType(type);
         }
@@ -940,7 +953,7 @@ public class ArtifactAssessment extends Basic {
             content.setAuthorExtension(user.get());
         }
         if (derivedFromUri.isPresent()
-            && !StringUtils.isBlank(derivedFromUri.get().getValue())) {
+                && !StringUtils.isBlank(derivedFromUri.get().getValue())) {
             content.addRelatedArtifact(derivedFromUri.get(), RelatedArtifactType.DERIVEDFROM);
         }
         this.addExtension(content);
@@ -956,15 +969,16 @@ public class ArtifactAssessment extends Basic {
         Optional<Extension> content = Optional.ofNullable(this.getExtensionByUrl(CONTENT));
         if (content.isPresent()) {
             Optional<Extension> maybeRelatedArtifact = content.get().getExtension().stream()
-                .filter(extension -> extension.getUrl().equals(
-                    ArtifactAssessment.ArtifactAssessmentContentExtension.RELATEDARTIFACT)
-                    && ((RelatedArtifact) extension.getValue())
-                    .getType()
-                    .equals(RelatedArtifactType.DERIVEDFROM))
-                .findFirst();
+                    .filter(extension -> extension
+                                    .getUrl()
+                                    .equals(ArtifactAssessment.ArtifactAssessmentContentExtension.RELATEDARTIFACT)
+                            && ((RelatedArtifact) extension.getValue())
+                                    .getType()
+                                    .equals(RelatedArtifactType.DERIVEDFROM))
+                    .findFirst();
             if (maybeRelatedArtifact.isPresent()) {
                 RelatedArtifact derivedFromArtifact =
-                    (RelatedArtifact) maybeRelatedArtifact.get().getValue();
+                        (RelatedArtifact) maybeRelatedArtifact.get().getValue();
                 returnedRelatedArtifact = Optional.of(derivedFromArtifact);
             }
         }
@@ -989,7 +1003,7 @@ public class ArtifactAssessment extends Basic {
             newRelatedArtifact.setType(RelatedArtifactType.DERIVEDFROM);
             newRelatedArtifact.setResourceElement(targetUri);
             content.addExtension(
-                ArtifactAssessment.ArtifactAssessmentContentExtension.RELATEDARTIFACT, newRelatedArtifact);
+                    ArtifactAssessment.ArtifactAssessmentContentExtension.RELATEDARTIFACT, newRelatedArtifact);
         }
         return this;
     }
@@ -999,40 +1013,40 @@ public class ArtifactAssessment extends Basic {
     }
 
     public boolean checkArtifactCommentParams(
-        String artifactAssessmentType,
-        String artifactAssessmentSummary,
-        String artifactAssessmentTargetReference,
-        String artifactAssessmentRelatedArtifact,
-        String derivedFromRelatedArtifactUrl,
-        String artifactAssessmentAuthor) {
+            String artifactAssessmentType,
+            String artifactAssessmentSummary,
+            String artifactAssessmentTargetReference,
+            String artifactAssessmentRelatedArtifact,
+            String derivedFromRelatedArtifactUrl,
+            String artifactAssessmentAuthor) {
         var contentCorrect = false;
         var artifactCorrect = false;
         var contentIndex = findIndex(CONTENT, null, this.getExtension());
         if (contentIndex != -1) {
             contentCorrect = checkContent(
-                contentIndex,
-                artifactAssessmentType,
-                artifactAssessmentSummary,
-                artifactAssessmentRelatedArtifact,
-                derivedFromRelatedArtifactUrl,
-                artifactAssessmentAuthor);
+                    contentIndex,
+                    artifactAssessmentType,
+                    artifactAssessmentSummary,
+                    artifactAssessmentRelatedArtifact,
+                    derivedFromRelatedArtifactUrl,
+                    artifactAssessmentAuthor);
         }
         var artifactIndex = findIndex(ARTIFACT, null, this.getExtension());
         if (artifactIndex != -1) {
             var artifactExt = this.getExtension().get(artifactIndex);
             artifactCorrect =
-                ((Reference) artifactExt.getValue()).getReference().equals(artifactAssessmentTargetReference);
+                    ((Reference) artifactExt.getValue()).getReference().equals(artifactAssessmentTargetReference);
         }
         return contentCorrect && artifactCorrect;
     }
 
     private boolean checkContent(
-        int contentIndex,
-        String artifactAssessmentType,
-        String artifactAssessmentSummary,
-        String artifactAssessmentRelatedArtifact,
-        String derivedFromRelatedArtifactUrl,
-        String artifactAssessmentAuthor) {
+            int contentIndex,
+            String artifactAssessmentType,
+            String artifactAssessmentSummary,
+            String artifactAssessmentRelatedArtifact,
+            String derivedFromRelatedArtifactUrl,
+            String artifactAssessmentAuthor) {
         var infoTypeCorrect = false;
         var summaryCorrect = false;
         var citationRelatedArtifactCorrect = false;
@@ -1040,51 +1054,50 @@ public class ArtifactAssessment extends Basic {
         var authorCorrect = false;
         var contentExt = this.getExtension().get(contentIndex);
         int infoTypeIndex = findIndex(
-            ArtifactAssessment.ArtifactAssessmentContentExtension.INFOTYPE, null, contentExt.getExtension());
+                ArtifactAssessment.ArtifactAssessmentContentExtension.INFOTYPE, null, contentExt.getExtension());
         if (infoTypeIndex != -1) {
             var infoTypeExt = contentExt.getExtension().get(infoTypeIndex);
             infoTypeCorrect = ((CodeType) infoTypeExt.getValue()).getCode().equals(artifactAssessmentType);
         }
         var summaryIndex = findIndex(
-            ArtifactAssessment.ArtifactAssessmentContentExtension.SUMMARY, null, contentExt.getExtension());
+                ArtifactAssessment.ArtifactAssessmentContentExtension.SUMMARY, null, contentExt.getExtension());
         if (summaryIndex != -1) {
             var summaryExt = contentExt.getExtension().get(summaryIndex);
             summaryCorrect = ((StringType) summaryExt.getValue()).getValue().equals(artifactAssessmentSummary);
         }
         var relatedArtifactList = contentExt.getExtension().stream()
-            .filter(e -> e.getUrl().equals(
-                ArtifactAssessment.ArtifactAssessmentContentExtension.RELATEDARTIFACT))
-            .collect(Collectors.toList());
+                .filter(e -> e.getUrl().equals(ArtifactAssessment.ArtifactAssessmentContentExtension.RELATEDARTIFACT))
+                .collect(Collectors.toList());
         if (!relatedArtifactList.isEmpty()) {
             var maybeCitation = relatedArtifactList.stream()
-                .filter(ext -> ((RelatedArtifact) ext.getValue()).getType().equals(RelatedArtifactType.CITATION))
-                .findAny();
+                    .filter(ext -> ((RelatedArtifact) ext.getValue()).getType().equals(RelatedArtifactType.CITATION))
+                    .findAny();
             var maybeDerivedFrom = relatedArtifactList.stream()
-                .filter(ext -> ((RelatedArtifact) ext.getValue()).getType().equals(RelatedArtifactType.DERIVEDFROM))
-                .findAny();
+                    .filter(ext -> ((RelatedArtifact) ext.getValue()).getType().equals(RelatedArtifactType.DERIVEDFROM))
+                    .findAny();
             if (maybeCitation.isPresent()) {
                 var citation = maybeCitation.get();
                 citationRelatedArtifactCorrect =
-                    ((RelatedArtifact) citation.getValue()).getResource().equals(artifactAssessmentRelatedArtifact);
+                        ((RelatedArtifact) citation.getValue()).getResource().equals(artifactAssessmentRelatedArtifact);
             }
             if (maybeDerivedFrom.isPresent()) {
                 var derivedFrom = maybeDerivedFrom.get();
                 derivedFromRelatedArtifactCorrect =
-                    ((RelatedArtifact) derivedFrom.getValue()).getResource().equals(derivedFromRelatedArtifactUrl);
+                        ((RelatedArtifact) derivedFrom.getValue()).getResource().equals(derivedFromRelatedArtifactUrl);
             }
         }
         var authorIndex = findIndex(
-            ArtifactAssessment.ArtifactAssessmentContentExtension.AUTHOR, null, contentExt.getExtension());
+                ArtifactAssessment.ArtifactAssessmentContentExtension.AUTHOR, null, contentExt.getExtension());
         if (authorIndex != -1) {
             var authorExt = contentExt.getExtension().get(authorIndex);
             authorCorrect = ((Reference) authorExt.getValue()).getReference().equals(artifactAssessmentAuthor);
         }
 
         return infoTypeCorrect
-            && summaryCorrect
-            && citationRelatedArtifactCorrect
-            && derivedFromRelatedArtifactCorrect
-            && authorCorrect;
+                && summaryCorrect
+                && citationRelatedArtifactCorrect
+                && derivedFromRelatedArtifactCorrect
+                && authorCorrect;
     }
 
     public boolean isValidArtifactComment() {
@@ -1098,26 +1111,32 @@ public class ArtifactAssessment extends Basic {
         if (contentIndex != -1) {
             var content = this.getExtension().get(contentIndex);
             infoTypeExists = findIndex(
-                ArtifactAssessment.ArtifactAssessmentContentExtension.INFOTYPE, null, content.getExtension()) != -1;
+                            ArtifactAssessment.ArtifactAssessmentContentExtension.INFOTYPE,
+                            null,
+                            content.getExtension())
+                    != -1;
             summaryExists = findIndex(
-                ArtifactAssessment.ArtifactAssessmentContentExtension.SUMMARY, null, content.getExtension()) != -1;
-            relatedArtifactExists =
-                findIndex(
-                    ArtifactAssessment.ArtifactAssessmentContentExtension.RELATEDARTIFACT, null, content.getExtension()) != -1;
+                            ArtifactAssessment.ArtifactAssessmentContentExtension.SUMMARY, null, content.getExtension())
+                    != -1;
+            relatedArtifactExists = findIndex(
+                            ArtifactAssessment.ArtifactAssessmentContentExtension.RELATEDARTIFACT,
+                            null,
+                            content.getExtension())
+                    != -1;
             authorExists = findIndex(
-                ArtifactAssessment.ArtifactAssessmentContentExtension.AUTHOR, null, content.getExtension()) != -1;
+                            ArtifactAssessment.ArtifactAssessmentContentExtension.AUTHOR, null, content.getExtension())
+                    != -1;
         }
         return (infoTypeExists || summaryExists || relatedArtifactExists || authorExists)
-            && dateExists
-            && artifactExists;
+                && dateExists
+                && artifactExists;
     }
 
     List<ArtifactAssessment.ArtifactAssessmentContentExtension> getContent() {
         return this.getExtension().stream()
-            .filter(ext -> ext.getUrl().equals(CONTENT))
-            .map(
-                ArtifactAssessment.ArtifactAssessmentContentExtension.class::cast)
-            .collect(Collectors.toList());
+                .filter(ext -> ext.getUrl().equals(CONTENT))
+                .map(ArtifactAssessment.ArtifactAssessmentContentExtension.class::cast)
+                .collect(Collectors.toList());
     }
 
     public ArtifactAssessment setArtifactExtension(CanonicalType target) {
@@ -1168,8 +1187,7 @@ public class ArtifactAssessment extends Basic {
         return this;
     }
 
-    public ArtifactAssessment setLastReviewDateExtension(
-        DateType reviewDate) {
+    public ArtifactAssessment setLastReviewDateExtension(DateType reviewDate) {
         if (reviewDate != null) {
             int index = findIndex(LAST_REVIEW_DATE, null, this.getExtension());
             if (index != -1) {
@@ -1242,7 +1260,7 @@ public class ArtifactAssessment extends Basic {
     }
 
     public ArtifactAssessment setArtifactAssessmentWorkflowStatusExtension(
-        Enumeration<ArtifactAssessment.ArtifactAssessmentWorkflowStatus> status) {
+            Enumeration<ArtifactAssessment.ArtifactAssessmentWorkflowStatus> status) {
         if (status != null) {
             int index = findIndex(WORKFLOW_STATUS, null, this.getExtension());
             if (index != -1) {
@@ -1255,7 +1273,7 @@ public class ArtifactAssessment extends Basic {
     }
 
     public ArtifactAssessment setArtifactAssessmentDispositionExtension(
-        Enumeration<ArtifactAssessment.ArtifactAssessmentDisposition> status) {
+            Enumeration<ArtifactAssessment.ArtifactAssessmentDisposition> status) {
         if (status != null) {
             int index = findIndex(DISPOSITION, null, this.getExtension());
             if (index != -1) {
@@ -1271,11 +1289,11 @@ public class ArtifactAssessment extends Basic {
         Optional<Extension> existingExtension;
         if (value != null) {
             existingExtension = extensions.stream()
-                .filter(e -> e.getUrl().equals(url) && e.getValue().equals(value))
-                .findAny();
+                    .filter(e -> e.getUrl().equals(url) && e.getValue().equals(value))
+                    .findAny();
         } else {
             existingExtension =
-                extensions.stream().filter(e -> e.getUrl().equals(url)).findAny();
+                    extensions.stream().filter(e -> e.getUrl().equals(url)).findAny();
         }
         if (existingExtension.isPresent()) {
             return extensions.indexOf(existingExtension.get());
@@ -1305,9 +1323,14 @@ public class ArtifactAssessment extends Basic {
             if (infoType != null) {
                 int index = findIndex(INFOTYPE, null, this.getExtension());
                 if (index != -1) {
-                    this.extension.set(index, new ArtifactAssessment.ArtifactAssessmentContentExtension.ArtifactAssessmentContentInformationTypeExtension(infoType));
+                    this.extension.set(
+                            index,
+                            new ArtifactAssessment.ArtifactAssessmentContentExtension
+                                    .ArtifactAssessmentContentInformationTypeExtension(infoType));
                 } else {
-                    this.addExtension(new ArtifactAssessment.ArtifactAssessmentContentExtension.ArtifactAssessmentContentInformationTypeExtension(infoType));
+                    this.addExtension(
+                            new ArtifactAssessment.ArtifactAssessmentContentExtension
+                                    .ArtifactAssessmentContentInformationTypeExtension(infoType));
                 }
             }
             return this;
@@ -1317,31 +1340,41 @@ public class ArtifactAssessment extends Basic {
             if (summary != null) {
                 int index = findIndex(SUMMARY, null, this.getExtension());
                 if (index != -1) {
-                    this.extension.set(index, new ArtifactAssessment.ArtifactAssessmentContentExtension.ArtifactAssessmentContentSummaryExtension(summary));
+                    this.extension.set(
+                            index,
+                            new ArtifactAssessment.ArtifactAssessmentContentExtension
+                                    .ArtifactAssessmentContentSummaryExtension(summary));
                 } else {
-                    this.addExtension(new ArtifactAssessment.ArtifactAssessmentContentExtension.ArtifactAssessmentContentSummaryExtension(summary));
+                    this.addExtension(
+                            new ArtifactAssessment.ArtifactAssessmentContentExtension
+                                    .ArtifactAssessmentContentSummaryExtension(summary));
                 }
             }
             return this;
         }
 
-        ArtifactAssessment.ArtifactAssessmentContentExtension addRelatedArtifact(CanonicalType reference, RelatedArtifactType type) {
+        ArtifactAssessment.ArtifactAssessmentContentExtension addRelatedArtifact(
+                CanonicalType reference, RelatedArtifactType type) {
             if (reference != null) {
                 RelatedArtifact newRelatedArtifact = new RelatedArtifact();
                 newRelatedArtifact.setType(type);
                 newRelatedArtifact.setResourceElement(reference);
                 int index = findIndex(RELATEDARTIFACT, newRelatedArtifact, this.getExtension());
                 if (index == -1) {
-                    this.addExtension(new ArtifactAssessment.ArtifactAssessmentContentExtension.ArtifactAssessmentContentRelatedArtifactExtension(newRelatedArtifact));
+                    this.addExtension(
+                            new ArtifactAssessment.ArtifactAssessmentContentExtension
+                                    .ArtifactAssessmentContentRelatedArtifactExtension(newRelatedArtifact));
                 }
             }
             return this;
         }
 
         ArtifactAssessment.ArtifactAssessmentContentExtension addComponent(
-            ArtifactAssessment.ArtifactAssessmentContentExtension component) {
+                ArtifactAssessment.ArtifactAssessmentContentExtension component) {
             if (component != null) {
-                this.addExtension(new ArtifactAssessment.ArtifactAssessmentContentExtension.ArtifactAssessmentContentComponentExtension(component));
+                this.addExtension(
+                        new ArtifactAssessment.ArtifactAssessmentContentExtension
+                                .ArtifactAssessmentContentComponentExtension(component));
             }
             return this;
         }
@@ -1350,48 +1383,65 @@ public class ArtifactAssessment extends Basic {
             if (author != null) {
                 int index = findIndex(AUTHOR, null, this.getExtension());
                 if (index != -1) {
-                    this.extension.set(index, new ArtifactAssessment.ArtifactAssessmentContentExtension.ArtifactAssessmentContentAuthorExtension(author));
+                    this.extension.set(
+                            index,
+                            new ArtifactAssessment.ArtifactAssessmentContentExtension
+                                    .ArtifactAssessmentContentAuthorExtension(author));
                 } else {
-                    this.addExtension(new ArtifactAssessment.ArtifactAssessmentContentExtension.ArtifactAssessmentContentAuthorExtension(author));
+                    this.addExtension(
+                            new ArtifactAssessment.ArtifactAssessmentContentExtension
+                                    .ArtifactAssessmentContentAuthorExtension(author));
                 }
             }
             return this;
         }
 
-        ArtifactAssessment.ArtifactAssessmentContentExtension setQuantityExtension(
-            Quantity quantity) {
+        ArtifactAssessment.ArtifactAssessmentContentExtension setQuantityExtension(Quantity quantity) {
             if (quantity != null) {
                 int index = findIndex(QUANTITY, null, this.getExtension());
                 if (index != -1) {
-                    this.extension.set(index, new ArtifactAssessment.ArtifactAssessmentContentExtension.ArtifactAssessmentContentQuantityExtension(quantity));
+                    this.extension.set(
+                            index,
+                            new ArtifactAssessment.ArtifactAssessmentContentExtension
+                                    .ArtifactAssessmentContentQuantityExtension(quantity));
                 } else {
-                    this.addExtension(new ArtifactAssessment.ArtifactAssessmentContentExtension.ArtifactAssessmentContentQuantityExtension(quantity));
+                    this.addExtension(
+                            new ArtifactAssessment.ArtifactAssessmentContentExtension
+                                    .ArtifactAssessmentContentQuantityExtension(quantity));
                 }
             }
             return this;
         }
 
-        ArtifactAssessment.ArtifactAssessmentContentExtension setTypeExtension(
-            CodeableConcept type) {
+        ArtifactAssessment.ArtifactAssessmentContentExtension setTypeExtension(CodeableConcept type) {
             if (type != null) {
                 int index = findIndex(TYPE, null, this.getExtension());
                 if (index != -1) {
-                    this.extension.set(index, new ArtifactAssessment.ArtifactAssessmentContentExtension.ArtifactAssessmentContentTypeExtension(type));
+                    this.extension.set(
+                            index,
+                            new ArtifactAssessment.ArtifactAssessmentContentExtension
+                                    .ArtifactAssessmentContentTypeExtension(type));
                 } else {
-                    this.addExtension(new ArtifactAssessment.ArtifactAssessmentContentExtension.ArtifactAssessmentContentTypeExtension(type));
+                    this.addExtension(
+                            new ArtifactAssessment.ArtifactAssessmentContentExtension
+                                    .ArtifactAssessmentContentTypeExtension(type));
                 }
             }
             return this;
         }
 
-        ArtifactAssessment.ArtifactAssessmentContentExtension setFreeToShareExtension(
-            BooleanType freeToShare) {
+        ArtifactAssessment.ArtifactAssessmentContentExtension setFreeToShareExtension(BooleanType freeToShare) {
             if (freeToShare != null) {
                 int index = findIndex(FREETOSHARE, null, this.getExtension());
                 if (index != -1) {
-                    this.extension.set(index, new ArtifactAssessment.ArtifactAssessmentContentExtension.ArtifactAssessmentContentFreeToShareExtension(freeToShare));
+                    this.extension.set(
+                            index,
+                            new ArtifactAssessment.ArtifactAssessmentContentExtension
+                                    .ArtifactAssessmentContentFreeToShareExtension(freeToShare));
                 } else {
-                    this.addExtension(new ArtifactAssessment.ArtifactAssessmentContentExtension.ArtifactAssessmentContentFreeToShareExtension(freeToShare));
+                    this.addExtension(
+                            new ArtifactAssessment.ArtifactAssessmentContentExtension
+                                    .ArtifactAssessmentContentFreeToShareExtension(freeToShare));
                 }
             }
             return this;
@@ -1401,7 +1451,9 @@ public class ArtifactAssessment extends Basic {
             if (classifier != null) {
                 int index = findIndex(CLASSIFIER, classifier, this.getExtension());
                 if (index == -1) {
-                    this.addExtension(new ArtifactAssessment.ArtifactAssessmentContentExtension.ArtifactAssessmentContentClassifierExtension(classifier));
+                    this.addExtension(
+                            new ArtifactAssessment.ArtifactAssessmentContentExtension
+                                    .ArtifactAssessmentContentClassifierExtension(classifier));
                 }
             }
             return this;
@@ -1411,16 +1463,18 @@ public class ArtifactAssessment extends Basic {
             if (path != null) {
                 int index = findIndex(PATH, path, this.getExtension());
                 if (index == -1) {
-                    this.addExtension(new ArtifactAssessment.ArtifactAssessmentContentExtension.ArtifactAssessmentContentPathExtension(path));
+                    this.addExtension(
+                            new ArtifactAssessment.ArtifactAssessmentContentExtension
+                                    .ArtifactAssessmentContentPathExtension(path));
                 }
             }
             return this;
         }
 
         @DatatypeDef(
-            name = "ArtifactAssessmentContentInformationTypeExtension",
-            isSpecialization = true,
-            profileOf = Extension.class)
+                name = "ArtifactAssessmentContentInformationTypeExtension",
+                isSpecialization = true,
+                profileOf = Extension.class)
         private class ArtifactAssessmentContentInformationTypeExtension extends Extension {
             public ArtifactAssessmentContentInformationTypeExtension(CodeType informationTypeCode) {
                 super(INFOTYPE);
@@ -1431,9 +1485,9 @@ public class ArtifactAssessment extends Basic {
         }
 
         @DatatypeDef(
-            name = "ArtifactAssessmentContentSummaryExtension",
-            isSpecialization = true,
-            profileOf = Extension.class)
+                name = "ArtifactAssessmentContentSummaryExtension",
+                isSpecialization = true,
+                profileOf = Extension.class)
         private class ArtifactAssessmentContentSummaryExtension extends Extension {
             public ArtifactAssessmentContentSummaryExtension(MarkdownType summary) {
                 super(SUMMARY, summary);
@@ -1442,9 +1496,9 @@ public class ArtifactAssessment extends Basic {
 
         @SuppressWarnings("squid:S2387")
         @DatatypeDef(
-            name = "ArtifactAssessmentContentTypeExtension",
-            isSpecialization = true,
-            profileOf = Extension.class)
+                name = "ArtifactAssessmentContentTypeExtension",
+                isSpecialization = true,
+                profileOf = Extension.class)
         private class ArtifactAssessmentContentTypeExtension extends Extension {
             @ca.uhn.fhir.model.api.annotation.Binding(valueSet = "http://hl7.org/fhir/ValueSet/certainty-type")
             protected CodeableConcept value;
@@ -1456,9 +1510,9 @@ public class ArtifactAssessment extends Basic {
 
         @SuppressWarnings("squid:S2387")
         @DatatypeDef(
-            name = "ArtifactAssessmentContentClassifierExtension",
-            isSpecialization = true,
-            profileOf = Extension.class)
+                name = "ArtifactAssessmentContentClassifierExtension",
+                isSpecialization = true,
+                profileOf = Extension.class)
         private class ArtifactAssessmentContentClassifierExtension extends Extension {
             @ca.uhn.fhir.model.api.annotation.Binding(valueSet = "http://hl7.org/fhir/ValueSet/certainty-rating")
             protected CodeableConcept value;
@@ -1469,9 +1523,9 @@ public class ArtifactAssessment extends Basic {
         }
 
         @DatatypeDef(
-            name = "ArtifactAssessmentContentQuantityExtension",
-            isSpecialization = true,
-            profileOf = Extension.class)
+                name = "ArtifactAssessmentContentQuantityExtension",
+                isSpecialization = true,
+                profileOf = Extension.class)
         private class ArtifactAssessmentContentQuantityExtension extends Extension {
             public ArtifactAssessmentContentQuantityExtension(Quantity quantity) {
                 super(QUANTITY, quantity);
@@ -1479,9 +1533,9 @@ public class ArtifactAssessment extends Basic {
         }
 
         @DatatypeDef(
-            name = "ArtifactAssessmentContentAuthorExtension",
-            isSpecialization = true,
-            profileOf = Extension.class)
+                name = "ArtifactAssessmentContentAuthorExtension",
+                isSpecialization = true,
+                profileOf = Extension.class)
         private class ArtifactAssessmentContentAuthorExtension extends Extension {
             public ArtifactAssessmentContentAuthorExtension(Reference author) {
                 super(AUTHOR, author);
@@ -1489,9 +1543,9 @@ public class ArtifactAssessment extends Basic {
         }
 
         @DatatypeDef(
-            name = "ArtifactAssessmentContentPathExtension",
-            isSpecialization = true,
-            profileOf = Extension.class)
+                name = "ArtifactAssessmentContentPathExtension",
+                isSpecialization = true,
+                profileOf = Extension.class)
         private class ArtifactAssessmentContentPathExtension extends Extension {
             public ArtifactAssessmentContentPathExtension(UriType path) {
                 super(PATH, path);
@@ -1499,9 +1553,9 @@ public class ArtifactAssessment extends Basic {
         }
 
         @DatatypeDef(
-            name = "ArtifactAssessmentContentRelatedArtifactExtension",
-            isSpecialization = true,
-            profileOf = Extension.class)
+                name = "ArtifactAssessmentContentRelatedArtifactExtension",
+                isSpecialization = true,
+                profileOf = Extension.class)
         private class ArtifactAssessmentContentRelatedArtifactExtension extends Extension {
             public ArtifactAssessmentContentRelatedArtifactExtension(RelatedArtifact relatedArtifact) {
                 super(RELATEDARTIFACT, relatedArtifact);
@@ -1509,9 +1563,9 @@ public class ArtifactAssessment extends Basic {
         }
 
         @DatatypeDef(
-            name = "ArtifactAssessmentContentFreeToShareExtension",
-            isSpecialization = true,
-            profileOf = Extension.class)
+                name = "ArtifactAssessmentContentFreeToShareExtension",
+                isSpecialization = true,
+                profileOf = Extension.class)
         private class ArtifactAssessmentContentFreeToShareExtension extends Extension {
             public ArtifactAssessmentContentFreeToShareExtension(BooleanType freeToShare) {
                 super(FREETOSHARE, freeToShare);
@@ -1519,12 +1573,12 @@ public class ArtifactAssessment extends Basic {
         }
 
         @DatatypeDef(
-            name = "ArtifactAssessmentContentComponentExtension",
-            isSpecialization = true,
-            profileOf = Extension.class)
+                name = "ArtifactAssessmentContentComponentExtension",
+                isSpecialization = true,
+                profileOf = Extension.class)
         private class ArtifactAssessmentContentComponentExtension extends Extension {
             public ArtifactAssessmentContentComponentExtension(
-                ArtifactAssessment.ArtifactAssessmentContentExtension contentExtension) {
+                    ArtifactAssessment.ArtifactAssessmentContentExtension contentExtension) {
                 super(COMPONENT, contentExtension);
             }
         }
@@ -1546,26 +1600,28 @@ public class ArtifactAssessment extends Basic {
     }
 
     @DatatypeDef(
-        name = "ArtifactAssessmentWorkflowStatusExtension",
-        isSpecialization = true,
-        profileOf = Extension.class)
+            name = "ArtifactAssessmentWorkflowStatusExtension",
+            isSpecialization = true,
+            profileOf = Extension.class)
     private class ArtifactAssessmentWorkflowStatusExtension extends Extension {
-        public ArtifactAssessmentWorkflowStatusExtension(Enumeration<ArtifactAssessment.ArtifactAssessmentWorkflowStatus> status) {
+        public ArtifactAssessmentWorkflowStatusExtension(
+                Enumeration<ArtifactAssessment.ArtifactAssessmentWorkflowStatus> status) {
             super(WORKFLOW_STATUS, status);
         }
     }
 
     @DatatypeDef(name = "ArtifactAssessmentDispositionExtension", isSpecialization = true, profileOf = Extension.class)
     private class ArtifactAssessmentDispositionExtension extends Extension {
-        public ArtifactAssessmentDispositionExtension(Enumeration<ArtifactAssessment.ArtifactAssessmentDisposition> disposition) {
+        public ArtifactAssessmentDispositionExtension(
+                Enumeration<ArtifactAssessment.ArtifactAssessmentDisposition> disposition) {
             super(DISPOSITION, disposition);
         }
     }
 
     @DatatypeDef(
-        name = "ArtifactAssessmentLastReviewDateExtension",
-        isSpecialization = true,
-        profileOf = Extension.class)
+            name = "ArtifactAssessmentLastReviewDateExtension",
+            isSpecialization = true,
+            profileOf = Extension.class)
     private class ArtifactAssessmentLastReviewDateExtension extends Extension {
         public ArtifactAssessmentLastReviewDateExtension(DateType lastReviewDate) {
             super(LAST_REVIEW_DATE, lastReviewDate);

@@ -142,37 +142,38 @@ public class ReleaseVisitor {
             MetadataResource rootArtifact, String releaseVersion, IRepository repository) {
         List<BundleEntryComponent> returnEntries = new ArrayList<>();
         // find any artifact assessments and update those as part of the bundle
-//        searchArtifactAssessmentForArtifact(rootArtifact.getIdElement(), repository).getEntry().stream()
-//                .map(entry -> (ArtifactAssessment) entry.getResource())
-//                .filter(entry -> entry != null)
-//                .forEach(artifactComment -> {
-//                    var ra = artifactComment.getContentFirstRep().addRelatedArtifact();
-//                    ra.setType(RelatedArtifactType.DERIVEDFROM)
-//                            .setResource("%s|%s".formatted(rootArtifact.getUrl(), releaseVersion));
-//                    returnEntries.add((BundleEntryComponent) PackageHelper.createEntry(artifactComment, true));
-//                });
+        //        searchArtifactAssessmentForArtifact(rootArtifact.getIdElement(), repository).getEntry().stream()
+        //                .map(entry -> (ArtifactAssessment) entry.getResource())
+        //                .filter(entry -> entry != null)
+        //                .forEach(artifactComment -> {
+        //                    var ra = artifactComment.getContentFirstRep().addRelatedArtifact();
+        //                    ra.setType(RelatedArtifactType.DERIVEDFROM)
+        //                            .setResource("%s|%s".formatted(rootArtifact.getUrl(), releaseVersion));
+        //                    returnEntries.add((BundleEntryComponent) PackageHelper.createEntry(artifactComment,
+        // true));
+        //                });
         searchArtifactAssessmentForArtifact(rootArtifact.getIdElement(), repository).getEntry().stream()
-            // The search is on Basic resources only unless we can register the ArtifactAssessment class
-            .map(entry -> {
-                try {
-                    return (Basic) entry.getResource();
-                } catch (Exception e) {
-                    return null;
-                }
-            })
-            .filter(entry -> entry != null)
-            // convert Basic to ArtifactAssessment by transferring the extensions
-            .map(basic -> {
-                ArtifactAssessment extensionsTransferred = new ArtifactAssessment();
-                extensionsTransferred.setExtension(basic.getExtension());
-                extensionsTransferred.setId(basic.getClass().getSimpleName() + "/" + basic.getIdPart());
-                return extensionsTransferred;
-            })
-            .forEach(artifactComment -> {
-                artifactComment.setDerivedFromContentRelatedArtifact(
-                    "%s|%s".formatted(rootArtifact.getUrl(), releaseVersion));
-                returnEntries.add((Bundle.BundleEntryComponent) PackageHelper.createEntry(artifactComment, true));
-            });
+                // The search is on Basic resources only unless we can register the ArtifactAssessment class
+                .map(entry -> {
+                    try {
+                        return (Basic) entry.getResource();
+                    } catch (Exception e) {
+                        return null;
+                    }
+                })
+                .filter(entry -> entry != null)
+                // convert Basic to ArtifactAssessment by transferring the extensions
+                .map(basic -> {
+                    ArtifactAssessment extensionsTransferred = new ArtifactAssessment();
+                    extensionsTransferred.setExtension(basic.getExtension());
+                    extensionsTransferred.setId(basic.getClass().getSimpleName() + "/" + basic.getIdPart());
+                    return extensionsTransferred;
+                })
+                .forEach(artifactComment -> {
+                    artifactComment.setDerivedFromContentRelatedArtifact(
+                            "%s|%s".formatted(rootArtifact.getUrl(), releaseVersion));
+                    returnEntries.add((Bundle.BundleEntryComponent) PackageHelper.createEntry(artifactComment, true));
+                });
         return returnEntries;
     }
 

@@ -93,8 +93,7 @@ public interface IWithdrawVisitorTest {
 
     @Test
     default void library_withdraw_No_draft_test() {
-        IBaseBundle bundle = createFromResourceLocation(
-            "Bundle-ersd-small-active.json");
+        IBaseBundle bundle = createFromResourceLocation("Bundle-ersd-small-active.json");
         IBaseBundle bundlets = getRepo().transaction(bundle);
         String version = "1.2.3";
         IIdType id = fhirContext().getVersion().newIdType().setValue("Library/SpecificationLibrary");
@@ -105,7 +104,7 @@ public interface IWithdrawVisitorTest {
         var params = createParametersForWithdrawVisitor(version);
 
         var exception =
-            assertThrows(PreconditionFailedException.class, () -> libraryAdapter.accept(withdrawVisitor, params));
+                assertThrows(PreconditionFailedException.class, () -> libraryAdapter.accept(withdrawVisitor, params));
         assertTrue(exception.getMessage().contains("Cannot withdraw an artifact that is not in draft status"));
     }
 }

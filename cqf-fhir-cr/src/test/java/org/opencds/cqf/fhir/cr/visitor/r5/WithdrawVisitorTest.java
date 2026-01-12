@@ -30,8 +30,8 @@ public class WithdrawVisitorTest implements IWithdrawVisitorTest {
 
     @BeforeEach
     void setup() {
-        SearchParameter sp = (SearchParameter) jsonParser.parseResource(
-            getClass().getResourceAsStream("SearchParameter-artifactAssessment.json"));
+        SearchParameter sp = (SearchParameter)
+                jsonParser.parseResource(getClass().getResourceAsStream("SearchParameter-artifactAssessment.json"));
         repo = new InMemoryFhirRepository(fhirContext);
         repo.update(sp);
     }

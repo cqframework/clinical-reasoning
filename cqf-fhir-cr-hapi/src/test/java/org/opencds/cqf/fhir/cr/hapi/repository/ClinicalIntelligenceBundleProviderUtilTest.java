@@ -41,8 +41,7 @@ import org.slf4j.LoggerFactory;
 
 public class ClinicalIntelligenceBundleProviderUtilTest {
 
-    private static final Logger log = LoggerFactory.getLogger(
-        ClinicalIntelligenceBundleProviderUtilTest.class);
+    private static final Logger log = LoggerFactory.getLogger(ClinicalIntelligenceBundleProviderUtilTest.class);
     // fhir context does not matter for this test; but a fhircontext is required
     private FhirContext context = FhirContext.forR4Cached();
 
@@ -61,14 +60,14 @@ public class ClinicalIntelligenceBundleProviderUtilTest {
         bundleProvider = mock(IBundleProvider.class);
 
         // probably always needed
-        lenient().when(restfulServer.getFhirContext())
-            .thenReturn(context);
+        lenient().when(restfulServer.getFhirContext()).thenReturn(context);
     }
 
     @ParameterizedTest
-    @CsvSource(textBlock =
-        // limit, linkSelf, offset, bundleType, searchId, offset source
-        """
+    @CsvSource(
+            textBlock =
+                    // limit, linkSelf, offset, bundleType, searchId, offset source
+                    """
         null, null, TRANSACTION, null
         null, null, TRANSACTION, searchID
         null, http://root.com/self, TRANSACTION, null
@@ -77,13 +76,10 @@ public class ClinicalIntelligenceBundleProviderUtilTest {
         2, null, TRANSACTION, searchID
         null, http://root.com/self, TRANSACTION, searchID
         2, http://root.com.self, TRANSACTION, searchID
-        """, nullValues = "null")
+        """,
+            nullValues = "null")
     public void createBundleFromBundleProvider_basicParametersCoverageTest(
-        Integer limit,
-        String linkSelf,
-        BundleTypeEnum bundleType,
-        String searchId
-    ) {
+            Integer limit, String linkSelf, BundleTypeEnum bundleType, String searchId) {
         // setup
         int pagesize = 2;
         int offset = 0;
@@ -100,28 +96,17 @@ public class ClinicalIntelligenceBundleProviderUtilTest {
         IPagingProvider pagingProvider = mock(IPagingProvider.class);
 
         // when
-        when(restfulServer.getDefaultPageSize())
-            .thenReturn(pagesize);
-        when(restfulServer.getPagingProvider())
-            .thenReturn(pagingProvider);
+        when(restfulServer.getDefaultPageSize()).thenReturn(pagesize);
+        when(restfulServer.getPagingProvider()).thenReturn(pagingProvider);
 
         // test
         IBaseResource resource = ClinicalIntelligenceBundleProviderUtil.createBundleFromBundleProvider(
-            restfulServer,
-            reqDetails,
-            limit,
-            linkSelf,
-            Set.of(),
-            bundleProvider,
-            offset,
-            bundleType,
-            searchId
-        );
+                restfulServer, reqDetails, limit, linkSelf, Set.of(), bundleProvider, offset, bundleType, searchId);
 
         // verify
         assertNotNull(resource);
         assertInstanceOf(Bundle.class, resource);
-        Bundle bundle = (Bundle)resource;
+        Bundle bundle = (Bundle) resource;
         List<IBaseResource> resources = BundleUtil.toListOfResources(context, bundle);
 
         if (limit != null && !isEmpty(searchId)) {
@@ -154,26 +139,26 @@ public class ClinicalIntelligenceBundleProviderUtilTest {
         libraries.add(null);
         bundleProvider = new SimpleBundleProvider(libraries);
 
-        ((SimpleBundleProvider)bundleProvider).setCurrentPageOffset(0);
-        ((SimpleBundleProvider)bundleProvider).setCurrentPageSize(count + 1); // +1 to get that null entry
+        ((SimpleBundleProvider) bundleProvider).setCurrentPageOffset(0);
+        ((SimpleBundleProvider) bundleProvider).setCurrentPageSize(count + 1); // +1 to get that null entry
 
         // test
         IBaseResource resource = ClinicalIntelligenceBundleProviderUtil.createBundleFromBundleProvider(
-            restfulServer,
-            reqDetails,
-            null, // limit
-            null, // link self
-            Set.of(), // includes
-            bundleProvider,
-            0, // offset
-            BundleTypeEnum.TRANSACTION,
-            null // searchId
-        );
+                restfulServer,
+                reqDetails,
+                null, // limit
+                null, // link self
+                Set.of(), // includes
+                bundleProvider,
+                0, // offset
+                BundleTypeEnum.TRANSACTION,
+                null // searchId
+                );
 
         // validate
         assertNotNull(resource);
         assertInstanceOf(Bundle.class, resource); // because we're using R4
-        Bundle bundle = (Bundle)resource;
+        Bundle bundle = (Bundle) resource;
         // no null value
         assertEquals(count, bundle.getTotal());
     }
@@ -191,27 +176,25 @@ public class ClinicalIntelligenceBundleProviderUtilTest {
             libraries.add(lib);
         }
 
-        bundleProvider = new SimpleBundleProvider(
-            libraries
-        );
+        bundleProvider = new SimpleBundleProvider(libraries);
 
         // test
         IBaseResource resource = ClinicalIntelligenceBundleProviderUtil.createBundleFromBundleProvider(
-            restfulServer,
-            reqDetails,
-            null, // limit
-            null, // link self
-            Set.of(), // includes
-            bundleProvider,
-            0, // offset
-            bundleType,
-            null // searchId
-        );
+                restfulServer,
+                reqDetails,
+                null, // limit
+                null, // link self
+                Set.of(), // includes
+                bundleProvider,
+                0, // offset
+                bundleType,
+                null // searchId
+                );
 
         // validate
         assertNotNull(resource);
         assertInstanceOf(Bundle.class, resource); // because we're using R4
-        Bundle bundle = (Bundle)resource;
+        Bundle bundle = (Bundle) resource;
         assertEquals(count, bundle.getTotal());
         assertEquals(bundleType.getCode(), bundle.getType().toCode());
     }
@@ -224,25 +207,25 @@ public class ClinicalIntelligenceBundleProviderUtilTest {
         bundleProvider = new SimpleBundleProvider(List.of());
 
         // some providers return null, some return 0
-        ((SimpleBundleProvider)bundleProvider).setSize(size);
+        ((SimpleBundleProvider) bundleProvider).setSize(size);
 
         // test
         IBaseResource resource = ClinicalIntelligenceBundleProviderUtil.createBundleFromBundleProvider(
-            restfulServer,
-            reqDetails,
-            null, // limit
-            null, // link self
-            Set.of(), // includes
-            bundleProvider,
-            0, // offset
-            BundleTypeEnum.TRANSACTION,
-            null // searchId
-        );
+                restfulServer,
+                reqDetails,
+                null, // limit
+                null, // link self
+                Set.of(), // includes
+                bundleProvider,
+                0, // offset
+                BundleTypeEnum.TRANSACTION,
+                null // searchId
+                );
 
         // validate
         assertNotNull(resource);
         assertInstanceOf(Bundle.class, resource);
-        Bundle bundle = (Bundle)resource;
+        Bundle bundle = (Bundle) resource;
         assertEquals(0, bundle.getEntry().size());
         assertNull(bundle.getLink("next"));
     }
@@ -271,68 +254,54 @@ public class ClinicalIntelligenceBundleProviderUtilTest {
         bundleProvider = mock(IBundleProvider.class);
 
         // mock
-        when(bundleProvider.getNextPageId())
-            .thenReturn("nextId");
-        when(bundleProvider.getPreviousPageId())
-            .thenReturn("previousId");
-        when(bundleProvider.getResources(anyInt(), anyInt()))
-            .thenReturn(libraries);
+        when(bundleProvider.getNextPageId()).thenReturn("nextId");
+        when(bundleProvider.getPreviousPageId()).thenReturn("previousId");
+        when(bundleProvider.getResources(anyInt(), anyInt())).thenReturn(libraries);
 
         switch (style) {
             case OFFSET -> {
-                when(bundleProvider.getCurrentPageOffset())
-                    .thenReturn(1);
+                when(bundleProvider.getCurrentPageOffset()).thenReturn(1);
             }
             case PAGE_ID -> {
                 IPagingProvider pagingProvider = mock(IPagingProvider.class);
-                when(restfulServer.getPagingProvider())
-                    .thenReturn(pagingProvider);
+                when(restfulServer.getPagingProvider()).thenReturn(pagingProvider);
 
-                when(bundleProvider.getCurrentPageOffset())
-                    .thenReturn(null);
-                when(restfulServer.canStoreSearchResults())
-                    .thenReturn(true);
-                when(bundleProvider.getCurrentPageId())
-                    .thenReturn("current");
-                when(pagingProvider.getDefaultPageSize())
-                    .thenReturn(count); // just to get everything
+                when(bundleProvider.getCurrentPageOffset()).thenReturn(null);
+                when(restfulServer.canStoreSearchResults()).thenReturn(true);
+                when(bundleProvider.getCurrentPageId()).thenReturn("current");
+                when(pagingProvider.getDefaultPageSize()).thenReturn(count); // just to get everything
             }
             case SEARCH_ID -> {
                 searchId = "searchId";
                 IPagingProvider pagingProvider = mock(IPagingProvider.class);
-                when(restfulServer.getPagingProvider())
-                    .thenReturn(pagingProvider);
+                when(restfulServer.getPagingProvider()).thenReturn(pagingProvider);
 
-                when(bundleProvider.size())
-                    .thenReturn(count + offset + 1); // +1 so there's thought to be a "next"
+                when(bundleProvider.size()).thenReturn(count + offset + 1); // +1 so there's thought to be a "next"
 
-                when(bundleProvider.getCurrentPageOffset())
-                    .thenReturn(null);
-                when(restfulServer.canStoreSearchResults())
-                    .thenReturn(true);
+                when(bundleProvider.getCurrentPageOffset()).thenReturn(null);
+                when(restfulServer.canStoreSearchResults()).thenReturn(true);
 
-                when(bundleProvider.getUuid())
-                    .thenReturn("SearchIdGuid");
+                when(bundleProvider.getUuid()).thenReturn("SearchIdGuid");
             }
         }
 
         // test
         IBaseResource resource = ClinicalIntelligenceBundleProviderUtil.createBundleFromBundleProvider(
-            restfulServer,
-            reqDetails,
-            count, // limit
-            null, // link self
-            Set.of(), // includes
-            bundleProvider,
-            offset, // offset
-            BundleTypeEnum.TRANSACTION,
-            searchId // searchId
-        );
+                restfulServer,
+                reqDetails,
+                count, // limit
+                null, // link self
+                Set.of(), // includes
+                bundleProvider,
+                offset, // offset
+                BundleTypeEnum.TRANSACTION,
+                searchId // searchId
+                );
 
         // validate
         assertNotNull(resource);
         assertInstanceOf(Bundle.class, resource);
-        Bundle bundle = (Bundle)resource;
+        Bundle bundle = (Bundle) resource;
         assertEquals(count, bundle.getEntry().size());
         // make sure links exist
         assertNotNull(bundle.getLink("next"));
@@ -340,7 +309,7 @@ public class ClinicalIntelligenceBundleProviderUtilTest {
     }
 
     @ParameterizedTest
-    @ValueSource(ints = { 0, 1 })
+    @ValueSource(ints = {0, 1})
     public void createBundleFromBundleProvider_pageOffset_coverageTest(int offset) {
         // setup
         Integer pageSize = null;
@@ -353,20 +322,15 @@ public class ClinicalIntelligenceBundleProviderUtilTest {
             libraries.add(lib);
         }
 
-        bundleProvider = new SimpleBundleProvider(
-            libraries
-        );
+        bundleProvider = new SimpleBundleProvider(libraries);
 
         // mock
-        when(restfulServer.canStoreSearchResults())
-            .thenReturn(true);
+        when(restfulServer.canStoreSearchResults()).thenReturn(true);
         {
             IPagingProvider provider = mock(IPagingProvider.class);
-            when(restfulServer.getPagingProvider())
-                .thenReturn(provider);
+            when(restfulServer.getPagingProvider()).thenReturn(provider);
             pageSize = 2;
-            when(provider.getDefaultPageSize())
-                .thenReturn(pageSize);
+            when(provider.getDefaultPageSize()).thenReturn(pageSize);
 
             if (offset > 0) {
                 SimpleBundleProvider sp = (SimpleBundleProvider) bundleProvider;
@@ -388,27 +352,27 @@ public class ClinicalIntelligenceBundleProviderUtilTest {
 
         // test
         IBaseResource resource = ClinicalIntelligenceBundleProviderUtil.createBundleFromBundleProvider(
-            restfulServer,
-            reqDetails,
-            pageSize, // limit
-            null, // link self
-            Set.of(), // includes
-            bundleProvider,
-            offset, // offset
-            BundleTypeEnum.TRANSACTION,
-            null // searchId
-        );
+                restfulServer,
+                reqDetails,
+                pageSize, // limit
+                null, // link self
+                Set.of(), // includes
+                bundleProvider,
+                offset, // offset
+                BundleTypeEnum.TRANSACTION,
+                null // searchId
+                );
 
         // validate
         assertNotNull(resource);
         assertInstanceOf(Bundle.class, resource);
-        Bundle bundle = (Bundle)resource;
+        Bundle bundle = (Bundle) resource;
         int usedPageSize = pageSize != null ? pageSize : 0;
         assertEquals(count - usedPageSize, bundle.getEntry().size());
     }
 
     @ParameterizedTest
-    @ValueSource(booleans = { true, false })
+    @ValueSource(booleans = {true, false})
     public void createBundleFromBundleProvider_invalidResourceList_coverageTest(boolean hasId) {
         // setup
         int count = 1;
@@ -423,32 +387,33 @@ public class ClinicalIntelligenceBundleProviderUtilTest {
             libraries.add(lib);
         }
 
-        bundleProvider = new SimpleBundleProvider(
-            libraries
-        );
+        bundleProvider = new SimpleBundleProvider(libraries);
 
         // test
         try {
             ClinicalIntelligenceBundleProviderUtil.createBundleFromBundleProvider(
-                restfulServer,
-                reqDetails,
-                count, // limit
-                null, // link self
-                Set.of(), // includes
-                bundleProvider,
-                0, // offset
-                BundleTypeEnum.TRANSACTION,
-                null // searchId
-            );
+                    restfulServer,
+                    reqDetails,
+                    count, // limit
+                    null, // link self
+                    Set.of(), // includes
+                    bundleProvider,
+                    0, // offset
+                    BundleTypeEnum.TRANSACTION,
+                    null // searchId
+                    );
             fail();
         } catch (InternalErrorException ex) {
-            assertTrue(ex.getLocalizedMessage()
-                .contains("Server method returned resource of type"), ex.getLocalizedMessage());
+            assertTrue(
+                    ex.getLocalizedMessage().contains("Server method returned resource of type"),
+                    ex.getLocalizedMessage());
         }
     }
 
     @ParameterizedTest
-    @EnumSource(value = RestOperationTypeEnum.class, names = { "EXTENDED_OPERATION_TYPE", "EXTENDED_OPERATION_INSTANCE"})
+    @EnumSource(
+            value = RestOperationTypeEnum.class,
+            names = {"EXTENDED_OPERATION_TYPE", "EXTENDED_OPERATION_INSTANCE"})
     public void createBundleFromBundleProvider_everythingOp_coverageTest(RestOperationTypeEnum opType) {
         // setup
         int count = 1;
@@ -467,21 +432,21 @@ public class ClinicalIntelligenceBundleProviderUtilTest {
 
         // test
         IBaseResource resource = ClinicalIntelligenceBundleProviderUtil.createBundleFromBundleProvider(
-            restfulServer,
-            reqDetails,
-            count, // limit
-            null, // link self
-            Set.of(), // includes
-            bundleProvider,
-            0, // offset
-            BundleTypeEnum.TRANSACTION,
-            null // searchId
-        );
+                restfulServer,
+                reqDetails,
+                count, // limit
+                null, // link self
+                Set.of(), // includes
+                bundleProvider,
+                0, // offset
+                BundleTypeEnum.TRANSACTION,
+                null // searchId
+                );
 
         // validate
         assertNotNull(resource);
         assertInstanceOf(Bundle.class, resource);
-        Bundle bundle = (Bundle)resource;
+        Bundle bundle = (Bundle) resource;
         assertEquals(count, bundle.getEntry().size());
     }
 }

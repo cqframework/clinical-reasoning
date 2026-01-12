@@ -8,7 +8,6 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.repository.IRepository;
 import org.hl7.fhir.dstu3.model.Library;
 import org.hl7.fhir.dstu3.model.SearchParameter;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,8 +27,8 @@ public class WithdrawVisitorTest implements IWithdrawVisitorTest {
 
     @BeforeEach
     public void setup() {
-        SearchParameter sp = (SearchParameter) jsonParser.parseResource(
-            getClass().getResourceAsStream("SearchParameter-artifactAssessment.json"));
+        SearchParameter sp = (SearchParameter)
+                jsonParser.parseResource(getClass().getResourceAsStream("SearchParameter-artifactAssessment.json"));
         repo = new InMemoryFhirRepository(fhirContext);
         repo.update(sp);
     }

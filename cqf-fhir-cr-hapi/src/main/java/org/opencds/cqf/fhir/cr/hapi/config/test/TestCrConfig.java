@@ -151,9 +151,10 @@ public class TestCrConfig {
     public IResourceChangeListenerRegistry resourceChangeListenerRegistry(
             InMemoryResourceMatcher inMemoryResourceMatcher,
             FhirContext fhirContext,
+            PartitionSettings partitionSettings,
             ResourceChangeListenerCacheFactory resourceChangeListenerCacheFactory) {
         return new ResourceChangeListenerRegistryImpl(
-                fhirContext, resourceChangeListenerCacheFactory, inMemoryResourceMatcher);
+                fhirContext, partitionSettings, resourceChangeListenerCacheFactory, inMemoryResourceMatcher);
     }
 
     @Bean

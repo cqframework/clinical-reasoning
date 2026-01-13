@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import org.cqframework.fhir.npm.NpmProcessor;
 import org.cqframework.fhir.utilities.IGContext;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -93,6 +92,7 @@ public class NpmBackedRepository implements INpmRepository {
     // cache these because the NpmPackage holds the unparsed files
     // and parsing each time is work
     private final Multimap<String, WrappedResource> resourceType2Resource = HashMultimap.create();
+    private final Multimap<String, WrappedResource> canonicalUrl2Resource = HashMultimap.create();
 
     public NpmBackedRepository(FhirContext context, EvaluationSettings settings) {
         this.fhirContext = context;
@@ -163,20 +163,18 @@ public class NpmBackedRepository implements INpmRepository {
             populateCaches(clazz, type);
         }
 
-        Collection<WrappedResource> resources = resourceType2Resource.get(type);
+        Collection<WrappedResource> resources = null;
+        if (hasUrl) {
+            resources = canonicalUrl2Resource.get(url);
+        } else {
+            resources = resourceType2Resource.get(type);
+        }
 
         if (isListEmpty(resources)) {
             return List.of();
         }
 
-        if (hasUrl) {
-            return resources.stream()
-                    .filter(r -> r.hasCanonicalUrl() && r.getCanonicalUrl().equals(url))
-                    .map(wr -> (T) wr.getResource())
-                    .collect(Collectors.toList());
-        } else {
-            return resources.stream().map(wr -> (T) wr.getResource()).toList();
-        }
+        return resources.stream().map(wr -> (T) wr.getResource()).toList();
     }
 
     private <T extends IBaseResource> void populateCaches(@NotNull Class<T> clazz, String type) {
@@ -191,7 +189,11 @@ public class NpmBackedRepository implements INpmRepository {
             List<T> pkgResources = getResourcesFromPkg(pkg, clazz);
             if (!isListEmpty(pkgResources)) {
                 for (T resource : pkgResources) {
-                    resourceType2Resource.put(type, new WrappedResource(resource));
+                    WrappedResource wrappedResource = new WrappedResource(resource);
+                    resourceType2Resource.put(type, wrappedResource);
+                    if (wrappedResource.hasCanonicalUrl()) {
+                        canonicalUrl2Resource.put(wrappedResource.getCanonicalUrl(), wrappedResource);
+                    }
                 }
             }
         }

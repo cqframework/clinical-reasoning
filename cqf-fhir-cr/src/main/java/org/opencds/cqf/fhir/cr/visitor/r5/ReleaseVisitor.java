@@ -141,17 +141,6 @@ public class ReleaseVisitor {
     public static List<BundleEntryComponent> findArtifactCommentsToUpdate(
             MetadataResource rootArtifact, String releaseVersion, IRepository repository) {
         List<BundleEntryComponent> returnEntries = new ArrayList<>();
-        // find any artifact assessments and update those as part of the bundle
-        //        searchArtifactAssessmentForArtifact(rootArtifact.getIdElement(), repository).getEntry().stream()
-        //                .map(entry -> (ArtifactAssessment) entry.getResource())
-        //                .filter(entry -> entry != null)
-        //                .forEach(artifactComment -> {
-        //                    var ra = artifactComment.getContentFirstRep().addRelatedArtifact();
-        //                    ra.setType(RelatedArtifactType.DERIVEDFROM)
-        //                            .setResource("%s|%s".formatted(rootArtifact.getUrl(), releaseVersion));
-        //                    returnEntries.add((BundleEntryComponent) PackageHelper.createEntry(artifactComment,
-        // true));
-        //                });
         searchArtifactAssessmentForArtifact(rootArtifact.getIdElement(), repository).getEntry().stream()
                 // The search is on Basic resources only unless we can register the ArtifactAssessment class
                 .map(entry -> {

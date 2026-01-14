@@ -261,14 +261,19 @@ public class ClinicalIntelligenceBundleProviderUtilTest {
         when(bundleProvider.getCurrentPageSize()).thenReturn(limit);
         when(bundleProvider.getNextPageId()).thenReturn("next");
         when(bundleProvider.getPreviousPageId()).thenReturn("prev");
-        when(bundleProvider.getResources(anyInt(), anyInt()))
-            .thenReturn(measures);
+        when(bundleProvider.getResources(anyInt(), anyInt())).thenReturn(measures);
 
         // test
         IBaseResource baseResource = ClinicalIntelligenceBundleProviderUtil.createBundleFromBundleProvider(
-            restfulServer, reqDetails, null, null, Set.of(),
-            bundleProvider, offset, BundleTypeEnum.SEARCHSET, null
-        );
+                restfulServer,
+                reqDetails,
+                null,
+                null,
+                Set.of(),
+                bundleProvider,
+                offset,
+                BundleTypeEnum.SEARCHSET,
+                null);
 
         // verify
         assertNotNull(baseResource);
@@ -279,11 +284,9 @@ public class ClinicalIntelligenceBundleProviderUtilTest {
         assertNotNull(nextLink);
         assertNotNull(prevLink);
         // offset should be 15 = offset + limit
-        assertTrue(nextLink.getUrl().contains(String.format("%s=%d", Constants.PARAM_OFFSET, 15)),
-            nextLink.getUrl());
+        assertTrue(nextLink.getUrl().contains(String.format("%s=%d", Constants.PARAM_OFFSET, 15)), nextLink.getUrl());
         // offset should be 5 = offset - limit
-        assertTrue(prevLink.getUrl().contains(String.format("%s=%d", Constants.PARAM_OFFSET, 5)),
-            prevLink.getUrl());
+        assertTrue(prevLink.getUrl().contains(String.format("%s=%d", Constants.PARAM_OFFSET, 5)), prevLink.getUrl());
     }
 
     @ParameterizedTest

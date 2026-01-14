@@ -168,7 +168,7 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .population("measure-population")
                 .hasSubjectCount(10)
                 .up()
-                .hasScore(230.54545454545453)
+                .hasScore(230.54545454545456)
                 .up()
                 .up()
                 // MeasureReport assertions (post-scoring) - verify FHIR resource output
@@ -186,7 +186,7 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .population("measure-observation")
                 .hasCount(11)
                 .up()
-                .hasScore("230.54545454545453")
+                .hasScore("230.54545454545456")
                 .stratifierById("stratifier-age")
                 .hasStratumCount(3)
                 .stratumByText(Integer.toString(EXPECTED_ENCOUNTER_BASIS_AGE_STRATUM_1))

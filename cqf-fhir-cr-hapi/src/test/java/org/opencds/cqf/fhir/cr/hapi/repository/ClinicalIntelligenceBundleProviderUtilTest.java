@@ -14,6 +14,7 @@ import static org.mockito.Mockito.when;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.IRestfulServer;
@@ -28,7 +29,10 @@ import java.util.List;
 import java.util.Set;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Bundle.BundleLinkComponent;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Library;
+import org.hl7.fhir.r4.model.Measure;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -41,9 +45,15 @@ import org.slf4j.LoggerFactory;
 
 public class ClinicalIntelligenceBundleProviderUtilTest {
 
+    public enum PagingStyle {
+        OFFSET,
+        PAGE_ID,
+        SEARCH_ID
+    }
+
     private static final Logger log = LoggerFactory.getLogger(ClinicalIntelligenceBundleProviderUtilTest.class);
     // fhir context does not matter for this test; but a fhircontext is required
-    private FhirContext context = FhirContext.forR4Cached();
+    private final FhirContext context = FhirContext.forR4Cached();
 
     private RequestDetails reqDetails;
 
@@ -54,6 +64,7 @@ public class ClinicalIntelligenceBundleProviderUtilTest {
     @BeforeEach
     public void before() {
         reqDetails = new SystemRequestDetails();
+        reqDetails.setFhirServerBase("http://localhost:8000/");
 
         restfulServer = mock(IRestfulServer.class);
 
@@ -230,10 +241,49 @@ public class ClinicalIntelligenceBundleProviderUtilTest {
         assertNull(bundle.getLink("next"));
     }
 
-    public enum PagingStyle {
-        OFFSET,
-        PAGE_ID,
-        SEARCH_ID
+    @Test
+    public void createBundleFromBundleProvider_withNextPageOfset_hasCorrectPageLinkOffsets() {
+        // setup
+        int offset = 10;
+        int limit = 5;
+        List<IBaseResource> measures = new ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            Measure measure = new Measure();
+            measure.setId(new IdType("Measure/" + i));
+            measure.setUrl("http://something.com/" + i);
+            measure.setName("measure" + i);
+
+            measures.add(measure);
+        }
+
+        bundleProvider = mock(IBundleProvider.class);
+        when(bundleProvider.getCurrentPageOffset()).thenReturn(offset);
+        when(bundleProvider.getCurrentPageSize()).thenReturn(limit);
+        when(bundleProvider.getNextPageId()).thenReturn("next");
+        when(bundleProvider.getPreviousPageId()).thenReturn("prev");
+        when(bundleProvider.getResources(anyInt(), anyInt()))
+            .thenReturn(measures);
+
+        // test
+        IBaseResource baseResource = ClinicalIntelligenceBundleProviderUtil.createBundleFromBundleProvider(
+            restfulServer, reqDetails, null, null, Set.of(),
+            bundleProvider, offset, BundleTypeEnum.SEARCHSET, null
+        );
+
+        // verify
+        assertNotNull(baseResource);
+        assertInstanceOf(Bundle.class, baseResource);
+        Bundle bundle = (Bundle) baseResource;
+        BundleLinkComponent nextLink = bundle.getLink("next");
+        BundleLinkComponent prevLink = bundle.getLink("previous");
+        assertNotNull(nextLink);
+        assertNotNull(prevLink);
+        // offset should be 15 = offset + limit
+        assertTrue(nextLink.getUrl().contains(String.format("%s=%d", Constants.PARAM_OFFSET, 15)),
+            nextLink.getUrl());
+        // offset should be 5 = offset - limit
+        assertTrue(prevLink.getUrl().contains(String.format("%s=%d", Constants.PARAM_OFFSET, 5)),
+            prevLink.getUrl());
     }
 
     @ParameterizedTest

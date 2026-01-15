@@ -137,8 +137,21 @@ public class MeasureReportDefScorer {
 
             case CONTINUOUSVARIABLE:
                 // Continuous variable scoring - returns aggregate value
-                PopulationDef measureObsPop = groupDef.getSingle(MeasurePopulationType.MEASUREOBSERVATION);
-                QuantityDef quantityDef = scoreContinuousVariable(measureUrl, measureObsPop);
+                final PopulationDef measureObsPop = groupDef.getSingle(MeasurePopulationType.MEASUREOBSERVATION);
+
+                if (measureObsPop == null) {
+                    return null;
+                }
+
+                final QuantityDef quantityDef = scoreContinuousVariable(measureUrl, measureObsPop);
+
+                // LUKETODO:  is this the right place for this, or do we maintain this at the group level,
+                // since that's where the score is?
+                // LUKETODO:  since we don't have numerators and denominators here, only a single MEASUREOBSERVATION
+                // doesn't that make sense?
+                // We want to record the aggregate result for later computation for continuous variable reports
+                measureObsPop.setAggregationResult(quantityDef);
+
                 return quantityDef != null ? quantityDef.value() : null;
 
             case COHORT:

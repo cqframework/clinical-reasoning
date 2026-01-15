@@ -325,10 +325,13 @@ class MeasureReportDefScorerTest {
 
         scorer.scoreGroup("http://example.com/Measure/test", groupDef);
 
-        // VERIFY: aggregationResult is null (CONTINUOUSVARIABLE measure)
+        // VERIFY: aggregationResult is null for non-observation populations
         assertNull(initialPopulation.getAggregationResult());
         assertNull(measurePopulation.getAggregationResult());
-        assertNull(measureObsPop.getAggregationResult());
+
+        // VERIFY: aggregationResult IS set for MEASUREOBSERVATION population (stores SUM result)
+        assertNotNull(measureObsPop.getAggregationResult());
+        assertEquals(60.0, measureObsPop.getAggregationResult(), 0.001);
 
         // VERIFY: SUM aggregation = 60.0
         assertEquals(60.0, groupDef.getScore(), 0.001);
@@ -382,10 +385,13 @@ class MeasureReportDefScorerTest {
 
         scorer.scoreGroup("http://example.com/Measure/test", groupDef);
 
-        // VERIFY: aggregationResult is null (CONTINUOUSVARIABLE measure)
+        // VERIFY: aggregationResult is null for non-observation populations
         assertNull(initialPopulation.getAggregationResult());
         assertNull(measurePopulation.getAggregationResult());
-        assertNull(measureObsPop.getAggregationResult());
+
+        // VERIFY: aggregationResult IS set for MEASUREOBSERVATION population (stores AVG result)
+        assertNotNull(measureObsPop.getAggregationResult());
+        assertEquals(20.0, measureObsPop.getAggregationResult(), 0.001);
 
         // VERIFY: AVG aggregation = 20.0
         assertEquals(20.0, groupDef.getScore(), 0.001);
@@ -439,10 +445,13 @@ class MeasureReportDefScorerTest {
 
         scorer.scoreGroup("http://example.com/Measure/test", groupDef);
 
-        // VERIFY: aggregationResult is null (CONTINUOUSVARIABLE measure)
+        // VERIFY: aggregationResult is null for non-observation populations
         assertNull(initialPopulation.getAggregationResult());
         assertNull(measurePopulation.getAggregationResult());
-        assertNull(measureObsPop.getAggregationResult());
+
+        // VERIFY: aggregationResult IS set for MEASUREOBSERVATION population (stores MIN result)
+        assertNotNull(measureObsPop.getAggregationResult());
+        assertEquals(10.0, measureObsPop.getAggregationResult(), 0.001);
 
         // VERIFY: MIN aggregation = 10.0
         assertEquals(10.0, groupDef.getScore(), 0.001);
@@ -496,10 +505,13 @@ class MeasureReportDefScorerTest {
 
         scorer.scoreGroup("http://example.com/Measure/test", groupDef);
 
-        // VERIFY: aggregationResult is null (CONTINUOUSVARIABLE measure)
+        // VERIFY: aggregationResult is null for non-observation populations
         assertNull(initialPopulation.getAggregationResult());
         assertNull(measurePopulation.getAggregationResult());
-        assertNull(measureObsPop.getAggregationResult());
+
+        // VERIFY: aggregationResult IS set for MEASUREOBSERVATION population (stores MAX result)
+        assertNotNull(measureObsPop.getAggregationResult());
+        assertEquals(30.0, measureObsPop.getAggregationResult(), 0.001);
 
         // VERIFY: MAX aggregation = 30.0
         assertEquals(30.0, groupDef.getScore(), 0.001);
@@ -1507,5 +1519,226 @@ class MeasureReportDefScorerTest {
 
         // Male stratum: 1/2 = 0.5
         assertEquals(0.5, maleStratum.getScore(), 0.001, "Male stratum should have score 0.5 (1/2)");
+    }
+
+    // ============================================================================
+    // PopulationDef.setAggregationResult() Tests
+    // ============================================================================
+
+    @Test
+    void testPopulationDef_SetAggregationResultWithQuantityDef() {
+        // Test the new setAggregationResult(QuantityDef) overload added in latest changes
+        CodeDef booleanBasis = createBooleanBasisCode();
+        ConceptDef measureObsCode = createMeasurePopulationConcept(MeasurePopulationType.MEASUREOBSERVATION);
+        PopulationDef measureObsPop = new PopulationDef(
+                "msrobs-1",
+                measureObsCode,
+                MeasurePopulationType.MEASUREOBSERVATION,
+                "expression",
+                booleanBasis,
+                null,
+                ContinuousVariableObservationAggregateMethod.SUM,
+                null);
+
+        // Initially null
+        assertNull(measureObsPop.getAggregationResult());
+
+        // Set using QuantityDef overload
+        QuantityDef quantityDef = new QuantityDef(42.5);
+        measureObsPop.setAggregationResult(quantityDef);
+
+        // Verify value is extracted and set
+        assertNotNull(measureObsPop.getAggregationResult());
+        assertEquals(42.5, measureObsPop.getAggregationResult(), 0.001);
+    }
+
+    @Test
+    void testPopulationDef_SetAggregationResultWithNullQuantityDef() {
+        // Test the setAggregationResult(QuantityDef) overload with null
+        CodeDef booleanBasis = createBooleanBasisCode();
+        ConceptDef measureObsCode = createMeasurePopulationConcept(MeasurePopulationType.MEASUREOBSERVATION);
+        PopulationDef measureObsPop = new PopulationDef(
+                "msrobs-1",
+                measureObsCode,
+                MeasurePopulationType.MEASUREOBSERVATION,
+                "expression",
+                booleanBasis,
+                null,
+                ContinuousVariableObservationAggregateMethod.AVG,
+                null);
+
+        // Set to a value first
+        measureObsPop.setAggregationResult(100.0);
+        assertEquals(100.0, measureObsPop.getAggregationResult(), 0.001);
+
+        // Set to null using QuantityDef overload
+        measureObsPop.setAggregationResult((QuantityDef) null);
+
+        // Verify it's null
+        assertNull(measureObsPop.getAggregationResult());
+    }
+
+    @Test
+    void testPopulationDef_SetAggregationResultWithDouble() {
+        // Test the existing setAggregationResult(Double) method still works
+        CodeDef booleanBasis = createBooleanBasisCode();
+        ConceptDef measureObsCode = createMeasurePopulationConcept(MeasurePopulationType.MEASUREOBSERVATION);
+        PopulationDef measureObsPop = new PopulationDef(
+                "msrobs-1",
+                measureObsCode,
+                MeasurePopulationType.MEASUREOBSERVATION,
+                "expression",
+                booleanBasis,
+                null,
+                ContinuousVariableObservationAggregateMethod.MEDIAN,
+                null);
+
+        // Initially null
+        assertNull(measureObsPop.getAggregationResult());
+
+        // Set using Double
+        measureObsPop.setAggregationResult(99.9);
+
+        // Verify value is set
+        assertNotNull(measureObsPop.getAggregationResult());
+        assertEquals(99.9, measureObsPop.getAggregationResult(), 0.001);
+
+        // Can also set to null
+        measureObsPop.setAggregationResult((Double) null);
+        assertNull(measureObsPop.getAggregationResult());
+    }
+
+    @Test
+    void testScoreGroup_ContinuousVariable_MedianAggregation() {
+        // Test MEDIAN aggregation and verify aggregationResult is set
+        // Observations: 5.0, 10.0, 15.0, 20.0, 25.0 → MEDIAN = 15.0
+        CodeDef booleanBasis = createBooleanBasisCode();
+        PopulationDef initialPopulation = createPopulationDef(
+                "ip-1", MeasurePopulationType.INITIALPOPULATION, Set.of("p1", "p2", "p3", "p4", "p5"), booleanBasis);
+
+        PopulationDef measurePopulation = createPopulationDef(
+                "mp-1", MeasurePopulationType.MEASUREPOPULATION, Set.of("p1", "p2", "p3", "p4", "p5"), booleanBasis);
+
+        ConceptDef measureObsCode = createMeasurePopulationConcept(MeasurePopulationType.MEASUREOBSERVATION);
+        PopulationDef measureObsPop = new PopulationDef(
+                "msrobs-1",
+                measureObsCode,
+                MeasurePopulationType.MEASUREOBSERVATION,
+                "expression",
+                booleanBasis,
+                null,
+                ContinuousVariableObservationAggregateMethod.MEDIAN,
+                null);
+
+        // Add observations in non-sorted order
+        Map<String, QuantityDef> obs1 = new HashMap<>();
+        obs1.put("obs-1", new QuantityDef(20.0));
+        measureObsPop.addResource("p1", obs1);
+
+        Map<String, QuantityDef> obs2 = new HashMap<>();
+        obs2.put("obs-2", new QuantityDef(5.0));
+        measureObsPop.addResource("p2", obs2);
+
+        Map<String, QuantityDef> obs3 = new HashMap<>();
+        obs3.put("obs-3", new QuantityDef(25.0));
+        measureObsPop.addResource("p3", obs3);
+
+        Map<String, QuantityDef> obs4 = new HashMap<>();
+        obs4.put("obs-4", new QuantityDef(10.0));
+        measureObsPop.addResource("p4", obs4);
+
+        Map<String, QuantityDef> obs5 = new HashMap<>();
+        obs5.put("obs-5", new QuantityDef(15.0));
+        measureObsPop.addResource("p5", obs5);
+
+        GroupDef groupDef = new GroupDef(
+                "group-1",
+                createTextOnlyConcept("Test MEDIAN Aggregation"),
+                List.of(),
+                List.of(initialPopulation, measurePopulation, measureObsPop),
+                MeasureScoring.CONTINUOUSVARIABLE,
+                false,
+                createImprovementNotationCode("increase"),
+                booleanBasis);
+
+        assertNull(groupDef.getScore());
+        assertNull(measureObsPop.getAggregationResult());
+
+        scorer.scoreGroup("http://example.com/Measure/median-test", groupDef);
+
+        // VERIFY: aggregationResult is null for non-observation populations
+        assertNull(initialPopulation.getAggregationResult());
+        assertNull(measurePopulation.getAggregationResult());
+
+        // VERIFY: aggregationResult IS set for MEASUREOBSERVATION population (stores MEDIAN result)
+        assertNotNull(measureObsPop.getAggregationResult());
+        assertEquals(15.0, measureObsPop.getAggregationResult(), 0.001);
+
+        // VERIFY: MEDIAN aggregation = 15.0
+        assertEquals(15.0, groupDef.getScore(), 0.001);
+    }
+
+    @Test
+    void testScoreGroup_ContinuousVariable_CountAggregation() {
+        // Test COUNT aggregation and verify aggregationResult is set
+        // 7 observations → COUNT = 7.0
+        CodeDef encounterBasis = createPopulationBasisCode("Encounter");
+        PopulationDef initialPopulation = createPopulationDef(
+                "ip-1", MeasurePopulationType.INITIALPOPULATION, Set.of("p1", "p2"), encounterBasis);
+
+        PopulationDef measurePopulation = createPopulationDef(
+                "mp-1", MeasurePopulationType.MEASUREPOPULATION, Set.of("p1", "p2"), encounterBasis);
+
+        ConceptDef measureObsCode = createMeasurePopulationConcept(MeasurePopulationType.MEASUREOBSERVATION);
+        PopulationDef measureObsPop = new PopulationDef(
+                "msrobs-1",
+                measureObsCode,
+                MeasurePopulationType.MEASUREOBSERVATION,
+                "expression",
+                encounterBasis,
+                null,
+                ContinuousVariableObservationAggregateMethod.COUNT,
+                null);
+
+        // Patient 1 has 4 observations
+        Map<String, QuantityDef> obs1 = new HashMap<>();
+        obs1.put("obs-1", new QuantityDef(10.0));
+        obs1.put("obs-2", new QuantityDef(20.0));
+        obs1.put("obs-3", new QuantityDef(30.0));
+        obs1.put("obs-4", new QuantityDef(40.0));
+        measureObsPop.addResource("p1", obs1);
+
+        // Patient 2 has 3 observations
+        Map<String, QuantityDef> obs2 = new HashMap<>();
+        obs2.put("obs-5", new QuantityDef(50.0));
+        obs2.put("obs-6", new QuantityDef(60.0));
+        obs2.put("obs-7", new QuantityDef(70.0));
+        measureObsPop.addResource("p2", obs2);
+
+        GroupDef groupDef = new GroupDef(
+                "group-1",
+                createTextOnlyConcept("Test COUNT Aggregation"),
+                List.of(),
+                List.of(initialPopulation, measurePopulation, measureObsPop),
+                MeasureScoring.CONTINUOUSVARIABLE,
+                false,
+                createImprovementNotationCode("increase"),
+                encounterBasis);
+
+        assertNull(groupDef.getScore());
+        assertNull(measureObsPop.getAggregationResult());
+
+        scorer.scoreGroup("http://example.com/Measure/count-test", groupDef);
+
+        // VERIFY: aggregationResult is null for non-observation populations
+        assertNull(initialPopulation.getAggregationResult());
+        assertNull(measurePopulation.getAggregationResult());
+
+        // VERIFY: aggregationResult IS set for MEASUREOBSERVATION population (stores COUNT result)
+        assertNotNull(measureObsPop.getAggregationResult());
+        assertEquals(7.0, measureObsPop.getAggregationResult(), 0.001);
+
+        // VERIFY: COUNT aggregation = 7.0
+        assertEquals(7.0, groupDef.getScore(), 0.001);
     }
 }

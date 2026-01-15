@@ -190,9 +190,8 @@ public class PopulationDef {
     }
 
     public void setAggregationResult(@Nullable QuantityDef quantityDefResult) {
-        setAggregationResult(Optional.ofNullable(quantityDefResult)
-            .map(QuantityDef::value)
-            .orElse(null));
+        setAggregationResult(
+                Optional.ofNullable(quantityDefResult).map(QuantityDef::value).orElse(null));
     }
 
     public void setAggregationResult(@Nullable Double aggregationResult) {

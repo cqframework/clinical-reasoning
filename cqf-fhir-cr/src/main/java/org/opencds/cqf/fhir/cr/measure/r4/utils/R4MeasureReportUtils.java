@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cr.measure.r4.utils;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_CQFM_AGGREGATE_METHOD_URL;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import java.math.BigDecimal;
 import java.util.List;
@@ -19,6 +20,7 @@ import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupPopulationComponent
 import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupComponent;
 import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupPopulationComponent;
 import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.Type;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 import org.opencds.cqf.fhir.cr.measure.common.ContinuousVariableObservationAggregateMethod;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
@@ -325,27 +327,56 @@ public class R4MeasureReportUtils {
                 .orElse(BigDecimal.ZERO);
     }
 
-    public static void addAggregationResult(
-            MeasureReportGroupPopulationComponent measurePopulation, PopulationDef populationDef) {
+    public static void addAggregationResultAndMethod(
+            MeasureReportGroupPopulationComponent reportPopulation, PopulationDef populationDef) {
 
-        addAggregationResult(measurePopulation, populationDef.getAggregationResult());
+        addAggregationResultAndMethod(
+                reportPopulation, populationDef.getAggregateMethod(), populationDef.getAggregationResult());
     }
 
-    public static void addAggregationResult(
+    public static void addAggregationResultAndMethod(
+            MeasureReportGroupPopulationComponent measurePopulation,
+            @Nullable ContinuousVariableObservationAggregateMethod aggregateMethod,
+            @Nullable BigDecimal aggregationResult) {
+
+        if (aggregateMethod != null
+                && ContinuousVariableObservationAggregateMethod.N_A != aggregateMethod
+                && aggregationResult != null) {
+
+            addAggregateMethodInner(measurePopulation, aggregateMethod);
+            addAggregationResultInner(measurePopulation, aggregationResult.doubleValue());
+        }
+    }
+
+    public static void addAggregationResultAndMethod(
+            MeasureReportGroupPopulationComponent measurePopulation,
+            @Nullable ContinuousVariableObservationAggregateMethod aggregateMethod,
+            @Nullable Double aggregationResult) {
+
+        if (aggregateMethod != null
+                && ContinuousVariableObservationAggregateMethod.N_A != aggregateMethod
+                && aggregationResult != null) {
+
+            addAggregateMethodInner(measurePopulation, aggregateMethod);
+            addAggregationResultInner(measurePopulation, aggregationResult);
+        }
+    }
+
+    private static void addAggregationResult(
             MeasureReportGroupPopulationComponent measurePopulation, @Nullable Double aggregationResult) {
 
         Optional.ofNullable(aggregationResult)
-                .ifPresent(nonNullAggregationResult -> measurePopulation.addExtension(
-                        MeasureConstants.EXT_AGGREGATION_METHOD_RESULT, new DecimalType(nonNullAggregationResult)));
+                .ifPresent(nonNullAggregationResult ->
+                        addAggregationResultInner(measurePopulation, nonNullAggregationResult));
     }
 
-    public static void addAggregateMethod(
+    private static void addAggregateMethod(
             MeasureReportGroupPopulationComponent measurePopulation, PopulationDef populationDef) {
 
         addAggregateMethod(measurePopulation, populationDef.getAggregateMethod());
     }
 
-    public static void addAggregateMethod(
+    private static void addAggregateMethod(
             MeasureReportGroupPopulationComponent measurePopulation,
             @Nullable ContinuousVariableObservationAggregateMethod aggregateMethod) {
 
@@ -357,6 +388,33 @@ public class R4MeasureReportUtils {
                 .ifPresent(nonNonAggregateMethod -> measurePopulation.addExtension(
                         MeasureConstants.EXT_CQFM_AGGREGATE_METHOD_URL,
                         new StringType(nonNonAggregateMethod.getText())));
+    }
+
+    private static void addAggregateMethodInner(
+            MeasureReportGroupPopulationComponent measurePopulation,
+            @Nonnull ContinuousVariableObservationAggregateMethod aggregateMethod) {
+
+        addExtensionValueInner(
+                measurePopulation,
+                MeasureConstants.EXT_CQFM_AGGREGATE_METHOD_URL,
+                new StringType(aggregateMethod.getText()));
+    }
+
+    private static void addAggregationResultInner(
+            MeasureReportGroupPopulationComponent measurePopulation, double aggregationResult) {
+
+        addExtensionValueInner(
+                measurePopulation, MeasureConstants.EXT_AGGREGATION_METHOD_RESULT, new DecimalType(aggregationResult));
+    }
+
+    private static void addExtensionValueInner(
+            MeasureReportGroupPopulationComponent measurePopulation, String extensionUrl, Type extensionValue) {
+
+        if (measurePopulation.hasExtension(extensionUrl)) {
+            measurePopulation.getExtensionByUrl(extensionUrl).setValue(extensionValue);
+        } else {
+            measurePopulation.addExtension(extensionUrl, extensionValue);
+        }
     }
 
     /**

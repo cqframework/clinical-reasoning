@@ -1059,13 +1059,13 @@ class MeasureScoringTypeRatioContVariableTest {
                 .hasCode(MeasurePopulationType.MEASUREOBSERVATION)
                 .hasCount(0) // we remove exclusions in these counts so users can see final Observation count used
                 .hasNoAggregationResultsExtensionValue()
-                .hasNoAggregateMethodExtension()
+                .hasAggregateMethodExtension(ContinuousVariableObservationAggregateMethod.SUM)
                 .up()
                 .populationId("observation-num")
                 .hasCode(MeasurePopulationType.MEASUREOBSERVATION)
                 .hasCount(0) // we remove exclusions in these counts so users can see final Observation count used
                 .hasNoAggregationResultsExtensionValue()
-                .hasNoAggregateMethodExtension()
+                .hasAggregateMethodExtension(ContinuousVariableObservationAggregateMethod.SUM)
                 .up()
                 .hasMeasureScore(false)
                 .up()
@@ -1155,13 +1155,13 @@ class MeasureScoringTypeRatioContVariableTest {
                 .hasCode(MeasurePopulationType.MEASUREOBSERVATION)
                 .hasCount(2) // we remove exclusions in these counts so users can see final Observation count used
                 .hasNoAggregationResultsExtensionValue()
-                .hasNoAggregateMethodExtension()
+                .hasAggregateMethodExtension(ContinuousVariableObservationAggregateMethod.SUM)
                 .up()
                 .populationId("observation-num")
                 .hasCode(MeasurePopulationType.MEASUREOBSERVATION)
                 .hasCount(0) // we remove exclusions in these counts so users can see final Observation count used
                 .hasNoAggregationResultsExtensionValue()
-                .hasNoAggregateMethodExtension()
+                .hasAggregateMethodExtension(ContinuousVariableObservationAggregateMethod.SUM)
                 .up()
                 .hasMeasureScore(false)
                 .up()

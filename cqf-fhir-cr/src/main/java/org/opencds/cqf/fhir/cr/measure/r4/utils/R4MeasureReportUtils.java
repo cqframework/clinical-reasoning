@@ -3,7 +3,6 @@ package org.opencds.cqf.fhir.cr.measure.r4.utils;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_CQFM_AGGREGATE_METHOD_URL;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import java.math.BigDecimal;
 import java.util.List;
@@ -28,7 +27,6 @@ import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumValueDef;
-import org.opencds.cqf.fhir.cr.measure.common.StratumValueWrapper;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 
 /**
@@ -339,13 +337,12 @@ public class R4MeasureReportUtils {
             @Nullable ContinuousVariableObservationAggregateMethod aggregateMethod,
             @Nullable BigDecimal aggregationResult) {
 
-        if (aggregateMethod != null
-                && ContinuousVariableObservationAggregateMethod.N_A != aggregateMethod
-                && aggregationResult != null) {
-
-            addAggregateMethodInner(measurePopulation, aggregateMethod);
-            addAggregationResultInner(measurePopulation, aggregationResult.doubleValue());
-        }
+        addAggregationResultAndMethod(
+                measurePopulation,
+                aggregateMethod,
+                Optional.ofNullable(aggregationResult)
+                        .map(BigDecimal::doubleValue)
+                        .orElse(null));
     }
 
     public static void addAggregationResultAndMethod(
@@ -362,37 +359,9 @@ public class R4MeasureReportUtils {
         }
     }
 
-    private static void addAggregationResult(
-            MeasureReportGroupPopulationComponent measurePopulation, @Nullable Double aggregationResult) {
-
-        Optional.ofNullable(aggregationResult)
-                .ifPresent(nonNullAggregationResult ->
-                        addAggregationResultInner(measurePopulation, nonNullAggregationResult));
-    }
-
-    private static void addAggregateMethod(
-            MeasureReportGroupPopulationComponent measurePopulation, PopulationDef populationDef) {
-
-        addAggregateMethod(measurePopulation, populationDef.getAggregateMethod());
-    }
-
-    private static void addAggregateMethod(
-            MeasureReportGroupPopulationComponent measurePopulation,
-            @Nullable ContinuousVariableObservationAggregateMethod aggregateMethod) {
-
-        Optional.ofNullable(aggregateMethod)
-                // There's no point in capturing "N_A" aggregation methods here, as this could cause
-                // bugs
-                .filter(nonNonAggregateMethod ->
-                        ContinuousVariableObservationAggregateMethod.N_A != nonNonAggregateMethod)
-                .ifPresent(nonNonAggregateMethod -> measurePopulation.addExtension(
-                        MeasureConstants.EXT_CQFM_AGGREGATE_METHOD_URL,
-                        new StringType(nonNonAggregateMethod.getText())));
-    }
-
     private static void addAggregateMethodInner(
             MeasureReportGroupPopulationComponent measurePopulation,
-            @Nonnull ContinuousVariableObservationAggregateMethod aggregateMethod) {
+            ContinuousVariableObservationAggregateMethod aggregateMethod) {
 
         addExtensionValueInner(
                 measurePopulation,
@@ -415,16 +384,5 @@ public class R4MeasureReportUtils {
         } else {
             measurePopulation.addExtension(extensionUrl, extensionValue);
         }
-    }
-
-    /**
-     * Helper method to convert expression result to CodeableConcept for stratum text extraction.
-     * Used internally by getStratumDefText for non-CodeableConcept values.
-     *
-     * @param value the StratumValueWrapper to convert
-     * @return a CodeableConcept with the text set to the string value
-     */
-    private static CodeableConcept expressionResultToCodableConcept(StratumValueWrapper value) {
-        return new CodeableConcept().setText(value.getValueAsString());
     }
 }

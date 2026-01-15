@@ -710,6 +710,148 @@ class R4MeasureReportUtilsTest {
     }
 
     // ========================================
+    // Tests for addAggregationResultAndMethod - with BigDecimal
+    // ========================================
+
+    @Test
+    void testAddAggregationResultAndMethod_FromBigDecimal_WithValue() {
+        MeasureReportGroupPopulationComponent population = new MeasureReportGroupPopulationComponent();
+
+        R4MeasureReportUtils.addAggregationResultAndMethod(
+                population, ContinuousVariableObservationAggregateMethod.AVG, new BigDecimal("123.456"));
+
+        // Assert both extensions are set
+        Extension resultExt = population.getExtensionByUrl(MeasureConstants.EXT_AGGREGATION_METHOD_RESULT);
+        assertNotNull(resultExt);
+        assertInstanceOf(DecimalType.class, resultExt.getValue());
+        assertEquals(new BigDecimal("123.456"), ((DecimalType) resultExt.getValue()).getValue());
+
+        Extension methodExt = population.getExtensionByUrl(EXT_CQFM_AGGREGATE_METHOD_URL);
+        assertNotNull(methodExt);
+        assertInstanceOf(StringType.class, methodExt.getValue());
+        assertEquals("avg", ((StringType) methodExt.getValue()).getValue());
+    }
+
+    @Test
+    void testAddAggregationResultAndMethod_FromBigDecimal_WithNullValue() {
+        MeasureReportGroupPopulationComponent population = new MeasureReportGroupPopulationComponent();
+
+        R4MeasureReportUtils.addAggregationResultAndMethod(
+                population, ContinuousVariableObservationAggregateMethod.SUM, (BigDecimal) null);
+
+        // Assert neither extension is set when value is null
+        Extension resultExt = population.getExtensionByUrl(MeasureConstants.EXT_AGGREGATION_METHOD_RESULT);
+        assertNull(resultExt, "No result extension should be added when value is null");
+        Extension methodExt = population.getExtensionByUrl(EXT_CQFM_AGGREGATE_METHOD_URL);
+        assertNull(methodExt, "No method extension should be added when value is null");
+    }
+
+    @Test
+    void testAddAggregationResultAndMethod_FromBigDecimal_WithZeroValue() {
+        MeasureReportGroupPopulationComponent population = new MeasureReportGroupPopulationComponent();
+
+        R4MeasureReportUtils.addAggregationResultAndMethod(
+                population, ContinuousVariableObservationAggregateMethod.COUNT, BigDecimal.ZERO);
+
+        // Assert both extensions are set
+        Extension resultExt = population.getExtensionByUrl(MeasureConstants.EXT_AGGREGATION_METHOD_RESULT);
+        assertNotNull(resultExt);
+        // Use compareTo for BigDecimal comparison to ignore scale differences (0 vs 0.0)
+        assertEquals(0, new BigDecimal("0").compareTo(((DecimalType) resultExt.getValue()).getValue()));
+
+        Extension methodExt = population.getExtensionByUrl(EXT_CQFM_AGGREGATE_METHOD_URL);
+        assertNotNull(methodExt);
+        assertEquals("count", ((StringType) methodExt.getValue()).getValue());
+    }
+
+    @Test
+    void testAddAggregationResultAndMethod_FromBigDecimal_WithNullMethod() {
+        MeasureReportGroupPopulationComponent population = new MeasureReportGroupPopulationComponent();
+
+        R4MeasureReportUtils.addAggregationResultAndMethod(
+                population, (ContinuousVariableObservationAggregateMethod) null, new BigDecimal("50.5"));
+
+        // Assert neither extension is set when method is null
+        Extension methodExt = population.getExtensionByUrl(EXT_CQFM_AGGREGATE_METHOD_URL);
+        assertNull(methodExt, "No method extension should be added when method is null");
+        Extension resultExt = population.getExtensionByUrl(MeasureConstants.EXT_AGGREGATION_METHOD_RESULT);
+        assertNull(resultExt, "No result extension should be added when method is null");
+    }
+
+    @Test
+    void testAddAggregationResultAndMethod_FromBigDecimal_WithN_A() {
+        MeasureReportGroupPopulationComponent population = new MeasureReportGroupPopulationComponent();
+
+        R4MeasureReportUtils.addAggregationResultAndMethod(
+                population, ContinuousVariableObservationAggregateMethod.N_A, new BigDecimal("75.25"));
+
+        // Assert neither extension is set when method is N_A
+        Extension methodExt = population.getExtensionByUrl(EXT_CQFM_AGGREGATE_METHOD_URL);
+        assertNull(methodExt, "No method extension should be added when method is N_A");
+        Extension resultExt = population.getExtensionByUrl(MeasureConstants.EXT_AGGREGATION_METHOD_RESULT);
+        assertNull(resultExt, "No result extension should be added when method is N_A");
+    }
+
+    @Test
+    void testAddAggregationResultAndMethod_FromBigDecimal_WithNegativeValue() {
+        MeasureReportGroupPopulationComponent population = new MeasureReportGroupPopulationComponent();
+
+        R4MeasureReportUtils.addAggregationResultAndMethod(
+                population, ContinuousVariableObservationAggregateMethod.MIN, new BigDecimal("-42.75"));
+
+        // Assert both extensions are set
+        Extension resultExt = population.getExtensionByUrl(MeasureConstants.EXT_AGGREGATION_METHOD_RESULT);
+        assertNotNull(resultExt);
+        assertEquals(new BigDecimal("-42.75"), ((DecimalType) resultExt.getValue()).getValue());
+
+        Extension methodExt = population.getExtensionByUrl(EXT_CQFM_AGGREGATE_METHOD_URL);
+        assertNotNull(methodExt);
+        assertEquals("min", ((StringType) methodExt.getValue()).getValue());
+    }
+
+    @Test
+    void testAddAggregationResultAndMethod_FromBigDecimal_WithHighPrecisionValue() {
+        MeasureReportGroupPopulationComponent population = new MeasureReportGroupPopulationComponent();
+
+        R4MeasureReportUtils.addAggregationResultAndMethod(
+                population, ContinuousVariableObservationAggregateMethod.MEDIAN, new BigDecimal("3.141592653589793"));
+
+        // Assert both extensions are set
+        Extension resultExt = population.getExtensionByUrl(MeasureConstants.EXT_AGGREGATION_METHOD_RESULT);
+        assertNotNull(resultExt);
+        // Note: conversion to double may lose precision
+        assertInstanceOf(DecimalType.class, resultExt.getValue());
+
+        Extension methodExt = population.getExtensionByUrl(EXT_CQFM_AGGREGATE_METHOD_URL);
+        assertNotNull(methodExt);
+        assertEquals("median", ((StringType) methodExt.getValue()).getValue());
+    }
+
+    @Test
+    void testAddAggregationResultAndMethod_FromBigDecimal_UpdatesExistingExtensions() {
+        MeasureReportGroupPopulationComponent population = new MeasureReportGroupPopulationComponent();
+
+        // Add initial values
+        population.addExtension(EXT_CQFM_AGGREGATE_METHOD_URL, new StringType("sum"));
+        population.addExtension(MeasureConstants.EXT_AGGREGATION_METHOD_RESULT, new DecimalType(10.0));
+
+        // Update with new values
+        R4MeasureReportUtils.addAggregationResultAndMethod(
+                population, ContinuousVariableObservationAggregateMethod.MAX, new BigDecimal("999.99"));
+
+        // Assert extensions are updated, not duplicated
+        assertEquals(2, population.getExtension().size(), "Should have exactly 2 extensions (not duplicated)");
+
+        Extension resultExt = population.getExtensionByUrl(MeasureConstants.EXT_AGGREGATION_METHOD_RESULT);
+        assertNotNull(resultExt);
+        assertEquals(new BigDecimal("999.99"), ((DecimalType) resultExt.getValue()).getValue());
+
+        Extension methodExt = population.getExtensionByUrl(EXT_CQFM_AGGREGATE_METHOD_URL);
+        assertNotNull(methodExt);
+        assertEquals("max", ((StringType) methodExt.getValue()).getValue());
+    }
+
+    // ========================================
     // Tests for addAggregationResultAndMethod - with PopulationDef
     // ========================================
 
